@@ -1,4 +1,4 @@
-/* Fonts */
+﻿/* Fonts */
 
 div.calcButtonHelp {
     font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
@@ -597,7 +597,7 @@ div.calcCursor
   41% { opacity: 0; }
   99% { opacity: 0; }
   100% { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }  @-moz-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }  @-moz-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } } 
 
 div.calcButtonHelp
 {
@@ -1943,7 +1943,7 @@ div.decl > div.stmt {
   45% { background-color: #ffc; }
   60% { background-color: #ff0; }
   100% { background-color: inherit; }
-}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } } 
 
 
 .codeSearchItem .navItemInner {
@@ -2475,7 +2475,7 @@ a.md-bigbutton:hover {
   35% { transform: translate(0, 0); }
   65% { transform: translate(0, 0); }
   100% { transform: translate(20em, 0); }
-}   /*CSSpref*/ @-webkit-keyframes moveProgressDot { 0% { -webkit-transform: translate(-11em, 0); } 35% { -webkit-transform: translate(0, 0); } 65% { -webkit-transform: translate(0, 0); } 100% { -webkit-transform: translate(20em, 0); } }  @-moz-keyframes moveProgressDot { 0% { -moz-transform: translate(-11em, 0); } 35% { -moz-transform: translate(0, 0); } 65% { -moz-transform: translate(0, 0); } 100% { -moz-transform: translate(20em, 0); } }
+}   /*CSSpref*/ @-webkit-keyframes moveProgressDot { 0% { -webkit-transform: translate(-11em, 0); } 35% { -webkit-transform: translate(0, 0); } 65% { -webkit-transform: translate(0, 0); } 100% { -webkit-transform: translate(20em, 0); } }  @-moz-keyframes moveProgressDot { 0% { -moz-transform: translate(-11em, 0); } 35% { -moz-transform: translate(0, 0); } 65% { -moz-transform: translate(0, 0); } 100% { -moz-transform: translate(20em, 0); } } 
 
 /************** from scriptlist.css *************/
 .slLeft {
@@ -3710,7 +3710,7 @@ right:4.5em;
   0% { transform: scale(1); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
-}   /*CSSpref*/ @-webkit-keyframes pulse { 0% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.2); } 100% { -webkit-transform: scale(1); } }  @-moz-keyframes pulse { 0% { -moz-transform: scale(1); } 50% { -moz-transform: scale(1.2); } 100% { -moz-transform: scale(1); } }
+}   /*CSSpref*/ @-webkit-keyframes pulse { 0% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.2); } 100% { -webkit-transform: scale(1); } }  @-moz-keyframes pulse { 0% { -moz-transform: scale(1); } 50% { -moz-transform: scale(1.2); } 100% { -moz-transform: scale(1); } } 
 
 
 .showInstall {
@@ -3723,7 +3723,7 @@ right:4.5em;
   40% { background: #fff; }
   60% { background: #f50; }
   100% { background: #fff; }
-}   /*CSSpref*/ @-webkit-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }  @-moz-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }  @-moz-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } } 
 
 @keyframes wave {
   0% { transform: translate(0,5em) }
@@ -3734,14 +3734,14 @@ right:4.5em;
   60% { transform: translate(-0.5em,0) }
   80% { transform: translate(0.5em,0) }
   100% { transform: translate(0,0) }
-}   /*CSSpref*/ @-webkit-keyframes wave { 0% { -webkit-transform: translate(0,5em) } 5% { -webkit-transform: translate(0,0) } 10% { -webkit-transform: translate(1em,0) } 25% { -webkit-transform: translate(-1em,0) } 40% { -webkit-transform: translate(0.5em,0) } 60% { -webkit-transform: translate(-0.5em,0) } 80% { -webkit-transform: translate(0.5em,0) } 100% { -webkit-transform: translate(0,0) } }  @-moz-keyframes wave { 0% { -moz-transform: translate(0,5em) } 5% { -moz-transform: translate(0,0) } 10% { -moz-transform: translate(1em,0) } 25% { -moz-transform: translate(-1em,0) } 40% { -moz-transform: translate(0.5em,0) } 60% { -moz-transform: translate(-0.5em,0) } 80% { -moz-transform: translate(0.5em,0) } 100% { -moz-transform: translate(0,0) } }
+}   /*CSSpref*/ @-webkit-keyframes wave { 0% { -webkit-transform: translate(0,5em) } 5% { -webkit-transform: translate(0,0) } 10% { -webkit-transform: translate(1em,0) } 25% { -webkit-transform: translate(-1em,0) } 40% { -webkit-transform: translate(0.5em,0) } 60% { -webkit-transform: translate(-0.5em,0) } 80% { -webkit-transform: translate(0.5em,0) } 100% { -webkit-transform: translate(0,0) } }  @-moz-keyframes wave { 0% { -moz-transform: translate(0,5em) } 5% { -moz-transform: translate(0,0) } 10% { -moz-transform: translate(1em,0) } 25% { -moz-transform: translate(-1em,0) } 40% { -moz-transform: translate(0.5em,0) } 60% { -moz-transform: translate(-0.5em,0) } 80% { -moz-transform: translate(0.5em,0) } 100% { -moz-transform: translate(0,0) } } 
 
 
 @keyframes delete {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, 10em) scale(0.5) }
   100% { transform: translate(0, 30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes delete { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes delete { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
+}   /*CSSpref*/ @-webkit-keyframes delete { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes delete { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } } 
 
 
 /* Screenshots */
@@ -4534,7 +4534,7 @@ span.videoCaption
 @keyframes pulseStar {
   0% { transform: none; }
   100% { transform: rotate(360deg); }
-}   /*CSSpref*/ @-webkit-keyframes pulseStar { 0% { -webkit-transform: none; } 100% { -webkit-transform: rotate(360deg); } }  @-moz-keyframes pulseStar { 0% { -moz-transform: none; } 100% { -moz-transform: rotate(360deg); } }
+}   /*CSSpref*/ @-webkit-keyframes pulseStar { 0% { -webkit-transform: none; } 100% { -webkit-transform: rotate(360deg); } }  @-moz-keyframes pulseStar { 0% { -moz-transform: none; } 100% { -moz-transform: rotate(360deg); } } 
 
 .tutorialLogo {
   font-size: 0.9em;
@@ -4673,7 +4673,7 @@ span.videoCaption
   0% { opacity: 0; }
   30% { opacity: 1; transform: scale(1.5, 1.5); }
   to { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -webkit-transform: scale(1.5, 1.5); } to { opacity: 1; } }  @-moz-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -moz-transform: scale(1.5, 1.5); } to { opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -webkit-transform: scale(1.5, 1.5); } to { opacity: 1; } }  @-moz-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -moz-transform: scale(1.5, 1.5); } to { opacity: 1; } } 
 @keyframes shakeTip {
   0% { transform: none; }
   15% { transform: translate(-0.5em, 0); }
@@ -4682,7 +4682,7 @@ span.videoCaption
   60% { transform: translate(0.3em, 0); }
   75% { transform: translate(-0.1em, 0); }
   to { transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes shakeTip { 0% { -webkit-transform: none; } 15% { -webkit-transform: translate(-0.5em, 0); } 30% { -webkit-transform: translate(0.5em, 0); } 45% { -webkit-transform: translate(-0.3em, 0); } 60% { -webkit-transform: translate(0.3em, 0); } 75% { -webkit-transform: translate(-0.1em, 0); } to { -webkit-transform: none; } }  @-moz-keyframes shakeTip { 0% { -moz-transform: none; } 15% { -moz-transform: translate(-0.5em, 0); } 30% { -moz-transform: translate(0.5em, 0); } 45% { -moz-transform: translate(-0.3em, 0); } 60% { -moz-transform: translate(0.3em, 0); } 75% { -moz-transform: translate(-0.1em, 0); } to { -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes shakeTip { 0% { -webkit-transform: none; } 15% { -webkit-transform: translate(-0.5em, 0); } 30% { -webkit-transform: translate(0.5em, 0); } 45% { -webkit-transform: translate(-0.3em, 0); } 60% { -webkit-transform: translate(0.3em, 0); } 75% { -webkit-transform: translate(-0.1em, 0); } to { -webkit-transform: none; } }  @-moz-keyframes shakeTip { 0% { -moz-transform: none; } 15% { -moz-transform: translate(-0.5em, 0); } 30% { -moz-transform: translate(0.5em, 0); } 45% { -moz-transform: translate(-0.3em, 0); } 60% { -moz-transform: translate(0.3em, 0); } 75% { -moz-transform: translate(-0.1em, 0); } to { -moz-transform: none; } } 
 @keyframes pulseTarget {
   0% { }
   10% { transform: scale(1.4, 1.4); }
@@ -4691,7 +4691,7 @@ span.videoCaption
   60% { transform: scale(1, 1); }
   80% { transform: scale(1.1, 1.1); }
   100% { }
-}   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } }
+}   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } } 
 
 .marginTop {
     margin-top:2em;
@@ -5111,7 +5111,7 @@ div.validation-error {
   0% { transform: translate(0em,0em); }
   20% { transform: translate(0em,-0.1em); }
   100% { transform: translate(0em,0em); }
-}   /*CSSpref*/ @-webkit-keyframes dingDing { 0% { -webkit-transform: translate(0em,0em); } 20% { -webkit-transform: translate(0em,-0.1em); } 100% { -webkit-transform: translate(0em,0em); } }  @-moz-keyframes dingDing { 0% { -moz-transform: translate(0em,0em); } 20% { -moz-transform: translate(0em,-0.1em); } 100% { -moz-transform: translate(0em,0em); } }
+}   /*CSSpref*/ @-webkit-keyframes dingDing { 0% { -webkit-transform: translate(0em,0em); } 20% { -webkit-transform: translate(0em,-0.1em); } 100% { -webkit-transform: translate(0em,0em); } }  @-moz-keyframes dingDing { 0% { -moz-transform: translate(0em,0em); } 20% { -moz-transform: translate(0em,-0.1em); } 100% { -moz-transform: translate(0em,0em); } } 
 
 .dingDingBox {
   position: absolute;
@@ -5134,12 +5134,12 @@ div.validation-error {
   80% { transform: scale(1); opacity: 1; }
   90% { transform: scale(0.25); }
   100% { transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes dingZoom { 0% { -webkit-transform: scale(1); opacity: 1; } 20% { -webkit-transform: scale(1.2); } 80% { -webkit-transform: scale(1); opacity: 1; } 90% { -webkit-transform: scale(0.25); } 100% { -webkit-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } }  @-moz-keyframes dingZoom { 0% { -moz-transform: scale(1); opacity: 1; } 20% { -moz-transform: scale(1.2); } 80% { -moz-transform: scale(1); opacity: 1; } 90% { -moz-transform: scale(0.25); } 100% { -moz-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } }
+}   /*CSSpref*/ @-webkit-keyframes dingZoom { 0% { -webkit-transform: scale(1); opacity: 1; } 20% { -webkit-transform: scale(1.2); } 80% { -webkit-transform: scale(1); opacity: 1; } 90% { -webkit-transform: scale(0.25); } 100% { -webkit-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } }  @-moz-keyframes dingZoom { 0% { -moz-transform: scale(1); opacity: 1; } 20% { -moz-transform: scale(1.2); } 80% { -moz-transform: scale(1); opacity: 1; } 90% { -moz-transform: scale(0.25); } 100% { -moz-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } } 
 
 @keyframes dingShow {
   0% { transform: scale(0.25) translate(0,-4em); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes dingShow { 0% { -webkit-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -webkit-transform: scale(1); opacity: 1; } }  @-moz-keyframes dingShow { 0% { -moz-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -moz-transform: scale(1); opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes dingShow { 0% { -webkit-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -webkit-transform: scale(1); opacity: 1; } }  @-moz-keyframes dingShow { 0% { -moz-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -moz-transform: scale(1); opacity: 1; } } 
 
 .diffSame {
   width: 7em;
@@ -5639,22 +5639,22 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 @keyframes bgToWhite {
   50% { background: white; }
   100% { background: white; }
-}   /*CSSpref*/ @-webkit-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }  @-moz-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }
+}   /*CSSpref*/ @-webkit-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }  @-moz-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } } 
 
 @keyframes borderToWhite {
   50% { border-color: white; }
   100% { border-color: white; }
-}   /*CSSpref*/ @-webkit-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }  @-moz-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }
+}   /*CSSpref*/ @-webkit-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }  @-moz-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } } 
 
 @keyframes colorToBlack {
   50% { color: black; }
   100% { color: black; }
-}   /*CSSpref*/ @-webkit-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }  @-moz-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }
+}   /*CSSpref*/ @-webkit-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }  @-moz-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } } 
 
 @keyframes colorToBlue {
   50% { color: #41900d; }
   100% { color: #41900d; }
-}   /*CSSpref*/ @-webkit-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-moz-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }
+}   /*CSSpref*/ @-webkit-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-moz-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } } 
 
 #scriptEditor[data-blockMode="yes"] .blocksToCode .stmt .line {
   animation: bgToWhite 1.5s;                      /*CSSpref*/  -webkit-animation: bgToWhite 1.5s;  -moz-animation: bgToWhite 1.5s;
@@ -5681,7 +5681,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
   45% { transform: translate(1.5em, 0) scale(1, 1); }
   70% { transform: translate(-0.8em, 0) scale(0.95, 0.95); }
   to { transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes shakeCode { 0% { -webkit-transform: none; } 20% { -webkit-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -webkit-transform: translate(1.5em, 0) scale(1, 1); } 70% { -webkit-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -webkit-transform: none; } }  @-moz-keyframes shakeCode { 0% { -moz-transform: none; } 20% { -moz-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -moz-transform: translate(1.5em, 0) scale(1, 1); } 70% { -moz-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes shakeCode { 0% { -webkit-transform: none; } 20% { -webkit-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -webkit-transform: translate(1.5em, 0) scale(1, 1); } 70% { -webkit-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -webkit-transform: none; } }  @-moz-keyframes shakeCode { 0% { -moz-transform: none; } 20% { -moz-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -moz-transform: translate(1.5em, 0) scale(1, 1); } 70% { -moz-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -moz-transform: none; } } 
 
 
 
@@ -5690,7 +5690,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
   0% { transform-origin: 20% 50% 0; transform: none; }
   70% { transform-origin: 20% 50% 0; transform: rotate(-5deg); }
   100% { transform-origin: 20% 50% 0; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes wrenchCode { 0% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } 70% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: rotate(-5deg); } 100% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } }  @-moz-keyframes wrenchCode { 0% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } 70% { -moz-transform-origin: 20% 50% 0; -moz-transform: rotate(-5deg); } 100% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes wrenchCode { 0% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } 70% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: rotate(-5deg); } 100% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } }  @-moz-keyframes wrenchCode { 0% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } 70% { -moz-transform-origin: 20% 50% 0; -moz-transform: rotate(-5deg); } 100% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } } 
 
 
 .stmt-inlineStmt {
