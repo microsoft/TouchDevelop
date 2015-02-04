@@ -6,7 +6,7 @@ import child_process = require('child_process');
 import crypto = require('crypto');
 
 function main() {
-    var files = ['server.js', 'iisnode.yml', 'web.config']
+    var files = ['shell.js', 'iisnode.yml', 'web.config']
     var obj = {}
     var sha = {}
     files.forEach(f => {
@@ -25,7 +25,7 @@ function main() {
     console.log("*** pkgshell.js written")
 
 
-    var ff = fs.readFileSync("../shell/server.js", "utf8")
+    var ff = fs.readFileSync("../shell/shell.js", "utf8")
     ff = ff.replace(/^\uFEFF/, "#!/usr/bin/env node\n")
     ff = ff.replace(/\r/g, "")
     ff = ff.replace(/^\s*var isNpm =.*$/m, "var isNpm = true;")

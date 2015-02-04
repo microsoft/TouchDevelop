@@ -19,7 +19,7 @@ var crypto = require('crypto');
 var child_process = require('child_process');
 
 var pathRoot = undefined;
-var verbose = false;
+var verbose = true;
 
 function toPromise(nodeF:(f:any) => void)
 {

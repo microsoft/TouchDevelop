@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "jake": "latest",
+    "typescript": "latest"
+  }
+}
