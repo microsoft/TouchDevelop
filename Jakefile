@@ -141,7 +141,7 @@ mkSimpleTask('editor/refs.d.ts', [
 mkSimpleTask('officemix/officemix.d.ts', [
     'officemix'
 ], "officemix", "officemix");
-mkSimpleTask('noderunner/jsonapi.d.ts', [], "noderunner", "jsonapi"); 
+mkSimpleTask('noderunner/jsonapi.d.ts', [], "noderunner", "jsonapi");
 mkSimpleTask('nodeclient/client.d.ts', [
     'rt/typings.d.ts',
     'noderunner/jsonapi.d.ts'
@@ -150,7 +150,7 @@ mkSimpleTask('nodeclient/client.d.ts', [
 mkSimpleTask('noderunner/runner.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'ast/refs.d.ts',
     'libnode/refs.d.ts',
     'noderunner'
@@ -159,7 +159,7 @@ mkSimpleTask('noderunner/runner.d.ts', [
 mkSimpleTask('runner/refs.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'storage/refs.d.ts',
     'libwinRT/refs.d.ts',
     'libwab/refs.d.ts',
@@ -171,7 +171,7 @@ mkSimpleTask('runner/refs.d.ts', [
 mkSimpleTask('mc/refs.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'storage/refs.d.ts',
     'mc'
 ], "mc", "refs");
@@ -265,3 +265,11 @@ task('run', [ 'default' ], { async: true }, function () {
         function() { complete(); }
     );
 });
+
+task('local', [ 'default' ], { async: true}, function() {
+  jake.exec(
+    [ 'node shell/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
+    { printStdout: true, printStderr: true },
+    function() { complete(); }
+  )
+})

@@ -1,6 +1,10 @@
 # node
 node_modules
 
+# shell
+cdn-cache
+tdconfig.json
+
 # build
 *.d.ts
 *.js
