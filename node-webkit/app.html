@@ -1,0 +1,12 @@
+<head>
+    <script>
+        function bodyOnLoad(){
+          // launches the local editor with the appropriate deployment key          
+          var host = process.env["TD_SERVER"]
+          var deploymentKey = process.env["TD_DEPLOYMENT_KEY"];
+          window.location.assign(host + "/editor/beta#td_deployment_key=" + deploymentKey);
+        }
+    </script>
+</head>
+<body onload="bodyOnLoad()">
+</body>
