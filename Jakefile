@@ -178,50 +178,61 @@ mkSimpleTask('mc/refs.d.ts', [
 
 
 // Now come the rules for files that are obtained by concatenating multiple
-// _js_ files into another one. [buildDeps] is for rules that end with ".d.ts"
-// but whose ".js"-generated files we want to concatenate. [deps] is for rules
-// that end with ".js". [extra] is for files we want to concatenate but that
-// are not generated.
+// _js_ files into another one. The sequence exactly reproduces what happened
+// previously, as there are ordering issues with initialization of global variables
+// (unsurprisingly). Here's the semantics of these entries:
+// - files ending with ".js" end up as dependencies (either as rule names, or as
+//   statically-checked-in files in the repo, such as [langs.js]), and are
+//   concatenated in the final file
+// - files without an extension generate a dependency on the ".d.ts" rule and
+//   the ".js" compiled file ends up in the concatenation
 var concatMap = {
-    "mcrunner.js": {
-        buildDeps: [ "rt/refs", "storage/refs", "mc/refs" ],
-        deps: [],
-        extra: [],
-    },
-    "noderunner.js": {
-        buildDeps: [ "browser/browser", "rt/refs", "ast/refs", "libnode/refs", "noderunner/runner" ],
-        deps: [ "build/api.js", "build/pkgshell.js" ],
-        extra: [ "build/langs.js" ],
-    },
-    "runtime.js": {
-        buildDeps: [ "rt/refs", "storage/refs", "libwinRT/refs", "libwab/refs",
-            "libnode/refs", "libcordova/refs", "runner/refs" ],
-        deps: [],
-        extra: [],
-    },
-    "main.js": {
-        buildDeps: [ "rt/refs", "ast/refs", "storage/refs", "libwinRT/refs",
-            "libwab/refs", "libcordova/refs", "editor/refs" ],
-        deps: [ "build/api.js", "build/pkgshell.js" ],
-        extra: [ "build/langs.js" ],
-    },
+    "mcrunner.js": [
+      "rt/refs",
+      "storage/refs",
+      "mc/refs",
+    ],
+    "noderunner.js": [
+        "browser/browser",
+        "rt/refs",
+        "ast/refs",
+        "build/api.js",
+        "build/langs.js",
+        "libnode/refs",
+        "build/pkgshell.js",
+        "noderunner/runner",
+    ],
+    "runtime.js": [
+        "rt/refs",
+        "storage/refs",
+        "libwinRT/refs",
+        "libwab/refs",
+        "libnode/refs",
+        "libcordova/refs",
+        "runner/refs",
+    ],
+    "main.js": [
+        "rt/refs",
+        "ast/refs",
+        "build/api.js",
+        "build/langs.js",
+        "storage/refs",
+        "libwinRT/refs",
+        "libwab/refs",
+        "libcordova/refs",
+        "build/pkgshell.js",
+        "editor/refs" ,
+    ],
 };
 
 // Apparently our node scripts can't run without this line.
 var nodePrelude = "var window = {};\n";
 
-// The rules are generated from the map above, which distinguishes between build
-// artifacts and file that were already there (so that the dependencies are
-// registered properly).
 Object.keys(concatMap).forEach(function (f) {
-    // The rules this rule depends on.
-    var deps = concatMap[f].buildDeps.map(function (x) { return x + ".d.ts" })
-            .concat(concatMap[f].deps);
-    // The files to be actually concatenated in the final output.
-    var toConcat = concatMap[f].buildDeps.map(function(x) { return x + ".js" })
-            .concat(concatMap[f].deps)
-            .concat(concatMap[f].extra);
-    file(f, deps, function () {
+    var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
+    var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
+    var toConcat = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; });
+    file(f, buildDeps, function () {
         console.log("[C]", f);
         var bufs = [];
         bufs.push(new Buffer(nodePrelude));

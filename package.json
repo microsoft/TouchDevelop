@@ -2,5 +2,8 @@
   "devDependencies": {
     "jake": "latest",
     "typescript": "latest"
+  },
+  "dependencies": {
+    "tsd": "^0.5.7"
   }
 }
