@@ -887,14 +887,12 @@ module TDev.AST.Diff {
                         return 0;
                 }
 
-                if (!(a instanceof FieldName || b instanceof FieldName)) {
-                    var da = a.getLiteral()
-                    var db = b.getLiteral()
-                    if (typeof da === "string" && typeof db === "string") {
-                        if (opts.preciseStrings && opts.preciseStrings[db])
-                            return (da == db) ? 0 : 3;
-                        if ((da == "") == (db == "")) return 0;
-                    }
+                var da = a.getLiteral()
+                var db = b.getLiteral()
+                if (typeof da === "string" && typeof db === "string") {
+                    if (opts.preciseStrings && opts.preciseStrings[db])
+                        return (da == db) ? 0 : 3;
+                    if ((da == "") == (db == "")) return 0;
                 }
             }
             return a.getText() == b.getText() ? 0 : 3;
