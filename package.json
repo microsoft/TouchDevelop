@@ -1,5 +1,5 @@
 {
-  "dependencies": {
+  "devDependencies": {
     "jake": "latest",
     "typescript": "latest"
   }
