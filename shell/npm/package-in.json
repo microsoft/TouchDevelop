@@ -1,0 +1,22 @@
+{
+  "name": "touchdevelop",
+  "version": "0.0.0",
+  "description": "TouchDevelop is an touch-friendly development environment. This package provides a host for running TouchDevelop scripts in node.js.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "bin/touchdevelop.js"
+  ],
+  "keywords": [
+    "touchdevelop",
+    "shell"
+  ],
+  "bin": {
+     "touchdevelop": "./bin/touchdevelop.js"
+  },
+  "preferGlobal": true,
+  "author": "Microsoft Research",
+  "license": "n/a"
+}

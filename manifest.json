@@ -1,0 +1,37 @@
+﻿{
+    "short_name": "TouchDevelop",
+    "name": "TouchDevelop",
+    "icons": [
+        {
+            "src": "https://www.touchdevelop.com/doc/touchdevelop57x57.png",
+            "sizes": "57x57",
+            "type": "image/png",
+            "density": "1.0"
+        },
+        {
+            "src": "https://www.touchdevelop.com/doc/touchdevelop72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "density": "1.5"
+        },
+        {
+            "src": "https://www.touchdevelop.com/doc/touchdevelop114x114.png",
+            "sizes": "114x114",
+            "type": "image/png",
+            "density": "2.0"
+        },
+        {
+            "src": "https://www.touchdevelop.com/doc/touchdevelop144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "density": "3.0"
+        },
+        {
+            "src": "https://www.touchdevelop.com/doc/touchdevelop196x196.png",
+            "sizes": "196x196",
+            "type": "image/png",
+            "density": "4.0"
+        }
+    ],
+    "display": "standalone"
+}

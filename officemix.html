@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>TouchDevelop Web App for Office Mix</title>
+    <meta charset="utf-8" />
+
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js" type="text/javascript"></script>
+    <script src="https://labsjs.blob.core.windows.net/sdk/LabsJS-1.0.4/labs-1.0.4.js" type="text/javascript"></script>
+    <script src="./officemix.js" type="text/javascript"></script>
+    <style>
+        html, body{
+            height: 100%;
+        }
+        body {
+            margin:0px;
+        }
+
+        iframe {
+            margin: 0px;
+            padding: 0px;
+            position: relative;
+            top: -1px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+        }
+
+        .statusBox  {
+            box-sizing: border-box;
+            color: rgb(51, 51, 51);
+            float: left;
+            font-family: 'Segoe UI light', Verdana, Helvetica, sans-serif;
+            font-size: 18.4px;
+            height: 25.6px;
+            padding-left: 10px;
+            padding-right: 10px;
+            text-align: center;
+        }
+
+        .right  {
+            float: right!important;
+        }
+
+        .btn    {
+            -webkit-writing-mode: horizontal-tb;
+            align-items: flex-start;
+            border-color: rgb(171, 171, 171);
+            border-width: 0.8px;
+            border-style: solid;
+            box-sizing: border-box;
+            color: rgb(68, 68, 68);
+            display: inline-block;
+            font-family: 'Segoe UI Regular', Verdana, Helvetica, sans-serif;
+            font-size: 12px;
+            height: 30px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 80px;
+            margin-bottom:5px;
+        }
+
+        .padder {
+            background-color: #9ad2ff;
+            padding-top: 5px;
+            padding-right: 5px;
+            z-index:-1;
+        }
+
+        mainContent    {
+            height: calc(100% - 50px);
+            height: -webkit-calc(100% - 50px);
+            height: -moz-calc(100% - 50px);
+        }
+
+    </style>
+
+</head>
+<body>
+    <div class="padder" id="chrome">
+            <div class="statusBox" id="AppStatus">Select an App</div>
+            <button class="btn" id="edit">Edit</button>
+            <button class="btn" id="preview">Preview</button>
+            <button class="btn right" id="another">Reset</button>
+    </div>
+    <div class="mainContent" id="mainContent">
+        <iframe id="tdFrame" />
+    </div>
+
+</body>
+</html>

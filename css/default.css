@@ -1,0 +1,1937 @@
+﻿body {
+    color: black;
+    font-size: 24px;
+    overflow: hidden; /* want no scrolling of the body ever - looks bad on touch screens. Instead, we scroll elements */
+    margin: 0;
+    touch-action: none;
+    -ms-touch-action: none;
+}
+
+body {
+    font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
+}
+
+
+html {
+    -ms-content-zooming: none;
+}
+
+* {
+  -ms-scroll-chaining: none;
+}
+
+#scriptEditor
+{
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+
+.symbol
+{
+    font-family: "Segoe UI Symbol", sans-serif;
+    opacity: 0.8;
+}
+
+span.stringLiteral
+{
+  word-break: break-all;
+}
+
+div.stringLiteral {
+  white-space:pre-wrap;
+}
+
+span.bold {
+    font-weight: bold;
+}
+
+#wallOverlay
+{
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    width: auto;
+    background: white;
+    z-index:0;
+}
+
+#theWallFloat {
+  position: absolute;
+  right: 1em;
+  bottom: 1em;
+}
+
+.spriteCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+textarea {
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+}
+
+.logView {
+  font-size: 0.8em;
+  background: white;
+  padding: 2%;
+  height: 96%;
+  color: black;
+  text-align:left;
+}
+
+.modalDialog .logView .logMsg {
+  color: black;
+}
+
+.modalDialog .logView .logMsg a {
+    color:black;
+    text-decoration:underline;
+    font-weight:normal;
+}
+
+.logView .logMsg {
+    white-space:pre-wrap;
+}
+
+.logView .logMsg:hover {
+    background-color:#eee;
+}
+.logView .logMsg[data-level^="error"] { color:darkred;}
+.logView .logMsg[data-level^="warning"] { color:darkorange;}
+.logView .logMsg[data-level^="info"] { }
+.logView .logMsg[data-level^="debug"] { color:gray;}
+
+input.logSearchInput {
+    width: 100%;
+    box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+    margin: 0px 0px 0.5em 0em;
+}
+
+.modalList
+{
+  background: white;
+  overflow: hidden;
+  height: 10em;
+  color: black;
+  position: relative;
+}
+
+.modalOverlay
+{
+  background-color: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index:0;
+}
+
+.modalMessage {
+  position: absolute;
+  text-align: center;
+  top: 40%;
+  left: 10%;
+  width: 80%;
+  color: #333;
+}
+
+.modalMessageHeader {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.modalMessagePleaseWait {
+  margin-top: 0.5em;
+  font-size: 0.8em;
+}
+
+.modalDialog
+{
+  color: white;
+  width: 23em;
+  display: inline-block;
+  text-align: left;
+  position: relative;
+}
+
+.modalDialog a,
+.modalDialog a:visited {
+  text-decoration: none;
+  font-weight: bold;
+  color: #EE1300;
+  color: #ff0;
+}
+.modalDialog a:hover {
+  text-decoration: underline;
+}
+.modalFullYellow a,
+.modalFullYellow a:visited,
+.modalFullWhite a,
+.modalFullWhite a:visited {
+  color: #008b00;
+}
+.modalDialogChooseItem {
+    margin:0.2em;
+    padding:0.4em;
+    font-size:1em;
+    background-color:#eee;
+    cursor:pointer;
+}
+
+.modal-translate {
+    font-size:0.8em;
+    color:gray;
+    cursor:pointer;
+    display:inline-block;
+    margin:1em;
+}
+
+.wall-dialog-line-textbox {
+  position: relative;
+  text-align: center;
+}
+
+.wall-dialog-line-textbox .wall-textbox {
+  width: 90%;
+}
+
+.wall-dialog-field-label {
+    display:inline-block;
+    width:8em;
+}
+
+.wall-dialog-field-input {
+    width:calc(100% - 10em);
+}
+
+.wall-dialog-field-block {
+    width:calc(100%-0.5em)
+}
+
+div.share-url {
+margin: 1.1em 0;
+text-align:center;
+font-size:1.2em;
+}
+
+.wall-media {
+    width:100%;
+    height:auto;
+}
+.classic-page .wall-media {
+    max-width:18.5em;
+}
+
+
+
+.wall-picture
+{
+    height:auto;
+}
+.classic-page .wall-picture
+{
+    width:100%;
+    max-width:18.5em;
+}
+.box-page .wall-picture
+{
+    display:block;
+}
+
+.wall-picture-preview {
+    width:100%;
+    height:auto;
+}
+.classic-page .wall-picture-preview 
+{
+    max-width:8em;
+    max-height:12em;
+}
+
+
+.modalDialogOuter {
+  display: table;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  display: table;
+  overflow: hidden;
+  text-align: center;
+  z-index:1;
+}
+
+
+.modalDialogInner {
+  background: #002A75;
+  background: #07a;
+  padding-top: 1.3em;
+  padding-bottom: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.modalFullWhite .modalDialogInner {
+  background: white;
+}
+
+.modalFullYellow .modalDialogInner {
+  background: #ccc;
+}
+
+.modalFullYellow .modalDialog,
+.modalFullWhite .modalDialog {
+  color: black;
+}
+
+.floatingFrown {
+  float: left;
+  font-size: 6em;
+  line-height:75%;
+  margin-right: 0.35em;
+  margin-bottom: 1em;
+}
+
+.modalChooser .modalDialogInner {
+  background: transparent;
+}
+
+.modalNoChrome .modalDialogInner {
+  background: transparent;
+  width: auto;
+  display: inline-block;
+}
+
+.modalFullScreen .modalDialog {
+  width: 80%;
+  height: 96%;
+  position: absolute;
+  left: 10%;
+  top: 2%;
+}
+
+.reallyFullScreen .modalDialog {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.modalSearch {
+  position: relative;
+  margin-bottom: 0.2em;
+}
+.modalSearch input {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+}
+
+.modalSearchHeader {
+  color: white;
+  font-size: 1.2em;
+  margin-bottom: 0.3em;
+  padding: 0.2em;
+  background: #0a0;
+}
+
+.modalSearchHeader.section {
+  margin-top: 0.4em;
+  padding-left: 1.1em;
+}
+
+.modalSearchHeader .small {
+  margin-top:0.2em;
+  font-size: 0.6em;
+}
+
+.modalDialogOuterLong .modalDialogInner {
+  height: 100%;
+  width: auto;
+  display: inline-block;
+}
+
+.modalDialogMid {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+button, input[type=button], .stmt, a.button
+{
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+div.checkbox {
+  margin: 0.8em 0.2em;
+  cursor: pointer;
+}
+
+div.theBox {
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: 0.5em;
+  display: inline-block;
+  background: white;
+  color: black;
+  border: 1px solid black;
+  text-align: center;
+  vertical-align: middle;
+}
+
+table.wall-table
+{
+    border-top:3px solid#069;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+table.wall-table th
+{
+    border-bottom:2px solid#069;
+}
+table.wall-table td
+{
+    border-bottom:1px solid#069;
+}
+table.wall-table td,table.wall-table th
+{
+    padding:5px 3px;
+}
+
+div.wall-record
+{
+    margin-top: 0.5em;
+/*  border: 1px solid black; */
+}
+h3.wall-record
+{
+  padding: 0px;
+  margin: 0px;
+}
+ul.wall-record
+{
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+p.wall-record
+{
+  padding: 0px;
+  margin: 0px;
+}
+
+.wall-button,
+.menuItem,
+.radio-button
+{
+  font-size: inherit;
+  font-family: inherit;
+  border: 2px solid black;
+  background: transparent;
+  color: black;
+}
+
+#theWall .wall-button, #wall-overlay .wall-button /* Windows 8 Modern guidelines */
+{
+    text-transform:uppercase;
+}
+
+.link-button {
+  font-size: inherit;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  display: inline-block;
+  color: blue;
+  text-decoration: underline;
+  padding: 0 0.3em;
+}
+
+.wall-button
+{
+  font-size: 0.8em;
+  padding: 0.5em 0.8em;
+  min-width: 7em;
+}
+
+.input-confirm {
+  min-width: 3em;
+  margin: 0;
+}
+
+.wall-button,
+.wall-textbox,
+div.wall-label
+{
+  margin: 0.5em 0.4em;
+}
+
+.input-label {
+  display:inline-block;
+  width: 7em;
+}
+
+.wall-textbox,
+textarea
+{
+  border: 3px solid white;
+  background: #eee;
+  color: black;
+  font-size: 1em;
+  padding: 0.2em;
+  font-family: inherit;
+  width:calc(100% - 2em);
+}
+
+.legacy-wall-box .wall-text {
+    white-space: pre-wrap;
+}
+
+.modalDialog .wall-button
+{
+  color: white;
+  border-color: white;
+}
+
+.modalFullYellow .modalDialog .wall-button,
+.modalFullWhite .modalDialog .wall-button
+{
+  color: black;
+  border-color: black;
+}
+
+.big-button {
+  font-size:1.3em;
+}
+
+.modalFullWhite .wall-dialog-buttons {
+  margin-top: 1.5em;
+}
+
+.modalFullWhite h3 {
+  font-size: 2em;
+  font-weight: 400;
+}
+
+.modalFullWhite p {
+  font-size: 1.2em;
+}
+
+.modalFullWhite p.agree {
+  color: #777;
+  font-size:0.8em;
+}
+
+.modalFullYellow .wall-dialog-buttons {
+  margin-top: 1.5em;
+}
+
+.modalFullYellow h3 {
+  font-size: 2em;
+  font-weight: 400;
+}
+
+.modalFullYellow p {
+  font-size: 1.2em;
+}
+
+.modalFullYellow p.agree {
+  color: #777;
+  font-size:0.8em;
+}
+
+.wall-button[data-active^="yes"],
+.wall-button:active {
+  background: #999;
+  color: white;
+}
+
+button {
+  position:relative;
+}
+
+div.copyright-logo .svg,
+div.code-button-frame .svg,
+div.topMenu-button-frame .svg,
+div.tabMenu-button-frame .svg,
+div.code-button-frame img,
+div.topMenu-button-frame img,
+div.tabMenu-button-frame img
+{
+  height: 100%;
+  width: 100%;
+}
+
+button.calc-button img
+{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -24px;
+  margin-top: -24px;
+  display: block;
+}
+
+div.wallExnBlock,
+div.wall-dialog {
+  background: #ccc;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;
+}
+
+div.wallExnBlock {
+  background: #ff5;
+  color: black;
+}
+
+div.wallExnHeader {
+  font-size: 2em;
+  margin-bottom: 0.2em;
+}
+
+div.wallExnMessage {
+  margin-bottom: 0.3em;
+}
+
+.wall-dialog-input {
+  width: 90%;
+}
+
+.wall-dialog-input input {
+  width: 100%;
+  margin: 0;
+}
+
+.wall-dialog-text-center {
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.wall-dialog-header {
+  margin-bottom: 0.2em;
+  margin-top:0.8em;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.wall-dialog-extra-space {
+  margin-top: 0.7em;
+}
+
+.wall-dialog-body {
+  margin-bottom: 0.5em;
+  font-size: 0.8em;
+}
+
+.wall-dialog-huge {
+  margin: 0.8em;
+  text-align:center;
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+.wall-dialog-large {
+  margin-top: 0em;
+  margin-bottom:1em;
+  text-align:center;
+  font-size: 1.5em;
+}
+
+.wall-dialog-buttons {
+  margin-top: 0.5em;
+  text-align: right;
+}
+
+.wall-dialog-buttons-many {
+    font-size:0.9em;
+    clear:both;
+}
+
+.text-left {
+    text-align:left;
+}
+
+#root.phone {
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+}
+
+.topButtons {
+  position: relative;
+  margin-top: 0.5em;
+}
+
+.portrait .topButtons {
+  margin-top: 0;
+}
+
+div.topButtons button {
+  display: block;
+}
+
+.bottomButtons {
+  position: absolute;
+  bottom:0;
+  right:0;
+  margin-bottom:0.95em;
+  margin-right:1em;
+  z-index:1;
+}
+
+.code-button,
+.tabMenu-button,
+.topMenu-button {
+  display: block;
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: rgba(255,255,255,0.0000001);
+  padding: 0.2em 0.5em 1.5em 0.5em;
+  text-align: center;
+  vertical-align: top;
+}
+
+.tabMenu-button
+{
+  border-top: 0.5em solid transparent;
+  padding: 0.2em 0.5em 1em 0.5em;
+}
+
+.landscape .tabMenu-button
+{
+  padding: 0;
+}
+
+.landscape .tabMenu-button .topMenu-button-desc
+{
+  display: none;
+}
+
+.portrait .topMenu-button,
+.portrait .tabMenu-button
+{
+  display: inline-block;
+}
+
+.code-button-frame,
+.topMenu-button-frame,
+.tabMenu-button-frame
+{
+  position: relative;
+  text-align: center;
+  width: 2.5em;
+  height: 2.5em;
+}
+
+.tabMenu-button-frame {
+  border: 2px solid transparent;
+}
+
+
+.code-button-frame,
+.topMenu-button-frame
+{
+  border: 2px solid black;
+  border-radius: 5em;
+  background-color:rgba(255, 255, 255, 0.4);
+}
+
+.tabMenu-button[data-tab-selected^="yes"] {
+    border-color: #09655E;
+}
+
+#root[data-pane-hidden^="yes"] .tabMenu-button[data-tab-selected^="yes"] {
+  border-color: transparent;
+}
+
+#root.assume-mouse .tabMenu-button:hover {
+    border-color: #E72A59;
+}
+
+.topMenu-button[data-disabled^="yes"]
+{
+  opacity: 0.2;
+}
+
+.tabMenu-button[data-active^="yes"],
+.code-button[data-active^="yes"] .code-button-frame,
+.topMenu-button[data-active^="yes"] .topMenu-button-frame
+{
+  background: #CCc;
+}
+
+.tabMenu-button .topMenu-button-desc {
+  bottom: 0.5em;
+}
+
+.topMenu-button-desc
+{
+  position: absolute;
+  width: 100%;
+  text-align: center;
+
+  bottom: 0.5em;
+  left: 0;
+  font-size: 0.6em;
+}
+
+.topMenu-button-long-desc .topMenu-button-desc {
+  bottom: 0.5em;
+  font-size: 0.5em;
+}
+
+textarea.scriptText
+{
+  font-size: 0.65em;
+  font-family: monospace;
+  width: 100%;
+  height: 100%;
+  resize:none;
+}
+
+::-webkit-scrollbar {
+    width: 0.7em;
+    height: 0.7em;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+}
+
+.pane, .btnRow {
+    position: absolute;
+    overflow: hidden;
+    height: 100%;
+    /* background: #f5f5f5; */
+}
+
+.btnRow {
+  width: 4em;
+}
+
+.scriptMainPanes {
+  position: absolute;
+  left: 5.5em;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+}
+
+.portrait .scriptMainPanes {
+  left: 0;
+  top: 4.6em;
+}
+
+.portrait .btnRow {
+  height: 4.5em;
+  width: 100%;
+}
+
+.phone .btnRow .wall-textbox {
+  font-size: 1.25em;
+}
+
+.landscape #rightPane {
+  top: 0;
+  left: 0;
+  width: 30%;
+}
+
+#leftPane {
+  top: 0;
+  right: 0;
+  width: 67%;
+}
+
+.portrait #leftPane {
+  width: 99%;
+}
+
+.portrait #rightPane {
+  top: 0;
+  right: 0;
+  width: 20em;
+  background: white;
+  border-left: 0.1em dotted #ccc;
+  display: none;
+}
+
+.landscape #leftBtnRow {
+  border-right: 0.1em dotted #ccc;
+  left: 0;
+  top: 0;
+}
+
+.portrait #leftBtnRow {
+  border-bottom: 0.1em dotted #ccc;
+}
+
+div.wall-box-tile>div.wall-box
+{
+  display: inline-block;
+}
+
+.errorNotification
+{
+  position: absolute;
+  width: auto;
+  left: 0;
+  right: 0;
+  bottom: 0px;
+  background-color: #E72A59;
+  font-size: 1em;
+  color: white;
+  padding: 0.5em 3em;
+  text-align: center;
+}
+
+.warningNotification
+{
+  position: absolute;
+  width: auto;
+  left: 0;
+  right: 0;
+  top: 0px;
+  background-color: #ba00c2;
+  font-size: 0.8em;
+  color: white;
+  z-index:3;
+  cursor:pointer;
+  padding-bottom:0.5em;
+  padding-left:1em;
+}
+
+.warningNotification .frownie {
+    font-size: 1.5em;
+    display:inline-block;
+}
+
+.warningNotification .info {
+    display:inline-block;
+    vertical-align:top;
+    margin:0.5em;
+    overflow:hidden;
+}
+
+.warningNotification .link {
+    text-decoration:underline;
+    font-weight:bold;
+}
+
+.saveNotification
+{
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  background-color: white;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: gray;
+  padding: 0.2em 1em;
+  text-align: center;
+}
+
+.not-logged-in {
+  color: rgb(25, 174, 221);
+  cursor: pointer;
+}
+
+.loadingNotification
+{
+  position: absolute;
+  width: 100%; 
+  left: 0; 
+  top: 45%; 
+  height: 1.6em; 
+  padding-top:1.6em;
+  padding-bottom:1.2em;
+  text-align: center; 
+  color: white; 
+  font-family: sans-serif; 
+  font-weight: bold;
+  background-color: gray;  
+  font-size: 1.6em;
+  z-index:1;
+}
+
+.progressNotification
+{
+  position: absolute;
+  width: 30em;
+  left: 0;
+  top: 0;
+  background-color: #41900D;  
+  font-size: 0.5em;
+  color: white;
+  padding: 0.7em;
+  text-align: left;
+  z-index:1;
+}
+
+
+.transparent {
+  opacity: 0;
+}
+
+#root .invisible {
+  display: none;
+}
+
+.iOSScroll
+{
+  -webkit-overflow-scrolling: touch;
+}
+
+.iOSScroll > * {
+  -webkit-transform: translateZ(0px);
+}
+
+.iOSScroll::-webkit-scrollbar {
+  width: 0px;
+}
+
+.boardContainer {
+ text-align: center;
+}
+
+/*
+ * Tracing
+ */
+table.traces
+{
+    width: 100%;
+    background-color: #d0d0d0;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+table.traces th
+{
+    text-align: center;
+}
+
+table.traces tr.hover:hover 
+{
+    background-color: #b0b0b0;
+}
+
+table.traces td
+{
+    border-top: 1px solid #b0b0b0;
+    border-bottom: 1px solid #b0b0b0;
+}
+
+/*
+ * Pickers
+ */
+
+.picker-form {
+  position: relative;
+  padding-top: 0.5em;
+  padding-bottom: 0.2em;
+  background: #ccc;
+}
+
+.picker-name {
+  display: inline-block;
+  width: 30%;
+  padding-left: 3%;
+}
+
+.picker-input {
+  display: inline-block;
+  position: relative;
+  width: 66%;
+}
+
+.picker-input input.wall-textbox {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+}
+
+input[data-invalid^="yes"]
+{
+  color: red;
+}
+
+
+
+
+.noDisplay {
+  display: none;
+}
+
+/* Edit mode */
+
+.wall-selected .topMenu-button-frame {
+  background: #fff;
+}
+
+.wall-selected {
+  position: absolute;
+  background: rgba(255,255,255,0.7);
+  z-index: 2;
+}
+
+
+.wall-box input, .wall-box textarea {
+    margin: 0;
+    padding: 1px; 
+    border: none; 
+    border-radius: 0px; 
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    resize:none;
+    outline:none;
+}
+
+.tappable {
+    cursor: pointer;
+}
+.box-page[livemode="true"] .wall-box {
+    cursor: pointer;
+}
+
+.tappable:hover {
+   box-shadow: 0px 0px 6px 6px rgba(128,128,128,0.5);
+}
+
+.tapped {
+   background: rgba(128,128,128,0.5) !important;
+}
+
+
+
+
+.box-page[livemode="true"] .wall-box[sel="strong"]:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border: 5px dotted #C00;
+  z-index: 10000;
+}
+
+
+.box-page[livemode="true"] .wall-box[sel="weak"]:before {
+  border: 5px dotted;
+  border-width: 6px;
+  border-color: rgba(204, 0, 0, 0.6);
+  background: rgba(204, 0, 0, 0.4);
+  z-index: 2;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+}
+
+.box-page[livemode="true"] .wall-box:before
+{
+  border: 1px solid blue;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.box-page[livemode="false"] .wall-box:before
+{
+  border: none;
+}
+
+/*  Wall styling */
+
+#wallContainer {
+  position: absolute;
+  width: auto;
+  height: auto;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+#wallContainer {
+  top: 4em;
+}
+
+.portrait #wallContainer {
+  top: 4.5em;
+}
+
+#wallContainer.no-bar {
+    top:0em !important;
+}
+
+#theWall {
+  font-size: 0.8em;
+}
+
+.wallWithColumns {
+  height: 100%;
+}
+
+.landscape .wallWithColumns .classic-page 
+{
+  column-width: 18.5em;                      /*CSSpref*/  -webkit-column-width: 18.5em;  -moz-column-width: 18.5em;
+  column-fill: auto;                      /*CSSpref*/  -webkit-column-fill: auto;  -moz-column-fill: auto;
+  padding-left: 1.5em;
+  padding-bottom: 1.5em;
+}
+
+.portrait .wallWithColumns .classic-page 
+{
+  margin-left: 1em;
+  font-size: 1.3em;
+}
+
+
+
+/*
+#theWall div.wall-page 
+{
+  max-width: 20em;
+  height: 100%;
+}
+*/
+
+.wall-fullscreen {
+position: relative;
+width: 100%;
+height: 100%;
+}
+
+.wall-page
+{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+}
+
+.box-page
+{
+  overflow: hidden;
+}
+
+
+.brokenColumns .wallFullScreenContainer,
+.brokenColumns .wall-page {
+  z-index: 1;
+}
+
+.sideWall .wall-page {
+  z-index: 0;
+}
+
+
+#wallBtns {
+  z-index:1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0em; /* otherwise it captures click events over full screen board */
+  text-align: right;
+  margin-top: 0.3em;
+}
+
+.portrait #wallBtns {
+  top: 0.5em;
+}
+
+.wallTitleDiv {
+  position: absolute;
+  left: 4em;
+  top: 0em;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 75%; /* HACK */
+}
+
+.portrait .wallTitleDiv {
+  left: 5em;
+}
+
+.portrait .wallTitleDivFirst,
+.wallTitleDivFirst {
+  left : 1em;
+}
+
+.wallTitleDiv .scriptTitle {
+  text-transform: uppercase;
+  font-size: 0.6em;
+  font-weight: bold;
+}
+
+.wallTitleDiv .title {
+  text-transform: uppercase;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.wallTitleDiv .subtitle {
+  text-transform: uppercase;
+  font-size: 0.7em;
+  font-weight: bold;
+}
+
+#wallBtns .topMenu-button-desc { display: none; }
+#wallBtns .bottomButtons .topMenu-button-desc { display: block; font-size: 0.5em; }
+
+.wallBack {
+  position: absolute;
+  left: 0.3em;
+  top: 0;
+}
+
+.wallCloudSymbol {
+  width: 9em; 
+  height: 1.5em;
+  text-align: center;
+  cursor:pointer;
+}
+.phone .wallCloudSymbol {
+  width: 5em; 
+}
+
+.wallCloudStatus {
+   left: 0em;
+   top: 1.5em;
+   text-align: center;
+   font-size: 0.7em;
+   cursor:pointer;
+}
+
+.portrait .wallBtnRow .topMenu-button {
+  margin-top: -0.3em;
+}
+
+#wallFullScreenBtns
+{
+    position: absolute;
+    left: 0.5em;
+    bottom: 1.5em;
+    z-index:10000;
+}
+
+.phone #wallFullScreenBtns {
+    bottom:2em;
+}
+
+.landscape #wallBtns .topMenu-button-frame
+{
+  width: 1.8em;
+  height: 1.8em;
+}
+
+#wallBtns .topMenu-button
+{
+  padding-bottom: 0.5em;
+  display: inline-block;
+}
+
+#wallBtns .bottomButtons .topMenu-button
+{
+  padding-bottom: 1.1em;
+}
+
+/*********************************************************************************/
+
+.expandingTextAreaContainer {
+    position: relative;
+}
+
+.expandingTextAreaContainer pre {
+  font-family: inherit;
+  font-size: 1em;
+  border: 3px solid transparent;
+  padding: 0.2em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  visibility: hidden;
+  display: block;
+  line-height: normal;
+}
+
+.expandingTextAreaContainer textarea {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  overflow: hidden;
+  position: absolute;
+  line-height: normal;
+  left: 0;
+  top: 0;
+  resize: none;
+}
+
+.wallBgPictureHorizontal,
+.wallBgPictureVertical
+{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wallBgPictureVertical canvas { width: auto; height: 100%; }
+.wallBgPictureHorizontal canvas { width: 100%; height: auto; }
+
+.viewPicture {
+  position:relative;
+  display:inline-block;
+}
+
+.viewPicture img,
+.viewPicture canvas {
+  max-width:100%;
+  max-height:100%;
+}
+
+/* wall elements */
+.item {
+  min-height: 4em;
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  position: relative;
+  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;
+}
+
+.item .item-crash {
+    background-color:yellow;
+}
+
+.item .item-image {
+    width: 3em;
+    height: 3em;
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+}
+
+.contact-image
+{
+    max-width:3em;
+    max-height:3em;
+}
+
+.item .item-info {
+  padding-left: 3.5em;
+  overflow: hidden;
+}
+
+.item .item-with-button {
+  margin-right:4em;
+}
+
+.item .item-info .item-title {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.item .item-info .item-subtitle {
+    /*opacity: 0.6;*/
+}
+
+.item-subtle {
+  margin-top: 0.3em;
+  opacity: 0.6;
+  font-size: 0.7em;
+  /*text-align: right;*/
+}
+
+.item .item-info .item-description {
+    margin-top: 0.3em;
+    max-height: 3em;
+    font-size: 0.7em;
+    overflow: hidden;
+}
+
+.item .item-buttons {
+    position:absolute;
+    top:0em;
+    right:0.5em;
+}
+
+.link-item {
+  min-height: 1em;
+  cursor: pointer;
+}
+
+.beta-note {
+  text-align: right;
+  position: absolute;
+  bottom: 0;
+  right: 1.5em;
+  font-size: 0.6em;
+
+  padding: 0.5em;
+  line-height: 1.1em;
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+}
+
+.copyright-note {
+  background: rgba(255,255,255,0.0001);
+  color: black;
+  font-size: 0.7em;
+  height: 1.66em;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+}
+
+.copyright-text {
+  position: absolute;
+  top: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  background: white;
+  opacity: 0.7;
+  height: 1.66em;
+}
+
+.copyright-logo {
+  width: 14em;
+  left: 0;
+}
+
+.copyright-info {
+  padding: 0.1em 0.7em;
+  right: 0;
+}
+
+#root[data-modal-visible^="yes"] .beta-note {
+  background: rgba(255, 255, 255, 0.0001);
+}
+
+.beta-feedback,
+.beta-legal {
+  display: inline-block;
+  margin-left: 1.5em;
+}
+
+.beta-black-nope { color: #000; }
+.beta-legal { color: #6c6c6c; }
+
+.beta-feedback {
+  color: #5ACC13;
+  text-decoration: underline;
+}
+
+.beta-underline {
+  text-decoration: underline;
+}
+
+.app-updated {
+  font-size: 1em;
+  padding: 0.5em;
+  background-color: #ff0;
+  position: absolute;
+  left: 30%;
+  top: 0;
+  width: 40%;
+  text-align: center;
+  color: black;
+}
+
+.mapPushpinInner {
+    width:39px;
+    height:25px;
+    font-size:9px;
+    overflow:hidden;
+}
+.mapPushpin
+{
+  position: absolute; 
+  font-size:0.7em;
+  width:39px;
+  height:25px;
+  padding: 8px 10px 8px 10px;
+  cursor:pointer;
+}
+.mapPushpin:before
+{
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  border-top: 16px solid green;
+  border-left: 0;
+  border-right: 14px solid transparent;        
+  border-bottom: 0;
+}
+
+.leaderboard-item {
+    background-color:rgba(255,255,255,0.3);
+    margin-top:0em;
+}
+
+.leaderboards-score
+{
+    position:absolute;
+    right: 0.2em;
+    top: 0.2em;
+    text-align:right;
+    font-size: 1.2em;
+}
+
+.leaderboard-img
+{
+    position:absolute;
+    left:0.2em;
+    top:0.4em;
+    width:3em;
+    height:3em;
+    background-size:cover;
+}
+
+.leaderboard-img img
+{
+    width:3em;
+    height:3em;
+}
+
+.leaderboard-center
+{
+    position:absolute;
+    left:3.6em;
+    top:0.4em;
+}
+
+.wallAdContainer 
+{
+    position:absolute;
+    bottom:1em;
+    left:20%;
+    width:500px;
+    height:130px;
+    background-color:lightgoldenrodyellow;
+    color:black;
+    border: 1px solid black;
+    font-size:0.8em;
+    text-align:center;
+    z-index:1000000;
+}
+
+.appBarSymbol {
+    font-family:"Segoe UI Symbol";
+    font-size:1.2em;
+    color:black;
+    position:absolute;
+    text-align:center;
+    vertical-align:middle;
+    top:0.4em;
+    left:0.4em;
+}
+
+.wallSocialWidget {
+    display:inline;
+    margin-right: 0.5em;
+}
+
+.bottomSocialWidget {
+  display: inline-block;
+  height: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+}
+
+.wallSocialLabel {
+  font-size: 0.7em;
+  margin-right: 1em;
+  margin-bottom: 0em;
+}
+
+.wall-dialog-button-huge {
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  margin-top: 0.3em;
+  font-size: 2em;
+  border-radius:0.5em;
+}
+
+
+.showFromBelow {
+  animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);                      /*CSSpref*/  -webkit-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);  -moz-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.bg-critical {
+    background-color:#8b0000;
+}
+
+@keyframes showFromBelow {
+  from { 
+    opacity: 0;
+    transform: translate(0, 1em);                      /*CSSpref*/  -webkit-transform: translate(0, 1em);  -moz-transform: translate(0, 1em);
+  }
+  to {
+    opacity: 1;
+    transform: none;                      /*CSSpref*/  -webkit-transform: none;  -moz-transform: none;
+  }
+}   /*CSSpref*/ @-webkit-keyframes showFromBelow { from { opacity: 0; -webkit-transform: translate(0, 1em); } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showFromBelow { from { opacity: 0; -moz-transform: translate(0, 1em); } to { opacity: 1; -moz-transform: none; } } 
+
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}   /*CSSpref*/ @-webkit-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-moz-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } } 
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}   /*CSSpref*/ @-webkit-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-moz-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } 
+
+@keyframes showPopup {
+  from { opacity: 0; transform: translate(0, 2em); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showPopup { from { opacity: 0; -webkit-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPopup { from { opacity: 0; -moz-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes showRightPanel {
+  from { opacity: 0; transform: translate(1em, 0); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showRightPanel { from { opacity: 0; -webkit-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showRightPanel { from { opacity: 0; -moz-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes showLeftPanel {
+  from { opacity: 0; transform: translate(-1em, 0); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showLeftPanel { from { opacity: 0; -webkit-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showLeftPanel { from { opacity: 0; -moz-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes showBottomPanel {
+  from { opacity: 0; transform: translate(0, 1em); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showBottomPanel { from { opacity: 0; -webkit-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showBottomPanel { from { opacity: 0; -moz-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes flipTile {
+  from { transform: none; }
+  50% { transform: scale(-4, 4) }
+  to { transform: scale(16, 16); }
+}   /*CSSpref*/ @-webkit-keyframes flipTile { from { -webkit-transform: none; } 50% { -webkit-transform: scale(-4, 4) } to { -webkit-transform: scale(16, 16); } }  @-moz-keyframes flipTile { from { -moz-transform: none; } 50% { -moz-transform: scale(-4, 4) } to { -moz-transform: scale(16, 16); } } 
+
+@keyframes fadeSlide {
+  from { transform: none; opacity: 1; }
+  to { transform: translate(4em, -4em); opacity: 0; }
+}   /*CSSpref*/ @-webkit-keyframes fadeSlide { from { -webkit-transform: none; opacity: 1; } to { -webkit-transform: translate(4em, -4em); opacity: 0; } }  @-moz-keyframes fadeSlide { from { -moz-transform: none; opacity: 1; } to { -moz-transform: translate(4em, -4em); opacity: 0; } } 
+
+@keyframes showPageLeft {
+  from { opacity: 0; transform: translate(-10em, 0); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showPageLeft { from { opacity: 0; -webkit-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageLeft { from { opacity: 0; -moz-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes hidePageLeft {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(10em, 0); }
+}   /*CSSpref*/ @-webkit-keyframes hidePageLeft { from { opacity: 1; -webkit-transform: none; } to { opacity: 0; -webkit-transform: translate(10em, 0); } }  @-moz-keyframes hidePageLeft { from { opacity: 1; -moz-transform: none; } to { opacity: 0; -moz-transform: translate(10em, 0); } } 
+
+@keyframes showPageRight {
+  from { opacity: 0; transform: translate(10em, 0); }
+  70% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}   /*CSSpref*/ @-webkit-keyframes showPageRight { from { opacity: 0; -webkit-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageRight { from { opacity: 0; -moz-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+
+@keyframes hidePageDown {
+  0% { transform: translate(0,0) }
+  60% { transform: translate(0, 10em) scale(0.5) }
+  100% { transform: translate(0, 30em) scale(0.5); opacity: 0 }
+}   /*CSSpref*/ @-webkit-keyframes hidePageDown { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageDown { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } } 
+
+@keyframes hidePageUp {
+  0% { transform: translate(0,0) }
+  60% { transform: translate(0, -10em) scale(0.5) }
+  100% { transform: translate(0, -30em) scale(0.5); opacity: 0 }
+}   /*CSSpref*/ @-webkit-keyframes hidePageUp { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, -10em) scale(0.5) } 100% { -webkit-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageUp { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, -10em) scale(0.5) } 100% { -moz-transform: translate(0, -30em) scale(0.5); opacity: 0 } } 
+
+
+a.button, a.button:hover, a.button:visited {
+    color:white;
+    text-decoration:none;
+    font-weight:400;
+    display:inline-block;
+}
+
+.floatleft {
+    float: left;
+}
+.floatright {
+    float: right;
+}
+
+.login-button {
+  background: #eee;
+  border: none;
+  margin: 0;
+  padding: 0.3em 0.5em;
+  font-size: 1em;
+  vertical-align: top;
+}
+
+.login-button .svg {
+  width: 11em;
+  height: 2.3em;
+  display: block;
+}
+
+.modalDialog .login-button {
+  margin-left: 0.5em;
+}
+
+.gray-button {
+  border: none;
+  background: #eee;
+  color: #686868 !important;
+  font-size: 1em;
+  vertical-align: top;
+}
+
+
+.radio-button {
+  border: none;
+}
+
+.radio-inner {
+  width: 0.5em;
+  height: 0.5em;
+  background: black;
+  border-radius: 2em;
+  margin: 0.1em;
+}
+
+.radio-outer {
+  border: 0.05em solid black;
+  border-radius: 2em;
+  display: inline-block;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+.radio-button[data-selected="no"] .radio-inner {
+  background-color: transparent;
+}
+
+.radio-label {
+  display: inline-block;
+  margin-right: 2em;
+}
+
+.radio-group {
+  text-align: center;
+  margin: 0.5em 0;
+}
+
+:focus {
+  outline: 0;
+  outline-color: transparent;
+  outline-style: none;
+}
+
+.inlineBlock {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.cloudSession .navItemInner 
+{
+    height: auto;
+    position: relative;
+	font-size: 0.7em;
+}
+
+.cloudSession .navContent 
+{
+    position: relative;
+    white-space: pre-line;
+    margin-left: 4em;
+    left: 0em;
+}
+
+.cloudSession .navName
+{
+    font-size: 1.2em;
+    margin-bottom: 0.2em;
+}
+
+.cloudSession .navDescription 
+{
+    text-wrap:normal;
+    white-space:pre-line;
+	font-size: 0.8em;
+	color: #666;
+}
+
+.navImg .svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cloudSession .navImg
+{
+	width: 3.15em;
+	height: 3.15em;
+  	border: 1px solid transparent;
+	position: absolute;
+        padding: 0;
+	top: 0;
+	left: 0;
+}
+
+
+.cloudSession.navItem
+{
+    position: relative;
+    overflow: visible;
+    padding: 0.4em;
+    border-left: 0.5em solid transparent;
+  font-family: inherit;
+  font-size: 1em;
+  text-align: left;
+  display: block;
+  border: none;
+  background: transparent;
+  width: 100%;
+}
