@@ -1,4 +1,4 @@
-///<reference path='../../External/TypeScript/node.d.ts'/>
+///<reference path='../typings/node/node.d.ts'/>
 ///(reference path='shell.d.ts'/)
 
 import fs = require('fs');

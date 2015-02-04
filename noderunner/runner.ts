@@ -3,7 +3,7 @@
 ///<reference path='../rt/refs.d.ts'/>
 ///<reference path='../ast/refs.d.ts'/>
 ///<reference path='../libnode/refs.d.ts'/>
-///<reference path='../../External/TypeScript/node.d.ts'/>
+///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='jsonapi.ts'/>
 ///(reference path='../shell/package.d.ts'/)
 
