@@ -7,7 +7,7 @@
 ///<reference path='../libwab/refs.d.ts'/>
 ///<reference path='../libcordova/refs.d.ts'/>
 ///<reference path='videoUtil.ts'/>
-///<reference path='TipManager.ts'/>
+///<reference path='tipManager.ts'/>
 ///<reference path='sideTab.ts'/>
 ///<reference path='benchmarker.ts'/>
 ///<reference path='calcbutton.ts'/>
