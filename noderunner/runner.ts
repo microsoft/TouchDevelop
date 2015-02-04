@@ -20,6 +20,7 @@ import crypto = require('crypto');
 import querystring = require('querystring');
 import child_process = require('child_process');
 import net = require('net');
+import events = require('events');
 
 export interface RestConfig {
     clientKey:string;
@@ -453,7 +454,7 @@ function httpGetTextAsync(u:string)
     var r = new TDev.PromiseInv()
     var p = url.parse(u);
 
-    https.get(u, (res:http.ServerResponse) => {
+    https.get(u, (res:http.ClientResponse) => {
         if (res.statusCode == 200) {
             (<any>res).setEncoding('utf8');
 
@@ -474,7 +475,7 @@ function httpGetBufferAsync(u:string)
     var r = new TDev.PromiseInv()
     var p = url.parse(u);
 
-    https.get(u, (res:http.ServerResponse) => {
+    https.get(u, (res:http.ClientResponse) => {
         if (res.statusCode == 200) {
             var bufs = []
             res.on('data', (c) => { bufs.push(c) });
@@ -1516,14 +1517,14 @@ function downloadFile(u:string, f:(s:string)=>void)
     var p = url.parse(u);
 
 
-    https.get(u, (res:http.ServerResponse) => {
+    https.get(u, (res:http.ClientResponse) => {
         if (res.statusCode == 200) {
-            if (/gzip/.test((<any>res).headers['content-encoding'])) {
-                var g:EventEmitter = zlib.createUnzip(undefined);
+            if (/gzip/.test(res.headers['content-encoding'])) {
+                var g: events.EventEmitter = zlib.createUnzip(undefined);
                 (<any>res).pipe(g);
             } else {
                 g = res;
-                (<any>res).setEncoding('utf8');
+                res.setEncoding('utf8');
             }
 
             var d = "";
@@ -1553,7 +1554,7 @@ function reportBug(ctx: string, err: any) {
         hostname: 'www.touchdevelop.com',
         path: '/api/bug',
         method: 'POST',
-    }, (res: http.ServerResponse) => {
+    }, (res: http.ClientResponse) => {
         if (res.statusCode == 200) {
             if (!slave)
                 console.log("bug logged succesfully");

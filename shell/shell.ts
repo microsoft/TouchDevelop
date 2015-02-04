@@ -10,6 +10,7 @@ import util = require('util');
 import crypto = require('crypto');
 import child_process = require('child_process');
 import os = require('os');
+import events = require('events');
 
 var config:any;
 var currentReqNo = 0;
@@ -189,7 +190,7 @@ function downloadStream(u:string, f:(str:any)=>void)
 {
     var p:any = url.parse(u);
 
-    https.get(p, (res:http.ServerResponse) => {
+    https.get(p, (res:http.ClientResponse) => {
         if (res.statusCode == 200) {
             f(res)
         } else {
@@ -217,8 +218,8 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
             downloadFile((<any>res).headers['location'], f)
             res.end()
         } else if (res.statusCode == 200) {
-            if (/gzip/.test((<any>res).headers['content-encoding'])) {
-                var g:EventEmitter = zlib.createUnzip(undefined);
+            if (/gzip/.test(res.headers['content-encoding'])) {
+                var g:events.EventEmitter = zlib.createUnzip(undefined);
                 (<any>res).pipe(g);
             } else {
                 g = res;
