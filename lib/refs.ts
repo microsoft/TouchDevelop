@@ -91,7 +91,7 @@
 ///<reference path='ApiManager.ts'/>
 ///<reference path='AdManager.ts'/>
 ///<reference path='Matrix.ts'/>
-///<reference path='ArtCache.ts'/>
+///<reference path='artCache.ts'/>
 ///<reference path='OAuthResponse.ts'/>
 ///<reference path='Actions.ts'/>
 ///<reference path='Contract.ts'/>
@@ -103,7 +103,7 @@
 ///<reference path='Collection.ts'/>
 ///<reference path='User.ts'/>
 ///<reference path='BluetoothDevice.ts'/>
-///<reference path='Ref.ts'/>
+///<reference path='ref.ts'/>
 ///<reference path='AudioContextManager.ts'/>
 ///<reference path='SpriteSheet.ts'/>
 ///<reference path='SpriteAnimation.ts'/>
