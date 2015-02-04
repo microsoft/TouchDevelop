@@ -255,6 +255,36 @@ module TDev
                     op.calcButton = Ticks.btnCut;
                     op.label = lf("need to delete this")
                     return;
+                } else if (stmt instanceof AST.ActionParameter) {
+                    var param = <AST.ActionParameter>stmt;
+                    var param0 = <AST.ActionParameter>param.diffAltStmt;
+                    if (param.getName() != param0.getName()) {
+                        op = new TutorialInstruction()
+                        op.stmt = param0
+                        op.targetName = param.getName()
+                        return;
+                    }
+                    if (param.getKind().toString() != param0.getKind().toString()) {
+                        op = new TutorialInstruction();
+                        op.stmt = param0
+                        op.targetKind = param.getKind()
+                        return;
+                    }
+                } else if (stmt instanceof AST.RecordField) {
+                    var field = <AST.RecordField>stmt;
+                    var field0 = <AST.RecordField>field.diffAltStmt;
+                    if (field.getName() != field0.getName()) {
+                        op = new TutorialInstruction()
+                        op.stmt = field0
+                        op.targetName = field.getName()
+                        return;
+                    }
+                    if (field.dataKind.toString() != field0.dataKind.toString()) {
+                        op = new TutorialInstruction();
+                        op.stmt = field0
+                        op.targetKind = field.dataKind
+                        return;
+                    }
                 } else {
                     var eh = stmt.calcNode()
                     if (eh && eh.diffTokens) {
@@ -380,10 +410,7 @@ module TDev
                                 if (typeof d[i].getLiteral() == "string" &&
                                     d[i + 3] &&
                                     typeof d[i + 3].getLiteral() == "string") {
-                                    if (d[i + 3] instanceof AST.FieldName)
-                                        op.localName = d[i + 3].getLiteral()
-                                    else
-                                        op.editString = d[i + 3].getLiteral()
+                                    op.editString = d[i + 3].getLiteral()
                                     op.addToken = d[i + 3]
                                 } else if (d[i].getThing() instanceof AST.PlaceholderDef && !d[i + 2]) {
                                     // the next token will delete the placeholder def
