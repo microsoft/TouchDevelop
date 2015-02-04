@@ -11,3 +11,5 @@ tdconfig.json
 build/*.json
 shell/npm/package.json
 touchdevelop.tgz
+results.html
+results.json
