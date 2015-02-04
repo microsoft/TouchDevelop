@@ -10,8 +10,12 @@ want to go to touchdevelop.com:
 * **stable:** https://www.touchdevelop.com/app
 * **beta:** https://www.touchdevelop.com/app/beta
 
+Other pages of interrest:
+* landing page: https://www.touchdevlop.com
+* blog: https://www.touchdevelop.com/blog
+* Hour Of Code tutorials: https://www.touchdevelop.com/hoc
 
-## what's it in this repo?
+## what's in this repo
 
 The repo is mostly written in [Typescript](http://www.typescriptlang.org/) with tiny pieces
 of HTML gluing.
@@ -24,14 +28,20 @@ This repo contains the source code for:
 * the node.js client
 
 However, you will not find the cloud backend running on
-https://www.touchdevelop.com that takes care of storing and managing the scripts.
+https://www.touchdevelop.com that takes care of storing and managing the scripts. The client uses the [cloud services](https://www.touchdevelop.com/help/cloudservices) provided by the TouchDevelop backend.
 
-## how can I contribute?
+## how can I contribute
 
 There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md) to TouchDevelop.
-* [Submit bugs](https://github.com/Microsoft/TouchDevelop/issues) and help us verify fixes as they are checked in.
-* Review the [source code changes](https://github.com/Microsoft/TouchDevelop/pulls).
-* [Contribute bug fixes or features](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md).
+
+* [submit bugs](https://github.com/Microsoft/TouchDevelop/issues) and help us verify fixes as they are checked in.
+* Review the [source code changes](https://github.com/Microsoft/TouchDevelop/pulls)
+* [contribute bug fixes or features](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md).
+
+If you're not a developer but still would like to help,
+you've more tasks for you!
+
+* [help translate the user inferface](https://touchdeveloptranslator.azurewebsites.net), do you use TouchDevelop and speak a foreign language? You can help!
 
 ## how to build
 
@@ -56,8 +66,11 @@ Use one of the following to build and test:
 
     jake            # Build locally
 
-## how to run this thing locally
+## where are the docs
 
-After building, you can run TouchDevelop from a local node server by running
+All the docs available online at
+> https://www.touchdevelop.com/docs
 
-    td
+The docs are
+authored as TouchDevelop scripts in TouchDevelop itself. You can fork them
+and send pull requests from TouchDevelop itself to update them.
