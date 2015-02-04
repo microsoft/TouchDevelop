@@ -1,7 +1,7 @@
 ﻿///<reference path='../rt/refs.d.ts'/>
 //<reference path='../browser/browser.d.ts'/>
-///<reference path='../../External/TypeScript/winjs.d.ts'/>
-///<reference path='../../External/TypeScript/winrt.d.ts'/>
+///<reference path='../typings/winjs/winjs.d.ts'/>
+///<reference path='../typings/winrt/winrt.d.ts'/>
 ///<reference path='Senses.ts'/>
 ///<reference path='Media.ts'/>
 ///<reference path='Pictures.ts'/>
