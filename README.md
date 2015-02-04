@@ -61,9 +61,7 @@ Change to the TouchDevelop directory:
 Install dependencies:
 
     npm install jake -g # skip this step if you're on Windows
-    npm install tsd@next -g
     npm install
-    tsd reinstall
 
 Build:
 
