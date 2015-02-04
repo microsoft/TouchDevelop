@@ -270,3 +270,11 @@ task('run', [ 'default' ], { async: true }, function () {
         function() { complete(); }
     );
 });
+
+task('local', [ 'default' ], { async: true}, function() {
+  jake.exec(
+    [ 'node shell/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
+    { printStdout: true, printStderr: true },
+    function() { complete(); }
+  )
+})
