@@ -45,7 +45,7 @@ var addPrefixToContent = (pref:string, cont:string) =>
     });
 
 echo("*** START CSS");
-forEachFile("..\\css", function (s) {
+forEachFile("../css", function (s) {
     var bn = s.replace(/\.css$/, "");
     if (bn == s) return;
 
