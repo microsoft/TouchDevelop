@@ -108,9 +108,9 @@ module TDev.RT {
         //@ writesMutable
         public set_at(index:number, item:T) : void
         {
-		    var _index = Math.floor(index);
-			if (0 <= _index && index < this.a.length)
-	            this.a[_index] = item;
+            var _index = Math.floor(index);
+            if (0 <= _index && index < this.a.length)
+                this.a[_index] = item;
         }
 
         //? Inserts an object at position index. Does nothing if index is out of range.

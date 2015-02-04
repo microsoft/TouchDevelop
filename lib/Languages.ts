@@ -102,17 +102,17 @@ module TDev.RT {
     }
     export module MicrosoftTranslator
     {
-		export function createTranslateButton(cls : string, tk : Ticks, elementDiv : HTMLElement, from : string, button = false, replaceContent = false) : HTMLElement {
+        export function createTranslateButton(cls : string, tk : Ticks, elementDiv : HTMLElement, from : string, button = false, replaceContent = false) : HTMLElement {
             var current = TDev.RT.Languages.current_language();
             if (from.toLowerCase() == current.toLowerCase()) return null;
 
             var translateBtn: HTMLElement = null;
             var trDiv = div('translated');
-			var translateCmt = () => {
+            var translateCmt = () => {
                 tick(tk);
-			    if (Cloud.anonMode(lf("translation"))) return;
-			    translateBtn.setFlag("working", true);
-			    TDev.RT.MicrosoftTranslator.translateAsync(from || '', current, elementDiv.innerHTML, true)
+                if (Cloud.anonMode(lf("translation"))) return;
+                translateBtn.setFlag("working", true);
+                TDev.RT.MicrosoftTranslator.translateAsync(from || '', current, elementDiv.innerHTML, true)
                     .done(translated => {
                         replaceContent = replaceContent && translated;
                         Browser.setInnerHTML(trDiv, translated ? translated : lf(":( Sorry, we could not translate this."));
@@ -129,9 +129,9 @@ module TDev.RT {
                         elementDiv.appendChild(trDiv);
                     });
             }
-		    translateBtn = createElement(button ? "button" : "div", cls, lf("translate")).withClick(translateCmt);
+            translateBtn = createElement(button ? "button" : "div", cls, lf("translate")).withClick(translateCmt);
             return translateBtn;
-		}
+        }
 
         // Translates some text between two languages using Bing. Empty source language to auto-detect. 5000 characters max.
         export var translateAsync = (source_lang: string, target_lang: string, text: string, html : boolean): Promise =>
@@ -152,8 +152,8 @@ module TDev.RT {
                 + '&text=' + encodeURIComponent(text);
             if (source_lang)
                 url += '&from=' + encodeURIComponent(source_lang);
-			if (html)
-				url += '&html=true';
+            if (html)
+                url += '&html=true';
 
             var request = WebRequest.mk(Cloud.getPrivateApiUrl(url), undefined);
             return request.sendAsync()

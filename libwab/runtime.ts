@@ -75,10 +75,10 @@ module TDev.RT.Wab {
         export var STOP_SEND_NFC_MESSAGE = "STOP_SEND_NFC_MESSAGE"; // new
         export var START_RECEIVE_NFC_MESSAGE = "START_RECEIVE_NFC_MESSAGE"; // new
         export var STOP_RECEIVE_NFC_MESSAGE = "STOP_RECEIVE_NFC_MESSAGE"; // new
-		export var UPDATE_TILE = "UPDATE_TILE"; // new, UpdateTileRequest
-		export var SPEAK_TEXT = "SPEAK_TEXT"; // new
-		export var SPEAK_SSML = "SPEAK_SSML"; // new
-		export var STATUS = "STATUS"; // new
+        export var UPDATE_TILE = "UPDATE_TILE"; // new, UpdateTileRequest
+        export var SPEAK_TEXT = "SPEAK_TEXT"; // new
+        export var SPEAK_SSML = "SPEAK_SSML"; // new
+        export var STATUS = "STATUS"; // new
         export var CURRENT_HASH = "CURRENT_HASH"; // new, wp8 specific
         export var CHECK_FOR_REFRESH = "CHECK_FOR_REFRESH"; // new, wp8 specific
         export var SWITCH_CHANNEL = "SWITCH_CHANNEL"; // new, wp8 specific
@@ -260,7 +260,7 @@ module TDev.RT.Wab {
         orientation: number;
     }
 
-	export interface UpdateTileRequest extends UriRequest {
+    export interface UpdateTileRequest extends UriRequest {
         counter?: number;
         content?: string;
         title?: string;
@@ -269,7 +269,7 @@ module TDev.RT.Wab {
         pictures?: string[];
         icon?: string;
         template?: string;
-	}
+    }
 
     export interface NetworkInformationResponse extends Response {
         connectionName?: string;
@@ -345,10 +345,10 @@ module TDev.RT.Wab {
         uri: string;
     }
 
-	export interface DictateRequest extends Request {
-		title?:string;
-		caption?: string;
-	}
+    export interface DictateRequest extends Request {
+        title?:string;
+        caption?: string;
+    }
 
     export interface DictateResponse extends Response {
         text: string;
@@ -476,7 +476,7 @@ module TDev.RT.Wab {
 
     export interface OAuthAuthenticationRequest extends UriRequest {
         redirectUri: string; // registered redirect uri
-		state: string; // state value to be validated
+        state: string; // state value to be validated
     }
 
     interface ProxyResponse extends Response {
@@ -1154,7 +1154,7 @@ module TDev.RT.Wab {
             caps.push("orientation");
         if (isSupportedAction(Action.LIST_APPOINTMENTS))
             caps.push("calendar");
-		if (isSupportedAction(Action.UPDATE_TILE))
+        if (isSupportedAction(Action.UPDATE_TILE))
             caps.push("tiles");
         if (isSupportedAction(Action.SPEAK_TEXT) ||
             isSupportedAction(Action.SPEAK_SSML) ||

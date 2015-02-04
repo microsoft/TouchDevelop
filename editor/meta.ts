@@ -113,14 +113,14 @@ module TDev.Meta {
     }
 
     export function chooseArtPictureAsync(options: ChooseArtPictureOptions = {}) { // Promise JsonArt
-		return new Promise((onSuccess, onError, onProgress) => {
+        return new Promise((onSuccess, onError, onProgress) => {
             var m = new ModalDialog();
             var art: JsonArt = undefined;
             m.onDismiss = () => onSuccess(art);
             var converter = (s: Browser.ArtInfo) => {
                 return s.mkSmallBoxNoClick().withClick(() => {
                     s.getJsonAsync()
-					.done(() => {
+                    .done(() => {
                         art = s.art;
                         m.dismiss();
                      });
@@ -170,8 +170,8 @@ module TDev.Meta {
             };
 
             var boxes = []
-			for(var i = 0; i < itms.length; ++i) {
-				var p = itms[i];
+            for(var i = 0; i < itms.length; ++i) {
+                var p = itms[i];
                 if (p instanceof Browser.GroupInfo) {
                     var s = <Browser.GroupInfo>p;
                     var b = converter(s);
@@ -192,7 +192,7 @@ module TDev.Meta {
     {
         searchPath?:string;
         filter?:(s:Browser.ScriptInfo)=>boolean;
-		maxItems?:number;
+        maxItems?:number;
     }
 
     export function chooseScriptAsync(options:ChooseScriptOptions):Promise
@@ -214,9 +214,9 @@ module TDev.Meta {
             };
 
             var boxes = []
-			var maxCount = options.maxItems || 50;
-			for(var i = 0; i < itms.length && boxes.length < maxCount; ++i) {
-				var p = itms[i];
+            var maxCount = options.maxItems || 50;
+            for(var i = 0; i < itms.length && boxes.length < maxCount; ++i) {
+                var p = itms[i];
                 if (p instanceof Browser.ScriptInfo) {
                     var s = <Browser.ScriptInfo>p;
                     var b = converter(s);

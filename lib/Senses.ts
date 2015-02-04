@@ -69,8 +69,8 @@ module TDev.RT {
         }
         export function raiseShakeEvent()
         {
-			if (_rt) {
-	            _rt.queueEvent("shake", null, []);
+            if (_rt) {
+                _rt.queueEvent("shake", null, []);
                 if (_onShake && _onShake.handlers)
                     _rt.queueLocalEvent(_onShake, []);
             }

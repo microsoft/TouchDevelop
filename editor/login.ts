@@ -7,7 +7,7 @@ module TDev.Login
 {
     export function show(hash:string = null) : boolean
     {
-			// Cloud.isOnline should be checked prior to call this api
+            // Cloud.isOnline should be checked prior to call this api
             if (/skipLogin/.test(document.URL)) {
                 HTML.showErrorNotification("skipLogin specified; won't login")
                 return false;
@@ -32,15 +32,15 @@ module TDev.Login
                             var match = response.match(/.*#access_token=([^&]*)/);
                             if (match) {
                                 var token = match[1];
-			                    var id = response.match(/.*&id=([^&]*)/)[1];
-	                            var expires = parseInt((response.match(/.*&expires_in=([^&]*)/)||["0","0"])[1]);
-		                        match = response.match(/.*&identity_provider=([^&]*)/);
-			                    var identityProvider = match ? decodeURIComponent(match[1]) : undefined;
-			                    var oldid = Cloud.getUserId();
-			                    if (oldid && id != oldid) {
+                                var id = response.match(/.*&id=([^&]*)/)[1];
+                                var expires = parseInt((response.match(/.*&expires_in=([^&]*)/)||["0","0"])[1]);
+                                match = response.match(/.*&identity_provider=([^&]*)/);
+                                var identityProvider = match ? decodeURIComponent(match[1]) : undefined;
+                                var oldid = Cloud.getUserId();
+                                if (oldid && id != oldid) {
                                     ModalDialog.info("sign in failed", "sign in with different account not supported at this time");
                                     return;
-			                    }
+                                }
                                 if (/.*[#&]dbg=true/.test(response))
                                     window.localStorage["dbg"] = true;
                                 else
@@ -72,6 +72,6 @@ module TDev.Login
                 Util.navigateInWindow(url);
             }
 
-			return true;
+            return true;
         }
 }

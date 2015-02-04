@@ -880,7 +880,7 @@ module TDev.Synth {
                                     mgr1 = "^(" + C + ")?" + V + C + V + C,       // [C]VCVC... is m>1
                                     s_v = "^(" + C + ")?" + v;                   // vowel in stem
 
-	            return function (w: string) {
+                return function (w: string) {
                                     var stem,
                                         suffix,
                                         firstch,

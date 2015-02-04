@@ -118,7 +118,7 @@ module TDev {
         icon:string;
         iconbackground:string;
         iconArtId?:string;
-		userid?:string;
+        userid?:string;
         time?:number;
         text: string;
         priority:number;

@@ -534,7 +534,7 @@ module TDev
         }
 
         public mayPostToWall(p: WallPage): boolean {
-		    return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
+            return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
         }
 
         public clearWall() {

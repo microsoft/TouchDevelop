@@ -56,22 +56,22 @@ module TDev.RT {
             return "<iframe src='//platform.twitter.com/widgets/tweet_button.html?url=" + encodeURI(url) + "&amp;text=" + encodeURI(text) + "&amp;count=none'style='border:none;overflow:hidden;width:56px;height:20px;' frameBorder='0' scrolling='no' allowTransparency='true'></iframe>"
         }
 
-		export interface ShareButton {
-			text: string;
-			handler: () => void;
-		}
+        export interface ShareButton {
+            text: string;
+            handler: () => void;
+        }
 
         export interface ShareOptions {
             header?: string;
             noDismiss?: boolean;
-			moreButtons? : ShareButton[];
+            moreButtons? : ShareButton[];
             tickCallback? : (network:string) => void;
             justButtons?: boolean;
         }
 
         export var shareButtons = (m:ModalDialog, link: Link, options:ShareOptions) => {
             return [
-				HTML.mkButton('email', () => {
+                HTML.mkButton('email', () => {
                     shareOnNetwork(link, "email", options);
                     if (!options.noDismiss) m.dismiss();
                 }),
@@ -82,23 +82,23 @@ module TDev.RT {
                 HTML.mkButton('twitter', () => {
                     shareOnNetwork(link, "twitter", options);
                     if (!options.noDismiss) m.dismiss();
-                })				
-			];
+                })                
+            ];
         }
 
         export function addShareButtons(m:ModalDialog, link: Link, options:ShareOptions = {}) : HTMLElement
         {
-			var buttons = shareButtons(m, link, options);
-			var cls = 'wall-dialog-buttons';
-			if (options.moreButtons) {
-				cls += ' wall-dialog-buttons-many';
-				options.moreButtons.forEach(b => {
-					buttons.push(HTML.mkButton(b.text, () => {						
-						if (!options.noDismiss) m.dismiss();
-						b.handler();
-					}));
-				});
-			}
+            var buttons = shareButtons(m, link, options);
+            var cls = 'wall-dialog-buttons';
+            if (options.moreButtons) {
+                cls += ' wall-dialog-buttons-many';
+                options.moreButtons.forEach(b => {
+                    buttons.push(HTML.mkButton(b.text, () => {                        
+                        if (!options.noDismiss) m.dismiss();
+                        b.handler();
+                    }));
+                });
+            }
             if (!options.justButtons) {
                 m.add(div('wall-dialog-header', options.header || "share"));
                 m.add(div('wall-dialog-body', tweetify(link.name())));

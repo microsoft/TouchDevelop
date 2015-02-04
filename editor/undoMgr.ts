@@ -73,7 +73,7 @@ module TDev {
             getName: () => "app"
           }
 
-		public currentId() { return this.currentIdx; }
+        public currentId() { return this.currentIdx; }
         public nextId() { return this.currentIdx++; }
 
         private updateCache(d: AST.Decl) {

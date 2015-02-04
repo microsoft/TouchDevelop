@@ -625,7 +625,7 @@ module TDev {
                 if (status == 400)
                     throw new Error("Cloud precondition violated" + info);
                 else if (status == 403 ||
-                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet				
+                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet                
                     {
                     HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)

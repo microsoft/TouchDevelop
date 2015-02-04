@@ -38,7 +38,7 @@ module TDev
 
         public getButton():HTMLButtonElement
         {
-			this._theButton.style.backgroundImage = ''; // clear any image
+            this._theButton.style.backgroundImage = ''; // clear any image
             this._theButton.setChildren([this._inner, this._help]);
             this.setSize(this.getDefaultWidth(), this.getDefaultHeight());
             // for some reason this is required by iPad - the event handlers seem to be unhooked by this
@@ -53,7 +53,7 @@ module TDev
             if (!this.sanityCheck())
                 return;
             if (this._tick) tick(this._tick);
-			TDev.Browser.EditorSoundManager.intellibuttonClick();
+            TDev.Browser.EditorSoundManager.intellibuttonClick();
             if(!!this._cb) this._cb(this._innerText);
         }
 
@@ -62,10 +62,10 @@ module TDev
             this._help.setChildren([document.createTextNode(s)]);
         }
 
-		public setBackgroundImage(url : string) {
-			this._theButton.style.backgroundImage = HTML.cssImage( url.replace("https://az31353.vo.msecnd.net/pub/", "https://az31353.vo.msecnd.net/thumb/") );
-			this._theButton.style.backgroundSize = 'cover';
-		}
+        public setBackgroundImage(url : string) {
+            this._theButton.style.backgroundImage = HTML.cssImage( url.replace("https://az31353.vo.msecnd.net/pub/", "https://az31353.vo.msecnd.net/thumb/") );
+            this._theButton.style.backgroundSize = 'cover';
+        }
 
         private setCallback(t:Ticks, f:(s:string)=>void)
         {
@@ -88,7 +88,7 @@ module TDev
         public clear() {
             this.setText("", "", null);
             HTML.setRole(this._theButton, "presentation");
-		}
+        }
 
         public clearIntelli()
         {

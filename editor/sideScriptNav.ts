@@ -190,10 +190,10 @@ module TDev
                 addBtn(HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdate, () => {
                     TheEditor.updateScript();
                 }));
-			if (!isParent && TheEditor.widgetEnabled("splitButton") && SizeMgr.canSplitScreen())
-				addBtn(HTML.mkRoundButton("svg:Split,black", lf("split"), Ticks.sideSplit, () => {
+            if (!isParent && TheEditor.widgetEnabled("splitButton") && SizeMgr.canSplitScreen())
+                addBtn(HTML.mkRoundButton("svg:Split,black", lf("split"), Ticks.sideSplit, () => {
                     TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)
-				}));
+                }));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
                 addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs, () => {
                     TheEditor.showAppLog(app);
@@ -236,10 +236,10 @@ module TDev
                 }));
             }
 
-			if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
-				addBtn(HTML.mkRoundButton("svg:plug,black", lf("plugins"), Ticks.sidePlugins, () => {
+            if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
+                addBtn(HTML.mkRoundButton("svg:plug,black", lf("plugins"), Ticks.sidePlugins, () => {
                     Plugins.runPlugin();
-				}));
+                }));
             if (!isParent && app.hasTests() && TheEditor.widgetEnabled("runTestsButton"))
                 addBtn(HTML.mkRoundButton("svg:experiment,black", lf("run tests"), Ticks.sideAllTests, () => {
                     TestMgr.testCurrentScript()
@@ -309,8 +309,8 @@ module TDev
                 if (!sect.newName) sect.newName = sect.label.replace(/s$/, "");
 
                 if (sect.things.length == 0) return;
-				// some sections are optional in tutorials
-				if (sect.tutorialHidden && sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
+                // some sections are optional in tutorials
+                if (sect.tutorialHidden && sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
 
                 items.push(div("navHeader", sect.label));
 

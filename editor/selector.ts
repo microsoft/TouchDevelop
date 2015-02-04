@@ -252,9 +252,9 @@ module TDev
 
                 Selector.insertionButtons().forEach(ib =>
                     btns.push(HTML.mkButton(ib.name, () => {
-						TDev.Browser.EditorSoundManager.intellibuttonClick();
-						this.surround(ib.node)();
-					})))
+                        TDev.Browser.EditorSoundManager.intellibuttonClick();
+                        this.surround(ib.node)();
+                    })))
 
                 btns.push(HTML.mkButton(lf("comment out"), () => {
                     TDev.Browser.EditorSoundManager.intellibuttonClick();
@@ -780,9 +780,9 @@ module TDev
                 var b0 = HTML.mkButtonElt("code-button", lbl0, img0, img1, lbl1);
                 (<any>b0).disableForPlaceholder = tck == Ticks.btnAddUp || tck == Ticks.btnAddDown;
                 HTML.setTickCallback(b0, tck, () => {
-					TDev.Browser.EditorSoundManager.intellibuttonClick();
-					f();
-				})
+                    TDev.Browser.EditorSoundManager.intellibuttonClick();
+                    f();
+                })
                 TheEditor.keyMgr.btnShortcut(b0, key);
                 return b0;
             }

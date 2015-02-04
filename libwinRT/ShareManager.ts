@@ -44,7 +44,7 @@ module TDev.RT.WinRT {
                 requestSetPicture(request, _text || "sharing a picture", _picture);
             }
             else {
-			    request.failWithDisplayText("Sorry, there is nothing to share for now.");
+                request.failWithDisplayText("Sorry, there is nothing to share for now.");
             }
         }
 

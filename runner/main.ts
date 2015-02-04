@@ -141,7 +141,7 @@ module TDev {
                 }
                 return url;
             }
-		    TDev.RT.Picture.patchLocalArtUrl = function (url: string): string {
+            TDev.RT.Picture.patchLocalArtUrl = function (url: string): string {
                 if (/\.\/art\//.test(url) && !/\?a=/.test(url)) {
                     // adding 'a' argument to trigger caching
                     url += "?a=" + (<any>window).webAppGuid;

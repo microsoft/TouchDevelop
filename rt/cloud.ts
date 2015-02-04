@@ -44,9 +44,9 @@ module TDev {
                 });
         }
 
-		return Cloud.isOnlineWithPingAsync()
-			.then((isOnline : boolean) => {
-				if (!isOnline) return Promise.as(false);
+        return Cloud.isOnlineWithPingAsync()
+            .then((isOnline : boolean) => {
+                if (!isOnline) return Promise.as(false);
 
                 var prevHash = (window.location.hash || "#").replace(/#/, "");
                 var login = (<any>TDev).Login;
@@ -230,9 +230,9 @@ module TDev {
         return <Progresses>JSON.parse(window.localStorage.getItem(name) || "{}");
     }
 
-	export function isOffline() : boolean {
-		return !isOnline();
-	}
+    export function isOffline() : boolean {
+        return !isOnline();
+    }
     export function isOnline() : boolean {
         var b = !TDev.Browser.noNetwork && (TDev.Browser.isNodeJS || window.navigator.onLine) && isTouchDevelopOnline();
         // randomly turns off connectivity
@@ -240,10 +240,10 @@ module TDev {
             b = false;
         return b;
     }
-	export function isOnlineWithPingAsync() : Promise { // of boolean
-		if (!isOnline()) return Promise.as(false);
-		return pingAsync();
-	}
+    export function isOnlineWithPingAsync() : Promise { // of boolean
+        if (!isOnline()) return Promise.as(false);
+        return pingAsync();
+    }
 
     export var transientOfflineMode = false;
     export function isTouchDevelopOnline() : boolean {
@@ -467,25 +467,25 @@ module TDev {
         numErrors?: number;
     }
 
-	export interface PostApiGroupsBody {
-		name: string;
-		description: string;
+    export interface PostApiGroupsBody {
+        name: string;
+        description: string;
         allowexport: boolean;
         allowappstatistics: boolean;
-		userplatform: string[];
-	}
-	export interface PostApiGroupsResponse {
-		id: string;
-	}
-	export interface ApiGroupCodeResponse {
-		code: string; // can be null; in particular, is null initially
+        userplatform: string[];
+    }
+    export interface PostApiGroupsResponse {
+        id: string;
+    }
+    export interface ApiGroupCodeResponse {
+        code: string; // can be null; in particular, is null initially
         expiration: number; // can be null; in particular, is null initially; in seconds since 1970
     }
     export interface ApiGroupCodeRequest {
-		expiration?: number;
-			// in seconds since 1970; if present, cannot be in the past or more than a year in the future;
-			// defaults to 14 days into the future if null or not present
-	}
+        expiration?: number;
+            // in seconds since 1970; if present, cannot be in the past or more than a year in the future;
+            // defaults to 14 days into the future if null or not present
+    }
 
     export function getUserInstalledBodyAsync(guid: string) : Promise // of InstalledBodies
     {
@@ -526,13 +526,13 @@ module TDev {
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notifications"), "");
     }
-	export interface PushNotificationRequestBody {
-		   // Push notification URL;
-		   // our cloud code will recognize by the URL what the target is. The URL must be understood by System.Uri.TryCreate
-		   subscriptionuri: string;
-		   versionminor: number; // minor OS version, e.g. 0
-		   versionmajor: number; // major OS version, e.g. 4
-	}
+    export interface PushNotificationRequestBody {
+           // Push notification URL;
+           // our cloud code will recognize by the URL what the target is. The URL must be understood by System.Uri.TryCreate
+           subscriptionuri: string;
+           versionminor: number; // minor OS version, e.g. 0
+           versionmajor: number; // major OS version, e.g. 4
+    }
     export function postNotificationChannelAsync(body: PushNotificationRequestBody) : Promise // of void
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notificationchannel"), body);
@@ -583,9 +583,9 @@ module TDev {
     {
         return Util.httpPostTextAsync(getPrivateApiUrl("/me/asksomething?accept=" + accept), "");
     }
-	// ping the server to test if it is online
-	// and there is no funny filtering happening
-	// this is costly so needs to be used wisely
+    // ping the server to test if it is online
+    // and there is no funny filtering happening
+    // this is costly so needs to be used wisely
     export function pingAsync(): Promise // of boolean
     {
         if (/http:\/\/localhost/i.test(document.URL)) return Promise.as(true); // does not work for localhost

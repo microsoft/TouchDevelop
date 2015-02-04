@@ -415,9 +415,9 @@ module TDev { export module Browser {
                     searchAdd = ['#docs'];
                     break;
             }
-			if (/\/groups$/.test(this.apiPath)) {
-				searchPath = this.apiPath;
-			}
+            if (/\/groups$/.test(this.apiPath)) {
+                searchPath = this.apiPath;
+            }
 
             var meid = Cloud.getUserId();
             if (searchMode) {
@@ -523,20 +523,20 @@ module TDev { export module Browser {
 
                 this.progressBar.start();
                 if (!cont && terms.length == 1) {
-					if (/^\/?[a-zA-Z]+$/i.test(terms[0])) {
-						TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
-							if (version != this.searchVersion) return;
-							var inf = this.getAnyInfoByPub(e, "");
-							if (inf) {
-								direct.setChildren([addEntry(inf)])
-							}
-						});
-					} else if (/^\d{9,64}$/i.test(terms[0])) {
-						Cloud.getPrivateApiAsync(terms[0])
-							.done((rc : JsonCode) => {
-								if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
-							}, e => {});
-					}
+                    if (/^\/?[a-zA-Z]+$/i.test(terms[0])) {
+                        TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
+                            if (version != this.searchVersion) return;
+                            var inf = this.getAnyInfoByPub(e, "");
+                            if (inf) {
+                                direct.setChildren([addEntry(inf)])
+                            }
+                        });
+                    } else if (/^\d{9,64}$/i.test(terms[0])) {
+                        Cloud.getPrivateApiAsync(terms[0])
+                            .done((rc : JsonCode) => {
+                                if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
+                            }, e => {});
+                    }
                 }
                 searchDiv.setChildren([div("sdLoadingMore", lf("searching..."))]);
 
@@ -879,7 +879,7 @@ module TDev { export module Browser {
                 else {
                     // user never registered; just skip
                     noOtherAsk();
-				}
+                }
             }
             this.skipOneSync = false;
 
@@ -932,35 +932,35 @@ module TDev { export module Browser {
             return name;
         }
 
-		public joinGroup(code : string) {
+        public joinGroup(code : string) {
             if (Cloud.anonMode(lf("joining groups"))) return;
 
             var name = HTML.mkTextInput("text", lf("enter invitation code"));
             name.maxLength = 64;
             name.pattern = '\d{9,64}';
             name.title = lf("a number between 9 and 64 characters long");
-			name.value = code || "";
+            name.value = code || "";
 
-			var codeid = name.value;
-			var groupid = "";
+            var codeid = name.value;
+            var groupid = "";
             var progressBar = HTML.mkProgressBar();
             var errorDiv = div('');
-			function setError(error : string) {
-				errorDiv.setChildren([error]);
-			}
+            function setError(error : string) {
+                errorDiv.setChildren([error]);
+            }
             var btn = HTML.mkButton(lf("join group"), () => {
-				hideBtn();
+                hideBtn();
                 progressBar.start();
                 Cloud.postPrivateApiAsync(codeid, {})
                     .done(() => {
                         progressBar.stop();
                         m.dismiss();
-						TheApiCacheMgr.invalidate("groups");
-						TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
-						var groupInfo = this.getGroupInfoById(groupid);
-						TheHost.loadDetails(groupInfo);
+                        TheApiCacheMgr.invalidate("groups");
+                        TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
+                        var groupInfo = this.getGroupInfoById(groupid);
+                        TheHost.loadDetails(groupInfo);
                     }, e => {
-						setError(lf("this invitation code is invalid or expired, please check for typing errors..."));
+                        setError(lf("this invitation code is invalid or expired, please check for typing errors..."));
                     });
             });
             function hideBtn() {
@@ -974,7 +974,7 @@ module TDev { export module Browser {
             hideBtn();
             var m = new ModalDialog();
             m.add([
-				progressBar,
+                progressBar,
                 div("wall-dialog-header", lf("join a group")),
                 div("wall-dialog-body", lf("Enter the invitation code"), Editor.mkHelpLink("invitation code")),
                 div("wall-dialog-line-textbox", name),
@@ -984,38 +984,38 @@ module TDev { export module Browser {
 
             var autoKeyboard = KeyboardAutoUpdate.mkInput(name, Util.catchErrors("getCode", () => {
                 codeid = name.value.trim();
-				var lastCode : JsonCode = null;
+                var lastCode : JsonCode = null;
                 if (/\d{9,64}/.test(codeid)) {
                     progressBar.start();
                     Cloud.getPrivateApiAsync(codeid)
-						.then((code: JsonCode) => {
-							lastCode = code;
-							if(code.verb == 'JoinGroup')
-								return Cloud.getPrivateApiAsync(code.data)
-							else
-								return Promise.as(undefined);
-						})
+                        .then((code: JsonCode) => {
+                            lastCode = code;
+                            if(code.verb == 'JoinGroup')
+                                return Cloud.getPrivateApiAsync(code.data)
+                            else
+                                return Promise.as(undefined);
+                        })
                         .done((group: JsonGroup) => {
-							if (group) {
-								showBtn();
-								groupid = group.id;
-								errorDiv.setChildren([
-									div('wall-dialog-header', 'group ',
-										HTML.mkA('', '#list:' + group.userid + '/groups:group:' + group.id + ':overview', '', group.name),
-										' created by ',
-										HTML.mkA('', '#list:installed-scripts:user:' + group.userid + ':overview', '', group.username)),
-									]);
-								if (group.allowexport)
-									errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
-								if (group.allowappstatistics)
-									errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
-							} else {
-								hideBtn();
-								if (lastCode.expiration > Date.now() / 1000)
-									setError(lf("this invitation code is expired."));
-								else
-									setError(lf("this invitation code is invalid, please check for typing errors..."));
-							}
+                            if (group) {
+                                showBtn();
+                                groupid = group.id;
+                                errorDiv.setChildren([
+                                    div('wall-dialog-header', 'group ',
+                                        HTML.mkA('', '#list:' + group.userid + '/groups:group:' + group.id + ':overview', '', group.name),
+                                        ' created by ',
+                                        HTML.mkA('', '#list:installed-scripts:user:' + group.userid + ':overview', '', group.username)),
+                                    ]);
+                                if (group.allowexport)
+                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
+                                if (group.allowappstatistics)
+                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
+                            } else {
+                                hideBtn();
+                                if (lastCode.expiration > Date.now() / 1000)
+                                    setError(lf("this invitation code is expired."));
+                                else
+                                    setError(lf("this invitation code is invalid, please check for typing errors..."));
+                            }
                         }, e => {
                             hideBtn();
                             setError(lf("this invitation code is invalid or expired, please check for typing errors..."));
@@ -1028,62 +1028,62 @@ module TDev { export module Browser {
             Util.onInputChange(name, () => autoKeyboard.keypress());
 
             m.show();
-			autoKeyboard.keypress();
+            autoKeyboard.keypress();
         }
 
         public createNewGroup() {
             if (Cloud.anonMode(lf("creating groups"))) return;
 
-			var progressBar = HTML.mkProgressBar();
+            var progressBar = HTML.mkProgressBar();
             var name = HTML.mkTextInput("text", lf("enter a group name"));
             name.value = lf("my group");
 
             var descr = HTML.mkTextArea("wall-textbox")
             descr.value = "";
 
-			var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
-			HTML.setCheckboxValue(allowExport, false);
+            var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
+            HTML.setCheckboxValue(allowExport, false);
 
             /* deprecated
-			var appStats = HTML.mkCheckBox(lf("owner has access to exported app statistics"));
-			HTML.setCheckboxValue(appStats, false);
+            var appStats = HTML.mkCheckBox(lf("owner has access to exported app statistics"));
+            HTML.setCheckboxValue(appStats, false);
             */
 
-			var div1, div2, cancelBtn;
+            var div1, div2, cancelBtn;
             var m = new ModalDialog();
             var groupInfo : GroupInfo;
             m.add([
-				progressBar,
+                progressBar,
                 div("wall-dialog-header", lf("create new group")),
                 div("wall-dialog-body", lf("A group can be used to run a class or an event. Users can collaborate on the same scripts at the same time."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',
-					div('', div('', lf("group name (minimum 4 characters)")), name),
-					div('', div('', lf("group description")), descr),
-					EditorSettings.editorMode() == EditorMode.pro ? div('', allowExport) : undefined
-					),
-				div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
+                    div('', div('', lf("group name (minimum 4 characters)")), name),
+                    div('', div('', lf("group description")), descr),
+                    EditorSettings.editorMode() == EditorMode.pro ? div('', allowExport) : undefined
+                    ),
+                div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
-					cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                    HTML.mkButtonOnce(lf("create"), () => {					
+                    cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
+                    HTML.mkButtonOnce(lf("create"), () => {                    
                         var request = <Cloud.PostApiGroupsBody>{
                             name: name.value,
                             description: descr.value,
-							allowexport: HTML.getCheckboxValue(allowExport),
-							allowappstatistics: false,
+                            allowexport: HTML.getCheckboxValue(allowExport),
+                            allowappstatistics: false,
                             userplatform: Browser.platformCaps
                         };
-						progressBar.start();
-						cancelBtn.removeSelf();
-						div1.removeSelf();
-						div2.removeSelf();
+                        progressBar.start();
+                        cancelBtn.removeSelf();
+                        div1.removeSelf();
+                        div2.removeSelf();
                         Cloud.postPrivateApiAsync("groups", request)
                             .then((r: Cloud.PostApiGroupsResponse) => {
-								TheApiCacheMgr.invalidate("groups");
-								TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
-								groupInfo = this.getGroupInfoById(r.id);
+                                TheApiCacheMgr.invalidate("groups");
+                                TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
+                                groupInfo = this.getGroupInfoById(r.id);
                                 return groupInfo.newInvitationCodeAsync();
                             }).then(() => {
-								progressBar.stop();
+                                progressBar.stop();
                                 m.dismiss();
                                 return groupInfo.changePictureAsync();
                             })
@@ -1265,7 +1265,7 @@ module TDev { export module Browser {
 
         public loadHash(h:string[])
         {
-			TipManager.update();
+            TipManager.update();
             if (h[0] == "help") {
                 if (this.reloadHelpTopic) {
                     this.initialSearch = this.lastSearchValue;
@@ -1281,9 +1281,9 @@ module TDev { export module Browser {
                 Runtime.lockOrientation(true, false, true);
 
             this.updateScroll()
-			var skipSync = this.visible;
-			// do not sync for help
-			if (h.length >=2 && h[0] === "list" && h[1] === "topics") skipSync = true;
+            var skipSync = this.visible;
+            // do not sync for help
+            if (h.length >=2 && h[0] === "list" && h[1] === "topics") skipSync = true;
             this.clearAsync(skipSync).done(() => {
                 this.emphInstall = this.firstLoad;
                 this.firstLoad = false;
@@ -1607,7 +1607,7 @@ module TDev { export module Browser {
             if (!SizeMgr.phoneMode)
                 this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
 
-			var allTabs = s.getAllTabs();
+            var allTabs = s.getAllTabs();
             var tabToLoad:BrowserTab = allTabs[0];
             if (tab)
                 tabToLoad = allTabs.filter((t) => t.getId() == tab)[0] || tabToLoad;
@@ -3016,7 +3016,7 @@ module TDev { export module Browser {
         }
     }
 
-	export class StoreAppsTab
+    export class StoreAppsTab
         extends BrowserTab {
         constructor(par: BrowserPage, private name : string, private path : string, private logo : string) {
             super(par)
@@ -3025,16 +3025,16 @@ module TDev { export module Browser {
         public getName() : string { return this.name; }
 
         private mkBox(b: Host, c: JsonStoreApp) {
-			var cont = [];
+            var cont = [];
             var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-			addNum(c.users, "svg:person");
+            addNum(c.users, "svg:person");
             addNum(c.launches, "svg:play");
 
             var time = c.time;
             var timeStr = Util.timeSince(time) + " :: /" + c.scriptid;
 
             var icon = div("sdIcon", HTML.mkImg(c.iconurl));
-			icon.style.backgroundColor = ScriptIcons.stableColorFromName(c.storeid);
+            icon.style.backgroundColor = ScriptIcons.stableColorFromName(c.storeid);
             var nameBlock = dirAuto(div("sdName", c.title));
             var hd = div("sdNameBlock", nameBlock);
 
@@ -3045,8 +3045,8 @@ module TDev { export module Browser {
                             div("sdHeader", icon,
                                 div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers)));
             return res.withClick(() => {
-				window.location.href = c.url;
-			});
+                window.location.href = c.url;
+            });
         }
 
         public tabBox(c: JsonStoreApp)
@@ -3062,33 +3062,33 @@ module TDev { export module Browser {
             Cloud.getPrivateApiAsync(this.parent.publicId + "/" + this.path)
                 .done((lst : any) => {
                     loadingDiv.removeSelf();
-					var apps : JsonStoreApp[] = lst.items;
+                    var apps : JsonStoreApp[] = lst.items;
                     var boxes = apps.map(app => this.tabBox(app));
                     this.tabContent.appendChildren(boxes);
                 },
                 (e) => {
                     loadingDiv.removeSelf();
-					var status = e.status;
-					if (status == 403) {
-						this.tabContent.appendChildren(div('', 'you are not allowed to see this data'));
-					} else {
-						this.tabContent.appendChildren(div('', 'failed to load apps; are you connected to internet?'));
-					}
+                    var status = e.status;
+                    if (status == 403) {
+                        this.tabContent.appendChildren(div('', 'you are not allowed to see this data'));
+                    } else {
+                        this.tabContent.appendChildren(div('', 'failed to load apps; are you connected to internet?'));
+                    }
                 });
         }
-	}
+    }
 
-	export class WindowsStoreAppsTab extends StoreAppsTab {
-		constructor(par : BrowserPage) {
-			super(par, "Windows Store", "windowsstoreapps", "win8");
-		}
-	}
+    export class WindowsStoreAppsTab extends StoreAppsTab {
+        constructor(par : BrowserPage) {
+            super(par, "Windows Store", "windowsstoreapps", "win8");
+        }
+    }
 
-	export class WindowsPhoneStoreAppsTab extends StoreAppsTab {
-		constructor(par : BrowserPage) {
-			super(par, "Windows Phone Store", "windowsphonestoreapps", "wp8");
-		}
-	}
+    export class WindowsPhoneStoreAppsTab extends StoreAppsTab {
+        constructor(par : BrowserPage) {
+            super(par, "Windows Phone Store", "windowsphonestoreapps", "wp8");
+        }
+    }
 
     export class KeysTab
         extends BrowserTab
@@ -3913,7 +3913,7 @@ module TDev { export module Browser {
     {
         private seenComments:any = {}
 
-		static topCommentInitialText : string = undefined;
+        static topCommentInitialText : string = undefined;
 
         constructor(par:BrowserPage, private canDeleteAny : () => boolean = undefined, private headerRenderer : (el : HTMLElement) => void = undefined) {
             super(par, "/comments")
@@ -4037,13 +4037,13 @@ module TDev { export module Browser {
                 var req = { kind: "comment", text: text.value, userplatform: Browser.platformCaps };
                 Cloud.postPrivateApiAsync(id + "/comments", req)
                     .done((resp: JsonComment) => {
-					cmtBox.setFlag("working", false);
-					if (reply)
-						postDiv.setChildren([cmtBox, inner]);
-					else
-						postDiv.setChildren([inner, cmtBox]);
+                    cmtBox.setFlag("working", false);
+                    if (reply)
+                        postDiv.setChildren([cmtBox, inner]);
+                    else
+                        postDiv.setChildren([inner, cmtBox]);
                     if (resp.id) {
-						TheApiCacheMgr.invalidate(id);
+                        TheApiCacheMgr.invalidate(id);
                         TheApiCacheMgr.store(resp.id, resp);
                         cmtBox.setChildren([this.commentBox(resp)]);
                         Browser.Hub.askToEnableNotifications();
@@ -4071,7 +4071,7 @@ module TDev { export module Browser {
                         }
                     }
                 }, (e: any) => {
-					cmtBox.setFlag("working", false);
+                    cmtBox.setFlag("working", false);
                     postDiv.setChildren([inner]);
                     if (e && e.status == 400)
                         ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
@@ -4080,7 +4080,7 @@ module TDev { export module Browser {
                 });
 
                 var cmtBox = div("sdCmtPosting", HTML.mkImg("svg:EmailOpen,#aaa,clip=100"), "posting...");
-				cmtBox.setFlag("working", true);
+                cmtBox.setFlag("working", true);
                 postDiv.className = "";
                 var inner = this.mkCommentPostWidget(reply, id);
                 postDiv.setChildren([cmtBox]);
@@ -4094,23 +4094,23 @@ module TDev { export module Browser {
                 }
             };
 
-			var attaching = false;
-			var attach = () => {
-				if (!attaching) {
-					attaching = true;
-					tick(Ticks.commentAttach);
-					Meta.chooseScriptAsync({ header : 'pick a published script to attach', filter : s => !!s.publicId })
-						.done(s => {
-							attaching = false;
-							if (s) {
+            var attaching = false;
+            var attach = () => {
+                if (!attaching) {
+                    attaching = true;
+                    tick(Ticks.commentAttach);
+                    Meta.chooseScriptAsync({ header : 'pick a published script to attach', filter : s => !!s.publicId })
+                        .done(s => {
+                            attaching = false;
+                            if (s) {
                                 var x = "/" + s.publicId
-								if(s.app)
-									x = "'" + s.app.getName() + "' " + x;
+                                if(s.app)
+                                    x = "'" + s.app.getName() + "' " + x;
                                 addText(x)
-							}
-						});
-				}
-			};
+                            }
+                        });
+                }
+            };
 
             var bug = () => {
                 tick(Ticks.commentBugTracking);
@@ -4147,8 +4147,8 @@ module TDev { export module Browser {
                     if (Cloud.anonMode(lf("posting comments"), expand)) return;
                     text.rows = 4;
                     postBtn.setChildren(<any[]>[
-						bugsEnabled ? HTML.mkButton(lf("bug-tracking"), bug) : null,
-						HTML.mkButton(lf("attach"), attach),
+                        bugsEnabled ? HTML.mkButton(lf("bug-tracking"), bug) : null,
+                        HTML.mkButton(lf("attach"), attach),
                         HTML.mkButton(lf("post"), post)]);
                 }
             }
@@ -4156,10 +4156,10 @@ module TDev { export module Browser {
             Util.onInputChange(text, expand);
             text.addEventListener("click", expand, false);
 
-			if (initialText) {
-				text.value = initialText;
-				Util.setTimeout(1, post);
-			}
+            if (initialText) {
+                text.value = initialText;
+                Util.setTimeout(1, post);
+            }
 
             return postDiv;
         }
@@ -4235,10 +4235,10 @@ module TDev { export module Browser {
                 if (this.forumName && !this.forumId)
                     this._topContainer = div(null);
                 else {
-					var t = CommentsTab.topCommentInitialText;
-					CommentsTab.topCommentInitialText = undefined;
+                    var t = CommentsTab.topCommentInitialText;
+                    CommentsTab.topCommentInitialText = undefined;
                     this._topContainer = this.mkCommentPostWidget(false, this.forumId || this.parent.getPublicationId(), t);
-				}
+                }
                 if (this.forumName == lf("issues"))
                     this.addBugControls();
                 //if (this.isForum())
@@ -4249,8 +4249,8 @@ module TDev { export module Browser {
                     this.headerRenderer(h);
                 }
             }
-			// invalidate forum to rlease
-			TheApiCacheMgr.invalidate(this.getUrl());
+            // invalidate forum to rlease
+            TheApiCacheMgr.invalidate(this.getUrl());
             return this._topContainer;
         }
 
@@ -4351,12 +4351,12 @@ module TDev { export module Browser {
         {
             var uid = this.browser().getCreatorInfo(c);
             var nestedComments = div(null);
-			var nestedPubs = div(null);
+            var nestedPubs = div(null);
             if (c.nestinglevel > 0 || c.comments == 0) nestedComments = null;
             else {
-				TheApiCacheMgr.invalidate(c.id + "/comments");
+                TheApiCacheMgr.invalidate(c.id + "/comments");
                 this.getNestedComments(nestedComments, c.id, null);
-			}
+            }
             var textDiv = div('sdSmallerTextBox');
             var cmts = new MdComments();
             cmts.allowLinks = false;
@@ -4366,16 +4366,16 @@ module TDev { export module Browser {
             Browser.setInnerHTML(textDiv, formattedText);
             dirAuto(textDiv);
 
-			// parsing any pub id
-			var pubRx = /(^|[^\w\/]|https?:\/\/tdev.ly|https?:\/\/(www\.)?touchdevelop.com)\/([a-z]{4,})/g;
-			var pubM = null;
+            // parsing any pub id
+            var pubRx = /(^|[^\w\/]|https?:\/\/tdev.ly|https?:\/\/(www\.)?touchdevelop.com)\/([a-z]{4,})/g;
+            var pubM = null;
             var isPull = /#pullRequest/i.test(c.text)
-			while ((pubM = pubRx.exec(c.text)) != null) {
-				TheApiCacheMgr.getAsync(pubM[3], true)
-					.done(
-						j => {
-							var jd = this.browser().getAnyInfoByEtag(j);
-							if (jd) {
+            while ((pubM = pubRx.exec(c.text)) != null) {
+                TheApiCacheMgr.getAsync(pubM[3], true)
+                    .done(
+                        j => {
+                            var jd = this.browser().getAnyInfoByEtag(j);
+                            if (jd) {
                                 var box = jd.mkSmallBox()
                                 nestedPubs.appendChild(box);
                                 if (isPull && jd instanceof ScriptInfo) {
@@ -4383,32 +4383,32 @@ module TDev { export module Browser {
                                         div("sdBaseCorner", HTML.mkButton(lf("pull"), () => (<ScriptInfo>jd).mergeScript())))
                                 }
                             }
-						},
-						e => {});
-			}
-			// parsing user id
-			var userRx = /(^|[^\w@])@([a-z]{4,})/g;
-			var userM = null;
-			while ((userM = userRx.exec(c.text)) != null) {
-				TheApiCacheMgr.getAsync(userM[2], true)
-					.done(
-						j => {
-							var jd = this.browser().getAnyInfoByEtag(j);
-							if (jd) nestedPubs.appendChild(jd.mkSmallBox());
-						},
-						e => {});
-			}
+                        },
+                        e => {});
+            }
+            // parsing user id
+            var userRx = /(^|[^\w@])@([a-z]{4,})/g;
+            var userM = null;
+            while ((userM = userRx.exec(c.text)) != null) {
+                TheApiCacheMgr.getAsync(userM[2], true)
+                    .done(
+                        j => {
+                            var jd = this.browser().getAnyInfoByEtag(j);
+                            if (jd) nestedPubs.appendChild(jd.mkSmallBox());
+                        },
+                        e => {});
+            }
 
             var translateBtn: HTMLElement = null;
             var translateCmt = () => {
                 translateBtn.setFlag("working", true);
                 CommentsTab.translateCommentAsync(c.id)
-					.done(translated => {
+                    .done(translated => {
                         var trDiv = div('translated', translated || ':( ' + lf("Sorry, we could not translate this message."));
                         dirAuto(trDiv);
-						translateBtn.setFlag("working", false);
-						translateBtn.removeSelf();
-						textDiv.appendChild(trDiv);
+                        translateBtn.setFlag("working", false);
+                        translateBtn.removeSelf();
+                        textDiv.appendChild(trDiv);
                 });
             }
             translateBtn = div("sdCmtBtn", HTML.mkImg("svg:Recycle,#aaa"), lf("translate")).withClick(translateCmt);
@@ -4466,7 +4466,7 @@ module TDev { export module Browser {
                                 c.comments > 0 ? " " + c.comments + " replies " : null,
                                 span("sdCmtId", " :: /" + c.id),
                             div("sdCmtBtns", translateBtn, likeBtn, delBtn)),
-						nestedPubs,
+                        nestedPubs,
                         nestedComments,
                         includePosting ? this.mkCommentPostWidget(true, c.id) : null
                         );
@@ -4698,7 +4698,7 @@ module TDev { export module Browser {
 
                 var req = { kind: "tag", id: id }
                 Cloud.postPrivateApiAsync(this.parent.getPublicationId() + "/tags", req)
-				.done((resp) => {
+                .done((resp) => {
                     this.updateTagTo(id, true);
                     Browser.Hub.askToEnableNotifications();
                 }, (e: any) => {
@@ -4769,7 +4769,7 @@ module TDev { export module Browser {
                     if (Cloud.anonMode(lf("adding tags"))) return;
                     var req = { kind: "tag", id: id }
                     Cloud.postPrivateApiAsync(sid + "/tags", req)
-					.done((resp) => {
+                    .done((resp) => {
                         this.updateTagTo(id, true);
                         Browser.Hub.askToEnableNotifications();
                     }, (e: any) => {
@@ -5833,31 +5833,31 @@ module TDev { export module Browser {
                 if (!big) res.className = "sdHeaderOuter";
             }
 
-			var hideScriptAsync = (all : boolean, id : string) : Promise => {
-				Util.log('script: hiding ' + id);
-				var rishidden = false;
-				return Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id), { kind: "script", ishidden: true })
-					.then(r => {
-						rishidden = r.ishidden;
-						return this.browser()
-							.getScriptInfoById(id)
-							.getRealJsonScriptPromise();
-					}).then(jsonScript => {
-						jsonScript.ishidden = rishidden;
-						return Util.httpGetJsonAsync(Cloud.getPrivateApiUrl(id));
-					}).then(r2 => {
-						if (all && (r2.id != r2.updateid || !r2.ishidden)) {
-							return hideScriptAsync(true, r2.updateid);
-						} else return Promise.as();
+            var hideScriptAsync = (all : boolean, id : string) : Promise => {
+                Util.log('script: hiding ' + id);
+                var rishidden = false;
+                return Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id), { kind: "script", ishidden: true })
+                    .then(r => {
+                        rishidden = r.ishidden;
+                        return this.browser()
+                            .getScriptInfoById(id)
+                            .getRealJsonScriptPromise();
+                    }).then(jsonScript => {
+                        jsonScript.ishidden = rishidden;
+                        return Util.httpGetJsonAsync(Cloud.getPrivateApiUrl(id));
+                    }).then(r2 => {
+                        if (all && (r2.id != r2.updateid || !r2.ishidden)) {
+                            return hideScriptAsync(true, r2.updateid);
+                        } else return Promise.as();
                     });
-			}
+            }
 
             var updateHideButton = (): void => {
                 var hidden = this.jsonScript.ishidden;
                 var id = this.publicId;
                 var working = false;
                 var btn;
-				if (hidden) {
+                if (hidden) {
                     btn = div("sdReportAbuse",
                         HTML.mkImg("svg:Unlock,#aaa,clip=100"), lf("unhide")).withClick(() => {
                             if (working) return;
@@ -5875,34 +5875,34 @@ module TDev { export module Browser {
                                     throw e;
                             }).done();
                         });
-				} else {
+                } else {
                     btn = div("sdReportAbuse",
                         HTML.mkImg("svg:Lock,#aaa,clip=100"), lf("hide")).withClick(() => {
-							var progressBar = HTML.mkProgressBar();
-							var m = new ModalDialog();
-							m.onDismiss = () => updateHideButton();
-							m.add(progressBar);
-							var hideBtns, statusDiv;
-							m.add(div('wall-dialog-header', lf("hide script")));
-							m.add(statusDiv = div('wall-dialog-body', lf("Do you want to hide only this version or all? If you only hide this version, the latest not-hidden version (if any) will become the latest update of this script.")));
-							m.add(hideBtns = div('wall-dialog-buttons',
-								HTML.mkButton(lf("hide this version"), () => {
-									hideBtns.removeSelf();
-									statusDiv.setChildren([lf("hiding...")]);
-									progressBar.start();
-									hideScriptAsync(false, this.publicId).done(() => m.dismiss());
-								}),
-								HTML.mkButton(lf("hide all"), () => {
-									hideBtns.removeSelf();
-									statusDiv.setChildren([lf("hiding...")]);
-									progressBar.start();
-									hideScriptAsync(true, this.publicId).done(() => m.dismiss());
-								}),
-								HTML.mkButton(lf("cancel"), () => m.dismiss())
-								));
-							m.show();
+                            var progressBar = HTML.mkProgressBar();
+                            var m = new ModalDialog();
+                            m.onDismiss = () => updateHideButton();
+                            m.add(progressBar);
+                            var hideBtns, statusDiv;
+                            m.add(div('wall-dialog-header', lf("hide script")));
+                            m.add(statusDiv = div('wall-dialog-body', lf("Do you want to hide only this version or all? If you only hide this version, the latest not-hidden version (if any) will become the latest update of this script.")));
+                            m.add(hideBtns = div('wall-dialog-buttons',
+                                HTML.mkButton(lf("hide this version"), () => {
+                                    hideBtns.removeSelf();
+                                    statusDiv.setChildren([lf("hiding...")]);
+                                    progressBar.start();
+                                    hideScriptAsync(false, this.publicId).done(() => m.dismiss());
+                                }),
+                                HTML.mkButton(lf("hide all"), () => {
+                                    hideBtns.removeSelf();
+                                    statusDiv.setChildren([lf("hiding...")]);
+                                    progressBar.start();
+                                    hideScriptAsync(true, this.publicId).done(() => m.dismiss());
+                                }),
+                                HTML.mkButton(lf("cancel"), () => m.dismiss())
+                                ));
+                            m.show();
                         });
-				}
+                }
                 abuseDiv.setChildren([btn]);
             }
 
@@ -6437,18 +6437,18 @@ module TDev { export module Browser {
             options.header = lf("share this script")
             options.noDismiss = true
             options.moreButtons = [{
-					text:lf("group"),
+                    text:lf("group"),
                     handler: () => {
                         tick(Ticks.publishShareGroup);
-						Meta.chooseGroupAsync({ header : lf("choose group"), includeSearch : false })
-							.done((g : GroupInfo) => {
-								if (g) {
-									CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
-									this.browser().loadDetails(g);
-								}
-							});
-					}
-				}]
+                        Meta.chooseGroupAsync({ header : lf("choose group"), includeSearch : false })
+                            .done((g : GroupInfo) => {
+                                if (g) {
+                                    CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
+                                    this.browser().loadDetails(g);
+                                }
+                            });
+                    }
+                }]
 
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
@@ -6722,20 +6722,20 @@ module TDev { export module Browser {
             var base64content = m[3];
             Util.betaCheck(!!contentType);
             if (contentType && base64content) {
-			    HTML.showProgressNotification(lf("uploading screenshot..."));
+                HTML.showProgressNotification(lf("uploading screenshot..."));
                 Cloud.postPrivateApiAsync(this.publicId+ "/screenshots", {
                     kind: "screenshot",
                     contentType: contentType,
                     content: base64content,
                     userplatform: Browser.platformCaps
                     }).then(() => {
-				        HTML.showProgressNotification(lf("screenshot uploaded"), true);
+                        HTML.showProgressNotification(lf("screenshot uploaded"), true);
                     }, e => {
-				        HTML.showProgressNotification(lf("screenshot upload failed"), true);
+                        HTML.showProgressNotification(lf("screenshot upload failed"), true);
                         World.handlePostingError(e, lf("post screenshot"));
                    }).done();
             }
-		}
+        }
 
         public appStudioUrlAsync(): Promise {
             if (!this.publicId) return Promise.as(undefined);
@@ -7187,13 +7187,13 @@ module TDev { export module Browser {
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-			 new UserScoreTab(this),
+             new UserScoreTab(this),
              new ScreenShotTab(this),
              new ScriptsTab(this),
-			 new UserSocialTab(this),
+             new UserSocialTab(this),
             ];
             if (this.isMe())
-				tabs.push(new UserPrivateTab(this));
+                tabs.push(new UserPrivateTab(this));
             return tabs;
         }
 
@@ -7260,7 +7260,7 @@ module TDev { export module Browser {
         constructor(par: UserInfo) {
             super(par,
                 "Informations about apps, keys and cloud sessions.",
-				WindowsStoreAppsTab, WindowsPhoneStoreAppsTab, KeysTab, CloudSessionsTab
+                WindowsStoreAppsTab, WindowsPhoneStoreAppsTab, KeysTab, CloudSessionsTab
                 );
         }
 
@@ -7315,49 +7315,49 @@ module TDev { export module Browser {
         public getId() { return "more"; }
     }
 
-	export class UserScoreTab
-		extends BrowserTab
-	{
-		constructor(par: BrowserPage) {
-			super(par);
-		}
+    export class UserScoreTab
+        extends BrowserTab
+    {
+        constructor(par: BrowserPage) {
+            super(par);
+        }
         public getName() { return lf("score"); }
         public getId() { return "score"; }
         public bgIcon() { return "svg:Group"; }
-		public hideOnEmpty() { return true; }
+        public hideOnEmpty() { return true; }
         public inlineIsTile() { return false; }
 
         public initTab() {
             if (Cloud.anonMode(lf("accessing user score"))) return;
 
             var loadingDiv = div('bigLoadingMore', lf("loading..."));
-			var ch = div('');
+            var ch = div('');
             this.tabContent.setChildren([loadingDiv, ch]);
-			Cloud.getPrivateApiAsync(this.parent.publicId + "/score").done((u: JsonUserScore) => {
+            Cloud.getPrivateApiAsync(this.parent.publicId + "/score").done((u: JsonUserScore) => {
             TheApiCacheMgr.getAsync(this.parent.publicId, true).done((ui: JsonUser) => {
 
-				loadingDiv.removeSelf();
+                loadingDiv.removeSelf();
 
-				var features = u.languageFeatures.features;
-				features.sort((a,b) => b.count - a.count);
-				var reviews = u.receivedPositiveReviews.scripts;
-				//reviews.sort((a,b) => b.count - a.count);
+                var features = u.languageFeatures.features;
+                features.sort((a,b) => b.count - a.count);
+                var reviews = u.receivedPositiveReviews.scripts;
+                //reviews.sort((a,b) => b.count - a.count);
 
-				ch.appendChild(div('sdScoreTitleTop', 'user score: ' + ui.score + ' points'));
+                ch.appendChild(div('sdScoreTitleTop', 'user score: ' + ui.score + ' points'));
 
-				ch.appendChild(div('sdScoreTitle', 'subscriptions: ' + ui.subscribers + " gives " + u.receivedSubscriptions.points + ' points'));
-				ch.appendChild(div('sdScoreTitle', 'active days: ' + ui.activedays + " gives " + u.activeDays.points + ' points'));
-				ch.appendChild(div('sdScoreTitle', 'language features: ' + features.length + " gives " + u.languageFeatures.points + ' points'));
-				ch.appendChild(div('sdScoreTitle', '♥ from other people: ' + ui.receivedpositivereviews + " gives " + u.receivedPositiveReviews.points + ' points'));
-				ch.appendChildren(
-					reviews.map((review : JsonScript) => this.browser().getScriptInfo(review).mkSmallBox())
-					);
-				ch.appendChild(div('',
-					features.map((feature : JsonFeature) => HTML.mkA('sdFeature', '#topic:' + feature.name, '', feature.title))
-					));
+                ch.appendChild(div('sdScoreTitle', 'subscriptions: ' + ui.subscribers + " gives " + u.receivedSubscriptions.points + ' points'));
+                ch.appendChild(div('sdScoreTitle', 'active days: ' + ui.activedays + " gives " + u.activeDays.points + ' points'));
+                ch.appendChild(div('sdScoreTitle', 'language features: ' + features.length + " gives " + u.languageFeatures.points + ' points'));
+                ch.appendChild(div('sdScoreTitle', '♥ from other people: ' + ui.receivedpositivereviews + " gives " + u.receivedPositiveReviews.points + ' points'));
+                ch.appendChildren(
+                    reviews.map((review : JsonScript) => this.browser().getScriptInfo(review).mkSmallBox())
+                    );
+                ch.appendChild(div('',
+                    features.map((feature : JsonFeature) => HTML.mkA('sdFeature', '#topic:' + feature.name, '', feature.title))
+                    ));
             })});
         }
-	}
+    }
 
     export class GroupsTab
         extends ListTab {
@@ -7663,20 +7663,20 @@ module TDev { export module Browser {
             var c = <JsonUser>cc;
             TheApiCacheMgr.store(c.id, c);
             var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
-			if ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id) {
-				var removeBtn = null;
-				user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
-					ModalDialog.ask(lf("Are you sure you want to remove this user from this group?"), lf("remove this user"), () => {
-						removeBtn.removeSelf();
-						HTML.showProgressNotification(lf("Removing user..."));
-						Cloud.deletePrivateApiAsync(c.id + "/groups/" + this.parent.publicId)
-							.done(() => {
-								user.removeSelf();
-							});
-					});
-				}));
-			}
-			return user;
+            if ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id) {
+                var removeBtn = null;
+                user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
+                    ModalDialog.ask(lf("Are you sure you want to remove this user from this group?"), lf("remove this user"), () => {
+                        removeBtn.removeSelf();
+                        HTML.showProgressNotification(lf("Removing user..."));
+                        Cloud.deletePrivateApiAsync(c.id + "/groups/" + this.parent.publicId)
+                            .done(() => {
+                                user.removeSelf();
+                            });
+                    });
+                }));
+            }
+            return user;
         }
     }
 
@@ -7684,9 +7684,9 @@ module TDev { export module Browser {
         extends BrowserPage {
         private name: string;
         public description: string;
-		public userid:string;
+        public userid:string;
         private collaborations: CollaborationsTab;
-		
+        
         constructor(par: Host) {
             super(par)
         }
@@ -7726,15 +7726,15 @@ module TDev { export module Browser {
             return this.withUpdate(res, (u: JsonGroup) => {
                 this.name = u.name;
                 this.description = u.description;
-				this.userid = u.userid;
+                this.userid = u.userid;
 
-				if (u.pictureid) {
+                if (u.pictureid) {
                     icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
-					icon.setChildren([]);
-				}
+                    icon.setChildren([]);
+                }
 
                 nameBlock.setChildren([u.name]);
                 dirAuto(nameBlock);
@@ -7742,7 +7742,7 @@ module TDev { export module Browser {
                 var cont = [];
                 var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.positivereviews, "♥");
-				addNum(u.comments, "✉");
+                addNum(u.comments, "✉");
                 /* if (big) {
                     addNum(u.subscribers, "svg:Person,black,clip=80");
                 } */
@@ -7754,25 +7754,25 @@ module TDev { export module Browser {
         public mkTile(sz: number) {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = ScriptIcons.stableColorFromName(this.publicId);
-	        d.appendChild(div("hubTileSearch", HTML.mkImg("svg:group,white")));
+            d.appendChild(div("hubTileSearch", HTML.mkImg("svg:group,white")));
 
             return this.withUpdate(d, (u: JsonGroup) => {
                 this.name = u.name;
-				if (u.pictureid) {
+                if (u.pictureid) {
                     d.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     d.style.backgroundRepeat = 'no-repeat';
                     d.style.backgroundPosition = 'center';
                     d.style.backgroundSize = 'cover';
-				}
+                }
                 var cont = [];
                 //var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 //addNum(u.receivedpositivereviews, "♥");
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
 
-                d.setChildren([				
-					div("hubTileSearch", HTML.mkImg("svg:group,white")),
-					div("hubTileTitleBar",
+                d.setChildren([                
+                    div("hubTileSearch", HTML.mkImg("svg:group,white")),
+                    div("hubTileTitleBar",
                     div("hubTileTitle", spanDirAuto(this.name)),
                     div("hubTileSubtitle",
                         div("hubTileAuthor", spanDirAuto(u.username), nums)))])
@@ -7804,11 +7804,11 @@ module TDev { export module Browser {
 
         public mkTabsCore(): BrowserTab[] {
             var tabs: BrowserTab[] = [
-				new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
+                new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
                 new GroupUsersTab(this),
                 this.collaborations = new CollaborationsTab(this),
                 new GroupUserProgressTab(this),
-				this
+                this
             ];
             return tabs;
         }
@@ -7836,18 +7836,18 @@ module TDev { export module Browser {
             this.withUpdate(el, (u: JsonGroup) => {
                 el.setChildren([Host.expandableTextBox(u.description)]);
                 if (!this.isMine()) {
-			        Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-			            .done(() => {}, e => {
-			                if (!u.isrestricted)
-			                    el.appendChild(div('', HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); })));
-		            });
+                    Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
+                        .done(() => {}, e => {
+                            if (!u.isrestricted)
+                                el.appendChild(div('', HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); })));
+                    });
                 }
              });
         }
 
         public initTab() {
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
-			var authorDiv = div('inlineBlock');
+            var authorDiv = div('inlineBlock');
             var ad = div("wall-div-buttons");
             var hd = div("sdDesc");
             var remainingContainer = div(null);
@@ -7861,76 +7861,76 @@ module TDev { export module Browser {
             this.tabContent.setChildren(ch);
 
             this.withUpdate(hd, (u: JsonGroup) => {
-				var membership = div('');
+                var membership = div('');
                 hd.setChildren([membership]);
 
-				var uid = this.browser().getCreatorInfo(u);
-				authorDiv.setChildren([ScriptInfo.labeledBox(lf("owner"), uid.mkSmallBox())]);
+                var uid = this.browser().getCreatorInfo(u);
+                authorDiv.setChildren([ScriptInfo.labeledBox(lf("owner"), uid.mkSmallBox())]);
 
-				ad.setChildren([]);
-				if (this.isMine()) {
+                ad.setChildren([]);
+                if (this.isMine()) {
                     ad.appendChild(HTML.mkButton(lf("change picture"), () => {
                         tick(Ticks.groupChangePicture);
                         this.changePictureAsync().done(() => this.browser().loadDetails(this, "settings"));
                     }));
-					if(u.isrestricted) {
-						Cloud.getPrivateApiAsync(this.publicId + "/code")
-							.done((r : Cloud.ApiGroupCodeResponse ) => {
-								if (r.code && r.expiration > Date.now() / 1000) {
-									var input = HTML.mkTextInput("text", lf("invitation code"));
-									// readonly does not pop keyboard on mobile
-									input.value = r.code;
-									input.onchange = () => { input.value = r.code };
-									var codeDiv = div('',
-										div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
+                    if(u.isrestricted) {
+                        Cloud.getPrivateApiAsync(this.publicId + "/code")
+                            .done((r : Cloud.ApiGroupCodeResponse ) => {
+                                if (r.code && r.expiration > Date.now() / 1000) {
+                                    var input = HTML.mkTextInput("text", lf("invitation code"));
+                                    // readonly does not pop keyboard on mobile
+                                    input.value = r.code;
+                                    input.onchange = () => { input.value = r.code };
+                                    var codeDiv = div('',
+                                        div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
                                         div('sdExpandableText',
-											lf("To join, users can enter the invitation code in the search or navigate to "),
-											HTML.mkA('', 'http://tdev.ly/' + r.code, '_blank', 'http://tdev.ly/' + r.code)),
+                                            lf("To join, users can enter the invitation code in the search or navigate to "),
+                                            HTML.mkA('', 'http://tdev.ly/' + r.code, '_blank', 'http://tdev.ly/' + r.code)),
                                         input
-									);
-									hd.appendChild(codeDiv);
-								} else {
-									hd.appendChild(div('', lf("This group is locked.")));
-									hd.appendChild(div('sdExpandableText', lf("There is no active invitation code. Tap 'new invitation code' to generate a code that will allow users to join immediately (the new code will be valid 14 days). Tap 'allow anyone to join' to allow any user to join without registration code.")));
-								}
+                                    );
+                                    hd.appendChild(codeDiv);
+                                } else {
+                                    hd.appendChild(div('', lf("This group is locked.")));
+                                    hd.appendChild(div('sdExpandableText', lf("There is no active invitation code. Tap 'new invitation code' to generate a code that will allow users to join immediately (the new code will be valid 14 days). Tap 'allow anyone to join' to allow any user to join without registration code.")));
+                                }
                                 ad.appendChild(HTML.mkButton(lf("new invitation code"), () => {
                                     tick(Ticks.groupCodeNew);
-			                        HTML.showProgressNotification(lf("requesting new invitiation code..."));
+                                    HTML.showProgressNotification(lf("requesting new invitiation code..."));
                                     this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
                                 }));
-								ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
-								ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
-							});
-					} else {
-						hd.appendChild(div('', lf("This group is open.")));
-						hd.appendChild(div('sdExpandableText', lf("Anyone can join this group without permissions.")));
-						ad.appendChild(HTML.mkButton(lf("require invitation code"), () => { tick(Ticks.groupRequireInvitationCodeToJoin); this.requireInvitationCodeToJoin(); }));
-						ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
-					}
-				}
+                                ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
+                                ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
+                            });
+                    } else {
+                        hd.appendChild(div('', lf("This group is open.")));
+                        hd.appendChild(div('sdExpandableText', lf("Anyone can join this group without permissions.")));
+                        ad.appendChild(HTML.mkButton(lf("require invitation code"), () => { tick(Ticks.groupRequireInvitationCodeToJoin); this.requireInvitationCodeToJoin(); }));
+                        ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
+                    }
+                }
 
-				Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-					.done(() => {
-						if(this.isMine()) {
-							//membership.appendChild(div('', 'You are the owner of this group. '));
-						} else {
-							membership.appendChild(div('', 'You are a member of this group.'));
-							ad.appendChild(HTML.mkButton(lf("leave group"), () => { tick(Ticks.groupLeave); this.leaveGroup(); }));
-						}
-					}, e => {
-						membership.appendChild(div('', 'You are not a member of this group.'));
-						if (!u.isrestricted)
-							ad.appendChild(HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); }));
-					});
+                Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
+                    .done(() => {
+                        if(this.isMine()) {
+                            //membership.appendChild(div('', 'You are the owner of this group. '));
+                        } else {
+                            membership.appendChild(div('', 'You are a member of this group.'));
+                            ad.appendChild(HTML.mkButton(lf("leave group"), () => { tick(Ticks.groupLeave); this.leaveGroup(); }));
+                        }
+                    }, e => {
+                        membership.appendChild(div('', 'You are not a member of this group.'));
+                        if (!u.isrestricted)
+                            ad.appendChild(HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); }));
+                    });
 
-				if (u.allowexport)
-					remainingContainer.appendChild(div('sdExpandableText',
-						lf("group owner can export your scripts to app."),
-						Editor.mkHelpLink("groups")));
-				if (u.allowappstatistics)
-					remainingContainer.appendChild(div('sdExpandableText',
-						lf("group owner has access to runtime statistics of exported apps."),
-						Editor.mkHelpLink("groups")));
+                if (u.allowexport)
+                    remainingContainer.appendChild(div('sdExpandableText',
+                        lf("group owner can export your scripts to app."),
+                        Editor.mkHelpLink("groups")));
+                if (u.allowappstatistics)
+                    remainingContainer.appendChild(div('sdExpandableText',
+                        lf("group owner has access to runtime statistics of exported apps."),
+                        Editor.mkHelpLink("groups")));
             });
         }
 
@@ -7959,84 +7959,84 @@ module TDev { export module Browser {
                     if (a) return this.updateGroupPictureAsync(a.id);
                     return Promise.as(undefined);
                 });
-		}
+        }
 
-		public allowAnyoneToJoin() {
-			this.restrictGroup(false);
-		}
+        public allowAnyoneToJoin() {
+            this.restrictGroup(false);
+        }
 
-		public requireInvitationCodeToJoin() {
-			this.restrictGroup(true);
-		}
+        public requireInvitationCodeToJoin() {
+            this.restrictGroup(true);
+        }
 
-		private joinGroupDirect() {
-			HTML.showProgressNotification(lf("Joining group..."));
-			Cloud.postPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId, {})
-				.done(() => {
-					this.invalidateCaches();
-					this.browser().loadDetails(this);
-			});
-		}
+        private joinGroupDirect() {
+            HTML.showProgressNotification(lf("Joining group..."));
+            Cloud.postPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId, {})
+                .done(() => {
+                    this.invalidateCaches();
+                    this.browser().loadDetails(this);
+            });
+        }
 
-		private updateGroupPictureAsync(pictureid : string) : Promise {
-			HTML.showProgressNotification(lf("Updating group picture..."));
-			return Cloud.postPrivateApiAsync(this.publicId, { pictureid : pictureid })
-				.then(() => { this.invalidateCaches(); });
-		}
+        private updateGroupPictureAsync(pictureid : string) : Promise {
+            HTML.showProgressNotification(lf("Updating group picture..."));
+            return Cloud.postPrivateApiAsync(this.publicId, { pictureid : pictureid })
+                .then(() => { this.invalidateCaches(); });
+        }
 
-		private restrictGroup(restricted : boolean) {
-			HTML.showProgressNotification(lf("Updating group access..."));
-			Cloud.postPrivateApiAsync(this.publicId, { isrestricted : restricted })
-				.done(() => {
-					this.invalidateCaches();
-					this.browser().loadDetails(this);
-			});
-		}
+        private restrictGroup(restricted : boolean) {
+            HTML.showProgressNotification(lf("Updating group access..."));
+            Cloud.postPrivateApiAsync(this.publicId, { isrestricted : restricted })
+                .done(() => {
+                    this.invalidateCaches();
+                    this.browser().loadDetails(this);
+            });
+        }
 
-		public newInvitationCodeAsync() {
+        public newInvitationCodeAsync() {
             return Cloud.postPrivateApiAsync(this.publicId + "/code", <Cloud.ApiGroupCodeRequest>{})
                 .then((r: Cloud.ApiGroupCodeResponse) => {
                     this.invalidateCaches();
                     return r.code;
                 });
-		}
+        }
 
-		public resetInvitationCode() {
-			HTML.showProgressNotification(lf("clearing invitiation code..."));
-			Cloud.deletePrivateApiAsync(this.publicId + "/code")
-				.done(() => {
-					this.invalidateCaches();
-					this.browser().loadDetails(this);
-				});
-		}
+        public resetInvitationCode() {
+            HTML.showProgressNotification(lf("clearing invitiation code..."));
+            Cloud.deletePrivateApiAsync(this.publicId + "/code")
+                .done(() => {
+                    this.invalidateCaches();
+                    this.browser().loadDetails(this);
+                });
+        }
 
-		public deleteGroup() {
-			ModalDialog.ask(lf("Are you sure you want to delete this group? There is no undo for this operation."), lf("delete group"), () => {
-				HTML.showProgressNotification(lf("deleting group..."));
-				Cloud.deletePrivateApiAsync(this.publicId)
-					.done(() => {
-						this.invalidateCaches();
-						Util.setHash("list:groups");
-					});
-			});
-		}
+        public deleteGroup() {
+            ModalDialog.ask(lf("Are you sure you want to delete this group? There is no undo for this operation."), lf("delete group"), () => {
+                HTML.showProgressNotification(lf("deleting group..."));
+                Cloud.deletePrivateApiAsync(this.publicId)
+                    .done(() => {
+                        this.invalidateCaches();
+                        Util.setHash("list:groups");
+                    });
+            });
+        }
 
-		public leaveGroup() {
-			ModalDialog.ask(lf("Are you sure you want to leave this group?"), lf("leave group"), () => {
-				HTML.showProgressNotification(lf("leaving group..."));
-				Cloud.deletePrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-					.done(() => {
-						this.invalidateCaches();
+        public leaveGroup() {
+            ModalDialog.ask(lf("Are you sure you want to leave this group?"), lf("leave group"), () => {
+                HTML.showProgressNotification(lf("leaving group..."));
+                Cloud.deletePrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
+                    .done(() => {
+                        this.invalidateCaches();
                         TheEditor.historyMgr.reload(HistoryMgr.windowHash());
-					});
-			});
-		}
+                    });
+            });
+        }
 
-		private invalidateCaches() {
-			TheApiCacheMgr.invalidate("groups");
-			TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
-			TheApiCacheMgr.invalidate(this.publicId);
-		}
+        private invalidateCaches() {
+            TheApiCacheMgr.invalidate("groups");
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
+            TheApiCacheMgr.invalidate(this.publicId);
+        }
 
         public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
@@ -8074,9 +8074,9 @@ module TDev { export module Browser {
 
         public mkTabsCore(): BrowserTab[] {
             var tabs: CommentsTab[] = [
-				new CommentsTab(this),
-				new CommentsTab(this),
-				new CommentsTab(this)
+                new CommentsTab(this),
+                new CommentsTab(this),
+                new CommentsTab(this)
             ];
 
             tabs[0].forumName = lf("general");
@@ -9113,7 +9113,7 @@ module TDev { export module Browser {
                 var numTotal = 0;
                 var hidden:JsonScript[] = []
                 var shown:JsonScript[] = []
-				var ignored = 0;
+                var ignored = 0;
 
                 lst.items.forEach((e:JsonScript, i:number) => {
                     var etag = lst.etags ? lst.etags[i].ETag : ""

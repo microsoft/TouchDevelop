@@ -62,7 +62,7 @@ module TDev.RT {
         //? Displays string on the wall
         export function post_to_wall(self:string, s:IStackFrame)
         {
-		    // backdoor for session testing
+            // backdoor for session testing
             if (dbg && self != null && self.indexOf("magic trap ") == 0) {
                var tests = new Revisions.SessionTests(s.rt);
                tests.runtest(self.substr(11));

@@ -3,12 +3,12 @@
 
 module TDev { export module AST {
 
-	export interface EventSig {
-		sig : string;
-		help: string;
-		obsolete?:boolean;
+    export interface EventSig {
+        sig : string;
+        help: string;
+        obsolete?:boolean;
         alt?:string;
-	}
+    }
 
     export var eventSigs : EventSig[] = [
         { sig: "gameloop()", help: "raised many times per second", alt:"time->on every frame" },
@@ -46,12 +46,12 @@ module TDev { export module AST {
         public globalKind:Kind = null;
         public platform = PlatformCapability.None;
         public lowPriority = false;
-		public help : string;
+        public help : string;
 
         constructor(p:Parser, sig : EventSig) {
-			var hds = sig.sig;
-			this.help = sig.help;
-			this.lowPriority = !!sig.obsolete;
+            var hds = sig.sig;
+            this.help = sig.help;
+            this.lowPriority = !!sig.obsolete;
             p.tokenize(hds);
             var hd = p.parseActionHeader();
             this.category = hd.name;

@@ -123,7 +123,7 @@ module TDev.RT {
         {
             this.initializeElements();
             if (this._nodeList)
-				return this._nodeList[Math.floor(index)];
+                return this._nodeList[Math.floor(index)];
             return undefined;
         }
 

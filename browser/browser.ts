@@ -359,7 +359,7 @@ module TDev {
 
             if (isWP8app) {
                 audioDataUrls = true; // through wab
-				screenshots = true; // through wab
+                screenshots = true; // through wab
                 audioWav = true;
             }
 

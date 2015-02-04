@@ -42,7 +42,7 @@ module TDev {
     function enumStrings(enum_: any) {
         var enumContents = Object.keys(enum_);
         var enumLength = Math.floor(enumContents.length / 2); // each 'normal' enum contains the strings and the numbers, 1 to 1
-		return Object.keys(enum_).filter(it => (+it !== +it)); // filter out the numbers
+        return Object.keys(enum_).filter(it => (+it !== +it)); // filter out the numbers
     }
 
     export var EditorSpyEventStrings = enumStrings(EditorSpyEvents);

@@ -56,7 +56,7 @@ module TDev.RT {
             this._name = name;
             this._albumName = albumName;
             this._artist = artist;
-			this._album = SongAlbum.mk(this._albumName, this._artist);
+            this._album = SongAlbum.mk(this._albumName, this._artist);
             this._duration = duration;
             this._genre = genre;
             this._rating = rating;

@@ -957,7 +957,7 @@ module TDev.TestMgr.Benchmarker
         var m = new ModalDialog();
         invalidateResults = false;
         m.canDismiss = false;
-		m.fullWhite();
+        m.fullWhite();
         m.add(div("wall-dialog-header", lf("Calculating your experience score...")));
         m.add(div("wall-dialog-body", lf("Please wait, it should take less than a minute.")));
         m.show();
@@ -1575,7 +1575,7 @@ module TDev.TestMgr.Benchmarker
             Fasta.resetRandomSeed();
             var time = put.fn(put.n, outs);
             var correct = false;
-			var hash = hashResultString(outs.join(""));
+            var hash = hashResultString(outs.join(""));
             if (put.name == "BinaryTrees" && hash == 45204502)
                 correct = true;
             if (put.name == "Mandelbrot" && hash == 18057621)

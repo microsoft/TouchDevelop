@@ -27,9 +27,9 @@ module TDev.RT {
             super()
         }
 
-		public clearUrl() {
-			this._url = undefined;
-		}
+        public clearUrl() {
+            this._url = undefined;
+        }
 
         public getReadonlyUrlSync() {
             if (this._isReadOnly && this._url && !this.canvas && !/^data:/.test(this._url)) return this._url;
@@ -64,13 +64,13 @@ module TDev.RT {
         public getDataUri(quality: number = 0.9, maxWidth: number = -1, forceJpeg = false): string {
             this.commitImageData();
             var c = this.getCanvas();
-			// dealing with empty image
-			if (c.width == 0 || c.height == 0) {
-				// create a 1x1 image to avoid a bogus data uri
+            // dealing with empty image
+            if (c.width == 0 || c.height == 0) {
+                // create a 1x1 image to avoid a bogus data uri
                 c = <HTMLCanvasElement>document.createElement('canvas');
                 c.width = 1;
                 c.height = 1;
-			}
+            }
 
             if (maxWidth > 0 && c.width > maxWidth) {
                 var temp = <HTMLCanvasElement>document.createElement('canvas');
@@ -186,13 +186,13 @@ module TDev.RT {
             return p;
         }
 
-		static fromCanvas(canvas : HTMLCanvasElement) : Picture {
-			var p = Picture.mkSync(canvas.width, canvas.height);
+        static fromCanvas(canvas : HTMLCanvasElement) : Picture {
+            var p = Picture.mkSync(canvas.width, canvas.height);
             p.ctx.save();
-			p.ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+            p.ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
             p.ctx.restore();
-			return p;
-		}
+            return p;
+        }
 
         static fromDataUrl(dataUrl:string, originalUrl : string = null, isResource = false) : Promise
         {
@@ -219,22 +219,22 @@ module TDev.RT {
             return Promise.as(Picture.fromUrlSync(url, isReadOnly, cors));
         }
 
-		// specialized in various platforms
-		static patchLocalArtUrl(url : string) : string {
-			return url;
-		}
+        // specialized in various platforms
+        static patchLocalArtUrl(url : string) : string {
+            return url;
+        }
 
         static fromArtUrl(url:string) : Promise
         {
-			// make sure to avoid loading a data url
-			if (/^data:image\/(jpeg|png|svg\+xml);base64,/i.test(url)) return Picture.fromDataUrl(url, undefined, true);
+            // make sure to avoid loading a data url
+            if (/^data:image\/(jpeg|png|svg\+xml);base64,/i.test(url)) return Picture.fromDataUrl(url, undefined, true);
 
-			var cors = true;
-			// update local art as needed
-			if (/^\.\/art\//.test(url)) {
-				url = Picture.patchLocalArtUrl(url);
-				cors = false; // no CORS needed
-			}
+            var cors = true;
+            // update local art as needed
+            if (/^\.\/art\//.test(url)) {
+                url = Picture.patchLocalArtUrl(url);
+                cors = false; // no CORS needed
+            }
 
             return ArtCache.getArtAsync(url, "image/*")
                 .then(() => {
@@ -667,21 +667,21 @@ module TDev.RT {
         //@ async
         public save_to_library(r:ResumeCtx) // : string
         {
-			HTML.showProgressNotification(lf("saving picture"));
+            HTML.showProgressNotification(lf("saving picture"));
             this.loadFirst(r, () => {
                 var defaultName = Picture.niceFilename() + ".png";
                 if ((<any>window).navigator.msSaveOrOpenBlob) {
-					try {
-						var result = (<any>window).navigator.msSaveOrOpenBlob(this.canvas.msToBlob(), defaultName);
-						return defaultName;
-					} catch(e) {
-						HTML.showProgressNotification(lf("saving picture failed..."));
-						return "";
-					}
-				}
+                    try {
+                        var result = (<any>window).navigator.msSaveOrOpenBlob(this.canvas.msToBlob(), defaultName);
+                        return defaultName;
+                    } catch(e) {
+                        HTML.showProgressNotification(lf("saving picture failed..."));
+                        return "";
+                    }
+                }
                 else {
                     var url = this.canvas.toDataURL('image/png');
-					var link = <HTMLAnchorElement>window.document.createElement('a');
+                    var link = <HTMLAnchorElement>window.document.createElement('a');
                     link.href = url;
                     (<any>link).download = defaultName;
                     var click = document.createEvent("Event");
@@ -790,8 +790,8 @@ module TDev.RT {
         //? Inverts the colors in the picture
         //@ writesMutable
         //@ picAsync
-		public negative(r : ResumeCtx) : void
-		{
+        public negative(r : ResumeCtx) : void
+        {
             this.loadFirst(r, () => {
                 this.changed();
                 this.ctx.save();
@@ -806,7 +806,7 @@ module TDev.RT {
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
             });
-		}
+        }
 
         //? Makes picture monochromatic (black and white)
         //@ writesMutable
@@ -1554,25 +1554,25 @@ module TDev.RT {
             var svg = "data:image/svg+xml;base64," + Web.base64_encode(markup);
             var img = <HTMLImageElement>document.createElement("img");
 
-			// workaround IE11 issue
-			var svgWidth = markup.match(/width="(\d+)"/);
-			if (svgWidth) img.width = parseInt(svgWidth[1]);
-			var svgHeight = markup.match(/height="(\d+)"/);
-			if (svgHeight) img.height = parseInt(svgHeight[1]);
+            // workaround IE11 issue
+            var svgWidth = markup.match(/width="(\d+)"/);
+            if (svgWidth) img.width = parseInt(svgWidth[1]);
+            var svgHeight = markup.match(/height="(\d+)"/);
+            if (svgHeight) img.height = parseInt(svgHeight[1]);
 
-			var unhappy = () => {
+            var unhappy = () => {
                 this.ctx.fillStyle = "lightgray";
                 this.ctx.fillRect(0, 0, 100, 100);
                 this.ctx.fillStyle = "white";
                 this.ctx.textAlign = "center";
                 this.ctx.textBaseline = "top";
                 this.ctx.font = "80px sans-serif";
-				this.ctx.fillText(':(', 50, 0);
-			};
+                this.ctx.fillText(':(', 50, 0);
+            };
 
             var svgLoadFailed = () => {
                 this.atPosition(r, left, top, angle, 1, () => {
-					unhappy();
+                    unhappy();
                 });
             }
 
@@ -1592,16 +1592,16 @@ module TDev.RT {
                         else if (height < 0 && width > 0)
                             h = width / img.width * img.height;
                         // draw svg
-						try {
-							this.ctx.drawImage(img, 0, 0, w, h);
-						} catch(ex) {
+                        try {
+                            this.ctx.drawImage(img, 0, 0, w, h);
+                        } catch(ex) {
                             try {
-							    // observed in IE11: sometimes, first call fails.
-							    this.ctx.drawImage(img, 0, 0, w, h);
+                                // observed in IE11: sometimes, first call fails.
+                                this.ctx.drawImage(img, 0, 0, w, h);
                             } catch(ex2) {
                                 unhappy();
                             }
-						}
+                        }
                     }
                 });
             };
@@ -1619,9 +1619,9 @@ module TDev.RT {
             super.post_to_wall(s)
         }
 
-		static niceFilename() : string {
-			var now = Time.now();
-			return now.year() + "-" + now.month() + "-" + now.day() + "-" + now.hour() + "-" + now.minute() + "-" + now.second() + "-" + now.millisecond();
-		}
+        static niceFilename() : string {
+            var now = Time.now();
+            return now.year() + "-" + now.month() + "-" + now.day() + "-" + now.hour() + "-" + now.minute() + "-" + now.second() + "-" + now.millisecond();
+        }
     }
 }

@@ -179,10 +179,10 @@ module TDev {
             if (phoneMode) rootClass += " phone";
             if (splitScreen) rootClass += " split";
             if (Browser.assumeMouse) rootClass += " assume-mouse";
-			if (Browser.assumeMouse
-				&& Browser.browser != BrowserSoftware.ie10
-				&& Browser.browser != BrowserSoftware.ie11)
-					rootClass += " assume-notouch";
+            if (Browser.assumeMouse
+                && Browser.browser != BrowserSoftware.ie10
+                && Browser.browser != BrowserSoftware.ie11)
+                    rootClass += " assume-notouch";
             if (topFontSize <= 12) rootClass += " tinyFont";
             if (topFontSize <= 18) rootClass += " smallFont";
             rootClass += " rootClass";

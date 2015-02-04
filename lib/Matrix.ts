@@ -112,9 +112,9 @@ module TDev.RT {
         //? Sets the value at a given index. Elements are ordered line by line starting top left.
         //@ writesMutable
         public set_at(index: number, value: number): void {
-		    var _index = Math.floor(index);
-			if (0 <= _index && index < this.data.length)
-	            this.data[_index] = value;
+            var _index = Math.floor(index);
+            if (0 <= _index && index < this.data.length)
+                this.data[_index] = value;
         }
 
         //? Gets the value at a given location. Returns invalid if outside of the array dimensions

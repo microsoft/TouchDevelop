@@ -399,7 +399,7 @@ module TDev
             var r = new CopyRenderer();
             var text = r.dispatch(s);
             try {
-				var w = window.open("about:blank", "tdScript" + ScriptProperties.winId++);
+                var w = window.open("about:blank", "tdScript" + ScriptProperties.winId++);
                 w.document.write("<!DOCTYPE html><html><head>" + CopyRenderer.css +
                                  "<title>" + Util.htmlEscape("Source: " + s.getName()) + "</title>" +
                                  "</head><body>" + text + "</body></html>");

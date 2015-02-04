@@ -185,10 +185,10 @@ module TDev {
             this.updateButtonsVisibility();
         }
 
-		public isFullScreen() : boolean {
-			return this.fullScreenContainer.style.display != "none" &&
-				!!this.fullScreenContainer.firstChild;
-		}
+        public isFullScreen() : boolean {
+            return this.fullScreenContainer.style.display != "none" &&
+                !!this.fullScreenContainer.firstChild;
+        }
 
         public tweakMsg(): HTMLElement {
             return div(null);
@@ -502,7 +502,7 @@ module TDev {
                     // artificially render the wall background color to avoid transparent boards
                     var page = this.currentRt.getCurrentPage();
                     var bgColor = page.bgColor || 'white';
-					var bgPicture = page.bgPicture;
+                    var bgPicture = page.bgPicture;
                     var canvas = <HTMLCanvasElement>document.createElement("canvas");
                     var w = fs.width;
                     var h = fs.height;
@@ -520,23 +520,23 @@ module TDev {
                     ctx.save();
                     ctx.fillStyle = bgColor;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-					if (bgPicture) {
-						var ww = page.bgPictureWidth;
-						var hh = page.bgPictureHeight;
-						var r = hh / ww;
-						var sr = canvas.height / canvas.width;
-						var left, top;
-						if (r > sr) {
-						    hh = ww * sr;
-							left = 0;
-							top = (page.bgPictureHeight - hh) / 2;
-						} else {
-						    ww = hh / sr;
-							top = 0;
-							left = (page.bgPictureWidth - ww) / 2;
-						}
-				        ctx.drawImage(bgPicture, left, top, ww, hh, 0, 0, canvas.width, canvas.height);
-					}
+                    if (bgPicture) {
+                        var ww = page.bgPictureWidth;
+                        var hh = page.bgPictureHeight;
+                        var r = hh / ww;
+                        var sr = canvas.height / canvas.width;
+                        var left, top;
+                        if (r > sr) {
+                            hh = ww * sr;
+                            left = 0;
+                            top = (page.bgPictureHeight - hh) / 2;
+                        } else {
+                            ww = hh / sr;
+                            top = 0;
+                            left = (page.bgPictureWidth - ww) / 2;
+                        }
+                        ctx.drawImage(bgPicture, left, top, ww, hh, 0, 0, canvas.width, canvas.height);
+                    }
                     ctx.drawImage(fs, 0, 0, canvas.width, canvas.height);
                     ctx.restore();
 

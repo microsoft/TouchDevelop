@@ -91,43 +91,43 @@ module TDev {
         haspicture:boolean; // whether this use has a picture
     }
 
-	export interface JsonScore {
-		points: number;
-	}
+    export interface JsonScore {
+        points: number;
+    }
 
-	export interface JsonReceivedPositiveReviewsScore extends JsonScore {
-		scripts : JsonScript[];
-	}
+    export interface JsonReceivedPositiveReviewsScore extends JsonScore {
+        scripts : JsonScript[];
+    }
 
-	export interface JsonFeature {
-		name:string;
-		title:string;
-		text:string;
-		count:number;
-	}
+    export interface JsonFeature {
+        name:string;
+        title:string;
+        text:string;
+        count:number;
+    }
 
-	export interface JsonLanguageFeaturesScore extends JsonScore {
-		features: JsonFeature[];
-	}
+    export interface JsonLanguageFeaturesScore extends JsonScore {
+        features: JsonFeature[];
+    }
 
-	export interface JsonUserScore
-	{
-		receivedPositiveReviews : JsonReceivedPositiveReviewsScore;
-		receivedSubscriptions : JsonScore;
-		languageFeatures : JsonLanguageFeaturesScore;
-		activeDays : JsonScore;
-	}
+    export interface JsonUserScore
+    {
+        receivedPositiveReviews : JsonReceivedPositiveReviewsScore;
+        receivedSubscriptions : JsonScore;
+        languageFeatures : JsonLanguageFeaturesScore;
+        activeDays : JsonScore;
+    }
 
     export interface JsonGroup extends JsonPublication {
         name: string;
         description: string;
         allowexport: boolean;
         allowappstatistics: boolean;
-		isrestricted : boolean;
-		pictureid : string;
-		comments : number;
-		positivereviews : number;
-		subscribers: number;
+        isrestricted : boolean;
+        pictureid : string;
+        comments : number;
+        positivereviews : number;
+        subscribers: number;
     }
 
     export interface JsonCode {
@@ -142,11 +142,11 @@ module TDev {
         data: string; // groupid for group invitation codes
     }
 
-	export interface JsonStoreApp
-	{
-		kind: string; // 'storeapp'
+    export interface JsonStoreApp
+    {
+        kind: string; // 'storeapp'
         time: number; // seconds since 1970 of last activity on this app (most likely: increase of users / launches)
-		url:string;
+        url:string;
         scriptid: string;
         storeid: string;
         title: string;
@@ -159,7 +159,7 @@ module TDev {
         username: string;
         userscore: number;
         userhaspicture: boolean;
-	}
+    }
 
     export interface JsonScript extends JsonPublication
     {
@@ -855,7 +855,7 @@ module TDev {
                     false))
                     continue;
 
-				var tdev = "https://www.touchdevelop.com/";
+                var tdev = "https://www.touchdevelop.com/";
                 if (allowRepl && (
                     applySpan(/^\{\#(\w+)\}/g, (m) => "<a name='" + quote(m[1]) + "'></a>") ||
                     applySpan(/^\[([^\[\]]*)\]\s*\(([^ \(\)\s]+)\)/, (m) => {
@@ -1097,7 +1097,7 @@ module TDev {
                         var boxDir = "";
                         var boxHd = "";
                         var boxFt = "";
-						var boxCss = "md-box";
+                        var boxCss = "md-box";
                         switch (boxClass) {
                             case "hint":
                                 boxHd = "<div class='md-box-header'>" + lf("hint") + "</div>";
@@ -1119,11 +1119,11 @@ module TDev {
                                 boxHd = "<div class='md-box-header-print'>" + lf("device in landscape") + "</div>";
                                 boxCss = "";
                                 break;
-							case "print":
-							case "screen":
+                            case "print":
+                            case "screen":
                             case "block":
                                 boxHd = "";
-								boxCss = "";
+                                boxCss = "";
                                 break;
                             case "avatar":
                                 var artId = MdComments.findArtId(parts[1]);
@@ -1294,7 +1294,7 @@ module TDev {
                 icon: e.icon,
                 iconbackground: e.iconbackground,
                 iconArtId: e.iconArtId,
-				userid: e.userid,
+                userid: e.userid,
                 time:e.time,
                 text: null,
                 rootid: e.rootid,
@@ -1927,7 +1927,7 @@ module TDev {
                                  + "<meta name='microsoft' content='notranslateclasses stmt keyword'/>"
                                  + "</head><body onload='try { window.print(); } catch(ex) {}'>"
                                  + "<div><img src='" + HTML.proxyResource("https://az31353.vo.msecnd.net/c04/uxoj.png") + "' alt='TouchDevelop by Microsoft Research'></div>"
-								 + text
+                                 + text
                                  + "</body></html>");
                 w.document.close();
             } catch(e) {

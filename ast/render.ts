@@ -1040,7 +1040,7 @@ module TDev
                       ".md-box-header, .md-box-header-print { font-weight: bold; font-size: 1.2em; }\n" +
                       ".md-box, .md-box-landscape, .md-box-portrait { margin-left: 2em;  margin-bottom:0.5em; border: 1px solid #555; border-left-width: 0.5em; padding: 1em; }\n" +
                       ".md-box-avatar { margin-bottom:0.5em; } .md-box-avatar-img { width:4em; display:inline-block; vertical-align:top;} .phone .md-box-avatar-img { width:3em; } .md-box-avatar-body { position:relative; padding:0em 0.5em 0em 0.5em; color:#000; background:#eeeeee; margin-left:1.5em; display:inline-block; width: calc(100% - 7em); } .phone .md-box-avatar-body { width: calc(100% - 6em); } .md-box-avatar-body:after { top: 1.1em; left: -1.5em; bottom: auto; border-width: 0px 1.5em 0.7em 0; border-color: transparent #eeeeee; content: ''; position: absolute; border-style: solid; display: block; width: 0; }\n"+
-					  ".md-box-screen { display:none; }\n" +
+                      ".md-box-screen { display:none; }\n" +
                       "a { color:black; }\n" +
                       "a.md-api-entry-link, .api-kind a { text-decoration: none; }\n" +
                       ".api-desc { color: black; font-size: 0.8em; }\n" +
@@ -1070,7 +1070,7 @@ module TDev
                       ".decl > .stmt { border: none; }\n" +
                       ".print-big { font-size: 1.5em; }\n" +
                       "a.md-bigbutton {}\n" +
-					  "@media print { #MicrosoftTranslatorWidget { display: none; } }\n" +
+                      "@media print { #MicrosoftTranslatorWidget { display: none; } }\n" +
                       'body { font-family: Calibri, "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }\n' +
                      "</style>";
 

@@ -253,11 +253,11 @@ module TDev
 
         public notifyStopAsync() : Promise
         {
-			TheEditor.stopPlayTime();
-			if (ScriptEditorWorldInfo &&
-			    ScriptEditorWorldInfo.status !== "published")
-				this.takeScreenshotMaybe();
-			return super.notifyStopAsync().then(v => {
+            TheEditor.stopPlayTime();
+            if (ScriptEditorWorldInfo &&
+                ScriptEditorWorldInfo.status !== "published")
+                this.takeScreenshotMaybe();
+            return super.notifyStopAsync().then(v => {
                 if (TheEditor.stepTutorial) TheEditor.stepTutorial.notify("runStop");
                 if (this.currentRt.headlessPluginMode &&
                     this.currentRt.runningPluginOn &&
@@ -299,27 +299,27 @@ module TDev
             if (!this.currentRt.liveMode())
                 LayoutMgr.instance.updateEditMode(this.currentRt);
 
-			// take screenshots periodically
-			var takePoll = () => {
-				if (this.takeScreenshotMaybe())
-					Util.setTimeout(TheEditor.hasLastScreenshot() ? 5000 : 3000, takePoll);
-			}
-			if (ScriptEditorWorldInfo &&
-			    ScriptEditorWorldInfo.status !== "published")
-				Util.setTimeout(2000, takePoll);
+            // take screenshots periodically
+            var takePoll = () => {
+                if (this.takeScreenshotMaybe())
+                    Util.setTimeout(TheEditor.hasLastScreenshot() ? 5000 : 3000, takePoll);
+            }
+            if (ScriptEditorWorldInfo &&
+                ScriptEditorWorldInfo.status !== "published")
+                Util.setTimeout(2000, takePoll);
         }
 
-		private takeScreenshotMaybe() : boolean {
-			if (this.currentRt && !this.currentRt.isStopped()) {
-				if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
-					var canvas = this.toScreenshotCanvas();
-					if (canvas)
-						TheEditor.setLastScreenshot(canvas);
-				}
-				return true;
-			}
-			return false;
-		}
+        private takeScreenshotMaybe() : boolean {
+            if (this.currentRt && !this.currentRt.isStopped()) {
+                if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
+                    var canvas = this.toScreenshotCanvas();
+                    if (canvas)
+                        TheEditor.setLastScreenshot(canvas);
+                }
+                return true;
+            }
+            return false;
+        }
 
         public notifyBreakpointHit(bp: string) {
             Util.log('editor: notifyBreakpointHit: ' + bp);
@@ -886,7 +886,7 @@ module TDev
         private complainedAboutMissingAPIs = false;
         public scriptUpdateId = "";
         private videoContainer: HTMLElement;
-		private docContainer : HTMLElement;
+        private docContainer : HTMLElement;
         private innerDocContainer:HTMLElement;
         private isReadOnly = false;
         private scriptCompiled = false;
@@ -945,25 +945,25 @@ module TDev
         public isDebuggerMode(): boolean { return this.debuggerMode; }
 
 
-		// we keep the last screenshot around for publishing
-		private lastScreenshotId : number;
-		private lastScreenshotCanvas : HTMLCanvasElement;
-		public lastScreenshotUri() : string {
-			if (this.hasLastScreenshot()) {
-				try {
-					return this.lastScreenshotCanvas.toDataURL('image/png');
-				} catch(e) { } // CORS issues
-			}
-		    return undefined;
-		}
-		public hasLastScreenshot() {
-			return this.lastScreenshotId == this.undoMgr.currentId()
-				&& this.lastScreenshotCanvas;
-		}
-		public setLastScreenshot(canvas : HTMLCanvasElement) {
-			this.lastScreenshotId = this.undoMgr.currentId();
-			this.lastScreenshotCanvas = canvas;
-		}
+        // we keep the last screenshot around for publishing
+        private lastScreenshotId : number;
+        private lastScreenshotCanvas : HTMLCanvasElement;
+        public lastScreenshotUri() : string {
+            if (this.hasLastScreenshot()) {
+                try {
+                    return this.lastScreenshotCanvas.toDataURL('image/png');
+                } catch(e) { } // CORS issues
+            }
+            return undefined;
+        }
+        public hasLastScreenshot() {
+            return this.lastScreenshotId == this.undoMgr.currentId()
+                && this.lastScreenshotCanvas;
+        }
+        public setLastScreenshot(canvas : HTMLCanvasElement) {
+            this.lastScreenshotId = this.undoMgr.currentId();
+            this.lastScreenshotCanvas = canvas;
+        }
 
         public refreshScriptNav() {
             this.scriptNav.refreshCore();
@@ -1155,7 +1155,7 @@ module TDev
                 el.style.display = 'none';
         }
 
-		public widgetEnabled(name : string) : boolean {
+        public widgetEnabled(name : string) : boolean {
             if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
                 return this.intelliProfile.hasKey(name)
 
@@ -1168,8 +1168,8 @@ module TDev
             if (AST.legacyMode && !Editor.blockWidgets[name] && !Editor.legacyWidgets[name])
                 return false;
 
-			return true
-		}
+            return true
+        }
 
         public editedStmt(selectorOk = false):AST.Stmt
         {
@@ -1195,8 +1195,8 @@ module TDev
         }
 
         public debugSupported() : boolean {
-			return this.widgetEnabled('debugButton')
-				&& !/nodebugger/.test(document.URL);
+            return this.widgetEnabled('debugButton')
+                && !/nodebugger/.test(document.URL);
         }
         public toggleBreakpoint(node: AST.Stmt) {
             if (this.isDebuggerMode() && !node.stableId) return; // crash observed in logs
@@ -1376,15 +1376,15 @@ module TDev
             }
 
             this.applyVideoSize();
-			TipManager.update();
+            TipManager.update();
         }
 
-        private placeSearchContainer() {				
-		    this.searchContainer.removeSelf();
-			if (SizeMgr.portraitMode)
-				this.portraitSearchContainer.setChildren([this.searchContainer]);
-			else
-				this.landscapeSearchContainer.setChildren([this.searchContainer]);
+        private placeSearchContainer() {                
+            this.searchContainer.removeSelf();
+            if (SizeMgr.portraitMode)
+                this.portraitSearchContainer.setChildren([this.searchContainer]);
+            else
+                this.landscapeSearchContainer.setChildren([this.searchContainer]);
         }
 
         public typeCheckNow()
@@ -1638,25 +1638,25 @@ module TDev
         }
 
 
-		private _lastPlayDuration:number = undefined;
-		public lastPlayDuration() : number {
-			var playDurr = this._lastPlayDuration;
-			this._lastPlayDuration = undefined;
-			if (playDurr < 0) playDurr = undefined;
-			else if (playDurr) playDurr /= 1000;
-			return playDurr;
-		}
-		private startPlayTime() { this._lastPlayDuration = -Util.now(); }
-		public stopPlayTime() {
-			if (this._lastPlayDuration < 0)
-				this._lastPlayDuration = Util.now() + this._lastPlayDuration;
-			else
-				this._lastPlayDuration = undefined;
+        private _lastPlayDuration:number = undefined;
+        public lastPlayDuration() : number {
+            var playDurr = this._lastPlayDuration;
+            this._lastPlayDuration = undefined;
+            if (playDurr < 0) playDurr = undefined;
+            else if (playDurr) playDurr /= 1000;
+            return playDurr;
+        }
+        private startPlayTime() { this._lastPlayDuration = -Util.now(); }
+        public stopPlayTime() {
+            if (this._lastPlayDuration < 0)
+                this._lastPlayDuration = Util.now() + this._lastPlayDuration;
+            else
+                this._lastPlayDuration = undefined;
         }
 
         static runCount = 0;
         public runAction(a: AST.Decl, args: any[]= null, opts: AST.CompilerOptions = {}) {
-			TipManager.setTip(null); // clear any tip
+            TipManager.setTip(null); // clear any tip
             var run0 = () => {
                 this.spyManager.onRunAction(<AST.Action>a);
                 ProgressOverlay.lockAndShow(lf("compiling script"), () => {
@@ -1802,7 +1802,7 @@ module TDev
             }
             setHash();
 
-			this.startPlayTime();
+            this.startPlayTime();
             var name = a.getStableName();
             var runIt = () => {
                 var publicId = ScriptEditorWorldInfo.status === "published" ? ScriptEditorWorldInfo.baseId : "";
@@ -2022,7 +2022,7 @@ module TDev
                 ]);
                 m.show();
             } else */
-			{
+            {
                 this.goToHubAsync().done();
             }
         }
@@ -2155,18 +2155,18 @@ module TDev
                     this.searchFor(this.searchBox.value);
             };
             this.searchButtonContainer = div("inlineBlock");
-			this.setupSearchContainer();
+            this.setupSearchContainer();
             this.setupSearchButton()
 
             elt("leftBtnRow").setChildren([top]);
         }
 
-		private setupSearchContainer() {
+        private setupSearchContainer() {
             this.searchContainer.setChildren(<any[]>[
-				this.widgetEnabled("codeSearch") ? this.searchBox : null,
-				this.widgetEnabled("codeSearch") || SizeMgr.portraitMode ? this.searchButtonContainer : null]);
-			this.sidePane().setFlag("code-search", this.widgetEnabled("codeSearch"));
-		}
+                this.widgetEnabled("codeSearch") ? this.searchBox : null,
+                this.widgetEnabled("codeSearch") || SizeMgr.portraitMode ? this.searchButtonContainer : null]);
+            this.sidePane().setFlag("code-search", this.widgetEnabled("codeSearch"));
+        }
 
         // it's public because it can be called by the host
         public debuggerTriggerPause() {
@@ -2545,7 +2545,7 @@ module TDev
             this.intelliProfile = null;
             this.displayLeft([]);
             this.complainedAboutMissingAPIs = false;
-			this.setLastScreenshot(null);
+            this.setLastScreenshot(null);
             this.searchBox.value = ""
             this.setReadOnly(false);
             this.scriptCompiled = false;
@@ -2866,7 +2866,7 @@ module TDev
             this.runImmediately = h[0] == "run";
 
             this.showEditorContainer();
-			TipManager.update();
+            TipManager.update();
 
             if (!this.forceReload && !this.runImmediately && this.visible && Script && Script.localGuid === h[1]) {
                 Ticker.dbg("Editor.loadHashCore.inline");
@@ -3723,14 +3723,14 @@ module TDev
         public loadTutorial(firstTime: boolean = false)
         {
             if (!Script) {
-				this.loadIntelliProfile(null, firstTime);
-				return;
-			}
+                this.loadIntelliProfile(null, firstTime);
+                return;
+            }
             var id = Script.editorState.tutorialId;
             if (!id) {
                 this.loadIntelliProfile(null, firstTime);
-				return;
-			}
+                return;
+            }
 
             if (/^t:/.test(id)) {
                 var ht = HelpTopic.findById(id.slice(2));
@@ -3738,17 +3738,17 @@ module TDev
                     this.followTopic(ht, firstTime);
                 } else {
                     this.loadIntelliProfile(null, firstTime);
-				}
+                }
             }
             else
                 World.getAnyScriptAsync(id).done((text) => {
                     if (!text) {
                         this.loadIntelliProfile(null, firstTime);
-					} else {
+                    } else {
                         if (!Script) return;
-						var ht = HelpTopic.fromScriptText(id, text);
-						this.followTopic(ht, firstTime);
-					}
+                        var ht = HelpTopic.fromScriptText(id, text);
+                        this.followTopic(ht, firstTime);
+                    }
                 })
         }
 
@@ -3766,19 +3766,19 @@ module TDev
 
         private loadIntelliProfile(ht: HelpTopic, firstTime: boolean = false)
         {
-			var refresh = () => {
+            var refresh = () => {
                 this.addIntelliProfile(Plugins.getPluginIntelliProfile());
-				this.setupTopButtons();
-				this.refreshScriptNav();
-				this.setupSearchContainer();
-			};
+                this.setupTopButtons();
+                this.refreshScriptNav();
+                this.setupSearchContainer();
+            };
 
             if (!ht) {
-				this.intelliProfile = null;
+                this.intelliProfile = null;
                 this.stepTutorial = null;
-				TipManager.setTip(null);
-				TDev.Browser.EditorSoundManager.keyboardSounds = false;
-				refresh();
+                TipManager.setTip(null);
+                TDev.Browser.EditorSoundManager.keyboardSounds = false;
+                refresh();
                 return;
             }
 
@@ -3837,14 +3837,14 @@ module TDev
                         if (firstTime)
                             TDev.Browser.EditorSoundManager.startTutorial();
                         refresh();
-						this.stepTutorial.startAsync().done(() => {
+                        this.stepTutorial.startAsync().done(() => {
                             refresh();
-							this.updateTutorial();
-						});
+                            this.updateTutorial();
+                        });
                     }
                 // })
                 })
-				refresh();
+                refresh();
             })
         }
 
@@ -3895,7 +3895,7 @@ module TDev
             */
 
             this.dismissSidePane();
-			this.setLastScreenshot(null);
+            this.setLastScreenshot(null);
             this.libExtractor.reset();
             Plugins.stopAllPlugins();
             return this.saveStateAsync({ forReal: true, clearScript: true });
@@ -5008,9 +5008,9 @@ module TDev
             AST.followingTutorial = true;
 
             this.removeVideo();
-			var innerHeader = topic.renderHeader();
-			innerHeader.className += " inlineDocsHeaderInnerInner";
-			var header = div("inlineDocsHeaderInner", innerHeader);
+            var innerHeader = topic.renderHeader();
+            innerHeader.className += " inlineDocsHeaderInnerInner";
+            var header = div("inlineDocsHeaderInner", innerHeader);
             this.innerDocContainer = null;
 
             this.videoContainer = divId("editorVideo", "editorVideo inlineDocs");
@@ -5023,7 +5023,7 @@ module TDev
             var href = (isTopic ? "#topic:" : "#script:") + topic.id;
 
             var btn = (icon, t:Ticks, f) => HTML.setTickCallback(Editor.sideDocBtn(icon), t, f)
-			var cancelBtn = btn("cancel", Ticks.sideTutorialCancel, () => {
+            var cancelBtn = btn("cancel", Ticks.sideTutorialCancel, () => {
                             ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"),
                               lf("leave tutorial"), () => {
                                     Script.editorState.tutorialId = "";
@@ -5031,17 +5031,17 @@ module TDev
                                     this.loadIntelliProfile(null);
                                     this.removeVideo();
                                     this.resetVideoConstraints();
-							});
-			});
-			var docButtons = div("inlineDocsButtons",
+                            });
+            });
+            var docButtons = div("inlineDocsButtons",
                         btn("Star", Ticks.sideTutorialRedisplay, () => {
                             Script.editorState.tutorialRedisplayed = (Script.editorState.tutorialRedisplayed || 0) + 1
                             if (this.stepTutorial)
                                 this.stepTutorial.startAsync().done();
                         }),
-						cancelBtn
+                        cancelBtn
             );
-			header.appendChild(docButtons);
+            header.appendChild(docButtons);
             elt("editorContainer").appendChild(this.videoContainer);
             this.applyVideoSize();
             this.updateTutorial()
@@ -5053,7 +5053,7 @@ module TDev
 
             this.videoContainer.removeSelf();
             this.videoContainer = null;
-			this.docContainer = null;
+            this.docContainer = null;
         }
 
         private applyVideoSize()
@@ -5870,18 +5870,18 @@ module TDev
                     case "forum":
                         hs = ["list", "comments", "forum", "forum", hs[1]];
                         break;
-					case "androidgcm":
-						hs = ["hub", "androidgcm", hs[1], hs[2], hs[3] ];
-						break;
-					case "joingroup":
-						hs = ["hub", "joingroup", hs[1] ];
-						break;
+                    case "androidgcm":
+                        hs = ["hub", "androidgcm", hs[1], hs[2], hs[3] ];
+                        break;
+                    case "joingroup":
+                        hs = ["hub", "joingroup", hs[1] ];
+                        break;
                     case "creategroup":
                         hs = ["hub", "creategroup"];
                         break;
-					case "pub":
-						hs = ["hub", "pub", hs[1] ];
-						break;						
+                    case "pub":
+                        hs = ["hub", "pub", hs[1] ];
+                        break;                        
                     case "print":
                         Promise.join(hs[1].split(/,/).map(EditorHistoryMgr.findOnlineById))
                             .then(HelpTopic.printManyAsync)

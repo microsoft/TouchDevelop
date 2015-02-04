@@ -69,7 +69,7 @@ module TDev {
             else if (!f) return v;
             else return coalesce(null);
         };
-	
+    
         return <Coalesced<T>>re;
     }
 
@@ -1051,11 +1051,11 @@ module TDev{
     }
 
     export function decodeDataURL(url: string, mimeType: string = null): Uint8Array {
-		if (!mimeType) {
-			var m = url.match(/^data:([^;]+);base64,/);
-			if (!m) return undefined;
-			mimeType = m[1];
-		}
+        if (!mimeType) {
+            var m = url.match(/^data:([^;]+);base64,/);
+            if (!m) return undefined;
+            mimeType = m[1];
+        }
         var prefix = 'data:' + mimeType + ';base64,';
         var binaryEncoded = url.substr(prefix.length);
         var binary = atob(binaryEncoded);
@@ -2775,19 +2775,19 @@ module TDev{
         return res
     }
 
-	export function unique<T>(arr: T[], f:(t:T)=>string) : T[]
-	{
-		var v : T[] = [];
+    export function unique<T>(arr: T[], f:(t:T)=>string) : T[]
+    {
+        var v : T[] = [];
         var r: { [index: string]: any; } = {}
         arr.forEach(e => {
             var k = f(e)
             if (!r.hasOwnProperty(k)) {
-			 r[k] = null;
+             r[k] = null;
              v.push(e);
-		    }
+            }
         })
-		return v;
-	}
+        return v;
+    }
 
     export function groupBy<T>(arr:T[], f:(t:T)=>string) : StringMap<T[]>
     {

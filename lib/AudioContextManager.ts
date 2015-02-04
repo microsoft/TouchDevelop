@@ -3,47 +3,47 @@
 declare class AudioBuffer {}
 
 module TDev.RT {
-	export module AudioContextManager {
-		var _context : any;
-		function context() {
-			if (!_context) _context = freshContext();
-			return _context;
-		}
+    export module AudioContextManager {
+        var _context : any;
+        function context() {
+            if (!_context) _context = freshContext();
+            return _context;
+        }
         function freshContext() {
-		    (<any>window).AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
-			if ((<any>window).AudioContext) {
+            (<any>window).AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
+            if ((<any>window).AudioContext) {
                 try {
                     // this call my crash.
                     // SyntaxError: audio resources unavailable for AudioContext construction
-					return  new (<any>window).AudioContext();
+                    return  new (<any>window).AudioContext();
                 } catch(e) {}
              }
             return undefined;
         }
-		export function isSupported() { return !!context(); }
-		export function loadAsync(buffer : ArrayBuffer) : Promise { // AudioBuffer
-			var ctx = context();
-			return new Promise((onSuccess, onError, onProgress) => {
-				ctx.decodeAudioData(buffer,
-				    b => onSuccess(b),
-					e => onSuccess(undefined)
-					);
-			});
-		}
+        export function isSupported() { return !!context(); }
+        export function loadAsync(buffer : ArrayBuffer) : Promise { // AudioBuffer
+            var ctx = context();
+            return new Promise((onSuccess, onError, onProgress) => {
+                ctx.decodeAudioData(buffer,
+                    b => onSuccess(b),
+                    e => onSuccess(undefined)
+                    );
+            });
+        }
 
-		export function play(buffer : AudioBuffer, volume : number) {
-			var ctx = context();
-			if (ctx) {
-				var source = ctx.createBufferSource();
-				source.buffer = buffer;
-				var gain = ctx.createGain();
-				gain.gain.value = volume;
+        export function play(buffer : AudioBuffer, volume : number) {
+            var ctx = context();
+            if (ctx) {
+                var source = ctx.createBufferSource();
+                source.buffer = buffer;
+                var gain = ctx.createGain();
+                gain.gain.value = volume;
                 source.connect(gain);
                 gain.connect(ctx.destination);
 
-				source.start(0);
-			}
-		}
+                source.start(0);
+            }
+        }
 
         function createNode(ctx : any) {
             if(!ctx.createScriptProcessor)
@@ -162,5 +162,5 @@ module TDev.RT {
                 writePCM(buffers[j]);
             return new Uint8Array(buffer, 0, buffer.byteLength);
         }
-	}
+    }
 }

@@ -20,40 +20,40 @@ module TDev { export module Browser {
         requiresLogin?: boolean;
     }
 
-	export module EditorSoundManager
-	{
-		var sounds : any = {};
+    export module EditorSoundManager
+    {
+        var sounds : any = {};
 
-		export var keyboardSounds = /sounds/.test(window.location.href);
-		export function intellibuttonClick() { if (keyboardSounds) playSound('aonptkth'); }
-		export function scoreUp() { playSound('sjmgbwrv'); }
-		export function tutorialStepNew() { playSound('ncoqavnw', 1); }
-		export function tutorialStepFinished() { playSound('sjmgbwrv', 1); }
-		export function tutorialStart() { playSound('sjmgbwrv', 1); }
+        export var keyboardSounds = /sounds/.test(window.location.href);
+        export function intellibuttonClick() { if (keyboardSounds) playSound('aonptkth'); }
+        export function scoreUp() { playSound('sjmgbwrv'); }
+        export function tutorialStepNew() { playSound('ncoqavnw', 1); }
+        export function tutorialStepFinished() { playSound('sjmgbwrv', 1); }
+        export function tutorialStart() { playSound('sjmgbwrv', 1); }
 
-		export function startTutorial() {
-			//keyboardSounds = true;
-			// caching
-			//TDev.RT.Sound.fromArtId('aonptkth').done(undefined, () => {});
+        export function startTutorial() {
+            //keyboardSounds = true;
+            // caching
+            //TDev.RT.Sound.fromArtId('aonptkth').done(undefined, () => {});
             tutorialStart();
-			TDev.RT.Sound.fromArtId('ncoqavnw').done(undefined, () => {});
-		}
+            TDev.RT.Sound.fromArtId('ncoqavnw').done(undefined, () => {});
+        }
 
-		function playSound(id : string, volume : number = 0.2)
-		{
-			var snd = <TDev.RT.Sound>sounds[id];
-			if(snd) snd.playAsync().done();
-			else {
-				TDev.RT.Sound.fromArtId(id).done(s => {
-					sounds[id] = s;
-					if (s) {
-						s.set_volume(volume);
-						s.playAsync().done();
-					}
-				}, e => {});
-			}
-		}
-	}
+        function playSound(id : string, volume : number = 0.2)
+        {
+            var snd = <TDev.RT.Sound>sounds[id];
+            if(snd) snd.playAsync().done();
+            else {
+                TDev.RT.Sound.fromArtId(id).done(s => {
+                    sounds[id] = s;
+                    if (s) {
+                        s.set_volume(volume);
+                        s.playAsync().done();
+                    }
+                }, e => {});
+            }
+        }
+    }
 
     export class Hub
         extends Screen {
@@ -240,7 +240,7 @@ module TDev { export module Browser {
         }
 
         public loadHash(h: string[]) {
-			TipManager.update();
+            TipManager.update();
             if (h[1] == "logout") {
                 // we may be hosed enough that ModalDialog.ask doesn't work anymore
                 if (window.confirm("Do you really want to sign out?\nAll your script data and any unsynchronized script changes will be lost.") == true) {
@@ -296,34 +296,34 @@ module TDev { export module Browser {
 
             this.showSections();
 
-			switch(h[1]) {
-				case "test":
-	                TestMgr.testAllScripts();
-					break;
-				case "singlebenchmark":
-	                HistoryMgr.instance.setHash(this.screenId() + ":singlebenchmark", null)
-		            if (!Cloud.isAccessTokenExpired())
-			            TestMgr.Benchmarker.runTDBenchmarksWithDialog(false);
-					break;
-				case "benchmarksuite":
-	                HistoryMgr.instance.setHash(this.screenId() + ":benchmarksuite", null)
-		            if (!Cloud.isAccessTokenExpired())
-			            TestMgr.Benchmarker.runTDBenchmarksWithDialog(true);
-					break;
-				case "joingroup":
-					var code = h[2];
-					HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)
+            switch(h[1]) {
+                case "test":
+                    TestMgr.testAllScripts();
+                    break;
+                case "singlebenchmark":
+                    HistoryMgr.instance.setHash(this.screenId() + ":singlebenchmark", null)
+                    if (!Cloud.isAccessTokenExpired())
+                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(false);
+                    break;
+                case "benchmarksuite":
+                    HistoryMgr.instance.setHash(this.screenId() + ":benchmarksuite", null)
+                    if (!Cloud.isAccessTokenExpired())
+                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(true);
+                    break;
+                case "joingroup":
+                    var code = h[2];
+                    HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)
                     Cloud.authenticateAsync(lf("joining groups"), false, true)
                         .done((auth) => {
-					        if (auth) Browser.TheHost.joinGroup(code);
+                            if (auth) Browser.TheHost.joinGroup(code);
                         });
-					break;
+                    break;
                 case "creategroup":
                     Util.log('creategroup received');
                     HistoryMgr.instance.setHash(this.screenId() + ":creategroup", null);
                     Cloud.authenticateAsync(lf("creating groups"), false, true)
                         .done((auth) => {
-					        if (auth) this.createGroup();
+                            if (auth) this.createGroup();
                         });
                     break;
                 case "androidgcm":
@@ -356,17 +356,17 @@ module TDev { export module Browser {
                     }
                     break;
                 case "pub":
-					var id = h[2];
-					if (/^[a-z]{4,}/.test(id)) {
+                    var id = h[2];
+                    if (/^[a-z]{4,}/.test(id)) {
                         HistoryMgr.instance.setHash(this.screenId() + ":pub:" + h[2], null)
-						TheApiCacheMgr.getAsync(id, true)
-							.done((d) => {
-								var details = this.browser().getAnyInfoByEtag(d);
-								if (details)
-									this.browser().loadDetails(details);
-							});
-					}
-					break;
+                        TheApiCacheMgr.getAsync(id, true)
+                            .done((d) => {
+                                var details = this.browser().getAnyInfoByEtag(d);
+                                if (details)
+                                    this.browser().loadDetails(details);
+                            });
+                    }
+                    break;
                 case "derive":
                     if (/^\w+$/.test(h[2])) {
                         HistoryMgr.instance.setHash(this.screenId() + ":derive:" + h[2], null)
@@ -397,7 +397,7 @@ module TDev { export module Browser {
                             })
                     }
                     break;
-			}			
+            }            
         }
 
         private tileClick(t: HTMLElement, f: () =>void ) {
@@ -474,7 +474,7 @@ module TDev { export module Browser {
         private templates : ScriptTemplate[];
 
         private joinGroup(code : string = null) {
-			this.browser().joinGroup(code);
+            this.browser().joinGroup(code);
         }
 
         private createGroup() {
@@ -520,7 +520,7 @@ module TDev { export module Browser {
             Ticker.rawTick('scriptTemplate_' + template.id);
 
             template = JSON.parse(JSON.stringify(template)); // clone template
-			var name = template.name;
+            var name = template.name;
             if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
 
@@ -871,13 +871,13 @@ module TDev { export module Browser {
             }
 
             var tutorialOffset = 0
-			function tileSize(k) {
+            function tileSize(k) {
                 k += tutorialOffset
                 var sz = 1;
                 if (k == 0) sz = 3;
                 else if (k == 1) sz = 2;
-				return sz;
-			}
+                return sz;
+            }
 
             var scriptSlots = 0
             if (s == "recent" && items.length < 5) {
@@ -960,17 +960,17 @@ module TDev { export module Browser {
             var beforeFirstFnBtn = null;
             var noFnBreak = false;
 
-			if (s == "social") {
-				elements = elements.slice(0, 4);
-				if (elements.length == 1) {
-					var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
-					fill.style.opacity = '0';
-					elements.push(fill);
-				}
+            if (s == "social") {
+                elements = elements.slice(0, 4);
+                if (elements.length == 1) {
+                    var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
+                    fill.style.opacity = '0';
+                    elements.push(fill);
+                }
 
                 var forumEl = this.mkFnBtn(lf("Forums"), () => { this.hide(); Hub.showForum() }, Ticks.hubForum, false, tileSize(elements.length));
-	            forumEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:im,white")));
-				elements.push(forumEl);
+                forumEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:im,white")));
+                elements.push(forumEl);
 
                 var toExternalBtn = (btn: HTMLElement) => {
                     btn.className += " externalBtn";
@@ -992,12 +992,12 @@ module TDev { export module Browser {
                     elements.push(el);
                 }
 
-				while (elements.length < 5) {
-					var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
-					fill.style.opacity = '0';
-					elements.push(fill);
-				}
-			}
+                while (elements.length < 5) {
+                    var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
+                    fill.style.opacity = '0';
+                    elements.push(fill);
+                }
+            }
 
             var addFnBtn = (lbl: string, t, f: () =>void , modal = false, size = 1) => {
                 elements.push(this.mkFnBtn(lbl, f, t, modal, size));
@@ -1036,10 +1036,10 @@ module TDev { export module Browser {
                     addFnBtn(lf("See More"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-					elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                    elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
                     // elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:person,white")));
 
-					elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                    elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
                     elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
                     elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
             } else {
@@ -1197,20 +1197,20 @@ module TDev { export module Browser {
 
             d.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("sign in"), () => {
-					tick(Ticks.legalNoticeSignIn);
-					if(Login.show()) {
-						localStorage["legalNotice"] = notice;
-						d.canDismiss = true;
-						d.dismiss();
-					}
+                    tick(Ticks.legalNoticeSignIn);
+                    if(Login.show()) {
+                        localStorage["legalNotice"] = notice;
+                        d.canDismiss = true;
+                        d.dismiss();
+                    }
                 }, "gray-button"),
-				HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
-					tick(Ticks.legalNoticeAgree);
-					localStorage["legalNotice"] = notice;
-					d.canDismiss = true;
-					d.dismiss();
-				}, "gray-button")
-			));
+                HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
+                    tick(Ticks.legalNoticeAgree);
+                    localStorage["legalNotice"] = notice;
+                    d.canDismiss = true;
+                    d.dismiss();
+                }, "gray-button")
+            ));
             d.fullWhite()
             d.canDismiss = false;
             d.show();
@@ -1619,8 +1619,8 @@ module TDev { export module Browser {
             var docsEl: HTMLElement;
             var apiEl: HTMLElement;
             var whatsNew: HTMLElement;
-			var begginersEl : HTMLElement;
-			//var advancedEl:HTMLElement;
+            var begginersEl : HTMLElement;
+            //var advancedEl:HTMLElement;
             var rate, skill, settings: HTMLElement;
             var searchEl: HTMLElement;
             var editorMode = EditorSettings.editorMode();
@@ -1878,11 +1878,11 @@ module TDev { export module Browser {
                     }
                 }
                 else if (s == "social") {
-					if (Cloud.getUserId())
-	                    this.browser().getLocationList(Cloud.getUserId() + "/groups?count=6", (items, cont) => this.addPageTiles(s, c, items));
+                    if (Cloud.getUserId())
+                        this.browser().getLocationList(Cloud.getUserId() + "/groups?count=6", (items, cont) => this.addPageTiles(s, c, items));
                     else
-						this.addPageTiles(s, c, []);
-				}
+                        this.addPageTiles(s, c, []);
+                }
                 else
                     this.browser().getLocationList(s + "-scripts", (items, cont) => this.addPageTiles(s, c, items));
             });
@@ -1972,8 +1972,8 @@ module TDev { export module Browser {
             };
 
             setNum(prevScore);
-			EditorSoundManager.scoreUp();
-			Util.coreAnim("dingShow", 1000, scoreDiv, () => {
+            EditorSoundManager.scoreUp();
+            Util.coreAnim("dingShow", 1000, scoreDiv, () => {
                 Util.setTimeout(600, advance)
             })
         }

@@ -348,21 +348,21 @@ module TDev.RT {
         }
 
         export function proxy(url: string) {
-			// don't proxy localhost
+            // don't proxy localhost
             if (!url || /^http:\/\/localhost(:[0-9]+)?\//i.test(url)) return url;
-			// don't proxy private ip ranges
-			// 10.0.0.0 - 10.255.255.255
-			// 172.16.0.0 - 172.31.255.255
-			// 192.168.0.0 - 192.168.255.255
-			var m = url.match(/^http:\/\/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)(:[0-9]+)?\//i);
-			if (m) {
-				var a = parseInt(m[1]);
-				if (a == 10) return url;
+            // don't proxy private ip ranges
+            // 10.0.0.0 - 10.255.255.255
+            // 172.16.0.0 - 172.31.255.255
+            // 192.168.0.0 - 192.168.255.255
+            var m = url.match(/^http:\/\/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)(:[0-9]+)?\//i);
+            if (m) {
+                var a = parseInt(m[1]);
+                if (a == 10) return url;
 
-				var b = parseInt(m[2]);
-				if (a == 172 && b >= 16 && b <= 31) return url;
-				if (a == 192 && b == 168) return url;
-			}
+                var b = parseInt(m[2]);
+                if (a == 172 && b >= 16 && b <= 31) return url;
+                if (a == 192 && b == 168) return url;
+            }
             return Cloud.getPrivateApiUrl("runtime/web/proxy?url=" + encodeURIComponent(url));
         }
 
@@ -374,7 +374,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a web service response as a JSON data structure (http get)
@@ -386,7 +386,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content_as_json()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a web service response as a XML data structure (http get)
@@ -399,7 +399,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content_as_xml()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a WAV sound file from internet
@@ -431,7 +431,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Uploads a sound to an internet page (http post). The sound must have been recorded from the microphone.
@@ -444,7 +444,7 @@ module TDev.RT {
             request.setContentAsSoundInternal(snd);
             request.sendAsync()
                 .done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Uploads a picture to an internet page (http post)
@@ -455,11 +455,11 @@ module TDev.RT {
             r.progress('Uploading...');
             request.set_method('post');
             pic.initAsync()
-				.then(() => {
-					request.setContentAsPictureInternal(pic, 0.85);
-					return request.sendAsync();
-				}).done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                .then(() => {
+                    request.setContentAsPictureInternal(pic, 0.85);
+                    return request.sendAsync();
+                }).done((response : WebResponse) => r.resumeVal(response.content()),
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a picture from internet
@@ -468,13 +468,13 @@ module TDev.RT {
         export function download_picture(url:string, r : ResumeCtx)
         {
             r.progress('Downloading...');
-			var pic = undefined;
+            var pic = undefined;
             Picture.fromUrl(url)
-				.then((p : Picture) => {
-					pic = p;
-					return p.initAsync();
-				})
-				.done(() => r.resumeVal(pic),
+                .then((p : Picture) => {
+                    pic = p;
+                    return p.initAsync();
+                })
+                .done(() => r.resumeVal(pic),
                     (e) => r.resumeVal(undefined));
         }
 
@@ -840,7 +840,7 @@ module TDev.RT {
             if (msubdomain) {
                 var appid = msubdomain[1];
                 actualRedirectURI = 'https://' + appid + '-' + userid + '.users.touchdevelop.com/oauth';
-				redirectURI = "https://www.touchdevelop.com/" + appid + '-' + userid + "/oauth";
+                redirectURI = "https://www.touchdevelop.com/" + appid + '-' + userid + "/oauth";
                 App.log('oauth appid redirect: ' + appid);
                 oauth_url = oauth_url.replace(subdomainRx, '');
             }

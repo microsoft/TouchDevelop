@@ -40,7 +40,7 @@ module TDev
             return !this.data.autoMode;
         }
 
-		public element(hint : boolean) : HTMLElement {
+        public element(hint : boolean) : HTMLElement {
             var docs = this.parent.renderDocs(this.data.docs)
             var e = div(null)
             Browser.setInnerHTML(e, docs);
@@ -49,8 +49,8 @@ module TDev
             var t = e.innerText || "";
             if (t.length > 4096) t = t.substr(0, 4096);
             this.text = t;
-			return e;
-		}
+            return e;
+        }
 
         public showDiff()
         {
@@ -732,7 +732,7 @@ module TDev
                     }
                     return this.stepStartedAsync();
                 });
-		}
+        }
 
         public dump():string
         {
@@ -753,7 +753,7 @@ module TDev
             var modalDuration = this.currentStep > 0 ? this.lastModalDuration : undefined;
             this.lastModalDuration = undefined
             if (modalDuration) modalDuration /= 1000;
-			var playDuration = this.currentStep > 0 ? TheEditor.lastPlayDuration() : undefined;
+            var playDuration = this.currentStep > 0 ? TheEditor.lastPlayDuration() : undefined;
             Cloud.postPrivateApiAsync("progress", {
                 progressId: this.progressId,
                 index: this.currentStep,
@@ -762,7 +762,7 @@ module TDev
                 helpCalls: help,
                 goalTips: goalTips,
                 modalDuration: modalDuration,
-				playDuration: playDuration,
+                playDuration: playDuration,
             }).done(undefined, () => { }); // don't wait, don't report error
             var data = <{ [id: string]: Cloud.Progress; }>{};
             var n = Math.round(Util.now() / 1000)
@@ -814,14 +814,14 @@ module TDev
                 this.stepStartedAsync().done(() => {
                     this.timer.start(500);
                     this.update();
-    			});
+                });
             }
         }
 
         private modalTime(start:number)
         {
             this.lastModalDuration = Util.now() - start
-		}
+        }
 
         private nowPublish()
         {
@@ -1002,7 +1002,7 @@ module TDev
                 }).then(() => ProgressOverlay.hide(), e => () => ProgressOverlay.hide());
         }
 
-		private firstStepAsync() {
+        private firstStepAsync() {
             var r = new PromiseInv();
 
             this.disableUpdate = true;
@@ -1111,39 +1111,39 @@ module TDev
         }
 
         private congrats = lf("excellent; great job; awesome; cool; you rock; well done; outstanding; you got it; right on").split(/\s*[;؛]\s*/);
-		private stepStartedAsync() {
-			var step = this.steps[this.currentStep];
-			if (step && step.hasStar()) {
-				return new Promise((onSuccess, onError, onProgress) => {
+        private stepStartedAsync() {
+            var step = this.steps[this.currentStep];
+            if (step && step.hasStar()) {
+                return new Promise((onSuccess, onError, onProgress) => {
                     this.disableUpdate = true;
-			        TipManager.setTip(null);
+                    TipManager.setTip(null);
                     var start = Util.now()
-					var m = new ModalDialog();
-					m.onDismiss = () => {
+                    var m = new ModalDialog();
+                    m.onDismiss = () => {
                         this.disableUpdate = false;
                         this.modalTime(start);
-						TDev.Browser.EditorSoundManager.tutorialStepNew();
+                        TDev.Browser.EditorSoundManager.tutorialStepNew();
                         this.timer.start(500);
                         this.update();
-						onSuccess(undefined);
-					}
+                        onSuccess(undefined);
+                    }
                     m.add(this.createStars());
-					if (!this.isFirstStep() && !step.data.avatars && !step.data.noCheers)
-						m.add(dirAuto(div('wall-dialog-header', Util.capitalizeFirst(Random.pick(this.congrats) + '!'))));
+                    if (!this.isFirstStep() && !step.data.avatars && !step.data.noCheers)
+                        m.add(dirAuto(div('wall-dialog-header', Util.capitalizeFirst(Random.pick(this.congrats) + '!'))));
                     var elementDiv = div('wall-dialog-body', step.element(false));
                     m.add(elementDiv);
 
                     if (this.translatedTutorial && this.translatedTutorial.steps[this.currentStep])
                         StepTutorial.addTranslatedDocs(m, elementDiv, !!this.translatedTutorial.manual, this.translatedTutorial.steps[this.currentStep].docs);
 
-					m.fullWhite();
+                    m.fullWhite();
                     m.setScroll();
 
-					m.add(div('wall-dialog-buttons tutDialogButons',
+                    m.add(div('wall-dialog-buttons tutDialogButons',
                         // TODO: mine tutorial locale
                         /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"), () => { this.replyDialog() }) : null,
-						HTML.mkButton(lf("let's do it!"), () => m.dismiss())
-						)
+                        HTML.mkButton(lf("let's do it!"), () => m.dismiss())
+                        )
                     );
 
                     if (this.hourOfCode) {
@@ -1164,8 +1164,8 @@ module TDev
                         }));
                     }
 
-					m.show();
-				});
+                    m.show();
+                });
             } else if (!step) {
                 this.keepTinkering(false)
                 return Promise.as();
@@ -1219,7 +1219,7 @@ module TDev
             var lightStars = [];
             var allStars = [];
             for(var i = -1; i < this.steps.length; ++i) {
-    		    if (i == -1 || this.steps[i].hasStar()) {
+                if (i == -1 || this.steps[i].hasStar()) {
                     numStars++;
                     var checkpoint = i > -1 && (this.steps[i].data.stcheckpoint || i == this.steps.length - 1);
                     var completed = colors && i < this.currentStep;

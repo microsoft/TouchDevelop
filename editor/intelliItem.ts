@@ -143,7 +143,7 @@ module TDev
                     tick(Ticks.calcIntelliButton)
                     tickN(Ticks.calcIntelliButton0, idx)
                 }
-				TDev.Browser.EditorSoundManager.intellibuttonClick();
+                TDev.Browser.EditorSoundManager.intellibuttonClick();
                 this.onClick()
             }
 
@@ -174,15 +174,15 @@ module TDev
             } else {
                 c._theButton.className = "calcButton calcStmtButton"
             }
-			// display picture art in button
-			if (this.prop instanceof TDev.AST.GlobalDef) {
-				var gd = <TDev.AST.GlobalDef>this.prop;
+            // display picture art in button
+            if (this.prop instanceof TDev.AST.GlobalDef) {
+                var gd = <TDev.AST.GlobalDef>this.prop;
                 var artPref = "https://az31353.vo.msecnd.net/pub/";
-				if (gd.isResource && gd.getKind().getName() == "Picture" && gd.url && gd.url.slice(0, artPref.length) == artPref) {
-					c.setBackgroundImage(gd.url);
-					inner.style.backgroundColor = 'rgba(238,238,255,0.5)';
-				}
-			}
+                if (gd.isResource && gd.getKind().getName() == "Picture" && gd.url && gd.url.slice(0, artPref.length) == artPref) {
+                    c.setBackgroundImage(gd.url);
+                    inner.style.backgroundColor = 'rgba(238,238,255,0.5)';
+                }
+            }
             c.intelliItem = this;
         }
 

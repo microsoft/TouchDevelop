@@ -23,7 +23,7 @@ module TDev
             orange: "#FFA500",
             purple: "#800080",
             red: "#FF0000",
-			pink: "#FFCBDB",
+            pink: "#FFCBDB",
             /* transparent: "#00FFFFFF", */
             white: "#FFFFFF",
             yellow: "#FFFF00",
