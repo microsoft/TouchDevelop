@@ -5,5 +5,8 @@
   },
   "dependencies": {
     "tsd": "^0.5.7"
+  },
+  "scripts": {
+    "test": "jake test"
   }
 }
