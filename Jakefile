@@ -141,8 +141,8 @@ mkSimpleTask('editor/refs.d.ts', [
 mkSimpleTask('officemix/officemix.d.ts', [
     'officemix'
 ], "officemix", "officemix");
-mkSimpleTask('noderunner/jsonapi.d.ts', [], "noderunner", "jsonapi"); 
-mkSimpleTask('nodeclient/client.d.ts', [
+mkSimpleTask('noderunner/jsonapi.d.ts', [], "noderunner", "jsonapi");
+mkSimpleTask('nodeclient/client.js', [
     'rt/typings.d.ts',
     'noderunner/jsonapi.d.ts'
 ], "nodeclient", "client", true);
@@ -150,7 +150,7 @@ mkSimpleTask('nodeclient/client.d.ts', [
 mkSimpleTask('noderunner/runner.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'ast/refs.d.ts',
     'libnode/refs.d.ts',
     'noderunner'
@@ -159,7 +159,7 @@ mkSimpleTask('noderunner/runner.d.ts', [
 mkSimpleTask('runner/refs.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'storage/refs.d.ts',
     'libwinRT/refs.d.ts',
     'libwab/refs.d.ts',
@@ -171,7 +171,7 @@ mkSimpleTask('runner/refs.d.ts', [
 mkSimpleTask('mc/refs.d.ts', [
     'browser/browser.d.ts',
     'rt/typings.d.ts',
-    'rt/refs.d.ts', 
+    'rt/refs.d.ts',
     'storage/refs.d.ts',
     'mc'
 ], "mc", "refs");
@@ -254,7 +254,7 @@ task('clean', [], function () {
     generated.forEach(function (f) { jake.rmRf(f); });
 });
 
-task('test', [ 'default' ], { async: true }, function () {
+task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function () {
     jake.exec([ 'node nodeclient/client.js buildtest' ], {}, function() { complete(); });
 });
 
