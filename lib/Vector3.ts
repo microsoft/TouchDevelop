@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT {
     //? A 3D vector
@@ -18,7 +18,7 @@ module TDev.RT {
         static zero = Vector3.mk(0, 0, 0);
 
         public toJsonKey() {
-             return [this._x, this._y, this._z]; 
+             return [this._x, this._y, this._z];
         }
 
         public keyCompareTo(o:any):number
@@ -31,7 +31,7 @@ module TDev.RT {
             diff = this._z - other._z;
             return diff;
         }
-        
+
         public exportJson(ctx: JsonExportCtx): any {
             return [this._x, this._y, this._z];
         }
@@ -80,16 +80,16 @@ module TDev.RT {
         public scale(scalar:number) : Vector3 { return Vector3.mk(this._x * scalar, this._y * scalar, this._z * scalar); }
 
         //? Restricts the vector in the specified range
-        public clamp(min:Vector3, max:Vector3) : Vector3 
+        public clamp(min:Vector3, max:Vector3) : Vector3
         {
             return Vector3.mk(Math_.clamp(min._x, max._x, this._x), Math_.clamp(min._y, max._y, this._y), Math_.clamp(min._z, max._z, this._z));
         }
 
         //? Calculates the cross product with the other vector
-        public cross(other:Vector3) : Vector3 
+        public cross(other:Vector3) : Vector3
         {
-            return Vector3.mk(this._y * other._z - this._z * other._y, 
-               this._z * other._x - this._x * other._z, 
+            return Vector3.mk(this._y * other._z - this._z * other._y,
+               this._z * other._x - this._x * other._z,
                this._x * other._y - this._y * other._x);
         }
 

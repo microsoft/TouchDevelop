@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -97,7 +97,7 @@ module TDev
             this.expressionDisplay.id = "expressionDisplay";
 
             var begX = 0, begY = 0;
-            var handler = new DragHandler(this.expressionDisplay, 
+            var handler = new DragHandler(this.expressionDisplay,
                 (tp:string, dx:number, dy:number, bx:number, by:number) => {
                     if (tp == "drag") {
                         var off = Util.offsetIn(this.expressionDisplay, elt("root"));
@@ -221,7 +221,7 @@ module TDev
                     idx = idx0;
                     break;
                 }
-                
+
                 if ((y <= yy && x <= xx) || y < e.offsetTop) {
                     var marg = 0.7*SizeMgr.topFontSize
                     if (mode == 1 && ((x - e.offsetLeft) < marg || (xx - x) < marg))
@@ -243,13 +243,13 @@ module TDev
             if (this.searchApi.visible) {
                 this.searchApi.dismissing();
                 // apperently, dismissing() can close us
-                if (!this.expr) return; 
+                if (!this.expr) return;
             }
 
-            var selIdx = this.tokenIdxAt(x, y, 1); 
+            var selIdx = this.tokenIdxAt(x, y, 1);
             if (selIdx >= this.expr.tokens.length)
                 selIdx = -1;
-            var editIdx = this.tokenIdxAt(x, y, 2); 
+            var editIdx = this.tokenIdxAt(x, y, 2);
             var idx = this.tokenIdxAt(x, y);
 
             //Util.log("tap: x={0} y={1} phase={2} tm={3}", x,y,phase,Util.now())
@@ -443,7 +443,7 @@ module TDev
             var st = (s:string, nb:string = "") => AST.proMode ? span("greyed", s) : (nb ? span("kw", nb) : null)
 
             if (this.stmt instanceof AST.For) {
-                var iname = (<AST.For>this.stmt).boundLocal.getName() 
+                var iname = (<AST.For>this.stmt).boundLocal.getName()
                 //introE = span("", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " = 0; " + iname + " < ")])
                 if (AST.proMode) {
                     introE = span("", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " < ")])
@@ -454,11 +454,11 @@ module TDev
                 }
             } else if (this.stmt instanceof AST.Foreach) {
                 if (AST.proMode) {
-                    introE = span("", <any[]>[span("kw", "for each "), span("greyed", "("), span("kw", "var "), 
+                    introE = span("", <any[]>[span("kw", "for each "), span("greyed", "("), span("kw", "var "),
                                 span("greyed", (<AST.Foreach>this.stmt).boundLocal.getName()), span("kw", " in ")]);
                     outroE = span("greyed", " ) {")
                 } else {
-                    introE = span("", <any[]>[span("kw", "for each "), 
+                    introE = span("", <any[]>[span("kw", "for each "),
                                 span("", (<AST.Foreach>this.stmt).boundLocal.getName()), span("kw", " in ")]);
                     outroE = span("kw", " do")
                 }
@@ -475,7 +475,7 @@ module TDev
                     introE = span("kw",  "var ")
                 if (this.isElse)
                     introE = span("kw",  "else ")
-                if (this.stmt instanceof AST.InlineActions && 
+                if (this.stmt instanceof AST.InlineActions &&
                     (<AST.InlineActions>this.stmt).implicitAction())
                     outroE = st(" {", " do")
             } else if (this.stmt instanceof AST.If) {
@@ -539,7 +539,7 @@ module TDev
                 this.displayElts.push(outroE);
                 toks.push(outroE);
             }
-            
+
             var curs = div("calcCursor", "|");
             //(<any> curs).cursorIndex = cursorPosition;
 
@@ -632,13 +632,13 @@ module TDev
             if (this.inSelectionMode()) {
                 if (this.keyboardSelectionLeft) {
                     if (this.cursorPosition >= this.selectionEnd) {
-                        this.unselect();  
+                        this.unselect();
                     } else {
                         this.selectionStart = this.cursorPosition;
                     }
                 } else {
                     if (this.cursorPosition <= this.selectionStart) {
-                        this.unselect();  
+                        this.unselect();
                     } else {
                         this.selectionEnd = this.cursorPosition;
                     }
@@ -688,7 +688,7 @@ module TDev
         public undo()
         {
             tick(Ticks.calcUndo)
-            
+
             if (this.expr == null) return false;
 
             // save the current state (overriding any previous identical state)
@@ -717,7 +717,7 @@ module TDev
         private saveUndo()
         {
             var prev = this.undoMgr.peekCalcState();
-            var curr = 
+            var curr =
                 {
                     expr: this.expr.serialize(),
                     cursorPosition: this.cursorPosition
@@ -1158,7 +1158,7 @@ module TDev
 
             var pos = this.lastOpenBracePos;
             this.lastOpenBracePos = -1;
-            
+
             var prevTok = this.expr.tokens[this.cursorPosition - 1]
             var prev2Tok = this.expr.tokens[this.cursorPosition - 2]
             if (/^[0-9\-]$/.test(o) &&
@@ -1272,7 +1272,7 @@ module TDev
                     this.fullDisplay()
                     return
                 }
-                    
+
                 var v1 = l instanceof AST.LocalDef ? a.nameLocal(v0) : Script.freshName(v0)
                 var renamed = false
 
@@ -1563,7 +1563,7 @@ module TDev
                 } else {
                     var v = this.calcButtonsRight.offsetHeight
                     this.searchDiv.style.height = SizeMgr.windowHeight - v + "px";
-                }    
+                }
             }
         }
 
@@ -1702,7 +1702,7 @@ module TDev
                 else
                     editBtns[4].clear();
             }
-            
+
             var cursorKeys = this.keyBlock(ph ? 3 : pm ? 5 : 11, 2, 2, 1);
             cursorKeys[0].setImage("svg:cursorLeft,black", lf("move cursor"), Ticks.calcMoveCursorLeft, () => this.moveCursor(-1));
             cursorKeys[1].setImage("svg:cursorRight,black", lf("move cursor"), Ticks.calcMoveCursorRight, () => this.moveCursor(+1));
@@ -2181,14 +2181,14 @@ module TDev
                 if (t) {
                     var df = t.getThing();
                     if (df instanceof AST.GlobalDef) {
-                        var k = df.getKind(); 
+                        var k = df.getKind();
                         if (df.getName() == "colors")
                             return k;
                     }
                 }
                 return null;
             }
-            
+
             return getKind(prevTok);
         }
 
@@ -2466,7 +2466,7 @@ module TDev
 
             var oops = false;
             var extractedKind = null
-            var name = 
+            var name =
                 this.selectionSearch(null, this.expr.parsed, (e, parm) => {
                     if (e.loc.len - 2 > this.selectionEnd - this.selectionStart)
                         return null; // too big
@@ -2530,7 +2530,7 @@ module TDev
             this.fullDisplay();
         }
 
-        private parameterName(parm:PropertyParameter) 
+        private parameterName(parm:PropertyParameter)
         {
             return !parm || parm.parentProperty.getInfixPriority() > 0 ? null : parm.getName();
         }
@@ -2608,7 +2608,7 @@ module TDev
                 }
 
                 var remLen = this.expr.tokens.length - e.loc.len;
-                    
+
                 if (remLen <= 2)
                     score = 0;
                 else if (score > 0)
@@ -2962,7 +2962,7 @@ module TDev
                             e.colorOverride = "#0af";
                             e.cornerIcon = "plug,#0af";
                             e.iconOverride = "svg:plug,white"
-                            e.cbOverride = () => { 
+                            e.cbOverride = () => {
                                 Plugins.runAnnotationOp(a, op)
                             };
                         })
@@ -3026,10 +3026,10 @@ module TDev
 
             var queryAsync = (terms: string) => Meta.searchArtAsync(terms, isSound ? "sound" : "picture")
                     .then((itms: Browser.ArtInfo[]) => itms.map(itm => converter(itm)).filter(itm => itm != null));
-            m.choose([], { queryAsync: queryAsync, 
+            m.choose([], { queryAsync: queryAsync,
                            searchHint: lf("Type to search..."),
                            initialEmptyQuery: true,
-                           initialQuery: art.getName() 
+                           initialQuery: art.getName()
                         });
 
             if (TheEditor.stepTutorial && TheEditor.stepTutorial.waitingFor == "editArt") {
@@ -3080,7 +3080,7 @@ module TDev
                 toks = toks.slice(2)
 
             toks.unshift(AST.mkFunOp(inl.inParameters.map(p => p.getName())))
-            
+
             var outer = <AST.InlineActions> inl.parentBlock().parent
             var outerToks = outer.expr.tokens
             var replTok = outerToks.filter(t => t.getThing() == inl.name)[0]
@@ -3123,7 +3123,7 @@ module TDev
                 e.cbOverride = () => { this.uncomment() };
             }
 
-            if (TheEditor.widgetEnabled('simplify') && !placeholderDef && !this.inSelectionMode() && 
+            if (TheEditor.widgetEnabled('simplify') && !placeholderDef && !this.inSelectionMode() &&
                 this.stmt.allowSimplify() && this.simplify(false)) {
                 var e = this.mkIntelliItem(0.9e20, Ticks.calcSimplify);
                 e.nameOverride = lf("simplify")
@@ -3242,7 +3242,7 @@ module TDev
 
             if (this.stmt instanceof AST.ExprStmt &&
                 (this.expr.tokens.length > 1 ||
-                 (this.expr.tokens.length > 0 && !(this.expr.tokens[0].getThing() instanceof AST.LocalDef)))) 
+                 (this.expr.tokens.length > 0 && !(this.expr.tokens[0].getThing() instanceof AST.LocalDef))))
             {
                 if (this.expr.tokens.every((t) => !t.getError()) &&
                     (this.expr.getKind().hasContext(KindContext.Parameter) ||
@@ -3252,7 +3252,7 @@ module TDev
                     var e = this.mkIntelliItem(1.1e20, Ticks.calcStoreInVar);
                     e.nameOverride = lf("store in var");
                     e.descOverride = lf("new variable");
-                    e.cbOverride = () => { 
+                    e.cbOverride = () => {
                         var suggestedName = this.storeVarName
                         this.storeVarName = null
                         this.unselect();
@@ -3274,7 +3274,7 @@ module TDev
                 var e = this.mkIntelliItem(1.2e20, Ticks.calcStoreInVar);
                 e.nameOverride = lf("is OK");
                 e.descOverride = lf("mark as OK");
-                e.cbOverride = () => { 
+                e.cbOverride = () => {
                     var stmt = new AST.Comment();
                     stmt.text = "E: " + this.stmt.getError().replace(/:.*/, "")
                     TheEditor.selector.injectBelow(stmt);
@@ -3402,7 +3402,7 @@ module TDev
         }
 
         private selectionLength() { return this.selectionEnd - this.selectionStart; }
-        
+
         private addBoxButtons()
         {
             // Clear the highlighting.
@@ -3441,7 +3441,7 @@ module TDev
 
                 return res;
             }
-            
+
             LayoutMgr.instance.setCurrentId(this.stmt.stableId);
 
             // This is not the newest result but there's no problem.
@@ -3629,7 +3629,7 @@ module TDev
                 e.descOverride = "insert";
                 e.iconOverride = "svg:NumberedList,white";
                 e.colorOverride = "rgb(0, 204, 153)";
-                e.cbOverride = () => { 
+                e.cbOverride = () => {
                     this.unselect();
                     var toks = this.expr.tokens
                     var isDigit = (t:AST.Token) => t && t.isDigit()
@@ -3670,11 +3670,11 @@ module TDev
 
             var setHelp = (args:any) => {
                 didIt = true
-                this.apiHelpDiv.setChildren(div("calcApiHelpInner", 
+                this.apiHelpDiv.setChildren(div("calcApiHelpInner",
                     args,
                     div('calcApiHelpMore', lf("help..."))
                     ).withClick(() => {
-                        if (TheEditor.widgetEnabled("calcApiHelp")) 
+                        if (TheEditor.widgetEnabled("calcApiHelp"))
                             TheEditor.displayHelp();
                         }))
             }
@@ -3773,7 +3773,7 @@ module TDev
 
             if (pages > 1) {
                 var last = keys.peek();
-                last.setImage("svg:" + (pages == curPage ? "ChapBack" : "Forward") + ",#5A5AFF,clip=125", 
+                last.setImage("svg:" + (pages == curPage ? "ChapBack" : "Forward") + ",#5A5AFF,clip=125",
                               (pages == curPage ? lf("rewind ") : lf("more ")) + curPage + "/" + pages,
                               Ticks.calcNextIntelliPage,
                               () => {
@@ -3925,9 +3925,9 @@ module TDev
             this.cursorPosBeforeSelection = -1;
         }
 
-        private findBiggerSelection(e:AST.Expr) : any 
+        private findBiggerSelection(e:AST.Expr) : any
         {
-            return this.selectionSearch(null, e, 
+            return this.selectionSearch(null, e,
                 (e, parm) => {
                     if (e.loc.len == this.selectionEnd - this.selectionStart) return null; // no extension
                     return { beg: e.loc.beg, end: e.loc.beg + e.loc.len };
@@ -4051,7 +4051,7 @@ module TDev
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcUnElseIf);
                 e.nameOverride = lf("if");
                 e.descOverride = lf("remove else");
-                e.cbOverride = () => { 
+                e.cbOverride = () => {
                     ifStmt.isElseIf = false;
                     this.fullDisplay()
                 };
@@ -4107,7 +4107,7 @@ module TDev
             if (!ins) {
                 if (this.showPerfectLine) {
                     this.templateLine.style.display = "block";
-                    Browser.setInnerHTML(this.templateLine, Renderer.tdiv("calcTemplateInner", 
+                    Browser.setInnerHTML(this.templateLine, Renderer.tdiv("calcTemplateInner",
                         lf("<b>this line is perfect!</b> let's move on")))
                 } else {
                     this.templateLine.style.display = "none";
@@ -4122,7 +4122,7 @@ module TDev
 
             if (ins.showTokens) {
                 this.templateLine.style.display = "block";
-                Browser.setInnerHTML(this.templateLine, Renderer.tdiv("calcTemplateInner", 
+                Browser.setInnerHTML(this.templateLine, Renderer.tdiv("calcTemplateInner",
                   lf("goal:") + " <span class='goalTokens'>" + this.renderer.renderDiffTokens(ins.showTokens) + "</span>"));
                 this.hasGoal = true;
             } else {
@@ -4153,7 +4153,7 @@ module TDev
                     if (this.specialKeypadOn != n) {
                         setF({
                             tick: n == 0 ? Ticks.calcBtnNormalKeypad :
-                                  n == 1 ? Ticks.calcBtnNumberKeypad : 
+                                  n == 1 ? Ticks.calcBtnNumberKeypad :
                                            Ticks.calcBtnMiscKeypad,
                             title: lf("tap there"),
                             description: lf("we need different keypad")
@@ -4185,7 +4185,7 @@ module TDev
                     setF({
                         tick: pos < this.cursorPosition ? Ticks.calcMoveCursorLeft : Ticks.calcMoveCursorRight,
                         title: lf("tap there"),
-                        description: 
+                        description:
                           pos < this.cursorPosition ? lf("move the cursor left") : lf("move the cursor right")
                     })
                     return false;
@@ -4306,8 +4306,8 @@ module TDev
                     label = ins.label
                     setF = TipManager.setTip;
                 } else if (ins.promoteToFieldNamed) {
-                    intelliFilter = c => c.tick == Ticks.calcBindGlobal || 
-                        (ins.promoteToFieldOf == "data" ? 
+                    intelliFilter = c => c.tick == Ticks.calcBindGlobal ||
+                        (ins.promoteToFieldOf == "data" ?
                             c.tick == Ticks.calcPromoteIntoGlobal :
                             c.tick == Ticks.calcPromoteIntoField);
                     label = lf("need a new field here");
@@ -4710,7 +4710,7 @@ module TDev
             var result = prop.getResult();
             if (result) {
                 var resultKind = result.getKind();
-                var rkname = IntelliPredictor.normalizedKindName(resultKind); 
+                var rkname = IntelliPredictor.normalizedKindName(resultKind);
                 if (rkname != "Nothing") {
                     return "a:" + rkname;
                 }
@@ -4759,7 +4759,7 @@ module TDev
             } else {
                 return; // ??
             }
-                
+
             TheEditor.undoMgr.clearCalc();
             TheEditor.undoMgr.pushMainUndoState();
 
@@ -4773,7 +4773,7 @@ module TDev
                 if (this.fieldExpr instanceof AST.LocalDef) {
                     this.dst = [AST.mkThing(this.fieldExpr.getName(), true)];
                 } else if (this.fieldExpr instanceof AST.GlobalDef) {
-                    this.dst = [AST.mkThing("data"), AST.mkPropRef(this.fieldExpr.getName())] 
+                    this.dst = [AST.mkThing("data"), AST.mkPropRef(this.fieldExpr.getName())]
                 } else {
                     Util.assert(false);
                 }
@@ -4853,7 +4853,7 @@ module TDev
 
             var yy = this.y + dy;
             if (yy < -SizeMgr.topFontSize*2 || yy > this.parent.getDisplayHeight() + SizeMgr.topFontSize) {
-                tick(Ticks.codeStartSelection); 
+                tick(Ticks.codeStartSelection);
                 TheEditor.selector.startSelection();
                 this.disabled = true
                 return
@@ -5858,7 +5858,7 @@ module TDev
             for (var i = fixContext.length - 1; i >= 0; i--) {
                 var f = fixContext[i];
                 if (f.precedence < opprec) {
-                    if (selectedType == opType) return true; 
+                    if (selectedType == opType) return true;
                     return false;
                 }
                 selectedType = f.resultType;

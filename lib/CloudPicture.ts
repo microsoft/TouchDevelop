@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A picture hosted on OneDrive.
     //@ cap(cloudservices) serializable stem("cloud pic") immutable ctx(general,cloudfield,json)
@@ -153,7 +153,7 @@ module TDev.RT {
             };
             return d;
         }
-       
+
         //? Posts the picture to the wall.
         public post_to_wall(s:IStackFrame) : void { super.post_to_wall(s) }
     }

@@ -1,4 +1,4 @@
-﻿///<reference path='../rt/refs.ts'/>
+///<reference path='../rt/refs.ts'/>
 ///<reference path='App.ts'/>
 ///<reference path='Appointment.ts'/>
 ///<reference path='Event.ts'/>

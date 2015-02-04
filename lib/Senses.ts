@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 // http://www.w3.org/TR/gamepad/#idl-def-GamepadButton
 interface Gamepad {
@@ -140,10 +140,10 @@ module TDev.RT {
         }
 
         //? Takes a picture and returns it. This picture does not contain the gps location.
-        //@ flow(SourceCamera) returns(Picture) uiAsync 
+        //@ flow(SourceCamera) returns(Picture) uiAsync
         //@ import("cordova", "org.apache.cordova.camera")
         export function take_camera_picture(r: ResumeCtx) // : Picture
-        {      
+        {
             var cam = (<any>navigator).camera;
             if (cam) {
                 cam.getPicture((url) => {
@@ -196,7 +196,7 @@ module TDev.RT {
 
         //? Records audio using the microphone
         //@ uiAsync cap(microphone) flow(SourceMicrophone) returns(Sound)
-        export function record_microphone(r : ResumeCtx) //: Sound 
+        export function record_microphone(r : ResumeCtx) //: Sound
         {
             AudioContextManager.recordMicrophoneAsync()
                 .then((url : string) => url ? Sound.fromArtUrl(url) : undefined)
@@ -207,10 +207,10 @@ module TDev.RT {
         //@ cap(accelerometer) returns(boolean) quickAsync
         //@ tandre
         export function is_device_stable(r : ResumeCtx) // : boolean
-        {            
+        {
             DeviceMotion.isDeviceStable(r);
         }
-                
+
         //? Indicates if an accelerometer is available.
         export function has_accelerometer(): boolean { return DeviceMotion.isMotionSupported(); }
 
@@ -218,7 +218,7 @@ module TDev.RT {
         //@ cap(accelerometer) returns(Vector3) quickAsync
         //@ tandre
         export function acceleration_stable(r: ResumeCtx) {
-            
+
             DeviceMotion.accelerationStable(r);
         }
 
@@ -226,7 +226,7 @@ module TDev.RT {
         //@ cap(accelerometer) returns(Vector3) quickAsync
         //@ tandre
         export function acceleration_smooth(r: ResumeCtx) {
-            
+
             DeviceMotion.accelerationSmooth(r);
         }
 
@@ -234,7 +234,7 @@ module TDev.RT {
         //@ cap(accelerometer) returns(Vector3) quickAsync
         //@ tandre
         export function acceleration_quick(r: ResumeCtx) {
-            
+
             DeviceMotion.accelerationQuick(r);
         }
 
@@ -251,7 +251,7 @@ module TDev.RT {
         //@ tandre
         export function current_location(r: ResumeCtx) {
             askLocationAccessAsync(r)
-                .then((allow) => { 
+                .then((allow) => {
                     if (allow)
                         GeoLocation.currentLocation(r);
                     else
@@ -277,7 +277,7 @@ module TDev.RT {
         //? Gets the primary camera if available
         //@ cap(camera) returns(Camera) quickAsync
         export function camera(r : ResumeCtx)
-        {            
+        {
             if (!_camera && UserMediaManager.isSupported()) {
                 _camera = new Camera();
             }
@@ -317,7 +317,7 @@ module TDev.RT {
         //@ cap(orientation) returns(Vector3) quickAsync
         export function orientation(r : ResumeCtx)
         {
-            
+
             DeviceOrientation.orientation(r);
         }
 
@@ -329,7 +329,7 @@ module TDev.RT {
         //@ cap(compass) returns(number) quickAsync
         //@ tandre
         export function heading(r: ResumeCtx) {
-            
+
             DeviceOrientation.heading(r);
         }
 
@@ -341,7 +341,7 @@ module TDev.RT {
         //@ cap(gyroscope) returns(Vector3) quickAsync
         //@ tandre
         export function rotation_speed(r: ResumeCtx) {
-            
+
             DeviceMotion.rotationRate(r);
         }
 
@@ -461,7 +461,7 @@ module TDev.RT {
 
         //? Gets the gamepad identifier
         public id(): string {
-            return this.gp.id; 
+            return this.gp.id;
         }
 
         //? Gets the player index

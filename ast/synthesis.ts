@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 //(s=(new TDev.Synth.Synthesizer.Synthesizer())).synthesizePrograms("set red background", TDev.TheEditor.currentAction(), 1)
 
@@ -435,7 +435,7 @@ module TDev.Synth {
                             return m1.score < m2.score;
                         });
                 else return [];
-            }  
+            }
             getBestMappingBetweenNodes(u: Node, v: Node): MappingScore[] {
                 //return getMappingBetweenNodes(u, v).filter(m1 => {
                 //    return( ! getMappingBetweenNodes(u, v).some(m2 => { return(m2.score > m1.score) }));
@@ -679,10 +679,10 @@ module TDev.Synth {
                 });
             });
             */
-            
+
             var mapping:NLP.MappedPropertiesToComponents[] = traces.map(trace => {
                 var lastNode: Node = undefined;
-                
+
                 return {
                     cost: trace.cost,
                     mapping: trace.path.map(u => {
@@ -701,7 +701,7 @@ module TDev.Synth {
             }).filter(m => {
                 return m.mapping.length > 0;
                 });
-            
+
             log("traces:");
             log(traces);
             log("mapping:");
@@ -719,19 +719,19 @@ module TDev.Synth {
 
         var stopWords: string[] = [
             "a", "able", "about", "across", "after", "all", "almost", "also",
-            "among", "an", "and", "any", "are", "as", "be", "because", //"at", 
+            "among", "an", "and", "any", "are", "as", "be", "because", //"at",
             "been", "but", "by", "can", "cannot", "could", "dear", "did", "do",
-            "does", "either", //"else", 
-            "ever", "from", "had", "has", //"for", 
-            "have", "he", "her", "hers", "him", "his", "how", "however", //"i", 
-            "into", "is", //"it", "its", 
+            "does", "either", //"else",
+            "ever", "from", "had", "has", //"for",
+            "have", "he", "her", "hers", "him", "his", "how", "however", //"i",
+            "into", "is", //"it", "its",
             "just", "least", "let", "like", "likely",
             "may", "me", "might", "most", "must", "my", "neither", "no", "nor",
             "of", "often", "only", "or", "other", "our", "own", "rather", //"not"
             "she", "should", "since", "so", "some", "than", "that", "the", "their",
             "them", "then", "there", "these", "they", "this", "tis", "to", "too",
             "twas", "us", "wants", "was", "we", "were", "what", "where", "which",
-            "who", "whom", "why", "will", "with", "would", "yet", //"while", 
+            "who", "whom", "why", "will", "with", "would", "yet", //"while",
             "you", "your"];
 
         var synonyms: Synonym[] = [
@@ -1562,7 +1562,7 @@ module TDev.Synth {
                 this.unusedComponents.splice(this.unusedComponents.indexOf(c), 1);
             }
             abstractCost(): number {            //less the program cost, better the program
-                return this.expansionCost+this.minCost()-this.underlyingMapping.cost;      //mapping's cost is actually profit   
+                return this.expansionCost+this.minCost()-this.underlyingMapping.cost;      //mapping's cost is actually profit
             }
             minCost(): number {
                 return this.symbols.filter(symbol => {
@@ -1614,7 +1614,7 @@ module TDev.Synth {
             dump(): void {
                 log(this.symbols);
             }
-            
+
             dfs(n: { visited: boolean; term: CFG.Terminal }, parent: CFG.Terminal, nodes: { visited: boolean; term: CFG.Terminal }[], L:CFG.Terminal[], stack: CFG.Terminal[]) {
                 if (n.visited) return;
                 n.visited = true;
@@ -1908,7 +1908,7 @@ module TDev.Synth {
                 this.program.symbols.forEach(s => {
                     stmts.pushRange(this.makeExprs(this.useInAst(<CFG.Terminal>s, <CFG.Terminal[]>this.program.symbols, this.program)));
                 });
-                //program.clean();            
+                //program.clean();
                 var block = AST.Parser.emptyBlock();
                 block.setChildren(stmts);
                 log(block);
@@ -2028,7 +2028,7 @@ module TDev.Synth {
                                     break;
                             }
                         }
-                        
+
                         else {
                             t.tokens.pushRange(this.makeCompletePropRef(t.concretizedValue));
                             t.token = AST.mkPropRef(t.concretizedValue.getName());              // may not be correct, error prone

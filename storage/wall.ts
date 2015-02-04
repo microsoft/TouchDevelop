@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev {
@@ -72,7 +72,7 @@ module TDev {
         public pickScriptAsync(mode: string, message: string): Promise { return Promise.as(undefined) }
         public saveAstAsync(id: string, ast: any): Promise { return Promise.as(undefined); }
         public packageScriptAsync(id : string, options: any) : Promise { return Promise.as(undefined); }
-        
+
         /* overriden in EditorHost */
         public showBackButton() {
             // we need a consistent experience for tutorial
@@ -81,7 +81,7 @@ module TDev {
                 return this.currentRt.getCurrentPage().backButtonVisible;
 
             if (this.currentRt.getPageCount() == 1 && (TDev.Browser.isCompiledApp || SizeMgr.splitScreen)) return false;
-            if (!this.currentRt.isStopped()) 
+            if (!this.currentRt.isStopped())
                 return this.currentRt.getCurrentPage().backButtonVisible;
             return true;
         }
@@ -225,7 +225,7 @@ module TDev {
             //if (Browser.webRunner)
             //    like = "<div class='bottomSocialWidget'>" + RT.ShareManager.createFacebookLike(shareLink() || Cloud.getServiceUrl()) + "</div>";
 
-            Browser.setInnerHTML(copyrights,  
+            Browser.setInnerHTML(copyrights,
                                 //"<span class='beta-underline'>share</span>&nbsp;&nbsp;" +
                                 //betaNote + "&nbsp;&nbsp;" +
                                 "©&nbsp;&nbsp;" +
@@ -437,7 +437,7 @@ module TDev {
 
             this.scriptTitleDiv.setChildren([this.currentRt.compiled.scriptTitle]);
 
-            
+
             this.cloudContainer = div("inlineBlock", this.cloudSymbol, this.cloudStatus);
             this.cloudContainer.withClick(() => {
                 if (this.cs_hasCloudState)
@@ -614,7 +614,7 @@ module TDev {
                 else {
                     var svg = SVG.getCloudSymbol(this.cs_color, type, status === "connected", 1.5);
                     //svg.style.width = "10em";
-                    //svg.style.height = "1.5em"; 
+                    //svg.style.height = "1.5em";
                     this.cloudSymbol.setChildren(svg);
                 }
                 this.cs_hasCloudState = hasCloudState;
@@ -633,9 +633,9 @@ module TDev {
                 else {
                     var svg = SVG.getCloudSymbol(color, this.cs_type, this.cs_status === "connected", 1.5);
                     //svg.style.width = (10 * SizeMgr.topFontSize) + "px";
-                    //svg.style.height = (1.5 * SizeMgr.topFontSize) + "px";  
+                    //svg.style.height = (1.5 * SizeMgr.topFontSize) + "px";
                     //svg.style.width = "10em";
-                   // svg.style.height = "1.5em";  
+                   // svg.style.height = "1.5em";
                     this.cloudSymbol.setChildren(svg);
                 }
                 this.cs_color = color;
@@ -737,7 +737,7 @@ module TDev {
                 !!Runtime.theRuntime.currentScriptId /* && this.currentRt.currentAuthorId != Cloud.getUserId() */; // the commented piece is questionable, put to remove by Nikolai
 
             var actions = this.exceptionActions(e) || {}
-                        
+
             var debugAction = actions.debug || Util.doNothing;
             var stackTraceAction = actions.stack || Util.doNothing;
             var cancelAction = Util.doNothing;
@@ -757,7 +757,7 @@ module TDev {
                     var run: IRun = {
                         clientfile: (<any>window).mainJsName,
                         compilerversion: this.currentRt.compiled._compilerVersion,
-                        kind: "run", 
+                        kind: "run",
                         publicationid: this.currentRt.currentScriptId,
                         error: error,
                         stack: stack,
@@ -831,7 +831,7 @@ module TDev {
                     lf("error message"),
                     error,
                     this.canEditCode() ? HTML.mkButton(lf("debug"), () => {
-                        tick(Ticks.crashDialogDebug);                        
+                        tick(Ticks.crashDialogDebug);
                         dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction();
                     }) : null,
                     HTML.mkButton(lf("cancel"), () => {
@@ -843,8 +843,8 @@ module TDev {
             } else { //!isUserError
                 this.attachScriptStackTrace(bug);
                 Util.sendErrorReport(bug);
-         
-                var jsinfo:HTMLElement = dbg ? div("inlineBlock", HTML.mkButton(lf("js info (dbg)"), 
+
+                var jsinfo:HTMLElement = dbg ? div("inlineBlock", HTML.mkButton(lf("js info (dbg)"),
                     () => {
                         jsinfo.className = "";
                         var addInfo = bug.stackTrace ? bug.stackTrace : "(none available)";
@@ -853,7 +853,7 @@ module TDev {
 
                 var dial = ModalDialog.buttons(
                     "TouchDevelop crashed",
-                    this.canEditCode() ? "do you want do debug the script?" : null, 
+                    this.canEditCode() ? "do you want do debug the script?" : null,
                     null, null,
                     this.canEditCode() ? HTML.mkButton(lf("debug"), () => { dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction(); }) : null,
                     jsinfo,

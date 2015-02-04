@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev { export module Browser {
 
@@ -30,7 +30,7 @@ module TDev { export module Browser {
 		export function tutorialStepNew() { playSound('ncoqavnw', 1); }
 		export function tutorialStepFinished() { playSound('sjmgbwrv', 1); }
 		export function tutorialStart() { playSound('sjmgbwrv', 1); }
-        
+
 		export function startTutorial() {
 			//keyboardSounds = true;
 			// caching
@@ -46,7 +46,7 @@ module TDev { export module Browser {
 			else {
 				TDev.RT.Sound.fromArtId(id).done(s => {
 					sounds[id] = s;
-					if (s) { 
+					if (s) {
 						s.set_volume(volume);
 						s.playAsync().done();
 					}
@@ -225,8 +225,8 @@ module TDev { export module Browser {
                     }
                     var st = h.editorState
                     ModalDialog.askMany(lf("resume tutorial?"),
-                        "We have detected you already got " + ((st.tutorialStep || 0) + 1) + 
-                        (st.tutorialNumSteps ? " of " + (st.tutorialNumSteps + 1) : "") + 
+                        "We have detected you already got " + ((st.tutorialStep || 0) + 1) +
+                        (st.tutorialNumSteps ? " of " + (st.tutorialNumSteps + 1) : "") +
                         " trophies in this tutorial.",
                         { "start over": () => {
                                 TopicInfo.followTopic(top, tutorialMode)
@@ -450,10 +450,10 @@ module TDev { export module Browser {
         }
 
         private mkFnBtn(lbl: string, f: () =>void , t = Ticks.noEvent, modal = false, size = 1, ovrLbl = null) {
-            var elt = div("hubTile hubTileBtn hubTileSize" + size, 
+            var elt = div("hubTile hubTileBtn hubTileSize" + size,
                 dirAuto(div("hubTileBtnLabel " + (
                     size <= 1 && Util.wordLength(lbl) > 10 ? " hubTileBtnLabelSmall" :
-                    Util.wordLength(lbl) >= 7 || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium" 
+                    Util.wordLength(lbl) >= 7 || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium"
                     : ""), ovrLbl, lbl)));
             (<any>elt).fnBtn = 1;
             var f0 = () => { tick(t); f() };
@@ -551,7 +551,7 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
-            var currentCap = PlatformCapabilityManager.current();            
+            var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
                     if (!template.caps) return true;
@@ -637,9 +637,9 @@ module TDev { export module Browser {
                 var author = top.fromJson && top.fromJson.userid != "jeiv" ? top.fromJson.username : "TouchDevelop";
                 var titleDiv;
                 tileOuter.appendChildren([
-                    div("tutDesc", 
+                    div("tutDesc",
                       titleDiv = div("tutDescFirst",
-                          div("tutDescTitle", titleText), 
+                          div("tutDescTitle", titleText),
                           div(null, descText)),
                         div("tutAuthor", "by " + author).withClick(() => {
                             if (isHelpTopic)
@@ -661,9 +661,9 @@ module TDev { export module Browser {
                 var imgUrl = ""
 
                 if (app) {
-                    var findImg = t => app.resources().filter(r => 
+                    var findImg = t => app.resources().filter(r =>
                             r.getKind() == api.core.Picture &&
-                            t.test(r.getName()) && 
+                            t.test(r.getName()) &&
                             /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
 
                     var img = findImg(/screenshot/) || findImg(/background/);
@@ -697,9 +697,9 @@ module TDev { export module Browser {
 
                     var starSpan = span("bold", ((prog.tutorialStep || 0) + 1) + "★");
                     var ofSteps = prog.tutorialNumSteps ? " of " + (prog.tutorialNumSteps + 1) : ""
-                    tile.appendChild(div("tutProgress", 
-                        ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ? 
-                            div(lf("steps done"), lf("done!"), div("label", starSpan)) 
+                    tile.appendChild(div("tutProgress",
+                        ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
+                            div(lf("steps done"), lf("done!"), div("label", starSpan))
                             :
                             div("steps", starSpan, ofSteps,
                                             div("label", lf("tutorial progress")))),
@@ -718,7 +718,7 @@ module TDev { export module Browser {
                     if (fetchingId == id) return
                     fetchingId = id
                     TheApiCacheMgr.getAnd(id, (j:JsonScript) => {
-                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time) 
+                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time)
                             fetchId(j.updateid)
                         else {
                             top = HelpTopic.fromJsonScript(j);
@@ -1012,7 +1012,7 @@ module TDev { export module Browser {
 
                 var upd = this.browser().headersWithUpdates();
                 if (upd.length > 0) {
-                    var updBtn = 
+                    var updBtn =
                         this.mkFnBtn(lf("Script Updates"), () => { this.updateScripts() }, Ticks.hubUpdates, true);
                     updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
                     elements.push(updBtn)
@@ -1105,12 +1105,12 @@ module TDev { export module Browser {
             var m = new ModalDialog();
             m.add(div("wall-dialog-header", lf("{0} script{0:s} to update", boxes.length)))
             if (dbg)
-                m.add(div("wall-dialog-buttons", 
+                m.add(div("wall-dialog-buttons",
                         HTML.mkButton(lf("select all"), () => { boxes.forEach((b) => HTML.setCheckboxValue(b, true) ) }),
                         HTML.mkButton(lf("unselect all"), () => { boxes.forEach((b) => HTML.setCheckboxValue(b, false) ) })))
             m.add(HTML.mkModalList(boxes));
-            m.add(div("wall-dialog-buttons", 
-                    HTML.mkButton(lf("cancel"), () => m.dismiss()), 
+            m.add(div("wall-dialog-buttons",
+                    HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButton(lf("update them!"), () => { m.dismiss(); update(); })))
             m.show();
         }
@@ -1187,7 +1187,7 @@ module TDev { export module Browser {
                 '</p>')
             */
 
-            
+
             var msgHolder = div(null);
             d.add(msgHolder);
 
@@ -1195,7 +1195,7 @@ module TDev { export module Browser {
             if (notice)
                 d.addHTML(notice);
 
-            d.add(div("wall-dialog-buttons", 
+            d.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("sign in"), () => {
 					tick(Ticks.legalNoticeSignIn);
 					if(Login.show()) {
@@ -1250,14 +1250,14 @@ module TDev { export module Browser {
                         canvas.height = Math.floor(h * f);
                         var ctx = canvas.getContext("2d");
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        uri = canvas.toDataURL('image/jpeg', 0.85); 
+                        uri = canvas.toDataURL('image/jpeg', 0.85);
                     }
 
                     preview.src = uri;
                     msg.setChildren([])
                     error.setChildren([])
-                    Util.httpPostTextAsync(Cloud.getPrivateApiUrl("me/picture"), JSON.stringify({ 
-                            content: uri.replace(/^[^,]*,/, ""), 
+                    Util.httpPostTextAsync(Cloud.getPrivateApiUrl("me/picture"), JSON.stringify({
+                            content: uri.replace(/^[^,]*,/, ""),
                             contentType: "image/jpeg"
                     })).done(resp => {
                         msg.setChildren("picture changed; it may take a few minutes and a page reload for the changes to show up");
@@ -1272,7 +1272,7 @@ module TDev { export module Browser {
                 img.onload = onLoad;
             })
 
-            var widget = div("form-section", 
+            var widget = div("form-section",
                 div("float-right", preview),
                 div(null, "picture"),
                 div(null, chooser),
@@ -1329,7 +1329,7 @@ module TDev { export module Browser {
                 dialogBody.appendChild(lastDiv = div("form-section", HTML.label("", HTML.span("input-label", lbl), inp, div("formHint", rest))))
                 return inp;
             }
-            
+
             Util.httpGetJsonAsync(Cloud.getPrivateApiUrl("me/settings")).done((settings) => {
                 Browser.setInnerHTML(dialogBody, "")
 
@@ -1528,7 +1528,7 @@ module TDev { export module Browser {
                 if (twitterhandle) twitterhandle.value = settings.twitterhandle || "";
                 if (email) email.value = settings.email || "";
                 if (school) school.value = settings.school || "";
-            
+
                 World._askEmail = World._askToEnableNotifications = World._askToEnableEmailNewsletter = World._askToEnableEmailNotifications = false;
             });
 
@@ -1577,9 +1577,9 @@ module TDev { export module Browser {
             var lbls = lbl.split(/: /)
             if (lbls[1]) lbl = lbls[1]
             var elt = div("hubTile hubTileBtn hubTileSize0", dirAuto(div("hubTileBtnLabel " + (
-                    lbl.length > 30 ? " hubTileBtnLabelTiny" 
+                    lbl.length > 30 ? " hubTileBtnLabelTiny"
                     : " hubTileBtnLabelSmall"), lbl)));
-            if (lbls[1]) 
+            if (lbls[1])
                 elt.appendChild(div("hubTileCorner", lbls[0]))
             elt.withClick(() => {
                 tick(t);
@@ -1651,8 +1651,8 @@ module TDev { export module Browser {
                 skill = this.mkFnBtn(skillTitle, () => {
                     EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
                 }, Ticks.hubChooseSkill, true),
-                settings = this.smallBtn(lf("Settings"), () => { 
-                    TheEditor.popupMenu() 
+                settings = this.smallBtn(lf("Settings"), () => {
+                    TheEditor.popupMenu()
                 }, Ticks.hubSettings),
                 Runtime.rateTouchDevelop && localStorage["rateTouchDevelop"] == 1 ?
                   rate = this.mkFnBtn(lf("Rate Touch- Develop"), () => {
@@ -1695,7 +1695,7 @@ module TDev { export module Browser {
 
                     //if (groupName == "libraries")
                     //    lbl = lbl.replace(" libraries", "");
-                    var elt = div("hubTile hubTileBtn hubTileSize" + sz, 
+                    var elt = div("hubTile hubTileBtn hubTileSize" + sz,
                                   div("hubTileTagTitle", lbl),
                                   div("hubTileTagNumber", t.instances + ""));
                     this.tileClick(elt, () => {
@@ -1730,7 +1730,7 @@ module TDev { export module Browser {
             function fullName(c:JsonTag) { return c.category ? c.category + " :: " + c.name : c.name; }
             var boxes =
                 tags.map((c) =>
-                    div("hubTagBox", 
+                    div("hubTagBox",
                         div("sdCmtTopic",
                             span("sdBold", fullName(c)),
                             " x" + c.instances + ""
@@ -1748,13 +1748,13 @@ module TDev { export module Browser {
         private updateSections()
         {
             var sects = {
-                "recent": lf("my scripts"), 
-                "misc": lf("learn"), 
-                "social": lf("social"), 
-                "showcase": lf("showcase"), 
-                "tags": lf("categories"), 
-                //"new": lf("new"), 
-                "top": lf("top & new"), 
+                "recent": lf("my scripts"),
+                "misc": lf("learn"),
+                "social": lf("social"),
+                "showcase": lf("showcase"),
+                "tags": lf("categories"),
+                //"new": lf("new"),
+                "top": lf("top & new"),
                 //"art": lf("art"),
                 "myart": lf("my art"),
             }

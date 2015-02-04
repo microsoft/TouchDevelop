@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev { export module RT {
     export class Vector4
@@ -52,7 +52,7 @@ module TDev { export module RT {
         public scale(scalar:number) : Vector4 { return Vector4.mk(this._x * scalar, this._y * scalar, this._z * scalar, this._w * scalar); }
 
         // Restricts the vector in the specified range
-        private clamp(min:Vector4, max:Vector4) : Vector4 
+        private clamp(min:Vector4, max:Vector4) : Vector4
         {
             return Vector4.mk(Math_.clamp(min._x, max._x, this._x), Math_.clamp(min._y, max._y, this._y), Math_.clamp(min._z, max._z, this._z), Math_.clamp(min._w, max._w, this._w));
         }
@@ -72,6 +72,6 @@ module TDev { export module RT {
         private withY(y:number) : Vector4 { return Vector4.mk(this._x,y,this._z,this._w); }
         public withZ(z:number) : Vector4 { return Vector4.mk(this._x,this._y,z,this._w); }
         public withW(w:number) : Vector4 { return Vector4.mk(this._x,this._y,this._z,w); }
-        
+
     }
 } }

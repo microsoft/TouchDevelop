@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -53,7 +53,7 @@ module TDev
             if (!this.sanityCheck())
                 return;
             if (this._tick) tick(this._tick);
-			TDev.Browser.EditorSoundManager.intellibuttonClick(); 
+			TDev.Browser.EditorSoundManager.intellibuttonClick();
             if(!!this._cb) this._cb(this._innerText);
         }
 
@@ -85,7 +85,7 @@ module TDev
             this.getButton();
         }
 
-        public clear() { 
+        public clear() {
             this.setText("", "", null);
             HTML.setRole(this._theButton, "presentation");
 		}
@@ -134,7 +134,7 @@ module TDev
 
         public setSize(w:number, h:number)
         {
-           this._theButton.style.width = w + "px"; 
+           this._theButton.style.width = w + "px";
            this._theButton.style.height = h + "px";
         }
 

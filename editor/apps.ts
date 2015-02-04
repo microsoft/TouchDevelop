@@ -259,7 +259,7 @@ module TDev.AppExport
                         })
                     ]);
 
-                    m.add(weWillCreate = 
+                    m.add(weWillCreate =
                         div("wall-dialog-body", "We will create a Web App for your script, so anyone with a link can run it. " +
                                         "This feature is still in Preview. "));
 
@@ -298,7 +298,7 @@ module TDev.AppExport
 
         m0.show();
     }
-   
+
     function storeLogo(name: string)
     {
         return ScriptIcons.getWinLogo(name, 3, '#ff0');
@@ -336,7 +336,7 @@ module TDev.AppExport
 
     function askManagementCerificateAsync() : Promise
     {
-        var m = new ModalDialog(); 
+        var m = new ModalDialog();
         m.add(div('wall-dialog-header', lf("azure management certificate")));
         m.addHTML(
             lf("Paste your certificate here. If you don't have an Azure subscription, <a href='http://www.youtube.com/watch?v=YE4u55oNjmw' target='_blank'>here is a 2 minute video</a> with instructions.") +
@@ -442,7 +442,7 @@ module TDev.AppExport
 
     function manualPublishProfileImportAsync() : Promise
     {
-        var m = new ModalDialog(); 
+        var m = new ModalDialog();
         m.add(div('wall-dialog-header', lf("azure publish profile import")));
         m.addHTML(
             lf("Paste your .PublishSettings file here. You can get it by first creating an Azure Website and then clicking on 'Download the publish profile' in 'quick glance' section on the right of the DASHBOARD tab.")
@@ -483,7 +483,7 @@ module TDev.AppExport
         if (data === undefined) return Util.httpGetJsonAsync(url);
         else return Util.httpPostRealJsonAsync(url, data)
     }
-    
+
     var allWebspaces = {
         eastuswebspace: "East US",
         westuswebspace: "West US",
@@ -707,7 +707,7 @@ module TDev.AppExport
     {
         var icn = div("navImg", HTML.mkImg("svg:" + icon));
         icn.style.backgroundColor = color;
-        var innerElt = div("navItemInner", icn, div("navContent", 
+        var innerElt = div("navItemInner", icn, div("navContent",
             div("navName", name),
             div("navDescription", desc)))
         var elt = HTML.mkButtonElt("navItem", innerElt);
@@ -863,7 +863,7 @@ module TDev.AppExport
 
         var creating = false
 
-        m.add(div("wall-dialog-body", 
+        m.add(div("wall-dialog-body",
                 Object.keys(allWebspaces).map(k =>
                     HTML.mkButton(lf("create in {0}", allWebspaces[k]), () => {
                         if (creating) return
@@ -887,7 +887,7 @@ module TDev.AppExport
 
                                     // add some secrets for use by the website
                                     var secrets = ["TOKEN_SECRET"]
-                                    secrets.forEach(s => 
+                                    secrets.forEach(s =>
                                         variables.push({
                                             Name: s,
                                             Value: Random.uniqueId(32),
@@ -937,7 +937,7 @@ module TDev.AppExport
                                                 }
                                             });
                                     if (HTML.getCheckboxValue(createServiceBusCb))
-                                        jobs.namespace = 
+                                        jobs.namespace =
                                             deployApiAsync("createnamespace", { webspace: wa.webspace, name: wa.website })
                                             .then(resp => {
                                                 if (resp.status != 200 || !resp.response.DefaultKey) {
@@ -959,7 +959,7 @@ module TDev.AppExport
                                     .then(() =>
                                         deployApiAsync("setazureconfig", {
                                             webspace: wa.webspace,
-                                            website: wa.website, 
+                                            website: wa.website,
                                             config: {
                                                 AppSettings: variables,
                                                 WebSocketsEnabled: true
@@ -994,7 +994,7 @@ module TDev.AppExport
 
         m.add(div('wall-dialog-body', createStorageCb));
         m.add(div('wall-dialog-body', createServiceBusCb));
-                
+
         m.addOk("cancel");
         m.show()
 
@@ -1005,7 +1005,7 @@ module TDev.AppExport
     export function ensureAzureDeploymentAsync()
     {
         var fail = () =>
-                ModalDialog.infoAsync(lf("deployment failed"), 
+                ModalDialog.infoAsync(lf("deployment failed"),
                             lf("please go to script properties and tap the [Azure] button"));
 
         var wa = Azure.getWebsiteAuthForApp(Script)
@@ -1109,7 +1109,7 @@ module TDev.AppExport
     function envSetup(wa: Azure.WebsiteAuth)
     {
         getAzureConfigAsync(wa).then(cfg => {
-            var m = new ModalDialog(); 
+            var m = new ModalDialog();
             m.addButtons({
                 update: () => {
                     var newVars = []
@@ -1134,7 +1134,7 @@ module TDev.AppExport
                         elt.value = newS
                         return
                     }
-                    deployApiAsync("setazureconfig", { webspace: wa.webspace, website: wa.website, 
+                    deployApiAsync("setazureconfig", { webspace: wa.webspace, website: wa.website,
                         config: {
                             AppSettings: newVars,
                         } })
@@ -1173,10 +1173,10 @@ module TDev.AppExport
         var prx = new ModalDialog();
         prx.add(div("wall-dialog-header", lf("proxy for devices")))
         if (existing.length == 0)
-            prx.add(div("wall-dialog-body", 
+            prx.add(div("wall-dialog-body",
                 lf("You don't have any proxies setup yet.")))
         else {
-            prx.add(div("wall-dialog-body", 
+            prx.add(div("wall-dialog-body",
                 lf("You have the following proxies setup: {0}", existing.join(", "))))
 
             prx.addHTML(lf("On device '{0}', apply the following instructions.", existing.peek()))
@@ -1270,7 +1270,7 @@ module TDev.AppExport
         if (m) relId = m[1]
         var relOverride = ""
         m = /deploymentRelID=(\d+-[a-f0-9\.]+-[a-z0-9]+)/i.exec(document.URL)
-        if (m) 
+        if (m)
             relOverride = m[1]
         var options: AST.Apps.DeploymentOptions = {
             userId: Cloud.getUserId(),
@@ -1295,7 +1295,7 @@ module TDev.AppExport
             "<li>" + lf("run the following commands:") + "</li></ol>");
 
         var npm = HTML.mkTextArea("shell")
-        npm.value = "npm install -g http://aka.ms/touchdevelop.tgz\ntouchdevelop " + cmd 
+        npm.value = "npm install -g http://aka.ms/touchdevelop.tgz\ntouchdevelop " + cmd
         npm.readOnly = true;
         Util.selectOnFocusTextArea(npm);
         m.add(npm);
@@ -1373,7 +1373,7 @@ module TDev.AppExport
             filePrefix: dir + "/www/"
         })
         // compile first,
-        AST.TypeChecker.tcApp(app)        
+        AST.TypeChecker.tcApp(app)
         var compiled = AST.Compiler.getCompiledScript(app, {
             packaging: true,
             artResolver: function (u) { return ArtUtil.artUrl(u, false); },
@@ -1500,7 +1500,7 @@ module TDev.AppExport
 
         function cli(descr: string, command: string, cwd: string = undefined): Promise {
             if (cancelled) return new PromiseInv();
-            status(command);            
+            status(command);
             return LocalShell.mgmtRequestAsync("runcli", {
                 command: command,
                 cwd: cwd
@@ -1584,9 +1584,9 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
             return runNpm ? cli(lf("installing jimp..."), "npm install -g jimp") : Promise.as();
-        }).then(() => mkDir(dir, "777")) 
+        }).then(() => mkDir(dir, "777"))
         .then(() => cli(lf("creating project"), "cordova create " + dir))
-        .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms), 
+        .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),
             platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir)))
         .then(() => Promise.sequentialMap(instructions.cordova.plugins,
             plugin => cli(lf("adding plugins"), "cordova plugin add " + plugin, dir)))
@@ -1601,7 +1601,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
                 status("creating icons and splash screens");
                 if (ficon)
                     ficon.path = dir + "/res/icon.png";
-                if (fsplash) 
+                if (fsplash)
                     fsplash.path = dir + "/res/screen/splash.jpeg";
                 var targetIcons : any[] = [];
                 var targetSplash: any[] = [];
@@ -1610,7 +1610,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
                         var pa = instructions.cordova.platforms[p];
                         configXml.push(Util.fmt('    <platform name="{0:q}">', p));
                         if(ficon)
-                            targetIcons = targetIcons.concat(pa.icons.map(icon => { 
+                            targetIcons = targetIcons.concat(pa.icons.map(icon => {
                                 configXml.push(Util.fmt('        <icon src="{0}" {1}{2}/>', icon.src,
                                     !icon.density ? Util.fmt('width="{0}" height="{1}"', icon.width, icon.height || icon.width) : " ",
                                     icon.density ? Util.fmt('density="{0}"', icon.density) : " "

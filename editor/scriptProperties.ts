@@ -1,4 +1,4 @@
-﻿
+
 ///<reference path='refs.ts'/>
 
 module TDev
@@ -79,13 +79,13 @@ module TDev
                 });
                 (<any>ch).flag = flag;
                 boxes.push(ch)
-                var d = div("capabilityBox", ch, div("platformCaps", 
+                var d = div("capabilityBox", ch, div("platformCaps",
                     Object.keys(ScriptProperties.shortPlatforms).map((n) => span((ScriptProperties.shortPlatforms[n] & flag) == flag ? "" : "greyedOut", n + " "))))
                 container.appendChild(d);
             });
             updateBoxes()
 
-            m.add(div("wall-dialog-buttons", 
+            m.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("set to current"), () => {
                     platforms = PlatformCapability.Current;
                     m.dismiss()
@@ -109,7 +109,7 @@ module TDev
                 }),
                 HTML.mkButton(lf("done"), () => { m.dismiss() })
                 ));
-            
+
             m.onDismiss = () => {
                 this.theScript.setPlatform(platforms);
                 this.updatePlatformDiv();
@@ -304,10 +304,10 @@ module TDev
             } else {
                 names = acts.map(a => a.getName()).join(", ")
             }
-            
+
 
             ModalDialog.ask("The following actions can be made atomic: " + names,
-                            "make atomic", 
+                            "make atomic",
                             () => {
                                 TheEditor.undoMgr.clearCalc();
                                 TheEditor.undoMgr.pushMainUndoState();
@@ -400,11 +400,11 @@ module TDev
             var text = r.dispatch(s);
             try {
 				var w = window.open("about:blank", "tdScript" + ScriptProperties.winId++);
-                w.document.write("<!DOCTYPE html><html><head>" + CopyRenderer.css + 
+                w.document.write("<!DOCTYPE html><html><head>" + CopyRenderer.css +
                                  "<title>" + Util.htmlEscape("Source: " + s.getName()) + "</title>" +
                                  "</head><body>" + text + "</body></html>");
             } catch (e) {
-                ModalDialog.info("cannot print", 
+                ModalDialog.info("cannot print",
                 "we couldn't print open a new window to print this page. check the popup-blocker preferences.");
             }
         }
@@ -514,7 +514,7 @@ module TDev
                 var m0 = new ModalDialog();
                 var popup = HTML.mkTextInput("other_id", lf("other script id"));
                 m0.add(div("wall-dialog-body", "other script id: ", popup));
-                m0.add(div("wall-dialog-buttons", 
+                m0.add(div("wall-dialog-buttons",
                     HTML.mkButton(lf("ok"), () => {
                         m0.canDismiss = false;
                         function doMerge(baseid:string) {
@@ -579,7 +579,7 @@ module TDev
             var targetHd:Cloud.Header;
             var targetSI:Browser.ScriptInfo;
 
-            Promise.join(Browser.TheHost.getInstalledHeaders().map(h => 
+            Promise.join(Browser.TheHost.getInstalledHeaders().map(h =>
                 h.scriptId ? Browser.TheApiCacheMgr.getAsync(h.scriptId, true)
                     .then(r => infos[h.scriptId] = r)
                 : Promise.as()))
@@ -637,7 +637,7 @@ module TDev
                                 Browser.TheHost.loadDetails(targetSI)
                                 Util.setTimeout(500, () => {
                                     // without this line, publishng from the hub leaves behind outdated script page
-                                    TheEditor.historyMgr.reload(HistoryMgr.windowHash()); 
+                                    TheEditor.historyMgr.reload(HistoryMgr.windowHash());
                                 });
                             });
                     }
@@ -662,7 +662,7 @@ module TDev
                                 return entries
                             })
                     })
-            
+
             var getManyBasesAsync = (ids:string[]) =>
                 Promise.join(ids.map(getBasesAsync))
                     .then(r => {
@@ -729,15 +729,15 @@ module TDev
                 m0.add(div("wall-dialog-body", "path: ", path));
                 var msg = div("wall-dialog-body");
                 m0.add(msg);
-                m0.add(div("wall-dialog-buttons", 
+                m0.add(div("wall-dialog-buttons",
                     HTML.mkButton(lf("export"), () => {
                         window.localStorage["rest_deploy_url"] = url.value;
                         window.localStorage["rest_deploy_path"] = path.value;
                         msg.setChildren("please wait...");
                         progressBar0.start();
                         Util.httpPostJsonAsync(url.value + "/deploy", {
-                            compiled: AST.Compiler.getCompiledScript(Script, { 
-                                packaging: true, 
+                            compiled: AST.Compiler.getCompiledScript(Script, {
+                                packaging: true,
                                 rest: true,
                                 authorId: Cloud.getUserId(),
                             }).getCompiledCode(),
@@ -764,7 +764,7 @@ module TDev
         private setIconColor(elts:string[], clr:(s:string)=>string, icon:(s:string)=>HTMLElement, setIt:(s:string)=>void)
         {
             var m = new ModalDialog();
-            var mkIcon = (path:string) : HTMLElement => 
+            var mkIcon = (path:string) : HTMLElement =>
             {
                 var img = icon(path);
                 var d = div("selectableIcon", img, div("noDisplay", path)).withClick(() => {
@@ -783,7 +783,7 @@ module TDev
         private setIcon()
         {
             this.setIconColor(TDev.ScriptIcons.icons,
-                         (s) => this.theScript.htmlColor(), 
+                         (s) => this.theScript.htmlColor(),
                          (s) => HTML.mkImg("svg:" + s + ",white"),
                          (s) => {
                             this.theScript.icon = s
@@ -962,7 +962,7 @@ module TDev
 
         private deleteScript()
         {
-            ModalDialog.ask("are you sure you want to uninstall this script?", "uninstall", 
+            ModalDialog.ask("are you sure you want to uninstall this script?", "uninstall",
                 () => {
                     TheEditor.uninstallCurrentScriptAsync().done();
                 });
@@ -1003,7 +1003,7 @@ module TDev
 
         private manageSessions() {
             if (!TheEditor.currentRt.sessions.enable_script_session_mgt())
-                ModalDialog.info(lf("not available"), 
+                ModalDialog.info(lf("not available"),
                     lf("No cloud session information found. Either this script does not have cloud data, was not run yet, or you are not signed in."))
             else {
                 TDev.RT.CloudData.scriptSessionsDialog(TheEditor.currentRt).done();

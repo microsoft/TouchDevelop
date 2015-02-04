@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -13,7 +13,7 @@ module TDev
         version: number;
         baseSnapshot: string;
     }
-    export interface EditorState { 
+    export interface EditorState {
         worldInfo: EditorWorldInfo;
         undoState: any;
         clipState: any;
@@ -157,7 +157,7 @@ module TDev
             }
             return Promise.as();
         }
-        
+
         public tweakMsg()
         {
             var d = div("copyright-text", lf("give feedback about touchdevelop!")).withClick(Editor.showFeedbackBox)
@@ -254,7 +254,7 @@ module TDev
         public notifyStopAsync() : Promise
         {
 			TheEditor.stopPlayTime();
-			if (ScriptEditorWorldInfo && 
+			if (ScriptEditorWorldInfo &&
 			    ScriptEditorWorldInfo.status !== "published")
 				this.takeScreenshotMaybe();
 			return super.notifyStopAsync().then(v => {
@@ -288,7 +288,7 @@ module TDev
             this.updatePause();
 
             if (this.currentRt.isStopped() && TheEditor.isDebuggerMode()) {
-                if (this.currentRt.getStackTrace().length > 0) TheEditor.leaveDebuggerMode(); 
+                if (this.currentRt.getStackTrace().length > 0) TheEditor.leaveDebuggerMode();
                 TheEditor.updateDebuggerButtons(true);
             }
 
@@ -304,7 +304,7 @@ module TDev
 				if (this.takeScreenshotMaybe())
 					Util.setTimeout(TheEditor.hasLastScreenshot() ? 5000 : 3000, takePoll);
 			}
-			if (ScriptEditorWorldInfo && 
+			if (ScriptEditorWorldInfo &&
 			    ScriptEditorWorldInfo.status !== "published")
 				Util.setTimeout(2000, takePoll);
         }
@@ -330,7 +330,7 @@ module TDev
             if (!node) return;
 
             Util.assert(node.node instanceof AST.Stmt);
-            
+
             TheEditor.updateStackAndCoverage();
             TheEditor.setRunningStmt(<AST.Stmt>node.node);
             TheEditor.clearTempBreakpoints();
@@ -437,7 +437,7 @@ module TDev
                 wallStyle.zIndex = "0";
                 wallStyle.visibility = "visible";
             }
-            
+
             this.wallVisible = false;
             elt("root").setFlag("wall-visible", false);
             TheEditor.showEditorContainer();
@@ -464,7 +464,7 @@ module TDev
             this.updatePause();
             this.updateButtonsVisibility();
             var wallStyle = elt("wallOverlay").style;
-            
+
             wallStyle.opacity = "1";
             wallStyle.zIndex = "0";
             wallStyle.display = "block";
@@ -482,7 +482,7 @@ module TDev
                 if (TheEditor.currentRt && TheEditor.currentRt.current && TheEditor.currentRt.current.pc) {
                     TheEditor.goToLocation(CodeLocation.fromNodeId(TheEditor.currentRt.current.pc));
                 }
-            } 
+            }
         }
 
         public backBtnHandler() {
@@ -564,7 +564,7 @@ module TDev
         public attachProfilingInfo(profilingData: AST.ProfilingDataCollection): void {
             if (!profilingData) return;
 
-            var scriptId = this.currentRt.currentScriptId;            
+            var scriptId = this.currentRt.currentScriptId;
             if (scriptId) {
                 if (this.currentRt.eventQ != null) {
                     this.currentRt.eventQ.calculateEpsInfo();
@@ -579,7 +579,7 @@ module TDev
                             return Cloud.postProfilingDataAsync(scriptId, profilingData)
                                 .then(() => profiled.count++);
                     })
-                    .done(undefined, () => { }); // ignore network errors   
+                    .done(undefined, () => { }); // ignore network errors
             }
             if (profilingData.show) {
                 this.resetAnnotators();
@@ -616,7 +616,7 @@ module TDev
 
         public attachDebuggingInfo(runMap: RunBitMap, stackTrace: IPackedStackTrace, errorMessage: string): void {
             if (!runMap && !stackTrace || !Script) return;
-            
+
             if (Script.annotatedBy == AST.AnnotationMode.None || Script.annotatedBy == AST.AnnotationMode.Coverage) {
                 new ScriptDebuggingAnnotator((!runMap || runMap.isEmpty()) ? null : runMap, stackTrace, errorMessage).visitApp(Script);
             }
@@ -640,7 +640,7 @@ module TDev
                     if (loc.stmt) loc.isSearchResult = true
                     TheEditor.goToLocation(loc)
                 } else {
-                    var m = ModalDialog.info("error in library", 
+                    var m = ModalDialog.info("error in library",
                       "it appears that the error is in fact in a library. " +
                       "you need to locate the relevant library reference and tap on [edit library].")
                     m.addHTML("<b>message:</b> " + Util.formatText(error))
@@ -654,7 +654,7 @@ module TDev
     export class ProfilingResultsAnnotator
         extends AST.NodeVisitor
         {
-        private maxDuration: number = 0;  // [ms]        
+        private maxDuration: number = 0;  // [ms]
 
         constructor(public profilingScriptData: AST.ProfilingDataCollection) {
             super()
@@ -700,7 +700,7 @@ module TDev
         private definitelyVisited(id: string): boolean {
             if (!id) return;
             if (this.definitelyVisitedCache[id] !== undefined) return this.definitelyVisitedCache[id];
-            
+
             var ret = (this.runMap && this.runMap.contains(id)) || (this.stackTrace && this.stackTrace.pack.some(node => node.id === id));
             this.definitelyVisitedCache[id] = ret;
             return ret;
@@ -775,7 +775,7 @@ module TDev
             delete st.debuggerRenderContext.isOnStackTrace;
 
             if (!this.stackTrace) return;
-            
+
             var ctx = st.debuggerRenderContext;
             var id = st.stableId;
 
@@ -864,7 +864,7 @@ module TDev
         public libCache = new LibraryCache();
         public live:LiveViewMgr = new LiveViewMgr();
         private doingRefresh = false;
-        public host = new EditorHost(); 
+        public host = new EditorHost();
         private scriptForCloud: string;
         private editorStateForCloud: string;
         public runImmediately = false;
@@ -956,9 +956,9 @@ module TDev
 			}
 		    return undefined;
 		}
-		public hasLastScreenshot() { 
-			return this.lastScreenshotId == this.undoMgr.currentId() 
-				&& this.lastScreenshotCanvas; 
+		public hasLastScreenshot() {
+			return this.lastScreenshotId == this.undoMgr.currentId()
+				&& this.lastScreenshotCanvas;
 		}
 		public setLastScreenshot(canvas : HTMLCanvasElement) {
 			this.lastScreenshotId = this.undoMgr.currentId();
@@ -986,9 +986,9 @@ module TDev
             this.removeStackAndCoverage();
 
             this.debuggerControl.visualRoot.removeSelf();
-            
+
             this.currentRt.stopAsync().done(() => { elt("editorContainer").setFlag("debuggerMode", false); this.scriptNav.refreshCore(); });
-            
+
             this.updateDebuggerButtons(false);
             this.resetSidePane();
             this.refreshDecl();
@@ -1212,7 +1212,7 @@ module TDev
             this.spyManager.onAddBreakpoint(node);
 
             if (this.isDebuggerMode()) {
-                Util.log("editor: addBreakpoint: " + node.stableId); 
+                Util.log("editor: addBreakpoint: " + node.stableId);
                 var id = node.stableId;
                 this.breakpoints.set(id, id);
                 this.currentRt.updateScriptBreakpoints();
@@ -1238,7 +1238,7 @@ module TDev
             this.spyManager.onRemoveBreakpoint(node);
 
             if(this.isDebuggerMode()) {
-                Util.log("editor: removeBreakpoint: " + node.stableId); 
+                Util.log("editor: removeBreakpoint: " + node.stableId);
                 this.breakpoints.remove(node.stableId);
                 this.currentRt.updateScriptBreakpoints();
                 this.refreshDecl();
@@ -1312,7 +1312,7 @@ module TDev
         public queueNavRefresh(typeCheck = true) {
             if (typeCheck)
                 this.typeCheckPending = true;
-            Util.setTimeout(1, () => 
+            Util.setTimeout(1, () =>
                 this.topScriptOp(() => this.refreshSideTab()))
         }
 
@@ -1615,7 +1615,7 @@ module TDev
                     newOpts[k] = opts[k]
                 })
                 cs = AST.Compiler.getCompiledScript(app, newOpts, this.breakpoints);
-            }) 
+            })
 
             return cs
         }
@@ -1647,10 +1647,10 @@ module TDev
 			return playDurr;
 		}
 		private startPlayTime() { this._lastPlayDuration = -Util.now(); }
-		public stopPlayTime() { 
+		public stopPlayTime() {
 			if (this._lastPlayDuration < 0)
-				this._lastPlayDuration = Util.now() + this._lastPlayDuration; 
-			else 
+				this._lastPlayDuration = Util.now() + this._lastPlayDuration;
+			else
 				this._lastPlayDuration = undefined;
         }
 
@@ -1698,9 +1698,9 @@ module TDev
             var run1 = () => {
                 if (args == null)
                     this.currentRt.headlessPluginMode = false;
-                if (args == null && 
+                if (args == null &&
                     a instanceof AST.Action &&
-                    ((<AST.Action>a).isPlugin() || (<AST.Action>a).isButtonPlugin()) 
+                    ((<AST.Action>a).isPlugin() || (<AST.Action>a).isButtonPlugin())
                     )
                 {
                     var act = <AST.Action>a;
@@ -1717,7 +1717,7 @@ module TDev
                     })
                     return
                 }
-                
+
                 run0();
             };
 
@@ -1965,7 +1965,7 @@ module TDev
 
         public showStackFrame(sf: AST.Stmt) {
             this.showStackTraceAgain();
-            
+
             var lookFor = sf.stableId;
             var trace = this.getStackTrace();
             var frames = trace.length;
@@ -2013,16 +2013,16 @@ module TDev
                 m.add([
                     div("wall-dialog-header", 'take a break?'),
                     div("wall-dialog-body", 'Are you sure you want to stop editing? You can come back at any time and continue where you left off.'),
-                    div("wall-dialog-buttons", 
-                        HTML.mkButton('cancel', () => m.dismiss()), 
-                        HTML.mkButton('take a break', () => { 
-                            m.dismiss(); 
+                    div("wall-dialog-buttons",
+                        HTML.mkButton('cancel', () => m.dismiss()),
+                        HTML.mkButton('take a break', () => {
+                            m.dismiss();
                             this.goToHubAsync().done();
                         }))
                 ]);
                 m.show();
             } else */
-			{ 
+			{
                 this.goToHubAsync().done();
             }
         }
@@ -2163,7 +2163,7 @@ module TDev
 
 		private setupSearchContainer() {
             this.searchContainer.setChildren(<any[]>[
-				this.widgetEnabled("codeSearch") ? this.searchBox : null, 
+				this.widgetEnabled("codeSearch") ? this.searchBox : null,
 				this.widgetEnabled("codeSearch") || SizeMgr.portraitMode ? this.searchButtonContainer : null]);
 			this.sidePane().setFlag("code-search", this.widgetEnabled("codeSearch"));
 		}
@@ -2173,7 +2173,7 @@ module TDev
             Util.assert(this.isDebuggerMode());
 
             this.calculatePauseBreakpoints();
-            this.currentRt.debuggerContinue();            
+            this.currentRt.debuggerContinue();
         }
         public debuggerContinue() {
             Util.assert(this.isDebuggerMode());
@@ -2193,7 +2193,7 @@ module TDev
         }
         private debuggerStepOver() {
             this.calculateStepOverBreakpoints();
-            this.calculateStepOutBreakpoints();           
+            this.calculateStepOutBreakpoints();
             this.debuggerContinue();
         }
 
@@ -2233,7 +2233,7 @@ module TDev
             if (this.host.wallVisible) return;
             if (inDebugMode) this.spyManager.onDebug(Script);
             else this.spyManager.onRun(Script);
-            
+
             this.dismissSidePane();
 
             if (this.isDebuggerMode()) this.leaveDebuggerMode();
@@ -2255,7 +2255,7 @@ module TDev
             if (!a) return;
             else this.runAction(a, null, { coverage: true, showCoverage: true });
         }
-                
+
         public runWithProfiling() {
             tick(Ticks.editorRunWithProfiling);
             var run = () => {
@@ -2300,7 +2300,7 @@ module TDev
             if (decl == Script) {
                 ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
                                 lf("uninstall"),
-                            () => { 
+                            () => {
                                     this.uninstallCurrentScriptAsync().done();
                             });
             } else {
@@ -2364,7 +2364,7 @@ module TDev
                                 if (a.isEvent()) {
                                     // there already is an event under this name,  make it into an action
                                     a.isPrivate = true;
-                                    a.eventInfo = null; 
+                                    a.eventInfo = null;
                                 }
                             }
                             d.setName(newName);
@@ -2381,7 +2381,7 @@ module TDev
         private topUndo()
         {
             this.topScriptOp(() => {
-                if (!this.calculator.undo()) 
+                if (!this.calculator.undo())
                     this.undoMgr.popMainUndoStateAsync().done();
             })
         }
@@ -2557,7 +2557,7 @@ module TDev
             Browser.TheHost.clearHelp();
 
             this.removeVideo();
-            
+
             this.host.wallVisible = false;
             this.resumeAction = null;
             this.rerunAction = null;
@@ -2650,7 +2650,7 @@ module TDev
 
         public hasModalPane()
         {
-            return this.visible && !this.isWallVisible() && Script && 
+            return this.visible && !this.isWallVisible() && Script &&
                    (!this.codeVisible() || !!this.currentStmtEditor || (this.currentSideTab && this.currentSideTab.isModal()));
         }
 
@@ -2697,7 +2697,7 @@ module TDev
         private loadScriptTextCore(worldInfo: EditorWorldInfo, text:string, editorState:string)
         {
             Util.assert(text && text.charAt(0) != '{');
-            
+
             ScriptEditorWorldInfo = undefined; // to avoid corrupt state
             setGlobalScript(AST.Parser.parseScript(text));
             try {
@@ -2709,7 +2709,7 @@ module TDev
             Script.localGuid = worldInfo.guid;
 
             ScriptEditorWorldInfo = worldInfo;
-            
+
             this.sideTabs.forEach((st:SideTab) => st.rebind());
         }
 
@@ -2945,7 +2945,7 @@ module TDev
                     Ticker.dbg("Editor.loadHashCore.cannotLoad");
                     fail()
                 } else {
-                    return this.prepareForLoadAsync("reloading script", () => 
+                    return this.prepareForLoadAsync("reloading script", () =>
                         this.loadScriptAsync(hd))
                 }
             });
@@ -3968,12 +3968,12 @@ module TDev
             return World.installUnpublishedAsync(t.baseId || "", t.baseUserId || "", stub);
         }
 
-        public cloneScriptAsync() : Promise 
-        { 
+        public cloneScriptAsync() : Promise
+        {
             //var old = ScriptEditorWorldInfo.baseId;
             Ticker.dbg("cloneScriptAsync");
             var host = Browser.TheHost;
-            return this.prepareForLoadAsync("cloning script", () => 
+            return this.prepareForLoadAsync("cloning script", () =>
                     host.updateInstalledHeaderCacheAsync().then(() => {
                         var scriptStub = {
                             editorName: "touchdevelop",
@@ -3999,7 +3999,7 @@ module TDev
             tick(Ticks.mainResetWorld);
 
             var userId = Cloud.getUserId();
-            // when users don't have an picture, the dialog has a broken image which looks really bad            
+            // when users don't have an picture, the dialog has a broken image which looks really bad
             // var meImg = userId  ? HTML.mkImg(Cloud.getPublicApiUrl(userId + "/picture?type=normal")) : null;
             var progressDialog = new ModalDialog();
             progressDialog.canDismiss = false;
@@ -4100,7 +4100,7 @@ module TDev
             if (World.switchToChannel) {
                 if ((<any>window).betaFriendlyId) {
                     betaDiv.appendChild(HTML.mkButton(
-                        Browser.isWP8app ? 
+                        Browser.isWP8app ?
                             lf("stop cloud services beta testing") :
                             lf("stop beta testing"),
                         () => {
@@ -4109,8 +4109,8 @@ module TDev
                             m.dismiss();
                         }))
                 } else {
-                    betaDiv.appendChild(HTML.mkButton( 
-                        Browser.isWP8app ? 
+                    betaDiv.appendChild(HTML.mkButton(
+                        Browser.isWP8app ?
                             lf("start cloud services beta testing") :
                             lf("start beta testing"),
                     () => {
@@ -4136,7 +4136,7 @@ module TDev
 
             m.add([
                 div("wall-dialog-header", lf("TouchDevelop settings")),
-                div("wall-dialog-body", Cloud.getUserId() ? lf("You have signed in with {0}.", Cloud.getIdentityProvider()) : 
+                div("wall-dialog-body", Cloud.getUserId() ? lf("You have signed in with {0}.", Cloud.getIdentityProvider()) :
                     lf("You are not signed in.")),
                 div("wall-dialog-body",
                     Editor.mkHelpLink("user accounts"),
@@ -4155,7 +4155,7 @@ module TDev
                             Util.setHash("hub:test");
                         }), lf("check if everything works")
                     ),
-                 div("wall-dialog-body", 
+                 div("wall-dialog-body",
                         HTML.mkButton(lf("show diagnostic log"), () => {
                             m.dismiss();
                             Editor.showLog();
@@ -4183,7 +4183,7 @@ module TDev
                             });
                         })),
                         div("wall-dialog-body", chaosOfflineEdit),
-                        div("wall-dialog-body", 
+                        div("wall-dialog-body",
                             HTML.mkButton(lf("perf cloud data"), () => {
                                 TestMgr.Benchmarker.displayPerfData();
                             }),
@@ -4200,10 +4200,10 @@ module TDev
                 ]);
             }
             m.add([
-                div("wall-dialog-buttons", 
+                div("wall-dialog-buttons",
                     HTML.mkButton(lf("close"), () => m.dismiss())),
             ]);
-            
+
             m.setScroll();
             m.fullWhite();
             m.show();
@@ -4214,8 +4214,8 @@ module TDev
             var r = divId("scriptEditor", null,
                       divId("editorContainer", null,
                         divId("leftBtnRow", "btnRow"),
-                        divId("scriptMainPanes", "scriptMainPanes", 
-                          divId("leftPane", "pane", 
+                        divId("scriptMainPanes", "scriptMainPanes",
+                          divId("leftPane", "pane",
                             divId("teamPaneContent", "teamContent"),
                             divId("leftPaneContent", "sideTabContent")
                             ),
@@ -4237,7 +4237,7 @@ module TDev
             Util.setupDragToScroll(elt("leftPaneContent"));
         }
 
-     
+
 
 
 
@@ -4394,7 +4394,7 @@ module TDev
         }
 
         private getEditorState() : EditorState {
-            return { 
+            return {
                 worldInfo: ScriptEditorWorldInfo,
                 undoState: null, // this.undoMgr.toJson(),
                 clipState: null, // this.clipMgr.toJson(),
@@ -4410,7 +4410,7 @@ module TDev
                 if (ScriptEditorWorldInfo.status == "published") {
                      Script.parentIds = [];
                      Script.notifyChange()
-                } 
+                }
                 ScriptEditorWorldInfo.status = "unpublished";
                 this.queueNavRefresh();
             }
@@ -4480,7 +4480,7 @@ module TDev
                         (!opts.isRevert && worldInfo.status !== "unpublished"))
                         this.queueNavRefresh();
                     var time = World.getCurrentTime();
-                    if (this.scriptForCloud === script && worldInfo.status == "published") { 
+                    if (this.scriptForCloud === script && worldInfo.status == "published") {
                         // just keep it - both the upgrade scenario and editor state update
                     } else {
                         // clear the parentIds when the script is first modified after publication/install
@@ -4522,7 +4522,7 @@ module TDev
                     prev.push(<ScriptToSave>{ header: h, script: script, editorState: serializedEditorState });
                     localStorage["editorScriptToSave"] = JSON.stringify(prev);
                     localStorage["editorScriptToSaveDirty"] = h.guid; // TODO: support saving not just one, but many past scripts
-                } 
+                }
 
                 if (opts.clearScript) {
                     setGlobalScript(null);
@@ -4611,7 +4611,7 @@ module TDev
         {
             return this.freshPictureResource();
         }
-        
+
         public freshLibrary() { return AST.LibraryRef.fresh(); }
 
         public freshObject() { return this.freshRecord('Object'); }
@@ -4788,7 +4788,7 @@ module TDev
                 this.dismissSidePane();
                 return;
             }
-            
+
             this.editNode(this.firstIfMissing(this.selector.selectedStmt));
         }
 
@@ -4824,7 +4824,7 @@ module TDev
                             this.setupNavPane();
                         this.lastDecl = null;
                         this.setupPlayButton();
-                        this.goToLocationAndEdit(loc); 
+                        this.goToLocationAndEdit(loc);
                     })
                 else {
                     //this.wallBox = <HTMLElement>this.getSideWall().lastChild;
@@ -4886,14 +4886,14 @@ module TDev
 
             case "Right":
                 if (!e.fromTextBox && !this.currentSideTab.isModal()) {
-                   this.editLastNode(); 
+                   this.editLastNode();
                    return true;
                 }
                 break;
 
             case "Enter":
                 if (!e.fromTextArea && !this.currentSideTab.isModal()) {
-                   this.editLastNode(); 
+                   this.editLastNode();
                    return true;
                 }
                 break;
@@ -4978,7 +4978,7 @@ module TDev
         {
             this.removeVideo();
             this.videoContainer = divId("editorVideo", "editorVideo inlineDocs", inner)
-            elt("editorContainer").appendChild(this.videoContainer); 
+            elt("editorContainer").appendChild(this.videoContainer);
             this.applyVideoSize();
         }
 
@@ -5001,7 +5001,7 @@ module TDev
             })
         }
 
-        
+
         public followTopic(topic:HelpTopic, firstTime: boolean = false, tutorialMode: string = "")
         {
             this.loadIntelliProfile(topic, firstTime);
@@ -5024,7 +5024,7 @@ module TDev
 
             var btn = (icon, t:Ticks, f) => HTML.setTickCallback(Editor.sideDocBtn(icon), t, f)
 			var cancelBtn = btn("cancel", Ticks.sideTutorialCancel, () => {
-                            ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"), 
+                            ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"),
                               lf("leave tutorial"), () => {
                                     Script.editorState.tutorialId = "";
                                     this.removeTutorialLibs();
@@ -5033,16 +5033,16 @@ module TDev
                                     this.resetVideoConstraints();
 							});
 			});
-			var docButtons = div("inlineDocsButtons", 
+			var docButtons = div("inlineDocsButtons",
                         btn("Star", Ticks.sideTutorialRedisplay, () => {
                             Script.editorState.tutorialRedisplayed = (Script.editorState.tutorialRedisplayed || 0) + 1
                             if (this.stepTutorial)
                                 this.stepTutorial.startAsync().done();
                         }),
-						cancelBtn                
+						cancelBtn
             );
 			header.appendChild(docButtons);
-            elt("editorContainer").appendChild(this.videoContainer); 
+            elt("editorContainer").appendChild(this.videoContainer);
             this.applyVideoSize();
             this.updateTutorial()
         }
@@ -5119,8 +5119,8 @@ module TDev
 
         static showFeedbackBox()
         {
-            var link = (text:string, lnk:string) => 
-                HTML.mkButton(text, 
+            var link = (text:string, lnk:string) =>
+                HTML.mkButton(text,
                                 () => { window.open(Cloud.getServiceUrl() + lnk) });
 
             if (ModalDialog.current && !ModalDialog.current.canDismiss) {
@@ -5136,7 +5136,7 @@ module TDev
             m.fullWhite();
             m.add(div("wall-dialog-header", Runtime.appName));
             m.add(div("wall-dialog-body", lf("For feedback and support please use our forum, or just email us!")));
-            m.add(div("wall-dialog-buttons", 
+            m.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("forum"), () => {
                     Browser.Hub.showForum();
                 }),
@@ -5152,11 +5152,11 @@ module TDev
 
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
                                           "TouchDevelop was brought to you by Microsoft Research."));
-            m.add(div("wall-dialog-buttons", 
+            m.add(div("wall-dialog-buttons",
                 link("legal", "/legal"),
                 link("privacy and cookies", "/privacy")));
 
-            m.add(div("wall-dialog-buttons", 
+            m.add(div("wall-dialog-buttons",
                 link("visit www.touchdevelop.com", "/")));
 
             m.show();
@@ -5175,7 +5175,7 @@ module TDev
             if (Browser.isWP8app) copyrights = "";
 
             Browser.setInnerHTML(beta, betaNote + copyrights);
-            
+
             beta.withClick(Editor.showFeedbackBox);
 
             return beta;
@@ -5183,7 +5183,7 @@ module TDev
 
         public displayHelp()
         {
-            tick(Ticks.calcHelp); 
+            tick(Ticks.calcHelp);
             if (HelpTopic.contextTopics.length == 0) {
                 Util.setHash("#help")
             } else {
@@ -5229,8 +5229,8 @@ module TDev
                     return;
                 }
 
-                ModalDialog.ask(lf("Some libraries need update: {0}", 
-                                         libs.map((l) => l.getName()).join(", ")), lf("update libraries"), 
+                ModalDialog.ask(lf("Some libraries need update: {0}",
+                                         libs.map((l) => l.getName()).join(", ")), lf("update libraries"),
                 () => {
                     tick(Ticks.editorUpdateLibrary);
                     this.updateLibraries(libs);
@@ -5255,7 +5255,7 @@ module TDev
         {
             var num = 0;
             Script.libraries().forEach((l) => {
-                if (l.isPublished()) 
+                if (l.isPublished())
                     Browser.TheApiCacheMgr.getAnd(l.getId(), (j:JsonScript) => {
                         var upd = null;
                         if (j.updateid && j.updateid != j.id && j.updatetime > j.time) upd = j.updateid;
@@ -5304,8 +5304,8 @@ module TDev
                 console.log(resp)
 
                 app.setStableNames();
-                var cs = TDev.AST.Compiler.getCompiledScript(app, { 
-                        packaging: true, 
+                var cs = TDev.AST.Compiler.getCompiledScript(app, {
+                        packaging: true,
                         authorId: "none",
                         scriptId: id
                 });
@@ -5403,7 +5403,7 @@ module TDev
                     })
                 .then(() => {
                     window.localStorage.setItem("offlineCaches", "loaded")
-                    return 
+                    return
                 })
         }
 
@@ -5450,7 +5450,7 @@ module TDev
         clearScript?: boolean;
         wasUpgraded?: boolean;
     }
-            
+
     export class SearchForNode
         extends AST.NodeVisitor
     {
@@ -5657,16 +5657,16 @@ module TDev
 
         // public fetchIfAvailable(l:AST.LibraryRef)
 
-        public loadLibAsync(l:AST.LibraryRef) 
+        public loadLibAsync(l:AST.LibraryRef)
         {
-            return this.loadLibCoreAsync(l).then((app:AST.App) => { 
+            return this.loadLibCoreAsync(l).then((app:AST.App) => {
                 l.resolved = app;
                 if (!app && l.getId())
                     l.setError("TD141: cannot load target library");
             });
         }
 
-        public loadLibsAsync(app:AST.App) 
+        public loadLibsAsync(app:AST.App)
         {
             return Promise.join(app.libraries().map((l) => this.loadLibAsync(l)));
         }
@@ -5935,7 +5935,7 @@ module TDev
             }
         }
 
-        public init() 
+        public init()
         {
             this.root = elt("loading");
         }

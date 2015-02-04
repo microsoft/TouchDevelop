@@ -73,7 +73,7 @@ module TDev.AST {
             if (k)
                 k.addExtensionAction(this._extensionAction = new LibExtensionAction(this));
         }
-            
+
         public fromTemplate(template:Action)
         {
             this.fromTemplateCore(template)
@@ -115,7 +115,7 @@ module TDev.AST {
             this._flags = super.getFlags()
         }
 
-        public toString() 
+        public toString()
         {
             return this.getNamespace() + this.getName();
         }
@@ -186,7 +186,7 @@ module TDev.AST {
 
         public parentLibrary() { return this._lib; }
         public getNamespace() { return LibraryRef.libNamespace(this.parentLibrary().getName()) }
-        public toString() 
+        public toString()
         {
             return this.getNamespace() + this.getName();
         }
@@ -259,7 +259,7 @@ module TDev.AST {
         {
             return this._lib;
         }
-        
+
         public getNamespace() { return LibraryRef.libNamespace(this.parentLibrary().getName()) }
     }
 
@@ -458,7 +458,7 @@ module TDev.AST {
             });
 
             var cmpBindings = (a:AST.Binding, b:AST.Binding) => {
-                if (a.isExplicit == b.isExplicit) 
+                if (a.isExplicit == b.isExplicit)
                     return a.formalName.localeCompare(b.formalName);
                 else if (a.isExplicit) return -1;
                 else return 1;
@@ -513,7 +513,7 @@ module TDev.AST {
             var form = this.formal;
             var err = null;
             // var al = binding.actualLib;
-            var compareParameters = (formal:ActionParameter[], actual:ActionParameter[], tp:string) => 
+            var compareParameters = (formal:ActionParameter[], actual:ActionParameter[], tp:string) =>
             {
                 if (formal.length != actual.length)
                     err = Util.fmt("TD136: '{0}' has {1} {2}-paramters, but '{3}' requires {4}", act, actual.length, tp, form.getName(), formal.length);
@@ -522,7 +522,7 @@ module TDev.AST {
                         var fk = formal[i].getKind();
                         var ak = actual[i].getKind();
                         if (!ctx.unify(fk, ak))
-                            err = Util.fmt("TD137: '{0}' has {1} as {3}-paramter #{2}, but '{4}' requires {5}", 
+                            err = Util.fmt("TD137: '{0}' has {1} as {3}-paramter #{2}, but '{4}' requires {5}",
                                            act, ak, i, tp, form.getName(), ctx.resolve(fk));
                     }
             }
@@ -574,7 +574,7 @@ module TDev.AST {
 
         public getPublicActionsAndActionTypes():Action[]
         {
-            var acts:Action[] = 
+            var acts:Action[] =
                 this.getPublicKinds()
                     .map(k => k instanceof UserActionKind ? (<UserActionKind>k).userAction : null)
                     .filter(a => a != null)
@@ -605,7 +605,7 @@ module TDev.AST {
         public isTutorial() { return this.getStableName() == "tutorialLib" }
 
         public isBrowsable()
-        { 
+        {
             if (followingTutorial && /^_/.test(this.getName())) return false
             return true
         }
@@ -697,7 +697,7 @@ module TDev.AST {
             }
         }
 
-        public substitute(k:Kind) : Kind 
+        public substitute(k:Kind) : Kind
         {
             if (k instanceof LibraryRefAbstractKind) {
                 var r:Kind = this.externalKindMapping[k.toString()];
@@ -733,7 +733,7 @@ module TDev.AST {
             }
 
             if (!this.isTopLevel()) return;
-            
+
             if (!this.resolved) {
                 this.resolveClauses.forEach((r:ResolveClause) => r.resolveExplicit(this));
                 return;
@@ -804,8 +804,8 @@ module TDev.AST {
                         }
                     });
                     // TODO only dump the used ones
-                    this.getPublicActions().forEach((a) => { 
-                        a.writeHeader(tw, true); 
+                    this.getPublicActions().forEach((a) => {
+                        a.writeHeader(tw, true);
                     });
                     tw.nl();
                 tw.endBlock();
@@ -941,7 +941,7 @@ module TDev.AST {
 
             var findMapped = (l:LibraryRef) =>
                 l == this.resolved.thisLibRef ? this :
-                this.resolveClauses.map((r:ResolveClause) => 
+                this.resolveClauses.map((r:ResolveClause) =>
                                                 r.formalLib == l ? r.defaultLib : null).filter((x) => !!x)[0];
 
             if (!this.resolved) return [];
@@ -973,7 +973,7 @@ module TDev.AST {
 
             newLibs.forEach((r:ResolveClause) => {
                 var lib = r.defaultLib;
-                var copyResolve = (c:ResolveClause,ix:number) => 
+                var copyResolve = (c:ResolveClause,ix:number) =>
                 {
                     var o = new ResolveClause(c.name);
                     o.defaultLib = findMapped(c.defaultLib);
@@ -1004,7 +1004,7 @@ module TDev.AST {
         extends LibraryRef
     {
         public isReal() { return true; }
-        public getPublicActions() 
+        public getPublicActions()
         {
             return <Action[]>this.resolved.things.filter((a:Decl) => a instanceof Action && !(<Action>a).isPrivate);
         }

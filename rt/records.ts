@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export module RT {
@@ -63,7 +63,7 @@ module TDev {
           //  public importJson(ctx: JsonImportCtx, jobj: JsonObject) {
          //       return this.importJsonFields(ctx, jobj);
           //  }
-          
+
             public exportJson(ctx: JsonExportCtx): any {
                 if (this.is_deleted())
                     return undefined;
@@ -186,7 +186,7 @@ module TDev {
             // overridden by index and table
             public is_deleted(): boolean { return false; }
             // overridden by cloud persisted things
-            public confirmed(): boolean { return true; }            
+            public confirmed(): boolean { return true; }
 
             public perform_get(fieldname: string, s: IStackFrame): RTValue { return Util.abstract(); }
             public perform_set(fieldname: string, value: RTValue, s: IStackFrame) { return Util.abstract(); }
@@ -609,7 +609,7 @@ module TDev {
                 if (!this[fieldname] && value)
                     this[fieldname] = value;
             }
-                
+
         }
 
         export class DecoratorEntry
@@ -761,7 +761,7 @@ module TDev {
                     r.resume()
                 })
             }
-          
+
 
             public getTable(entries: RecordEntry[], sf: IStackFrame): HTMLElement {
                 var tab: HTMLElement = document.createElement("table");
@@ -805,7 +805,7 @@ module TDev {
             public exportJson(ctx: JsonExportCtx): any {
                 var entries = this.get_enumerator();
                 return ctx.encodeArrayNode(this, entries.slice(0));
-            } 
+            }
 
             public to_json(s: IStackFrame): JsonObject {
                 var ctx = new JsonExportCtx(s);
@@ -857,7 +857,7 @@ module TDev {
                 Util.oops("subclasses are supposed to override this method");
                 return null;
             }
-         
+
             public importJsonRecord(ctx: JsonImportCtx, target: RecordEntry, json: any, delayrecursion: boolean): RecordEntry {
 
                 this.logMutation(ctx.s);
@@ -887,8 +887,8 @@ module TDev {
                 return target;
             }
 
-          
-           
+
+
         }
 
         export class TableSingleton
@@ -966,7 +966,7 @@ module TDev {
                 }
                 return target;
             }
-          
+
 
             private cacheditems: TableEntry[];
             private dependentcaches = [];
@@ -1019,7 +1019,7 @@ module TDev {
             }
 
             public constructrow(args: IArguments) {
-                
+
 
 
                 this.clearCachedData();
@@ -1029,7 +1029,7 @@ module TDev {
                 this.logMutation(args[args.length-1]);
                 var links = new Array<string>();
                 for (var i = 0; i < ent.keys.length; ++i) {
-                    var x = <CloudTableEntry>args[i]; 
+                    var x = <CloudTableEntry>args[i];
                     var correctsession = x.check(false);
                     if (!correctsession)
                         Util.userError(lf("invalid link argument: originated in a different session"));
@@ -1138,7 +1138,7 @@ module TDev {
                 }
                 return target;
             }
-            
+
         }
 
 
@@ -1467,7 +1467,7 @@ module TDev {
                 entries.forEach(e => delete (<any>e).flagthatthisentryispresentusingalongnoncollidingname);
             }
 
-         
+
         }
 
 
@@ -1528,7 +1528,7 @@ module TDev {
                 return a;
             }
 
-         
+
 
             public post_to_wall(frame: IStackFrame): void {
                 frame.rt.postBoxedHtml(this.getTable(this.get_enumerator(), frame), frame.pc);
@@ -1539,14 +1539,14 @@ module TDev {
                 keys.push(ctx.s);
                 return this.access(<any> keys);
             }
-          
+
             public prune_to(entries: RecordEntry[]) {
                 entries.forEach(e => (<any>e).flagthatthisentryispresentusingalongnoncollidingname = true);
                 var tobedeleted = this._index.filteredValues(e => !(<any>e).flagthatthisentryispresentusingalongnoncollidingname);
                 entries.forEach(e => delete (<any>e).flagthatthisentryispresentusingalongnoncollidingname);
                 tobedeleted.forEach(e => {
                     var keys = e.keys.map(k => e[k]);
-                    keys.push(null); //dummy item for what is ususally context but not needed here 
+                    keys.push(null); //dummy item for what is ususally context but not needed here
                     var key = this.makekey(<any> keys);
                     this._index.remove(key);
                 });
@@ -1640,7 +1640,7 @@ module TDev {
                 var op = Conv.toCloud(lval.codomain, undefined, false);
                 session.user_modify_lval(lval, op);
             }
-       
+
             // static domains and codomains
 
             public static getCloudDomain(kind: string): string {
@@ -1744,7 +1744,7 @@ module TDev {
                         return RT.Color.fromInt32(Number(val));
                     case "datetime":
                         var nr = Number(val || 0); //SEBTODO: think about default
-                        return RT.DateTime.mkMs(nr); 
+                        return RT.DateTime.mkMs(nr);
                     case "oauthresponse":
                         if (!val) return; // return undefined value
                         return (new OAuthResponse()).importJson(new JsonImportCtx(null), JSON.parse(val));

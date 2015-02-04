@@ -12,7 +12,7 @@ module TDev.AST.Json
     export interface JNodeRef { dummyNodeRef: number; }
     export interface JTypeRef { dummyTypeRef: number; }
 
-    // the JTypeRef may be either a simple string, or if it starts with '{', 
+    // the JTypeRef may be either a simple string, or if it starts with '{',
     // it is JSON-encoded and conforms to one of these interfaces or is just a string (API type)
     export interface JGenericTypeInstance extends JTypeRef {
         g: string;
@@ -61,7 +61,7 @@ module TDev.AST.Json
         stringForm?:string;
     }
 
-    // when building expressions of these three types you can provide localId/type or name; 
+    // when building expressions of these three types you can provide localId/type or name;
     // if you provide both, name is ignored
     export interface JLocalRef extends JExpr
     {
@@ -100,7 +100,7 @@ module TDev.AST.Json
         // this is available when using the short form
         locals?: JLocalDef[];
     }
-    
+
     export interface JComment extends JStmt { text: string; }
     export interface JFor extends JStmt
     {
@@ -232,7 +232,7 @@ module TDev.AST.Json
 
     export interface JTypeBinding extends JBinding { type:JTypeRef; }
     export interface JActionBinding extends JBinding { actionId:JNodeRef; }
-    
+
     export interface JResolveClause extends JNode
     {
         name:string;
@@ -260,7 +260,7 @@ module TDev.AST.Json
         type:JTypeRef;
     }
     export interface JRecordKey extends JRecordField {}
-    
+
     // local variable or a parameter
     export interface JLocalDef extends JNode
     {
@@ -360,7 +360,7 @@ module TDev.AST.Json
         ctxCloudField?: boolean;
         ctxWallTap?: boolean;          // do global variables of this type get 'wall tap' events
         ctxEnumerable?: boolean;       // can it be used with foreach construct
-        ctxJson?: boolean;             // can it be json exported/imported 
+        ctxJson?: boolean;             // can it be json exported/imported
         properties: JProperty[];
     }
 

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export module ShareManager
     {
@@ -123,7 +123,7 @@ module TDev.RT {
             function shareEmail() { window.open('mailto:?subject=' + encodedName + '&body=' + encodedAddress); }
             function shareTweet() { window.open('https://twitter.com/intent/tweet?text=' + encodedText); }
             function shareFacebookLike() { window.open('http://www.facebook.com/plugins/like.php?send=false&layout=standard&width=200&show_faces=false&font&colorscheme=light&action=like&height=35&href=' + encodedAddress); }
-            function shareFacebook() { 
+            function shareFacebook() {
                 window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedAddress,
                             'facebook-share-dialog',
                             'width=626,height=436'); }
@@ -150,7 +150,7 @@ module TDev.RT {
 
         export function shareLinkAsync(link: Link, network: string) : Promise
         {
-            return new Promise((onSuccess, onError, onProgress) => {                
+            return new Promise((onSuccess, onError, onProgress) => {
                 if (shareOnNetwork(link, network)) onSuccess(null);
                 else {
                     // implemented in seperate platforms
@@ -184,7 +184,7 @@ module TDev.RT {
                         var m = new ModalDialog();
                         m.add(div('wall-dialog-header', "share"));
                         m.add(div('wall-dialog-body', tweetify(text)));
-                        m.add(div('wall-dialog-body', 
+                        m.add(div('wall-dialog-body',
                             HTML.mkButton('email', () => {
                                 shareEmail();
                                 m.dismiss();

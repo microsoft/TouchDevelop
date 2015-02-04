@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A json data structure builder
     //@ stem("jsb") ctx(general,enumerable,json)

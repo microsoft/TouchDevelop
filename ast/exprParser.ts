@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev.AST.ExprParser
@@ -20,9 +20,9 @@ module TDev.AST.ExprParser
             if (/^fun:/.test(o)) o = "fun"
             return infixProps[o];
         }
-    
+
         var isDigit = (c:string) => /^[0-9]$/.test(c);
-    
+
         function mkComma(op0:StackOp)
         {
             var r = new StackOp();
@@ -32,7 +32,7 @@ module TDev.AST.ExprParser
             r.op = ",";
             return r;
         }
-    
+
         function mkZero(op0:StackOp)
         {
             var r = new StackOp();
@@ -42,12 +42,12 @@ module TDev.AST.ExprParser
             r.expr.loc = r;
             return r;
         }
-    
+
         export function parse0(tokens:Token[])
         {
             var dt:string;
             var res:StackOp[] = [];
-    
+
             for (var i = 0; i < tokens.length; ++i) {
                 tokens[i].clearError();
             }
@@ -76,7 +76,7 @@ module TDev.AST.ExprParser
                                 var seenDot = false;
                                 var num = "";
                                 var c = "";
-    
+
                                 while (i < tokens.length) {
                                     if (tokens[i].nodeType() !== "operator")
                                         break;
@@ -89,15 +89,15 @@ module TDev.AST.ExprParser
                                     } else break;
                                     i++;
                                 }
-    
+
                                 r.len = i - r.beg;
                                 i--;
-    
+
                                 if (num === ".") {
                                     r.markError(lf("TD142: expecting a digit before or after the dot"));
                                     num = "0.0";
                                 }
-    
+
                                 r.type = "literal";
                                 var lit = mkLit(parseFloat(num));
                                 lit.stringForm = num
@@ -105,7 +105,7 @@ module TDev.AST.ExprParser
                                 r.expr.loc = r;
                         } else {
                             if (dt === "(" || dt === ")")
-                                r.prioOverride = -1; 
+                                r.prioOverride = -1;
                             else
                                 r.infixProperty = getInfixProperty(dt);
                             if (!r.prio())
@@ -118,10 +118,10 @@ module TDev.AST.ExprParser
                         break;
                 }
             }
-    
+
             return res;
         }
-    
+
         export function parse1(tokens0:Token[])
         {
             var tokens = parse0(tokens0);
@@ -134,7 +134,7 @@ module TDev.AST.ExprParser
                     loc = tokens.peek();
                 else
                     loc = tokens[currentTok];
-    
+
                 if (currentTok >= tokens.length || loc.op !== op) {
                     loc.markError(lf("TD144: it seems you're missing '{0}', try adding it", op));
                     return false;
@@ -144,12 +144,12 @@ module TDev.AST.ExprParser
                     return true;
                 }
             }
-    
+
             function reduceOps(stack:StackOp[], minPrio:number) {
                 if (minPrio == 4 || minPrio == 98) minPrio++; // priority 4 and 98 binds right
-    
+
                 var top = stack.pop();
-    
+
                 while (stack.length > 0 && stack.peek().prio() >= minPrio) {
                     var curOp = stack.pop();
                     var leftArg = stack.pop();
@@ -175,14 +175,14 @@ module TDev.AST.ExprParser
                     Util.assert(!isNaN(top.len));
                     top.expr.loc = top;
                 }
-    
+
                 stack.push(top);
             }
-    
+
             function parseCallArgs(firstArg:Expr) : Expr[]
             {
                 var args:AstNode[] = [];
-    
+
                 var t = tokens[currentTok];
                 if (!t)
                     return [firstArg];
@@ -205,24 +205,24 @@ module TDev.AST.ExprParser
 
                 if (!!t && t.op == ")") {
                     currentTok++;
-                    return [firstArg]; 
+                    return [firstArg];
                 }
                 var e = parseParenFree(false);
                 args = e.flatten(TDev.api.core.TupleProp);
                 expect(")");
-    
+
                 return [firstArg].concat(<Expr[]>args);
             }
-    
+
             function parseParenFree(isTop:boolean):Expr
             {
                 var stack:StackOp[] = [];
-    
+
                 while (currentTok < tokens.length) {
                     var prev = stack.peek();
                     var op = tokens[currentTok++];
                     var prevExpr = prev != null ? prev.expr : null;
-    
+
                     if (op.expr !== null) {
                         if (prev != null && prev.prio() === 0) {
                             op.markError(lf("TD145: there seem to be an operator (like '+', '(' or ',') missing here"));
@@ -244,7 +244,7 @@ module TDev.AST.ExprParser
                                 op.markError(lf("TD146: we didn't expect '{0}' here", op.op))
                             }
                         }
-    
+
                         if (!prev || !prev.expr) {
                             op.markError(lf("TD147: we didn't expect '{0}' here", op.op));
                             if (op.op == ",") {
@@ -275,7 +275,7 @@ module TDev.AST.ExprParser
                             op.len = end - op.beg;
                             stack.pop();
                         }
-    
+
                         var args = parseCallArgs(prevExpr);
                         op.expr = mkCall(op.propertyRef, args);
                         op.expr.loc = op;
@@ -283,7 +283,7 @@ module TDev.AST.ExprParser
                         op.len = prevTok.beg + prevTok.len - op.beg;
                         Util.assert(!isNaN(op.len));
                         stack.push(op);
-    
+
                     } else if (op.prio() < 0) {
                         if (op.op === "(") {
                             if (prevExpr) {
@@ -313,8 +313,8 @@ module TDev.AST.ExprParser
                         op.markError(lf("TD153: parse error"));
                     }
                 }
-    
-    
+
+
                 while (stack.length > 0) {
                     if (stack.peek().expr === null) {
                         stack.peek().markError(lf("TD154: the operator needs something after it"));
@@ -328,7 +328,7 @@ module TDev.AST.ExprParser
                         break;
                     }
                 }
-    
+
                 reduceOps(stack, 1);
 
                 var t = stack.peek();
@@ -337,7 +337,7 @@ module TDev.AST.ExprParser
                 else
                     return t.expr;
             }
-    
+
             return parseParenFree(true);
         }
 }

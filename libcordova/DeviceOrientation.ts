@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Cordova {
 
     export function DeviceOrientationInit()
@@ -20,7 +20,7 @@ module TDev.RT.Cordova {
         export function addHeadingReadingEvent() {
             watchID = (<any>navigator).compass.watchHeading((heading) => {
                 DeviceOrientation.setHeading(heading.magneticHeading);
-            }, 
+            },
             (error) => {
                 Util.log("compass error: " + error)
             }, {

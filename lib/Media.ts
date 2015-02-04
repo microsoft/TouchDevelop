@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT {
     //? Pictures and music...
@@ -9,7 +9,7 @@ module TDev.RT {
         //@ [result].writesMutable
         //@ [width].defl(480) [height].defl(800)
         export function create_picture(width:number, height:number) : Picture { return Picture.mk(width, height); }
-        
+
         //? Searches the Windows Phone Store (type in applications or music)
         //@ stub flow(SinkSafe)
         //@ [type].defl("music")
@@ -27,7 +27,7 @@ module TDev.RT {
         //@ cap(media) flow(SourceMusic) returns(Playlists)
         //@ embedsLink("Playlists", "Playlist") async
         export function playlists(r : ResumeCtx)  // : Playlists
-        { 
+        {
             askMusicAccessAsync(r)
                 .then(allow => r.resumeVal(undefined))
                 .done();
@@ -62,7 +62,7 @@ module TDev.RT {
                 _pictureAlbums = PictureAlbums.mk([PictureAlbum.mk('cats', 'cats', pics)]);
                 return _pictureAlbums;
             });
-        }        
+        }
 
         //? Gets the pictures on the phone
         //@ async cap(media) flow(SourcePicture) returns(Pictures)
@@ -129,7 +129,7 @@ module TDev.RT {
         }
 
         //? Chooses a picture from the media library
-        //@ flow(SourcePicture) returns(Picture) uiAsync 
+        //@ flow(SourcePicture) returns(Picture) uiAsync
         //@ import("cordova", "org.apache.cordova.camera")
         export function choose_picture(r: ResumeCtx)
         {
@@ -139,7 +139,7 @@ module TDev.RT {
         //? Gets the picture albums
         //@ cap(media) flow(SourcePicture) returns(PictureAlbums)
         //@ embedsLink("Picture Albums", "Picture Album") async
-        export function picture_albums(r: ResumeCtx) //: PictureAlbums 
+        export function picture_albums(r: ResumeCtx) //: PictureAlbums
         {
             askPictureAccessAsync(r)
                 .then(allow => {
@@ -183,7 +183,7 @@ module TDev.RT {
         //@ cap(media) flow(SourceMusic) returns(SongAlbums)
         //@ embedsLink("Song Albums", "Song Album") async
         export function song_albums(r : ResumeCtx) // : SongAlbums
-        { 
+        {
             askMusicAccessAsync(r)
                 .then(allow => {
                     if (!allow) return Promise.as(SongAlbums.mk([]));
@@ -559,16 +559,16 @@ module TDev.RT {
         export function icon_names() : Collection<string>
         {
             return Collection.mkStrings(iconNames.slice(0));
-        }        
-        
+        }
+
         function load_icon(name : string, size:number)
         {
             if (iconNames.indexOf(name.toLowerCase()) < 0)
                 return undefined;
-                
+
             return Picture.fromSVGIcon(name.toLowerCase(), size);
         }
-        
+
         //? Gets a 48x48 icon picture. Use 'media->icon names' to retrieve the list of names available.
         //@ hidden cap(editoronly)
         export function icon(name:string):Picture

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev.HTML {
@@ -326,7 +326,7 @@ module TDev.HTML {
         if (/^image\/(png|jpeg)$/.test(file.type)) {
             input = document.createElement("img");
             input.style.maxWidth = '21em';
-            input.style.maxHeight = '11em'; 
+            input.style.maxHeight = '11em';
             input.src = file;
         } else {
             input = document.createElement("audio");
@@ -337,7 +337,7 @@ module TDev.HTML {
         var prev = new FileReader();
         prev.onload = (e) => input.src = prev.result;
         prev.readAsDataURL(file);
-        return <IMediaInputElement>{ 
+        return <IMediaInputElement>{
             element : input,
             validate : () => null,
             readAsync : (): Promise => { // of String
@@ -514,7 +514,7 @@ module TDev.HTML {
             current: -1,
             enabled: true,
             buttons:
-                lbls.map((l, i) => setTickCallback(mkButtonElt("radio-button", 
+                lbls.map((l, i) => setTickCallback(mkButtonElt("radio-button",
                     div("radio-outer", div("radio-inner")), div("radio-label", l.name)), l.tick, () => {
                         if (res.enabled)
                             res.change(i)
@@ -672,7 +672,7 @@ module TDev.HTML {
     }
 
 
-    export function mkA(cl:string, href:string, target:string, ...children:any[]):HTMLAnchorElement 
+    export function mkA(cl:string, href:string, target:string, ...children:any[]):HTMLAnchorElement
     {
         var elt = <HTMLAnchorElement>document.createElement("a");
         elt.href = href;
@@ -716,14 +716,14 @@ module TDev.HTML {
 
     export function showProxyNotification(message: string, url: string)
     {
-        var msg = div("errorNotification", 
+        var msg = div("errorNotification",
             message, mkBr(), span("smallText", "URL: " + url));
         showNotification(msg);
     }
 
     export function showCorsNotification(url: string)
     {
-        var msg = div("errorNotification", 
+        var msg = div("errorNotification",
             lf("Access Denied: Your web browser and the web site prevent cross-origin resource sharing (CORS)."),
             mkA("", "https://www.touchdevelop.com/docs/CORS", "_blank", "Learn more..."), mkBr(), span("smallText", "URL: " + url));
         showNotification(msg);
@@ -868,7 +868,7 @@ module TDev.HTML {
 "br": 1,            // A single line break
 "del": 1,           // Text that has been deleted from a document
 "div": 1,           // A section in a document
-"em": 1,            // Emphasized text 
+"em": 1,            // Emphasized text
 "p": 1,             // A paragraph
 "i": 1,             // A part of text in an alternate voice or mood
 "u": 1,             // Text that should be stylistically different from normal text
@@ -897,7 +897,7 @@ module TDev.HTML {
 "canvas": 2,        // Used to draw graphics, on the fly, via scripting (usually JavaScript)
 "caption": 2,       // A table caption
 "cite": 2,          // The title of a work
-"col": 2,           // Specifies column properties for each column within a <colgroup> element 
+"col": 2,           // Specifies column properties for each column within a <colgroup> element
 "colgroup": 2,      // Specifies a group of one or more columns in a table for formatting
 "datalist": 2,      // Specifies a list of pre-defined options for input controls
 "dd": 2,            // A description/value of a term in a description list
@@ -1013,7 +1013,7 @@ module TDev.HTML {
         "fill-opacity": 2,
         "stroke-miterlimit": 2,
         "stroke-dasharray": 2,
-    }    
+    }
 
     function htmlOops(msg:string, html:string, other?:string)
     {
@@ -1094,7 +1094,7 @@ module TDev.HTML {
         var v = html5Tags[tn]
         return v === 1 || v === 2
     }
-    
+
     export function allowedAttributeName(tn: string) {
         if (!html5Attributes.hasOwnProperty(tn))
             return false

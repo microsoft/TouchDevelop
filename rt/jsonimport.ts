@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 'use strict';
 
@@ -115,7 +115,7 @@ module TDev {
             var v = source ? source[key] : undefined;
             return (typeof v == "boolean") ? v : undefined;
         }
- 
+
         // immutable RT types
 
         public importDateTime(source: any, key: any): RT.DateTime {
@@ -187,7 +187,7 @@ module TDev {
             if (!target) target = new RT.OAuthResponse();
             return target.importJson(this, v);
         }
-        
+
         // records
 
         public importRecord(source: any, target: any, key: any, singleton: RT.RecordSingleton): RT.RTValue {
@@ -248,7 +248,7 @@ module TDev {
 
 
 
-        
+
         // import json array. Factory creates [key,val] or undefined if it should not be imported
         public importArray(obj: any, json: any[], key: (n: number) => any, factory: (n: number) => any[]): boolean {
             if (!Array.isArray(json))

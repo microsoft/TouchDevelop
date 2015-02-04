@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? The front or back camera
     //@ walltap
@@ -109,7 +109,7 @@ module TDev.RT {
         //? Takes a low quality picture from the camera.
         //@ flow(SourceCamera) returns(Picture) uiAsync
         public preview(r: ResumeCtx) // : Picture
-        {           
+        {
             if (this._video) {
                 this.previewVideo(this._video, r);
             } else {
@@ -123,7 +123,7 @@ module TDev.RT {
                             r.rt.postBoxedHtml(this._video, r.rt.current.pc);
                             // events specifying that the video started do not trigger reliably
                             // so unfortunately, waiting is our best option
-                            Util.setTimeout(5 * 1000, () => { this.previewVideo(this._video, r); });                        
+                            Util.setTimeout(5 * 1000, () => { this.previewVideo(this._video, r); });
                         }
                     })
                     .done();

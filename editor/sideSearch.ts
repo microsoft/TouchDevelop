@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -138,9 +138,9 @@ module TDev
 
             var maxEntries = 50;
 
-            var addResult = (decl:AST.Decl) => 
+            var addResult = (decl:AST.Decl) =>
             {
-                var codeSearch = (stmt:AST.Stmt) => 
+                var codeSearch = (stmt:AST.Stmt) =>
                 {
                     if (stmt instanceof AST.Block) {
                         var b = <AST.Block>stmt;
@@ -290,7 +290,7 @@ module TDev
 
             var cmpScore = (a:CodeLocation, b:CodeLocation) => b.score - a.score;
             entries.stableSortObjs(cmpScore);
-            
+
             var hasMore = false;
             if (entries.length > maxEntries) {
                 entries = entries.slice(0, maxEntries);

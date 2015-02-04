@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A spring between two sprites.
     //@ ctx(general,gckey)
@@ -18,7 +18,7 @@ module TDev { export module RT {
         public delete_() {
             this.board.deleteSpring(this);
         }
-        
+
         public forceOn(sprite : Sprite) : Vector2 {
             var other = sprite === this.sprite1 ? this.sprite2 : this.sprite1;
             var force = other._position.subtract(sprite._position).scale(this.stiffness);

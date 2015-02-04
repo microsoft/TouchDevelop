@@ -1,9 +1,9 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 // Bing Maps signatures
 declare module Microsoft.Maps {
     export function loadModule(name : string, options : any);
-    export class Map { 
+    export class Map {
         constructor(el: HTMLElement, v: any);
         public entities : EntityCollection;
         public setOptions(options: any): void;
@@ -21,20 +21,20 @@ declare module Microsoft.Maps {
     export class Point {
         constructor(x : number, y : number);
     }
-    export class Location { 
+    export class Location {
         constructor(latitude : number, longitude : number);
         public latitude: number;
         public longitude: number;
     }
-    export class Pushpin { 
+    export class Pushpin {
         constructor(center: Microsoft.Maps.Location, options: any);
         setLocation(center: Microsoft.Maps.Location);
         setOptions(options:any);
     }
-    export class Polyline { 
+    export class Polyline {
         constructor(locs: Microsoft.Maps.Location[], options: any);
     }
-    export class Polygon { 
+    export class Polygon {
         constructor(locs: Microsoft.Maps.Location[], options: any);
     }
     export class Color {

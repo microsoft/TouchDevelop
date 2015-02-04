@@ -1,7 +1,7 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
-module TDev { 
+module TDev {
     export module Cloud {
 
     export var lite = false;
@@ -156,7 +156,7 @@ module TDev {
     export function oauthStates() {
         var a = JSON.parse(window.localStorage.getItem("oauth_states") || "[]");
         if (a.length == 0) a = [Random.normalized().toString()];
-        window.localStorage.setItem("oauth_states",  JSON.stringify(a)) 
+        window.localStorage.setItem("oauth_states",  JSON.stringify(a))
         return a;
     }
     export function setUserId(id : string) {
@@ -252,7 +252,7 @@ module TDev {
     export function setTouchDevelopOnline(value: boolean) {
         if (value)
             window.localStorage.removeItem('offline_mode');
-        else 
+        else
             window.localStorage.setItem('offline_mode',  "true")
     }
     export function isChaosOffline() : boolean {
@@ -261,7 +261,7 @@ module TDev {
     export function setChaosOffline(value: boolean) {
         if (!value)
             window.localStorage.removeItem('chaos_offline_mode');
-        else 
+        else
             window.localStorage.setItem('chaos_offline_mode',  "true")
     }
     export function offlineErrorAsync(): Promise {
@@ -276,7 +276,7 @@ module TDev {
     {
         return getUserId() != "paema";
     }
-    export function onlineInfo(): string {        
+    export function onlineInfo(): string {
         if (Cloud.isOffline()) {
             var msg = lf("You appear to be offline. ") + (isTouchDevelopOnline()
                 ? lf("Please connect to the internet.")
@@ -339,7 +339,7 @@ module TDev {
         }
         return false;
     }
-    
+
     export interface Header {
         guid: string;
         name: string;
@@ -355,7 +355,7 @@ module TDev {
         userId: string;
         status: string;
         hasErrors: boolean;
-        //libraryDependencies: string[];            
+        //libraryDependencies: string[];
         publishAsHidden:boolean;
         recentUse: number; // seconds since epoch
         // For compatibility reasons with previous cloud entries, we need to
@@ -388,11 +388,11 @@ module TDev {
         v?: number;
         user?: any;
         blobcontainer?: string;
-    }       
+    }
     export interface InstalledBodies {
         bodies: Body[];
         recentUses: RecentUse[];
-    }       
+    }
     export interface UserSettings {
         nickname?: string;
         aboutme?: string;
@@ -442,7 +442,7 @@ module TDev {
         userId: string;
         status: string;
         hasErrors: boolean;
-        //libraryDependencies: string[];            
+        //libraryDependencies: string[];
         script: string;
         editorState: string;
         recentUse: number; // seconds since epoch
@@ -482,8 +482,8 @@ module TDev {
         expiration: number; // can be null; in particular, is null initially; in seconds since 1970
     }
     export interface ApiGroupCodeRequest {
-		expiration?: number; 
-			// in seconds since 1970; if present, cannot be in the past or more than a year in the future; 
+		expiration?: number;
+			// in seconds since 1970; if present, cannot be in the past or more than a year in the future;
 			// defaults to 14 days into the future if null or not present
 	}
 
@@ -527,9 +527,9 @@ module TDev {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notifications"), "");
     }
 	export interface PushNotificationRequestBody {
-		   // Push notification URL; 
+		   // Push notification URL;
 		   // our cloud code will recognize by the URL what the target is. The URL must be understood by System.Uri.TryCreate
-		   subscriptionuri: string; 
+		   subscriptionuri: string;
 		   versionminor: number; // minor OS version, e.g. 0
 		   versionmajor: number; // major OS version, e.g. 4
 	}
@@ -547,7 +547,7 @@ module TDev {
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/settings"), body);
     }
-    export interface AppApiKey 
+    export interface AppApiKey
     {
         id : string;
         name : string;

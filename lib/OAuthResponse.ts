@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? OAuth 2.0 Access Token or Error as described in http://tools.ietf.org/html/rfc6749.
     //@ stem("oauth res") serializable ctx(general,cloudfield,json)
@@ -138,7 +138,7 @@ module TDev.RT {
             return r;
         }
 
-        public toString() 
+        public toString()
         {
             var s: string;
             if (this._error)

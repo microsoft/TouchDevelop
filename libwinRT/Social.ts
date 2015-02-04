@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.WinRT {
     export function SocialInit()
     {
@@ -86,7 +86,7 @@ module TDev.RT.WinRT {
 
     export module SocialWinRT
     {
-        function searchTwitter(terms: string, r: ResumeCtx) 
+        function searchTwitter(terms: string, r: ResumeCtx)
         {
             var url = "http://search.twitter.com/search.json?q=" + encodeURIComponent(terms);
             var request = Web.create_request(url);
@@ -179,7 +179,7 @@ module TDev.RT.WinRT {
                     r.resumeVal(msgs);
                 });
         }
-        
+
         // Searches for recent messages in a social network (twitter, facebook)
         export function search(network: string, terms: string, r: ResumeCtx) // : Collection<Message>
         {
@@ -188,7 +188,7 @@ module TDev.RT.WinRT {
                 searchTwitter(terms, r);
             else if (network === 'facebook')
                 searchTwitter(terms, r);
-            else 
+            else
             {
                 Time.log('unknown social network ' + network + '. use twitter or facebook.');
                 r.resumeVal(undefined);

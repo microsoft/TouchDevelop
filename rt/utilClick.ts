@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -55,7 +55,7 @@ module TDev
         public skipIt(e:Event)
         {
             var targ = <HTMLElement>e.target;
-            if (e.target != e.currentTarget && 
+            if (e.target != e.currentTarget &&
                 (targ.nodeName == "INPUT" || targ.nodeName == "TEXTAREA")) return true;
 
             return false;
@@ -70,7 +70,7 @@ module TDev
         }
 
         public getPosition(element:HTMLElement) {
-            var xPosition = 0; 
+            var xPosition = 0;
             var yPosition = 0;
             while (element) {
                 xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
@@ -278,7 +278,7 @@ module TDev
             if (typeof HTMLElement != "undefined")
                 HTMLElement.prototype.withClick = function (cb, allowSelect?) {
                     Util.clickHandler(this, cb, allowSelect);
-                    return this; 
+                    return this;
                 };
         } catch (e) {
         }

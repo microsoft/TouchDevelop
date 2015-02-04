@@ -59,7 +59,7 @@ module TDev
             var s = r.dispatch(this.data.template)
             var d = div("diffOuter")
             Browser.setInnerHTML(d, s);
-            
+
             var m = new ModalDialog()
             m.add(d)
             Util.setupDragToScroll(d)
@@ -105,7 +105,7 @@ module TDev
                 op = new TutorialInstruction()
                 if (toRename) {
                     op.decl = toRename
-                    op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header : 
+                    op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header :
                               toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).values :
                               toRename instanceof AST.GlobalDef ? (<AST.GlobalDef>toRename) : null
                     op.targetName = this.data.declName()
@@ -172,7 +172,7 @@ module TDev
                 var v1 = alt.loopVariable()
                 return (v0 && v1 && v0.getName() != v1.getName())
             }
-            
+
             function findFirst(stmt:AST.Stmt)
             {
                 if (op) return;
@@ -349,7 +349,7 @@ module TDev
                                         var th = (<AST.Call>currCall).args[0].getThing()
                                         if (th instanceof AST.LocalDef &&
                                             th.getName() == promoteToName &&
-                                            th.getKind().toString() == promoteKind.toString()) 
+                                            th.getKind().toString() == promoteKind.toString())
                                         {
                                             op.promoteToFieldNamed = promoteToName
                                             op.promoteToFieldOf = promoteToGlobal ? "data" : promoteToFieldOf
@@ -366,7 +366,7 @@ module TDev
                             op.delToken = firstTok
                             return;
                         }
-                        
+
                         if (op.promoteToFieldNamed) {
                             return
                         }
@@ -441,7 +441,7 @@ module TDev
                                         placeholderKind.getRoot() == api.core.Ref &&
                                         d[i + 1].getThing() instanceof AST.LocalDef &&
                                         d[i + 3].getProperty() &&
-                                        !localKind(d[i + 1].getThing().getName()).getProperty(d[i + 3].getProperty().getName())) 
+                                        !localKind(d[i + 1].getThing().getName()).getProperty(d[i + 3].getProperty().getName()))
                                     {
                                         op.promoteToFieldNamed = d[i + 3].getProperty().getName()
                                         op.promoteToFieldOf = d[i + 1].getThing().getName()
@@ -482,7 +482,7 @@ module TDev
 
             function setPers(rp:AST.RecordPersistence) {
                 op = new TutorialInstruction()
-                op.calcButton = 
+                op.calcButton =
                     rp == AST.RecordPersistence.Local ? Ticks.recordPersLocal :
                     rp == AST.RecordPersistence.Cloud ? Ticks.recordPersCloud :
                                                         Ticks.recordPersTemporary;
@@ -766,12 +766,12 @@ module TDev
             }).done(undefined, () => { }); // don't wait, don't report error
             var data = <{ [id: string]: Cloud.Progress; }>{};
             var n = Math.round(Util.now() / 1000)
-            data[this.progressId] = { 
+            data[this.progressId] = {
                 guid: this.guid,
                 index: this.currentStep,
                 lastUsed: n,
                 numSteps: this.steps.length,
-                completed: this.currentStep >= this.steps.length ? n : undefined 
+                completed: this.currentStep >= this.steps.length ? n : undefined
             };
             Cloud.storeProgress(data);
             Cloud.postPendingProgressAsync().done();
@@ -820,7 +820,7 @@ module TDev
 
         private modalTime(start:number)
         {
-            this.lastModalDuration = Util.now() - start        
+            this.lastModalDuration = Util.now() - start
 		}
 
         private nowPublish()
@@ -1213,7 +1213,7 @@ module TDev
             }
         }
 
-        private createStars(colors = true) { 
+        private createStars(colors = true) {
             var stars = div('wall-dialog-body tutorialStars');
             var numStars = 0
             var lightStars = [];
@@ -1252,7 +1252,7 @@ module TDev
                         var aa = allStars[sk++];
                         aa.style.width = starSize + "em"
                         aa.style.height = starSize + "em"
-                        rowDiv.appendChild(aa); 
+                        rowDiv.appendChild(aa);
                     }
                 }
             }
@@ -1264,7 +1264,7 @@ module TDev
                 var delay = 10;
                 allStars.forEach(star => {
                     Util.setTimeout(delay, () => Util.coreAnim("pulseStar", interval * 3, star))
-                    delay += interval;                    
+                    delay += interval;
                 })
             }
 
@@ -1276,16 +1276,16 @@ module TDev
         private showRunOverlay(step: Step)
         {
             var tip =
-               div('tip tip-tl', div('tipInner', 
+               div('tip tip-tl', div('tipInner',
                     div('tipTitle', lf("tap here to continue coding")),
                     div('tipDescr', this.currentCommandArg() || lf("your program is running!"))))
 
             tip.style.bottom = "2em";
             tip.style.right = "2em";
 
-            var overlay = 
+            var overlay =
                 div("modalOverlay" /* , tip */)
-                
+
             overlay.withClick(() => {
                 Runtime.theRuntime.stopAsync().done()
                 if (overlay)
@@ -1591,7 +1591,7 @@ module TDev
                         return;
                 }
             }
-            
+
             // HTML.showProgressNotification("ds: " + ins.diffSize + " (prev: " + this.prevDiffSize + ")")
 
             if (!this.goalTimer.running)

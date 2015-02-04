@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -10,7 +10,7 @@ module TDev
         immutableReason():string;
         kindBoxHeader():string;
     }
-    
+
     export class VariableProperties
         extends CodeView
         implements KindBoxModel
@@ -60,9 +60,9 @@ module TDev
                 function doKind(hd:string, ctx, f:(k:Kind)=>void)
                 {
                     var m = new ModalDialog();
-                    var kindList = DeclRender.mkKindList(ctx, model.getKind(), 
-                                                         (k:Kind) => { 
-                                                            m.dismiss(); 
+                    var kindList = DeclRender.mkKindList(ctx, model.getKind(),
+                                                         (k:Kind) => {
+                                                            m.dismiss();
                                                             if (k.getParameterCount() == 0 || k.getRoot() != k) f(k);
                                                             else {
                                                                 Util.assert(k.getParameterCount() == 1)
@@ -94,10 +94,10 @@ module TDev
 
         private isActive() { return !!this.theVariable; }
 
-        public getContexts() { 
+        public getContexts() {
             return this.theVariable.isResource ? KindContext.ArtResource
-                 : this.theVariable.getRecordPersistence() == AST.RecordPersistence.Temporary ? KindContext.GlobalVar 
-                 : KindContext.CloudField; 
+                 : this.theVariable.getRecordPersistence() == AST.RecordPersistence.Temporary ? KindContext.GlobalVar
+                 : KindContext.CloudField;
         }
         public getKind() { return this.theVariable.getKind(); }
         public immutableReason():string { return null; }
@@ -134,7 +134,7 @@ module TDev
             if (this.theVariable.isResource)
                 this.load(this.theVariable); // need to get new art editor
             else
-                this.syncAll(); 
+                this.syncAll();
         }
 
         private syncAll(tc = true)
@@ -182,7 +182,7 @@ module TDev
 
             this.persistanceRadio.onchange = () => this.persistanceChanged();
 
-            var saveBox = div(null, 
+            var saveBox = div(null,
                   Editor.mkHelpLink("persistent data"),
                   this.persistanceRadio.elt)
 
@@ -288,7 +288,7 @@ module TDev
         private progressBar = HTML.mkProgressBar();
         private uploadButton : HTMLElement;
         private searchOnlineButton : HTMLElement;
-        
+
         private uploadHandler() {
             ArtUtil.uploadPictureDialogAsync().done((a: TDev.JsonArt) => {
                 if(!!a) {
@@ -315,7 +315,7 @@ module TDev
 
             var queryAsync = (terms: string) => Meta.searchArtAsync(terms, "picture")
                     .then((itms: Browser.ArtInfo[]) => itms.map(itm => converter(itm)).filter(itm => itm != null));
-            m.choose([], { queryAsync: queryAsync, 
+            m.choose([], { queryAsync: queryAsync,
                            searchHint: lf("Type to search..."),
                            initialEmptyQuery: true });
         }
@@ -348,14 +348,14 @@ module TDev
                 this.searchOnlineHandler();
             });
         }
-        
-        public set(v: string) { 
-            this.url.value = v; 
+
+        public set(v: string) {
+            this.url.value = v;
             this.img.src = v;
         }
         public get() { return this.url.value; }
 
-        public render() 
+        public render()
         {
             var durl = div('', [this.searchOnlineButton,this.uploadButton]);
             var r = div("artEditor",
@@ -364,7 +364,7 @@ module TDev
                   div("varLabel", lf("url")),
                   div('', this.url),
                   div("varLabel", lf("preview")),
-                  div('', [<HTMLElement>this.progressBar, this.img, this.imgInfo])                  
+                  div('', [<HTMLElement>this.progressBar, this.img, this.imgInfo])
                   );
             (<any>r).blinkSection = durl
             return r
@@ -379,11 +379,11 @@ module TDev
             super()
             this.url = HTML.mkTextInput("text", lf("url"));
         }
-        
+
         public set(v:string) { this.url.value = v; }
         public get() { return this.url.value; }
 
-        public render() 
+        public render()
         {
             return div("artEditor",
                   div("varLabel", lf("value")),
@@ -412,8 +412,8 @@ module TDev
             this.url = HTML.mkTextInput("text", lf("url"));
             this.keyUrl = HTML.mkTextInput("text", lf("key uri"));
         }
-        
-        public set(v: string) { 
+
+        public set(v: string) {
             var value = TDev.RT.String_.valueFromArtUrl(v);
             if (value) {
                 // TODO: limit size of value
@@ -437,14 +437,14 @@ module TDev
         public get() {
             var v = this.value.value;
             if (v) return TDev.RT.String_.valueToArtUrl(v);
-            
+
             var k = this.keyUrl.value;
             if (k) return TDev.RT.String_.valueToKeyUrl(k);
-            
+
             return this.url.value;
         }
 
-        public render() 
+        public render()
         {
             var d = div("artEditor",
                   div("varLabel", lf("url")),
@@ -454,7 +454,7 @@ module TDev
                   div("varLabel", lf("key url")),
                   this.keyUrl);
             return d;
-        }    
+        }
     }
 
     export class SoundEditor
@@ -528,7 +528,7 @@ module TDev
                   div("varLabel", lf("i want to find sounds")),
                   durl,
                   div("varLabel", lf("url")),
-                  this.url, 
+                  this.url,
                   this.audioDiv
                   );
             (<any>r).blinkSection = durl;
@@ -561,7 +561,7 @@ module TDev
                 this.inputs.push(div("sliderWithLabel", r, l));
                 return r;
             }
-        
+
             this.sliders = this.labels.map(mkSlider);
         }
 
@@ -572,7 +572,7 @@ module TDev
             this.backgrounds.forEach((e:HTMLElement) => { e.style.backgroundColor = htmlColor });
             this.foregrounds.forEach((e:HTMLElement) => { e.style.color = htmlColor });
         }
-        
+
         public set(v:string)
         {
             v = v.slice(1); // strip #
@@ -589,13 +589,13 @@ module TDev
             return r;
         }
 
-        public render() 
+        public render()
         {
             return div("artEditor",
                   div("varLabel", lf("color")),
                   this.inputs,
                   this.currentHex,
-                  this.backgrounds, 
+                  this.backgrounds,
                   this.foregrounds);
         }
     }
@@ -789,7 +789,7 @@ module TDev
                 var publishBtn, cancelBtn;
                 m.add(div("wall-dialog-body", lf("Everyone will be able to see your picture on the Internet forever. ")));
                 m.add(TDev.Cloud.mkLegalDiv());
-                m.add(div("wall-dialog-buttons", 
+                m.add(div("wall-dialog-buttons",
                     cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     publishBtn = HTML.mkButton(lf("publish"), () => {
                     errorDiv.setChildren([]);

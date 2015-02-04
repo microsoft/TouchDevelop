@@ -182,7 +182,7 @@ function getArt(uri:string, f:()=>void)
 
         var d = "";
         var len = 0
-        res.on("data", (ch) => { 
+        res.on("data", (ch) => {
             file.write(ch)
             len += ch.length
         })
@@ -310,7 +310,7 @@ export function optimize(args: string[]) {
         getScript("");
         args = Object.keys(scriptsCache);
     }
-    
+
     writeResultsHeader(() => {
         fs.appendFileSync("results.html", "<table><tr><td>Id</td><td>OKs eliminated</td>" +
             "<td>Inlining (calls to)</td><td>Inlining (inlined actions)</td><td>Actions</td>" +
@@ -342,8 +342,8 @@ export function optimize(args: string[]) {
 
 export function azure(args:string[])
 {
-    parseCore(args, getScriptAsync, (req) => { 
-        req.prettyScript = 0; 
+    parseCore(args, getScriptAsync, (req) => {
+        req.prettyScript = 0;
         req.compile = false;
         req.requiredPlatformCaps = -1
     }, (id:string, resp:TDev.ParseResponse) => {
@@ -415,7 +415,7 @@ export function update(args:string[])
         } else {
             console.log("considered %d, got %d hits", considered, hits);
         }
-    } 
+    }
 
     function get(cont:string)
     {
@@ -479,7 +479,7 @@ export function embedwp8(args:string[])
         var path = null
         if (file == "release.html") path = ""
         else if (file == "error.html") path = ".error"
-        if (path != null) 
+        if (path != null)
             url = "https://www.touchdevelop.com/app/" + path + "?releaseid=" + id + "&rewrite=false"
         tdevGet(url, data => {
             fs.writeFileSync(trg + file, data);
@@ -641,7 +641,7 @@ function readList(fn:string):any[]
 
 var scriptInfo:any = {}
 
-function scriptInfoList():any[] { 
+function scriptInfoList():any[] {
     return Object.keys(scriptInfo).map(k => scriptInfo[k])
 }
 
@@ -1181,7 +1181,7 @@ function infostats(args:string[])
             var n = 0
             var totalRuns = 0
             var totalSize = 0
-            
+
             lst.forEach(s => {
                 if (!f(s)) return
                 n++
@@ -1590,7 +1590,7 @@ export function dlall(args:string[])
         if (lst.continuation) {
             get(lst.continuation);
         }
-    } 
+    }
 
     function get(cont:string)
     {
@@ -1659,7 +1659,7 @@ export function updatelang(args:string[])
 
     var allTrans = {}
     var numStarted = 0
-    
+
     var usedSet = {}
     JSON.parse(fs.readFileSync("build/localization.json", "utf8")).strings.forEach(s => {
         usedSet[s] = 1
@@ -1813,7 +1813,7 @@ export function updatehelp(args:string[])
         numScripts++;
         tdevGet(id + "/text?original=true", (text) => {
             if (!text) {
-                console.log('error: failed to retreive text for /' + id);                
+                console.log('error: failed to retreive text for /' + id);
             } else {
                 cachedScripts[id] = text;
                 text.replace(/url\s*=\s*"(http[^"]*)"/g, (m, url) => {
@@ -1835,7 +1835,7 @@ export function updatehelp(args:string[])
 
         var plat = scr.platforms.filter(e => e != "webonly")
         if (plat.length == 0) plat = undefined
-     
+
         var desc = {
             name: scr.name,
             id: scr.id,
@@ -1884,8 +1884,8 @@ export function updatehelp(args:string[])
                     numScripts++;
                     tdevGet(id + "/webast", dat => {
                         var ast = JSON.parse(dat)
-                        var pics = ast.decls.filter(d => 
-                                    d.nodeType == "art" && d.type == "Picture" && 
+                        var pics = ast.decls.filter(d =>
+                                    d.nodeType == "art" && d.type == "Picture" &&
                                     /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(d.url))
                         var findImg = t => pics.filter(d => t.test(d.name))[0]
                         var img = findImg(/screenshot/i) || findImg(/background/i);
@@ -1898,8 +1898,8 @@ export function updatehelp(args:string[])
                     } else {
                         numScripts++;
                         getScript(m[1], text => {
-                            if (!text) 
-                                throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');    
+                            if (!text)
+                                throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');
                             oneDone()
                         })
                     }
@@ -1999,7 +1999,7 @@ function fetchhistory(args:string[])
                     fs.mkdirSync(args[1])
                 checked = true;
 
-                var user = url.replace(/\/.*/, "") 
+                var user = url.replace(/\/.*/, "")
                 var burl = user + "/installed/" + scr.guid + "/history"
                 var hurl = burl + access_token + "&count=100"
                 var hentries = 0
@@ -2094,7 +2094,7 @@ function fetchscriptinfo(args:string[]) {
         fn = args.shift()
     }
 
-    if (!fn) 
+    if (!fn)
         return
 
     var scripts:any[] = JSON.parse(fs.readFileSync(fn, "utf8"))
@@ -2583,7 +2583,7 @@ function buckethist(args:string[])
 
     var csv = "userid,start,stop,active,#learned,"
 
-    var divs = 5 
+    var divs = 5
 
     for (var i = 0; i < divs; ++i) csv += "#" + i + ","
     for (var i = 0; i < divs; ++i) csv += "%" + i + ","
@@ -2780,7 +2780,7 @@ function computeCorrelations(perUser:any)
             if (l == "one")
                 res += "," + catMap[c].length + ","
             else
-                res += correlation(catMap[c].map(v => v[i] / v[actDays]), 
+                res += correlation(catMap[c].map(v => v[i] / v[actDays]),
                             target).replace(/^[^,]*/, "")
         })
         res += "\r\n"
@@ -3118,7 +3118,7 @@ function tmp1(args:string[])
             n.forEach(a => args.push(a))
         }
 
-        if (args.length > 2) 
+        if (args.length > 2)
             runNode(logFn, done, args)
     })
 
@@ -3182,7 +3182,7 @@ function tmp0(args:string[])
         clIds[j] = tmp
     })
     */
-    
+
 
     var curr = 0
 
@@ -3202,7 +3202,7 @@ function tmp0(args:string[])
             n.forEach(a => args.push(a))
         }
 
-        if (args.length > 2) 
+        if (args.length > 2)
             runNode(logFn, done, args)
     })
 

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Play, stop or resume songs, ...
     export module Player
@@ -211,7 +211,7 @@ module TDev.RT {
                 _audio.play();
             }
         }
-        
+
         //? Stops playing a song
         //@ cap(musicandsounds)
         //@ writesMutable
@@ -302,7 +302,7 @@ module TDev.RT {
                 case 'song':
                     var s = Song.mk(media.url(), 'media', media.title());
                     Player.play(s);
-                    break;  
+                    break;
                 default:
                     Web.play_media(media.url());
                     break;

@@ -16,15 +16,15 @@ var usageCounts:any = {}
 var helpCache:any = {}
 var topicList = {}
 
-var prelude = 
+var prelude =
   "var TDev; TDev = TDev || {};\n" +
   "TDev.md_initApis = function md_initApis() {\n" +
   "   'use strict';\n" +
-  "   var self;\n" + 
-  "   var multiplex;\n" + 
-  "   var mkKind = TDev.Kind.md_make;\n" + 
-  "   var mkProp = TDev.Property.md_make;\n" + 
-  "   var mkArg = TDev.PropertyParameter.md_make;\n" + 
+  "   var self;\n" +
+  "   var multiplex;\n" +
+  "   var mkKind = TDev.Kind.md_make;\n" +
+  "   var mkProp = TDev.Property.md_make;\n" +
+  "   var mkArg = TDev.PropertyParameter.md_make;\n" +
   "   var k_Nothing = mkKind(10000, 'Nothing', 'Represents no value of interest');\n" +
   "   k_Nothing.md_isData();\n" +
   "\n" +
@@ -216,7 +216,7 @@ function processFile(filename:string)
             help = m[1].trim();
             translationHelpStrings[help] = 1
         }
-        
+
         m = /^\s*\/\/@@(.*)/.exec(line);
         if (m) jsAttrs.push(m[1].trim());
         else {
@@ -252,7 +252,7 @@ function processFile(filename:string)
 
                 if (isData) {
                     tdname = "is invalid";
-                    wrLine(false, "self = mkProp(" + (propUsage[tdname] || 0) + ", " + currKind + ", " 
+                    wrLine(false, "self = mkProp(" + (propUsage[tdname] || 0) + ", " + currKind + ", "
                             + q(tdname) + ", \"Returns true if the current instance is useless\", [], k_Boolean_);")
                     wrLine(false, "self.md_runOnInvalid();");
                     wrLine(false, "self.md_cap('none');");
@@ -283,7 +283,7 @@ function processFile(filename:string)
                 if (isBuiltin) args.shift();
 
                 var retType = attr_returns || retTypeS || "void";
-                
+
                 if (typeArgsS) {
                     wrLine(false, "multiplex = TDev.MultiplexRootProperty.md_make_kind();")
                     method_type_params = typeArgsS.split(/,\s*/)
@@ -304,7 +304,7 @@ function processFile(filename:string)
                     tdname = attr_name;
                 }
                 topicList[hashify(hashPref + tdname)] = 1
-                var mkArgs = (propUsage[tdname] || 0) + ", " + currKind + ", " + q(tdname) + ", " + q(help) + ", " + 
+                var mkArgs = (propUsage[tdname] || 0) + ", " + currKind + ", " + q(tdname) + ", " + q(help) + ", " +
                               "[" + sargs.join(", ") + "], " + kindRef(retType)
                 if (typeArgsS) {
                     wrLine(false, "self = TDev.MultiplexRootProperty.md_make_prop(multiplex, " + mkArgs + ");")

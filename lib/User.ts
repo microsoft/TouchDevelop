@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A user account
     //@ ctx(general,indexkey,cloudfield,walltap,json) serializable
@@ -30,7 +30,7 @@ module TDev.RT {
                         id: userId,
                     })
             } else {
-                p = Cloud.getPublicApiAsync(encodeURIComponent(userId)) 
+                p = Cloud.getPublicApiAsync(encodeURIComponent(userId))
             }
 
             User.jsonCache[userId] = p
@@ -47,7 +47,7 @@ module TDev.RT {
                 id = this._id.replace(/^[^:]+:/, "")
             else
                 return undefined;
-            return Cloud.getServiceUrl() + "/api/" + encodeURIComponent(id) + path; 
+            return Cloud.getServiceUrl() + "/api/" + encodeURIComponent(id) + path;
         }
         public getPictureUrl(user: any, which: string) {
             return (user && user.haspicture) ? this.getApiUrl("/picture" + ((which && which != "original") ? ("?type=" + encodeURIComponent(which)) : "")) : undefined;
@@ -73,7 +73,7 @@ module TDev.RT {
             return (this._id < other._id) ? - 1 :
                 (this._id > other._id) ? 1 : 0;
         }
-        
+
 
         static mk(id: string): User {
             var u = new User();

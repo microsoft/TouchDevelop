@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -35,7 +35,7 @@ module TDev
                 i.setFlag("errors", decl instanceof AST.Decl && decl.hasErrors())
                 i.setFlag("warnings", decl instanceof AST.Decl && decl.hasWarnings())
                 var isCurr = decl == d;
-                if (isCurr) 
+                if (isCurr)
                     sel = i;
                 i.setFlag("selected", isCurr);
             })
@@ -132,10 +132,10 @@ module TDev
                 r.appendChild(d);
             }
             if (!isParent && app.isDocsTopic())
-                addBtn(HTML.mkRoundButton("svg:movie,black", lf("preview"), Ticks.sidePreview, () => { 
+                addBtn(HTML.mkRoundButton("svg:movie,black", lf("preview"), Ticks.sidePreview, () => {
                     var topic = HelpTopic.fromScript(app)
-                    var d = 
-                    elt('leftPaneContent').setChildren([ 
+                    var d =
+                    elt('leftPaneContent').setChildren([
                         topic.render(e => {
                             Browser.TopicInfo.attachCopyHandlers(e);
                             World.getInstalledHeaderAsync(Script.localGuid).then((h: Cloud.Header) => {
@@ -191,7 +191,7 @@ module TDev
                     TheEditor.updateScript();
                 }));
 			if (!isParent && TheEditor.widgetEnabled("splitButton") && SizeMgr.canSplitScreen())
-				addBtn(HTML.mkRoundButton("svg:Split,black", lf("split"), Ticks.sideSplit, () => { 
+				addBtn(HTML.mkRoundButton("svg:Split,black", lf("split"), Ticks.sideSplit, () => {
                     TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)
 				}));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
@@ -203,7 +203,7 @@ module TDev
                     TheEditor.searchFor(":m");
                 }));
 
-            if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") && 
+            if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") &&
                 (Azure.getWebsiteAuthForApp(app) || app.usesCloudLibs() || Script.usesCloudLibs())) {
                 addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("deploy"), Ticks.sideDeployWebSite, () => {
                     var wa = Azure.getWebsiteAuthForApp(app)
@@ -237,11 +237,11 @@ module TDev
             }
 
 			if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
-				addBtn(HTML.mkRoundButton("svg:plug,black", lf("plugins"), Ticks.sidePlugins, () => { 
+				addBtn(HTML.mkRoundButton("svg:plug,black", lf("plugins"), Ticks.sidePlugins, () => {
                     Plugins.runPlugin();
 				}));
             if (!isParent && app.hasTests() && TheEditor.widgetEnabled("runTestsButton"))
-                addBtn(HTML.mkRoundButton("svg:experiment,black", lf("run tests"), Ticks.sideAllTests, () => { 
+                addBtn(HTML.mkRoundButton("svg:experiment,black", lf("run tests"), Ticks.sideAllTests, () => {
                     TestMgr.testCurrentScript()
                 }));
 
@@ -293,7 +293,7 @@ module TDev
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (this.editor.widgetEnabled("editLibraryButton")) {
                             var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
-                                    () => { 
+                                    () => {
                                         LibraryRefProperties.editLibrary(lib, () => {})
                                     });
                             d = ScriptNav.addSideButton(d, runbtn);
@@ -303,8 +303,8 @@ module TDev
                 items.push(d);
                 return d;
             }
-    
-            var displayThings = (sect:ThingSection) => 
+
+            var displayThings = (sect:ThingSection) =>
             {
                 if (!sect.newName) sect.newName = sect.label.replace(/s$/, "");
 
@@ -328,8 +328,8 @@ module TDev
             if (TheEditor.parentScript) {
                 var parDiv = declIt(TheEditor.parentScript)
 
-                var sharebtn = HTML.mkRoundButton("svg:cancel,black", lf("disconnect"), Ticks.sideDisconnect, 
-                    () => { 
+                var sharebtn = HTML.mkRoundButton("svg:cancel,black", lf("disconnect"), Ticks.sideDisconnect,
+                    () => {
                         TheEditor.disconnectParent()
                         TheEditor.queueNavRefresh();
                     });
@@ -362,7 +362,7 @@ module TDev
 
             if (!debugMode)
                 items.push(this.scriptButtons(Script, false, !!TheEditor.parentScript));
-                      
+
 
             /*
             var tp = TheEditor.clipMgr.pasteType();
@@ -376,14 +376,14 @@ module TDev
             }
             */
 
-            var addNode = (t:Ticks, n:AST.Decl) => 
+            var addNode = (t:Ticks, n:AST.Decl) =>
             {
                 Util.assert(!debugMode);
                 tick(t);
                 this.editor.addNode(n);
             }
 
-            var addEvent = () => 
+            var addEvent = () =>
             {
                 Util.assert(!debugMode);
                 var mkEvent = (a:AST.Action) => {
@@ -410,7 +410,7 @@ module TDev
             var actions = <AST.Action[]> things.filter((t) => t instanceof AST.Action);
             var vars = <AST.GlobalDef[]> things.filter((t) => t instanceof AST.GlobalDef);
 
-            var normalActions = actions.filter((a) => !a.isPage() && !a.isEvent() && !a.isActionTypeDef() && !a.isTest()) 
+            var normalActions = actions.filter((a) => !a.isPage() && !a.isEvent() && !a.isActionTypeDef() && !a.isTest())
             var byKind:StringMap<AST.Decl[]> = {}
             var unsorted = normalActions.filter(a => {
                 var k = a.getExtensionKind()
@@ -448,12 +448,12 @@ module TDev
                     label: lf("pages"),
                     widget: "pagesSection",
                     things: actions.filter((a) => a.isPage() && !a.isTest()),
-                    initiallyHidden: AST.blockMode, 
+                    initiallyHidden: AST.blockMode,
                     createOne: () => [{
                         decl: this.editor.freshPage(),
                         displayName: 'page',
                         description: lf("A user interface"),
-                        tick: Ticks.sideAddPage,                        
+                        tick: Ticks.sideAddPage,
                     }],
                 }, <ThingSection>{
                     label: lf("tests"),
@@ -538,7 +538,7 @@ module TDev
                         displayName: 'callback',
                         description: lf("A signature definition of an action")
                     }],
-                }, 
+                },
             ]
 
             var c = sections.shift()
@@ -553,13 +553,13 @@ module TDev
                     ScriptNav.addAnythingVisible = false;
                     Util.setTimeout(100, () => TheEditor.updateTutorial())
                 };
-                
+
                 sections.forEach((sect) => {
                     if (!sect.createOne) return
                     sect.createOne().forEach((ds, i) => {
                         // d.setName(sect.newName
                         var d = ds.decl;
-                        var dname = (d instanceof AST.RecordDef) ? (<AST.RecordDef> d).getCoreName() : d.getName();                    
+                        var dname = (d instanceof AST.RecordDef) ? (<AST.RecordDef> d).getCoreName() : d.getName();
                         d.setName(ds.displayName);
                         var b = DeclRender.mkBox(d);
                         boxes.push(b);

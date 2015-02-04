@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT {
     export enum SpriteType
@@ -17,7 +17,7 @@ module TDev.RT {
             super()
         }
     }
-    
+
     //? A sprite
     //@ icon("sprite") ctx(general,gckey)
     export class Sprite
@@ -39,7 +39,7 @@ module TDev.RT {
         private _acceleration : Vector2 = Vector2.mk(0,0);
         public _width : number = undefined;
         private _mass : number = Number.NaN;
-        
+
         public _position : Vector2 = Vector2.mk(0,0);
         private _color : Color = Colors.light_gray();
         private _text : string = undefined;
@@ -47,7 +47,7 @@ module TDev.RT {
         public _hidden : boolean = false;
         private _opacity : number = 1;
         private _clip: number[] = undefined;
-        
+
         public spriteType : SpriteType;
         public fontSize : number;
         private _picture : Picture;
@@ -64,7 +64,7 @@ module TDev.RT {
         private _lastPosition : Vector2 ; // used in redraw, no serialization
 
         private _springs : Spring[] = [];
-        
+
         /// <summary>
         /// newPosition, newSpeed, and midSpeed, newRotation are only used during an update step and need not be serialized
         /// </summary>
@@ -147,10 +147,10 @@ module TDev.RT {
 
         //? Sets the angle of the sprite in degrees
         //@ writesMutable
-        public set_angle(angle:number) : void { 
+        public set_angle(angle:number) : void {
             if(this._angle != angle) {
                 this._angle = angle;
-                this.computeBoundingBox(); 
+                this.computeBoundingBox();
                 this.contentChanged();
             }
         }
@@ -184,29 +184,29 @@ module TDev.RT {
 
         //? Sets the height in pixels
         //@ writesMutable
-        public set_height(height:number) : void 
+        public set_height(height:number) : void
         {
             height = Math.max(1, height);
             if (height != this._height) {
-                this._height = height; 
+                this._height = height;
                 if (this._picture)
                     this._width = this._picture.widthSync() / Math.max(1, this._picture.heightSync()) * this._height;
-                this.computeBoundingBox(); 
-                this.contentChanged(); 
+                this.computeBoundingBox();
+                this.contentChanged();
             }
         }
 
         //? Sets the width in pixels
         //@ writesMutable
-        public set_width(width:number) : void { 
-            width = Math.max(1, width); 
+        public set_width(width:number) : void {
+            width = Math.max(1, width);
             if(this._width != width) {
                 this._frame = null;
                 this._width = width;
                 if (this._picture)
                     this._height = this._picture.heightSync() / Math.max(1, this._picture.widthSync()) * this._width;
-                this.computeBoundingBox(); 
-                this.contentChanged(); 
+                this.computeBoundingBox();
+                this.contentChanged();
             }
         }
 
@@ -420,21 +420,21 @@ module TDev.RT {
             return this.onEveryFrame.addHandler(perform)
         }
 
-        public changed(): void 
+        public changed(): void
         {
             this.hasChanged = true;
         }
 
-        private contentChanged(): void 
+        private contentChanged(): void
         {
             this.changed();
             this.shapeDirty = true;
         }
-        
+
         public redraw(ctx : CanvasRenderingContext2D, debug: boolean)
         {
             if (!debug && (this._hidden || this._opacity == 0 || this._width <= 0 || this._height <= 0 || this._scale == 0)) return; // don't render hidden sprites
-            
+
             //if (!hasChanged) return;
             //hasChanged = false;
             this.drawShape(ctx, debug);
@@ -458,17 +458,17 @@ module TDev.RT {
 
             //canvas.width = _width;
             //canvas.height = _height;
-            
+
             var fcolor = this.color().toHtml();
-            var dcolor = () => this.color().make_transparent(1).toHtml(); // debug color not tranparent   
+            var dcolor = () => this.color().make_transparent(1).toHtml(); // debug color not tranparent
             var scaledWidth = this._width * this._scale;
-            var scaledHeight = this._height * this._scale;    
+            var scaledHeight = this._height * this._scale;
             var scaledFontSize = Math_.round_with_precision(this.fontSize * this._scale, 1);
             ctx.save();
             ctx.translate(this.x(), this.y());
             var ag = this._angle / 180 * Math.PI;
             if (this._frame && this._frame.rotated) ag -= 90;
-            ctx.rotate(ag);            
+            ctx.rotate(ag);
             switch (this.spriteType) {
             case SpriteType.Rectangle:
                 ctx.translate(-scaledWidth/2, -scaledHeight/2);
@@ -485,7 +485,7 @@ module TDev.RT {
                 break;
 
             case SpriteType.Ellipse:
-                // TODO need to play with createRadialGradient() 
+                // TODO need to play with createRadialGradient()
                 ctx.scale(scaledWidth/scaledHeight, 1);
                 ctx.translate(-scaledHeight/2, -scaledHeight/2);
 
@@ -494,10 +494,10 @@ module TDev.RT {
                   ctx.strokeStyle = dcolor();
                   ctx.strokeRect(0, 0, scaledHeight, scaledHeight);
                 }
-                
+
                 // set opacity only after debugging done
                 ctx.globalAlpha = this._opacity;
-                if (!this._hidden) {                
+                if (!this._hidden) {
                     ctx.beginPath();
                     ctx.arc(scaledHeight/2, scaledHeight/2, scaledHeight/2, 0, 2*Math.PI);
                     if (Browser.brokenGradient) {
@@ -546,7 +546,7 @@ module TDev.RT {
                     }
                 }
                 break;
-                
+
             case SpriteType.Text:
                 ctx.translate(-scaledWidth/2, -scaledHeight/2);
                 // debug rectangle around ellipse
@@ -582,8 +582,8 @@ module TDev.RT {
                         ctx.translate(0, scaledFontSize * 1.25);
                     }
                 }
-                break;    
-                
+                break;
+
             case SpriteType.Anchor:
                 ctx.translate(- scaledWidth/2, - scaledHeight/2);
                 // debug rectangle around ellipse
@@ -730,7 +730,7 @@ module TDev.RT {
 
         /// <summary>
         /// Consider segments o0 + d0*s and o1 + d1*t, parametrized by s and t in [0,1]
-        /// Either the segments overlap, i.e., we can find both s and t in the range [0,1], in which case, the 
+        /// Either the segments overlap, i.e., we can find both s and t in the range [0,1], in which case, the
         /// closest segment is 0 length.
         ///
         /// Otherwise the closest distance will be rooted at one of the four endpoints of these segments.
@@ -755,7 +755,7 @@ module TDev.RT {
             var v2 = this.minPointSegment(x0, y0, dx0, dy0, x1 + dx1, y1 + dy1);
             var v3 = this.minPointSegment(x1, y1, dx1, dy1, x0, y0);
             var v4 = this.minPointSegment(x1, y1, dx1, dy1, x0 + dx0, y0 + dy0);
-            
+
             var d1 = v1.length();
             var d2 = v2.length();
             var d3 = v3.length();
@@ -802,7 +802,7 @@ module TDev.RT {
             // rotate unitNormal into rotation of box of this sprite by adding -angle to it
             var angle = Math.atan(unitNormal.y()/unitNormal.x());
             angle = angle - Math.PI * this._angle / 180;
-            
+
             // find intersect with horizontals of bb
             var tan = Math.tan(angle);
             var horiz = Math.abs(this.radiusY()/tan);
@@ -817,7 +817,7 @@ module TDev.RT {
             }
             return Math.abs(this.radiusX()/Math.cos(angle));
         }
-        
+
         public radius(unitNormal : Vector2) : number
         {
             // TODO: Explain where this funky dot product came from...
@@ -850,14 +850,14 @@ module TDev.RT {
             return rad;
         }
 
-        private radiusX() : number { return this.width() / 2; } 
+        private radiusX() : number { return this.width() / 2; }
         private radiusY() : number { return this.height() / 2; }
 
 
         /// <summary>
         /// Used during a time step to determine collisions etc.
         /// </summary>
-        public stepDisplacement() : Vector2 
+        public stepDisplacement() : Vector2
         {
             return this.newPosition.subtract(this._position);
         }
@@ -865,7 +865,7 @@ module TDev.RT {
         /// <summary>
         /// Apply gravity and user applied force and also repulsive forces due to touching of walls/other objects
         /// </summary>
-        private computeForces(positionSpeed : Vector4) : Vector2 
+        private computeForces(positionSpeed : Vector4) : Vector2
         {
             var force = (this._parent.gravity().add(this._acceleration)).scale(this.mass());
 
@@ -944,13 +944,13 @@ module TDev.RT {
         }
 
         /// <summary>
-        /// Make a time step. 
+        /// Make a time step.
         ///   - Uses speed, position to create newSpeed and newPosition
-        /// 
-        /// CommitUpdate moves the newPosition, newSpeed into position, speed, thereby finalizing it. 
-        /// 
+        ///
+        /// CommitUpdate moves the newPosition, newSpeed into position, speed, thereby finalizing it.
+        ///
         /// Use Euler midpoint method.
-        /// 
+        ///
         /// This method must be IDEMPOTENT so we can call it a few times during a step with different partial time steps.
         /// </summary>
         public update(dT:number):void
@@ -976,7 +976,7 @@ module TDev.RT {
                 var anyDone = false;
                 this._animations.forEach(anim => anyDone = !anim.evolve(rt, dT) || anyDone);
                 // cleanup on demand
-                if (anyDone) { 
+                if (anyDone) {
                     this._animations = this._animations.filter(anim => anim.isActive);
                     if (this._animations.length == 0) this._animations = undefined;
                 }
@@ -1022,13 +1022,13 @@ module TDev.RT {
                 s0y = 0;
             }
             else {
-                d0x = 0; 
+                d0x = 0;
                 d0y = (this._height - this._width);
                 s0x = 0;
                 s0y = -d0y / 2;
             }
             var d0 = this.rotate(new Vector2(d0x, d0y));
-            var s0 = this.rotate(new Vector2(s0x, s0y)); 
+            var s0 = this.rotate(new Vector2(s0x, s0y));
             return new Vector4(this.x() + s0.x(), this.y() + s0.y(), d0.x(), d0.y());
         }
 
@@ -1151,8 +1151,8 @@ module TDev.RT {
         //@ [width].defl(48) [height].defl(48)
         public set_clip(left: number, top: number, width: number, height: number): void
         {
-            if (this._picture 
-                && isFinite(left) && isFinite(top) && isFinite(width) && isFinite(height)) 
+            if (this._picture
+                && isFinite(left) && isFinite(top) && isFinite(width) && isFinite(height))
             {
                 this._frame = undefined;
                 this._width = width;
@@ -1167,7 +1167,7 @@ module TDev.RT {
         public setFrame(frame : SpriteFrame) {
             if (this._frame != frame) {
                 this._frame = frame;
-                if (this._width <= 0) this._width = frame.width;                
+                if (this._width <= 0) this._width = frame.width;
                 this._height = frame.width <= 0 ? frame.height : this._width / frame.width * frame.height;
                 this._clip = [frame.x, frame.y, frame.width, frame.height];
                 // this._angle = frame.rotated ? -90 : 0;
@@ -1204,7 +1204,7 @@ module TDev.RT {
             this._parent.deleteSprite(this);
             this._parent = null;
         }
-        
+
         //? True if sprite is deleted.
         //@ readsMutable
         public is_deleted(): boolean {
@@ -1220,12 +1220,12 @@ module TDev.RT {
             return false;
         }
 
-        public addSpring(sp:Spring) : void 
+        public addSpring(sp:Spring) : void
         {
             this._springs.push(sp);
         }
 
-        public removeSpring(sp:Spring) : void 
+        public removeSpring(sp:Spring) : void
         {
             var idx = this._springs.indexOf(sp);
             if (idx > -1)
@@ -1284,7 +1284,7 @@ module TDev.RT {
                 Mass: this.mass(),
                 'Acceleration X': this.acceleration_x(),
                 'Acceleration Y': this.acceleration_y(),
-                Visible: this.is_visible(),                          
+                Visible: this.is_visible(),
             };
         }
     }

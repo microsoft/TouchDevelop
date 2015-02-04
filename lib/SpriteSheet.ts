@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export interface SpriteFrame {
         x : number;
@@ -107,9 +107,9 @@ module TDev.RT {
         //@ writesMutable [loops].defl(1)
         public add_animation(name : string, frames : Collection<string>, duration : number, loops : number, yoyo:boolean) {
             if (duration <= 0) duration = frames.count() * 1/30.0; // 30fps
-            this.animations[name] = <SpriteFrameClip>{ 
-                frames : frames.a.slice(0), 
-                duration : Math.max(0.02, duration), 
+            this.animations[name] = <SpriteFrameClip>{
+                frames : frames.a.slice(0),
+                duration : Math.max(0.02, duration),
                 loopCount:Math.floor(loops),
                 yoyo:yoyo
             };
@@ -141,8 +141,8 @@ module TDev.RT {
         //? Displays the sprite sheet.
         //@ readsMutable
         //@ embedsLink("Wall", "Picture")
-        public post_to_wall(s: IStackFrame): void { 
-            super.post_to_wall(s) 
+        public post_to_wall(s: IStackFrame): void {
+            super.post_to_wall(s)
         }
     }
 }

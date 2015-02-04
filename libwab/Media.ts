@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Wab {
     export function MediaInit()
     {
@@ -12,7 +12,7 @@ module TDev.RT.Wab {
 
         if (isSupportedAction(Action.STATUS)) {
             Util.log('wab: boosting STATUS');
-            HTML.showProgressNotification = HTMLWab.showProgressNotification; 
+            HTML.showProgressNotification = HTMLWab.showProgressNotification;
         }
 
         if (isSupportedAction(Action.LIST_IMAGE_ALBUMS)) {

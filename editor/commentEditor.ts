@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -46,7 +46,7 @@ module TDev
 
             TheEditor.showStmtEditor(this);
         }
-        
+
         public handleKey(e:KeyboardEvent) : boolean
         {
             if (e.keyName == "Esc") {

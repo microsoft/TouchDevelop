@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? An HTTP web response
     //@ stem("response") ctx(general,gckey)
@@ -29,7 +29,7 @@ module TDev.RT {
             r._statusCode = proxyResponse.code;
             var headers = proxyResponse.headers;
             if (headers)
-                headers.forEach(h => r._headers.set_at(h.name.toLowerCase(), h.value)); 
+                headers.forEach(h => r._headers.set_at(h.name.toLowerCase(), h.value));
             if (proxyResponse.forceText || request.proxyResponseType() == "text") r._content = proxyResponse.contentText;
             else r._content = atob(proxyResponse.content);
             r._binaryContent = proxyResponse.binaryContent
@@ -65,7 +65,7 @@ module TDev.RT {
             if (this._binaryContent)
                 return this._binaryContent;
             if (!this._content) return null;
-            return new Uint8Array(this._content); 
+            return new Uint8Array(this._content);
         }
 
         //? Reads the response body as a Buffer.

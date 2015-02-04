@@ -88,11 +88,11 @@ module TDev {
         public notifyRunState() { }
         public notifyBreakpointHit() { }
         public notifyBreakpointContinue() { }
-        
+
         public notifyPagePush() : void
         {
         }
-        
+
         public notifyPagePop(p:TDev.WallPage) : void
         {
         }

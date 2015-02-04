@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? An audio/video player on the home network
     //@ stem("pa") walltap cap(home) obsolete

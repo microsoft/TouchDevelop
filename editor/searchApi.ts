@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -57,13 +57,13 @@ module TDev
                 }
                 recognition.onerror = (e:any) => {
                     Util.log('reco:error' + e);
-                }               
+                }
                 recognition.onstart = () => {
                     Util.log('reco:start');
-                }               
+                }
                 recognition.onend = () => {
                     Util.log('reco:end');
-                }               
+                }
                 recognition.start();
             }
         }
@@ -359,7 +359,7 @@ module TDev
             }
 
             var addList = (entries: IntelliItem[]) => {
-                var cmpName = (a: IntelliItem, b: IntelliItem) => 
+                var cmpName = (a: IntelliItem, b: IntelliItem) =>
                     b.alphaOverride() - a.alphaOverride() ||
                     Util.stringCompare(a.getName(), b.getName());
                 var cmpScoreThenName = (a: IntelliItem, b: IntelliItem) =>
@@ -791,7 +791,7 @@ module TDev
 
     /* SYNTHESIS
     export class SynthesisCleaner
-        extends TDev.AST.NodeVisitor 
+        extends TDev.AST.NodeVisitor
     {
         constructor () {
             super()
@@ -801,7 +801,7 @@ module TDev
             this.visitChildren(n);
             return null
         }
-                
+
         visitBlock(n: TDev.AST.Block) {
             n.stmts = n.stmts.filter((s) => s.nodeType() != "comment");
             this.visitChildren(n);

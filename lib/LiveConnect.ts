@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? OneDrive, OneNote operations
     export module CloudStorage {
@@ -169,7 +169,7 @@ module TDev.RT {
             return LiveConnect.authenticateAsync("wl.skydrive wl.skydrive_update wl.contacts_skydrive")
                 .then((accessToken: string) => {
                     if (!accessToken) return undefined;
-                    return "https://apis.live.net/v5.0/" + id + "/picture?type=" + media + "&access_token=" + accessToken; 
+                    return "https://apis.live.net/v5.0/" + id + "/picture?type=" + media + "&access_token=" + accessToken;
                 });
         }
 

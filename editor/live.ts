@@ -10,7 +10,7 @@ module TDev
         private liveRefreshWaiting = false;
         private liveWallDiv = div(null);
 
-        
+
 
         constructor()
         {

@@ -16,7 +16,7 @@ function startBuilder() {
 }
 
 if (!dst || src.mtime.getTime() > dst.mtime.getTime()) {
-    var p = child_process.spawn("node", 
+    var p = child_process.spawn("node",
            ["../../External/TypeScript/tsc.js",
             "-out", "build.js", "../rt/promise.ts", "build.ts"],
             { stdio: "inherit" });

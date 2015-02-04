@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? This type is no longer supported. See [](/tiles) for more information.
     //@ ctx(general,gckey,walltap) cap(tiles)

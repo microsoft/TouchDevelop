@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export var PrevScript:string = undefined;
@@ -109,10 +109,10 @@ module TDev {
 
         public rt_start = "";
         public rt_stop = "";
-  
+
         public getKind(name:string) : Kind
         {
-            return this._kinds[name]; 
+            return this._kinds[name];
         }
 
         public getThing(name:string) : AST.SingletonDef
@@ -269,8 +269,8 @@ module TDev {
 
         private initSingletons()
         {
-            this._kindList.forEach((k:Kind) => { 
-                k.initSingleton(); 
+            this._kindList.forEach((k:Kind) => {
+                k.initSingleton();
                 if (!!k.singleton) {
                     this._singletons[k.singleton.getName()] = k.singleton;
                     this._singletonList.push(k.singleton);
@@ -288,7 +288,7 @@ module TDev {
             //this.core.App.singleton._isBrowsable = false;
             this.core.PlaceholderThing._isBrowsable = false;
         }
-        
+
 
         public asyncReport()
         {
@@ -310,7 +310,7 @@ module TDev {
     }
 
     export var api = new Api();
-    
+
     export class ApiNode
     {
         constructor(public _name:string) {
@@ -333,10 +333,10 @@ module TDev {
         WallTap         = 0x0100,
         Enumerable      = 0x0200,    // provides enumeration
         Json            = 0x0400,    // support json export/import
-        
+
         General         = KindContext.Parameter | KindContext.GlobalVar,
 
-        //ParametricPropagateMask = KindContext.Json | 
+        //ParametricPropagateMask = KindContext.Json |
 
         ArtResource     = 0x04000000,    // additional, not in WP
     }
@@ -385,7 +385,7 @@ module TDev {
         AnyWeb =
            Location
            | Maps
-           | Search 
+           | Search
            | Translation
            | EditorOnly
            | MusicAndSounds
@@ -395,7 +395,7 @@ module TDev {
            | CloudServices
            ,
 
-        WindowsPhone = 
+        WindowsPhone =
             Accelerometer
             | Calendar
             | CloudServices
@@ -449,7 +449,7 @@ module TDev {
             | Network
             ,
 
-        WinRT = 
+        WinRT =
             Accelerometer
             | Camera
             | CloudServices
@@ -473,8 +473,8 @@ module TDev {
             ,
 
         AzureWebSite =
-            Npm 
-            | Network 
+            Npm
+            | Network
             | Shell,
 
         CordovaApp =
@@ -492,7 +492,7 @@ module TDev {
            CloudServices
            | Location
            | Maps
-           | Search 
+           | Search
            | Translation
            ,
 
@@ -535,7 +535,7 @@ module TDev {
         WebAll              = ImplementationStatus.Web | ImplementationStatus.WinRT | ImplementationStatus.Wab
     }
 
-    
+
     export class Kind
         extends ApiNode
     {
@@ -578,7 +578,7 @@ module TDev {
             if (other instanceof AST.RecordDef)
                 return this.equals((<AST.RecordDef>other).entryKind)
         }
-        
+
         public equals(other:Kind)
         {
             return this == other;
@@ -613,7 +613,7 @@ module TDev {
             throw new Error(msg + " at " + this.getName())
         }
 
-        public md_cap(...caps:string[]) { 
+        public md_cap(...caps:string[]) {
             this.generalCapabilities |= Property.getPlatform(caps, (s) => this.md_oops(s));
         }
 
@@ -662,7 +662,7 @@ module TDev {
         public initProperties()
         {
             var maxUsage = this._propList.map((p:Property) => p._usage_count).max() + 1;
-            this._propList.forEach((p:Property) => { 
+            this._propList.forEach((p:Property) => {
                 p.getUsage().apiFreq = p._usage_count / maxUsage;
             });
         }
@@ -695,7 +695,7 @@ module TDev {
         private _propByName:any = {};
         private _propList:Property[] = [];
         public singleton:AST.SingletonDef;
-        
+
         public icon(): string { return this._icon; }
         private _icon = "";
 
@@ -733,8 +733,8 @@ module TDev {
             return this.getName();
         }
 
-        public isEnumerable() { 
-           //return !!this.elementKind || (!!this.getProperty("at") && !!this.getProperty("count")); 
+        public isEnumerable() {
+           //return !!this.elementKind || (!!this.getProperty("at") && !!this.getProperty("count"));
            return this.hasContext(KindContext.Enumerable);
         }
 
@@ -802,7 +802,7 @@ module TDev {
         {
             return super.matches(other) || this.parameters.some(p => p.matches(other))
         }
-        
+
         public cleanup()
         {
             if (this.generated) {
@@ -905,7 +905,7 @@ module TDev {
                 if (p.availableOnlyOn && p.availableOnlyOn.indexOf(this.parameters[0]) < 0)
                     return;
                 this.md_addProperty(p.substFor(this))
-            }) 
+            })
         }
 
         public getParameter(idx:number)
@@ -978,7 +978,7 @@ module TDev {
         public getSignature()
         {
             var s = this.getInParameters().map((p:PropertyParameter) => p.getName() + ":" + p.getKind()).join(", ");
-            var outParm = this.getOutParameters()[0] 
+            var outParm = this.getOutParameters()[0]
             var resKind = outParm ? outParm.getKind() : null;
             if (!resKind || resKind == api.core.Nothing) {
                 return "(" + s + ")";
@@ -1064,7 +1064,7 @@ module TDev {
             this.usage_count = -1;
             api.md_addKind(this);
         }
-        public listProperties() : IProperty[] 
+        public listProperties() : IProperty[]
             { return this.getProps().map(Property.withParent(this)); }
 
         public getHelp():string { return this._help; }
@@ -1110,9 +1110,9 @@ module TDev {
         {
             if (!(k instanceof ParametricKind)) return []
             //var pk = <ParametricKind>k
-            return Util.range(0, k.getParameterCount()).map(i => { return { 
-                ofKind: k, 
-                idx: i, 
+            return Util.range(0, k.getParameterCount()).map(i => { return {
+                ofKind: k,
+                idx: i,
                 prefix: i == 0 ? "" : (<ParametricKind>k).getParameterPrefix(i) + " "
             } })
         }
@@ -1223,7 +1223,7 @@ module TDev {
 
         NonBrowsable = PropertyFlags.IsObsolete | PropertyFlags.IsHidden | PropertyFlags.IsPrivate,
     }
-   
+
     // keep in sync with ApiGenerator/Program.cs
     export enum ParameterFlags
     {
@@ -1349,7 +1349,7 @@ module TDev {
 
         public runtimeName()
         {
-           return this._runtimeName || Api.runtimeName(this.getName()) 
+           return this._runtimeName || Api.runtimeName(this.getName())
         }
 
         private topicCache:string;
@@ -1373,7 +1373,7 @@ module TDev {
         }
 
         public md_async() {
-            if (this._implStatus & ImplementationStatus.Pauses) this.flags |= PropertyFlags.Async; 
+            if (this._implStatus & ImplementationStatus.Pauses) this.flags |= PropertyFlags.Async;
             else this.md_oops("async specified on method with no ResumeCtx")
         }
 
@@ -1391,8 +1391,8 @@ module TDev {
         public md_picAsync() { this._asyncReason = "pic"; }
         // the first call may be slow but remaining ones are fast; type may provide pre-load method
         public md_cachedAsync() { this._asyncReason = "cached"; }
-        
-        // other reasons are: 
+
+        // other reasons are:
         //    the real 'async' annotation
         //    'obsolete' annotation
         //    'stub' annotation
@@ -1453,7 +1453,7 @@ module TDev {
             throw new Error(msg + " at " + this.parentKind.toString() + "->" + this.getName())
         }
 
-        public md_stub(...platforms:string[]) { 
+        public md_stub(...platforms:string[]) {
             this._implStatus = this._implStatus & ~ImplementationStatus.WebAll;
             for (var i = 0; i < platforms.length; ++i)
                 switch (platforms[i]) {
@@ -1478,7 +1478,7 @@ module TDev {
             return r;
         }
 
-        public md_cap(...caps:string[]) { 
+        public md_cap(...caps:string[]) {
             if (this._md_cap_set) this.md_oops("cap() called twice; use cap(foo,bar) instead")
             this._md_cap_set = true;
             this._platform = Property.getPlatform(caps, (s) => this.md_oops(s));
@@ -1529,17 +1529,17 @@ module TDev {
             var mask = PropertyFlags.NeedsTracing2|PropertyFlags.NeedsTimestamping2|PropertyFlags.HasPauseContinue2;
             return (this.getFlags() & mask) == mask;
         }
-        public needsTracing() { 
+        public needsTracing() {
             return !!(this.getFlags() & (PropertyFlags.NeedsTracing | PropertyFlags.NeedsTracing2))
         }
-        public needsTimestamping() { 
+        public needsTimestamping() {
             return !!(this.getFlags() & (PropertyFlags.NeedsTimestamping | PropertyFlags.NeedsTimestamping2))
         }
         public hasPauseContinue() {
             return !!(this.getFlags() & (PropertyFlags.HasPauseContinue | PropertyFlags.HasPauseContinue2))
         }
 
-        static withParent(par:Kind) 
+        static withParent(par:Kind)
         {
             return (p:IProperty) => {
                 p.parentKind = par;
@@ -1577,8 +1577,8 @@ module TDev {
         private isQuick() { return false; }
         public forwardsTo() : AST.Decl { return null; }
         public forwardsToStmt() : AST.Stmt { return null; }
-        public isBrowsable() { 
-            return ((this.flags & PropertyFlags.NonBrowsable) == 0 && 
+        public isBrowsable() {
+            return ((this.flags & PropertyFlags.NonBrowsable) == 0 &&
                     (!this.parentKind.isPrivate) &&
                     ((this.flags & PropertyFlags.DocsOnly) == 0 || !Script || Script.isDocsTopic()) &&
                     (dbg || !(this.flags & PropertyFlags.IsDebugOnly)) &&
@@ -1601,7 +1601,7 @@ module TDev {
                 else
                     return " : " + resKind.toString();
             }
-        } 
+        }
 
         public getSignature():string { return Property.getSignatureCore(this); }
 
@@ -1611,9 +1611,9 @@ module TDev {
             else return this._name;
         }
 
-        public canBeOffloaded(): boolean { 
+        public canBeOffloaded(): boolean {
             if (this.getName() == "post to wall") return false;
-            
+
             // allow record operations to be offloaded
             if (this.parentKind.getRecord()) return true;
 
@@ -1626,7 +1626,7 @@ module TDev {
             if (canBeOffloadedList.indexOf(parentName) >= 0 ||
                 parentName == "Places" && this._name != "check in")
                 return true;
-            return false; 
+            return false;
         }
 
         public isRefMethod()
@@ -1705,8 +1705,8 @@ module TDev {
             this._stringValues = v;
             if (!this.hasOwnProperty('getDefaultValue')) {
                 this.getDefaultValue = () => [AST.mkLit(
-                    this.getKind() == api.core.Number ? 
-                    parseFloat(v[0]) : 
+                    this.getKind() == api.core.Number ?
+                    parseFloat(v[0]) :
                     this.getKind() == api.core.Boolean ?
                     v[0] == "true" : v[0]
                 )];
@@ -1748,7 +1748,7 @@ module TDev {
     {
         private _multiResult:PropertyParameter;
 
-        constructor(private _parametricKind:ParametricKind, 
+        constructor(private _parametricKind:ParametricKind,
                     parentKind:Kind, name:string, desc:string, parms:PropertyParameter[], retType:Kind)
         {
             super(parentKind, name, desc, parms, retType)
@@ -1781,7 +1781,7 @@ module TDev {
         public instanceFor(parK:MultiplexKind, k:Kind, args:Kind[]):Property
         {
             var par = this._parametricKind.createInstance(args)
-            var r = super.substForInternal(par, (pp, rk) => 
+            var r = super.substForInternal(par, (pp, rk) =>
                 new MultiplexProperty(k, parK, rk, pp));
             (<MultiplexProperty>r).savedArgs = args
             return r
@@ -1789,7 +1789,7 @@ module TDev {
 
         public substFor(par:ParametricKind, mk:(pp:PropertyParameter[], rk:Kind)=>Property = null)
         {
-            return super.substForInternal(par, (pp, rk) => 
+            return super.substForInternal(par, (pp, rk) =>
                 new MultiplexRootProperty(this._parametricKind, par, this._name, this._help, pp, rk))
         }
     }

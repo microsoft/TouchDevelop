@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A song album
     //@ stem("album") walltap cap(media)
@@ -54,7 +54,7 @@ module TDev.RT {
             return Media.songsAsync(this._name)
                 .then(s => this._songs = s);
         }
-        
+
 
         public toString(): string {
             return this.name();
@@ -123,7 +123,7 @@ module TDev.RT {
                 if (this._genre)
                     dc.appendChild(div("item-subtle", this._genre));
                 d.appendChild(div('item-buttons', HTML.mkRoundButton("svg:play,black", lf("play"), Ticks.songAlbumPlay, () => this.playAsync().done())));
-            })                
+            })
             return d;
         }
 

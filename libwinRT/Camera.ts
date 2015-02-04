@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export class WinRTCamera
         extends Camera
@@ -56,7 +56,7 @@ module TDev.RT {
                     return Picture.fromUrl(u);
                 })
                 .done(
-                    (p: Picture) => r.resumeVal(p), 
+                    (p: Picture) => r.resumeVal(p),
                     (e: any) => r.resumeVal(undefined)
                 );
         }

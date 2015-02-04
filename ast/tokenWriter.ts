@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev { export module AST {
@@ -146,7 +146,7 @@ module TDev { export module AST {
                     this.op0("]");
                 }
             }
-            
+
             return this
         }
 

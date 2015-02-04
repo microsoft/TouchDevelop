@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 // openDatabase("TDev", "1.0", "TouchDevelop database", 5 * 1024 * 1024).transaction(function (tx) { tx.executeSql("DELETE FROM TABLESessions;"); });

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Phone numbers, vibrate, etc...
     export module Phone
@@ -59,7 +59,7 @@ module TDev.RT {
         }
 
         //? Vibrates the phone for ... seconds (0.02 minimum)
-        //@ [seconds].defl(0.1) 
+        //@ [seconds].defl(0.1)
         //@ import("cordova", "org.apache.cordova.vibration")
         export function vibrate(seconds: number): void {
             vibrateCore(seconds)

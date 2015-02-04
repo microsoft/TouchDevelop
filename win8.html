@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -110,10 +110,10 @@
             if (eventObject.detail.previousExecutionState !== appModel.Activation.ApplicationExecutionState.terminated) {
                 TDev.initAsync().done();
                 TDev.RT.WinRT.ShareManagerWinRT.init();
-                // TODO: This application has been newly launched. Initialize 
+                // TODO: This application has been newly launched. Initialize
                 // your application here.
             } else {
-                // TODO: This application has been reactivated from suspension. 
+                // TODO: This application has been reactivated from suspension.
                 // Restore application state here.
             }
             WinJS.UI.processAll();
@@ -136,11 +136,11 @@
     // print charm handled in printmanager
     app.oncheckpoint = function (ev) {
         // TODO: This application is about to be suspended. Save any state
-        // that needs to persist across suspensions here. You might use the 
+        // that needs to persist across suspensions here. You might use the
         // WinJS.Application.sessionState object, which is automatically
         // saved and restored across suspension. If you need to complete an
         // asynchronous operation before your application is suspended, call
-        // eventObject.setPromise(). 
+        // eventObject.setPromise().
 
         if (!!TDev.TheEditor) eventObject.setPromise(TDev.TheEditor.saveStateAsync());
     };

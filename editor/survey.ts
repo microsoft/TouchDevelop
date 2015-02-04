@@ -46,7 +46,7 @@ module TDev {
     }
 
     export var EditorSpyEventStrings = enumStrings(EditorSpyEvents);
-        
+
     export interface EditorSpyTicks {
         [event: string]: Ticks;
     }

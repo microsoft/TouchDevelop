@@ -13,7 +13,7 @@ module TDev.Meta {
         if (!libs.scriptName || !libs.scriptId) return Promise.as(undefined);
 
         if (libs.scriptId == libs.topScriptId) {
-            if (name == Script.localGuid || 
+            if (name == Script.localGuid ||
                 (ScriptEditorWorldInfo.status === "published" && name == ScriptEditorWorldInfo.baseId)) {
                 appToDump = Script;
             }
@@ -38,11 +38,11 @@ module TDev.Meta {
                     if (allowedAsts[key] || rt.runningPluginOn == name || rt.tutorialObject == name) return text;
                     var app = AST.Parser.parseScript(text)
                     var r = new PromiseInv();
-                    var m = ModalDialog.ask("Script '" + libs.scriptName + "' is trying to read the source code of script '" + 
-                                                app.getName() + "'", "allow source access", 
+                    var m = ModalDialog.ask("Script '" + libs.scriptName + "' is trying to read the source code of script '" +
+                                                app.getName() + "'", "allow source access",
                                                 () => {
                                                     allowedAsts[key] = true;
-                                                    r.success(text) 
+                                                    r.success(text)
                                                     r = null;
                                                 })
                     m.onDismiss = () => {
@@ -140,11 +140,11 @@ module TDev.Meta {
             var queryAsync = (terms: string) => searchArtAsync(terms, "picture")
                 .then((itms: Browser.ArtInfo[]) => itms.map(itm => converter(itm)).filter(itm => itm != null));
             m.choose([], {
-                queryAsync: queryAsync, 
+                queryAsync: queryAsync,
                 header: options.title,
                 searchHint: lf("Search..."),
                 initialQuery: options.initialQuery,
-                initialEmptyQuery: !options.initialQuery, 
+                initialEmptyQuery: !options.initialQuery,
                 custombuttons : customButtons
             });
         });
@@ -159,8 +159,8 @@ module TDev.Meta {
         var r = new PromiseInv();
 
         Browser.TheHost.getLocationList("me/groups?count=100", (itms:Browser.BrowserPage[], cont:string) => {
-            var m = new ModalDialog(); 
-            var selected = false;            
+            var m = new ModalDialog();
+            var selected = false;
             var converter = (s : Browser.GroupInfo) => {
                 return s.mkSmallBoxNoClick().withClick(() => {
                         selected = true;
@@ -200,9 +200,9 @@ module TDev.Meta {
         var r = new PromiseInv();
 
         Browser.TheHost.getLocationList("recent-scripts", (itms:Browser.BrowserPage[], cont:string) => {
-            var m = new ModalDialog(); 
+            var m = new ModalDialog();
             var selected = false;
-            
+
             var converter = (s : Browser.ScriptInfo) => {
                 if (!options.filter || options.filter(s))
                     return s.mkSmallBoxNoClick().withClick(() => {
@@ -210,7 +210,7 @@ module TDev.Meta {
                         m.dismiss();
                         r.success(s);
                     });
-                else return null;            
+                else return null;
             };
 
             var boxes = []
@@ -227,7 +227,7 @@ module TDev.Meta {
             if (options.searchPath)
                 options.queryAsync = (terms : string) => {
                     return new Promise((onSuccess, onError, onProgress) => {
-                        Browser.TheHost.getLocationList(options.searchPath + encodeURIComponent(terms), 
+                        Browser.TheHost.getLocationList(options.searchPath + encodeURIComponent(terms),
                             (itms:Browser.BrowserPage[], cont:string) => {
                                 var bxs = [];
                                 itms.forEach((itm) => {

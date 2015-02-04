@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     export module GeoLocation {
         export function isSupported() : boolean { return !!(<any>window).navigator.geolocation;         }
@@ -15,18 +15,18 @@ module TDev { export module RT {
                     },
                     (error:any) => {
                         r.resumeVal(undefined);
-                    }, 
+                    },
                     { enableHighAccuracy : accurate }
                     );
             } else {
                 r.resumeVal(undefined);
             }
         }
-        
+
         export function currentLocation(r: ResumeCtx) {
             getCurrentPosition(false, r);
         }
-        
+
         export function currentLocationAccurate(r : ResumeCtx) {
             getCurrentPosition(true, r);
         }

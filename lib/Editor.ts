@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export module EditorServices {
         export function getTokenAsync(aud: string): Promise {
@@ -34,7 +34,7 @@ module TDev.RT {
         extends RTValue
     {
         public allAnnotations:AstAnnotation[] = [];
-        
+
         constructor(rt:Runtime, headless:boolean)
         {
             super()
@@ -82,7 +82,7 @@ module TDev.RT {
                 .done(ds => r.resumeVal(ds ? JsonObject.wrap(ds) : undefined))
         }
 
-        //? Authenticates the user for the given app name and returns the token if successful. The identity of the token is contructed with ``{app name} - {user id}``. 
+        //? Authenticates the user for the given app name and returns the token if successful. The identity of the token is contructed with ``{app name} - {user id}``.
         //@ async returns(string) cap(editoronly)
         public user_token(app_name : string, r: ResumeCtx) {
             if (Cloud.anonMode(lf("user token"))) {
@@ -117,7 +117,7 @@ module TDev.RT {
             EditorServices
                 .getTokenAsync("TouchDevelop Bin")
                 .then(token => {
-                    if (!token) {                         
+                    if (!token) {
                         r.resumeVal("");
                         return;
                     }

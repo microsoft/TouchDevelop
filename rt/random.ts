@@ -17,7 +17,7 @@ module TDev.Random {
     {
         return (v >>> b) | (v << (32 - b));
     }
-    
+
     function sha256round(w:Uint32Array)
     {
         Util.assert(w.length == 64);
@@ -44,7 +44,7 @@ module TDev.Random {
             var s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
             var maj = (a & b) ^ (a & c) ^ (b & c)
             var temp2 = s0 + maj
- 
+
             h = g
             g = f
             f = e

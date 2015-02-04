@@ -77,10 +77,10 @@ module TDev
         public kind(k:Kind) { return Util.htmlEscape(k.toString()); }
         public op(kw:string) { return Util.htmlEscape(Renderer.spacedText(kw)); }
         public st(kw:string) { return Renderer.tspan("st", kw); }
-        public tline(s:string) { 
-            return Renderer.tdiv("line", s.trim() + (this.showDiff || AST.blockMode ? "" : 
+        public tline(s:string) {
+            return Renderer.tdiv("line", s.trim() + (this.showDiff || AST.blockMode ? "" :
                 "<span class='lineSpacer'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")) + "<br/>"; }
-    
+
         public isAux = false;
         public shortNameHeuristicsApplied = false;
         public shortNameHeuristics = false;
@@ -202,8 +202,8 @@ module TDev
                 v = v + "";
                 Util.die();
                 break;
-            case "boolean": 
-                div = Renderer.tspan("kw", v ? "true" : "false"); 
+            case "boolean":
+                div = Renderer.tspan("kw", v ? "true" : "false");
                 break;
             case "string":
                 div = this.renderString(v);
@@ -214,7 +214,7 @@ module TDev
             return this.wrapError(n, div);
         }
 
-        public visitPropertyRef(n:AST.PropertyRef) 
+        public visitPropertyRef(n:AST.PropertyRef)
         {
             var nm = n.getText();
             var arrow = n.getOrMakeProp().getArrow()
@@ -222,7 +222,7 @@ module TDev
             return this.wrapError(n, this.id(arrow + nm));
         }
 
-        public visitThingRef(n:AST.ThingRef) 
+        public visitThingRef(n:AST.ThingRef)
         {
             if (this.codeReplacement && !n.forceLocal && n.getText() == 'code')
                 return this.codeReplacement;
@@ -321,16 +321,16 @@ module TDev
             if (e.profilingExprData) {
                 var index = Math.floor(e.profilingExprData.duration / AST.ExprHolder.profilingDurationBucketSize);
                 var color: string = AST.ExprHolder.heatmapColors[index];
-                return "<span style='background-color:" + color + "'>" + res + "</span>" + 
+                return "<span style='background-color:" + color + "'>" + res + "</span>" +
                        "<span class='profile' style='background-color:" + color + "'>" +
                        Math.round(e.profilingExprData.duration) + "ms/" + Math.round(e.profilingExprData.count) + "</span>";
             }
-            
+
             if (e.debuggingData) {
                 if (e.debuggingData.critical && e.debuggingData.max) {
                     var scorePartial = e.debuggingData.critical / e.debuggingData.max.critical;
                     var score = Math.floor(scorePartial * 27); // there are 28 colors, first of them is white
-                    var color: string = AST.ExprHolder.heatmapColors[score]; 
+                    var color: string = AST.ExprHolder.heatmapColors[score];
                     var ret = "<span style='background-color:" + color + "'>" + res + "</span>";
                     if (dbg) ret += ("<span class='profile' style='background-color:" + color + "'>" + Math.floor(scorePartial*100) + "%</span>");
                     return ret;
@@ -408,7 +408,7 @@ module TDev
 
             return " stmt-" + cat + " stmt-" + tp
         }
-        
+
         public stmt(n:AST.Stmt, args:string, f:(e:HTMLElement)=>void = undefined, blockNode:AST.Stmt = null)
         {
             if (this.showDiff)
@@ -477,7 +477,7 @@ module TDev
                     })
                 }
             }
-            
+
             if (res == "" && node instanceof AST.Stmt) {
                 var calcNode = (<AST.Stmt>node).calcNode();
                 if (calcNode && calcNode.hint) {
@@ -557,8 +557,8 @@ module TDev
                 return r;
             }
 
-            var ss = this.diffLine(a, a.diffAltStmt, renderHead) + 
-                     this.possibleError(a) + 
+            var ss = this.diffLine(a, a.diffAltStmt, renderHead) +
+                     this.possibleError(a) +
                      this.renderBlock(a.body) +
                      (!AST.legacyMode ? this.endKeyword("function") : "")
             return this.stmt(a, ss);
@@ -597,7 +597,7 @@ module TDev
         public visitWhile(n:AST.While)
         {
             return this.stmt(n,
-                (AST.proMode ? 
+                (AST.proMode ?
                     this.tline(this.kw("while") + this.st(" (") + this.expr(n.condition) + this.st(") {")) :
                     this.tline(this.kw("while") + this.expr(n.condition) + this.kw("do"))) +
               this.possibleError(n) +
@@ -653,8 +653,8 @@ module TDev
         {
             var idiff = this.diffTwoWords(n.boundLocal.getName(), n.diffAltStmt ? (<AST.For>n.diffAltStmt).boundLocal.getName() : null)
             var i = this.id(n.boundLocal.getName())
-            return this.stmt(n, 
-                (AST.proMode ? 
+            return this.stmt(n,
+                (AST.proMode ?
                       //this.tline(this.kw("for") + this.st("(") + this.kw0("var ") + idiff + Renderer.tspan("greyed", " = 0; " + i + " < ") +
                       //           this.expr(n.upperBound) + Renderer.tspan("greyed", "; " + i + " = " + i + " + 1") + this.st(") {")) :
                       this.tline(this.kw("for") + this.st("(") + this.kw0("var ") + idiff + this.st(" < ") +
@@ -674,7 +674,7 @@ module TDev
             return this.stmt(n,
               this.tline(this.kw("for each ") + (AST.proMode ? this.st("(") + this.kw0("var ") : "") +
                 this.diffTwoWords(n.boundLocal.getName(), n.diffAltStmt ? (<AST.Foreach>n.diffAltStmt).boundLocal.getName() : null) +
-                this.kw("in") + this.expr(n.collection) + 
+                this.kw("in") + this.expr(n.collection) +
                     (AST.proMode ? this.st(")") + (hasWhere ? "" : this.st(" {"))
                                         : (!hasWhere ? this.kw("do") : ""))) +
               this.possibleError(n) +
@@ -694,7 +694,7 @@ module TDev
         public visitAnyIf(n:AST.If):string
         {
             var children =
-              AST.proMode ? 
+              AST.proMode ?
                 this.tline((n.isElseIf ? this.st("}") + this.kw("else if") : this.kw("if")) + this.st(" (") + this.expr(n.rawCondition) + this.st(") {")) :
                 this.tline(this.kw(n.isElseIf ? "else if" : "if") + this.expr(n.rawCondition) + this.kw("then"))
 
@@ -712,8 +712,8 @@ module TDev
 
             if (n.displayElse) {
                 if (n.rawElseBody.isBlockPlaceholder()) {
-                    return this.stmt(n, children) + 
-                        this.stmt(n.rawElseBody.stmts[0] || n, 
+                    return this.stmt(n, children) +
+                        this.stmt(n.rawElseBody.stmts[0] || n,
                         AST.proMode ?
                             this.tline(this.st("}") + this.kw("else") + this.st("{ }")) :
                             this.tline(this.kw("else") + Renderer.tspan("greyed", "do nothing") + this.kw(" end ") + this.greyKw("if")),
@@ -735,7 +735,7 @@ module TDev
         {
 
             var finaltok = this.op((<AST.Block>n.parent).stmts.peek() == n ? ")" : ",")
-            var str = this.diffLine(n, n.diffAltStmt, 
+            var str = this.diffLine(n, n.diffAltStmt,
                 n => [this.id(n.getName()), this.op(":"), this.kind(n.getKind()), finaltok])
             return this.stmt(n, str + this.possibleError(n));
         }
@@ -783,10 +783,10 @@ module TDev
             if (AST.proMode && !inParms && !outParms)
                 hd += this.st(" {")
 
-            return this.tline(hd) + 
-              inParms + 
-              returns + 
-              outParms + 
+            return this.tline(hd) +
+              inParms +
+              returns +
+              outParms +
               this.possibleError(n.action);
         }
 
@@ -810,12 +810,12 @@ module TDev
                     var k = a.modelParameter.getKind()
                     if (k instanceof AST.RecordEntryKind) {
                         var r = (<AST.RecordEntryKind>k).getRecord()
-                        inner += 
+                        inner +=
                             this.tline(this.kw("data")) +
                             (r.values.stmts.length == 0 ? this.addModelFieldHint() : this.renderBlock(r.values))
                     }
                 }
-                
+
                 inner +=
                     this.tline(this.kw("initialize")) +
                     this.renderBlock(a.getPageBlock(true)) +
@@ -900,7 +900,7 @@ module TDev
 
         private libName(l:AST.LibraryRef) { return Renderer.tspan("id symbol", AST.libSymbol) + (l ? this.id(l.getName()) : "?") }
 
-        public visitResolveClause(n:AST.ResolveClause) 
+        public visitResolveClause(n:AST.ResolveClause)
         {
             return this.stmt(n,
               this.tline(this.kw("uses") + this.id(n.getName()) + this.kw("bound to") + this.libName(n.defaultLib) + this.kw("with")) +
@@ -909,16 +909,16 @@ module TDev
               this.renderBlock(n.actionBindings));
         }
 
-        public visitActionBinding(n:AST.ActionBinding) 
+        public visitActionBinding(n:AST.ActionBinding)
         {
             if (this.showDiff && !n.isExplicit) return ""
-            return this.stmt(n, this.tline((n.isExplicit ? this.kw("explicit") : "") + 
-                            this.kw("action") + this.id(n.formalName) + this.kw("bound to") + 
+            return this.stmt(n, this.tline((n.isExplicit ? this.kw("explicit") : "") +
+                            this.kw("action") + this.id(n.formalName) + this.kw("bound to") +
                             this.libName(n.actualLib) + this.id("\u200A\u2192\u00A0" + (n.getActualName()))) +
                     this.possibleError(n))
         }
 
-        public visitKindBinding(n:AST.KindBinding) 
+        public visitKindBinding(n:AST.KindBinding)
         {
             if (this.showDiff && !n.isExplicit) return ""
             return this.stmt(n, this.tline( /*(n.isExplicit ? this.kw("explicit") : "") + */
@@ -932,8 +932,8 @@ module TDev
         }
 
         public visitGlobalDef(n:AST.GlobalDef)
-        {            
-            var l0 = this.diffLine(n, n.diffAltDecl, 
+        {
+            var l0 = this.diffLine(n, n.diffAltDecl,
                 n => [this.kw(n.isResource ? "art" : "data"), this.id(n.getName()), this.op(":"), this.kind(n.getKind())])
             var l1 = this.diffLine(n, n.diffAltDecl,
                 n => n.isResource && n.url ? [this.kw("with"), this.id("data: "), this.renderArtUrl(n.getKind(), n.url)] : [])
@@ -965,7 +965,7 @@ module TDev
             return r
         }
 
-        public visitApp(n: AST.App) 
+        public visitApp(n: AST.App)
         {
             var r = ""
             n.orderedThings().forEach((t) => {
@@ -1000,8 +1000,8 @@ module TDev
             }
             hd += this.id(prop.getName())
 
-            var parms = prop.getParameters().slice(1).map((p) => 
-                (withLinks ? "<br/>" : "") + 
+            var parms = prop.getParameters().slice(1).map((p) =>
+                (withLinks ? "<br/>" : "") +
                 "<span class='sig-parameter'>" + this.id(p.getName()) + "</span>" + this.op(":") + kindLink(p.getKind()))
 
             if(parms.length > 0)
@@ -1044,14 +1044,14 @@ module TDev
                       "a { color:black; }\n" +
                       "a.md-api-entry-link, .api-kind a { text-decoration: none; }\n" +
                       ".api-desc { color: black; font-size: 0.8em; }\n" +
-                      ".signature { font-size: 1.3em; }\n" + 
+                      ".signature { font-size: 1.3em; }\n" +
                       ".md-api-entry { color: black; border: 1px dotted #BBB; padding: 0.6em 1em 0.5em 1em; margin: 0.5em 0; }\n" +
-                      ".md-api-header { font-size: 1.4em; margin-bottom: 1em; }\n" + 
-                      ".md-api-header .signature { margin-bottom: 0.4em; }\n" + 
-                      ".md-api-header .sig-parameter { display:inline-block; margin-left: 4em; }\n" + 
+                      ".md-api-header { font-size: 1.4em; margin-bottom: 1em; }\n" +
+                      ".md-api-header .signature { margin-bottom: 0.4em; }\n" +
+                      ".md-api-header .sig-parameter { display:inline-block; margin-left: 4em; }\n" +
                       ".md-para { margin-top: 1em; margin-bottom: 1em; }\n"+
                       ".block .md-para { margin: 0; }\n"+
-                      "span.stringLiteral { word-break: break-all; } div.stringLiteral { white-space:pre-wrap; }\n" + 
+                      "span.stringLiteral { word-break: break-all; } div.stringLiteral { white-space:pre-wrap; }\n" +
                       ".md-warning { background-color:lightyellow; border-left:solid 0.25em red; padding:0.5em; margin-left:2em;}\n"+
                       "div.md-video-link { position: relative; } div.md-video-link > img { width: calc(100 % - 1em); } div.md-video-link > svg { position: absolute;left:0em; }\n" +
                       "@media print { a.md-external-link:link:after, a.md-external-link:visited:after { content: ' (' attr(href) ') '; font-size: 80%; } }\n"+
@@ -1084,7 +1084,7 @@ module TDev
             this.formatComments = false;
         }
 
-        public tline(s:string) { 
+        public tline(s:string) {
             return Renderer.tdiv("line", s.trim());
         }
 
@@ -1100,18 +1100,18 @@ module TDev
                 return "<div class='hint'>" + s.trim() + "</div>";
         }
 
-        public visitActionBinding(n:AST.ActionBinding) 
+        public visitActionBinding(n:AST.ActionBinding)
         {
             if (!n.isExplicit && !n.getError()) return "";
             return super.visitActionBinding(n);
         }
 
-        public visitKindBinding(n:AST.KindBinding) 
+        public visitKindBinding(n:AST.KindBinding)
         {
             if (!n.isExplicit && !n.getError()) return "";
             return super.visitKindBinding(n);
         }
-        
+
         static styleMap = {
             '<span class=.keyword':     "font-weight: bold; color: #41900D",
             '<div class=.block':        "margin-left: 1em",
@@ -1122,7 +1122,7 @@ module TDev
 
         static inlineStyles(text:string):string
         {
-            var bodyStyle = 
+            var bodyStyle =
                 "font-family: 'Segoe UI', 'Helvetica', sans-serif;" +
                 "font-size:16px;" +
                 //"max-width: 600px;" +

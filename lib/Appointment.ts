@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? An calendar appointment
     //@ stem("a") immutable ctx(general,gckey,walltap) cap(calendar)

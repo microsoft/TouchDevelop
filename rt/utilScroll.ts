@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export class DragToScrollHandler
@@ -50,7 +50,7 @@ module TDev {
         private record(pos:any)
         {
             //var n = pos.timestamp;
-            //if (!n) 
+            //if (!n)
             var n = new Date().getTime();
             // TODO keep the history small?
             this.theHistory.push(
@@ -122,7 +122,7 @@ module TDev {
                 var speed = Math.abs(dx) + Math.abs(dy);
                 if (speed < 50) return;
 
-                this.inertialAnimation = 
+                this.inertialAnimation =
                     new Animation((p:number) => {
                         this.scrollTo(this.posX - (last.x + dx * p), this.posY - (last.y + dy * p));
                     });
@@ -222,7 +222,7 @@ module TDev {
                 if (d) d.unhook();
             }
         }
-        
+
         export function setupHDragToScroll(e:HTMLElement)
         {
             (<any>e).scrollEnabled = true;

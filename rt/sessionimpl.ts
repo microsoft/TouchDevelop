@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export module Revisions {
@@ -43,7 +43,7 @@ module TDev {
             //user_get_ast_log(lval: LVal): any;
             user_is_defaultvalue(lval: LVal): boolean;
             user_is_datum_confirmed(datum: Datum): void;
-            
+
             user_yield(): boolean;
             user_push();
             user_enable_sync(enable: boolean);
@@ -113,7 +113,7 @@ module TDev {
 
             isTdWebSocket: boolean; // always true for these
         }
-      
+
 
         export class Layer {
 
@@ -123,7 +123,7 @@ module TDev {
             public grounded: boolean;
             public session: ClientSession;
 
-            public clientrounds: any; // server only, contains all 
+            public clientrounds: any; // server only, contains all
 
             public cloudOperations: CloudOperation[];
 
@@ -145,7 +145,7 @@ module TDev {
                     || this.grounded
                     || this.clientrounds);
             }
-            
+
             public clear(): boolean {
                 var changes = false;
                 this.data.forEach((d: Datum) => {
@@ -225,7 +225,7 @@ module TDev {
                     this.deleted = true;
                     this.unlink();
                 }
-             } 
+             }
 
             public fromCloudOp: boolean;
 
@@ -335,7 +335,7 @@ module TDev {
             public collapse(first: any, second: any, grounded: boolean): any { }
 
             // overridden by item, entry, lval
-            public target(): string { return ""; } 
+            public target(): string { return ""; }
 
             // overridden by item
             public unlink():void {}
@@ -448,7 +448,7 @@ module TDev {
             // the following fields are used for transient purposes during queries (no invariants are maintained)
             public lvals: LVal[]; // set to contain all the lvals with nondefault values
             public qcount: number; // used internally, for duplicate filtering in queries
-                       
+
         }
 
         export class LVal extends Datum {
@@ -522,7 +522,7 @@ module TDev {
                     if (sum !== 0 || (!relative && !grounded))
                         return relative ? ("A" + sum) : sum.toString();
                     else
-                        return undefined; 
+                        return undefined;
                 } else if (this.codomain === "ast") {
                     return second;
                     //session.assertConsistency(typeof (first) == "object" && Array.isArray(first) && typeof (second) == "object" && Array.isArray(second), "sync data format changed");
@@ -622,7 +622,7 @@ module TDev {
             public key_Sstate() { return this.localname + "/S"; }
             public key_Cstate() { return this.localname + "/C"; }
             public key_layer(layer: string) { return this.localname + "/" + layer; }
-            
+
 
             public S_toJSONstring(): any {
                 return JSON.stringify({
@@ -663,7 +663,7 @@ module TDev {
                 this.localround = json.localround;
             }
 
-           
+
 
             // tuning parameters
             public sendinterval = 250;
@@ -680,14 +680,14 @@ module TDev {
             public user_specify_ast_encoding(s: IAstEncoding) {
                 this.astencoding = s;
             }
-                
+
             // ---- consistency fault detection
 
             public assertConsistency(cond: boolean, message?: string) {
                 if (!cond) {
                     this.faulted = true; // this session is dead. User can reload using button.
                     this.statuschanges = true;
-                    Util.check(cond, /* message || <-- creates hundreds of crash reports */ "local cache inconsistent with server"); // report 
+                    Util.check(cond, /* message || <-- creates hundreds of crash reports */ "local cache inconsistent with server"); // report
                 }
             }
 
@@ -713,7 +713,7 @@ module TDev {
                     this.assertConsistency(lval.definition === definition);
                     this.assertConsistency(ukeys.length === lval.ukeys.length);
                     for (var i = 0; i < ukeys.length; i++)
-                        this.assertConsistency(ukeys[i] === lval.ukeys[i]);     
+                        this.assertConsistency(ukeys[i] === lval.ukeys[i]);
                     this.assertConsistency(lkeys.length === lval.lkeys.length);
                     for (var i = 0; i < lkeys.length; i++)
                         this.assertConsistency(lkeys[i] === lval.lkeys[i]);
@@ -861,7 +861,7 @@ module TDev {
                 return "[" + (this.servername || this.localname) + "] " + msg;
             }
 
-            
+
             public user_is_datum_deleted(datum: Datum): boolean {
                 if (datum.has_deleted_dependencies())
                     return true;
@@ -904,9 +904,9 @@ module TDev {
                     return s === "";
             }
 
-            
-           
-         
+
+
+
             // the data : a giant map [string -> Datum]
             // containing
             //             items, mapped as (uid) -> Item
@@ -971,7 +971,7 @@ module TDev {
                 }
             }
 
-            // for debugging purposes only 
+            // for debugging purposes only
             public checkinvariants() {
 
                 // comment this out when debugging
@@ -1021,8 +1021,8 @@ module TDev {
                                 p = Packet.MakeDelPacket((<Item>d).uid);
                             }
                         } else if (d instanceof LVal && (op !== undefined)) {
-                            
-                            p = Packet.MakeModPacket(d.definition, op, d.ukeys, d.lkeys, this.astencoding); 
+
+                            p = Packet.MakeModPacket(d.definition, op, d.ukeys, d.lkeys, this.astencoding);
                         }
                         result.push(p.toString());
                         count2 += 1;
@@ -1034,7 +1034,7 @@ module TDev {
 
 
             //
-            // constructor 
+            // constructor
             //
             public initialize_data() {
                 this.data = {};
@@ -1047,7 +1047,7 @@ module TDev {
 
             //
             // the layers
-            // 
+            //
             public layers: any;
             public create_layer(name: string, clientround?: number, serverround?: number): Layer {
                 Util.assert(!this.layers[name]);
@@ -1127,7 +1127,7 @@ module TDev {
             public all_layers():Layer[] {
                 return <Layer[]> Util.values(this.layers);
             }
-            
+
 
             public logLayers() {
                 var layers = this.all_layers();
@@ -1137,13 +1137,13 @@ module TDev {
                     this.log(Util.fmt("Layer {0} (s:{1}/c:{2})", layer.name, layer.serverround, layer.clientround));
                 }
             }
-            
+
 
             //
             // transitions
             //
 
-        
+
 
 
 
@@ -1172,7 +1172,7 @@ module TDev {
                 }
                 return this.dependency_is_gone(i, layer);
             }
-        
+
             public uid_is_gone(uid: string, layer: Layer): boolean {
                 var i: Item = this.get_item(uid);
                 if (!i)
@@ -1189,7 +1189,7 @@ module TDev {
             }
 
 
-       
+
             public EncodeLayer(layer: Layer, mode: EncodingMode, socket?: MyWebSocket): Packet[] {
 
                 var includeCloudEffects = (mode != EncodingMode.CLIENT_LAYER_TO_SERVER && mode != EncodingMode.SERVER_UPDATES_TO_CLIENT);
@@ -1201,8 +1201,8 @@ module TDev {
                 if (layer.grounded) {
                     packets.push(Packet.MakeCldStarPacket(comp));
                 }
-                
-                // add cloud effect packets 
+
+                // add cloud effect packets
                 layer.data.forEach((d: Datum) =>
                 {
                     if (mode == EncodingMode.SERVER_LAYER_TO_CLIENT) {
@@ -1255,7 +1255,7 @@ module TDev {
             }
 
 
-            
+
             public static MakeModTarget(definition: string, ukeys: string[], lkeys: string[]): string {
                 var s = (definition ? Parser.WriteComboString(definition) : "");
                 ukeys.forEach((uid: string) => {
@@ -1331,7 +1331,7 @@ module TDev {
 
             // channel compression
             private dochannelcompression = false;
-       
+
             public stopAsync() {
                 return Promise.as();
             }
@@ -1445,7 +1445,7 @@ module TDev {
                                                 baselayer.clientround = baselayer.clientround + 1;
                                             }
                                         });
-                                        // success                                 
+                                        // success
                                         this.loaded = true;
                                         this.statuschanges = true;
                                         if (this.trace_save_and_load) this.trace_load();
@@ -1549,7 +1549,7 @@ module TDev {
                 this.nexttry = 0;
                 if (this.dochannelcompression)
                     this.ws.channelCompressor = new ChannelCompressor();
-                 
+
 
                 this.ws.onmessage = (e) => {
                     if (this.ws !== ws) return;
@@ -1588,7 +1588,7 @@ module TDev {
                     this.log("disconnected, code=" + c.code + ", reason=" + c.reason);
 
                     if (c.code === 1011 || c.code === 1005 || c.code === 1000) { // cannot rely on error codes
-                        if (c.reason.indexOf("switched server") !== -1 
+                        if (c.reason.indexOf("switched server") !== -1
                             || c.reason.indexOf("member not found") !== -1
                             || c.reason.indexOf("session salt mismatch") !== -1) {
                             this.marooned = true;
@@ -1787,7 +1787,7 @@ module TDev {
                                 save = true;
                             }
                         }
-                      
+
                     }
                     else {
                         if (serverlayer.serverround >= this.readblock) {
@@ -1927,7 +1927,7 @@ module TDev {
                 return this.table.setItemsAsync(kvpairs);
             }
 
-            
+
             public SaveToDiskAsync(layers: Layer[]): Promise {
 
                 if (this.faulted)
@@ -2205,10 +2205,10 @@ module TDev {
                     };
             }
 
-       
+
 
             public NumberWaitingRpcs(): number { // overridden by NodeSession
-                return 0; 
+                return 0;
             }
 
             public user_set_userdata(key: string, val: any, equals?: (a, b) => boolean) {
@@ -2293,7 +2293,7 @@ module TDev {
             }
 
 
-         
+
 
             public protocolversion(): string { return "3.0"; }
 
@@ -2635,7 +2635,7 @@ module TDev {
                     if (this.astencoding)
                        op = this.astencoding.fromstrings(op);
                 }
-                
+
                 var target = ClientSession.MakeModTarget(definition, ukeys, lkeys);
 
                 // create if not exist
@@ -2690,7 +2690,7 @@ module TDev {
          * NodeSession
          * *************
          * A client cloud session that connects to a node server, i.e. that connects to an exported app.
-         * 
+         *
          **/
         export class NodeSession extends ClientSession {
             public returnMap = {};
@@ -2732,7 +2732,7 @@ module TDev {
             }
 
             // ------ Cloud Operations
-            // keep track of the curring top-level cloud operation that is being executed/recorded               
+            // keep track of the curring top-level cloud operation that is being executed/recorded
             public recording: CloudOperation = null;
             public recordinground: number;
 
@@ -2800,7 +2800,7 @@ module TDev {
             public NumberWaitingRpcs(): number {
                 return Object.keys(this.returnMap).length;
             }
-            
+
             // Receive result of an RPC performed through user_rpc_cloud_operation
             public ReceiveOperation(p: Packet) {
                 var json = JSON.parse(p.lkeys[0]);
@@ -2822,7 +2822,7 @@ module TDev {
                         this.returnMap[opid].error(res);
                     }
                     }).done();
-                    
+
                 // otherwise it returned the result
                 } else {
 
@@ -2865,7 +2865,7 @@ module TDev {
          * ServerSession
          * *************
          * A cloud session running on the node server
-         * 
+         *
          **/
         export class ServerSession extends NodeSession {
 
@@ -2878,9 +2878,9 @@ module TDev {
 
             constructor(
                 nodeserver: string,
-                servername: string,        
-                localname: string,          
-                user: string,               
+                servername: string,
+                localname: string,
+                user: string,
                 public rt: TDev.Runtime,
                 public wsServer: WebSocketServerWrapper
                 ) {
@@ -2902,7 +2902,7 @@ module TDev {
             private types = {};
 
             public log(msg: string) { Util.log(msg); }
-            
+
 
             // overwrite creating an item so we can use the uidcountstart provided by the client to create our id's.
             // More: When a client executes a cloud operation optimistically, it keeps track of the objects it has created
@@ -3044,7 +3044,7 @@ module TDev {
             // The WebSocket server - set by ServerSessions
 
 
-        
+
 
             // Send Layer to a particular client
             public sendLayerToClient(layer: Layer, socket: MyWebSocket) {
@@ -3078,7 +3078,7 @@ module TDev {
 
 
 
-            // Send Packet to a particular client 
+            // Send Packet to a particular client
             public sendPacketToClient(session: ClientSession, p: Packet, socket:MyWebSocket) {
                 var s = p.toString()
                 session.log(socket.membernumber.toString() + "< " + s);
@@ -3145,7 +3145,7 @@ module TDev {
             //}
 
 
-            
+
 
 
             // Update the keysets of all clients with respect to this layer.
@@ -3214,7 +3214,7 @@ module TDev {
                         var lval = <LVal>datum;
 
                         // Index property: if the user is
-                        // TODO: check for User key 
+                        // TODO: check for User key
                         if (/^\w+\[.*\]/.exec(lval.indexdomain)) {
                             if (keyset.contains(lval.lkeys[0])) {
                                 this.add_lval_to_keyset(lval, keyset);
@@ -3249,7 +3249,7 @@ module TDev {
                                 }
                             }
                         }
-                    
+
 
                         return;
                     }
@@ -3282,7 +3282,7 @@ module TDev {
                 }, true);
             }
 
-            
+
             // initialize a keyset for given socket,
             // taking into consideration the keys that this client already has
             private initializeKeyset(socket: MyWebSocket, keys: string[]) {
@@ -3347,7 +3347,7 @@ module TDev {
                 return repl.replication;
             }
 
-            /* 
+            /*
              * WebSocket Setup
              * ***************
              * Accepting ws requests, handling ws messages and terminating sockets
@@ -3461,7 +3461,7 @@ module TDev {
 
             }
 
-           
+
 
             // Handle incoming status packet from client
             public handleStatusPacket(p: Packet, socket: MyWebSocket) {
@@ -3528,7 +3528,7 @@ module TDev {
                     p.lkeys[5] = disambiguator;
                     p.lkeys[2] = (membernumber).toString();
                     this.disambiguators[membernumber] = disambiguator;
-                    
+
 
                 // user reconnecting
                 } else {
@@ -3580,7 +3580,7 @@ module TDev {
                     socket.lastclientroundsent = 0;
                     socket.lastserverroundsent = 0;
                     this.sendLayerToClient(baselayer, socket);
-                
+
                 // 4.b) Or send missing deltas/keys
                 } else {
                     this.log("Sending " + (baselayer.serverround - startFrom).toString() + " Deltas");
@@ -3647,7 +3647,7 @@ module TDev {
                                 res: res,
                                 socket: socket
                             })
-                        
+
                         // report error to client
                         }, (err) => {
                             this.sendError(opid, err, socket);
@@ -3700,7 +3700,7 @@ module TDev {
 
                 sReq.setJsonBody(params);
                 sReq._api_path = path;
-                
+
                 this.currentOp = promiseInv;
                 promiseInv.thenalways(() => {
                     if (this.currentOp === promiseInv) {
@@ -3714,7 +3714,7 @@ module TDev {
                     this.uidcountstart = uidcountstart;
                     this.uidcountstop = uidcountstop;
                 });
-                
+
                 // 2) dispatch the actual request
                 var promise = (<any>this.rt).dispatchServerRequest(sReq, promiseInv);
 
@@ -3828,7 +3828,7 @@ module TDev {
             //    return promise.then((res) => { this.sessions.rt.sessions.getCurrentSession().membernumber = 0; return res }, (err) => Promise.wrapError(err));
             //}
 
-            
+
 
             // Send the results for the executed rpc cloud ops in this layer to the clients
             public sendResults(layer: Layer) {
@@ -3863,7 +3863,7 @@ module TDev {
              * the newly committed layer to all connected clients
              *
              **/
-            
+
             // Merge, Save and Send the unsaved layer if necessary
             // SaveAndSend is called:
             //  * periodically by ClientSession.loadAsync (no serverround)
@@ -3896,7 +3896,7 @@ module TDev {
 
                     // 1) collapse the unsaved layer into B
                     this.collapse_layers("B", oldlayer.name, true);
-                    
+
                     // 2) save B and meta data to disk
                     this.last_C_save = this.SaveToDiskAsync().then(() => {
                         //...
@@ -3904,7 +3904,7 @@ module TDev {
                         // 3.1) send the committed layer to all clients
                         this.log("Broadcasting Layer " + oldlayer.name);
                         this.sockets().forEach((s: MyWebSocket) => {
-                            // the save may have interleaved with new connections joining.. these have already sent the latest 
+                            // the save may have interleaved with new connections joining.. these have already sent the latest
                             if (s.lastserverroundsent < oldlayer.serverround) {
                                 Util.assert(s.lastserverroundsent == oldlayer.serverround - 1);
                                 this.sendLayerToClient(oldlayer, s);
@@ -3933,7 +3933,7 @@ module TDev {
                 return promise;
             }
 
-     
+
 
 
             /*
@@ -4008,14 +4008,14 @@ module TDev {
                                     packets.forEach(p => this.ProcessLoadedPacket(p, baselayer));
                                 }
                                 //this.logLayers();
-                                
+
                             }
                             // fix up client round if baselayer was not appropriately saved
                             if (baselayer.serverround < this.localround - 1) {
                                 this.log("Corrupted files - lost " + (this.localround - baselayer.serverround - 1) + " rounds. ");
                                 this.localround = baselayer.serverround + 1;
                             }
-                            // success           
+                            // success
                             this.loaded = true;
                             this.statuschanges = true;
 
@@ -4217,7 +4217,7 @@ module TDev {
                 return p;
             }
 
-        
+
 
             public static MakeCopPacket(path: string, params: any, opid?: number, uidcountstart?: number, uidcountstop?: number) {
                 var json = {
@@ -4246,7 +4246,7 @@ module TDev {
                 p.lkeys = [JSON.stringify(json)];
                 return p;
             }
-  
+
             public static ParsePacket(from: string, ws: WebSocket, fromDisk?: boolean): Packet {
                 var p = new Packet();
                 var code = from.slice(0, 3);
@@ -4287,7 +4287,7 @@ module TDev {
                 if (this.serveritemcount !== undefined)
                     s = s + "|-" + this.serveritemcount;
                 return s;
-            }                
+            }
 
             public send(ws: WebSocket) {
 
@@ -4390,8 +4390,8 @@ module TDev {
                     type = CloudTypes.DOMAIN_DYNAMIC;
                 }  }
             */
-               
-          
+
+
 
             // targets and packets
 
@@ -4443,12 +4443,12 @@ module TDev {
                 return s.replace(regexp, '@$&');
             }
             /*
-       public static ReadDefinitionString(s: string): string 
+       public static ReadDefinitionString(s: string): string
        {
            var regexp = /\$(.)/g;
            return s.replace(regexp, '$1');
        }
-       public static ReadComboString(s: string): string 
+       public static ReadComboString(s: string): string
        {
            var regexp = /\@(.)/g;
            return s.replace(regexp, '$1');

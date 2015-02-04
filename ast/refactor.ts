@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.AST {
     // update library references
@@ -11,7 +11,7 @@ module TDev.AST {
         private theApp: App = null;
         private targetLibrary: LibraryRef = null;
         private declsSelectedToMove: DeclAndDeps[] = [];
-        private otherDeclsToMove: DeclAndDeps[] = []; 
+        private otherDeclsToMove: DeclAndDeps[] = [];
         private remainingDecls: DeclAndDeps[] = null;
         public appRewritten: string = null
         public library: string = null;
@@ -155,14 +155,14 @@ module TDev.AST {
                 });
             });
 
-            // keep a copy of originals in case user wants to revert   
+            // keep a copy of originals in case user wants to revert
             this.getAllDeclsToMove().forEach(dd => { dd.serialized = dd.decl.serialize(); });
 
             // we need to rewrite the decls that depend on target library to remove the library reference
             var removeTarget = new RemoveLibraryReference(this.targetLibrary);
             this.getAllDeclsToMove().forEach(dd => removeTarget.dispatch(dd.decl));
 
-            // create the accessor functions that will permit application to 
+            // create the accessor functions that will permit application to
             // access the fields/properties of the hidden data
             var accessors = new CreateAccessors(
                 this.theApp,
@@ -175,7 +175,7 @@ module TDev.AST {
             var rewriter = new RewriteApp(this.targetLibrary, actions.map(dd => dd.decl), accessors);
             rewriter.performRewrite(this.theApp);
 
-            //  move everything to library 
+            //  move everything to library
             //  NOTE: we are assuming that there are no name conflicts with things already in the library
             var libraryReferences = [];
             this.getAllDeclsToMove().forEach((dd) => {
@@ -208,7 +208,7 @@ module TDev.AST {
                 }
             });
 
-            // save the app and library 
+            // save the app and library
             InitIdVisitor.ensureOK(this.theApp)
             InitIdVisitor.ensureOK(this.targetLibrary.resolved)
             this.appRewritten = this.theApp.serialize();
@@ -226,10 +226,10 @@ module TDev.AST {
         constructor(
             public theApp: App,
             public declsToLibrary: Decl[],
-            public remaining: DeclAndDeps[]) {  
-            // go through the actions that remain in the application to see 
-            // what globals/fields/properties they access of decls that are 
-            // moving to the library  
+            public remaining: DeclAndDeps[]) {
+            // go through the actions that remain in the application to see
+            // what globals/fields/properties they access of decls that are
+            // moving to the library
             remaining.forEach(dd => {
                 dd.direct.readGlobals.forEach(rg => this.addGlobal(rg, "R"));
                 dd.direct.writtenGlobals.forEach(wg => this.addGlobal(wg, "W"));
@@ -248,7 +248,7 @@ module TDev.AST {
                     if (this.declsToLibrary.indexOf(e) >= 0 && this.collectionOfRecords.indexOf(e) < 0)
                         this.collectionOfRecords.push(e);
                 });
-            });         
+            });
         }
 
         // these are all derived from dd
@@ -350,7 +350,7 @@ module TDev.AST {
             if (expr.getKind() instanceof RecordEntryKind) {
                 writer.id("r").op(":").id(record.entryKind.getName());
                 first = false;
-            } 
+            }
             // always skip the implicit this
             var i = 1;
             while (i < parms.length) {
@@ -635,7 +635,7 @@ module TDev.AST {
                 n.getFields().forEach(f => { f.dataKind = this.rewriteKind.rewriteKind(f.dataKind) });
             }
         }
-        
+
         // helper method for rewriting call
         rewriteThingRef(t: ThingRef) {
             var tokens = this.lastExprHolder.tokens;
@@ -647,7 +647,7 @@ module TDev.AST {
         }
 
         // when rewriting a call, we need to be careful to rewrite bottom up,
-        // as calls can be nested under calls. we also need to track mode, as 
+        // as calls can be nested under calls. we also need to track mode, as
         // done in DirectAccessFinder
 
         visitCall(n: Call) {
@@ -749,7 +749,7 @@ module TDev.AST {
                             var leftmost = getLeftmost(subcall);
                             // TODO: are we sure about thingref check???
                             if (leftmost instanceof ThingRef) {
-                                // replace the subcall by thingref 
+                                // replace the subcall by thingref
                                 // identify the token subsequence associated with subcall
                                 var tokens = this.lastExprHolder.tokens;
                                 var leftIdx = tokens.indexOf(leftmost);
@@ -761,7 +761,7 @@ module TDev.AST {
                                 // replace the subcall sequence with the library thingref
                                 tokens.spliceArr(leftIdx, rightIdx - leftIdx + 1, newExprHolder.tokens);
                             } else {
-                                // it's a local variable or parameter, 
+                                // it's a local variable or parameter,
                             }
                         }
                     } else {
@@ -842,7 +842,7 @@ module TDev.AST {
                     }
                 } else {
                     // Question: do we need to recurse over SimpleProperties and their param/return types
-                    // Answer: depends if we can reach a userdefined type from a Simple Property, which I 
+                    // Answer: depends if we can reach a userdefined type from a Simple Property, which I
                     // don't think is possible.
                 }
             }
@@ -898,7 +898,7 @@ module TDev.AST {
         }
     }
 
-    // wrap  decl in the AST to keep track of its dependences 
+    // wrap  decl in the AST to keep track of its dependences
     export class DeclAndDeps {
         private manager: DeclAndDepsManager;
         constructor(m: DeclAndDepsManager) {
@@ -1076,7 +1076,7 @@ module TDev.AST {
         }
     }
 
-    // the stuff below here should be generically useful for lots of other 
+    // the stuff below here should be generically useful for lots of other
     // refactoring and analyses that need to find out what is referenced by
     // a declaration (action, global, record, etc.)
 

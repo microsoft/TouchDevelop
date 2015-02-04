@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
 	export interface ITileData {
         counter?: number;
@@ -63,7 +63,7 @@ module TDev.RT {
         //@ cap(tiles) uiAsync
 		export function pin_default(r : ResumeCtx) {
 			var rt = r.rt;
-			Tiles.updateTileAsync(defaultFragment(rt), <ITileData>{ 
+			Tiles.updateTileAsync(defaultFragment(rt), <ITileData>{
 				title: r.rt.getScriptName(),
                 background: r.rt.getScriptColor(),
                 pin: true,

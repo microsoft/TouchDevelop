@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -31,7 +31,7 @@ module TDev
                 return "libs";
             return this.decl.getName();
         }
-        
+
         public alphaOverride()
         {
             if (this.cbOverride) return 30;
@@ -145,7 +145,7 @@ module TDev
                 }
 				TDev.Browser.EditorSoundManager.intellibuttonClick();
                 this.onClick()
-            } 
+            }
 
             if (this.imageOverride)
                 c.setImage(this.imageOverride, help, Ticks.noEvent, fn)

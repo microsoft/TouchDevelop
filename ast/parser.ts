@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev { export module AST {
@@ -23,7 +23,7 @@ module TDev { export module AST {
                 "var": GlobalDef.parse,
                 "table": RecordDef.parse
             };
-        
+
             this.statementCallbacks = {
                 "meta": this.parseMetaStmt,
                 "skip": this.parseSkip,
@@ -41,7 +41,7 @@ module TDev { export module AST {
         private declarationCallbacks:any;
         private statementCallbacks:any;
 
-        static stmtCtor(f:new()=>any) 
+        static stmtCtor(f:new()=>any)
         {
             return (p:Parser) => {
                 var r = new f();
@@ -146,11 +146,11 @@ module TDev { export module AST {
             return r;
         }
 
-        static parseType(text:string, script:App = null) : Kind 
+        static parseType(text:string, script:App = null) : Kind
             { return Parser.parseEndpoint(text, (p) => p.parseType(), null, script); }
         static parseExprHolder(text:string, script:App = null) : ExprHolder
             { return Parser.parseEndpoint(text, (p) => p.parseExpr(), null, script); }
-        static parseStmt(text:string, script:App = null) : Stmt 
+        static parseStmt(text:string, script:App = null) : Stmt
             { return Parser.parseEndpoint(text, (p) => p.parseOneStmt(), null, script); }
         static parseDecl(text:string, script:App = null) : Decl
             { return Parser.parseEndpoint(text, (p) => p.parseOneDecl(), null, script); }
@@ -480,7 +480,7 @@ module TDev { export module AST {
             var toks:Token[] = [];
             var t:LexToken;
 
-            var add = (tp:string, json = undefined) => 
+            var add = (tp:string, json = undefined) =>
             {
                 if (json === undefined)
                     json = {};
@@ -552,7 +552,7 @@ module TDev { export module AST {
             } else {
                 return null;
             }
-        
+
         }
 
         static emptyBlock()
@@ -870,8 +870,8 @@ module TDev { export module AST {
                 this.currentAction.isAtomic = true;
                 var parms = this.currentAction.header.inParameters;
                 var parm0 = <ActionParameter>parms.stmts[0];
-                if (parm0 && 
-                    parms.stmts[0] && 
+                if (parm0 &&
+                    parms.stmts[0] &&
                     (parm0.getKind().isExtensionEnabled() || parm0.getKind() instanceof UnresolvedKind) &&
                     ((this.featureMissing(LanguageFeature.UnicodeModel) &&
                         (parm0.getName() == "model" || parm0.getName() == "page data")) ||
@@ -983,7 +983,7 @@ module TDev { export module AST {
                 this.error("expecting 'box' here");
                 return;
             }
-            
+
             (Parser.stmtCtor(node))(this);
         }
 
@@ -1010,7 +1010,7 @@ module TDev { export module AST {
                 var prev = this.stmtList[len - 1];
                 var inls = <InlineActions>prev;
                 if (!(prev instanceof InlineActions)) {
-                    inls = new InlineActions(); 
+                    inls = new InlineActions();
                     inls.setStableName(prev.getStableName());
                     inls.expr = (<ExprStmt>prev).expr;
                     inls.parent = prev.parent;

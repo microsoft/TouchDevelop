@@ -184,7 +184,7 @@ module TDev.RT {
         constructor(private ref:Ref<T>, on_changed:Action)
         {
             super()
-            
+
             this.ev = new Event_();
             this.ev.addHandler(on_changed);
         }
@@ -207,7 +207,7 @@ module TDev.RT {
 
         public _clear(s:IStackFrame)
         {
-            this.ref._clear(s); 
+            this.ref._clear(s);
             this.notify(s);
         }
 

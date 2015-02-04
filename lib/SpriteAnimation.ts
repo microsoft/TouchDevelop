@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     interface SpriteAnimationData {
         apply : (rt : Runtime, sprite : Sprite, value : number) => void;
@@ -27,18 +27,18 @@ module TDev.RT {
         }
 
         private pushTween(
-            apply : (rt : Runtime, sprite : Sprite, value : number) => void, 
-            easing : (value : number) => number, 
+            apply : (rt : Runtime, sprite : Sprite, value : number) => void,
+            easing : (value : number) => number,
             duration : number) : SpriteAnimationData {
             this.ensureActive();
             if (this._tweens.length > 0 && this._tweens[this._tweens.length-1].repeat < 0)
                 Util.userError(lf("the previous animation repeats forever"));
-            var tween = { apply : apply, 
-                easing : easing, 
-                duration : Math.max(duration,0), 
-                repeat : 1, 
+            var tween = { apply : apply,
+                easing : easing,
+                duration : Math.max(duration,0),
+                repeat : 1,
                 yoyo:false,
-                reversed:false 
+                reversed:false
             };
             this._tweens.push(tween);
             return tween;
@@ -93,7 +93,7 @@ module TDev.RT {
         //? Moves the sprite to a given location using separate easing for x and y
         //@ writesMutable
         //@ [duration].defl(1)
-        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine') 
+        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         //@ [shape].deflStrings('inout', 'out', 'in')
         public move_to(duration : number, easing : string, shape : string, x : number, y : number) {
             var oldx = this._sprite.x();
@@ -110,7 +110,7 @@ module TDev.RT {
 
         //? Changes the text of the sprite.
         //@ [duration].defl(1)
-        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine') 
+        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         //@ [shape].deflStrings('inout', 'out', 'in')
         public text(duration: number, easing: string, shape: string, value: string) {
             var oldtext = this._sprite.text() || "";
@@ -145,7 +145,7 @@ module TDev.RT {
 
         //? Changes the color of the sprite
         //@ [duration].defl(1)
-        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine') 
+        //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         //@ [shape].deflStrings('inout', 'out', 'in')
         public color(duration : number, easing : string, shape : string, c : Color) {
             var old = this._sprite.color();
@@ -167,7 +167,7 @@ module TDev.RT {
 
         //? Scales the sprite
         //@ writesMutable [duration].defl(0.5) [value].defl(1.2)
-        //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo') 
+        //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo')
         //@ [shape].deflStrings('inout', 'out', 'in')
         public scale(duration : number, easing : string, shape : string, value : number) {
             var current = 1.0;
@@ -179,7 +179,7 @@ module TDev.RT {
 
          //? Modifies the sprite width
          //@ writesMutable [duration].defl(0.5) [value].defl(100)
-         //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo') 
+         //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo')
          //@ [shape].deflStrings('inout', 'out', 'in')
          public width(duration: number, easing: string, shape: string, value: number) {
              var current = this._sprite.width();
@@ -191,7 +191,7 @@ module TDev.RT {
 
          //? Modifies the sprite height
          //@ writesMutable [duration].defl(0.5) [value].defl(100)
-         //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo') 
+         //@ [easing].deflStrings('sine', 'linear', 'quadratic', 'cubic', 'expo')
          //@ [shape].deflStrings('inout', 'out', 'in')
          public height(duration: number, easing: string, shape: string, value: number) {
              var current = this._sprite.height();
@@ -203,7 +203,7 @@ module TDev.RT {
 
         //? Starts a new animation and continues with the current animation
         //@ writesMutable
-        public fork() : SpriteAnimation {            
+        public fork() : SpriteAnimation {
             var anim = this._sprite.createAnimation();
             this.pushTween(
                 function(rt, sprite, k) { sprite.startAnimation(anim); },
@@ -239,7 +239,7 @@ module TDev.RT {
         //? Waits for the other animation to complete before proceding.
         public wait_for(animation : SpriteAnimation) {
             var tween = this.pushTween(
-                function(rt, sprite, k) { 
+                function(rt, sprite, k) {
                     if(!animation.isActive)
                         tween.duration = -1;
                 },
@@ -286,14 +286,14 @@ module TDev.RT {
         //@ [duration].defl(1) writesMutable
         public sleep(duration : number) {
             this.pushTween(
-                function(rt, sprite, x) {}, 
-                SpriteAnimation.easing['linear']['in'], 
-                duration 
+                function(rt, sprite, x) {},
+                SpriteAnimation.easing['linear']['in'],
+                duration
             );
         }
 
         //? Fades in to fully opaque
-        //@ writesMutable [duration].defl(0.5) 
+        //@ writesMutable [duration].defl(0.5)
         //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         public fade_in(duration : number, easing : string)
         {
@@ -308,7 +308,7 @@ module TDev.RT {
         }
 
         //? Fades out to transparent
-        //@ writesMutable [duration].defl(0.5) 
+        //@ writesMutable [duration].defl(0.5)
         //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         public fade_out(duration : number, easing : string)
         {
@@ -323,7 +323,7 @@ module TDev.RT {
         }
 
          //? Changes the opacity of the sprite
-         //@ writesMutable [duration].defl(0.5) 
+         //@ writesMutable [duration].defl(0.5)
          //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
          //@ [shape].deflStrings('inout', 'out', 'in')
          public fade(duration: number, easing: string, shape: string, opacity : number) {
@@ -339,7 +339,7 @@ module TDev.RT {
          }
 
         //? Scales up and fades out an object
-        //@ writesMutable [duration].defl(0.5) [scale].defl(1.5) 
+        //@ writesMutable [duration].defl(0.5) [scale].defl(1.5)
         //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
         public puff_out(duration : number, easing : string, scale : number)
         {
@@ -360,7 +360,7 @@ module TDev.RT {
         public hide() {
             this.pushTween(
                 function(rt, sprite, value) { sprite.hide(); },
-                SpriteAnimation.easing['linear']['in'], 
+                SpriteAnimation.easing['linear']['in'],
                 0
             );
         }
@@ -370,7 +370,7 @@ module TDev.RT {
         public show() {
             this.pushTween(
                 function(rt, sprite, value) { sprite.show(); },
-                SpriteAnimation.easing['linear']['in'], 
+                SpriteAnimation.easing['linear']['in'],
                 0
             );
         }
@@ -380,7 +380,7 @@ module TDev.RT {
         public delete_() {
             this.pushTween(
                 function(rt, sprite, value) { sprite.delete_(); },
-                SpriteAnimation.easing['linear']['in'], 
+                SpriteAnimation.easing['linear']['in'],
                 0
             );
         }
@@ -390,7 +390,7 @@ module TDev.RT {
         public play_sound(sound : Sound) {
             this.pushTween(
                 function(rt, sprite, value) { sound.playAsync().done(); },
-                SpriteAnimation.easing['linear']['in'], 
+                SpriteAnimation.easing['linear']['in'],
                 0
             );
         }
@@ -400,10 +400,10 @@ module TDev.RT {
             var sheet = this._sprite.sheet();
             if (sheet)
                 this.pushTween(
-                    function(rt, sprite, value) { 
+                    function(rt, sprite, value) {
                         sheet.set_frame(sprite, name);
                     },
-                    SpriteAnimation.easing['linear']['in'], 
+                    SpriteAnimation.easing['linear']['in'],
                     0
                 );
         }
@@ -428,21 +428,21 @@ module TDev.RT {
         }
 
         //? Rotates the sprite.
-        //@ writesMutable [duration].defl(1) 
-        //@ [easing].deflStrings('expo', 'linear', 'quadratic', 'cubic', 'sine') 
+        //@ writesMutable [duration].defl(1)
+        //@ [easing].deflStrings('expo', 'linear', 'quadratic', 'cubic', 'sine')
         //@ [shape].deflStrings('in', 'out', 'inout')
         public turn_to(duration : number, easing : string, shape : string, angle : number) {
             var old = this._sprite.angle();
             this.pushTween(
                 function(rt, sprite, value) { sprite.set_angle(old * value + (1-value) * angle); },
-                SpriteAnimation.resolveEasing(easing,shape), 
+                SpriteAnimation.resolveEasing(easing,shape),
                 duration
             );
         }
 
         //? Calls a user handler during the animation. ``handler`` receives a number from 0 to 1 during the tweeining.
-        //@ writesMutable [duration].defl(1) 
-        //@ [easing].deflStrings('expo', 'linear', 'quadratic', 'cubic', 'sine') 
+        //@ writesMutable [duration].defl(1)
+        //@ [easing].deflStrings('expo', 'linear', 'quadratic', 'cubic', 'sine')
         //@ [shape].deflStrings('in', 'out', 'inout')
         public run(duration : number, easing : string, shape : string, handler : NumberAction) {
             var ev = new Event_();
@@ -472,7 +472,7 @@ module TDev.RT {
                     tween = this._tweens[++this._tweenIndex];
                 else if (tween.repeat > 0 && --tween.repeat == 0)
                     tween = this._tweens[++this._tweenIndex];
-                else // repeat                    
+                else // repeat
                     if (tween.yoyo) tween.reversed = !tween.reversed;
             }
             // are we done?
@@ -493,13 +493,13 @@ module TDev.RT {
         }
 
         public getViewCore(s: IStackFrame, b:BoxBase): HTMLElement {
-            return div('item', 'tween');            
+            return div('item', 'tween');
         }
 
         //? Describes the animation.
         //@ readsMutable
-        public post_to_wall(s: IStackFrame): void { 
-            super.post_to_wall(s) 
+        public post_to_wall(s: IStackFrame): void {
+            super.post_to_wall(s)
         }
     }
 }

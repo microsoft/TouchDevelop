@@ -27,7 +27,7 @@ module TDev.RT.Minecraft {
             TDev.Util.log("WALL: " + s);
             return undefined;
         }
-        
+
         public postBoxedTextWithTap(s:string, rtV: any) : TDev.WallBox
         {
             return this.postBoxedText(s);
@@ -51,7 +51,7 @@ module TDev.RT.Minecraft {
         {
             if (this.quietlyHandleError(e))
                 return
-            
+
             if (e.programCounter)
                 this.errorPC = e.programCounter;
 

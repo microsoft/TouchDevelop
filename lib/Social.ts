@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Emails, sms, contacts, calendar, ...
     export module Social
@@ -57,7 +57,7 @@ module TDev.RT {
         //@ [result].writesMutable
         //@ [network].deflStrings("facebook", "twitter")
         export function search(network: string, terms: string, r: ResumeCtx) // : Collection<Message>
-        {           
+        {
 			var links = Collections.create_message_collection();
 			r.resumeVal(links);
 

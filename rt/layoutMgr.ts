@@ -11,7 +11,7 @@ module TDev {
         public onRendered: () => void = () => { };
 
         public numBoxes: number = 0;
-        
+
         public changedtext: string;
 
         boxes: BoxBase[];
@@ -67,7 +67,7 @@ module TDev {
                 this.updateRootElement();
 
 
-         
+
 
             //if (!!this.rootBox) {
             //     this.boxes.forEach((box: WallBox) =>
@@ -78,11 +78,11 @@ module TDev {
         private static renderexecutionmode = false;
         public static RenderExecutionMode(): boolean { return LayoutMgr.renderexecutionmode; }
         public static SetRenderExecutionMode(val: boolean) { LayoutMgr.renderexecutionmode = val; }
-        
+
         private static needrelayout = false;
 
         public static QueueReLayout() {
-            // keep it simple... do it immediately. 
+            // keep it simple... do it immediately.
             //if (!LayoutMgr.renderexecutionmode && LayoutMgr.instance.rootBox) {
             //    LayoutMgr.instance.CoreLayout();
             //}
@@ -131,7 +131,7 @@ module TDev {
             }
         }
 
-        
+
         //private static TestAndClear(): boolean {
         //    var n = needrelayout;
         //    needrelayout = false;
@@ -493,7 +493,7 @@ module TDev {
             }
         }
 
-       
+
         public scrollbarWidth: number = undefined;
         public scrollbarHeight: number = undefined;
         private FindScrollbarSizes(elt: HTMLElement) {
@@ -528,9 +528,9 @@ module TDev {
         }
 
        // public onZoom() {
-       //   
+       //
        // }
-        
+
 
         private scrollToShow(box: BoxBase) {
             // TODO: Implement this.
@@ -545,14 +545,14 @@ module TDev {
             }
 
             this.rootElement = e; // div wall-page box-page
-            this.rootBox = box;   
+            this.rootBox = box;
             box.isRoot = true;
 
-           
+
             // Prevent flickering.
             var el = box.element;
            // el.style.visibility = "hidden";
-            
+
             // fix element structure if necessary
             if (this.rootElement.firstChild != el || ! this.rootBox.structuring_done) {
                 this.CreateOrFixElementStructure();
@@ -560,7 +560,7 @@ module TDev {
 
             // the core layout algorithm
             this.CoreLayout();
-           
+
 
             //el.style.visibility = "visible";
         }
@@ -576,7 +576,7 @@ module TDev {
             }
             return false;
         }
-   
+
         // the idempotent layout algorithm. Call this to recompute layout on non-structural changes.
         public CoreLayout(): void {
 
@@ -610,7 +610,7 @@ module TDev {
                 }
 
                 // Calculate default scaling
-             
+
                 this.calcDefaultScaling();
 
                 if (this.sideview) {
@@ -626,8 +626,8 @@ module TDev {
             false);  // set to true to stop measuring
         }
 
-      
-       
+
+
 
         private CreateOrFixElementStructure() {
             this.boxes = [];
@@ -635,7 +635,7 @@ module TDev {
             // Remove previous content unless recycled
             var e = this.rootElement;
             var el = this.rootBox.element;
-            while (e.hasChildNodes()) {         
+            while (e.hasChildNodes()) {
                 var b = e.firstChild;
                 if (b == el)
                     break;
@@ -664,7 +664,7 @@ module TDev {
         }
 
 
-       
+
         /*
         private doLayout(rootBox: WallBox) {
             // Horizontal layout
@@ -684,8 +684,8 @@ module TDev {
         */
 
 
-      
-       
+
+
         // Put this box in the database.
         public recordmapping(box: BoxBase) {
             if (this.pcTable[box.getAstNodeId()] === undefined)
@@ -764,7 +764,7 @@ module TDev {
                 this.topDown = reversed;
             }
         }
-        public rtPage() : TDev.RT.Page 
+        public rtPage() : TDev.RT.Page
         {
             if (!this._rtPage)
                 this._rtPage = TDev.RT.Page.mk(this);
@@ -783,7 +783,7 @@ module TDev {
 
         getFrame(prev: IStackFrame, ret: IContinuationFunction) {
             var rt = prev.rt;
-            
+
             if (!this.isAuto()) {
                 var frame: IStackFrame = <any>{};
                 frame.previous = prev;
@@ -836,7 +836,7 @@ module TDev {
             this.setCurrentBox(this.rootBox);
             this.lastChildCount = -1;
         }
-        
+
 
         render(host: RuntimeHost, popCount: number = 0) {
             Contract.Requires(popCount >= 0);
@@ -853,7 +853,7 @@ module TDev {
 
             rootElt.style.background = "none"; // see through to the real background as set in applyPageAttributes
             rootElt.style.color = this.fgColor;
-            
+
             if (this.isAuto()) {    //if (this.rootBox.isGeneric()) {
                 rootElt.className =  "wall-page " + (this.csslayout ? " html-page" : "box-page");
                 this.setFullScreenElement(host, null);
@@ -874,7 +874,7 @@ module TDev {
                         return;
                     }
                 }
-                
+
                 this.setFullScreenElement(host,null);
                 rootElt.className = "wall-page classic-page";
                 // push front boxes
@@ -934,7 +934,7 @@ module TDev {
         //public editEvent: RT.Event_;
         public textEditingEvent: RT.Event_;
 
-        constructor() {         
+        constructor() {
             this.tappedEvent = this.mkEv();
             this.textEditingEvent = this.mkEv();
         }
@@ -947,7 +947,7 @@ module TDev {
             r.isPageEvent = true;
             return r;
         }
-        
+
     }
 
     export class HtmlAttributes extends BoxAttributes {
@@ -955,7 +955,7 @@ module TDev {
         public classnames: string[];
         public styles: StringMap<string>;
         public attributes: StringMap<string>;
-        
+
         public applyToStyle(b: BoxBase) {
             Util.assert(b instanceof HtmlBox);
             var bb = <HtmlBox> b;
@@ -979,7 +979,7 @@ module TDev {
         public foreground: string;
         public border: string;
 
-        public width: number[]; // width[MIN], width[MAX] 
+        public width: number[]; // width[MIN], width[MAX]
         public height: number[]; // height[MIN], height[MAX]
         public margin: number[]; // margin[T], margin[R], margin[B], margin[L]
         public padding: number[]; // padding[T], padding[R], padding[B], padding[L]
@@ -990,10 +990,10 @@ module TDev {
         public scroll: boolean[]; // [H,V]
         public arrangement: number[]; // [H,V]
         public wrap: boolean;
-        public wraplimit: number; 
+        public wraplimit: number;
 
         // for compatibility with old API
-        public legacystretch: boolean[]; 
+        public legacystretch: boolean[];
         public legacybaseline: boolean;
 
         public textEditedEvent: RT.Event_;
@@ -1108,7 +1108,7 @@ module TDev {
         public isLeaf(): boolean { return false } // overridden
 
         // for live navigation
-        public doLiveNavigation(): boolean { return true; } 
+        public doLiveNavigation(): boolean { return true; }
         public getRenderedWidth(): number { return 0; } // overridden
         public getRenderedHeight(): number { return 0; } // overridden
         public setHighlight(strong: boolean = true) { }// overridden
@@ -1167,7 +1167,7 @@ module TDev {
                if (!done && this.parent)
                   this.parent.tapped();
         }
-      
+
         // click handlers that are installed by posted content
         private contenttaphandler: () => void;
         public withClick(h: () => void): void {
@@ -1178,10 +1178,10 @@ module TDev {
         }
 
         // overridden by WallBox - creates grey shadow
-        setRenderedTappable(tappable: boolean, tapped: boolean) { } 
+        setRenderedTappable(tappable: boolean, tapped: boolean) { }
 
 
-  
+
 
 
         // ---------- editable text binding
@@ -1204,7 +1204,7 @@ module TDev {
                     rt.forcePageRefresh();
                 }));
             }
-            else // RT.TextAction 
+            else // RT.TextAction
                 this.attributes.textEditingEvent.addHandler(handler);
         }
 
@@ -1247,7 +1247,7 @@ module TDev {
             }
 
         }
-         
+
         setInputText(text: string) {
 
             var cur = this.getEditableContent();
@@ -1374,7 +1374,7 @@ module TDev {
         }
 
         // ----------- tree traversals
- 
+
         public doLayout() { /*overridden*/  }
 
         public visitS() {
@@ -1529,7 +1529,7 @@ module TDev {
         public clearHighlight() {
             this.element.style.cssText = this.rendered_styles;
         }
-    
+
 
         public doLayout() {
             this.passA();
@@ -1596,7 +1596,7 @@ module TDev {
     export class WallBox extends BoxBase {
 
         // specialize types
-        public attributes: LayoutAttributes; 
+        public attributes: LayoutAttributes;
 
         // Constants
         static FLOW_HORIZONTAL: number = 0;
@@ -1872,7 +1872,7 @@ module TDev {
                 }
 
                 var numchildren = this.children.length;
-                    
+
                 // arrangement sets stretch margins
                 var harr = this.attributes.arrangement[WallBox.H];
                 if (harr !== undefined) {
@@ -1931,7 +1931,7 @@ module TDev {
             this.setRenderedTappable((this.attributes.tappedEvent.handlers || this.contenttapapplies()) ? true : false, false);
 
         }
-        
+
 
         //isGeneric() {
         //    return !this.wallLike;
@@ -1955,14 +1955,14 @@ module TDev {
                 return max;
             return val;
         }
-        
+
         private tryPreserveAspectRatio(): boolean {
 
             return /img|canvas|video|audio|boardContainer|viewPicture/i.test(this.content.tagName)
                 || /boardContainer|viewPicture/i.test(this.content.className);
 
         }
- 
+
         private fillh(f: number): boolean {
             if (f <= 0)  return false;
             if (Math.abs(1-f) < 0.0001 || this.isRoot) return true;
@@ -2044,7 +2044,7 @@ module TDev {
                         this.cached_width = newwidth;
                         this.cached_aspectratio = 0;
 
-                        // determine baseline if asked for 
+                        // determine baseline if asked for
                         if (this.attributes.legacybaseline && this.cached_baseline === -1) {
                             if (!this.baselineprobe) {
                                 this.baselineprobe = span(null, "s");
@@ -2074,7 +2074,7 @@ module TDev {
                             ha = ha || (<any>targetelt).height;
                             wa = wa || (<any>targetelt).width;
                         }
-                       
+
                         this.cached_width = wa || this.element.scrollWidth;
 
                         this.cached_aspectratio = (this.tryPreserveAspectRatio() && this.cached_width) ?
@@ -2109,7 +2109,7 @@ module TDev {
                     this.A_asc = this.A_sc;
                     var flex = (this.attributes.stretchwidth == 1 || !this.tryPreserveAspectRatio() || (this.attributes.stretchwidth == -1 && this.content && this.content.tagName == "IMG")) ? 1 : 0;
                     this.A_mc = flex ? 0 : this.A_asc;
-                    this.A_fcc = flex; 
+                    this.A_fcc = flex;
                 } else if (this.contentType === WallBox.CONTENT_TEXT) {
                     var statedwidth = this.cached_width;
                     var safetywidth = statedwidth + 1;  // need safety margin pixel ... browser are not good at this
@@ -2206,7 +2206,7 @@ module TDev {
                 // leaf node
                 this.B_scr = false;
             } else {
-                // composite node 
+                // composite node
                 overflow = allowance < this.A_mc;
                 this.B_scr = (overflow && this.attributes.scroll[WallBox.H]);
                 if (this.attributes.flow === WallBox.FLOW_VERTICAL || this.attributes.flow === WallBox.FLOW_OVERLAY) {
@@ -2252,7 +2252,7 @@ module TDev {
                         var remainder = space_for_content;
                         var wsum = this.A_fcc;
                         var csum = this.A_scc;
-                        if (remainder === 0 || wsum === 0) 
+                        if (remainder === 0 || wsum === 0)
                             this.children.forEach((c:WallBox) => remainder -= (c.B_s = c.A_s));
                         else {
                             var limit = (c:WallBox) => {
@@ -2284,7 +2284,7 @@ module TDev {
                             ls = child.A_sr;
                             lf = extra_s * child.A_fr;
                             x = x + child.B_s + ls + lf;
-                        }                       
+                        }
                     }
                     else {
                         if (allowance > this.A_asc) {
@@ -2547,12 +2547,12 @@ module TDev {
                             child.D_y = wst + extra_s * child.C_ft;
                         }
                         else if (this.D_scr) {
-                            // we are scrolling - give full requested size                   
+                            // we are scrolling - give full requested size
                             child.D_y = wst;
                             child.D_s = child.C_s;
 
                         } else {
-                            // shrink as much as possible          
+                            // shrink as much as possible
                             child.D_y = wst;
                             child.D_s = Math.max(child.C_m, allowance - ws);
                         }
@@ -2612,7 +2612,7 @@ module TDev {
                     }
                     else {
                         if (this.D_scr) {
-                            // we are scrolling - give full requested size                   
+                            // we are scrolling - give full requested size
                             for (var i = 0; i < numchildren; i++) {
                                 var child = <WallBox>this.children[i];
                                 child.D_s = child.C_s;
@@ -2677,7 +2677,7 @@ module TDev {
                 });
         }
 
-      
+
 
         onInputTextChangeDone() {
 
@@ -2697,9 +2697,9 @@ module TDev {
                 this.runtime.forcePageRefresh(); // we need to ensure display is updated.
             }
         }
-        
 
-       
+
+
         // Getters
         public size(): number { return this.children.length; }
         public get(index: number): BoxBase { return this.children[index]; }
@@ -2720,7 +2720,7 @@ module TDev {
         public getFontSize(): number { return this.attributes.fontSize; }
         public getFontWeight(): string { return this.attributes.fontWeight; }
         public getFontFamily(): string { return this.attributes.fontFamily; }
- 
+
         /*
         public getMinWidth(): number { return this.width[WallBox.MIN]; }
         public getMaxWidth(): number { return this.width[WallBox.MAX]; }
@@ -2767,11 +2767,11 @@ module TDev {
             this.attributes.scroll = [h, v];
             this.onCall("scrolling", pc);
         }
-        public setEmBorder(color: string, width: number, pc = "") { 
-            this.attributes.border = color;    
+        public setEmBorder(color: string, width: number, pc = "") {
+            this.attributes.border = color;
             var bw = SizeMgr.topFontSize * width;
             this.attributes.borderwidth = [bw, bw, bw, bw];
-            this.onCall("border", pc); 
+            this.onCall("border", pc);
        }
        public setBorderWidth(top: number, right: number, bottom: number, left: number, pc = "") {
             this.attributes.borderwidth = [top, right, bottom, left];
@@ -2788,7 +2788,7 @@ module TDev {
         public setWrap(wrap: boolean, width: number, pc = "") { this.attributes.wrap = wrap;  this.attributes.wraplimit = Math.max(width,1); this.onCall("text wrap", pc); }
         public setWidth(width: number, pc = "") { this.attributes.width = [width, width]; this.onCall("width", pc); }
         public setWidthRange(minWidth: number, maxWidth: number, pc = "") { this.attributes.width[WallBox.MIN] = minWidth; this.attributes.width[WallBox.MAX] = maxWidth; this.onCall("width range", pc); }
-                
+
         public setHorizontalStretch(n: number, pc = "") {
             this.attributes.stretchwidth = n;
             this.onCall("horizontal stretch", pc);
@@ -2811,7 +2811,7 @@ module TDev {
                 this.attributes.textalign = WallBox.ARRANGE_RIGHT;
             else if (right == 0 && left == 0)
                 this.attributes.textalign = WallBox.ARRANGE_CENTER;
-            else 
+            else
             this.attributes.textalign = WallBox.ARRANGE_JUSTIFY;
             this.attributes.legacystretch[WallBox.H] = true;
             this.onCall("horizontal alignment", pc);
@@ -2850,7 +2850,7 @@ module TDev {
 
         public setHeight(height: number, pc = "") { this.attributes.height = [height, height]; this.onCall("height", pc); }
         public setHeightRange(minHeight: number, maxHeight: number, pc = "") { this.attributes.height[WallBox.MIN] = minHeight; this.attributes.height[WallBox.MAX] = maxHeight; this.onCall("height range", pc); }
-        
+
         public setEmFontSize(fontSize: number, pc = "") { this.setFontSize(SizeMgr.topFontSize * fontSize, pc); }
 
         public setEmBorderWidth(top: number, right: number, bottom: number, left: number, pc = "") {
@@ -2893,7 +2893,7 @@ module TDev {
         }
 
 
-      
+
         // functions for manipulating the appearance of the HTML element. Called by layout algorithm.
 
         setRenderedX(x: number) {
@@ -3011,8 +3011,8 @@ module TDev {
         //        this.element = copy;
         //    }
         //}
-                
-        
+
+
         setRenderedTappable(tappable: boolean, tapped: boolean) {
 
             var x = "wall-box" + (tappable ? " tappable " : "") + (tapped ? " tapped" : "");
@@ -3121,6 +3121,6 @@ module TDev {
         }
 
 
-        
+
         }
 

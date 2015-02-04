@@ -178,7 +178,7 @@ module TDev.AST
         {
             return this._actionName;
         }
-        
+
         public matchesDecl(a:AST.Decl)
         {
             return a.getCoreName() == this.declName() && this.template.nodeType() == a.nodeType()
@@ -276,7 +276,7 @@ module TDev.AST
                             if (m) {
                                 currStep.hintLevel = m[1]
                             }
-                            
+
                             m = /^\s*\{stvalidator:([^:]*)(:(.*))?\}\s*$/i.exec(c.text)
                             if (m) {
                                 currStep.validator = m[1]
@@ -289,7 +289,7 @@ module TDev.AST
                                 }
                                 isCommand = true
                             }
-                            
+
                             if (!isCommand) {
                                 isDoc = true
                             }
@@ -438,7 +438,7 @@ module TDev.AST
                             var rec2 = <RecordDef>Parser.parseDecl(rec.serialize(), app);
                             s.template = rec2
                             var clean = (f:FieldBlock) => {
-                                var newStmts = f.stmts.filter((f:RecordField) => 
+                                var newStmts = f.stmts.filter((f:RecordField) =>
                                         visibleRecordFields[f.def().getName() + "->" + f.getName()])
                                 f.setChildren(newStmts)
                             }
@@ -496,7 +496,7 @@ module TDev.AST
                 return resSteps
             }
 
-            function addHeaders(b:AST.Block) 
+            function addHeaders(b:AST.Block)
             {
                 var acc = []
                 var prevStep:Step = b.parent ? b.parent.stepState : null

@@ -11,7 +11,7 @@ module TDev {
         public _listeners: Promise[] = [];
         public _value: any;
         public _state: PromiseState = PromiseState.Pending;
-        public _notify(l: Promise) : void {            
+        public _notify(l: Promise) : void {
             if (this._value instanceof Promise) {
                 var p = <Promise>this._value;
                 if (!!p._state)
@@ -19,7 +19,7 @@ module TDev {
                 else
                     p._listeners.push(l);
             }
-            else 
+            else
                 l._onNotify(this);
         }
         public isPending() { return this._state == PromiseState.Pending }
@@ -28,14 +28,14 @@ module TDev {
                 var promise = this;
                 try {
                     init(
-                        function (v) { 
+                        function (v) {
                             if (promise._state != PromiseState.Pending) {
                                 Promise.checkHandler("trying to resolve promise more than once")
-                                return; 
+                                return;
                             }
                             promise._value = v;
                             promise._state = PromiseState.Success;
-                            promise._notifyListeners(); 
+                            promise._notifyListeners();
                         },
                         function (v) {
                             if (promise._state == PromiseState.Error) {
@@ -44,7 +44,7 @@ module TDev {
                             }
                             promise._value = v || new Error("An error occured");
                             promise._state = PromiseState.Error;
-                            promise._notifyListeners(); 
+                            promise._notifyListeners();
                         },
                         undefined); // TODO: progress
                 } catch (err) {
@@ -76,15 +76,15 @@ module TDev {
         public then(onSuccess: (v: any) => any, onError: (v: any) => any = undefined, onProgress: (v: any) => any = undefined) : Promise {
             var onSuccess3: (v: any) => any
             var onError3: (v: any) => any
-            var r = new Promise((onSuccess2: (v: any) => any, onError2: (v: any) => any, onProgress2: (v: any) => any) => {                
+            var r = new Promise((onSuccess2: (v: any) => any, onError2: (v: any) => any, onProgress2: (v: any) => any) => {
                 onSuccess3 = onSuccess2;
                 onError3 = onError2;
             }, function(p: Promise) {
                 var v = p._value;
                 var s = p._state;
                 if (s === PromiseState.Error) {
-                    if (!!onError) 
-                    try {                        
+                    if (!!onError)
+                    try {
                         v = onError(v);
                         s = PromiseState.Success;
                     } catch (e) {
@@ -103,7 +103,7 @@ module TDev {
                 }
                 Promise.propagate(s, v, onSuccess3, onError3);
             });
-            if (!!this._state) 
+            if (!!this._state)
                 this._notify(r);
             else
                 this._listeners.push(r);
@@ -124,16 +124,16 @@ module TDev {
             return v instanceof Promise ? v : Promise.wrap(v);
         }
         static wrap(v: any = undefined) : Promise {
-            return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {                    
+            return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
                 onSuccess(v);
             });
         }
         static wrapError(v: any = undefined) : Promise {
-            return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {                    
+            return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
                 onError(v);
             });
         }
-        static delay(ms:number, f: () => Promise = null) : Promise 
+        static delay(ms:number, f: () => Promise = null) : Promise
         {
             return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
                 window.setTimeout(() => f ? f().then(v => onSuccess(v), e => onError(e), v => onProgress(v)) : onSuccess(undefined), ms);
@@ -146,17 +146,17 @@ module TDev {
                 var results = Array.isArray(values) ? <any>new Array(values.length) : {};
                 if (keys.length == 0) { onSuccess(results); return; }
                 var missing = keys.length;
-                var next = function() { 
-                    if (--missing == 0) 
+                var next = function() {
+                    if (--missing == 0)
                         if (Object.keys(errors).length == 0)
                             onSuccess(results);
                         else
                             onError(errors);
                 };
                 keys.forEach(function (key) { Promise.as(values[key]).then(
-                            function(v) { results[key] = v; next(); }, 
+                            function(v) { results[key] = v; next(); },
                             function (v) { errors[key] = v; next(); }); });
-            });           
+            });
         }
         static thenEach(values: any, onSuccess: (v: any) => any = undefined, onError: (v: any) => any = undefined, onProgress: (v: any) => any = undefined) : Promise {
             var result = Array.isArray(values) ? <any>new Array(values.length) : {};
@@ -173,7 +173,7 @@ module TDev {
             return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
                 var keys = Object.keys(values)
                 var results = Array.isArray(values) ? <any>new Array(values.length) : {};
-                function next(i:number) { 
+                function next(i:number) {
                     if (i >= keys.length) {
                         onSuccess(results);
                     } else {
@@ -181,7 +181,7 @@ module TDev {
                         try {
                             Promise.as(values[key]).done(function (x) {
                                 Promise.as(f(x, key, results)).done(
-                                    function (v) { results[key] = v; next(i+1); }, 
+                                    function (v) { results[key] = v; next(i+1); },
                                     onError);
                             });
                         } catch (e) {
@@ -190,7 +190,7 @@ module TDev {
                     }
                 }
                 next(0);
-            });           
+            });
 
         }
     }

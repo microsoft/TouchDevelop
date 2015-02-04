@@ -79,16 +79,16 @@ module TDev.RT {
             var milli = this.interval * 1000;
             var eventHandler = () => {
                 this.armed = false;
-                if (this.version != this.rt.versionNumber) 
+                if (this.version != this.rt.versionNumber)
                     return;
 
                 if (this.oneTime) {
                     this.active = false;
                 }
                 else {
-                    if (this.rt && 
-                        this.handlerEvent.handlers && 
-                        this.active && 
+                    if (this.rt &&
+                        this.handlerEvent.handlers &&
+                        this.active &&
                         !this.armed) {
                         this.armed = true;
                         Util.setTimeout(milli, eventHandler);
@@ -96,11 +96,11 @@ module TDev.RT {
                 }
                 if (this.handlerEvent.pendinghandlers == 0)
                     this.rt.queueLocalEvent(this.handlerEvent);
-            }            
+            }
 
-            if (this.rt && 
-                this.handlerEvent.handlers && 
-                this.active && 
+            if (this.rt &&
+                this.handlerEvent.handlers &&
+                this.active &&
                 !this.armed) {
                 this.armed = true;
                 Util.setTimeout(milli, eventHandler);

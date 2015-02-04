@@ -24,7 +24,7 @@ module TDev
                 this.inl = <AST.InlineAction>ss;
             else Util.die();
 
-            this.setChildren([ 
+            this.setChildren([
                           TheEditor.selector.deleteButton()
                           ]);
         }

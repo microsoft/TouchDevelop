@@ -174,7 +174,7 @@ module TDev.AST.Diff {
                 break;
             }
         }
-        
+
         visitCall(c:Call)
         {
             super.visitCall(c)
@@ -293,8 +293,8 @@ module TDev.AST.Diff {
             }
 
             //if (!tutorialMode)
-                return dissimilarity 
-            
+                return dissimilarity
+
             /*
             if (2*dissimilarity > similarity)
                 return 2*dissimilarity - similarity;
@@ -342,7 +342,7 @@ module TDev.AST.Diff {
 
         var missing = newer.things.filter(t => {
             var ot:Decl = null
-            if (opts.useStableNames && t.getStableName() && !newer.syntheticIds[t.getStableName()] && 
+            if (opts.useStableNames && t.getStableName() && !newer.syntheticIds[t.getStableName()] &&
                 olderByStable.hasOwnProperty(t.getStableName()))
                 ot = olderByStable[t.getStableName()]
             if (!ot && olderByName.hasOwnProperty(t.getName()))
@@ -881,8 +881,8 @@ module TDev.AST.Diff {
                 if (pa && pb) {
                     var ka = pa.parentKind
                     var kb = pb.parentKind
-                    if (ka && ka == kb && ka.getName() == "Colors" && 
-                        /#[a-fA-F0-9]{6}/.test(pa.getDescription(true)) && 
+                    if (ka && ka == kb && ka.getName() == "Colors" &&
+                        /#[a-fA-F0-9]{6}/.test(pa.getDescription(true)) &&
                         /#[a-fA-F0-9]{6}/.test(pb.getDescription(true)))
                         return 0;
                 }
@@ -938,7 +938,7 @@ module TDev.AST.Diff {
                 if (oo[i] instanceof ExprHolder) {
                     diffExprs(<ExprHolder>oo[i], <ExprHolder>nn[i], opts)
 
-                    if (!opts.tutorialMode && 
+                    if (!opts.tutorialMode &&
                         oo.length == 1 &&
                         newStmt instanceof ExprStmt &&
                         diffRatio(<ExprHolder>nn[i]) > 0.5) {
@@ -1033,7 +1033,7 @@ module TDev.AST.Diff {
 
     export function templateDiff(act:Decl, templ:Decl, opts:Options)
     {
-        setLongIds(act) 
+        setLongIds(act)
         setLongIds(templ)
         matchStmts(act, templ, opts)
         diffDecls(act, templ, opts)
@@ -1357,7 +1357,7 @@ module TDev.AST.Diff {
         function ehField(k:string) {
             return (k == "condition" || k == "expr" || k == "bound" || k == "collection")
         }
-            
+
         function quote(s:string) {
             return s.toLowerCase().replace(/[ \r\n\t]/g, "")
         }
@@ -1379,8 +1379,8 @@ module TDev.AST.Diff {
         }
 
         var allowedStrings:any = {};
-        
-        ([ 
+
+        ([
         "TouchDevelop is cool!", "tap to create bubbles", "hello", "hello world", "hello world!"
         ]).forEach(s => {
             allowedStrings[quote(s)] = 1
@@ -1558,9 +1558,9 @@ module TDev.AST.Diff {
         var newApp = prep(newText)
         new InitIdVisitor(false).dispatch(oldApp)
         //new InitIdVisitor(false).dispatch(newApp)
-        diffApps(oldApp, newApp, { 
+        diffApps(oldApp, newApp, {
             useStableNames: true,
-            //tutorialMode: true, 
+            //tutorialMode: true,
         })
         var info = {
             oldApp: DiffStat.run(oldApp),

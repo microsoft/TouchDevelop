@@ -9,7 +9,7 @@ module TDev.AST.Json
         return (<any>j) === "" ||
             j.tokens && (j.tokens.length == 0 || (j.tokens.length == 1 && j.tokens[0].nodeType == "placeholder"))
     }
-    
+
     function isEmptyBlock(b:JStmt[])
     {
         return !b || b.length == 0 || (b.length == 1 && b[0].nodeType == "exprStmt" && isPlaceholder((<JExprStmt>b[0]).expr))
@@ -409,7 +409,7 @@ module TDev.AST.Json
                     delete r[boundLocal]
                 }
             }
-                
+
             return r;
         }
 
@@ -582,28 +582,28 @@ module TDev.AST.Json
             return this.toJsons(n.stmts)
         }
 
-        public visitFor(n:For) { 
-            return { 
-                index: n.boundLocal, 
-                bound: n.upperBound, 
+        public visitFor(n:For) {
+            return {
+                index: n.boundLocal,
+                bound: n.upperBound,
                 body: n.body
-            } 
+            }
         }
 
-        public visitForeach(n:Foreach) { 
-            return { 
-                iterator: n.boundLocal, 
+        public visitForeach(n:Foreach) {
+            return {
+                iterator: n.boundLocal,
                 collection: n.collection,
                 conditions: n.conditions,
-                body: n.body 
-            } 
+                body: n.body
+            }
         }
 
         public visitWhile(n:While) {
-            return { 
+            return {
                 condition: n.condition,
-                body: n.body 
-            } 
+                body: n.body
+            }
         }
 
         public visitBox(n:Box) {
@@ -611,31 +611,31 @@ module TDev.AST.Json
         }
 
         public visitAnyIf(n:If) {
-            return { 
+            return {
                 nodeType: "if",
                 condition: n.rawCondition,
                 thenBody: n.rawThenBody,
                 elseBody: this.possiblyEmptyBlock(n.rawElseBody),
                 isElseIf: n.isElseIf,
-            } 
+            }
         }
 
         public visitWhere(n:Where) {
-            return { condition: n.condition } 
+            return { condition: n.condition }
         }
 
-        public visitExprStmt(n:ExprStmt) { 
+        public visitExprStmt(n:ExprStmt) {
             return { expr: n.expr }
         }
 
-        public visitInlineActions(n:InlineActions) { 
+        public visitInlineActions(n:InlineActions) {
             var r:any = this.visitExprStmt(n)
             r.actions = n.actions
             return r;
         }
 
         public visitInlineAction(n:InlineAction) {
-            return { 
+            return {
                 reference: n.name,
                 inParameters: this.toJsons(n.inParameters),
                 outParameters: this.toJsons(n.outParameters),
@@ -662,7 +662,7 @@ module TDev.AST.Json
         }
 
         public visitActionCore(n:Action, includeBody:boolean) {
-            var r:any = { 
+            var r:any = {
                 name: n.getName(),
                 inParameters: this.toJsons(n.header.inParameters.stmts),
                 outParameters: n.header.outParameters,
@@ -736,7 +736,7 @@ module TDev.AST.Json
                 exportedTypes: n.getPublicKinds().map((k) => Lexer.quoteId(k.getName())).join(" "),
                 exportedTypeDefs: n.getPublicKinds().map((k, i) => {
                     if (k instanceof LibraryRefAbstractKind)
-                        return { 
+                        return {
                             nodeType: "libAbstractType",
                             name: k.getName(),
                             id: n.stableId + "$tp" + i
@@ -858,7 +858,7 @@ module TDev.AST.Json
         public visitResolveClause(n:ResolveClause) {
             return {
                 name: n.name,
-                defaultLibId: !n.defaultLib || n.defaultLib.isThis() ? null : this.ref(n.defaultLib), 
+                defaultLibId: !n.defaultLib || n.defaultLib.isThis() ? null : this.ref(n.defaultLib),
                 withTypes: n.kindBindings,
                 withActions: n.actionBindings,
             }
@@ -1085,7 +1085,7 @@ module TDev.AST.Json
                 tw.keyword("meta").keyword("private").op0(";").nl();
             if (a.nodeType == "page")
                 tw.keyword("meta").keyword("page").op0(";").nl();
-            if (a.isOffline) 
+            if (a.isOffline)
                 tw.keyword("meta").keyword("offline").op0(";").nl();
             if (a.isQuery)
                 tw.keyword("meta").keyword("query").op0(";").nl();
@@ -1103,7 +1103,7 @@ module TDev.AST.Json
         function findNode(id:JNodeRef)
         {
             var i = <any>id;
-            if (nodesById.hasOwnProperty(i)) 
+            if (nodesById.hasOwnProperty(i))
                 return nodesById[i];
             return null;
         }
@@ -1139,7 +1139,7 @@ module TDev.AST.Json
                         infixPri = p.getInfixPriority() || 0
                 }
                 if (infixPri) {
-                    if (e.name == "-" && 
+                    if (e.name == "-" &&
                         (e.args[0].nodeType == "numberLiteral") &&
                         ((<JNumberLiteral>e.args[0]).value === 0.0) &&
                         (!(<JNumberLiteral>e.args[0]).stringForm)) {
@@ -1518,7 +1518,7 @@ module TDev.AST.Json
                         tw.sep().op0("\u2192").id0(nm)
                         return;
                     }
-                } 
+                }
 
                 tw.sep().op0("\u2192").id0(n.name == null ? "<unbound>" : n.name);
             },

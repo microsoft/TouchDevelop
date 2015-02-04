@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
@@ -54,7 +54,7 @@ module TDev {
         export function astsessionid(userid:string, guid:string) {
             return userid + "0pa" + letterify(guid);
         }
- 
+
 
         export function scripthash(author: string, title: string) {
             return letterify(author + title);
@@ -188,7 +188,7 @@ module TDev {
                                 continue;
                             cs.serverinfo = <Revisions.ServerJson> json[f];
                             cs._title = cs.serverinfo.title;
-                            cs._permissions = ""; // not meant for creating fresh sessions             
+                            cs._permissions = ""; // not meant for creating fresh sessions
                             sessions.push(cs);
                         }
                     return sessions;
@@ -393,20 +393,20 @@ module TDev {
                 });
             }
 
-            public static deleteSessionFileAsync(context:ISessionContext, desc: ISessionParams): Promise 
+            public static deleteSessionFileAsync(context:ISessionContext, desc: ISessionParams): Promise
             {
                 // check if this session is open in some slot - if so, delete by closing it
                 var openedby = desc.localname && Slot.slots[desc.localname];
                 if (openedby)
                    return openedby.disconnect(true);
-                
+
                 // delete by opening and then closing
                 var s = context.createSession(desc);
                 return Slot.queueSessionWork(desc.localname, "deleting session cache", () => {
                     return s.loadAsync().then(() => s.closeAsync(true));
                 });
             }
- 
+
             public static queueSessionWork(localname: string, description: string, work: () => Promise): Promise
             {
                 var waitfor = Slot.busysessions[localname];
@@ -445,7 +445,7 @@ module TDev {
                 else
                     return Revisions.getRevisionServiceTokenAsync(forcefreshtoken);
             }
-            public _authtoken: string; //HACK      
+            public _authtoken: string; //HACK
             public setAccessToken(token: string) {
                 this._authtoken = token;
             }
@@ -488,7 +488,7 @@ module TDev {
                 this.current_script = TDev.RT.CloudSession.makeScriptIdentifier(basescript, author);
             }
 
-      
+
 
             public refreshFinalScriptContext(): boolean {  // returns true if there were any changes
 
@@ -550,7 +550,7 @@ module TDev {
             // the current cloud session
             public CurrentSession: ClientSession = undefined;
 
-            // the local session 
+            // the local session
             public LocalSession: ClientSession = undefined;
 
             // get the current cloud or node session
@@ -820,7 +820,7 @@ module TDev {
                 var op = RT.Conv.toCloud("string", value, false);
                 return this.get_attribute_lval(key, rt).then((lval) => this.LocalSession.user_modify_lval(lval, op));
             }
-            private get_attribute_lval(key: string, rt: Runtime): Promise //Revisions.LVal 
+            private get_attribute_lval(key: string, rt: Runtime): Promise //Revisions.LVal
             {
                 var waitfor = this.LocalSession ? Promise.as() : this.localSessionSlot.connect(this.getLocalSessionDescriptor());
                 return waitfor.then(() => this.LocalSession.user_get_lval(Revisions.Parser.MakeProperty(key, "attributes[]", "string"), [], []));
@@ -839,7 +839,7 @@ module TDev {
                 });
             }
 
-            // ------------ tie state changes to environment 
+            // ------------ tie state changes to environment
 
             // cautious yield
             public yieldSession(): boolean {
@@ -906,7 +906,7 @@ module TDev {
             public addDoorbellListener(listener: () => boolean) {
                 this.doorbelllisteners.push(listener);
             }
-          
+
 
             public clearCachedData() {
                 for (var l in this.registereddatacaches) {
@@ -993,7 +993,7 @@ module TDev {
             }
 
         }
-    
+
         // data caches get notified directly to invalidate them
         export interface IDataCache {
             clearCachedData(): void;
@@ -1149,7 +1149,7 @@ module TDev {
 
             this.onMessage((str, buff) => {
                 var data = str
-                if (buff) 
+                if (buff)
                     data = RT.Buffer.fromTypedArray(buff)
                 w.receiveMessage(RT.WebSocketMessage.mk(data))
             })

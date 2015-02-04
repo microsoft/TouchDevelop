@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev { export module Contract {
 
@@ -7,5 +7,5 @@ module TDev { export module Contract {
         if (!e) {
             throw new Error("Contract Requires failed");
         }
-    }    
-} } 
+    }
+} }

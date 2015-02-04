@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     export class Vector2
         extends RTValue
@@ -40,9 +40,9 @@ module TDev { export module RT {
 
         // Computes the dot product
         static dot(v1:Vector2, other:Vector2) : number { return v1._x * other._x + v1._y * other._y; }
-        
+
         // Restricts the vector in the specified range
-        private clamp(min:Vector2, max:Vector2) : Vector2 
+        private clamp(min:Vector2, max:Vector2) : Vector2
         {
             return Vector2.mk(Math_.clamp(min._x, max._x, this._x), Math_.clamp(min._y, max._y, this._y));
         }
@@ -58,12 +58,12 @@ module TDev { export module RT {
         // Turns the vector into a string
         private to_string() : string { return '(' + this._x + ',' + this._y + ')'; }
 
-        public rotate90Left():Vector2 
+        public rotate90Left():Vector2
         {
             return Vector2.mk(-this._y, this._x);
         }
 
-        public equals(that:Vector2):boolean 
+        public equals(that:Vector2):boolean
         {
             return this._x == that._x && this._y == that._y;
         }

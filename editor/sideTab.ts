@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -62,7 +62,7 @@ module TDev
 
         public highlightCarret()
         {
-            if (TheEditor.sideKeyFocus) 
+            if (TheEditor.sideKeyFocus)
                 this.carretIdx = Util.boundTo(this.carretBound(), this.carretIdx, this.htmlEntries.length - 1);
             else
                 this.carretIdx = -1;

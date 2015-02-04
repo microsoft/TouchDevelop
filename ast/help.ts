@@ -19,7 +19,7 @@ module TDev {
         medModalDuration?: number;
         medPlayDuration?: number;
     }
-    
+
     export interface JsonProgressStats {
         kind: string; // progressstats
         publicationId: string;
@@ -50,7 +50,7 @@ module TDev {
         time:number;// time when publication was created
         userid:string; // user id of user who published
         userscore : number;
-        username:string; 
+        username:string;
         userhaspicture:boolean;
     }
 
@@ -142,7 +142,7 @@ module TDev {
         data: string; // groupid for group invitation codes
     }
 
-	export interface JsonStoreApp 
+	export interface JsonStoreApp
 	{
 		kind: string; // 'storeapp'
         time: number; // seconds since 1970 of last activity on this app (most likely: increase of users / launches)
@@ -166,7 +166,7 @@ module TDev {
         name:string;
         description:string;
         icon:string; // script icon name
-        iconbackground:string; // script icon background color in HTML notation 
+        iconbackground:string; // script icon background color in HTML notation
         iconurl: string; // script icon picture url (obsolete)
         iconArtId?: string; // art id for script icon
         splashArtId?: string; // art id for script splash screen
@@ -216,7 +216,7 @@ module TDev {
     {
         publicationid:string; // script id that is being commented on
         publicationname:string; // script name
-        publicationkind:string; // 
+        publicationkind:string; //
     }
 
     export interface JsonRunBucket extends JsonPubOnPub {
@@ -492,7 +492,7 @@ module TDev {
                         v.setChildren(video);
                         v.withClick(() => { });
                     });
-                }                
+                }
             });
         }
 
@@ -558,7 +558,7 @@ module TDev {
             }
             return undefined;
         }
-            
+
         static findArtId(id : string) : string {
             var artVar = Script ? Script.resources().filter((r) => MdComments.shrink(r.getName()) == MdComments.shrink(id))[0] : null;
             var artPref = "https://az31353.vo.msecnd.net/pub/"
@@ -618,17 +618,17 @@ module TDev {
                 if (!Script) return MdComments.error(lf("import can only be used from a script context"));
                 var r = "";
                 [
-                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.npmModules}, 
-                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.pipPackages}, 
-                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.cordovaPlugins}, 
+                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.npmModules},
+                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.pipPackages},
+                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.cordovaPlugins},
                  {name:'touchdevelop', url:'#pub:{0:q}', pkgs:Script.touchDevelopPlugins}
                 ].forEach(imports => {
                     var keys = Object.keys(imports.pkgs);
                     if (keys.length > 0) {
-                        keys.forEach(key => { 
+                        keys.forEach(key => {
                             var url = Util.fmt(imports.url, key);
                             var ver = imports.pkgs[key];
-                            r += Util.fmt("<li>{3}: <a target='blank' href='{1}'>{0:q}{2}</a></li>\n", key, url, ver ? " " + ver : "", imports.name); 
+                            r += Util.fmt("<li>{3}: <a target='blank' href='{1}'>{0:q}{2}</a></li>\n", key, url, ver ? " " + ver : "", imports.name);
                         });
                     }
                 });
@@ -899,7 +899,7 @@ module TDev {
             return outp;
         }
 
-        public formatInline(s: string) 
+        public formatInline(s: string)
         {
             var prev = this.allowLinks;
             var prevI = this.allowImages;
@@ -916,7 +916,7 @@ module TDev {
             }
         }
 
-        public formatTextNoLinks(s: string) 
+        public formatTextNoLinks(s: string)
         {
             var prev = this.allowLinks;
             this.allowLinks = false;
@@ -927,7 +927,7 @@ module TDev {
             }
         }
 
-        public formatText(s: string, comment:AST.Comment = null) 
+        public formatText(s: string, comment:AST.Comment = null)
         {
             if (!s) return s;
 
@@ -972,7 +972,7 @@ module TDev {
 
         private mkCopyButton(tp:string, dt:string)
         {
-            var r = Util.fmt("<button class='{0} copy-button' data-type='{1:q}' data-data='{2:q}'>", 
+            var r = Util.fmt("<button class='{0} copy-button' data-type='{1:q}' data-data='{2:q}'>",
                              this.useSVG ? "code-button" : "wall-button", tp, dt);
             if (!this.useSVG)
                 r += "copy";
@@ -1084,7 +1084,7 @@ module TDev {
                         var seenStmt = false;
                         while (j < stmts.length) {
                             if ((stmts[j] instanceof AST.Comment) &&
-                                /^\s*(\{\/code}|````)\s*$/.test((<AST.Comment>stmts[j]).text)) 
+                                /^\s*(\{\/code}|````)\s*$/.test((<AST.Comment>stmts[j]).text))
                                 break;
                             j++;
                         }
@@ -1255,7 +1255,7 @@ module TDev {
         public id:string;
         public fromJson:JsonScript;
         public isBuiltIn = false;
-        public isTutorial(): boolean { 
+        public isTutorial(): boolean {
             return this.hashTags()
                 && /#(stepbystep|hourofcode)\b/i.test(this.allHashTags)
                 && !/template|notes/i.test(this.json.name);
@@ -1581,7 +1581,7 @@ module TDev {
         public nextTutorials(): string[] {
             var m = /\{stnexttutorials:([^\}]+)\}/i.exec(this.json.text);
             if (m) return m[1].split(',');
-            return [];            
+            return [];
         }
 
         public moreTutorials(): string {
@@ -1602,7 +1602,7 @@ module TDev {
             // unpublished tutorial
             if (!tutorialId)
                 return Promise.as(this.translatedTopic = <HelpTopicInfoJson>{ body: undefined });
-            
+
             return ProgressOverlay.lockAndShowAsync(lf("translating topic...") + (dbg ? tutorialId : ""))
                 .then(() => {
                     var blobUrl = HTML.proxyResource("https://tdtutorialtranslator.blob.core.windows.net/docs/" + to + "/" + tutorialId);
@@ -1655,7 +1655,7 @@ module TDev {
             var j = this.json;
             var loadScript = (id) => {
                 if (id == "") {
-                    if (j.text == null && j.id) 
+                    if (j.text == null && j.id)
                         return HelpTopic.getScriptAsync(j.id).then((text) => {
                             j.text = text;
                             return text;
@@ -1702,7 +1702,7 @@ module TDev {
             var ch = ""
 
             if (this.apiProperty) {
-                ch += "<div class='md-api-header md-tutorial'>" + 
+                ch += "<div class='md-api-header md-tutorial'>" +
                           (new Renderer()).renderPropertySig(this.apiProperty, true) +
                           "<div class='md-prop-desc'>" +
                             mdcmt.formatText(this.apiProperty.getDescription()) +
@@ -1713,7 +1713,7 @@ module TDev {
                     ch += "<div class='md-tutorial'>" +
                             "<ul>" +
                               (cap == PlatformCapability.None ? "" :
-                                "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) + 
+                                "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) +
                                  " <a title='" + lf("read more about platforms") + "' href='/help/platforms'>" + lf("Learn more...") + "</a></li>") +
                               (!this.apiProperty.isBeta() ? "" :
                                 "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change") +
@@ -1810,7 +1810,7 @@ module TDev {
                     }
             })
         }
-        
+
         public docInfoAsync() : Promise // of HelpTopicInfoJson
         {
             var md = new TDev.MdComments(new TDev.CopyRenderer());
@@ -1895,7 +1895,7 @@ module TDev {
 
         static printManyAsync(topics:HelpTopic[])
         {
-            return Promise.join(topics.map(t => t.printedAsync())).then(arr => 
+            return Promise.join(topics.map(t => t.printedAsync())).then(arr =>
                 HelpTopic.printText(arr.join("<div style='page-break-after:always'></div>\n"), "Help"))
         }
 
@@ -1910,10 +1910,10 @@ module TDev {
             return this.renderAsync(md).then((text) => {
                 if (newsletter)
                     return CopyRenderer.inlineStyles(text);
-                else 
+                else
                     return (
                     "<h1>" + Util.htmlEscape(this.json.name) + "</h1>" +
-                    "<p>" + Util.htmlEscape(this.json.description) + "</p>" + 
+                    "<p>" + Util.htmlEscape(this.json.description) + "</p>" +
                     text)
             })
         }
@@ -1964,7 +1964,7 @@ module TDev {
             // without SVG we don't do any icons at the moment; in future see below
             if (mdcmt.useSVG)
                 r.push("<span class='api-icon' style='background:" + j.iconbackground + "'>" +
-                     (mdcmt.useSVG ? SVG.getIconSVGCore(j.icon + ",white") : 
+                     (mdcmt.useSVG ? SVG.getIconSVGCore(j.icon + ",white") :
                          "<img src='/replaceicons/" + j.icon + ".png' alt='" + j.icon + "'>") + "</span>");
             r.push("<div class='api-names'><div class='api-name'>" + Util.htmlEscape(n) + "</div>");
             r.push("<div class='api-desc'>" + Util.htmlEscape(j.description) + "</div>");

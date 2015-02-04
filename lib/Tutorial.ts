@@ -19,10 +19,10 @@ module TDev.RT {
         //@ uiAsync
         export function show_hint(message:string, r:ResumeCtx)
         {
-            var m = new ModalDialog();         
+            var m = new ModalDialog();
             m.add([div("wall-dialog-header", lf("tutorial hint")),
                     Wall.body(message),
-                     div("wall-dialog-buttons", 
+                     div("wall-dialog-buttons",
                         [HTML.mkButtonOnce("ok", () => m.dismiss())])
                     ]);
             m.onDismiss = () => r.resume();

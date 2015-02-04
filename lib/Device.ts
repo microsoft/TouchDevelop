@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A device on the home network
     //@ stem("dev") immutable walltap cap(home) obsolete

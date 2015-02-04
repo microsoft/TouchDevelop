@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A argb color (alpha, red, green, blue)
     //@ stem("c") icon("color") immutable ctx(general,indexkey,walltap,cloudfield,json) serializable
@@ -215,7 +215,7 @@ module TDev.RT {
 
             var tempSpan: HTMLElement;
             tempSpan = span(null, "R: " + this.r + " G: " + this.g + " B: " + this.b).withClick(clickHandler);
-            
+
             var s: string;
             for (s = (this.toInt32() & 0xffffff).toString(16); s.length < 6; s = "0" + s) { }
             tempSpan.style.backgroundColor = "#" + s;

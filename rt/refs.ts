@@ -1,4 +1,4 @@
-﻿///<reference path='typings.d.ts'/>
+///<reference path='typings.d.ts'/>
 ///<reference path='RTValue.ts'/>
 ///<reference path='jsonimport.ts'/>
 ///<reference path='cloud.ts'/>

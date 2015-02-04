@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.WinRT {
     export function ShareManagerInit()
     {
@@ -92,7 +92,7 @@ module TDev.RT.WinRT {
             ShareManager.createFacebookLike = null;
             ShareManager.createTwitterTweet = null;
         }
-        
+
         export function shareSocialAsync(network: string, text: string, uri : string) : Promise
         {
             _uri = uri;
@@ -101,7 +101,7 @@ module TDev.RT.WinRT {
             return Promise.as();
         }
 
-        export function sharePictureAsync(pic : Picture, network : string, message : string) 
+        export function sharePictureAsync(pic : Picture, network : string, message : string)
         {
             _picture = pic;
             _text = message;

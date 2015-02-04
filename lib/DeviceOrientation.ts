@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     export enum DeviceFaceOrientation {
         Up,
@@ -9,7 +9,7 @@ module TDev { export module RT {
         LandscapeLeft,
         LandscapeRight
     }
-    
+
     export module DeviceOrientation
     {
         var _alpha: number = undefined;
@@ -139,12 +139,12 @@ module TDev { export module RT {
         {
             _heading = heading;
         }
-        
-        function reading(ev: any) { 
+
+        function reading(ev: any) {
             Util.log('deviceorientation: reading...');
             // read data
             setOrientation(<number>ev.alpha, <number>ev.beta, <number>ev.gamma);
-            
+
             // compass
             setHeading(<number>ev.compassHeading || <number>ev.webkitCompassHeading || undefined);
             if (!_heading && ev.absolute) {
@@ -180,7 +180,7 @@ module TDev { export module RT {
         export var addOrientationReadingEvent = () =>
         {
             Util.log('deviceorientation: attaching');
-            window.addEventListener('deviceorientation', reading, false);                
+            window.addEventListener('deviceorientation', reading, false);
         }
 
         export var removeOrientationReadingEvent = () =>
@@ -201,7 +201,7 @@ module TDev { export module RT {
         function calibrateCompass(ev : Event) {
             HTML.showNotificationText("Your compass needs calibrating! Wave your device in a figure-eight motion.");
         }
-                   
+
         export function start(r : Runtime) {
             if (r.isHeadless()) return
             if (isOrientationSupported() || isHeadingSupported()) {
@@ -217,7 +217,7 @@ module TDev { export module RT {
                 Util.log('deviceorientation: not supported');
                 clearData();
             }
-        }        
+        }
 
         export function stop(r: Runtime) {
             if (r.isHeadless()) return

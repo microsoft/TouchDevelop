@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 declare class EventArgs {}
 interface EventHandler {
     (sender: Object, args: EventArgs): void;
@@ -66,10 +66,10 @@ module TDev.RT {
         function initialize() {
             var a = <any>window;
             if (a && !a.SpeechRecognition) {
-                a.SpeechRecognition = a.SpeechRecognition || 
-                        a.webkitSpeechRecognition || 
-                        a.mozSpeechRecognition || 
-                        a.oSpeechRecognition || 
+                a.SpeechRecognition = a.SpeechRecognition ||
+                        a.webkitSpeechRecognition ||
+                        a.mozSpeechRecognition ||
+                        a.oSpeechRecognition ||
                         a.msSpeechRecognition;
             }
             if (a && !a.SpeechSynthesisUtterance) {
@@ -164,7 +164,7 @@ module TDev.RT {
         }
 
         export var detectAsync = (text: string) : Promise =>
-        {           
+        {
             if (text.length == 0) {
                 return Promise.as(undefined);
             }
@@ -214,7 +214,7 @@ module TDev.RT {
             var url = 'runtime/languages/pictureToText';
 
             var privateUrl = Cloud.getPrivateApiUrl(url);
-            var request = WebRequest.mk(privateUrl, undefined); 
+            var request = WebRequest.mk(privateUrl, undefined);
             pic.initAsync().done(() => {
                 request.setContentAsPictureInternal(pic, 0.75);
                 request.set_method("POST");
@@ -264,7 +264,7 @@ module TDev.RT {
                             res += e.results[i][0].transcript;
                     }
                     status.setChildren([res]);
-                    m.add(btns = div('wall-dialog-buttons', 
+                    m.add(btns = div('wall-dialog-buttons',
                         HTML.mkButton('cancel', () => m.dismiss()),
                         HTML.mkButton('try again', () => {
                             btns.removeSelf();
@@ -281,7 +281,7 @@ module TDev.RT {
                     Util.log('speech recog: onerror');
                     status.setChildren(['oops, couldn\'t understand what you said.']);
 
-                    m.add(btns = div('wall-dialog-buttons', 
+                    m.add(btns = div('wall-dialog-buttons',
                         HTML.mkButton('cancel', () => m.dismiss()),
                         HTML.mkButton('try again', () => {
                             btns.removeSelf();
@@ -317,7 +317,7 @@ module TDev.RT {
         //? Automatically detects the language of a given text using Bing.
         //@ async cap(translation) flow(SinkSafe) returns(string)
         export function detect_language(text: string, r: ResumeCtx) //: string
-        {           
+        {
             var rt = r.rt;
             Cloud.authenticateAsync(lf("translation"))
                 .then((authenticated) => {
@@ -326,7 +326,7 @@ module TDev.RT {
                 })
                 .done((lang) => r.resumeVal(lang));
         }
-                
+
         //? This api was renamed. Use `speak_text` instead.
         //@ cap(translation) flow(SinkSafe) obsolete
         //@ [result].writesMutable

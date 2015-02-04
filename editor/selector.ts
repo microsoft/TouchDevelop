@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -64,7 +64,7 @@ module TDev
                   node: { type: "exprStmt", tokens: [] } },
             { name: "//",         desc: "a comment",
                   node: { type: "comment", text: "" } },
-            { name: "paste",      desc: "paste from clipboard", 
+            { name: "paste",      desc: "paste from clipboard",
                   node: emptyExprStmt },
             */
         ]; }
@@ -82,7 +82,7 @@ module TDev
             return false;
         }
 
-        public edit(n:AST.AstNode) { 
+        public edit(n:AST.AstNode) {
             return TheEditor.editNode(n, false); // TODO XXX - why did we set refreshIds=true here previously?
         }
 
@@ -113,7 +113,7 @@ module TDev
                 TheEditor.calculator.inlineEdit(TheEditor.calculator.expr.tokens[0]);
         }
 
-        public addCallback(off:number, stmt = null, t = Ticks.noEvent) 
+        public addCallback(off:number, stmt = null, t = Ticks.noEvent)
         { return () => {
             tick(t);
             TheEditor.getSpyManager().onAddNear(stmt);
@@ -303,9 +303,9 @@ module TDev
             var extracted = AST.Parser.emptyBlock();
             extracted.setChildren(stmts);
 
-            var extr = new AST.Extractor(extracted, 
-                                         TDev.TheEditor.currentAction(), 
-                                         callPlaceholder, 
+            var extr = new AST.Extractor(extracted,
+                                         TDev.TheEditor.currentAction(),
+                                         callPlaceholder,
                                          Script.freshName(this.extractedName.value));
             extr.run();
             extr.extractedAction.isOffloaded = offload;
@@ -330,7 +330,7 @@ module TDev
             return placeHolder;
         }
 
-        private surround(node:string) 
+        private surround(node:string)
         { return () => {
             tick(Ticks.codeSurround)
             var ch0 = this.copyOutSelection();
@@ -551,7 +551,7 @@ module TDev
 
         private setSizes()
         {
-            var desc = (s:AST.AstNode) => 
+            var desc = (s:AST.AstNode) =>
             {
                 if (s instanceof AST.Stmt) {
                     if (!(s instanceof AST.Block) && (<AST.Stmt>s).renderedAs)
@@ -729,8 +729,8 @@ module TDev
             Util.childNodes(this.topButtonRow, this.topLeftButtonRow, this.bottomButtonRow, this.bottomLeftButtonRow).forEach((e:HTMLElement) => {
                 e.setFlag("disabled",
                         TheEditor.isDebuggerMode() ||
-                        ((<any>e).enableForPlaceholder && !disableAdd) || 
-                        ((<any>e).disableForPlaceholder && disableAdd) || 
+                        ((<any>e).enableForPlaceholder && !disableAdd) ||
+                        ((<any>e).disableForPlaceholder && disableAdd) ||
                         this.selectionBlock.immutableReason);
             });
             var disableBreakpoints = !this.selectedStmt || (this.selectedStmt.nodeType() === "comment") || (!TheEditor.isDebuggerMode() && Script.annotatedBy !== AST.AnnotationMode.Crash);
@@ -781,7 +781,7 @@ module TDev
                 (<any>b0).disableForPlaceholder = tck == Ticks.btnAddUp || tck == Ticks.btnAddDown;
                 HTML.setTickCallback(b0, tck, () => {
 					TDev.Browser.EditorSoundManager.intellibuttonClick();
-					f(); 
+					f();
 				})
                 TheEditor.keyMgr.btnShortcut(b0, key);
                 return b0;
@@ -823,8 +823,8 @@ module TDev
 
                 var moveLeft:HTMLElement = null;
 
-                if (stmt.isLastChild() && 
-                    stmt.parentBlock().parent.parentBlock() != null && 
+                if (stmt.isLastChild() &&
+                    stmt.parentBlock().parent.parentBlock() != null &&
                     stmt.isExecutableStmt()) {
 
                     var act = TheEditor.currentAction();
@@ -832,9 +832,9 @@ module TDev
                     else if (stmt.parent.parent instanceof AST.InlineAction) {}
                     else if (TheEditor.stepTutorial) {}
                     else {
-                        moveLeft = mkBtnDown("svg:ArrowDownL,black", lf("move left"), "Ctrl-L", Ticks.btnMoveLeft, () => { 
+                        moveLeft = mkBtnDown("svg:ArrowDownL,black", lf("move left"), "Ctrl-L", Ticks.btnMoveLeft, () => {
                                             tick(Ticks.codeMoveLeft);
-                                            this.moveOut() 
+                                            this.moveOut()
                                     });
                         (<any>moveLeft).enableForPlaceholder = true;
                     }
@@ -876,7 +876,7 @@ module TDev
         public cutCode()
         {
             tick(Ticks.codeCut);
-            this.cutSelection() 
+            this.cutSelection()
         }
 
         public copyCode()
@@ -942,7 +942,7 @@ module TDev
             if (d < 0) {
                 targetPos -= pageSize;
                 newDesc = this.tops.filter((s:SizeDesc) => s.top >= targetPos)[0];
-            } else { 
+            } else {
                 targetPos += pageSize;
                 for (var i = 0; i < this.tops.length; ++i) {
                     if (this.tops[i].top >= targetPos) break;
@@ -962,7 +962,7 @@ module TDev
             var act = TheEditor.currentAction();
             if (!act) return null;
 
-            var desc = (s:AST.AstNode) => 
+            var desc = (s:AST.AstNode) =>
             {
                 if (s instanceof AST.Stmt) {
                     if (!(s instanceof AST.Block)) {
@@ -1029,7 +1029,7 @@ module TDev
         public bye()
         {
             this.clear();
-            //if (!!scrollCont) 
+            //if (!!scrollCont)
             //    scrollCont.removeEventListener("scroll", this, false);
         }
     }
@@ -1095,7 +1095,7 @@ module TDev
             this.stmt = ss;
             TheEditor.showStmtEditor(this);
         }
-        
+
         public bye()
         {
         }

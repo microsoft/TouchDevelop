@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A contact
     //@ walltap cap(contacts)
@@ -29,7 +29,7 @@ module TDev.RT {
         private _work_phone : string = undefined;
         private _mobile_phone : string = undefined;
         private _web_site : string = undefined;
-        
+
         static mkFake(firstName : string, middleName : string, lastName : string, email : string, phoneNumber : string, pictureUrl : string): Contact {
             var c = new Contact();
             c._first_name = firstName;
@@ -145,7 +145,7 @@ module TDev.RT {
 					.filter(s => !!s)
 					.join(" ");
         }
-        
+
         //? Gets the first name if any.
         //@ readsMutable
         public first_name() : string { return this._first_name || ''; }
@@ -225,7 +225,7 @@ module TDev.RT {
         //? Sets the work address
         //@ writesMutable
         public set_work_address(work_address:string) : void { this._work_address = work_address; }
-        
+
         //? Gets the work address if any
         //@ readsMutable
         public home_address() : string { return this._home_address; }
@@ -252,8 +252,8 @@ module TDev.RT {
 
         //? Gets the picture of the contact if any.
         //@ returns(Picture) readsMutable picAsync
-        public picture(r : ResumeCtx) // : Picture 
-        { 
+        public picture(r : ResumeCtx) // : Picture
+        {
             if (!this._picture && this._pictureUrl) {
                 Picture.fromUrl(this._pictureUrl, true)
                     .then((pic) => {
@@ -267,9 +267,9 @@ module TDev.RT {
 
 		//? Sets the picture
 		//@ writesMutable [picture].readsMutable
-        public set_picture(picture: Picture): void { 
+        public set_picture(picture: Picture): void {
             this._pictureUrl = undefined;
-            this._picture = picture; 
+            this._picture = picture;
         }
 
 		//? Sets the picture url
@@ -357,7 +357,7 @@ module TDev.RT {
         //? Sets the mobile phone
         //@ writesMutable
         public set_mobile_phone(mobile_phone:string) : void { this._mobile_phone = mobile_phone; }
-        
+
         //? Gets the web site if any
 		//@ readsMutable
         public web_site() : Link { return this._web_site ? Link.mk(this._web_site, LinkKind.hyperlink) : undefined; }

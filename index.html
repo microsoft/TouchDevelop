@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html data-manifest="">
 <head>
     <meta charset="utf-8" />
     <title>TouchDevelop - Web App</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -14,18 +14,18 @@
     <link rel="apple-touch-icon" sizes="114x114" href="https://www.touchdevelop.com/doc/touchdevelop114x114.png" />
     <link rel="apple-touch-icon" sizes="144x144" href="https://www.touchdevelop.com/doc/touchdevelop144x144.png" />
     <link rel="apple-touch-icon" sizes="200x200" href="https://www.touchdevelop.com/doc/touchdevelop200x200.png" />
-    <meta name="Description" content="create apps on iPad, iPhone, Android, PC, Mac"/> 
-    <meta name="application-name" content="TouchDevelop"/> 
-    <meta name="msapplication-tap-highlight" content="no"/> 
+    <meta name="Description" content="create apps on iPad, iPhone, Android, PC, Mac"/>
+    <meta name="application-name" content="TouchDevelop"/>
+    <meta name="msapplication-tap-highlight" content="no"/>
     <meta name="msapplication-tooltip" content="create apps on iPad, iPhone, Android, PC, Mac"/>
     <meta name="msapplication-starturl" content="https://www.touchdevelop.com/app/"/>
     <meta name="msapplication-TileColor" content="#008B00"/>
-    <meta name="msapplication-TileImage" content="https://www.touchdevelop.com/doc/tilelogo.png"/> 
+    <meta name="msapplication-TileImage" content="https://www.touchdevelop.com/doc/tilelogo.png"/>
     <meta name="msapplication-task" content="name=Hub;action-uri=/app/;icon-uri=/favicon.ico" />
     <meta name="msapplication-task" content="name=My Scripts;action-uri=/app/#list:installed-scripts;icon-uri=/favicon.ico" />
     <meta name="msapplication-task" content="name=Forum;action-uri=/app/#list:installed-scripts:script:bttt:comments;icon-uri=/favicon.ico" />
     <meta name="msapplication-task" content="name=Notifications;action-uri=/app/#list:installed-scripts:notifications:ajlk:notifications;icon-uri=/favicon.ico" />
-    <meta property="og:title" content="TouchDevelop - Web App"/> 
+    <meta property="og:title" content="TouchDevelop - Web App"/>
     <meta property="og:site_name" content="TouchDevelop"/>
     <meta property="og:type" content="website" />
     <meta property="og:description" content="create apps on iPad, iPhone, Android, PC, Mac" />
@@ -89,7 +89,7 @@ function statusMsg(m) {
 }
 var TDev;
 statusMsg("js initialized");
-if (window.localStorage && 
+if (window.localStorage &&
     window.localStorage.always_beta === "yes" &&
     !betaFriendlyId &&
     window.location.pathname === "/app/")

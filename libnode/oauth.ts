@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 
 module TDev.RT.Node {
-    
+
     export var storeOAuthHTML =
 "<!DOCTYPE html>\n" +
 "<html>\n" +

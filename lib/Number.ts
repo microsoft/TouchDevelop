@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A number (possibly negative and/or fractional)
     //@ stem("x") icon("123") immutable isData builtin ctx(general,indexkey,cloudfield,json)
@@ -75,7 +75,7 @@ module TDev { export module RT {
         //? Compares numbers for less
         //@ name("<") infixPriority(5) inlineApply("<")
         export function lt(self: number, other: number) : boolean { return false; }
-        
+
         //? Compares numbers for more or equal
         //@ name("\u2265") infixPriority(5) inlineApply(">=")
         export function ge(self: number, other: number) : boolean { return false; }

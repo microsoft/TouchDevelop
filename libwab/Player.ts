@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Wab {
     export function PlayerInit()
     {
@@ -27,7 +27,7 @@ module TDev.RT.Wab {
 
         if (isSupportedAction(Action.ACTIVE_SONG)) {
             Util.log('wab: boosting ACTIVE_SONG');
-            Player.active_song = PlayerWab.active_song;            
+            Player.active_song = PlayerWab.active_song;
         }
 
         if (isSupportedAction(Action.START_ACTIVE_SONG_CHANGED)) {
@@ -60,7 +60,7 @@ module TDev.RT.Wab {
         export function pause() { playerCommand('pause', null); }
         export function playOne(song: Song) {
             Util.log('wab: play ' + song.url());
-            HTML.showProgressNotification(lf("playing song..."));        
+            HTML.showProgressNotification(lf("playing song..."));
             playerCommand('play', song.url());
             Util.log('wab: play done');
         }
@@ -74,7 +74,7 @@ module TDev.RT.Wab {
                             var song = Song.mk(response.uri, undefined, response.title);
                             song.init(response.title, response.album, response.artist, response.duration || -1, "", 0, response.track || -1);
                             r.resumeVal(song);
-                        } 
+                        }
                     } else
                         r.resumeVal(undefined);
                 });

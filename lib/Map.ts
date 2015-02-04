@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A map pushpin
     //@ stem("pushpin") ctx(general,gckey) cap(maps)
@@ -35,7 +35,7 @@ module TDev.RT {
 
         //? Gets the pushpin geo location
         //@ readsMutable
-        public location(): Location_ 
+        public location(): Location_
         {
             return this._location;
         }
@@ -141,7 +141,7 @@ module TDev.RT {
                 options.fillColor = new Microsoft.Maps.Color(this._fill.a, this._fill.r, this._fill.g, this._fill.b);
                 pp = new Microsoft.Maps.Polygon(locs, options);
             }
-            else 
+            else
                 pp = new Microsoft.Maps.Polyline(locs, options);
             map.entities.push(pp);
         }
@@ -169,33 +169,33 @@ module TDev.RT {
 
         //? Gets the zoom level
         //@ readsMutable
-        public zoom() : number { 
+        public zoom() : number {
             this.syncView();
-            return this._zoom; 
+            return this._zoom;
         }
 
         //? Sets the zoom level from 1 (earth) to 21 (street)
         //@ writesMutable
         //@ [level].defl(12)
-        public set_zoom(level:number) : void { 
+        public set_zoom(level:number) : void {
             this.syncView();
-            this._zoom = level; 
-            this.updateView(); 
+            this._zoom = level;
+            this.updateView();
         }
 
         //? Gets the map center location
         //@ readsMutable
-        public center(): Location_ { 
+        public center(): Location_ {
             this.syncView();
-            return this._center;  
+            return this._center;
         }
 
         //? Sets the map center location
         //@ writesMutable
         public set_center(center: Location_): void {
             this.syncView();
-            this._center = center; 
-            this.updateView(); 
+            this._center = center;
+            this.updateView();
         }
 
         //? Adds a text pushpin on the map
@@ -341,7 +341,7 @@ module TDev.RT {
                         (<WallBox>b).attributes.stretchheight = 1;
                     }
                 });
- 
+
             return el;
         }
 
@@ -366,7 +366,7 @@ module TDev.RT {
 
         //? Changes the current zoom and center so that all the pushpins are visible. This method has no effect if the map is not posted on a the wall yet.
         //@ writesMutable
-        public view_pushpins(): void 
+        public view_pushpins(): void
         {
             this.syncView();
             if (this._map && this._pushpins.length > 0) {

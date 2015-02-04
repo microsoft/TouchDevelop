@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A media file on the home network
     //@ stem("link") immutable cap(home) obsolete

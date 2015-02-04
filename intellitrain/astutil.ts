@@ -1,4 +1,4 @@
-﻿///<reference path='../editor/refs.ts'/>
+///<reference path='../editor/refs.ts'/>
 
 
 module TDev.AST.Json {
@@ -166,7 +166,7 @@ module TDev.AST.Json {
         resolve(prop: JPropertyRef): JProperty;
         resolveProp(parent:string, name:string): JProperty;
 
-        returnType(prop: JProperty): string;    
+        returnType(prop: JProperty): string;
     }
 
 

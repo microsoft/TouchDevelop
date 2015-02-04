@@ -1,15 +1,15 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? An HTTP web response to be returned
     //@ stem("resp") ctx(general,gckey) betaOnly
     export class ServerResponse
-        extends RTValue 
+        extends RTValue
     {
         private _headers: StringMap = new StringMap();
         private _content: any;
         private _restResult: any;
         private _statusCode = 200;
-        
+
         constructor(private _request:ServerRequest, private _proxy?: PromiseInv)
         {
             super()
@@ -138,7 +138,7 @@ module TDev.RT {
                     Util.userError(lf("set_content_... cannot be called on the response object when action has result(s)"))
             }
 
-            
+
             if (typeof data == "string")
                 data = ServerResponse.toUtfBuffer(data)
 

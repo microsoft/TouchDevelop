@@ -1,7 +1,7 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev { export module RT {
-    
+
     //? A collection of sprites
     //@ stem("sprites") icon("spriteset") ctx(general,gckey,enumerable)
     export class SpriteSet
@@ -10,7 +10,7 @@ module TDev { export module RT {
     {
         // ordered by insertion time
         private _elements : Sprite[] = [];
-        
+
         constructor() {
             super()
         }
@@ -18,7 +18,7 @@ module TDev { export module RT {
         //? Removes all sprites from the set.
         //@ writesMutable
         public clear(): void { this._elements = []; }
-        
+
         //? Returns the number of sprites in the set
         //@ readsMutable
         public count() : number { return this._elements.length; }
@@ -46,9 +46,9 @@ module TDev { export module RT {
         //@ writesMutable ignoreReturnValue
         public remove(sprite:Sprite) : boolean {
             var idx = this.index_of(sprite);
-            if (idx >= 0) { 
+            if (idx >= 0) {
                 this._elements.splice(idx, 1);
-                return true; 
+                return true;
             }
             return false;
         }

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT {
     //? A sound effect
@@ -22,7 +22,7 @@ module TDev.RT {
 
         static mk(
             url: string,
-            urlToken : SoundUrlTokenDomain = SoundUrlTokenDomain.None, 
+            urlToken : SoundUrlTokenDomain = SoundUrlTokenDomain.None,
             originalUrl : string = null) : Sound
         {
             var s = new Sound();
@@ -32,7 +32,7 @@ module TDev.RT {
             return s;
         }
 
-        static fromDataUrl(dataUrl: string, originalUrl : string) : Promise 
+        static fromDataUrl(dataUrl: string, originalUrl : string) : Promise
         {
             if (!dataUrl) return Promise.as(null);
 
@@ -58,7 +58,7 @@ module TDev.RT {
 		{
             // do not test for CORS with data urls
             if (Sound.dataUriMimeType(url))
-                return Sound.fromDataUrl(url, null); 
+                return Sound.fromDataUrl(url, null);
 
             var s = Sound.mk(url, SoundUrlTokenDomain.None, url);
             return s.initAsync();
@@ -73,7 +73,7 @@ module TDev.RT {
         {
             // do not test for CORS with data urls
             if (Sound.dataUriMimeType(url))
-                return Sound.fromDataUrl(url, null); 
+                return Sound.fromDataUrl(url, null);
 
 			if (/^\.\/art\//.test(url)) {
 				url = Sound.patchLocalArtUrl(url);
@@ -84,7 +84,7 @@ module TDev.RT {
             }
 
             url = HTML.proxyResource(url);
-			            
+			
             function streamed() : Promise {
                 var s = Sound.mk(url, SoundUrlTokenDomain.None, url);
                 return s.initAsync();
@@ -119,10 +119,10 @@ module TDev.RT {
             if (this._buffer || this._audio) return Promise.as(this);
 
 			// if Web Audio supported, simply load the sound data
-			if (AudioContextManager.isSupported() && 
+			if (AudioContextManager.isSupported() &&
 				Sound.dataUriMimeType(this._url)) {
 				var array = Util.decodeDataURL(this._url);
-				if (array) 
+				if (array)
 					return AudioContextManager
 						.loadAsync(array.buffer)
 						.then(b => {
@@ -130,7 +130,7 @@ module TDev.RT {
 							return this;
 						});
 			}
-            
+
 			// HTML5 way, using an audio tag
 			return this.createAudioAsync()
                .then(audio => HTML.audioLoadAsync(audio))
@@ -183,7 +183,7 @@ module TDev.RT {
 		    return Promise.as(url);
 		}
 
-        private createAudioAsync(): Promise // HTMLAudioElement 
+        private createAudioAsync(): Promise // HTMLAudioElement
         {
             return this.createUrlAsync()
                 .then(url => {
@@ -208,15 +208,15 @@ module TDev.RT {
 
         //? Gets the pitch adjustment, ranging from -1 (down one octave) to 1 (up one octave).
         //@ readsMutable
-        public pitch() : number 
-        { 
-            return this._pitch; 
+        public pitch() : number
+        {
+            return this._pitch;
         }
 
         //? Sets the pitch adjustment, ranging from -1 (down one octave) to 1 (up one octave).
         //@ writesMutable
-        public set_pitch(pitch:number) : void { 
-            this._pitch = pitch; 
+        public set_pitch(pitch:number) : void {
+            this._pitch = pitch;
         }
 
         //? Gets the volume from 0 (silent) to 1 (full volume)
@@ -225,7 +225,7 @@ module TDev.RT {
 
         //? Sets the volume from 0 (silent) to 1 (full volume).
         //@ writesMutable
-        public set_volume(v:number) : void { 
+        public set_volume(v:number) : void {
             this._volume = Math_.normalize(v);
             if (this._audio)
                 this.syncAudioProperties(this._audio);
@@ -295,7 +295,7 @@ module TDev.RT {
 
         //? Plays the sound effect
         //@ cap(musicandsounds) quickAsync
-        //@ readsMutable 
+        //@ readsMutable
         //@ import("cordova", "org.apache.cordova.media")
         public play(r : ResumeCtx) : void
         {
@@ -305,7 +305,7 @@ module TDev.RT {
 
         //? Plays the song with different volume (0 to 1), pitch (-1 to 1) and pan (-1 to 1).
         //@ cap(musicandsounds) quickAsync
-        //@ [volume].defl(1) 
+        //@ [volume].defl(1)
         //@ import("cordova", "org.apache.cordova.media")
         public play_special(volume:number, pitch:number, pan:number, r : ResumeCtx) : void
         {
@@ -323,7 +323,7 @@ module TDev.RT {
                 this.playAsync().done();
             }), s.pc);
         }
-        
+
         //? Not supported anymore
         //@ obsolete
         //@ writesMutable

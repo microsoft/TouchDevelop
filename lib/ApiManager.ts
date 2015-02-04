@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export interface JsonKey
     {
@@ -56,7 +56,7 @@ module TDev.RT {
             if (token && token.expires < Date.now()) {
                 return Promise.as(token.accessToken);
             }
-            
+
             // cache miss
             var url = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13';
             var request = Web.create_request(url);

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A picture
     //@ stem("pic") icon("Photo") walltap enumerable
@@ -104,8 +104,8 @@ module TDev.RT {
             return p;
         }
 
-        private imgLoadAsync(url : string, cors : boolean, dataUrl : string = null): Promise 
-        {            
+        private imgLoadAsync(url : string, cors : boolean, dataUrl : string = null): Promise
+        {
             var rt = Runtime.theRuntime;
             var auth = (!dataUrl && cors && !/^https:\/\/az31353.vo.msecnd.net\/pub\//.test(url)) ? Cloud.authenticateAsync(lf("image proxying")) : Promise.as(true);
             return auth.then((authenticated) => { // ask wab to expand urls
@@ -166,12 +166,12 @@ module TDev.RT {
         private delayLoadSync(f: (p: Picture) => Promise): Picture {
             this.initFn = f;
             return this;
-        } 
+        }
 
         private delayLoad(f: (p: Picture) => Promise): Promise {
             this.delayLoadSync(f);
             return Promise.as(this);
-        } 
+        }
 
         static delayed(f:(p:Picture)=>Promise):Promise
         {
@@ -331,7 +331,7 @@ module TDev.RT {
             Util.assert(!!this.canvas);
             return this.canvas;
         }
-                
+
         //? Gets the number of pixels
         //@ readsMutable returns(number)
         //@ picAsync
@@ -397,12 +397,12 @@ module TDev.RT {
                 return this.canvas.width;
             });
         }
-        
+
         //? Refreshes the picture on the wall
         //@ readsMutable
-        public update_on_wall() : void 
+        public update_on_wall() : void
         {
-            if (this.imageData) 
+            if (this.imageData)
                 this.ctx.putImageData(this.imageData, 0, 0);
             //commitImageData();
         }
@@ -516,9 +516,9 @@ module TDev.RT {
         public pixel(left: number, top: number, r:ResumeCtx)
         {
             this.initAsync().done(() => {
-              left = Math.round(left); 
+              left = Math.round(left);
               top = Math.round(top);
-              this.at(left + top * this.widthSync(), r); 
+              this.at(left + top * this.widthSync(), r);
             });
         }
 
@@ -602,7 +602,7 @@ module TDev.RT {
                     }
                 }
                 this.slowlyloadingelement.onerror = () => {
-                    // Util.log("onerror")               
+                    // Util.log("onerror")
                     b.SwapImageContent(Picture.errorPic());
                 }
             }
@@ -644,7 +644,7 @@ module TDev.RT {
 
                 var ow = this.widthSync();
                 var oh = this.heightSync();
-                
+
                 // clone canvas
                 var temp = <HTMLCanvasElement>document.createElement('canvas');
                 temp.width = ow;
@@ -705,7 +705,7 @@ module TDev.RT {
                 this.ctx.fillRect(0, 0, this.widthSync(), this.heightSync());
                 this.ctx.restore();
             });
-            
+
         }
 
         //? Clears a rectangle on a the picture to a given color
@@ -741,15 +741,15 @@ module TDev.RT {
                         var dr = 255 - p[i];
                         var dg = 255 - p[i+1];
                         var db = 255 - p[i+2];
-                        if (dr < threshold 
-                        && dg < threshold 
-                        && db < threshold) { 
+                        if (dr < threshold
+                        && dg < threshold
+                        && db < threshold) {
                             p[i + 3] = Math.floor((dr + dg + db) / (3 * threshold) * 255);
                         }
                     }
                     this.ctx.putImageData(data, 0, 0);
                     this.ctx.restore();
-                });            
+                });
         }
 
         //? Recolors the picture with the background and foreground color, based on a color threshold between 0.0 and 1.0
@@ -774,9 +774,9 @@ module TDev.RT {
                 var threshold255 = 255 * Math_.normalize(threshold) * 3;
                 for (var i = 0; i < p.length; i+=4)
                 {
-                    var k = (p[i] + p[i+1] + p[i+2]);     
+                    var k = (p[i] + p[i+1] + p[i+2]);
                     var isb = k < threshold255;
-                    // apply tint 
+                    // apply tint
                     p[i] = isb ? br : fr;
                     p[i + 1] = isb ? bg : fg;
                     p[i + 2] = isb ? bb : fb;
@@ -800,8 +800,8 @@ module TDev.RT {
                 for (var i = 0; i < p.length; i+=4)
                 {
                     p[i] = 255 - p[i];
-                    p[i+1] = 255 - p[i+1]; 
-                    p[i+2] = 255 - p[i+2];       
+                    p[i+1] = 255 - p[i+1];
+                    p[i+2] = 255 - p[i+2];
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -820,11 +820,11 @@ module TDev.RT {
                 var p = data.data;
                 for (var i = 0; i < p.length; i+=4)
                 {
-                    var k = (p[i] + p[i+1] + p[i+2])/3;     
-                    // apply tint      
+                    var k = (p[i] + p[i+1] + p[i+2])/3;
+                    // apply tint
                     p[i] = k;
-                    p[i+1] = k; 
-                    p[i+2] = k;       
+                    p[i+1] = k;
+                    p[i+2] = k;
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -844,8 +844,8 @@ module TDev.RT {
                 for (var i = 0; i < p.length; i+=4)
                 {
                     p[i] = 255-p[i];
-                    p[i+1] = 255-p[i+1]; 
-                    p[i+2] = 255-p[i+2];       
+                    p[i+1] = 255-p[i+1];
+                    p[i+2] = 255-p[i+2];
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -871,24 +871,24 @@ module TDev.RT {
                 // see Digital video and HDTV: algorithms and interfaces
                 for (var i = 0; i < p.length; i+=4)
                 {
-                    var a = p[i+3]; 
+                    var a = p[i+3];
                     var r = p[i];
-                    var g = p[i+1]; 
-                    var b = p[i+2];;       
+                    var g = p[i+1];
+                    var b = p[i+2];;
                     // convert to gray with constant factors according to luminance contribution
                     // of each color channel, 0.2126 - 0.7152 - 0.0722
                     var gray = (r *  0.2126 + g * 0.7152 + b *  0.0722);
-           
-                    // apply tint      
-                    a = a * ta;      
-                    r = gray * tr;      
-                    g = gray * tg;      
-                    b = gray * tb;       
 
-                    p[i+3] = a; 
+                    // apply tint
+                    a = a * ta;
+                    r = gray * tr;
+                    g = gray * tg;
+                    b = gray * tb;
+
+                    p[i+3] = a;
                     p[i] = r;
-                    p[i+1] = g; 
-                    p[i+2] = b;       
+                    p[i+1] = g;
+                    p[i+2] = b;
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -907,15 +907,15 @@ module TDev.RT {
                 // brightness is a translation of pixels
                 var f = factor < -1.0 ? -1.0 : factor > 1.0 ? 1.0 : factor;
                 var fi = f * 255;
-                
+
                 this.ctx.save();
                 var data = this.ctx.getImageData(0, 0, this.widthSync(), this.heightSync());
                 var p = data.data;
                 for (var i = 0; i < p.length; i+=4)
                 {
                     var r = p[i];
-                    var g = p[i+1]; 
-                    var b = p[i+2];;       
+                    var g = p[i+1];
+                    var b = p[i+2];;
 
                     var ri = r + fi;
                     var gi = g + fi;
@@ -926,8 +926,8 @@ module TDev.RT {
                     b = bi > 255 ? 255 : (bi < 0 ? 0 : bi);
 
                     p[i] = r;
-                    p[i+1] = g; 
-                    p[i+2] = b;       
+                    p[i+1] = g;
+                    p[i+2] = b;
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -945,35 +945,35 @@ module TDev.RT {
                 // see Digital video and HDTV: algorithms and interfaces
                 // contrast is a scaling of pixels
                 var f = factor < -1.0 ? -1.0 : factor > 1.0 ? 1.0 : factor;
-                var cfi = 1 + f;    
+                var cfi = 1 + f;
                 this.ctx.save();
                 var data = this.ctx.getImageData(0, 0, this.widthSync(), this.heightSync());
                 var p = data.data;
                 for (var i = 0; i < p.length; i+=4)
                 {
                     var r = p[i];
-                    var g = p[i+1]; 
-                    var b = p[i+2];;       
+                    var g = p[i+1];
+                    var b = p[i+2];;
 
-                    var ri = r - 128;         
-                    var gi = g - 128;         
-                    var bi = b - 128;          
-                    
-                    ri = ri * cfi;         
-                    gi = gi * cfi;         
-                    bi = bi * cfi;          
-                    
-                    ri = ri + 128;         
-                    gi = gi + 128;         
-                    bi = bi + 128;          
-                    
-                    r = ri > 255 ? 255 : (ri < 0 ? 0 : ri);         
-                    g = gi > 255 ? 255 : (gi < 0 ? 0 : gi);         
+                    var ri = r - 128;
+                    var gi = g - 128;
+                    var bi = b - 128;
+
+                    ri = ri * cfi;
+                    gi = gi * cfi;
+                    bi = bi * cfi;
+
+                    ri = ri + 128;
+                    gi = gi + 128;
+                    bi = bi + 128;
+
+                    r = ri > 255 ? 255 : (ri < 0 ? 0 : ri);
+                    g = gi > 255 ? 255 : (gi < 0 ? 0 : gi);
                     b = bi > 255 ? 255 : (bi < 0 ? 0 : bi);
 
                     p[i] = r;
-                    p[i+1] = g; 
-                    p[i+2] = b;       
+                    p[i+1] = g;
+                    p[i+2] = b;
                 }
                 this.ctx.putImageData(data, 0, 0);
                 this.ctx.restore();
@@ -1008,7 +1008,7 @@ module TDev.RT {
                 this.cropInternal(ileft, itop, iwidth, iheight);
             });
         }
-        
+
         private cropInternal(left:number, top:number, cwidth:number, cheight:number) : void
         {
             TDev.Contract.Requires(left >= 0 && left < this.widthSync());
@@ -1159,9 +1159,9 @@ module TDev.RT {
 
                 var g = svg.child("g");
                 if (!g) return null;
-                
+
                 var transform = g.attr("transform");
-                var m = /matrix\(([^)]+)\)/.exec(transform);             
+                var m = /matrix\(([^)]+)\)/.exec(transform);
                 if (m) {
                     var v = m[1].split(/[, ]/).map(p => parseFloat(p));
                     ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
@@ -1289,21 +1289,21 @@ module TDev.RT {
             while(i < parts.length) {
                 var command = parts[i++];
                 switch(command) {
-                    case 'Z': 
-                    case 'z':    
+                    case 'Z':
+                    case 'z':
                         ctx.closePath();
                         break;
                     case 'm':
                         rx = x;
-                        ry = y; 
-                        ctx.moveTo(rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++])); 
+                        ry = y;
+                        ctx.moveTo(rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++]));
                         while(i+1 < parts.length && !isNaN(parseFloat(parts[i])))
                             ctx.lineTo(rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++]));
                         x = rx;
                         y = ry;
                         break;
-                    case 'M': 
-                        ctx.moveTo(x = parseFloat(parts[i++]), y = parseFloat(parts[i++])); 
+                    case 'M':
+                        ctx.moveTo(x = parseFloat(parts[i++]), y = parseFloat(parts[i++]));
                         while(i+1 < parts.length && !isNaN(parseFloat(parts[i])))
                             ctx.lineTo(x = parseFloat(parts[i++]), y = parseFloat(parts[i++]));
                         break;
@@ -1311,14 +1311,14 @@ module TDev.RT {
                         rx = x;
                         ry = y;
                         do {
-                            ctx.lineTo(rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++])); 
+                            ctx.lineTo(rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++]));
                         } while(i+1 < parts.length && !isNaN(parseFloat(parts[i])));
                         x = rx;
                         y = ry;
                         break;
                     case 'L':
                         do {
-                            ctx.lineTo(x = parseFloat(parts[i++]), y = parseFloat(parts[i++])); 
+                            ctx.lineTo(x = parseFloat(parts[i++]), y = parseFloat(parts[i++]));
                         } while(i+1 < parts.length && !isNaN(parseFloat(parts[i])));
                         break;
                     case 'c':
@@ -1330,7 +1330,7 @@ module TDev.RT {
                             var x2 = rx + parseFloat(parts[i++]);
                             var y2 = ry + parseFloat(parts[i++]);
                             ctx.bezierCurveTo(
-                                x1, y1, 
+                                x1, y1,
                                 x2, y2,
                                 rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++]));
                         } while(i+5 < parts.length && !isNaN(parseFloat(parts[i])));
@@ -1339,10 +1339,10 @@ module TDev.RT {
                         x = rx;
                         y = ry;
                         break;
-                    case 'C': 
+                    case 'C':
                         do {
                             ctx.bezierCurveTo(
-                                parseFloat(parts[i++]), parseFloat(parts[i++]), 
+                                parseFloat(parts[i++]), parseFloat(parts[i++]),
                                 cpx = parseFloat(parts[i++]), cpy = parseFloat(parts[i++]), x = parseFloat(parts[i++]), y = parseFloat(parts[i++]));
                         } while(i+5 < parts.length && !isNaN(parseFloat(parts[i])));
                         break;
@@ -1351,7 +1351,7 @@ module TDev.RT {
                         do {
                             var x2 = parseFloat(parts[i++]);
                             var y2 = parseFloat(parts[i++]);
-                            var x1 = 2*x-cpx; 
+                            var x1 = 2*x-cpx;
                             var y1 = 2*y-cpy;
                             ctx.bezierCurveTo(x1,y1, cpx = x2, cpy = y2, x = parseFloat(parts[i++]), y = parseFloat(parts[i++]));
                         } while(i+3 < parts.length && !isNaN(parseFloat(parts[i])));
@@ -1366,7 +1366,7 @@ module TDev.RT {
                             var x1 = 2*rx-cpx;
                             var y1 = 2*ry-cpy;
                             ctx.bezierCurveTo(
-                                x1, y1, 
+                                x1, y1,
                                 cpx = x2, cpy = y2,
                                 rx = rx + parseFloat(parts[i++]), ry = ry + parseFloat(parts[i++]));
                         } while(i+3 < parts.length && !isNaN(parseFloat(parts[i])));
@@ -1401,7 +1401,7 @@ module TDev.RT {
             }
             return true;
         }
-        
+
         //? Sets the pixel color at a given pixel
         //@ writesMutable
         //@ [color].deflExpr('colors->accent')
@@ -1436,14 +1436,14 @@ module TDev.RT {
                 /*
                 // this one is slower
                 if (!this._onePixelData) {
-                    this._onePixelData = this.ctx.createImageData(1,1); // only do this once per page 
+                    this._onePixelData = this.ctx.createImageData(1,1); // only do this once per page
                 }
                 var d  = this._onePixelData.data;
-                d[0] = color.R(); 
-                d[1] = color.G(); 
+                d[0] = color.R();
+                d[1] = color.G();
                 d[2] = color.B();
-                d[3] = color.A(); 
-                this.ctx.putImageData( this._onePixelData, left, top );      
+                d[3] = color.A();
+                this.ctx.putImageData( this._onePixelData, left, top );
                 */
             });
         }
@@ -1615,11 +1615,11 @@ module TDev.RT {
         //? Displays the image to the wall; you need to call 'update on wall' later if you want changes to be reflected.
         //@ readsMutable
         //@ embedsLink("Wall", "Picture")
-        public post_to_wall(s: IStackFrame): void { 
-            super.post_to_wall(s) 
+        public post_to_wall(s: IStackFrame): void {
+            super.post_to_wall(s)
         }
 
-		static niceFilename() : string {                
+		static niceFilename() : string {
 			var now = Time.now();
 			return now.year() + "-" + now.month() + "-" + now.day() + "-" + now.hour() + "-" + now.minute() + "-" + now.second() + "-" + now.millisecond();
 		}

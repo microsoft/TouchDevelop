@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A scene contains layers of parralax backgrounds.
     //@ stem("scene")
@@ -39,7 +39,7 @@ module TDev.RT {
             this._layers.sort((a, b) => b.distance() - a.distance());
         }
 
-        //? Creates a new layer on the scene. The distance determines the order of rendering and how fast the layer moves        
+        //? Creates a new layer on the scene. The distance determines the order of rendering and how fast the layer moves
         //@ writesMutable picAsync ignoreReturnValue
         //@ embedsLink("BoardBackgroundScene", "BoardBackgroundLayer")
         //@ returns(BoardBackgroundLayer)
@@ -137,7 +137,7 @@ module TDev.RT {
         //? Gets a value indicating how the picture aligns vertically. The default is `top`.
         //@ readsMutable
         public align_y() { return this._alignY; }
-        //? Sets a value indicating how the picture aligns vertically. The default is `top`. 
+        //? Sets a value indicating how the picture aligns vertically. The default is `top`.
         //@ [align].deflStrings("bottom", "top", "center")
         //@ writesMutable
         public set_align_y(align: string) {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Ask or display values on the wall...
     export module Wall
@@ -25,12 +25,12 @@ module TDev.RT {
         //@ tandre2
         //@ uiAsync
         export function prompt(text:string, r: ResumeCtx) : void
-        {      
+        {
 			var rt = r.rt;
 			if (rt.useModalWallDialogs()) {
-				var m = new ModalDialog();         
+				var m = new ModalDialog();
 				m.add([body(text),
-						 div("wall-dialog-buttons", 
+						 div("wall-dialog-buttons",
 							[R.mkButtonOnce("ok", () => m.dismiss())])
 						]);
 				m.onDismiss = () => r.resume();
@@ -39,7 +39,7 @@ module TDev.RT {
 			    var btns;
 				var elt = div("wall-dialog",
 						[body(text),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
                             [R.mkButtonOnce("ok", () => {
                                 Screen.popModalHash("wall");
                                 r.resume();
@@ -58,14 +58,14 @@ module TDev.RT {
         //@ tandre2
         //@ uiAsync
         export function ask_boolean(text:string, caption:string, r:ResumeCtx)
-        {   
-			var rt = r.rt;         
+        {
+			var rt = r.rt;
 			if (rt.useModalWallDialogs()) {
 				var value = false;
 				var m = new ModalDialog();
 				m.add([div("wall-dialog-header", text),
 						 body(caption),
-						 div("wall-dialog-buttons", 
+						 div("wall-dialog-buttons",
 							[R.mkButton(lf("no"), () => {
 								value = false;
 								m.dismiss();
@@ -82,7 +82,7 @@ module TDev.RT {
 				var elt = div("wall-dialog",
 						[div("wall-dialog-header", text),
 						 body(caption),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
                             [R.mkButtonOnce("no", () => {
                                 Screen.popModalHash("wall");
                                 r.resumeVal(false)
@@ -105,7 +105,7 @@ module TDev.RT {
         //@ tandre2
         //@ uiAsync
         export function ask_number(text:string, r:ResumeCtx)
-        {            
+        {
 			var rt = r.rt;
 			var t = R.mkTextInput("number", lf("enter a decimal number"));
 			t.value = "";
@@ -115,7 +115,7 @@ module TDev.RT {
 				m.add([
 					body(text),
 					div("wall-dialog-input", t),
-					div("wall-dialog-buttons", 
+					div("wall-dialog-buttons",
 						[R.mkButton(lf("ok"), () => {
                             value = t.valueAsNumber;
                             if (!isFinite(value)) value = parseFloat(t.value); // Firefox
@@ -130,7 +130,7 @@ module TDev.RT {
 				var elt = div("wall-dialog",
 						[body(text),
 						 div("wall-dialog-input", t),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
 							[R.mkButtonOnce("ok", () => {
                                 Screen.popModalHash("wall");
 				                btns.removeSelf();
@@ -159,7 +159,7 @@ module TDev.RT {
         //@ tandre2
         //@ uiAsync
         export function ask_string(text:string, r:ResumeCtx)
-        {            
+        {
 			var rt = r.rt;
 			var t = R.mkTextArea("variableDesc");
 			t.value = "";
@@ -168,7 +168,7 @@ module TDev.RT {
 				var m = new ModalDialog();
 				m.add([body(text),
 						 div("wall-dialog-input", t),
-						 div("wall-dialog-buttons", 
+						 div("wall-dialog-buttons",
 							[R.mkButton(lf("ok"),  () => {
 								value = t.value;
 								m.dismiss();
@@ -181,7 +181,7 @@ module TDev.RT {
 				var elt = div("wall-dialog",
 						[body(text),
 						 div("wall-dialog-input", t),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
 							[R.mkButtonOnce("ok", () => {
                                 Screen.popModalHash("wall");
 								t.blur();
@@ -227,7 +227,7 @@ module TDev.RT {
         //@ tandre2
         //@ uiAsync
         export function pick_string(text:string, caption:string, values:Collection<string>, r:ResumeCtx)
-        {            
+        {
 			var rt = r.rt;
 			if (rt.useModalWallDialogs()) {
 				var m = new ModalDialog();
@@ -280,7 +280,7 @@ module TDev.RT {
 						 body(caption),
 						 div("wall-dialog-input", t),
                          body("Enter a time like 15:43 or 3:43pm or 15:43:20 or 3:43:20pm"),
-						 div("wall-dialog-buttons", 
+						 div("wall-dialog-buttons",
 							[R.mkButton(lf("ok"), () => {
 								var tt = String_.to_time(t.value);
 								if (tt != null)
@@ -297,7 +297,7 @@ module TDev.RT {
 						 body(caption),
 						 div("wall-dialog-input", t),
                          body("Enter a time like 15:43 or 3:43pm or 15:43:20 or 3:43:20pm"),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
 							[R.mkButtonOnce("ok", () => {
                                 Screen.popModalHash("wall");
 								t.blur();
@@ -325,7 +325,7 @@ module TDev.RT {
         //@ tandre2
         //@ [caption].defl("pick a date")
         //@ uiAsync
-        export function pick_date(text: string, caption: string, r: ResumeCtx) //: DateTime 
+        export function pick_date(text: string, caption: string, r: ResumeCtx) //: DateTime
         {
 			var rt = r.rt;
             var t = R.mkTextInput("date", lf("enter a date"));
@@ -354,7 +354,7 @@ module TDev.RT {
 						[div("wall-dialog-header", text),
 						 body(caption),
 						 div("wall-dialog-input", t),
-						 btns = div("wall-dialog-buttons", 
+						 btns = div("wall-dialog-buttons",
 							[R.mkButtonOnce("ok", () => {
                                 Screen.popModalHash("wall");
 								t.blur();
@@ -456,7 +456,7 @@ module TDev.RT {
         //@ [camera].readsMutable
         //@ [camera].deflExpr('senses->camera')
         export function set_background_camera(camera : Camera, r: ResumeCtx): void
-        {            
+        {
             camera
                 .getVideoAsync(r.rt)
                 .then(v => {
@@ -517,7 +517,7 @@ module TDev.RT {
         }
 
         //? Clears the application bar buttons and hides the bar
-        export function clear_buttons(s:IStackFrame) : void 
+        export function clear_buttons(s:IStackFrame) : void
         {
             s.rt.clearPageButtons();
         }
@@ -581,7 +581,7 @@ module TDev.RT {
 
         //? Returns the current back stack of pages, starting from the current page to the bottom page.
         export function pages(s:IStackFrame) : Collection<Page>
-        { 
+        {
             var c = s.rt.getPageCount();
             var arr:Page[] = []
             for (var i = 0; i < c;++i)

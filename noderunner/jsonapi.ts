@@ -22,7 +22,7 @@ module TDev {
     // POST /api/parse
     export interface ParseRequest extends ParseRequestBase {
         requiredPlatformCaps?: number; // if set, will compute platform caps, errors etc.
-        prettyScript?: number;         // 0/undefined - none, 1 - entire script with embedded errors, 
+        prettyScript?: number;         // 0/undefined - none, 1 - entire script with embedded errors,
         // 2 - like 1 and also decls with errors from libraries
         prettyDocs?: boolean;             // pretty-print script as documentation
         prettyText?: boolean;             // pretty-print script as text (for serialization)
@@ -62,7 +62,7 @@ module TDev {
         availableExprsTime?: number;  // likewise
         constantPropagationTime?: number;
         compileTime?: number;         // likewise
-        features?: any;                // set only when req.features; featureName=>count map        
+        features?: any;                // set only when req.features; featureName=>count map
     }
 
     // POST /api/query

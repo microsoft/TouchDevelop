@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 //? This module controls benchmark execution to assess the performance of
 //? TouchDevelop on a user device. It can:
@@ -68,12 +68,12 @@ module TDev.TestMgr.Benchmarker
             outs.push("long lived tree of depth " + maxDepth + " check: " +
                       longLivedTree.itemCheck());
             return Util.perfNow() - timer;
-        }        
+        }
     }
 
     //? The Mandelbrot benchmark does n^2 calculations to build a 2D fractal
     //? image.
-    module Mandelbrot {        
+    module Mandelbrot {
         export function main(n: number, outs: string[]) {
             var timer = Util.perfNow();
             var h = n;
@@ -113,7 +113,7 @@ module TDev.TestMgr.Benchmarker
 
     //? SpectralNorm performs matrix floating point calculations.
     module SpectralNorm {
-        
+
         function A(i: number, j: number) {
             return 1 / ((i + j) * (i + j + 1) / 2 + i + 1);
         }
@@ -127,7 +127,7 @@ module TDev.TestMgr.Benchmarker
                 v[i] = t;
             }
         }
-        
+
         function Atu(u: number[], v: number[]) {
             for (var i = 0; i < u.length; ++i) {
                 var t = 0;
@@ -293,7 +293,7 @@ module TDev.TestMgr.Benchmarker
             outs.push(energy(bodySystem).toFixed(7));
             return Util.perfNow() - timer;
         }
-   
+
     }
 
     //? The pfannkuchen (pancakes) calculates the maximum number of flips
@@ -317,7 +317,7 @@ module TDev.TestMgr.Benchmarker
                     }
                     var flips = 1;
                     var qq = 1;
-                    // Flipping 
+                    // Flipping
                     while (qq != 0) {
                         qq = q[q0];
                         if (qq == 0) {
@@ -375,7 +375,7 @@ module TDev.TestMgr.Benchmarker
             outs.push('maxflips=' + maxflips.toString());
             return Util.perfNow() - timer;
         }
-       
+
     }
 
     // Fasta benchmark exercises maps and string operations
@@ -498,7 +498,7 @@ module TDev.TestMgr.Benchmarker
 
     //? Exercises string operations and maps by reversing a sequence of DNA
     //? nucleotides.
-    module ReverseComplement {        
+    module ReverseComplement {
         var complement = {
             y: 'R',
             v: 'B',
@@ -576,17 +576,17 @@ module TDev.TestMgr.Benchmarker
             });
             reverseFormat(lines, outs);
             return Util.perfNow() - timer;
-        }       
+        }
     }
 
     //? Exercises hash maps
-    module KNucleotide {       
+    module KNucleotide {
         function populateFreq(seq: string, length: number) {
             var n = seq.length - length + 1;
             var frequencies = {};
             for (var i = 0; i < n; ++i) {
                 var sub = seq.substring(i, i + length);
-                frequencies[sub] = (frequencies[sub] === undefined ? 0 
+                frequencies[sub] = (frequencies[sub] === undefined ? 0
                                     : frequencies[sub])
                     + 1;
             }
@@ -643,7 +643,7 @@ module TDev.TestMgr.Benchmarker
             find(seq, 'GGTATTTTAATT', outs);
             find(seq, 'GGTATTTTAATTTATAGT', outs);
             return Util.perfNow() - timer;
-        }     
+        }
 
     }
 
@@ -651,10 +651,10 @@ module TDev.TestMgr.Benchmarker
 
     //? Records a single program measurement.
     export class Measurement {
-        constructor(public name: string, public time: number, 
+        constructor(public name: string, public time: number,
                     public correct: boolean) { }
     }
-    
+
     //? Records the summary of several Measurement objects
     export class SumMeasurement {
         constructor(public name: string, public lowest: number,
@@ -674,7 +674,7 @@ module TDev.TestMgr.Benchmarker
             this.sumMeasurements = [];
         }
 
-        //? Returns the SumMeasurement object for a particular program, 
+        //? Returns the SumMeasurement object for a particular program,
         //? or -1 if it is not yet available.
         public lookUp(s: string): number {
             if (s == null)
@@ -752,7 +752,7 @@ module TDev.TestMgr.Benchmarker
             });
             this.sumMeasurements = aggList;
         }
-        
+
         //? Calculates the total time spent in the testing of all the
         //? measurements that were recorded in this manager
         public totalTime(): number {
@@ -787,7 +787,7 @@ module TDev.TestMgr.Benchmarker
             if (this.sumMeasurements.length == 0)
                 this.computeAggregate();
             var benchtimes: { [name: string]: number; } = {};
-            this.sumMeasurements.forEach((elt: SumMeasurement) => { 
+            this.sumMeasurements.forEach((elt: SumMeasurement) => {
                 // we also need to store all intermediate programs time
                 benchtimes[elt.name] = Math.round(elt.lowest * 100) / 100;
                 num += elt.lowest;
@@ -795,7 +795,7 @@ module TDev.TestMgr.Benchmarker
             localStorage["benchtimes"] = JSON.stringify(benchtimes);
             return Math.round(num * 100) / 100;
         }
-       
+
         //? Clear all data used by this manager
         public clear(): void {
             this.sumMeasurements = [];
@@ -854,12 +854,12 @@ module TDev.TestMgr.Benchmarker
         { id: "ezksbyle", name: 'Fastax' },
         { id: "sqdrxjsu", name: 'ReverseComplement'},
         { id: "zuakcwjt", name: 'KNucleotide' }
-    ];        
+    ];
     //? A list of the same TouchDevelop programs, but using a reduced input
     //? for functional testing only.
     var tdSmallBenchmarks : IBenchmark[] = [
         { id: "kqlseizl", name: 'binary trees (small)' },
-        { id: "ntgpnwsf", name: 'mandelbrot (small)' },        
+        { id: "ntgpnwsf", name: 'mandelbrot (small)' },
         { id: "bvmckmio", name: 'spectral norm (small)' },
         { id: "bjhxvkup", name: 'n body (small)' },
         { id: "aznnthrd", name: 'fannkuch redux (small)' },
@@ -970,8 +970,8 @@ module TDev.TestMgr.Benchmarker
 
     //? Prompts a dialog while running the benchmarks the user voluntarily accepted
     //? to run. It can either run one benchmark or the entire suite.
-    export function runTDBenchmarksWithDialog(entireSuite = false): Promise {   
-        var rp = new PromiseInv();     
+    export function runTDBenchmarksWithDialog(entireSuite = false): Promise {
+        var rp = new PromiseInv();
         invalidateResults = false;
         installVisibilityChangeHook();
         var showEndDialog = (res: number) => {
@@ -981,23 +981,23 @@ module TDev.TestMgr.Benchmarker
                 m.add(div("wall-dialog-body", lf("Your help has been very important, thank you.")));
                 m.add(div("wall-dialog-body", "Your device took " + res + " ms to run this test."));
                 m.add(div("wall-dialog-buttons", HTML.mkButton(lf("ok"), () => {
-                    m.dismiss();                    
+                    m.dismiss();
                 })));
                 m.onDismiss = () => {
                     rp.success(undefined);
                 }
                 m.show();
             };
-        
+
 
         var displayError = (err: any) => {
             ProgressOverlay.hide();
             uninstallVisibilityChangeHook();
             TDev.ModalDialog.info("Tests cancelled", "We couldn't complete the tests: " + err.message);
         };
-        
+
         iterations = 0;
-        
+
         var doIt = () => {
             ProgressOverlay.lockAndShow("Running the TouchDevelop benchmark",
                 () => {
@@ -1064,7 +1064,7 @@ module TDev.TestMgr.Benchmarker
     function onchange(evt): void {
         evt = evt || window.event;
         if (document[getHiddenType()]) {
-            invalidateResults = true;            
+            invalidateResults = true;
         }
     }
 
@@ -1077,11 +1077,11 @@ module TDev.TestMgr.Benchmarker
         else if (hidden == "webkitHidden")
             document.removeEventListener("webkitvisibilitychange", onchange, false);
         else if (hidden == "msHidden")
-            document.removeEventListener("msvisibilitychange", onchange, false); 
+            document.removeEventListener("msvisibilitychange", onchange, false);
     }
 
     function installVisibilityChangeHook():void {
-        var hidden = "hidden";       
+        var hidden = "hidden";
 
         if (hidden in document)
             document.addEventListener("visibilitychange", onchange);
@@ -1090,7 +1090,7 @@ module TDev.TestMgr.Benchmarker
         else if ((hidden = "webkitHidden") in document)
             document.addEventListener("webkitvisibilitychange", onchange);
         else if ((hidden = "msHidden") in document)
-            document.addEventListener("msvisibilitychange", onchange);            
+            document.addEventListener("msvisibilitychange", onchange);
     }
 
     var iterations = 0;
@@ -1105,7 +1105,7 @@ module TDev.TestMgr.Benchmarker
     //?  - updateOverlay:  sends messages to ProgressOverlay reporting progress
     //?
     //? Returns:
-    //? 
+    //?
     //?   promise with pair <time spent, number iterations>
     export function runUnitBenchmarksAsync(testOnly: boolean = false,
                                            updateOverlay: boolean = false)
@@ -1142,13 +1142,13 @@ module TDev.TestMgr.Benchmarker
                             iter: i});
                 return;
             }
-   
+
             if (updateOverlay) {
                 if (testOnly) {
-                    ProgressOverlay.setProgress("testing benchmarks (" + (i + 1).toString() + " of " 
+                    ProgressOverlay.setProgress("testing benchmarks (" + (i + 1).toString() + " of "
                         + (1 + getNumScripts() + TestMgr.getNumScripts()).toString() + ")");
                 } else if (i < jsIterations) {
-                    ProgressOverlay.setProgress("unit time measurement (" + (i + 1).toString() + " of " 
+                    ProgressOverlay.setProgress("unit time measurement (" + (i + 1).toString() + " of "
                         + (jsIterations + getNumScripts() + TestMgr.getNumScripts()).toString() + ")");
                 } else {
                     var curTime = ((timeOutTime - RT.Perf.ellapsed(totalTime))/1000).toFixed(0);
@@ -1175,10 +1175,10 @@ module TDev.TestMgr.Benchmarker
             ++i;
             Util.setTimeout(Browser.isWebkit ? 100 : 1, doNextJS)
         }
-                
+
         Util.setTimeout(Browser.isWebkit ? 100 : 1, doNextJS)
         return rp;
-    }    
+    }
 
     export function getNumScripts(): number {
         return tdBenchmarks.length + iterations;
@@ -1237,8 +1237,8 @@ module TDev.TestMgr.Benchmarker
             userplatform: Browser.platformCaps
         };
         RT.Perf.pushCustomData(data);
-    }    
-    
+    }
+
     //? Run TouchDevelop benchmarks and populates tdProgramsTested with the
     //? results for each program tested.
     //?  - testOnly:  runs only one iteration to check if the output is correct
@@ -1246,7 +1246,7 @@ module TDev.TestMgr.Benchmarker
     //?  - runRandom: run a random program from the benchmark and report
     //?      the results to the cloud
     //? It returns a Promise with the total time spent in this process
-    export function runTDBenchmarksAsync(testOnly: boolean = false, 
+    export function runTDBenchmarksAsync(testOnly: boolean = false,
                                          updateOverlay : boolean = false,
                                          runRandom : boolean = false)
     : Promise {
@@ -1291,9 +1291,9 @@ module TDev.TestMgr.Benchmarker
                 rp.success(durr);
                 return;
             }
-            
+
             var prg = myBench[Math.floor(i / tdIterations)];
-            
+
             if (updateOverlay) {
                 var prefix = "";
                 if (testOnly) {
@@ -1305,7 +1305,7 @@ module TDev.TestMgr.Benchmarker
                     + (Math.floor(i / tdIterations) + 1 + iterations)
                         .toString() + " of " + (myBench.length + iterations
                         + TestMgr.getNumScripts()).toString() + ")");
-            
+
             }
             i++;
 
@@ -1317,25 +1317,25 @@ module TDev.TestMgr.Benchmarker
                     .then((text) => (scriptCache[s] = text));
             }
 
-            AST.loadScriptAsync(getScriptAsync).done((resp: AST.LoadScriptResult) => 
+            AST.loadScriptAsync(getScriptAsync).done((resp: AST.LoadScriptResult) =>
             {
                 if (resp.numErrors > 0 && Script.actions()
                     .every((a) => !a.isCompilerTest())) {
-                    var res = new Measurement(prg.id + Script.getName(), 0, 
+                    var res = new Measurement(prg.id + Script.getName(), 0,
                                               false);
                     res.name += " (parse errors)";
                     tdProgramsTested.measurements.push(res);
-                    
+
                     var h = new TestMgr.TestHost();
                     h.scriptId = prg.id;
                     h.exceptionHandler(new Error(resp.status));
-                    
+
                     doNextTD();
-                } else {                    
+                } else {
                     var timeToken = RT.Perf.start(prg.id);
                     TestMgr.runTestsAsync(prg.id, flags)
                         .done((res: TestMgr.ScriptTestResult) => {
-                            res.totalTime = RT.Perf.stop(timeToken);                            
+                            res.totalTime = RT.Perf.stop(timeToken);
                             if (res.downloadError) {
                                 if (--tryAgain == 0) {
                                     rp.error("download error");
@@ -1343,7 +1343,7 @@ module TDev.TestMgr.Benchmarker
                                 }
                                 --i;
                                 doNextTD();
-                                return;                                
+                                return;
                             }
                             tdProgramsTested.measurements
                                 .push(new Measurement(prg.name, res.totalTime,
@@ -1355,7 +1355,7 @@ module TDev.TestMgr.Benchmarker
                                 if (lowest > 0)
                                     reportBenchmarkResult(prg.name, prg.id, lowest, flags);
                             }
-                            doNextTD();                     
+                            doNextTD();
                         })
                 }
             }, rp.error);
@@ -1394,12 +1394,12 @@ module TDev.TestMgr.Benchmarker
     }
 
     export function displayPerfData(): void {
-        var m = new ModalDialog();               
+        var m = new ModalDialog();
         var allData: RT.Perf.PerfData[] = [];
-        
-        m.addClass("accountSettings");        
-        //m.noChrome();        
-        
+
+        m.addClass("accountSettings");
+        //m.noChrome();
+
         var setIds: string[] = [];
         var changeSetIds = (name: string, v: boolean) => {
             if (v)
@@ -1447,10 +1447,10 @@ module TDev.TestMgr.Benchmarker
                     + "\t" + data.compilerversion + "\t" + data.releaseid + "\t" + data.userplatform.join(",")
                     + "\n";
                 });
-                copyToClipboard(s); 
-            }, errorHandler);            
-        }        
-        
+                copyToClipboard(s);
+            }, errorHandler);
+        }
+
         m.add([div("wall-dialog-header", lf("TouchDevelop settings")),
                div("wall-dialog-body", lf("Which perf measurements are you interested in?"))
             ]);
@@ -1466,11 +1466,11 @@ module TDev.TestMgr.Benchmarker
             m.dismiss();
         }));
         divbuttons.appendChild(HTML.mkButton(lf("cancel"), () => { m.dismiss() }));
-        
+
         m.add([div("wall-dialog-body", HTML.mkCheckBox("syncasync", (v) => changeSetIds("syncasync", v), false)),
                div("wall-dialog-body", HTML.mkCheckBox("tests", (v) => changeSetIds("tests", v), false)),
                divbuttons
-            ]);        
+            ]);
 
         m.fullWhite();
         m.setScroll();
@@ -1485,11 +1485,11 @@ module TDev.TestMgr.Benchmarker
         m.add(d);
         m.noChrome();
         m.setScroll();
-        
+
         var h = "";
         var hasError = false;
 
-        var perScript = "";        
+        var perScript = "";
         if (RT.Perf.unit() > 0 && jsProgramsTested.aggregatesCount() > 0) {
             perScript += "<div>Perf unit time measurement (total time: ";
             perScript += (totalTime / RT.Perf.unit()).toFixed(3) + " - ";
@@ -1508,8 +1508,8 @@ module TDev.TestMgr.Benchmarker
                 perScript += (pgr.average / RT.Perf.unit()).toFixed(3) + " - ";
                 perScript += pgr.average.toFixed(3) + " ms. </td><td> +-";
                 perScript += pgr.stddev.toFixed(3) +"</td></tr> \n";
-            });            
-            perScript += "</table></div>\n";            
+            });
+            perScript += "</table></div>\n";
         }
         if (tdProgramsTested.aggregatesCount() > 0) {
             perScript += "<div><table>\n";
@@ -1529,7 +1529,7 @@ module TDev.TestMgr.Benchmarker
                 perScript += pgr.average.toFixed(1) + " ms. </td><td> +-";
                 perScript += pgr.stddev.toFixed(3) + "</td></tr> \n";
             });
-            perScript += "</table></div>\n";            
+            perScript += "</table></div>\n";
         }
         if (RT.Perf.unit() > 0) {
             perScript += "<br/><div><b>Unit time is " + RT.Perf.unit()
@@ -1556,7 +1556,7 @@ module TDev.TestMgr.Benchmarker
     }
 
     //? Time measurement code
-    module BenchTester {        
+    module BenchTester {
         export function hashResultString(input: string): number {
             var h = 0, g = 0;
             for (var i = 0; i < input.length; ++i) {
@@ -1570,11 +1570,11 @@ module TDev.TestMgr.Benchmarker
         }
 
         //? Runs a benchmark for i times and reports mesurements
-        export function Run(put: IJsBenchmark) {                        
-            var outs = [];            
-            Fasta.resetRandomSeed();            
+        export function Run(put: IJsBenchmark) {
+            var outs = [];
+            Fasta.resetRandomSeed();
             var time = put.fn(put.n, outs);
-            var correct = false;            
+            var correct = false;
 			var hash = hashResultString(outs.join(""));
             if (put.name == "BinaryTrees" && hash == 45204502)
                 correct = true;

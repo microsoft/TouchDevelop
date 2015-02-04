@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev { export module AST {
@@ -88,7 +88,7 @@ module TDev { export module AST {
         {
             return this.mkAction(this.eventClasses[0], "event")
         }
-        
+
         public init()
         {
             var p = new Parser();
@@ -111,7 +111,7 @@ module TDev { export module AST {
             clses.sort((a, b) => b.category.length - a.category.length);
             var cls = clses[0];
             if (cls === undefined) {
-                a.isPrivate = true; 
+                a.isPrivate = true;
                 p.error("no such event category " + a.getName());
             } else {
                 a.setEventInfo(new EventInfo(cls));

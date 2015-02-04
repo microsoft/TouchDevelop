@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A combination of date and time
     //@ stem("dt") immutable ctx(general,indexkey,cloudfield,json) serializable
@@ -18,7 +18,7 @@ module TDev.RT {
             }
             return r;
         }
-        
+
         static mkMs(ms:number) : DateTime
         {
             var r = new DateTime();
@@ -49,7 +49,7 @@ module TDev.RT {
         public isSerializable() { return true; }
 
         public toJsonKey():any { return this.d.getTime(); }
-        
+
         //? Converts the value into a json data structure.
         public to_json(): JsonObject {
             return JsonObject.wrap(this.d.getTime());
@@ -63,9 +63,9 @@ module TDev.RT {
 
         public isDefaultValue():boolean
         {
-            return this.equals(DateTime.defaultValue);  
+            return this.equals(DateTime.defaultValue);
         }
-        
+
         //? Returns a date that adds the specified number of days to the value of this instance.
         //@ [days].defl(1)
         public add_days(days:number) : DateTime { return this.add_seconds(days * 24 * 3600); }
@@ -195,11 +195,11 @@ module TDev.RT {
         public to_universal_time(): DateTime
         {
             return DateTime.mk(new Date(
-                this.d.getUTCFullYear(), 
-                this.d.getUTCMonth(), 
-                this.d.getUTCDate(),  
-                this.d.getUTCHours(), 
-                this.d.getUTCMinutes(), 
+                this.d.getUTCFullYear(),
+                this.d.getUTCMonth(),
+                this.d.getUTCDate(),
+                this.d.getUTCHours(),
+                this.d.getUTCMinutes(),
                 this.d.getUTCSeconds())
                 );
         }

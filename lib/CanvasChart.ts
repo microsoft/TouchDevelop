@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Charts {
     export class Point {
         constructor (public x: number, public y: number) { }
@@ -15,7 +15,7 @@ module TDev.RT.Charts {
         public gridRows = 11;
         public gridCols = 11;
         public area = true;
-        
+
         // Variables used for data configuration.
         private points: Point[];
 
@@ -245,16 +245,16 @@ module TDev.RT.Charts {
                 n = 4; // This value only allows results smaller than about 1000 = 10^n
 
 
-                do // Tick vector length reduction 
+                do // Tick vector length reduction
                 {
                     --n;
                     intervalSize = currentBase * Math.pow(10.0, exponentYmax - n);
 
-                    upperBound = 
+                    upperBound =
                         Math.ceil(mantissaYmax * Math.pow(10.0, n) / currentBase)
                         * intervalSize;
 
-                    nIntervals = 
+                    nIntervals =
                         Math.ceil((upperBound - start) / intervalSize);
                     lowerBound = upperBound - nIntervals * intervalSize;
                 }

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export var sharedText: string = null;
@@ -64,10 +64,10 @@ module TDev {
             var d = div("copyright-text", txt);
             if (SizeMgr.phoneMode)
                 d.innerHTML = "<span class='beta-underline'>more</span>";
-            
+
             return d.withClick(() => {
-                var link = (text:string, lnk:string) => 
-                    HTML.mkButton(text, 
+                var link = (text:string, lnk:string) =>
+                    HTML.mkButton(text,
                                     () => { window.open(Cloud.getServiceUrl() + lnk) });
 
                 var m = new ModalDialog();
@@ -79,11 +79,11 @@ module TDev {
                           "Windows, Windows Phone, Mac, Linux, iPhone, iPad, Android, etc. (and soon your toaster :-)");
 
                 if (webAppId) {
-                    m.add(div("wall-dialog-buttons", 
+                    m.add(div("wall-dialog-buttons",
                         link("tweak this web app", "/" + webAppId),
                         link("explore TouchDevelop", "/app")));
                 } else {
-                    m.add(div("wall-dialog-buttons", 
+                    m.add(div("wall-dialog-buttons",
                         link("run TouchDevelop now!", "/app")));
                 }
 
@@ -151,7 +151,7 @@ module TDev {
                 return url;
             }
         }
-        // office mix 
+        // office mix
         if (TDev.Browser.webAppImplicit) {
             // do not ask the authenticate
             var auth = TDev.Cloud.authenticateAsync;
@@ -259,7 +259,7 @@ module TDev {
                     }
                     r.resumeVal(undefined);
                 }, e => {
-                    TDev.RT.Time.log('error while translating');                    
+                    TDev.RT.Time.log('error while translating');
                     r.resumeVal(undefined);
                 });
         };
@@ -291,7 +291,7 @@ module TDev {
                     }
                     r.resumeVal(undefined);
                 }, e => {
-                    TDev.RT.Time.log('error while detecting language');                    
+                    TDev.RT.Time.log('error while detecting language');
                     r.resumeVal(undefined);
                 });
         };
@@ -314,7 +314,7 @@ module TDev {
         }
     }
 
-    function initAsync() : Promise 
+    function initAsync() : Promise
     {
         if (RT.Wab)
             return RT.Wab.initAsync().then(() => init2Async());
@@ -624,7 +624,7 @@ module TDev {
                 }
             };
 
-            (<any>TDev.RT.Bazaar).post_leaderboard_to_wall = function (r: ResumeCtx) //: void 
+            (<any>TDev.RT.Bazaar).post_leaderboard_to_wall = function (r: ResumeCtx) //: void
             {
                 if (!Browser.webRunner && !Browser.webAppImplicit) {
                     TDev.RT.App.restart("", r);

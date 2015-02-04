@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT.Perf {
     export var timeReporting = false;
@@ -103,7 +103,7 @@ module TDev.RT.Perf {
         events.forEach((e: PerfData) => {
             e.userplatform = Browser.platformCaps;
         });
-        
+
         Cloud.postPrivateApiAsync("benchmarks", events).done(
             json => {
                 window.localStorage["archivedPerfData"] = [];
@@ -136,7 +136,7 @@ module TDev.RT.Perf {
             durr = ts.lastPause - ts.time;
         }
         durr = Math.round(durr * 100) / 100;
-        
+
         var u = unit();
         if (ts.report) {
             if (u > 0 && compilerVersion != undefined && releaseId != undefined) {

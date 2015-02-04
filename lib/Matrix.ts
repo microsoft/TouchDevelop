@@ -1,14 +1,14 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A 2D matrix of numbers
-    //@ stem("m") enumerable serializable 
+    //@ stem("m") enumerable serializable
     export class Matrix
         extends RTValue
     {
         private data: number[] = [];
         private rowCount: number = 0;
         private columnCount: number = 0;
-        
+
         //public exportJson(ctx: JsonExportCtx): any {
         //    return ctx.encodeObjectNode(this, ["data", "rowCount", "columnCount"], [this.data.slice(0), this.rowCount, this.columnCount]);
         //}
@@ -20,10 +20,10 @@ module TDev.RT {
             if (columnCount < 0 || isNaN(columnCount))
                 return null;
             var irow = Math.floor(rowCount);
-            if (irow < 0) 
+            if (irow < 0)
                 return null;
             var icolumn = Math.floor(columnCount);
-            if (icolumn < 0) 
+            if (icolumn < 0)
                 return null;
             if (irow * icolumn < 0)
                 return null;
@@ -36,7 +36,7 @@ module TDev.RT {
         }
 
         private index(i: number, j: number): number {
-            return this.columnCount * Math.floor(i) + Math.floor(j);            
+            return this.columnCount * Math.floor(i) + Math.floor(j);
         }
 
         public toString(): string {
@@ -48,7 +48,7 @@ module TDev.RT {
                 for (var j = 0; j < this.columnCount; j++)
                 {
                     if (j > 0)
-                        r.push(", "); 
+                        r.push(", ");
                     r.push( this.data[this.index(i, j)].toString() );
                 }
             }
@@ -75,7 +75,7 @@ module TDev.RT {
             super.post_to_wall(s);
         }
 
-       
+
         public getViewCore(s: IStackFrame, b: BoxBase): HTMLElement {
             var d = div("item");
             for (var i = 0;  i < this.rowCount; i++) {
@@ -114,7 +114,7 @@ module TDev.RT {
         public set_at(index: number, value: number): void {
 		    var _index = Math.floor(index);
 			if (0 <= _index && index < this.data.length)
-	            this.data[_index] = value; 
+	            this.data[_index] = value;
         }
 
         //? Gets the value at a given location. Returns invalid if outside of the array dimensions
@@ -135,7 +135,7 @@ module TDev.RT {
             var m = new Matrix();
             m.rowCount = this.rowCount;
             m.columnCount = this.columnCount;
-            m.data = this.data.slice(0); 
+            m.data = this.data.slice(0);
             return m;
         }
 
@@ -255,9 +255,9 @@ module TDev.RT {
             for (var i = 0; i < this.data.length;++i)
                 this.data[i] = value;
         }
-        
+
         public debuggerDisplay(clickHandler: () => any) {
-            
+
             var container: HTMLElement = div(null).withClick(clickHandler);
 
             var tableVar: HTMLElement;
@@ -265,7 +265,7 @@ module TDev.RT {
             var tableRow: HTMLElement;
 
             tableVar = document.createElement("table").withClick(clickHandler);
-            
+
             for(var i = 0; i < this.rowCount; ++i) {
                 tableRow = createElement("tr");
 

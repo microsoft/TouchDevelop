@@ -157,7 +157,7 @@ module TDev.AST {
             var result : { [s:string]:HashNode } = {};
             var flat = flatten(sl.map((x : Stmt) => new HashNode(undefined, getStableName(x), [], x)), result, []);
             flat.forEach(function(x,i) {
-              result[x].successors = flat.slice(i+1,flat.length)    
+              result[x].successors = flat.slice(i+1,flat.length)
             });
             return result;
         }
@@ -316,7 +316,7 @@ module TDev.AST {
 
             function combineTokens(tl:Token[]) : Token[] {
                 return TDev.AST.ExprParser.parse0(tl).map(
-                    (x:StackOp) => { 
+                    (x:StackOp) => {
                         if(x.expr) {
                             return <Token>(x.expr);
                         } else {
@@ -549,7 +549,7 @@ module TDev.AST {
                         return f(aN.stmt);
                     }
                 }
-                
+
                 function mergeExprHolder(f) {
                     var temp = new ExprHolder();
                     temp.tokens = merge3inputs(x => f(x).tokens, true);
@@ -840,7 +840,7 @@ module TDev.AST {
             mergeLog(">>> Merge: "+getTime()+" step 1");
 
             // step 1 - perform additions and deletions
-            
+
             Object.keys(parentMap).forEach(x => {
                 var intersect = (containsId(hashA,x) &&
                     containsId(hashB,x) && containsId(hashO,x));
@@ -1108,7 +1108,7 @@ module TDev.AST {
                     transitiveClosure(edgeMap);
                 } else {
                     // part (a) - take the ones where A (left) disagrees
-                    
+
             var imStart = getTime();
                     // slow
                     var sla = childs.reduce((acc:HashNode[],x:string) => {
@@ -1250,8 +1250,8 @@ module TDev.AST {
                 childs.sort((a,b) => {
                     if(true || oldSeqMerge) { // TODO XXX - remove
                         if(edgeMap[a][b] > 0) {
-                            return -1; 
-                        } else if(edgeMap[b][a] > 0) { 
+                            return -1;
+                        } else if(edgeMap[b][a] > 0) {
                             return 1;
                         } else {
                             throw "merge exception: ("+a+", "+b+") not ordered";
@@ -1410,7 +1410,7 @@ module TDev.AST {
 
         export function basicTest(o:string, a:string, b:string) {
             if(!o) {
-                o = 
+                o =
 "meta version \"v2.2,js,ctx,refs,localcloud,unicodemodel,allasync\";\n"+
 "meta name \"awe-inspiring script\";\n"+
 "meta rootId \"nLWNALhDdDnO6mTvydoNe8aI\";\n"+
@@ -1430,7 +1430,7 @@ module TDev.AST {
 "}\n"
             }
             if(!a) {
-                a = 
+                a =
 "meta version \"v2.2,js,ctx,refs,localcloud,unicodemodel,allasync\";\n"+
 "meta name \"awe-inspiring script\";\n"+
 "meta rootId \"nLWNALhDdDnO6mTvydoNe8aI\";\n"+
@@ -1450,7 +1450,7 @@ module TDev.AST {
 "}\n"
             }
             if(!b) {
-                b = 
+                b =
 "meta version \"v2.2,js,ctx,refs,localcloud,unicodemodel,allasync\";\n"+
 "meta name \"awe-inspiring script\";\n"+
 "meta rootId \"nLWNALhDdDnO6mTvydoNe8aI\";\n"+

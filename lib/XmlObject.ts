@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? An xml element or collection of elements
     //@ stem("xml") immutable ctx(general,gckey,enumerable)
@@ -166,7 +166,7 @@ module TDev.RT {
                 var childNodes = this._element.childNodes;
                 for (var i = 0; i < childNodes.length; ++i) {
                     var child = childNodes[i];
-                    if (child.nodeType == Node.ELEMENT_NODE && 
+                    if (child.nodeType == Node.ELEMENT_NODE &&
                         child.localName == localName &&
                         (!namespaceURI || child.namespaceURI == namespaceURI)
                         )
@@ -196,7 +196,7 @@ module TDev.RT {
                 var childNodes = this._element.childNodes;
                 for (var i = 0; i < childNodes.length; ++i) {
                     var child = childNodes[i];
-                    if (child.nodeType == Node.ELEMENT_NODE  && (name.length === 0 || 
+                    if (child.nodeType == Node.ELEMENT_NODE  && (name.length === 0 ||
                         (child.localName == localName &&
                         (!namespaceURI || child.namespaceURI == namespaceURI))))
                         nodes.push(<Element>child);

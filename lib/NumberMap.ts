@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A map of numbers to numbers
     //@ stem("m") enumerable serializable ctx(general,json)
@@ -56,7 +56,7 @@ module TDev.RT {
         public min() : number
         {
             if (this.length == 0) return undefined;
-            
+
             var r = Number.MAX_VALUE;
             Object.keys(this.items).forEach((key) => {
                 var value = this.at_key(key);
@@ -71,7 +71,7 @@ module TDev.RT {
         public max() : number
         {
             if (this.length == 0) return undefined;
-            
+
             var r = Number.MIN_VALUE;
             Object.keys(this.items).forEach((key) => {
                 var value = this.at_key(key);
@@ -80,7 +80,7 @@ module TDev.RT {
             });
             return r;
         }
-        
+
         private at_key(key:string) : number
         {
             var result = (<any>(this.items)[key]);
@@ -95,7 +95,7 @@ module TDev.RT {
             var key = index.toString();
             return this.at_key(key);
         }
-        
+
         //? Sets the element at index. Index may be any floating-point value.
         //@ writesMutable
         public set_at(index:number, value:number) : void
@@ -103,7 +103,7 @@ module TDev.RT {
             var key = index.toString();
             this.set_at_key(key, value);
         }
-        
+
         private set_at_key(key:string, value:number) : void
         {
             var val = this.items[key];
@@ -113,7 +113,7 @@ module TDev.RT {
             if (value != undefined)
                 this.length++;
         }
-        
+
 
         //? Sets many elements at once.
         //@ writesMutable [numbers].readsMutable
@@ -124,18 +124,18 @@ module TDev.RT {
                 this.set_at_key(key, value);
             });
         }
-        
+
         //? Removes the value at a given index
         public remove(index:number) : void
         {
             var val = this.items[index];
             if (val != undefined)
-            {    
+            {
                 this.length--;
                 this.items[index] = undefined;
-            }            
-        }        
-        
+            }
+        }
+
         public toString() : string
         {
             var s = "{";
@@ -145,7 +145,7 @@ module TDev.RT {
                     var value = this.at_key(key);
                     if (s.length > 1)
                         s += ", ";
-                    s+= key + "->" + value;                
+                    s+= key + "->" + value;
                 }
             });
             if (count == 20)
@@ -154,8 +154,8 @@ module TDev.RT {
             return s;
         }
 
-        public get_enumerator() { 
-            var k : number[] = <number[]>Object.keys(this.items).map(parseFloat); 
+        public get_enumerator() {
+            var k : number[] = <number[]>Object.keys(this.items).map(parseFloat);
             k.sort((a, b) => a - b);
             return k;
         }
@@ -241,9 +241,9 @@ module TDev.RT {
             var items = this.items;
 
             Object.keys(items).forEach(k => {
-                ret["at(" + k + ")"] = items[k]; 
+                ret["at(" + k + ")"] = items[k];
             });
-            
+
             return ret;
         }
     }

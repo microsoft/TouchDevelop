@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 'use strict';
 
@@ -10,7 +10,7 @@ module TDev.RT {
 
         public on_render_heap = false;
         public versioncounter: number = 1; // used to track changes for auto-refresh purposes
-     
+
 
         // the 'reuse key' is used by the incremental box tree algorithm.
         // whenever posting to the wall, it checks equality (===) of the reuse key
@@ -45,7 +45,7 @@ module TDev.RT {
             }
             if (box instanceof WallBox && (<WallBox>box).getDepth() === 1) s.rt.renderBox(box);
         }
-        
+
 
         public viewIsRefreshable() { return false }
 
@@ -64,15 +64,15 @@ module TDev.RT {
         {
             return div("wall-text", this.getShortStringRepresentation());
         }
-    
 
 
-        
+
+
         public updateViewCore(s: IStackFrame, b: BoxBase) { }
 
 
         // subclasses can override this to provide customized string representations
-        public getShortStringRepresentation(): string 
+        public getShortStringRepresentation(): string
         {
             try {
                 if ((<any>this).to_string)
@@ -118,7 +118,7 @@ module TDev.RT {
         }
         public jsonExportMark = false; // used to block infinite recursion
 
-       
+
         public toJsonKey():any
         {
             throw new Error("cannot use " + this.rtType() + " as a key (it is not a value)");
@@ -131,13 +131,13 @@ module TDev.RT {
         {
             return false;  // overridden in value types where objects may denote the default value
         }
-        
+
         static CompareKeys(a:RTValue, b:RTValue):number
         {
             if (!a)
               return (b ? -1 : 0);
             else
-              return (b ? a.keyCompareTo(b) : 1);  
+              return (b ? a.keyCompareTo(b) : 1);
         }
 
 
@@ -168,15 +168,15 @@ module TDev.RT {
 
         2. Overriding methods in classes
 
-            To override methods in class Baz defined <prefix>Baz class deriving from Baz 
+            To override methods in class Baz defined <prefix>Baz class deriving from Baz
             in TDev.RT (or in TDev.RT.<prefix>).
 
             File lib<prefix>/Baz.str:
-            module TDev.RT {    
+            module TDev.RT {
                 class <prefix>Baz extends Baz
                 {
                     private _my_field:number;
-                    public foo(x:number) { 
+                    public foo(x:number) {
                         // body of Baz.foo
                     }
                 }
@@ -311,7 +311,7 @@ module TDev.RT {
         }
     }
 
-  
+
 
     export interface IPicker
     {

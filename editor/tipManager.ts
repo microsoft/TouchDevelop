@@ -1,6 +1,6 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
-module TDev { 
+module TDev {
     export interface Tip {
         tick?: Ticks;
         tickArg?: string;
@@ -41,7 +41,7 @@ module TDev {
             return !!currentTip
         }
 
-        export function setTip(tip: Tip) 
+        export function setTip(tip: Tip)
         {
             var needsAnimation = tip && (!currentTip || currentTip.description != tip.description)
 			currentTip = tip;
@@ -77,7 +77,7 @@ module TDev {
 			return false;
 		}
 
-        function updateTip(needsAnimation:boolean) 
+        function updateTip(needsAnimation:boolean)
         {
 			var tip = currentTip;
 

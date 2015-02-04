@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A collection of picture albums
     //@ stem("picalbums") enumerable cap(media)
@@ -16,7 +16,7 @@ module TDev.RT {
             pa.a = albums;
             return pa;
         }
-        
+
         //? Gets the item at position 'index'; invalid if index is out of bounds
         public at(index:number) : PictureAlbum { return this.a[Math.floor(index)]; }
 

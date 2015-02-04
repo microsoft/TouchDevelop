@@ -1,4 +1,4 @@
-﻿///<reference path='labs-1.0.4.d.ts'/>
+///<reference path='labs-1.0.4.d.ts'/>
 // full docs: https://labsjs.blob.core.windows.net/sdk/LabsJS-1.0.4/labs.html
 // use http://labsjs.blob.core.windows.net/sdk/LabsJS-1.0.4/labshost.html for testing
 /*
@@ -10,8 +10,8 @@ The editor app provides a way to pick the web app to execute. This app is provid
 
     * script selected, IScriptMessage
 
-            { kind : 'script', 
-              data : IScript 
+            { kind : 'script',
+              data : IScript
               releaseid?: ... }
 
 Optionaly, the releaseid can be specified as a field
@@ -28,7 +28,7 @@ The view app may be any TouchDevelop app. Additionally some apps may also decide
 
     * 'labGetState' : request state stored in current lab
 
-            { kind : 'labGetState' }   
+            { kind : 'labGetState' }
 
     Upon receiving this message, the state (IStateMessage) is sent to the web app.
 
@@ -226,7 +226,7 @@ module TDev {
             setHeight("mainContent", 100, 10);
         }
         }
-        
+
         log("td: disablling preview mode");
         _isPreviewMode = false;
     }
@@ -443,7 +443,7 @@ module TDev {
             releaseid: queryUrl("releaseid")
         };
         log("td: data: " + JSON.stringify(data));
-        if (/isTutorial/.test(window.location.href)) receiveTutorialSelected(data); 
+        if (/isTutorial/.test(window.location.href)) receiveTutorialSelected(data);
         else    receiveScriptSelected(data);
     }
 
@@ -647,7 +647,7 @@ module TDev {
         }
         else {
             log("td: User config already set. Ignoring leaderboard message");
-        }  
+        }
     }
     function handleLeaderboardComplete(score: number) : void{
         var comp = <Labs.Components.ActivityComponentInstance>_lab.components[1];
@@ -771,7 +771,7 @@ module TDev {
     }
 
     function fillEmptyIndices(index: number, toInsert: boolean): number {
-        if (index == 0 || index == 1 || index == 2) return 0; 
+        if (index == 0 || index == 1 || index == 2) return 0;
         var ret: Map[] = _indexMap.filter(v => {
             if (v.value == index) return true;
             return false;
@@ -979,7 +979,7 @@ module TDev {
                         updateChrome();
                     });
                 }
-                
+
                 break;
             case Labs.Core.LabMode.View:
                 if (_editor) {

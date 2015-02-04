@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev
 {
     export class ModalDialog
@@ -40,7 +40,7 @@ module TDev
         {
             this.showBare();
         }
-        
+
         public addLog() {
             if (!this.logView) {
                 this.logView = new TDev.RT.AppLogView();
@@ -79,7 +79,7 @@ module TDev
 
         public addHTML(html:string) : HTMLElement
         {
-            var b = div("wall-dialog-body"); 
+            var b = div("wall-dialog-body");
             Browser.setInnerHTML(b, html);
             this.add(b);
             return b;
@@ -107,7 +107,7 @@ module TDev
             }
         }
 
-        public stretchWide() 
+        public stretchWide()
         {
             this.floating.style.width = 'calc(100% - 4em)';
             this.dialog.style.width = '100%';
@@ -200,8 +200,8 @@ module TDev
             m.add([
                 div("wall-dialog-header", confirmation + "?"),
                 div("wall-dialog-body", msg),
-                div("wall-dialog-buttons", 
-                    HTML.mkButton(lf("cancel"), () => m.dismiss()), 
+                div("wall-dialog-buttons",
+                    HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButton(confirmation, () => { act(); m.dismiss(); }))
             ]);
             m.show();
@@ -214,7 +214,7 @@ module TDev
             m.add([
                 div("wall-dialog-header", header),
                 div("wall-dialog-body", msg),
-                div("wall-dialog-buttons", 
+                div("wall-dialog-buttons",
                     Object.keys(options).map((k:string) =>
                         HTML.mkButton(k, () => { m.dismiss(); options[k](); })))
             ]);
@@ -293,7 +293,7 @@ module TDev
 
         static showText(s:string, title:string = null, msg:string = null, done : () => void = null) : ModalDialog
         {
-            var m = new ModalDialog(); 
+            var m = new ModalDialog();
             if (title != null)
                 m.add(div('wall-dialog-header', title));
             if (msg != null)
@@ -378,7 +378,7 @@ module TDev
         private listheight: number;
         private buttondiv: HTMLElement;
         private searchbox: HTMLElement;
-       
+
         public showorhidelist(show: boolean) {
             var d = show ? "" : "none";
             if (this.searchbox)
@@ -412,7 +412,7 @@ module TDev
 
                 if (terms.length > 0) limitedMode = false;
                 var skipCnt = 0;
-                
+
                 boxes.forEach((b:HTMLElement) => {
                     var miss = false;
                     if (limitedMode && (<any>b).initiallyHidden) {
@@ -437,7 +437,7 @@ module TDev
                     }));
                 }
                 list.setChildren(res);
-                
+
                 if (onlineOK && !!options.queryAsync && Cloud.isOnline()) {
                     progressBar.start();
                     options.queryAsync(allTerms).then((bxs : HTMLElement[]) => {
@@ -482,12 +482,12 @@ module TDev
             else
                 this.buttondiv.appendChild(HTML.mkButtonTick(lf("cancel"), Ticks.chooseCancel, () => this.dismiss()));
             this.add(this.buttondiv);
-     
+
             this.show();
 
             // this has to happen after show() - show() saves the keyboard state so later this handler is removed
             if (needKbd)
-                KeyboardMgr.instance.register("***", (e:KeyboardEvent) => { 
+                KeyboardMgr.instance.register("***", (e:KeyboardEvent) => {
                     if (e.fromTextBox) return false;
                     var s = Util.keyEventString(e);
                     if (s) {
@@ -513,7 +513,7 @@ module TDev
             refresh(options.initialEmptyQuery);
          }
 
-      
+
     }
 
     export interface ModalChooseOptions
@@ -530,7 +530,7 @@ module TDev
         noBackground?: boolean;
         custombuttons?: HTMLElement[];
     }
-        
+
 
     export module ProgressOverlay
     {
@@ -572,8 +572,8 @@ module TDev
             }
 
             if (!overlay) {
-                overlay = 
-                    div("modalOverlay", div("modalMessage", 
+                overlay =
+                    div("modalOverlay", div("modalMessage",
                             msgDiv = div("modalMessageHeader"),
                             addInfo = div("modalMessagePleaseWait"),
                             progress = div("modalMessagePleaseWait")

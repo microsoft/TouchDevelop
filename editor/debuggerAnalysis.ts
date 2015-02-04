@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 
 module TDev {
-    
+
     export interface IStringSet {
         [key: string]: boolean;
     }
@@ -59,7 +59,7 @@ module TDev {
 
     export function setToArray(s: IStringSet) {
         if (!s) return [];
-        
+
         return Object.keys(s).filter(k => !!k);
     }
 
@@ -92,7 +92,7 @@ module TDev {
         private definitelyVisited(id: string): boolean {
             if (!id) return;
             if (this.definitelyVisitedCache[id] !== undefined) return this.definitelyVisitedCache[id];
-            
+
             var ret = (this.runMap && this.runMap.contains(id)) || (this.stackTrace && this.stackTrace.pack.some(node => node.id === id));
             this.definitelyVisitedCache[id] = ret;
             return ret;
@@ -198,7 +198,7 @@ module TDev {
 
     export class FullRunMapDebuggingAnnotator
         extends AST.NodeVisitor {
-        
+
         constructor(public fullRunMap: IStringSet) { super(); }
 
         public visitApp(script: AST.App) {
@@ -291,7 +291,7 @@ module TDev {
         public topRatedId: string;
         public topRatedRate: number = 0;
         public localTopRate: number = 0;
-        
+
         public topRateContainer = { critical: 0 };
 
         constructor(
@@ -302,16 +302,16 @@ module TDev {
             public errorMessage: string = null)
         {
             super();
-            
+
             this.bugSkeleton = setEmpty(normalPortrait.intersection) ? {} : setDifference(bugPortrait.intersection, normalPortrait.intersection) || {};
             this.bugInnerSkeleton = setEmpty(normalPortrait.union) ? {} : setDifference(this.bugSkeleton, normalPortrait.union);
-            this.bugShell = setEmpty(normalPortrait.union) ? {} : setDifference(bugPortrait.union, normalPortrait.union);           
+            this.bugShell = setEmpty(normalPortrait.union) ? {} : setDifference(bugPortrait.union, normalPortrait.union);
         }
 
         public rate(id: string): number {
             var ret = 0;
             var countSet = (s: IStringSet) => ret += (s[id] ? 1 : 0);
-            
+
             countSet(this.bugPortrait.union || {});
             countSet(this.bugPortrait.intersection || {});
             countSet(this.stacky.tops || {});
@@ -328,7 +328,7 @@ module TDev {
                 this.topRatedRate = ret;
                 this.topRatedId = id;
             }
-            
+
             return ret;
         }
 
@@ -343,7 +343,7 @@ module TDev {
             this.localTopRate = 0;
             super.visitAction(node);
             if (!node || !this.localTopRate) return;
-            
+
             node.debuggingData = { critical: this.localTopRate, max: this.topRateContainer };
         }
 
@@ -410,7 +410,7 @@ module TDev {
             var message = this.stacky && this.stacky.tops && this.stacky.tops[s.stableId] ? this.errorMessage : undefined;
 
             s.expr.debuggingData = { critical: rate, max: this.topRateContainer, errorMessage: message };
-            
+
             this.updateRatingForGlobals(s.expr, rate);
         }
 
@@ -433,7 +433,7 @@ module TDev {
         public vars: StmtHashTable = new StmtHashTable() // Stmt => VariableFinder
 
         private steps = 0;
-        
+
         constructor(public roots: AST.Stmt[], public universum: IStringSet) { }
 
         static varsFrom(stmt: AST.AstNode) {
@@ -479,10 +479,10 @@ module TDev {
             var ignoreIxs: number[] = [];
             total.forEach((stmt, ix) => {
                 var check = this.relevants.get(stmt);
-                
+
                 var defs = this.defs(stmt);
                 var newRefs = this.refs(stmt);
-                
+
                 var rel1 = setIntersection(refs, defs);
                 var rel2 = setDifference(refs, defs);
 
@@ -501,12 +501,12 @@ module TDev {
             });
 
             ignoreIxs.forEach(ix => delete total[ix]);
-            
+
             return total;
         }
 
-        
-        
+
+
         private addToSlice(stmt: AST.Stmt) {
             if (stmt && this.universum && this.universum[stmt.stableId]) this.slice.set(stmt, true);
         }
@@ -580,7 +580,7 @@ module TDev {
             if (this.eventCounter > 10) {
                 this.removeSelf();
                 tick(Ticks.coverageBucketSurveyExceededSuccessfully);
-            } 
+            }
             this.eventCounter++;
         }
 

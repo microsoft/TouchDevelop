@@ -3,7 +3,7 @@ module TDev.RT {
     //? A collection of objects
     //@ stem("coll") icon("NumberedList")
     //@ enumerable serializable ctx(general,json)
-    export class Collection<T> 
+    export class Collection<T>
         extends RTValue
     {
         constructor(public typeInfo:any) {
@@ -110,7 +110,7 @@ module TDev.RT {
         {
 		    var _index = Math.floor(index);
 			if (0 <= _index && index < this.a.length)
-	            this.a[_index] = item; 
+	            this.a[_index] = item;
         }
 
         //? Inserts an object at position index. Does nothing if index is out of range.
@@ -122,7 +122,7 @@ module TDev.RT {
         }
 
         //? Exports a JSON representation of the contents.
-        //@ readsMutable [result].writesMutable 
+        //@ readsMutable [result].writesMutable
         public to_json(sf: IStackFrame): JsonObject {
             var ctx = new JsonExportCtx(sf);
             ctx.push(this);
@@ -130,7 +130,7 @@ module TDev.RT {
             ctx.pop(this);
             return JsonObject.wrap(json);
         }
-        
+
         //? Imports a JSON representation of the contents.
         //@ writesMutable
         public from_json(jobj: JsonObject, sf:IStackFrame): void {
@@ -138,7 +138,7 @@ module TDev.RT {
         }
 
         //? Returns a collections of elements that satisfy the filter `condition`
-        //@ readsMutable [result].writesMutable 
+        //@ readsMutable [result].writesMutable
         public where(condition:Predicate<T>, s:IStackFrame) : Collection<T>
         {
             var rt = s.rt
@@ -154,7 +154,7 @@ module TDev.RT {
         }
 
         //? Returns a collection sorted using specified `comparison` function
-        //@ readsMutable [result].writesMutable 
+        //@ readsMutable [result].writesMutable
         public sorted(comparison:Comparison<T>, s:IStackFrame) : Collection<T>
         {
             var rt = s.rt
@@ -192,13 +192,13 @@ module TDev.RT {
         public slice(start: number, end: number): Collection<T> {
             return Collection.fromArray(this.a.slice(Math.floor(start), Math.floor(end)), this.typeInfo);
         }
-        
+
         public jsonExportKey(ctx: JsonExportCtx) {
             return null; // conservative - recursion is possible if wrapped type is recursive
         }
 
         public exportJson(ctx: JsonExportCtx): any {
-            
+
             if (this.a.length > 0 && (this.a[0]["exportJson"] === undefined)) {
                 var a0 = this.a[0]
                 if (typeof a0 == "string" || typeof a0 == "number" || typeof a0 == "boolean") {
@@ -263,7 +263,7 @@ module TDev.RT {
             s += ']';
             return span(null, s);
         }
-        
+
         private getRecord():RecordSingleton
         {
             if (this.typeInfo instanceof RecordSingleton)
@@ -379,7 +379,7 @@ module TDev.RT {
 
         //
         // Methods specific to Collection<some-specific-type>
-        // 
+        //
 
         //? Computes the minimum of the values
         //@ readsMutable onlyOn(Number)
@@ -436,7 +436,7 @@ module TDev.RT {
         //? Sorts the places by distance to the location
         //@ writesMutable onlyOn(Location, Place)
         public sort_by_distance(loc:Location_) : void
-        { 
+        {
             var getLoc = (l) => {
                 if (l instanceof Place) return (<Place>l).location()
                 return <Location_>l
@@ -447,7 +447,7 @@ module TDev.RT {
                 if (!lloc && !rloc) return 0;
                 if (!lloc) return 1;
                 if (!rloc) return -1;
-                
+
                 return rloc.distance(lloc) - lloc.distance(rloc);
             });
         }

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.WinRT {
     export function BazaarInit()
     {
@@ -6,8 +6,8 @@ module TDev.RT.WinRT {
     }
 
     export module BazaarWinRT {
-        export function storeidAsync() : Promise {        
+        export function storeidAsync() : Promise {
             return Promise.as(Windows.ApplicationModel.Store.CurrentApp.appId);
-        }    
+        }
     }
 }

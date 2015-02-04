@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 //declare class AudioContext {}
 declare class AudioBuffer {}
 
@@ -24,8 +24,8 @@ module TDev.RT {
 		export function loadAsync(buffer : ArrayBuffer) : Promise { // AudioBuffer
 			var ctx = context();
 			return new Promise((onSuccess, onError, onProgress) => {
-				ctx.decodeAudioData(buffer, 
-				    b => onSuccess(b), 
+				ctx.decodeAudioData(buffer,
+				    b => onSuccess(b),
 					e => onSuccess(undefined)
 					);
 			});
@@ -79,9 +79,9 @@ module TDev.RT {
                           buffersLength += clone.length;
                         };
                         source.connect(node);
-                        // if the script node is not connected to an output the "onaudioprocess" event 
+                        // if the script node is not connected to an output the "onaudioprocess" event
                         // is not triggered in chrome.
-                        node.connect(ctx.destination);  
+                        node.connect(ctx.destination);
 
                         var wav = undefined;
                         var m = new ModalDialog();
@@ -97,7 +97,7 @@ module TDev.RT {
                             m.dismiss();
                         }))
                         );
-                        m.onDismiss = () => { 
+                        m.onDismiss = () => {
                             if (source) {
                                 source.disconnect();
                                 source = null;
@@ -120,7 +120,7 @@ module TDev.RT {
             var buffer = new ArrayBuffer(44 + buffersLength * 2);
             var view = new DataView(buffer);
             var offset = 0;
-            
+
             function writeString(s : string){
               for (var i = 0; i < s.length; i++, offset++){
                 view.setUint8(offset, s.charCodeAt(i));

@@ -11,7 +11,7 @@ clean:
 tags:
 	strada-tags.pl */*.ts
 
-deploy: main.js 
+deploy: main.js
 	for f in css tutorial json; do \
 	  mkdir -p $(TARGET)/$$f; \
 	  cp -f $$f/* $(TARGET)/$$f/; \
@@ -25,7 +25,7 @@ pub: all do-pub
 
 p: all do-pub-small
 
-do-pub: 
+do-pub:
 	cmd /c "minify.bat runtime.js"
 	cmd /c "minify.bat main.js"
 	/c/dev/TouchStudio/Tools/DevUploader/bin/Debug/DevUploader.exe \
@@ -35,7 +35,7 @@ do-pub:
 		runtime.js noderunner.js webapp.html cordova.js \
 		error.html
 
-do-pub-small: 
+do-pub-small:
 	/c/dev/TouchStudio/Tools/DevUploader/bin/Debug/DevUploader.exe \
 		-b:$(RELEASE) \
 		browser.js main.js css index.html browsers.html app.manifest cordova.js \
