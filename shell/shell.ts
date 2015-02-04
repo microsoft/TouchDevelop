@@ -213,10 +213,10 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
     if (p.protocol == "https:")
         mod = https
 
-    mod.get(p, (res:http.ServerResponse) => {
+    mod.get(p, (res:http.ClientResponse) => {
         if (res.statusCode == 302) {
-            downloadFile((<any>res).headers['location'], f)
-            res.end()
+            downloadFile(res.headers['location'], f);
+            (<any>res).end();
         } else if (res.statusCode == 200) {
             if (/gzip/.test(res.headers['content-encoding'])) {
                 var g:events.EventEmitter = zlib.createUnzip(undefined);
@@ -753,7 +753,7 @@ var pluginCmds:StringMap<(ar:ApiRequest)=>void> = {
     mkdir:      ar => mkDirP(ar.data.name + "/dummy", ar.data.mode, () => { ar.pluginCb()(undefined, undefined); }),
     writeFile: ar => {
         mkDirP(ar.data.name);
-        return fs.writeFile(ar.data.name, ar.data.data, "utf8", ar.pluginCb())
+        return fs.writeFile(ar.data.name, ar.data.data, "utf8", <any>ar.pluginCb())
     },
     readFile:   ar => fs.readFile(ar.data.name, "utf8", ar.pluginCb(true)),
     readDir:    ar => fs.readdir(ar.data.name, ar.pluginCb(true)),

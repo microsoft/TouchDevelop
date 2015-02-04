@@ -19,6 +19,7 @@ var generated = [];
 function mkTscCall(dir, refs, out) {
     return [
         tsc,
+        "--noEmitOnError",
         "--target ES5",
         "--module commonjs",
         out ? "--out "+dir+"/"+refs+".js" : "",
@@ -206,6 +207,9 @@ var concatMap = {
     },
 };
 
+// Apparently our node scripts can't run without this line.
+var nodePrelude = "var window = {};\n";
+
 // The rules are generated from the map above, which distinguishes between build
 // artifacts and file that were already there (so that the dependencies are
 // registered properly).
@@ -219,11 +223,12 @@ Object.keys(concatMap).forEach(function (f) {
             .concat(concatMap[f].extra);
     file(f, deps, function () {
         console.log("[C]", f);
-        var buf = new Buffer(1048576);
+        var bufs = [];
+        bufs.push(new Buffer(nodePrelude));
         toConcat.forEach(function (f) {
-            fs.readFileSync(f).copy(buf);
+            bufs.push(fs.readFileSync(f));
         });
-        fs.writeFileSync(f, buf);
+        fs.writeFileSync(f, Buffer.concat(bufs));
     });
 });
 
@@ -243,5 +248,9 @@ task('test', [ 'default' ], { async: true }, function () {
 });
 
 task('run', [ 'default' ], { async: true }, function () {
-    jake.exec([ 'node noderunner 80 silent ' ], {}, function() { complete(); });
+    jake.exec(
+        [ 'node noderunner 80 silent ' ],
+        { printStdout: true, printStderr: true },
+        function() { complete(); }
+    );
 });
