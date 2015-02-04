@@ -281,10 +281,20 @@ task('run', [ 'default' ], { async: true }, function (port) {
     );
 });
 
-task('local', [ 'default' ], { async: true}, function() {
+task('local', [ 'default' ], { async: true }, function() {
   jake.exec(
     [ 'node shell/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
     { printStdout: true, printStderr: true },
     function() { complete(); }
   )
 })
+
+task('update-docs', [ 'nodeclient/client.js', 'default' ], { async: true }, function() {
+  jake.exec(
+    [ 'node nodeclient/client.js updatehelp',
+      'node nodeclient/client.js updatelang' ],
+    { printStdout: true, printStderr: true },
+    function() { complete(); }
+  )
+})
+
