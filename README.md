@@ -72,9 +72,10 @@ Build:
 After building, you can run TouchDevelop from a local node server by running:
 
     jake run
+    # or, if port 80 is already used on your machine
+    jake run[8080]
 
 ## Tests
-
 
     jake test
 

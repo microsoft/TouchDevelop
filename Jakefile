@@ -267,14 +267,15 @@ task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function ()
     jake.exec([ 'node nodeclient/client.js buildtest' ], {}, function() { complete(); });
 });
 
-task('run', [ 'default' ], { async: true }, function () {
+task('run', [ 'default' ], { async: true }, function (port) {
+    port = port || 80;
     // XXX fix this too
     console.log("[F] copying browser/browser.js to browser.js");
     if (fs.exists("browser.js"))
       fs.unlink("browser.js");
     fs.writeFileSync("browser.js", fs.readFileSync("browser/browser.js"));
     jake.exec(
-        [ 'node noderunner 80 silent ' ],
+        [ 'node noderunner '+port+' silent ' ],
         { printStdout: true, printStderr: true },
         function() { complete(); }
     );
