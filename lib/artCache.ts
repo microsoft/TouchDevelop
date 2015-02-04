@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.RT {
     export module ArtCache {
@@ -50,7 +50,7 @@ module TDev.RT {
         {
             return getArtCacheTableAsync()
                 .then((table:Storage.Table) => table.getKeysAsync()
-                    .then((keys:string[]) => 
+                    .then((keys:string[]) =>
                         table.getItemsAsync(keys)
                             .then(v => {
                                 storage.artCache = v
@@ -83,7 +83,7 @@ module TDev.RT {
 
             // skip with proxy?
             url = HTML.proxyResource(url);
-            
+
             var id = url;
             var art = null;
             var table = null;

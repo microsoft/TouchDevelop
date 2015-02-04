@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A piece of text
     //@ stem("s") icon("ABC") immutable isData builtin ctx(general,indexkey,cloudfield,walltap,enumerable,json)
@@ -44,7 +44,7 @@ module TDev.RT {
                     if (dataUrl) return Promise.as(valueFromArtUrl(dataUrl));
                     else Util.httpGetTextAsync(url)
                 })
-                .then(txt => txt, e => { 
+                .then(txt => txt, e => {
                     App.logEvent(App.ERROR, "art", lf("failed to load url {0}", url), undefined);
                     return ""
                 });
@@ -62,11 +62,11 @@ module TDev.RT {
         //? Displays string on the wall
         export function post_to_wall(self:string, s:IStackFrame)
         {
-		    // backdoor for session testing
+            // backdoor for session testing
             if (dbg && self != null && self.indexOf("magic trap ") == 0) {
                var tests = new Revisions.SessionTests(s.rt);
                tests.runtest(self.substr(11));
-               return; 
+               return;
             }
 
             if (self != null) {
@@ -103,7 +103,7 @@ module TDev.RT {
         //@ robust
         export function compare(self:string, other:string) : number
         {
-            var r = self.localeCompare(other); 
+            var r = self.localeCompare(other);
             if (r < 0) return -1;
             if (r > 0) return 1;
             return 0;
@@ -141,7 +141,7 @@ module TDev.RT {
 
         //? Determines whether the ending matches the specified string
         //@ robust
-        export function ends_with(self:string, value:string) : boolean 
+        export function ends_with(self:string, value:string) : boolean
         {
             var i = self.lastIndexOf(value);
             return i > -1 && i == (self.length - value.length); // TODO: more efficient implementation
@@ -176,7 +176,7 @@ module TDev.RT {
         export function last_index_of(self:string, value:string, start:number) : number { return self.lastIndexOf(value, start); }
 
         //? Gets the groups from the matching the regex expression (pattern)
-        export function match(self: string, pattern: string): Collection<string> 
+        export function match(self: string, pattern: string): Collection<string>
         {
             try {
                 var rx = new RegExp(pattern, "m");
@@ -219,12 +219,12 @@ module TDev.RT {
         //? Replace every match of the regex according to the replacement string
         export function replace_regex(self: string, pattern: string, replace: string): string
         {
-            try 
+            try
             {
                 var rx = new RegExp(pattern, "gm");
                 return self.replace(rx, replace);
             }
-            catch (e) 
+            catch (e)
             {
                 Time.log('invalid regex pattern: ' + pattern);
                 return undefined;
@@ -234,11 +234,11 @@ module TDev.RT {
         //? Run `replacer` on every match of the regex
         export function replace_regex_with_converter(self: string, pattern: string, replace: StringConverter<Collection<string>>, s:IStackFrame): string
         {
-            try 
+            try
             {
                 var rx = new RegExp(pattern, "gm");
             }
-            catch (e) 
+            catch (e)
             {
                 Time.log('invalid regex pattern: ' + pattern);
                 return undefined;

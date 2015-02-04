@@ -1,17 +1,17 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
     export class NumberCharm {
-        
+
         private initialNumberString: string;
         private currentNumber: number;
         private log10: number;
-        
+
         private initialTokens: AST.Token[] = null;
         private lastTokens: AST.Token[] = null;
 
-        public getInitialTokens(): AST.Token[] 
+        public getInitialTokens(): AST.Token[]
         {
             return this.initialTokens === null ? null : this.initialTokens.slice(0);
         }
@@ -182,7 +182,7 @@ module TDev
                 return true;
             });
         }
-        
+
         private update() {
             var i = this.initialNumberString.indexOf(".");
             var numString: string;

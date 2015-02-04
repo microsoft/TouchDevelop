@@ -1,15 +1,15 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A collection of pictures
     //@ stem("pics") enumerable cap(media)
     export class Pictures
         extends RTValue
-    {    
+    {
         private _urls: string[] = [];
         constructor() {
             super()
         }
-        
+
         static mk(urls: string[]) {
             if (!urls) return undefined;
 
@@ -35,7 +35,7 @@ module TDev.RT {
 
         //? Gets a random picture; invalid if collection is empty
         //@ returns(Picture) picAsync
-        public random(r : ResumeCtx) {            
+        public random(r : ResumeCtx) {
             this.at(Math_.rand(this.count()), r);
         }
 
@@ -71,10 +71,10 @@ module TDev.RT {
         public thumbnail(index: number, r : ResumeCtx) {
             this.atAsync(index, 'thumbnail').done(p => r.resumeVal(p));
         }
-        
+
         //? Renamed to 'random'
         //@ hidden returns(Picture) picAsync
-        public rand(r : ResumeCtx) {            
+        public rand(r : ResumeCtx) {
             this.random(r);
         }
     }

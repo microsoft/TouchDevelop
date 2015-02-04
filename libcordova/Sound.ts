@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 // http://docs.phonegap.com/en/edge/cordova_media_media.md.html
 interface Media {
     new (url: string): Media;

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export class WinRTPicture
         extends Picture

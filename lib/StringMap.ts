@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A map from strings to strings
     //@ stem("d") enumerable serializable ctx(general,json)
@@ -38,7 +38,7 @@ module TDev { export module RT {
             var result = (<any>(this.items)[key]);
             return <string>(result);
         }
-                
+
         //? Sets the value at a given key; invalid if not found
         //@ writesMutable
         public set_at(key:string, value:string) : void
@@ -94,12 +94,12 @@ module TDev { export module RT {
         }
 
         //? Clears the values from the map
-        public clear() 
+        public clear()
         {
             this.items = new Object();
             this.length = 0;
         }
-        
+
         //? Sets many elements at once.
         //@ writesMutable [strings].readsMutable
         public set_many(strings:StringMap) : void
@@ -109,18 +109,18 @@ module TDev { export module RT {
                 this.set_at(key, value);
             });
         }
-        
+
         //? Removes the value at a given key
         public remove(key:string) : void
         {
             var val = this.items[key];
             if (val != null)
-            {    
+            {
                 this.length--;
                 delete this.items[key];
-            }            
-        }        
-        
+            }
+        }
+
         public toString(): string {
             var s = "{" + Object.keys(this.items)
                 .map(key => key + "->" + this.at(key))

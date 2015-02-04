@@ -45,7 +45,7 @@ module TDev
                 lib.pubid = "";
                 lib.rebind();
             } else {
-                return Promise.as(); // ??? 
+                return Promise.as(); // ???
             }
             earlyCb();
             lib.notifyChange();
@@ -194,7 +194,7 @@ module TDev
                 this.rebindKind(<AST.KindBinding>s);
             else if (s instanceof AST.ActionBinding)
                 this.rebindAction(<AST.ActionBinding>s);
-            else 
+            else
                 return false;
 
             return true;
@@ -211,7 +211,7 @@ module TDev
             this.formRoot.setChildren(<any[]>[
                                   Editor.mkHelpButton("libraries"),
                                   div("varLabel", lf("library reference")),
-                                  div("varHalf", 
+                                  div("varHalf",
                                     div("formHint", lf("known here as:")),
                                     this.libraryName),
                                   div("varHalf",

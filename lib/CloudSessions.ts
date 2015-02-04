@@ -1,11 +1,11 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
 
 
 
     //? A cloud data session
     //@ ctx(general) stem("session") cap(cloudData) serializable
-    export class CloudSession 
+    export class CloudSession
         extends RTValue {
 
         // the unique identifier for the session.
@@ -103,7 +103,7 @@ module TDev.RT {
         public owner(): User { return User.mk(this.ownerid); }
 
         //? Indicates if the current user owns this session
-        //@ returns(boolean) 
+        //@ returns(boolean)
         public is_owned(s: IStackFrame) { //: boolean {
             return s.rt.sessions.getUserId() === this.ownerid;
             //Bazaar.userIdAsync(r.rt).done(userId => r.resumeVal(userId === this.ownerid));
@@ -122,7 +122,7 @@ module TDev.RT {
         //@ async returns(JsonObject)
         //@ dbgOnly
         public server_info(r: ResumeCtx) {
-            
+
             if (this.isNodeSession())
                 Util.userError(lf("cannot get session info for deployed cloud libraries"), r.rt.current.pc);
             if (this.ownerid !== r.rt.sessions.getUserId())
@@ -132,7 +132,7 @@ module TDev.RT {
 
             var promise = Revisions.getServerInfoAsync(this._id);
             promise.then((result) => r.resumeVal(result));
-       
+
            // unrelated: testing attribute code
            // Revisions.setLocalSessionAttributeAsync("test", "42", r.rt).then(() => {
            //     var x = Revisions.getLocalSessionAttributeAsync("test", r.rt);
@@ -141,7 +141,7 @@ module TDev.RT {
             return promise.done();
         }
     }
-   
+
     //? Cloud session management
     //@ cap(cloudData)
     export module CloudData {
@@ -169,7 +169,7 @@ module TDev.RT {
             return i.rt.sessions.clearCurrentSession();
         }
 
-        
+
         //? Export a JSON representation of all the cloud data
         //@ dbgOnly
         export function to_json(s: IStackFrame): JsonObject {
@@ -233,21 +233,21 @@ module TDev.RT {
             });
         }
 
-       
+
 
 
         //? Gets the everyone-session, in which cloud data is shared by everyone running this script.
         export function everyone_session(s: IStackFrame): CloudSession {
             return CloudSession.fromDescriptor(s.rt.sessions.getEveryoneSessionDescriptor());
         }
-      
+
 
 
         //? Waits until the current server state has been received. Returns false if offline, or if time limit is exceeded.
         //@ [timeout].deflExpr(30)
         //@ async returns(boolean)
         //@ writesMutable
-        export function wait_for_server(timeout: number, r: ResumeCtx) // : bool 
+        export function wait_for_server(timeout: number, r: ResumeCtx) // : bool
         {
             var ses = r.rt.sessions;
             var cs = ses.getCurrentSession();
@@ -275,11 +275,11 @@ module TDev.RT {
         }
 
 
-        //? Creates a new cloud session owned by the current user. 
+        //? Creates a new cloud session owned by the current user.
         //@ [type].defl("shareable") [type].deflStrings("shareable", "private", "broadcast")
         //@ async returns(CloudSession)
         //@ writesMutable
-        export function create_session(title: string, type: string, r: ResumeCtx) // : CloudSession 
+        export function create_session(title: string, type: string, r: ResumeCtx) // : CloudSession
         {
             if (!title)
                 Util.userError(lf("must specify title"), r.rt.current.pc);
@@ -291,7 +291,7 @@ module TDev.RT {
             }).done();
         }
 
-        
+
 
         //? Gets a session from a session id
         export function session_of(id: string, title: string, s: IStackFrame): CloudSession {
@@ -328,7 +328,7 @@ module TDev.RT {
         }
 
         export function formatCloudSessionInfo(cloudSession: CloudSession, preselected: boolean, includesserverdata: boolean, showscriptname: boolean, user: RT.User = null): HTMLElement {
-    
+
             var percentfull = (cloudSession.sessionimpl && cloudSession.sessionimpl.user_get_percent_full()) ? cloudSession.sessionimpl.user_get_percent_full() :
                 (cloudSession.serverinfo && cloudSession.serverinfo.percentfull) ? cloudSession.serverinfo.percentfull : 0;
             var percentfullstring = percentfull ? (" (" + percentfull + "% full)") : "";
@@ -444,7 +444,7 @@ module TDev.RT {
                     })
                 }
             })
-            
+
             return btn
         }
 
@@ -526,7 +526,7 @@ module TDev.RT {
                     var cached = !owned && (cloudSession.isBroadcastSession() || cloudSession.isShareableSession());
 
                     if (owned || (cached && !inuse)) {
-                        
+
                         var deleteElt = HTML.mkButtonElt("navItem", inuse ? "clear" : cached ? "remove" : "delete");
                         var isRed = false;
                         deleteElt.withClick(() => {
@@ -603,7 +603,7 @@ module TDev.RT {
                     connectToShareableElt.withClick(() => {
                         var cs = new CloudSession();
                         cs._id = sharableId.textarea.value;
-                        cs._title = ""; // TODO: what about title? 
+                        cs._title = ""; // TODO: what about title?
                         cs._permissions = "";
                         if (cs.validate() && cs.tag[0] === "c") {
                             chosenSession = cs;
@@ -717,7 +717,7 @@ module TDev.RT {
                 };
             };
 
-             
+
             HTML.showProgressNotification(lf("Loading sessions..."));
             Revisions.queryCachedSessionsAsync(specificscript, rt).then(sessionsInCache => {
                 sessionsInCache.forEach(s => incorporate(s));
@@ -726,12 +726,12 @@ module TDev.RT {
                     return true;
                 }, e => false).then(includesSessionsOnRevisionServer => dialog(includesSessionsOnRevisionServer))
             }).done();
-           
+
 
             return p;
         }
 
-    
+
 
         function askSwitchAccessAsync(previoussession: Revisions.ClientSession, session: CloudSession, owner: string, r: ResumeCtx, secondchance: boolean) : Promise {
             // don't ask for private sessions
@@ -766,7 +766,7 @@ module TDev.RT {
                 Util.userError(lf("cannot connect to a just-me session of another user"));
             if (session.isNodeSession())
                 Util.userError(lf("cannot connect to a node session"));
-          
+
             var ls = rt.sessions.getCurrentSession();
             ls.user_yield();
             if (session._id === ls.servername) {
@@ -776,7 +776,7 @@ module TDev.RT {
             {
                 var p = Promise.as();
                 var ownerinfo;
-                p = p.then(() => RT.User.getJsonAsync(session.ownerid).then((user) => ownerinfo = user, (e) => ownerinfo = undefined));  
+                p = p.then(() => RT.User.getJsonAsync(session.ownerid).then((user) => ownerinfo = user, (e) => ownerinfo = undefined));
                 p = p.then(() => {
                     var ownername = ownerinfo ? (ownerinfo.name + " (/" + session.ownerid + ")") : ("user /" + session.ownerid);
                     return askSwitchAccessAsync(ls, session, ownername, r, false);
@@ -786,7 +786,7 @@ module TDev.RT {
                 }).done();
             }
         }
- 
+
 
         //? Asks the user to choose a session to switch to
         //@ uiAsync

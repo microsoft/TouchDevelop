@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A media server on the home network
     //@ stem("server") walltap cap(home) obsolete

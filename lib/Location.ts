@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A geo coordinate (latitude, longitude, ...)
     //@ stem("loc") immutable ctx(general,indexkey,cloudfield,json) serializable
@@ -21,8 +21,8 @@ module TDev.RT {
         {
             return Location_.mk(lat, lon, undefined, undefined, undefined, undefined, undefined);
         }
-     
-        static mk(lat : number, lon : number, alt : number, horacc : number, veracc : number, cou : number, spe : number) : Location_            
+
+        static mk(lat : number, lon : number, alt : number, horacc : number, veracc : number, cou : number, spe : number) : Location_
         {
             var l = new Location_();
             l._latitude = lat;
@@ -42,7 +42,7 @@ module TDev.RT {
             l._longitude = Number(s.slice(pos + 1));
             return l;
         }
-     
+
         //? Converts to a string lat,long
         public to_string() : string { return this._latitude + ',' + this._longitude; }
 
@@ -76,13 +76,13 @@ module TDev.RT {
             loc._speed = ctx.importNumber(json, "speed");
             return loc;
         }
-  
+
         public isSerializable() { return true; }
-        
-        public toJsonKey() 
-        { 
-            return [this._latitude, this._longitude, this._altitude, 
-            this._hor_accuracy, this._vert_accuracy, 
+
+        public toJsonKey()
+        {
+            return [this._latitude, this._longitude, this._altitude,
+            this._hor_accuracy, this._vert_accuracy,
             this._speed, this._course];
         }
 
@@ -104,8 +104,8 @@ module TDev.RT {
             diff = this._course - other._course;
             return diff;
         }
-        
-       
+
+
         //? Gets the latitude of the coordinate
         public latitude() : number { return this._latitude; }
 
@@ -165,11 +165,11 @@ module TDev.RT {
             var radius = 6367.0; // earth radius in kilometers
             return radius * 2 * Math.asin(
                 Math.min(
-                    1, 
+                    1,
                     Math.sqrt(
-                            Math.pow(Math.sin(((Math_.deg_to_rad(lat2 - lat1))) / 2.0), 2.0) 
-                            + Math.cos(Math_.deg_to_rad(lat1)) 
-                            * Math.cos(Math_.deg_to_rad(lat2)) 
+                            Math.pow(Math.sin(((Math_.deg_to_rad(lat2 - lat1))) / 2.0), 2.0)
+                            + Math.cos(Math_.deg_to_rad(lat1))
+                            * Math.cos(Math_.deg_to_rad(lat2))
                             * Math.pow(Math.sin(((Math_.deg_to_rad(lng2 - lng1))) / 2.0), 2.0)
                       )
                   )

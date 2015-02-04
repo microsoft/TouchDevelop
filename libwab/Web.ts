@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Wab {
     export function WebInit()
     {
@@ -63,7 +63,7 @@ module TDev.RT.Wab {
                 action: Action.OAUTH_AUTHENTICATION,
                 uri: url,
                 redirectUri: redirect_uri,
-				state: stateArg
+                state: stateArg
             })
                 .then((response: UriResponse) => {
                     if (response.status == Status.OK && response.uri &&  response.uri.indexOf(stateArg) > -1)

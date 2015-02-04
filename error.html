@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -19,8 +19,8 @@ p, ul {
   line-height: 1.6em;
 }
 .hidden {
-    display:none; 
-    visibility:hidden; 
+    display:none;
+    visibility:hidden;
     overflow:hidden;
 }
 .errorInfo {
@@ -91,7 +91,7 @@ p, ul {
 </div>
 <h2>About Browser Storage</h2>
 <p>
-    TouchDevelop stores your scripts and data in a database maintained by your browser. 
+    TouchDevelop stores your scripts and data in a database maintained by your browser.
     Browsers impose restrictions on whether a website is allowed to store data, and how much data it may use.
     Go to the settings of your browser and make sure that touchdevelop.com is allowed to store (more) data.
 </p>
@@ -134,12 +134,12 @@ If this doesn't work, this <a
 <div id="#storageversion" class="hidden">
 <div style='font-size:1.2em; margin: 3em 0;'>
     <span style='color:red; font-weight:bold;'>Database format too new.</span>
-    You ran a newer TouchDevelop version which upgraded the database in your browser; 
+    You ran a newer TouchDevelop version which upgraded the database in your browser;
     because of a breaking change, you cannot go back to an older TouchDevelop version.
     Try <a href="https://www.touchdevelop.com/app/beta">touchdevelop.com/app/beta</a>.
 </div>
 <h2>About Browser Storage</h2>
-<p>TouchDevelop stores your scripts and data in a database maintained by your browser. 
+<p>TouchDevelop stores your scripts and data in a database maintained by your browser.
 </p>
 </div>
 
@@ -180,8 +180,8 @@ If this doesn't work, this <a
     <span style='color:red; font-weight:bold;'>TouchDevelop encountered a problem with scripts stored in your browser.</span>
 </div>
 <div>
-    If this happens often you can try to 
-    <a href="https://www.touchdevelop.com/app/#hub:logout">log out from the TouchDevelop Web App</a> 
+    If this happens often you can try to
+    <a href="https://www.touchdevelop.com/app/#hub:logout">log out from the TouchDevelop Web App</a>
     which will re-download scripts in your account from the cloud.
     Otherwise, just go back to <a href="https://www.touchdevelop.com/app/">TouchDevelop Web App</a>.
 </div>
@@ -237,7 +237,7 @@ If this doesn't work, this <a
             h = "";
         if (h == "") h = "#";
         i = h.indexOf(',')
-        var errorInfo 
+        var errorInfo
         if (i != -1) {
             errorInfo = decodeURIComponent(h.substr(i + 1));
             h = h.substr(0, i);

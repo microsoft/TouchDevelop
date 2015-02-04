@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export interface AppLogTransport {
         log? : (level : number, category : string, msg: string, meta?: any) => void;
@@ -455,7 +455,7 @@ module TDev.RT {
             if (Browser.isCompiledApp)
                 App.restart("", r);
             else
-                r.rt.stopAsync().done(); 
+                r.rt.stopAsync().done();
         }
 
         //? Restarts the app and pops a restart dialog
@@ -495,7 +495,7 @@ module TDev.RT {
                         m.fullWhite();
                         m.show();
                     }
-                }); 
+                });
         }
 
         //? Aborts the execution if the condition is false.
@@ -575,7 +575,7 @@ module TDev.RT {
         }
 
         //? Runs a shell command. This action is only available when the script is running from a local web server.
-        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv") 
+        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv")
         //@ cap(shell) returns(JsonObject) async
         export function run_command(cmd: string, data: JsonObject, r: ResumeCtx) {
             var proxyAsync = r.rt.host.localProxyAsync;

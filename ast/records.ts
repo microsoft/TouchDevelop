@@ -335,7 +335,7 @@ module TDev.AST {
 
         public accept(v:NodeVisitor) { return v.visitRecordField(this); }
         public fieldKind:ParametricKind;
-        public isLastChild() { return false; } // no moving please 
+        public isLastChild() { return false; } // no moving please
 
         public nodeType() { return "recordField"; }
         public setName(v: string) {
@@ -374,7 +374,7 @@ module TDev.AST {
         {
             if (this.propertyDeflStrings === undefined) {
                 var m = /\{hints:([^{}]*)/.exec(this.getDescription())
-                if (m) 
+                if (m)
                     this.propertyDeflStrings = m[1].split(/,/)
                 else if (this.dataKind == api.core.Boolean)
                     // make true the default
@@ -406,7 +406,7 @@ module TDev.AST {
         }
 
         private propertyCache:IProperty;
-        
+
         public asProperty() : IProperty
         {
             if (!this.propertyCache) {
@@ -419,7 +419,7 @@ module TDev.AST {
                 }
                 else {
                     this.propertyCache =
-                        new SimpleProperty(this, "access the " + this.dataKind.toString() + " field", false, 
+                        new SimpleProperty(this, "access the " + this.dataKind.toString() + " field", false,
                                             this.def().entryKind, this.dataKind, true);
                 }
                 var s = this;
@@ -427,7 +427,7 @@ module TDev.AST {
             }
             return this.propertyCache;
         }
-      
+
 
         public writeDef(tw: TokenWriter)
         {
@@ -446,8 +446,8 @@ module TDev.AST {
             .comment(this.description);
         }
 
-     
-        
+
+
         public getCloudType(): string {
             if (this.isKey) {
                 if (this.dataKind instanceof RecordEntryKind) {
@@ -531,7 +531,7 @@ module TDev.AST {
         public getDescription() { return this.record ? this.record.getEntryKindDescription() : ""; }
         public getHelp() { return this.record.getEntryKindDescription(); }
         public getStemName() { return this.record.getCoreName() }
- 
+
 
         private props:IProperty[];
 
@@ -567,11 +567,11 @@ module TDev.AST {
                 var eq    = new SimpleProperty("equals", "tests if two references refer to the same object", false, this, api.core.Boolean, false, this)
                 var post = new SimpleProperty("post to wall", "displays the object on the wall", false, this, api.core.Nothing)
                 var tojson = new SimpleProperty("to json", "export a JSON representation of the contents", false, this, api.core.JsonObject)
-                
+
                 switch (this.record.recordType) {
-                case RecordType.Object: 
+                case RecordType.Object:
                     this.props = [
-                        post, clear, eq, 
+                        post, clear, eq,
                         new SimpleProperty("is invalid", "checks if reference has not been set", false, this, api.core.Boolean),
                         tojson,
                         new SimpleProperty("from json", "import field values from a JSON object", false, this, api.core.Nothing, false, api.core.JsonObject)
@@ -612,7 +612,7 @@ module TDev.AST {
 
             }
 
- 
+
             return this.props;
         }
 
@@ -628,7 +628,7 @@ module TDev.AST {
         }
 
         public listProperties() : IProperty[] { return this.getCommonProps()
-                                                         .concat(this.record.getFields().map((p) => p.asProperty())) 
+                                                         .concat(this.record.getFields().map((p) => p.asProperty()))
                                                          .concat(this.listExtensions()) }
 
         public getProperty(name:string) : IProperty
@@ -723,7 +723,7 @@ module TDev.AST {
             switch (this.record.recordType) {
             case RecordType.Object:
                 return this.from_json ? "create a fresh object and initialize from given JSON object" : "create a fresh object";
-            case RecordType.Table: 
+            case RecordType.Table:
                 if (this.record.keys.count() === 0) return "create a fresh row in the table";
                 else return "create a fresh row in the table, with the given links";
             case RecordType.Decorator:
@@ -781,7 +781,7 @@ module TDev.AST {
         public parentLibrary() : AST.LibraryRef { return null }
 
         public locallypersisted() { return this.persistent && !(this.cloudEnabled || this.cloudPartiallyEnabled); }
- 
+
         public hasErrors() { return !!this.getError() || this.getFields().some((r) => !!r.getError()); }
 
         public children(): AstNode[] {
@@ -843,7 +843,7 @@ module TDev.AST {
                 return this.description;
 
             var pref = "A " + this.getPersistenceDescription()
-        
+
             switch (this.recordType) {
                 case RecordType.Object: return "A loose collection of " + this.getCoreName() + " objects.";
                 case RecordType.Table: return pref + " table containing " + this.getCoreName() + " records.";
@@ -902,7 +902,7 @@ module TDev.AST {
                         });
                         return Revisions.Parser.MakeDomain(this.getStableName(), Revisions.Parser.DOMAIN_DYNAMIC, links);
                     }
-                case RecordType.Index: 
+                case RecordType.Index:
                      {
                         var keys = this.keys.stmts.map(x =>
                         {
@@ -951,7 +951,7 @@ module TDev.AST {
 
             var origtype = oldtype || this.recordType;
             var newtype = this.recordType;
-            
+
             // delete keys if switching away from decorator
             if (origtype === RecordType.Decorator && newtype != RecordType.Decorator) {
                  this.keys.setChildren([]);
@@ -960,7 +960,7 @@ module TDev.AST {
             // delete keys if switching to a non-index
             else if (origtype != newtype && newtype != RecordType.Index) {
                  this.keys.setChildren([]);
-            } 
+            }
 
             // force decorator to be valid at all times
             if (newtype === RecordType.Decorator)
@@ -1070,7 +1070,7 @@ module TDev.AST {
         public getCategory() { return PropertyCategory.Record; }
         public getNamespace() { return recordSymbol + "\u200A"; }
         public toString() { return this.getNamespace() + this.getName(); }
-        
+
         public writeTo(tw:TokenWriter)
         {
             this.writeId(tw);
@@ -1256,6 +1256,6 @@ module TDev.AST {
         }
 
     }
-    
+
 
 }

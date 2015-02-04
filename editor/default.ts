@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev
 {
     export var sharedText:string = null;
@@ -52,7 +52,7 @@ module TDev
 
     function onlyOneTab()
     {
-        // implicit web apps don't use the database to 
+        // implicit web apps don't use the database to
         // avoid multiple tabs issues
         if (!TDev.Storage.temporary) {
             // to avoid races with database storage,
@@ -75,7 +75,7 @@ module TDev
 
         window.addEventListener("resize", Util.catchErrors("windowResize", function () {
             SizeMgr.applySizes();
-            
+
         }));
 
         window.addEventListener("hashchange", Util.catchErrors("hashchange", function (ev) {
@@ -98,7 +98,7 @@ module TDev
             Ticker.saveCurrent()
             RT.Perf.saveCurrent();
         }
-            
+
         (<any>window).tdevSaveState = saveState;
         window.onunload = saveState;
 
@@ -204,7 +204,7 @@ module TDev
         if (/dbg=[1t]/.test(url) || window.localStorage["dbg"]) dbg = true;
         if (/nodbg/.test(url)) dbg = false;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
-       
+
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
         if (/temporaryStorage/.test(url)) {
@@ -217,7 +217,7 @@ module TDev
             Util.setTranslationLangauge(m[1])
         } else if (!Util.loadUserLanguageSetting()) {
             var lang = window.navigator.language || window.navigator.userLanguage
-            if (lang) 
+            if (lang)
                 Util.setTranslationLangauge(lang)
         }
 
@@ -259,7 +259,7 @@ module TDev
         function logAppCacheEvent(ev:Event) {
             Ticker.dbg("app cache event: {0}, status={1}", ev.type, appCache.status);
         }
-        [ 'cached', 'checking', 'downloading', 'error', 'noupdate', 'obsolete', 'progress', 'updateready' 
+        [ 'cached', 'checking', 'downloading', 'error', 'noupdate', 'obsolete', 'progress', 'updateready'
           ].forEach((ev) => appCache.addEventListener(ev, logAppCacheEvent, false));
 
         World.getScriptMeta = (script) => {
@@ -330,7 +330,7 @@ module TDev
 
         if (/livelang/.test(url)) {
             return Util.httpGetJsonAsync("https://touchdeveloptranslator.azurewebsites.net/api/Svc/export"
-                    + "?user=" + encodeURIComponent(Cloud.getUserId()) 
+                    + "?user=" + encodeURIComponent(Cloud.getUserId())
                     + "&lang=" + encodeURIComponent(Util.getTranslationLanguage()))
                 .then(resp => {
                     if (resp && resp.translations) {
@@ -343,7 +343,7 @@ module TDev
                     HTML.showErrorNotification("cannot load langauge " + Util.getTranslationLanguage())
                     return initEditorAsync()
                 })
-                
+
         } else
             return initEditorAsync();
     }
@@ -355,11 +355,11 @@ module TDev
 
     // return at most 5 results
     function searchResultSuggestions(query: string) : string[]
-    { 
-        return Browser.TheHost.quickSearch(query) 
+    {
+        return Browser.TheHost.quickSearch(query)
     }
 
-    function searchPaneVisible(visible: boolean) { 
+    function searchPaneVisible(visible: boolean) {
         // TODO: handle visibility changes
     }
 
@@ -462,7 +462,7 @@ module TDev
             }
         }
         World.waitForUpdate = waitForUpdate;
-        
+
         statusMsg("global init 1");
 
         Ticker.fillEditorInfoBugReport = (b:BugReport) => {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A post on a message board
     //@ stem("msg") ctx(general,gckey,walltap) serializable

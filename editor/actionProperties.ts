@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -106,10 +106,10 @@ module TDev
             */
         }
 
-        static copyCutRefs(kind:string, decl:AST.Decl) 
+        static copyCutRefs(kind:string, decl:AST.Decl)
         {
             var cp =  !TheEditor.isDebuggerMode() && TheEditor.widgetEnabled("copyPaste");
-            return div(null, 
+            return div(null,
               cp ? ActionProperties.functionBox(lf("cut"), "Ctrl-X, Shift-Del", Ticks.sideCut, () => TheEditor.cutDecl(decl)) : undefined,
               cp ? ActionProperties.functionBox(lf("copy"), "Ctrl-C, Ctrl-Ins", Ticks.sideCopy, () => TheEditor.copyDecl(decl)) : undefined,
               ActionProperties.functionBox(lf("delete"), "Del", Ticks.sideDelete, () => TheEditor.cutDecl(decl, true)),
@@ -135,12 +135,12 @@ module TDev
             var act = this.theAction.action;
             var offloadDisabled = ev || !dbg || !Util.cloudRun || !act.canBeOffloaded();
             var showSettings = TheEditor.widgetEnabled("actionSettings");
-            var propDivs = 
+            var propDivs =
                  [div("prop-spacer"),
-                  div(null, span("varLabel", "action")), 
+                  div(null, span("varLabel", "action")),
                   this.actionName,
                   !showSettings || ev ? null : this.privateAction,
-                  !showSettings || ev ? null : div("formHint", 
+                  !showSettings || ev ? null : div("formHint",
                     Script.isLibrary ? lf("Private actions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
                   ev ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),

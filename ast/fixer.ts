@@ -68,7 +68,7 @@ module TDev.AST.Fixer
         return r
     }
 
-    function staticPropRef(s:string, p:string) 
+    function staticPropRef(s:string, p:string)
     {
         return [<AST.Token> AST.mkThing(s), AST.mkPropRef(p)]
     }
@@ -94,7 +94,7 @@ module TDev.AST.Fixer
         return null;
     }
 
-    export function tokenize(toks:AST.Token[]) : AST.Token[] 
+    export function tokenize(toks:AST.Token[]) : AST.Token[]
     {
         return toks.collect((t:AST.Token) => {
             if (t instanceof AST.Literal) return flatten(<Literal>t)

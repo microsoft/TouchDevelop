@@ -1,11 +1,11 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A contact
     //@ walltap cap(contacts)
     export class Contact
         extends RTValue
     {
-		private _id : string = undefined;
+        private _id : string = undefined;
         private _first_name : string = undefined;
         private _last_name : string = undefined;
         private _nick_name : string = undefined;
@@ -29,7 +29,7 @@ module TDev.RT {
         private _work_phone : string = undefined;
         private _mobile_phone : string = undefined;
         private _web_site : string = undefined;
-        
+
         static mkFake(firstName : string, middleName : string, lastName : string, email : string, phoneNumber : string, pictureUrl : string): Contact {
             var c = new Contact();
             c._first_name = firstName;
@@ -48,7 +48,7 @@ module TDev.RT {
 
         public clone(): Contact {
             var c = new Contact();
-			c._id = this._id;
+            c._id = this._id;
             c._first_name = this._first_name;
             c._last_name = this._last_name;
             c._nick_name = this._nick_name;
@@ -123,29 +123,29 @@ module TDev.RT {
             return r;
         }
 
-		//? Gets the user id if any
+        //? Gets the user id if any
         //@ readsMutable
-		public id() : string {
-			return this._id;
-		}
+        public id() : string {
+            return this._id;
+        }
 
-		//? Sets the user id
+        //? Sets the user id
         //@ writesMutable
-		public set_id(id : string) {
-			this._id = id;
-		}
+        public set_id(id : string) {
+            this._id = id;
+        }
 
         //? Gets the display name (not used when saving contact)
         //@ readsMutable
         public name() : string
         {
-			if (this._nick_name) return this._nick_name;
-			else
-	            return [this._first_name, this._middle_name, this._last_name]
-					.filter(s => !!s)
-					.join(" ");
+            if (this._nick_name) return this._nick_name;
+            else
+                return [this._first_name, this._middle_name, this._last_name]
+                    .filter(s => !!s)
+                    .join(" ");
         }
-        
+
         //? Gets the first name if any.
         //@ readsMutable
         public first_name() : string { return this._first_name || ''; }
@@ -225,7 +225,7 @@ module TDev.RT {
         //? Sets the work address
         //@ writesMutable
         public set_work_address(work_address:string) : void { this._work_address = work_address; }
-        
+
         //? Gets the work address if any
         //@ readsMutable
         public home_address() : string { return this._home_address; }
@@ -252,8 +252,8 @@ module TDev.RT {
 
         //? Gets the picture of the contact if any.
         //@ returns(Picture) readsMutable picAsync
-        public picture(r : ResumeCtx) // : Picture 
-        { 
+        public picture(r : ResumeCtx) // : Picture
+        {
             if (!this._picture && this._pictureUrl) {
                 Picture.fromUrl(this._pictureUrl, true)
                     .then((pic) => {
@@ -265,15 +265,15 @@ module TDev.RT {
             r.resumeVal(this._picture);
         }
 
-		//? Sets the picture
-		//@ writesMutable [picture].readsMutable
-        public set_picture(picture: Picture): void { 
+        //? Sets the picture
+        //@ writesMutable [picture].readsMutable
+        public set_picture(picture: Picture): void {
             this._pictureUrl = undefined;
-            this._picture = picture; 
+            this._picture = picture;
         }
 
-		//? Sets the picture url
-		//@ writesMutable
+        //? Sets the picture url
+        //@ writesMutable
         public setPicture_url(url: string) {
             this._pictureUrl = url;
             this._picture = null;
@@ -307,8 +307,8 @@ module TDev.RT {
         //? Gets the work or personal email if any
         //@ readsMutable
         public email() : Link { return this._email ? Link.mk(this._email, LinkKind.email) : undefined; }
-		//? Sets the work or personal email
-		//@ writesMutable
+        //? Sets the work or personal email
+        //@ writesMutable
         public set_email(email:string) : void { this._email = email; }
 
         //? Gets the work email if any
@@ -330,8 +330,8 @@ module TDev.RT {
         //? Gets the cell or work or home phone number if any
         //@ readsMutable
         public phone_number() : Link { return this._phone_number ? Link.mk(this._phone_number, LinkKind.phoneNumber) : undefined; }
-		//? Sets the cell or work or home phone number if any
-		//@ writesMutable
+        //? Sets the cell or work or home phone number if any
+        //@ writesMutable
         public set_phone_number(phone_number:string) : void { this._phone_number = phone_number; }
 
         //? Gets the home phone number if any
@@ -343,7 +343,7 @@ module TDev.RT {
         public set_home_phone(home_phone:string) : void { this._home_phone = home_phone; }
 
         //? Gets the work phone number if any
-		//@ readsMutable
+        //@ readsMutable
         public work_phone() : Link { return this._work_phone ? Link.mk(this._work_phone, LinkKind.phoneNumber) : undefined; }
 
         //? Sets the work phone
@@ -351,15 +351,15 @@ module TDev.RT {
         public set_work_phone(work_phone:string) : void { this._work_phone = work_phone; }
 
         //? Gets the cell phone number if any
-		//@ readsMutable
+        //@ readsMutable
         public mobile_phone() : Link { return this._mobile_phone ? Link.mk(this._mobile_phone, LinkKind.phoneNumber) : undefined; }
 
         //? Sets the mobile phone
         //@ writesMutable
         public set_mobile_phone(mobile_phone:string) : void { this._mobile_phone = mobile_phone; }
-        
+
         //? Gets the web site if any
-		//@ readsMutable
+        //@ readsMutable
         public web_site() : Link { return this._web_site ? Link.mk(this._web_site, LinkKind.hyperlink) : undefined; }
         //? Sets the web site
         //@ writesMutable

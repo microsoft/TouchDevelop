@@ -2,7 +2,7 @@
 module TDev.RT {
     export class JsonParser
     {
-        /// JSON parser trying to be more lenient than real JSON, mimicking what .NET does. This means we accept 
+        /// JSON parser trying to be more lenient than real JSON, mimicking what .NET does. This means we accept
         /// - single quoted or double quoted keys
         /// - unquoted keys, as long as they are letter, digit, _, -, ., +, -
         /// NOTE this does not match .NET exactly, as .NET uses Unicode characterization of IsNumberOrDigit.
@@ -170,7 +170,7 @@ module TDev.RT {
                         cnext("l");
                         return null;
                 }
-                onerror("expected true, false, or null at \n" 
+                onerror("expected true, false, or null at \n"
                        +"      " + s.slice(Math.max(0, index - 20), index) + "\n"
                        +" ---->" + s.slice(index + 1, Math.min(s.length, index + 20)));
             }

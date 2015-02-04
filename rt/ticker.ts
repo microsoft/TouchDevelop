@@ -215,7 +215,7 @@ module TDev {
         debuggerHelp,
         debuggerValueClicked,
         debuggerKeyboardEvent,
-        
+
         editorTutorialClose,
         editorTutorialNext,
         editorTutorialPrevious,
@@ -275,7 +275,7 @@ module TDev {
         sideMoveToLibrary,
         sideTutorialCancel,
         sideTutorialRedisplay,
-        
+
         appsCreateAzureWebsite,
         appsDeployWebsite,
 
@@ -315,7 +315,7 @@ module TDev {
         coreRerun,
         corePublishHidden,
         corePublishPublic,
-        
+
         runtimePlayAgain,
         runtimeBack,
 
@@ -562,7 +562,7 @@ module TDev {
         {
             var now = new Date()
             dateStr = Util.fmt("{0}.{1}.{2}", now.getFullYear(), now.getMonth() + 1, now.getDate())
-            if (delay > maxDelay) 
+            if (delay > maxDelay)
                 delay = maxDelay;
             thresholdTime = now.getTime() + delay*1000;
         }
@@ -618,7 +618,7 @@ module TDev {
             prevEvents.push({
                 sessionEvents: sessionEvents,
                 dateStr: dateStr,
-                chunkId: chunkId++ 
+                chunkId: chunkId++
             })
 
             prevEvents = prevEvents.filter((e) => !!e.dateStr)
@@ -672,7 +672,7 @@ module TDev {
                 }
             }, e => { }) // ignore error; will try again later
         }
-        
+
 
         export function tickName(t:Ticks):string
         {

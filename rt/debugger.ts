@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
@@ -17,7 +17,7 @@ module TDev {
     export class PackedStackTrace implements IPackedStackTrace {
         public pack: ICallNode[] = []; // all the callnodes we have
         public path: number[] = []; // trace is an indexing array into the pack
-        
+
         static buildFrom(st: IStackFrame[]): PackedStackTrace {
             var ret = new PackedStackTrace()
             var pack: string[] = []
@@ -65,7 +65,7 @@ module TDev {
         public toJSON() {
             return Object.keys(this.data);
         }
-        
+
         public isEmpty() {
             return this.empty;
         }
@@ -74,7 +74,7 @@ module TDev {
             this.empty = true;
             this.data = {}
         }
-        
+
         static fromJSON(json: any): RunBitMap {
             if (json == null) return null;
 

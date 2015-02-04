@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 // TODO events and async
 
@@ -51,7 +51,7 @@ module TDev.AST
 
         visitAction(node:Action)
         {
-            var fixupLocal = (a:ActionParameter) => { 
+            var fixupLocal = (a:ActionParameter) => {
                 var l = a.local;
                 l._kind = this.fixupKind(node, l.getKind());
             }
@@ -356,7 +356,7 @@ module TDev.AST
                     var p = <PropertyRef>t;
                     if (!p.prop)
                         p.prop = p.getOrMakeProp();
-                    if (AST.mkFakeCall(p).referencedRecordField() && 
+                    if (AST.mkFakeCall(p).referencedRecordField() &&
                         prevTok && prevTok.getThing() instanceof LocalDef && prevTok.getThing().getName() == modelSymbol)
                         p.skipArrow = true;
                     else if (p.skipArrow)
@@ -435,7 +435,7 @@ module TDev.AST
                                 lf("we have a library '{0}' here; {1}", call.prop().getName(), msg)
                         else if ((par.isBuiltin || call.args.length == 1) && !exception)
                             expr.hint =
-                                lf("'{0}' returns a '{1}'; {2}", 
+                                lf("'{0}' returns a '{1}'; {2}",
                                          call.prop().getName(), call.getKind(), msg)
                         else if (!exception) {
                             /*
@@ -459,19 +459,19 @@ module TDev.AST
                         }
                     }
                     else if (act && act.getOutParameters().length > 0)
-                        expr.hint = 
-                            lf("'{0}' returns {1} values; you can use 'store in var' button to save them to locals", 
+                        expr.hint =
+                            lf("'{0}' returns {1} values; you can use 'store in var' button to save them to locals",
                                      call.prop().getName(), act.getOutParameters().length)
                 }
             } else if (tp == null && whoExpects == "void") {
                 var k = expr.getKind();
                 if (k != this.core.Nothing && k != this.core.Unknown) {
                     if (k.singleton)
-                        expr.hint = 
+                        expr.hint =
                             lf("now you can select a property of {0}; it doesn't do anything by itself", k)
                     else
-                        expr.hint = 
-                            lf("we have {0:a} here; it doesn't do anything by itself{1}", k, 
+                        expr.hint =
+                            lf("we have {0:a} here; it doesn't do anything by itself{1}", k,
                                 k == api.core.String || k == api.core.Number ? "; use 'post to wall' to display it" : "")
                 }
             }
@@ -488,7 +488,7 @@ module TDev.AST
                 this.nothingLocals.push(<LocalDef>expr.tokens[0].getThing());
                 expr.tokens.splice(0, 2);
             }
-            if (this.nothingLocals.length > 0 && expr.tokens.length == 1 && 
+            if (this.nothingLocals.length > 0 && expr.tokens.length == 1 &&
                 this.nothingLocals.indexOf(<LocalDef>expr.tokens[0].getThing()) >= 0) {
                 expr.tokens = []
                 this.numFixes++;
@@ -506,7 +506,7 @@ module TDev.AST
                             expr.tokens.pop()
                     }
                 }
-                
+
                 expr.tokens = expr.tokens.filter(t => t.tokenFix != "delete")
                 this.numFixes++;
             }
@@ -584,10 +584,10 @@ module TDev.AST
                 this.actionSection = ActionSection.Init;
             else if (node.rawThenBody == this.pageDisplay)
                 this.actionSection = ActionSection.Display;
-            
+
             if (isComment)
                 this.errorLevel++
-            
+
             this.typeCheck(node.rawThenBody);
             node.rawThenBody.newlyWrittenLocals = this.writtenLocals.slice(prevWritten.length);
 
@@ -736,7 +736,7 @@ module TDev.AST
         }
 
         public visitComment(node:Comment)
-        { 
+        {
             this.updateStmtUsage(node);
         }
 
@@ -749,14 +749,14 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
-            
+
             this.scope(() => {
                 // TODO in - read-only?
                 var prevErr = this.errorCount;
 
                 this.typeResolver.visitAction(node);
 
-                var fixupLocalInp = (a:ActionParameter) => { 
+                var fixupLocalInp = (a:ActionParameter) => {
                     this.declareLocal(a.local);
                     if (node.isPage())
                         this.readOnlyLocals.push(a.local)
@@ -871,7 +871,7 @@ module TDev.AST
                 }
                 return lf("TD166: cannot store {0} in a {1}",
                             whats, wheres);
-            }   
+            }
         }
 
         visitGlobalDef(node: GlobalDef) {
@@ -922,7 +922,7 @@ module TDev.AST
         {
             node.clearError();
             this.typeResolver.visitRecordField(node);
-            
+
             var pers = node.def().getRecordPersistence()
             var cl = pers != RecordPersistence.Temporary;
             var ctx = cl ? (node.isKey ? KindContext.IndexKey : KindContext.CloudField) :
@@ -981,7 +981,7 @@ module TDev.AST
                 }
             }
 
-            
+
         }
 
         public visitRecordDef(node:RecordDef)
@@ -1003,7 +1003,7 @@ module TDev.AST
             node.things.forEach((n:Decl) => {
                 var wt = n._wasTypechecked;
                 n._wasTypechecked = true;
-                this.dispatch(n); 
+                this.dispatch(n);
                 if (!wt) n.notifyChange();
             });
 
@@ -1037,7 +1037,7 @@ module TDev.AST
             var unassigned = vars.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
                 this.setNodeError(node,
-                    lf("TD127: output parameter{0:s} {1} need to be assigned to before the action finishes", 
+                    lf("TD127: output parameter{0:s} {1} need to be assigned to before the action finishes",
                              unassigned.length, unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
             }
         }
@@ -1095,7 +1095,7 @@ module TDev.AST
 
             this.topInline = inl
             this.expect(inl.expr, null, "void");
-           
+
             var p = this.localScopes.length - 1;
             this.localScopes[p] = this.localScopes[p].filter((l) => names.indexOf(l) < 0);
 
@@ -1110,7 +1110,7 @@ module TDev.AST
                     var op = <OptionalParameter>iab
                     this.expect(op.expr, op.recordField ? op.recordField.dataKind : null, "optional")
                     return
-                } 
+                }
 
 
                 var ia = <InlineAction>iab
@@ -1157,7 +1157,7 @@ module TDev.AST
 
             this.localScopes[p] = prevScope
         }
-        
+
 
         /////////////////////////////////////////////////
         // Expression type-checking
@@ -1301,7 +1301,7 @@ module TDev.AST
             t._kind = this.core.Unknown; // will get overridden
             if (args.length != 2) {
                 // cannot trigger this one?
-                this.markError(t, lf("TD104: syntax error in async")); 
+                this.markError(t, lf("TD104: syntax error in async"));
                 return;
             }
 
@@ -1384,7 +1384,7 @@ module TDev.AST
             t._kind = this.core.Nothing;
             if (args.length != 2) {
                 // cannot trigger this one?
-                this.markError(t, lf("TD104: syntax error in assignment")); 
+                this.markError(t, lf("TD104: syntax error in assignment"));
                 return;
             }
             Util.assert(args.length == 2);
@@ -1433,7 +1433,7 @@ module TDev.AST
                         loc.isRegular = true
                         this.declareLocal(loc)
                         if (!src.getKind().hasContext(KindContext.Parameter)) {
-                            if (src.getKind() == api.core.Nothing && 
+                            if (src.getKind() == api.core.Nothing &&
                                 this.topApp.featureMissing(LanguageFeature.ContextCheck))
                                 info.fixContextError = true;
                             this.markError(tr, lf("TD155: '{0}' cannot be assigned to a local variable", src.getKind()))
@@ -1545,7 +1545,7 @@ module TDev.AST
                         hasBrError = true
                     } else brStack.pop()
                 }
-                    
+
             })
 
             if (!hasBrError && brStack.length > 0)
@@ -1816,7 +1816,7 @@ module TDev.AST
                 if (nn)
                     t.propRef.data = nn
                 prop = null;
-            }   
+            }
 
             if (!prop || prop instanceof UnresolvedProperty) {
                 prop = k0.getProperty(t.propRef.data);
@@ -1928,9 +1928,9 @@ module TDev.AST
             } else if (prop.getFlags() & PropertyFlags.IsObsolete) {
                 this.hintsToFlush.push(lf("'{0}' is obsolete and should not be used", prop.getName()));
             }
-    
+
             t._kind = prop.getResult().getKind();
-    
+
             var inP = prop.getParameters();
 
             if (this.countToUpdate > 0)
@@ -1973,7 +1973,7 @@ module TDev.AST
                 args.push(t)
 
                 if (!topInline) return
-                    
+
                 var used:StringMap<boolean> = {}
                 topInline.optionalParameters().forEach(opt => {
                     var fld = lk.getProperty(opt.getName())
@@ -2001,7 +2001,7 @@ module TDev.AST
                     this.markError(t, lf("TD188: '{0}' already has the optional parameters object passed explicitly", prop))
                 else
                     this.markError(t, lf("TD184: '{0}' doesn't take optional parameters", prop))
-    
+
             if (inP.length < args.length)
                 this.markError(t, lf("TD115: excessive parameter(s) supplied to {0}", prop));
             else if (inP.length > args.length)
@@ -2010,12 +2010,12 @@ module TDev.AST
             var concatOk = (e:Expr) => {
                 var k = e.getKind()
                 if (k == api.core.Unknown) return;
-                if (k == api.core.Nothing || 
-                    k.singleton || 
+                if (k == api.core.Nothing ||
+                    k.singleton ||
                     k instanceof AST.LibraryRefKind)
                     this.markError(e, lf("TD117: cannot use this expression as argument to ||; are you missing parenthesis?"));
             }
-            
+
             // args[0] is already typechecked; typechecking it again is exponential
 
             if (prop == this.core.StringConcatProp) {
@@ -2086,7 +2086,7 @@ module TDev.AST
                 }
                 t.savedFix = this.cloneCall(t, args)
                 this.saveFixes++
-            } 
+            }
         }
     }
 

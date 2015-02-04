@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Describes the motion of the device
     //@ ctx(general,walltap) cap(motion)
@@ -16,7 +16,7 @@ module TDev.RT {
         constructor() {
             super()
         }
-        
+
 
         //? Gets the linear acceleration of the device, in gravitational units.
         //@ tandre
@@ -63,7 +63,7 @@ module TDev.RT {
         //? Displays the motion reading to the wall.
         public post_to_wall(s : IStackFrame): void {
             var rt = s.rt;
-            if (this.acceleration()) 
+            if (this.acceleration())
                 rt.postBoxedText('acc: ' + this.acceleration.toString(), s.pc);
             if (this.rotation_speed())
                 rt.postBoxedText('rot: ' + this.rotation_speed.toString(), s.pc);

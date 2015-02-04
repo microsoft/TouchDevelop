@@ -1,4 +1,4 @@
-# For security reasons, logging, dev errors, and debugging 
+# For security reasons, logging, dev errors, and debugging
 # should be disabled in production deployments:
 
 loggingEnabled: false
@@ -29,5 +29,5 @@ node_env: production
 # logFileFlushInterval: 5000
 # flushResponse: false
 # enableXFF: false
-# promoteServerVars:  
+# promoteServerVars:
 nodeProcessCommandLine: "D:\Program Files (x86)\nodejs\0.10.29\node.exe"

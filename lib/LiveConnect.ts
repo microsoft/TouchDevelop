@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? OneDrive, OneNote operations
     export module CloudStorage {
@@ -137,30 +137,30 @@ module TDev.RT {
     }
 
     export module OneDrive {
-		function mkRequestAsync(scope : string, path : string) : Promise {
+        function mkRequestAsync(scope : string, path : string) : Promise {
             return LiveConnect.authenticateAsync(scope)
                 .then((accessToken: string) => {
                     if (!accessToken) return undefined;
-					var request = WebRequest.mk("https://apis.live.net/v5.0/" + path, undefined);
-					request.set_header("Authorization", "Bearer " + accessToken);
-					return request;
-				});
-		}
+                    var request = WebRequest.mk("https://apis.live.net/v5.0/" + path, undefined);
+                    request.set_header("Authorization", "Bearer " + accessToken);
+                    return request;
+                });
+        }
 
         /*
-		// returns available bytes
-		export function quotaAsync() : Promise { // number			
+        // returns available bytes
+        export function quotaAsync() : Promise { // number            
             return mkRequestAsync("wl.skydrive", "/me/skydrive/quota")
                 .then((request: WebRequest) => {
                     if (!request) return Promise.as(-1);
-					return request.sendAsync()
-						.then((response : WebResponse) => {
-							var js = LiveConnect.readContent(response);
-							if (js) {
-								return js.number('available');
-							}
-							return -1;
-						});
+                    return request.sendAsync()
+                        .then((response : WebResponse) => {
+                            var js = LiveConnect.readContent(response);
+                            if (js) {
+                                return js.number('available');
+                            }
+                            return -1;
+                        });
                 });
         }
         */
@@ -169,7 +169,7 @@ module TDev.RT {
             return LiveConnect.authenticateAsync("wl.skydrive wl.skydrive_update wl.contacts_skydrive")
                 .then((accessToken: string) => {
                     if (!accessToken) return undefined;
-                    return "https://apis.live.net/v5.0/" + id + "/picture?type=" + media + "&access_token=" + accessToken; 
+                    return "https://apis.live.net/v5.0/" + id + "/picture?type=" + media + "&access_token=" + accessToken;
                 });
         }
 
@@ -185,8 +185,8 @@ module TDev.RT {
                 pic.getUrlAsync().done(url => imgDiv.setChildren([HTML.mkImg(url, 'wall-picture-preview')]));
                 m.add(div('wall-dialog-header', 'upload to OneDrive'));
                 m.add(div('wall-dialog-body', 'Would you like to upload this picture to "', folderName, '" your OneDrive?'));
-				if (shared)
-	                m.add(div('wall-dialog-body', '!!! This picture will be shared with everyone.'));
+                if (shared)
+                    m.add(div('wall-dialog-body', '!!! This picture will be shared with everyone.'));
                 m.add(div('wall-dialog-body', imgDiv));
                 m.add(div('wall-dialog-buttons', [
                     HTML.mkButton('cancel', () => {

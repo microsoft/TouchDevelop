@@ -353,13 +353,13 @@ module TDev {
                         canWriteLocalStorage = true;
                         window.localStorage.removeItem("test");
                     }
-                } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari    
+                } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari
 
             audioWav = isGecko;
 
             if (isWP8app) {
                 audioDataUrls = true; // through wab
-				screenshots = true; // through wab
+                screenshots = true; // through wab
                 audioWav = true;
             }
 
@@ -476,7 +476,7 @@ module TDev {
                 return genericMessage("<p>TouchDevelop is not supported in the current browser.</p>", "<a href='https://www.touchdevelop.com/app/.browsers#supported'>a supported browser</a>");
             }
 
-            if (!canWriteLocalStorage) { 
+            if (!canWriteLocalStorage) {
                 if (browser == BrowserSoftware.safari)
                     return message("<p>You are running Safari in Private Mode or Private Browsing. TouchDevelop does not support this mode, as TouchDevelop needs to maintain a database of installed scripts, but Private Mode or Private Browsing does not allow the use of databases.</p>",
                         "<p><b>Please disable Private Mode or Private Browsing, and then try again.</b></p>" +
@@ -493,7 +493,7 @@ module TDev {
 
             // note that on WP8, if Internet Explorer is configured to disallow "storing files", then IndexedDB is not available --- however, this does not actually matter for the Windows Phone app, as it uses its own database backend
             // in some configrations, we will use an in-memory database instead
-            if (!canWebSql && !canIndexedDB && !isWP8app && !canMemoryTable) { 
+            if (!canWebSql && !canIndexedDB && !isWP8app && !canMemoryTable) {
                 if (browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11)
                     return genericMessage("<p>You are running Internet Explorer in the InPrivate mode. TouchDevelop does not support this mode, as TouchDevelop needs to maintain a database of installed scripts, but the InPrivate mode does not allow the use of databases.</p>",
                         "a regular Internet Explorer window");
@@ -516,7 +516,7 @@ module TDev {
             }
         }
 
-        function browsersHtml() 
+        function browsersHtml()
         {
             var url = (<any>window).browsersUrl;
             if (url) window.location.href = (<any>window).browsersUrl;
@@ -550,7 +550,7 @@ module TDev {
                 if (window.localStorage["browserReported"]) return;
                 try {
                     window.localStorage["browserReported"] = "1";
-                } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari    
+                } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari
             }
 
             var now = new Date();
@@ -633,7 +633,7 @@ module TDev {
                 statusMsg("browser detector processing");
                 detect();
                 var um = unsupportedMessage(what, path);
-                
+
                 if (!um || /ignoreAgent/.test(document.URL)) {
                     statusMsg("browser detector success: " + browserShortName);
                     (<any>window).browserSupported = true;

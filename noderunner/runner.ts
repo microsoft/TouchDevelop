@@ -61,7 +61,7 @@ export class NodeRuntime
 
         return undefined;
     }
-    
+
     public postBoxedTextWithTap(s:string, rtV: any) : TDev.WallBox
     {
         return this.postBoxedText(s);
@@ -181,7 +181,7 @@ function runScriptAsync(text:string, action:string = null, state = undefined)
     var host = new RunnerHost();
     // TODO: unique GUID per web app?
     host.currentGuid = "404ccebb-4bbd-4692-9d6d-094519aaf915";
-    
+
     return host.runAsync(action, state);
 }
 
@@ -206,11 +206,11 @@ class ApiRequest
         else
             res = JSON.stringify(resJson);
         if (verbose || slave) {
-            TDev.Util.log(TDev.Util.fmt("{0} [{1}] /{2} OK, {3} bytes, {4} + {5} s", 
-                    this.request.url, 
+            TDev.Util.log(TDev.Util.fmt("{0} [{1}] /{2} OK, {3} bytes, {4} + {5} s",
+                    this.request.url,
                     this.addInfo,
-                    this.data && this.data.id || "", 
-                    res.length, 
+                    this.data && this.data.id || "",
+                    res.length,
                         Math.round(this.startCompute - this.startTime)/1000,
                         Math.round(Date.now() - this.startCompute)/1000
             ))
@@ -317,7 +317,7 @@ class ApiRequest
 
             var data = ""
             res.on("data", function(d) { data += d })
-            res.on("end", function(err) { 
+            res.on("end", function(err) {
                 var j = <any>data
                 try {
                     j = JSON.parse(data)
@@ -352,7 +352,7 @@ class ApiRequest
 
 function statsResp(ar:ApiRequest) {
     ar.spaces = 2;
-    ar.ok(<TDev.StatsResponse> { 
+    ar.ok(<TDev.StatsResponse> {
         memory: process.memoryUsage(),
         uptime: process.uptime(),
         jsFile: jsPath,
@@ -371,7 +371,7 @@ function renderHelpTopicAsync(ht:TDev.HelpTopic)
     md.useExternalLinks = true;
     return ht.renderAsync(md).then((text) => {
         return "<h1>" + TDev.Util.htmlEscape(ht.json.name) + "</h1>" +
-               (ht.isApiHelp() ? "" : "<p>" + TDev.Util.htmlEscape(ht.json.description) + "</p>") + 
+               (ht.isApiHelp() ? "" : "<p>" + TDev.Util.htmlEscape(ht.json.description) + "</p>") +
                text;
     })
 }
@@ -461,7 +461,7 @@ function httpGetTextAsync(u:string)
             var d = "";
             res.on('data', (c) => { d += c });
             res.on('end', () => r.success(d))
-           
+
         } else {
             r.error("JSON get error " + u)
         }
@@ -482,7 +482,7 @@ function httpGetBufferAsync(u:string)
             res.on('end', () => {
                 r.success(Buffer.concat(bufs))
             })
-           
+
         } else {
             r.error(null)
         }
@@ -516,7 +516,7 @@ function getAstInfoWithLibs(ar:ApiRequest, opts:TDev.StringMap<string>)
     if (numMissing == 0)
         finish()
     else
-        TDev.Promise.join(Object.keys(missing).map(k => 
+        TDev.Promise.join(Object.keys(missing).map(k =>
             (/^[a-z]+$/.test(k) ?
                 httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(k)).then(v => v, err => null)
             : TDev.Promise.as(null))
@@ -557,7 +557,7 @@ function compress(data:any)
 
 //
 // Azure deployment
-// 
+//
 
 // from http://msdn.microsoft.com/en-us/library/azure/dn236427.aspx
 // they don't seem to provide an API to query this...
@@ -677,7 +677,7 @@ export interface DeployReq {
     subscriptionId: string; // guid
     managementCertificate: string; // base64 encoded
 
-    // for /listwebsites 
+    // for /listwebsites
     // nothing
 
     // for /createwebsite, /getpublishxml
@@ -813,7 +813,7 @@ var deployHandlers = {
             })
         })
     },
-    
+
 
     "getpublishxml": (ar:ApiRequest) => {
         if (ar.wsBroken()) return
@@ -895,7 +895,7 @@ var deployHandlers = {
                     })
                 } else {
                     doFtp(ar, "put", "tdconfig.json", JSON.stringify(cfg, null, 4), (err, cont) => {
-                        if (err) ar.deployErr(err);                     
+                        if (err) ar.deployErr(err);
                         else ar.ok({ status: 200, config: cfg })
                     })
                 }
@@ -947,7 +947,7 @@ function decodeJWT(token:string, aud:string)
         return { error: "invalid token (JSON)" }
     }
 
-    
+
     try {
         var ok = (<any>crypto).createVerify("RSA-SHA256")
             .update(parts[0] + "." + parts[1])
@@ -1009,7 +1009,7 @@ var apiHandlers = {
         }
         var j = ht.json
         renderHelpTopicAsync(ht).done(top => {
-            var resp = <TDev.DocsResponse> { 
+            var resp = <TDev.DocsResponse> {
                 prettyDocs: top,
                 title: j.name,
                 scriptId: j.id,
@@ -1188,8 +1188,8 @@ var apiHandlers = {
 
             case "compile":
                 TDev.Script.setStableNames();
-                var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, { 
-                        packaging: true, 
+                var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
+                        packaging: true,
                         scriptId: r.id
                 });
 
@@ -1229,7 +1229,7 @@ var apiHandlers = {
                 break;
 
             case "nodepackage":
-                TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, { 
+                TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
                     relId: relId,
                     scriptId: r.id,
                     filePrefix: "static/",
@@ -1257,7 +1257,7 @@ var apiHandlers = {
     "parse": (ar:ApiRequest) => {
         var r = <TDev.ParseRequest>ar.data;
         parseScript(ar, (tcRes) => {
-            var res:TDev.ParseResponse = { 
+            var res:TDev.ParseResponse = {
                 numErrors: tcRes.numErrors,
                 numLibErrors: tcRes.numLibErrors,
                 status: tcRes.status,
@@ -1317,7 +1317,7 @@ var apiHandlers = {
                 opts.scriptId = r.id
                 var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, opts)
                 res.compiledScript = cs.getCompiledCode();
-                res.packageResources = cs.packageResources;                
+                res.packageResources = cs.packageResources;
                 ar.addInfo += "compile,";
                 if (/TDev\.Util\.syntaxError\(/.test(res.compiledScript)) {
                     res.numErrors++;
@@ -1353,7 +1353,7 @@ var apiHandlers = {
                 res.packageResources = cs.packageResources;
                 ar.addInfo += "optimize,";
             }
-            
+
 
             function scriptText() {
                 return TDev.AST.App.sanitizeScriptTextForCloud(TDev.Script.serialize().replace(/\n+/g, "\n"));
@@ -1533,7 +1533,7 @@ function downloadFile(u:string, f:(s:string)=>void)
                 console.log("DOWNLOAD %s", u);
                 f(d)
             })
-           
+
         } else {
             console.error("error downloading file");
             console.error(res);
@@ -1797,7 +1797,7 @@ function mergetest(args:string[])
 ["bdfhqjve", "uajggmbz"],
 ["qewhvmsc", "srewiqhg"],
     ];
-    
+
     /*var unseenMap = {}
     unseen.forEach(x => {
         unseenMap[x] = true
@@ -1840,7 +1840,7 @@ function mergetest(args:string[])
 
     // fail = hjqb
     // slow = 17007
-    dirs.forEach(dir => { 
+    dirs.forEach(dir => {
         var info2:any = JSON.parse(fs.readFileSync(dir+"/shortinfo.json", "utf-8"))
         /*info2.forEach(script => {
             var keys = Object.keys(script)
@@ -1870,7 +1870,7 @@ function mergetest(args:string[])
             }
             //if(!unseenMap[i+1]) return;
             //if(!badMap[i+1] || i+1 <= 104001) return;
-            if((startIndex > 0 && i+1 < startIndex) 
+            if((startIndex > 0 && i+1 < startIndex)
             || (startIndex == -2 && slow.indexOf(i+1) < 0)
             || (startIndex == -3 && !prev)
             || (startIndex == -4 && !prev)) return script;
@@ -1936,7 +1936,7 @@ function mergetest(args:string[])
             } else if((i+1)%100 == 0) {
                 console.log(">"+(i+1))
             }
-            
+
             TDev.AST.reset();
             global.gc();
 
@@ -2053,7 +2053,7 @@ function compressJson()
         var c0 = cursor
         cursor += numUsers
 
-        var proc = child_process.spawn("node", ["noderunner0", "compress"].concat(args), 
+        var proc = child_process.spawn("node", ["noderunner0", "compress"].concat(args),
             { stdio: 'pipe' })
 
         var logFile = "logs/" + Date.now() + "." + cursor + ".txt"
@@ -2064,7 +2064,7 @@ function compressJson()
 
         proc.on('close', (code) => {
             console.log("     at %d, %d ms/entry", c0, Math.round((Date.now() - startTime) / (c0 + numUsers)))
-            if (code) 
+            if (code)
                 console.log("exit code: " + code)
             logStream.end()
             threadsAvail++;
@@ -2114,7 +2114,7 @@ export function globalInit()
 
     TDev.Promise.errorHandler = reportBug;
     TDev.Util.perfNow = () => Date.now();
-    
+
     TDev.Ticker.fillEditorInfoBugReport = (b:TDev.BugReport) => {
         try {
             b.currentUrl = "runner";

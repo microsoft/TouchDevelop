@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -138,7 +138,7 @@ module TDev
         public getBox() {
             return this._theArea;
         }
-        
+
         public showValue(val: any) {
             var dived = s => div(null, s);
             var rawdived = s => {
@@ -246,7 +246,7 @@ module TDev
             var buttons = this.buttons;
             var self = this;
 
-            
+
             buttons[0].setTextEx("wall", "go back", Ticks.debuggerGotoWall, () => TheEditor.gotoWall());
             buttons[1].setTextEx("stack", "show", Ticks.debuggerShowStack, () => TheEditor.showStackTraceAgain(false));
             buttons[2].setTextEx("current", "go to", Ticks.debuggerGotoCurrent, () => TheEditor.showRunningStmt());
@@ -389,7 +389,7 @@ module TDev
             this.varview.clear();
             var varFinder = new AST.VariableFinder();
             varFinder.traverse(s, true);
-            
+
             var currentAction = TheEditor.currentAction();
 
             // the hashtable prevents dupes
@@ -442,7 +442,7 @@ module TDev
             this.visualRoot.style.right = "0";
             this.visualRoot.style.width = "auto";
         }
-        
+
         public handleKey(e:KeyboardEvent) : boolean
         {
             if (!this.expr) return false;

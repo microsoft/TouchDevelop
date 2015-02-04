@@ -239,7 +239,7 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
                 //console.log("download file: " + u + " " + total.length)
                 f(null, total, (<any>res).headers)
             })
-           
+
         } else {
             var msg = "error downloading file " + u + "; HTTP " + res.statusCode
             error.log(msg)
@@ -268,7 +268,7 @@ function downloadJson(u:string, f:(err:any, d:any)=>void)
     })
 }
 
-interface StringMap<T> 
+interface StringMap<T>
 {
     [index:string] : T;
 }
@@ -593,7 +593,7 @@ function createProcess(d:RunCliOptions)
     var isWin = /^win/.test(os.platform())
     debug.log("running: " + d.command + (d.args ? (" " + d.args.join(" ")) : ""))
     var env = clone(d.env || process.env);
-    if (pythonEnv) Object.keys(pythonEnv).forEach(k => env[k] = pythonEnv[k]);    
+    if (pythonEnv) Object.keys(pythonEnv).forEach(k => env[k] = pythonEnv[k]);
     var proc = child_process.spawn(d.args ? d.command : isWin ? "cmd" : "sh", d.args || [isWin ? "/c" : "-c", d.command], {
         cwd: d.cwd || undefined,
         env: env,
@@ -954,7 +954,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                     var w = img.bitmap.width;
                     var h = img.bitmap.height;
                     var tw = target.width;
-                    var th = target.height; 
+                    var th = target.height;
                     if (w/tw > h/th) {
                         var dx = Math.floor((w - h*tw/th) / 2);
                         crop(img, dx, 0, w - 2*dx, h)
@@ -1176,7 +1176,7 @@ function loadScriptCoreAsync()
 
 function loadWsModule(f:()=>void)
 {
-    if (wsModule) 
+    if (wsModule)
         f()
     else {
         var finish = () => {
@@ -1300,7 +1300,7 @@ function cacheEditor(version:string, manifest:string)
 {
     var cache:any = {}
 
-    var ent = (buf, hd) => { 
+    var ent = (buf, hd) => {
         var tp = hd['content-type']
         var r:any = {
             headers: {
@@ -1600,7 +1600,7 @@ function handleReq(req, resp)
             ar.error(404, "No script deployed")
         } else {
             initScript(() => {
-                var rt = TDev.Runtime.theRuntime 
+                var rt = TDev.Runtime.theRuntime
                 if (rt.requestHandler)
                     rt.requestHandler(req, resp)
                 else {
@@ -1759,7 +1759,7 @@ function downloadNode()
             'else echo "Unsupported platform: $(uname)"; fi\n' +
             '')
 
-        console.log("\n\n" + 
+        console.log("\n\n" +
 "Instructions\n" +
 "============\n\n" +
 "After all the downloads are done, run:\n\n\t" +

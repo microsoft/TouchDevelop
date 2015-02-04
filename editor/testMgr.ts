@@ -50,7 +50,7 @@ module TDev.TestMgr
         public notifyPagePush() {}
         public notifyPagePop(p:WallPage) {}
         public dontWaitForEvents() { return true; }
-        public wallShown() { } 
+        public wallShown() { }
         public wallHidden() { }
         public updateButtonsVisibility() { }
         public notifyPageButtonUpdate() { }
@@ -95,7 +95,7 @@ module TDev.TestMgr
                 coverage: false,
                 crashOnInvalid: /crashOnInvalid/.test(document.URL),
             };
-        } 
+        }
         var compileCounter = TDev.RT.Perf.start("compile." + testHost.scriptId);
         var cs = AST.Compiler.getCompiledScript(Script, flags);
         TDev.RT.Perf.stop(compileCounter);
@@ -130,8 +130,8 @@ module TDev.TestMgr
                 var a = <AST.Action>t;
                 return a.isTest();
             } else return false;
-        });        
-        
+        });
+
         testHost = new TestHost();
         testHost.scriptId = id;
 
@@ -188,14 +188,14 @@ module TDev.TestMgr
                         rt.testMode = true;
 
                         ProgressOverlay.bumpShow(); // rt.run is calling hide
-                        
+
                         if (act.isPage()) {
                             rt.run(Runtime.syntheticFrame((s) => {
                                 s.rt.postAutoPage("this", actRes.name);
                             }), []);
                         } else {
                             rt.run(rt.compiled.actionsByStableName[act.getStableName()], []);
-                        }                        
+                        }
                     }
                 }
             }
@@ -247,11 +247,11 @@ module TDev.TestMgr
         if (res.length > 1) {
 
             if (Benchmarker.jsProgramsTested.aggregatesCount() > 0) {
-                perScript += "<div><br/>performance benchmarks (JavaScript)</div>" 
+                perScript += "<div><br/>performance benchmarks (JavaScript)</div>"
             }
             Benchmarker.jsProgramsTested.forEachAggregate((mes: Benchmarker.SumMeasurement) => {
                 perScript += "<div><b class='" + (!mes.correct ? "test-error" : "test-ok") + "'>" + mes.name + "</b>"
-                    + " (" + (mes.average / TDev.RT.Perf.unit()).toFixed(3) + ' - ' 
+                    + " (" + (mes.average / TDev.RT.Perf.unit()).toFixed(3) + ' - '
                     + mes.average.toFixed(0) + "ms)</div>\n";
                 if (!mes.correct) {
                     numFailed++;
@@ -260,7 +260,7 @@ module TDev.TestMgr
                 numTotal++;
             });
             if (Benchmarker.jsProgramsTested.aggregatesCount() > 0) {
-                perScript += "<div><br/>performance benchmarks (TouchDevelop)</div>" 
+                perScript += "<div><br/>performance benchmarks (TouchDevelop)</div>"
             }
             Benchmarker.tdProgramsTested.forEachAggregate((mes: Benchmarker.SumMeasurement) => {
                 perScript += "<div><b class='" + (!mes.correct ? "test-error" : "test-ok") + "'>" + mes.name + "</b>"
@@ -466,8 +466,8 @@ module TDev.TestMgr
             return;
 
         var betaFriendlyId = (<any>window).betaFriendlyId;
-        if (!Browser.isWP8app 
-            && betaFriendlyId 
+        if (!Browser.isWP8app
+            && betaFriendlyId
             && window.localStorage["betaTestsRunFor"] != betaFriendlyId) {
             window.localStorage["betaTestsRunFor"] = betaFriendlyId;
             testAllScripts(true);

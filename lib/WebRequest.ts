@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export interface IProxyResponse {
         response: WebResponse;
@@ -206,8 +206,8 @@ module TDev.RT {
             return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
                 // quick check for connectivity
                 if (Cloud.isOffline()) {
-					if (request._showNotifications)
-	                    HTML.showNotificationText('Web request failed, please connect to Internet.');
+                    if (request._showNotifications)
+                        HTML.showNotificationText('Web request failed, please connect to Internet.');
                     onSuccess(WebResponse.mkCrash(request));
                     return;
                 }
@@ -356,17 +356,17 @@ module TDev.RT {
             })
         }
 
-		public setContentAsSoundInternal(snd : Sound) : void {
-			var url = snd.getDataUri();
-			if (url) {
-				var mimeType = Sound.dataUriMimeType(url);
-				var bytes = Util.decodeDataURL(url, mimeType);
-				if (bytes) {
-					this._content = bytes;
-					this.set_content_type(mimeType);
-				}
-			}
-		}
+        public setContentAsSoundInternal(snd : Sound) : void {
+            var url = snd.getDataUri();
+            if (url) {
+                var mimeType = Sound.dataUriMimeType(url);
+                var bytes = Util.decodeDataURL(url, mimeType);
+                if (bytes) {
+                    this._content = bytes;
+                    this.set_content_type(mimeType);
+                }
+            }
+        }
 
         public setContentAsPictureInternal(pic: Picture, quality: number, forceJpeg = false): void
         {

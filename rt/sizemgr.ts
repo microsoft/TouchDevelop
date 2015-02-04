@@ -1,5 +1,5 @@
-﻿///<reference path='refs.ts'/>
-module TDev { 
+///<reference path='refs.ts'/>
+module TDev {
     export var snapView = false;
 
     export module SizeMgr
@@ -27,7 +27,7 @@ module TDev {
         function setupPhoneSimulation()
         {
             if (phoneSimulationW >= 0) return;
-            
+
             var m = /phone=([\d\.]+)(x([\d\.]+))?/.exec(window.document.URL);
             if (m) {
                 phoneSimulationW = parseFloat(m[1]);
@@ -124,7 +124,7 @@ module TDev {
 
             var applySim = (w:number, simW:number) =>
                 simW <= 0 ? w : simW <= 2 ? simW * w : simW;
-            
+
             w = applySim(w, phoneSimulationW);
             h = applySim(h, phoneSimulationH);
 
@@ -179,10 +179,10 @@ module TDev {
             if (phoneMode) rootClass += " phone";
             if (splitScreen) rootClass += " split";
             if (Browser.assumeMouse) rootClass += " assume-mouse";
-			if (Browser.assumeMouse 
-				&& Browser.browser != BrowserSoftware.ie10 
-				&& Browser.browser != BrowserSoftware.ie11)
-					rootClass += " assume-notouch";
+            if (Browser.assumeMouse
+                && Browser.browser != BrowserSoftware.ie10
+                && Browser.browser != BrowserSoftware.ie11)
+                    rootClass += " assume-notouch";
             if (topFontSize <= 12) rootClass += " tinyFont";
             if (topFontSize <= 18) rootClass += " smallFont";
             rootClass += " rootClass";
@@ -212,5 +212,5 @@ module TDev {
 
         }
 
-    } 
+    }
 }

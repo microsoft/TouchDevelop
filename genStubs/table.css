@@ -32,7 +32,7 @@ td {
 }
 
 .impl td,
-.not-impl td 
+.not-impl td
 {
   position: relative;
 }

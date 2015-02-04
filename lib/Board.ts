@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev { export module RT {
     //? A board to build 2D games
@@ -19,7 +19,7 @@ module TDev { export module RT {
         public backgroundColor:Color = null;
         private backgroundPicture:Picture = null;
         private backgroundCamera: Camera = null;
-        private _boundaryDistance : number = NaN;        
+        private _boundaryDistance : number = NaN;
         private _everyFrameTimer : Timer = undefined;
 
         constructor() {
@@ -39,7 +39,7 @@ module TDev { export module RT {
         private _touchedSpriteStack: Sprite[];
         private _touchLast: Vector3;
         private _runtime:Runtime;
-        
+
         /// <summary>
         /// for debugging only
         /// </summary>
@@ -52,7 +52,7 @@ module TDev { export module RT {
         private _obstacles : Obstacle[] = [];
         private _springs: Spring[] = [];
         private _backgroundScene: BoardBackgroundScene = undefined;
-        
+
         static mk(rt:Runtime, landscape : boolean, w:number, h:number, full:boolean)
         {
             var b = new Board();
@@ -78,8 +78,8 @@ module TDev { export module RT {
             (<any>this.container).updateSizes = () => {
                 this.updateScaleFactor();
                 this.redrawBoardAndContents();
-            };         
-               
+            };
+
             var handler = new TouchHandler(this.canvas, (e,x,y) => { this.touchHandler(e, x, y); });
 
         }
@@ -295,7 +295,7 @@ module TDev { export module RT {
             }
             return false;
         }
-        
+
         private findTouchedSprites(x:number, y:number) : Sprite[] {
             var candidates = this.orderedSprites()
                 .filter(sp => !sp._hidden && sp.contains(x, y))
@@ -304,7 +304,7 @@ module TDev { export module RT {
                 return undefined;
             return candidates;
         }
-        
+
         private applyBackground()
         {
             this.ctx.save();
@@ -314,7 +314,7 @@ module TDev { export module RT {
             }
             // it may not have a canvas when the picture is still loading and an resize event occurs
             else if (!!this.backgroundPicture && this.backgroundPicture.hasCanvas()) {
-                this.ctx.drawImage(this.backgroundPicture.getCanvas(), 0, 0, 
+                this.ctx.drawImage(this.backgroundPicture.getCanvas(), 0, 0,
                     this.backgroundPicture.widthSync(), this.backgroundPicture.heightSync(), 0, 0, this._width, this._height);
             } else if (!!this.backgroundColor) {
                 this.ctx.fillStyle = this.backgroundColor.toHtml();
@@ -395,7 +395,7 @@ module TDev { export module RT {
             this._walls.push(WallSegment.mk(o.x + o.xextent, o.y + o.yextent, -o.xextent, -o.yextent, o.elasticity, o.friction, o));
             this._obstacles.push(o);
         }
-        
+
         //? Create a new collection for sprites.
         public create_sprite_set() : SpriteSet {
             return new SpriteSet();
@@ -465,7 +465,7 @@ module TDev { export module RT {
         //? Update positions of sprites on board.
         //@ timestamp
         //@ writesMutable
-        public evolve() : void 
+        public evolve() : void
         {
             Util.assert(!!this._runtime);
             if (!this._runtime) return;
@@ -482,7 +482,7 @@ module TDev { export module RT {
             this.detectCollisions(dT);
             this.sprites.forEach(sprite => sprite.commitUpdate(this._runtime, dT));
         }
-        
+
         private detectCollisions(dT:number):void
         {
             // detect wall collisions
@@ -597,13 +597,13 @@ module TDev { export module RT {
 
         //? Sets the uniform acceleration vector for objects on the board to pixels/sec^2
         //@ writesMutable [y].defl(200)
-        public set_gravity(x:number, y:number) : void 
+        public set_gravity(x:number, y:number) : void
         {
            this._gravity = new Vector2(x, y);
-        }    
+        }
 
         public gravity() : Vector2 { return this._gravity; }
-        
+
         //? Gets the sprite indexed by i
         //@ readsMutable
         public at(i:number) : Sprite { return this.sprites[i]; }
@@ -729,22 +729,22 @@ module TDev { export module RT {
             this.ctx.beginPath();
             for (var i = 0; i < this._springs.length; i++) {
                 var o = this._springs[i];
-                
+
                 this.ctx.moveTo(o.sprite1.x(), o.sprite1.y());
-                this.ctx.lineTo(o.sprite2.x(), o.sprite2.y()); 
+                this.ctx.lineTo(o.sprite2.x(), o.sprite2.y());
             }
             this.ctx.stroke();
             this.ctx.restore();
 
         }
 
-        private renderObstacles() : void 
+        private renderObstacles() : void
         {
             this.ctx.save();
             for (var i = 0; i < this._obstacles.length; i++) {
                 var o = this._obstacles[i];
                 if (!o.isValid()) continue;
-                
+
                 this.ctx.beginPath();
                 this.ctx.lineWidth = o._thickness;
                 this.ctx.strokeStyle = o._color.toHtml();
@@ -754,7 +754,7 @@ module TDev { export module RT {
             }
             this.ctx.restore();
         }
-        
+
         public mkSprite(tp:SpriteType, w:number, h:number)
         {
             var s = Sprite.mk(tp, this.initialX(), this.initialY(), w, h);
@@ -770,7 +770,7 @@ module TDev { export module RT {
             s.changed();
             this.spritesChanged();
         }
-        
+
         //? Create a new ellipse sprite.
         //@ readsMutable [result].writesMutable
         //@ [width].defl(20) [height].defl(20)
@@ -837,13 +837,13 @@ module TDev { export module RT {
         //@ [elasticity].defl(1)
         public create_obstacle(x:number, y:number, width:number, height:number, elasticity:number) : Obstacle {
             if (width == 0 && height == 0) return; // avoid singularities
-            
+
             var o = new Obstacle(this, x, y, width, height, elasticity, 1 - elasticity);
             this.addObstacle(o);
             return o;
         }
 
-        public deleteObstacle(obstacle : Obstacle) 
+        public deleteObstacle(obstacle : Obstacle)
         {
             var idx = this._obstacles.indexOf(obstacle);
             if (idx > -1) {
@@ -874,7 +874,7 @@ module TDev { export module RT {
         }
 
         //? Clear all queued events related to this board
-        public clear_events() : void 
+        public clear_events() : void
         {
         }
 
@@ -898,7 +898,7 @@ module TDev { export module RT {
         {
             this.backgroundCamera = null;
         }
-        
+
         //? Clear the background picture
         public clear_background_picture(): void
         {
@@ -915,7 +915,7 @@ module TDev { export module RT {
             }
         }
     }
-    
+
     //? An obstacle on a board
     //@ ctx(general,gckey)
     export class Obstacle
@@ -955,7 +955,7 @@ module TDev { export module RT {
         public delete_() {
             this.board.deleteObstacle(this);
         }
-        
+
         public isValid() : boolean {
             if (!this.IsFinite(this.x)) return false;
             if (!this.IsFinite(this.y)) return false;
@@ -963,14 +963,14 @@ module TDev { export module RT {
             if (!this.IsFinite(this.yextent)) return false;
             return true;
         }
-        
+
         private IsFinite(x:number) : boolean {
             if (isNaN(x)) return false;
             if (isFinite(x)) return true;
             return false;
         }
     }
-    
+
     export class WallSegment {
         public _position:Vector2;
         public _unitExtent:Vector2;
@@ -978,7 +978,7 @@ module TDev { export module RT {
         public _elasticity:number;
         public _friction:number;
         public _obstacle : Obstacle;
-        
+
         static mk(x:number, y:number, xextent:number, yextent:number, elasticity:number, friction:number, obstacle : Obstacle = undefined)
         {
             var w = new WallSegment();
@@ -994,13 +994,13 @@ module TDev { export module RT {
 
         /// <summary>
         /// Find two points, p1 along wall and p2 along sprite path, such that their distance is the radius of the sprite.
-        /// 
+        ///
         /// s = 0..length. P1(s) = pos + unitExtent * s
         /// t = 0..1       P2(t) = lastPosition + t*(newPosition - lastPosition);
-        /// 
+        ///
         /// For now, we simplify this to just compute the time t at which the sprite is distance r from the wall. To avoid
         /// missing collisions on the end of the segment, we pretend that the segment extends by object radius on both sides.
-        /// 
+        ///
         /// </summary>
         public processPotentialCollision(sprite:Sprite, dT:number):boolean
         {
@@ -1016,7 +1016,7 @@ module TDev { export module RT {
             var normalRadius = sprite.radius(unitNormal);
             if (distance < normalRadius / 2)
             {
-                // inside or behind the wall 
+                // inside or behind the wall
                 // check how much
                 if (distance <= -normalRadius / 2)
                 {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export module DeviceMotion
     {
@@ -10,7 +10,7 @@ module TDev.RT {
         var _runtime: Runtime = undefined;
         var _deviceStableCount: number = 0;
 
-        // This is the maximum inclination angle variation on any axis between the average acceleration and the filtered 
+        // This is the maximum inclination angle variation on any axis between the average acceleration and the filtered
         // acceleration beyond which the device cannot be calibrated on that particular axis.
         // The calibration cannot be done until this condition is met on the last contiguous samples from the accelerometer
         // 0.5 deg inclination delta at max
@@ -98,7 +98,7 @@ module TDev.RT {
             // Stablity check
             // If current low-pass filtered sample is deviating for more than 1/100 g from average (max of 0.5 deg inclination noise if device steady)
             // then reset the stability counter.
-            // The calibration will be prevented until the counter is reaching the sample count size (calibration enabled only if entire 
+            // The calibration will be prevented until the counter is reaching the sample count size (calibration enabled only if entire
             // sampling buffer is "stable"
             if (_low && _optimal) {
                 var dv = _low.subtract(_optimal);
@@ -181,7 +181,7 @@ module TDev.RT {
 
         export var isSupported = () : boolean =>
         {
-            return  isMotionSupported() 
+            return  isMotionSupported()
                 || DeviceOrientation.isOrientationSupported()
                 || Browser.assumeMouse;
         }
@@ -207,7 +207,7 @@ module TDev.RT {
             if (isMotionSupported())
                 window.addEventListener('devicemotion', reading, false);
             else if (DeviceOrientation.isOrientationSupported())
-                window.addEventListener('deviceorientation', orientationReading, false);   
+                window.addEventListener('deviceorientation', orientationReading, false);
             else if (Browser.assumeMouse)
                 window.addEventListener('mousemove', mouseReading, false);
         }
@@ -215,7 +215,7 @@ module TDev.RT {
         export var removeReadingEvent = () =>
         {
             window.removeEventListener('devicemotion', reading, false);
-            window.removeEventListener('deviceorientation', orientationReading, false);   
+            window.removeEventListener('deviceorientation', orientationReading, false);
             window.removeEventListener('mousemove', mouseReading, false);
         }
 
@@ -234,8 +234,8 @@ module TDev.RT {
             DeviceMotion.removeReadingEvent();
             clearData();
         }
-    
-        export function accelerationStable(r : ResumeCtx) {            
+
+        export function accelerationStable(r : ResumeCtx) {
             start(r.rt);
             r.resumeVal(_raw);
         }

@@ -16,7 +16,7 @@ function main() {
         h.update(fc, "utf8")
         sha[f] = h.digest("hex").toLowerCase()
     })
-    fs.writeFileSync("pkgshell.js", 
+    fs.writeFileSync("pkgshell.js",
         "var TDev;\n" +
         "TDev.pkgShell = " + JSON.stringify(obj, null, 2) + ";\n" +
         "TDev.pkgShellSha = " + JSON.stringify(sha, null, 2) + ";\n"

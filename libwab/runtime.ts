@@ -26,9 +26,9 @@ module TDev.RT.Wab {
         export var STOP_GYRO = "STOP_GYRO";
         export var START_ACCELEROMETER = "START_ACCELEROMETER";
         export var STOP_ACCELEROMETER = "STOP_ACCELEROMETER";
-        export var START_COMPASS = "START_COMPASS"; // new 
+        export var START_COMPASS = "START_COMPASS"; // new
         export var STOP_COMPASS = "STOP_COMPASS"; // new
-        export var START_ORIENTATION = "START_ORIENTATION"; // new 
+        export var START_ORIENTATION = "START_ORIENTATION"; // new
         export var STOP_ORIENTATION = "STOP_ORIENTATION"; // new
         export var LOG = "LOG";
         export var PROXY = "PROXY";
@@ -58,7 +58,7 @@ module TDev.RT.Wab {
         export var BROWSE = "BROWSE"; // new
         export var DICTATE = "DICTATE"; // speech to text, new
         export var OAUTH_AUTHENTICATION = "OAUTH_AUTHENTICATION"; // new
-        export var NETWORK_INFORMATION = "NETWORK_INFORMATION"; // new 
+        export var NETWORK_INFORMATION = "NETWORK_INFORMATION"; // new
         export var LOCK_ORIENTATION = "LOCK_ORIENTATION"; // new
         export var POWER_INFORMATION = "POWER_INFORMATION"; // new
         export var REVIEW_CURRENT_APP = "REVIEW_CURRENT_APP"; // new
@@ -75,10 +75,10 @@ module TDev.RT.Wab {
         export var STOP_SEND_NFC_MESSAGE = "STOP_SEND_NFC_MESSAGE"; // new
         export var START_RECEIVE_NFC_MESSAGE = "START_RECEIVE_NFC_MESSAGE"; // new
         export var STOP_RECEIVE_NFC_MESSAGE = "STOP_RECEIVE_NFC_MESSAGE"; // new
-		export var UPDATE_TILE = "UPDATE_TILE"; // new, UpdateTileRequest
-		export var SPEAK_TEXT = "SPEAK_TEXT"; // new
-		export var SPEAK_SSML = "SPEAK_SSML"; // new
-		export var STATUS = "STATUS"; // new
+        export var UPDATE_TILE = "UPDATE_TILE"; // new, UpdateTileRequest
+        export var SPEAK_TEXT = "SPEAK_TEXT"; // new
+        export var SPEAK_SSML = "SPEAK_SSML"; // new
+        export var STATUS = "STATUS"; // new
         export var CURRENT_HASH = "CURRENT_HASH"; // new, wp8 specific
         export var CHECK_FOR_REFRESH = "CHECK_FOR_REFRESH"; // new, wp8 specific
         export var SWITCH_CHANNEL = "SWITCH_CHANNEL"; // new, wp8 specific
@@ -184,7 +184,7 @@ module TDev.RT.Wab {
     }
 
     export interface RequestPermissionsResponse extends Response
-    { 
+    {
         version:string;
         supportedActions:string[]; // Action.SOMETHING
 
@@ -260,7 +260,7 @@ module TDev.RT.Wab {
         orientation: number;
     }
 
-	export interface UpdateTileRequest extends UriRequest {
+    export interface UpdateTileRequest extends UriRequest {
         counter?: number;
         content?: string;
         title?: string;
@@ -269,7 +269,7 @@ module TDev.RT.Wab {
         pictures?: string[];
         icon?: string;
         template?: string;
-	}
+    }
 
     export interface NetworkInformationResponse extends Response {
         connectionName?: string;
@@ -336,19 +336,19 @@ module TDev.RT.Wab {
         uri?: string;
         photoUri?: string;
     }
-    
+
     export interface UriRequest extends Request {
         uri: string;
     }
-    
+
     export interface UriResponse extends Response {
         uri: string;
     }
 
-	export interface DictateRequest extends Request {
-		title?:string;
-		caption?: string;
-	}
+    export interface DictateRequest extends Request {
+        title?:string;
+        caption?: string;
+    }
 
     export interface DictateResponse extends Response {
         text: string;
@@ -452,7 +452,7 @@ module TDev.RT.Wab {
     interface LogRequest extends Request {
         texts: string[];
     }
-    
+
     interface ProxyCredentials {
         name: string;
         password: string;
@@ -476,7 +476,7 @@ module TDev.RT.Wab {
 
     export interface OAuthAuthenticationRequest extends UriRequest {
         redirectUri: string; // registered redirect uri
-		state: string; // state value to be validated
+        state: string; // state value to be validated
     }
 
     interface ProxyResponse extends Response {
@@ -486,24 +486,24 @@ module TDev.RT.Wab {
         table: string;
         keys: string[];
     }
-    
+
     interface DbGetResponse extends Response {
         values: string[];
     }
-    
+
     interface DbSetRequest extends Request {
         table: string;
         keys: string[];
         values: string[];
     }
-    
+
     interface DbSetResponse extends Response {
     }
-    
+
     interface DbKeysRequest extends Request {
         table: string;
     }
-    
+
     interface DbKeysResponse extends Response {
         keys: string[];
     }
@@ -513,7 +513,7 @@ module TDev.RT.Wab {
         landscapeAllowed: boolean;
         showClock: boolean;
     }
-    
+
 
     export interface BluetoothDeviceName {
         hostName: string;
@@ -602,7 +602,7 @@ module TDev.RT.Wab {
     function openWp8Async(): Promise {
         var ret = new PromiseInv();
         _webSocket = new WebSocket(URI);
-        _webSocket.onopen = () => { 
+        _webSocket.onopen = () => {
             var r = ret;
             ret = undefined;
             Util.log("wp8ws: open");
@@ -644,7 +644,7 @@ module TDev.RT.Wab {
                 isLastResponse(r)) {
                 delete _pendingResponses[key];
             }
-            if (pending.onSuccess) 
+            if (pending.onSuccess)
                 Util.setTimeout(0, () => {
                     try {
                         pending.onSuccess(r);
@@ -668,7 +668,7 @@ module TDev.RT.Wab {
                 if (typeof v == "number") {
                     if (repl)
                         v = attachments[v];
-                    else 
+                    else
                         maxId = Math.max(maxId, v);
                 } else if (Array.isArray(v)) {
                     v.forEach((z, i) => {
@@ -794,7 +794,7 @@ module TDev.RT.Wab {
             case Status.ERR_INTERNAL_ERROR:
                 msg = "TouchDevelop runtime crashed"; break;
             case Status.ERR_MALFORMED_REQUEST:
-                msg = "WebAppBooster reported a malformed request"; break; 
+                msg = "WebAppBooster reported a malformed request"; break;
             case Status.ERR_NOT_AVAILABLE:
             case Status.ERR_NOT_AVAILABLE_WP8:
                 msg = "Not available";
@@ -841,7 +841,7 @@ module TDev.RT.Wab {
                         else onError(wrapResponse(response));
                     }, requestError);
                 }, requestError); break;
-                default: 
+                default:
                     onError(wrapResponse(response));
             }
         }, requestError)
@@ -856,7 +856,7 @@ module TDev.RT.Wab {
             }
         }
     }
-    
+
     export function sendRequestAsync(request: Request): Promise {
         return new Promise((onSuccess, onError, onProgress) => {
             sendRequest(request, onSuccess, onError);
@@ -886,8 +886,8 @@ module TDev.RT.Wab {
         Util.log('wab: requesting permissions');
         return new Promise((onSuccess, onError, onProgress) => {
             _sendRequest(<RequestPermissionsRequest>{
-                action: Action.REQUEST_PERMISSIONS, 
-                permissions: [Permission.READ_CONTACTS, Permission.READ_CALENDAR, Permission.GYRO, Permission.ACCELEROMETER, 
+                action: Action.REQUEST_PERMISSIONS,
+                permissions: [Permission.READ_CONTACTS, Permission.READ_CALENDAR, Permission.GYRO, Permission.ACCELEROMETER,
                               Permission.AUDIO, Permission.GALLERY, Permission.CAMERA, Permission.VIBRATE, Permission.RECORD_AUDIO, Permission.BLUETOOTH],
             }, (response: RequestPermissionsResponse) => {
                 if (response.status == Status.OK) {
@@ -939,7 +939,7 @@ module TDev.RT.Wab {
                     return r;
                 })
         }
-        
+
         public getKeysAsync(): Promise // of string[]
         {
             return sendRequestAsync(<DbKeysRequest>{ action: Action.DB_KEYS, table: this.name })
@@ -1040,7 +1040,7 @@ module TDev.RT.Wab {
 
     function lockOrientation(p: boolean, l: boolean, clock: boolean) {
         SizeMgr.lastOrientationLockTime = Util.now();
-        sendRequestAsync(<LockOrientationRequest>{ 
+        sendRequestAsync(<LockOrientationRequest>{
             action: Action.LOCK_ORIENTATION,
             portraitAllowed: p,
             landscapeAllowed: l,
@@ -1051,7 +1051,7 @@ module TDev.RT.Wab {
     }
 
     function arrivedAtHash(h:string) {
-        sendRequestAsync(<CurrentHashRequest>{ 
+        sendRequestAsync(<CurrentHashRequest>{
             action: Action.CURRENT_HASH,
             hash: h,
             isMainScreen: h == '#hub' || h == '#',
@@ -1154,17 +1154,17 @@ module TDev.RT.Wab {
             caps.push("orientation");
         if (isSupportedAction(Action.LIST_APPOINTMENTS))
             caps.push("calendar");
-		if (isSupportedAction(Action.UPDATE_TILE))
+        if (isSupportedAction(Action.UPDATE_TILE))
             caps.push("tiles");
-        if (isSupportedAction(Action.SPEAK_TEXT) || 
+        if (isSupportedAction(Action.SPEAK_TEXT) ||
             isSupportedAction(Action.SPEAK_SSML) ||
             isSupportedAction(Action.DICTATE))
             caps.push("speech");
-        if (isSupportedAction(Action.LIST_SONGS) 
-            || isSupportedAction(Action.LIST_SONG_ALBUM) 
-            || isSupportedAction(Action.LIST_SONG_ALBUMS) 
-            || isSupportedAction(Action.SONG_ALBUM) 
-            || isSupportedAction(Action.PLAYER_COMMAND) 
+        if (isSupportedAction(Action.LIST_SONGS)
+            || isSupportedAction(Action.LIST_SONG_ALBUM)
+            || isSupportedAction(Action.LIST_SONG_ALBUMS)
+            || isSupportedAction(Action.SONG_ALBUM)
+            || isSupportedAction(Action.PLAYER_COMMAND)
             || isSupportedAction(Action.PLAYER_STATE)
             || isSupportedAction(Action.ACTIVE_SONG)
             || isSupportedAction(Action.START_ACTIVE_SONG_CHANGED)

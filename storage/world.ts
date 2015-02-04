@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev {
@@ -12,7 +12,7 @@ module TDev {
         var currentUserInfo:any = null;
         var currentUserPromise = new PromiseInv();
         var localStorage = window.localStorage;
-        var getIndexTablePromise = () => Storage.getTableAsync("Index");        
+        var getIndexTablePromise = () => Storage.getTableAsync("Index");
         var getScriptsTablePromise = () => Storage.getTableAsync("Scripts");
         var getTracesTablePromise = () => Storage.getTableAsync("Traces");
         var blobcontainer = ""
@@ -59,7 +59,7 @@ module TDev {
             bodyItem[guid + "-script"] = undefined;
             bodyItem[guid + "-scriptState"] = undefined;
             bodyItem[guid + "-scriptVersionInCloud"] = undefined;
-            return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]); 
+            return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
         function setInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header, script: string, editorState: string, scriptState: string, cloudScriptVersion: string) : Promise {
             var headerItem = {}
@@ -81,7 +81,7 @@ module TDev {
 
             log(header.guid + "/" + header.scriptId + ": " + header.name + " save with base " + header.scriptVersion.baseSnapshot);
 
-            return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]); 
+            return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
         function setCloudScriptVersionAsync(scriptsTable: Storage.Table, guid: string, cloudScriptVersion: string) : Promise {
             var bodyItem = {}
@@ -112,7 +112,7 @@ module TDev {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is newer");
             if (Cloud.lite)
                 return Util.httpGetJsonAsync(blobcontainer + header.scriptVersion.baseSnapshot)
-                    .then(resp => 
+                    .then(resp =>
                         indexTable.getValueAsync(header.guid)
                             .then(str => str ? JSON.parse(str) : null)
                             .then(hd => {
@@ -170,13 +170,13 @@ module TDev {
                 var body = <Cloud.Body>undefined;
                 installedBodies.bodies.forEach(function (b) { if (b.guid == header.guid) body = b; });
                 if (!body) return undefined;
-                var cloudScriptVersion = JSON.stringify(header.scriptVersion);                    
+                var cloudScriptVersion = JSON.stringify(header.scriptVersion);
                 // do not delete state on publication; make sure we don't override body with ""
                 return setInstalledAsync(indexTable, scriptsTable, getHeader(body), body.script || null, body.editorState || null, null, cloudScriptVersion);
             })
             .then((r) => r, (e) => {
                 if (e.status == 400) {
-                    ModalDialog.info("cannot publish", 
+                    ModalDialog.info("cannot publish",
                         "Your script '" + header.name + "' cannot be published. Error message: " + (e.errorMessage || "not available"))
                     getInstalledHeaderAsync(header.guid).then((header:Cloud.Header) => {
                         if (header.status == "tobepublished") {
@@ -225,14 +225,14 @@ module TDev {
         var syncVersion = undefined;
         var continuouslySyncVersion = undefined;
         var syncCount = 0;
-        export function cancelSync() { 
+        export function cancelSync() {
             syncVersion = undefined;
         }
         export function syncIsActive()
         {
             return !!syncVersion;
         }
-        export function cancelContinuouslySync() { 
+        export function cancelContinuouslySync() {
             if (continuouslySyncVersion) {
                 continuouslySyncVersion = undefined;
                 cancelSync();
@@ -277,10 +277,10 @@ module TDev {
         }
 
         var lastV;
-        export function syncAsync(uploadRecentUses: boolean = true, v: number = undefined, m: boolean = false, 
-                                  onNotLoggedIn: () => void = undefined, 
-                                  onBadTime: (number) => void = undefined, 
-                                  onAskBeta: () => void = undefined, 
+        export function syncAsync(uploadRecentUses: boolean = true, v: number = undefined, m: boolean = false,
+                                  onNotLoggedIn: () => void = undefined,
+                                  onBadTime: (number) => void = undefined,
+                                  onAskBeta: () => void = undefined,
                                   onAskSomething: (AskSomething) => void = undefined,
                                   onNoOtherAsk: () => void = undefined): Promise // of string --- undefined: success; some text: we hit an error (no internet, not yet logged in, too much posted...); you can try again later
         {
@@ -297,7 +297,7 @@ module TDev {
                 }
             }
             time("appcache");
-            
+
             syncCount++;
 
             if (Cloud.isOffline()) {
@@ -484,26 +484,26 @@ module TDev {
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
                 time("diff");
-                data.downloaded = Promise.thenEach(newerHeaders, (h: Cloud.Header) => { 
-                    if (syncVersion != mySyncVersion) return canceled; 
-                    return downloadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(-1, 0, 0) }); 
+                data.downloaded = Promise.thenEach(newerHeaders, (h: Cloud.Header) => {
+                    if (syncVersion != mySyncVersion) return canceled;
+                    return downloadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(-1, 0, 0) });
                 });
                 data.removed = Promise.thenEach(deletedHeaders, (h: Cloud.Header) => {
                     if (syncVersion != mySyncVersion) return canceled;
-                    return removeInstalledAsync(data.indexTable, data.scriptsTable, h.guid); 
+                    return removeInstalledAsync(data.indexTable, data.scriptsTable, h.guid);
                 });
                 data.uploaded = Promise.thenEach(dirtyHeaders, (h: Cloud.Header) => {
                     if (syncVersion != mySyncVersion) return canceled;
-                    return uploadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(0, -1, 0) }); 
+                    return uploadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(0, -1, 0) });
                 });
                 data.uptodates = Promise.join(uptodates);
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
                 time("download+upload");
                 if (syncVersion != mySyncVersion) return canceled;
-                data.tobepublished = Promise.thenEach(tobepublished, (header) => publishInstalledAsync(data.indexTable, data.scriptsTable, header).then(result => { 
+                data.tobepublished = Promise.thenEach(tobepublished, (header) => publishInstalledAsync(data.indexTable, data.scriptsTable, header).then(result => {
                     progress(0, 0, -1);
-                    if (!result) 
+                    if (!result)
                         ModalDialog.info("publishing failed", "There was a versioning mismatch between your local state and the cloud. Please check the content of the script you want to publish and then try again.");
                 }));
                 data.progress = Cloud.postPendingProgressAsync();
@@ -554,7 +554,7 @@ module TDev {
                 }
                 else if (status == 403)
                     //(Cloud.isOnline() && /localhost/.test(document.URL)) // because of CORS on localhost when not logged in yet
-                {                        
+                {
                     var message = status == 403
                         ? Cloud.getAccessToken()
                             ? onNotLoggedIn
@@ -625,7 +625,7 @@ module TDev {
                 if (status == 400)
                     throw new Error("Cloud precondition violated" + info);
                 else if (status == 403 ||
-                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet				    
+                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet                
                     {
                     HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)
@@ -677,7 +677,7 @@ module TDev {
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
                 var h = data.items[guid];
-                if (!h) return undefined; // already uninstalled? 
+                if (!h) return undefined; // already uninstalled?
                 var header = uninstall(<Cloud.Header>JSON.parse(h));
                 return setInstalledAsync(data.indexTable, data.scriptsTable, header, undefined, undefined, null, null);
             });
@@ -693,7 +693,7 @@ module TDev {
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
                 var h = data.items[guid];
-                if (!h) return undefined; // uninstalled? 
+                if (!h) return undefined; // uninstalled?
                 var header = <Cloud.Header>JSON.parse(h);
                 if (header.status !== "unpublished") return undefined;
                 header.status = "tobepublished";
@@ -710,7 +710,7 @@ module TDev {
                 items: indexTable.getItemsAsync([guid])
             }).then(function (data/*: SyncData*/) {
                 var h = data.items[guid];
-                if (!h) return undefined; // uninstalled? 
+                if (!h) return undefined; // uninstalled?
                 var header = <Cloud.Header>JSON.parse(h);
                 if (header.recentUse < recentUse) header.recentUse = recentUse;
                 var headerItem = {};
@@ -722,7 +722,7 @@ module TDev {
             return Math.floor(new Date().getTime()/1000);
         }
         function installAsync(status: string, scriptId: string, userId: string, stub: ScriptStub) : Promise // of Cloud.Header
-        {            
+        {
             var meta;
             if (stub.editorName == "touchdevelop") {
                 meta = getScriptMeta(stub.scriptText);
@@ -779,12 +779,12 @@ module TDev {
                         scriptName: getScriptMeta(text).name,
                     })
                 });
-            });                 
+            });
         }
         export function installUnpublishedAsync(baseScriptId: string, baseUserId: string, stub: ScriptStub) : Promise // of Cloud.Header
         {
             return installAsync("unpublished", baseScriptId, baseUserId, stub);
-        }        
+        }
         export function getInstalledAsync() : Promise // yields object whose keys are guids, and the values are Headers
         {
             return Promise.join({
@@ -819,7 +819,7 @@ module TDev {
         }
         export function getInstalledScriptsAsync(guids: string[]) : Promise // of guid => string (script text)
         {
-            return getScriptsTablePromise().then((scriptsTable) => 
+            return getScriptsTablePromise().then((scriptsTable) =>
                 scriptsTable.getItemsAsync(guids.map((g) => g + "-script")).then((map) => {
                     var r = {}
                     guids.forEach((g) => {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -33,7 +33,7 @@ module TDev
         private snapshotId: Promise = null;
 
         private dismissBtn:HTMLElement;
-		private runBtn:HTMLElement;
+        private runBtn:HTMLElement;
         private toCodeBtn:HTMLElement;
         public visible = false;
         public prepopulate:string;
@@ -57,13 +57,13 @@ module TDev
                 }
                 recognition.onerror = (e:any) => {
                     Util.log('reco:error' + e);
-                }               
+                }
                 recognition.onstart = () => {
                     Util.log('reco:start');
-                }               
+                }
                 recognition.onend = () => {
                     Util.log('reco:end');
-                }               
+                }
                 recognition.start();
             }
         }
@@ -259,13 +259,13 @@ module TDev
                 });
             this.runBtn = div("");
             this.updateRunButton();
-			this.runBtn.style.zIndex = "1"; // above apiDismiss
+            this.runBtn.style.zIndex = "1"; // above apiDismiss
             this.runBtn.style.position = "relative";
 
             this.toCodeBtn.style.display = "none";
             this.backContainer.setChildren([
                 this.dismissBtn,
-				this.runBtn,
+                this.runBtn,
                 this.toCodeBtn
             ]);
         }
@@ -359,7 +359,7 @@ module TDev
             }
 
             var addList = (entries: IntelliItem[]) => {
-                var cmpName = (a: IntelliItem, b: IntelliItem) => 
+                var cmpName = (a: IntelliItem, b: IntelliItem) =>
                     b.alphaOverride() - a.alphaOverride() ||
                     Util.stringCompare(a.getName(), b.getName());
                 var cmpScoreThenName = (a: IntelliItem, b: IntelliItem) =>
@@ -545,7 +545,7 @@ module TDev
             var verb = this.getVerb(terms);
             if (verbOverride) verb = verbOverride
 
-			var itemCount = (Browser.isMobile ? 5 : 20) + terms.length * 2;
+            var itemCount = (Browser.isMobile ? 5 : 20) + terms.length * 2;
             /* SYNTHESIS if (verb[0] == 'd') {
                 tick(Ticks.searchApiSynthesis);
                 return this.runSynthesisAsync(terms);
@@ -622,7 +622,7 @@ module TDev
         }
 
         private appendArt(a : JsonArt) {
-			this.editor.undoMgr.pushMainUndoState();
+            this.editor.undoMgr.pushMainUndoState();
             this.editor.undoMgr.clearCalc();
             var n = null;
             var appendPlay = false;
@@ -646,11 +646,11 @@ module TDev
         }
 
         private removeBtn(btn : HTMLElement) {
-			btn.removeSelf();
-			var idx = this.htmlEntries.indexOf(btn);
-			if (idx >= 0)
-				this.htmlEntries.splice(idx, 1);
-		}
+            btn.removeSelf();
+            var idx = this.htmlEntries.indexOf(btn);
+            if (idx >= 0)
+                this.htmlEntries.splice(idx, 1);
+        }
 
         private searchCoreAsync(pref: string, terms: string, continuation : string = undefined, filter : (p:Browser.BrowserPage) => boolean = p => true) : Promise {
             if (!this.autoUpdate.resultsCurrent(terms)) {
@@ -658,8 +658,8 @@ module TDev
             }
 
             this.progressBar.start();
-			var uri = pref + encodeURIComponent(this.stripVerb(terms));
-			if (continuation) uri += "&continuation=" + encodeURIComponent(continuation);
+            var uri = pref + encodeURIComponent(this.stripVerb(terms));
+            if (continuation) uri += "&continuation=" + encodeURIComponent(continuation);
             return Browser.TheHost.getLocationList(uri, (itms: Browser.BrowserPage[], cont: string) => {
                 this.progressBar.stop();
                 if (!this.autoUpdate.resultsCurrent(terms)) {
@@ -791,7 +791,7 @@ module TDev
 
     /* SYNTHESIS
     export class SynthesisCleaner
-        extends TDev.AST.NodeVisitor 
+        extends TDev.AST.NodeVisitor
     {
         constructor () {
             super()
@@ -801,7 +801,7 @@ module TDev
             this.visitChildren(n);
             return null
         }
-                
+
         visitBlock(n: TDev.AST.Block) {
             n.stmts = n.stmts.filter((s) => s.nodeType() != "comment");
             this.visitChildren(n);

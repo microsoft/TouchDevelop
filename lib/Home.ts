@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? Interact with devices in the home network. Devices must be UPnP™ compatible.
     //@ cap(home) obsolete

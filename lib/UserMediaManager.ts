@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export module UserMediaManager
     {
@@ -26,7 +26,7 @@ module TDev.RT {
         {
             if (!isSupported()) return Promise.as(undefined);
 
-            return new Promise((onSuccess, onError, onProgress) => 
+            return new Promise((onSuccess, onError, onProgress) =>
             {
                 try {
                     (<any>navigator).getUserMedia(
@@ -51,7 +51,7 @@ module TDev.RT {
         {
             if (!isSupported()) return Promise.as(undefined);
 
-            return new Promise((onSuccess, onError, onProgress) => 
+            return new Promise((onSuccess, onError, onProgress) =>
             {
                 try {
                     var constraints = <any>{

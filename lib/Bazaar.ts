@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Browse and review scripts from the bazaar
     export module Bazaar
@@ -39,13 +39,13 @@ module TDev.RT {
         //@ async returns(number)
         //@ tandre hasPauseContinue
         //@ readsMutable
-        export function leaderboard_score(r: ResumeCtx) // : number 
+        export function leaderboard_score(r: ResumeCtx) // : number
         {
             var rt = r.rt;
             var currentScore = cachedScore(rt);
             var localScore = () => r.resumeVal(currentScore);
 
-            if (!rt.currentScriptId || !Cloud.isOnline()) { 
+            if (!rt.currentScriptId || !Cloud.isOnline()) {
                 localScore();
             } else {
                 Cloud.authenticateAsync(lf("leaderboard"))
@@ -82,7 +82,7 @@ module TDev.RT {
         //? Posts the current game score to the script leaderboard
         //@ async
         //@ writesMutable
-        export function post_leaderboard_score(score: number, r: ResumeCtx) //: void 
+        export function post_leaderboard_score(score: number, r: ResumeCtx) //: void
         {
             var rt = r.rt;
             var currentScore = cachedScore(rt, score);
@@ -143,7 +143,7 @@ module TDev.RT {
 
         //? Posts the current game leaderboard to the wall
         //@ cachedAsync
-        export function post_leaderboard_to_wall(r: ResumeCtx) //: void 
+        export function post_leaderboard_to_wall(r: ResumeCtx) //: void
         {
             // TODO this should be cached for page display
             var rt = r.rt;
@@ -227,7 +227,7 @@ module TDev.RT {
 
         //? Opens the leaderboard for the current script
         //@ obsolete
-        export function open_leaderboard(r : ResumeCtx): void 
+        export function open_leaderboard(r : ResumeCtx): void
         {
             post_leaderboard_to_wall(r);
         }
@@ -280,7 +280,7 @@ module TDev.RT {
                 Util.log("storeid: " + id);
                 return Promise.as(id);
             }
-            return Promise.as("");            
+            return Promise.as("");
         };
 
     }

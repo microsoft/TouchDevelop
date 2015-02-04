@@ -189,7 +189,7 @@ module TDev.AST.Apps {
                 });
                 instructions.cordova.plugins =
                     Object.keys(compiled.cordovaPlugins)
-                    .map(k => k + (/^https?:\/\//.test(k) || /^\*?$/.test(compiled.cordovaPlugins[k]) ? "" : "@" + compiled.cordovaPlugins[k]));                 
+                    .map(k => k + (/^https?:\/\//.test(k) || /^\*?$/.test(compiled.cordovaPlugins[k]) ? "" : "@" + compiled.cordovaPlugins[k]));
             }
             compiled.packageResources.forEach(pr => {
                 instructions.files.push({
@@ -219,7 +219,7 @@ module TDev.AST.Apps {
         if (options.compileServer) {
             opts.packaging = false
             opts.cloud = true
-        
+
             compiled = AST.Compiler.getCompiledScript(app, opts)
             var serverCode = compiled.getCompiledCode();
 
@@ -275,7 +275,7 @@ module TDev.AST.Apps {
 
         if (options.downloadLocalFilesFrom) {
             promise = Promise.join(
-                ["css/default.css", "browser.js", "runtime.js"].map(fn => 
+                ["css/default.css", "browser.js", "runtime.js"].map(fn =>
                     Util.httpGetTextAsync(options.downloadLocalFilesFrom + fn).then(content => {
                         instructions.files.push({
                             path: options.filePrefix + fn,
@@ -288,7 +288,7 @@ module TDev.AST.Apps {
                     url: theBase + n
             }));
         }
-        
+
         // these 2 files are not stored in cdn, they are rewritten in the cloud
         [ "error", "browsers"].forEach(n => instructions.files.push({
             path: options.filePrefix + n + ".html",

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
      export enum LinkKind
      {
@@ -9,7 +9,7 @@ module TDev.RT {
         phoneNumber,
         hyperlink,
         radio,
-        address       
+        address
     }
 
     //? A link to a video, image, email, phone number
@@ -57,7 +57,7 @@ module TDev.RT {
             lnk._kind = kind;
             return lnk;
         }
-        
+
         public toString(): string {
             var s = this.name();
             return s;
@@ -74,7 +74,7 @@ module TDev.RT {
 
         //? Sets the name
         //@ writesMutable
-        public set_name(name : string ) : void { 
+        public set_name(name : string ) : void {
             this._description = "";
             this._title = name;
         }
@@ -114,7 +114,7 @@ module TDev.RT {
 
         public getViewCore(s: IStackFrame, b: BoxBase = null): HTMLElement
         {
-            switch (this._kind) 
+            switch (this._kind)
             {
                 case LinkKind.image:
                     var img = <HTMLImageElement>createElement("img");
@@ -143,7 +143,7 @@ module TDev.RT {
                             (<any>video).crossorigin = "anonymous";
                             video.load();
                             this.slowlyloadingelement = video;
-                            b.delayedlayout = true;                   
+                            b.delayedlayout = true;
                             return video;
                         }
                     } catch(e) {
@@ -152,7 +152,7 @@ module TDev.RT {
                 default:
                     var url = this.address();
                     var text = "go";
-                    switch (this._kind) 
+                    switch (this._kind)
                     {
                         case LinkKind.phoneNumber:
                             if (!/^tel:/i.test(url))
@@ -183,7 +183,7 @@ module TDev.RT {
                         b.RefreshOnScreen();
                     }
                     this.slowlyloadingelement.onerror = () => {
-                        // Util.log("onerror")               
+                        // Util.log("onerror")
                         b.SwapImageContent(Picture.errorPic());
                     }
                 } else {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A picture hosted on OneDrive.
     //@ cap(cloudservices) serializable stem("cloud pic") immutable ctx(general,cloudfield,json)
@@ -92,19 +92,19 @@ module TDev.RT {
         }
 
         public downloadPictureAsync(media: string): Promise { // Picture
-			var pic : Picture = undefined;
+            var pic : Picture = undefined;
             return this.toPictureUrlAsync(media)
                 .then((url: string) => {
                     if (!url) return Promise.as(undefined);
-					return Picture.fromUrl(url, false, false)
-						.then(p => {
-							pic = p;
-							return p.initAsync();
-						})
-						.then(() => {
-							pic.clearUrl();
-							return pic;
-						});
+                    return Picture.fromUrl(url, false, false)
+                        .then(p => {
+                            pic = p;
+                            return p.initAsync();
+                        })
+                        .then(() => {
+                            pic.clearUrl();
+                            return pic;
+                        });
                 });
         }
 
@@ -124,8 +124,8 @@ module TDev.RT {
         public download_picture(media: string, r: ResumeCtx) {
             this.downloadPictureAsync(media)
                 .done(
-					(p: Picture) => r.resumeVal(p),
-					(e) => r.resumeVal(undefined));
+                    (p: Picture) => r.resumeVal(p),
+                    (e) => r.resumeVal(undefined));
         }
 
         public getViewCore(s: IStackFrame, b: BoxBase): HTMLElement {
@@ -153,7 +153,7 @@ module TDev.RT {
             };
             return d;
         }
-       
+
         //? Posts the picture to the wall.
         public post_to_wall(s:IStackFrame) : void { super.post_to_wall(s) }
     }

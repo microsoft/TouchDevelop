@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A picture album
     //@ stem("album") walltap cap(media)
@@ -21,7 +21,7 @@ module TDev.RT {
             pa._pictures = pictures;
             return pa;
         }
-        
+
         //? Gets the children albums
         //@ async embedsLink("Picture Album", "Picture Albums") returns(PictureAlbums)
         public albums(r : ResumeCtx) { //: PictureAlbums {

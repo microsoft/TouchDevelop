@@ -1,4 +1,4 @@
-﻿
+
 ///<reference path='refs.ts'/>
 
 
@@ -94,7 +94,7 @@ module TDev {
                     });
             }
 
-     
+
        */
 
             // session tests
@@ -104,7 +104,7 @@ module TDev {
                      (token:any) => {
                          this.print("success:");
                          this.print("token=" + token);
-                        
+
                      },
                      (e) => {
                          this.fail("error: " + e);
@@ -123,7 +123,7 @@ module TDev {
                             this.print("");
                             this.print("id=" + si._id);
                             this.print("d=" + si._title);
-                            
+
                         });
                     },
                     (e) => {
@@ -132,7 +132,7 @@ module TDev {
 
             }
 
-            
+
             public deletetests(): void {
                 var user = Cloud.getUserId();
                 this.print("issuing get request for sessions by user " + user + "...");
@@ -322,7 +322,7 @@ module TDev {
                         var is = s.user_get_items_in_domain("customer()");
                         this.assert(is.length == 4);
 
-                        
+
                         var es = s.user_get_entries_in_indexdomain("customertable[customer()]");
                         this.assert(es.length == 3);
 

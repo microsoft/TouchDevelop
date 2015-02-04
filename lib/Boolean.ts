@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? true or false
     //@ stem("b") icon("CheckBox") immutable isData builtin ctx(general,indexkey,cloudfield,json)

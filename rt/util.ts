@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     export var debuggerExceptions = false;
@@ -9,7 +9,7 @@ module TDev {
     export var asyncEnabled = true;
     export var isWebWorker = false;
 
-    export interface StringMap<T> 
+    export interface StringMap<T>
     {
         [index:string] : T;
     }
@@ -38,7 +38,7 @@ module TDev {
         var ret = enumType[theEnum];
         if (!ret) throw new Error("Cannot convert enum to string: " + theEnum);
         return ret;
-    } 
+    }
 
     export function nullify(v: any) {
         // == null returns true for both null and undefined
@@ -69,7 +69,7 @@ module TDev {
             else if (!f) return v;
             else return coalesce(null);
         };
-	
+    
         return <Coalesced<T>>re;
     }
 
@@ -126,7 +126,7 @@ module TDev {
 
     export function dirAuto(el: HTMLElement): HTMLElement {
         if (el) {
-            if (Browser.directionAuto) 
+            if (Browser.directionAuto)
                 el.setAttribute('dir', 'auto');
             else {
                 var t = el.innerText;
@@ -283,7 +283,7 @@ module TDev{
     }
 
     export function httpPostJsonAsync(url:string, body: any) : Promise {
-        return httpRequestAsync(url, "POST", JSON.stringify(body), 
+        return httpRequestAsync(url, "POST", JSON.stringify(body),
             Cloud.lite ? "application/json;charset=UTF-8" : "text/plain;charset=UTF-8").then((s) => s ? parseJsonWithHack(s) : {});
     }
 
@@ -299,7 +299,7 @@ module TDev{
         // TODO: clean up dependency between cloud and Util
         if (Cloud.isOffline()) return Cloud.offlineErrorAsync();
 
-        return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {                    
+        return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
             var client:XMLHttpRequest;
             var resolved = false
             function innerSuccess() {
@@ -313,7 +313,7 @@ module TDev{
 
                 if (client.readyState == 4) {
                     resolved = true
-                    if (client.status == 200) 
+                    if (client.status == 200)
                         innerSuccess();
                     else
                         innerError();
@@ -606,7 +606,7 @@ module TDev{
         arr.clear = function () {
             return this.splice(0, this.length);
         }
-        
+
         var str = (<any> String).prototype;
         str.startsWith = function (str:string) { this.slice(0, str.length) == str; }
         str.endsWith = function (str:string) { this.slice(-str.length) == str; }
@@ -694,11 +694,11 @@ module TDev{
         };
 
         var obj = <any>Object.prototype;
-        obj.create = function (o:any) {  
-            function F() {}  
-            F.prototype = o;  
-            return new F();  
-        };  
+        obj.create = function (o:any) {
+            function F() {}
+            F.prototype = o;
+            return new F();
+        };
 
         Object.keys = function (o:any) {
             var res = []
@@ -759,7 +759,7 @@ module TDev{
         if (s.rt.devMode)
             Util.userError(apiName + " is not supported in this version of TouchDevelop");
         return undefined;
-    } 
+    }
 
     export function guidGen()
     {
@@ -771,7 +771,7 @@ module TDev{
         var nohyphens = guid.replace(/-/g, 'z');
         var nonumbers = nohyphens.replace(/[0-9]/g, s => {
                var digit = s.charCodeAt(0) - ("0".charCodeAt(0)) + ("m".charCodeAt(0));
-               return String.fromCharCode(digit) 
+               return String.fromCharCode(digit)
         });
         return nonumbers;
     }
@@ -1051,11 +1051,11 @@ module TDev{
     }
 
     export function decodeDataURL(url: string, mimeType: string = null): Uint8Array {
-		if (!mimeType) {
-			var m = url.match(/^data:([^;]+);base64,/);
-			if (!m) return undefined;
-			mimeType = m[1];
-		}
+        if (!mimeType) {
+            var m = url.match(/^data:([^;]+);base64,/);
+            if (!m) return undefined;
+            mimeType = m[1];
+        }
         var prefix = 'data:' + mimeType + ';base64,';
         var binaryEncoded = url.substr(prefix.length);
         var binary = atob(binaryEncoded);
@@ -1806,7 +1806,7 @@ module TDev{
         if (elt.type === "text" || elt.type === "number")
             try {
                 elt.setSelectionRange(selectAll ? 0 : elt.value.length, elt.value.length);
-            } catch (e) { }                
+            } catch (e) { }
     }
 
     export function hideKeyboard()
@@ -1953,11 +1953,11 @@ module TDev{
             }
             conn.onclose = () => {
                 console.log("Remote log connection closed")
-                remoteLogConnection = null 
+                remoteLogConnection = null
             }
             conn.onerror = function () {
                 console.log("Remote log connection error")
-                remoteLogConnection = null 
+                remoteLogConnection = null
             }
         }
 
@@ -1974,9 +1974,9 @@ module TDev{
 
         var lm:LogMessage = {
             timestamp: n,
-            level: 
-                /^log:/.test(f) ? 6 : 
-                /^crash/i.test(f) ? 3 
+            level:
+                /^log:/.test(f) ? 6 :
+                /^crash/i.test(f) ? 3
                     : 7,
             category: "tdlog",
             msg: msg
@@ -2081,8 +2081,8 @@ module TDev{
                 return true;
             } else return false;
         }
-        
-        for (var p in b) 
+
+        for (var p in b)
             if (b.hasOwnProperty(p) && !a.hasOwnProperty(p))
                 return false;
 
@@ -2112,7 +2112,7 @@ module TDev{
             iterHtml(node, f)
         }
     }
-    
+
     export function highlightWords(e:Node, terms:string[], keepCache = false)
     {
         if (e instanceof Text) {
@@ -2202,7 +2202,7 @@ module TDev{
         b.style.visibility = "hidden";
         Util.setTimeout(time, () => {
             b.style.visibility = "";
-            Util.fadeIn(b, () => { 
+            Util.fadeIn(b, () => {
                 b.style.opacity = '1';
                 Util.setTimeout(2000, () => Util.coreAnim("blinkLocation", 4000, b));
             })
@@ -2211,7 +2211,7 @@ module TDev{
     }
 
     export function animAsync(name:string, duration:number, elt:HTMLElement) {
-        return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {                    
+        return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
             coreAnim(name, duration, elt, () => onSuccess(null));
         });
     }
@@ -2318,7 +2318,7 @@ module TDev{
         case "PageDown": keyName = "PgDn"; break;
         case "PageUp": keyName = "PgUp"; break;
         }
-        
+
         if (e.altKey) keyName = "Alt-" + keyName;
         if (e.ctrlKey) keyName = "Ctrl-" + keyName;
         if (e.shiftKey) keyName = "Shift-" + keyName;
@@ -2375,7 +2375,7 @@ module TDev{
     export function between(low:number, x:number, high:number) { return boundTo(low, x, high) }
     export function intBetween(low:number, x:number, high:number) { return Math.round(boundTo(low, x, high)) }
 
-    export function fmt_va(f:string, args:any[]) : string 
+    export function fmt_va(f:string, args:any[]) : string
     {
         if (args.length == 0) return f;
         return (<any>f).replace(/\{([0-9]+)(\:[^\}]+)?\}/g, function (s:string, n:string, spec:string) : string {
@@ -2526,7 +2526,7 @@ module TDev{
             return;
 
         var bug = Ticker.mkBugReport(err, ctx);
-        
+
         // the time check is to prevent infinite reload loop
         var willReload = fatal;
         var lastBugReload = window.localStorage["lastBugReload"];
@@ -2636,7 +2636,7 @@ module TDev{
             res += String.fromCharCode((code >> 8) & 0xff);
         }
         return res;
-        
+
     }
 
     export function toUTF8(str:string)
@@ -2707,10 +2707,10 @@ module TDev{
 
     export function jsStringQuote(s:string)
     {
-        return s.replace(/[^A-Z0-9a-z .!?_\-$]/g, 
-                (c) => { 
+        return s.replace(/[^A-Z0-9a-z .!?_\-$]/g,
+                (c) => {
                     var h = c.charCodeAt(0).toString(16);
-                    return "\\u" + "0000".substr(0, 4 - h.length) + h; 
+                    return "\\u" + "0000".substr(0, 4 - h.length) + h;
             });
     }
 
@@ -2775,19 +2775,19 @@ module TDev{
         return res
     }
 
-	export function unique<T>(arr: T[], f:(t:T)=>string) : T[]
-	{
-		var v : T[] = [];
+    export function unique<T>(arr: T[], f:(t:T)=>string) : T[]
+    {
+        var v : T[] = [];
         var r: { [index: string]: any; } = {}
         arr.forEach(e => {
             var k = f(e)
             if (!r.hasOwnProperty(k)) {
-			 r[k] = null;
+             r[k] = null;
              v.push(e);
-		    }
+            }
         })
-		return v;
-	}
+        return v;
+    }
 
     export function groupBy<T>(arr:T[], f:(t:T)=>string) : StringMap<T[]>
     {
@@ -2997,7 +2997,7 @@ module TDev{
             var toSend = translationTracker
             translationTracker = {}
             Util.httpPostRealJsonAsync("https://touchdeveloptranslator.azurewebsites.net/api/Svc/submit",
-                { 
+                {
                     freqs: toSend,
                     lang: getTranslationLanguage(),
                     token: translationToken,
@@ -3097,7 +3097,7 @@ module TDev{
   var numStatic = 1
   export function lf_static(format:string, account:boolean):string
   {
-      //if (account) 
+      //if (account)
       //    if (numStatic++ % 1000 == 0) debugger;
 
       if (Util.translationDebug)
@@ -3113,7 +3113,7 @@ module TDev{
       if (!Util.sForPlural && lfmt != format && /\d:s\}/.test(lfmt)) {
           lfmt = lfmt.replace(/\{\d+:s\}/g, "")
       }
-          
+
       if (Util.translationDebug)
           return Util.fmt_va(lfmt, args).toUpperCase()
       else
@@ -3181,18 +3181,18 @@ module TDev{
         updateValue: string = null;
         // make it slightly slower on phones, faster on desktop
         public delay = Browser.isDesktop ? 300 : Browser.isCellphone ? 800 : 500;
-        
+
         constructor(private read : () => string, public update:(s:string)=>void)
         {
         }
 
-        static mkInput(textbox: HTMLInputElement, update: (s: string) => void ) : KeyboardAutoUpdate 
+        static mkInput(textbox: HTMLInputElement, update: (s: string) => void ) : KeyboardAutoUpdate
         {
             var kb = new KeyboardAutoUpdate(() => textbox.value, update);
             return kb;
         }
 
-        static mkTextArea(textbox: HTMLTextAreaElement, update: (s: string) => void ) : KeyboardAutoUpdate 
+        static mkTextArea(textbox: HTMLTextAreaElement, update: (s: string) => void ) : KeyboardAutoUpdate
         {
             var kb = new KeyboardAutoUpdate(() => textbox.value, update);
             return kb;
@@ -3222,7 +3222,7 @@ module TDev{
         public resultsCurrent(s:string):boolean
         {
             //Util.log("autokeyboard - current: cv " + this.version + ", " + (this.textbox.value == s));
-            return this.read() == s;    
+            return this.read() == s;
         }
     }
 

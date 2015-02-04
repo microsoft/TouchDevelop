@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? 2D barcodes, QR codes and NFC tags
     export module Tags
@@ -27,7 +27,7 @@ module TDev.RT {
             return r.host.askSourceAccessAsync("proximity", "send and receive data using NFC.", false);
         }
 
-        function sendNFCDialogAsync(writeTag : boolean, type: string, value: string): Promise { 
+        function sendNFCDialogAsync(writeTag : boolean, type: string, value: string): Promise {
             return new Promise((onSuccess, onError, onProgress) => {
                 var mid : number = 0;
                 var m = new ModalDialog();
@@ -42,7 +42,7 @@ module TDev.RT {
                     m.add(div('wall-dialog-header', 'tap+send'));
                     m.add(div('wall-dialog-body', 'Go ahead and tap your device to another device that supports NFC.'));
                 }
-                m.add(div('wall-dialog-buttons', 
+                m.add(div('wall-dialog-buttons',
                     HTML.mkButton('cancel', () => {
                         Util.log('nfc: user cancel');
                         m.dismiss();
@@ -59,7 +59,7 @@ module TDev.RT {
             });
         }
 
-        function receiveNFCDialogAsync(type: string): Promise { 
+        function receiveNFCDialogAsync(type: string): Promise {
             return new Promise((onSuccess, onError, onProgress) => {
                 var mid : number = 0;
                 var m = new ModalDialog();
@@ -70,7 +70,7 @@ module TDev.RT {
                 };
                 m.add(div('wall-dialog-header', 'tap+receive'));
                 m.add(div('wall-dialog-body', 'Go ahead and tap your device to another device that supports NFC.'));
-                m.add(div('wall-dialog-buttons', 
+                m.add(div('wall-dialog-buttons',
                     HTML.mkButton('cancel', () => {
                         Util.log('nfc: user cancel');
                         m.dismiss();
@@ -124,7 +124,7 @@ module TDev.RT {
         export function nfc_send_picture(pic : Picture, r: ResumeCtx) {
             askProximityAccessAsync(r.rt)
                 .then(allow => {
-                    if (allow) 
+                    if (allow)
                         return pic.initAsync()
                             .then(() => sendNFCDialogAsync(false, 'picture', pic.getDataUri()));
                     else return Promise.as();
@@ -152,7 +152,7 @@ module TDev.RT {
             else if (size > 3) size = 3;
             if (text.length > 1000) text = text.substr(0, 1000);
 
-            var url = 'runtime/tags/tag?kind=' + encodeURIComponent(kind) 
+            var url = 'runtime/tags/tag?kind=' + encodeURIComponent(kind)
                 + '&size=' + encodeURIComponent(size.toString())
                 + '&bw=' + (bw ? 'true' : 'false')
                 + '&text=' + text;
@@ -166,7 +166,7 @@ module TDev.RT {
         //@ [result].writesMutable
         //@ [size].defl(1) [bw].defl(true)
         export function tag_url(url: string, size: number, bw: boolean, r: ResumeCtx) // : Picture
-        {            
+        {
             tag(url, size, bw, 'url', r);
         }
 
@@ -175,7 +175,7 @@ module TDev.RT {
         //@ [result].writesMutable
         //@ [size].defl(1) [bw].defl(true)
         export function tag_text(text:string, size:number, bw:boolean, r : ResumeCtx) //: Picture
-        {            
+        {
             tag(text, size, bw, 'text', r);
         }
 

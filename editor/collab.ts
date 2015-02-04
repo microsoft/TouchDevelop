@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
@@ -82,7 +82,7 @@ module TDev {
         }
 
 
-        /// -------- push and pull enable/disable 
+        /// -------- push and pull enable/disable
 
 
         // temporary pull suppression (initially false, controlled from editor while editing in calculator or other buffers)
@@ -125,7 +125,7 @@ module TDev {
                 processAstTable();
             }
         }
-       
+
 
         /// ---------- chat & presence interface
 
@@ -204,7 +204,7 @@ module TDev {
             sessionId: number;
         }
 
-        var msg_expiration_msec = 15 * 60 * 1000; 
+        var msg_expiration_msec = 15 * 60 * 1000;
 
         export function getLastTenMessages(): IMessage[]{
             if (!AstSession || !AstSession.loaded || AstSession.faulted)
@@ -220,7 +220,7 @@ module TDev {
                     msg.uid = items[i].uid;
                     var ukeys = [items[i].uid];
                     var lkeys = [];
-                    var timestampfield = AstSession.user_get_lval(ct_chattable_timestamp, ukeys, lkeys);      
+                    var timestampfield = AstSession.user_get_lval(ct_chattable_timestamp, ukeys, lkeys);
                     var userfield = AstSession.user_get_lval(ct_chattable_user, ukeys, lkeys);
                     var contentfield = AstSession.user_get_lval(ct_chattable_content, ukeys, lkeys);
                     msg.user = AstSession.user_get_value(userfield);
@@ -397,7 +397,7 @@ module TDev {
             return Promise.as();
         }
 
-  
+
 
         function loaduserdata(): boolean {
             var pc = Collab.AstSession.user_get_userdata("asts");
@@ -442,7 +442,7 @@ module TDev {
         export function astEquals(ast1: string[], ast2: string[]):boolean {
             return ast1[0] == ast2[0] || ast1[1] === ast2[1];
         }
-        
+
         function randomsuffix(): string {
             var d = new Date();
             var ms = d.getMilliseconds();
@@ -487,7 +487,7 @@ module TDev {
             }
         }
 
-       
+
         export function recordAst(ast: string) : any {
 
             Util.assert(ready);
@@ -510,7 +510,7 @@ module TDev {
                   //TODO : make pending changes visible
                 //AstSession.user_push();
                // AstSession.user_modify_lval(AstSession.user_get_lval(ct_participantindex_blockedpushes, [], [AstSession.getMemberNumber().toString()]), "A1");
- 
+
             }
             else {
                 // clear unsaved changes
@@ -561,7 +561,7 @@ module TDev {
             }
             else if (!ready) {
                 Util.log(">>> processAstTable first time, (" + items.length + ")");
-            } else 
+            } else
                 Util.log(">>> processAstTable (" + items.length + ")");
 
 
@@ -637,7 +637,7 @@ module TDev {
             if (delayed_push)
                 pushAstToCloud();
         }
-   
+
 
         /// ------------------- the actual merge function
 
@@ -653,7 +653,7 @@ module TDev {
 
             //  take shortcuts based on merge function equivalences
             if (astEquals(o_ast, b_ast)     // easy merge: deltas are consecutive edits
-                || astEquals(b_ast, a_ast))  // easy merge: identical change                           
+                || astEquals(b_ast, a_ast))  // easy merge: identical change
             {
                 return a_ast;
             }
@@ -703,12 +703,12 @@ module TDev {
             // if we are in testing mode, record results and test equivalences
             if (testMode)
                 var record = JSON.stringify({ "O": os, "A": as, "B": bs, "actual": mergeds });
-           
+
 
             return [name + "=" + mergedesc, mergeds];
         }
 
-     
+
 
         // session context functions
 
@@ -762,7 +762,7 @@ module TDev {
             return desc;
         }
 
- 
+
     }
 
 

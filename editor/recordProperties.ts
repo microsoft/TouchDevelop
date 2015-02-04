@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -92,7 +92,7 @@ module TDev
 
         private mkField(key:boolean)
         {
-            var terminology = (key ? this.theRecord.getKeyTerminology() : this.theRecord.getValueTerminology()); 
+            var terminology = (key ? this.theRecord.getKeyTerminology() : this.theRecord.getValueTerminology());
             if (!terminology) return null;
 
             var b = HTML.mkButtonTick(lf("add {0}", terminology), key ? Ticks.recordAddKey : Ticks.recordAddValue, () => {
@@ -101,7 +101,7 @@ module TDev
                 var stmt = blk.emptyStmt()
                 if (!stmt) {
                     var x = this.theRecord.cloudEnabled ? lf("replicated tables") : this.theRecord.persistent ? lf("persistent tables") : lf("tables");
-                    TDev.ModalDialog.info(lf("No can do"), 
+                    TDev.ModalDialog.info(lf("No can do"),
                       lf("Links have to lead to other {0}. You don't have any other {0} defined at the moment.", x));
                     return;
                 }
@@ -179,11 +179,11 @@ module TDev
 
         // kind container methods
 
-        public getContexts():KindContext 
+        public getContexts():KindContext
         {
             return KindContext.GcKey;
         }
-        public getKind() { 
+        public getKind() {
             var theKey = <AST.RecordField> this.theRecord.keys.stmts[0];
             return (theKey) ? theKey.dataKind : api.getKind("Sprite");
         }
@@ -264,7 +264,7 @@ module TDev
             this.theRecord = null;
             TheEditor.dismissSidePane();
             this.theRecord = a;
-          
+
             this.formRoot.className += " recordProperties";
 
 
@@ -275,7 +275,7 @@ module TDev
                                   this.mkKey,
                                   this.mkVal,
                                   ]);
-            
+
             this.editor.displayLeft([this.formRoot]);
             this.syncAll(false);
         }

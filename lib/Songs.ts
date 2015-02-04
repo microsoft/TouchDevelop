@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A collection of songs
     //@ immutable enumerable cap(media)
@@ -6,7 +6,7 @@ module TDev.RT {
         extends RTValue
     {
         private _songs: Song[] = [];
-        
+
         constructor() {
             super()
         }
@@ -52,7 +52,7 @@ module TDev.RT {
         //? Plays the song.
         //@ cap(musicandsounds)
         public play()
-        {            
+        {
             Player.play_many(this);
         }
 

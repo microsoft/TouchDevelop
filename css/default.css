@@ -1,4 +1,4 @@
-﻿body {
+body {
     color: black;
     font-size: 24px;
     overflow: hidden; /* want no scrolling of the body ever - looks bad on touch screens. Instead, we scroll elements */
@@ -250,7 +250,7 @@ font-size:1.2em;
     width:100%;
     height:auto;
 }
-.classic-page .wall-picture-preview 
+.classic-page .wall-picture-preview
 {
     max-width:8em;
     max-height:12em;
@@ -369,7 +369,7 @@ font-size:1.2em;
 button, input[type=button], .stmt, a.button
 {
   cursor: pointer;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
 button::-moz-focus-inner {
@@ -960,17 +960,17 @@ div.wall-box-tile>div.wall-box
 .loadingNotification
 {
   position: absolute;
-  width: 100%; 
-  left: 0; 
-  top: 45%; 
-  height: 1.6em; 
+  width: 100%;
+  left: 0;
+  top: 45%;
+  height: 1.6em;
   padding-top:1.6em;
   padding-bottom:1.2em;
-  text-align: center; 
-  color: white; 
-  font-family: sans-serif; 
+  text-align: center;
+  color: white;
+  font-family: sans-serif;
   font-weight: bold;
-  background-color: gray;  
+  background-color: gray;
   font-size: 1.6em;
   z-index:1;
 }
@@ -981,7 +981,7 @@ div.wall-box-tile>div.wall-box
   width: 30em;
   left: 0;
   top: 0;
-  background-color: #41900D;  
+  background-color: #41900D;
   font-size: 0.5em;
   color: white;
   padding: 0.7em;
@@ -1031,7 +1031,7 @@ table.traces th
     text-align: center;
 }
 
-table.traces tr.hover:hover 
+table.traces tr.hover:hover
 {
     background-color: #b0b0b0;
 }
@@ -1098,9 +1098,9 @@ input[data-invalid^="yes"]
 
 .wall-box input, .wall-box textarea {
     margin: 0;
-    padding: 1px; 
-    border: none; 
-    border-radius: 0px; 
+    padding: 1px;
+    border: none;
+    border-radius: 0px;
     background: transparent;
     font-family: inherit;
     font-size: inherit;
@@ -1205,7 +1205,7 @@ input[data-invalid^="yes"]
   height: 100%;
 }
 
-.landscape .wallWithColumns .classic-page 
+.landscape .wallWithColumns .classic-page
 {
   column-width: 18.5em;                      /*CSSpref*/  -webkit-column-width: 18.5em;  -moz-column-width: 18.5em;
   column-fill: auto;                      /*CSSpref*/  -webkit-column-fill: auto;  -moz-column-fill: auto;
@@ -1213,7 +1213,7 @@ input[data-invalid^="yes"]
   padding-bottom: 1.5em;
 }
 
-.portrait .wallWithColumns .classic-page 
+.portrait .wallWithColumns .classic-page
 {
   margin-left: 1em;
   font-size: 1.3em;
@@ -1222,7 +1222,7 @@ input[data-invalid^="yes"]
 
 
 /*
-#theWall div.wall-page 
+#theWall div.wall-page
 {
   max-width: 20em;
   height: 100%;
@@ -1323,13 +1323,13 @@ height: 100%;
 }
 
 .wallCloudSymbol {
-  width: 9em; 
+  width: 9em;
   height: 1.5em;
   text-align: center;
   cursor:pointer;
 }
 .phone .wallCloudSymbol {
-  width: 5em; 
+  width: 5em;
 }
 
 .wallCloudStatus {
@@ -1585,7 +1585,7 @@ height: 100%;
 }
 .mapPushpin
 {
-  position: absolute; 
+  position: absolute;
   font-size:0.7em;
   width:39px;
   height:25px;
@@ -1599,7 +1599,7 @@ height: 100%;
   bottom: -16px;
   border-top: 16px solid green;
   border-left: 0;
-  border-right: 14px solid transparent;        
+  border-right: 14px solid transparent;
   border-bottom: 0;
 }
 
@@ -1640,7 +1640,7 @@ height: 100%;
     top:0.4em;
 }
 
-.wallAdContainer 
+.wallAdContainer
 {
     position:absolute;
     bottom:1em;
@@ -1702,7 +1702,7 @@ height: 100%;
 }
 
 @keyframes showFromBelow {
-  from { 
+  from {
     opacity: 0;
     transform: translate(0, 1em);                      /*CSSpref*/  -webkit-transform: translate(0, 1em);  -moz-transform: translate(0, 1em);
   }
@@ -1710,82 +1710,82 @@ height: 100%;
     opacity: 1;
     transform: none;                      /*CSSpref*/  -webkit-transform: none;  -moz-transform: none;
   }
-}   /*CSSpref*/ @-webkit-keyframes showFromBelow { from { opacity: 0; -webkit-transform: translate(0, 1em); } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showFromBelow { from { opacity: 0; -moz-transform: translate(0, 1em); } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showFromBelow { from { opacity: 0; -webkit-transform: translate(0, 1em); } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showFromBelow { from { opacity: 0; -moz-transform: translate(0, 1em); } to { opacity: 1; -moz-transform: none; } }
 
 
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-moz-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } } 
+}   /*CSSpref*/ @-webkit-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-moz-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-moz-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } 
+}   /*CSSpref*/ @-webkit-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-moz-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @keyframes showPopup {
   from { opacity: 0; transform: translate(0, 2em); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPopup { from { opacity: 0; -webkit-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPopup { from { opacity: 0; -moz-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showPopup { from { opacity: 0; -webkit-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPopup { from { opacity: 0; -moz-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes showRightPanel {
   from { opacity: 0; transform: translate(1em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showRightPanel { from { opacity: 0; -webkit-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showRightPanel { from { opacity: 0; -moz-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showRightPanel { from { opacity: 0; -webkit-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showRightPanel { from { opacity: 0; -moz-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes showLeftPanel {
   from { opacity: 0; transform: translate(-1em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showLeftPanel { from { opacity: 0; -webkit-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showLeftPanel { from { opacity: 0; -moz-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showLeftPanel { from { opacity: 0; -webkit-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showLeftPanel { from { opacity: 0; -moz-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes showBottomPanel {
   from { opacity: 0; transform: translate(0, 1em); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showBottomPanel { from { opacity: 0; -webkit-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showBottomPanel { from { opacity: 0; -moz-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showBottomPanel { from { opacity: 0; -webkit-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showBottomPanel { from { opacity: 0; -moz-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes flipTile {
   from { transform: none; }
   50% { transform: scale(-4, 4) }
   to { transform: scale(16, 16); }
-}   /*CSSpref*/ @-webkit-keyframes flipTile { from { -webkit-transform: none; } 50% { -webkit-transform: scale(-4, 4) } to { -webkit-transform: scale(16, 16); } }  @-moz-keyframes flipTile { from { -moz-transform: none; } 50% { -moz-transform: scale(-4, 4) } to { -moz-transform: scale(16, 16); } } 
+}   /*CSSpref*/ @-webkit-keyframes flipTile { from { -webkit-transform: none; } 50% { -webkit-transform: scale(-4, 4) } to { -webkit-transform: scale(16, 16); } }  @-moz-keyframes flipTile { from { -moz-transform: none; } 50% { -moz-transform: scale(-4, 4) } to { -moz-transform: scale(16, 16); } }
 
 @keyframes fadeSlide {
   from { transform: none; opacity: 1; }
   to { transform: translate(4em, -4em); opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes fadeSlide { from { -webkit-transform: none; opacity: 1; } to { -webkit-transform: translate(4em, -4em); opacity: 0; } }  @-moz-keyframes fadeSlide { from { -moz-transform: none; opacity: 1; } to { -moz-transform: translate(4em, -4em); opacity: 0; } } 
+}   /*CSSpref*/ @-webkit-keyframes fadeSlide { from { -webkit-transform: none; opacity: 1; } to { -webkit-transform: translate(4em, -4em); opacity: 0; } }  @-moz-keyframes fadeSlide { from { -moz-transform: none; opacity: 1; } to { -moz-transform: translate(4em, -4em); opacity: 0; } }
 
 @keyframes showPageLeft {
   from { opacity: 0; transform: translate(-10em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPageLeft { from { opacity: 0; -webkit-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageLeft { from { opacity: 0; -moz-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showPageLeft { from { opacity: 0; -webkit-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageLeft { from { opacity: 0; -moz-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes hidePageLeft {
   from { opacity: 1; transform: none; }
   to { opacity: 0; transform: translate(10em, 0); }
-}   /*CSSpref*/ @-webkit-keyframes hidePageLeft { from { opacity: 1; -webkit-transform: none; } to { opacity: 0; -webkit-transform: translate(10em, 0); } }  @-moz-keyframes hidePageLeft { from { opacity: 1; -moz-transform: none; } to { opacity: 0; -moz-transform: translate(10em, 0); } } 
+}   /*CSSpref*/ @-webkit-keyframes hidePageLeft { from { opacity: 1; -webkit-transform: none; } to { opacity: 0; -webkit-transform: translate(10em, 0); } }  @-moz-keyframes hidePageLeft { from { opacity: 1; -moz-transform: none; } to { opacity: 0; -moz-transform: translate(10em, 0); } }
 
 @keyframes showPageRight {
   from { opacity: 0; transform: translate(10em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPageRight { from { opacity: 0; -webkit-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageRight { from { opacity: 0; -moz-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } } 
+}   /*CSSpref*/ @-webkit-keyframes showPageRight { from { opacity: 0; -webkit-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageRight { from { opacity: 0; -moz-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
 
 @keyframes hidePageDown {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, 10em) scale(0.5) }
   100% { transform: translate(0, 30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes hidePageDown { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageDown { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } } 
+}   /*CSSpref*/ @-webkit-keyframes hidePageDown { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageDown { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
 
 @keyframes hidePageUp {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, -10em) scale(0.5) }
   100% { transform: translate(0, -30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes hidePageUp { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, -10em) scale(0.5) } 100% { -webkit-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageUp { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, -10em) scale(0.5) } 100% { -moz-transform: translate(0, -30em) scale(0.5); opacity: 0 } } 
+}   /*CSSpref*/ @-webkit-keyframes hidePageUp { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, -10em) scale(0.5) } 100% { -webkit-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageUp { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, -10em) scale(0.5) } 100% { -moz-transform: translate(0, -30em) scale(0.5); opacity: 0 } }
 
 
 a.button, a.button:hover, a.button:visited {
@@ -1875,14 +1875,14 @@ a.button, a.button:hover, a.button:visited {
   vertical-align: top;
 }
 
-.cloudSession .navItemInner 
+.cloudSession .navItemInner
 {
     height: auto;
     position: relative;
 	font-size: 0.7em;
 }
 
-.cloudSession .navContent 
+.cloudSession .navContent
 {
     position: relative;
     white-space: pre-line;
@@ -1896,7 +1896,7 @@ a.button, a.button:hover, a.button:visited {
     margin-bottom: 0.2em;
 }
 
-.cloudSession .navDescription 
+.cloudSession .navDescription
 {
     text-wrap:normal;
     white-space:pre-line;

@@ -11,8 +11,8 @@ module TDev {
 
     export class Hashtable
     {
-        static primeSizes = [13, 29, 59, 127, 257, 521, 1049, 2099, 4201, 8419, 16843, 33703, 67409, 134837, 
-            269683, 539389, 1078787, 2157587, 4315183, 8630387, 17260781, 34521589, 69043189, 138086407, 
+        static primeSizes = [13, 29, 59, 127, 257, 521, 1049, 2099, 4201, 8419, 16843, 33703, 67409, 134837,
+            269683, 539389, 1078787, 2157587, 4315183, 8630387, 17260781, 34521589, 69043189, 138086407,
             276172823, 552345671, 1104691373, 2209382761];
 
         private entries:HashtableEntry[];
@@ -53,7 +53,7 @@ module TDev {
         public remove(k: any): HashtableEntry {
             return this.deleteKey(k);
         }
-     
+
         private lookup(k:any, addNew = false)
         {
             if (!this.entries) {
@@ -94,7 +94,7 @@ module TDev {
         {
             var size = this.sizeAtLeast(this.entries.length);
             if (size == 0) return; // over 4G entries?
-        
+
             var oldEntries = this.entries;
             this.entries = [];
             for (var i = 0; i < size; ++i)

@@ -1,10 +1,10 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev.AST {
     // a visitor to find the set of ``next'' statements after provided one
     // the next finder is conservative and can find false nodes!
     export class NextFinder
-        extends NodeVisitor {     
+        extends NodeVisitor {
         constructor()
         {
             super();
@@ -136,7 +136,7 @@ module TDev.AST {
         }
 
     }
-    
+
     class AwaitChecker extends NodeVisitor {
         private res = false;
 
@@ -168,13 +168,13 @@ module TDev.AST {
     }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Visitor classes that enable Dataflow Analyses to walk through the AST    
-        
+    // Visitor classes that enable Dataflow Analyses to walk through the AST
+
     // PredecessorsFinder extracts the list of predecessors statements of another statement
     // by walking the AST. These are the predecessors when converting the AST to a CFG.
     // NOTE: Valid nodes for all dataflow analyses are Statement nodes
     // that contain an ExprHolder instance (therefore, consumes an expression).
-    // PredecessorsFinder and SuccessorsFinder both walk through these nodes 
+    // PredecessorsFinder and SuccessorsFinder both walk through these nodes
     // and bypasses the rest (Box es, for instance).
     export class PredecessorsFinder
         extends NodeVisitor {
@@ -186,13 +186,13 @@ module TDev.AST {
         static enclosingStmt(stmt: Stmt): Stmt {
             return stmt.parentBlock() && stmt.parentBlock().parent;
         }
-        
+
         static asLoop(stmt: Stmt): Stmt {
             if (stmt instanceof While || stmt instanceof For || stmt instanceof Foreach) return stmt;
             else return null;
         }
 
-        // Tries to dig the last statement of a block that belongs to the 
+        // Tries to dig the last statement of a block that belongs to the
         // current stmt. If it does not contain a block, returns itself.
         static unpeelAndGetLast(stmt: Stmt): Stmt[]{
             var ret: Stmt[] = [];
@@ -230,7 +230,7 @@ module TDev.AST {
 
             var container = ifstmt.parentBlock().stmts;
             var ix = container.indexOf(ifstmt);
-            
+
             --ix;
 
             Util.assert(ix >= 0);
@@ -266,7 +266,7 @@ module TDev.AST {
                 }
             } else {
                 var prev = container[ix];
-                // In case of a block of statements, we need to unpeel and go 
+                // In case of a block of statements, we need to unpeel and go
                 // inside it. For loops, the loop itself is the statement.
                 if ((prev instanceof For)
                     || (prev instanceof While)
@@ -281,7 +281,7 @@ module TDev.AST {
                 if (ret.length == 0)
                     ret = this.previousInBlock(prev);
             }
-            
+
             return ret;
         }
 
@@ -290,23 +290,23 @@ module TDev.AST {
         // predecessors of loop structures.
         static lastInCodeBlock(body: CodeBlock): Stmt[] {
             if (body == null) return [];
-            
+
             var enclosing = PredecessorsFinder.enclosingStmt(body);
             var container = body.stmts;
             var ix = container.length - 1;
 
-            if (ix < 0) {                
+            if (ix < 0) {
                 return [];
             }
 
-            var last = container[ix];            
+            var last = container[ix];
 
-            // In case of a block of statements, we need to unpeel and go 
+            // In case of a block of statements, we need to unpeel and go
             // inside it. For loops, the loop itself is the statement.
             if ((last instanceof For)
                 || (last instanceof While)
                 || (last instanceof Foreach))
-                return [last];            
+                return [last];
             if (last instanceof If && (<If>last).isElseIf) {
                 return PredecessorsFinder.unpeelAndGetLast((<If>last).parentIf);
             }
@@ -334,25 +334,25 @@ module TDev.AST {
         // statement in the block
         public visitStmt(stmt: Stmt): Stmt[] {
             return this.previousInBlock(stmt);
-        }        
+        }
 
         // The predecessor of an If is simply the previous statement in its
-        // enclosing block. 
+        // enclosing block.
         public visitIf(stmt: If): Stmt[]{
             Util.assert(!stmt.isElseIf);
-            return this.previousInBlock(stmt);            
+            return this.previousInBlock(stmt);
         }
         // If it is an Ifelse, then its predecessor is the previous If.
         public visitElseIf(n: If) {
             return this.findPreviousIf(n);
         }
 
-        // Returns the list of predecessor statements for "stmt". Uses a 
+        // Returns the list of predecessor statements for "stmt". Uses a
         // visitor to handle different node types.
         static find(stmt: Stmt): Stmt[] {
             if (!stmt) return [];
 
-            return new PredecessorsFinder().dispatch(stmt);    
+            return new PredecessorsFinder().dispatch(stmt);
         }
     }
 
@@ -365,7 +365,7 @@ module TDev.AST {
     //
     // NOTE: Valid nodes for all dataflow analyses are Statement nodes
     // that contain an ExprHolder instance (therefore, consumes an expression).
-    // PredecessorsFinder and SuccessorsFinder both walk through these nodes 
+    // PredecessorsFinder and SuccessorsFinder both walk through these nodes
     // and bypasses the rest (Box es, for instance).
     export class SuccessorsFinder
         extends NodeVisitor {
@@ -398,7 +398,7 @@ module TDev.AST {
             } else if (stmt instanceof While) {
                 ret = ret.concat(stmt);
             } else if (stmt instanceof If) {
-                ret = ret.concat(stmt);                
+                ret = ret.concat(stmt);
             } else if (stmt instanceof Box) {
                 ret = ret.concat(SuccessorsFinder.firstInCodeBlock((<Box>stmt).body));
             } else if (stmt instanceof ExprStmt) {
@@ -423,7 +423,7 @@ module TDev.AST {
                 return [];
             var next = container[ix];
             if (!(next instanceof If) || !((<If>next).isElseIf))
-                return [];            
+                return [];
             return [next];
         }
 
@@ -444,7 +444,7 @@ module TDev.AST {
             var ret = [];
             if (ix >= container.length) {
                 // We are the last statement, so we can only find the next
-                // statement looking for our parents: it is either the 
+                // statement looking for our parents: it is either the
                 // enclosing loop or the successor of our parent. NOTE: We do not
                 // jump directly from the last statement of a loop to outside
                 // the loop: it must first go to the loop node to check the
@@ -486,7 +486,7 @@ module TDev.AST {
             var ret = [];
             if (ix >= container.length) {
                 // We are the last statement, so we can only find the next
-                // statement looking for our parents: it is either the 
+                // statement looking for our parents: it is either the
                 // enclosing loop or the successor of our parent. NOTE: We do not
                 // jump directly from the last statement of a loop to outside
                 // the loop: it must first go to the loop node to check the
@@ -513,7 +513,7 @@ module TDev.AST {
 
             return ret;
         }
-        
+
         // Extracts the first statement in a code block, useful for finding
         // successors of loop structures.
         static firstInCodeBlock(body: CodeBlock): Stmt[] {
@@ -521,7 +521,7 @@ module TDev.AST {
 
             var container = body.stmts;
             var ix = 0;
-            var enclosing = SuccessorsFinder.enclosingStmt(body);            
+            var enclosing = SuccessorsFinder.enclosingStmt(body);
 
             if (ix >= container.length) {
                 // nothing useful inside
@@ -557,8 +557,8 @@ module TDev.AST {
 
         // Successors of the "If" node are the first statements of its child
         // code blocks ("then" and "else"). If the else path includes another
-        // condition check (ifelse node), then the first statement of "then" 
-        // block and the next ifelse node are the successors.                
+        // condition check (ifelse node), then the first statement of "then"
+        // block and the next ifelse node are the successors.
         public visitIf(stmt: If): Stmt[]{
             var ret = SuccessorsFinder.firstInCodeBlock(stmt.rawThenBody);
             if (stmt.displayElse)
@@ -573,12 +573,12 @@ module TDev.AST {
         static find(stmt: Stmt): Stmt[] {
             if (!stmt) return [];
 
-            return new SuccessorsFinder().dispatch(stmt);            
+            return new SuccessorsFinder().dispatch(stmt);
         }
     }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Dataflow set data strucutes 
+    // Dataflow set data strucutes
 
     // An element may be anything worth storing in Ins/Outs sets for each point
     // of the program and depends on the analysis. Reaching definitions will
@@ -588,31 +588,31 @@ module TDev.AST {
     export class SetElement {
         constructor(public id: number, public key: string, public refNode: Expr) { }
     }
-    
+
     // The pool keeps the elements alive and assign the lowest possible id
     // to reference them, and Set instances reference them using a lightweight
     // bitset representation. If IDs are large, more memory will be necessary
     // to represent the bitset.
     // After an analysis is done, a pool contains all elements generated by
     // Gen equations.
-    class SetElementsPool {                
+    class SetElementsPool {
         private map: { [s: string]: number; };
         private pool: SetElement[];
 
-        constructor(private curId = 0) {            
+        constructor(private curId = 0) {
             this.map = {};
             this.pool = [];
         }
 
         // Builds a new SetElement and assign to it the lowest possible id. Get
         // it if an element with the same id already exists.
-        public getElm(key: string, refNode: Expr): SetElement {            
+        public getElm(key: string, refNode: Expr): SetElement {
             var idx = this.map[["a_", key].join("")];
             if (idx == undefined) {
                 idx = this.curId++;
                 var elm = new SetElement(idx, key, refNode);
                 this.pool.push(elm);
-                this.map[["a_", key].join("")] = idx;                
+                this.map[["a_", key].join("")] = idx;
             }
             return this.pool[idx];
         }
@@ -625,7 +625,7 @@ module TDev.AST {
         public size(): number {
             return this.pool.length;
         }
-                
+
     }
 
     // The memory representation of all Ins/Outs sets for all points of the
@@ -710,10 +710,10 @@ module TDev.AST {
                 this.growSet(elm);
             if (elm > this.largestIndex)
                 this.largestIndex = elm;
-            return !!(this._myset[Math.floor(elm / 32)] & (1 << elm % 32)); 
+            return !!(this._myset[Math.floor(elm / 32)] & (1 << elm % 32));
         }
 
-        public union(a: BitSet): void {            
+        public union(a: BitSet): void {
             if (a.largestIndex > this.largestIndex) {
                 this.setLargestIndex(a.largestIndex);
             } else if (this.largestIndex > a.largestIndex) {
@@ -723,15 +723,15 @@ module TDev.AST {
                 this._myset[i] |= a._myset[i];
             }
             if (a.allSet)
-                this.allSet = true;        
+                this.allSet = true;
         }
 
-        public intersection(a: BitSet): void {            
+        public intersection(a: BitSet): void {
             if (a.largestIndex > this.largestIndex) {
                 this.setLargestIndex(a.largestIndex);
             } else if (this.largestIndex > a.largestIndex) {
                 a.setLargestIndex(this.largestIndex);
-            }            
+            }
             for (var i = 0; i < a.setSize; ++i) {
                 this._myset[i] &= a._myset[i];
             }
@@ -739,12 +739,12 @@ module TDev.AST {
                 this.allSet = false;
         }
 
-        public forEach(cb: (elm: number) => void ): void {         
+        public forEach(cb: (elm: number) => void ): void {
             if (this.largestIndex < 0)
                 return;
             for (var i = 0; i <= this.largestIndex / 32; ++i) {
                 var idx = i * 32;
-                var val = this._myset[i];                
+                var val = this._myset[i];
                 while (val != 0 && idx <= this.largestIndex) {
                     if (val & 1)
                         cb(idx);
@@ -761,21 +761,21 @@ module TDev.AST {
             return a;
         }
 
-        public equals(a: BitSet): boolean {            
+        public equals(a: BitSet): boolean {
             if ((this.allSet && !a.allSet) || (!this.allSet && a.allSet))
                 return false;
             if (a.largestIndex > this.largestIndex) {
                 this.setLargestIndex(a.largestIndex);
             } else if (this.largestIndex > a.largestIndex) {
                 a.setLargestIndex(this.largestIndex);
-            }            
+            }
             for (var i = 0; i < a.setSize; ++i) {
                 if (this._myset[i] != a._myset[i])
                     return false;
-            }            
+            }
             return true;
         }
-    }    
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Dataflow framework classes
@@ -792,7 +792,7 @@ module TDev.AST {
         // function. You should start with an allSet set for analysis that
         // use intersection confluence.
         buildStartingSet(a: Action, _set: BitSet): void;
-        // Change _set to reflect Gen[n], where n is an expression. 
+        // Change _set to reflect Gen[n], where n is an expression.
         // inSet: the original set before Kill kicked in
         // isIV: true when this expression does not actually exist, but was
         //   generated to simulate the behavior experienced by induction
@@ -815,7 +815,7 @@ module TDev.AST {
     // action, but only consider nodes that are Statement and that contains
     // expressions (ExprHolder instances), skipping other nodes.
     // Uses BitSet for union and intersection set operations, topological sort
-    // for the initial visit order and a worklist for the remaining visits    
+    // for the initial visit order and a worklist for the remaining visits
     // NOTE: If the analysis is backwards, notice that Ins/Outs sets are
     // reversed.
     class DataflowVisitor
@@ -835,7 +835,7 @@ module TDev.AST {
         // backwards: direction, true if backwards.
         // intersection:  confluence operator, false if union, true if
         //    intersection
-        // useWorklist: true if uses a worklist to visit nodes, false will 
+        // useWorklist: true if uses a worklist to visit nodes, false will
         //    use the blind algorithm of revisiting all nodes each time a
         //    modification is detected.
         constructor(public df: IDataflowAnalysis, public pool: SetElementsPool,
@@ -884,11 +884,11 @@ module TDev.AST {
 
         public visitAstNode(node: AstNode): any {
             this.visitChildren(node);
-        }             
-        
+        }
+
         // This is the core of DataflowVisitor and handles our subject of
         // interest: AST Statements that contains ExprHolder instances.
-        private visitExprHolderHolder(stmt: Stmt) {            
+        private visitExprHolderHolder(stmt: Stmt) {
             var preds = this.backwards ? AST.SuccessorsFinder.find(stmt) : AST.PredecessorsFinder.find(stmt);
             var newIn: BitSet;
             if (this.starting) {
@@ -906,14 +906,14 @@ module TDev.AST {
                         else
                             newIn.union(nOut);
                     }
-                });                
+                });
                 if (validPreds == 0) {
                     newIn = this.startingSet.clone();
                 }
-            }            
+            }
             this.Ins[stmt.nodeId] = newIn;
-            var newOut = newIn.clone(); 
-            
+            var newOut = newIn.clone();
+
             // Calculate kill/gen sets. Ignore placeholders.
             if (stmt instanceof ExprStmt && !stmt.isPlaceholder()) {
                 this.df.kill((<ExprStmt>stmt).expr, newOut, false);
@@ -922,7 +922,7 @@ module TDev.AST {
                 // A "For" node implicitly updates the induction variable each
                 // time it is run, and some analyses need to know about this.
                 // We generate fake expressions that represent this behavior.
-                if (stmt instanceof For) {                    
+                if (stmt instanceof For) {
                     var forInitialAssgn = exprToStmt(this.generateAssignZero((<For>stmt).boundLocal));
                     var forIncAssgn = exprToStmt(this.generateInc((<For>stmt).boundLocal));
                     this.df.kill(forInitialAssgn.expr, newOut, true);
@@ -933,7 +933,7 @@ module TDev.AST {
                 this.df.kill(stmt.calcNode(), newOut, false);
                 this.df.gen(stmt.calcNode(), newOut, newIn, false);
             }
-             
+
             // Check to see if we are stuck at a fixed point or if we need
             // to continue running the analysis for succs nodes.
             var oldOut = this.Outs[stmt.nodeId];
@@ -949,19 +949,19 @@ module TDev.AST {
                             this.worklist.push(s);
                             this.visited[s.nodeId] = false;
                         });
-                    }                    
+                    }
                 } else {
                     this.changed = true;
                 }
                 this.Outs[stmt.nodeId] = newOut;
-            }            
+            }
             // Attach the analysis info into the AST
             if (stmt instanceof ExprStmt) {
                 this.df.updateNode(stmt, (<ExprStmt>stmt).expr);
             } else if (!!stmt.calcNode()) {
                 this.df.updateNode(stmt, stmt.calcNode());
             }
-            
+
             if (!this.useWorklist)
                 this.visitChildren(stmt);
         }
@@ -986,7 +986,7 @@ module TDev.AST {
         }
         visitExprStmt(n: ExprStmt) {
             this.visitExprHolderHolder(n);
-        }                
+        }
 
         // Non-recursive version of a topological sort to order our first
         // visit to the Action's nodes. Recursive versions are simpler
@@ -1047,7 +1047,7 @@ module TDev.AST {
                             found = true;
                             break;
                         }
-                    }                    
+                    }
                     Util.assert(found);
                 }
                 var cur = s.shift();
@@ -1063,11 +1063,11 @@ module TDev.AST {
                         incomingEdges[x.nodeId] = 0;
                         s.push(x);
                     }
-                }                
-            }                      
+                }
+            }
         }
 
-        private dfTesting(s: Stmt) {            
+        private dfTesting(s: Stmt) {
             // Testing to ensure  x C Succs[Preds[x]]
             var preds = AST.PredecessorsFinder.find(s);
             var succs;
@@ -1096,7 +1096,7 @@ module TDev.AST {
                 Util.assert(found);
             }
         }
-      
+
         // Entry point for the dataflow analysis. Initialize all data
         // structures and start visiting the statements of Action n.
         visitAction(n: Action) {
@@ -1104,7 +1104,7 @@ module TDev.AST {
                 return;
             if (n.isPage())
                 return;
-            
+
             if (this.useWorklist) {
                 this.worklist = [];
                 this.topologicalSort(n);
@@ -1137,11 +1137,11 @@ module TDev.AST {
                 }
             }
         }
-    }   
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Dataflow Analyses
-    
+
     // * REACHING DEFINITIONS *
 
     // Motivation: RD seeks to eliminate "ok checks" that slows down script
@@ -1150,7 +1150,7 @@ module TDev.AST {
     // Flags to activate: options.okElimination, URL ?okElimination
 
     // Manages Reaching Definitions data attached to the AST as the result
-    // of the analysis.    
+    // of the analysis.
     export class ReachingDefsMgr {
         constructor(public defs: Expr[], public node: Stmt) { }
 
@@ -1214,7 +1214,7 @@ module TDev.AST {
         private df: DataflowVisitor;
         private curNode: Stmt;
         private pool: SetElementsPool;
-        constructor() {            
+        constructor() {
         }
 
         // Convenience methods
@@ -1224,7 +1224,7 @@ module TDev.AST {
                 if (d instanceof LocalDef) return <LocalDef>d;
             }
             return null;
-        }   
+        }
 
         private getLocalName(e: Token): String {
             var ld = this.getLocal(e);
@@ -1232,8 +1232,8 @@ module TDev.AST {
                 return ld.getName();
             }
             return null;
-        }   
-        
+        }
+
         // Helper function to calculate the Gen set when the expression
         // is a variable copy. We need to copy all the definitions of the
         // source variable to the destination variable.
@@ -1318,7 +1318,7 @@ module TDev.AST {
                 if (prop == api.core.AssignmentProp) {
                     c.args[0].flatten(api.core.TupleProp).forEach((e) => {
                         var l = this.getLocalName(e);
-                        if (l) {                            
+                        if (l) {
                             if (genKill) { // Generate
                                 // First check if it is a local copy expression
                                 if (!this.handleCopy(curCall, _set)) {
@@ -1337,7 +1337,7 @@ module TDev.AST {
                                             if (l2 == l)
                                                 remove = true;
                                         });
-                                    }                     
+                                    }
                                     if (remove)
                                         _set.remove(idx);
                                 });
@@ -1355,7 +1355,7 @@ module TDev.AST {
 
         kill(n: ExprHolder, _set: BitSet, isIV = false): void {
             this.updateSet(n, _set, false);
-        }             
+        }
 
         // Extract our calculated RD set by using Set and SetElementsPool data
         // structure, then stick this into the AST.
@@ -1364,12 +1364,12 @@ module TDev.AST {
             var defs:Expr[] = [];
             this.df.Ins[s.nodeId].forEach((idx: number) => {
                 defs.push(this.pool.getElmById(idx).refNode);
-            });     
+            });
             if (defs.length > 0)
-                n.reachingDefs = new ReachingDefsMgr(defs, s);       
+                n.reachingDefs = new ReachingDefsMgr(defs, s);
         }
 
-        // Helper function to generate a fake invalid assignment. 
+        // Helper function to generate a fake invalid assignment.
         private generateInvalidAssignmentFor(l: LocalDef): Expr {
             var localThing = mkThing(l.getName());
             (<ThingRef>localThing).def = l;
@@ -1386,7 +1386,7 @@ module TDev.AST {
             var args = c.args.slice(0);
             args[0] = mkThing(dst.getName());
             (<ThingRef>args[0]).def = dst;
-            return mkCall(c.propRef, args);            
+            return mkCall(c.propRef, args);
         }
 
         // Our start node for the action assigns all input parameters to
@@ -1395,7 +1395,7 @@ module TDev.AST {
             a.allLocals.forEach((e: Decl) => {
                 if (!(e instanceof LocalDef))
                     return;
-                var l = (<LocalDef>e).getName();                
+                var l = (<LocalDef>e).getName();
                 var elm = this.pool.getElm(l, this.generateInvalidAssignmentFor(<LocalDef>e));
                 _set.add(elm.id);
             });
@@ -1404,7 +1404,7 @@ module TDev.AST {
         // All nodes start empty in this analysis.
         buildStartingSet(a: Action, _set: BitSet): void {
         }
-        
+
         // Entry point for this analysis. Analyze the App Action-wise.
         visitApp(n: App) {
             n.things.forEach((a: Decl) => {
@@ -1414,20 +1414,20 @@ module TDev.AST {
                     this.df.dispatch(a);
                 }
             });
-        }        
-    }    
-    
+        }
+    }
+
     // * DOMINATOR SET *
 
     // Motivation:
     // The Dominator Set Analysis is used only to debug intersection-confluence
     // analysis, since it is the simplest analysis you can build with the
     // intersection confluence operator. May be used as boilerplate code for
-    // other analyses as well.    
+    // other analyses as well.
     // Flags to activate: no one
 
     export class DominatorsMgr {
-        constructor(public doms: Expr[], public node: Stmt) { }   
+        constructor(public doms: Expr[], public node: Stmt) { }
 
         public toString() {
             var str = "DOMS(" + this.node.nodeId + ") : {";
@@ -1435,7 +1435,7 @@ module TDev.AST {
                 return e.nodeId.toString();
             }).join();
             return str + "}";
-        }        
+        }
     }
 
     // Dominators will compute the set of statements that dominate each
@@ -1449,7 +1449,7 @@ module TDev.AST {
         private curNode: Stmt;
         private pool: SetElementsPool;
         constructor() {
-        }         
+        }
 
         // Our gen set is simply our own expression id.
         gen(n: ExprHolder, _set: BitSet, inSet: BitSet, isIV = false): void {
@@ -1461,19 +1461,19 @@ module TDev.AST {
 
         // We do not need to kill. The intersection confluence operator takes
         // care of eliminating IDs that do not dominate this statement.
-        kill(n: ExprHolder, _set: BitSet, isIV = false): void {            
+        kill(n: ExprHolder, _set: BitSet, isIV = false): void {
         }
 
         // Put our calculated set into the AST node of this statement
         updateNode(s: Stmt, n: ExprHolder) {
             n.dominators = null;
-            var doms: Expr[] = [];            
+            var doms: Expr[] = [];
             this.df.Ins[s.nodeId].forEach((idx: number) => {
                 doms.push(this.pool.getElmById(idx).refNode);
             });
             if (doms.length > 0)
                 n.dominators = new DominatorsMgr(doms, s);
-        }        
+        }
 
         // We assume no one dominates the first node.
         buildStartNodeSet(a: Action, _set: BitSet): void {
@@ -1506,7 +1506,7 @@ module TDev.AST {
     // time in which the program already used the value and thus it was
     // already checked, and all the remaining checks may be eliminated.
     // Uset set analysis calculates the set of local variables that were
-    // already used at a certain point of the program, but were not 
+    // already used at a certain point of the program, but were not
     // redefined since the last use, therefore, enabling us to remove
     // redundant "ok checks".
     // Flags to activate: options.okElimination, URL ?okElimination
@@ -1531,7 +1531,7 @@ module TDev.AST {
             }
             return null;
         }
-        
+
         // The compiler asks whether the local ld was already used at this
         // point in order to eliminate redundant "ok checks".
         public alreadyUsed(ld: LocalDef): boolean {
@@ -1539,7 +1539,7 @@ module TDev.AST {
             this.used.forEach((e: Expr) => {
                 var name1 = UsedSetMgr.getLocalName(e);
                 if (name1 && name1 == ld.getName()) {
-                    res = true;   
+                    res = true;
                 }
             });
             return res;
@@ -1566,7 +1566,7 @@ module TDev.AST {
         private curNode: Stmt;
         private pool: SetElementsPool;
         constructor() {
-        }       
+        }
 
         // This is actually the kill set. Since, for UsedAnalysis, we need to
         // kill after generation (as opposed to the common case), we reverse
@@ -1596,7 +1596,7 @@ module TDev.AST {
                                 _set.forEach((idx: number) => {
                                     var elm = this.pool.getElmById(idx);
                                     if (elm.key == l)
-                                        _set.remove(idx);                                    
+                                        _set.remove(idx);
                                 });
                             }
                         }
@@ -1605,7 +1605,7 @@ module TDev.AST {
             }
         }
 
-        // This is actually the gen set. We look for all uses of local 
+        // This is actually the gen set. We look for all uses of local
         // variables and add them to the set.
         kill(n: ExprHolder, _set: BitSet, isIV = false): void {
             if (!n.parsed)
@@ -1627,19 +1627,19 @@ module TDev.AST {
                     if (refcall.prop() && refcall.prop().getName() == "is invalid") {
                         // x->is_invalid is not a use of x
                     } else if (refcall.prop() != api.core.AssignmentProp) {
-                        exprVisitQueue = exprVisitQueue.concat(refcall.children());                        
+                        exprVisitQueue = exprVisitQueue.concat(refcall.children());
                     } else {
                         exprVisitQueue = exprVisitQueue.concat(refcall.args.slice(1));
                     }
-                }                
-            }            
+                }
+            }
         }
 
         // Put our calculated UsedSet into the AST, so the compiler can query
         // later.
         updateNode(s: Stmt, n: ExprHolder) {
             n.usedSet = null;
-            var usedSet: Expr[] = [];            
+            var usedSet: Expr[] = [];
             this.df.Ins[s.nodeId].forEach((idx: number) => {
                 usedSet.push(this.pool.getElmById(idx).refNode);
             });
@@ -1681,10 +1681,10 @@ module TDev.AST {
     // Flags to activate: options.commonSubexprElim, URL ?commonSubexprElim
 
     export class AvailableExpressionsMgr {
-        constructor(public aeSet: Expr[], public node: Stmt) { }    
-        
+        constructor(public aeSet: Expr[], public node: Stmt) { }
+
         // Helper method to check if the entire expression is idempotent,
-        // which means there is no effect in recalculating it or not. 
+        // which means there is no effect in recalculating it or not.
         private hasOnlyIdempotentNodes(e: Expr) {
             var exprVisitQueue: Expr[] = [];
             exprVisitQueue.push(e);
@@ -1718,9 +1718,9 @@ module TDev.AST {
                 if (ae.toString() == e.toString()
                     && this.hasOnlyIdempotentNodes(e))
                     res.push(ae);
-            });            
+            });
             return res;
-        }    
+        }
 
         // Debugging
         public toString() {
@@ -1787,7 +1787,7 @@ module TDev.AST {
                         if (l) {
                             { // Kill all expressions that the same var
                                 _set.forEach((idx: number) => {
-                                    var elm = this.pool.getElmById(idx);                                
+                                    var elm = this.pool.getElmById(idx);
                                     if (this.usesLocal(elm.refNode, l))
                                         _set.remove(idx);
                                 });
@@ -1798,7 +1798,7 @@ module TDev.AST {
             }
         }
 
-        // This is actually the gen set. We look for all uses of local 
+        // This is actually the gen set. We look for all uses of local
         // variables and add them to the set.
         kill(n: ExprHolder, _set: BitSet, isIV = false): void {
             if (isIV)
@@ -1817,7 +1817,7 @@ module TDev.AST {
                         exprVisitQueue = exprVisitQueue.concat(refcall.args.slice(1));
                     } else {
                         exprVisitQueue = exprVisitQueue.concat(refcall.children());
-                    }                    
+                    }
                 }
             }
         }
@@ -1826,7 +1826,7 @@ module TDev.AST {
         // later.
         updateNode(s: Stmt, n: ExprHolder) {
             n.aeSet = null;
-            var aeSet: Expr[] = [];            
+            var aeSet: Expr[] = [];
             this.df.Ins[s.nodeId].forEach((idx: number) => {
                 aeSet.push(this.pool.getElmById(idx).refNode);
             });
@@ -1858,7 +1858,7 @@ module TDev.AST {
 
     // * CONSTANT FOLDING/PROPAGATION FRAMEWORK *
 
-    // Motivation:    
+    // Motivation:
     // This analysis computes the set of locals defined as constants, yielding
     // pairs <local, constant value>, and also folds an idempotent expression
     // that works with constants. A pair <local, constant value> may be the
@@ -1866,9 +1866,9 @@ module TDev.AST {
     // may separate an action into several steps, each one being a different
     // native JavaScript function, the JIT engine will miss optimization
     // opportunities beyond the step granularity, and this analysis can help
-    // in these cases by performing global constant folding.    
+    // in these cases by performing global constant folding.
     // Flags to activate: options.constantPropagation, URL ?constantPropagation
-    
+
     // Manages the information we stick into the AST statement nodes. It also
     // has the logic to perform folding for selected idempotent operators.
     export class ConstantPropagationMgr {
@@ -1912,9 +1912,9 @@ module TDev.AST {
             }
             return null;
         }
-        
+
         // Entry point for expression evaluation. By using the information
-        // available at this point of the program (pairs <local, value>), 
+        // available at this point of the program (pairs <local, value>),
         // tries to evaluate the result of the expression "e". If it is
         // possible to know this at compile time, returns the value,
         // otherwise returns null.
@@ -1939,11 +1939,11 @@ module TDev.AST {
                         if (!hasNull) {
                             return ConstantPropagationMgr.evaluate(refcall, values);
                         }
-                    } 
-                    return null;                    
+                    }
+                    return null;
                 }
             };
-            return visitExpr(e);            
+            return visitExpr(e);
         }
 
         // Debugging purposes
@@ -1977,10 +1977,10 @@ module TDev.AST {
         private generateAssignmentFor(l: LocalDef, value: any): Expr {
             var localThing = mkThing(l.getName());
             (<ThingRef>localThing).def = l;
-            var literal = mkLit(value);            
+            var literal = mkLit(value);
             return mkCall(PropertyRef.mkProp(api.core.AssignmentProp),
                 [localThing, literal]);
-        }        
+        }
 
         // Helper function to handle copy assignments
         private cloneAndChangeDst(c: Call, dst: LocalDef): Expr {
@@ -2005,7 +2005,7 @@ module TDev.AST {
                 return ld.getName();
             }
             return null;
-        }   
+        }
 
         // Handle copy. Copies the literal value of src to dst.
         private handleCopy(c: Call, _set: BitSet): boolean {
@@ -2030,16 +2030,16 @@ module TDev.AST {
                                     var newCall = this.cloneAndChangeDst(refcall, dst);
                                     var newElm = this.pool.getElm(newCall.getText(), newCall);
                                     _set.add(newElm.id);
-                                    bypassGen = true; 
+                                    bypassGen = true;
                                 }
                             });
                         }
                     });
                 }
-            }           
+            }
             return bypassGen;
-        }        
-        
+        }
+
         // Entry point for generating/killing elements.
         private updateSet(n: ExprHolder, _set: BitSet, genKill: boolean): void {
             if (!n.parsed || !(n.parsed instanceof Call))
@@ -2070,7 +2070,7 @@ module TDev.AST {
                                         var elm = this.pool.getElm(assgn.getText(), assgn);
                                         _set.add(elm.id);
                                     }
-                                    
+
                                 }
                             } else { /// Kill all locals that this expression redefined
                                 _set.forEach((idx: number) => {
@@ -2103,20 +2103,20 @@ module TDev.AST {
         kill(n: ExprHolder, _set: BitSet, isIV = false): void {
             if (!isIV)
                 this.updateSet(n, _set, false);
-        }    
+        }
 
         // Helper function to compute the information the
         // ConstantPropagationMgr instance needs, converting the elements
         // of the BitSet into a regular JavaScript object array.
         private generateCpSet(_set: BitSet): Expr[] {
-            var cpSet: Expr[] = [];            
+            var cpSet: Expr[] = [];
             _set.forEach((idx: number) => {
                 cpSet.push(this.pool.getElmById(idx).refNode);
             });
             return cpSet;
         }
-        
-        // Update the AST with the info we calculated for this node, 
+
+        // Update the AST with the info we calculated for this node,
         // use generateCpSet
         updateNode(s: Stmt, n: ExprHolder) {
             var cpSet = this.generateCpSet(this.df.Ins[s.nodeId]);
@@ -2188,12 +2188,12 @@ module TDev.AST {
     // Step1: Build a callgraph for the App using the
     // visitor pattern. While it is visiting each Action, it checks not only
     // for calls that helps to build the callgraph, but also for statements
-    // that precludes an action from being inlined (i.e. loop statements). 
+    // that precludes an action from being inlined (i.e. loop statements).
     //
     // Step2: Afterwards, it sorts the callgraph using topological
     // sort, allowing it to easily perform a bottom-up traversal of the tree.
     // Then, it marks actions as inlined if they satisfy some
-    // predefined properties in "actionHasDesiredProperties()", if it doesn't 
+    // predefined properties in "actionHasDesiredProperties()", if it doesn't
     // have any unwanted statements and finally if all the actions it calls
     // are also inlined.
     export class InlineAnalysis
@@ -2258,7 +2258,7 @@ module TDev.AST {
         visitCall(n: Call) {
             var a = n.calledAction();
             var prop = n.prop();
-            // Check for unwanted calls 
+            // Check for unwanted calls
             if (prop && prop.getCategory() == PropertyCategory.Library) {
                 this.nowVisiting.canInline = false;
                 return;
@@ -2315,7 +2315,7 @@ module TDev.AST {
             }
             this.nowVisiting = cgNode;
             this.nowVisiting.canInline = true;
-            this.visitChildren(n);            
+            this.visitChildren(n);
             if (this.nowVisiting.canInline
                 && this.actionHasDesiredProperties(n)
                 && this.nowVisiting.succs.length == 0) {
@@ -2332,14 +2332,14 @@ module TDev.AST {
             for (var i = 0; i < this.nodes.length; ++i) {
                 visited[i] = false;
                 indexMap[["a_", this.nodes[i].action.getName()].join("")] = i;
-            }            
+            }
             var visit = (cur: number) => {
                 if (visited[cur])
                     return;
                 visited[cur] = true;
                 for (var i = 0; i < this.nodes[cur].preds.length; ++i) {
                     visit(indexMap[["a_", this.nodes[cur].preds[i].action.getName()].join("")]);
-                }             
+                }
                 traversalOrder.unshift(this.nodes[cur]);
             }
             for (var i = 0; i < this.nodes.length; ++i) {
@@ -2365,7 +2365,7 @@ module TDev.AST {
                 sorted[i].action.canBeInlined = canInline;
             }
         }
-    
+
         // Debugging purposes
         public dumpCallGraph() {
             for (var i = 0; i < this.nodes.length; ++i) {

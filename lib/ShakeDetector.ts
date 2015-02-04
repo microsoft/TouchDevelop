@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export enum ShakeType
     {
@@ -53,7 +53,7 @@ module TDev.RT {
         var minimumRequiredMovesForShake : number = 2;
 
         // last still vector - average of the last still signal
-        // used to eliminate the gravitation effect 
+        // used to eliminate the gravitation effect
         // initial value has no meaning, it's just a dummy vector to avoid dealing with null values
         var _lastStillVector : Vector3 = Vector3.mk(0, -1, 0);
 
@@ -81,10 +81,10 @@ module TDev.RT {
             var shakeType : ShakeType = undefined;
 
             // check if this vector is considered a shake vector
-            var isShakeMagnitude : boolean = 
+            var isShakeMagnitude : boolean =
                 Math.abs(_lastStillVector.length() - currentVector.length()) > shakeMagnitudeWithoutGravitationThreshold;
 
-            // following is a state machine for detection of shake signal start and end            
+            // following is a state machine for detection of shake signal start and end
 
             // if still --> shake
             if ((!_isInShakeState) && (isShakeMagnitude))
@@ -176,7 +176,7 @@ module TDev.RT {
             _stillSignal.unshift(currentVector);
 
             // if still signal is getting too big, remove old items
-            if (_stillSignal.length > 2 * maximumStillVectorsNeededForAverage) 
+            if (_stillSignal.length > 2 * maximumStillVectorsNeededForAverage)
             {
                 _stillSignal.pop();
             }
@@ -199,7 +199,7 @@ module TDev.RT {
                 return;
             }
 
-            // classify vector 
+            // classify vector
             var vectorShakeType : ShakeType = classifyVectorShakeType(currentVectorWithoutGravitation);
             // count vector to histogram
             _shakeHistogram[<number>vectorShakeType]++;
@@ -232,7 +232,7 @@ module TDev.RT {
             {
                 var currentStillVector = _stillSignal[i];
                 // make sure current vector is very still
-                var isStillMagnitude  : boolean = (Math.abs(_lastStillVector.length() - currentStillVector.length()) 
+                var isStillMagnitude  : boolean = (Math.abs(_lastStillVector.length() - currentStillVector.length())
                     < stillMagnitudeWithoutGravitationThreshold);
 
                 if (isStillMagnitude)
@@ -256,11 +256,11 @@ module TDev.RT {
                 _lastStillVector = sumVector.scale(1 / count);
             }
         }
-    
+
         /// <summary>
         /// Classify vector shake type
         /// </summary>
-        function classifyVectorShakeType(v : Vector3) : ShakeType 
+        function classifyVectorShakeType(v : Vector3) : ShakeType
         {
             var absX :number = Math.abs(v.x());
             var absY :number = Math.abs(v.y());
@@ -313,7 +313,7 @@ module TDev.RT {
             {
                 var countSignsChanges = countSignChanges(shakeType);
 
-                // check that we have enough shakes 
+                // check that we have enough shakes
                 if (countSignsChanges < minimumRequiredMovesForShake)
                 {
                     //Util.log('sd: shake cancelled signs: ' + countSignsChanges);

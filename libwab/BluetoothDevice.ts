@@ -25,7 +25,7 @@ module TDev.RT.Wab {
             this._displayName = j.displayName;
             this._hostName = j.hostName;
             this._serviceName = j.serviceName;
-			this._isConnected = false;
+            this._isConnected = false;
         }
 
         private mkReq(act:string)

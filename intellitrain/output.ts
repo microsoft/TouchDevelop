@@ -1,4 +1,4 @@
-﻿///<reference path='../editor/refs.ts'/>
+///<reference path='../editor/refs.ts'/>
 
 module TDev.Util {
     export interface IOutput {

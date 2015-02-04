@@ -209,7 +209,7 @@ module TDev.RT.Node {
             TDev.Util.log("WALL: " + s);
             return undefined;
         }
-        
+
         public postBoxedTextWithTap(s:string, rtV: any) : TDev.WallBox
         {
             return this.postBoxedText(s);
@@ -262,7 +262,7 @@ module TDev.RT.Node {
                 return Runtime.pumpEvents;
             });
         }
-            
+
 
         public queueActionCall(service: string, action: string, params: any, socket: any): Promise {
             var promise = new PromiseInv();
@@ -322,7 +322,7 @@ module TDev.RT.Node {
         {
             if (this.quietlyHandleError(e))
                 return
-            
+
             if (e.programCounter)
                 this.errorPC = e.programCounter;
 
@@ -569,7 +569,7 @@ module TDev.RT.Node {
             }
             return new TDev.PromiseInv();
         }
-        
+
         Cloud.getUserId = () => {
             var rt = Runtime.theRuntime
             if (!rt) return undefined

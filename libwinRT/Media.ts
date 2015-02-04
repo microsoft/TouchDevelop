@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.WinRT {
     export function MediaInit()
     {
@@ -35,7 +35,7 @@ module TDev.RT.WinRT {
                     Picture.fromUrl(url)
                         .then(
                             (p : Picture) => r.resumeVal(p),
-                            (e : any) => r.resumeVal(undefined));                    
+                            (e : any) => r.resumeVal(undefined));
                 }
                 else
                     r.resumeVal(undefined);

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A page button on the wall
     //@ ctx(general,gckey,walltap)
@@ -9,7 +9,7 @@ module TDev.RT {
         constructor() {
             super()
         }
-            
+
         private _icon :string;
         private _text :string;
         private _page :Page;
@@ -43,16 +43,16 @@ module TDev.RT {
         //? Gets the text
         //@ readsMutable
         public text() : string { return this._text; }
-        
-        public getElement() : HTMLElement { 
+
+        public getElement() : HTMLElement {
             if (!this._element) {
                 this._element = HTML.mkButtonElt("topMenu-button", [
-                    div("topMenu-button-frame", PageButtonManager.getIconElement(this._icon)), 
+                    div("topMenu-button-frame", PageButtonManager.getIconElement(this._icon)),
                     div("topMenu-button-desc", this._text)
                 ]);
                 this._element.style.display = 'inline-block';
             }
-            return this._element; 
+            return this._element;
         }
     }
 }

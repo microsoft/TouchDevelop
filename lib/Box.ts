@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev { export module RT {
 
     //? Current box element in the page.
@@ -74,7 +74,7 @@ module TDev { export module RT {
                 }, s.rt.getTopScriptPc());
             }
         }
-        
+
         //? Arrange boxes inside this box from top to bottom.
         export function use_vertical_layout(s:IStackFrame): void
         {
@@ -88,7 +88,7 @@ module TDev { export module RT {
             var box = s.rt.getCurrentBox();
             box.setFlow(WallBox.FLOW_HORIZONTAL, s.rt.getTopScriptPc());
         }
-        
+
         //? Arrange boxes inside this box as layers on top of each other.
         export function use_overlay_layout(s:IStackFrame): void {
             var box = s.rt.getCurrentBox();
@@ -102,16 +102,16 @@ module TDev { export module RT {
             var box = s.rt.getCurrentBox();
             box.setEmWidth(width, s.rt.getTopScriptPc());
         }
-        
+
         //? Set the height of this box.
         export function set_height(height:number, s:IStackFrame) : void
         {
             var box = s.rt.getCurrentBox();
             box.setEmHeight(height, s.rt.getTopScriptPc());
         }
-        
+
         //? Set lower and upper limits on the width of this box.
-        export function set_width_range(min_width: number, max_width: number, s:IStackFrame): void 
+        export function set_width_range(min_width: number, max_width: number, s:IStackFrame): void
         {
             var box = s.rt.getCurrentBox();
             box.setEmWidthRange(min_width, max_width, s.rt.getTopScriptPc());
@@ -147,7 +147,7 @@ module TDev { export module RT {
             }
             box.setVerticalStretch(n, s.rt.getTopScriptPc());
         }
- 
+
         //? Set the color and width of the border.
         //@ [color].deflExpr('colors->foreground') [width].defl(0.1)
         export function set_border(color: Color, width: number, s:IStackFrame): void {
@@ -162,7 +162,7 @@ module TDev { export module RT {
             var box = s.rt.getCurrentBox();
             box.setEmBorderWidth(top, right, bottom, left, s.rt.getTopScriptPc());
         }
-        
+
         //? Set the margins of this box (to leave space around the outside of this box).
         //@ [left].defl(0.5) [top].defl(0.5)
         export function set_margins(top: number, right: number, bottom: number, left: number, s:IStackFrame): void
@@ -179,8 +179,8 @@ module TDev { export module RT {
             box.setEmPadding(top, right, bottom, left, s.rt.getTopScriptPc());
         }
 
-    
-      
+
+
 
         // Set the weights for extending the margins of this box.
         //export function stretch_margins(top:number, right:number, bottom:number, left:number, s:IStackFrame) : void
@@ -203,7 +203,7 @@ module TDev { export module RT {
 
         //? align (0,0)=center (1,0)=left, (0,1)=right, (1,1)=stretch
         //@ obsolete
-        export function set_horizontal_alignment(left: number, right: number, s: IStackFrame): void 
+        export function set_horizontal_alignment(left: number, right: number, s: IStackFrame): void
         {
             var box = s.rt.getCurrentBox();
             box.setHorizontalAlignment(left, right, s.rt.getTopScriptPc());
@@ -262,7 +262,7 @@ module TDev { export module RT {
         }
 
 
-        
+
         //? Set font size in this box and contained boxes.
         //@ [font_size].defl(1)
         export function set_font_size(font_size: number, s:IStackFrame): void
@@ -283,7 +283,7 @@ module TDev { export module RT {
         //? Set font family in this box and contained boxes.
         //@ [family].defl("Default") [family].deflStrings("Default", "Arial, Helvetica, sans-serif", "Courier New, Courier, monospace", "Georgia, serif", "Lucida Console, Monaco, monospace", "Lucida Sans Unicode, Lucida Grande, sans - serif", "Palatino Linotype, Book Antiqua, Palatino, serif", "Tahoma, Geneva, sans - serif", "Times New Roman, Times, serif", "Trebuchet MS, sans-serif", "Verdana, Geneva, sans-serif", "Comic Sans MS, cursive")
          //@ dbgOnly
-       export function set_font_family(family: string, s:IStackFrame): void 
+       export function set_font_family(family: string, s:IStackFrame): void
         {
             var box = s.rt.getCurrentBox();
             box.setFontFamily(family, s.rt.getTopScriptPc());
@@ -291,7 +291,7 @@ module TDev { export module RT {
 
         //? Specify whether to use scrollbars on overflow.
         //@ [horizontal_scrolling].defl(true) [vertical_scrolling].defl(true)
-        export function set_scrolling(horizontal_scrolling: boolean, vertical_scrolling: boolean, s:IStackFrame): void 
+        export function set_scrolling(horizontal_scrolling: boolean, vertical_scrolling: boolean, s:IStackFrame): void
         {
             var box = s.rt.getCurrentBox();
             box.setScrolling(horizontal_scrolling, vertical_scrolling, s.rt.getTopScriptPc());
@@ -318,12 +318,12 @@ module TDev { export module RT {
         {
             var box = s.rt.getCurrentBox();
             box.attributes.textEditingEvent.addHandler(handler);
-        }        
+        }
 
 
         //? Set what happens when the user has finished editing the text in the box.
         //@ obsolete
-        export function on_text_edited(handler:TextAction, s:IStackFrame): void 
+        export function on_text_edited(handler:TextAction, s:IStackFrame): void
         {
             var box = s.rt.getCurrentBox();
             box.attributes.textEditedEvent.addHandler(handler);
@@ -351,7 +351,7 @@ module TDev { export module RT {
         }
 
 
-        //? 
+        //?
         //@ hidden
         export function is_init(s:IStackFrame): boolean
         {
@@ -370,12 +370,12 @@ module TDev { export module RT {
         {
             return s.rt.host.userWallHeight() / SizeMgr.topFontSize;
         }
-        
+
         //? Get the number of pixels in an em
         export function pixels_per_em(): number {
             return SizeMgr.topFontSize;
         }
-     
+
         //? Set whether to break long lines, and specify what length is too short for breaking
         //@ [wrap].readsMutable
         //@ [wrap].defl(true) [minimumwidth].defl(15)
@@ -383,7 +383,7 @@ module TDev { export module RT {
         {
             var box = s.rt.getCurrentBox();
             box.setWrap(wrap, minimumwidth, s.rt.getTopScriptPc());
-        }      
+        }
     }
 
     //? Current html element in the page.
@@ -412,7 +412,7 @@ module TDev { export module RT {
         //@ betaOnly
         export function add_css_class(name: string, s: IStackFrame): void {
             if (!name) return;
-            
+
             var box = s.rt.getCurrentHtmlBox();
             box.addClassName(name, s.rt.getTopScriptPc());
         }
@@ -457,6 +457,6 @@ module TDev { export module RT {
             var box = s.rt.getCurrentHtmlBox();
             box.attributes.tappedEvent.addHandler(handler);
         }
-    
+
     }
 } }

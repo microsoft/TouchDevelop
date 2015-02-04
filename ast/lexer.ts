@@ -1,11 +1,11 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev.AST {
     export module Lexer
     {
         var operators = [
-            "+", "-", "*", "/", "=", "\u2260", "\u2264", "<", "\u2265", ">", 
+            "+", "-", "*", "/", "=", "\u2260", "\u2264", "<", "\u2265", ">",
             ":=", "(", ")", ",", "\u2225", "\u2192", "$",
             "...",
             ";", "{", "}", "//", ":", "?",
@@ -22,16 +22,16 @@ module TDev.AST {
         };
         var invAsciiOps:any = {};
         var keywordList:string[] = [
-                "for", "do", "foreach", "if", "then", "else", 
-                "action", "event", "table", "var", "script", "in", "while", "meta", "skip", "returns",                
+                "for", "do", "foreach", "if", "then", "else",
+                "action", "event", "table", "var", "script", "in", "while", "meta", "skip", "returns",
                 // query language
                 "apply", "distinct", "reverse", "top", "bottom", "where", "order by", "transform to",
                 // to be possibly used later
-                "function", "global",  
+                "function", "global",
                 "goto", "break", "continue", "return",
-                "match", "switch", "case", 
-                "public", "private", 
-                "this", "self", 
+                "match", "switch", "case",
+                "public", "private",
+                "this", "self",
                 "try", "finally", "catch", "throw",
                 "and", "or", "not"
         ];
@@ -64,7 +64,7 @@ module TDev.AST {
                 keywords[s] = true;
             });
         }
-        
+
         export function quotedOp(op:string) { return /^[a-zA-Z]/.test(op); }
 
         function escapeStr(s:string, quoted:boolean, asciiOnly:boolean)

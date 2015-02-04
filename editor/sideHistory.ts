@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -58,7 +58,7 @@ module TDev
             r.scrollPos = j.scrollPos;
             return r;
         }
-      
+
         static fromNodeId(id:string, lib:string = null)
         {
             if (!id) return null;

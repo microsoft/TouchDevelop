@@ -188,7 +188,7 @@ module TDev.Plugins {
             r.error("exception: " + e)
         }
     }
-        
+
     function runBackgroundPluginAsync(si:Browser.ScriptInfo)
     {
         if (!pluginWorker) {
@@ -216,7 +216,7 @@ module TDev.Plugins {
         }
 
 
-        var guid = si.getCloudHeader() ? Promise.as(si.getGuid()) : 
+        var guid = si.getCloudHeader() ? Promise.as(si.getGuid()) :
             Browser.TheApiCacheMgr.getAsync(si.publicId, true)
                 .then((info: JsonScript) => World.installPublishedAsync(si.publicId, info.userid))
                 .then((hd:Cloud.Header) => hd.guid)
@@ -348,7 +348,7 @@ module TDev.Plugins {
             .then(hd => {
                 if (!hd || hd.status == "deleted")
                     return null
-                
+
                 if (Util.values(pluginsBySlot).some(p => p.buttonGuid == hd.guid))
                     return null
 
@@ -430,7 +430,7 @@ module TDev.Plugins {
             .then(() => {
                 if (si.getCloudHeader())
                     return TheEditor.loadScriptAsync(si.getCloudHeader(), true);
-                else  
+                else
                     return Browser.TheApiCacheMgr.getAsync(si.publicId, true)
                         .then((info: JsonScript) => TheEditor.loadPublicScriptAsync(si.publicId, info.userid, true));
             })

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A text box
     //@ stem("tb") ctx(general,gckey,walltap)
@@ -13,13 +13,13 @@ module TDev.RT {
         private _border: Color = undefined;
         private _el: HTMLElement;
         private box: BoxBase;
-        
-        static mk(text : string, font_size : number) : TextBox 
+
+        static mk(text : string, font_size : number) : TextBox
         {
             var tb = new TextBox();
             tb._text = text;
             tb._font_size = font_size;
-            return tb;    
+            return tb;
         }
 
         //? Gets the text
@@ -83,7 +83,7 @@ module TDev.RT {
             return this._el;
         }
 
-      
+
         private updateOnWall(s:IStackFrame, b:BoxBase) {
             var el = this._el;
             if (!el) return;

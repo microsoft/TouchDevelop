@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Emails, sms, contacts, calendar, ...
     export module Social
@@ -57,11 +57,11 @@ module TDev.RT {
         //@ [result].writesMutable
         //@ [network].deflStrings("facebook", "twitter")
         export function search(network: string, terms: string, r: ResumeCtx) // : Collection<Message>
-        {           
-			var links = Collections.create_message_collection();
-			r.resumeVal(links);
+        {
+            var links = Collections.create_message_collection();
+            r.resumeVal(links);
 
-			/*
+            /*
             var url = Cloud.getPrivateApiUrl('runtime/social/search?network=' + encodeURIComponent(network) + '&query=' + encodeURIComponent(terms));
             var request = WebRequest.mk(url, undefined);
             request
@@ -95,7 +95,7 @@ module TDev.RT {
                     }
                     r.resumeVal(undefined);
                 }).done();
-			*/
+            */
         }
 
         //? Searches for places nearby. The distance is in meters.
@@ -107,15 +107,15 @@ module TDev.RT {
         }
 
         var _fakeContacts: Contact[] = [
-            Contact.mkFake("Orlando", "N.",	"Gee", "orlando0@adventure-works.com", "245-555-0173", "1.jpg"),
+            Contact.mkFake("Orlando", "N.",    "Gee", "orlando0@adventure-works.com", "245-555-0173", "1.jpg"),
             Contact.mkFake("Janet", "M.", "Gates", "janet1@adventure-works.com", "710-555-0173", "9.jpg"),
-            Contact.mkFake("Donna", "F.", "Carreras", "donna0@adventure-works.com",	"279-555-0130", "10.jpg"),
+            Contact.mkFake("Donna", "F.", "Carreras", "donna0@adventure-works.com",    "279-555-0130", "10.jpg"),
             Contact.mkFake("Lucy", null, "Harrington", "lucy0@adventure-works.com", "828-555-0186", "32.jpg"),
             Contact.mkFake("Rosmarie","J.", "Carroll", "rosmarie0@adventure-works.com", "244-555-0112", "42.jpg"),
             Contact.mkFake("Dominic", "P.", "Gash", "dominic0@adventure-works.com", "192-555-0173", "5.jpg"),
             Contact.mkFake("Kathleen", "M.", "Garza", "kathleen0@adventure-works.com", "150-555-0127", "72.jpg"),
             Contact.mkFake("Johnny", "A.", "Caprio", "johnny0@adventure-works.com", "112-555-0191","28.jpg"),
-            Contact.mkFake("Christopher", "R.",	"Beck","christopher1@adventure-works.com", "1 (11) 500 555-0132", "48.jpg"),
+            Contact.mkFake("Christopher", "R.",    "Beck","christopher1@adventure-works.com", "1 (11) 500 555-0132", "48.jpg"),
             Contact.mkFake("Donald", "L.", "Blanton", "donald0@adventure-works.com", "357-555-0161", "184.jpg")
         ];
 

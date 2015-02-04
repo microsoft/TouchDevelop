@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export module BingServices {
         function readBingSearchResponse(response: WebResponse): BingSearchResult[] {
@@ -155,7 +155,7 @@ module TDev.RT {
         }
         export function rt_stop(rt: Runtime) {
             clearReceivedMessageEvent(rt);
-        }       
+        }
 
         function toLink(jlink: BingSearchResult, kind: LinkKind): Link {
             var link: Link = Link.mk(jlink.url, kind);
@@ -254,7 +254,7 @@ module TDev.RT {
         }
 
         //? Gets the type of the network servicing Internet requests (unknown, none, ethernet, wifi, mobile)
-        //@ quickAsync returns(string) 
+        //@ quickAsync returns(string)
         //@ import("cordova", "org.apache.cordova.network-information")
         export function connection_type(r: ResumeCtx) { //: string
             var res = 'unknown';
@@ -309,7 +309,7 @@ module TDev.RT {
                 d.add(div("wall-dialog-header", lf("web browsing...")));
                 d.add(div("wall-dialog-body", "We tried to open the following web page: " + url + "."))
                 d.add(div("wall-dialog-body", lf("If the page did not open, tap the 'open' button below, otherwise tap 'done'.")))
-                d.add(div("wall-dialog-buttons", 
+                d.add(div("wall-dialog-buttons",
                         HTML.mkA("button wall-button", url, "_blank", "open"),
                         HTML.mkButton(lf("done"), () => {
                             d.dismiss();
@@ -348,21 +348,21 @@ module TDev.RT {
         }
 
         export function proxy(url: string) {
-			// don't proxy localhost
+            // don't proxy localhost
             if (!url || /^http:\/\/localhost(:[0-9]+)?\//i.test(url)) return url;
-			// don't proxy private ip ranges
-			// 10.0.0.0 - 10.255.255.255
-			// 172.16.0.0 - 172.31.255.255
-			// 192.168.0.0 - 192.168.255.255
-			var m = url.match(/^http:\/\/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)(:[0-9]+)?\//i);
-			if (m) {
-				var a = parseInt(m[1]);
-				if (a == 10) return url;
+            // don't proxy private ip ranges
+            // 10.0.0.0 - 10.255.255.255
+            // 172.16.0.0 - 172.31.255.255
+            // 192.168.0.0 - 192.168.255.255
+            var m = url.match(/^http:\/\/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)(:[0-9]+)?\//i);
+            if (m) {
+                var a = parseInt(m[1]);
+                if (a == 10) return url;
 
-				var b = parseInt(m[2]);
-				if (a == 172 && b >= 16 && b <= 31) return url;
-				if (a == 192 && b == 168) return url;
-			}
+                var b = parseInt(m[2]);
+                if (a == 172 && b >= 16 && b <= 31) return url;
+                if (a == 192 && b == 168) return url;
+            }
             return Cloud.getPrivateApiUrl("runtime/web/proxy?url=" + encodeURIComponent(url));
         }
 
@@ -374,7 +374,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a web service response as a JSON data structure (http get)
@@ -386,7 +386,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content_as_json()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a web service response as a XML data structure (http get)
@@ -399,7 +399,7 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response: WebResponse) => r.resumeVal(response.content_as_xml()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a WAV sound file from internet
@@ -431,35 +431,35 @@ module TDev.RT {
             request
                 .sendAsync()
                 .done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Uploads a sound to an internet page (http post). The sound must have been recorded from the microphone.
         //@ async cap(network) flow(SinkWeb) returns(string)
-        export function upload_sound(url: string, snd: Sound, r : ResumeCtx) //: string 
+        export function upload_sound(url: string, snd: Sound, r : ResumeCtx) //: string
         {
             var request = create_request(url);
             r.progress('Uploading...');
-            request.set_method('post');            
+            request.set_method('post');
             request.setContentAsSoundInternal(snd);
             request.sendAsync()
                 .done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Uploads a picture to an internet page (http post)
         //@ async cap(network) flow(SinkWeb) returns(string)
-        export function upload_picture(url: string, pic: Picture, r : ResumeCtx) //: string 
+        export function upload_picture(url: string, pic: Picture, r : ResumeCtx) //: string
         {
             var request = create_request(url);
             r.progress('Uploading...');
             request.set_method('post');
             pic.initAsync()
-				.then(() => {
-					request.setContentAsPictureInternal(pic, 0.85);
-					return request.sendAsync();
-				}).done((response : WebResponse) => r.resumeVal(response.content()),
-					(e) => r.resumeVal(undefined));
+                .then(() => {
+                    request.setContentAsPictureInternal(pic, 0.85);
+                    return request.sendAsync();
+                }).done((response : WebResponse) => r.resumeVal(response.content()),
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Downloads a picture from internet
@@ -467,19 +467,19 @@ module TDev.RT {
         //@ [result].writesMutable
         export function download_picture(url:string, r : ResumeCtx)
         {
-            r.progress('Downloading...');            
-			var pic = undefined;
+            r.progress('Downloading...');
+            var pic = undefined;
             Picture.fromUrl(url)
-				.then((p : Picture) => {
-					pic = p;
-					return p.initAsync();
-				})
-				.done(() => r.resumeVal(pic),
-                    (e) => r.resumeVal(undefined));                    
+                .then((p : Picture) => {
+                    pic = p;
+                    return p.initAsync();
+                })
+                .done(() => r.resumeVal(pic),
+                    (e) => r.resumeVal(undefined));
         }
 
         //? Decodes a string that has been HTML-encoded
-        export function html_decode(html: string): string 
+        export function html_decode(html: string): string
         {
             return Util.htmlUnescape(html);
         }
@@ -572,7 +572,7 @@ module TDev.RT {
 
         //? Converts a string into an base64-encoded string
         export function base64_encode(text: string): string
-        {                    
+        {
                return Util.base64Encode(text);
         }
 
@@ -805,7 +805,7 @@ module TDev.RT {
             if (/state=|redirect_uri=/i.test(oauth_url)) {
                 r.resumeVal(OAuthResponse.mkError("access_denied", "The `redirect_uri` and `state` query arguments are not allowed.", null));
                 return;
-            }            
+            }
 
             // check connection
             if (!Web.is_connected()) {
@@ -840,7 +840,7 @@ module TDev.RT {
             if (msubdomain) {
                 var appid = msubdomain[1];
                 actualRedirectURI = 'https://' + appid + '-' + userid + '.users.touchdevelop.com/oauth';
-				redirectURI = "https://www.touchdevelop.com/" + appid + '-' + userid + "/oauth";
+                redirectURI = "https://www.touchdevelop.com/" + appid + '-' + userid + "/oauth";
                 App.log('oauth appid redirect: ' + appid);
                 oauth_url = oauth_url.replace(subdomainRx, '');
             }
@@ -979,7 +979,7 @@ module TDev.RT {
                 catch (e) {
                     App.log("web: posting message to parent failed");
                 }
-            }            
+            }
         }
 
         function receiveMessage(rt:Runtime, event: MessageEvent) {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? A song
     //@ icon("Music") walltap
@@ -32,10 +32,10 @@ module TDev.RT {
             return song;
         }
 
-        public initAsync() : Promise 
-        { 
+        public initAsync() : Promise
+        {
             this._initialized = true;
-            return Promise.as();         
+            return Promise.as();
         }
 
         public initNoData()
@@ -56,7 +56,7 @@ module TDev.RT {
             this._name = name;
             this._albumName = albumName;
             this._artist = artist;
-			this._album = SongAlbum.mk(this._albumName, this._artist);
+            this._album = SongAlbum.mk(this._albumName, this._artist);
             this._duration = duration;
             this._genre = genre;
             this._rating = rating;
@@ -72,7 +72,7 @@ module TDev.RT {
 
         //? Gets the name of the artist
         //@ returns(string) cachedAsync
-        public artist(r: ResumeCtx) { 
+        public artist(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._artist);
             else this.initAsync().done(() => {
                 r.resumeVal(this._artist || '');
@@ -81,7 +81,7 @@ module TDev.RT {
 
         //? Gets the duration in seconds
         //@ returns(number) cachedAsync
-        public duration(r: ResumeCtx) { 
+        public duration(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._duration);
             else this.initAsync().done(() => {
                 r.resumeVal(this._duration);
@@ -90,7 +90,7 @@ module TDev.RT {
 
         //? Gets the genre of the song
         //@ returns(string) cachedAsync
-        public genre(r: ResumeCtx) { 
+        public genre(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._genre);
             else this.initAsync().done(() => {
                 r.resumeVal(this._genre || '');
@@ -103,7 +103,7 @@ module TDev.RT {
         //? Gets the play count
         //@ returns(number) cachedAsync
         //@ readsMutable
-        public play_count(r: ResumeCtx) {            
+        public play_count(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._playCount);
             else this.initAsync().done(() => {
                 r.resumeVal(this._playCount);
@@ -115,7 +115,7 @@ module TDev.RT {
 
         //? Gets the users rating. -1 if not rated.
         //@ returns(number) cachedAsync
-        public rating(r: ResumeCtx) { 
+        public rating(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._rating);
             else this.initAsync().done(() => {
                 r.resumeVal(this._rating);
@@ -124,7 +124,7 @@ module TDev.RT {
 
         //? Gets the track number in the album
         //@ returns(number) cachedAsync
-        public track(r: ResumeCtx) { 
+        public track(r: ResumeCtx) {
             if (this._initialized) r.resumeVal(this._track);
             else this.initAsync().done(() => {
                 r.resumeVal(this._track);

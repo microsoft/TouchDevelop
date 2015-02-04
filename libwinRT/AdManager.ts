@@ -1,8 +1,8 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 // Microsoft Advertisement signatures
 declare module MicrosoftNSJS.Advertising {
-    export class AdControl { 
+    export class AdControl {
         constructor(el: HTMLElement, v: any);
     }
 }

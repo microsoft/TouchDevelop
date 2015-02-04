@@ -1,8 +1,8 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     export class WinRTPictures
         extends Pictures
-    {    
+    {
         private _files : Windows.Storage.StorageFile[];
 
         constructor() {
@@ -37,7 +37,7 @@ module TDev.RT {
                      r.resumeVal(pic);
                  });
         }
-        
+
         // Gets the thumbnail of i-th picture.
         public thumbnail(index: number, r: ResumeCtx)
         {
@@ -79,7 +79,7 @@ module TDev.RT {
 
         // Displays the picture thumbmails to the wall
         public post_to_wall(s:IStackFrame) : void {
-            
+
         }
     }
 }

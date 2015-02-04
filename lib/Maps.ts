@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Maps, location to address, address to location
     export module Maps
@@ -23,7 +23,7 @@ module TDev.RT {
         //@ [from].deflExpr('senses->current_location') [walking].defl(true)
         export function directions(from: Location_, to: Location_, walking: boolean, r :ResumeCtx)
         {
-            
+
             if (from.equals(to)) {
                 var col = Collections.create_location_collection();
                 col.add(from);
@@ -33,10 +33,10 @@ module TDev.RT {
             }
 
             var url = 'runtime/maps/directions?'
-               + 'fromLat=' + encodeURIComponent(from.latitude().toString()) 
-               + '&fromLong=' + encodeURIComponent(from.longitude().toString())                
+               + 'fromLat=' + encodeURIComponent(from.latitude().toString())
+               + '&fromLong=' + encodeURIComponent(from.longitude().toString())
                + '&toLat=' + encodeURIComponent(to.latitude().toString())
-               + '&toLong=' + encodeURIComponent(to.longitude().toString()) 
+               + '&toLong=' + encodeURIComponent(to.longitude().toString())
                + '&walking=' + (walking ? 'true' : 'false');
             var request = WebRequest.mk(Cloud.getPrivateApiUrl(url), undefined);
             r.progress('Getting directions...');

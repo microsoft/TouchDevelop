@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? An incomming HTTP web request
     //@ stem("request") ctx(general,gckey) betaOnly
@@ -17,10 +17,10 @@ module TDev.RT {
         private _startHandleTime:number;
         private _id: string;
         public _user: User;
-        public _onStop: PromiseInv; 
+        public _onStop: PromiseInv;
         public _api_path: string;
         public _stackframe: IStackFrame;
-       
+
 
         static mk(req: any, _proxy?: PromiseInv)
         {

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -23,7 +23,7 @@ module TDev
             orange: "#FFA500",
             purple: "#800080",
             red: "#FF0000",
-			pink: "#FFCBDB",
+            pink: "#FFCBDB",
             /* transparent: "#00FFFFFF", */
             white: "#FFFFFF",
             yellow: "#FFFF00",
@@ -49,7 +49,7 @@ module TDev
         private lastColor: string = null;
         private lastTokens: AST.Token[] = null;
 
-        public getInitialTokens(): AST.Token[] 
+        public getInitialTokens(): AST.Token[]
         {
             return this.initialTokens === null ? null : this.initialTokens.slice(0);
         }
@@ -89,7 +89,7 @@ module TDev
                 }
                 params.value = NaN;
             };
-            
+
             var numTokens = 0;
             var propertyName = (<AST.PropertyRef> toks[0]).data;
             switch (propertyName) {
@@ -251,7 +251,7 @@ module TDev
                     this.selectPalette(name);
                 });
             }
-            
+
             // Construct the whole form
             this.colorBox = div(
                 "colorBox charm",
@@ -261,7 +261,7 @@ module TDev
                     this.palettes["HSB"]]);
             this.colorBox.style.left = x + "px";
             this.colorBox.style.top = y + "px";
-            
+
             var m = new ModalDialog();
             m.opacity = 0;
             var cancelIt = false;
@@ -315,7 +315,7 @@ module TDev
             this.selectedPalette = paletteName;
             this.updateOnTextInput();
         }
-        
+
         private updateOnTextInput() {
             if (this.selectedPalette === "HSB") {
                 var c = this.parseColorCode(this.inp.value);
@@ -424,7 +424,7 @@ module TDev
                 addOps(b, toks);
                 toks.push(AST.mkOp(")"));
             }
-            
+
             if (this.onUpdate !== null) {
                 this.onUpdate(toks);
             }
@@ -432,7 +432,7 @@ module TDev
             this.lastColor = color;
         }
 
-        private fillZero(s: string, length: number): string 
+        private fillZero(s: string, length: number): string
         {
             return s.length >= length ?
                     s : new Array(length - s.length + 1).join('0') + s;
@@ -507,8 +507,8 @@ module TDev
             }
             return hsb;
         }
-        
-        private floatsToRgb(r: number, g: number, b: number): string 
+
+        private floatsToRgb(r: number, g: number, b: number): string
         {
             return this.fillZero(Math.round(r * 255).toString(16), 2)
                 + this.fillZero(Math.round(g * 255).toString(16), 2)

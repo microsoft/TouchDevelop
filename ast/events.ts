@@ -1,14 +1,14 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev { export module AST {
 
-	export interface EventSig {
-		sig : string;
-		help: string;
-		obsolete?:boolean;
+    export interface EventSig {
+        sig : string;
+        help: string;
+        obsolete?:boolean;
         alt?:string;
-	}
+    }
 
     export var eventSigs : EventSig[] = [
         { sig: "gameloop()", help: "raised many times per second", alt:"time->on every frame" },
@@ -46,12 +46,12 @@ module TDev { export module AST {
         public globalKind:Kind = null;
         public platform = PlatformCapability.None;
         public lowPriority = false;
-		public help : string;
+        public help : string;
 
         constructor(p:Parser, sig : EventSig) {
-			var hds = sig.sig;
-			this.help = sig.help;
-			this.lowPriority = !!sig.obsolete;
+            var hds = sig.sig;
+            this.help = sig.help;
+            this.lowPriority = !!sig.obsolete;
             p.tokenize(hds);
             var hd = p.parseActionHeader();
             this.category = hd.name;
@@ -88,7 +88,7 @@ module TDev { export module AST {
         {
             return this.mkAction(this.eventClasses[0], "event")
         }
-        
+
         public init()
         {
             var p = new Parser();
@@ -111,7 +111,7 @@ module TDev { export module AST {
             clses.sort((a, b) => b.category.length - a.category.length);
             var cls = clses[0];
             if (cls === undefined) {
-                a.isPrivate = true; 
+                a.isPrivate = true;
                 p.error("no such event category " + a.getName());
             } else {
                 a.setEventInfo(new EventInfo(cls));

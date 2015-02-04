@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 
 module TDev
@@ -236,14 +236,14 @@ module TDev
         {
             window.localStorage[key] = value;
         }
-        export function location() : boolean { 
-            return !readSetting("rtnolocation"); 
+        export function location() : boolean {
+            return !readSetting("rtnolocation");
         }
-        export function setLocation(value : boolean) { 
+        export function setLocation(value : boolean) {
             storeSetting("rtnolocation", value ? value : undefined);
         }
-        export function sounds() : boolean { 
-            return !readSetting("rtsnosounds");        
+        export function sounds() : boolean {
+            return !readSetting("rtsnosounds");
         }
         export function setSounds(value: boolean) : void {
             storeSetting("rtsnosounds", value ? value : undefined);
@@ -304,7 +304,7 @@ module TDev
             if (this.sessions.isNodeClient()) {
                 return (<Revisions.NodeSession>this.sessions.getCurrentSession()).clientUserId;
             }
-            
+
             return Cloud.getUserId()
         }
 
@@ -534,7 +534,7 @@ module TDev
         }
 
         public mayPostToWall(p: WallPage): boolean {
-		    return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
+            return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
         }
 
         public clearWall() {
@@ -706,7 +706,7 @@ module TDev
             this.host.notifyPagePop(prevPage);
             this.applyPageAttributes();
 
-            // ensure render code is called         
+            // ensure render code is called
             if (currentPage.isAuto())
                 this.forcePageRefresh();
             else
@@ -1170,7 +1170,7 @@ module TDev
 
         ////////////////////////////////////////////////////////////////////////
         // Hooks for compiler
-        ////////////////////////////////////////////////////////////////////////        
+        ////////////////////////////////////////////////////////////////////////
 
         public enterAsync(t: RT.Task<any>, s: IStackFrame) {
             this.current.continueAt = s.returnAddr;
@@ -1839,7 +1839,7 @@ module TDev
                     this.handleException(e);
                 });
             });
-            
+
         }
 
         public resyncData()
@@ -1855,7 +1855,7 @@ module TDev
 
             this.compiled.initGlobals(this.datas, this);
 
-            // let NodeJS skip initArtAsync 
+            // let NodeJS skip initArtAsync
             //if (Browser.isNodeJS) return loadSession;
             //else
                 return Promise.join([this.compiled.initArtAsync(this.datas), loadSession]);
@@ -1907,13 +1907,13 @@ module TDev
 
             return false
         }
-            
+
 
         public handleException(e:any)
         {
             if (this.quietlyHandleError(e))
                 return
-            
+
             this.handlingException = true;
             if (e.programCounter)
                 this.errorPC = e.programCounter;
@@ -2077,7 +2077,7 @@ module TDev
                             if (!newFn) break;
                             Util.check(!this.resumePointOverride);
                             this.resumePointOverride = null;
-                        } 
+                        }
 
                         if (this.state != RtState.Running) {
                             break;
@@ -2251,7 +2251,7 @@ module TDev
             }
             return {matches:false, args:[]};
         }
-        
+
         public isGameLoop() { return this.category == "gameloop" && !this.evts; }
         public isPause() { return this.category == "pause" && !this.evts; }
         public clear() {}
@@ -2348,7 +2348,7 @@ module TDev
             }
             return {matches:false, args:[]};
         }
-        
+
         public isGameLoop() { return false; }
         public isPause() { return false; }
         public isPageEvent() { return false }
@@ -2374,7 +2374,7 @@ module TDev
         public maximumEps = 0;
         public averageEps = 0;
         public epsHistory: number[] = [];
-        public profiling = false;        
+        public profiling = false;
         public numPageEvents = 0;
 
         constructor(public rt: Runtime) {
@@ -2432,7 +2432,7 @@ module TDev
 
         public calculateEpsInfo() {
             if (this.epsHistory.length > 2) {
-                // first and last measurements are inaccurate 
+                // first and last measurements are inaccurate
                 var myEpsHistory = this.epsHistory.slice(1);
                 myEpsHistory.pop();
                 var minimum = Number.MAX_VALUE;
@@ -2459,7 +2459,7 @@ module TDev
 
         private setupGameLoopTimer() {
             var stopLogEPS = false;
-                        
+
             // Log gameloop events per second
             var logEPS = (): void => {
                 var eps = this.eps;
@@ -2485,7 +2485,7 @@ module TDev
                     this.add("gameloop", null, []);
 
                 Util.setTimeout(20, gameLoop);
-            }            
+            }
 
             this.needsGameLoopTimer = false;
             gameLoop();
@@ -2543,7 +2543,7 @@ module TDev
                 this.queuePageUpdate();
             }
         }
-      
+
         // queue events if nothing else is in the queue
         public maybeRunPageRefresh():IContinuationFunction {
             if (this.rt.isHeadless())
@@ -2582,7 +2582,7 @@ module TDev
                 }
                 var fn = e.dispatch(this.rt, this.eventsByCategory);
                 if (fn != null) return fn;
-                this.queue.shift();                
+                this.queue.shift();
                 if (e.isPageEvent()) this.numPageEvents--;
                 Util.assert(this.numPageEvents >= 0);
              }
@@ -2640,7 +2640,7 @@ module TDev
         public set(bp: string, val: boolean) {
             this.cs.breakpointBindings[bp].setter(val);
         }
-        
+
         public get(bp: string) {
             return this.cs.breakpointBindings[bp].getter();
         }
@@ -2649,7 +2649,7 @@ module TDev
     export class CompilerOptStatistics {
         constructor(public inlinedFunctions = 0, public inlinedCalls = 0, public eliminatedOks = 0,
             public termsReused = 0, public constantsPropagated = 0,
-            public reachingDefsTime = 0, public inlineAnalysisTime = 0, public dominatorsTime = 0, 
+            public reachingDefsTime = 0, public inlineAnalysisTime = 0, public dominatorsTime = 0,
             public usedAnalysisTime = 0, public availableExpressionsTime = 0,
             public constantPropagationTime = 0,
             public compileTime = 0, public numActions = 0, public numStatements = 0) {
@@ -2718,7 +2718,7 @@ module TDev
         public _getProfilingResults: () => any = () => null;
         public _showCoverage = false;
         public _compilerVersion: string;
-        
+
         public breakpointBindings: BreakpointBindings = {};
         public breakpoints: BreakpointCollection;
         public initBreakpoints: Hashtable = null;
@@ -2742,7 +2742,7 @@ module TDev
         public extractAllRunMaps(rt: Runtime) {
             var defined = true;
             Object.keys(this.libScripts).forEach((k) => {
-                var extractRunMap = this.libScripts[k].extractRunMap; 
+                var extractRunMap = this.libScripts[k].extractRunMap;
                 if (extractRunMap)
                     extractRunMap(rt);
                 else
@@ -2765,7 +2765,7 @@ module TDev
 
             if (!hasPages) return;
 
-            this.registerEventHandler("page", null, 
+            this.registerEventHandler("page", null,
                 (prev:IStackFrame, ret:(s:IStackFrame)=>any, libName:string, pageName:string, ...args:any[]) => {
                     var p = prev.rt.pushPage(true);
                     p.libName = libName;
@@ -2934,7 +2934,7 @@ module TDev
             curr.push(new EventHandlerDesc(varId, entry));
 
             if (!this.eventsByCategory["pause"])
-                this.registerEventHandler("pause", null, 
+                this.registerEventHandler("pause", null,
                     (prev:IStackFrame, ret:(s:IStackFrame)=>any) => {
                         var frame:IStackFrame = <any>{};
                         frame.previous = prev;
@@ -2946,7 +2946,7 @@ module TDev
                         };
                         return frame;
                     });
-            if (!this.eventsByCategory["async"]) 
+            if (!this.eventsByCategory["async"])
                 // will never get called; handled specially
                 this.registerEventHandler("async", null, null);
         }
@@ -3063,8 +3063,8 @@ module TDev
             return JsonObject.wrap(o);
         }
 
-        export function queueAction(s: IStackFrame, a: ActionBase, args: any[], 
-                            whenDone:(s:IStackFrame)=>void = null, 
+        export function queueAction(s: IStackFrame, a: ActionBase, args: any[],
+                            whenDone:(s:IStackFrame)=>void = null,
                             errorHandler: (err:any, s:IStackFrame)=>void = null) {
             if (a) {
                 var ev = new Event_();

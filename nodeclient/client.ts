@@ -182,7 +182,7 @@ function getArt(uri:string, f:()=>void)
 
         var d = "";
         var len = 0
-        res.on("data", (ch) => { 
+        res.on("data", (ch) => {
             file.write(ch)
             len += ch.length
         })
@@ -310,7 +310,7 @@ export function optimize(args: string[]) {
         getScript("");
         args = Object.keys(scriptsCache);
     }
-    
+
     writeResultsHeader(() => {
         fs.appendFileSync("results.html", "<table><tr><td>Id</td><td>OKs eliminated</td>" +
             "<td>Inlining (calls to)</td><td>Inlining (inlined actions)</td><td>Actions</td>" +
@@ -342,8 +342,8 @@ export function optimize(args: string[]) {
 
 export function azure(args:string[])
 {
-    parseCore(args, getScriptAsync, (req) => { 
-        req.prettyScript = 0; 
+    parseCore(args, getScriptAsync, (req) => {
+        req.prettyScript = 0;
         req.compile = false;
         req.requiredPlatformCaps = -1
     }, (id:string, resp:TDev.ParseResponse) => {
@@ -415,7 +415,7 @@ export function update(args:string[])
         } else {
             console.log("considered %d, got %d hits", considered, hits);
         }
-    } 
+    }
 
     function get(cont:string)
     {
@@ -479,7 +479,7 @@ export function embedwp8(args:string[])
         var path = null
         if (file == "release.html") path = ""
         else if (file == "error.html") path = ".error"
-        if (path != null) 
+        if (path != null)
             url = "https://www.touchdevelop.com/app/" + path + "?releaseid=" + id + "&rewrite=false"
         tdevGet(url, data => {
             fs.writeFileSync(trg + file, data);
@@ -641,7 +641,7 @@ function readList(fn:string):any[]
 
 var scriptInfo:any = {}
 
-function scriptInfoList():any[] { 
+function scriptInfoList():any[] {
     return Object.keys(scriptInfo).map(k => scriptInfo[k])
 }
 
@@ -1181,7 +1181,7 @@ function infostats(args:string[])
             var n = 0
             var totalRuns = 0
             var totalSize = 0
-            
+
             lst.forEach(s => {
                 if (!f(s)) return
                 n++
@@ -1590,7 +1590,7 @@ export function dlall(args:string[])
         if (lst.continuation) {
             get(lst.continuation);
         }
-    } 
+    }
 
     function get(cont:string)
     {
@@ -1659,7 +1659,7 @@ export function updatelang(args:string[])
 
     var allTrans = {}
     var numStarted = 0
-    
+
     var usedSet = {}
     JSON.parse(fs.readFileSync("build/localization.json", "utf8")).strings.forEach(s => {
         usedSet[s] = 1
@@ -1813,7 +1813,7 @@ export function updatehelp(args:string[])
         numScripts++;
         tdevGet(id + "/text?original=true", (text) => {
             if (!text) {
-                console.log('error: failed to retreive text for /' + id);                
+                console.log('error: failed to retreive text for /' + id);
             } else {
                 cachedScripts[id] = text;
                 text.replace(/url\s*=\s*"(http[^"]*)"/g, (m, url) => {
@@ -1835,7 +1835,7 @@ export function updatehelp(args:string[])
 
         var plat = scr.platforms.filter(e => e != "webonly")
         if (plat.length == 0) plat = undefined
-     
+
         var desc = {
             name: scr.name,
             id: scr.id,
@@ -1884,8 +1884,8 @@ export function updatehelp(args:string[])
                     numScripts++;
                     tdevGet(id + "/webast", dat => {
                         var ast = JSON.parse(dat)
-                        var pics = ast.decls.filter(d => 
-                                    d.nodeType == "art" && d.type == "Picture" && 
+                        var pics = ast.decls.filter(d =>
+                                    d.nodeType == "art" && d.type == "Picture" &&
                                     /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(d.url))
                         var findImg = t => pics.filter(d => t.test(d.name))[0]
                         var img = findImg(/screenshot/i) || findImg(/background/i);
@@ -1898,8 +1898,8 @@ export function updatehelp(args:string[])
                     } else {
                         numScripts++;
                         getScript(m[1], text => {
-                            if (!text) 
-                                throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');    
+                            if (!text)
+                                throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');
                             oneDone()
                         })
                     }
@@ -1999,7 +1999,7 @@ function fetchhistory(args:string[])
                     fs.mkdirSync(args[1])
                 checked = true;
 
-                var user = url.replace(/\/.*/, "") 
+                var user = url.replace(/\/.*/, "")
                 var burl = user + "/installed/" + scr.guid + "/history"
                 var hurl = burl + access_token + "&count=100"
                 var hentries = 0
@@ -2094,7 +2094,7 @@ function fetchscriptinfo(args:string[]) {
         fn = args.shift()
     }
 
-    if (!fn) 
+    if (!fn)
         return
 
     var scripts:any[] = JSON.parse(fs.readFileSync(fn, "utf8"))
@@ -2583,7 +2583,7 @@ function buckethist(args:string[])
 
     var csv = "userid,start,stop,active,#learned,"
 
-    var divs = 5 
+    var divs = 5
 
     for (var i = 0; i < divs; ++i) csv += "#" + i + ","
     for (var i = 0; i < divs; ++i) csv += "%" + i + ","
@@ -2780,7 +2780,7 @@ function computeCorrelations(perUser:any)
             if (l == "one")
                 res += "," + catMap[c].length + ","
             else
-                res += correlation(catMap[c].map(v => v[i] / v[actDays]), 
+                res += correlation(catMap[c].map(v => v[i] / v[actDays]),
                             target).replace(/^[^,]*/, "")
         })
         res += "\r\n"
@@ -2894,77 +2894,77 @@ interface UserFeatureInfo {
 var userFeatures:UserFeatureInfo[] = [
 { userFn: u => 1, desc: "one" },
 
-{ tick: "mainKeyEvent",		desc: "press a key on the keyboard" },
-{ tick: "calcEdit",		desc: "edit line of code" },
-{ tick: "coreRun",		desc: "run a script" },
-{ tick: "mainInit",		desc: "start web app" },
-{ tick: "crashDialogDebug",	desc: "start debugger" },
-{ tick: "viewLibraryRefInit",	desc: "edit library reference" },
-{ tick: "sideCommentInit",	desc: "edit comment" },
-{ tick: "corePublishPublic",	desc: "publish a script (public)",	cls: ["publish"] },
-{ tick: "corePublishHidden",	desc: "publish a script (hidden)",	cls: ["publish"] },
-{ tick: "sideAddEvent",		desc: "add a global event" },
-{ tick: "calcHelp",		desc: "help from calculator" },
-{ tick: "browseListDocs",	desc: "top-level help" },
-{ tick: "hubCreateScript",	desc: "create fresh script" },
-{ tick: "hubNotifications",	desc: "hub notifications" },
-{ tickRx: /^js.browseTopic/,	desc: "browse help topic" },
-{ tick: "browseHeart",		desc: "add heart to script" },
-{ tick: "groupJoin",		desc: "joined a group" },
-{ tick: "browseListGroups",	desc: "browse list of groups" },
-{ tick: "browseListForum",	desc: "browse to the forum" },
-{ tick: "calcKeyboardSearch",	desc: "use keyboard for property insert" },
-{ tick: "calcStartSearch",	desc: "search for property" },
-{ tick: "browseUpdate",		desc: "update script" },
-{ tick: "editorUpdateLibrary",	desc: "update library" },
-{ tick: "editorUpdateScript",	desc: "update script from editor" },
-{ tick: "hubDocsTutorial",	desc: "tutorials dialog" },
-{ tick: "hubUploadPicture",	desc: "upload art picture" },
-{ tick: "hubUploadSound",	desc: "upload art sound" },
-{ tickRx: /^Pub.comment$/,	desc: "post comment" },
-{ tickRx: /^Pub.review$/,	desc: "add heart" },
+{ tick: "mainKeyEvent",        desc: "press a key on the keyboard" },
+{ tick: "calcEdit",        desc: "edit line of code" },
+{ tick: "coreRun",        desc: "run a script" },
+{ tick: "mainInit",        desc: "start web app" },
+{ tick: "crashDialogDebug",    desc: "start debugger" },
+{ tick: "viewLibraryRefInit",    desc: "edit library reference" },
+{ tick: "sideCommentInit",    desc: "edit comment" },
+{ tick: "corePublishPublic",    desc: "publish a script (public)",    cls: ["publish"] },
+{ tick: "corePublishHidden",    desc: "publish a script (hidden)",    cls: ["publish"] },
+{ tick: "sideAddEvent",        desc: "add a global event" },
+{ tick: "calcHelp",        desc: "help from calculator" },
+{ tick: "browseListDocs",    desc: "top-level help" },
+{ tick: "hubCreateScript",    desc: "create fresh script" },
+{ tick: "hubNotifications",    desc: "hub notifications" },
+{ tickRx: /^js.browseTopic/,    desc: "browse help topic" },
+{ tick: "browseHeart",        desc: "add heart to script" },
+{ tick: "groupJoin",        desc: "joined a group" },
+{ tick: "browseListGroups",    desc: "browse list of groups" },
+{ tick: "browseListForum",    desc: "browse to the forum" },
+{ tick: "calcKeyboardSearch",    desc: "use keyboard for property insert" },
+{ tick: "calcStartSearch",    desc: "search for property" },
+{ tick: "browseUpdate",        desc: "update script" },
+{ tick: "editorUpdateLibrary",    desc: "update library" },
+{ tick: "editorUpdateScript",    desc: "update script from editor" },
+{ tick: "hubDocsTutorial",    desc: "tutorials dialog" },
+{ tick: "hubUploadPicture",    desc: "upload art picture" },
+{ tick: "hubUploadSound",    desc: "upload art sound" },
+{ tickRx: /^Pub.comment$/,    desc: "post comment" },
+{ tickRx: /^Pub.review$/,    desc: "add heart" },
 
-{ tick: "codeExtractAction",	desc: "extract action",			cls: ["advanced"] },
-{ tick: "sideFindRefs",		desc: "find references",		cls: ["advanced"] },
-{ tick: "sideAddAction",	desc: "add action",			cls: ["advanced"] },
-{ tick: "sideActionAddInput",	desc: "add action input parameter",	cls: ["advanced"] },
-{ tick: "sideActionAddOutput",	desc: "add action output parameter",	cls: ["advanced"] },
-{ tick: "sideAddActionTypeDef",	desc: "add action type",		cls: ["advanced"] },
-{ tick: "sideAddLibrary",	desc: "add library reference",		cls: ["advanced"] },
-{ tick: "sideAddPage",		desc: "add a page",			cls: ["advanced"] },
-{ tick: "sideAddRecord",	desc: "add a record",			cls: ["advanced"] },
-{ tick: "sideAddResource",	desc: "add an art resource",		cls: ["advanced"] },
-{ tick: "sideAddVariable",	desc: "add a variable",			cls: ["advanced"] },
-{ tick: "viewRecordInit",	desc: "edit record",			cls: ["advanced"] },
-{ tick: "viewScriptInit",	desc: "edit script properties",		cls: ["advanced"] },
-{ tick: "viewVariableInit",	desc: "edit variable properties",	cls: ["advanced"] },
-{ tickRx: /^js.calcReplaceIn/,	desc: "code replace",			cls: ["advanced"] },
-{ tick: "codeSurround",		desc: "surround code",			cls: ["advanced"] },
+{ tick: "codeExtractAction",    desc: "extract action",            cls: ["advanced"] },
+{ tick: "sideFindRefs",        desc: "find references",        cls: ["advanced"] },
+{ tick: "sideAddAction",    desc: "add action",            cls: ["advanced"] },
+{ tick: "sideActionAddInput",    desc: "add action input parameter",    cls: ["advanced"] },
+{ tick: "sideActionAddOutput",    desc: "add action output parameter",    cls: ["advanced"] },
+{ tick: "sideAddActionTypeDef",    desc: "add action type",        cls: ["advanced"] },
+{ tick: "sideAddLibrary",    desc: "add library reference",        cls: ["advanced"] },
+{ tick: "sideAddPage",        desc: "add a page",            cls: ["advanced"] },
+{ tick: "sideAddRecord",    desc: "add a record",            cls: ["advanced"] },
+{ tick: "sideAddResource",    desc: "add an art resource",        cls: ["advanced"] },
+{ tick: "sideAddVariable",    desc: "add a variable",            cls: ["advanced"] },
+{ tick: "viewRecordInit",    desc: "edit record",            cls: ["advanced"] },
+{ tick: "viewScriptInit",    desc: "edit script properties",        cls: ["advanced"] },
+{ tick: "viewVariableInit",    desc: "edit variable properties",    cls: ["advanced"] },
+{ tickRx: /^js.calcReplaceIn/,    desc: "code replace",            cls: ["advanced"] },
+{ tick: "codeSurround",        desc: "surround code",            cls: ["advanced"] },
 
-{ tick: "scriptTemplateADJscript",	desc: "new blank script",	cls: ["start script"] },
-{ tick: "scriptTemplateADJgame",	desc: "new blank game",		cls: ["start script"] },
-{ tick: "scriptTemplateADJcloud_app",	desc: "new blank cloud app",	cls: ["start script"] },
-{ tick: "scriptTemplateADJapp",		desc: "new blank box app",	cls: ["start script"] },
+{ tick: "scriptTemplateADJscript",    desc: "new blank script",    cls: ["start script"] },
+{ tick: "scriptTemplateADJgame",    desc: "new blank game",        cls: ["start script"] },
+{ tick: "scriptTemplateADJcloud_app",    desc: "new blank cloud app",    cls: ["start script"] },
+{ tick: "scriptTemplateADJapp",        desc: "new blank box app",    cls: ["start script"] },
 
 
-{ tick: "scriptTemplateADJdrawing",	desc: "start tutorial drawing",		cls: [] },
-{ tick: "scriptTemplateADJturtle",	desc: "start tutorial turtle",		cls: [] },
-{ tick: "scriptTemplateADJsoundboard",	desc: "start tutorial soundboard",	cls: [] },
-{ tick: "scriptTemplateADJlove",	desc: "start tutorial love",		cls: [] },
-{ tick: "scriptTemplateADJrocks",	desc: "start tutorial rocks",		cls: [] },
-{ tick: "scriptTemplateADJpopper",	desc: "start tutorial popper",		cls: [] },
-{ tick: "scriptTemplateADJsong_shaker",	desc: "start tutorial song_shaker",	cls: [] },
-{ tick: "scriptTemplateADJtap_counter",	desc: "start tutorial tap_counter",	cls: [] },
-{ tick: "scriptTemplatecutestADJ_pet",	desc: "start tutorial cutest_pet",	cls: [] },
-{ tick: "scriptTemplateADJspiral",	desc: "start tutorial spiral",		cls: [] },
-{ tick: "scriptTemplateADJfractal",	desc: "start tutorial fractal",		cls: [] },
-{ tick: "scriptTemplateADJcat",		desc: "start tutorial cat",		cls: [] },
-{ tick: "scriptTemplateADJhide_and_seek",desc: "start tutorial hide_and_seek",	cls: [] },
-{ tick: "scriptTemplateADJpong",	desc: "start tutorial pong",		cls: [] },
-{ tick: "scriptTemplateADJmath",	desc: "start tutorial math",		cls: [] },
-{ tick: "scriptTemplateADJsphero",	desc: "start tutorial sphero",		cls: [] },
-{ tick: "scriptTemplateADJbeatbox",	desc: "start tutorial beatbox",		cls: [] },
-{ tick: "scriptTemplateADJlevel",	desc: "start tutorial level",		cls: [] },
+{ tick: "scriptTemplateADJdrawing",    desc: "start tutorial drawing",        cls: [] },
+{ tick: "scriptTemplateADJturtle",    desc: "start tutorial turtle",        cls: [] },
+{ tick: "scriptTemplateADJsoundboard",    desc: "start tutorial soundboard",    cls: [] },
+{ tick: "scriptTemplateADJlove",    desc: "start tutorial love",        cls: [] },
+{ tick: "scriptTemplateADJrocks",    desc: "start tutorial rocks",        cls: [] },
+{ tick: "scriptTemplateADJpopper",    desc: "start tutorial popper",        cls: [] },
+{ tick: "scriptTemplateADJsong_shaker",    desc: "start tutorial song_shaker",    cls: [] },
+{ tick: "scriptTemplateADJtap_counter",    desc: "start tutorial tap_counter",    cls: [] },
+{ tick: "scriptTemplatecutestADJ_pet",    desc: "start tutorial cutest_pet",    cls: [] },
+{ tick: "scriptTemplateADJspiral",    desc: "start tutorial spiral",        cls: [] },
+{ tick: "scriptTemplateADJfractal",    desc: "start tutorial fractal",        cls: [] },
+{ tick: "scriptTemplateADJcat",        desc: "start tutorial cat",        cls: [] },
+{ tick: "scriptTemplateADJhide_and_seek",desc: "start tutorial hide_and_seek",    cls: [] },
+{ tick: "scriptTemplateADJpong",    desc: "start tutorial pong",        cls: [] },
+{ tick: "scriptTemplateADJmath",    desc: "start tutorial math",        cls: [] },
+{ tick: "scriptTemplateADJsphero",    desc: "start tutorial sphero",        cls: [] },
+{ tick: "scriptTemplateADJbeatbox",    desc: "start tutorial beatbox",        cls: [] },
+{ tick: "scriptTemplateADJlevel",    desc: "start tutorial level",        cls: [] },
 
 { userFn: u => u.activedays, desc: "active days" },
 { userFn: u => u.receivedpositivereviews, desc: "number of hearts" },
@@ -3118,7 +3118,7 @@ function tmp1(args:string[])
             n.forEach(a => args.push(a))
         }
 
-        if (args.length > 2) 
+        if (args.length > 2)
             runNode(logFn, done, args)
     })
 
@@ -3182,7 +3182,7 @@ function tmp0(args:string[])
         clIds[j] = tmp
     })
     */
-    
+
 
     var curr = 0
 
@@ -3202,7 +3202,7 @@ function tmp0(args:string[])
             n.forEach(a => args.push(a))
         }
 
-        if (args.length > 2) 
+        if (args.length > 2)
             runNode(logFn, done, args)
     })
 
@@ -3435,7 +3435,7 @@ export interface ScriptTemplate {
     topic?: string;
     source?: string; // computed
     caps?: string; // optional
-	betaOnly?:boolean; // optional
+    betaOnly?:boolean; // optional
 }
 
 var lf = (x:string) => x;

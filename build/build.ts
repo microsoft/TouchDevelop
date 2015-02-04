@@ -183,11 +183,11 @@ class Project {
         return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
             console.log("[build] " + this.shortName + " " + path.dirname(this.name));
             var start = now();
-            var args = [pathRoot + "/External/TypeScript/tsc.js", 
+            var args = [pathRoot + "/External/TypeScript/tsc.js",
                         "--target", "ES5",
                         "--module", "commonjs",
                         this.compileAsModule ? "--outDir" : "--out", this.compileAsModule ? path.dirname(this.name) : this.name + ".js",
-                        "--declaration", 
+                        "--declaration",
                         this.mainFile.path]
             //console.log(args)
             var p = child_process.spawn("node", args, { stdio: "inherit" });
@@ -210,7 +210,7 @@ class Project {
             });
         });
     }
-   
+
     buildAsync():Promise
     {
         var mkPromise = () =>

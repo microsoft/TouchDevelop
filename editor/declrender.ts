@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -51,7 +51,7 @@ module TDev
         var recordColor = "#800080";
         var userDefinedColor = "#1B91E0";
 
-        export var declColor:any = 
+        export var declColor:any =
         {
             globalDef: (d:AST.GlobalDef) => {
                 var c = DeclRender.propColor(d);
@@ -68,10 +68,10 @@ module TDev
                 if (Util.cloudRun) {
                     a.canBeOffloadedCache = AST.CanBeOffloadedState.Unknown;
                     // recompute isOffloaded since the action or those it calls may change
-                    a.isOffloaded = /^cloud/.test(a.getName()) || (a.isOffloaded && a.canBeOffloaded()); 
+                    a.isOffloaded = /^cloud/.test(a.getName()) || (a.isOffloaded && a.canBeOffloaded());
                     if (a.isOffloaded) return "#800000";
                 }
-                return actionColor; 
+                return actionColor;
             },
 
             libraryRef: (l:AST.LibraryRef) =>
@@ -183,15 +183,15 @@ module TDev
             localDef: (d:AST.LocalDef) =>
                 d.getKind().icon() || "svg:Document,white",
             singletonDef: () => "svg:touchDevelop,white",
-            property: (p:IProperty) => 
+            property: (p:IProperty) =>
               p.getResult().getKind().icon() || "svg:touchDevelop,white",
             declEntry: (d:DeclEntry) => d.icon,
             kind: (k:Kind) => k.icon() || "svg:Document,white",
             codeLocation: () => "svg:actionLocation,white",
             codeLocationCurr: () => "svg:actionLocation,white",
             codeLocationLib: () => "svg:actionLocation,white",
-            libraryRef: (l:AST.LibraryRef) => 
-                appCloudColor(l.resolved, 
+            libraryRef: (l:AST.LibraryRef) =>
+                appCloudColor(l.resolved,
                     l.resolved && l.resolved.icon ? l.resolved.iconPath() : "svg:recycleLib,white"),
         };
 
@@ -276,7 +276,7 @@ module TDev
             if (decl.debuggingData && decl.debuggingData.critical && decl.debuggingData.max) {
                 var scorePartial = decl.debuggingData.critical / decl.debuggingData.max.critical;
                 var score = Math.floor(scorePartial * 27); // there are 28 colors, first of them is white
-                var color: string = AST.ExprHolder.heatmapColors[score]; 
+                var color: string = AST.ExprHolder.heatmapColors[score];
                 innerElt.style.backgroundColor = color;
             }
             (<any> elt).theDesc = descDiv;

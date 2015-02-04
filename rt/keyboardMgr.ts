@@ -124,7 +124,7 @@ module TDev {
             if (index < 0) return;
             this.popBack(this.urlStack.length - index)
         }
-        
+
 
         private popBack(toPop = 1) {
             Ticker.dbg("historyMgr: popBack " + toPop);
@@ -140,7 +140,7 @@ module TDev {
                     entry.onPop = null;
                     f();
                 }
-            } 
+            }
 
             // inform the WAB shell whether the current url is the top page
             var last = this.urlStack.peek()
@@ -163,7 +163,7 @@ module TDev {
                 var t = this.urlStack[i]
                 if (t && !/^#modal-/.test(t.url)) return t.url
             }
-            
+
             return "#"
         }
 
@@ -291,7 +291,7 @@ module TDev {
 
         public syncDone() {}
         public hashReloaded() {}
-        
+
         private paneState = 0;
 
         public autoHide() { return SizeMgr.portraitMode; }
@@ -421,10 +421,10 @@ module TDev {
             Util.normalizeKeyEvent(e);
             if (/-(Control|Alt)$/.test(e.keyName))
                 return true;
-                
+
             if (Browser.isGecko) {
-                var isRepeated = 
-                    e.type == "keypress" && 
+                var isRepeated =
+                    e.type == "keypress" &&
                     this.previousStoppedEvent &&
                     this.previousStoppedEvent.type == "keydown";
                 this.previousStoppedEvent = null;

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
@@ -15,7 +15,7 @@ module TDev {
         public toJson() {
             var usedEntries: any = {}
             return {
-                savedApp: 
+                savedApp:
                 this.savedApp.map((e: IndexedString) => {
                         if (usedEntries[e.idx + ""]) {
                             return { idx: e.idx, s: null }
@@ -31,7 +31,7 @@ module TDev {
         static fromJson(par: UndoMgr, j: any) {
             var r = new UndoState();
             var entries: any = {}
-            r.savedApp = 
+            r.savedApp =
             j.savedApp.map((e: any) => {
                     if (typeof e == "string")
                         return { idx: par.nextId(), s: e }
@@ -73,7 +73,7 @@ module TDev {
             getName: () => "app"
           }
 
-		public currentId() { return this.currentIdx; }
+        public currentId() { return this.currentIdx; }
         public nextId() { return this.currentIdx++; }
 
         private updateCache(d: AST.Decl) {
@@ -143,13 +143,13 @@ module TDev {
             if (appDecl.cachedSerialized && appDecl.cachedSerialized.idx > 0)
                 appDecl.cachedSerialized.idx = -appDecl.cachedSerialized.idx;
             add(appDecl);
-            
+
             Ticker.dbg("UndoMgr.createSavedApp " + this.logMsg);
             this.logMsg = "";
 
             return res;
         }
-        
+
         public getScriptSource() {
             if (this.mainStates.length == 0) return "";
             var u = this.mainStates.peek();
@@ -178,12 +178,12 @@ module TDev {
             if (!Collab.currentCloudAst) {
                 return;
             }
-             
+
             Collab.pushUndoToLog(ast1, ast2);
         }
 
 
-     
+
         public refreshFromLog(): Promise {
 
             //if (this.refreshLock)
@@ -207,7 +207,7 @@ module TDev {
                 this.pushToLog(true);
             }
 
-            return this.pullIntoEditor(isUndo);                     
+            return this.pullIntoEditor(isUndo);
         }
         */
 

@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? New or built-in colors
     export module Colors
@@ -40,7 +40,7 @@ module TDev.RT {
 
          //? Gets the color that has the ARGB value of #FFFFCBDB
         export function pink(): Color { return Color.fromHtml("#FFFFCBDB"); }
-       
+
         //? Gets the color that has the ARGB value of #FF000000
         export function black(): Color { return Color.fromHtml("#FF000000"); }
 

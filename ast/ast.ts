@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
     //declare class RenderState;
@@ -11,7 +11,7 @@ module TDev {
 }
 
 module TDev.AST {
-  
+
 
     export var api = TDev.api;
     var currentNodeId = 1;
@@ -70,7 +70,7 @@ module TDev.AST {
         }
 
         public getError() { return this._error; }
-        public setError(m:string) { this._error = m; } 
+        public setError(m:string) { this._error = m; }
         public clearError() { this._error = null; }
 
         public writeTo(tw:TokenWriter) : void
@@ -107,20 +107,20 @@ module TDev.AST {
             return prefix + k;
         }
 
-        
+
 
         public canBeOffloaded(): boolean {
-            var res = true; 
+            var res = true;
             if (!this.isPlaceholder()) {
                 var children = this.children();
                 for (var i = 0; i < children.length; i++) {
                     if (!children[i].canBeOffloaded()) {
                         res = false;
                         break;
-                    } 
+                    }
                 }
             }
-            return res; 
+            return res;
         }
     }
 
@@ -179,7 +179,7 @@ module TDev.AST {
         public loopVariable():LocalDef { return null }
 
         // if this instanceof Block, these are attached at the beginning of the body, and otherwise after the the current statement
-        public diffStmts:Stmt[]; 
+        public diffStmts:Stmt[];
         public diffAltStmt:Stmt;
         public diffStatus:number; // -1, 0, +1, -N for moved old statements
         public diffFeatures:any;
@@ -246,7 +246,7 @@ module TDev.AST {
 
         public writeIdOpt(tw:TokenWriter)
         {
-            this.writeId(tw); 
+            this.writeId(tw);
         }
 
         public parentApp():App
@@ -263,7 +263,7 @@ module TDev.AST {
             if (p) return (<ActionHeader>p).action;
             else return null;
         }
-        
+
         public helpTopic()
         {
             return this.nodeType();
@@ -886,9 +886,9 @@ module TDev.AST {
         constructor() {
             super()
         }
-        public isVarDef() { 
-            return this.expr.looksLikeVarDef || 
-                (!!this.expr.assignmentInfo() && this.expr.assignmentInfo().definedVars.length > 0); 
+        public isVarDef() {
+            return this.expr.looksLikeVarDef ||
+                (!!this.expr.assignmentInfo() && this.expr.assignmentInfo().definedVars.length > 0);
         }
         public isPagePush() { return !!this.expr.assignmentInfo() && this.expr.assignmentInfo().isPagePush; }
         public nodeType() { return "exprStmt"; }
@@ -1058,7 +1058,7 @@ module TDev.AST {
 
         public forSearch() { return "where " + this.name.getName(); } // TODO add parameters?
         public accept(v:NodeVisitor) { return v.visitInlineAction(this); }
-        // public isExecutableStmt() { return true; } ?? 
+        // public isExecutableStmt() { return true; } ??
     }
 
     export class InlineActions
@@ -1181,9 +1181,9 @@ module TDev.AST {
         public nodeType() { return "where"; }
         public calcNode() { return this.condition; }
         public accept(v:NodeVisitor) { return v.visitWhere(this); }
-        public isPlaceholder() 
+        public isPlaceholder()
         {
-            return this.condition.isPlaceholder() || 
+            return this.condition.isPlaceholder() ||
             (this.condition.tokens.length == 1 && this.condition.tokens[0].getText() == "true");
         }
 
@@ -1613,7 +1613,7 @@ module TDev.AST {
 
         public getName() { return "need " + this.getKind().serialize() + (this.label ? ":" + this.label : ""); }
         public label:string;
-        public longError() 
+        public longError()
         {
             return lf("TD100: insert {0:a} here", this.label || this.getKind().toString())
         }
@@ -1665,15 +1665,15 @@ module TDev.AST {
         public getExtensionKind():Kind
         {
             var p = this.getInParameters()
-            if (p.length >= 1 && !/\?$/.test(p[0].getName()) && 
+            if (p.length >= 1 && !/\?$/.test(p[0].getName()) &&
                 p[0].getKind().isExtensionEnabled())
                 return p[0].getKind()
             return null
         }
 
         public getFlags()
-        { 
-            var flags = !this.isAtomic ? PropertyFlags.Async : PropertyFlags.None 
+        {
+            var flags = !this.isAtomic ? PropertyFlags.Async : PropertyFlags.None
 
             if (this.body)
                 for (var i = 0; i < this.body.stmts.length; ++i) {
@@ -1702,15 +1702,15 @@ module TDev.AST {
 
         public modelParameter:ActionParameter;
 
-        public helpTopic() { 
-            return this.isActionTypeDef() ? "action types" : 
-                   this.isPage() ? "pages" : 
-                   this.isEvent() ? "events" : 
-                   "code"; 
+        public helpTopic() {
+            return this.isActionTypeDef() ? "action types" :
+                   this.isPage() ? "pages" :
+                   this.isEvent() ? "events" :
+                   "code";
         }
 
         // flag to indicate whether to offload the action.
-        // When Util.cloudRun is set, the editor allows to select a sequence of stmts, 
+        // When Util.cloudRun is set, the editor allows to select a sequence of stmts,
         // extracts them to a new action, and set the offload flag of the new action to true.
         public isOffloaded: boolean;
         public isAtomic: boolean = false;
@@ -1754,14 +1754,14 @@ module TDev.AST {
         {
             var desc = this.getInlineHelp();
             if (desc) return desc;
-            return this.isActionTypeDef() ? lf("an action type definition") 
-                 : this.isEvent() ? lf("an event handler") 
+            return this.isActionTypeDef() ? lf("an action type definition")
+                 : this.isEvent() ? lf("an event handler")
                  : this.isPage() ? lf("a page") : lf("an action")
         }
 
         // IProperty
         public getCategory():PropertyCategory { return PropertyCategory.Action; }
-        public getParameters() : PropertyParameter[] 
+        public getParameters() : PropertyParameter[]
         {
             return super.getParameters().concat(
                 this.getInParameters().map((p:ActionParameter) => this.mkPP(p.getName(), p.getKind())));
@@ -1828,9 +1828,9 @@ module TDev.AST {
         public hasInParameters() { return this.getInParameters().length > 0; }
         public hasOutParameters() { return this.getOutParameters().length > 0; }
 
-        public nameLocal(n:string, usedNames:any = {}) 
+        public nameLocal(n:string, usedNames:any = {})
         {
-            return AstNode.freshNameCore(n, 
+            return AstNode.freshNameCore(n,
                 (n:string) =>
                     usedNames.hasOwnProperty(n) ||
                     this.allLocals.some((l:LocalDef) => l.getName() == n) ||
@@ -1871,7 +1871,7 @@ module TDev.AST {
 
         public writeHeader(tw:TokenWriter, forLibSig = false)
         {
-            var writeParms = (parms:ActionParameter[]) => 
+            var writeParms = (parms:ActionParameter[]) =>
             {
                 var first = true;
                 parms.forEach((l:ActionParameter) => {
@@ -2437,14 +2437,14 @@ module TDev.AST {
         {
             if (<any>v === true) v = "yes";
             switch (k) {
-            case "icon": this.icon = v; break;               
+            case "icon": this.icon = v; break;
             case "name": this.setName(v); break;
             case "color": this.color = v; break;
             case "seed": this.seed = v; break;
             case "version": this.setVersion(v); break;
             case "platform": this.setPlatformString(v); break;
             case "parentIds": this.parentIds = v.split(/,\s*/).filter(x => !!x); break;
-            case "editorState": 
+            case "editorState":
                 if (v) try { this.editorState = JSON.parse(v); } catch (e) { Util.check(false, "editor state corrupted"); }
                 break;
             case "rootId": this.rootId = v; break;
@@ -2486,7 +2486,7 @@ module TDev.AST {
             }
             return null;
         }
-        
+
         public allActions():Action[] { return <Action[]>this.things.filter((t) => t instanceof Action); }
         public actions():Action[] { return <Action[]>this.things.filter((t) => t instanceof Action && !((<Action>t).isEvent()) && !((<Action>t).isActionTypeDef())); }
         public events():Action[] { return <Action[]>this.things.filter((t) => t instanceof Action && ((<Action>t).isEvent())); }
@@ -2519,7 +2519,7 @@ module TDev.AST {
         }
 
 
-        public toMeta():any 
+        public toMeta():any
         {
             var r = {
                 type: "app",
@@ -2543,7 +2543,7 @@ module TDev.AST {
 
             return r;
         }
-        
+
         public toJsonScript() : any
         {
             var r = {
@@ -2692,8 +2692,8 @@ module TDev.AST {
                 (<RecordDef>t).getFields().forEach(f => {
                     if (f.getStableName()) {
                         var q = u[f.getStableName()]
-                        if (q && 
-                            (declExists(q) || 
+                        if (q &&
+                            (declExists(q) ||
                              (q instanceof RecordField && declExists(q.def()) && q.def().getFields().indexOf(q) >= 0)))
                             f.setStableName(null);
                     }
@@ -2734,9 +2734,9 @@ module TDev.AST {
             return a.replace(/\s*\d+$/, "") == b.replace(/\s*\d+$/,"");
         }
 
-        public freshName(n:string) 
+        public freshName(n:string)
         {
-            return AstNode.freshNameCore(n, 
+            return AstNode.freshNameCore(n,
                 (n:string) =>
                     api.getThing(n) != null ||
                     n == "this" ||
@@ -2806,7 +2806,7 @@ module TDev.AST {
         public hint = "";
         public getError()
         {
-            
+
             if (this._error != null)
                 return this._error;
             if (this.debuggingData.errorMessage)
@@ -2932,7 +2932,7 @@ module TDev.AST {
         public getLocalDef():LocalDef {
             var r = this.getThing()
             if (r instanceof LocalDef) return <LocalDef>r
-            else return null; 
+            else return null;
         }
         public isDigit() { return false }
 
@@ -2985,7 +2985,7 @@ module TDev.AST {
         public getText() { return this.data + ""; }
         public accept(v:NodeVisitor) { return v.visitLiteral(this); }
         public getLiteral() { return this.data; }
-        
+
         public writeTo(tw:TokenWriter)
         {
             switch (typeof this.data) {
@@ -3041,7 +3041,7 @@ module TDev.AST {
         public isDigit() { return /^[0-9.\-]$/.test(this.data) }
 
         public funSpan:number;
-        
+
         public writeTo(tw:TokenWriter)
         {
             if (this.data == "(" || this.data == ")")
@@ -3106,7 +3106,7 @@ module TDev.AST {
         }
 
         public forSearch() { return this.getText().toLowerCase(); }
-        public matches(d:AstNode) { 
+        public matches(d:AstNode) {
             if (!this.prop) return false;
             if (this.prop.forwardsTo() == d)
                 return true;
@@ -3130,9 +3130,9 @@ module TDev.AST {
             super()
         }
         public getText() { return !this.def ? this.data : this.def.getName(); }
-        public shortName() 
+        public shortName()
         {
-            return !this.def ? null : 
+            return !this.def ? null :
             this.def instanceof SingletonDef ? this.def.getKind().shortName() : null;
         }
         public nodeType() { return "thingRef"; }
@@ -3150,7 +3150,7 @@ module TDev.AST {
             else
                 tw.id(this.getText());
         }
-    
+
         public forSearch() { return this.getText().toLowerCase() }
         public matches(d:AstNode) { return this.def == d; }
         public canBeOffloaded(): boolean { return this.def.canBeOffloaded(); }
@@ -3237,7 +3237,7 @@ module TDev.AST {
         }
 
         public getCall() { return this }
-        
+
         public getLiftedSetter()
         {
             var prop = this.prop()
@@ -3249,7 +3249,7 @@ module TDev.AST {
             var tp = prop.getResult().getKind()
             if (tp.equals(api.core.Nothing)) return null
             var setter = prop.parentKind.getProperty("set " + prop.getName())
-            if (setter && 
+            if (setter &&
                 !(setter.getFlags() & PropertyFlags.Async) &&
                 setter.getResult().getKind().equals(api.core.Nothing)) {
                 var parms = setter.getParameters()
@@ -3320,7 +3320,7 @@ module TDev.AST {
         public canBeOffloaded(): boolean {
             var act = this.calledAction();
             var prop = this.prop();
-            
+
             for (var i = 0; i < this.args.length; i++) {
                 if (!this.args[i].canBeOffloaded()) return false;
             }
@@ -3350,7 +3350,7 @@ module TDev.AST {
     // Constructors
     // -------------------------------------------------------------------------------------------------------
 
-    export function mkLocal(name:string, k:Kind) 
+    export function mkLocal(name:string, k:Kind)
     {
         var r = new LocalDef();
         r.setName(name);
@@ -3413,7 +3413,7 @@ module TDev.AST {
 
     export function mkPropRef(v:string) : PropertyRef
     {
-       var p = new PropertyRef(); 
+       var p = new PropertyRef();
        p.data = v;
        return p;
     }
@@ -3437,7 +3437,7 @@ module TDev.AST {
         default: Util.die();
         }
     }
-    
+
     export function mkParam(name:string, k:Kind) { return mkLocal(name, k); }
 
     export function mkPlaceholderThingRef() { return mkThing("$skip"); }
@@ -3448,7 +3448,7 @@ module TDev.AST {
         if(p) {
             r.setStableName(p.consumeLabel());
         }
-        
+
         r.expr = expr;
         return r;
     }
@@ -3748,7 +3748,7 @@ module TDev.AST {
         private writtenLocals0:LocalDef[];
         readLocals:LocalDef[];
         writtenLocals:LocalDef[];
-        
+
         // globals read or written, including both global variables and records
         readGlobals: Decl[];
         writtenGlobals: Decl[];
@@ -3798,7 +3798,7 @@ module TDev.AST {
             }
             return null;
         }
-       
+
 
 
         visitAstNode(n:AstNode)
@@ -3819,7 +3819,7 @@ module TDev.AST {
             this.add(n.def, this.readLocals0);
             return null;
         }
-        
+
         visitCall(n: Call) {
 
             var prop = n.prop();
@@ -4006,7 +4006,7 @@ module TDev.AST {
 
     // Find out what methods are called (transitively) from the node
     export class MethodFinder
-        extends NodeVisitor 
+        extends NodeVisitor
     {
         called: Action[];
 
@@ -4039,7 +4039,7 @@ module TDev.AST {
     // remove comments, skip statments, useless meta
     // used for loose script equality
     export class ScriptCompacter
-        extends TDev.AST.NodeVisitor 
+        extends TDev.AST.NodeVisitor
     {
         constructor () {
             super()
@@ -4060,7 +4060,7 @@ module TDev.AST {
             this.visitChildren(n);
             return null
         }
-                
+
         visitBlock(n: TDev.AST.Block) {
             n.stmts = n.stmts.filter((s) => s.nodeType() != "comment" && !s.isPlaceholder());
             this.visitChildren(n);
@@ -4478,7 +4478,7 @@ module TDev.AST {
                         }
                         resolved[id] = app;
                     }
-                    
+
                     if (resolved[id]) {
                         lib.resolved = resolved[id];
                     } else {
@@ -4589,7 +4589,7 @@ module TDev.AST {
     export class FindErrorVisitor extends NodeVisitor
     {
         firstError:Stmt;
-        public visitStmt(s:Stmt) 
+        public visitStmt(s:Stmt)
         {
             if (this.firstError) return;
             if (s.getError()) this.firstError = s
@@ -4687,7 +4687,7 @@ module TDev.AST {
         public allowAllLibraries : boolean = true;
         private properties:any; // p.helpTopic() => #occurences
 
-        public merge(other : IntelliProfile) 
+        public merge(other : IntelliProfile)
         {
             this.allowAllLibraries = this.allowAllLibraries && other.allowAllLibraries;
             if (other.properties) {
@@ -4865,7 +4865,7 @@ module TDev.AST {
             var n = this.lastStmt
             var ai = eh.assignmentInfo()
             if (ai)
-                ai.definedVars.forEach((x, i) => x.setStableName(n.getStableName() + "$l" + i)); 
+                ai.definedVars.forEach((x, i) => x.setStableName(n.getStableName() + "$l" + i));
         }
 
         // Stmt and subclasses need IDs

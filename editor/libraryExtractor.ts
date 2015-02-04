@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev
 {
@@ -26,7 +26,7 @@ module TDev
 
         private getRemainingDecls(): AST.DeclAndDeps[] {
             return this.split.getRemainingDecls();
-        }   
+        }
 
         // everything starts off with the user requesting to move a declaration D
         // from a script/app into a library. The identification of a pair
@@ -58,7 +58,7 @@ module TDev
         static defaultLibraryTemplate =
             "meta version 'v2.2';\n" +
             "meta isLibrary 'yes';\n" +
-            "meta hasIds 'yes';\n" 
+            "meta hasIds 'yes';\n"
             ;
 
         // this dialog prompts the user to select an existing library in the app
@@ -103,7 +103,7 @@ module TDev
                                 var header = <Cloud.Header>newLibrary;
                                 var lib = TheEditor.freshLibrary();
                                 this.split.setAppAndLib(Script, lib);
-                                Script.addDecl(lib);                                
+                                Script.addDecl(lib);
                                 TheEditor.bindLibrary(lib, Browser.TheHost.createInstalled(header));
                                 tick(Ticks.toLibNewLib);
                                 m.dismiss();
@@ -174,7 +174,7 @@ module TDev
 
         // once there are some declarations selected to move to the library, we help
         // the user by identifying other declarations they might want to consider moving:
-        // 
+        //
         // 1. subsetOfDeclsToMove: these are declarations whose direct accesses
         //    are a subset of the declsToMove; that is, the downward closure of D in this set
         //    is guaranteed to be in declsToMove (won't drag anything else in).
@@ -219,7 +219,7 @@ module TDev
                 dd.getTransitiveClosure().forEach(ee => { ee.count += (dd.getInclude() ? 1 : -1); });
                 dd.getTransitiveClosure().forEach(ee => this.updateBoxes(ee));
             };
-            return b;           
+            return b;
         }
 
         private showDeclAndDep(dd: AST.DeclAndDeps, showTrans:boolean) {
@@ -340,5 +340,5 @@ module TDev
         }
     }
 
-   
+
 }

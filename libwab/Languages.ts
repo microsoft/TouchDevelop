@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Wab {
     export function LanguagesInit()
     {
@@ -7,7 +7,7 @@ module TDev.RT.Wab {
             Util.log('wab: boosting DICTATE');
             Languages.record_text = LanguagesWab.record_text;
         }
-        
+
         if (isSupportedAction(Action.SPEAK_TEXT)) {
             Util.log('wab: boosting SPEAK_TEXT');
             Languages.speak_text = LanguagesWab.speak_text;

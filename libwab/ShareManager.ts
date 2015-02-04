@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT.Wab {
     export function ShareManagerInit()
     {
@@ -36,7 +36,7 @@ module TDev.RT.Wab {
         export function shareButtons(m:ModalDialog, link: Link, options:ShareManager.ShareOptions)
         {
             return [
-				HTML.mkButton('share', () => {
+                HTML.mkButton('share', () => {
                     shareSocialAsync("", link.name(), link.address()).done()
                     if (!options.noDismiss) m.dismiss();
                 })

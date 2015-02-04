@@ -1,4 +1,4 @@
-﻿///<reference path='refs.ts'/>
+///<reference path='refs.ts'/>
 module TDev.RT {
     //? Create invalid values
     export module Invalid
@@ -26,38 +26,38 @@ module TDev.RT {
         export function picture() : Picture { return undefined; }
 
         //? Creates an invalid Pictures instance
-		//@ cap(media)
+        //@ cap(media)
         export function pictures() : Pictures { return undefined; }
 
         //? Creates an invalid Picture Album instance
-		//@ cap(media)
+        //@ cap(media)
         export function picture_album() : PictureAlbum { return undefined; }
 
         //? Creates an invalid Picture Albums instance
-		//@ cap(media)
+        //@ cap(media)
         export function picture_albums() : PictureAlbums { return undefined; }
 
         //? Creates an invalid Song instance
         export function song() : Song { return undefined; }
 
         //? Creates an invalid Songs instance
-		//@ cap(media)
+        //@ cap(media)
         export function songs() : Songs { return undefined; }
 
         //? Creates an invalid Song Album instance
-		//@ cap(media)
+        //@ cap(media)
         export function song_album() : SongAlbum { return undefined; }
 
         //? Creates an invalid Song Albums instance
-		//@ cap(media)
+        //@ cap(media)
         export function song_albums() : SongAlbums { return undefined; }
 
         //? Creates an invalid Playlist instance
-		//@ cap(media)
+        //@ cap(media)
         export function playlist() : Playlist { return undefined; }
 
         //? Creates an invalid Playlists instance
-		//@ cap(media)
+        //@ cap(media)
         export function playlists() : Playlists { return undefined; }
 
         //? Creates an invalid Location instance
@@ -67,7 +67,7 @@ module TDev.RT {
         export function location_collection() : Collection<Location_> { return undefined; }
 
         //? Creates an invalid Map instance
-		//@ cap(maps)
+        //@ cap(maps)
         export function map() : Map { return undefined; }
 
         //? Creates an invalid Sound instance
@@ -110,50 +110,50 @@ module TDev.RT {
         export function sprite_set() : SpriteSet { return undefined; }
 
         //? Creates an invalid Tile instance
-		//@ cap(tiles)
+        //@ cap(tiles)
         export function tile() : Tile { return undefined; }
 
         //? Creates an invalid Xml Object instance
         export function xml_object() : XmlObject { return undefined; }
 
         //? Creates an invalid Device instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function device() : Device { return undefined; }
 
         //? Creates an invalid Device Collection instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function device_collection() : Collection<Device> { return undefined; }
 
         //? Creates an invalid Printer instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function printer() : Printer { return undefined; }
 
         //? Creates an invalid Printer Collection instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function printer_collection() : Collection<Printer> { return undefined; }
 
         //? Creates an invalid Media Player instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_player() : MediaPlayer { return undefined; }
 
         //? Creates an invalid Media Player Collection instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_player_collection() : Collection<MediaPlayer> { return undefined; }
 
         //? Creates an invalid Media Server instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_server() : MediaServer { return undefined; }
 
         //? Creates an invalid Media Server Collection instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_server_collection() : Collection<MediaServer> { return undefined; }
 
         //? Creates an invalid Media Link instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_link() : MediaLink { return undefined; }
 
         //? Creates an invalid Media Link Collection instance
-		//@ cap(home) obsolete
+        //@ cap(home) obsolete
         export function media_link_collection() : Collection<MediaLink> { return undefined; }
 
         //? Creates an invalid Place instance
@@ -172,15 +172,15 @@ module TDev.RT {
         export function contact_collection() : Collection<Contact> { return undefined; }
 
         //? Creates an invalid Appointment instance
-		//@ cap(calendar)
+        //@ cap(calendar)
         export function appointment() : Appointment { return undefined; }
 
         //? Creates an invalid Appointment Collection instance
-		//@ cap(calendar)
+        //@ cap(calendar)
         export function appointment_collection() : Collection<Appointment> { return undefined; }
 
         //? Creates an invalid Motion instance
-		//@ cap(motion)
+        //@ cap(motion)
         export function motion() : Motion { return undefined; }
 
         //? Creates an invalid Camera instance
@@ -241,9 +241,9 @@ module TDev.RT {
         //? Creates an invalid Form Builder instance
         export function form_builder(): FormBuilder { return undefined; }
 
-		//? Creates an invalid BlueTooth Device instance
-		//@ cap(bluetooth)
-		export function bluetooth_device() : BluetoothDevice { return undefined; }
+        //? Creates an invalid BlueTooth Device instance
+        //@ cap(bluetooth)
+        export function bluetooth_device() : BluetoothDevice { return undefined; }
 
         //? Creates an invalid User instance
         export function user(): User { return undefined; }
