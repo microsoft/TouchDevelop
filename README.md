@@ -28,7 +28,7 @@ https://www.touchdevelop.com that takes care of storing and managing the scripts
 
 ## how can I contribute?
 
-There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md) to TypeScript.
+There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md) to TouchDevelop.
 * [Submit bugs](https://github.com/Microsoft/TouchDevelop/issues) and help us verify fixes as they are checked in.
 * Review the [source code changes](https://github.com/Microsoft/TouchDevelop/pulls).
 * [Contribute bug fixes or features](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md).
