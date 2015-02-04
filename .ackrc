@@ -1,0 +1,4 @@
+--type=nojs
+--ignore-file=match:\.d\.ts$
+--ignore-file=is:tags
+--ignore-file=is:scripts.cache

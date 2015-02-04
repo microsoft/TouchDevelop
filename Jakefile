@@ -246,7 +246,7 @@ Object.keys(concatMap).forEach(function (f) {
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
 task('default', [ 'css-prefixes' ].concat(Object.keys(concatMap)), function () {
-    console.log("\nBuild completed.");
+    console.log("[I] build completed.");
 });
 
 task('clean', [], function () {
@@ -259,6 +259,11 @@ task('test', [ 'default' ], { async: true }, function () {
 });
 
 task('run', [ 'default' ], { async: true }, function () {
+    // XXX fix this too
+    console.log("[F] copying browser/browser.js to browser.js");
+    if (fs.exists("browser.js"))
+      fs.unlink("browser.js");
+    fs.writeFileSync("browser.js", fs.readFileSync("browser/browser.js"));
     jake.exec(
         [ 'node noderunner 80 silent ' ],
         { printStdout: true, printStderr: true },
