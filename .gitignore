@@ -1,0 +1,9 @@
+# node
+node_modules
+
+# build
+*.d.ts
+*.js
+build/*.json
+shell/npm/package.json
+touchdevelop.tgz
