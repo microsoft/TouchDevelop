@@ -281,6 +281,11 @@ task('upload', [], { async : true }, function() {
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
+    // XXX fix this too
+    console.log("[F] copying build/browser.js to browser.js");
+    if (fs.exists("browser.js"))
+      fs.unlink("browser.js");
+    fs.writeFileSync("browser.js", fs.readFileSync("build/browser.js"));
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     var uploadKey = process.env.TD_UPLOAD_KEY;
     console.log("[I] uploading v" + buildVersion)
