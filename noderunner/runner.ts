@@ -1,8 +1,8 @@
 ///<reference path='../rt/typings.d.ts'/>
 ///<reference path='../browser/browser.d.ts'/>
-///<reference path='../build/rt.d.ts'/>
-///<reference path='../build/ast.d.ts'/>
-///<reference path='../build/libnode.d.ts'/>
+///<reference path='../rt/refs.d.ts'/>
+///<reference path='../ast/refs.d.ts'/>
+///<reference path='../libnode/refs.d.ts'/>
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='jsonapi.ts'/>
 ///(reference path='../shell/package.d.ts'/)

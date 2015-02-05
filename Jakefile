@@ -29,15 +29,14 @@ function mkTscCall(dir, refs, out) {
         "--noEmitOnError",
         "--target ES5",
         "--module commonjs",
-        "--declaration",
-        out ? "--out build/"+dir+".js" : "",
-        dir+"/"+refs+".ts"
+        out ? "--out "+dir+"/"+refs+".js" : "",
+        "--declaration "+dir+"/"+refs+".ts"
     ].join(" ");
 }
 
 function mkSimpleTask(production, dependencies, folder, target, isStandalone) {
-    generated.push('build/'+folder+'.js');
-    generated.push('build/'+folder+'.d.ts');
+    generated.push(folder+'/'+target+'.js');
+    generated.push(folder+'/'+target+'.d.ts');
 
     return file(production, dependencies, { async: true }, function () {
         console.log("[B] "+production);
