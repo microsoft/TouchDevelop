@@ -322,5 +322,31 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
   )
 })
 
+task('nw', [ 'default' ], { async : true }, function() {
+  console.log('[I] building nw packages')
+  jake.mkdirP('build/nw');
+  ['node-webkit/app.html',
+   'node-webkit/logo.png',
+   'node-webkit/package.json',
+   'build/browser.js',
+   'build/main.js',
+   'build/shell.js',
+   'build/runtime.js',
+   'css/default.css',
+   'css/editor.css'].forEach(function(f) { jake.cpR(f, 'build/nw') })
+  var nwBuilder = require('node-webkit-builder');
+  var nw = new nwBuilder({
+      files: 'build/nw/**',
+      platforms: ['win32'], //['osx32', 'osx64', 'win32', 'win64'],
+      buildDir: 'build/nw_build',
+      cacheDir: 'nw_cache',
+  });
+  nw.on('log',  console.log);
+  nw.build().then(function () {
+     console.log('[I] nw packaged');
+     complete();
+  });
+})
+
 
 // vim: ft=javascript

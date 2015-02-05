@@ -2,6 +2,9 @@
 node_modules
 npm-debug.log
 
+# node-webkit-builder
+nw_cache
+
 # shell
 cdn-cache
 tdconfig.json
