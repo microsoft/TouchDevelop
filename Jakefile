@@ -301,7 +301,7 @@ task('upload', [], { async : true }, function() {
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
-    fixupFiles();
+    fixUpFiles();
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     upload(buildVersion);
   }
@@ -309,7 +309,7 @@ task('upload', [], { async : true }, function() {
 
 task('run', [ 'default' ], { async: true }, function (port) {
     port = port || 80;
-    fixupFiles();
+    fixUpFiles();
     jake.exec(
         [ 'node noderunner '+port+' silent ' ],
         { printStdout: true, printStderr: true },
