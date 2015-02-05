@@ -6,11 +6,11 @@ import child_process = require('child_process');
 import crypto = require('crypto');
 
 function main() {
-    var files = ['shell.js', 'iisnode.yml', 'web.config']
+    var files = ['shell.js', '../shell/iisnode.yml', '../shell/web.config']
     var obj = {}
     var sha = {}
     files.forEach(f => {
-        var fc = fs.readFileSync("../shell/" + f, "utf8")
+        var fc = fs.readFileSync(f, "utf8")
         obj[f] = fc
         var h = crypto.createHash('sha256')
         h.update(fc, "utf8")
@@ -25,7 +25,7 @@ function main() {
     console.log("*** pkgshell.js written")
 
 
-    var ff = fs.readFileSync("../shell/shell.js", "utf8")
+    var ff = fs.readFileSync("shell.js", "utf8")
     ff = ff.replace(/^\uFEFF/, "#!/usr/bin/env node\n")
     ff = ff.replace(/\r/g, "")
     ff = ff.replace(/^\s*var isNpm =.*$/m, "var isNpm = true;")

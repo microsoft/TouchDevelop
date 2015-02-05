@@ -25,7 +25,7 @@
 ///<reference path='modaldialog.ts'/>
 ///<reference path='storage.ts'/>
 ///<reference path='perf.ts'/>
-///<reference path='../browser/browser.d.ts'/>
+///<reference path='../build/browser.d.ts'/>
 ///<reference path='../lib/refs.ts'/>
 ///<reference path='records.ts'/>
 ///<reference path='headless.ts'/>

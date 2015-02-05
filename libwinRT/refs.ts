@@ -1,5 +1,5 @@
-///<reference path='../rt/refs.d.ts'/>
-//<reference path='../browser/browser.d.ts'/>
+///<reference path='../build/rt.d.ts'/>
+//<reference path='../build/browser.d.ts'/>
 ///<reference path='../typings/winjs/winjs.d.ts'/>
 ///<reference path='../typings/winrt/winrt.d.ts'/>
 ///<reference path='Senses.ts'/>
