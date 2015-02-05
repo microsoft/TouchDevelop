@@ -152,8 +152,8 @@ mkSimpleTask('build/jsonapi.d.ts', [], "noderunner/jsonapi.ts");
 mkSimpleTask('build/client.js', [
     'rt/typings.d.ts',
     'build/jsonapi.d.ts',
-    'nodeclient/client.ts'
-], "nodeclient/client.ts");
+    'tools/client.ts'
+], "tools/client.ts");
 // XXX coarse-grained dependencies here over the whole 'noderunner' directory
 mkSimpleTask('build/runner.js', [
     'build/browser.d.ts',

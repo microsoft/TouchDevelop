@@ -94,7 +94,7 @@ fork them and send pull requests from TouchDevelop itself to update them.
 ## More handy commands
 
 Our catch-all tool is `build/client.js`, which is compiled from
-`nodeclient/client.ts`. Some of the common invocations of `client.js` are
+`tools/client.ts`. Some of the common invocations of `client.js` are
 exposed as Jake targets.
 
     # assumes TD_UPLOAD_KEY and TD_UPLOAD_USER are set, uploads a new test build
@@ -115,7 +115,8 @@ The `client.js` is built by default.
 * `browser`: feature-detection
 * `editor`: the TouchDevelop user interface that drives the website: hub, script
   list, editor itself
-* `generated`: files needed for the build that are re-generated manually
+* `generated`: files needed for the build that are re-generated manually once in
+  a while
 * `intellitrain`:
 * `json`:
 * `lib`: the libraries exposed to TouchDevelop scripts, written in TypeScript
@@ -124,15 +125,29 @@ The `client.js` is built by default.
 * `libwab`:
 * `libwinRT`:
 * `mc`: Minecraft bindings
-* `nodeclient`: our multi-purpose local tool
-* `noderunner`: local node server for running TouchDevelop locally
+* `noderunner`: runs in the cloud, and parses TouchDevelop scripts / compiles
+  them; as an accident, it is also used to run a local node server when
+  developing
 * `node-webkit`:
 * `officemix`:
 * `rt`: various run-time support libraries for the TouchDevelop application:
   in-browser storage, cloud connection, promises, DOM utilities...
-* `runner`:
+* `runner`: the run-time system for *generated* TouchDevelop apps; that is, once
+  a TouchDevelop script is packaged as an app (webapp, cordova app, etc.),
+  `runner.html` is the entry point
 * `shell`:
 * `storage`: code for syncing your locally-stored scripts and the cloud storage,
   in the TouchDevelop application
-* `tools`: internal tools that are part of the build (pre-processings)
+* `tools`: internal tools that are part of the build (pre-processing)
 * `www`: the base files that make up the TouchDevelop website (html and css)
+
+### Structure of the generated website / app
+
+When packaged, as the website or as an app, the directory structure is flat.
+That is, the CSS and HTML files from `www/` as well as the generated `.js` files
+from `build/` all end up in the same directory. That way, `index.html` can refer
+to `main.js` without worrying.
+
+When running locally (via `jake run`), the local node server knows where to find
+the right files to give the illusion that all files are at the root `/` of the
+web server.

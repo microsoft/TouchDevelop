@@ -1463,7 +1463,7 @@ var scriptsCache:any;
 function getScript(id:string)
 {
     if (!scriptsCache) {
-        var f = fs.readFileSync('scripts.cache', 'utf-8');
+        var f = fs.readFileSync('generated/scripts.cache', 'utf-8');
         var fj = JSON.parse('{' + f + ' "theEnd": {} }');
         delete fj.theEnd;
         scriptsCache = fj;
@@ -1508,7 +1508,7 @@ function downloadScript(arg:string, f:(s:string) => void)
         function save(text) {
             if (!scriptsCache[arg]) {
                 scriptsCache[arg] = text;
-                fs.appendFileSync('scripts.cache', '"' + arg + '": ' + JSON.stringify(text) + ",\n", "utf-8");
+                fs.appendFileSync('generated/scripts.cache', '"' + arg + '": ' + JSON.stringify(text) + ",\n", "utf-8");
             }
             f(text);
         }
@@ -3421,13 +3421,13 @@ function tdupload(args:string[])
             "build/runtime.js",
             "build/browser.js",
             "build/noderunner.js",
-            "css/default.css",
-            "css/editor.css",
-            "index.html",
-            "browsers.html",
-            "app.manifest",
-            "webapp.html",
-            "error.html",
+            "www/default.css",
+            "www/editor.css",
+            "www/index.html",
+            "www/browsers.html",
+            "www/app.manifest",
+            "webapp/webapp.html",
+            "www/error.html",
             "build/touchdevelop.tgz",
         ]
 
@@ -3445,7 +3445,7 @@ function tdupload(args:string[])
             url += "&contentType=" + encodeURIComponent(mime)
 
             tdevGet(url, (resp) => {
-                console.log(path + ": " + resp)
+                console.log(fileName + ": " + resp)
             }, 1, data)
         })
     })
@@ -3686,7 +3686,7 @@ export function main()
         var d = cmds[cmd]
         d.f(args);
     } else {
-        console.log("USAGE: node nodeclient.js [URL] COMMAND [ARGUMENTS...]");
+        console.log("USAGE: node build/client.js [URL] COMMAND [ARGUMENTS...]");
         console.log("URL defaults to %s", localUrl);
         console.log("Commands:");
         Object.keys(cmds).forEach((cmd) => {
