@@ -1,11 +1,11 @@
 ///<reference path='../rt/typings.d.ts'/>
 ///<reference path='../browser/browser.d.ts'/>
-///<reference path='../rt/refs.d.ts'/>
-///<reference path='../ast/refs.d.ts'/>
-///<reference path='../storage/refs.d.ts'/>
-///<reference path='../libwinRT/refs.d.ts'/>
-///<reference path='../libwab/refs.d.ts'/>
-///<reference path='../libcordova/refs.d.ts'/>
+///<reference path='../build/rt.d.ts'/>
+///<reference path='../build/ast.d.ts'/>
+///<reference path='../build/storage.d.ts'/>
+///<reference path='../build/libwinRT.d.ts'/>
+///<reference path='../build/libwab.d.ts'/>
+///<reference path='../build/libcordova.d.ts'/>
 ///<reference path='videoUtil.ts'/>
 ///<reference path='tipManager.ts'/>
 ///<reference path='sideTab.ts'/>
