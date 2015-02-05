@@ -264,8 +264,24 @@ task('clean', [], function () {
 });
 
 task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function () {
-    jake.exec([ 'node nodeclient/client.js buildtest' ], {}, function() { complete(); });
+    jake.exec([ 'node nodeclient/client.js buildtest' ],
+      { printStdout: true, printStderr: true },
+      function() { complete(); });
 });
+
+task('ci', [], { async : true }, function() {
+  if (!process.env.TRAVIS) {
+    console.log("[I] not in travis, skipping upload")
+    complete();
+  } else {
+    assert(process.env.TRAVIS_BUILD_NUMBER)
+    assert(process.env.TD_UPLOAD_KEY)
+    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+    console.log("[I] uploading v" + buildVersion)
+    // TODO: upload data
+    complete();
+  }
+})
 
 task('run', [ 'default' ], { async: true }, function (port) {
     port = port || 80;
@@ -297,4 +313,3 @@ task('update-docs', [ 'nodeclient/client.js', 'default' ], { async: true }, func
     function() { complete(); }
   )
 })
-
