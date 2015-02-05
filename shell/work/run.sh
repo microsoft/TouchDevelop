@@ -1,3 +1,4 @@
 #!/bin/sh
 
-node ../server.js --cli TD_LOCAL_EDITOR_PATH=../.. TD_ALLOW_EDITOR=true
+rm -f tdserver.js
+node ../../build/shell.js --cli TD_LOCAL_EDITOR_PATH=../.. TD_ALLOW_EDITOR=true

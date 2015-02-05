@@ -3,8 +3,6 @@ RELEASE = michal
 
 all:
 	jake
-	rm -f nodeclient/client.js
-	jake nodeclient/client.js
 
 clean:
 	jake clean
