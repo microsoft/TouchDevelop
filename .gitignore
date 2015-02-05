@@ -17,3 +17,7 @@ touchdevelop.tgz
 results.html
 results.json
 build/
+
+# vim
+tags
+*.sw?

@@ -10,6 +10,7 @@ import http = require('http');
 import https = require('https');
 import path = require('path');
 import child_process = require('child_process');
+import crypto = require("crypto")
 
 var scriptsWithErrors = ["isrt", "bvxv", "cgcbb", "bkiza", "urde",
   "oasy", "faxz", // tap wall RECORD is missing in webapp
@@ -99,7 +100,7 @@ https.globalAgent = new ReuseAgentSSL({ maxSockets: maxSock });
 
 
 
-function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5)
+function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
 {
     var currReq = reqNo++;
     var isDone = false
@@ -134,7 +135,7 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5)
     }
 
     var purl:any = /^http(s?):/.test(uri) ? url.parse(uri) : { hostname: 'www.touchdevelop.com', path: '/api/' + uri }
-    purl.method = 'GET'
+    purl.method = body ? 'PUT' : 'GET'
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
     } else {
@@ -151,7 +152,11 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5)
             finish(null)
         }
     })
-    req.end();
+
+    if (body)
+        req.end(body);
+    else
+        req.end();
 }
 
 function getArt(uri:string, f:()=>void)
@@ -3374,6 +3379,78 @@ function userfeat(args:string[])
     fs.writeFileSync("userfeat.json", "{\"labels\":" + JSON.stringify(labels) + ",\n\"users\":[\n" + recStr.join(",\n") + "\n]}\n")
 }
 
+export function guidGen()
+{
+    function f() { return crypto.randomBytes(2).toString("hex").toLowerCase() }
+    return f()+f()+"-"+f()+"-4"+f().slice(-3)+"-"+f()+"-"+f()+f()+f();
+}
+
+function getMime(filename:string)
+{
+    var ext = path.extname(filename).slice(1)
+    switch (ext) {
+        case "txt": return "text/plain";
+        case "html":
+        case "htm": return "text/html";
+        case "css": return "text/css";
+        case "js": return "application/javascript";
+        case "jpg":
+        case "jpeg": return "image/jpeg";
+        case "png": return "image/png";
+        case "ico": return "image/x-icon";
+        case "manifest": return "text/cache-manifest";
+        case "json": return "application/json";
+        case "svg": return "image/svg+xml";
+        default: return "application/octet-stream";
+    }
+}
+
+function tdupload(args:string[])
+{
+    var key = args.shift()
+    var lbl = args.shift()
+
+    if (!/^\d\d\d\d\d\d\d\d\d\d\d/.test(lbl))
+        lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
+
+    console.log("releaseid:" + lbl)
+
+    if (args.length == 0)
+        args = [
+            "main.js",
+            "runtime.js",
+            "touchdevelop.tgz",
+            "browser.js",
+            "css/default.css",
+            "css/editor.css",
+            "index.html",
+            "browsers.html",
+            "app.manifest",
+            "noderunner.js",
+            "webapp.html",
+            //"cordova.js",
+            "error.html",
+        ]
+
+    args.forEach(path => {
+
+        fs.readFile(path, (err, data) => {
+            if (err) {
+                console.log(err)
+                return
+            }
+
+            var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
+            url += "&path=" + lbl + "/" + encodeURIComponent(path)
+            url += "&contentType=" + encodeURIComponent(getMime(path))
+
+            tdevGet(url, (resp) => {
+                console.log(path + ": " + resp)
+            }, 1, data)
+        })
+    })
+}
+
 var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
@@ -3421,6 +3498,7 @@ var cmds = {
     "infostats": { f:infostats, a:'', h:'print out stats based on withinfo.json'},
     "addstats": { f:addstats, a:'', h:'query detailed stats'},
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
+    "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
 }
 
 export interface ScriptTemplate {

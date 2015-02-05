@@ -2,10 +2,12 @@ TARGET = out
 RELEASE = michal
 
 all:
-	(cd build; node boot.js)
+	jake
+	rm -f nodeclient/client.js
+	jake nodeclient/client.js
 
 clean:
-	(cd build; node boot.js clean)
+	jake clean
 
 .PHONY: tags
 tags:

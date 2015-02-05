@@ -289,7 +289,7 @@ module TDev.RT {
 
         //? Copies all bytes from `source` to current buffer at `offset`
         //@ readsMutable
-        public clone()
+        public clone(): Buffer
         {
             var res = Buffer.mk(this.count())
             res.copy_from(0, this)

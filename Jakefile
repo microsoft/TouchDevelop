@@ -317,3 +317,6 @@ task('update-docs', [ 'nodeclient/client.js', 'default' ], { async: true }, func
     function() { complete(); }
   )
 })
+
+
+// vim: ft=javascript

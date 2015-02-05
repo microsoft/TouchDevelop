@@ -16,7 +16,6 @@ function readFile(filename:string)
 }
 
 function writeFile(filename:string, text:string) {
-    if (text.charAt(0) != '\uFEFF') text = '\uFEFF' + text;
     fs.writeFileSync(filename, text, "utf8");
 }
 
@@ -95,7 +94,7 @@ forEachFile("../css", function (s) {
             }
         }
 
-        out += line + "\r\n";
+        out += line.replace(/\s+$/, "") + "\n";
     }
 
     if (out != origFile) {
