@@ -3417,10 +3417,10 @@ function tdupload(args:string[])
 
     if (args.length == 0)
         args = [
-            "build/main.js",
-            "build/runtime.js",
-            "build/browser.js",
-            "build/noderunner.js",
+            "main.js",
+            "runtime.js",
+            "browser.js",
+            "noderunner.js",
             "css/default.css",
             "css/editor.css",
             "index.html",
