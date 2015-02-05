@@ -1618,7 +1618,7 @@ export function buildtest()
     var port = 12000 + Math.floor(Math.random()*10000);
     var now = Date.now();
     localUrl = "http://localhost:" + port + "/";
-    var p = child_process.fork("noderunner.js", [ port + "", "silent" ], { silent: true });
+    var p = child_process.fork("build/noderunner.js", [ port + "", "silent" ], { silent: true });
     p.stderr.pipe(<any>process.stderr);
     afterParse = () => {
         console.log("kill server");

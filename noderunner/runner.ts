@@ -1499,13 +1499,12 @@ function getMime(filename:string)
 function serveFile(filename:string, resp:http.ServerResponse)
 {
     // When running locally, we resolve "foo.js" to "build/foo.js", since all
-    // our generated files are in that folder.
+    // our js files are in that folder.
     if (filename.substr(filename.length - 3, 3) == ".js")
         filename = "build/"+filename;
-    // Furthermore, once compiled, we sit as "build/noderunner.js", so prepend a
-    // "../" to the file.
-    filename = "../"+filename;
-    var fn = path.resolve(__dirname, filename)
+    // Furthermore, once compiled, we sit as "build/noderunner.js", so
+    // __dirname+"../" is the root directory.
+    var fn = path.resolve(path.join(__dirname, ".."), filename)
     fs.exists(fn, (yes) => {
         if (yes)
             fs.readFile(fn, (err, content) => {
