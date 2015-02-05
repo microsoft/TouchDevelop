@@ -1498,6 +1498,13 @@ function getMime(filename:string)
 
 function serveFile(filename:string, resp:http.ServerResponse)
 {
+    // When running locally, we resolve "foo.js" to "build/foo.js", since all
+    // our generated files are in that folder.
+    if (filename.substr(filename.length - 3, 3) == ".js")
+        filename = "build/"+filename;
+    // Furthermore, once compiled, we sit as "build/noderunner.js", so prepend a
+    // "../" to the file.
+    filename = "../"+filename;
     var fn = path.resolve(__dirname, filename)
     fs.exists(fn, (yes) => {
         if (yes)
@@ -1577,8 +1584,8 @@ function reportBug(ctx: string, err: any) {
 function startServer(port:number)
 {
     var allowed = ['css', 'tutorial', 'json', 'icons', "webapp", "testing", "vueplot",
-                   'index.html', 'browser.js', 'main.js', 'favicon.ico', "worker.js", "runtime.js",
-                   "cordova.js",
+                   'index.html',
+                   'browser.js', 'main.js', 'favicon.ico', "worker.js", "runtime.js", "cordova.js",
                    'browsers.html', 'results.html', 'error.html', 'landing.html', 'hoc.html'
                    ];
 
