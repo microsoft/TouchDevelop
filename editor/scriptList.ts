@@ -6083,9 +6083,9 @@ module TDev { export module Browser {
             var setBtn = (state:number, hearts:string, f:()=>void) => {
                 var btn:HTMLElement;
                 if (state < 0)
-                    btn = mkBtn(Ticks.browseHeart, "svg:HeartAlt,white,opacity=0.3", hearts, null, f);
+                    btn = mkBtn(Ticks.browseHeart, "svg:wholeheart,white,opacity=0.3", hearts, null, f);
                 else
-                    btn = mkBtn(Ticks.browseUnHeart, "svg:HeartAlt,white", hearts, null, f);
+                    btn = mkBtn(Ticks.browseUnHeart, "svg:wholeheart,white", hearts, null, f);
                 heartButton.setChildren([btn]);
                 btn.setFlag("working", Math.abs(state) < 2);
             }
