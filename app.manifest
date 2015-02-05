@@ -1,7 +1,6 @@
 CACHE MANIFEST
 
 CACHE:
-./cordova.js
 ./main.js
 ./browser.js
 ./css/default.css
