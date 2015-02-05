@@ -1518,8 +1518,13 @@ function proxyEditor(cmds:string[], req, resp)
     } else if (rel == "local") {
         var mime = getMime(file)
         var enc = /^text\//.test(mime) ? "utf8" : null
-        if (!fs.existsSync(localPath + "/" + file))
-            localPath += "/build"
+        if (!fs.existsSync(localPath + "/" + file)) {
+            if (/\.css$/.test(file))
+              localPath += "/css"
+            else
+              localPath += "/build"
+        }
+        info.log(file + "->" + localPath + "/" + file)
         fs.readFile(localPath + "/" + file, enc, (err, data:any) => {
             if (err) {
                 resp.writeHead(404)
