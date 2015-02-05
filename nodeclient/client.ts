@@ -3419,7 +3419,7 @@ function tdupload(args:string[])
         args = [
             "main.js",
             "runtime.js",
-            "build/browser.js",
+            "browser.js",
             "noderunner.js",
             "css/default.css",
             "css/editor.css",
