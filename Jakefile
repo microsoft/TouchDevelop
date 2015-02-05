@@ -5,6 +5,7 @@
  *   reference to [../storage/whatever.ts] in [libwinRT/refs.ts], then you must
  *   update the dependencies of the [libwinRT/refs.d.ts] task.
  **/
+var assert = require('assert');
 var child_process = require("child_process");
 var fs = require("fs");
 
@@ -264,6 +265,7 @@ task('clean', [], function () {
 });
 
 task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function () {
+    console.log("[I] running tests")
     jake.exec([ 'node nodeclient/client.js buildtest' ],
       { printStdout: true, printStderr: true },
       function() { complete(); });
@@ -274,8 +276,8 @@ task('ci', [], { async : true }, function() {
     console.log("[I] not in travis, skipping upload")
     complete();
   } else {
-    assert(process.env.TRAVIS_BUILD_NUMBER)
-    assert(process.env.TD_UPLOAD_KEY)
+    assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number")
+    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key")
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     console.log("[I] uploading v" + buildVersion)
     // TODO: upload data
