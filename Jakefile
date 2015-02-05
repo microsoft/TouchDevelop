@@ -305,13 +305,13 @@ task('run', [ 'default' ], { async: true }, function (port) {
 });
 
 task('local', [ 'default' ], { async: true }, function() {
-  jake.rmRf('tdserver.js')
+  jake.rmRf('tdserver.js');
   jake.exec(
     [ 'node build/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
     { printStdout: true, printStderr: true },
     function() { complete(); }
-  )
-})
+  );
+});
 
 task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
   jake.exec(
@@ -319,8 +319,8 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
       'node build/client.js updatelang' ],
     { printStdout: true, printStderr: true },
     function() { complete(); }
-  )
-})
+  );
+});
 
 task('nw', [ 'default' ], { async : true }, function() {
   console.log('[I] building nw packages')
@@ -346,7 +346,16 @@ task('nw', [ 'default' ], { async : true }, function() {
      console.log('[I] nw packaged');
      complete();
   });
-})
+});
 
+task('cordova', [ 'default' ], {}, function () {
+  // FIXME minify
+  jake.mkdirP('build/cordova/');
+  ['www/index.html',
+   'build/browser.js',
+   'build/main.js',
+   'www/default.css',
+   'www/editor.css'].forEach(function (f) { jake.cpR(f, 'build/cordova/'); });
+});
 
 // vim: ft=javascript
