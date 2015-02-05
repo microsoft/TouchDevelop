@@ -278,6 +278,7 @@ function fixUpFiles() {
     console.log("[F] copying build/browser.js to browser.js");
     if (fs.exists("browser.js"))
       fs.unlink("browser.js");
+    fs.writeFileSync("browser.js", fs.readFileSync("build/browser.js"));
 }
 
 // this task runs as a "after_success" step in the travis-ci automation
