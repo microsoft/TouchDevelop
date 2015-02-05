@@ -1,6 +1,6 @@
 ///<reference path='../rt/typings.d.ts'/>
-//<reference path='../browser/browser.d.ts'/>
-///<reference path='../rt/refs.d.ts'/>
+//<reference path='../build/browser.d.ts'/>
+///<reference path='../build/rt.d.ts'/>
 ///<reference path='tokenWriter.ts'/>
 ///<reference path='api.ts'/>
 ///<reference path='ast.ts'/>

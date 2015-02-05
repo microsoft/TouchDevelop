@@ -1,6 +1,6 @@
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='../rt/typings.d.ts'/>
-///<reference path='../noderunner/jsonapi.d.ts'/>
+///<reference path='../build/jsonapi.d.ts'/>
 
 import fs = require('fs');
 import os = require('os');
@@ -1721,7 +1721,7 @@ export function updatelang(args:string[])
             res += "if (lang == \"" + l + "\") TDev.Util._setLangaugeArray(keys, " + arrToStr(arr) + ");\n\n"
         })
         res += "}\n\n"
-        fs.writeFileSync("build/langs.js", res)
+        fs.writeFileSync("generated/langs.js", res)
     }
 
     tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/Svc/language list", resp => {
@@ -1765,7 +1765,7 @@ export function updatehelp(args:string[])
             s += "\n], [\n";
             s += templates.map(t => JSON.stringify(t)).join(",\n");
             s += "\n]";
-            fs.writeFileSync("help.cache", s);
+            fs.writeFileSync("generated/help.cache", s);
 
             var offKeys = Object.keys(offlineScripts)
             offKeys.sort((a, b) => cachedScripts[b].length - cachedScripts[a].length)
