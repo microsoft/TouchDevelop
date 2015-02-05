@@ -273,6 +273,7 @@ task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
       function() { complete(); });
 });
 
+// this task runs as a "after_success" step in the travis-ci automation
 task('ci', [], { async : true }, function() {
   if (!process.env.TRAVIS) {
     console.log("[I] not in travis, skipping upload");
@@ -281,8 +282,9 @@ task('ci', [], { async : true }, function() {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+    var uploadKey = process.env.TD_UPLOAD_KEY;
     console.log("[I] uploading v" + buildVersion)
-    // TODO: upload data
+    node nodeclient/client.js tdupload uploadKey build-label
     complete();
   }
 })
