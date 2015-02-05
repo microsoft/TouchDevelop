@@ -256,7 +256,7 @@ Object.keys(concatMap).forEach(function (f) {
 
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
-task('default', [ 'css-prefixes' ].concat(Object.keys(concatMap)), function () {
+task('default', [ 'css-prefixes', 'build/client.js' ].concat(Object.keys(concatMap)), function () {
     console.log("[I] build completed.");
 });
 
@@ -273,35 +273,43 @@ task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
       function() { complete(); });
 });
 
-// this task runs as a "after_success" step in the travis-ci automation
-task('upload', [], { async : true }, function() {
-  if (!process.env.TRAVIS) {
-    console.log("[I] not in travis, skipping upload");
-    complete();
-  } else {
-    assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
-    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
+function fixUpFiles() {
     // XXX fix this too
     console.log("[F] copying build/browser.js to browser.js");
     if (fs.exists("browser.js"))
       fs.unlink("browser.js");
-    fs.writeFileSync("browser.js", fs.readFileSync("build/browser.js"));
-    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+}
+
+// this task runs as a "after_success" step in the travis-ci automation
+task('upload', [], { async : true }, function() {
+  var upload = function (buildVersion) {
     var uploadKey = process.env.TD_UPLOAD_KEY;
     console.log("[I] uploading v" + buildVersion)
     jake.exec([ 'node build/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
       { printStdout: true, printStderr: true },
       function() { complete(); });
+
+  };
+  if (!process.env.TRAVIS) {
+    if (process.env.TD_UPLOAD_KEY && process.env.TD_UPLOAD_USER) {
+      fixUpFiles();
+      upload((new Date()).toISOString()+"-"+process.env.TD_UPLOAD_USER);
+    } else {
+      console.log("[I] not in travis, skipping upload");
+      complete();
+    }
+  } else {
+    assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
+    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
+    fixupFiles();
+    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+    upload(buildVersion);
   }
 })
 
 task('run', [ 'default' ], { async: true }, function (port) {
     port = port || 80;
-    // XXX fix this too
-    console.log("[F] copying build/browser.js to browser.js");
-    if (fs.exists("browser.js"))
-      fs.unlink("browser.js");
-    fs.writeFileSync("browser.js", fs.readFileSync("build/browser.js"));
+    fixupFiles();
     jake.exec(
         [ 'node noderunner '+port+' silent ' ],
         { printStdout: true, printStderr: true },
@@ -317,7 +325,7 @@ task('local', [ 'default' ], { async: true }, function() {
   )
 })
 
-task('update-docs', [ 'nodeclient/client.js', 'default' ], { async: true }, function() {
+task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
   jake.exec(
     [ 'node nodeclient/client.js updatehelp',
       'node nodeclient/client.js updatelang' ],

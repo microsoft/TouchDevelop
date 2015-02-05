@@ -67,6 +67,10 @@ Build:
 
     jake
 
+If you need to clean the build directory:
+
+    jake clean
+
 ## Running
 
 After building, you can run TouchDevelop from a local node server by running:
@@ -78,6 +82,13 @@ After building, you can run TouchDevelop from a local node server by running:
 ## Tests
 
     jake test
+
+## Other targets (for developers)
+
+    # assumes TD_UPLOAD_KEY and TD_UPLOAD_USER are set, uploads a new test build
+    jake upload
+    # update the files in generated/
+    jake update-docs
 
 ## Documentation
 
