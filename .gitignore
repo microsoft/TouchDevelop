@@ -6,8 +6,7 @@ npm-debug.log
 nw_cache
 
 # shell
-cdn-cache
-tdconfig.json
+shell/work/
 
 # build
 browser.js
