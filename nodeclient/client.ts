@@ -3431,17 +3431,18 @@ function tdupload(args:string[])
             "build/touchdevelop.tgz",
         ]
 
-    args.forEach(path => {
-
-        fs.readFile(path, (err, data) => {
+    args.forEach(p => {
+        fs.readFile(p, (err, data) => {
             if (err) {
                 console.log(err)
                 return
             }
 
+            var fileName = path.basename(p)
+            var mime = getMime(p)
             var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
-            url += "&path=" + lbl + "/" + encodeURIComponent(path)
-            url += "&contentType=" + encodeURIComponent(getMime(path))
+            url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
+            url += "&contentType=" + encodeURIComponent(mime)
 
             tdevGet(url, (resp) => {
                 console.log(path + ": " + resp)

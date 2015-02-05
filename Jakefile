@@ -306,7 +306,7 @@ task('run', [ 'default' ], { async: true }, function (port) {
 
 task('local', [ 'default' ], { async: true }, function() {
   jake.exec(
-    [ 'node build/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
+    [ 'node build/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=build/' ],
     { printStdout: true, printStderr: true },
     function() { complete(); }
   )
