@@ -134,11 +134,13 @@ The `client.js` is built by default.
   in-browser storage, cloud connection, promises, DOM utilities...
 * `runner`: the run-time system for *generated* TouchDevelop apps; that is, once
   a TouchDevelop script is packaged as an app (webapp, cordova app, etc.),
-  `runner.html` is the entry point
+  `runner.js` is the runtime system and the stub is in `webapp`
 * `shell`:
 * `storage`: code for syncing your locally-stored scripts and the cloud storage,
   in the TouchDevelop application
 * `tools`: internal tools that are part of the build (pre-processing)
+* `webapp`: the stub file that is used to generate the HTML5 Web App when
+  exporting a script
 * `www`: the base files that make up the TouchDevelop website (html and css)
 
 ### Structure of the generated website / app
