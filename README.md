@@ -60,16 +60,12 @@ Change to the TouchDevelop directory:
 
 Install dependencies:
 
-    npm install jake -g # skip this step if you're on Windows
+    npm install jake -g
     npm install
 
 Build:
 
     jake
-
-If you need to clean the build directory:
-
-    jake clean
 
 ## Running
 
@@ -83,12 +79,9 @@ After building, you can run TouchDevelop from a local node server by running:
 
     jake test
 
-## Other targets (for developers)
+## Cleaning
 
-    # assumes TD_UPLOAD_KEY and TD_UPLOAD_USER are set, uploads a new test build
-    jake upload
-    # update the files in generated/
-    jake update-docs
+    jake clean
 
 ## Documentation
 
@@ -97,3 +90,20 @@ All the docs are available online at
 
 The docs are authored as TouchDevelop scripts in TouchDevelop itself. You can
 fork them and send pull requests from TouchDevelop itself to update them.
+
+## More handy commands
+
+Our catch-all tool is `build/client.js`, which is compiled from
+`nodeclient/client.ts`. Some of the common invocations of `client.js` are
+exposed as Jake targets.
+
+    # assumes TD_UPLOAD_KEY and TD_UPLOAD_USER are set, uploads a new test build
+    jake upload
+    # update the files in generated/
+    jake update-docs
+
+Find out about other commands directly:
+
+    node build/client.js
+
+The `client.js` is built by default.
