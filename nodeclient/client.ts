@@ -1,6 +1,6 @@
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='../rt/typings.d.ts'/>
-///<reference path='../noderunner/jsonapi.d.ts'/>
+///<reference path='../build/jsonapi.d.ts'/>
 
 import fs = require('fs');
 import os = require('os');

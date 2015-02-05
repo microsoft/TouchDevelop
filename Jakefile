@@ -266,9 +266,9 @@ task('clean', [], function () {
     jake.rmRf('build');
 });
 
-task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function () {
+task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
     console.log("[I] running tests")
-    jake.exec([ 'node nodeclient/client.js buildtest' ],
+    jake.exec([ 'node build/client.js buildtest' ],
       { printStdout: true, printStderr: true },
       function() { complete(); });
 });
@@ -303,7 +303,7 @@ task('run', [ 'default' ], { async: true }, function (port) {
 
 task('local', [ 'default' ], { async: true }, function() {
   jake.exec(
-    [ 'node shell/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
+    [ 'node build/shell.js TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=.' ],
     { printStdout: true, printStderr: true },
     function() { complete(); }
   )
