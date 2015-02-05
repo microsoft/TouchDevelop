@@ -3,7 +3,7 @@ node_js:
   - "0.10"
 sudo: false
 after_success:
-    - "jake ci"
+    - "jake upload"
 notifications:
   email:
     - touchdevelop-build@microsoft.com
