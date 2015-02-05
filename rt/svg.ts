@@ -180,6 +180,11 @@ export module SVG {
         return r;
     }
 
+    export function getIconNames()
+    {
+        return Object.keys(icons)
+    }
+
     export function getAllIcons()
     {
         var r = ""

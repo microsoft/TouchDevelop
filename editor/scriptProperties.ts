@@ -778,6 +778,23 @@ module TDev
             m.choose(elts.map(mkIcon));
         }
 
+        static showIcons()
+        {
+            var m = new ModalDialog();
+            var mkIcon = (path:string) : HTMLElement =>
+            {
+                var img = HTML.mkImg("svg:" + path +",black")
+                var name = div("md-caption", path)
+                name.style.fontSize = "0.5em";
+                var d = div("selectableIcon", img, name).withClick(() => {
+                    ModalDialog.info(path, "was the icon")
+                });
+                d.style.border = "1px dotted #ccc"; // for transparent images
+                return d;
+            }
+            m.choose(SVG.getIconNames().map(mkIcon));
+        }
+
         private setIcon()
         {
             this.setIconColor(TDev.ScriptIcons.icons,
