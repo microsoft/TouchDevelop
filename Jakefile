@@ -31,6 +31,7 @@ function mkSimpleTask(production, dependencies, target) {
     var tscCall = [
       "node node_modules/typescript/bin/tsc",
       "--noEmitOnError",
+      "--removeComments",
       "--target ES5",
       "--module commonjs",
       "--declaration", // not always strictly needed, but better be safe than sorry
