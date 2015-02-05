@@ -390,7 +390,7 @@ export function genStubs()
     */
     fs.writeFileSync("localization.json", JSON.stringify({ strings: tr }, null, 1))
 
-    helpDefinitions += "TDev.api.addHelpTopics(" + loadText("../help.cache") + ")\n\n";
+    helpDefinitions += "TDev.api.addHelpTopics(" + loadText("../generated/help.cache") + ")\n\n";
     helpDefinitions += "TDev.AST.Json.docs = " + JSON.stringify(loadText("../ast/jsonInterfaces.ts").replace(/\r/g, "")) + ";\n";
     helpDefinitions += "TDev.webappHtml = " + JSON.stringify(loadText("../webapp.html").replace(/\r/g, "")) + ";\n";
 

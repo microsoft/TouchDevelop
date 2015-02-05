@@ -273,11 +273,11 @@ task('test', [ 'nodeclient/client.js', 'default' ], { async: true }, function ()
 
 task('ci', [], { async : true }, function() {
   if (!process.env.TRAVIS) {
-    console.log("[I] not in travis, skipping upload")
+    console.log("[I] not in travis, skipping upload");
     complete();
   } else {
-    assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number")
-    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key")
+    assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
+    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     console.log("[I] uploading v" + buildVersion)
     // TODO: upload data
