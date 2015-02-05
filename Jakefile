@@ -282,7 +282,7 @@ task('upload', [], { async : true }, function() {
   };
   if (!process.env.TRAVIS) {
     if (process.env.TD_UPLOAD_KEY && process.env.TD_UPLOAD_USER) {
-      upload((new Date()).toISOString()+"-"+process.env.TD_UPLOAD_USER);
+      upload(process.env.TD_UPLOAD_USER);
     } else {
       console.log("[I] not in travis, skipping upload");
       complete();
