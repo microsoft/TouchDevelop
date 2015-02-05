@@ -278,3 +278,5 @@ task('local', [ 'default' ], { async: true}, function() {
     function() { complete(); }
   )
 })
+
+// vim: ft=javascript
