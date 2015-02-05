@@ -105,11 +105,12 @@ module TDev.RT {
             var headers = this._headers.keys().a.map(k => {
                 return { name: k, value: this._headers.at(k) };
             });
+            var isString = typeof this._content == "string"
             return {
                 url: this._url,
                 method: this._method,
-                contentText: typeof this._content == "string" ? this._content : undefined,
-                content: this._content instanceof Uint8Array ? Util.base64EncodeBytes(this._content) : undefined,
+                contentText: isString ? this._content : undefined,
+                content: this._content && !isString ? Util.base64EncodeBytes(this._content) : undefined,
                 responseType: this._proxyResponseType,
                 headers: headers,
                 credentials: credentials
