@@ -1498,10 +1498,14 @@ function getMime(filename:string)
 
 function serveFile(filename:string, resp:http.ServerResponse)
 {
-    // When running locally, we resolve "foo.js" to "build/foo.js", since all
-    // our js files are in that folder.
-    if (filename.substr(filename.length - 3, 3) == ".js")
+    // When running locally, we must give the illusion of a flat directory
+    // structure, since that's what we have *once we're packaged*. However,
+    // because no packaging happened yet, we must figure out where to find the
+    // files. It's easy: js files are in [build/] and the rest is in [www/].
+    if (filename != "worker.js" && filename.substr(filename.length - 3, 3) == ".js")
         filename = "build/"+filename;
+    else
+        filename = "www/"+filename;
     // Furthermore, once compiled, we sit as "build/noderunner.js", so
     // __dirname+"../" is the root directory.
     var fn = path.resolve(path.join(__dirname, ".."), filename)
@@ -1582,10 +1586,11 @@ function reportBug(ctx: string, err: any) {
 
 function startServer(port:number)
 {
-    var allowed = ['css', 'tutorial', 'json', 'icons', "webapp", "testing", "vueplot",
+    var allowed = ['tutorial', 'json', 'icons', 'webapp.html',
                    'index.html',
                    'browser.js', 'main.js', 'favicon.ico', "worker.js", "runtime.js", "cordova.js",
-                   'browsers.html', 'results.html', 'error.html', 'landing.html', 'hoc.html'
+                   'browsers.html', 'error.html', 'landing.html', 'hoc.html',
+                    'default.css', 'editor.css',
                    ];
 
     http.createServer((req, resp) => {

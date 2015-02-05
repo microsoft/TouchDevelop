@@ -370,13 +370,14 @@ export function genStubs()
         processFile(path.join(libPath, fn));
     })
 
-    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libwab", "libwinRT", "libnode", "nodeclient"]
+    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libwab", "libwinRT", "libnode"]
     srcPaths.forEach(pth => {
         fs.readdirSync("../" + pth).forEach((fn) => {
             fileCnt++;
             processLf(path.join("../" + pth, fn));
         })
-    })
+    });
+    processLf("../tools/client.ts");
 
     Object.keys(translationHelpStrings).forEach(k => translationStrings[k] = 1)
     var tr = Object.keys(translationStrings)
@@ -392,7 +393,7 @@ export function genStubs()
 
     helpDefinitions += "TDev.api.addHelpTopics(" + loadText("../generated/help.cache") + ")\n\n";
     helpDefinitions += "TDev.AST.Json.docs = " + JSON.stringify(loadText("../ast/jsonInterfaces.ts").replace(/\r/g, "")) + ";\n";
-    helpDefinitions += "TDev.webappHtml = " + JSON.stringify(loadText("../webapp.html").replace(/\r/g, "")) + ";\n";
+    helpDefinitions += "TDev.webappHtml = " + JSON.stringify(loadText("../webapp/webapp.html").replace(/\r/g, "")) + ";\n";
 
     saveText("api.js", prelude + kindInit + interlude + parametricInit + parametricFinal + propInit + helpDefinitions + postlude);
     fs.writeFileSync("topiclist.json", JSON.stringify(topicList, null, 2))
