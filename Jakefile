@@ -274,7 +274,7 @@ task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
-task('ci', [], { async : true }, function() {
+task('upload', [], { async : true }, function() {
   if (!process.env.TRAVIS) {
     console.log("[I] not in travis, skipping upload");
     complete();
@@ -284,8 +284,9 @@ task('ci', [], { async : true }, function() {
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     var uploadKey = process.env.TD_UPLOAD_KEY;
     console.log("[I] uploading v" + buildVersion)
-    node nodeclient/client.js tdupload uploadKey build-label
-    complete();
+    jake.exec([ 'node nodeclient/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
+      { printStdout: true, printStderr: true },
+      function() { complete(); });
   }
 })
 
