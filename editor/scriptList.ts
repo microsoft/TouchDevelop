@@ -1035,19 +1035,21 @@ module TDev { export module Browser {
             if (Cloud.anonMode(lf("creating groups"))) return;
 
             var progressBar = HTML.mkProgressBar();
-            var name = HTML.mkTextInput("text", lf("enter a group name"));
+            var name = HTML.mkTextInput("text", lf("enter a group name (required)"));
             name.value = lf("my group");
 
             var descr = HTML.mkTextArea("wall-textbox")
+            descr.placeholder = lf("enter a description");
             descr.value = "";
+
+            var school = HTML.mkTextInput("text", lf("enter the school name"));
+            school.value = lf("enter the school name");
+
+            var grade = HTML.mkTextInput("text", lf("enter class grade"));
+            grade.value = lf("enter the class grade");
 
             var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
             HTML.setCheckboxValue(allowExport, false);
-
-            /* deprecated
-            var appStats = HTML.mkCheckBox(lf("owner has access to exported app statistics"));
-            HTML.setCheckboxValue(appStats, false);
-            */
 
             var div1, div2, cancelBtn;
             var m = new ModalDialog();
@@ -1059,15 +1061,19 @@ module TDev { export module Browser {
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("group name (minimum 4 characters)")), name),
                     div('', div('', lf("group description")), descr),
+                    div('', div('', lf("school name")), school),
+                    div('', div('', lf("class grade")), grade),
                     EditorSettings.editorMode() == EditorMode.pro ? div('', allowExport) : undefined
                     ),
                 div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
                     cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                    HTML.mkButtonOnce(lf("create"), () => {                    
+                    HTML.mkButtonOnce(lf("create"), () => {
                         var request = <Cloud.PostApiGroupsBody>{
                             name: name.value,
                             description: descr.value,
+                            school: school.value,
+                            grade: grade.value,
                             allowexport: HTML.getCheckboxValue(allowExport),
                             allowappstatistics: false,
                             userplatform: Browser.platformCaps
@@ -7686,7 +7692,7 @@ module TDev { export module Browser {
         public description: string;
         public userid:string;
         private collaborations: CollaborationsTab;
-        
+
         constructor(par: Host) {
             super(par)
         }
@@ -7770,7 +7776,7 @@ module TDev { export module Browser {
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
 
-                d.setChildren([                
+                d.setChildren([
                     div("hubTileSearch", HTML.mkImg("svg:group,white")),
                     div("hubTileTitleBar",
                     div("hubTileTitle", spanDirAuto(this.name)),
@@ -9498,4 +9504,3 @@ module TDev { export module Browser {
 
 
 } }
-

@@ -470,6 +470,8 @@ module TDev {
     export interface PostApiGroupsBody {
         name: string;
         description: string;
+        school?:string;
+        grade?:string;
         allowexport: boolean;
         allowappstatistics: boolean;
         userplatform: string[];
@@ -657,4 +659,3 @@ module TDev {
 
     }
 }
-
