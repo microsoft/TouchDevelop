@@ -107,3 +107,32 @@ Find out about other commands directly:
     node build/client.js
 
 The `client.js` is built by default.
+
+## The various repositories in the tree
+
+* `ast`: contains the lexer, parser, type-checker and ast definitions for the
+  TouchDevelop language
+* `browser`: feature-detection
+* `editor`: the TouchDevelop user interface that drives the website: hub, script
+  list, editor itself
+* `generated`: files needed for the build that are re-generated manually
+* `intellitrain`:
+* `json`:
+* `lib`: the libraries exposed to TouchDevelop scripts, written in TypeScript
+* `libcordova`:
+* `libnode`:
+* `libwab`:
+* `libwinRT`:
+* `mc`: Minecraft bindings
+* `nodeclient`: our multi-purpose local tool
+* `noderunner`: local node server for running TouchDevelop locally
+* `node-webkit`:
+* `officemix`:
+* `rt`: various run-time support libraries for the TouchDevelop application:
+  in-browser storage, cloud connection, promises, DOM utilities...
+* `runner`:
+* `shell`:
+* `storage`: code for syncing your locally-stored scripts and the cloud storage,
+  in the TouchDevelop application
+* `tools`: internal tools that are part of the build (pre-processings)
+* `www`: the base files that make up the TouchDevelop website (html and css)
