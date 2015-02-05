@@ -284,7 +284,7 @@ task('upload', [], { async : true }, function() {
     var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
     var uploadKey = process.env.TD_UPLOAD_KEY;
     console.log("[I] uploading v" + buildVersion)
-    jake.exec([ 'node nodeclient/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
+    jake.exec([ 'node build/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
       { printStdout: true, printStderr: true },
       function() { complete(); });
   }
