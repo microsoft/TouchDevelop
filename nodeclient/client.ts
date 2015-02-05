@@ -3417,19 +3417,18 @@ function tdupload(args:string[])
 
     if (args.length == 0)
         args = [
-            "main.js",
-            "runtime.js",
-            "touchdevelop.tgz",
-            "browser.js",
+            "build/main.js",
+            "build/runtime.js",
+            "build/browser.js",
+            "build/noderunner.js",
             "css/default.css",
             "css/editor.css",
             "index.html",
             "browsers.html",
             "app.manifest",
-            "noderunner.js",
             "webapp.html",
-            //"cordova.js",
             "error.html",
+            "touchdevelop.tgz",
         ]
 
     args.forEach(path => {
