@@ -1,6 +1,7 @@
 {
-  "main": "app.html",
   "name": "TouchDevelop",
+  "version": "3.3.0",
+  "main": "app.html",
   "node-main": "shell.js",
   "description": "TouchDevelop is a mobile and cloud friendly app creation environment.",
   "keywords": [ "TouchDevelop", "coding", "apps", "education" ],
@@ -16,11 +17,11 @@
     "resizable":true
   },
   "licenses": [{
-       "type": "MIT",
+       "type": "MIT"
   }],
   "repositories": [{
             "type": "git",
             "url": "http://github.com/microsoft/TouchDevelop.git",
-            "path": "nw"
+            "path": "node-webkit"
   }]
 }

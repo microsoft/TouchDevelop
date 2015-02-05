@@ -1665,7 +1665,7 @@ module TDev { export module Browser {
             (<any>searchEl).breakBefore = 1;
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
-            settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:setting,white")));
+            settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
             skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white")));
 
             skill.className += " exportBtn";
@@ -1898,7 +1898,7 @@ module TDev { export module Browser {
             if (Cloud.getUserId()) {
                 var uid = this.browser().getUserInfoById("me", "me");
                 this.meBox.setChildren([uid.mkSmallBox()]);
-                var notificationsBtn = HTML.mkImg('svg:inbox,#444');
+                var notificationsBtn = HTML.mkImg('svg:bell,#444');
                 notificationsBtn.id = "notificationsBtn";
                 var notificationsCounterDiv = div('notificationCounter', this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
                 notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");

@@ -2158,7 +2158,7 @@ module TDev.AST {
             if (!this.color) return ScriptIcons.stableColorFromName(this.getName());
             else return "#" + this.color.replace("#", "").slice(-6);
         }
-        public iconName() { return this.icon || ScriptIcons.stableIconFromName(this.getName()) }
+        public iconName() { return "emptycircle" } // this.icon || ScriptIcons.stableIconFromName(this.getName())
         public iconPath() { return "svg:" + this.iconName() + ",white"; }
 
         private version:string;

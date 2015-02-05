@@ -261,7 +261,7 @@ module TDev
     export class Runtime
     {
         // shell/package.ts depends on the exact format of the next line
-        static shellVersion = 22;
+        static shellVersion = 23;
 
         // this is not to be set from the editor - only in the exported app
         static initialUrl: string;

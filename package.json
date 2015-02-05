@@ -1,7 +1,8 @@
 {
   "devDependencies": {
     "jake": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "node-webkit-builder":"latest"
   },
   "dependencies": {
     "tsd": "^0.5.7"

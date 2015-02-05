@@ -4197,6 +4197,7 @@ module TDev
                         (!Util.localTranslationTracking && dbg ? HTML.mkButtonTick(lf("run benchmarks"), Ticks.hubBenchmarks, () => { TestMgr.Benchmarker.runBenchmarksButtonAsync(); }) : null),
                         (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
+                        (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
             }
             m.add([
