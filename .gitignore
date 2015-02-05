@@ -1,5 +1,6 @@
 # node
 node_modules
+npm-debug.log
 
 # shell
 cdn-cache
@@ -13,7 +14,6 @@ noderunner.js
 runtime.js
 shell/npm/bin/touchdevelop.js
 shell/npm/package.json
-touchdevelop.tgz
 results.html
 results.json
 build/

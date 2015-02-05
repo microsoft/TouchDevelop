@@ -50,7 +50,7 @@ function main() {
         if (stderr)
             console.log("npm pack: " + stderr)
         var fn = pkg.name + "-" + pkg.version + ".tgz"
-        fs.renameSync(npm + fn, "../touchdevelop.tgz")
+        fs.renameSync(npm + fn, "../build/touchdevelop.tgz")
     }))
 
 }

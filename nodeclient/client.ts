@@ -3428,7 +3428,7 @@ function tdupload(args:string[])
             "app.manifest",
             "webapp.html",
             "error.html",
-            "touchdevelop.tgz",
+            "build/touchdevelop.tgz",
         ]
 
     args.forEach(path => {
