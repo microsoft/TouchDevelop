@@ -11,7 +11,6 @@ module TDev
             super()
         }
         private scriptName = HTML.mkTextInput("text", lf("script name"));
-        private iconContainer = div("scriptPropContainer");
         private colorContainer = div("scriptPropContainer");
         private iconArtIdContainer = div("scriptPropContainer");
         private splashArtIdContainer = div("scriptPropContainer");
@@ -192,7 +191,6 @@ module TDev
                 div("formLine", lf("name: "), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on
                 this.pubId = div("inline-block"),
-                this.iconContainer,
                 this.colorContainer,
                 this.iconArtIdContainer,
                 this.splashArtIdContainer,
@@ -835,12 +833,6 @@ module TDev
             this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published" ? null
                 : [lf("published id: "),
                    HTML.mkA("idlink", "https://www.touchdevelop.com/" + ScriptEditorWorldInfo.baseId, "_blank", "/" + ScriptEditorWorldInfo.baseId)]);
-
-            var icon = new DeclEntry(lf("icon: {0}", this.theScript.icon || ""));
-            icon.icon = this.theScript.iconPath();
-            icon.color = this.theScript.htmlColor();
-            icon.description = lf("tap to change the icon");
-            this.iconContainer.setChildren([icon.mkBox().withClick(() => this.setIcon())]);
 
             var color = new DeclEntry(lf("color: {0}", this.theScript.htmlColor()));
             color.icon = "";
