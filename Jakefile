@@ -234,9 +234,6 @@ var concatMap = {
     ],
 };
 
-// Apparently our node scripts can't run without this line.
-var nodePrelude = "var window = {};\n";
-
 Object.keys(concatMap).forEach(function (f) {
     var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
     var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
@@ -244,7 +241,12 @@ Object.keys(concatMap).forEach(function (f) {
     file(f, buildDeps, function () {
         console.log("[C]", f);
         var bufs = [];
-        bufs.push(new Buffer(nodePrelude));
+
+	if (/noderunner/.test(f)) {
+	    // Apparently our node scripts can't run without this line.
+	    bufs.push(new Buffer("var window = {};\n"));
+	}
+
         toConcat.forEach(function (f) {
             bufs.push(fs.readFileSync(f));
         });
