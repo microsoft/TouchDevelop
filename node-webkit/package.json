@@ -10,7 +10,7 @@
   "window": {
     "title": "TouchDevelop",
     "icon": "logo.png",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "min_width": 400,
     "min_height": 400,

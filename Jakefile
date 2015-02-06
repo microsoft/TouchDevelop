@@ -296,7 +296,7 @@ task('upload', [], { async : true }, function() {
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
-    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER || -80000);
     upload(buildVersion);
   }
 })
@@ -338,18 +338,16 @@ task('nw', [ 'default' ], { async : true }, function() {
   console.log('[I] building nw packages')
   jake.rmRf('build/nw');
   jake.mkdirP('build/nw');
-  [
-   'node-webkit/app.html',
+  ['node-webkit/app.html',
    'node-webkit/logo.png',
    'node-webkit/package.json',
-   'build/shell.js'
-   ].forEach(function(f) { jake.cpR(f, 'build/nw') })
+   'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({
       files: 'build/nw/**',
-      platforms: ['win32'], //['osx32', 'osx64', 'win32', 'win64'],
+      platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',
-      cacheDir: 'nw_cache',
+      cacheDir: 'nw_cache'
   });
   nw.on('log',  console.log);
   nw.build().then(function () {

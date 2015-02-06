@@ -18,6 +18,7 @@ declare var TDev;
 var inAzure = false;
 var controllerUrl = "";
 var isNpm = false;
+var inNodeWebkit = false;
 
 interface TdState {
     downloadedFiles:StringMap<string>;
@@ -1846,7 +1847,9 @@ function main()
     var scriptId = ""
     var internet = inAzure ? true : false
     var useBeta = false
-    var cli = false
+    var cli = false;
+
+    inNodeWebkit = fs.existsSync("./app.html");
 
     var usage = () => {
         console.error("unknown option: " + args[0])
@@ -1863,7 +1866,7 @@ function main()
         process.exit(1)
     }
 
-    if (!inAzure && __dirname != process.cwd()) {
+    if (!inAzure && !inNodeWebkit && __dirname != process.cwd()) {
         if (isNpm) process.env["TD_ALLOW_EDITOR"] = "true"
         respawnLoop()
         return
@@ -1917,6 +1920,11 @@ function main()
     }
 
     useBeta = true; // always use beta
+
+    if (inNodeWebkit) {
+      cli = true;
+      process.env['TD_ALLOW_EDITOR'] = true;
+    }
 
     debug.log("start, autoupdate=" + hasAutoUpdate())
     var shouldStart = !cli && (isNpm || !!process.env['TD_LOCAL_DROP'] || !!process.env['TD_ALLOW_EDITOR'])
