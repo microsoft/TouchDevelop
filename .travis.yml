@@ -7,3 +7,8 @@ after_success:
 notifications:
   email:
     - touchdevelop-build@microsoft.com
+cache:
+  directories:
+    - node_modules
+    - nw_cache
+    - node-webkit/node_modules
