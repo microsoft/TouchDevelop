@@ -156,14 +156,14 @@ mkSimpleTask('build/client.js', [
     'tools/client.ts'
 ], "tools/client.ts");
 // XXX coarse-grained dependencies here over the whole 'noderunner' directory
-mkSimpleTask('build/runner.js', [
+mkSimpleTask('build/nrunner.js', [
     'build/browser.d.ts',
     'rt/typings.d.ts',
     'build/rt.d.ts',
     'build/ast.d.ts',
     'build/libnode.d.ts',
     'noderunner'
-], "noderunner/runner.ts");
+], "noderunner/nrunner.ts");
 // XXX same here
 mkSimpleTask('build/runner.d.ts', [
     'build/browser.d.ts',
@@ -209,7 +209,7 @@ var concatMap = {
         "generated/langs.js",
         "build/libnode",
         "build/pkgshell.js",
-        "build/runner.js",
+        "build/nrunner.js",
     ],
     "build/runtime.js": [
         "build/rt",
