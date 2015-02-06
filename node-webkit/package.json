@@ -19,6 +19,7 @@
   "licenses": [{
        "type": "MIT"
   }],
+  "bugs":"http://github.com/microsoft/TouchDevelop/issues",
   "repositories": [{
     "type": "git",
     "url": "http://github.com/microsoft/TouchDevelop.git",

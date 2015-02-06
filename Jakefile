@@ -340,6 +340,7 @@ task('nw', [ 'default' ], { async : true }, function() {
   jake.mkdirP('build/nw');
   ['node-webkit/app.html',
    'node-webkit/logo.png',
+   'node-webkit/client.ico',
    'node-webkit/package.json',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
   var nwBuilder = require('node-webkit-builder');
@@ -347,7 +348,8 @@ task('nw', [ 'default' ], { async : true }, function() {
       files: 'build/nw/**',
       platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',
-      cacheDir: 'nw_cache'
+      cacheDir: 'nw_cache',
+      winIco: 'build/nw/client.ico'
   });
   nw.on('log',  console.log);
   nw.build().then(function () {
