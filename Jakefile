@@ -333,7 +333,20 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
   );
 });
 
-task('nw', [ 'default' ], { async : true }, function() {
+task('nw-npm', {async : true }, function() {
+  var task = this;
+  if (fs.existsSync('node-webkit/node_modules'))
+    task.complete();
+  else /*
+    jake.exec(
+      [ 'npm install node-webkit/package.json' ],
+      { printStdout: true, printStderr: true },
+      function() { task.complete(); }
+    ); */
+    task.complete(); // FIXME: exec in a different directory
+})
+
+task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
   var task = this;
   console.log('[I] building nw packages')
   jake.rmRf('build/nw');
@@ -342,6 +355,7 @@ task('nw', [ 'default' ], { async : true }, function() {
    'node-webkit/logo.png',
    'node-webkit/client.ico',
    'node-webkit/package.json',
+   'node-webkit/node_modules',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({

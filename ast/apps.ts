@@ -223,6 +223,7 @@ module TDev.AST.Apps {
             compiled = AST.Compiler.getCompiledScript(app, opts)
             var serverCode = compiled.getCompiledCode();
 
+            // update node-webkit/package.json as well
             compiled.npmModules["faye-websocket"] = "0.8.1";
 
             var pkgJson = {

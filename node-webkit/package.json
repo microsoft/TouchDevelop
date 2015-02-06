@@ -24,5 +24,8 @@
     "type": "git",
     "url": "http://github.com/microsoft/TouchDevelop.git",
     "path": "node-webkit"
-  }]
+  }],
+  "dependencies": {
+    "faye-websocket": "0.8.1"
+  }
 }
