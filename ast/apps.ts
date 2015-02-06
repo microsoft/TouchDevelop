@@ -275,7 +275,7 @@ module TDev.AST.Apps {
 
         if (options.downloadLocalFilesFrom) {
             promise = Promise.join(
-                ["css/default.css", "browser.js", "runtime.js"].map(fn =>
+                ["default.css", "browser.js", "runtime.js"].map(fn =>
                     Util.httpGetTextAsync(options.downloadLocalFilesFrom + fn).then(content => {
                         instructions.files.push({
                             path: options.filePrefix + fn,
@@ -283,7 +283,7 @@ module TDev.AST.Apps {
                         });
                     })))
         } else {
-            ["css/default.css", "browser.js", "runtime.js"].forEach(n => instructions.files.push({
+            ["default.css", "browser.js", "runtime.js"].forEach(n => instructions.files.push({
                     path: options.filePrefix + n,
                     url: theBase + n
             }));

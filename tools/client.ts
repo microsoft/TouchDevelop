@@ -2149,7 +2149,9 @@ function getOneList(name:string, saveFiles:boolean, f:()=>void)
     var dir = "getlistdata/"
     if (!/localhost/.test(localUrl)) {
         var m = /(.*)\?(.*)/.exec(localUrl)
-        if (m) {
+        if (/tdpublogger/.test(localUrl)) {
+            hurl = localUrl + hurl
+        } else if (m) {
             hurl = m[1] + "api/" + name + "?" + m[2]
         } else {
             hurl = localUrl + "api/" + hurl
@@ -2212,6 +2214,58 @@ function getlist(args:string[])
     })
 }
 
+function dlpubs(args:string[])
+{
+    localUrl = "http://www.touchdevelop.com"
+    var pubs:any = {}
+    var num = 1
+    var arr = []
+
+    var byKind:any = {}
+
+    var oneUp = () => {
+        if (--num == 0) {
+            Object.keys(pubs).forEach(k => {
+                var p = pubs[k]
+                if (!byKind[p.kind])
+                    byKind[p.kind] = []
+                byKind[p.kind].push(p)
+            })
+            Object.keys(byKind).forEach(k => {
+                byKind[k].sort((a, b) => b.time - a.time)
+                fs.writeFileSync("tdp-" + k + ".json", JSON.stringify(byKind[k], null, 1))
+            })
+        } else console.log(num)
+    }
+
+    var flush = () => {
+        if (arr.length == 0) return
+        var arr0 = arr
+        arr = []
+        num++
+        post("", { array: arr0 }, (resp) => {
+            arr0.forEach((o, i) => {
+                var b = resp.array[i]
+                if (b.body) {
+                    pubs[o.relative_url] = b.body
+                } else if (b.code != 404) { 
+                    console.log(o.relative_url + ": " + b.code)
+                }
+            })
+            oneUp()
+        })
+    }
+
+    args.forEach(fn => {
+        JSON.parse(fs.readFileSync(fn, "utf8")).forEach(ent => {
+            if (arr.length > 40) flush()
+            arr.push({ method: "GET", relative_url: ent.id })
+        })
+    })
+    flush()
+    oneUp()
+}
+
 function importlite(args:string[])
 {
     var pref = args[0]
@@ -2221,17 +2275,24 @@ function importlite(args:string[])
     if (args[2])
         chunk = parseInt(args[2]) || 40
 
-    var last = ""
-    var lastFn = "getlistdata/importlite-last." + pref + ".json"
-    if (fs.existsSync(lastFn)) {
-        last = JSON.parse(fs.readFileSync(lastFn, "utf8")).file
-    }
-
     var files = []
-    fs.readdirSync("getlistdata").forEach(fn => {
-        if (fn.slice(0, pref.length + 1) == pref + ".")
-            files.push("getlistdata/" + fn)
-    })
+
+    if (args[3]) {
+        files = args.slice(3)
+    } else {
+
+        var last = ""
+        var lastFn = "getlistdata/importlite-last." + pref + ".json"
+        if (fs.existsSync(lastFn)) {
+            last = JSON.parse(fs.readFileSync(lastFn, "utf8")).file
+        }
+
+        fs.readdirSync("getlistdata").forEach(fn => {
+            if (fn.slice(0, pref.length + 1) == pref + ".")
+                files.push("getlistdata/" + fn)
+        })
+
+    }
 
     files.sort()
     files.reverse()
@@ -2309,7 +2370,7 @@ function importlite(args:string[])
                 else cnts[s]++
             })
             console.log(cnts)
-            if (fn)
+            if (fn && lastFn)
                 fs.writeFileSync(lastFn, JSON.stringify({ file: fn }), "utf8")
             handleFrom(entries)
         }
@@ -3499,6 +3560,7 @@ var cmds = {
     "addstats": { f:addstats, a:'', h:'query detailed stats'},
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
+    "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
 }
 
 export interface ScriptTemplate {
