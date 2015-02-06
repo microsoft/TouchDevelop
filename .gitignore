@@ -3,9 +3,11 @@ node_modules
 npm-debug.log
 
 # node-webkit-builder
+cache
 nw_cache
 
 # shell
+cdn-cache
 shell/work/
 
 # build

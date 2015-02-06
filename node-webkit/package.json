@@ -10,8 +10,8 @@
   "window": {
     "title": "TouchDevelop",
     "icon": "logo.png",
-    "toolbar": false,
-    "frame": false,
+    "toolbar": true,
+    "frame": true,
     "min_width": 400,
     "min_height": 400,
     "resizable":true
@@ -20,8 +20,8 @@
        "type": "MIT"
   }],
   "repositories": [{
-            "type": "git",
-            "url": "http://github.com/microsoft/TouchDevelop.git",
-            "path": "node-webkit"
+    "type": "git",
+    "url": "http://github.com/microsoft/TouchDevelop.git",
+    "path": "node-webkit"
   }]
 }

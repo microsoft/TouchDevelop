@@ -329,16 +329,14 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
 
 task('nw', [ 'default' ], { async : true }, function() {
   console.log('[I] building nw packages')
+  jake.rmRf('build/nw');
   jake.mkdirP('build/nw');
-  ['node-webkit/app.html',
+  [
+   'node-webkit/app.html',
    'node-webkit/logo.png',
    'node-webkit/package.json',
-   'build/browser.js',
-   'build/main.js',
-   'build/shell.js',
-   'build/runtime.js',
-   'css/default.css',
-   'css/editor.css'].forEach(function(f) { jake.cpR(f, 'build/nw') })
+   'build/shell.js'
+   ].forEach(function(f) { jake.cpR(f, 'build/nw') })
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({
       files: 'build/nw/**',
