@@ -341,7 +341,7 @@ task('nw-npm', {async : true }, function() {
       { cwd: 'node-webkit' },
       function (error, stdout, stderr) {
         if (stdout) console.log(stdout.toString());
-        if (stderr) console.log(stderr.toString());
+        if (stderr) console.error(stderr.toString());
         if (error) task.fail(error);
         else task.complete();
       }
@@ -364,13 +364,15 @@ task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
       files: 'build/nw/**',
       platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',
-      cacheDir: 'nw_cache',
-      winIco: 'build/nw/client.ico'
+      cacheDir: 'nw_cache'
   });
   nw.on('log',  console.log);
   nw.build().then(function () {
      console.log('[I] nw packaged');
      task.complete();
+  }).catch(function (error) {
+    console.error(error);
+    task.fail();
   });
 });
 
