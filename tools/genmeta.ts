@@ -361,9 +361,9 @@ function processLf(filename:string)
 export function genStubs()
 {
     console.log("*** Start");
-    usageCounts = loadJson("../json/usage_count.json");
+    usageCounts = loadJson("json/usage_count.json");
 
-    var libPath = "../lib/"
+    var libPath = "lib/"
 
     fs.readdirSync(libPath).forEach((fn) => {
         fileCnt++;
@@ -372,12 +372,12 @@ export function genStubs()
 
     var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libwab", "libwinRT", "libnode"]
     srcPaths.forEach(pth => {
-        fs.readdirSync("../" + pth).forEach((fn) => {
+        fs.readdirSync(pth).forEach((fn) => {
             fileCnt++;
-            processLf(path.join("../" + pth, fn));
+            processLf(path.join(pth, fn));
         })
     });
-    processLf("../tools/client.ts");
+    processLf("tools/client.ts");
 
     Object.keys(translationHelpStrings).forEach(k => translationStrings[k] = 1)
     var tr = Object.keys(translationStrings)
@@ -389,14 +389,14 @@ export function genStubs()
         }
     })
     */
-    fs.writeFileSync("localization.json", JSON.stringify({ strings: tr }, null, 1))
+    fs.writeFileSync("build/localization.json", JSON.stringify({ strings: tr }, null, 1))
 
-    helpDefinitions += "TDev.api.addHelpTopics(" + loadText("../generated/help.cache") + ")\n\n";
-    helpDefinitions += "TDev.AST.Json.docs = " + JSON.stringify(loadText("../ast/jsonInterfaces.ts").replace(/\r/g, "")) + ";\n";
-    helpDefinitions += "TDev.webappHtml = " + JSON.stringify(loadText("../webapp/webapp.html").replace(/\r/g, "")) + ";\n";
+    helpDefinitions += "TDev.api.addHelpTopics(" + loadText("generated/help.cache") + ")\n\n";
+    helpDefinitions += "TDev.AST.Json.docs = " + JSON.stringify(loadText("ast/jsonInterfaces.ts").replace(/\r/g, "")) + ";\n";
+    helpDefinitions += "TDev.webappHtml = " + JSON.stringify(loadText("webapp/webapp.html").replace(/\r/g, "")) + ";\n";
 
-    saveText("api.js", prelude + kindInit + interlude + parametricInit + parametricFinal + propInit + helpDefinitions + postlude);
-    fs.writeFileSync("topiclist.json", JSON.stringify(topicList, null, 2))
+    saveText("build/api.js", prelude + kindInit + interlude + parametricInit + parametricFinal + propInit + helpDefinitions + postlude);
+    fs.writeFileSync("build/topiclist.json", JSON.stringify(topicList, null, 2))
 
     console.log("*** Stop; " + fileCnt + " files");
     if (errCnt > 0) {
