@@ -2266,6 +2266,53 @@ function dlpubs(args:string[])
     oneUp()
 }
 
+function splitEntries(newEntries:any[], chunk:number)
+{
+    var allIds = {}
+    newEntries = newEntries.filter(e => {
+        if (e.kind == "script" && !e.text)
+            return false
+        if (e.id && allIds.hasOwnProperty(e.id))
+            return false
+        allIds[e.id] = e
+        return true
+    })
+
+    var bases = {}
+    var todo = {}
+    newEntries.forEach(e => {
+        if (e.baseid)
+            bases[e.baseid] = e
+        todo[e.id] = e
+    })
+
+    var goesFirst = e => bases.hasOwnProperty(e.id) || (e.baseid && todo.hasOwnProperty(e.baseid))
+    newEntries = newEntries.filter(goesFirst).concat(newEntries.filter(e => !goesFirst(e)))
+
+    var visited = {}
+
+    var entries = []
+
+    while (newEntries.length > 0) {
+        var curr = []
+        newEntries = newEntries.filter(e => {
+            if (curr.length >= chunk) return true
+            if (e.baseid && todo.hasOwnProperty(e.baseid)) return true
+            if (!visited.hasOwnProperty(e.id)) {
+                curr.push(e)
+                visited[e.id] = 1
+            }
+            return false
+        })
+        if (curr.length == 0)
+            throw new Error("cycle?")
+        curr.forEach(e => { delete todo[e.id] })
+        entries.push(curr)
+    }
+
+    return entries
+}
+
 function importlite(args:string[])
 {
     var pref = args[0]
@@ -2302,60 +2349,35 @@ function importlite(args:string[])
 
     var lastTime = Date.now()
 
-    var handleFrom = (entries:any[]) => {
-        while (entries.length == 0) {
-            var fn = files.shift()
-            if (!fn) return // the end
-            var delta = Date.now() - lastTime
-            //if (delta > 30000) { console.log("delta " + delta + ", exiting") return }
-            console.log("read " + fn + " " + delta)
-            lastTime = Date.now()
-            var newEntries = JSON.parse(fs.readFileSync(fn, "utf8"))
-            newEntries.reverse()
-            var allIds = {}
+    var nextFile = () => {
+        var fn = files.shift()
+        if (!fn) return // the end
+        var delta = Date.now() - lastTime
+        //if (delta > 30000) { console.log("delta " + delta + ", exiting") return }
+        console.log("read " + fn + " " + delta)
+        lastTime = Date.now()
+        var newEntries = JSON.parse(fs.readFileSync(fn, "utf8"))
+        newEntries.reverse()
+        var entries = splitEntries(newEntries, chunk)
+        newEntries = null
 
-            newEntries = newEntries.filter(e => {
-                if (e.kind == "script" && !e.text)
-                    return false
-                if (e.id && allIds.hasOwnProperty(e.id))
-                    return false
-                allIds[e.id] = e
-                return true
-            })
-
-            var bases = {}
-            var todo = {}
-            newEntries.forEach(e => {
-                if (e.baseid)
-                    bases[e.baseid] = e
-                todo[e.id] = e
-            })
-
-            var goesFirst = e => bases.hasOwnProperty(e.id) || (e.baseid && todo.hasOwnProperty(e.baseid))
-            newEntries = newEntries.filter(goesFirst).concat(newEntries.filter(e => !goesFirst(e)))
-
-            var visited = {}
-
-            while (newEntries.length > 0) {
-                var curr = []
-                newEntries = newEntries.filter(e => {
-                    if (curr.length >= chunk) return true
-                    if (e.baseid && todo.hasOwnProperty(e.baseid)) return true
-                    if (!visited.hasOwnProperty(e.id)) {
-                        curr.push(e)
-                        visited[e.id] = 1
-                    }
-                    return false
-                })
-                if (curr.length == 0)
-                    throw new Error("cycle?")
-                curr.forEach(e => { delete todo[e.id] })
-                entries.push(curr)
-            }
-
-            newEntries = null
+        if (entries.length == 0) {
+            nextFile()
+            return
         }
 
+        if (fn && lastFn)
+            fs.writeFileSync(lastFn, JSON.stringify({ file: fn }), "utf8")
+
+        importEntries(entries, args[1], nextFile)
+
+    }
+    nextFile()
+}
+
+function importEntries(entries, key, cb)
+{
+    var handleFrom = (entries:any[]) => {
         var handleResp = resp => {
             if (!resp && --retries > 0) {
                 console.log("RETRY")
@@ -2370,19 +2392,24 @@ function importlite(args:string[])
                 else cnts[s]++
             })
             console.log(cnts)
-            if (fn && lastFn)
-                fs.writeFileSync(lastFn, JSON.stringify({ file: fn }), "utf8")
-            handleFrom(entries)
+
+            if (entries.length == 0)
+                cb()
+            else
+                handleFrom(entries)
         }
 
         var hd = entries.shift()
-        var retries = 5
 
-        var query = () => post("import?key=" + args[1], hd, handleResp)
+        if (!hd) throw new Error("no header")
+
+        var retries = 5
+        var query = () => post("import?key=" + key, hd, handleResp)
         query()
     }
-    handleFrom([])
+    handleFrom(entries)
 }
+
 
 function empties(args:string[])
 {
