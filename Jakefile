@@ -267,7 +267,7 @@ task('clean', [], function () {
     jake.rmRf('build/');
 });
 
-task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
+task('test', [ 'build/client.js', 'default', 'nw' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
