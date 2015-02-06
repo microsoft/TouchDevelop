@@ -337,13 +337,15 @@ task('nw-npm', {async : true }, function() {
   var task = this;
   if (fs.existsSync('node-webkit/node_modules'))
     task.complete();
-  else /*
-    jake.exec(
-      [ 'npm install node-webkit/package.json' ],
-      { printStdout: true, printStderr: true },
-      function() { task.complete(); }
-    ); */
-    task.complete(); // FIXME: exec in a different directory
+  else child_process.exec('npm install',
+      { cwd: 'node-webkit' },
+      function (error, stdout, stderr) {
+        if (stdout) console.log(stdout.toString());
+        if (stderr) console.log(stderr.toString());
+        if (error) task.fail(error);
+        else task.complete();
+      }
+    );
 })
 
 task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
