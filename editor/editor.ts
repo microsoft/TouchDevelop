@@ -2110,7 +2110,7 @@ module TDev
         private setupExternalButtons() {
             elt("externalEditorChrome").setChildren([
                 Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => {
-                    this.goToHub();
+                    this.goToHub("list:installed-scripts:foobar:overview");
                 }),
                 div("tdLite", [ "TouchDevelop Lite" ])
             ])
@@ -3901,23 +3901,26 @@ module TDev
             return this.saveStateAsync({ forReal: true, clearScript: true });
         }
 
-        private goToHub(tab = "overview") {
+        private goToHub(hash) {
             this.hide(true);
-
-            var prevGuid = Script ? Script.localGuid : null;
-            var path = this.lastListPath || "installed-scripts"
-            this.lastListPath = null
-
-            if (prevGuid)
-                Util.setHash("list:" + path + ":script:" + prevGuid + ":" + tab);
-            else
-                Util.setHash("hub");
+            Util.setHash(hash);
         }
 
         public goToHubAsync(tab = "overview"): Promise
         {
+            var prevGuid = Script ? Script.localGuid : null;
+            var path = this.lastListPath || "installed-scripts"
+            this.lastListPath = null
+
+            var hash: string;
+
+            if (prevGuid)
+                hash = "list:" + path + ":script:" + prevGuid + ":" + tab;
+            else
+                hash = "hub";
+
             return this.onExitAsync().then(() => {
-                this.goToHub(tab);
+                this.goToHub(hash);
             });
         }
 
