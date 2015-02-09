@@ -1093,7 +1093,8 @@ function getMime(filename:string)
         case "html":
         case "htm": return "text/html";
         case "css": return "text/css";
-        case "js": return "application/x-javascript";
+        case "ts": return "text/plain";
+        case "js": return "application/javascript";
         case "jpg":
         case "jpeg": return "image/jpeg";
         case "png": return "image/png";
