@@ -90,6 +90,9 @@ All the docs are available online at
 
 The docs are authored as TouchDevelop scripts in TouchDevelop itself. You can
 fork them and send pull requests from TouchDevelop itself to update them.
+You can update the local cache of documents by running this command:
+
+    jake update-docs
 
 ## More handy commands
 
@@ -120,22 +123,22 @@ The `client.js` is built by default.
 * `intellitrain`:
 * `json`:
 * `lib`: the libraries exposed to TouchDevelop scripts, written in TypeScript
-* `libcordova`:
-* `libnode`:
-* `libwab`:
-* `libwinRT`:
+* `libcordova`: Apache Cordova specific implementations
+* `libnode`: Node.JS specific implementations
+* `libwab`: WebAppBooster implementations, used by the Windows Phone client
+* `libwinRT`: (deprecated) WinRT specific implementations
 * `mc`: Minecraft bindings
 * `noderunner`: runs in the cloud, and parses TouchDevelop scripts / compiles
   them; as an accident, it is also used to run a local node server when
   developing
-* `node-webkit`:
-* `officemix`:
+* `node-webkit`: configuration files for the node-webkit app creation
+* `officemix`: office mix app host
 * `rt`: various run-time support libraries for the TouchDevelop application:
   in-browser storage, cloud connection, promises, DOM utilities...
 * `runner`: the run-time system for *generated* TouchDevelop apps; that is, once
   a TouchDevelop script is packaged as an app (webapp, cordova app, etc.),
   `runner.js` is the runtime system and the stub is in `webapp`
-* `shell`:
+* `shell`: shell app used by Azure and node-webkit
 * `storage`: code for syncing your locally-stored scripts and the cloud storage,
   in the TouchDevelop application
 * `tools`: internal tools that are part of the build (pre-processing)
@@ -153,3 +156,27 @@ to `main.js` without worrying.
 When running locally (via `jake run`), the local node server knows where to find
 the right files to give the illusion that all files are at the root `/` of the
 web server.
+
+## LICENSE
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Microsoft
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

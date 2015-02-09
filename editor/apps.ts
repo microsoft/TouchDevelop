@@ -1514,8 +1514,8 @@ module TDev.AppExport
 
         function mkDir(path:string, mode: string) {
             if (cancelled) return new PromiseInv();
-
-            logger.debug('mkdir ' + path);
+            if (!path) return Promise.as();
+            logger.debug('mkdir "' + path + '"');
             return LocalShell.mgmtRequestAsync("plugin/mkdir", {
                 minVersion: Runtime.shellVersion,
                 name: path.replace('\\','/'),

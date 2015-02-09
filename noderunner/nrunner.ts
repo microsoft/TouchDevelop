@@ -5,7 +5,6 @@
 ///<reference path='../build/libnode.d.ts'/>
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='jsonapi.ts'/>
-///(reference path='../shell/package.d.ts'/)
 
 var window;
 var navigator;

@@ -55,4 +55,3 @@
 ///<reference path='../intellitrain/features.ts'/>
 ///<reference path='../intellitrain/output.ts'/>
 ///<reference path='../intellitrain/tokenize.ts'/>
-///(reference path='../shell/package.d.ts'/)

@@ -1,5 +1,4 @@
 ///<reference path='../typings/node/node.d.ts'/>
-///(reference path='shell.d.ts'/)
 
 import fs = require('fs');
 import child_process = require('child_process');

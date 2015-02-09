@@ -267,7 +267,7 @@ task('clean', [], function () {
     jake.rmRf('build/');
 });
 
-task('test', [ 'build/client.js', 'default' ], { async: true }, function () {
+task('test', [ 'build/client.js', 'default', 'nw' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
@@ -296,7 +296,7 @@ task('upload', [], { async : true }, function() {
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
-    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER);
+    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER || -80000);
     upload(buildVersion);
   }
 })
@@ -313,11 +313,11 @@ task('run', [ 'default' ], { async: true }, function (port) {
 
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
-  jake.mkdirP('shell/work')
-  jake.rmRf('shell/work/tdserver.js')
-  process.chdir("shell/work")
+  jake.mkdirP('build/local')
+  jake.rmRf('build/local/tdserver.js')
+  process.chdir("build/local")
   jake.exec(
-    [ 'node ../../build/shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../..' ],
+    [ 'node ../shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
@@ -333,30 +333,41 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
   );
 });
 
-task('nw', [ 'default' ], { async : true }, function() {
+task('nw-npm', {async : true }, function() {
   var task = this;
-  console.log('[I] building nw packages')
   jake.mkdirP('build/nw');
   ['node-webkit/app.html',
    'node-webkit/logo.png',
+   'node-webkit/client.ico',
    'node-webkit/package.json',
-   'build/browser.js',
-   'build/main.js',
-   'build/shell.js',
-   'build/runtime.js',
-   'css/default.css',
-   'css/editor.css'].forEach(function(f) { jake.cpR(f, 'build/nw') })
+   'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
+  child_process.exec('npm install', { cwd: 'build/nw' },
+      function (error, stdout, stderr) {
+        if (stdout) console.log(stdout.toString());
+        if (stderr) console.error(stderr.toString());
+        if (error) task.fail(error);
+        else task.complete();
+      }
+    );
+})
+
+task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
+  var task = this;
+  console.log('[I] building nw packages')
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({
       files: 'build/nw/**',
-      platforms: ['win32'], //['osx32', 'osx64', 'win32', 'win64'],
+      platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',
-      cacheDir: 'nw_cache',
+      cacheDir: 'nw_cache'
   });
   nw.on('log',  console.log);
   nw.build().then(function () {
      console.log('[I] nw packaged');
      task.complete();
+  }).catch(function (error) {
+    console.error(error);
+    task.fail();
   });
 });
 

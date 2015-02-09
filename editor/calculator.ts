@@ -4240,7 +4240,7 @@ module TDev
                     setF({
                         tick: Ticks.calcNextIntelliTopPage,
                         title: lf("tap there"),
-                        description: lf("it gotta be on a different page")
+                        description: lf("show more options")
                     })
                     return;
                 }
@@ -4373,7 +4373,7 @@ module TDev
                         setF({
                             tick: Ticks.calcNextIntelliPage,
                             title: lf("tap there"),
-                            description: lf("it gotta be on a different page")
+                            description: lf("show more options")
                         })
                         return;
                     }

@@ -18,6 +18,17 @@ declare var TDev;
 var inAzure = false;
 var controllerUrl = "";
 var isNpm = false;
+var inNodeWebkit = false;
+var dataDir : string = ".";
+
+function dataPath(p : string) : string {
+  p = p || "";
+  return dataDir ? path.join(dataDir, p) : p;
+}
+
+function userHome() : string {
+  return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+}
 
 interface TdState {
     downloadedFiles:StringMap<string>;
@@ -36,7 +47,7 @@ interface LogMessage {
 class Logger {
     logIdx = -1;
     logMsgs:LogMessage[] = [];
-    logSz = 500;
+    logSz = 1000;
 
     constructor(public level:number)
     {
@@ -281,7 +292,7 @@ interface FileEntry {
 }
 
 function mkDirP(path: string, mode = "777", cb? : () => void) {
-    var elts = path.split(/\//)
+    var elts = path.split(/\/|\\/)
     // we might have gotten a race here if we used async
     var mk = (i: number) => {
         if (i > 0) {
@@ -424,22 +435,22 @@ function initPython(force: boolean, finish: (err?: string) => void) {
             next();
         });
     }
-    function mkVirtualEnv() {
+    function mkVirtualEnv(pyDir : string) {
         // install virtualenv if needed.
         child_process.execFile("pip", ["install", "virtualenv"], {}, (e, so, se) => {
-            child_process.execFile("python", ["-m", "virtualenv", "--verbose", "py"], {}, (err, stdout, stderr) => {
+            child_process.execFile("python", ["-m", "virtualenv", "--verbose", pyDir], {}, (err, stdout, stderr) => {
                 if (stdout) debug.log(stdout.toString())
                 if (stderr) info.log(stderr.toString())
                 // even if virtualenv failed, we might still be able to work
                 if (!err)
-                    virtualEnvDir = path.join(process.cwd(), "py");
+                    virtualEnvDir = pyDir;
                 setEnv();
                 checkPip();
             });
         });
     }
     function checkPip() {
-        runCommand({ command: "pip --version", cwd: "py" }, (res) => {
+        runCommand({ command: "pip --version", cwd: virtualEnvDir }, (res) => {
             if (res.stdout) debug.log(res.stdout);
             if (res.stderr) info.log(res.stderr);
             if (res.code) {
@@ -457,8 +468,8 @@ function initPython(force: boolean, finish: (err?: string) => void) {
             if (e) finish('error while download get-pip.py: ' + e);
             else {
                 debug.log('writing get-pip.py');
-                fs.writeFileSync('py/get-pip.py', buf, 'utf-8');
-                runCommand({ command: "python get-pip.py", cwd: "py" }, (res) => {
+                fs.writeFileSync(path.join(virtualEnvDir + '/get-pip.py'), buf, 'utf-8');
+                runCommand({ command: "python get-pip.py", cwd: virtualEnvDir }, (res) => {
                     if (res.stdout) debug.log(res.stdout);
                     if (res.stderr) error.log(res.stderr);
                     if (res.code) finish("pip installation failed: " + res.code);
@@ -469,15 +480,16 @@ function initPython(force: boolean, finish: (err?: string) => void) {
     }
 
     findPython(() => {
-        var ready = fs.existsSync("py");
+        var pyDir = dataPath("py");
+        var ready = fs.existsSync(pyDir);
         if (ready && !force) {
-            info.log('found existing python virtual environment...');
-            virtualEnvDir = path.join(process.cwd(), "py");
+            info.log('found existing python virtual environment at ' + pyDir);
+            virtualEnvDir = pyDir;
             done();
             return;
         }
         info.log("creating Python virtual environment...");
-        mkVirtualEnv();
+        mkVirtualEnv(pyDir);
     });
 }
 
@@ -647,6 +659,7 @@ function deployAr(ar:ApiRequest, isScript:boolean)
 
 var socketCmds:StringMap<(ws, data)=>void> = {
     shell: (ws, data) => {
+        data.cwd = dataPath(data.cwd); // map to userhome if needed
         var proc = createProcess(data)
 
         if (ws.currProc) {
@@ -690,7 +703,7 @@ var socketCmds:StringMap<(ws, data)=>void> = {
     },
 
     kill: (ws, data) => {
-        if (ws.currProc) {
+        if (ws.currProc && ws.currProc.pid) {
             debug.log('killing process ' + ws.currProc.pid);
             ws.currProc.kill("SIGKILL")
             ws.currProc = null
@@ -750,15 +763,18 @@ function mgmtSocket(ws)
 }
 
 var pluginCmds:StringMap<(ar:ApiRequest)=>void> = {
-    mkdir:      ar => mkDirP(ar.data.name + "/dummy", ar.data.mode, () => { ar.pluginCb()(undefined, undefined); }),
+    mkdir:      ar => mkDirP(dataPath(path.join(ar.data.name, "dummy")), ar.data.mode, () => { ar.pluginCb()(undefined, undefined); }),
     writeFile: ar => {
-        mkDirP(ar.data.name);
-        return fs.writeFile(ar.data.name, ar.data.data, "utf8", <any>ar.pluginCb())
+        mkDirP(dataPath(ar.data.name));
+        return fs.writeFile(dataPath(ar.data.name), ar.data.data, "utf8", <any>ar.pluginCb())
     },
-    readFile:   ar => fs.readFile(ar.data.name, "utf8", ar.pluginCb(true)),
-    readDir:    ar => fs.readdir(ar.data.name, ar.pluginCb(true)),
+    readFile:   ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
+    readDir:    ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
     writeFiles: ar => deployAr(ar, false),
-    shell:      ar => runCommand(ar.data, r => ar.ok(r)),
+    shell:      ar => {
+      ar.data.cwd = path.join(dataDir, ar.data.cwd);
+      runCommand(ar.data, r => ar.ok(r))
+    },
     open:       ar => openUrl(ar.data.url, () => ar.ok({})),
     pythonEnv: ar => initPython(false, (err?) => {
         if (err) ar.exception(err)
@@ -912,7 +928,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
     },
 
     savecache: ar => {
-        fs.writeFile("offlinecache.json", JSON.stringify(ar.data), "utf8", err => {
+        fs.writeFile(dataPath("offlinecache.json"), JSON.stringify(ar.data), "utf8", err => {
             if (err) ar.exception(err)
             else ar.ok({})
         })
@@ -1066,7 +1082,7 @@ class ProxyEntry {
 
 function saveState()
 {
-    fs.writeFileSync("tdstate.json", JSON.stringify(tdstate))
+    fs.writeFileSync(dataPath("tdstate.json"), JSON.stringify(tdstate))
 }
 
 function getMime(filename:string)
@@ -1350,7 +1366,7 @@ function cacheEditor(version:string, manifest:string)
                 cache[l] = ent(buf, hd)
                 if (--num == 0) {
                     Object.keys(cache).forEach(k => editorCache[k] = cache[k])
-                    fs.writeFile(version + ".json", JSON.stringify(cache, null, 2), "utf8", (err) => { if (err) cacheError(err) })
+                    fs.writeFile(dataPath(version + ".json"), JSON.stringify(cache, null, 2), "utf8", (err) => { if (err) cacheError(err) })
                 }
             })
         })
@@ -1362,14 +1378,16 @@ function proxyEditor(cmds:string[], req, resp)
     if (!editorCache) {
         editorCache = {};
         ["current", "beta"].forEach(v => {
-            if (fs.existsSync(v + ".json")) {
-                var c = JSON.parse(fs.readFileSync(v + ".json", "utf8"))
+            var editorJson = dataPath(v + ".json");
+            if (fs.existsSync(editorJson)) {
+                var c = JSON.parse(fs.readFileSync(editorJson, "utf8"))
                 Object.keys(c).forEach(k => editorCache[k] = c[k])
             }
         })
-        if (!fs.existsSync("cdn-cache")) {
-            fs.mkdirSync("cdn-cache")
-            fs.mkdirSync("cdn-cache/meta")
+
+        if (!fs.existsSync(dataPath("cdn-cache"))) {
+            fs.mkdirSync(dataPath("cdn-cache"))
+            fs.mkdirSync(dataPath("cdn-cache/meta"))
         }
     }
 
@@ -1417,7 +1435,7 @@ function proxyEditor(cmds:string[], req, resp)
         var h = crypto.createHash("sha256")
         h.update(new Buffer(url, "utf8"))
         file += "." + h.digest("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 16)
-        cacheDir = "cdn-cache"
+        cacheDir = dataPath("cdn-cache")
     }
     else suff = "?releaseid=" + rel
 
@@ -1456,7 +1474,7 @@ function proxyEditor(cmds:string[], req, resp)
             break;
 
         case "offlinecache":
-            fs.readFile("offlinecache.json", "utf8", (err, data) => {
+            fs.readFile(dataPath("offlinecache.json"), "utf8", (err, data) => {
                 if (err) data = "{}"
                 resp.writeHead(200, { 'Content-Type': 'application/json; encoding=utf-8' })
                 var d = JSON.parse(data)
@@ -1516,6 +1534,7 @@ function proxyEditor(cmds:string[], req, resp)
             } else sendCached();
         })
     } else if (rel == "local") {
+        debug.log('serving ' + file + ' from ' + localPath)
         var mime = getMime(file)
         var enc = /^text\//.test(mime) ? "utf8" : null
 
@@ -1703,100 +1722,6 @@ function runScript(id:string, start:()=>void, reload:()=>void)
     })
 }
 
-function downloadNode()
-{
-    info.log("looking up latest node version...")
-    var version = ""
-
-    function untar(url:string, fn:string, f) {
-        var tar = require(rootDir + "/node_modules/tar")
-
-        debug.log("downloading " + url + "...")
-        downloadStream(url, str => {
-            str.pipe(zlib.createGunzip(undefined))
-               .pipe(tar.Parse())
-               .on("entry", e => {
-                   if (e.props.path.slice(-fn.length) == fn) {
-                       f(e);
-                       f = () => {};
-                       //e.pipe(fs.createWriteStream(trg, { mode: '777' }))
-                   }
-               })
-               .on("end", () => {
-                   f(null)
-               })
-        })
-    }
-
-    function save(fn) {
-        return trg => {
-            debug.log("saving " + fn)
-            trg.pipe(fs.createWriteStream(fn, { mode: '777' }))
-        }
-    }
-
-    function saveStr(fn, str) {
-        (<any>fs).writeFile(fn, str, { mode: '777' }, err => {})
-    }
-
-
-    function downloadAll() {
-        var base = "https://nodejs.org/dist/latest/node"
-        var tar = base + "-" + version
-        if (!fs.existsSync("node.darwin"))
-            untar(tar + "-darwin-x86.tar.gz", "bin/node", save("node.darwin"))
-        if (!fs.existsSync("node.linux"))
-            untar(tar + "-linux-x86.tar.gz", "bin/node", save("node.linux"))
-        if (!fs.existsSync("node.linux64"))
-            untar(tar + "-linux-x64.tar.gz", "bin/node", save("node.linux64"))
-        if (!fs.existsSync("node.exe"))
-            downloadStream(base + ".exe", save("node.exe"))
-        untar("https://www.touchdevelop.com/api/language/touchdevelop.tgz", "touchdevelop.js", save("server.js"))
-
-        saveStr("tdserver.cmd", ".\\node.exe server.js TD_ALLOW_EDITOR=true TD_LOCAL_DROP=true\r\n")
-        saveStr("tdserver.sh",
-            '#!/bin/sh\n' +
-            'chmod +x node.exe node.darwin node.linux node.linux64\n' +
-            'export TD_ALLOW_EDITOR=true TD_LOCAL_DROP=true\n' +
-            'if [ "$(uname -s)" = "Darwin" ]; then ./node.darwin server.js\n' +
-            'elif [ "$(uname -s).$(uname -m)" = "Linux.x86_64" ]; then ./node.linux64 server.js\n' +
-            'elif [ "$(uname -s)" = "Linux" ]; then ./node.linux server.js\n' +
-            'elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then ./node.exe server.js\n' +
-            'else echo "Unsupported platform: $(uname)"; fi\n' +
-            '')
-
-        console.log("\n\n" +
-"Instructions\n" +
-"============\n\n" +
-"After all the downloads are done, run:\n\n\t" +
-(process.platform == "win32" ? "tdserver.cmd" : "./tdserver.sh") + "\n\n" +
-"This should start your default browser in TouchDevelop editor. Do *not* sign in,\n" +
-"and follow activity (e.g., a tutorial) you want to be available offline.\n" +
-"Once you're done, go to Hub->Settings and tap on 'save offline caches' at\n" +
-"the bottom.\n" +
-"\n")
-
-    }
-
-    downloadFile("https://nodejs.org/dist/latest/", (err, buf) => {
-        var str = buf.toString("utf8")
-        var m = /node-(v[\d\.]+)-x86\.msi/.exec(str)
-        version = m[1]
-        info.log("node version: " + version)
-
-        if (!fs.existsSync("node_modules"))
-            fs.mkdirSync("node_modules")
-
-        if (!fs.existsSync("node_modules/tar"))
-            runCommand({
-                command: "npm install tar"
-            }, r => {
-                downloadAll()
-            })
-        else downloadAll()
-    })
-}
-
 function respawnLoop()
 {
     info.log('starting shell watch...')
@@ -1846,7 +1771,10 @@ function main()
     var scriptId = ""
     var internet = inAzure ? true : false
     var useBeta = false
-    var cli = false
+    var cli = false;
+    var useHome = false;
+
+    inNodeWebkit = fs.existsSync("./app.html");
 
     var usage = () => {
         console.error("unknown option: " + args[0])
@@ -1857,13 +1785,13 @@ function main()
         console.error("  --scriptid ID     -- fetch newest version of /ID and run it (-s)")
         console.error("  --cli             -- don't start the browser")
         console.error("  --internet        -- allow connections from outside localhost")
-        console.error("  --pkg             -- create a TouchDevelop drop-folder")
+        console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  NAME=VALUE        -- set environment variable for the script")
 
         process.exit(1)
     }
 
-    if (!inAzure && __dirname != process.cwd()) {
+    if (!inAzure && !inNodeWebkit && __dirname != process.cwd()) {
         if (isNpm) process.env["TD_ALLOW_EDITOR"] = "true"
         respawnLoop()
         return
@@ -1888,9 +1816,6 @@ function main()
                 args.shift()
                 scriptId = args.shift()
                 break;
-            case "--pkg":
-                downloadNode()
-                return
             case "--cli":
                 args.shift()
                 cli = true
@@ -1903,6 +1828,10 @@ function main()
                 args.shift()
                 internet = true
                 break
+            case "--usehome":
+                args.shift();
+                useHome = true;
+                break;
             default:
                 var m = /^([A-Za-z0-9_]+)=(.*)$/.exec(args[0])
                 if (m) {
@@ -1918,10 +1847,22 @@ function main()
 
     useBeta = true; // always use beta
 
+    if (inNodeWebkit) {
+      cli = true;
+      process.env['TD_ALLOW_EDITOR'] = true;
+      useHome = true;
+    }
+    if (useHome && userHome()) {
+      dataDir = path.join(userHome(), "TouchDevelop");
+      mkDirP(path.join(dataDir, 'dummy'));
+      info.log('data directory: ' + dataDir);
+    }
+
     debug.log("start, autoupdate=" + hasAutoUpdate())
     var shouldStart = !cli && (isNpm || !!process.env['TD_LOCAL_DROP'] || !!process.env['TD_ALLOW_EDITOR'])
 
-    if (process.env['TD_LOCAL_DROP'] || !fs.existsSync("tdconfig.json")) {
+    var tdConfigJson = dataPath("tdconfig.json");
+    if (process.env['TD_LOCAL_DROP'] || !fs.existsSync(tdConfigJson)) {
         debug.log("generating initial tdconfig.json")
         config = {
             deploymentKey: crypto.randomBytes(20).toString("hex").toLowerCase(),
@@ -1929,10 +1870,10 @@ function main()
             tiemstampText: new Date().toString(),
             shellVersion: 108
         }
-        fs.writeFileSync("tdconfig.json", JSON.stringify(config, null, 2))
+        fs.writeFileSync(tdConfigJson, JSON.stringify(config, null, 2))
     }
 
-    config = JSON.parse(fs.readFileSync("tdconfig.json", "utf8"))
+    config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
 
     info.log("Deployment key: " + config.deploymentKey);
 
@@ -1953,8 +1894,9 @@ function main()
     process.env['TD_DEPLOYMENT_KEY'] = config.deploymentKey
     process.env['TD_CONTROLLER_URL'] = controllerUrl
 
-    if (fs.existsSync("tdstate.json"))
-        tdstate = JSON.parse(fs.readFileSync("tdstate.json", "utf8"))
+    var tdStateJson = dataPath("tdstate.json")
+    if (fs.existsSync(tdStateJson))
+        tdstate = JSON.parse(fs.readFileSync(tdStateJson, "utf8"))
     else
         tdstate = { downloadedFiles: {}, numDeploys: 0, deployedId: "" }
 

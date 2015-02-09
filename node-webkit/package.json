@@ -11,7 +11,7 @@
     "title": "TouchDevelop",
     "icon": "logo.png",
     "toolbar": false,
-    "frame": false,
+    "frame": true,
     "min_width": 400,
     "min_height": 400,
     "resizable":true
@@ -19,9 +19,13 @@
   "licenses": [{
        "type": "MIT"
   }],
+  "bugs":"http://github.com/microsoft/TouchDevelop/issues",
   "repositories": [{
-            "type": "git",
-            "url": "http://github.com/microsoft/TouchDevelop.git",
-            "path": "node-webkit"
-  }]
+    "type": "git",
+    "url": "http://github.com/microsoft/TouchDevelop.git",
+    "path": "node-webkit"
+  }],
+  "dependencies": {
+    "faye-websocket": "0.8.1"
+  }
 }
