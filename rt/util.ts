@@ -69,7 +69,7 @@ module TDev {
             else if (!f) return v;
             else return coalesce(null);
         };
-    
+
         return <Coalesced<T>>re;
     }
 
@@ -249,7 +249,9 @@ module TDev{
     function networkError(client: XMLHttpRequest, meth: string, filename: string) {
         var e = new Error(Util.fmt("cannot {0} '{1}'; status={2}", meth, filename, client.status));
         (<any>e).status = client.status;
-        (<any>e).errorMessage = decodeErrorMessage(client.getResponseHeader("ErrorMessage")); // this doesn't seem to work because of CORS
+        try {
+          (<any>e).errorMessage = decodeErrorMessage(client.getResponseHeader("ErrorMessage")); // this doesn't seem to work because of CORS
+        } catch(e) {}
         if ((<any>e).errorMessage == undefined) {
             (<any>e).errorMessage = client.responseText;
         }
@@ -3518,4 +3520,3 @@ module TDev{
         }
     }
 }
-

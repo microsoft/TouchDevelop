@@ -313,11 +313,11 @@ task('run', [ 'default' ], { async: true }, function (port) {
 
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
-  jake.mkdirP('shell/work')
-  jake.rmRf('shell/work/tdserver.js')
-  process.chdir("shell/work")
+  jake.mkdirP('build/local')
+  jake.rmRf('build/local/tdserver.js')
+  process.chdir("build/local")
   jake.exec(
-    [ 'node ../../build/shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../..' ],
+    [ 'node ../shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
