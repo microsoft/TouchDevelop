@@ -335,10 +335,16 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
 
 task('nw-npm', {async : true }, function() {
   var task = this;
-  if (fs.existsSync('node-webkit/node_modules'))
+  jake.mkdirP('build/nw');
+  ['node-webkit/app.html',
+   'node-webkit/logo.png',
+   'node-webkit/client.ico',
+   'node-webkit/package.json',
+   'node-webkit/node_modules',
+   'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
+  if (fs.existsSync('build/nw/node_modules'))
     task.complete();
-  else child_process.exec('npm install',
-      { cwd: 'node-webkit' },
+  else child_process.exec('npm install', { cwd: 'build/nw' },
       function (error, stdout, stderr) {
         if (stdout) console.log(stdout.toString());
         if (stderr) console.error(stderr.toString());
@@ -351,14 +357,6 @@ task('nw-npm', {async : true }, function() {
 task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
   var task = this;
   console.log('[I] building nw packages')
-  jake.rmRf('build/nw');
-  jake.mkdirP('build/nw');
-  ['node-webkit/app.html',
-   'node-webkit/logo.png',
-   'node-webkit/client.ico',
-   'node-webkit/package.json',
-   'node-webkit/node_modules',
-   'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({
       files: 'build/nw/**',
