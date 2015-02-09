@@ -342,9 +342,7 @@ task('nw-npm', {async : true }, function() {
    'node-webkit/package.json',
    'node-webkit/node_modules',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
-  if (fs.existsSync('build/nw/node_modules'))
-    task.complete();
-  else child_process.exec('npm install', { cwd: 'build/nw' },
+  child_process.exec('npm install', { cwd: 'build/nw' },
       function (error, stdout, stderr) {
         if (stdout) console.log(stdout.toString());
         if (stderr) console.error(stderr.toString());
