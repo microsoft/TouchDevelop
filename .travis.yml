@@ -11,4 +11,4 @@ cache:
   directories:
     - node_modules
     - nw_cache
-    - node-webkit/node_modules
+    - build/nw/node_modules
