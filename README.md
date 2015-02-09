@@ -129,8 +129,7 @@ The `client.js` is built by default.
 * `libwinRT`: (deprecated) WinRT specific implementations
 * `mc`: Minecraft bindings
 * `noderunner`: runs in the cloud, and parses TouchDevelop scripts / compiles
-  them; as an accident, it is also used to run a local node server when
-  developing
+  them by responding to requests on `/api`.
 * `node-webkit`: configuration files for the node-webkit app creation
 * `officemix`: office mix app host
 * `rt`: various run-time support libraries for the TouchDevelop application:
@@ -138,7 +137,8 @@ The `client.js` is built by default.
 * `runner`: the run-time system for *generated* TouchDevelop apps; that is, once
   a TouchDevelop script is packaged as an app (webapp, cordova app, etc.),
   `runner.js` is the runtime system and the stub is in `webapp`
-* `shell`: shell app used by Azure and node-webkit
+* `shell`: shell app used by Azure and node-webkit; basically a way to serve
+  files locally
 * `storage`: code for syncing your locally-stored scripts and the cloud storage,
   in the TouchDevelop application
 * `tools`: internal tools that are part of the build (pre-processing)

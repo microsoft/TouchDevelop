@@ -1475,52 +1475,6 @@ function handleApi(req:http.ServerRequest, resp:http.ServerResponse)
     }
 }
 
-function getMime(filename:string)
-{
-    var ext = path.extname(filename).slice(1)
-    switch (ext) {
-        case "txt": return "text/plain";
-        case "html":
-        case "htm": return "text/html";
-        case "css": return "text/css";
-        case "js": return "application/x-javascript";
-        case "jpg":
-        case "jpeg": return "image/jpeg";
-        case "png": return "image/png";
-        case "ico": return "image/x-icon";
-        case "manifest": return "text/cache-manifest";
-        case "json": return "application/json";
-        case "svg": return "image/svg+xml";
-        default: return "application/octet-stream";
-    }
-}
-
-function serveFile(filename:string, resp:http.ServerResponse)
-{
-    // When running locally, we must give the illusion of a flat directory
-    // structure, since that's what we have *once we're packaged*. However,
-    // because no packaging happened yet, we must figure out where to find the
-    // files. It's easy: js files are in [build/] and the rest is in [www/].
-    if (filename != "worker.js" && filename.substr(filename.length - 3, 3) == ".js")
-        filename = "build/"+filename;
-    else
-        filename = "www/"+filename;
-    // Furthermore, once compiled, we sit as "build/noderunner.js", so
-    // __dirname+"../" is the root directory.
-    var fn = path.resolve(path.join(__dirname, ".."), filename)
-    fs.exists(fn, (yes) => {
-        if (yes)
-            fs.readFile(fn, (err, content) => {
-                resp.writeHead(200, { 'Content-Type': getMime(filename) });
-                resp.end(content, "utf-8");
-            })
-        else {
-            resp.writeHead(404, "File not found");
-            resp.end();
-        }
-    })
-}
-
 function downloadFile(u:string, f:(s:string)=>void)
 {
     var p = url.parse(u);
@@ -1585,13 +1539,6 @@ function reportBug(ctx: string, err: any) {
 
 function startServer(port:number)
 {
-    var allowed = ['tutorial', 'json', 'icons', 'webapp.html',
-                   'index.html',
-                   'browser.js', 'main.js', 'favicon.ico', "worker.js", "runtime.js", "cordova.js",
-                   'browsers.html', 'error.html', 'landing.html', 'hoc.html',
-                    'default.css', 'editor.css',
-                   ];
-
     http.createServer((req, resp) => {
         try {
             reqId++;
@@ -1601,20 +1548,8 @@ function startServer(port:number)
             var u = url.parse(req.url);
             var pp = path.normalize(u.pathname).replace(/\\/g, "/").replace(/^\/*/, "");
             var m = /^([^\/]*)/.exec(pp);
-            if (m) {
-                if (m[1] == "")
-                    serveFile("index.html", resp);
-                else if (allowed.indexOf(m[1]) >= 0)
-                    serveFile(pp, resp);
-                else if (m[1] == "api" || m[1] == "deploy")
-                    handleApi(req, resp)
-                else {
-                    resp.writeHead(404, "File not found");
-                    resp.end();
-                }
-            } else {
-                serveFile("index.html", resp);
-            }
+            if (m && (m[1] == "api" || m[1] == "deploy"))
+                handleApi(req, resp);
         } catch (err) {
             reportBug("noderunner", err);
         }

@@ -301,16 +301,6 @@ task('upload', [], { async : true }, function() {
   }
 })
 
-task('run', [ 'default' ], { async: true }, function (port) {
-  var task = this;
-  port = port || 80;
-  jake.exec(
-      [ 'node build/noderunner '+port+' silent ' ],
-      { printStdout: true, printStderr: true },
-      function() { task.complete(); }
-  );
-});
-
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
   jake.mkdirP('build/local')
