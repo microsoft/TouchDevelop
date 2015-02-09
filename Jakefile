@@ -340,7 +340,6 @@ task('nw-npm', {async : true }, function() {
    'node-webkit/logo.png',
    'node-webkit/client.ico',
    'node-webkit/package.json',
-   'node-webkit/node_modules',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
   child_process.exec('npm install', { cwd: 'build/nw' },
       function (error, stdout, stderr) {
