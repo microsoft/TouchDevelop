@@ -6295,7 +6295,7 @@ module TDev { export module Browser {
                 }
 
                 if (this.correspondingTopic) {
-                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow"), () => {
+                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"), () => {
                         tick(Ticks.browseFollowTopic)
                         this.correspondingTopic.follow()
                     })])
