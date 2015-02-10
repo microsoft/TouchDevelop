@@ -38,6 +38,12 @@ var generated = [
   'results.json',
 ];
 
+// A list of targets we compile with the --noImplicitAny flag.
+var noImplicitAny = {
+  "build/browser.d.ts": null,
+};
+
+
 // This function tries to be "smart" about the target.
 // - if the target is of the form "build/foobar.ts", the output is bundled with
 //   [--out] into "build/foobar.js", and "build/foobar.d.ts" is also generated;
@@ -57,6 +63,8 @@ function mkSimpleTask(production, dependencies, target) {
       "--sourceRoot "+sourceRoot,
       "--declaration", // not always strictly needed, but better be safe than sorry
     ];
+    if (production in noImplicitAny)
+      tscCall.push("--noImplicitAny");
     var match = target.match(/(\w+)\/refs.ts/);
     if (match) {
       tscCall.push("--out build/"+match[1]+".js");

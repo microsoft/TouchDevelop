@@ -21,7 +21,7 @@ module TDev {
         export var isNodeJS = false;
         export var isHeadless = false;
         export var isTouchDevice = false;
-        export var isMobile = undefined;
+        export var isMobile: boolean = undefined;
         export var isCellphone = false;
         export var isTablet = false;
         export var isDesktop = false;
@@ -84,7 +84,7 @@ module TDev {
 
         export var loadingDone = false;
 
-        export var platformCaps = []
+        export var platformCaps: string[] = []
         export var browserShortName = "unknown";
 
         export var startTimestamp = 0;
@@ -394,8 +394,8 @@ module TDev {
             else if (!isTouchDevice) recommendedBrowser = "Please upgrade to Windows 8 with Internet Explorer 10 or better.";
             */
 
-            var message = (problemHTML, fixHTML = undefined) => <UnsupportedMessage>{ problemHTML: problemHTML, fixHTML: fixHTML };
-            var genericMessage = (problemHTML, upgradedBrowserName = undefined) => message(problemHTML, upgradedBrowserName ?
+            var message = (problemHTML: string, fixHTML: string = undefined) => <UnsupportedMessage>{ problemHTML: problemHTML, fixHTML: fixHTML };
+            var genericMessage = (problemHTML: string, upgradedBrowserName: string = undefined) => message(problemHTML, upgradedBrowserName ?
                 "<p>Follow these easy steps to run " + what + " on your device:</p>" +
                 "<ol class='light'><li>open <b>" + upgradedBrowserName + "</b></li><li>navigate to <u>touchdevelop.com" + path + "</u>, or the short form <u>tdev.ly" + path + "</u></li></ol>" +
                 "<p>You can copy&amp;paste the link into " + upgradedBrowserName + ".</p>" : undefined);
@@ -404,20 +404,20 @@ module TDev {
                 return genericMessage("<p>It seems you're running TouchDevelop inside of another app.</p>", "your regular internet browser");
 
             // only firefox supported
-            var olderAndroidMessage = problemHTML => message(problemHTML,
+            var olderAndroidMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on Android:</p>" +
                 "<ol class='light'><li><b>try to install the latest <a href='market://details?id=org.mozilla.firefox&hl=en'>Firefox Browser</a></b> from the Google Play Store</li>" +
                 "<li>open <u>touchdevelop.com" + path + "</u>, or the short form <u>tdev.ly" + path + "</u> in the Chrome Browser</li></ol>" +
                 "<p>You can copy&amp;paste the link into Firefox.</p>");
 
             // chrome, firefox, opera
-            var chromeAndroidMessage = problemHTML => message(problemHTML,
+            var chromeAndroidMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on Android:</p>" +
                 "<ol class='light'><li><b>install the latest <a href='market://details?id=com.android.chrome&hl=en'>Chrome Browser</a> or <a href='market://details?id=org.mozilla.firefox&hl=en'>Firefox Browser</a> or <a href='market://details?id=com.opera.browser&hl=en'>Opera Browser</a> </b> from the Google Play Store</li>" +
                 "<li>open <u>touchdevelop.com" + path + "</u>, or the short form <u>tdev.ly" + path + "</u> in the Chrome Browser</li></ol>" +
                 "<p>You can copy&amp;paste the link into the installed browser.</p>");
 
-            var upgradeMessage = problemHTML => message(problemHTML,
+            var upgradeMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on your device:</p>" +
                 "<ol class='light'><li>upgrade your browser to the latest version</li><li>navigate to <u>touchdevelop.com" + path + "</u>, or the short form <u>tdev.ly" + path + "</u></li></ol>" +
                 "<p>You can copy&amp;paste the link into your upgraded browser.</p>");
@@ -558,12 +558,12 @@ module TDev {
             var now = new Date();
             var userAgent = window.navigator.userAgent;
             var dateStr = now.getFullYear() + "." + (now.getMonth() + 1) + "." + now.getDate();
-            var se = {};
+            var se: { [x: string]: number } = {};
             se["browser." + browser] = 1;
             var ticksReq = {
                 dateStr: dateStr,
                 sessionEvents: se,
-                platform: [],
+                platform: <any[]>[],
                 jsUrl: (<any>window).mainJsName
             }
 
@@ -587,7 +587,7 @@ module TDev {
                   resolution: "",
                   jsUrl: (<any>window).mainJsName,
                   timestamp: now.getTime(),
-                  platform: [],
+                  platform: <any[]>[],
               };
               var client = new XMLHttpRequest();
               client.open("POST", serviceUrl + "/api/bug");
@@ -597,7 +597,7 @@ module TDev {
           }
         }
 
-        function statusMsg(m) {
+        function statusMsg(m: string) {
             var f = (<any>window).statusMsg;
             if (f) f(m);
         }
