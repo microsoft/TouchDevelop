@@ -1219,7 +1219,16 @@ input[data-invalid^="yes"]
   font-size: 1.3em;
 }
 
-
+.close-round-button {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 0.5em;
+  background: white;
+  border-radius: 50%;
+}
 
 /*
 #theWall div.wall-page

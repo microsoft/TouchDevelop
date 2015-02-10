@@ -756,10 +756,13 @@ module TDev.HTML {
         return r;
     }
 
-    export function mkAutoExpandingTextArea()
+    export function mkAutoExpandingTextArea(showDismiss = false)
     {
         var ta = HTML.mkTextArea();
         var pre = document.createElement("pre");
+        var dismiss = showDismiss ? div('close-round-button', HTML.mkImg("svg:cancel,black")).withClick(() => {
+          if(r.onDismiss) r.onDismiss();
+        }) : null
         var content = span(null, null)
         pre.setChildren([content, mkBr()])
         var update = () => {
@@ -767,7 +770,14 @@ module TDev.HTML {
             r.onUpdate();
         }
         Util.onInputChange(ta, update)
-        var r = { div: div("expandingTextAreaContainer", pre, ta), textarea: ta, update: update, onUpdate: () => {} }
+        var r = {
+          div: div("expandingTextAreaContainer", pre, ta, dismiss),
+          textarea: ta,
+          update: update,
+          onUpdate: () => {},
+          dismiss: dismiss,
+          onDismiss: () => {},
+        }
         return r
     }
 
