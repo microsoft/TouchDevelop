@@ -538,6 +538,8 @@ module TDev {
                         e.innerHTML = fixHTML;
                 }
             }
+            e = document.getElementById("userAgent");
+            if (e) e.innerText = "User Agent: " + window.navigator.userAgent;
         }
 
         function reportBrowser(browser:string)
@@ -634,7 +636,7 @@ module TDev {
                 detect();
                 var um = unsupportedMessage(what, path);
 
-                if (!um || /ignoreAgent/.test(document.URL)) {
+                if (!um || /ignoreAgent/.test(document.URL) || inCordova) {
                     statusMsg("browser detector success: " + browserShortName);
                     (<any>window).browserSupported = true;
                     if (isIndex)
