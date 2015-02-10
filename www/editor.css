@@ -2825,7 +2825,6 @@ div.iconThumb {
   position: absolute;
   font-size: 0.8em;
   font-weight: bold;
-  background: white;
   padding-left: 0.5em;
   right: 0;
   bottom: 0;
@@ -3394,7 +3393,7 @@ div.sdTabTileLabel {
   position: relative;
   margin-top: 0.3em;
   font-size: 0.5em;
-  color: #999;
+  color: #888;
 }
 
 .phone .sdCmtMeta {
@@ -3483,6 +3482,7 @@ div.sdTabTileLabel {
   position: absolute;
   right: 0;
   bottom: -1em;
+  color:#000;
 }
 
 .sdVotingButtons,
