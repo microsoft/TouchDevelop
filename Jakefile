@@ -8,6 +8,8 @@
 var assert = require('assert');
 var child_process = require("child_process");
 var fs = require("fs");
+var path = require("path");
+var source_map = require("source-map");
 
 jake.addListener("start", function () {
   if (!fs.existsSync("build"))
@@ -36,6 +38,8 @@ function mkSimpleTask(production, dependencies, target) {
       "--removeComments",
       "--target ES5",
       "--module commonjs",
+      "--sourceMap",
+      "--sourceRoot /editor/local/",
       "--declaration", // not always strictly needed, but better be safe than sorry
     ];
     var match = target.match(/(\w+)\/refs.ts/);
@@ -46,6 +50,8 @@ function mkSimpleTask(production, dependencies, target) {
     }
     tscCall.push(target);
     return file(production, dependencies, { async: true, parallelLimit: branchingFactor }, function () {
+      if (process.env.TD_VERBOSE)
+        console.log(tscCall.join(" "));
       var task = this;
       console.log("[B] "+production);
       jake.exec(tscCall.join(" "), { printStdout: true }, function () {
@@ -233,23 +239,75 @@ var concatMap = {
     ],
 };
 
+// Just a dumb concatenation
+function justCat(files, dest) {
+    console.log("[C]", dest);
+    var bufs = [];
+
+    files.forEach(function (f) {
+        bufs.push(fs.readFileSync(f));
+    });
+
+    fs.writeFileSync(dest, Buffer.concat(bufs));
+}
+
+// A concatenation that recomputes proper maps. Generates the source map in the
+// same directory as the original map, and expects it to remain that way.
+function mapCat(files, dest) {
+  console.log("[C]", dest, "with maps");
+
+  // An array of buffers for all the files we want to concatenate.
+  var bufs = [];
+  // Current line offest.
+  var lineOffset = 0;
+  // The source map we're generating.
+  var map = new source_map.SourceMapGenerator({ file: dest + ".map" });
+
+  files.forEach(function (f) {
+    var buf = fs.readFileSync(f);
+    bufs.push(buf);
+    if (fs.existsSync(f + ".map")) {
+      var originalMap = new source_map.SourceMapConsumer(fs.readFileSync(f + ".map", { encoding: "utf-8" }));
+      originalMap.eachMapping(function (m) {
+        map.addMapping({
+          generated: {
+            line: m.generatedLine + lineOffset,
+            column: m.generatedColumn,
+          },
+          original: {
+            line: m.originalLine,
+            column: m.originalColumn,
+          },
+          source: m.source,
+          name: m.name
+        });
+      });
+      // An extra line was added for the sourcemap comment already.
+      lineOffset--;
+    }
+    lineOffset += buf.toString().split("\n").length;
+    if (buf[buf.length - 1] == "\n".charCodeAt(0))
+        lineOffset--;
+  });
+
+  bufs.push(new Buffer("\n//# sourceMappingURL="+path.basename(dest)+".map"));
+
+  fs.writeFileSync(dest, Buffer.concat(bufs));
+  fs.writeFileSync(dest+".map", map.toString());
+}
+
 Object.keys(concatMap).forEach(function (f) {
     var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
+    var prelude = f == "build/noderunner.js" ? ["tools/node_prelude.js"] : [];
     var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
-    var toConcat = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; });
+    var toConcat = prelude.concat(
+      concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
+    );
     file(f, buildDeps, { parallelLimit: branchingFactor }, function () {
-        console.log("[C]", f);
-        var bufs = [];
-
-	if (/noderunner/.test(f)) {
-	    // Apparently our node scripts can't run without this line.
-	    bufs.push(new Buffer("var window = {};\n"));
-	}
-
-        toConcat.forEach(function (f) {
-            bufs.push(fs.readFileSync(f));
-        });
-        fs.writeFileSync(f, Buffer.concat(bufs));
+      if (f == "build/main.js" && process.env.TD_SOURCE_MAPS)
+        mapCat(toConcat, f);
+      else
+        justCat(toConcat, f);
     });
 });
 
