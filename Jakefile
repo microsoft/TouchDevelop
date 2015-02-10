@@ -59,10 +59,12 @@ function mkSimpleTask(production, dependencies, target) {
       "--removeComments",
       "--target ES5",
       "--module commonjs",
-      "--sourceMap",
-      "--sourceRoot "+sourceRoot,
       "--declaration", // not always strictly needed, but better be safe than sorry
     ];
+    if (process.env.TD_SOURCE_MAPS) {
+      tscCall.push("--sourceMap");
+      tscCall.push("--sourceRoot "+sourceRoot);
+    }
     if (production in noImplicitAny)
       tscCall.push("--noImplicitAny");
     var match = target.match(/(\w+)\/refs.ts/);

@@ -58,6 +58,8 @@ module TDev
         private onNextDisplay:()=>void = null;
         private wrenchUndo = false;
 
+        public isInlineEditing() { return this.visualRoot.getFlag("inline-editing"); }
+
         private expressionDisplay = div("line");
         private calcTopButtons = div("calcButtonsTop");
         private calcButtonsRight = div("calcButtonsRight");
@@ -1225,7 +1227,7 @@ module TDev
 
         private inlineEditString(l:AST.Literal)
         {
-            var res = HTML.mkAutoExpandingTextArea()
+            var res = HTML.mkAutoExpandingTextArea(true)
             res.div.className += " calcStringEdit";
             res.textarea.value = l.data;
             res.div.id = "stringEdit";
@@ -1238,15 +1240,17 @@ module TDev
                     this.switchToNormalKeypad();
                 this.display();
             };
+            res.dismiss.id = "inlineEditCloseBtn";
+            res.onDismiss = () => this.checkNextDisplay();
 
             (<any>res.div).focusEditor = () => {
                 res.update();
                 Util.setKeyboardFocusTextArea(res.textarea);
-            };
+              };
 
             res.onUpdate = () => {
                 TheEditor.selector.positionButtonRows();
-            };
+              };
 
             return res.div;
         }
@@ -4292,9 +4296,9 @@ module TDev
 
                 if (ins.editString && this.inlineEditToken == ins.addAfter) {
                     TipManager.setTip({
-                        el: elt("stringEdit"),
+                        el: elt("inlineEditCloseBtn"),
                         title: lf("type: ") + ins.editString,
-                        description: lf("tap (←) when done"),
+                        description: lf("tap here when done"),
                     })
                     return;
                 }

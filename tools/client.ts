@@ -3495,6 +3495,9 @@ function getMime(filename:string)
 
 function tdupload(args:string[])
 {
+    if (process.env.TD_SOURCE_MAPS && !process.env.TRAVIS)
+        console.warn("Warning: uploading a local build with source maps to the cloud: "+
+                "the source maps will be useless there.");
     var key = args.shift()
     var lbl = args.shift()
 
@@ -3522,6 +3525,8 @@ function tdupload(args:string[])
         ]
 
     args.forEach(p => {
+        if (!fs.existsSync(p))
+            return;
         fs.readFile(p, (err, data) => {
             if (err) {
                 console.log(err)

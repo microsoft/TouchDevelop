@@ -725,10 +725,10 @@ module TDev
             this.bottomLeftButtonRow.style.left = xx + "px";
 
             var disableAdd = this.selectedStmt.isPlaceholder() || this.selectionBlock.immutableReason || !this.selectionBlock.allowAdding();
-
+            var inlineEditMode = TheEditor.calculator.isInlineEditing() && !!elt("inlineEditCloseBtn");
             Util.childNodes(this.topButtonRow, this.topLeftButtonRow, this.bottomButtonRow, this.bottomLeftButtonRow).forEach((e:HTMLElement) => {
                 e.setFlag("disabled",
-                        TheEditor.isDebuggerMode() ||
+                        TheEditor.isDebuggerMode() || inlineEditMode ||
                         ((<any>e).enableForPlaceholder && !disableAdd) ||
                         ((<any>e).disableForPlaceholder && disableAdd) ||
                         this.selectionBlock.immutableReason);
@@ -1101,4 +1101,3 @@ module TDev
         }
     }
 }
-
