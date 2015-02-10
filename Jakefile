@@ -11,13 +11,14 @@ var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
 
-// [execSync] does not seem to work on Windows
+// [execSync] does work inside mintty...
 function findGitHead() {
   var head = fs.readFileSync(".git/HEAD", { encoding: "ascii" });
   var match = head.match(/^ref: (.*)/);
-  var rev = fs.readFileSync(".git/"+match[1], { encoding: "ascii" }).trim();
-  console.log("Git HEAD is", rev);
-  return rev;
+  if (match)
+    return fs.readFileSync(".git/"+match[1], { encoding: "ascii" }).trim();
+  else
+    return head.trim();
 }
 
 var head = findGitHead();
