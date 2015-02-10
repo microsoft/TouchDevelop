@@ -1379,7 +1379,7 @@ module TDev
             TipManager.update();
         }
 
-        private placeSearchContainer() {                
+        private placeSearchContainer() {
             this.searchContainer.removeSelf();
             if (SizeMgr.portraitMode)
                 this.portraitSearchContainer.setChildren([this.searchContainer]);
@@ -5028,15 +5028,9 @@ module TDev
 
             var btn = (icon, t:Ticks, f) => HTML.setTickCallback(Editor.sideDocBtn(icon), t, f)
             var cancelBtn = btn("cancel", Ticks.sideTutorialCancel, () => {
-                            ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"),
-                              lf("leave tutorial"), () => {
-                                    Script.editorState.tutorialId = "";
-                                    this.removeTutorialLibs();
-                                    this.loadIntelliProfile(null);
-                                    this.removeVideo();
-                                    this.resetVideoConstraints();
-                            });
-            });
+                ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"),
+                    lf("leave tutorial"), () => this.leaveTutorial());
+                });
             var docButtons = div("inlineDocsButtons",
                         btn("Star", Ticks.sideTutorialRedisplay, () => {
                             Script.editorState.tutorialRedisplayed = (Script.editorState.tutorialRedisplayed || 0) + 1
@@ -5049,6 +5043,14 @@ module TDev
             elt("editorContainer").appendChild(this.videoContainer);
             this.applyVideoSize();
             this.updateTutorial()
+        }
+
+        public leaveTutorial() {
+            Script.editorState.tutorialId = "";
+            this.removeTutorialLibs();
+            this.loadIntelliProfile(null);
+            this.removeVideo();
+            this.resetVideoConstraints();
         }
 
         public removeVideo()
@@ -5885,7 +5887,7 @@ module TDev
                         break;
                     case "pub":
                         hs = ["hub", "pub", hs[1] ];
-                        break;                        
+                        break;
                     case "print":
                         Promise.join(hs[1].split(/,/).map(EditorHistoryMgr.findOnlineById))
                             .then(HelpTopic.printManyAsync)

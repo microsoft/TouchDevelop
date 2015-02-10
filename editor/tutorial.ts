@@ -828,6 +828,7 @@ module TDev
             if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script)
                 return;
 
+            TheEditor.leaveTutorial();
             World.getInstalledHeaderAsync(Script.localGuid).done((h: Cloud.Header) => {
                 if (h.status == "published") return Promise.as();
 
@@ -927,7 +928,7 @@ module TDev
                     tick(Ticks.hourOfCodeFinal);
                     this.openHocFinish();
                 }) : null,
-                span('hoc-link', lf("keep editing")).withClick(() => {
+                HTML.mkButton(lf("keep editing"), () => {
                     willNowPublish = true;
                     m.dismiss();
                 })
