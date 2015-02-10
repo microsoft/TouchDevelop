@@ -11,6 +11,17 @@ var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
 
+// [execSync] does not seem to work on Windows
+function findGitHead() {
+  var head = fs.readFileSync(".git/HEAD", { encoding: "ascii" });
+  var match = head.match(/^ref: (.*)/);
+  var rev = fs.readFileSync(".git/"+match[1], { encoding: "ascii" }).trim();
+  console.log("Git HEAD is", rev);
+  return rev;
+}
+
+var head = findGitHead();
+
 jake.addListener("start", function () {
   if (!fs.existsSync("build"))
     fs.mkdirSync("build");
@@ -32,6 +43,9 @@ var generated = [
 // - otherwise, the file is just compiled as a single file into the "build/"
 //   directory
 function mkSimpleTask(production, dependencies, target) {
+    var sourceRoot = (process.env.TRAVIS
+      ? "https://github.com/Microsoft/TouchDevelop/raw/"+head+"/"
+      : "/editor/local/");
     var tscCall = [
       "node node_modules/typescript/bin/tsc",
       "--noEmitOnError",
@@ -39,7 +53,7 @@ function mkSimpleTask(production, dependencies, target) {
       "--target ES5",
       "--module commonjs",
       "--sourceMap",
-      "--sourceRoot /editor/local/",
+      "--sourceRoot "+sourceRoot,
       "--declaration", // not always strictly needed, but better be safe than sorry
     ];
     var match = target.match(/(\w+)\/refs.ts/);
@@ -50,8 +64,6 @@ function mkSimpleTask(production, dependencies, target) {
     }
     tscCall.push(target);
     return file(production, dependencies, { async: true, parallelLimit: branchingFactor }, function () {
-      if (process.env.TD_VERBOSE)
-        console.log(tscCall.join(" "));
       var task = this;
       console.log("[B] "+production);
       jake.exec(tscCall.join(" "), { printStdout: true }, function () {
