@@ -14,3 +14,4 @@ cache:
     - node_modules
     - nw_cache
     - build/nw/node_modules
+    - typings
