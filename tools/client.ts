@@ -3509,6 +3509,7 @@ function tdupload(args:string[])
             "build/main.js.map",
             "build/runtime.js",
             "build/browser.js",
+            "build/browser.js.map",
             "build/noderunner.js",
             "www/default.css",
             "www/editor.css",
