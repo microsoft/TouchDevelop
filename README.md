@@ -65,16 +65,16 @@ Install dependencies:
 
 Build:
 
-    export TD_SOURCE_MAPS=1 # optional, will slow down your build significantly
+    export TD_SOURCE_MAPS=1 # optional, will slow down your build
     jake
 
 ## Running
 
 After building, you can run TouchDevelop from a local node server by running:
 
-    jake run
-    # or, if port 80 is already used on your machine
-    jake run[8080]
+    jake local
+
+The local instance can be accessed at `http://localhost:4242/editor/local/`.
 
 ## Tests
 

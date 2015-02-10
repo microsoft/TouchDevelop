@@ -11,7 +11,7 @@ var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
 
-// [execSync] does work inside mintty...
+// [execSync] does not work inside mintty...
 function findGitHead() {
   var head = fs.readFileSync(".git/HEAD", { encoding: "ascii" });
   var match = head.match(/^ref: (.*)/);
