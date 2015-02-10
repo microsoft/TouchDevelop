@@ -397,7 +397,7 @@ module TDev { export module Browser {
                             })
                     }
                     break;
-            }            
+            }
         }
 
         private tileClick(t: HTMLElement, f: () =>void ) {
@@ -1561,8 +1561,8 @@ module TDev { export module Browser {
 
         private exportBtn(lbl:string, f:()=>void, t : Ticks):HTMLElement {
             var elt = div("hubTile hubTileBtn hubTileSize1 hubTileWithLogo tutorialBtn",
-                dirAuto(div("hubTileBtnLabel hubTileBtnLabelSmall", lbl)),
-                div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:shoppingcartalt,white"))
+                dirAuto(div("hubTileBtnLabel hubTileBtnLabelSmall", lbl))
+                /* ,div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:shoppingcartalt,white"))  FIXME: need icons */
                 );
             elt.withClick(() => {
                 tick(t);
@@ -1666,7 +1666,7 @@ module TDev { export module Browser {
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
-            skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white")));
+            /* skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white"))); FIXME: need icons */
 
             skill.className += " exportBtn";
             if (rate) rate.className += " exportBtn";
