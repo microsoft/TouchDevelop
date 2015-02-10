@@ -25,7 +25,7 @@ module TDev.RT.Wab {
         }
 
         export function facebookLike(text: string, url: string, fburl: string): HTMLElement {
-            return div("sdCmtBtn", HTML.mkImg("svg:Share,#aaa"), 'share').withClick(() => {
+            return div("sdCmtBtn", lf("share")).withClick(() => {
                 sendRequestAsync(<ShareRequest>{ action: Action.SHARE, text: nullToUndefined(text), uri: nullToUndefined(url), provider: '' })
                     .done();
             });
@@ -36,7 +36,7 @@ module TDev.RT.Wab {
         export function shareButtons(m:ModalDialog, link: Link, options:ShareManager.ShareOptions)
         {
             return [
-                HTML.mkButton('share', () => {
+                HTML.mkButton(lf("share"), () => {
                     shareSocialAsync("", link.name(), link.address()).done()
                     if (!options.noDismiss) m.dismiss();
                 })
