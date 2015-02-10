@@ -156,9 +156,9 @@ That is, the CSS and HTML files from `www/` as well as the generated `.js` files
 from `build/` all end up in the same directory. That way, `index.html` can refer
 to `main.js` without worrying.
 
-When running locally (via `jake run`), the local node server knows where to find
-the right files to give the illusion that all files are at the root `/` of the
-web server.
+When running locally (via `jake local`), the local node server knows where to find
+the right files to give the illusion that all files are in the `/editor/local/`
+directory of the web server.
 
 ## LICENSE
 
