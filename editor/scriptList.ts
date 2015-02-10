@@ -3789,9 +3789,9 @@ module TDev { export module Browser {
             //function setLikeBtn(s: number, f: () => void ) {
             //    var btn: HTMLElement;
             //    if (s < 0)
-            //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt, #000"), "add")
+            //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart, #000"), "add")
             //    else
-            //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), "remove")
+            //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), "remove")
             //    if (Math.abs(s) < 2) btn.setFlag("working", true);
             //    likeBtn.setChildren([btn.withClick(f)]);
             //}
@@ -3878,9 +3878,9 @@ module TDev { export module Browser {
             function setLikeBtn(s: number, h : string, f: () => void ) {
                 var btn: HTMLElement;
                 if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), h)
                 else
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
             }
@@ -4447,9 +4447,9 @@ module TDev { export module Browser {
             function setLikeBtn(s:number, h:string, f:()=>void) {
                 var btn:HTMLElement;
                 if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), h)
                 else
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
             }
@@ -4818,7 +4818,7 @@ module TDev { export module Browser {
         public needsJsonScript() { return true; }
         public getPreciseCount():number { return !this.script() || !this.script().jsonScript ? -1 : getScriptHeartCount(this.script().jsonScript); }
 
-        public bgIcon() { return "svg:HeartAlt"; }
+        public bgIcon() { return "svg:wholeheart"; }
         public noneText() { return lf("no hearts. you can add one once you install the script!"); }
         public inlineText(c:JsonReview)
         {
@@ -5055,7 +5055,7 @@ module TDev { export module Browser {
         }
         public getId() { return "given-hearts"; }
         public getName() { return lf("given ♥"); }
-        public bgIcon() { return "svg:HeartAlt"; }
+        public bgIcon() { return "svg:wholeheart"; }
         public noneText() { return lf("no hearts awarded by this user"); }
 
         public inlineText(c:JsonReview)
@@ -5380,9 +5380,9 @@ module TDev { export module Browser {
             var setBtn = (state:number, hearts:string, f:()=>void) => {
                 var btn:HTMLElement;
                 if (state < 0)
-                    btn = mkBtn("svg:HeartAlt,white,opacity=0.3", hearts, null, f);
+                    btn = mkBtn("svg:wholeheart,white,opacity=0.3", hearts, null, f);
                 else
-                    btn = mkBtn("svg:HeartAlt,white", hearts, null, f);
+                    btn = mkBtn("svg:wholeheart,white", hearts, null, f);
                 heartButton.setChildren([btn]);
                 btn.setFlag("working", Math.abs(state) < 2);
             }
@@ -8520,9 +8520,9 @@ module TDev { export module Browser {
                 //function setLikeBtn(s: number, f: () => void ) {
                 //    var btn: HTMLElement;
                 //    if (s < 0)
-                //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), "add")
+                //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), "add")
                 //    else
-                //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), "remove")
+                //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), "remove")
                 //    if (Math.abs(s) < 2) btn.setFlag("working", true);
                 //    likeBtn.setChildren([btn.withClick(f)]);
                 //}
@@ -8779,9 +8779,9 @@ module TDev { export module Browser {
                 var btn:HTMLElement;
                 var cntDiv = showCount ? div("sdDocsCount") : null;
                 if (s < 0)
-                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:HeartAlt,#000"), h)
+                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:wholeheart,#000"), h)
                 else
-                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:HeartAlt,#EAC117"), h)
+                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:wholeheart,#EAC117"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
