@@ -2755,7 +2755,7 @@ module TDev { export module Browser {
         {
             if (!big || !this.getPublicationId()) return null;
 
-            return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#aaa,clip=100"), lf("report abuse")).withClick(() => {
+            return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
                 window.open(Cloud.getServiceUrl() + "/user/report/" + this.getPublicationId())
             });
 
@@ -2814,11 +2814,11 @@ module TDev { export module Browser {
             var text = this.twitterMessage();
             var r: HTMLElement;
             if (Cloud.isOffline())
-                r = div("sdReportAbuse", HTML.mkImg("svg:Package,#aaa,clip=100"), 'package').withClick(() => {
+                r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'package').withClick(() => {
                     TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
                 });
             else
-                //r = div("sdCmtBtn", HTML.mkImg("svg:Package,#aaa"), 'share').withClick(() => {});
+                //r = div("sdCmtBtn", HTML.mkImg("svg:Package,#000"), 'share').withClick(() => {});
                 r = TDev.RT.ShareManager.facebookLike(text, url, null);
             return r;
         }
@@ -3782,14 +3782,14 @@ module TDev { export module Browser {
             //}
 
             //if (c.userid == Cloud.getUserId()) {
-            //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#aaa"), "delete").withClick(deleteCmt);
+            //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
             //}
 
             //var likeBtn = div("sdCmtBtnOuter");
             //function setLikeBtn(s: number, f: () => void ) {
             //    var btn: HTMLElement;
             //    if (s < 0)
-            //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#aaa"), "add")
+            //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt, #000"), "add")
             //    else
             //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), "remove")
             //    if (Math.abs(s) < 2) btn.setFlag("working", true);
@@ -3871,14 +3871,14 @@ module TDev { export module Browser {
             }
 
             if (c.userid == Cloud.getUserId()) {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#aaa"), "delete").withClick(deleteCmt);
+                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
             }
 
             var likeBtn = div("sdCmtBtnOuter");
             function setLikeBtn(s: number, h : string, f: () => void ) {
                 var btn: HTMLElement;
                 if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#aaa"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), h)
                 else
                     btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
@@ -4085,7 +4085,7 @@ module TDev { export module Browser {
                         World.handlePostingError(e, "post comment");
                 });
 
-                var cmtBox = div("sdCmtPosting", HTML.mkImg("svg:EmailOpen,#aaa,clip=100"), "posting...");
+                var cmtBox = div("sdCmtPosting", HTML.mkImg("svg:EmailOpen,#000,clip=100"), "posting...");
                 cmtBox.setFlag("working", true);
                 postDiv.className = "";
                 var inner = this.mkCommentPostWidget(reply, id);
@@ -4417,7 +4417,7 @@ module TDev { export module Browser {
                         textDiv.appendChild(trDiv);
                 });
             }
-            translateBtn = div("sdCmtBtn", HTML.mkImg("svg:Recycle,#aaa"), lf("translate")).withClick(translateCmt);
+            translateBtn = div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000"), lf("translate")).withClick(translateCmt);
 
             var delBtn:HTMLElement = null;
             var deleteCmt = () => {
@@ -4438,16 +4438,16 @@ module TDev { export module Browser {
             }
 
             if (c.userid == Cloud.getUserId() || (this.canDeleteAny && this.canDeleteAny())) {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#aaa"), lf("delete")).withClick(deleteCmt);
+                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), lf("delete")).withClick(deleteCmt);
             } else {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#aaa"), lf("abuse")).withClick(reportAbuse);
+                delBtn = div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000"), lf("abuse")).withClick(reportAbuse);
             }
 
             var likeBtn = div("sdCmtBtnOuter");
             function setLikeBtn(s:number, h:string, f:()=>void) {
                 var btn:HTMLElement;
                 if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#aaa"), h)
+                    btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), h)
                 else
                     btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
@@ -5031,7 +5031,7 @@ module TDev { export module Browser {
             if (this.parent.isMe()) {
                 var unsubDiv:HTMLElement;
                 box.firstChild.appendChild(
-                    unsubDiv = <HTMLElement>div("sdReportAbuse", HTML.mkImg("svg:Person,#aaa,clip=100"), lf("unsubscribe")).withClick(() => {
+                    unsubDiv = <HTMLElement>div("sdReportAbuse", HTML.mkImg("svg:Person,#000,clip=100"), lf("unsubscribe")).withClick(() => {
                         unsubDiv.style.opacity = "0.1";
                         Util.httpRequestAsync(Cloud.getPrivateApiUrl(c.id + "/subscriptions"), "DELETE", undefined).then(() => {
                             UserInfo.invalidateSubscriptions(c.id)
@@ -5100,7 +5100,7 @@ module TDev { export module Browser {
                     div(null, ScriptInfo.labeledBox(lf("featuring"), b.getScriptInfoById(c.publicationid).mkSmallBox())),
                     div(null, ScriptInfo.labeledBox(lf("taker"), b.getCreatorInfo(c).mkSmallBox())),
                     buttons = div("sdScreenShotButtons",
-                      div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#aaa"), lf("report abuse")).withClick(reportAbuse)
+                      div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000"), lf("report abuse")).withClick(reportAbuse)
                       )
                     ));
 
@@ -5115,7 +5115,7 @@ module TDev { export module Browser {
                 // delete button if screenshot author
                 if (c.userid === Cloud.getUserId()) {
                     buttons.appendChild(
-                        div("sdCmtBtn", HTML.mkImg("svg:Delete,#aaa"), lf("delete")).withClick(deleteScreenshot)
+                        div("sdCmtBtn", HTML.mkImg("svg:Delete,#000"), lf("delete")).withClick(deleteScreenshot)
                     );
                 }
 
@@ -5865,7 +5865,7 @@ module TDev { export module Browser {
                 var btn;
                 if (hidden) {
                     btn = div("sdReportAbuse",
-                        HTML.mkImg("svg:Unlock,#aaa,clip=100"), lf("unhide")).withClick(() => {
+                        HTML.mkImg("svg:Unlock,#000,clip=100"), lf("unhide")).withClick(() => {
                             if (working) return;
                             btn.setFlag("working", true);
                             Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id), { kind: "script", ishidden: false }).then(r => {
@@ -5883,7 +5883,7 @@ module TDev { export module Browser {
                         });
                 } else {
                     btn = div("sdReportAbuse",
-                        HTML.mkImg("svg:Lock,#aaa,clip=100"), lf("hide")).withClick(() => {
+                        HTML.mkImg("svg:Lock,#000,clip=100"), lf("hide")).withClick(() => {
                             var progressBar = HTML.mkProgressBar();
                             var m = new ModalDialog();
                             m.onDismiss = () => updateHideButton();
@@ -8513,14 +8513,14 @@ module TDev { export module Browser {
                 //}
 
                 //if (u.userid == Cloud.getUserId()) {
-                //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#aaa"), "delete").withClick(deleteCmt);
+                //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
                 //}
 
                 //var likeBtn = div("sdCmtBtnOuter");
                 //function setLikeBtn(s: number, f: () => void ) {
                 //    var btn: HTMLElement;
                 //    if (s < 0)
-                //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#aaa"), "add")
+                //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#000"), "add")
                 //    else
                 //        btn = div("sdCmtBtn", HTML.mkImg("svg:HeartAlt,#a00"), "remove")
                 //    if (Math.abs(s) < 2) btn.setFlag("working", true);
@@ -8779,7 +8779,7 @@ module TDev { export module Browser {
                 var btn:HTMLElement;
                 var cntDiv = showCount ? div("sdDocsCount") : null;
                 if (s < 0)
-                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:HeartAlt,#aaa"), h)
+                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:HeartAlt,#000"), h)
                 else
                     btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:HeartAlt,#EAC117"), h)
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
