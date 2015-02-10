@@ -65,6 +65,7 @@ Install dependencies:
 
 Build:
 
+    export TD_SOURCE_MAPS=1 # optional, will slow down your build significantly
     jake
 
 ## Running

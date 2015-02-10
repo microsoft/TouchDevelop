@@ -3506,6 +3506,7 @@ function tdupload(args:string[])
     if (args.length == 0)
         args = [
             "build/main.js",
+            "build/main.js.map",
             "build/runtime.js",
             "build/browser.js",
             "build/noderunner.js",

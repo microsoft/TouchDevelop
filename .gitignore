@@ -11,11 +11,6 @@ cdn-cache
 shell/work/
 
 # build
-browser.js
-main.js
-mcrunner.js
-noderunner.js
-runtime.js
 shell/npm/bin/touchdevelop.js
 shell/npm/package.json
 results.html

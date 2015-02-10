@@ -2,9 +2,10 @@
   "devDependencies": {
     "jake": "latest",
     "typescript": "latest",
-    "node-webkit-builder":"latest"
+    "node-webkit-builder": "latest"
   },
   "dependencies": {
+    "source-map": "^0.2.0",
     "tsd": "^0.5.7"
   },
   "scripts": {
