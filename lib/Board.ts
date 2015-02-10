@@ -785,7 +785,7 @@ module TDev { export module RT {
 
         //? Create a new text sprite.
         //@ readsMutable [result].writesMutable
-        //@ [width].defl(100) [height].defl(20) [fontSize].defl(40)
+        //@ [width].defl(100) [height].defl(40) [fontSize].defl(20)
         //@ embedsLink("Board", "Sprite")
         public create_text(width:number, height:number, fontSize:number, text:string) : Sprite
         {
