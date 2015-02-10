@@ -1278,19 +1278,21 @@ module TDev
         {
             var tip =
                div('tip tip-tl', div('tipInner',
-                    div('tipTitle', lf("tap here to continue coding")),
-                    div('tipDescr', this.currentCommandArg() || lf("your program is running!"))))
+                    div('tipTitle', lf("tap there to continue coding")),
+                    div('tipDescr', this.currentCommandArg() || "")))
 
-            tip.style.bottom = "2em";
-            tip.style.right = "2em";
+            tip.style.bottom = "calc(50% - 3em)";
+            tip.style.right = "calc(50% - 3em)";
 
             var overlay =
                 div("modalOverlay" /* , tip */)
 
             overlay.withClick(() => {
                 Runtime.theRuntime.stopAsync().done()
-                if (overlay)
+                if (overlay) {
                     overlay.removeSelf()
+                    overlay = null;
+                }
             });
             overlay.style.backgroundColor = "rgba(255, 255, 79, 0.1)";
             overlay.style.cursor = "pointer";
@@ -1301,6 +1303,9 @@ module TDev
                     overlay = null
                 }
             }
+            Util.setTimeout(3000, () => {
+              if (overlay) overlay.appendChild(tip)
+            })
         }
 
         public notify(cmd:string)
@@ -1391,13 +1396,13 @@ module TDev
                 TipManager.scheduleTip({
                     tick: Ticks.wallStop,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || lf("stop the script to continue the tutorial")
+                    description: this.currentCommandArg() || ""
                 })
              else
                 TipManager.scheduleTip({
                     tick: Ticks.wallBack,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || lf("tap (←) to continue the tutorial")
+                    description: this.currentCommandArg() || ""
                 })
         }
 
