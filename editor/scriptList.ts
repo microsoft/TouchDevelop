@@ -3958,7 +3958,6 @@ module TDev { export module Browser {
         }
         static bugUsers = [ "gxfb", "wonm", "ajlk", "bqsl", "ikyp", "pboj", "jeiv", "expza" ]
 
-
         public finalListElt():HTMLElement
         {
             if (!this.isForum() && this.parent instanceof ScriptInfo) {
@@ -4082,10 +4081,10 @@ module TDev { export module Browser {
                     if (e && e.status == 400)
                         ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
                     else
-                        World.handlePostingError(e, "post comment");
+                        World.handlePostingError(e, lf("post comment"));
                 });
 
-                var cmtBox = div("sdCmtPosting", HTML.mkImg("svg:EmailOpen,#000,clip=100"), "posting...");
+                var cmtBox = div("sdCmtPosting", lf("posting..."));
                 cmtBox.setFlag("working", true);
                 postDiv.className = "";
                 var inner = this.mkCommentPostWidget(reply, id);
@@ -4105,7 +4104,7 @@ module TDev { export module Browser {
                 if (!attaching) {
                     attaching = true;
                     tick(Ticks.commentAttach);
-                    Meta.chooseScriptAsync({ header : 'pick a published script to attach', filter : s => !!s.publicId })
+                    Meta.chooseScriptAsync({ header : lf("pick a script to attach"), filter : s => !!s.publicId })
                         .done(s => {
                             attaching = false;
                             if (s) {
@@ -4255,7 +4254,6 @@ module TDev { export module Browser {
                     this.headerRenderer(h);
                 }
             }
-            // invalidate forum to rlease
             TheApiCacheMgr.invalidate(this.getUrl());
             return this._topContainer;
         }
@@ -4277,7 +4275,7 @@ module TDev { export module Browser {
 
         private getNestedComments(elt:HTMLElement, id:string, cont:string)
         {
-            elt.setChildren(["loading replies..."]);
+            elt.setChildren([lf("loading replies...")]);
             var count = this.nestedCommentsCount(cont);
             TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
                 var items = <JsonComment[]>lst.items;
@@ -4365,7 +4363,7 @@ module TDev { export module Browser {
             }
             var textDiv = div('sdSmallerTextBox');
             var cmts = new MdComments();
-            cmts.allowLinks = false;
+            cmts.allowLinks = true;
             cmts.allowImages = false;
             cmts.allowVideos = false;
             var formattedText = cmts.formatText(c.text)
