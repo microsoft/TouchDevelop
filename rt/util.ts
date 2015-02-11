@@ -173,6 +173,32 @@ module TDev{
         getName():string;
     }
 
+    export module HttpLog {
+        export var enabled = false;
+        var theLog = []
+        var startTime = 0
+
+        export function log(req:any) {
+            req.timestamp = Date.now()
+            if (/^[\{\[]/.test(req.contentText)) {
+                req.contentJson = JSON.parse(req.contentText)
+                delete req.contentText
+            }
+            req.method = req.method.toUpperCase()
+            if (Util.startsWith(req.url, Cloud.getServiceUrl())) {
+                req.url = req.url.slice(Cloud.getServiceUrl().length).replace(/.access_token=.*/, "")
+            }
+            if (!startTime) startTime = req.timestamp
+            req.relativeTime = req.timestamp - startTime
+            theLog.push(Util.jsonClone(req))
+        }
+
+        export function show() {
+            theLog.forEach(e => console.log(e))
+            return theLog
+        }
+    }
+
   export module Util {
 
     export var eventLogging = false;
@@ -321,6 +347,15 @@ module TDev{
                         innerError();
                 }
             }
+
+            if (HttpLog.enabled)
+                HttpLog.log({
+                    url: url,
+                    method: method,
+                    contentText: body,
+                    headers: contentType ? [{ name: "Content-Type", value: contentType }] : []
+                })
+
             client = new XMLHttpRequest();
             client.onreadystatechange = ready;
             client.open(method, url);

@@ -261,6 +261,8 @@ module TDev.RT {
                             }
                         }
                     };
+                    if (HttpLog.enabled)
+                        HttpLog.log(request.serializeForProxy())
                     request.prepareAndSend(client);
                 } catch (e) {
                     onCORS();

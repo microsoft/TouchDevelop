@@ -452,6 +452,10 @@ module TDev
             (<any>window).rootUrl = "https://tdscratch.azurewebsites.net"
         }
 
+        if (/httplog=1/.test(document.URL)) {
+            HttpLog.enabled = true;
+        }
+
         var ms = document.getElementById("mainScript");
         if (ms && (<HTMLScriptElement>ms).src) {
             Ticker.mainJsName = (<HTMLScriptElement>ms).src;
