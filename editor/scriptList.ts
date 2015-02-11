@@ -1426,7 +1426,7 @@ module TDev { export module Browser {
             this.show();
             this.topTitle = header;
 
-            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:BulletList,black", header, null, Ticks.editBtnSideSearch, () => {
+            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
                 if (!this.sidePaneVisibleNow()) this.showSidePane();
             })]);
 
