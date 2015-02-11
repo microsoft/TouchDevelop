@@ -1,5 +1,6 @@
 # enforce unix style line endings
 * text eol=lf
+*.sln text eol=crlf
 
 *.png binary
 *.jpg binary

@@ -18,6 +18,9 @@ results.html
 results.json
 build/
 
+# visual studio
+*.suo
+
 # vim
 tags
 *.sw?
