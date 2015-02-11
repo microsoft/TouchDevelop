@@ -400,7 +400,7 @@ task('upload', [], { async : true }, function() {
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
-    var buildVersion = 80000 + parseInt(process.env.TRAVIS_BUILD_NUMBER || -80000);
+    var buildVersion = 80100 + parseInt(process.env.TRAVIS_BUILD_NUMBER || - 80000);
     upload(buildVersion);
   }
 })
