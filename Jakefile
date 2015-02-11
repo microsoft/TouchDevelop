@@ -45,7 +45,7 @@ var noImplicitAny = {
 
 
 // This function tries to be "smart" about the target.
-// - if the target is of the form "build/foobar.ts", the output is bundled with
+// - if the target is of the form "foobar/refs.ts", the output is bundled with
 //   [--out] into "build/foobar.js", and "build/foobar.d.ts" is also generated;
 // - otherwise, the file is just compiled as a single file into the "build/"
 //   directory
@@ -120,8 +120,8 @@ file('build/pkgshell.js', [ 'build/package.js' ], { async: true }, function () {
 // These dependencies have been hand-crafted by reading the various [refs.ts]
 // files. The dependencies inside the same folder are coarse-grained: for
 // instance, anytime something changes in [editor/], [build/editor.d.ts] gets
-// rebuilt. This amounts to assuming that for all [foo/bar.ts], [bar.ts] appears
-// in [build/foo.ts].
+// rebuilt. This amounts to assuming that for all [foo/bar.ts], [bar.ts] is a
+// dependency of [build/foo.js].
 mkSimpleTask('build/browser.d.ts', [
     'browser/browser.ts'
 ], "browser/browser.ts");

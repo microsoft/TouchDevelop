@@ -112,7 +112,7 @@ Find out about other commands directly:
 
 The `client.js` is built by default.
 
-## The various repositories in the tree
+## The various directories in the tree
 
 * `ast`: contains the lexer, parser, type-checker and ast definitions for the
   TouchDevelop language
