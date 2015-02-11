@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A device connected via Bluetooth
-    //@ stem("gadget") icon("Wifi") cap(bluetooth)
+    //@ stem("gadget") icon("chip") cap(bluetooth)
     export class BluetoothDevice
         extends RTValue
     {

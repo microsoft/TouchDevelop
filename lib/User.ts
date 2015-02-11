@@ -2,7 +2,7 @@
 module TDev.RT {
     //? A user account
     //@ ctx(general,indexkey,cloudfield,walltap,json) serializable
-    //@ icon("Person") immutable isData ctx(general) serializable
+    //@ icon("fa-user") immutable isData ctx(general) serializable
     export class User
         extends RTValue {
         private _id: string = undefined;

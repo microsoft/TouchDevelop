@@ -17,6 +17,7 @@ shell/npm/package.json
 results.html
 results.json
 build/
+temp/
 
 # vim
 tags

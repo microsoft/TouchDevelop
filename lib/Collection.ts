@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A collection of objects
-    //@ stem("coll") icon("NumberedList")
+    //@ stem("coll") icon("fa-list-ol")
     //@ enumerable serializable ctx(general,json)
     export class Collection<T>
         extends RTValue

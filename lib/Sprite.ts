@@ -19,7 +19,7 @@ module TDev.RT {
     }
 
     //? A sprite
-    //@ icon("sprite") ctx(general,gckey)
+    //@ icon("fa-rocket") ctx(general,gckey)
     export class Sprite
         extends RTValue
     {

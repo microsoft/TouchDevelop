@@ -132,7 +132,7 @@ module TDev
                 r.appendChild(d);
             }
             if (!isParent && app.isDocsTopic())
-                addBtn(HTML.mkRoundButton("svg:movie,black", lf("preview"), Ticks.sidePreview, () => {
+                addBtn(HTML.mkRoundButton("svg:film,black", lf("preview"), Ticks.sidePreview, () => {
                     var topic = HelpTopic.fromScript(app)
                     var d =
                     elt('leftPaneContent').setChildren([

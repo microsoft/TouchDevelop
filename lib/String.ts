@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A piece of text
-    //@ stem("s") icon("ABC") immutable isData builtin ctx(general,indexkey,cloudfield,walltap,enumerable,json)
+    //@ stem("s") icon("fa-file-text-o") immutable isData builtin ctx(general,indexkey,cloudfield,walltap,enumerable,json)
     export module String_
     {
 
