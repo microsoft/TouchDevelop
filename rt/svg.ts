@@ -225,12 +225,10 @@ export module SVG {
         });
 
         var ic = icons[name.toLowerCase()];
-        if (!ic && scriptIcons.hasOwnProperty(name.toLowerCase())) {
+        if (!ic /* && scriptIcons.hasOwnProperty(name.toLowerCase()) */) {
             Util.log("SCRIPTICON: " + name)
             ic = icons["cancel"]
         }
-        if (!Util.check(ic, "no such icon " + name))
-          ic = icons["cancel"]
 
         var viewPort = viewDiff + " " + viewDiff + " " + (480 - 2*viewDiff) + " " + (h - 2*viewDiff);
 
