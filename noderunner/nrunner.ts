@@ -369,9 +369,8 @@ function renderHelpTopicAsync(ht:TDev.HelpTopic)
     md.showCopy = false;
     md.useExternalLinks = true;
     return ht.renderAsync(md).then((text) => {
-        return "<h1>" + TDev.Util.htmlEscape(ht.json.name) + "</h1>" +
-               (ht.isApiHelp() ? "" : "<p>" + TDev.Util.htmlEscape(ht.json.description) + "</p>") +
-               text;
+        return "<h1>" + TDev.Util.htmlEscape(ht.json.name) + "</h1>"
+               + text;
     })
 }
 

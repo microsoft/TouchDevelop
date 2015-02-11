@@ -10,3 +10,5 @@
 ///<reference path='officemix/refs.ts'/>
 ///<reference path='mc/refs.ts'/>
 ///<reference path='editor/refs.ts'/>
+///<reference path='noderunner/nrunner.ts'/>
+///<reference path='shell/shell.ts'/>
