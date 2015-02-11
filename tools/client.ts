@@ -1613,7 +1613,7 @@ export function download(args:string[])
     });
 }
 
-export function buildtest()
+export function buildtest(args:string[])
 {
     var port = 12000 + Math.floor(Math.random()*10000);
     var now = Date.now();
@@ -1630,7 +1630,7 @@ export function buildtest()
             process.exit(1);
         }
     };
-    setTimeout(() => { test([]); }, 1000);
+    setTimeout(() => { test(args); }, 1000);
 }
 
 function recursiveDir(p:string)
@@ -3550,7 +3550,7 @@ var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
     "test": { f: test, a: "[id...]", h: "download given scripts, store them in cache and run parsing tests; when no ids given run tests for all stored scripts" },
-    "buildtest": { f: buildtest, a: "", h: "run build tests" },
+    "buildtest": { f: buildtest, a: "[id...]", h: "run build tests" },
     "platform": { f: platform, a: "id", h: "compute platform capabilities for a given script" },
     "update": { f: update, a: "[N]", h: "download new interesting scripts from last N days (default 7)" },
     "tags": { f: tags, a: "[N]", h: "download top N (default 50) scripts for every tag" },
