@@ -5173,7 +5173,7 @@ module TDev
             var beta = div("beta-note");
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
-            var copyrights = "<div class='beta-legal'>© 2014 <span class='beta-black'>Microsoft</span></div>" +
+            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>Microsoft</span></div>" +
                              "<div class='beta-legal'><span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
                              ;
 
