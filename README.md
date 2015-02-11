@@ -105,8 +105,6 @@ exposed as Jake targets.
 
     # assumes TD_UPLOAD_KEY and TD_UPLOAD_USER are set, uploads a new test build
     jake upload
-    # update the files in generated/
-    jake update-docs
 
 Find out about other commands directly:
 
