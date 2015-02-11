@@ -44,6 +44,29 @@ var noImplicitAny = {
 };
 
 
+// On Windows, merely changing a file in the directory does *not* change that
+// directory's mtime, meaning that we can't depend on a directory, but rather
+// need to depend on all the files in a directory. [expand] takes a list of
+// dependencies, and for filenames that seem to be directories, performs a
+// manual expansion.
+function expand(dependencies) {
+  var isFolder = function (f) {
+    return f.indexOf(".") < 0 && f.indexOf("/") < 0;
+  };
+  var acc = [];
+  dependencies.forEach(function (f) {
+    if (isFolder(f)) {
+      var l = new jake.FileList();
+      l.include(f+"/*");
+      acc = acc.concat(l.toArray());
+    } else {
+      acc.push(f);
+    }
+  });
+  return acc;
+}
+
+
 // This function tries to be "smart" about the target.
 // - if the target is of the form "foobar/refs.ts", the output is bundled with
 //   [--out] into "build/foobar.js", and "build/foobar.d.ts" is also generated;
@@ -74,7 +97,7 @@ function mkSimpleTask(production, dependencies, target) {
       tscCall.push("--outDir build/");
     }
     tscCall.push(target);
-    return file(production, dependencies, { async: true, parallelLimit: branchingFactor }, function () {
+    return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
       var task = this;
       console.log("[B] "+production);
       jake.exec(tscCall.join(" "), { printStdout: true }, function () {
