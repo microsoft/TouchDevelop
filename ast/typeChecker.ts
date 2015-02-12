@@ -1576,21 +1576,6 @@ module TDev.AST
             return checkArgumentCount;
         }
 
-        private handleCssImport(t: Call) {
-            var checkArgumentCount = this.checkStringLiteralArguments(t);
-            if (!checkArgumentCount) return;
-
-            var propName = t.prop().getName();
-            switch (propName) {
-                case "use css":
-                    if (!checkArgumentCount(2)) return;
-                    var url = t.args[1].getStringLiteral()
-                    if (url && !/^https:\/\//i.test(url))
-                        this.markError(t, "url must start with `https://`");
-                    break;
-            }
-        }
-
         private handleJavascriptImport(t:Call)
         {
             var checkArgumentCount = this.checkStringLiteralArguments(t);
@@ -1851,11 +1836,6 @@ module TDev.AST
             if (prop && prop.parentKind == this.core.App &&
                 /^(javascript|import)/.test(prop.getName())) {
                 this.handleJavascriptImport(t);
-            }
-
-            if (prop && prop.parentKind == this.core.Dom &&
-                /^(use css)$/.test(prop.getName())) {
-                this.handleCssImport(t);
             }
 
             var imports = prop.getImports();

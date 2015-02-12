@@ -401,15 +401,14 @@ module TDev {
             })
         }
 
-        public importCss(url: string) {
-            Util.assert(!!url, "missing url");
+        public importCss(css: string) {
             this.cssSetup = true
-            var fileref = document.createElement("link")
-            fileref.setAttribute("rel", "stylesheet")
-            fileref.setAttribute("type", "text/css")
-            fileref.setAttribute("href", url)
-            fileref.setAttribute("data-td-css", "yes")
-            document.head.appendChild(fileref)
+            if (css) {
+                var fileref = document.createElement("style")
+                fileref.appendChild(document.createTextNode(css));
+                fileref.setAttribute("data-td-css", "yes")
+                document.head.appendChild(fileref)
+            }
         }
 
         public showWall() {

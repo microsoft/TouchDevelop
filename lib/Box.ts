@@ -389,14 +389,14 @@ module TDev { export module RT {
     //? Current html element in the page.
     //@ betaOnly
     export module Dom {
-        //? Use CSS for layout
+        //? Use CSS for layout and import additional CSS stylesheets. Use string art resource to import urls.
         //@ betaOnly
-        export function use_css(stylesheet_url: string, s: IStackFrame): void {
+        export function use_css(stylesheet: string, s: IStackFrame): void {
             s.rt.forceNonRender(lf("cannot change css while displaying page"));
             s.rt.getCurrentPage().csslayout = true;
             s.rt.applyPageAttributes(true);
-            if (stylesheet_url)
-                (<any>s.rt.host).importCss(stylesheet_url)
+            if (stylesheet)
+                (<any>s.rt.host).importCss(stylesheet)
         }
 
         //? Specify the tagname for this element
