@@ -5367,6 +5367,10 @@ module TDev
 
         export function updateShellAsync()
         {
+            return Promise.as();
+
+            // disable this stuff, until it works
+
             if (!Browser.localProxy) return Promise.as()
 
             updateDeploymentKey();
