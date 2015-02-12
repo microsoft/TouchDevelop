@@ -194,7 +194,7 @@ module TDev.AST.Apps {
             compiled.packageResources.forEach(pr => {
                 instructions.files.push({
                     path: options.filePrefix + pr.packageUrl.replace(/^\.\//, ""),
-                    url: pr.url,
+                    url: HTML.proxyResource(pr.url),
                     content: pr.content,
                     kind: pr.kind,
                     type: pr.type,
