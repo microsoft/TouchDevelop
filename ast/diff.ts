@@ -238,7 +238,12 @@ module TDev.AST.Diff {
         {
             var d = new DiffFeatureDetector(opt)
             d.dispatch(n)
-            return d.features
+            var f = d.features
+            Object.keys(f).forEach(k => {
+                if (/^numberLiteral:/.test(k) || /^op:[0-9]/.test(k))
+                    f[k] = f[k] * 0.2
+            })
+            return f
         }
 
         static cmp(a:any, b:any)
