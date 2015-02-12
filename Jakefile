@@ -353,8 +353,10 @@ Object.keys(concatMap).forEach(function (f) {
 });
 
 task('log', [], { async: true }, function () {
-  console.log("[I] dumping the last few commits in build/log");
-  runAndComplete([ "git log -n 100 --oneline > build/log" ], this);
+  if (process.env.TRAVIS) {
+    console.log("[I] dumping the last few commits in build/git-log");
+    runAndComplete([ "git log -n 100 --oneline > build/git-log" ], this);
+  }
 });
 
 // Our targets are the concatenated files, which are the final result of the
