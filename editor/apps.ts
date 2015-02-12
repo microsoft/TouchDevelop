@@ -1501,7 +1501,7 @@ module TDev.AppExport
         function cli(descr: string, command: string, cwd: string = undefined): Promise {
             if (cancelled) return new PromiseInv();
             status(command);
-            return LocalShell.mgmtRequestAsync("runcli", {
+            return LocalShell.mgmtRequestAsync("plugin/shell", {
                 command: command,
                 cwd: cwd
             }).then(resp => {
