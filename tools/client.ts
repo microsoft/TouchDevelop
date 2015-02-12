@@ -2444,7 +2444,7 @@ function dlstats(args:string[])
 
 function printscript(args:string[])
 {
-    args.forEach(a => console.log("\uFEFF" + getScript(a)))
+    args.forEach(a => console.log(getScript(a)))
 }
 
 function byruns(args:string[])
