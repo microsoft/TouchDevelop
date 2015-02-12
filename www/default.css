@@ -1944,3 +1944,8 @@ a.button, a.button:hover, a.button:visited {
   background: transparent;
   width: 100%;
 }
+
+.phone .phone-hidden,
+.portrait .portrait-hidden {
+    display:none;
+}

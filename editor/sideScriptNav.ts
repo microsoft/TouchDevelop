@@ -190,10 +190,6 @@ module TDev
                 addBtn(HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdate, () => {
                     TheEditor.updateScript();
                 }));
-            if (!isParent && TheEditor.widgetEnabled("splitButton") && SizeMgr.canSplitScreen())
-                addBtn(HTML.mkRoundButton("svg:Split,black", lf("split"), Ticks.sideSplit, () => {
-                    TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)
-                }));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
                 addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs, () => {
                     TheEditor.showAppLog(app);

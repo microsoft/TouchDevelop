@@ -8,6 +8,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ts", "ts", "{DEB60A00-BDAC-
 		vsrefs.ts = vsrefs.ts
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "www", "www", "{48FA68B4-F63A-4E84-AE87-36EBA47CBC47}"
+	ProjectSection(SolutionItems) = preProject
+		www\app.manifest = www\app.manifest
+		www\browsers.html = www\browsers.html
+		www\default.css = www\default.css
+		www\editor.css = www\editor.css
+		www\error.html = www\error.html
+		www\favicon.ico = www\favicon.ico
+		www\index.html = www\index.html
+		www\manifest.json = www\manifest.json
+		www\worker.js = www\worker.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
