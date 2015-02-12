@@ -9,6 +9,7 @@ module TDev.AST.Diff {
         tutorialMode?:boolean;
         preciseStrings?:StringMap<boolean>;
         useStableNames?:boolean;
+        tutorialCustomizations?: TutorialCustomizations;
     }
 
     class RandomIdSetter
@@ -877,10 +878,14 @@ module TDev.AST.Diff {
             if (a.nodeType() != b.nodeType()) return 3;
 
             if (opts.approxNameMatching) {
+                var cust = opts.tutorialCustomizations
+
                 var fa = a.getForwardedDecl()
                 var fb = b.getForwardedDecl()
-                if (isArt(fa) && isArt(fb) && fa.getKind() == fb.getKind())
+                if (isArt(fa) && isArt(fb) && fa.getKind() == fb.getKind()) {
+                    cust.artMapping[fb.getName()] = fa.getName()
                     return 0;
+                }
 
                 var pa = a.getProperty()
                 var pb = b.getProperty()
@@ -898,7 +903,12 @@ module TDev.AST.Diff {
                 if (typeof da === "string" && typeof db === "string") {
                     if (opts.preciseStrings && opts.preciseStrings[db])
                         return (da == db) ? 0 : 3;
-                    if ((da == "") == (db == "")) return 0;
+                    if (da == "" && db == "") return 0;
+                    if (da != "" && db != "") {
+                        if (cust)
+                            cust.stringMapping[db] = da
+                        return 0;
+                    }
                 }
             }
             return a.getText() == b.getText() ? 0 : 3;

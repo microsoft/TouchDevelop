@@ -24,6 +24,12 @@ module TDev.AST
         manual?: boolean;
     }
 
+    export interface TutorialCustomizations
+    {
+        stringMapping: StringMap<string>;
+        artMapping: StringMap<string>;
+    }
+
     class SyntacticMethodFinder
         extends NodeVisitor
     {
@@ -580,7 +586,7 @@ module TDev.AST
             return res;
         }
 
-        static reply(orig:App, app:App, steps:Step[])
+        static reply(orig:App, app:App, steps:Step[], customizations:TutorialCustomizations)
         {
             var last:StringMap<Decl> = {}
             steps.forEach(s => {
@@ -603,9 +609,27 @@ module TDev.AST
             newApp.setName(orig.getName())
             newApp.comment = orig.comment
 
-            // TODO we could do a merge here
-
             AST.TypeChecker.tcScript(newApp);
+
+            AST.visitExprHolders(newApp, (stmt, eh) => {
+                eh.tokens = eh.tokens.map(t => {
+                    var sl = t.getStringLiteral()
+                    if (sl && customizations.stringMapping.hasOwnProperty(sl))
+                        return mkLit(customizations.stringMapping[sl])
+                    return t
+                })
+            })
+            newApp.resources().forEach(r => {
+                if (customizations.artMapping.hasOwnProperty(r.getName())) {
+                    var nn = customizations.artMapping[r.getName()]
+                    var other = orig.resources().filter(t => t.getName() == nn)[0]
+                    if (other && other.getKind() == r.getKind()) {
+                        r.setName(nn)
+                        r.url = other.url
+                        r.comment = other.comment
+                    }
+                }
+            })
 
             newApp.hasIds = true;
             new AST.InitIdVisitor(false).dispatch(newApp)

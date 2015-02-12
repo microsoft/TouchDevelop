@@ -145,7 +145,8 @@ module TDev
                 approxNameMatching: true,
                 placeholderOk: true,
                 tutorialMode: true,
-                preciseStrings: this.data.preciseStrings
+                preciseStrings: this.data.preciseStrings,
+                tutorialCustomizations: this.parent.customizations
             })
 
             function lookupLocal(name:string)
@@ -626,6 +627,7 @@ module TDev
         public hasValidators = false;
         public hourOfCode = false;
         private translatedTutorial: TDev.AST.TranslatedTutorialInfo = undefined;
+        public customizations:AST.TutorialCustomizations;
 
         constructor(private app:AST.App, private topic:HelpTopic, firstTime: boolean, private guid:string)
         {
@@ -644,6 +646,8 @@ module TDev
 
             this.showInitialStep = firstTime;
             this.hourOfCode = /#hourOfCode/i.test(this.topic.json.text || "");
+
+            this.resetCustomizations()
 
             var skipActions:StringMap<boolean> = {}
 
@@ -674,6 +678,11 @@ module TDev
                 }
             }
 
+        }
+
+        private resetCustomizations()
+        {
+            this.customizations = { stringMapping: {}, artMapping: {} }
         }
 
         public updateProfile(ip:AST.IntelliProfile)
@@ -1765,7 +1774,7 @@ module TDev
 
         public reply(stepNo:number)
         {
-            var scr = AST.Step.reply(Script, this.app, this.steps.slice(0, stepNo).map(s => s.data))
+            var scr = AST.Step.reply(Script, this.app, this.steps.slice(0, stepNo).map(s => s.data), this.customizations)
             TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, scr, JSON.stringify(Script.editorState)).then(() => {
                 if (this.replyModalDialog) {
                     this.replyModalDialog.dismiss()
