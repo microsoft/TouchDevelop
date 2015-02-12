@@ -7502,7 +7502,7 @@ module TDev { export module Browser {
         }
         public getName() { return lf("scripts"); }
         public getId() { return "scripts"; }
-        public bgIcon() { return "svg:Space"; }
+        public bgIcon() { return "svg:globe"; }
 
         public initTab() {
             var infoDiv = div('sdExpandableText',
