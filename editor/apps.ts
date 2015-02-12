@@ -1324,7 +1324,7 @@ module TDev.AppExport
 
         var cordovaOptions = app.editorState.cordova || TDev.AST.Apps.cordovaDefaultOptions();
         // test if user allowed to export app
-        if (baseScriptId && baseScriptId != "unknown") {
+        if (false && baseScriptId && baseScriptId != "unknown") {
             if (cordovaOptions.canExport === undefined) {
                 ProgressOverlay.lockAndShowAsync(lf("preparing export (one time setup)"))
                     .then(() => Cloud.getPublicApiAsync(baseScriptId + "/canexportapp/" + Cloud.getUserId()))
@@ -1498,10 +1498,10 @@ module TDev.AppExport
             logger.info(cmd);
         }
 
-        function cli(descr: string, command: string, cwd: string = undefined): Promise {
+        function cli(descr: string, command: string, cwd: string = undefined, root = false): Promise {
             if (cancelled) return new PromiseInv();
             status(command);
-            return LocalShell.mgmtRequestAsync("runcli", {
+            return LocalShell.mgmtRequestAsync(root ? "runcli" : "plugin/shell", {
                 command: command,
                 cwd: cwd
             }).then(resp => {
@@ -1577,13 +1577,13 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then(() => AST.Apps.getDeploymentInstructionsAsync(app, options))
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
-            return cli(lf("checking cordova..."), "cordova --version");
+            return cli(lf("checking cordova..."), "cordova --version", undefined, true);
         }).then(resp => resp.code == 0 && /4\.1/.test(resp.stdout) ? Promise.as() :
-                cli(lf("installing cordova..."), "npm install -g cordova"))
+            cli(lf("installing cordova..."), "npm install -g cordova", undefined, true))
         .then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
-            return runNpm ? cli(lf("installing jimp..."), "npm install -g jimp") : Promise.as();
+            return runNpm ? cli(lf("installing jimp..."), "npm install jimp", undefined, true) : Promise.as();
         }).then(() => mkDir(dir, "777"))
         .then(() => cli(lf("creating project"), "cordova create " + dir))
         .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),

@@ -770,9 +770,12 @@ var pluginCmds:StringMap<(ar:ApiRequest)=>void> = {
     },
     readFile:   ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
     readDir:    ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
-    writeFiles: ar => deployAr(ar, false),
+    writeFiles: ar => {
+        ar.data.files.forEach((f: FileEntry) => f.path = dataPath(f.path));
+        deployAr(ar, false);
+    },
     shell:      ar => {
-      ar.data.cwd = path.join(dataDir, ar.data.cwd);
+      ar.data.cwd = dataPath(ar.data.cwd);
       runCommand(ar.data, r => ar.ok(r))
     },
     open:       ar => openUrl(ar.data.url, () => ar.ok({})),
