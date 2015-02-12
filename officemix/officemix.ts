@@ -608,7 +608,7 @@ module TDev {
                 var choices: Labs.Components.IChoice[] = compC.component.choices;
                 for (var it2 in choices) {
                     if (answer[it] == choices[it2].name) {
-                        answerID.push(choices[it2].id);
+                        answerID.push(parseInt(choices[it2].id));
                         break;
                     }
                 }

@@ -197,8 +197,8 @@ mkSimpleTask('build/editor.d.ts', [
     'intellitrain',
     'editor'
 ], "editor/refs.ts");
-mkSimpleTask('build/officemix.d.ts', [
-    'officemix'
+mkSimpleTask('build/officemix.js', [
+    'officemix/officemix.ts'
 ], "officemix/officemix.ts");
 mkSimpleTask('build/jsonapi.d.ts', [], "noderunner/jsonapi.ts");
 mkSimpleTask('build/client.js', [
@@ -247,6 +247,9 @@ mkSimpleTask('build/mc.d.ts', [
 // - files without an extension generate a dependency on the ".d.ts" rule and
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
+    "build/om.js": [
+      "build/officemix.js",
+    ],
     "build/mcrunner.js": [
       "build/rt",
       "build/storage",

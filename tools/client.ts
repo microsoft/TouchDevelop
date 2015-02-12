@@ -2248,7 +2248,7 @@ function dlpubs(args:string[])
                 var b = resp.array[i]
                 if (b.body) {
                     pubs[o.relative_url] = b.body
-                } else if (b.code != 404) { 
+                } else if (b.code != 404) {
                     console.log(o.relative_url + ": " + b.code)
                 }
             })
@@ -3522,6 +3522,8 @@ function tdupload(args:string[])
             "webapp/webapp.html",
             "www/error.html",
             "build/touchdevelop.tgz",
+            "officemix/officemix.html",
+            "build/officemix.js",
         ]
 
     args.forEach(p => {
