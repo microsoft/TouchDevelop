@@ -8,7 +8,8 @@ mobile-friendly editor makes coding fun, even on your phone or tablet!
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
 [![Beta Status](https://www.touchdevelop.com/badges/release/beta)](https://www.touchdevelop.com/app/beta)
-[![Could Status](https://www.touchdevelop.com/badges/release/cloud)](https://www.touchdevelop.com/)
+[![latest Status](https://www.touchdevelop.com/badges/release/latest)](https://www.touchdevelop.com/app/latest)
+[![Cloud Status](https://www.touchdevelop.com/badges/release/cloud)](https://www.touchdevelop.com/)
 
 **This repo contains the source code of the TouchDevelop editor.** If you are
 intending to write TouchDevelop scripts, you probably want to go to
