@@ -1098,7 +1098,6 @@ module TDev
             // ui
             splitButton: 1,
             uploadArtInSearchButton: 1,
-            errorsButton: 1,
             calcApiHelp: 1,
             sideRunButton: 1,
             scriptPropertiesManagement: 1,
@@ -1133,6 +1132,7 @@ module TDev
             // script lifecycle
             updateButton: 1,
             editLibraryButton: 1,
+            errorsButton: 1,
             logsButton: 1,
             deployButton:1,
             // ui
