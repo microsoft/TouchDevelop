@@ -36,7 +36,7 @@ module TDev.RT {
         //? Gets a random picture; invalid if collection is empty
         //@ returns(Picture) picAsync
         public random(r : ResumeCtx) {
-            this.at(Math_.rand(this.count()), r);
+            this.at(Math_.random(this.count()), r);
         }
 
         //? Gets the number of elements in the collection

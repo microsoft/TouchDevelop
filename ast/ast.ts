@@ -20,6 +20,9 @@ module TDev.AST {
     export var blockMode = false;
     export var legacyMode = true;
 
+    export var propRenames:StringMap<string> = {};
+    export var crossKindRenames:StringMap<string> = {};
+
     export function reset()
     {
         currentNodeId = 1;

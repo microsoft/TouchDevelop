@@ -318,6 +318,21 @@ module TDev.AST
             }
 
             expr.clearError();
+
+            expr.tokens.forEach((t, i) => {
+                if (!(t instanceof ThingRef)) return
+                var tt = <ThingRef>t
+                if (tt.forceLocal) return
+                if (!(expr.tokens[i + 1] instanceof PropertyRef)) return
+                var pp = <PropertyRef>expr.tokens[i + 1]
+                var key = tt.data + "->" + pp.data
+                if (AST.crossKindRenames.hasOwnProperty(key)) {
+                    var m = /(.*)->(.*)/.exec(AST.crossKindRenames[key])
+                    tt.data = m[1]
+                    pp.data = m[2]
+                }
+            })
+
             var parsed = ExprParser.parse1(expr.tokens);
             parsed.clearError();
             parsed._kind = null;
@@ -1817,6 +1832,13 @@ module TDev.AST
                     } else if (k0.getName() == "Create" && t.propRef.data == "collection of") {
                         prop = k0.getProperty("Collection of")
                     }
+                }
+
+                if (!prop) {
+                    var pref = k0.getName() + "->"
+                    var autoRenameKey = pref + t.propRef.data
+                    if (AST.propRenames.hasOwnProperty(autoRenameKey))
+                        prop = k0.getProperty(AST.propRenames[autoRenameKey])
                 }
 
                 if (!prop) {

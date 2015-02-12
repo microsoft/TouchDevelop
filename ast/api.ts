@@ -1446,6 +1446,21 @@ module TDev {
             if (!this._imports) this._imports = [];
             this._imports.push({ manager: manager, name: name, version: version });
         }
+        public md_oldName(s:string) {
+            var pref = this.parentKind.getName() + "->"
+            if (/->/.test(s))
+                s = Util.capitalizeFirst(s)
+            else
+                s = pref + s
+            if (Util.startsWith(s, pref))
+                AST.propRenames[s] = this.getName()
+            else {
+                var m = /(.*)->(.*)/.exec(s)
+                var k = api.getKind(m[1])
+                if (!k) this.md_oops("no such kind: " + m[1])
+                AST.crossKindRenames[k.getName().toLowerCase() + "->" + m[2]] = this.parentKind.getName().toLowerCase() + "->" + this.getName()
+            }
+        }
         public getImports() { return this._imports; }
 
         private md_oops(msg:string)

@@ -31,7 +31,7 @@ module TDev.RT {
 
         //? Returns a random integral number bounded between limit and 0, not including limit unless it is 0
         //@ tandre
-        //@ [limit].defl(2)
+        //@ [limit].defl(2) oldName("rand")
         export function random(limit: number): number {
             var max = Math.round(limit);
             if (max == 0) return 0;
@@ -44,11 +44,6 @@ module TDev.RT {
         //? Returns a random floating-point number x: 0 ≤ x < 1
         //@ tandre
         export function random_normalized() : number { return Random.normalized(); }
-
-        //? Renamed to 'random'
-        //@ hidden
-        //@ tandre
-        export function rand(max:number) : number { return random(max); }
 
         //? Renamed to 'random normalized'
         //@ hidden

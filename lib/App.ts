@@ -402,6 +402,7 @@ module TDev.RT {
         export var DEBUG = 7;
 
         //? Appends this message to the debug log.
+        //@ oldName("time->log")
         export function log(message: string): void
         {
             logEvent(INFO, "", message, undefined);
