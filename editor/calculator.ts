@@ -811,6 +811,10 @@ module TDev
                 this.expr.tokens = [];
             this.importTokens()
             this.cursorPosition = this.expr.tokens.length;
+            // Position the cursor right after the colon so that suggestions for
+            // types appear right away.
+            if (s instanceof AST.RecordField || s instanceof AST.ActionParameter)
+                this.cursorPosition = 1;
 
             Ticker.dbg("Calc.edit2");
 
