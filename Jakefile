@@ -197,8 +197,8 @@ mkSimpleTask('build/editor.d.ts', [
     'intellitrain',
     'editor'
 ], "editor/refs.ts");
-mkSimpleTask('build/officemix.js', [
-    'officemix/officemix.ts'
+mkSimpleTask('build/officemix.d.ts', [
+    'officemix'
 ], "officemix/officemix.ts");
 mkSimpleTask('build/jsonapi.d.ts', [], "noderunner/jsonapi.ts");
 mkSimpleTask('build/client.js', [
@@ -247,9 +247,6 @@ mkSimpleTask('build/mc.d.ts', [
 // - files without an extension generate a dependency on the ".d.ts" rule and
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
-    "build/om.js": [
-      "build/officemix.js",
-    ],
     "build/mcrunner.js": [
       "build/rt",
       "build/storage",
@@ -362,7 +359,7 @@ Object.keys(concatMap).forEach(function (f) {
 
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
-task('default', [ 'css-prefixes', 'build/client.js' ].concat(Object.keys(concatMap)), {
+task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts' ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");
