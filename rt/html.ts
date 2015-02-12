@@ -760,7 +760,7 @@ module TDev.HTML {
     {
         var ta = HTML.mkTextArea();
         var pre = document.createElement("pre");
-        var dismiss = showDismiss ? div('close-round-button', HTML.mkImg("svg:cancel,black")).withClick(() => {
+        var dismiss = showDismiss ? div('close-round-button', HTML.mkImg("svg:check,black")).withClick(() => {
           if(r.onDismiss) r.onDismiss();
         }) : null
         var content = span(null, null)

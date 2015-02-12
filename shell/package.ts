@@ -25,7 +25,7 @@ function main() {
 
 
     var ff = fs.readFileSync("build/shell.js", "utf8")
-    ff = ff.replace(/^\uFEFF/, "#!/usr/bin/env node\n")
+    ff = ff.replace(/^/g, "#!/usr/bin/env node\n")
     ff = ff.replace(/\r/g, "")
     ff = ff.replace(/^\s*var isNpm =.*$/m, "var isNpm = true;")
     var npm = "shell/npm/"

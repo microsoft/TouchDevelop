@@ -238,7 +238,12 @@ module TDev.AST.Diff {
         {
             var d = new DiffFeatureDetector(opt)
             d.dispatch(n)
-            return d.features
+            var f = d.features
+            Object.keys(f).forEach(k => {
+                if (/^numberLiteral:/.test(k) || /^op:[0-9]/.test(k))
+                    f[k] = f[k] * 0.2
+            })
+            return f
         }
 
         static cmp(a:any, b:any)
@@ -863,7 +868,8 @@ module TDev.AST.Diff {
                 return 1;
             if (!a) {
                 if (/^[0-9\.]$/.test(b.getText()))
-                    return 1 - (0.1 / (eh1.tokens.indexOf(b) + 2))
+                    // used to be "1 -"; not sure what for --MM
+                    return 1 + (0.1 / (eh1.tokens.indexOf(b) + 2))
                 else
                     return 1 + (0.1 / (eh1.tokens.indexOf(b) + 2))
             }

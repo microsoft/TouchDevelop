@@ -49,7 +49,7 @@ interface IScript
 
 function loadText(filename:string)
 {
-    return fs.readFileSync(filename, "utf8").replace(/^\uFEFF/, "");
+    return fs.readFileSync(filename, "utf8");
 }
 
 function loadJson(filename:string)
@@ -58,7 +58,6 @@ function loadJson(filename:string)
 }
 
 function saveText(filename:string, text:string) {
-    if (text.charAt(0) != '\uFEFF') text = '\uFEFF' + text;
     var s = fs.existsSync(filename) ? fs.statSync(filename) : null;
     if (s && (s.mode & 0x80) == 0) {
         console.log("running tf edit " + filename);

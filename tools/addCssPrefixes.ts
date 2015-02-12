@@ -12,7 +12,7 @@ var path = require('path');
 
 function readFile(filename:string)
 {
-    return fs.readFileSync(filename, "utf8").replace(/^\uFEFF/, "");
+    return fs.readFileSync(filename, "utf8");
 }
 
 function writeFile(filename:string, text:string) {

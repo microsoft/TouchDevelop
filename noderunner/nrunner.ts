@@ -2163,7 +2163,7 @@ export function globalInit()
     } else if (process.argv[2] == "mergetest") {
         mergetest(process.argv.slice(3))
     } else {
-        var text = fs.readFileSync(process.argv[2], "utf8").replace(/^\uFEFF/, "");
+        var text = fs.readFileSync(process.argv[2], "utf8");
         runScriptAsync(text).done((v) => {
             console.log(v)
         })
