@@ -885,6 +885,7 @@ module TDev {
                     if (h.status != "published") return Promise.as();
                     h.status = "published";
                     h.scriptId = id;
+                    h.meta = null // recompute
                     return updateInstalledScriptAsync(h, text, null, true)
                 })
             })
@@ -899,6 +900,7 @@ module TDev {
             hd.scriptVersion.instanceId = Cloud.getWorldId()
             hd.scriptVersion.time = getCurrentTime();
             hd.scriptVersion.version++;
+            hd.meta = null // recompute
             return World.setInstalledScriptAsync(hd, script, state, "")
         }
 

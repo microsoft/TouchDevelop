@@ -6576,6 +6576,7 @@ module TDev { export module Browser {
                                 // don't mess up with version number and instance id - this may conflict with the editor
                                 header.scriptVersion.instanceId = Cloud.getWorldId()
                                 header.scriptVersion.time = World.getCurrentTime();
+                                header.meta = app.toMeta()
                                 savePromise = World.setInstalledScriptAsync(header, app.serialize(), null)
                             }
 
