@@ -2122,10 +2122,13 @@ module TDev
 
             if (snapView) return;
 
+            var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)) : null;
+            if (splitBtn) splitBtn.classList.add("phone-hidden");
             var top = div("topButtons",
                 this.backBtnDiv = div("inlineBlock topMenu-button-container search-back"),
                 this.playBtnDiv = div("inlineBlock topMenu-button-container"),
-                this.widgetEnabled("undoButton") ? Editor.mkTopMenuItem("svg:undo,black", lf("undo"), Ticks.codeUndo, "Ctrl-Z", () => this.topUndo()) : null,
+                this.widgetEnabled("undoButton") ? Editor.mkTopMenuItem("svg:undo,black", lf("undo"), Ticks.codeUndo, "Ctrl-Z",() => this.topUndo()) : null,
+                splitBtn,
                 this.portraitSearchContainer
                 );
             this.updateBackButton();
