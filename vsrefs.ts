@@ -7,7 +7,7 @@
 ///<reference path='libnode/refs.ts'/>
 ///<reference path='libwinrt/refs.ts'/>
 ///<reference path='runner/refs.ts'/>
-///<reference path='officemix/refs.ts'/>
+///<reference path='officemix/officemix.ts'/>
 ///<reference path='mc/refs.ts'/>
 ///<reference path='editor/refs.ts'/>
 ///<reference path='noderunner/nrunner.ts'/>
