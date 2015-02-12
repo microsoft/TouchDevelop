@@ -863,7 +863,8 @@ module TDev.AST.Diff {
                 return 1;
             if (!a) {
                 if (/^[0-9\.]$/.test(b.getText()))
-                    return 1 - (0.1 / (eh1.tokens.indexOf(b) + 2))
+                    // used to be "1 -"; not sure what for --MM
+                    return 1 + (0.1 / (eh1.tokens.indexOf(b) + 2))
                 else
                     return 1 + (0.1 / (eh1.tokens.indexOf(b) + 2))
             }
