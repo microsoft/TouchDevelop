@@ -1735,18 +1735,28 @@ function respawnLoop()
 
     // process.env["TD_AUTO_UPDATE_ENABLED"] = "true"
 
+    var attempts = 0;
+
     function startOne() {
         var startTime = Date.now()
         var child = child_process.fork(process.cwd() + "/tdserver.js", process.argv.slice(2))
         child.on("exit", (code) => {
             debug.log("local folder touchdevelop exit, " + code)
-            if (code === 0)
-                startOne()
+            if (code === 0) {
+                if (++attempts > 10) {
+                    console.error("Too many failures, aborting. Please retry manually.");
+                    process.exit();
+                } else {
+                    console.log("Failure, retrying in 5s...");
+                    setTimeout(startOne, 5000);
+                }
+            }
         })
     }
 
-    if (!fs.existsSync("tdserver.js")) copy()
-    startOne()
+    if (!fs.existsSync("tdserver.js"))
+        copy();
+    startOne();
 }
 
 var _shellSha = ""
