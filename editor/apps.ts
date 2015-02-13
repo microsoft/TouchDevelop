@@ -1505,7 +1505,7 @@ module TDev.AppExport
                 command: command,
                 cwd: cwd
             }).then(resp => {
-                logger.info(lf("{0} exited with {1}", command, resp.code));
+                if (resp.code) logger.info(lf("{0} exited with {1}", command, resp.code));
                 if (resp.stdout) logger.debug(resp.stdout);
                 if (resp.stderr) {
                     if (ignoreErrors) logger.debug(resp.stderr);
@@ -1588,7 +1588,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             jimpInstalled = true;
             return runNpm ? cli(lf("installing jimp..."), "npm install jimp") : Promise.as();
         }).then(() => mkDir(dir, "777"))
-        .then(() => cli(lf("creating project"), "cordova create " + dir))
+        .then(() => cli(lf("creating project"), "cordova create " + dir, undefined, true))
         .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),
             platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir, true)))
         .then(() => Promise.sequentialMap(instructions.cordova.plugins,
@@ -1657,7 +1657,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             var xml = configXml.join("\n");
             return writeFiles([{ path: dir + "/config.xml", content: xml}]);
         })
-        .then(() => Promise.sequentialMap(instructions.cordova.runs, run => cli(lf("building and launching apps"), "cordova run " + run, dir)))
+        .then(() => Promise.sequentialMap(instructions.cordova.runs, run => cli(lf("building and launching apps"), "cordova run " + run, dir, true)))
         .then(() => {
             status(lf("Hooray! build completed!"));
         }, e => {
