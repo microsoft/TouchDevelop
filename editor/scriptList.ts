@@ -7629,22 +7629,6 @@ module TDev { export module Browser {
                     })
                     .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
                     .done(() => done());
-                }),
-                HTML.mkButton(lf("create new script"), () => {
-                    start();
-                    Browser.TheHub.chooseScriptFromTemplateAsync()
-                        .done(template => {
-                            if (template) {
-                                HTML.showProgressNotification(lf("creating script..."), true);
-                                var headerGuid, scriptText;
-                                TheEditor.newScriptAsync(template.source, template.name)
-                                    .then(header => World.getInstalledScriptAsync(headerGuid = header.guid))
-                                    .then(text => { scriptText = text; return World.syncAsync(); })
-                                    .then(() => TDev.Collab.startCollaborationAsync(headerGuid, scriptText, this.parent.publicId))
-                                    .then(() => World.syncAsync())
-                                    .done(() => done());
-                            }
-                        });
                 })
             ]);
         }
