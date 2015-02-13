@@ -39,66 +39,8 @@ var afterParse = () => {};
 var numErrors = 0;
 var reqNo = 0
 
-
-
-var maxSock = 15
-
-var Agent = require('http').Agent
-  , AgentSSL = require('https').Agent
-
-function buildAgent(self) {
-  self.removeAllListeners('free')
-  self.on('free', function(socket, host, port) {
-    var name = host + ':' + port
-    if (self.requests[name] && self.requests[name].length) {
-      self.requests[name].shift().onSocket(socket)
-    } else {
-      // if an error happens while we don't use the socket anyway, meh, throw the socket away
-      var onIdleError = function() {
-        socket.destroy()
-      }
-      socket._onIdleError = onIdleError
-      socket.on('error', onIdleError)
-    }
-  })
-
-  self.addRequestNoreuse = self.addRequest
-  self.addRequest = function(req, host, port) {
-    var name = host + ':' + port
-    var socks = this.sockets[name]
-    if (socks) {
-      for (var i = 0; i < socks.length; ++i) {
-        var idleSocket = socks[i]
-        if (idleSocket._onIdleError) {
-          idleSocket.removeListener('error', idleSocket._onIdleError)
-          delete idleSocket._onIdleError
-          req._reusedSocket = true
-          req.onSocket(idleSocket)
-          return
-         }
-       }
-    }
-
-    this.addRequestNoreuse(req, host, port)
-  }
-}
-
-function ReuseAgent(options) {
-  Agent.call(this, options)
-  buildAgent(this)
-}
-util.inherits(ReuseAgent, Agent)
-
-function ReuseAgentSSL(options) {
-  AgentSSL.call(this, options)
-  buildAgent(this)
-}
-util.inherits(ReuseAgentSSL, AgentSSL)
-
-http.globalAgent = new ReuseAgent({ maxSockets: maxSock });
-https.globalAgent = new ReuseAgentSSL({ maxSockets: maxSock });
-
-
+http.globalAgent.maxSockets = 15;
+https.globalAgent.maxSockets = 15;
 
 function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
 {
@@ -3514,6 +3456,7 @@ function tdupload(args:string[])
             "build/browser.js",
             "build/browser.js.map",
             "build/noderunner.js",
+            "build/git-log",
             "www/default.css",
             "www/editor.css",
             "www/index.html",
