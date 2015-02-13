@@ -175,7 +175,7 @@ module TDev.RT {
         //@ robust
         export function last_index_of(self:string, value:string, start:number) : number { return self.lastIndexOf(value, start); }
 
-        //? Gets the groups from the matching the regex expression (pattern)
+        //? Gets the groups from the matching the regex expression (pattern). Returns an empty collection if no matches.
         export function match(self: string, pattern: string): Collection<string>
         {
             try {
