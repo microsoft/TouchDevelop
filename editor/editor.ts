@@ -5148,8 +5148,8 @@ module TDev
             m.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("latest changes"), () => {
                     HTML.showProgressNotification(lf("downloading change log..."))
-                    Util.httpGetTextAsync((<any>window).mainJsName.replace(/main.js$/, "gitlog.txt"))
-                        .then(t => ModalDialog.showText(t))
+                    Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
+                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/compare/" + t.commitRange))
                         .done()
                 }),
                 HTML.mkButton(lf("forum"), () => {

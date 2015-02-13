@@ -352,10 +352,13 @@ Object.keys(concatMap).forEach(function (f) {
     });
 });
 
-task('log', [], { async: true }, function () {
-  if (process.env.TRAVIS) {
-    console.log("[I] dumping the last few commits in build/gitlog.txt");
-    runAndComplete([ "git log -n 100 --pretty='format:%H%x20%ci%x20%cN%n%w(90,4,4)%s%n%w(90,4,4)%b' > build/gitlog.txt" ], this);
+task('log', [], { async: false }, function () {
+  if (process.env.TRAVIS_COMMIT_RANGE) {
+    console.log("[I] dumping commit info to build/buildinfo.json");
+    fs.writeFileSync('build/buildinfo.json', JSON.stringify({
+      commit: process.env.TRAVIS_COMMIT,
+      commitRange: process.env.TRAVIS_COMMIT_RANGE
+    }));
   }
 });
 

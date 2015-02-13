@@ -3456,7 +3456,7 @@ function tdupload(args:string[])
             "build/browser.js",
             "build/browser.js.map",
             "build/noderunner.js",
-            "build/gitlog.txt",
+            "build/buildinfo.json",
             "www/default.css",
             "www/editor.css",
             "www/index.html",
