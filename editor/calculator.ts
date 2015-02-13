@@ -4143,6 +4143,14 @@ module TDev
             // if (ins.delToken) pos++;
             var setF = TipManager.scheduleTip;
 
+            if (pos > this.cursorPosition &&
+                ins.addToken &&
+                ins.addToken.getOperator() &&
+                this.expr.tokens.slice(this.cursorPosition, pos).every(t => t.getOperator() == ins.addToken.getOperator()))
+            {
+                pos = this.cursorPosition
+            }
+
             var inKeypad = (n:number) =>
             {
                 if (SizeMgr.portraitMode) {
