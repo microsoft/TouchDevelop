@@ -1333,7 +1333,7 @@ module TDev { export module Browser {
             Util.httpGetJsonAsync(Cloud.getPrivateApiUrl("me/settings")).done((settings) => {
                 Browser.setInnerHTML(dialogBody, "")
 
-                var nickname, website, twitterhandle, location, area, aboutme, realname, gender, yearofbirth,
+                var nickname, website, twitterhandle, githubuser, location, area, aboutme, realname, gender, yearofbirth,
                     culture, howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
                     school;
 
@@ -1349,6 +1349,9 @@ module TDev { export module Browser {
 
                     twitterhandle = <HTMLInputElement>textEntry(lf("twitter handle"), HTML.mkTextInput("text", lf("twitter handle")),
                         lf("Your twitter handle, like @touchdevelop."));
+
+                    githubuser = <HTMLInputElement>textEntry(lf("github user"), HTML.mkTextInput("text", lf("github user")),
+                        lf("Your GitHub user."));
 
                     location = <HTMLInputElement>textEntry(lf("location"), HTML.mkTextInput("text", lf("location")),
                         lf("Where in the world are you?"))
@@ -1490,6 +1493,7 @@ module TDev { export module Browser {
                                     email: email === undefined ? undefined : email.value,
                                     location: location === undefined ? undefined : location.value,
                                     twitterhandle: twitterhandle === undefined ? undefined : twitterhandle.value,
+                                    githubuser: githubuser === undefined ? undefined : githubuser.value,
                                     school: school ? school.value : undefined,
                                 }).done(resp => {
                                     progressBar.stop();
@@ -1526,6 +1530,7 @@ module TDev { export module Browser {
                 if (area) { area.textarea.value = settings.aboutme || ""; area.update() }
                 if (realname) realname.value = settings.realname || "";
                 if (twitterhandle) twitterhandle.value = settings.twitterhandle || "";
+                if (githubuser) githubuser.value = settings.githubuser || "";
                 if (email) email.value = settings.email || "";
                 if (school) school.value = settings.school || "";
 

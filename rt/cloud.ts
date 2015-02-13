@@ -412,6 +412,7 @@ module TDev {
         email?: string;
         location?: string;
         twitterhandle?: string;
+        githubuser?: string;
         editorMode?: string;
         school?: string;
         wallpaper?: string;
