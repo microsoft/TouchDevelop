@@ -21,9 +21,11 @@ If you want to always run the latest build,
 * **latest:** https://www.touchdevelop.com/app/latest
 
 The make sure which version you're running, tap the small
-copyright/legal/version bar in the bottom right, and then the `latest changes`
+copyright/legal/version bar in the bottom right, and then the **latest changes**
 button. This will give you the changes that went into your current version, and
-in particular if the fix for your submitted issue is in.
+in particular if the fix for your submitted issue is in.  If the expected
+change is not there, try reloading the page. Keep in mind that the build
+process takes a few minutes.
 
 Other pages of interest:
 * landing page: [https://www.touchdevelop.com](https://www.touchdevelop.com)
