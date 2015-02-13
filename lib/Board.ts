@@ -421,6 +421,12 @@ module TDev { export module RT {
         //? add an action that fires for every display frame.
         //@ ignoreReturnValue
         public add_on_every_frame(perform: Action, s: IStackFrame): EventBinding {
+            return this.on_every_frame(perform, s);
+        }
+
+        //? add an action that fires for every display frame.
+        //@ ignoreReturnValue
+        public on_every_frame(perform: Action, s: IStackFrame): EventBinding {
             return this.frame_timer(s).on_trigger(perform);
         }
 
@@ -626,7 +632,7 @@ module TDev { export module RT {
                 bot.entryAddr = prev
                 return bot
             };
-            this.add_on_every_frame(handler, s);
+            this.on_every_frame(handler, s);
         }
 
         //? Make updates visible.
