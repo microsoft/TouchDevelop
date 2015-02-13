@@ -3172,7 +3172,7 @@ module TDev
                 if (op instanceof AST.Literal || op instanceof AST.Operator) {
                     this.tokenEdit(op);
                 } else if (op instanceof AST.ThingRef) {
-                    if (this.cursorPosition == 1 && (<AST.ThingRef> op).def instanceof AST.LocalDef) {
+                    if (this.expr.tokens.slice(0, this.cursorPosition).every(t => t.getOperator() == "," || !!t.getLocalDef())) {
                         this.intelliAssign();
                     }
                     this.tokenEdit(op);
