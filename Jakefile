@@ -11,17 +11,12 @@ var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
 
-// [execSync] does not work inside mintty...
-function findGitHead() {
-  var head = fs.readFileSync(".git/HEAD", { encoding: "ascii" });
-  var match = head.match(/^ref: (.*)/);
-  if (match)
-    return fs.readFileSync(".git/"+match[1], { encoding: "ascii" }).trim();
-  else
-    return head.trim();
+var head;
+function getGitHead() {
+  if (!head)
+    head = child_process.execSync("git rev-parse HEAD");
+  return head;
 }
-
-var head = findGitHead();
 
 jake.addListener("start", function () {
   if (!fs.existsSync("build"))
@@ -74,7 +69,7 @@ function expand(dependencies) {
 //   directory
 function mkSimpleTask(production, dependencies, target) {
     var sourceRoot = (process.env.TRAVIS
-      ? "https://github.com/Microsoft/TouchDevelop/raw/"+head+"/"
+      ? "https://github.com/Microsoft/TouchDevelop/raw/"+getGitHead()+"/"
       : "/editor/local/");
     var tscCall = [
       "node node_modules/typescript/bin/tsc",
@@ -357,9 +352,16 @@ Object.keys(concatMap).forEach(function (f) {
     });
 });
 
+task('log', [], { async: true }, function () {
+  if (process.env.TRAVIS) {
+    console.log("[I] dumping the last few commits in build/git-log");
+    runAndComplete([ "git log -n 100 --oneline > build/git-log" ], this);
+  }
+});
+
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
-task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts' ].concat(Object.keys(concatMap)), {
+task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts', 'log' ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");
