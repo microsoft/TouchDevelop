@@ -1324,7 +1324,7 @@ module TDev.AppExport
 
         var cordovaOptions = app.editorState.cordova || TDev.AST.Apps.cordovaDefaultOptions();
         // test if user allowed to export app
-        if (false && baseScriptId && baseScriptId != "unknown") {
+        if (baseScriptId && baseScriptId != "unknown") {
             if (cordovaOptions.canExport === undefined) {
                 ProgressOverlay.lockAndShowAsync(lf("preparing export (one time setup)"))
                     .then(() => Cloud.getPublicApiAsync(baseScriptId + "/canexportapp/" + Cloud.getUserId()))
