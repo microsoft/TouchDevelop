@@ -1498,16 +1498,19 @@ module TDev.AppExport
             logger.info(cmd);
         }
 
-        function cli(descr: string, command: string, cwd: string = undefined, root = false): Promise {
+        function cli(descr: string, command: string, cwd: string = undefined, ignoreErrors = false): Promise {
             if (cancelled) return new PromiseInv();
             status(command);
-            return LocalShell.mgmtRequestAsync(root ? "runcli" : "plugin/shell", {
+            return LocalShell.mgmtRequestAsync(cwd ? "plugin/shell" : "runcli", {
                 command: command,
                 cwd: cwd
             }).then(resp => {
                 logger.info(lf("{0} exited with {1}", command, resp.code));
                 if (resp.stdout) logger.debug(resp.stdout);
-                if (resp.stderr) logger.error(resp.stderr);
+                if (resp.stderr) {
+                    if (ignoreErrors) logger.debug(resp.stderr);
+                    else logger.error(resp.stderr);
+                }
                 return resp;
             });
         }
@@ -1578,16 +1581,16 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
             return cli(lf("checking cordova..."), "cordova --version", undefined, true);
-        }).then(resp => resp.code == 0 && /4\.1/.test(resp.stdout) ? Promise.as() :
-            cli(lf("installing cordova..."), "npm install -g cordova", undefined, true))
+        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) ? Promise.as() :
+            cli(lf("installing cordova..."), "npm install -g cordova"))
         .then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
-            return runNpm ? cli(lf("installing jimp..."), "npm install jimp", undefined, true) : Promise.as();
+            return runNpm ? cli(lf("installing jimp..."), "npm install jimp") : Promise.as();
         }).then(() => mkDir(dir, "777"))
         .then(() => cli(lf("creating project"), "cordova create " + dir))
         .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),
-            platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir)))
+            platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir, true)))
         .then(() => Promise.sequentialMap(instructions.cordova.plugins,
             plugin => cli(lf("adding plugins"), "cordova plugin add " + plugin, dir)))
         // first write icon and generate all needed icons
