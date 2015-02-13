@@ -20,6 +20,11 @@ intending to write TouchDevelop scripts, you probably want to go to
 If you want to always run the latest build,
 * **latest:** https://www.touchdevelop.com/app/latest
 
+The make sure which version you're running, tap the small
+copyright/legal/version bar in the bottom right, and then the `latest changes`
+button. This will give you the changes that went into your current version, and
+in particular if the fix for your submitted issue is in.
+
 Other pages of interest:
 * landing page: [https://www.touchdevelop.com](https://www.touchdevelop.com)
 * blog: [https://www.touchdevelop.com/blog](https://www.touchdevelop.com/blog)
