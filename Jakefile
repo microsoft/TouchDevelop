@@ -354,8 +354,8 @@ Object.keys(concatMap).forEach(function (f) {
 
 task('log', [], { async: true }, function () {
   if (process.env.TRAVIS) {
-    console.log("[I] dumping the last few commits in build/git-log");
-    runAndComplete([ "git log -n 100 --oneline > build/git-log" ], this);
+    console.log("[I] dumping the last few commits in build/gitlog.txt");
+    runAndComplete([ "git log -n 100 > build/gitlog.txt" ], this);
   }
 });
 
