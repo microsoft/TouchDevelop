@@ -5146,6 +5146,12 @@ module TDev
             m.add(div("wall-dialog-header", Runtime.appName));
             m.add(div("wall-dialog-body", lf("For feedback and support please use our forum, or just email us!")));
             m.add(div("wall-dialog-buttons",
+                HTML.mkButton(lf("latest changes"), () => {
+                    HTML.showProgressNotification(lf("downloading change log..."))
+                    Util.httpGetTextAsync((<any>window).mainJsName.replace(/main.js$/, "gitlog.txt"))
+                        .then(t => ModalDialog.showText(t))
+                        .done()
+                }),
                 HTML.mkButton(lf("forum"), () => {
                     Browser.Hub.showForum();
                 }),
