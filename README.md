@@ -6,6 +6,8 @@ Android, Windows, Mac, Linux developed with <3 at Microsoft Research. Our
 mobile-friendly editor makes coding fun, even on your phone or tablet!
 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
+[![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
+
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
 [![Beta Status](https://www.touchdevelop.com/badges/release/beta)](https://www.touchdevelop.com/app/beta)
 [![latest Status](https://www.touchdevelop.com/badges/release/latest)](https://www.touchdevelop.com/app/latest)
