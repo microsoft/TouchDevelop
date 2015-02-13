@@ -5149,7 +5149,7 @@ module TDev
                 HTML.mkButton(lf("latest changes"), () => {
                     HTML.showProgressNotification(lf("downloading change log..."))
                     Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
-                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/compare/" + t.commitRange))
+                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
                         .done()
                 }),
                 HTML.mkButton(lf("forum"), () => {
