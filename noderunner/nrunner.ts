@@ -35,7 +35,6 @@ export var jsPath = '@@RELEASED_FILE@@';
 export var relId = 'local';
 export var verbose = false;
 export var slave = false;
-export var sharedText:string = null;
 var reqId = 0;
 var restConfig:RestConfig;
 var needsWebSocket = true;

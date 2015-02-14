@@ -1,8 +1,6 @@
 ///<reference path='refs.ts'/>
 module TDev
 {
-    export var sharedText:string = null;
-
     function initEditorAsync()
     {
         SizeMgr.earlyInit();
