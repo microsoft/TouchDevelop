@@ -8,6 +8,7 @@ module TDev {
     export var isBeta = false;
     export var asyncEnabled = true;
     export var isWebWorker = false;
+    export var noHub = false;
 
     export interface StringMap<T>
     {

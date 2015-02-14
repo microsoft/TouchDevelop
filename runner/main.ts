@@ -1,7 +1,6 @@
 ///<reference path='refs.ts'/>
 
 module TDev {
-    export var sharedText: string = null;
     export var runnerHost : RunnerHost = null;
 
     export class RunnerHost
