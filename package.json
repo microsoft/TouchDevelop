@@ -2,6 +2,7 @@
   "devDependencies": {
     "jake": "latest",
     "typescript": "latest",
+    "nw": "latest",
     "node-webkit-builder": "latest"
   },
   "dependencies": {

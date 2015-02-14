@@ -362,7 +362,7 @@ task('clean', [], function () {
     jake.rmRf('build/');
 });
 
-task('test', [ 'build/client.js', 'default', 'nw' ], { async: true }, function () {
+task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
@@ -408,6 +408,12 @@ task('local', [ 'default' ], { async: true }, function() {
   );
 });
 
+task('nw', ['default', 'nw-npm'], { async: true }, function() {
+  var task = this;
+  task.complete();
+  jake.exec('node node_modules/nw/bin/nw build/nw');
+})
+
 task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
   var task = this;
   jake.exec(
@@ -436,7 +442,7 @@ task('nw-npm', {async : true }, function() {
     );
 })
 
-task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
+task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
   var task = this;
   console.log('[I] building nw packages')
   var nwBuilder = require('node-webkit-builder');

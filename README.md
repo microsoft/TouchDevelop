@@ -88,11 +88,17 @@ Build:
 
 ## Running
 
-After building, you can run TouchDevelop from a local node server by running:
+There's different way to run TouchDevelop:
+
+* from a local node.js server:
 
     jake local
 
 The local instance can be accessed at `http://localhost:4242/editor/local/`.
+
+* packaged as a [nwjs] app:
+
+    jake nw
 
 ## Tests
 
