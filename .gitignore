@@ -7,10 +7,6 @@ typings
 cache
 nw_cache
 
-# shell
-cdn-cache
-shell/work/
-
 # build
 shell/npm/bin/touchdevelop.js
 shell/npm/package.json
