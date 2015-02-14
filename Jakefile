@@ -222,15 +222,6 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
-// XXX same here
-mkSimpleTask('build/mc.d.ts', [
-    'build/browser.d.ts',
-    'rt/typings.d.ts',
-    'build/rt.d.ts',
-    'build/storage.d.ts',
-    'mc'
-], "mc/refs.ts");
-
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
@@ -242,11 +233,6 @@ mkSimpleTask('build/mc.d.ts', [
 // - files without an extension generate a dependency on the ".d.ts" rule and
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
-    "build/mcrunner.js": [
-      "build/rt",
-      "build/storage",
-      "build/mc",
-    ],
     "build/noderunner.js": [
         "build/browser",
         "build/rt",
