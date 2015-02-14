@@ -24,3 +24,6 @@ build/
 # vim
 tags
 *.sw?
+
+# misc stuff
+temp/
