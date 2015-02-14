@@ -2103,7 +2103,7 @@ module TDev
             this.backBtnDiv.setChildren([
                 this.hasModalPane() ?
                     Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
+                    TDev.noHub ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
             ])
         }
 

@@ -927,7 +927,7 @@ module TDev
         {
             TheEditor.dismissSidePane();
 
-            if (Collab.AstSession && a.editorState.groupId) {
+            if (Collab.AstSession && a.editorState.groupId && !TDev.noHub) {
                 var sessionId = Collab.AstSession.servername;
                 var groupId = a.editorState.groupId;
                 var groupInfo = Browser.TheHost.getGroupInfoById(groupId);

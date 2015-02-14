@@ -204,6 +204,7 @@ module TDev
         if (/dbg=[1t]/.test(url) || window.localStorage["dbg"]) dbg = true;
         if (/nodbg/.test(url)) dbg = false;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
+        if (/nohub/.test(url)) TDev.noHub = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
