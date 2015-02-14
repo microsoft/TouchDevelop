@@ -10,6 +10,9 @@ var child_process = require("child_process");
 var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
+var events = require("events");
+
+events.EventEmitter.defaultMaxListeners = 32;
 
 var head;
 function getGitHead() {
