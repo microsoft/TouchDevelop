@@ -248,19 +248,23 @@ module TDev.RT {
             }
 
             try {
-                var value = parseValue();
-                skipWhiteSpace();
-                if (current) {
-                    onerror(lf("illegal json value"));
+                return JsonObject.wrap(JSON.parse(s))
+            } catch (e) {
+                try {
+                    var value = parseValue();
+                    skipWhiteSpace();
+                    if (current) {
+                        onerror(lf("illegal json value"));
+                    }
+                    var js = JsonObject.wrap(value);
+                    return js;
                 }
-                var js = JsonObject.wrap(value);
-                return js;
-            }
-            catch(e)
-            {
-                if (log)
-                    log(lf("error parsing json {0} {1}", s, e.message));
-                return undefined;
+                catch(e)
+                {
+                    if (log)
+                        log(lf("error parsing json {0} {1}", s, e.message));
+                    return undefined;
+                }
             }
         }
 
