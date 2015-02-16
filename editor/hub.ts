@@ -1572,7 +1572,11 @@ module TDev { export module Browser {
             Util.setHash('#topic:exporttoapp');
         }
 
-        private showMisc(container:HTMLElement)
+        private showSimplifiedLearn(container:HTMLElement) {
+            return this.showLearn(container);
+        }
+
+        private showLearn(container:HTMLElement)
         {
             function toTutBtn(btn: HTMLElement) {
                 btn.className += " tutorialBtn";
@@ -1711,15 +1715,16 @@ module TDev { export module Browser {
 
         private updateSections()
         {
+            var isBeginner = (EditorSettings.editorMode() === EditorMode.block);
             var sects = {
                 "recent": lf("my scripts"),
                 "misc": lf("learn"),
-                "top": lf("top & new"),
+                "showcase": lf("showcase"),
             };
-            if (EditorSettings.editorMode() > EditorMode.block) {
+            if (!isBeginner) {
                 var extra = {
+                    "top": lf("top & new"),
                     "social": lf("social"),
-                    "showcase": lf("showcase"),
                     "tags": lf("categories"),
                     //"new": lf("new"),
                     //"art": lf("art"),
@@ -1836,7 +1841,7 @@ module TDev { export module Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    this.showMisc(c)
+                    isBeginner ? this.showSimplifiedLearn(c) : this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {

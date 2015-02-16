@@ -5,13 +5,17 @@ TouchDevelop is a touch-friendly app creation environment for iPad, iPhone,
 Android, Windows, Mac, Linux developed with <3 at Microsoft Research. Our
 mobile-friendly editor makes coding fun, even on your phone or tablet!
 
-[![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
-[![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
 
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
 [![Beta Status](https://www.touchdevelop.com/badges/release/beta)](https://www.touchdevelop.com/app/beta)
 [![latest Status](https://www.touchdevelop.com/badges/release/latest)](https://www.touchdevelop.com/app/latest)
 [![Cloud Status](https://www.touchdevelop.com/badges/release/cloud)](https://www.touchdevelop.com/)
+
+[![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
+
+[![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
+[![devDependency Status](https://david-dm.org/Microsoft/TouchDevelop/dev-status.svg)](https://david-dm.org/Microsoft/TouchDevelop#info=devDependencies)
+
 
 **This repo contains the source code of the TouchDevelop editor.** If you are
 intending to write TouchDevelop scripts, you probably want to go to
