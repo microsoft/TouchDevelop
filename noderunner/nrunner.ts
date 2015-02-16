@@ -1099,8 +1099,8 @@ var apiHandlers = {
                 "sudo apt-get -y update\n" +
                 "wget http://node-arm.herokuapp.com/node_latest_armhf.deb\n" +
                 "sudo dpkg -i node_latest_armhf.deb\n" +
-                "npm install -g https://www.touchdevelop.com/api/language/touchdevelop.tgz\n" +
-                "wget --output $HOME/Icons/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
+                "sudo npm install -g http://aka.ms/touchdevelop.tgz\n" +
+                "wget --output $HOME/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
                 "wget --output $HOME/.local/applications https://www.touchdevelop.com/api/language/touchdevelop.desktop\n" +
                 "wget --output $HOME/Desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
             break;
@@ -1116,7 +1116,7 @@ var apiHandlers = {
                 "GenericName=Microsoft TouchDevelop\n" +
                 "Exec=touchdevelop\n" +
                 "Terminal=true\n" +
-                "Icon[en_US]=$HOME/Icons/TouchDevelop.png\n" +
+                "Icon[en_US]=$HOME/TouchDevelop.png\n" +
                 "Type=Application\n" +
                 "Categories=Programming;Games\n" +
                 "Comment[en_US]=Mod Minecraft Pi using TouchDevelop!", "utf-8");
