@@ -575,24 +575,18 @@ module TDev.RT {
             return undefined
         }
 
-        function askShellAsync(rt:Runtime)
-        {
-            return rt.host.askSourceAccessAsync(lf("execute shell commands or manipulate files"),
-                lf("the shell and/or the file system. This script may be harmful for your computer. Do not allow this if you do not trust the source of this script."), false, true)
-        }
-
         //? Runs a shell command. This action is only available when the script is running from a local web server.
-        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv")
+        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv", "socket")
         //@ cap(shell) returns(JsonObject) async
         export function run_command(cmd: string, data: JsonObject, r: ResumeCtx) {
             var proxyAsync = r.rt.host.localProxyAsync;
-            if (cmd == "socket") Util.userError("invalid cmd")
             if (!proxyAsync) {
                 r.resumeVal(JsonObject.wrap({ error: 'notsupported', reason: lf("This command requires a local proxy.") }));
                 return;
             }
 
-            askShellAsync(r.rt)
+            r.rt.host.askSourceAccessAsync(lf("execute shell commands or manipulate files"),
+                lf("the shell and/or the file system. This script may be harmful for your computer. Do not allow this if you do not trust the source of this script."), false, true)
                 .then((allow :boolean) => {
                     if (!allow) return Promise.as(JsonObject.wrap({ error: 'denied', reason: lf("The user denied access to shell execution.") }));
                     else return proxyAsync(cmd, data ? data.value() : undefined);
@@ -600,32 +594,6 @@ module TDev.RT {
                 .done(res => r.resumeVal(JsonObject.wrap(res)),
                 e => r.resumeVal(JsonObject.wrap({ error: 'proxyerror', message: e.message, stack: e.stack }))
                 )
-        }
-
-        //? Opens a WebSocket to the shell. This action is only available when the script is running from a local web server.
-        //@ betaOnly dbgOnly
-        //@ cap(shell) returns(WebSocket_) async
-        export function open_shell_socket(r: ResumeCtx) {
-            var proxyAsync = r.rt.host.localProxyAsync;
-            if (!proxyAsync) {
-                App.log(lf("This command requires a local proxy."))
-                r.resumeVal(undefined)
-                return;
-            }
-
-            askShellAsync(r.rt)
-                .then((allow :boolean) => {
-                    if (!allow) {
-                        App.log(lf("The user denied access to shell execution."))
-                        return undefined
-                    }
-                    else return proxyAsync("socket", undefined)
-                })
-                .done(res => r.resumeVal(WebSocket_.mk(res, r.rt)),
-                e => {
-                    App.log(e.message)
-                    r.resumeVal(undefined)
-                })
         }
 
         //? Shows a dialog with the logs
