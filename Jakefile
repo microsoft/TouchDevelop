@@ -412,9 +412,7 @@ task('local', [ 'default' ], { async: true }, function() {
 });
 
 task('nw', ['default', 'nw-npm'], { async: true }, function() {
-  var task = this;
-  task.complete();
-  jake.exec('node node_modules/nw/bin/nw build/nw');
+  runAndComplete([ 'node node_modules/nw/bin/nw build/nw' ], this);
 })
 
 task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
