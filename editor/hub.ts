@@ -884,47 +884,6 @@ module TDev { export module Browser {
                 tutorialOffset++;
                 elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
                 scriptSlots = 4 - items.length
-
-
-                /*
-                var sz = items.length == 0 ? 3 : items.length == 1 ? 2 : 1;
-                var showBtn = this.mkFnBtn("", () => {
-                        this.hide();
-                        this.browser().showList("showcase-scripts", null);
-                    }, Ticks.hubMyScriptsShowcase, false, sz)
-                elements.push(showBtn)
-                var screens = div("showcaseScreens")
-                showBtn.appendChildren([screens, div("showcaseLabel", lf("Explore Showcase"))])
-
-                var sz0 = sz;
-                this.browser().getLocationList("showcase-scripts", (items, cont) => {
-                    var cnt = sz0 == 3 ? 12 : sz0 == 2 ? 4 : 3;
-                    Promise.join(items.slice(0, cnt*2).map(s => (<ScriptInfo>s).getRealJsonScriptPromise()))
-                    .done((scripts:JsonScript[]) => {
-                        var urls = scripts.map(s => s.screenshotthumburl).filter(s => !!s).slice(0, cnt)
-                        screens.setChildren(urls.map(s => HTML.mkImg(s)))
-                    })
-                });
-
-                var budget = 4 - items.length;
-                this.getAvailableTemplates().slice(3).forEach(template => {
-                    if (--budget < 0) return;
-                    if (sz > 1) sz--;
-                    var btn = this.mkFnBtn("", () => {
-                        this.createScriptFromTemplate(template)
-                    }, Ticks.hubMyScriptsTemplate, true, sz)
-                    btn.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
-                    btn.className += " hubScriptTemplate";
-                    btn.appendChildren([
-                        div("hubTileTutorialIcon", HTML.mkImg("svg:" + template.icon + ",white")),
-                        div("hubTileTutorialName", template.title,
-                            div("hubTileTutorialSubtitle", lf("tutorial"))
-                        ),
-                        div("hubTileTitleBar", div("hubTileTutorialDesc", template.description)),
-                    ])
-                    elements.push(btn)
-                })
-                */
             }
 
 
@@ -1755,13 +1714,18 @@ module TDev { export module Browser {
             var sects = {
                 "recent": lf("my scripts"),
                 "misc": lf("learn"),
-                "social": lf("social"),
-                "showcase": lf("showcase"),
-                "tags": lf("categories"),
-                //"new": lf("new"),
                 "top": lf("top & new"),
-                //"art": lf("art"),
-                "myart": lf("my art"),
+            };
+            if (EditorSettings.editorMode() != EditorMode.block) {
+                var extra = {
+                    "social": lf("social"),
+                    "showcase": lf("showcase"),
+                    "tags": lf("categories"),
+                    //"new": lf("new"),
+                    //"art": lf("art"),
+                    "myart": lf("my art"),
+                };
+                Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
 
             if (SizeMgr.portraitMode) {
