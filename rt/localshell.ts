@@ -7,6 +7,7 @@ module TDev {
         export function localProxyHandler() {
             return function (cmd, data) {
                 if (cmd == "shell") return LocalShell.runShellAsync(data)
+                else if (cmd == "socket") return LocalShell.shellSocketAsync()
                 else return LocalShell.mgmtRequestAsync("plugin/" + cmd, data)
             };
         }
@@ -54,6 +55,25 @@ module TDev {
             Util.log("shell mgmtRequest " + path)
             if (!data) return Util.httpGetJsonAsync(mgmtUrl(path))
             else return Util.httpPostRealJsonAsync(mgmtUrl(path), data)
+        }
+
+        export function shellSocketAsync(): Promise
+        {
+            var wsurl = mgmtUrl("").replace(/^http/, "ws");
+            Util.log('shell socket: {0}', wsurl);
+            var ws = new WebSocket(wsurl);
+            var r = new PromiseInv()
+
+            ws.onopen = () => {
+                ws.onopen = null
+                ws.onerror = null
+                r.success(ws)
+            }
+            ws.onerror = e => {
+                r.error(ws)
+            }
+
+            return r
         }
 
         var lastShell: WebSocket = undefined;

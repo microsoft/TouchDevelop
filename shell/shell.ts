@@ -11,6 +11,7 @@ import crypto = require('crypto');
 import child_process = require('child_process');
 import os = require('os');
 import events = require('events');
+import net = require("net");
 
 var config:any;
 var currentReqNo = 0;
@@ -662,10 +663,8 @@ var socketCmds:StringMap<(ws, data)=>void> = {
         data.cwd = dataPath(data.cwd); // map to userhome if needed
         var proc = createProcess(data)
 
-        if (ws.currProc) {
-            debug.log('killing process ' + ws.currProc.pid);
-            ws.currProc.kill("SIGKILL")
-        }
+        socketCmds['kill'](ws, data)
+
         ws.currProc = proc
         debug.log('process ' + ws.currProc.pid);
 
@@ -708,10 +707,40 @@ var socketCmds:StringMap<(ws, data)=>void> = {
             ws.currProc.kill("SIGKILL")
             ws.currProc = null
         }
+
+        if (ws.currSock) {
+            debug.log('closing socket')
+            ws.currSock.destroy()
+            ws.currSock = null
+        }
     },
 
     log: (ws, data) => {
         logListeners.push(ws)
+    },
+
+    connect: (ws, data) => {
+        socketCmds['kill'](ws, data)
+        ws.currSock = net.connect(data.options, () => {
+            ws.currSock.setEncoding("utf8")
+            ws.sendJson({ op: "connected" })
+        })
+
+        ws.currSock.on("data", data => {
+            ws.sendJson({ op: "recv", data: data })
+        })
+
+        ws.currSock.on("error", err => {
+            ws.currSock = null
+            ws.sendError(err)
+        })
+    },
+
+    send: (ws, data) => {
+        if (!ws.currSock)
+            ws.sendError("no socket open")
+        else
+            ws.currSock.write(data.data, "utf8")
     },
 }
 

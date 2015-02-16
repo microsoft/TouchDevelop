@@ -559,7 +559,8 @@ module TDev.RT {
                 ws.onopen = null;
                 r.resumeVal(WebSocket_.mk(ws, r.rt))
             }
-            ws.onerror = () => {
+            ws.onerror = err => {
+                App.log("Error opening WebSocket to " + url + ": " + err.message)
                 r.resumeVal(undefined)
             }
         }
