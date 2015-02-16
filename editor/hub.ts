@@ -1716,7 +1716,7 @@ module TDev { export module Browser {
                 "misc": lf("learn"),
                 "top": lf("top & new"),
             };
-            if (EditorSettings.editorMode() != EditorMode.block) {
+            if (EditorSettings.editorMode() > EditorMode.block) {
                 var extra = {
                     "social": lf("social"),
                     "showcase": lf("showcase"),

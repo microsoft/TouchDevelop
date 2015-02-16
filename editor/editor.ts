@@ -5708,7 +5708,7 @@ module TDev
             mode = mode.trim().toLowerCase();
             if (mode === BLOCK_MODE) return EditorMode.block;
             else if (mode === CLASSIC_MODE) return EditorMode.classic;
-            else if (mode == PRO_MODE) return EditorMode.pro;
+            else if (mode === PRO_MODE) return EditorMode.pro;
             else return EditorMode.unknown;
         }
 
