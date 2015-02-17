@@ -1410,7 +1410,7 @@ function proxyEditor(cmds:string[], req, resp)
 {
     if (!editorCache) {
         editorCache = {};
-        ["current", "beta"].forEach(v => {
+        ["current", "beta", "latest"].forEach(v => {
             var editorJson = dataPath(v + ".json");
             if (fs.existsSync(editorJson)) {
                 var c = JSON.parse(fs.readFileSync(editorJson, "utf8"))
@@ -1428,7 +1428,7 @@ function proxyEditor(cmds:string[], req, resp)
     if (!rel) rel = "current"
     var localPath = process.env["TD_LOCAL_EDITOR_PATH"]
     if (rel == "local" && !localPath) rel = "nope"
-    if (!/^(current|beta|local|cdn-pub|cdn-thumb|cache|^\d\d\d\d\d\d[\da-z\.-]+)$/.test(rel)) {
+    if (!/^(current|beta|latest|local|cdn-pub|cdn-thumb|cache|^\d\d\d\d\d\d[\da-z\.-]+)$/.test(rel)) {
         resp.writeHead(404, "Not found")
         resp.end("Not found")
         return
@@ -1461,6 +1461,7 @@ function proxyEditor(cmds:string[], req, resp)
 
     if (rel == "current") path += "current"
     else if (rel == "beta") path += "beta"
+    else if (rel == "latest") path += "latest"
     else if (rel == "cache") {
         url = decodeURIComponent(file)
         url = url.replace(/[?&]access_token=.*/, "")
@@ -1517,7 +1518,7 @@ function proxyEditor(cmds:string[], req, resp)
             return;
     }
 
-    if ((rel == "current" || rel == "beta") && file == "manifest")
+    if ((rel == "current" || rel == "beta" || rel == "latest") && file == "manifest")
         cacheEditor(rel, url)
 
     var serveText = (text) => {
@@ -1813,7 +1814,8 @@ function main()
     var args = process.argv.slice(2)
     var scriptId = ""
     var internet = inAzure ? true : false
-    var useBeta = false
+    var useBeta = false;
+    var useLatest = false;
     var cli = false;
     var useHome = false;
 
@@ -1827,6 +1829,7 @@ function main()
         console.error("  --port NUMBER     -- port to listen to (-p)")
         console.error("  --scriptid ID     -- fetch newest version of /ID and run it (-s)")
         console.error("  --cli             -- don't start the browser")
+        console.error("  --latest          -- use latest (potentially unstable) TouchDevelop version")
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  NAME=VALUE        -- set environment variable for the script")
@@ -1867,6 +1870,9 @@ function main()
                 args.shift()
                 useBeta = true;
                 break
+            case "--latest":
+                args.shift()
+                useLatest = true;
             case "--internet":
                 args.shift()
                 internet = true
@@ -1924,6 +1930,7 @@ function main()
     if (process.env['TD_ALLOW_EDITOR']) {
         startUrl = "http://localhost:" + port + "/editor/"
         if (process.env["TD_LOCAL_EDITOR_PATH"]) startUrl += "local";
+        else if (useLatest) startUrl += "latest";
         else if (useBeta) startUrl += "beta"
         startUrl += "#td_deployment_key=" + config.deploymentKey
         info.log("Editor URL: " + startUrl);
