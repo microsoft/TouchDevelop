@@ -1247,7 +1247,7 @@ module TDev {
     export class HelpTopic
     {
         private searchCache:string;
-        private app:AST.App;
+        public app:AST.App;
         private apiKind:Kind;
         private apiProperty:IProperty;
         private subTopics:StringMap<HelpTopic>;

@@ -20,6 +20,15 @@ module TDev { export module Browser {
         requiresLogin?: boolean;
     }
 
+    interface ITutorial {
+        title: string;
+        // Represents the progress of the script corresponding to that tutorial
+        header?: Cloud.Header;
+        // The tutorial per se (the terminology in the source code refers to
+        // "topic")
+        topic: HelpTopic;
+    }
+
     export module EditorSoundManager
     {
         var sounds : any = {};
@@ -601,29 +610,76 @@ module TDev { export module Browser {
             return tileOuter
         }
 
-        public tutorialTile(templateId:string, f:(startFrom:Cloud.Header)=>void):HTMLElement
-        {
+        // From what I understand, finding a tutorial is all but an easy task.
+        // There's a variety of steps involved which I tried to isolate in this
+        // function...
+        // - [headerByTutorialId] is a promise of a map from tutorial id (e.g.
+        //   "t:codingjetpackjumper" to the corresponding [Cloud.Header])
+        // - the result of this promise is considered good for three seconds
+        //   only, and is renewed after that by re-assigning a fresh promise
+        //   into the variable
+        // - the result of a call to [HelpTopic.findById]...  may return a
+        //   null-ish value in case the tutorial is not in the cache; if this is
+        //   the case, we fetch the corresponding tutorial using [TheApiCacheMgr]
+        //   and follow the succession of updates to the tutorial.
+        // - once this is done, we call [finish]
+        // - because we may have found the tutorial we wanted in the process, we
+        //   return a new value for [top]
+        private findTutorial(templateId: string, finish) {
+            var top = HelpTopic.findById("t:" + templateId)
+
             if (!this.headerByTutorialId || Date.now() - this.headerByTutorialIdUpdated > 3000) {
                 this.headerByTutorialId = this.tutorialsByUpdateIdAsync();
                 this.headerByTutorialIdUpdated = Date.now()
             }
 
+            if (top) {
+                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish(res, top));
+            } else {
+                var fetchingId = null
+                var fetchId = id => {
+                    // Is the pointer structure of [updateid]'s expected to
+                    // loop? I assume that we abort in this case?
+                    if (fetchingId == id)
+                        return;
+                    fetchingId = id;
+                    TheApiCacheMgr.getAnd(id, (j:JsonScript) => {
+                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time)
+                            fetchId(j.updateid);
+                        else {
+                            top = HelpTopic.fromJsonScript(j);
+                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish(res, top));
+                        }
+                    })
+                }
+
+                fetchId(templateId);
+            }
+        }
+
+        // Start a tutorial, with an (optional) header that represents progress,
+        // along with an optional function.
+        private startTutorial(top: HelpTopic, header: Cloud.Header = null) {
+            if (header) {
+                this.browser().createInstalled(header).edit();
+            } else {
+                TopicInfo.followTopic(top);
+            }
+        }
+
+        public tutorialTile(templateId:string, f:(startFrom:Cloud.Header)=>void):HTMLElement
+        {
             var tileOuter = div("tutTileOuter")
 
-            var top = HelpTopic.findById("t:" + templateId)
-            var isHelpTopic = !!top;
-
-            var start = (header:Cloud.Header) => {
+            var startTutorial = (top, header: Cloud.Header) => {
                 Util.log("tutorialTile.start: " + templateId)
-                if (f) f(header)
-                if (header) {
-                    this.browser().createInstalled(header).edit()
-                } else {
-                    TopicInfo.followTopic(top)
-                }
+                if (f)
+                    f(header);
+                this.startTutorial(top, header);
             };
 
-            var finish = res => {
+            var finish = (res, top: HelpTopic) => {
+                var isHelpTopic = !!top;
                 var tile = div("tutTile")
                 tileOuter.setChildren([tile])
 
@@ -703,32 +759,14 @@ module TDev { export module Browser {
                             :
                             div("steps", starSpan, ofSteps,
                                             div("label", lf("tutorial progress")))),
-                            div("restart", HTML.mkButton(lf("start over"), () => start(null)))))
+                            div("restart", HTML.mkButton(lf("start over"), () => startTutorial(top, null)))))
                 }
 
-                titleDiv.withClick(() => start(continueHeader))
-                tile.withClick(() => start(continueHeader))
+                titleDiv.withClick(() => startTutorial(top, continueHeader))
+                tile.withClick(() => startTutorial(top, continueHeader))
             };
 
-            if (top) {
-                Promise.join([Promise.as(null), this.headerByTutorialId]).done(finish)
-            } else {
-                var fetchingId = null
-                var fetchId = id => {
-                    if (fetchingId == id) return
-                    fetchingId = id
-                    TheApiCacheMgr.getAnd(id, (j:JsonScript) => {
-                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time)
-                            fetchId(j.updateid)
-                        else {
-                            top = HelpTopic.fromJsonScript(j);
-                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(finish)
-                        }
-                    })
-                }
-
-                fetchId(templateId)
-            }
+            this.findTutorial(templateId, finish);
 
             return tileOuter
         }
@@ -1572,8 +1610,55 @@ module TDev { export module Browser {
             Util.setHash('#topic:exporttoapp');
         }
 
+        // Takes care of the painful, non-trivial task of fetching all the
+        // tutorials. For each tutorial found, we call [k] with it.
+        private fetchAllTutorials(k: (t: ITutorial) => void) {
+            var helpTopic = HelpTopic.findById("tutorials");
+            helpTopic.initAsync().then(() => {
+                // The list of tutorials is represented as an app, with a single
+                // action, whose body is a list of comments...
+                var comments = <AST.Comment[]> helpTopic.app.actions()[0].body.stmts;
+                // Each comment has a special Markdown structure that can be
+                // inspected using regular expressions. Essentially, we match the
+                // syntax {macro:argument} where macro is the string "follow" and
+                // argument is the title of the corresponding tutorial.
+                comments.forEach((c: AST.Comment) => {
+                    // Copied from [help.ts]
+                    var m = c.text.match(/\{(\w+)(:([^{}]*))?\}/);
+                    if (m && m[1] == "follow") {
+                        var id = MdComments.shrink(m[3]);
+                        // Copied from [tutorialTitle], and (hopefully) simplified.
+                        this.findTutorial(id, (res, topic: HelpTopic) => {
+                            var key = topic.updateKey();
+                            var header = res[1][key]; // may be null or undefined
+                            k({
+                                title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
+                                header: header,
+                                topic: topic,
+                            });
+                        });
+                    }
+                });
+            })
+        }
+
         private showSimplifiedLearn(container:HTMLElement) {
-            return this.showLearn(container);
+            var buttons = [];
+            this.fetchAllTutorials((tutorial: ITutorial) => {
+                // We just listen for the first eight tutorials.
+                if (buttons.length > 8)
+                    return;
+
+                buttons.push(this.mkFnBtn(tutorial.title, () => {
+                    this.startTutorial(tutorial.topic, tutorial.header);
+                }));
+                if (buttons.length == 8) {
+                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
+                        Util.setHash('#topic:tutorials');
+                    }));
+                    this.layoutTiles(container, buttons);
+                }
+            });
         }
 
         private showLearn(container:HTMLElement)
@@ -1715,16 +1800,16 @@ module TDev { export module Browser {
 
         private updateSections()
         {
-            var isBeginner = (EditorSettings.editorMode() === EditorMode.block);
+            var isBeginner = (EditorSettings.editorMode() <= EditorMode.block);
             var sects = {
                 "recent": lf("my scripts"),
                 "misc": lf("learn"),
                 "showcase": lf("showcase"),
+                "social": lf("social"),
             };
             if (!isBeginner) {
                 var extra = {
                     "top": lf("top & new"),
-                    "social": lf("social"),
                     "tags": lf("categories"),
                     //"new": lf("new"),
                     //"art": lf("art"),
