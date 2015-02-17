@@ -2123,7 +2123,7 @@ module TDev
             if (snapView) return;
 
             var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)) : null;
-            if (splitBtn) splitBtn.classList.add("phone-hidden");
+            if (splitBtn) splitBtn.className += " portrait-hidden split-visible";
             var top = div("topButtons",
                 this.backBtnDiv = div("inlineBlock topMenu-button-container search-back"),
                 this.playBtnDiv = div("inlineBlock topMenu-button-container"),

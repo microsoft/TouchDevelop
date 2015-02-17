@@ -1949,3 +1949,7 @@ a.button, a.button:hover, a.button:visited {
 .portrait .portrait-hidden {
     display:none;
 }
+
+.split .split-visible {
+  display: inline-block;
+}
