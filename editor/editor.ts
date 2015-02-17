@@ -5350,7 +5350,7 @@ module TDev
         public replyTutorial(stepNo:number)
         {
             if (this.stepTutorial)
-                this.stepTutorial.reply(stepNo)
+                this.stepTutorial.replyAsync(stepNo).done();
         }
 
         public canReplyTutorial()

@@ -1568,7 +1568,6 @@ function proxyEditor(cmds:string[], req, resp)
             } else sendCached();
         })
     } else if (rel == "local") {
-        debug.log('serving ' + file + ' from ' + localPath)
         var mime = getMime(file)
         var enc = /^text\//.test(mime) ? "utf8" : null
 

@@ -1151,7 +1151,8 @@ module TDev
 
                     m.add(div('wall-dialog-buttons tutDialogButons',
                         // TODO: mine tutorial locale
-                        /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"), () => { this.replyDialog() }) : null,
+                        /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"),() => { this.replyDialog() }) : null,
+                        this.currentStep > 0 ? HTML.mkButton(lf("previous step"),() => { this.replyAsync(this.currentStep - 1).done(() => { m.dismiss(); }); }) : null,
                         HTML.mkButton(lf("let's do it!"), () => m.dismiss())
                         )
                     );
@@ -1529,7 +1530,7 @@ module TDev
                     this.stepCompleted()
                 } else {
                     this.disableUpdate = true;
-                    this.reply(this.currentStep + 1)
+                    this.replyAsync(this.currentStep + 1).done();
                 }
                 return
             }
@@ -1772,10 +1773,10 @@ module TDev
 
         private replyModalDialog:ModalDialog;
 
-        public reply(stepNo:number)
+        public replyAsync(stepNo:number) : Promise
         {
             var scr = AST.Step.reply(Script, this.app, this.steps.slice(0, stepNo).map(s => s.data), this.customizations)
-            TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, scr, JSON.stringify(Script.editorState)).then(() => {
+            return TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, scr, JSON.stringify(Script.editorState)).then(() => {
                 if (this.replyModalDialog) {
                     this.replyModalDialog.dismiss()
                     this.replyModalDialog = null
@@ -1788,7 +1789,7 @@ module TDev
                 this.fromReply = true;
                 this.update();
                 this.notify("runBack");
-            }).done();
+            });
         }
 
         public replyDialog()
