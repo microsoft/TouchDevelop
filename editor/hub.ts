@@ -1656,9 +1656,10 @@ module TDev { export module Browser {
                 if (buttons.length > 7)
                     return;
 
-                var btn = this.mkFnBtn(tutorial.title, () => {
+                var btn = this.mkFnBtn("", () => {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
+                btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
                 btn.style.backgroundImage = "url("+tutorial.topic.json.screenshot+")";
                 btn.style.backgroundSize = "cover";
                 buttons.push(btn);
