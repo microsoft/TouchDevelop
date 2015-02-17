@@ -4274,6 +4274,7 @@ module TDev
 
                     Calculator.searchTip(elt("apiSearchBox"), <AST.GlobalDef>fw)
                     this.searchApi.prepopulate = fw.getName()
+                    this.searchApi.artKind = fw.getKind();
                     TheEditor.stepTutorial.expectingSearch = 1;
                     return;
                 }
