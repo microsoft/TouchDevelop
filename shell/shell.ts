@@ -1231,6 +1231,7 @@ function loadWsModule(f:()=>void)
         var finish = () => {
             wsModule = require("faye-websocket")
             global.WebSocket = wsModule.Client
+            debug.log("Faye websocket loaded")
             f()
         }
 
@@ -1985,10 +1986,18 @@ function main()
     app.on("upgrade", (req, sock, body) => {
         loadWsModule(() => {
             if (wsModule.isWebSocket(req) &&
-                req.url == "/-tdevmgmt-/" + config.deploymentKey) {
-                mgmtSocket(new wsModule(req, sock, body))
+                req.url.slice(0, 12)  == "/-tdevmgmt-/")
+            {
+                if (req.url.slice(-config.deploymentKey.length) == config.deploymentKey) {
+                    debug.log("starting mgmt socket")
+                    mgmtSocket(new wsModule(req, sock, body))
+                } else {
+                    debug.log("invalid key for socket")
+                    sock.end()
+                }
             }
             else if (wsServer) wsServer.upgradeCallback(req, sock, body)
+            else sock.end()
         })
     })
 

@@ -36,7 +36,8 @@ module TDev
         private runBtn:HTMLElement;
         private toCodeBtn:HTMLElement;
         public visible = false;
-        public prepopulate:string;
+        public prepopulate: string;
+        public artKind: Kind; // restricting to picture or sounds
         private doInsertOnDismissing = false;
 
         private dismissDiv = div("apiDismiss");
@@ -209,6 +210,7 @@ module TDev
 
         public dismissing()
         {
+            this.artKind = null;
             if (this.doInsertOnDismissing) {
                 this.doInsertOnDismissing = false;
                 return super.onEnter();
@@ -569,14 +571,16 @@ module TDev
             this.setChildren([<HTMLElement>div("navMessage", msg)].concat(this.htmlEntries))
         }
 
-        private searchAzureSearchArtAsync(terms: string, itemCount: number, type: string = undefined) {
+        private searchAzureSearchArtAsync(terms: string, itemCount: number, kind: string = undefined) {
             if (!this.autoUpdate.resultsCurrent(terms)) {
                 return Promise.as();
             }
+            if (!kind && this.artKind) kind = this.artKind.getName().toLowerCase();
+
             var uploadPicBtn, uploadSndBtn;
             this.progressBar.start();
 
-            return Meta.searchArtAsync(terms, type, 0).then(arts => {
+            return Meta.searchArtAsync(terms, kind, 0).then(arts => {
                 this.progressBar.stop();
                 if (!this.autoUpdate.resultsCurrent(terms)) {
                     return;
