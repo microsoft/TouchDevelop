@@ -27,6 +27,8 @@ module TDev { export module Browser {
         // The tutorial per se (the terminology in the source code refers to
         // "topic")
         topic: HelpTopic;
+        // The app that contains the tutorial
+        app?: AST.App;
     }
 
     export module EditorSoundManager
@@ -667,6 +669,22 @@ module TDev { export module Browser {
             }
         }
 
+        private findImgForTutorial(app: AST.App) {
+            // XXX it seems that this function is actually unused as [app] is
+            // always null?!!
+            if (!app)
+                return null;
+
+            var findImg = t => app.resources().filter(r =>
+                    r.getKind() == api.core.Picture &&
+                    t.test(r.getName()) &&
+                    /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
+
+            var img = findImg(/screenshot/) || findImg(/background/);
+
+            return img;
+        }
+
         public tutorialTile(templateId:string, f:(startFrom:Cloud.Header)=>void):HTMLElement
         {
             var tileOuter = div("tutTileOuter")
@@ -714,20 +732,8 @@ module TDev { export module Browser {
                 }
 
 
-                var imgUrl = ""
-
-                if (app) {
-                    var findImg = t => app.resources().filter(r =>
-                            r.getKind() == api.core.Picture &&
-                            t.test(r.getName()) &&
-                            /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
-
-                    var img = findImg(/screenshot/) || findImg(/background/);
-                    if (img)
-                        imgUrl = img.url
-                } else {
-                    imgUrl = top.json.screenshot
-                }
+                var img = this.findImgForTutorial(app);
+                var imgUrl = img ? img.url : top.json.screenshot;
 
                 if (imgUrl) {
                     var picDiv = tile
@@ -1635,6 +1641,7 @@ module TDev { export module Browser {
                                 title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
                                 header: header,
                                 topic: topic,
+                                app: res[0],
                             });
                         });
                     }
@@ -1646,16 +1653,20 @@ module TDev { export module Browser {
             var buttons = [];
             this.fetchAllTutorials((tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
-                if (buttons.length > 8)
+                if (buttons.length > 7)
                     return;
 
-                buttons.push(this.mkFnBtn(tutorial.title, () => {
+                var btn = this.mkFnBtn(tutorial.title, () => {
                     this.startTutorial(tutorial.topic, tutorial.header);
-                }));
-                if (buttons.length == 8) {
-                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
+                }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
+                btn.style.backgroundImage = "url("+tutorial.topic.json.screenshot+")";
+                btn.style.backgroundSize = "cover";
+                buttons.push(btn);
+
+                if (buttons.length == 7) {
+                    buttons.push(this.mkFnBtn(lf("all tutorials"), () => {
                         Util.setHash('#topic:tutorials');
-                    }));
+                    }, Ticks.noEvent, false, 1));
                     this.layoutTiles(container, buttons);
                 }
             });
