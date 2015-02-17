@@ -401,7 +401,7 @@ task('upload', [], { async : true }, function() {
 
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
-  jake.mkdirP('build/local')
+  jake.mkdirP('build/local/node_modules')
   jake.rmRf('build/local/tdserver.js')
   process.chdir("build/local")
   jake.exec(
