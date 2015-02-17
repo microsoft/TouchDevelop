@@ -11,7 +11,11 @@ module TDev
             super()
         }
 
-        private actionName = HTML.mkTextInput("text", lf("action name"));
+        private actionName = HTML.mkTextInputWithOk("text", lf("action name"),() => {
+            this.updateActionName();
+            this.theAction.notifyChange();
+            TheEditor.refreshDecl();
+        });
         private privateAction = HTML.mkTickCheckBox(Ticks.actionPropPrivate, lf("private action"));
         private testAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("test action"));
         private queryAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("read only"));

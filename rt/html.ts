@@ -423,24 +423,28 @@ module TDev.HTML {
         return txt;
     }
 
-    export function mkTextInputWithOk(type:string, placeholder = "") : HTMLInputElement
+    export function mkTextInputWithOk(type:string, placeholder? : string, onOk? : () => void) : HTMLInputElement
     {
         var res = mkTextInput(type, placeholder)
         var okBtn:HTMLElement = null;
 
         Util.onInputChange(res, () => {
             if (okBtn) return
+            res.style.width = "calc(100% - 6em)";
             okBtn = mkButton(lf("ok"), () => {
                 var b = okBtn
                 okBtn = null
+                res.style.width = "";
                 if (b) b.removeSelf();
                 res.blur()
+                if (onOk) onOk();
             }, "input-confirm");
             res.parentNode.insertBefore(okBtn, res.nextSibling)
         })
         res.addEventListener("blur", () => {
             var b = okBtn
             okBtn = null
+            res.style.width = "";
             if (b) b.removeSelf();
         }, false)
 

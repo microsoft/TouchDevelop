@@ -1711,8 +1711,8 @@ module TDev
             } else if (ins.targetName) {
                 TipManager.setTip({
                     el: elt("renameBox") || elt("renameBox2"),
-                    title: lf("type: ") + ins.targetName,
-                    description: elt("renameBox") ? lf("tap (←) when done") : lf("tap [ok] when done"),
+                    title: lf("enter text: ") + ins.targetName,
+                    description: lf("tap [ok] when done"),
                 })
             } else if (ins.targetKind) {
                 if (VariableProperties.kindSelectorVisible) {
