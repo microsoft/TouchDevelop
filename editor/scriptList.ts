@@ -720,9 +720,8 @@ module TDev { export module Browser {
                                 }))
                         ]);
                         m.show();
-                    } else if (!Cloud.lite && !benchmarksNagged) {
-                        if (nagVector == null)
-                            nagVector = {};
+                    } else if (!Cloud.lite && !benchmarksNagged && EditorSettings.editorMode() >= EditorMode.classic) {
+                        if (nagVector == null) nagVector = {};
                         nagVector[<string>Cloud.currentReleaseId] = true;
                         localStorage["benchmarksNagVector"] = JSON.stringify(nagVector);
                         tick(Ticks.benchmarksNagDisplay);
