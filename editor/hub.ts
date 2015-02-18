@@ -964,7 +964,8 @@ module TDev { export module Browser {
             var noFnBreak = false;
 
             if (s == "social") {
-                elements = elements.slice(0, 4);
+                var slots = this.isBeginner() ? 5 : 4;
+                elements = elements.slice(0, slots);
                 if (elements.length == 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
@@ -979,23 +980,23 @@ module TDev { export module Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (elements.length < 5) {
+                if (elements.length < slots + 1) {
                     var el = toExternalBtn(this.mkFnBtn(lf("Facebook"), () => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
                     el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
                     elements.push(el);
                 }
-                if (elements.length < 5) {
+                if (elements.length < slots + 1) {
                     var el = toExternalBtn(this.mkFnBtn(lf("Twitter"), () => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
                     el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
                     elements.push(el);
                 }
-                if (elements.length < 5) {
+                if (elements.length < slots + 1) {
                     var el = toExternalBtn(this.mkFnBtn(lf("YouTube"), () => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
                     //el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
                     elements.push(el);
                 }
 
-                while (elements.length < 5) {
+                while (elements.length < slots + 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
                     elements.push(fill);
@@ -1008,7 +1009,7 @@ module TDev { export module Browser {
 
             if (s == "recent") {
                 noFnBreak = true;
-                addFnBtn(lf("See More"), Ticks.hubSeeMoreMyScripts,
+                addFnBtn(lf("all my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
@@ -1036,15 +1037,17 @@ module TDev { export module Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("See More"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
+                    addFnBtn(lf("all my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                    elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                    // elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:person,white")));
-
-                    elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
-                    elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
+                    if (!this.isBeginner()) {
+                        elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                        elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                        elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
+                        elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
+                    } else {
+                        elements.push(this.mkFnBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
+                    }
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
@@ -1810,16 +1813,19 @@ module TDev { export module Browser {
             m.choose(boxes);
         }
 
+        private isBeginner() {
+            return EditorSettings.editorMode() <= EditorMode.block;
+        }
+
         private updateSections()
         {
-            var isBeginner = (EditorSettings.editorMode() <= EditorMode.block);
             var sects = {
                 "recent": lf("my scripts"),
                 "misc": lf("learn"),
                 "showcase": lf("showcase"),
                 "social": lf("social"),
             };
-            if (!isBeginner) {
+            if (!this.isBeginner()) {
                 var extra = {
                     "top": lf("top & new"),
                     "tags": lf("categories"),
@@ -1938,7 +1944,7 @@ module TDev { export module Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    isBeginner ? this.showSimplifiedLearn(c) : this.showLearn(c);
+                    this.isBeginner() ? this.showSimplifiedLearn(c) : this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
