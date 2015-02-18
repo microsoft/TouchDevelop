@@ -720,9 +720,8 @@ module TDev { export module Browser {
                                 }))
                         ]);
                         m.show();
-                    } else if (!Cloud.lite && !benchmarksNagged) {
-                        if (nagVector == null)
-                            nagVector = {};
+                    } else if (!Cloud.lite && !benchmarksNagged && EditorSettings.editorMode() >= EditorMode.classic) {
+                        if (nagVector == null) nagVector = {};
                         nagVector[<string>Cloud.currentReleaseId] = true;
                         localStorage["benchmarksNagVector"] = JSON.stringify(nagVector);
                         tick(Ticks.benchmarksNagDisplay);
@@ -956,6 +955,7 @@ module TDev { export module Browser {
                         progressBar.stop();
                         m.dismiss();
                         TheApiCacheMgr.invalidate("groups");
+                        TheApiCacheMgr.invalidate("me/groups");
                         TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                         var groupInfo = this.getGroupInfoById(groupid);
                         TheHost.loadDetails(groupInfo);
@@ -1000,11 +1000,9 @@ module TDev { export module Browser {
                                 showBtn();
                                 groupid = group.id;
                                 errorDiv.setChildren([
-                                    div('wall-dialog-header', 'group ',
-                                        HTML.mkA('', '#list:' + group.userid + '/groups:group:' + group.id + ':overview', '', group.name),
-                                        ' created by ',
-                                        HTML.mkA('', '#list:installed-scripts:user:' + group.userid + ':overview', '', group.username)),
-                                    ]);
+                                    div('wall-dialog-header', 'found group'),
+                                    this.getGroupInfoById(group.id).mkSmallBox()
+                                ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
                                 if (group.allowappstatistics)
@@ -1085,6 +1083,7 @@ module TDev { export module Browser {
                         Cloud.postPrivateApiAsync("groups", request)
                             .then((r: Cloud.PostApiGroupsResponse) => {
                                 TheApiCacheMgr.invalidate("groups");
+                                TheApiCacheMgr.invalidate("me/groups");
                                 TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                                 groupInfo = this.getGroupInfoById(r.id);
                                 return groupInfo.newInvitationCodeAsync();
@@ -7227,7 +7226,8 @@ module TDev { export module Browser {
             if (this.isMe())
                 ch.unshift(accountButtons = div("sdBottomButtons sdAccountBtns",
                     HTML.mkButton(lf("account settings"), () => { Hub.accountSettings() }),
-                    HTML.mkButton(lf("change wallpaper"), () => { Hub.chooseWallpaper() })
+                    HTML.mkButton(lf("skill level"),() => { EditorSettings.showChooseEditorModeAsync().done() }),
+                    HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() })
                 ));
             ch.unshift(hd);
 
@@ -7401,7 +7401,8 @@ module TDev { export module Browser {
 
         private progressTable : HTMLTableElement;
         private progressHeader : HTMLTableRowElement;
-        private tutorials : StringMap<string> = {};
+        private tutorials: StringMap<string> = {};
+        private userRows: StringMap<HTMLTableRowElement> = {};
         topContainer() : HTMLElement
         {
             this.progressTable = document.createElement("table");
@@ -7415,14 +7416,18 @@ module TDev { export module Browser {
             var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
             this.progressHeader.appendChild(st);
             this.tutorials = {};
+            this.userRows = {};
             return div('tbProgress', this.progressTable);
         }
 
         public tabBox(cc:JsonIdObject):HTMLElement
         {
-            var tr = (u : JsonUser) => {
-                var row = document.createElement("tr");
-                row.dataset["userid"] = c.id;
+            var tr = (u: JsonUser) => {
+                var row = this.userRows[c.id];
+                if (!row) {
+                    row = this.userRows[c.id] = document.createElement("tr");
+                    row.dataset["userid"] = c.id;
+                }
                 var cell = document.createElement("td");
                 row.appendChild(cell);
                 var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();

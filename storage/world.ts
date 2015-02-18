@@ -544,16 +544,17 @@ module TDev {
                 var info = "";
                 if (status || errorMessage)
                     info = " (code " + status + (errorMessage ? (": " + errorMessage) : "") + ")";
+                Util.log('nosync: ' + info);
                 if (Util.navigatingAway) {
                     HTML.showProgressNotification(undefined);
                     return undefined;
                 } else if (status == 400) {
-                    var message = "Cloud precondition violated" + info
+                    var message = lf("Cloud precondition violated") + info;
                     HTML.showProgressNotification(message)
                     return message;
                 }
                 else if (status == 503) {
-                    var message = "Did you post a lot recently? You must wait for one hour before you can post more." + info;
+                    var message = lf("Did you post a lot recently? You must wait for one hour before you can post more.") + info;
                     HTML.showProgressNotification(message);
                     return message;
                 }
@@ -563,10 +564,10 @@ module TDev {
                     var message = status == 403
                         ? Cloud.getAccessToken()
                             ? onNotLoggedIn
-                                ? ("cannot sync - your access token has expired and will renew automatically" + info)
-                                : ("cannot sync - your access token has expired" + info)
-                            : ("cannot sync - you are not signed in" + info)
-                        : "(cannot sync" + info + ")";
+                                ? lf("cannot sync - your access token has expired and will renew automatically") + info
+                                : lf("cannot sync - your access token has expired") + info
+                            : lf("cannot sync - you are not signed in") + info
+                        : lf("cannot sync") + info;
                     HTML.showProgressNotification(message)
                     if (status == 403)
                         Cloud.setAccessToken(undefined);
@@ -574,11 +575,11 @@ module TDev {
                     return message;
                 }
                 else if (!Cloud.isTouchDevelopOnline()) {
-                    var message = "cannot sync - you are in offline mode";
+                    var message = lf("cannot sync - you are in offline mode");
                     HTML.showProgressNotification(v ? undefined : message);
                     return message;
                 } else {
-                    var message = "cannot sync - are you offline?" + info;
+                    var message = lf("cannot sync - are you offline?") + info;
                     HTML.showProgressNotification(v ? undefined : message);
                     return message;
                 }

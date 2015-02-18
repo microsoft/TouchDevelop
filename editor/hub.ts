@@ -13,7 +13,8 @@ module TDev { export module Browser {
         description: string;
         name: string;
         source: string;
-        section:string;
+        section: string;
+        editorMode: number;
         caps?: string;
         baseId?: string;
         baseUserId?: string;
@@ -399,6 +400,7 @@ module TDev { export module Browser {
                                         name: scr.name,
                                         source: txt,
                                         section: "",
+                                        editorMode:0,
                                         baseId: scr.id,
                                         baseUserId: scr.userid,
                                     }
@@ -562,9 +564,11 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
+            var editorMode = EditorSettings.editorMode();
             var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
+                    if (template.editorMode > editorMode) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
@@ -852,7 +856,7 @@ module TDev { export module Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates")
+                    if (k != "templates" && !this.isBeginner())
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
@@ -964,7 +968,7 @@ module TDev { export module Browser {
             var noFnBreak = false;
 
             if (s == "social") {
-                var slots = this.isBeginner() ? 5 : 4;
+                var slots = 4;
                 elements = elements.slice(0, slots);
                 if (elements.length == 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
@@ -980,22 +984,22 @@ module TDev { export module Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Facebook"), () => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
-                    elements.push(el);
+                if (!this.isBeginner()) {
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Twitter"),() => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("YouTube"),() => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
+                        elements.push(el);
+                    }
                 }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Twitter"), () => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("YouTube"), () => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
-                    //el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-
                 while (elements.length < slots + 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
@@ -1009,17 +1013,18 @@ module TDev { export module Browser {
 
             if (s == "recent") {
                 noFnBreak = true;
-                addFnBtn(lf("all my scripts"), Ticks.hubSeeMoreMyScripts,
+                addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-
-                var upd = this.browser().headersWithUpdates();
-                if (upd.length > 0) {
-                    var updBtn =
-                        this.mkFnBtn(lf("Script Updates"), () => { this.updateScripts() }, Ticks.hubUpdates, true);
-                    updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
-                    elements.push(updBtn)
+                if (!this.isBeginner()) {
+                    var upd = this.browser().headersWithUpdates();
+                    if (upd.length > 0) {
+                        var updBtn =
+                            this.mkFnBtn(lf("Script Updates"),() => { this.updateScripts() }, Ticks.hubUpdates, true);
+                        updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
+                        elements.push(updBtn)
+                    }
                 }
             }
             else if (s == "art" || s == "myart") {
@@ -1037,7 +1042,7 @@ module TDev { export module Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("all my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
+                    addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
                     if (!this.isBeginner()) {
@@ -1656,7 +1661,7 @@ module TDev { export module Browser {
             var buttons = [];
             this.fetchAllTutorials((tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
-                if (buttons.length > 7)
+                if (buttons.length > 6)
                     return;
 
                 var btn = this.mkFnBtn("", () => {
@@ -1667,13 +1672,24 @@ module TDev { export module Browser {
                 btn.style.backgroundSize = "cover";
                 buttons.push(btn);
 
-                if (buttons.length == 7) {
-                    buttons.push(this.mkFnBtn(lf("all tutorials"), () => {
+                if (buttons.length == 6) {
+                    buttons.push(this.createSkillButton());
+                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
                         Util.setHash('#topic:tutorials');
                     }, Ticks.noEvent, false, 1));
                     this.layoutTiles(container, buttons);
                 }
             });
+        }
+
+        private createSkillButton(): HTMLElement {
+            var editorMode = EditorSettings.editorMode();
+            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
+            var skill = this.mkFnBtn(skillTitle,() => {
+                EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
+            }, Ticks.hubChooseSkill, true);
+            skill.className += " exportBtn";
+            return skill;
         }
 
         private showLearn(container:HTMLElement)
@@ -1689,10 +1705,8 @@ module TDev { export module Browser {
             var whatsNew: HTMLElement;
             var begginersEl : HTMLElement;
             //var advancedEl:HTMLElement;
-            var rate, skill, settings: HTMLElement;
+            var rate, settings: HTMLElement;
             var searchEl: HTMLElement;
-            var editorMode = EditorSettings.editorMode();
-            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
             var elements = [
                 this.startTutorialButton(Ticks.hubDocsTutorial),
                 docsEl = toTutBtn(this.mkFnBtn(lf("Search Help"), () => {
@@ -1716,9 +1730,7 @@ module TDev { export module Browser {
                 }, Ticks.hubDocsApi, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
-                skill = this.mkFnBtn(skillTitle, () => {
-                    EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
-                }, Ticks.hubChooseSkill, true),
+                this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()
                 }, Ticks.hubSettings),
@@ -1734,9 +1746,7 @@ module TDev { export module Browser {
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
-            /* skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white"))); FIXME: need icons */
 
-            skill.className += " exportBtn";
             if (rate) rate.className += " exportBtn";
 
             this.layoutTiles(container, elements);
@@ -1821,7 +1831,7 @@ module TDev { export module Browser {
         {
             var sects = {
                 "recent": lf("my scripts"),
-                "misc": lf("learn"),
+                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
                 "showcase": lf("showcase"),
                 "social": lf("social"),
             };
@@ -1981,7 +1991,7 @@ module TDev { export module Browser {
                 notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
 
                 this.notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate("notifications"); Util.setHash("#notifications") });
+                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate("me/notifications"); Util.setHash("#notifications") });
                 World.onNewNotificationChanged = (n: number) => {
                     if (n > 0 && this.notificationsCount != n) {
                         HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });
