@@ -466,6 +466,7 @@ module TDev {
         v?: number;
         delay: number;
         numErrors?: number;
+        headers?: Header[];
     }
 
     export interface PostApiGroupsBody {

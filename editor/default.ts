@@ -446,9 +446,12 @@ module TDev
             return true;
         }
 
-        if (/lite=1/.test(document.URL)) {
+        var mx = /lite=([0-9a-z]+)/.exec(document.URL)
+
+        if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            (<any>window).rootUrl = "https://tdscratch.azurewebsites.net"
+            (<any>window).rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://tdscratch.azurewebsites.net"
+            TDev.Ticker.disable()
         }
 
         if (/httplog=1/.test(document.URL)) {

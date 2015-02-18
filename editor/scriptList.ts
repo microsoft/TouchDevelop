@@ -3236,6 +3236,10 @@ module TDev { export module Browser {
 
         static historicalTextAsync(uid:string, guid:string, it:JsonHistoryItem)
         {
+            if (Cloud.lite)
+                return World.getScriptBlobAsync(it.historyid)
+                    .then(resp => resp ? resp.script : null)
+
             var scrid = it.scriptstatus == "published" ? it.scriptid : null
             return scrid ? ScriptCache.getScriptAsync(scrid) :
                     Cloud.getPrivateApiAsync(uid + "/installed/" + guid + "/history/" + it.historyid)

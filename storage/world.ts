@@ -108,10 +108,15 @@ module TDev {
 
         export var mergeScripts = (base:string, local:string, server:string) => local;
 
+        export function getScriptBlobAsync(snapshotId:string)
+        {
+            return Util.httpGetJsonAsync(blobcontainer + snapshotId)
+        }
+
         function downloadInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header) : Promise {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is newer");
             if (Cloud.lite)
-                return Util.httpGetJsonAsync(blobcontainer + header.scriptVersion.baseSnapshot)
+                return getScriptBlobAsync(header.scriptVersion.baseSnapshot)
                     .then(resp =>
                         indexTable.getValueAsync(header.guid)
                             .then(str => str ? JSON.parse(str) : null)
@@ -119,7 +124,7 @@ module TDev {
                                 var baseVer, currVer;
                                 if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot) {
                                     log(header.guid + "/" + header.scriptId + ": " + header.name + " merging based on " + hd.scriptVersion.baseSnapshot);
-                                    return Util.httpGetJsonAsync(blobcontainer + hd.scriptVersion.baseSnapshot)
+                                    return getScriptBlobAsync(hd.scriptVersion.baseSnapshot)
                                         .then(r => { baseVer = r })
                                         .then(() => scriptsTable.getItemsAsync([header.guid + "-script", header.guid + "-editorState"]))
                                         .then(r => { currVer = { script: r[header.guid + "-script"], editorState: r[header.guid + "-editorState"] } })
