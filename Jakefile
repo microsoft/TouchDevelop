@@ -402,10 +402,13 @@ task('upload', [], { async : true }, function() {
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
   jake.mkdirP('build/local/node_modules')
-  jake.rmRf('build/local/tdserver.js')
+  jake.cpR('build/shell.js', 'build/local/tdserver.js')
   process.chdir("build/local")
+  var node = "node"
+  if (process.env.TD_SHELL_DEBUG)
+    node = "node-debug"
   jake.exec(
-    [ 'node ../shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
+    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
