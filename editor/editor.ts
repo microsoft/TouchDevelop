@@ -5150,15 +5150,14 @@ module TDev
             m.add(div("wall-dialog-header", Runtime.appName));
             m.add(div("wall-dialog-body", lf("For feedback and support please use our forum, or just email us!")));
             m.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("latest changes"), () => {
+                HTML.mkButton(lf("changes"),() => {
                     HTML.showProgressNotification(lf("downloading change log..."))
                     Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
-                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
-                        .done()
+                        .done(t => window.location.href = "http://github.com/Microsoft/TouchDevelop/commits/" + t.commit)
                 }),
-                HTML.mkButton(lf("forum"), () => {
-                    Browser.Hub.showForum();
-                }),
+                HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
+                HTML.mkButton(lf("GitHub"),() => { window.location.href = "https://github.com/Microsoft/TouchDevelop"; })
+                /*
                 HTML.mkButton(lf("email"), () => {
                     if (Browser.win8) {
                         window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App Early Preview for Windows 8");
@@ -5167,7 +5166,8 @@ module TDev
                     } else {
                         window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop Web App v" + relId);
                     }
-                })));
+                }) */
+                ));
 
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
                                           "TouchDevelop was brought to you by Microsoft Research."));
