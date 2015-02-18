@@ -3552,6 +3552,7 @@ export interface ScriptTemplate {
     scriptid: string;
     section:string;
     topic?: string;
+    editorMode:number; // 1 block, 2 coder, 3 expert
     source?: string; // computed
     caps?: string; // optional
     betaOnly?:boolean; // optional
@@ -3574,7 +3575,8 @@ var templates: ScriptTemplate[] = [{
     description: lf("An empty script, which doesn't do anything."),
     section: sectTemplates,
     name: 'ADJ script',
-    scriptid: 'bbcka'
+    scriptid: 'bbcka',
+    editorMode: 1,
 }, {
     title: lf("blank game"),
     id: 'game',
@@ -3582,7 +3584,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ game',
     description: lf("Boiler plate code to create a game."),
     section: sectTemplates,
-    scriptid: 'arqha'
+    scriptid: 'arqha',
+    editorMode: 1,
 }, {
     title: lf("blank app"),
     id: 'pages',
@@ -3590,7 +3593,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ app',
     description: lf("An empty app using pages and boxes."),
     section: sectTemplates,
-    scriptid: 'zkru'
+    scriptid: 'zkru',
+    editorMode: 2,
 }, {
     title: lf("blank turtle"),
     id: 'blankturtle',
@@ -3598,7 +3602,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ drawing',
     description: lf("An turtle app."),
     section: sectBeginners,
-    scriptid: 'oobxb'
+    scriptid: 'oobxb',
+    editorMode: 1,
 }, {
     title: lf("blank scratch"),
     id: 'blankscratch',
@@ -3606,7 +3611,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ app',
     description: lf("An empty app using the scratch library."),
     section: sectBeginners,
-    scriptid: 'rbhea'
+    scriptid: 'rbhea',
+    editorMode: 1,
 }, {
     title: lf("blank pixel art"),
     id: 'blankpixelart',
@@ -3614,7 +3620,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ art',
     description: lf("A pixel art app."),
     section: sectBeginners,
-    scriptid: 'mdrw'
+    scriptid: 'mdrw',
+    editorMode: 1,
 }, /*{
     title: lf("blank boostrap app"),
     id: 'blankbootstrapapp',
@@ -3639,6 +3646,7 @@ var templates: ScriptTemplate[] = [{
     description: lf("An wrapper around an Apache Cordova plugin."),
     section: sectCordova,
     scriptid: 'ripnb',
+    editorMode: 3,
 }, {
     title: lf("blank express web site"),
     id: 'blankexpresswebsite',
@@ -3647,6 +3655,7 @@ var templates: ScriptTemplate[] = [{
     description: lf("An Express web site."),
     section: sectAzure,
     scriptid: 'ludeb',
+    editorMode: 3,
 }, {
     title: lf("blank restify web site"),
     id: 'blankrestifywebsite',
@@ -3655,6 +3664,7 @@ var templates: ScriptTemplate[] = [{
     description: lf("A Restify web api."),
     section: sectAzure,
     scriptid: 'hzdib',
+    editorMode: 3,
 }, {
     title: lf("blank node library"),
     id: 'blanknodelibrary',
@@ -3663,6 +3673,7 @@ var templates: ScriptTemplate[] = [{
     description: lf("An wrapper for a node package."),
     section: sectAzure,
     scriptid: 'nrlha',
+    editorMode: 3,
 }, {
     title: lf("blank arduino"),
     id: 'blankarduino',
@@ -3670,7 +3681,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ sketch',
     description: lf("An empty Arduino sketch."),
     section: sectMakers,
-    scriptid: 'rtyga'
+    scriptid: 'rtyga',
+    editorMode: 2,
 }, {
     title: lf("blank esplora"),
     id: 'blankesplora',
@@ -3678,7 +3690,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ esplora',
     description: lf("An empty Arduino Esplora script."),
     section: sectMakers,
-    scriptid: 'iuyec'
+    scriptid: 'iuyec',
+    editorMode: 2,
 }, {
     title: lf("blank engduino"),
     id: 'blankengduino',
@@ -3686,7 +3699,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ engduino',
     description: lf("An empty Engduino script."),
     section: sectMakers,
-    scriptid: 'zqbpa'
+    scriptid: 'zqbpa',
+    editorMode: 2,
 }, {
     title: lf("blank tutorial"),
     id: 'blanktutorial',
@@ -3694,7 +3708,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ tutorial',
     description: lf("An empty interactive tutorial."),
     section: sectTouchDevelop,
-    scriptid: 'yujva'
+    scriptid: 'yujva',
+    editorMode: 3,
 }, , {
     title: lf("blank script plugin"),
     id: 'blankscriptplugin',
@@ -3702,7 +3717,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ plugin',
     description: lf("An empty script editor plugin."),
     section: sectTouchDevelop,
-    scriptid: 'tiwt'
+    scriptid: 'tiwt',
+    editorMode: 3,
 }, {
     title: lf("blank office mix"),
     id: 'blankofficemix',
@@ -3710,7 +3726,8 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ mix app',
     description: lf("An empty Office Mix app."),
     section: sectOthers,
-    scriptid: 'zbxb'
+    scriptid: 'zbxb',
+    editorMode: 3,
 }
 ];
 

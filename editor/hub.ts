@@ -13,7 +13,8 @@ module TDev { export module Browser {
         description: string;
         name: string;
         source: string;
-        section:string;
+        section: string;
+        editorMode: number;
         caps?: string;
         baseId?: string;
         baseUserId?: string;
@@ -399,6 +400,7 @@ module TDev { export module Browser {
                                         name: scr.name,
                                         source: txt,
                                         section: "",
+                                        editorMode:0,
                                         baseId: scr.id,
                                         baseUserId: scr.userid,
                                     }
@@ -562,9 +564,11 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
+            var editorMode = EditorSettings.editorMode();
             var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
+                    if (template.editorMode > editorMode) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
@@ -852,7 +856,7 @@ module TDev { export module Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates")
+                    if (k != "templates" && !this.isBeginner())
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");

@@ -11,3 +11,4 @@
 ///<reference path='editor/refs.ts'/>
 ///<reference path='noderunner/nrunner.ts'/>
 ///<reference path='shell/shell.ts'/>
+///<reference path='tools/client.ts'/>
