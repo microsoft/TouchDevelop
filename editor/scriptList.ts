@@ -7227,7 +7227,8 @@ module TDev { export module Browser {
             if (this.isMe())
                 ch.unshift(accountButtons = div("sdBottomButtons sdAccountBtns",
                     HTML.mkButton(lf("account settings"), () => { Hub.accountSettings() }),
-                    HTML.mkButton(lf("change wallpaper"), () => { Hub.chooseWallpaper() })
+                    HTML.mkButton(lf("skill level"),() => { EditorSettings.showChooseEditorModeAsync().done() }),
+                    HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() })
                 ));
             ch.unshift(hd);
 
