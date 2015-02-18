@@ -1149,10 +1149,13 @@ module TDev
                     m.fullWhite();
                     m.setScroll();
 
+                    var previousStep = this.currentStep - 1;
+                    while (!!this.steps[previousStep] && !this.steps[previousStep].hasStar())
+                        previousStep--;
                     m.add(div('wall-dialog-buttons tutDialogButons',
                         // TODO: mine tutorial locale
                         /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"),() => { this.replyDialog() }) : null,
-                        this.currentStep > 0 ? HTML.mkButton(lf("go to previous step"),() => { this.replyAsync(this.currentStep - 1).done(() => { m.dismiss(); }); }) : null,
+                        previousStep >= 0 ? HTML.mkButton(lf("go to previous step"),() => { this.replyAsync(previousStep).done(() => { m.dismiss(); }); }) : null,
                         HTML.mkButton(lf("let's do it!"), () => m.dismiss())
                         )
                     );
