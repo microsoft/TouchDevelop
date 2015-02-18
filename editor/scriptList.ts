@@ -999,11 +999,10 @@ module TDev { export module Browser {
                                 showBtn();
                                 groupid = group.id;
                                 errorDiv.setChildren([
-                                    div('wall-dialog-header', 'group ',
-                                        HTML.mkA('', '#list:' + group.userid + '/groups:group:' + group.id + ':overview', '', group.name),
-                                        ' created by ',
-                                        HTML.mkA('', '#list:installed-scripts:user:' + group.userid + ':overview', '', group.username)),
-                                    ]);
+                                    this.getGroupInfoById(group.id).mkSmallBox(),
+                                    div('wall-dialog-header','created by'),
+                                    this.getUserInfoById(group.userid, group.username).mkSmallBox()
+                                ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
                                 if (group.allowappstatistics)
