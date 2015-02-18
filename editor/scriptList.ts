@@ -7401,7 +7401,8 @@ module TDev { export module Browser {
 
         private progressTable : HTMLTableElement;
         private progressHeader : HTMLTableRowElement;
-        private tutorials : StringMap<string> = {};
+        private tutorials: StringMap<string> = {};
+        private userRows: StringMap<HTMLTableRowElement> = {};
         topContainer() : HTMLElement
         {
             this.progressTable = document.createElement("table");
@@ -7415,14 +7416,18 @@ module TDev { export module Browser {
             var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
             this.progressHeader.appendChild(st);
             this.tutorials = {};
+            this.userRows = {};
             return div('tbProgress', this.progressTable);
         }
 
         public tabBox(cc:JsonIdObject):HTMLElement
         {
-            var tr = (u : JsonUser) => {
-                var row = document.createElement("tr");
-                row.dataset["userid"] = c.id;
+            var tr = (u: JsonUser) => {
+                var row = this.userRows[c.id];
+                if (!row) {
+                    row = this.userRows[c.id] = document.createElement("tr");
+                    row.dataset["userid"] = c.id;
+                }
                 var cell = document.createElement("td");
                 row.appendChild(cell);
                 var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
