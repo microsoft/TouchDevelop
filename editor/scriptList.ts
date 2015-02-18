@@ -999,9 +999,8 @@ module TDev { export module Browser {
                                 showBtn();
                                 groupid = group.id;
                                 errorDiv.setChildren([
-                                    this.getGroupInfoById(group.id).mkSmallBox(),
-                                    div('wall-dialog-header','created by'),
-                                    this.getUserInfoById(group.userid, group.username).mkSmallBox()
+                                    div('wall-dialog-header', 'found group'),
+                                    this.getGroupInfoById(group.id).mkSmallBox()
                                 ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
