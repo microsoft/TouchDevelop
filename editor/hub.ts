@@ -1009,17 +1009,18 @@ module TDev { export module Browser {
 
             if (s == "recent") {
                 noFnBreak = true;
-                addFnBtn(lf("all my scripts"), Ticks.hubSeeMoreMyScripts,
+                addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-
-                var upd = this.browser().headersWithUpdates();
-                if (upd.length > 0) {
-                    var updBtn =
-                        this.mkFnBtn(lf("Script Updates"), () => { this.updateScripts() }, Ticks.hubUpdates, true);
-                    updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
-                    elements.push(updBtn)
+                if (!this.isBeginner()) {
+                    var upd = this.browser().headersWithUpdates();
+                    if (upd.length > 0) {
+                        var updBtn =
+                            this.mkFnBtn(lf("Script Updates"),() => { this.updateScripts() }, Ticks.hubUpdates, true);
+                        updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
+                        elements.push(updBtn)
+                    }
                 }
             }
             else if (s == "art" || s == "myart") {
@@ -1668,7 +1669,7 @@ module TDev { export module Browser {
                 buttons.push(btn);
 
                 if (buttons.length == 7) {
-                    buttons.push(this.mkFnBtn(lf("all tutorials"), () => {
+                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
                         Util.setHash('#topic:tutorials');
                     }, Ticks.noEvent, false, 1));
                     this.layoutTiles(container, buttons);
