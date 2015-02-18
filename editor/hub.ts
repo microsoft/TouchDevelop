@@ -1661,7 +1661,7 @@ module TDev { export module Browser {
             var buttons = [];
             this.fetchAllTutorials((tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
-                if (buttons.length > 7)
+                if (buttons.length > 6)
                     return;
 
                 var btn = this.mkFnBtn("", () => {
@@ -1672,13 +1672,24 @@ module TDev { export module Browser {
                 btn.style.backgroundSize = "cover";
                 buttons.push(btn);
 
-                if (buttons.length == 7) {
+                if (buttons.length == 6) {
+                    buttons.push(this.createSkillButton());
                     buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
                         Util.setHash('#topic:tutorials');
                     }, Ticks.noEvent, false, 1));
                     this.layoutTiles(container, buttons);
                 }
             });
+        }
+
+        private createSkillButton(): HTMLElement {
+            var editorMode = EditorSettings.editorMode();
+            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
+            var skill = this.mkFnBtn(skillTitle,() => {
+                EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
+            }, Ticks.hubChooseSkill, true);
+            skill.className += " exportBtn";
+            return skill;
         }
 
         private showLearn(container:HTMLElement)
@@ -1694,10 +1705,8 @@ module TDev { export module Browser {
             var whatsNew: HTMLElement;
             var begginersEl : HTMLElement;
             //var advancedEl:HTMLElement;
-            var rate, skill, settings: HTMLElement;
+            var rate, settings: HTMLElement;
             var searchEl: HTMLElement;
-            var editorMode = EditorSettings.editorMode();
-            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
             var elements = [
                 this.startTutorialButton(Ticks.hubDocsTutorial),
                 docsEl = toTutBtn(this.mkFnBtn(lf("Search Help"), () => {
@@ -1721,9 +1730,7 @@ module TDev { export module Browser {
                 }, Ticks.hubDocsApi, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
-                skill = this.mkFnBtn(skillTitle, () => {
-                    EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
-                }, Ticks.hubChooseSkill, true),
+                this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()
                 }, Ticks.hubSettings),
@@ -1739,9 +1746,7 @@ module TDev { export module Browser {
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
-            /* skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white"))); FIXME: need icons */
 
-            skill.className += " exportBtn";
             if (rate) rate.className += " exportBtn";
 
             this.layoutTiles(container, elements);
