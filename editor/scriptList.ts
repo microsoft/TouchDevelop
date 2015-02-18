@@ -955,6 +955,7 @@ module TDev { export module Browser {
                         progressBar.stop();
                         m.dismiss();
                         TheApiCacheMgr.invalidate("groups");
+                        TheApiCacheMgr.invalidate("me/groups");
                         TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                         var groupInfo = this.getGroupInfoById(groupid);
                         TheHost.loadDetails(groupInfo);
@@ -1082,6 +1083,7 @@ module TDev { export module Browser {
                         Cloud.postPrivateApiAsync("groups", request)
                             .then((r: Cloud.PostApiGroupsResponse) => {
                                 TheApiCacheMgr.invalidate("groups");
+                                TheApiCacheMgr.invalidate("me/groups");
                                 TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                                 groupInfo = this.getGroupInfoById(r.id);
                                 return groupInfo.newInvitationCodeAsync();
