@@ -225,6 +225,7 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
     if (p.protocol == "https:")
         mod = https
 
+    debug.log('download ' + u);
     mod.get(p, (res:http.ClientResponse) => {
         if (res.statusCode == 302) {
             downloadFile(res.headers['location'], f);
@@ -1374,6 +1375,7 @@ function cacheEditor(version:string, manifest:string)
             return
 
         info.log("caching new version of the editor, " + text.length)
+        debug.log(text);
 
         cache[manifest] = ent(buf, hd)
         var num = 0
