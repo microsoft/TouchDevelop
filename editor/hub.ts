@@ -964,7 +964,7 @@ module TDev { export module Browser {
             var noFnBreak = false;
 
             if (s == "social") {
-                var slots = this.isBeginner() ? 5 : 4;
+                var slots = 4;
                 elements = elements.slice(0, slots);
                 if (elements.length == 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
@@ -980,22 +980,22 @@ module TDev { export module Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Facebook"), () => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
-                    elements.push(el);
+                if (!this.isBeginner()) {
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Twitter"),() => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("YouTube"),() => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
+                        elements.push(el);
+                    }
                 }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Twitter"), () => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-                if (elements.length < slots + 1) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("YouTube"), () => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
-                    //el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-
                 while (elements.length < slots + 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
@@ -1038,7 +1038,7 @@ module TDev { export module Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("all my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
+                    addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
                     if (!this.isBeginner()) {
@@ -1822,7 +1822,7 @@ module TDev { export module Browser {
         {
             var sects = {
                 "recent": lf("my scripts"),
-                "misc": lf("learn"),
+                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
                 "showcase": lf("showcase"),
                 "social": lf("social"),
             };
