@@ -1991,7 +1991,7 @@ module TDev { export module Browser {
                 notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
 
                 this.notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate("notifications"); Util.setHash("#notifications") });
+                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate("me/notifications"); Util.setHash("#notifications") });
                 World.onNewNotificationChanged = (n: number) => {
                     if (n > 0 && this.notificationsCount != n) {
                         HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });
