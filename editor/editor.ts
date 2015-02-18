@@ -5153,10 +5153,11 @@ module TDev
                 HTML.mkButton(lf("changes"),() => {
                     HTML.showProgressNotification(lf("downloading change log..."))
                     Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
-                        .done(t => window.location.href = "http://github.com/Microsoft/TouchDevelop/commits/" + t.commit)
+                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
+                        .done();
                 }),
                 HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
-                HTML.mkButton(lf("GitHub"),() => { window.location.href = "https://github.com/Microsoft/TouchDevelop"; })
+                HTML.mkButton(lf("GitHub"),() => { RT.Web.browseAsync("https://github.com/Microsoft/TouchDevelop").done(); })
                 /*
                 HTML.mkButton(lf("email"), () => {
                     if (Browser.win8) {
