@@ -1,4 +1,5 @@
 ///<reference path='ast/refs.ts'/>
+///<reference path='browser/browser.ts'/>
 ///<reference path='storage/refs.ts'/>
 ///<reference path='lib/refs.ts'/>
 ///<reference path='rt/refs.ts'/>

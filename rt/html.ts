@@ -746,16 +746,20 @@ module TDev.HTML {
         var r = <ProgressBar>div("progressBar", Util.range(0, 4).map((v) => div("progressDot progressDot-" + v)));
         HTML.setRole(r, "progressbar");
         var n = 0;
-        function update(k:number) {
+        function update(k: number) {
             n += k;
             if (n < 0) n = 0;
             r.style.display = n > 0 ? "block" : "none";
         }
         update(0);
 
-        r.start = () => { update(+1) };
-        r.stop = () => { update(-1) };
-        r.reset = () => { update(-n) };
+        if (Browser.noAnimations) {
+            r.start = r.stop = r.reset = () => { };
+        } else {
+            r.start = () => { update(+1) };
+            r.stop = () => { update(-1) };
+            r.reset = () => { update(-n) };
+        }
 
         return r;
     }

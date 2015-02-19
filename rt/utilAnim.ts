@@ -51,7 +51,7 @@ module TDev
             try {
                 if (!this.running) return;
                 var now = new Date().getTime();
-                if (now > this.beginTime + this.duration) {
+                if (now > this.beginTime + this.duration || Browser.noAnimations) {
                     this.complete();
                     return;
                 }
