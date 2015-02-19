@@ -55,11 +55,14 @@ module TDev {
     }
 
     // lite only
-    export interface JsonNotification extends JsonPublication
+    export interface JsonNotification extends JsonPubOnPub
     {
         notificationkind: string;
-        publicationid: string;
-        publicationkind: string;
+
+        // if publicationkind == 'review', this will hold the script data
+        supplementalid: string;
+        supplementalkind: string;
+        supplementalname: string;
     }
 
     export interface JsonDocument
