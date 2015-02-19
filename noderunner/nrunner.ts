@@ -276,7 +276,8 @@ class ApiRequest
         }
         var opts = <any> url.parse("https://management.core.windows.net/" + this.data.subscriptionId + "/services" + path)
         opts.pfx = new Buffer(this.data.managementCertificate, "base64")
-        //opts.agent = new https.Agent(opts);
+        if (/^v0\.10\./.test(process.version) || /^v0\.8\./.test(process.version))
+            opts.agent = new https.Agent(opts);
         var buf = new Buffer(0)
         opts.headers = {
           "x-ms-version": isBus ? "2013-03-01" : "2012-10-10",
