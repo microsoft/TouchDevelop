@@ -54,6 +54,14 @@ module TDev {
         userhaspicture:boolean;
     }
 
+    // lite only
+    export interface JsonNotification extends JsonPublication
+    {
+        notificationkind: string;
+        publicationid: string;
+        publicationkind: string;
+    }
+
     export interface JsonDocument
     {
         url:string; // website for human consumption

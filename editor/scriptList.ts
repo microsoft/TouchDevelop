@@ -4932,11 +4932,14 @@ module TDev { export module Browser {
 
         public tabBox(c:JsonPublication):HTMLElement
         {
-            var pub = this.browser().getAnyInfoByPub(c, "");
+            var pub = c.kind == "notification" 
+                ? this.browser().getAnyInfoByEtag({ id: (<JsonNotification>c).publicationid, kind: (<JsonNotification>c).publicationkind, ETag: "" })
+                : this.browser().getAnyInfoByPub(c, "");
             var lab = (l:string, box = null, content = null) => ScriptInfo.labeledBox(l, box || pub.mkSmallBox())
             var own = c.userid == this.parent.publicId;
+            var kind = c.kind == "notification" ? (<JsonNotification>c).publicationkind : c.kind
 
-            switch (c.kind) {
+            switch (kind) {
             case "script":
                 return div(null, lab(lf("forked")))
             case "comment":
