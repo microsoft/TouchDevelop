@@ -276,7 +276,7 @@ class ApiRequest
         }
         var opts = <any> url.parse("https://management.core.windows.net/" + this.data.subscriptionId + "/services" + path)
         opts.pfx = new Buffer(this.data.managementCertificate, "base64")
-        opts.agent = new https.Agent(opts);
+        //opts.agent = new https.Agent(opts);
         var buf = new Buffer(0)
         opts.headers = {
           "x-ms-version": isBus ? "2013-03-01" : "2012-10-10",
@@ -592,6 +592,7 @@ function doFtp(ar:ApiRequest, operation:string, filename:string, filecontent:str
         var s = dat.toString()
 
        // if (verbose) console.log(s) // debug
+       //console.log(s)
 
         if (/^530/.test(s)) {
             client.end()
@@ -619,6 +620,8 @@ function doFtp(ar:ApiRequest, operation:string, filename:string, filecontent:str
                 host: m[1] + "." + m[2] + "." + m[3] + "." + m[4],
                 port: parseInt(m[5])*256 + parseInt(m[6])
             }
+
+            //console.log(operation + " " + filename)
 
             if (operation == "put") {
                 client.write("STOR " + filename + "\r\n")
