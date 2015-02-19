@@ -1142,7 +1142,7 @@ module TDev { export module Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if (!Storage.temporary || this.showingTemporarySignin) return;
+            if (!Storage.temporary || this.showingTemporarySignin || EditorSettings.editorMode() <= EditorMode.block) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
