@@ -1668,8 +1668,12 @@ module TDev { export module Browser {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
                 btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                btn.style.backgroundImage = "url("+tutorial.topic.json.screenshot+")";
-                btn.style.backgroundSize = "cover";
+                if (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot) {
+                    btn.style.backgroundImage = tutorial.topic.json.iconArtId
+                        ? ArtUtil.artUrl(tutorial.topic.json.iconArtId, true)
+                        : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
+                    btn.style.backgroundSize = "cover";
+                }
                 buttons.push(btn);
 
                 if (buttons.length == 6) {
