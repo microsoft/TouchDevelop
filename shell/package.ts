@@ -5,11 +5,16 @@ import child_process = require('child_process');
 import crypto = require('crypto');
 
 function main() {
-    var files = [ 'build/shell.js', 'shell/iisnode.yml', 'shell/web.config' ]
+    var files = {
+        'build/shell.js': 'server.js',
+        'shell/iisnode.yml': 'iisnode.yml',
+        'shell/web.config': 'web.config'
+    }
     var obj = {}
     var sha = {}
-    files.forEach(f => {
+    Object.keys(files).forEach(f => {
         var fc = fs.readFileSync(f, "utf8")
+        f = files[f]
         obj[f] = fc
         var h = crypto.createHash('sha256')
         h.update(fc, "utf8")
