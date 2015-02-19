@@ -2204,6 +2204,17 @@ module TDev{
 
     export function coreAnim(name:string, duration:number, elt:HTMLElement, andThen = undefined) : HTMLElement
     {
+        var remove = () => { elt.removeSelf(); }
+        if (Browser.noAnimations) {
+            if (/^fadeOut/.test(name)) {
+                elt.style.opacity = "0";
+                if (!andThen) andThen = remove;
+            }
+            if (andThen)
+                Util.setTimeout(300,() => andThen());
+            return;
+        }
+
         var evtName = Browser.isWebkit ? "webkitAnimationEnd" : "animationend";
         var propName = animationProperty();
         var oldOpacity = elt.style.opacity;
@@ -2223,7 +2234,6 @@ module TDev{
         var id = Util.setTimeout(duration + 300, f);
 
         elt.addEventListener(evtName, f);
-        var remove = () => { elt.removeSelf(); }
         if (/^fadeOut/.test(name)) {
             elt.style.opacity = "0";
             if (!andThen) andThen = remove;

@@ -206,9 +206,12 @@ module TDev
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
-        if (/temporaryStorage/.test(url)) {
+        if (Browser.noStorage || /temporaryStorage/.test(url)) {
             Browser.supportMemoryTable(true);
             Storage.temporary = true;
+        }
+        if (/noAnim/.test(url)) {
+            Browser.noAnimations = true;
         }
 
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
