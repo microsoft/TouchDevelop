@@ -55,6 +55,12 @@ module TDev.RT {
             this.item[name] = value;
         }
 
+
+        //? Creates a deep copy clone of the object
+        public clone(): JsonBuilder {
+            return JsonBuilder.wrap(Util.jsonClone(this.item));
+        }
+
             //? Sets the number value.
         public set_number(name: string, value: number): void {
             if (name.length == 0) return;
