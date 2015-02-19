@@ -401,7 +401,7 @@ module TDev.AppExport
         var res = new PromiseInv();
         var name = HTML.mkTextInput("text", lf("web site name"));
         m.add(name)
-        m.add(div('', lf("url (e.g. http://localhost:4242/editor):")));
+        m.add(div('', lf("url (e.g. http://localhost:4242):")));
         var url = HTML.mkTextInput("url", lf("web site url"));
         m.add(url)
         m.add(div('', lf("key (printed out by your node server on startup):")));
@@ -412,7 +412,7 @@ module TDev.AppExport
                 if (!/^http(s?):\/\//.test(url.value)) {
                     throw new Error(lf("Please provide a proper http(s) url (e.g. http://localhost:4242)"));
                 }
-                if (url.value.indexOf("/") !== url.value.length) {
+                if (!/\/$/.test(url.value)) {
                     url.value = url.value + "/";
                 }
                 var wa = <Azure.WebsiteAuth> {
@@ -474,7 +474,11 @@ module TDev.AppExport
         var m = /\/(\d+-[a-f0-9\.]+-[^\/]+)\//.exec(baseUrl)
         if (m)
             return Cloud.getPrivateApiUrl("deploy/" + path + "?releaseid=" + m[1])
-        return baseUrl + "api/deploy/" + path
+        m = /noderunner=(\d+)/.exec(document.URL)
+        if (m)
+            return "http://localhost:" + m[1] + "/api/deploy/" + path
+        else
+            return Cloud.getPrivateApiUrl("deploy/" + path)
     }
 
     export function mgmtRequestAsync(wa:Azure.WebsiteAuth, path:string, data?:any) : Promise
