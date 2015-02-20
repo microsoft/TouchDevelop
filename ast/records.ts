@@ -275,10 +275,6 @@ module TDev.AST {
             super()
             this.setStableName(uniqueAstId(16));
 
-            this.exprHolder.tokens = [ <AST.Token> new FieldName() ].concat(propertyRefsForKind(k));
-            this.exprHolder.parsed = new AST.Literal(); // placeholder
-            this.exprHolder.locals = [];
-
             this.commentBlock.setChildren([]);
             description.split(/\n/).forEach(l => {
                 if (!l)
@@ -288,6 +284,18 @@ module TDev.AST {
                 c.text = l;
                 this.commentBlock.push(c);
             });
+
+            this.setConsistentState(name, k);
+        }
+
+        // The calculator will call this method before editing us, so that our
+        // exprholder is not left in a stale state from a previous
+        // (unsuccessful) edit.
+        public setConsistentState(name: string, k: Kind) {
+
+            this.exprHolder.tokens = [ <AST.Token> new FieldName() ].concat(propertyRefsForKind(k));
+            this.exprHolder.parsed = new AST.Literal(); // placeholder
+            this.exprHolder.locals = [];
 
             this.setName(name);
             this.setKind(k);
