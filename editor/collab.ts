@@ -16,6 +16,11 @@ module TDev {
             meta: string;
         }
 
+        export function getSessionOwner(session: string): string {
+            return session.substr(0, session.indexOf("0"));
+        }
+
+
         export function getCollaborationsAsync(group: string): Promise { // CollaborationInfo[]
             var userid = Cloud.getUserId();
             if (!userid) return undefined;
@@ -31,7 +36,7 @@ module TDev {
             });
         }
 
-        export function getCollaborationAsync(owner: string, scriptguid: string): Promise { // CollaborationInfo
+        /*export function getCollaborationAsync(owner: string, scriptguid: string): Promise { // CollaborationInfo
             var sessionid = Revisions.astsessionid(owner, scriptguid);
             return Revisions.getRevisionServiceTokenAsync().then((token) => {
                 if (Cloud.isOffline()) return Promise.wrapError("Cloud is offline");
@@ -43,13 +48,13 @@ module TDev {
                         return <CollaborationInfo> x;
                 });
             });
-        }
+        }*/
 
         export function startCollaborationAsync(scriptGuid: string, script: string, group: string): Promise { // session id
             TDev.tick(Ticks.collabStartCollaboration);
             var userid = Cloud.getUserId();
             if (!userid) return undefined;
-            var sessionid = Revisions.astsessionid(userid, scriptGuid);
+            var sessionid = Revisions.make_astsessionid(userid);
             var ci = <CollaborationInfo> {};
             ci.owner = userid;
             ci.group = group;
@@ -60,17 +65,29 @@ module TDev {
                 if (Cloud.isOffline()) return Promise.wrapError("Cloud is offline");
                 var url = Revisions.revisionservice_http() + "/" + sessionid + "/collaboration"
                     + "?user=" + userid + "&access_token=" + encodeURIComponent(token);
-                return Util.httpRequestAsync(url, "PUT", JSON.stringify(ci)).then((s) => {
-                    return sessionid;
+                return Util.httpRequestAsync(url, "PUT", JSON.stringify(ci)).then(
+                (s) => Editor.updateEditorStateAsync(scriptGuid, (st) => {
+                                    st.collabSessionId = sessionid;
+                                    st.groupId = this.publicId;
+                                }),
+                (e) => {
+                    if (typeof (e) == "object" && e.errorMessage.indexOf("already in group") != -1)
+                        ModalDialog.info(lf("can't add twice"), lf("this script has already been added to a group."));
+                    else if(typeof (e) == "object" && e.errorMessage.indexOf("invalid group") != -1)
+                        ModalDialog.info(lf("cannot add script to group"), lf("could not access this group."));
+                    else if (typeof (e) == "object" && e.errorMessage.indexOf("not a group member") != -1)
+                        ModalDialog.info(lf("cannot add script to group"), lf("you are not a member of this group."));
+                    else
+                        throw e;
                 });
             });
         }
 
-        export function stopCollaborationAsync(scriptOwner: string, scriptGuid: string): Promise { // void
+        export function stopCollaborationAsync(sessionid: string): Promise { // void
             TDev.tick(Ticks.collabStopCollaboration);
             var userid = Cloud.getUserId();
             if (!userid) return undefined;
-            var sessionid = Revisions.astsessionid(scriptOwner, scriptGuid);
+            var owner = Collab.getSessionOwner(sessionid);
             return Revisions.getRevisionServiceTokenAsync().then((token) => {
                 if (Cloud.isOffline()) return Promise.wrapError("Cloud is offline");
                 var url = Revisions.revisionservice_http() + "/" + sessionid + "/collaboration"

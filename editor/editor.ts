@@ -2302,10 +2302,10 @@ module TDev
         {
             if (decl == Script) {
                 ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
-                                lf("uninstall"),
-                            () => {
-                                    this.uninstallCurrentScriptAsync().done();
-                            });
+                    lf("uninstall"),
+                    () => {
+                        this.uninstallCurrentScriptAsync().done();
+                    });
             } else {
                 this.undoMgr.pushMainUndoState();
                 if (!dontCopy)
@@ -3935,8 +3935,18 @@ module TDev
             return TDev.Storage.clearAsync();
         }
 
+
         public uninstallCurrentScriptAsync()
         {
+            var isownedgroupscript = Script.editorState
+                && Script.editorState.collabSessionId
+                && Collab.getSessionOwner(Script.editorState.collabSessionId) == Cloud.getUserId();
+
+            if (isownedgroupscript) {
+                ModalDialog.info(lf("owned group script"), lf("you are the owner of this group script. To uninstall, you must first remove it from the group scripts."));
+                return Promise.as();
+            }
+
             tick(Ticks.codeUninstallScript);
             var guid = Script.localGuid;
             currentScreen = null;

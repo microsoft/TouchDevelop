@@ -6801,20 +6801,34 @@ module TDev { export module Browser {
         }
 
         private uninstall()
-        {
-            TipManager.setTip(null);
-            Promise.join([
-                this.browser().deletePaneAnimAsync(),
-                World.uninstallAsync(this.getGuid())
-            ]).done(() => {
-                this.cloudHeader = null;
-                if (this.publicId)
-                    TheEditor.historyMgr.reload(HistoryMgr.windowHash());
-                else {
-                    this.browser().skipOneSync = true;
-                    Util.setHash("list:installed-scripts");
+        {       
+            Editor.updateEditorStateAsync(this.getGuid(),(st) => {
+
+                var isownedgroupscript = st
+                    && st.collabSessionId
+                    && Collab.getSessionOwner(st.collabSessionId) == Cloud.getUserId();
+
+                if (isownedgroupscript) {
+                    ModalDialog.info(lf("owned group script"), lf("you are the owner of this group script. To uninstall, you must first remove it from the group scripts."));
+                    return;
                 }
-            });
+
+                TipManager.setTip(null);
+
+                Promise.join([
+                    this.browser().deletePaneAnimAsync(),
+                    World.uninstallAsync(this.getGuid())
+                ]).done(() => {
+                    this.cloudHeader = null;
+                    if (this.publicId)
+                        TheEditor.historyMgr.reload(HistoryMgr.windowHash());
+                    else {
+                        this.browser().skipOneSync = true;
+                        Util.setHash("list:installed-scripts");
+                    }
+                });
+
+            }).done();
         }
 
         private killData() {
@@ -7551,7 +7565,7 @@ module TDev { export module Browser {
                                     var info = this.browser().getInstalledByGuid(collab.ownerScriptguid);
                                 else if (hd)
                                     info = this.browser().getInstalledByGuid(hd.guid)
-                                else {
+                                if (!info) {
                                     var app = AST.Parser.parseScript(collab.meta)
                                     var j = app.toJsonScript()
                                     j.userid = collab.owner
@@ -7571,7 +7585,7 @@ module TDev { export module Browser {
                                     var box = info.mkBoxCore(false).withClick(() => {
                                         if (collab.owner == me)
                                             setAndEdit()
-                                        else if (hd)
+                                        else if (hd && hd.status !== "deleted")
                                             info.edit()
                                         else {
                                             var stub: World.ScriptStub = {
@@ -7594,11 +7608,16 @@ module TDev { export module Browser {
                                                 lf("remove script"),
                                                 () => {
                                                     HTML.showProgressNotification(lf("removing script from group"), true);
-                                                    TDev.Collab.stopCollaborationAsync(collab.owner, collab.ownerScriptguid)
-                                                        .then(() => Editor.updateEditorStateAsync(collab.ownerScriptguid, (st) => {
-                                                            delete st.collabSessionId;
-                                                            delete st.groupId;
-                                                        }))
+                                                    TDev.Collab.stopCollaborationAsync(collab.session)
+                                                        .then(() => {
+                                                            if (collab.owner == me)
+                                                                Editor.updateEditorStateAsync(collab.ownerScriptguid,(st) => {
+                                                                    if (st.collabSessionId === collab.session) {
+                                                                        delete st.collabSessionId;
+                                                                        delete st.groupId;
+                                                                    }
+                                                                });
+                                                        })
                                                         .done(() => loadCollaborations())
                                                 });
                                         }));
@@ -7818,24 +7837,20 @@ module TDev { export module Browser {
             return tabs;
         }
 
-        public addScriptAsync(script : ScriptInfo) : Promise{
+        public addScriptAsync(script: ScriptInfo): Promise {
             if (!script) return Promise.as();
 
             return ProgressOverlay.lockAndShowAsync(lf("adding script to group..."))
-                  .then(() => script.getScriptTextAsync())
-                  .then(text => TDev.Collab.startCollaborationAsync(script.getGuid(), text, this.publicId))
-                  .then(sessionid => {
-                    if (sessionid) {
-                        Editor.updateEditorStateAsync(script.getGuid(), (st) => {
-                            st.collabSessionId = sessionid;
-                            st.groupId = this.publicId;
-                        })
-                    }
-                  })
-                  .then(() => World.syncAsync())
-                  .then(() => Cloud.postCommentAsync(this.publicId, lf("Script ``{0:q}`` was added to the group.", script.getTitle())))
-                  .then(() => ProgressOverlay.hide(), e => { ProgressOverlay.hide(); throw e;});
+                .then(() => script.getScriptTextAsync())
+                .then(text => TDev.Collab.startCollaborationAsync(script.getGuid(), text, this.publicId))
+                .then((successfullystarted) => {
+                if (successfullystarted)
+                    return World.syncAsync()
+                        .then(() => Cloud.postCommentAsync(this.publicId, lf("Script ``{0:q}`` was added to the group.", script.getTitle())))
+                })
+                .then(() => ProgressOverlay.hide(), e => { ProgressOverlay.hide(); throw e; });
         }
+        
 
         private updateCommentsHeader(el : HTMLElement) {
             this.withUpdate(el, (u: JsonGroup) => {
