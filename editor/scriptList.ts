@@ -1224,7 +1224,13 @@ module TDev { export module Browser {
             }
         }
 
-        public getReferencedPubInfo(e:JsonPubOnPub):BrowserPage { return this.getAnyInfoByEtag({ id: e.publicationid, kind: e.publicationkind, ETag: "" }); }
+        public getReferencedPubInfo(e:JsonPubOnPub):BrowserPage {
+            if (e.kind == "notification") {
+                var jn = <JsonNotification>e
+                return this.getAnyInfoByEtag({ id: jn.supplementalid, kind: jn.supplementalkind, ETag: "" });
+            }
+            return this.getAnyInfoByEtag({ id: e.publicationid, kind: e.publicationkind, ETag: "" });
+        }
 
         public getAnyInfoByEtag(e:JsonEtag):BrowserPage
         {
@@ -4932,27 +4938,31 @@ module TDev { export module Browser {
 
         public tabBox(c:JsonPublication):HTMLElement
         {
-            var pub = c.kind == "notification" 
-                ? this.browser().getAnyInfoByEtag({ id: (<JsonNotification>c).publicationid, kind: (<JsonNotification>c).publicationkind, ETag: "" })
+            var jn = c.kind == "notification" ? <JsonNotification>c : null
+            var pub = jn
+                ? this.browser().getAnyInfoByEtag({ id: jn.publicationid, kind: jn.publicationkind, ETag: "" })
                 : this.browser().getAnyInfoByPub(c, "");
             var lab = (l:string, box = null, content = null) => ScriptInfo.labeledBox(l, box || pub.mkSmallBox())
             var own = c.userid == this.parent.publicId;
-            var kind = c.kind == "notification" ? (<JsonNotification>c).publicationkind : c.kind
+            var kind = jn ? jn.publicationkind : c.kind
+            var notkind = jn ? jn.notificationkind : ""
 
             switch (kind) {
             case "script":
-                return div(null, lab(lf("forked")))
+                return div(null, lab(notkind == "subscribed" ? lf("published") : lf("forked")))
             case "comment":
-                return div(null, lab(own ? lf("wrote") : lf("reply")))
+                //return div(null, lab(own ? lf("wrote") : lf("reply")))
+                return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
             case "review":
                 return div(null, lab(own ? lf("gave ♥") : lf("got ♥"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()))
             case "screenshot":
+                if (jn) return div(null); // TODO
                 return div(null, lab(lf("screenshot"), ScreenShotTab.mkBox(this.browser(), <JsonScreenShot>c)),
                                  lab(lf("of"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
             case "art":
-                return div(null, lab(lf("art"), ArtTab.mkBox(this.browser(), <JsonArt>c)));
+                return div(null, lab(lf("art")));
             case "group":
-                return div(null, lab(lf("group"), GroupsTab.mkBox(this.browser(), <JsonGroup>c)));
+                return div(null, lab(lf("group")));
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
                     lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));

@@ -778,6 +778,10 @@ module TDev
                 if (/^e\s*\d*$/.test(loc.getName()))
                     this.autoLocal = loc;
             }
+            if (s instanceof AST.RecordField) {
+                var rf = <AST.RecordField> s;
+                rf.setConsistentState(rf.getName(), rf.dataKind);
+            }
 
             var ch = Util.childNodes(s.renderedAs);
             this.isElse = s.renderedAs.getFlag("elseDoNothing") || s.renderedAs.getFlag("elseIf");
@@ -880,7 +884,9 @@ module TDev
 
         private backspace(isDel = false)
         {
-            tick(Ticks.calcBackspace)
+            tick(Ticks.calcBackspace);
+            if (this.stmt instanceof AST.RecordNameHolder)
+                return;
 
             var now = Util.now();
             var quick = (now - this.lastBackspaceTime) < 500;
@@ -2202,6 +2208,9 @@ module TDev
 
         private intelliNew(off:number, q:number)
         {
+            if (this.stmt instanceof AST.RecordNameHolder)
+                return;
+
             var e = this.mkIntelliItem(q, Ticks.calcNewLine);
             e.nameOverride = lf("new line");
             e.descOverride = off < 0 ? lf("new stmt above") : lf("new stmt below");
@@ -2321,7 +2330,7 @@ module TDev
             // Approximate test for determining whether we should show
             // suggestions.
             if ((this.stmt instanceof AST.RecordField || this.stmt instanceof AST.ActionParameter) &&
-                !(k.primaryKind instanceof MultiplexKind))
+                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.RecordNameHolder)
             {
                 return;
             }
