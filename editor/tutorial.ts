@@ -1149,9 +1149,13 @@ module TDev
                     m.fullWhite();
                     m.setScroll();
 
+                    var previousStep = this.currentStep - 1;
+                    while (!!this.steps[previousStep] && !this.steps[previousStep].hasStar())
+                        previousStep--;
                     m.add(div('wall-dialog-buttons tutDialogButons',
                         // TODO: mine tutorial locale
-                        /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"), () => { this.replyDialog() }) : null,
+                        /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"),() => { this.replyDialog() }) : null,
+                        previousStep >= 0 ? HTML.mkButton(lf("go to previous step"),() => { this.replyAsync(previousStep).done(() => { m.dismiss(); }); }) : null,
                         HTML.mkButton(lf("let's do it!"), () => m.dismiss())
                         )
                     );
@@ -1529,7 +1533,7 @@ module TDev
                     this.stepCompleted()
                 } else {
                     this.disableUpdate = true;
-                    this.reply(this.currentStep + 1)
+                    this.replyAsync(this.currentStep + 1).done();
                 }
                 return
             }
@@ -1711,8 +1715,8 @@ module TDev
             } else if (ins.targetName) {
                 TipManager.setTip({
                     el: elt("renameBox") || elt("renameBox2"),
-                    title: lf("type: ") + ins.targetName,
-                    description: elt("renameBox") ? lf("tap (←) when done") : lf("tap [ok] when done"),
+                    title: lf("enter text: ") + ins.targetName,
+                    description: lf("tap [ok] when done"),
                 })
             } else if (ins.targetKind) {
                 if (VariableProperties.kindSelectorVisible) {
@@ -1772,10 +1776,10 @@ module TDev
 
         private replyModalDialog:ModalDialog;
 
-        public reply(stepNo:number)
+        public replyAsync(stepNo:number) : Promise
         {
             var scr = AST.Step.reply(Script, this.app, this.steps.slice(0, stepNo).map(s => s.data), this.customizations)
-            TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, scr, JSON.stringify(Script.editorState)).then(() => {
+            return TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, scr, JSON.stringify(Script.editorState)).then(() => {
                 if (this.replyModalDialog) {
                     this.replyModalDialog.dismiss()
                     this.replyModalDialog = null
@@ -1788,7 +1792,7 @@ module TDev
                 this.fromReply = true;
                 this.update();
                 this.notify("runBack");
-            }).done();
+            });
         }
 
         public replyDialog()

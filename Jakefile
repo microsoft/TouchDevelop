@@ -10,6 +10,9 @@ var child_process = require("child_process");
 var fs = require("fs");
 var path = require("path");
 var source_map = require("source-map");
+var events = require("events");
+
+events.EventEmitter.defaultMaxListeners = 32;
 
 var head;
 function getGitHead() {
@@ -222,15 +225,6 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
-// XXX same here
-mkSimpleTask('build/mc.d.ts', [
-    'build/browser.d.ts',
-    'rt/typings.d.ts',
-    'build/rt.d.ts',
-    'build/storage.d.ts',
-    'mc'
-], "mc/refs.ts");
-
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
@@ -242,11 +236,6 @@ mkSimpleTask('build/mc.d.ts', [
 // - files without an extension generate a dependency on the ".d.ts" rule and
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
-    "build/mcrunner.js": [
-      "build/rt",
-      "build/storage",
-      "build/mc",
-    ],
     "build/noderunner.js": [
         "build/browser",
         "build/rt",
@@ -352,10 +341,13 @@ Object.keys(concatMap).forEach(function (f) {
     });
 });
 
-task('log', [], { async: true }, function () {
-  if (process.env.TRAVIS) {
-    console.log("[I] dumping the last few commits in build/gitlog.txt");
-    runAndComplete([ "git log -n 100 --pretty='format:%H%x20%ci%x20%cN%n%w(90,4,4)%s%n%w(90,4,4)%b' > build/gitlog.txt" ], this);
+task('log', [], { async: false }, function () {
+  if (process.env.TRAVIS_COMMIT_RANGE) {
+    console.log("[I] dumping commit info to build/buildinfo.json");
+    fs.writeFileSync('build/buildinfo.json', JSON.stringify({
+      commit: process.env.TRAVIS_COMMIT,
+      commitRange: process.env.TRAVIS_COMMIT_RANGE
+    }));
   }
 });
 
@@ -373,7 +365,7 @@ task('clean', [], function () {
     jake.rmRf('build/');
 });
 
-task('test', [ 'build/client.js', 'default', 'nw' ], { async: true }, function () {
+task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
@@ -409,15 +401,22 @@ task('upload', [], { async : true }, function() {
 
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
-  jake.mkdirP('build/local')
-  jake.rmRf('build/local/tdserver.js')
+  jake.mkdirP('build/local/node_modules')
+  jake.cpR('build/shell.js', 'build/local/tdserver.js')
   process.chdir("build/local")
+  var node = "node"
+  if (process.env.TD_SHELL_DEBUG)
+    node = "node-debug"
   jake.exec(
-    [ 'node ../shell.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
+    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
 });
+
+task('nw', ['default', 'nw-npm'], { async: true }, function() {
+  runAndComplete([ 'node node_modules/nw/bin/nw build/nw' ], this);
+})
 
 task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
   var task = this;
@@ -447,7 +446,7 @@ task('nw-npm', {async : true }, function() {
     );
 })
 
-task('nw', [ 'default', 'nw-npm' ], { async : true }, function() {
+task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
   var task = this;
   console.log('[I] building nw packages')
   var nwBuilder = require('node-webkit-builder');

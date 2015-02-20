@@ -11,6 +11,7 @@ import crypto = require('crypto');
 import child_process = require('child_process');
 import os = require('os');
 import events = require('events');
+import net = require("net");
 
 var config:any;
 var currentReqNo = 0;
@@ -224,6 +225,7 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
     if (p.protocol == "https:")
         mod = https
 
+    debug.log('download ' + u);
     mod.get(p, (res:http.ClientResponse) => {
         if (res.statusCode == 302) {
             downloadFile(res.headers['location'], f);
@@ -662,10 +664,8 @@ var socketCmds:StringMap<(ws, data)=>void> = {
         data.cwd = dataPath(data.cwd); // map to userhome if needed
         var proc = createProcess(data)
 
-        if (ws.currProc) {
-            debug.log('killing process ' + ws.currProc.pid);
-            ws.currProc.kill("SIGKILL")
-        }
+        socketCmds['kill'](ws, data)
+
         ws.currProc = proc
         debug.log('process ' + ws.currProc.pid);
 
@@ -708,10 +708,40 @@ var socketCmds:StringMap<(ws, data)=>void> = {
             ws.currProc.kill("SIGKILL")
             ws.currProc = null
         }
+
+        if (ws.currSock) {
+            debug.log('closing socket')
+            ws.currSock.destroy()
+            ws.currSock = null
+        }
     },
 
     log: (ws, data) => {
         logListeners.push(ws)
+    },
+
+    connect: (ws, data) => {
+        socketCmds['kill'](ws, data)
+        ws.currSock = net.connect(data.options, () => {
+            ws.currSock.setEncoding("utf8")
+            ws.sendJson({ op: "connected" })
+        })
+
+        ws.currSock.on("data", data => {
+            ws.sendJson({ op: "recv", data: data })
+        })
+
+        ws.currSock.on("error", err => {
+            ws.currSock = null
+            ws.sendError(err)
+        })
+    },
+
+    send: (ws, data) => {
+        if (!ws.currSock)
+            ws.sendError("no socket open")
+        else
+            ws.currSock.write(data.data, "utf8")
     },
 }
 
@@ -1202,6 +1232,7 @@ function loadWsModule(f:()=>void)
         var finish = () => {
             wsModule = require("faye-websocket")
             global.WebSocket = wsModule.Client
+            debug.log("Faye websocket loaded")
             f()
         }
 
@@ -1344,6 +1375,7 @@ function cacheEditor(version:string, manifest:string)
             return
 
         info.log("caching new version of the editor, " + text.length)
+        debug.log(text);
 
         cache[manifest] = ent(buf, hd)
         var num = 0
@@ -1381,7 +1413,7 @@ function proxyEditor(cmds:string[], req, resp)
 {
     if (!editorCache) {
         editorCache = {};
-        ["current", "beta"].forEach(v => {
+        ["current", "beta", "latest"].forEach(v => {
             var editorJson = dataPath(v + ".json");
             if (fs.existsSync(editorJson)) {
                 var c = JSON.parse(fs.readFileSync(editorJson, "utf8"))
@@ -1399,7 +1431,7 @@ function proxyEditor(cmds:string[], req, resp)
     if (!rel) rel = "current"
     var localPath = process.env["TD_LOCAL_EDITOR_PATH"]
     if (rel == "local" && !localPath) rel = "nope"
-    if (!/^(current|beta|local|cdn-pub|cdn-thumb|cache|^\d\d\d\d\d\d[\da-z\.-]+)$/.test(rel)) {
+    if (!/^(current|beta|latest|local|cdn-pub|cdn-thumb|cache|^\d\d\d\d\d\d[\da-z\.-]+)$/.test(rel)) {
         resp.writeHead(404, "Not found")
         resp.end("Not found")
         return
@@ -1432,6 +1464,7 @@ function proxyEditor(cmds:string[], req, resp)
 
     if (rel == "current") path += "current"
     else if (rel == "beta") path += "beta"
+    else if (rel == "latest") path += "latest"
     else if (rel == "cache") {
         url = decodeURIComponent(file)
         url = url.replace(/[?&]access_token=.*/, "")
@@ -1488,7 +1521,7 @@ function proxyEditor(cmds:string[], req, resp)
             return;
     }
 
-    if ((rel == "current" || rel == "beta") && file == "manifest")
+    if ((rel == "current" || rel == "beta" || rel == "latest") && file == "manifest")
         cacheEditor(rel, url)
 
     var serveText = (text) => {
@@ -1538,7 +1571,6 @@ function proxyEditor(cmds:string[], req, resp)
             } else sendCached();
         })
     } else if (rel == "local") {
-        debug.log('serving ' + file + ' from ' + localPath)
         var mime = getMime(file)
         var enc = /^text\//.test(mime) ? "utf8" : null
 
@@ -1784,7 +1816,8 @@ function main()
     var args = process.argv.slice(2)
     var scriptId = ""
     var internet = inAzure ? true : false
-    var useBeta = false
+    var useBeta = false;
+    var useLatest = false;
     var cli = false;
     var useHome = false;
 
@@ -1798,6 +1831,7 @@ function main()
         console.error("  --port NUMBER     -- port to listen to (-p)")
         console.error("  --scriptid ID     -- fetch newest version of /ID and run it (-s)")
         console.error("  --cli             -- don't start the browser")
+        console.error("  --latest          -- use latest (potentially unstable) TouchDevelop version")
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  NAME=VALUE        -- set environment variable for the script")
@@ -1838,6 +1872,9 @@ function main()
                 args.shift()
                 useBeta = true;
                 break
+            case "--latest":
+                args.shift()
+                useLatest = true;
             case "--internet":
                 args.shift()
                 internet = true
@@ -1895,6 +1932,7 @@ function main()
     if (process.env['TD_ALLOW_EDITOR']) {
         startUrl = "http://localhost:" + port + "/editor/"
         if (process.env["TD_LOCAL_EDITOR_PATH"]) startUrl += "local";
+        else if (useLatest) startUrl += "latest";
         else if (useBeta) startUrl += "beta"
         startUrl += "#td_deployment_key=" + config.deploymentKey
         info.log("Editor URL: " + startUrl);
@@ -1950,10 +1988,18 @@ function main()
     app.on("upgrade", (req, sock, body) => {
         loadWsModule(() => {
             if (wsModule.isWebSocket(req) &&
-                req.url == "/-tdevmgmt-/" + config.deploymentKey) {
-                mgmtSocket(new wsModule(req, sock, body))
+                req.url.slice(0, 12)  == "/-tdevmgmt-/")
+            {
+                if (req.url.slice(-config.deploymentKey.length) == config.deploymentKey) {
+                    debug.log("starting mgmt socket")
+                    mgmtSocket(new wsModule(req, sock, body))
+                } else {
+                    debug.log("invalid key for socket")
+                    sock.end()
+                }
             }
             else if (wsServer) wsServer.upgradeCallback(req, sock, body)
+            else sock.end()
         })
     })
 

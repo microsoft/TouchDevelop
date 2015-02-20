@@ -720,9 +720,8 @@ module TDev { export module Browser {
                                 }))
                         ]);
                         m.show();
-                    } else if (!Cloud.lite && !benchmarksNagged) {
-                        if (nagVector == null)
-                            nagVector = {};
+                    } else if (!Cloud.lite && !benchmarksNagged && EditorSettings.editorMode() >= EditorMode.classic) {
+                        if (nagVector == null) nagVector = {};
                         nagVector[<string>Cloud.currentReleaseId] = true;
                         localStorage["benchmarksNagVector"] = JSON.stringify(nagVector);
                         tick(Ticks.benchmarksNagDisplay);
@@ -956,6 +955,7 @@ module TDev { export module Browser {
                         progressBar.stop();
                         m.dismiss();
                         TheApiCacheMgr.invalidate("groups");
+                        TheApiCacheMgr.invalidate("me/groups");
                         TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                         var groupInfo = this.getGroupInfoById(groupid);
                         TheHost.loadDetails(groupInfo);
@@ -1000,11 +1000,9 @@ module TDev { export module Browser {
                                 showBtn();
                                 groupid = group.id;
                                 errorDiv.setChildren([
-                                    div('wall-dialog-header', 'group ',
-                                        HTML.mkA('', '#list:' + group.userid + '/groups:group:' + group.id + ':overview', '', group.name),
-                                        ' created by ',
-                                        HTML.mkA('', '#list:installed-scripts:user:' + group.userid + ':overview', '', group.username)),
-                                    ]);
+                                    div('wall-dialog-header', 'found group'),
+                                    this.getGroupInfoById(group.id).mkSmallBox()
+                                ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
                                 if (group.allowappstatistics)
@@ -1085,6 +1083,7 @@ module TDev { export module Browser {
                         Cloud.postPrivateApiAsync("groups", request)
                             .then((r: Cloud.PostApiGroupsResponse) => {
                                 TheApiCacheMgr.invalidate("groups");
+                                TheApiCacheMgr.invalidate("me/groups");
                                 TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
                                 groupInfo = this.getGroupInfoById(r.id);
                                 return groupInfo.newInvitationCodeAsync();
@@ -1225,7 +1224,13 @@ module TDev { export module Browser {
             }
         }
 
-        public getReferencedPubInfo(e:JsonPubOnPub):BrowserPage { return this.getAnyInfoByEtag({ id: e.publicationid, kind: e.publicationkind, ETag: "" }); }
+        public getReferencedPubInfo(e:JsonPubOnPub):BrowserPage {
+            if (e.kind == "notification") {
+                var jn = <JsonNotification>e
+                return this.getAnyInfoByEtag({ id: jn.supplementalid, kind: jn.supplementalkind, ETag: "" });
+            }
+            return this.getAnyInfoByEtag({ id: e.publicationid, kind: e.publicationkind, ETag: "" });
+        }
 
         public getAnyInfoByEtag(e:JsonEtag):BrowserPage
         {
@@ -3236,6 +3241,10 @@ module TDev { export module Browser {
 
         static historicalTextAsync(uid:string, guid:string, it:JsonHistoryItem)
         {
+            if (Cloud.lite)
+                return World.getScriptBlobAsync(it.historyid)
+                    .then(resp => resp ? resp.script : null)
+
             var scrid = it.scriptstatus == "published" ? it.scriptid : null
             return scrid ? ScriptCache.getScriptAsync(scrid) :
                     Cloud.getPrivateApiAsync(uid + "/installed/" + guid + "/history/" + it.historyid)
@@ -4929,24 +4938,31 @@ module TDev { export module Browser {
 
         public tabBox(c:JsonPublication):HTMLElement
         {
-            var pub = this.browser().getAnyInfoByPub(c, "");
+            var jn = c.kind == "notification" ? <JsonNotification>c : null
+            var pub = jn
+                ? this.browser().getAnyInfoByEtag({ id: jn.publicationid, kind: jn.publicationkind, ETag: "" })
+                : this.browser().getAnyInfoByPub(c, "");
             var lab = (l:string, box = null, content = null) => ScriptInfo.labeledBox(l, box || pub.mkSmallBox())
             var own = c.userid == this.parent.publicId;
+            var kind = jn ? jn.publicationkind : c.kind
+            var notkind = jn ? jn.notificationkind : ""
 
-            switch (c.kind) {
+            switch (kind) {
             case "script":
-                return div(null, lab(lf("forked")))
+                return div(null, lab(notkind == "subscribed" ? lf("published") : lf("forked")))
             case "comment":
-                return div(null, lab(own ? lf("wrote") : lf("reply")))
+                //return div(null, lab(own ? lf("wrote") : lf("reply")))
+                return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
             case "review":
                 return div(null, lab(own ? lf("gave ♥") : lf("got ♥"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()))
             case "screenshot":
+                if (jn) return div(null); // TODO
                 return div(null, lab(lf("screenshot"), ScreenShotTab.mkBox(this.browser(), <JsonScreenShot>c)),
                                  lab(lf("of"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
             case "art":
-                return div(null, lab(lf("art"), ArtTab.mkBox(this.browser(), <JsonArt>c)));
+                return div(null, lab(lf("art")));
             case "group":
-                return div(null, lab(lf("group"), GroupsTab.mkBox(this.browser(), <JsonGroup>c)));
+                return div(null, lab(lf("group")));
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
                     lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
@@ -7237,7 +7253,8 @@ module TDev { export module Browser {
             if (this.isMe())
                 ch.unshift(accountButtons = div("sdBottomButtons sdAccountBtns",
                     HTML.mkButton(lf("account settings"), () => { Hub.accountSettings() }),
-                    HTML.mkButton(lf("change wallpaper"), () => { Hub.chooseWallpaper() })
+                    HTML.mkButton(lf("skill level"),() => { EditorSettings.showChooseEditorModeAsync().done() }),
+                    HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() })
                 ));
             ch.unshift(hd);
 
@@ -7411,7 +7428,8 @@ module TDev { export module Browser {
 
         private progressTable : HTMLTableElement;
         private progressHeader : HTMLTableRowElement;
-        private tutorials : StringMap<string> = {};
+        private tutorials: StringMap<string> = {};
+        private userRows: StringMap<HTMLTableRowElement> = {};
         topContainer() : HTMLElement
         {
             this.progressTable = document.createElement("table");
@@ -7425,14 +7443,18 @@ module TDev { export module Browser {
             var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
             this.progressHeader.appendChild(st);
             this.tutorials = {};
+            this.userRows = {};
             return div('tbProgress', this.progressTable);
         }
 
         public tabBox(cc:JsonIdObject):HTMLElement
         {
-            var tr = (u : JsonUser) => {
-                var row = document.createElement("tr");
-                row.dataset["userid"] = c.id;
+            var tr = (u: JsonUser) => {
+                var row = this.userRows[c.id];
+                if (!row) {
+                    row = this.userRows[c.id] = document.createElement("tr");
+                    row.dataset["userid"] = c.id;
+                }
                 var cell = document.createElement("td");
                 row.appendChild(cell);
                 var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
@@ -7648,22 +7670,6 @@ module TDev { export module Browser {
                     })
                     .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
                     .done(() => done());
-                }),
-                HTML.mkButton(lf("create new script"), () => {
-                    start();
-                    Browser.TheHub.chooseScriptFromTemplateAsync()
-                        .done(template => {
-                            if (template) {
-                                HTML.showProgressNotification(lf("creating script..."), true);
-                                var headerGuid, scriptText;
-                                TheEditor.newScriptAsync(template.source, template.name)
-                                    .then(header => World.getInstalledScriptAsync(headerGuid = header.guid))
-                                    .then(text => { scriptText = text; return World.syncAsync(); })
-                                    .then(() => TDev.Collab.startCollaborationAsync(headerGuid, scriptText, this.parent.publicId))
-                                    .then(() => World.syncAsync())
-                                    .done(() => done());
-                            }
-                        });
                 })
             ]);
         }

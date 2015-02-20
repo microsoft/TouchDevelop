@@ -77,7 +77,10 @@ module TDev.RT.Node {
         }
         util.inherits(ReuseAgentSSL, AgentSSL)
 
-        mkAgent = p => p == "https:" ? new ReuseAgentSSL({ maxSockets: maxSock }) : new ReuseAgent({ maxSockets: maxSock })
+        if (/^v0\.10/.test(process.version))
+            mkAgent = p => p == "https:" ? new ReuseAgentSSL({ maxSockets: maxSock }) : new ReuseAgent({ maxSockets: maxSock })
+        else
+            mkAgent = p => p == "https:" ? new AgentSSL({ maxSockets: maxSock }) : new Agent({ maxSockets: maxSock })
 
         console.log("creating new HTTP agent")
 

@@ -401,7 +401,7 @@ module TDev.AppExport
         var res = new PromiseInv();
         var name = HTML.mkTextInput("text", lf("web site name"));
         m.add(name)
-        m.add(div('', lf("url (e.g. http://localhost:4242/editor):")));
+        m.add(div('', lf("url (e.g. http://localhost:4242):")));
         var url = HTML.mkTextInput("url", lf("web site url"));
         m.add(url)
         m.add(div('', lf("key (printed out by your node server on startup):")));
@@ -412,7 +412,7 @@ module TDev.AppExport
                 if (!/^http(s?):\/\//.test(url.value)) {
                     throw new Error(lf("Please provide a proper http(s) url (e.g. http://localhost:4242)"));
                 }
-                if (url.value.indexOf("/") !== url.value.length) {
+                if (!/\/$/.test(url.value)) {
                     url.value = url.value + "/";
                 }
                 var wa = <Azure.WebsiteAuth> {
@@ -474,7 +474,11 @@ module TDev.AppExport
         var m = /\/(\d+-[a-f0-9\.]+-[^\/]+)\//.exec(baseUrl)
         if (m)
             return Cloud.getPrivateApiUrl("deploy/" + path + "?releaseid=" + m[1])
-        return baseUrl + "api/deploy/" + path
+        m = /noderunner=(\d+)/.exec(document.URL)
+        if (m)
+            return "http://localhost:" + m[1] + "/api/deploy/" + path
+        else
+            return Cloud.getPrivateApiUrl("deploy/" + path)
     }
 
     export function mgmtRequestAsync(wa:Azure.WebsiteAuth, path:string, data?:any) : Promise
@@ -1498,16 +1502,19 @@ module TDev.AppExport
             logger.info(cmd);
         }
 
-        function cli(descr: string, command: string, cwd: string = undefined, root = false): Promise {
+        function cli(descr: string, command: string, cwd: string = undefined, ignoreErrors = false): Promise {
             if (cancelled) return new PromiseInv();
             status(command);
-            return LocalShell.mgmtRequestAsync(root ? "runcli" : "plugin/shell", {
+            return LocalShell.mgmtRequestAsync(cwd ? "plugin/shell" : "runcli", {
                 command: command,
                 cwd: cwd
             }).then(resp => {
-                logger.info(lf("{0} exited with {1}", command, resp.code));
+                if (resp.code) logger.info(lf("{0} exited with {1}", command, resp.code));
                 if (resp.stdout) logger.debug(resp.stdout);
-                if (resp.stderr) logger.error(resp.stderr);
+                if (resp.stderr) {
+                    if (ignoreErrors) logger.debug(resp.stderr);
+                    else logger.error(resp.stderr);
+                }
                 return resp;
             });
         }
@@ -1578,16 +1585,16 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
             return cli(lf("checking cordova..."), "cordova --version", undefined, true);
-        }).then(resp => resp.code == 0 && /4\.1/.test(resp.stdout) ? Promise.as() :
-            cli(lf("installing cordova..."), "npm install -g cordova", undefined, true))
+        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) ? Promise.as() :
+            cli(lf("installing cordova..."), "npm install -g cordova"))
         .then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
-            return runNpm ? cli(lf("installing jimp..."), "npm install jimp", undefined, true) : Promise.as();
+            return runNpm ? cli(lf("installing jimp..."), "npm install jimp") : Promise.as();
         }).then(() => mkDir(dir, "777"))
-        .then(() => cli(lf("creating project"), "cordova create " + dir))
+        .then(() => cli(lf("creating project"), "cordova create " + dir, undefined, true))
         .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),
-            platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir)))
+            platform => cli(lf("adding platforms"), "cordova platform add " + platform, dir, true)))
         .then(() => Promise.sequentialMap(instructions.cordova.plugins,
             plugin => cli(lf("adding plugins"), "cordova plugin add " + plugin, dir)))
         // first write icon and generate all needed icons
@@ -1654,7 +1661,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             var xml = configXml.join("\n");
             return writeFiles([{ path: dir + "/config.xml", content: xml}]);
         })
-        .then(() => Promise.sequentialMap(instructions.cordova.runs, run => cli(lf("building and launching apps"), "cordova run " + run, dir)))
+        .then(() => Promise.sequentialMap(instructions.cordova.runs, run => cli(lf("building and launching apps"), "cordova run " + run, dir, true)))
         .then(() => {
             status(lf("Hooray! build completed!"));
         }, e => {

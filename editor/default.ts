@@ -1,8 +1,6 @@
 ///<reference path='refs.ts'/>
 module TDev
 {
-    export var sharedText:string = null;
-
     function initEditorAsync()
     {
         SizeMgr.earlyInit();
@@ -204,12 +202,16 @@ module TDev
         if (/dbg=[1t]/.test(url) || window.localStorage["dbg"]) dbg = true;
         if (/nodbg/.test(url)) dbg = false;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
+        if (/nohub/.test(url)) TDev.noHub = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
-        if (/temporaryStorage/.test(url)) {
+        if (Browser.noStorage || /temporaryStorage/.test(url)) {
             Browser.supportMemoryTable(true);
             Storage.temporary = true;
+        }
+        if (/noAnim/.test(url)) {
+            Browser.noAnimations = true;
         }
 
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
@@ -447,9 +449,12 @@ module TDev
             return true;
         }
 
-        if (/lite=1/.test(document.URL)) {
+        var mx = /lite=([0-9a-z]+)/.exec(document.URL)
+
+        if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            (<any>window).rootUrl = "https://tdscratch.azurewebsites.net"
+            (<any>window).rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://tdscratch.azurewebsites.net"
+            TDev.Ticker.disable()
         }
 
         if (/httplog=1/.test(document.URL)) {

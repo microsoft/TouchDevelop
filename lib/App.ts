@@ -576,7 +576,7 @@ module TDev.RT {
         }
 
         //? Runs a shell command. This action is only available when the script is running from a local web server.
-        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv")
+        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv", "socket")
         //@ cap(shell) returns(JsonObject) async
         export function run_command(cmd: string, data: JsonObject, r: ResumeCtx) {
             var proxyAsync = r.rt.host.localProxyAsync;

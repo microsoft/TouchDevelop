@@ -7,6 +7,9 @@ module TDev {
         export function localProxyHandler() {
             return function (cmd, data) {
                 if (cmd == "shell") return LocalShell.runShellAsync(data)
+                else if (cmd == "socket") 
+                    return LocalShell.mgmtRequestAsync("stats")
+                        .then(() => { return { url: mgmtUrl("").replace(/^http/, "ws") } })
                 else return LocalShell.mgmtRequestAsync("plugin/" + cmd, data)
             };
         }

@@ -412,6 +412,7 @@ module TDev {
         email?: string;
         location?: string;
         twitterhandle?: string;
+        githubuser?: string;
         editorMode?: string;
         school?: string;
         wallpaper?: string;
@@ -465,6 +466,7 @@ module TDev {
         v?: number;
         delay: number;
         numErrors?: number;
+        headers?: Header[];
     }
 
     export interface PostApiGroupsBody {

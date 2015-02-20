@@ -45,6 +45,8 @@ module TDev {
         export var canMemoryTable = true;
         export var hasHardwareBack = false;
         export var localProxy = false;
+        export var noAnimations = false;
+        export var noStorage = false;
 
         export var isGenStubs = false;
         export var mobileWebkit = false;
@@ -312,6 +314,13 @@ module TDev {
                 brokenBackButton = true;
                 brokenResize = true;
             }
+
+            // raspberry pi
+            if (/Linux armv7/.test(userAgent)) {
+                noAnimations = true;
+                noStorage = true; // I/O very slow
+            }
+
             browserShortName = browserName(browser);
             if (isWP8app) browserShortName += ".wp8app";
             else if (isCellphone) browserShortName += ".phone";
@@ -507,11 +516,11 @@ module TDev {
 
         export function supportMemoryTable(value: boolean) {
             if (value) {
-                window.localStorage.removeItem('disableMemoryTable');
+                if (canWriteLocalStorage) window.localStorage.removeItem('disableMemoryTable');
                 canMemoryTable = true;
             }
             else {
-                window.localStorage["disableMemoryTable"] = "1";
+                if (canWriteLocalStorage) window.localStorage["disableMemoryTable"] = "1";
                 canMemoryTable = false;
             }
         }

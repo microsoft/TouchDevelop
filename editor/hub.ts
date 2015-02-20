@@ -13,11 +13,23 @@ module TDev { export module Browser {
         description: string;
         name: string;
         source: string;
-        section:string;
+        section: string;
+        editorMode: number;
         caps?: string;
         baseId?: string;
         baseUserId?: string;
         requiresLogin?: boolean;
+    }
+
+    interface ITutorial {
+        title: string;
+        // Represents the progress of the script corresponding to that tutorial
+        header?: Cloud.Header;
+        // The tutorial per se (the terminology in the source code refers to
+        // "topic")
+        topic: HelpTopic;
+        // The app that contains the tutorial
+        app?: AST.App;
     }
 
     export module EditorSoundManager
@@ -388,6 +400,7 @@ module TDev { export module Browser {
                                         name: scr.name,
                                         source: txt,
                                         section: "",
+                                        editorMode:0,
                                         baseId: scr.id,
                                         baseUserId: scr.userid,
                                     }
@@ -551,9 +564,11 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
+            var editorMode = EditorSettings.editorMode();
             var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
+                    if (template.editorMode > editorMode) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
@@ -601,29 +616,92 @@ module TDev { export module Browser {
             return tileOuter
         }
 
-        public tutorialTile(templateId:string, f:(startFrom:Cloud.Header)=>void):HTMLElement
-        {
+        // From what I understand, finding a tutorial is all but an easy task.
+        // There's a variety of steps involved which I tried to isolate in this
+        // function...
+        // - [headerByTutorialId] is a promise of a map from tutorial id (e.g.
+        //   "t:codingjetpackjumper" to the corresponding [Cloud.Header])
+        // - the result of this promise is considered good for three seconds
+        //   only, and is renewed after that by re-assigning a fresh promise
+        //   into the variable
+        // - the result of a call to [HelpTopic.findById]...  may return a
+        //   null-ish value in case the tutorial is not in the cache; if this is
+        //   the case, we fetch the corresponding tutorial using [TheApiCacheMgr]
+        //   and follow the succession of updates to the tutorial.
+        // - once this is done, we call [finish]
+        // - because we may have found the tutorial we wanted in the process, we
+        //   return a new value for [top]
+        private findTutorial(templateId: string, finish) {
+            var top = HelpTopic.findById("t:" + templateId)
+
             if (!this.headerByTutorialId || Date.now() - this.headerByTutorialIdUpdated > 3000) {
                 this.headerByTutorialId = this.tutorialsByUpdateIdAsync();
                 this.headerByTutorialIdUpdated = Date.now()
             }
 
+            if (top) {
+                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish(res, top));
+            } else {
+                var fetchingId = null
+                var fetchId = id => {
+                    // Is the pointer structure of [updateid]'s expected to
+                    // loop? I assume that we abort in this case?
+                    if (fetchingId == id)
+                        return;
+                    fetchingId = id;
+                    TheApiCacheMgr.getAnd(id, (j:JsonScript) => {
+                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time)
+                            fetchId(j.updateid);
+                        else {
+                            top = HelpTopic.fromJsonScript(j);
+                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish(res, top));
+                        }
+                    })
+                }
+
+                fetchId(templateId);
+            }
+        }
+
+        // Start a tutorial, with an (optional) header that represents progress,
+        // along with an optional function.
+        private startTutorial(top: HelpTopic, header: Cloud.Header = null) {
+            if (header) {
+                this.browser().createInstalled(header).edit();
+            } else {
+                TopicInfo.followTopic(top);
+            }
+        }
+
+        private findImgForTutorial(app: AST.App) {
+            // XXX it seems that this function is actually unused as [app] is
+            // always null?!!
+            if (!app)
+                return null;
+
+            var findImg = t => app.resources().filter(r =>
+                    r.getKind() == api.core.Picture &&
+                    t.test(r.getName()) &&
+                    /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
+
+            var img = findImg(/screenshot/) || findImg(/background/);
+
+            return img;
+        }
+
+        public tutorialTile(templateId:string, f:(startFrom:Cloud.Header)=>void):HTMLElement
+        {
             var tileOuter = div("tutTileOuter")
 
-            var top = HelpTopic.findById("t:" + templateId)
-            var isHelpTopic = !!top;
-
-            var start = (header:Cloud.Header) => {
+            var startTutorial = (top, header: Cloud.Header) => {
                 Util.log("tutorialTile.start: " + templateId)
-                if (f) f(header)
-                if (header) {
-                    this.browser().createInstalled(header).edit()
-                } else {
-                    TopicInfo.followTopic(top)
-                }
+                if (f)
+                    f(header);
+                this.startTutorial(top, header);
             };
 
-            var finish = res => {
+            var finish = (res, top: HelpTopic) => {
+                var isHelpTopic = !!top;
                 var tile = div("tutTile")
                 tileOuter.setChildren([tile])
 
@@ -658,20 +736,8 @@ module TDev { export module Browser {
                 }
 
 
-                var imgUrl = ""
-
-                if (app) {
-                    var findImg = t => app.resources().filter(r =>
-                            r.getKind() == api.core.Picture &&
-                            t.test(r.getName()) &&
-                            /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
-
-                    var img = findImg(/screenshot/) || findImg(/background/);
-                    if (img)
-                        imgUrl = img.url
-                } else {
-                    imgUrl = top.json.screenshot
-                }
+                var img = this.findImgForTutorial(app);
+                var imgUrl = img ? img.url : top.json.screenshot;
 
                 if (imgUrl) {
                     var picDiv = tile
@@ -703,32 +769,14 @@ module TDev { export module Browser {
                             :
                             div("steps", starSpan, ofSteps,
                                             div("label", lf("tutorial progress")))),
-                            div("restart", HTML.mkButton(lf("start over"), () => start(null)))))
+                            div("restart", HTML.mkButton(lf("start over"), () => startTutorial(top, null)))))
                 }
 
-                titleDiv.withClick(() => start(continueHeader))
-                tile.withClick(() => start(continueHeader))
+                titleDiv.withClick(() => startTutorial(top, continueHeader))
+                tile.withClick(() => startTutorial(top, continueHeader))
             };
 
-            if (top) {
-                Promise.join([Promise.as(null), this.headerByTutorialId]).done(finish)
-            } else {
-                var fetchingId = null
-                var fetchId = id => {
-                    if (fetchingId == id) return
-                    fetchingId = id
-                    TheApiCacheMgr.getAnd(id, (j:JsonScript) => {
-                        if (j.updateid && j.id !== j.updateid && j.updatetime > j.time)
-                            fetchId(j.updateid)
-                        else {
-                            top = HelpTopic.fromJsonScript(j);
-                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(finish)
-                        }
-                    })
-                }
-
-                fetchId(templateId)
-            }
+            this.findTutorial(templateId, finish);
 
             return tileOuter
         }
@@ -808,7 +856,7 @@ module TDev { export module Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates")
+                    if (k != "templates" && !this.isBeginner())
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
@@ -884,47 +932,6 @@ module TDev { export module Browser {
                 tutorialOffset++;
                 elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
                 scriptSlots = 4 - items.length
-
-
-                /*
-                var sz = items.length == 0 ? 3 : items.length == 1 ? 2 : 1;
-                var showBtn = this.mkFnBtn("", () => {
-                        this.hide();
-                        this.browser().showList("showcase-scripts", null);
-                    }, Ticks.hubMyScriptsShowcase, false, sz)
-                elements.push(showBtn)
-                var screens = div("showcaseScreens")
-                showBtn.appendChildren([screens, div("showcaseLabel", lf("Explore Showcase"))])
-
-                var sz0 = sz;
-                this.browser().getLocationList("showcase-scripts", (items, cont) => {
-                    var cnt = sz0 == 3 ? 12 : sz0 == 2 ? 4 : 3;
-                    Promise.join(items.slice(0, cnt*2).map(s => (<ScriptInfo>s).getRealJsonScriptPromise()))
-                    .done((scripts:JsonScript[]) => {
-                        var urls = scripts.map(s => s.screenshotthumburl).filter(s => !!s).slice(0, cnt)
-                        screens.setChildren(urls.map(s => HTML.mkImg(s)))
-                    })
-                });
-
-                var budget = 4 - items.length;
-                this.getAvailableTemplates().slice(3).forEach(template => {
-                    if (--budget < 0) return;
-                    if (sz > 1) sz--;
-                    var btn = this.mkFnBtn("", () => {
-                        this.createScriptFromTemplate(template)
-                    }, Ticks.hubMyScriptsTemplate, true, sz)
-                    btn.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
-                    btn.className += " hubScriptTemplate";
-                    btn.appendChildren([
-                        div("hubTileTutorialIcon", HTML.mkImg("svg:" + template.icon + ",white")),
-                        div("hubTileTutorialName", template.title,
-                            div("hubTileTutorialSubtitle", lf("tutorial"))
-                        ),
-                        div("hubTileTitleBar", div("hubTileTutorialDesc", template.description)),
-                    ])
-                    elements.push(btn)
-                })
-                */
             }
 
 
@@ -961,7 +968,8 @@ module TDev { export module Browser {
             var noFnBreak = false;
 
             if (s == "social") {
-                elements = elements.slice(0, 4);
+                var slots = 4;
+                elements = elements.slice(0, slots);
                 if (elements.length == 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
@@ -976,23 +984,23 @@ module TDev { export module Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (elements.length < 5) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Facebook"), () => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
-                    elements.push(el);
+                if (!this.isBeginner()) {
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("Twitter"),() => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
+                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
+                        elements.push(el);
+                    }
+                    if (elements.length < slots + 1) {
+                        var el = toExternalBtn(this.mkFnBtn(lf("YouTube"),() => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
+                        elements.push(el);
+                    }
                 }
-                if (elements.length < 5) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("Twitter"), () => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
-                    el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-                if (elements.length < 5) {
-                    var el = toExternalBtn(this.mkFnBtn(lf("YouTube"), () => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
-                    //el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                    elements.push(el);
-                }
-
-                while (elements.length < 5) {
+                while (elements.length < slots + 1) {
                     var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
                     fill.style.opacity = '0';
                     elements.push(fill);
@@ -1005,17 +1013,18 @@ module TDev { export module Browser {
 
             if (s == "recent") {
                 noFnBreak = true;
-                addFnBtn(lf("See More"), Ticks.hubSeeMoreMyScripts,
+                addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-
-                var upd = this.browser().headersWithUpdates();
-                if (upd.length > 0) {
-                    var updBtn =
-                        this.mkFnBtn(lf("Script Updates"), () => { this.updateScripts() }, Ticks.hubUpdates, true);
-                    updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
-                    elements.push(updBtn)
+                if (!this.isBeginner()) {
+                    var upd = this.browser().headersWithUpdates();
+                    if (upd.length > 0) {
+                        var updBtn =
+                            this.mkFnBtn(lf("Script Updates"),() => { this.updateScripts() }, Ticks.hubUpdates, true);
+                        updBtn.appendChild(div('hubTileCounter', upd.length.toString()));
+                        elements.push(updBtn)
+                    }
                 }
             }
             else if (s == "art" || s == "myart") {
@@ -1033,15 +1042,17 @@ module TDev { export module Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("See More"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
+                    addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                    elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                    // elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:person,white")));
-
-                    elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
-                    elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
+                    if (!this.isBeginner()) {
+                        elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                        elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                        elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
+                        elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
+                    } else {
+                        elements.push(this.mkFnBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
+                    }
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
@@ -1333,7 +1344,7 @@ module TDev { export module Browser {
             Util.httpGetJsonAsync(Cloud.getPrivateApiUrl("me/settings")).done((settings) => {
                 Browser.setInnerHTML(dialogBody, "")
 
-                var nickname, website, twitterhandle, location, area, aboutme, realname, gender, yearofbirth,
+                var nickname, website, twitterhandle, githubuser, location, area, aboutme, realname, gender, yearofbirth,
                     culture, howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
                     school;
 
@@ -1349,6 +1360,9 @@ module TDev { export module Browser {
 
                     twitterhandle = <HTMLInputElement>textEntry(lf("twitter handle"), HTML.mkTextInput("text", lf("twitter handle")),
                         lf("Your twitter handle, like @touchdevelop."));
+
+                    githubuser = <HTMLInputElement>textEntry(lf("github user"), HTML.mkTextInput("text", lf("github user")),
+                        lf("Your GitHub user."));
 
                     location = <HTMLInputElement>textEntry(lf("location"), HTML.mkTextInput("text", lf("location")),
                         lf("Where in the world are you?"))
@@ -1490,6 +1504,7 @@ module TDev { export module Browser {
                                     email: email === undefined ? undefined : email.value,
                                     location: location === undefined ? undefined : location.value,
                                     twitterhandle: twitterhandle === undefined ? undefined : twitterhandle.value,
+                                    githubuser: githubuser === undefined ? undefined : githubuser.value,
                                     school: school ? school.value : undefined,
                                 }).done(resp => {
                                     progressBar.stop();
@@ -1526,6 +1541,7 @@ module TDev { export module Browser {
                 if (area) { area.textarea.value = settings.aboutme || ""; area.update() }
                 if (realname) realname.value = settings.realname || "";
                 if (twitterhandle) twitterhandle.value = settings.twitterhandle || "";
+                if (githubuser) githubuser.value = settings.githubuser || "";
                 if (email) email.value = settings.email || "";
                 if (school) school.value = settings.school || "";
 
@@ -1608,7 +1624,75 @@ module TDev { export module Browser {
             Util.setHash('#topic:exporttoapp');
         }
 
-        private showMisc(container:HTMLElement)
+        // Takes care of the painful, non-trivial task of fetching all the
+        // tutorials. For each tutorial found, we call [k] with it.
+        private fetchAllTutorials(k: (t: ITutorial) => void) {
+            var helpTopic = HelpTopic.findById("tutorials");
+            helpTopic.initAsync().then(() => {
+                // The list of tutorials is represented as an app, with a single
+                // action, whose body is a list of comments...
+                var comments = <AST.Comment[]> helpTopic.app.actions()[0].body.stmts;
+                // Each comment has a special Markdown structure that can be
+                // inspected using regular expressions. Essentially, we match the
+                // syntax {macro:argument} where macro is the string "follow" and
+                // argument is the title of the corresponding tutorial.
+                comments.forEach((c: AST.Comment) => {
+                    // Copied from [help.ts]
+                    var m = c.text.match(/\{(\w+)(:([^{}]*))?\}/);
+                    if (m && m[1] == "follow") {
+                        var id = MdComments.shrink(m[3]);
+                        // Copied from [tutorialTitle], and (hopefully) simplified.
+                        this.findTutorial(id, (res, topic: HelpTopic) => {
+                            var key = topic.updateKey();
+                            var header = res[1][key]; // may be null or undefined
+                            k({
+                                title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
+                                header: header,
+                                topic: topic,
+                                app: res[0],
+                            });
+                        });
+                    }
+                });
+            })
+        }
+
+        private showSimplifiedLearn(container:HTMLElement) {
+            var buttons = [];
+            this.fetchAllTutorials((tutorial: ITutorial) => {
+                // We just listen for the first eight tutorials.
+                if (buttons.length > 6)
+                    return;
+
+                var btn = this.mkFnBtn("", () => {
+                    this.startTutorial(tutorial.topic, tutorial.header);
+                }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
+                btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
+                btn.style.backgroundImage = "url("+tutorial.topic.json.screenshot+")";
+                btn.style.backgroundSize = "cover";
+                buttons.push(btn);
+
+                if (buttons.length == 6) {
+                    buttons.push(this.createSkillButton());
+                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
+                        Util.setHash('#topic:tutorials');
+                    }, Ticks.noEvent, false, 1));
+                    this.layoutTiles(container, buttons);
+                }
+            });
+        }
+
+        private createSkillButton(): HTMLElement {
+            var editorMode = EditorSettings.editorMode();
+            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
+            var skill = this.mkFnBtn(skillTitle,() => {
+                EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
+            }, Ticks.hubChooseSkill, true);
+            skill.className += " exportBtn";
+            return skill;
+        }
+
+        private showLearn(container:HTMLElement)
         {
             function toTutBtn(btn: HTMLElement) {
                 btn.className += " tutorialBtn";
@@ -1621,10 +1705,8 @@ module TDev { export module Browser {
             var whatsNew: HTMLElement;
             var begginersEl : HTMLElement;
             //var advancedEl:HTMLElement;
-            var rate, skill, settings: HTMLElement;
+            var rate, settings: HTMLElement;
             var searchEl: HTMLElement;
-            var editorMode = EditorSettings.editorMode();
-            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
             var elements = [
                 this.startTutorialButton(Ticks.hubDocsTutorial),
                 docsEl = toTutBtn(this.mkFnBtn(lf("Search Help"), () => {
@@ -1648,9 +1730,7 @@ module TDev { export module Browser {
                 }, Ticks.hubDocsApi, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
-                skill = this.mkFnBtn(skillTitle, () => {
-                    EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
-                }, Ticks.hubChooseSkill, true),
+                this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()
                 }, Ticks.hubSettings),
@@ -1666,9 +1746,7 @@ module TDev { export module Browser {
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
-            /* skill.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:threecolumn,white"))); FIXME: need icons */
 
-            skill.className += " exportBtn";
             if (rate) rate.className += " exportBtn";
 
             this.layoutTiles(container, elements);
@@ -1745,18 +1823,27 @@ module TDev { export module Browser {
             m.choose(boxes);
         }
 
+        private isBeginner() {
+            return EditorSettings.editorMode() <= EditorMode.block;
+        }
+
         private updateSections()
         {
             var sects = {
                 "recent": lf("my scripts"),
-                "misc": lf("learn"),
-                "social": lf("social"),
+                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
                 "showcase": lf("showcase"),
-                "tags": lf("categories"),
-                //"new": lf("new"),
-                "top": lf("top & new"),
-                //"art": lf("art"),
-                "myart": lf("my art"),
+                "social": lf("social"),
+            };
+            if (!this.isBeginner()) {
+                var extra = {
+                    "top": lf("top & new"),
+                    "tags": lf("categories"),
+                    //"new": lf("new"),
+                    //"art": lf("art"),
+                    "myart": lf("my art"),
+                };
+                Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
 
             if (SizeMgr.portraitMode) {
@@ -1867,7 +1954,7 @@ module TDev { export module Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    this.showMisc(c)
+                    this.isBeginner() ? this.showSimplifiedLearn(c) : this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
@@ -1904,7 +1991,7 @@ module TDev { export module Browser {
                 notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
 
                 this.notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate("notifications"); Util.setHash("#notifications") });
+                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); Util.setHash("#notifications") });
                 World.onNewNotificationChanged = (n: number) => {
                     if (n > 0 && this.notificationsCount != n) {
                         HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });

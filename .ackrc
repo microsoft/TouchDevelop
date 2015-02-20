@@ -5,3 +5,4 @@
 --ignore-file=is:help.cache
 --ignore-file=is:browsers.html
 --ignore-file=is:error.html
+--ignore-file=is:beta.json

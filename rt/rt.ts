@@ -2093,7 +2093,7 @@ module TDev
                     }
                     if (numCheck++ > 10) {
                         var now = Date.now();
-                        if (now - this.lastBreak > 50) {
+                        if (now - this.lastBreak > (Browser.isNodeJS ? 1000 : 50)) {
                             continueLater = true;
                             break;
                         }

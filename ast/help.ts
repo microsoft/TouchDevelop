@@ -54,6 +54,17 @@ module TDev {
         userhaspicture:boolean;
     }
 
+    // lite only
+    export interface JsonNotification extends JsonPubOnPub
+    {
+        notificationkind: string;
+
+        // if publicationkind == 'review', this will hold the script data
+        supplementalid: string;
+        supplementalkind: string;
+        supplementalname: string;
+    }
+
     export interface JsonDocument
     {
         url:string; // website for human consumption
@@ -1247,7 +1258,7 @@ module TDev {
     export class HelpTopic
     {
         private searchCache:string;
-        private app:AST.App;
+        public app:AST.App;
         private apiKind:Kind;
         private apiProperty:IProperty;
         private subTopics:StringMap<HelpTopic>;

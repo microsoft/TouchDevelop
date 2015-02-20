@@ -2645,13 +2645,15 @@ module TDev.AST {
         static sanitizeScriptTextForCloud(s:string)
         {
             var r = "";
-            s = s.replace(/(\r?\n)+$/, "");
-            s.split(/\n/).forEach((ln) => {
-                if (/^meta (stableNames|editorState)/.test(ln)) {}
-                else {
-                    r += ln + "\n";
-                }
-            });
+            if (s) {
+                s = s.replace(/(\r?\n)+$/, "");
+                s.split(/\n/).forEach((ln) => {
+                    if (/^meta (stableNames|editorState)/.test(ln)) { }
+                    else {
+                        r += ln + "\n";
+                    }
+                });
+            }
             return r;
         }
 

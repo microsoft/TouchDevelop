@@ -423,24 +423,28 @@ module TDev.HTML {
         return txt;
     }
 
-    export function mkTextInputWithOk(type:string, placeholder = "") : HTMLInputElement
+    export function mkTextInputWithOk(type:string, placeholder? : string, onOk? : () => void) : HTMLInputElement
     {
         var res = mkTextInput(type, placeholder)
         var okBtn:HTMLElement = null;
 
         Util.onInputChange(res, () => {
             if (okBtn) return
+            res.style.width = "calc(100% - 6em)";
             okBtn = mkButton(lf("ok"), () => {
                 var b = okBtn
                 okBtn = null
+                res.style.width = "";
                 if (b) b.removeSelf();
                 res.blur()
+                if (onOk) onOk();
             }, "input-confirm");
             res.parentNode.insertBefore(okBtn, res.nextSibling)
         })
         res.addEventListener("blur", () => {
             var b = okBtn
             okBtn = null
+            res.style.width = "";
             if (b) b.removeSelf();
         }, false)
 
@@ -742,16 +746,20 @@ module TDev.HTML {
         var r = <ProgressBar>div("progressBar", Util.range(0, 4).map((v) => div("progressDot progressDot-" + v)));
         HTML.setRole(r, "progressbar");
         var n = 0;
-        function update(k:number) {
+        function update(k: number) {
             n += k;
             if (n < 0) n = 0;
             r.style.display = n > 0 ? "block" : "none";
         }
         update(0);
 
-        r.start = () => { update(+1) };
-        r.stop = () => { update(-1) };
-        r.reset = () => { update(-n) };
+        if (Browser.noAnimations) {
+            r.start = r.stop = r.reset = () => { };
+        } else {
+            r.start = () => { update(+1) };
+            r.stop = () => { update(-1) };
+            r.reset = () => { update(-n) };
+        }
 
         return r;
     }
@@ -817,6 +825,7 @@ module TDev.HTML {
 
     export function cssImage(url:string, opacity = 1) : string
     {
+        if (!url) return "";
         var u = "url(" + proxyResource(url) + ")";
         if (opacity <= 1)
             u = Util.fmt("linear-gradient(to bottom, rgba(255,255,255,{0}) 0%,rgba(255,255,255,{0}) 100%), {1}", (1-opacity).toFixed(3) , u);

@@ -2103,7 +2103,7 @@ module TDev
             this.backBtnDiv.setChildren([
                 this.hasModalPane() ?
                     Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
+                    TDev.noHub ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
             ])
         }
 
@@ -2123,7 +2123,7 @@ module TDev
             if (snapView) return;
 
             var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)) : null;
-            if (splitBtn) splitBtn.classList.add("phone-hidden");
+            if (splitBtn) splitBtn.className += " portrait-hidden split-visible";
             var top = div("topButtons",
                 this.backBtnDiv = div("inlineBlock topMenu-button-container search-back"),
                 this.playBtnDiv = div("inlineBlock topMenu-button-container"),
@@ -2512,6 +2512,10 @@ module TDev
                     return World.saveAsync(guid).then((response: Cloud.PostUserInstalledResponse) => {
                         //Ticker.dbg("save-stop " + id)
                         if (!Util.check(this.scheduled, "save-sch2")) return Promise.as();
+
+                        if (Cloud.lite && !response.numErrors && ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid == guid) {
+                            ScriptEditorWorldInfo.baseSnapshot = response.headers[0].scriptVersion.baseSnapshot
+                        }
 
                         this.lastSaveTime = Math.min(Util.now() - start, 30000);
                         if (response) this.saveToCloudDelay = response.delay * 1000;
@@ -5156,15 +5160,15 @@ module TDev
             m.add(div("wall-dialog-header", Runtime.appName));
             m.add(div("wall-dialog-body", lf("For feedback and support please use our forum, or just email us!")));
             m.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("latest changes"), () => {
+                HTML.mkButton(lf("changes"),() => {
                     HTML.showProgressNotification(lf("downloading change log..."))
-                    Util.httpGetTextAsync((<any>window).mainJsName.replace(/main.js$/, "gitlog.txt"))
-                        .then(t => ModalDialog.showText(t))
-                        .done()
+                    Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
+                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
+                        .done();
                 }),
-                HTML.mkButton(lf("forum"), () => {
-                    Browser.Hub.showForum();
-                }),
+                HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
+                HTML.mkButton(lf("GitHub"),() => { RT.Web.browseAsync("https://github.com/Microsoft/TouchDevelop").done(); })
+                /*
                 HTML.mkButton(lf("email"), () => {
                     if (Browser.win8) {
                         window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App Early Preview for Windows 8");
@@ -5173,7 +5177,8 @@ module TDev
                     } else {
                         window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop Web App v" + relId);
                     }
-                })));
+                }) */
+                ));
 
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
                                           "TouchDevelop was brought to you by Microsoft Research."));
@@ -5360,7 +5365,7 @@ module TDev
         public replyTutorial(stepNo:number)
         {
             if (this.stepTutorial)
-                this.stepTutorial.reply(stepNo)
+                this.stepTutorial.replyAsync(stepNo).done();
         }
 
         public canReplyTutorial()
@@ -5718,7 +5723,7 @@ module TDev
             mode = mode.trim().toLowerCase();
             if (mode === BLOCK_MODE) return EditorMode.block;
             else if (mode === CLASSIC_MODE) return EditorMode.classic;
-            else if (mode == PRO_MODE) return EditorMode.pro;
+            else if (mode === PRO_MODE) return EditorMode.pro;
             else return EditorMode.unknown;
         }
 

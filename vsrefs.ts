@@ -1,4 +1,5 @@
 ///<reference path='ast/refs.ts'/>
+///<reference path='browser/browser.ts'/>
 ///<reference path='storage/refs.ts'/>
 ///<reference path='lib/refs.ts'/>
 ///<reference path='rt/refs.ts'/>
@@ -8,7 +9,7 @@
 ///<reference path='libwinrt/refs.ts'/>
 ///<reference path='runner/refs.ts'/>
 ///<reference path='officemix/officemix.ts'/>
-///<reference path='mc/refs.ts'/>
 ///<reference path='editor/refs.ts'/>
 ///<reference path='noderunner/nrunner.ts'/>
 ///<reference path='shell/shell.ts'/>
+///<reference path='tools/client.ts'/>
