@@ -2204,6 +2204,9 @@ module TDev
 
         private intelliNew(off:number, q:number)
         {
+            if (this.stmt instanceof AST.RecordNameHolder)
+                return;
+
             var e = this.mkIntelliItem(q, Ticks.calcNewLine);
             e.nameOverride = lf("new line");
             e.descOverride = off < 0 ? lf("new stmt above") : lf("new stmt below");
@@ -2323,7 +2326,7 @@ module TDev
             // Approximate test for determining whether we should show
             // suggestions.
             if ((this.stmt instanceof AST.RecordField || this.stmt instanceof AST.ActionParameter) &&
-                !(k.primaryKind instanceof MultiplexKind))
+                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.RecordNameHolder)
             {
                 return;
             }
