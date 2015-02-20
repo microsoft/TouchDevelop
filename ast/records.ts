@@ -69,7 +69,11 @@ module TDev.AST {
         public notifyChange() {
             var toks = this.exprHolder.tokens;
             if (toks[0] && toks[0] instanceof RecordName) {
-                super.setName((<RecordName>toks[0]).data);
+                var newName = (<RecordName>toks[0]).data;
+                if (newName.length)
+                    super.setName(newName);
+                else
+                    (<RecordName>toks[0]).data = this.getName();
             }
         }
 

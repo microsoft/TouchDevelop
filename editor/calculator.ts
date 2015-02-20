@@ -880,7 +880,9 @@ module TDev
 
         private backspace(isDel = false)
         {
-            tick(Ticks.calcBackspace)
+            tick(Ticks.calcBackspace);
+            if (this.stmt instanceof AST.RecordNameHolder)
+                return;
 
             var now = Util.now();
             var quick = (now - this.lastBackspaceTime) < 500;
