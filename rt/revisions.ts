@@ -51,8 +51,8 @@ module TDev {
         export function everyonesessionid(author: string, scriptname: string) {
             return author + "0pu" + scripthash(author, scriptname);
         }
-        export function astsessionid(userid:string, guid:string) {
-            return userid + "0pa" + letterify(guid);
+        export function make_astsessionid(userid:string) {
+            return userid + "0pa" + letterify(Util.guidGen());
         }
 
 
