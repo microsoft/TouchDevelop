@@ -17,6 +17,7 @@ module TDev.RT.Node {
     var https = require("https")
     var zlib = require("zlib")
     var Buffer;
+    var webSocketModule;
 
     function setupGlobalAgent() {
         var maxSock = 15
@@ -92,9 +93,13 @@ module TDev.RT.Node {
     export var mkAgent : (protocol:string) => any;
 
 
-    export var logInfo: (s:string) => void;
-    export var logError: (s:string) => void;
-    export var handleError: (err:any) => void;
+    export var logInfo: (s:string) => void = s => Util.log(s);
+    export var logError: (s:string) => void = s => Util.log("error: " + s);
+    export var handleError: (err:any) => void = err => {
+        if (err.rtProtectHandled)
+            return
+        RT.App.logException(err)
+    }
 
     class FsTable implements Storage.Table
     {
@@ -190,6 +195,7 @@ module TDev.RT.Node {
     {
         private routes:any = {}
         private restInits:any[] = [];
+        private mainActionRef:any = null;
         public nodeModules: any = {};
         public initPromise:Promise;
         public requestHandler: (req:any, resp:any) => void;
@@ -306,18 +312,30 @@ module TDev.RT.Node {
             this.restInits.push(fn)
         }
 
+        public setMainAction(fn:(s:IStackFrame) => any)
+        {
+            this.mainActionRef = fn;
+        }
+
+        public hasInits() { return this.restInits.length > 0 }
+
         public queueInits()
         {
-            this.restInits.forEach(fn => {
+            var queue = fn => {
                 var lifted = (bot, retAddr) => {
-                    App.log("running an _init action")
+                    // App.log("running an _init action")
                     var lc = fn(bot)
                     return lc.invoke(lc, retAddr)
                 }
                 var ev = new Event_()
                 ev.addHandler(<any>lifted)
                 this.queueLocalEvent(ev)
-            })
+            }
+
+            if (this.hasInits())
+                this.restInits.forEach(queue)
+            else if (this.mainActionRef)
+                queue(this.mainActionRef)
         }
 
 
@@ -530,6 +548,8 @@ module TDev.RT.Node {
     export function setup(): void {
         if (!Browser.isNodeJS) return
 
+        process.on('uncaughtException', handleError)
+
         Buffer = global.Buffer;
 
         Browser.canIndexedDB = false;
@@ -624,6 +644,7 @@ module TDev.RT.Node {
         (<any>TDev.RT.Buffer).fromNodeBuffer = buf => TDev.RT.Buffer.fromTypedArray(buf);
     }
 
+    /*
     export function loadScriptAsync(wsServer: WebSocketServerWrapper)
     {
         host = new RunnerHost(wsServer);
@@ -635,7 +656,7 @@ module TDev.RT.Node {
         host.currentGuid = rt.compiled.scriptGuid;
         logInfo("initializing data");
         Browser.localProxy = true;
-                return rt.initDataAsync().then(() => {
+        return rt.initDataAsync().then(() => {
             logInfo("starting server script")
             rt.setState(RtState.AtAwait, "start server");
             rt.queueInits()
@@ -643,6 +664,71 @@ module TDev.RT.Node {
                 // this will be only executed once all _init() actions are done
                 initProm.success(null)
             })
+        })
+    }
+    */
+
+    export function startServerAsync()
+    {
+        var ret = new PromiseInv()
+        var port = process.env.PORT || 4242
+
+        var app = http.createServer();
+
+        app.on("upgrade", (req, sock, body) => {
+            var rt = <TheNodeRuntime> Runtime.theRuntime
+            if (rt.wsServer && rt.wsServer.isReal())
+                rt.wsServer.upgradeCallback(req, sock, body)
+            else sock.end()
+        })
+
+        app.on("request", (req, resp) => {
+            var rt = <TheNodeRuntime> Runtime.theRuntime
+            rt.requestHandler(req, resp)
+        })
+
+        app.on("listening", () => {
+            Util.log("listenting on " + port)
+            ret.success(app)
+        })
+
+        app.listen(port)
+
+        return ret
+    }
+
+    export function runMainAsync()
+    {
+        if (require.resolve("faye-websocket"))
+            webSocketModule = require("faye-websocket")
+        var wsServer = new WebSocketServerWrapper(webSocketModule)
+
+        host = new RunnerHost(wsServer);
+        var rt = <TheNodeRuntime> host.currentRt;
+        Runtime.theRuntime = rt;
+        var initProm = new PromiseInv()
+        rt.initPromise = initProm
+        host.initFromPrecompiled();
+        host.currentGuid = rt.compiled.scriptGuid;
+
+        Util.log("initializing data");
+        Browser.localProxy = true;
+
+        return rt.initDataAsync().then(() => {
+            Util.log("starting server script")
+            rt.setState(RtState.AtAwait, "start server");
+            var autoStart = rt.hasInits()
+            rt.queueInits()
+            rt.queueAsyncStd(() => {
+                // this will be only executed once all _init() actions are done
+                if (autoStart)
+                    initProm.success(startServerAsync())
+                else {
+                    Util.log("main finished")
+                    initProm.success(null)
+                }
+            })
+            return initProm
         })
     }
 

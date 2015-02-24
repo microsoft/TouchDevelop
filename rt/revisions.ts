@@ -1174,6 +1174,8 @@ module TDev {
         {
         }
 
+        public isReal() { return !!this.WebSocketModule }
+
         public upgradeCallback(request, socket, body)
         {
             var ws = this.WebSocketModule

@@ -261,7 +261,7 @@ module TDev
     export class Runtime
     {
         // shell/package.ts depends on the exact format of the next line
-        static shellVersion = 24;
+        static shellVersion = 25;
 
         // this is not to be set from the editor - only in the exported app
         static initialUrl: string;
@@ -2775,29 +2775,7 @@ module TDev
                 });
         }
 
-        public getCompiledCode()
-        {
-            Object.keys(this.libScripts).forEach((name:string) => { this.libScripts[name].primaryName = null })
-
-            var res = "var TDev;\nif (!TDev) TDev = {};\nTDev.precompiledScript = {\n"
-            var first = true;
-            Object.keys(this.libScripts).forEach((name:string) => {
-                if (!first)
-                    res += ",\n\n// **************************************************************\n"
-                first = false;
-
-                res += Util.jsStringLiteral(name) + ": ";
-                var cs = <CompiledScript>this.libScripts[name];
-                if (cs.primaryName) res += Util.jsStringLiteral(cs.primaryName);
-                else {
-                    cs.primaryName = name;
-                    res += cs.code
-                }
-            })
-            res += "}\n"
-
-            return res;
-        }
+        public getCompiledCode():string { return null } // overridden from the Compiler
 
         public initFromPrecompiled(script:any = null)
         {

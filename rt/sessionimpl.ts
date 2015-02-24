@@ -1379,6 +1379,9 @@ module TDev {
                                 if (!this.closed && !this.faulted)
                                     this.SaveAndSend();
                             }, this.sendinterval);
+                            var h = <any>this.intervalhandle
+                            // this shouldn't keep the node.js event loop running
+                            if (h.unref) h.unref()
                         }
                     },
                     (error) => {

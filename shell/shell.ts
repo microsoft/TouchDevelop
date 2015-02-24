@@ -15,12 +15,15 @@ import net = require("net");
 
 var config:any;
 var currentReqNo = 0;
-declare var TDev;
 var inAzure = false;
 var controllerUrl = "";
 var isNpm = false;
 var inNodeWebkit = false;
 var dataDir : string = ".";
+var useFileSockets = true
+var allowEditor = false;
+
+(<any>http.globalAgent).options.keepAlive = true;
 
 function dataPath(p : string) : string {
   p = p || "";
@@ -857,15 +860,9 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
 
     info: ar => {
         loadScript(() => {
-            TDev.RT.Node.getRuntimeInfoAsync(ar.cmd.slice(1).join("/")).done(
-                resp => ar.ok(resp), err => ar.exception(err))
-        })
-    },
-
-    runtime: ar => {
-        loadScript(() => {
-            TDev.RT.Node.runtimeOpAsync(ar.cmd.slice(1).join("/"), ar.data)
-                .done(resp => ar.ok(resp), err => ar.exception(err))
+            ar.ok({ error: "not implemented" })
+            //TDev.RT.Node.getRuntimeInfoAsync(ar.cmd.slice(1).join("/")).done(
+            //    resp => ar.ok(resp), err => ar.exception(err))
         })
     },
 
@@ -1150,11 +1147,6 @@ function loadScript(f)
     scriptLoadPromise.done(f)
 }
 
-function initScript(f)
-{
-    scriptLoadPromise.then(() => TDev.Runtime.theRuntime.initPromise).done(f)
-}
-
 function reloadScript()
 {
     scriptLoadPromise = loadScriptCoreAsync();
@@ -1162,66 +1154,75 @@ function reloadScript()
 
 var logException = (msg:string) => {}
 
-function loadScriptCoreAsync()
-{
-    if (needsStop) {
-        needsStop = false
-        return global.TDev.Runtime.stopPendingScriptsAsync().thenalways(() => loadScriptCoreAsync())
+class Worker {
+    public socketPath: string;
+    public port: number;
+    public child: child_process.ChildProcess
+
+    public shutdown()
+    {
+        setTimeout(() => {
+                if (this.child) this.child.kill()
+                setTimeout(() => {
+                    if (this.child) this.child.kill("SIGKILL")
+                }, 1000)
+            }, 1000)
     }
 
-    debug.log("handling script files")
+    public init()
+    {
+        this.child.on("exit", () => {
+            this.child = null
+        })
+    }
 
-    global.TDev = {};
-    if (!global.window)
-        global.window = {};
-    if (!global.document)
-        global.document = global.window.document = { URL: "http://localhost/" }
-    global.window.isNodeJS = true;
-
-    var files = ["./static/browser.js", "./static/runtime.js", "./script/compiled.js"]
-    var total = ""
-    files.forEach(f => {
-        total += fs.readFileSync(f, "utf8") + "\n"
-    })
-    total = total.replace(/^var TDev;/mg, "")
-    total = total.replace(/^  TDev;/mg, "  TDev_fake;") // minified
-    fs.writeFileSync("script/total.js", total, "utf8")
-
-    debug.log("require " + rootDir + "/script/total.js");
-
-    var name = (<any>require).resolve(rootDir + "/script/total.js")
-    delete require.cache[name];
-    require(rootDir + "/script/total.js")
-
-    debug.log("loading script");
-
-    var res = new TDev.PromiseInv();
-    loadWsModule(() => {
-        var WebSocketServer = wsModule.server;
-        if (wsServer) {
-            debug.log("shutting down websockets");
-            wsServer.closeConnections()
-        }
-        debug.log("loading new websockets server");
-        wsServer = new TDev.WebSocketServerWrapper(wsModule)
-
-        needsStop = true
-        TDev.RT.Node.logInfo = s => info.log(s)
-        TDev.RT.Node.logError = s => error.log(s)
-        TDev.RT.Node.handleError = handleError;
-        logException = msg => {
-            try {
-                TDev.RT.App.logException(msg)
-            } catch (e) {
+    public getUrl():any
+    {
+        if (this.socketPath)
+            return { socketPath: this.socketPath }
+        else
+            return {
+                hostname: "127.0.0.1",
+                port: this.port
             }
-        }
+    }
+}
 
-        TDev.RT.App.addTransport(logTransport)
+var workers = []
+var portNum = 10000;
 
-        res.success(TDev.RT.Node.loadScriptAsync(wsServer))
+function loadScriptCoreAsync()
+{
+    var isWin = /^win/.test(os.platform())
+
+    workers.forEach(w => w.shutdown())
+    workers = []
+
+    var w = new Worker()
+    workers.push(w)
+
+    var env = JSON.parse(JSON.stringify(process.env))
+
+    if (useFileSockets) {
+        var sockPath = "tdsh." + crypto.randomBytes(16).toString("hex")
+        env.PORT = isWin ? "\\\\.\\" + sockPath : "/tmp/." + sockPath
+        w.socketPath = env.PORT
+    } else {
+        w.port = portNum++
+        env.PORT = w.port
+    }
+
+    debug.log("forking child script")
+
+    w.child = child_process.fork("./script/compiled.js", [], {
+        env: env
     })
+    w.init()
 
-    return res
+    return {
+        then: f => f(),
+        done: f => f()
+    }
 }
 
 function loadWsModule(f:()=>void)
@@ -1622,13 +1623,11 @@ function proxyEditor(cmds:string[], req, resp)
     }
 }
 
-function handleReq(req, resp)
+function specHandleReq(req, resp)
 {
     var ar = new ApiRequest(req, resp);
-
     try {
         var u = url.parse(req.url);
-
         var uu = u.pathname
         if (uu == "/") uu = "index.html";
         if (!/^[\/\\]/.test(uu)) uu = "/" + uu
@@ -1652,14 +1651,16 @@ function handleReq(req, resp)
                 }
             }
             return
-        } else if (cmd[0] == "editor" && process.env["TD_ALLOW_EDITOR"] === "true") {
+        } else if (cmd[0] == "editor" && allowEditor) {
             proxyEditor(cmd.slice(1), req, resp)
             return
-        } else if (cmd[0] == "favicon.ico" && process.env["TD_ALLOW_EDITOR"] === "true") {
+        } else if (cmd[0] == "favicon.ico" && allowEditor) {
             proxyEditor(["cache", encodeURIComponent("https://www.touchdevelop.com/favicon.ico")], req, resp)
-        } else if (!scriptLoadPromise) {
-            ar.error(404, "No script deployed")
         } else {
+            ar.error(404, "No script deployed")
+        } 
+        
+        /*{
             initScript(() => {
                 var rt = TDev.Runtime.theRuntime
                 if (rt.requestHandler)
@@ -1679,12 +1680,34 @@ function handleReq(req, resp)
                     })
                 }
             })
-        }
-
-
+        }*/
 
     } catch (e) {
         ar.exception(e)
+    }
+}
+
+
+function handleReq(req, resp)
+{
+    if (/^\/-tdevmgmt-/.test(req.url))
+        specHandleReq(req, resp)
+    else if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
+        specHandleReq(req, resp)
+    else if (workers.length == 0)
+        specHandleReq(req, resp) // 404
+    else {
+        var w = workers[Math.floor(Math.random() * workers.length)]
+        var u = w.getUrl()
+        u.method = req.method
+        u.headers = req.headers
+        u.path = req.path
+
+        var creq = http.request(u, cres => {
+            resp.writeHead(cres.statusCode, cres.headers)
+            cres.pipe(resp);
+        })
+        req.pipe(creq);
     }
 }
 
@@ -1930,6 +1953,7 @@ function main()
 
     var startUrl = undefined;
     if (process.env['TD_ALLOW_EDITOR']) {
+        allowEditor = true;
         startUrl = "http://localhost:" + port + "/editor/"
         if (process.env["TD_LOCAL_EDITOR_PATH"]) startUrl += "local";
         else if (useLatest) startUrl += "latest";
