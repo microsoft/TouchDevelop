@@ -245,7 +245,7 @@ module TDev {
                 return TheEditor.loadScriptTextAsync(ScriptEditorWorldInfo, newast[1], TheEditor.serializeState(), false).then(
                     () => {
                         // if (!isUndo) {
-                        TheEditor.renderDefaultDecl(true);
+                        TheEditor.renderDefaultDecl(true, true);
                         TheEditor.queueNavRefresh();
 
                         this.last_editor_version = newast;

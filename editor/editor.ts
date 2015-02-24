@@ -1247,8 +1247,9 @@ module TDev
             this.refreshDecl();
         }
 
-        public renderDecl(decl: AST.Decl, transparent : boolean = false) {
-            this.goToLocation(new CodeLocation(decl), !transparent);
+        // [fromCloud]: was this triggered by a collaboration pull?
+        public renderDecl(decl: AST.Decl, transparent : boolean = false, fromCloud=false) {
+            this.goToLocation(new CodeLocation(decl), !transparent, fromCloud);
         }
 
         public bindLibrary(lib: AST.LibraryRef, scr: Browser.ScriptInfo) {
@@ -1260,13 +1261,14 @@ module TDev
             return this.host.wallVisible;
         }
 
-        public goToLocation(loc: CodeLocation, useAnim = true) {
+        public goToLocation(loc: CodeLocation, useAnim = true, fromCloud=false) {
             if (!this.currentSideTab)
                 this.setupNavPane();
 
             this.searchTab.saveLocation();
             this.selector.clear();
-            this.dismissModalPane();
+            if (!fromCloud)
+                this.dismissModalPane();
             this.loadLocation(loc, useAnim);
             this.searchTab.saveLocation();
             try {
@@ -2815,7 +2817,7 @@ module TDev
             })
         }
 
-        public renderDefaultDecl(transparent : boolean = false)
+        public renderDefaultDecl(transparent : boolean = false, fromCloud = false)
         {
             if (!this.currentSideTab)
                 this.setupNavPane();
@@ -2834,7 +2836,7 @@ module TDev
             if (!a) a = Script.actions()[0];
             if (!a) a = Script;
 
-            this.renderDecl(a, transparent);
+            this.renderDecl(a, transparent, true);
         }
 
         public wallShown()
