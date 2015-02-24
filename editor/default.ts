@@ -515,11 +515,6 @@ module TDev
                 statusMsg("global init deviceready");
                 initAsync().done();
             }, false)
-        }
-        else if (Browser.win8) {
-            statusMsg("global init 3");
-            // done elsewhere
-            // initWin8();
         } else if ((<any>window).browserSupported) {
             statusMsg("global init 4");
             initJs();

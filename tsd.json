@@ -7,12 +7,6 @@
   "installed": {
     "node/node.d.ts": {
       "commit": "23b6edd28c0f5ccbe9e01bcfc84963d07b921ff7"
-    },
-    "winrt/winrt.d.ts": {
-      "commit": "23b6edd28c0f5ccbe9e01bcfc84963d07b921ff7"
-    },
-    "winjs/winjs.d.ts": {
-      "commit": "23b6edd28c0f5ccbe9e01bcfc84963d07b921ff7"
     }
   }
 }

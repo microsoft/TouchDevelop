@@ -514,14 +514,9 @@ module TDev{
 
 
        // does HTML need to be sanitized?
-       if (!!window.toStaticHTML && Browser.win8)
-           Browser.setInnerHTML = (el, html) => {
-                el.innerHTML = window.toStaticHTML(HTML.sanitizeHTML(html));
-           }
-       else
-           Browser.setInnerHTML = (el, html) => {
-                el.innerHTML = HTML.sanitizeHTML(html);
-           }
+       Browser.setInnerHTML = (el, html) => {
+        el.innerHTML = HTML.sanitizeHTML(html);
+       }
     }
 
     var zeroTimeoutFunctions:any[];
@@ -2272,38 +2267,6 @@ module TDev{
     export function showLeftPanel(elt:HTMLElement, andThen = undefined) { return coreAnim("showLeftPanel" + easeOut, 250, elt, andThen); }
     export function showRightPanel(elt:HTMLElement, andThen = undefined) { return coreAnim("showRightPanel" + easeOut, 250, elt, andThen); }
     export function showBottomPanel(elt:HTMLElement, andThen = undefined) { return coreAnim("showBottomPanel" + easeOut, 150, elt, andThen); }
-    /*
-    export function hidePanel(elt:HTMLElement, andThen = undefined) { return coreAnim("hidePanel", elt, andThen); }
-    */
-
-    /*
-    export function hidePanel(elt:HTMLElement, andThen = undefined)
-    {
-        if (Browser.win8) {
-            WinJS.UI.executeAnimation(
-                elt,
-                [<any> {
-                    property: "-ms-transform",
-                    delay: 0,
-                    duration: 150,
-                    timing: "cubic-bezier(0.8, 0.1, 0.9, 0.5)",
-                    from: "translate(0px, 0px)",
-                    to: "translate(100px, 0px)"
-                },
-                {
-                    property: "opacity",
-                    delay: 0,
-                    duration: 150,
-                    timing: "linear",
-                    from: 1,
-                    to: 0
-                }]).done(function() { if (andThen) andThen(); });
-        } else {
-            if (andThen) andThen();
-        }
-    }
-    */
-
 
     function stopEvent()
     {

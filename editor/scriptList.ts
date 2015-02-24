@@ -3027,80 +3027,6 @@ module TDev { export module Browser {
         }
     }
 
-    export class StoreAppsTab
-        extends BrowserTab {
-        constructor(par: BrowserPage, private name : string, private path : string, private logo : string) {
-            super(par)
-        }
-        public getId() : string { return this.path; }
-        public getName() : string { return this.name; }
-
-        private mkBox(b: Host, c: JsonStoreApp) {
-            var cont = [];
-            var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-            addNum(c.users, "svg:person");
-            addNum(c.launches, "svg:play");
-
-            var time = c.time;
-            var timeStr = Util.timeSince(time) + " :: /" + c.scriptid;
-
-            var icon = div("sdIcon", HTML.mkImg(c.iconurl));
-            icon.style.backgroundColor = ScriptIcons.stableColorFromName(c.storeid);
-            var nameBlock = dirAuto(div("sdName", c.title));
-            var hd = div("sdNameBlock", nameBlock);
-
-            var numbers = div("sdNumbers", cont);
-            var author = div("sdAuthorInner", c.publisher);
-            var addInfo = div("sdAddInfoInner", timeStr);
-            var res = div("sdHeaderOuter sdBigHeader",
-                            div("sdHeader", icon,
-                                div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers)));
-            return res.withClick(() => {
-                window.location.href = c.url;
-            });
-        }
-
-        public tabBox(c: JsonStoreApp)
-        {
-            return this.mkBox(this.browser(), c);
-        }
-
-        public initTab() {
-            this.tabContent.setChildren([ScriptIcons.getWinLogo(this.logo, 2, '#000'), Editor.mkHelpLink("export to app")]);
-
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            this.tabContent.appendChildren([loadingDiv]);
-            Cloud.getPrivateApiAsync(this.parent.publicId + "/" + this.path)
-                .done((lst : any) => {
-                    loadingDiv.removeSelf();
-                    var apps : JsonStoreApp[] = lst.items;
-                    var boxes = apps.map(app => this.tabBox(app));
-                    this.tabContent.appendChildren(boxes);
-                },
-                (e) => {
-                    loadingDiv.removeSelf();
-                    var status = e.status;
-                    if (status == 403) {
-                        this.tabContent.appendChildren(div('', 'you are not allowed to see this data'));
-                    } else {
-                        this.tabContent.appendChildren(div('', 'failed to load apps; are you connected to internet?'));
-                    }
-                });
-        }
-    }
-
-    export class WindowsStoreAppsTab extends StoreAppsTab {
-        constructor(par : BrowserPage) {
-            super(par, "Windows Store", "windowsstoreapps", "win8");
-        }
-    }
-
-    export class WindowsPhoneStoreAppsTab extends StoreAppsTab {
-        constructor(par : BrowserPage) {
-            super(par, "Windows Phone Store", "windowsphonestoreapps", "wp8");
-        }
-    }
-
     export class KeysTab
         extends BrowserTab
     {
@@ -7296,7 +7222,7 @@ module TDev { export module Browser {
         constructor(par: UserInfo) {
             super(par,
                 "Informations about apps, keys and cloud sessions.",
-                WindowsStoreAppsTab, WindowsPhoneStoreAppsTab, KeysTab, CloudSessionsTab
+                KeysTab, CloudSessionsTab
                 );
         }
 

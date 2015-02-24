@@ -369,7 +369,7 @@ export function genStubs()
         processFile(path.join(libPath, fn));
     })
 
-    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libwab", "libwinRT", "libnode"]
+    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libwab", "libnode"]
     srcPaths.forEach(pth => {
         fs.readdirSync(pth).forEach((fn) => {
             fileCnt++;

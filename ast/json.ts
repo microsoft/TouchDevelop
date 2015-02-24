@@ -321,7 +321,6 @@ module TDev.AST.Json
                     pausesInterpreter: optBool(p._implStatus & ImplementationStatus.Pauses),
                     usesStackFrame: optBool(p._implStatus & ImplementationStatus.UsesStackFrame),
                     missingWeb: optBool(!(p._implStatus & ImplementationStatus.Web)),
-                    missingWinRT: optBool(!(p._implStatus & ImplementationStatus.WinRT)),
                     missingWab: optBool(!(p._implStatus & ImplementationStatus.Wab)),
                     capabilities: App.capabilityString(p.getCapability()) || undefined,
 

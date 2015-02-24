@@ -4049,18 +4049,10 @@ module TDev
             World.cancelSync();
             Cloud.setAccessToken(undefined);
             return this.resetWorldAsync().then(() => {
-                if (Browser.win8)
-                    Browser.TheHost.clearMeAsync(true).then(() =>
-                    {
-                        progressBar.stop();
-                        progressDialog.dismiss();
-                    }).done();
-                else {
-                    // don't stop progress; keep animation running until we actually navigate away
-                    window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
-                    if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
-                    Util.navigateInWindow(url);
-                }
+                // don't stop progress; keep animation running until we actually navigate away
+                window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
+                if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
+                Util.navigateInWindow(url);
             });
         }
 
@@ -4420,9 +4412,6 @@ module TDev
             if (Browser.webAppBooster) {
                 api.core.currentPlatform = PlatformCapabilityManager.current(); // based on supported features
                 api.core.currentPlatformImpl = ImplementationStatus.Wab;
-            } else if (Browser.win8) {
-                api.core.currentPlatform = PlatformCapability.WinRT;
-                api.core.currentPlatformImpl = ImplementationStatus.WinRT;
             } else {
                 api.core.currentPlatform = PlatformCapabilityManager.current();
                 api.core.currentPlatformImpl = ImplementationStatus.Web;
@@ -5183,16 +5172,6 @@ module TDev
                 }),
                 HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
                 HTML.mkButton(lf("GitHub"),() => { RT.Web.browseAsync("https://github.com/Microsoft/TouchDevelop").done(); })
-                /*
-                HTML.mkButton(lf("email"), () => {
-                    if (Browser.win8) {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App Early Preview for Windows 8");
-                    } else if (Browser.isWP8app) {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App for Windows Phone 8 with cloud services v" + relId);
-                    } else {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop Web App v" + relId);
-                    }
-                }) */
                 ));
 
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +

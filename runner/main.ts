@@ -360,67 +360,6 @@ module TDev {
         return runnerHost.runAsync();
     }
 
-    function initWin8()
-    {
-        var app = WinJS.Application;
-        var webapp = Windows.UI.WebUI.WebUIApplication;
-        app.onactivated = (eventObject:any) => {
-            if (eventObject.detail.kind === Windows.ApplicationModel.Activation.ActivationKind.launch) {
-                TDev.Util.log('win8 activated: ' + eventObject.detail.kind);
-                eventObject.setPromise(
-                        initAsync()
-                        .then(() => WinJS.UI.processAll())
-                        );
-            }
-        };
-        webapp.onresuming = (eventObject: any) => {
-            TDev.Util.log('win8 resuming: ' + (runnerHost ? 'resuming' : 'no runtime'));
-            if (runnerHost)
-                runnerHost.currentRt.resumeExecution(false);
-        };
-        app.oncheckpoint = (eventObject:any) => {
-            TDev.Util.log('win8 checkpoint: ' + (runnerHost ? 'stop async' : 'already paused'));
-            if (runnerHost)
-                eventObject.setPromise(runnerHost.currentRt.stopAsync(true));
-        };
-
-        (<any>app).onsettings = (e) => {
-            TDev.Util.log('win8 settings');
-            var appcommands : any = {
-                "about": {
-                    title: "About",
-                    href: "/html/about.html"
-                },
-                "privacystatement": {
-                    title: "Privacy Statement",
-                    href: "/html/privacystatement.html"
-                }
-            };
-            if (TDev.RunnerSettings.showTermsOfUse) {
-                appcommands.termsofuse = {
-                    title: "Terms of Use",
-                    href: "/html/termsofuse.html"
-                };
-            }
-            if (TDev.RunnerSettings.showFeedback) {
-                appcommands.feedback = {
-                    title: "Feedback",
-                    href: "/html/feedback.html"
-                };
-            }
-            if (TDev.RunnerSettings.showSettings) {
-                appcommands.settings = {
-                    title: "Settings",
-                    href: "/html/settings.html"
-                };
-            }
-            e.detail.applicationcommands = appcommands;
-            (<any>WinJS.UI).SettingsFlyout.populateSettings(e);
-        };
-
-        app.start();
-    }
-
     function initJs()
     {
         window.onload = Util.catchErrors("windowOnLoad", () => {
@@ -460,8 +399,6 @@ module TDev {
                 ((<any>TDev.RT).Node).setup()
         } else if (Browser.inCordova) {
             TDev.RT.Cordova.setup(() => initAsync().done())
-        } else if (Browser.win8) {
-            initWin8();
         } else {
             initJs();
         }
@@ -579,7 +516,6 @@ module TDev {
         export function launch(appid: string, storeid: string) {
             _appid = appid || "invalid";
             _storeid = storeid || "unknown";
-            if (Browser.win8) Win8RunnerSettings.init();
             RunnerSettings.reportLaunch();
             // override leaderboards
             (<any>TDev.RT.Bazaar).loadLeaderboardItemsAsync = function (scriptId: string) {
@@ -702,26 +638,6 @@ module TDev {
                 RuntimeSettings.storeSetting("td.userid", userid);
             }
             return userid;
-        }
-    }
-
-    export module Win8RunnerSettings {
-        export function init() {
-            TDev.RuntimeSettings.readSetting = Win8RunnerSettings.readSetting;
-            TDev.RuntimeSettings.storeSetting = Win8RunnerSettings.storeSetting;
-            TDev.RT.WinRT.BazaarInit();
-        }
-
-        export function readSetting(key : string): string {
-            var applicationData = Windows.Storage.ApplicationData.current;
-            var roamingSettings = applicationData.roamingSettings;
-            return  roamingSettings.values[key];
-        }
-
-        export function storeSetting(key : string, value : any) {
-            var applicationData = Windows.Storage.ApplicationData.current;
-            var roamingSettings = applicationData.roamingSettings;
-            roamingSettings.values[key] = value;
         }
     }
 }

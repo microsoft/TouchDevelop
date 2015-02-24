@@ -6,10 +6,10 @@
 ///<reference path='libwab/refs.ts'/>
 ///<reference path='libcordova/refs.ts'/>
 ///<reference path='libnode/refs.ts'/>
-///<reference path='libwinrt/refs.ts'/>
 ///<reference path='runner/refs.ts'/>
 ///<reference path='officemix/officemix.ts'/>
 ///<reference path='editor/refs.ts'/>
 ///<reference path='noderunner/nrunner.ts'/>
 ///<reference path='shell/shell.ts'/>
 ///<reference path='tools/client.ts'/>
+///<reference path='tools/genMeta.ts'/>

@@ -2,10 +2,7 @@
 ///<reference path='../rt/typings.d.ts'/>
 ///<reference path='../build/rt.d.ts'/>
 ///<reference path='../build/storage.d.ts'/>
-///<reference path='../build/libwinRT.d.ts'/>
 ///<reference path='../build/libwab.d.ts'/>
 ///<reference path='../build/libnode.d.ts'/>
 ///<reference path='../build/libcordova.d.ts'/>
-///<reference path='../typings/winjs/winjs.d.ts'/>
-///<reference path='../typings/winrt/winrt.d.ts'/>
 ///<reference path='main.ts'/>

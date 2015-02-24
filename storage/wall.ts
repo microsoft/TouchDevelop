@@ -32,7 +32,7 @@ module TDev {
         public wallVisible = false;
 
         public copyrightHeight = 26;
-        public showCopyright = !Browser.win8 && !Browser.isWP8app;
+        public showCopyright = !Browser.isWP8app;
         private keyState: any = null;
         public localProxyAsync : (path: string, data: any) => Promise = undefined;
 

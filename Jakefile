@@ -2,8 +2,8 @@
  * Instructions for updating this file.
  * - this file must be updated everytime a new cross-folder dependency is added
  *   into any of the [refs.ts] file. For instance, if suddenly you add a
- *   reference to [../storage/whatever.ts] in [build/libwinRT.ts], then you must
- *   update the dependencies of the [build/libwinRT.d.ts] task.
+ *   reference to [../storage/whatever.ts] in [build/libwab.ts], then you must
+ *   update the dependencies of the [build/libwab.d.ts] task.
  **/
 var assert = require('assert');
 var child_process = require("child_process");
@@ -161,11 +161,6 @@ mkSimpleTask('build/ast.d.ts', [
     'build/rt.d.ts',
     'ast'
 ], "ast/refs.ts");
-mkSimpleTask('build/libwinRT.d.ts', [
-    'build/rt.d.ts',
-    'build/browser.d.ts',
-    'libwinRT'
-], "libwinRT/refs.ts");
 mkSimpleTask('build/libwab.d.ts', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
@@ -189,7 +184,6 @@ mkSimpleTask('build/editor.d.ts', [
     'build/rt.d.ts',
     'build/ast.d.ts',
     'build/storage.d.ts',
-    'build/libwinRT.d.ts',
     'build/libwab.d.ts',
     'build/libcordova.d.ts',
     'intellitrain',
@@ -219,7 +213,6 @@ mkSimpleTask('build/runner.d.ts', [
     'rt/typings.d.ts',
     'build/rt.d.ts',
     'build/storage.d.ts',
-    'build/libwinRT.d.ts',
     'build/libwab.d.ts',
     'build/libnode.d.ts',
     'build/libcordova.d.ts',
@@ -249,7 +242,6 @@ var concatMap = {
     "build/runtime.js": [
         "build/rt",
         "build/storage",
-        "build/libwinRT",
         "build/libwab",
         "build/libnode",
         "build/libcordova",
@@ -261,7 +253,6 @@ var concatMap = {
         "build/api.js",
         "generated/langs.js",
         "build/storage",
-        "build/libwinRT",
         "build/libwab",
         "build/libcordova",
         "build/pkgshell.js",
