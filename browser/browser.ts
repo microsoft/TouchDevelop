@@ -83,6 +83,7 @@ module TDev {
         export var notifyBackToHost = false;
         export var logToHost = false;
         export var noNetwork = false;
+        export var lowMemory = false;
 
         export var loadingDone = false;
 
@@ -319,6 +320,7 @@ module TDev {
             if (/Linux armv7/.test(userAgent)) {
                 noAnimations = true;
                 noStorage = true; // I/O very slow
+                lowMemory = true; // limited amount of memory
             }
 
             browserShortName = browserName(browser);

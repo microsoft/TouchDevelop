@@ -6006,7 +6006,7 @@ module TDev { export module Browser {
                 var bigIcon = div("hubTileScreenShot");
 
                 var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
-                if (ss) {
+                if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
                     bigIcon.style.backgroundImage = HTML.cssImage(ss);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
@@ -7758,7 +7758,7 @@ module TDev { export module Browser {
                 this.description = u.description;
                 this.userid = u.userid;
 
-                if (u.pictureid) {
+                if (u.pictureid && !Browser.lowMemory) {
                     icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
@@ -7788,7 +7788,7 @@ module TDev { export module Browser {
 
             return this.withUpdate(d, (u: JsonGroup) => {
                 this.name = u.name;
-                if (u.pictureid) {
+                if (u.pictureid && !Browser.lowMemory) {
                     d.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     d.style.backgroundRepeat = 'no-repeat';
                     d.style.backgroundPosition = 'center';

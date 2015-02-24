@@ -127,6 +127,8 @@ module TDev { export module Browser {
         }
 
         private paralax() {
+            if (Browser.noAnimations) return;
+
             if (this.vertical) {
                 var dx = -this.mainContent.scrollTop / 10;
                 Util.setTransform(this.bglogo, "translate(0px," + dx + "px)")
@@ -739,7 +741,7 @@ module TDev { export module Browser {
                 var img = this.findImgForTutorial(app);
                 var imgUrl = img ? img.url : top.json.screenshot;
 
-                if (imgUrl) {
+                if (imgUrl && !Browser.lowMemory) {
                     var picDiv = tile
                     picDiv.style.backgroundColor = '#eee';
                     picDiv.style.backgroundImage = HTML.cssImage(imgUrl);
@@ -887,9 +889,11 @@ module TDev { export module Browser {
                 Util.setHash('#topic:tutorials');
             }, t, true, 3, dirAuto(div("hubTileOver", lf("Create your own apps"))));
 
-            elt.style.backgroundSize = 'contain';
-            elt.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/zxddkvgm');
-            elt.style.backgroundRepeat = 'no-repeat';
+            if (!Browser.lowMemory) {
+                elt.style.backgroundSize = 'contain';
+                elt.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/zxddkvgm');
+                elt.style.backgroundRepeat = 'no-repeat';
+            }
             elt.className += " tutorialBtn";
 
             return elt
@@ -1668,7 +1672,7 @@ module TDev { export module Browser {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
                 btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                if (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot) {
+                if (!Browser.lowMemory && (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot)) {
                     btn.style.backgroundImage = tutorial.topic.json.iconArtId
                         ? ArtUtil.artUrl(tutorial.topic.json.iconArtId, true)
                         : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));

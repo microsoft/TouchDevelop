@@ -7,7 +7,7 @@ module TDev.RT {
         var getArtCacheTableAsync = () => Storage.getTableAsync("ArtCache");
         export var getMaxItems = () =>
         {
-            return TDev.Browser.isMobile ? 25 : 150;
+            return TDev.Browser.lowMemory ? 0 : TDev.Browser.isMobile ? 25 : 150;
         }
         export var getMaxItemSize = () => {
             return Browser.isMobile ? 500000 : 10000000; // 500Kb max size for mobile, 10mb for desktop
@@ -75,6 +75,9 @@ module TDev.RT {
 
         export function getArtAsync(url: string, accept:string = "*") : Promise // of string
         {
+            // disabled art cache
+            if (!getMaxItems()) return null;
+
             // make sure we have a url and not a data uri
             if (!url || !/^https?:\/\//.test(url)) {
                 Util.log('art cache: must be absolute url');
