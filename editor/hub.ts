@@ -2,7 +2,7 @@
 
 module TDev { export module Browser {
 
-    export var TheHub:Hub;
+    export var TheHub: Hub;
 
     export interface ScriptTemplate {
         title: string;
@@ -564,11 +564,11 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
-            var editorMode = EditorSettings.editorMode();
+            var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
             var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
-                    if (template.editorMode > editorMode) return false;
+                    if (template.editorMode && template.editorMode > editorMode) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
@@ -1142,7 +1142,7 @@ module TDev { export module Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if (!Storage.temporary || this.showingTemporarySignin) return;
+            if (!Storage.temporary || this.showingTemporarySignin || EditorSettings.editorMode() <= EditorMode.block) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
@@ -1668,8 +1668,12 @@ module TDev { export module Browser {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
                 btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                btn.style.backgroundImage = "url("+tutorial.topic.json.screenshot+")";
-                btn.style.backgroundSize = "cover";
+                if (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot) {
+                    btn.style.backgroundImage = tutorial.topic.json.iconArtId
+                        ? ArtUtil.artUrl(tutorial.topic.json.iconArtId, true)
+                        : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
+                    btn.style.backgroundSize = "cover";
+                }
                 buttons.push(btn);
 
                 if (buttons.length == 6) {

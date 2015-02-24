@@ -1104,9 +1104,9 @@ var apiHandlers = {
                 "wget http://node-arm.herokuapp.com/node_latest_armhf.deb\n" +
                 "sudo dpkg -i node_latest_armhf.deb\n" +
                 "sudo npm install -g http://aka.ms/touchdevelop.tgz\n" +
-                "wget --output $HOME/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
-                "wget --output $HOME/.local/applications https://www.touchdevelop.com/api/language/touchdevelop.desktop\n" +
-                "wget --output $HOME/Desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
+                "wget -O $HOME/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
+                "wget -O $HOME/.local/applications https://www.touchdevelop.com/api/language/touchdevelop.desktop\n" +
+                "wget -O $HOME/Desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
             break;
 
         // linux desktop shortcut, mainly for raspberry pi
