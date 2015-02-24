@@ -237,6 +237,7 @@ mkSimpleTask('build/runner.d.ts', [
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
     "build/noderunner.js": [
+        "tools/node_prelude.js",
         "build/browser",
         "build/rt",
         "build/ast",
@@ -245,6 +246,14 @@ var concatMap = {
         "build/libnode",
         "build/pkgshell.js",
         "build/nrunner.js",
+    ],
+    "build/noderuntime.js": [
+        "tools/node_prelude.js",
+        "build/browser",
+        "build/rt",
+        "build/storage",
+        "build/libnode",
+        "build/runner",
     ],
     "build/runtime.js": [
         "build/rt",
@@ -328,11 +337,8 @@ function mapCat(files, dest) {
 
 Object.keys(concatMap).forEach(function (f) {
     var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
-    var prelude = f == "build/noderunner.js" ? ["tools/node_prelude.js"] : [];
     var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
-    var toConcat = prelude.concat(
-      concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
-    );
+    var toConcat = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
     file(f, buildDeps, { parallelLimit: branchingFactor }, function () {
       if (f == "build/main.js" && process.env.TD_SOURCE_MAPS)
         mapCat(toConcat, f);
