@@ -1083,6 +1083,7 @@ module TDev
             addNewButton: 1,
             undoButton: 1,
             // refactoring
+            promoteRefactoring: 1,
             fixItButton: 1,
             splitScreen: 1,
         }
@@ -1093,7 +1094,6 @@ module TDev
             actionSettings: 1,
             publishAsHidden: 1,
             // refactoring
-            promoteRefactoring: 1,
             simplify: 1,
             // ui
             splitButton: 1,
