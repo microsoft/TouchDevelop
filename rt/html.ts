@@ -999,6 +999,7 @@ module TDev.HTML {
         // video
         "controls": 2,
         "autoplay": 2,
+        "disabled": 2,
 
         // accessibility,
         "role":2,
@@ -1114,10 +1115,18 @@ module TDev.HTML {
         return v === 1 || v === 2
     }
 
-    export function allowedAttributeName(tn: string) {
-        if (!html5Attributes.hasOwnProperty(tn))
+    export function allowedAttribute(name: string, val: string) {
+        if (/^data-/.test(name))
+            return true
+        if (!html5Attributes.hasOwnProperty(name))
             return false
-        var v = html5Attributes[tn]
-        return v === 1 || v === 2
+        var v = html5Attributes[val]
+        if (v === 1)
+            // essentially, we want to exclude javascript:..., but it can be written in many ways, so we go for a white-list instead
+            return /^(http|\/|\.\/|#|mailto:)/.test(val)
+        else if (v === 2)
+            return true
+        else
+            return false
     }
 }

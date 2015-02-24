@@ -421,7 +421,7 @@ module TDev { export module RT {
         //@ betaOnly
         export function set_attribute(name: string, value: string, s: IStackFrame): void {
             if (!name) return;
-            if (!HTML.allowedAttributeName(name))
+            if (!HTML.allowedAttribute(name, value))
                 Util.userError(lf("attribute not allowed"), s.pc);
             var box = s.rt.getCurrentHtmlBox();
             box.setAttribute(name, value, s.rt.getTopScriptPc());
