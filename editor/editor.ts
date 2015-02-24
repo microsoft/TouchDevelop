@@ -166,13 +166,25 @@ module TDev
             return d;
         }
 
+        public showAppView(logs? : LogMessage[]) {
+            TDev.RT.App.showAppLogAsync(logs, undefined, els => {
+                els.filter(el => el.dataset['crash']).forEach(el => {
+                    el.withClick(() => {
+                        var crash = JSON.parse(el.dataset['crash']);
+                        ModalDialog.dismissCurrent();
+                        TheEditor.showStackTrace(crash.stack);
+                    });
+                });
+            }).done()
+        }
+
         public additionalButtons(): HTMLElement[]{
             this.pauseBtnDiv = div("inlineBlock")
             this.updatePause()
 
             var btns = [this.pauseBtnDiv];
             if (ScriptEditorWorldInfo.status != "published" && TheEditor.widgetEnabled("wallLogsButton"))
-                btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => TDev.RT.App.showAppLogAsync().done()));
+                btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
             return btns;
         }
 
@@ -1051,16 +1063,15 @@ module TDev
                         logs.push(RT.App.createInfoMessage('---------------------'));
                         logs.push(RT.App.createInfoMessage(wa.website + " -- touchdevelop log"));
                         logs = logs.concat(resp.tdlog);
-                        TDev.RT.App.showLog(logs);
+                        this.host.showAppView(logs);
                     }, e => {
                         logs.push(RT.App.createInfoMessage(''));
                         logs.push(RT.App.createInfoMessage('--- error while retreiving web site logs ---'));
                         logs.push(RT.App.createInfoMessage(e.message || ""));
-                        TDev.RT.App.showLog(logs);
+                        this.host.showAppView(logs);
                     });
             }
-            else
-                TDev.RT.App.showAppLogAsync().done();
+            else this.host.showAppView();
         }
 
         public showRunningStmt() {

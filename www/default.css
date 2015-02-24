@@ -108,6 +108,8 @@ textarea {
 .logView .logMsg[data-level^="info"] { }
 .logView .logMsg[data-level^="debug"] { color:gray;}
 
+.logView .logMsg[data-crash] { cursor:pointer; border: 2px solid red; }
+
 input.logSearchInput {
     width: 100%;
     box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;

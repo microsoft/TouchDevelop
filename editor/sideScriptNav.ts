@@ -188,15 +188,15 @@ module TDev
             if (!isParent && TheEditor.widgetEnabled("updateButton") &&
                 (TheEditor.scriptUpdateId || TheEditor.librariesNeedUpdate()))
                 addBtn(HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdate, () => {
-                    TheEditor.updateScript();
+                    this.editor.updateScript();
                 }));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
-                addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs, () => {
-                    TheEditor.showAppLog(app);
+                addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs,() => {
+                    this.editor.showAppLog(app);
                 }));
             if (!isParent && TheEditor.widgetEnabled("errorsButton"))
                 addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors, () => {
-                    TheEditor.searchFor(":m");
+                    this.editor.searchFor(":m");
                 }));
 
             if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") &&
