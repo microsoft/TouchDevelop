@@ -18,7 +18,7 @@ mobile-friendly editor makes coding fun, even on your phone or tablet!
 
 
 **This repo contains the source code of the TouchDevelop editor.** If you are
-intending to write TouchDevelop scripts, you probably want to go to
+intending to write TouchDevelop scripts, you want to go to
 `touchdevelop.com`:
 * **stable:** https://www.touchdevelop.com/app
 * **beta:** https://www.touchdevelop.com/app/beta
@@ -66,51 +66,72 @@ If you're not a developer but still would like to help, we've got more tasks for
 
 * [help translate the user inferface](https://touchdeveloptranslator.azurewebsites.net): do you use TouchDevelop and speak a foreign language? You can help!
 
-## Building
+## Setup
 
 In order to build TouchDevelop, ensure that you have [Git](http://git-scm.com/downloads) and [Node.js](http://nodejs.org/) installed.
 
-Clone a copy of the repo:
+* clone a copy of the repo:
 
-    git clone https://github.com/Microsoft/TouchDevelop.git
+````
+git clone https://github.com/Microsoft/TouchDevelop.git
+````
 
-Change to the TouchDevelop directory:
+* change to the TouchDevelop directory:
 
-    cd TouchDevelop
+````
+cd TouchDevelop
+````
 
-Install dependencies:
+* install dependencies:
 
-    npm install jake -g
-    npm install tsd@next -g
-    tsd reinstall
-    npm install
+````
+npm install jake -g
+npm install tsd@next -g
+tsd reinstall
+npm install
+````
 
-Build:
+## Building
 
-    export TD_SOURCE_MAPS=1 # optional, will slow down your build
-    jake
+There's different way to build and run TouchDevelop:
 
-## Running
+* just build:
 
-There's different way to run TouchDevelop:
+````
+jake
+````
 
-* from a local node.js server:
+You can generate source maps by defining the env variable ``TD_SOURCE_MAPS``
 
-    jake local
+````
+export TD_SOURCE_MAPS=1 # optional, will slow down your build
+````
 
-The local instance can be accessed at `http://localhost:4242/editor/local/`.
+* build and run locally:
 
-* packaged as a [nwjs] app:
+````
+jake local
+````
 
-    jake nw
 
-## Tests
 
-    jake test
+* run packaged as a [nwjs] app:
 
-## Cleaning
+````
+jake nw
+````
 
-    jake clean
+* run the test suite
+
+````
+jake test
+````
+
+* cleaning
+
+````
+jake clean
+````
 
 ## Editing
 
