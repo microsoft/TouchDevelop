@@ -2,7 +2,7 @@
 
 module TDev { export module Browser {
 
-    export var TheHub:Hub;
+    export var TheHub: Hub;
 
     export interface ScriptTemplate {
         title: string;
@@ -564,11 +564,11 @@ module TDev { export module Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
-            var editorMode = EditorSettings.editorMode();
+            var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
             var currentCap = PlatformCapabilityManager.current();
             return this.templates
                 .filter(template => {
-                    if (template.editorMode > editorMode) return false;
+                    if (template.editorMode && template.editorMode > editorMode) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
