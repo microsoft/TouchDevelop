@@ -3808,16 +3808,19 @@ module TDev
 
             var calcw = Math.min(7, Calculator.keypadW());
             var pageSize = calcw - 1;
+            var firstPageSize = EditorSettings.editorMode() <= EditorMode.block
+                ? Math.min(pageSize, 4) // var, if, for, while
+                : pageSize;
 
             var firstPage:IntelliItem[] = stmtItems.slice(0);
             var usage = (a:IntelliItem) => api.core.stmtUsage(a.usageKey).count();
             if (TheEditor.intelliProfile)
                 firstPage = stmtItems.filter(it => (usage(it) >= 1) || TheEditor.intelliProfile.hasKey(it.usageKey))
 
-            if (firstPage.length > pageSize) {
+            if (firstPage.length > firstPageSize) {
                 var cmpStmt = (a:IntelliItem, b:IntelliItem) => usage(b) - usage(a);
                 firstPage.sort(cmpStmt);
-                firstPage = firstPage.slice(0, pageSize);
+                firstPage = firstPage.slice(0, firstPageSize);
                 firstPage = stmtItems.filter(it => firstPage.indexOf(it) >= 0)
             }
 
@@ -3825,7 +3828,7 @@ module TDev
             var pages:IntelliItem[][] = [];
 
             var currPage = 0;
-            var pages = Util.chopArray(remainingItems, pageSize);
+            var pages = Util.chopArray(remainingItems, firstPageSize);
             pages.unshift(firstPage);
 
             var setupTop = ():void => {

@@ -1108,6 +1108,8 @@ module TDev
             eventsSection: 1,
             artSection:1,
             librariesSection: 1,
+            // statements
+            comment: 1,
         }
         static proWidgets: StringMap<number> = {
             //navigation
