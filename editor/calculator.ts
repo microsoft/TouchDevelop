@@ -738,7 +738,7 @@ module TDev
         private setupIntelliProfile()
         {
             this.showAsync = asyncEnabled;
-            if (TheEditor.intelliProfile && !TheEditor.widgetEnabled("async")) {
+            if (!TheEditor.widgetEnabled("async")) {
                 this.showAsync = false;
             }
         }
