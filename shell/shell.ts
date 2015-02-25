@@ -2011,8 +2011,12 @@ function main()
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  --workers NUMBER  -- number of worker servers to start (-w); negative to multiply by number of cores")
-        console.error("  --blob NAME       -- use Azure Blob Storage for deployment, using named channel")
         console.error("  NAME=VALUE        -- set environment variable for the script")
+        console.error("")
+        console.error("Supported environment variable options:")
+        console.error("TD_ALLOW_EDITOR         -- set to 'true' to proxy editor at /editor/")
+        console.error("TD_LOCAL_EDITOR_PATH    -- serve files from path at /editor/local")
+        console.error("TD_BLOB_DEPLOY_CHANNEL  -- deploy from Azure blob storage, using named channel")
 
         process.exit(1)
     }
@@ -2031,10 +2035,6 @@ function main()
             case "--controller":
                 args.shift()
                 controllerUrl = args.shift()
-                break;
-            case "--blob":
-                args.shift()
-                blobChannel = args.shift()
                 break;
             case "-w":
             case "--workers":
@@ -2175,6 +2175,8 @@ function main()
             startUp()
         }
     }
+
+    blobChannel = process.env['TD_BLOB_DEPLOY_CHANNEL']
 
     app = http.createServer(handleReq);
     app.on("upgrade", (req, sock, body) =>
