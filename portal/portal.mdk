@@ -1,0 +1,73 @@
+[INCLUDE=bootstrap]
+Title      : Bootstrap demo document
+Theme      : darkly
+Css        : nav-example.css
+~Col       : .col-lg-4
+
+~ Begin Container
+~ Masthead
+
+### Project name {.text-muted}
+
+* {.active} [Home](#)
+* [Projects](http://rise4fun.com)
+* [Services](#)
+* [Downloads](#)
+* [About](#)
+* [Contact](#)
+{.nav .nav-justified}
+~ 
+
+~ Jumbotron
+# A Webpage in Madoko
+By using the bootstrap framwork it is easy to create great looking
+webpages that display well both on Mobile and Desktop platforms.
+In madoko, we can directly use any standard bootstrap class names, 
+like `Jumbotron` as a custom block!
+{.lead}
+
+[Learn about Bootstrap](http://getbootstrap.com/css/){.btn .btn-lg .btn-success html-role=button}
+~
+
+<!-- Example row of columns -->
+~ Begin Row
+~ Col
+## Safari bug warning! 
+As of v7.0.1, Safari exhibits a bug in which resizing your browser
+horizontally causes rendering errors in the justified nav that are
+cleared upon refreshing. 
+{.text-danger}
+
+Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas
+eget quam. Vestibulum id ligula porta felis euismod semper. Fusce
+dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
+fermentum massa.\
+[View details &raquo;](#){.btn .btn-primary html-role=button}
+~
+
+~ Col
+## Heading
+Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas
+eget quam. Vestibulum id ligula porta felis euismod semper. Fusce
+dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
+fermentum massa.\
+[View details &raquo;](#){.btn .btn-primary html-role=button}
+~
+
+~ Col
+## Heading
+Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas
+eget quam. Vestibulum id ligula porta felis euismod semper. Fusce
+dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
+fermentum massa. type here. which is amazing.\
+[View details &raquo;](#){.btn .btn-primary html-role=button}
+~
+
+~ End Row
+
+~ Footer
+&copy; Company 2014
+~
+
+~ End Container
+
