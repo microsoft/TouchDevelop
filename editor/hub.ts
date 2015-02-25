@@ -152,9 +152,6 @@ module TDev { export module Browser {
                     ]);
 
                 Host.tryUpdate();
-
-                if (!Cloud.isAccessTokenExpired())
-                    TestMgr.runBetaTests();
             }
         }
 
@@ -311,19 +308,6 @@ module TDev { export module Browser {
             this.showSections();
 
             switch(h[1]) {
-                case "test":
-                    TestMgr.testAllScripts();
-                    break;
-                case "singlebenchmark":
-                    HistoryMgr.instance.setHash(this.screenId() + ":singlebenchmark", null)
-                    if (!Cloud.isAccessTokenExpired())
-                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(false);
-                    break;
-                case "benchmarksuite":
-                    HistoryMgr.instance.setHash(this.screenId() + ":benchmarksuite", null)
-                    if (!Cloud.isAccessTokenExpired())
-                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(true);
-                    break;
                 case "joingroup":
                     var code = h[2];
                     HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)

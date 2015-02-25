@@ -1742,20 +1742,6 @@ module TDev
                 else run1()
             };
 
-            if (!this.stepTutorial && !TestMgr.Benchmarker.unitTimeReported()) {
-                if (TDev.RT.Perf.unit() < 0) {
-                    if (++Editor.runCount > 5 && Math.random() < .20) {
-                        TestMgr.Benchmarker.measureUnitTimeAsync().done(() => {
-                            TestMgr.Benchmarker.reportUnitTime();
-                            run();
-                        });
-                        return;
-                    }
-                }
-                else
-                    TestMgr.Benchmarker.reportUnitTime();
-            }
-
             if (!this.parentScript && Script.usesCloudLibs() && !Azure.getDestinationAppUrl(Script)) {
                 AppExport.setupAzure()
                 return
@@ -2281,18 +2267,6 @@ module TDev
                 var a = Script.mainAction();
                 if (!a) return;
                 else this.runAction(a, null, { profiling: true, showProfiling: true });
-            }
-
-            if (!this.stepTutorial && !TestMgr.Benchmarker.unitTimeReported()) {
-                if (TDev.RT.Perf.unit() < 0) {
-                    TestMgr.Benchmarker.measureUnitTimeAsync().done(() => {
-                        TestMgr.Benchmarker.reportUnitTime();
-                        run();
-                    });
-                    return;
-                }
-                else
-                    TestMgr.Benchmarker.reportUnitTime();
             }
             run();
         }
@@ -4211,17 +4185,12 @@ module TDev
                         })),
                         div("wall-dialog-body", chaosOfflineEdit),
                         div("wall-dialog-body",
-                            HTML.mkButton(lf("perf cloud data"), () => {
-                                TestMgr.Benchmarker.displayPerfData();
-                            }),
                             !LocalShell.mgmtUrl("") ? null :
                                 HTML.mkButton(lf("save offline caches"), () =>
                                     LocalProxy.saveCachesAsync().done())
                             ),
                         div("wall-dialog-body", HTML.mkCheckBox("enable new intelli prediction",
                             (v) => { TheEditor.calculator.enableNewPredictor = v; }, TheEditor.calculator.enableNewPredictor)),
-                        (dbg ? HTML.mkButtonTick(lf("run tests"), Ticks.hubTests, () => { TestMgr.testAllScripts(); }) : null),
-                        (!Util.localTranslationTracking && dbg ? HTML.mkButtonTick(lf("run benchmarks"), Ticks.hubBenchmarks, () => { TestMgr.Benchmarker.runBenchmarksButtonAsync(); }) : null),
                         (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),

@@ -8,7 +8,6 @@
 ///<reference path='videoUtil.ts'/>
 ///<reference path='tipManager.ts'/>
 ///<reference path='sideTab.ts'/>
-///<reference path='benchmarker.ts'/>
 ///<reference path='calcbutton.ts'/>
 ///<reference path='calculator.ts'/>
 ///<reference path='clipMgr.ts'/>
@@ -34,7 +33,6 @@
 ///<reference path='sideSearch.ts'/>
 ///<reference path='sideInlineAction.ts'/>
 ///<reference path='undoMgr.ts'/>
-///<reference path='testIds.ts'/>
 ///<reference path='testMgr.ts'/>
 ///<reference path='actionProperties.ts'/>
 ///<reference path='recordEditor.ts'/>

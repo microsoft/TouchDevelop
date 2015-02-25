@@ -683,26 +683,6 @@ module TDev { export module Browser {
 
                     var translateNag = !!localStorage["translateNagged"];
 
-                    var benchmarksNagged = false;
-                    var benchmarksNagVector = localStorage["benchmarksNagVector"];
-                    var nagVector: { [version: string]: boolean; } = null;
-                    if (benchmarksNagVector) {
-                        try {
-                            nagVector = JSON.parse(benchmarksNagVector);
-                        } catch (e) { }
-                        if (nagVector != null) {
-                            if (!!nagVector[<string>Cloud.currentReleaseId])
-                                benchmarksNagged = true;
-                        }
-                    }
-                    if (!Cloud.getUserId() ||
-                        !TDev.isBeta ||
-                        dbg) // don't nag dbg users, as those do not represent general population
-                        benchmarksNagged = true;
-
-                    if(Math.random() > 0.05) // only 5% of users get nagged
-                        benchmarksNagged = true;
-
                     if (!Cloud.lite && dbg &&
                         !!Cloud.getUserId() && !translateNag
                         && (<any>window).userScore > 30 && Math.random() < 0.1) { // only 20% get nagged of powerusers
@@ -718,28 +698,6 @@ module TDev { export module Browser {
                                     tick(Ticks.translateNagOk);
                                     RT.Web.browseAsync("https://touchdeveloptranslator.azurewebsites.net/#").done();
                                 }))
-                        ]);
-                        m.show();
-                    } else if (!Cloud.lite && !benchmarksNagged && EditorSettings.editorMode() >= EditorMode.classic) {
-                        if (nagVector == null) nagVector = {};
-                        nagVector[<string>Cloud.currentReleaseId] = true;
-                        localStorage["benchmarksNagVector"] = JSON.stringify(nagVector);
-                        tick(Ticks.benchmarksNagDisplay);
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("Help the TouchDevelop community!")),
-                            div("wall-dialog-body", lf("You can help us by running a TouchDevelop benchmark to test how well we perform on your device.")),
-                            div("wall-dialog-buttons",
-                                HTML.mkButton(lf("no, thanks"), () => {
-                                    m.dismiss();
-                                    tick(Ticks.benchmarksNagDismiss);
-                                }),
-                                HTML.mkButton(lf("run benchmark"), () => {
-                                    tick(Ticks.benchmarksNagRunOne);
-                                    m.dismiss();
-                                    TestMgr.Benchmarker.runTDBenchmarksWithDialog(false).done();
-                                })
-                                )
                         ]);
                         m.show();
                     }
