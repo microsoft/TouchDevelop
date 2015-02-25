@@ -1,8 +1,5 @@
 ///<reference path='refs.ts'/>
-
-
-module TDev {
-    export module Cloud {
+module TDev.Cloud {
 
     export var lite = false;
 
@@ -518,10 +515,6 @@ module TDev {
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("bug"), bug);
     }
-    export function postRunReportAsync(id: string, run: any): Promise // of ???
-    {
-        return Util.httpPostJsonAsync(getPrivateApiUrl(id + "/runs"), run);
-    }
     export function postTicksAsync(ticks:any) : Promise // of void
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("ticks"), ticks);
@@ -608,41 +601,6 @@ module TDev {
             client.send();
         });
     }
-
-    export function postProfilingDataAsync(id: string, body: any /*ProfilingData*/): Promise // of void
-    {
-        return Util.httpPostJsonAsync(getPrivateApiUrl(id + "/profile?v=1"), body);
-    }
-
-    export function postCoverageDataAsync(id: string, body: any /*CoverageData*/): Promise // of void
-    {
-        return Util.httpPostJsonAsync(getPrivateApiUrl(id + "/coverage"), body);
-    }
-
-    export function getCoverageDataAsync(id: string, compilerversion: string, intersection: boolean = false): Promise // of CoverageData[]
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl(id + "/coverage?compilerversion=" + encodeURIComponent(compilerversion) + (intersection ? "&view=intersection" : "")));
-    }
-
-    export interface Covered {
-        count: number;
-    }
-    export function getCoveredAsync(id: string, compilerversion: string): Promise // of Covered
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl("me/covered/" + id + "?compilerversion=" + encodeURIComponent(compilerversion)));
-    }
-
-    export function getProfileDataAsync(id: string, compilerversion: string): Promise // of ProfileData[]
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl(id + "/profile?compilerversion=" + encodeURIComponent(compilerversion)));
-    }
-    export interface Profiled {
-        count: number;
-    }
-    export function getProfiledAsync(id: string, compilerversion: string): Promise // of Profiled
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl("me/profiled/" + id + "?compilerversion=" + encodeURIComponent(compilerversion)));
-    }
     export function postPendingProgressAsync() {
         if (!getUserId() || !getAccessToken() || isOffline() || dbg) return Promise.as();
         var data = loadPendingProgress();
@@ -656,8 +614,5 @@ module TDev {
     export function postCommentAsync(id: string, text:string): Promise { // JsonComment
         var req = { kind: "comment", text: text, userplatform: Browser.platformCaps };
         return Cloud.postPrivateApiAsync(id + "/comments", req)
-    }
-
-
     }
 }

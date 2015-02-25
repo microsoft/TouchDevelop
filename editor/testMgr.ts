@@ -92,7 +92,6 @@ module TDev.TestMgr
                 blockChaining: Browser.compilerBlockChaining || /blockChaining/.test(document.URL),
                 commonSubexprElim: /commonSubexprElim/.test(document.URL),
                 constantPropagation: /constantPropagation/.test(document.URL),
-                coverage: false,
                 crashOnInvalid: /crashOnInvalid/.test(document.URL),
             };
         }

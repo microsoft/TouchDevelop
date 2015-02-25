@@ -153,24 +153,6 @@ module TDev {
         data: string; // groupid for group invitation codes
     }
 
-    export interface JsonStoreApp
-    {
-        kind: string; // 'storeapp'
-        time: number; // seconds since 1970 of last activity on this app (most likely: increase of users / launches)
-        url:string;
-        scriptid: string;
-        storeid: string;
-        title: string;
-        publisher: string;
-        iconurl: string;
-        languages: string[];
-        users: number;
-        launches: number;
-        userid: string; // creator of scriptid
-        username: string;
-        userscore: number;
-        userhaspicture: boolean;
-    }
 
     export interface JsonScript extends JsonPublication
     {
@@ -230,37 +212,6 @@ module TDev {
         publicationkind:string; //
     }
 
-    export interface JsonRunBucket extends JsonPubOnPub {
-        compilerversion: string; // the version of the compiler
-        publicationid: string; // script id
-        publicationname: string; // script name
-        publicationkind: string; // should be "script"
-        hash: string; // the hash of the bucket (probably not interesting to anyone)
-        runs: number; // the "weight" of the bucket #1, the total number of runs bound to it
-        cumulativeruns: number; // the "weight" of the bucket #2, the total number of encounters
-        error: string; // the error message
-    }
-
-    export interface JsonStackFrame {
-        id: string; // the id of the ast node
-        action: string; // the name of the action
-    }
-
-    export interface JsonStackTrace {
-        pack: JsonStackFrame[]; // the array of stack frames
-        path: number[]; // the trace in a form of indexes into pack
-    }
-
-    export interface JsonRun extends JsonPubOnPub {
-        bucketid: string; // id of the bucket
-        userplatform?: string[]; // platform
-        anonymous: boolean; // is this run anonymous?
-        error: string; // the error message
-        runmap: string[]; // the run map
-        stack: JsonStackTrace; // the stack trace
-        clientversion: string; // the long release version of the client
-        compilerversion: string; // the version of the compiler for this run
-    }
 
     export interface JsonComment extends JsonPubOnPub
     {

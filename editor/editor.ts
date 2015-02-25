@@ -561,13 +561,6 @@ module TDev
             return Meta.packageScriptAsync(this.currentRt, id, options);
         }
 
-        static scriptProfiledCache: { [scriptId: string]: Promise/*of Profiled*/; } = {}
-        static getScriptProfiledAsync(scriptId: string): Promise { // of Profiled
-            var p = EditorHost.scriptProfiledCache[scriptId];
-            if (!p) EditorHost.scriptProfiledCache[scriptId] = p = Cloud.getProfiledAsync(scriptId, TDev.AST.Compiler.version);
-            return p;
-        }
-
         resetAnnotators() {
             new ProfilingResultsAnnotator(null).visitApp(Script);
             new ScriptDebuggingAnnotator(null, null, null).visitApp(Script);
@@ -584,14 +577,6 @@ module TDev
                     profilingData.maximumEps = this.currentRt.eventQ.maximumEps;
                     profilingData.averageEps = this.currentRt.eventQ.averageEps;
                 }
-                EditorHost.getScriptProfiledAsync(scriptId)
-                    .then(profiled=> {
-                        var p = profiled.count < 20 ? 1 - .90 * profiled.count / 20 : .1; // probability of uploading profiling information; this is after the probability of getting instrumented for profiling; the combined probability converges to 1%
-                        if (Random.normalized() < p)
-                            return Cloud.postProfilingDataAsync(scriptId, profilingData)
-                                .then(() => profiled.count++);
-                    })
-                    .done(undefined, () => { }); // ignore network errors
             }
             if (profilingData.show) {
                 this.resetAnnotators();
@@ -599,26 +584,8 @@ module TDev
             }
         }
 
-        static scriptCoveredCache: { [scriptId: string]: Promise/*of Covered*/; } = { }
-        static getScriptCoveredAsync(scriptId: string): Promise { // of Covered
-            var p = EditorHost.scriptCoveredCache[scriptId];
-            if (!p) EditorHost.scriptCoveredCache[scriptId] = p = Cloud.getCoveredAsync(scriptId, TDev.AST.Compiler.version);
-            return p;
-        }
-
         public attachCoverageInfo(coverageData: CoverageData, showCoverage: boolean): void {
             if (!coverageData) return;
-
-            var scriptId = this.currentRt.currentScriptId;
-            if (scriptId)
-                EditorHost.getScriptCoveredAsync(scriptId)
-                    .then(covered => {
-                        var p = covered.count < 90 ? .5 - .49 * covered.count / 90 : .01; // probability of uploading coverage information
-                        if (Random.normalized() < p)
-                            return Cloud.postCoverageDataAsync(scriptId, coverageData)
-                                .then(() => covered.count++);
-                    })
-                    .done(undefined, () => { }); // ignore network errors
 
             if (showCoverage) {
                 this.resetAnnotators();
@@ -1623,7 +1590,6 @@ module TDev
                     crashOnInvalid: /crashOnInvalid/.test(document.URL),
                     commonSubexprElim: /commonSubexprElim/.test(document.URL),
                     constantPropagation: /constantPropagation/.test(document.URL),
-                    coverage: true,
                     azureSite: Azure.getDestinationAppUrl(app),
                 };
                 Object.keys(opts).forEach((k) => {

@@ -14,7 +14,6 @@
 ///<reference path='collab.ts'/>
 ///<reference path='declrender.ts'/>
 ///<reference path='debugger.ts'/>
-///<reference path='debuggerAnalysis.ts'/>
 ///<reference path='libraryExtractor.ts'/>
 ///<reference path='editor.ts'/>
 ///<reference path='tutorial.ts'/>

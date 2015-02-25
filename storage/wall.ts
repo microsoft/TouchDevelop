@@ -715,8 +715,6 @@ module TDev {
         public attachScriptStackTrace(bug: BugReport): void { }
         /* overriden in EditorHost */
         public debugModeEnabled(): boolean { return false; }
-        /* overriden in EditorHost */
-        public publishRunHelpLink(title: string): any { return undefined; }
 
         public exceptionHandler(e:any)
         {
@@ -731,10 +729,6 @@ module TDev {
             var stack = PackedStackTrace.buildFrom(this.currentRt.getStackTrace());
             TDev.RT.App.logException(e);
 
-            var askRunReport =
-                !!e.isUserError &&
-                !!Runtime.theRuntime.currentScriptId /* && this.currentRt.currentAuthorId != Cloud.getUserId() */; // the commented piece is questionable, put to remove by Nikolai
-
             var actions = this.exceptionActions(e) || {}
 
             var debugAction = actions.debug || Util.doNothing;
@@ -747,70 +741,7 @@ module TDev {
                 d.addFirst(div("floatingFrown", ":("))
             }
 
-            if (askRunReport) {
-                var futureModalDialog: ModalDialog;
-                var debugBtn: any = (this.debugModeEnabled() && debugAction) ? HTML.mkButton(lf("debug"), () => {
-                    debugAction(); this.attachDebuggingInfo(runMap, stack, msg); futureModalDialog.dismiss()
-                }) : null;
-                var sendRunReport = (anonymous: boolean, comment?: string) => {
-                    var run: IRun = {
-                        clientfile: (<any>window).mainJsName,
-                        compilerversion: this.currentRt.compiled._compilerVersion,
-                        kind: "run",
-                        publicationid: this.currentRt.currentScriptId,
-                        error: error,
-                        stack: stack,
-                        runmap: runMap.isEmpty() ? undefined : runMap,
-                        userplatform: Browser.platformCaps,
-                        anonymous: anonymous
-                    };
-                    var rt = Runtime.theRuntime;
-                    Cloud.postRunReportAsync(rt.currentScriptId, run).done(
-                        json => {
-                            HTML.showProgressNotification(dbg ? ("crash report submitted: /" + json.id) : "thank you for your run report");
-                            if (!!comment) {
-                                var jsonComment = {
-                                    kind: "comment",
-                                    text: comment,
-                                    userplatform: Browser.platformCaps
-                                };
-                                Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(json.id + "/comments"), jsonComment).done();
-                            }
-                        },
-                        e => HTML.showProgressNotification(dbg ? ("crash report send failed: " + e) : "thank you for your run report")
-                    );
-                }
-
-                var hiddenContent = div(null);
-                var commentArea = HTML.mkAutoExpandingTextArea();
-                commentArea.textarea.placeholder = "describe how you crashed the script";
-
-                var defDS = hiddenContent.style.display;
-                hiddenContent.style.display = "none";
-                hiddenContent.setChildren([commentArea.div, debugBtn]);
-                var showHidden = (v: boolean) => hiddenContent.style.display = v ? defDS : "none";
-
-                var commentBox = HTML.mkCheckBox(
-                    lf("show additional options"),
-                    showHidden
-                );
-
-                futureModalDialog = ModalDialog.askManyWithAdditionalElts(
-                    lf("the script crashed"), this.publishRunHelpLink("about posting crash"),
-                    lf("Do you want to post some information to help improve the script? (The collected information include a stack trace, a coverage map, and a message.)"),
-                    lf("error message"),
-                    error,
-                    {
-                        "post": () => sendRunReport(false, commentArea.textarea.value || null),
-                        "post anonymously": () => sendRunReport(true, commentArea.textarea.value || null),
-                        cancel: () => { },
-                    },
-                    commentBox,
-                    hiddenContent
-                    );
-                futureModalDialog.fullYellow();
-                frown(futureModalDialog)
-            } else if(this.canEditCode() && !!e.syntaxErrorDeclName) {
+            if(this.canEditCode() && !!e.syntaxErrorDeclName) {
                 var dial = ModalDialog.buttons(
                     lf("errors in the code?"),
                     lf("the script appears to have some errors. fix each error marked with a red :( symbol and try to run again"),
