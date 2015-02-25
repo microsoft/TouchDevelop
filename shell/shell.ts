@@ -23,6 +23,7 @@ var dataDir : string = ".";
 var useFileSockets = true
 var allowEditor = false;
 var numWorkers = 1;
+var blobChannel = "";
 
 (<any>http.globalAgent).options.keepAlive = true;
 
@@ -42,7 +43,6 @@ interface TdState {
 }
 
 var tdstate:TdState;
-var wsModule:any;
 
 interface LogMessage {
     timestamp: number;
@@ -697,13 +697,32 @@ function runCommand(d:RunCliOptions, f) {
 
 function deployAr(ar:ApiRequest, isScript:boolean)
 {
+    var final = (err, resp) => {
+        if (err) ar.ok({ status: "error", message: err + "" })
+        else ar.ok(resp)
+    }
+
+    if (isScript && blobChannel) {
+        var n = Math.round((Date.now()/1000))
+        var id = (100000000000 - n) + "." + crypto.randomBytes(8).toString("hex")
+        setBlobJson(id, ar.data, err => {
+            if (err) ar.exception(err)
+            else
+                setBlobJson("ch-" + blobChannel, { blob: id, time: n }, err => {
+                    if (err) ar.exception(err)
+                    else {
+                        blobDeployCallback = final
+                        checkUpdate()
+                    }
+                })
+        })
+        return
+    }
+
     if (!isScript)
         tdstate.downloadedFiles = {}
 
-    deploy(ar.data, (err, resp) => {
-        if (err) ar.ok({ status: "error", message: err + "" })
-        else ar.ok(resp)
-    }, isScript)
+    deploy(ar.data, final, isScript)
 }
 
 var socketCmds:StringMap<(ws, data)=>void> = {
@@ -1281,23 +1300,29 @@ function loadScriptCoreAsync()
     }
 }
 
-function loadWsModule(f:()=>void)
+var loadedModules:any = {}
+
+function loadModule(name:string, f:(mod)=>void)
 {
-    if (wsModule)
-        f()
+    if (loadedModules.hasOwnProperty(name))
+        f(loadedModules[name])
     else {
         var finish = () => {
-            wsModule = require("faye-websocket")
-            global.WebSocket = wsModule.Client
-            debug.log("Faye websocket loaded")
-            f()
+            var mod = require(name)
+            loadedModules[name] = mod
+            debug.log("module " + name + " loaded")
+            f(mod)
         }
 
-        if (fs.existsSync(rootDir + "/node_modules/faye-websocket"))
+        if (fs.existsSync(rootDir + "/node_modules/" + name))
             finish()
         else
-            executeNpm(["install", "faye-websocket"], finish)
+            executeNpm(["install", name], finish)
     }
+}
+
+function loadWsModule(f:()=>void)
+{
 }
 
 var lastCtrlResponse = Date.now();
@@ -1885,6 +1910,78 @@ function shellSha()
     return _shellSha;
 }
 
+
+var blobSvc;
+var containerName = 'tddeployments'
+var updateDelay = 3000;
+var lastAzureDeployment = "";
+var updateWatchdog = 0;
+var blobDeployCallback;
+
+function setBlobJson(name, json, f) {
+    blobSvc.createBlockBlobFromText(containerName, name, JSON.stringify(json, null, 2), f)
+}
+
+function getBlobJson(name, f) {
+    blobSvc.getBlobToText(containerName, name, (err, data) => {
+        f(err, data ? JSON.parse(data) : null)
+    })
+}
+
+function checkUpdate()
+{
+    var n = Date.now()
+    if (n - updateWatchdog < 25000)
+        return
+    updateWatchdog = n
+    var reset = () => {
+        if (updateWatchdog == n) updateWatchdog = 0
+    }
+
+    getBlobJson("ch-" + blobChannel, (err, d) => {
+        if (d && d.blob && d.blob != lastAzureDeployment) {
+            info.log("new deployment, " + d.blob)
+            getBlobJson(d.blob, (err, data) => {
+                lastAzureDeployment = d.blob
+                if (data) {
+                    deploy(data, (err, resp) => {
+                        var f = blobDeployCallback
+                        blobDeployCallback = null
+                        if (f) f(err, resp)
+                        if (err)
+                            error.log("cannot deploy: " + err)
+                        else
+                            info.log(resp)
+                        reset()
+                    })
+                } else {
+                    error.log("cannot fetch deployment: " + err.message)
+                    reset()
+                }
+            })
+        } else {
+            if (err && err.statusCode != 404)
+                console.log(err)
+            reset()
+        }
+    })
+}
+
+function loadAzureStorage(f)
+{
+    loadModule("azure-storage", az => {
+        if (!blobSvc)
+            blobSvc = az.createBlobService()
+        blobSvc.createContainerIfNotExists(containerName, err => {
+            if (err)
+                throw err;
+            setInterval(checkUpdate, updateDelay)
+        })
+        checkUpdate()
+        f()
+    })
+}
+
 function main()
 {
     inAzure = !!process.env.PORT;
@@ -1914,6 +2011,7 @@ function main()
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  --workers NUMBER  -- number of worker servers to start (-w); negative to multiply by number of cores")
+        console.error("  --blob NAME       -- use Azure Blob Storage for deployment, using named channel")
         console.error("  NAME=VALUE        -- set environment variable for the script")
 
         process.exit(1)
@@ -1933,6 +2031,10 @@ function main()
             case "--controller":
                 args.shift()
                 controllerUrl = args.shift()
+                break;
+            case "--blob":
+                args.shift()
+                blobChannel = args.shift()
                 break;
             case "-w":
             case "--workers":
@@ -2056,6 +2158,10 @@ function main()
     }
 
     var reload = () => {
+        if (!tdstate.numDeploys) {
+            startUp();
+            return
+        }
         info.log('reloading script...');
         try {
             reloadScript()
@@ -2071,8 +2177,9 @@ function main()
     }
 
     app = http.createServer(handleReq);
-    app.on("upgrade", (req, sock, body) => {
-        loadWsModule(() => {
+    app.on("upgrade", (req, sock, body) =>
+        loadModule("faye-websocket", wsModule => {
+            global.WebSocket = wsModule.Client
             if (wsModule.isWebSocket(req) &&
                 req.url.slice(0, 12)  == "/-tdevmgmt-/")
             {
@@ -2085,16 +2192,16 @@ function main()
                 }
             }
             else sock.end()
-        })
-    })
+        }))
 
     if (scriptId) {
         shouldStart = false;
         runScript(scriptId, startUp, reload)
-    } else if (tdstate.numDeploys > 0) {
-        reload()
     } else {
-        startUp()
+        if (blobChannel)
+            loadAzureStorage(startUp)
+        else
+            reload()
     }
 }
 
