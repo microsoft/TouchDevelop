@@ -120,6 +120,49 @@ class ApiRequest {
     {
     }
 
+    forwardToWorkers()
+    {
+        var respArr = []
+        var numReqs = 1
+
+        var oneUp = () => {
+            if (--numReqs == 0) this.ok({ workers: respArr })
+        }
+
+        workers.forEach((w, i) => {
+            var thisResp:any = {
+                worker: w.description(),
+            }
+            respArr[i] = thisResp
+
+            if (!w.child) {
+                thisResp.code = -1
+                return
+            }
+
+            var u = w.getUrl()
+            u.method = this.req.method
+            u.headers = this.req.headers
+            u.path = this.req.url
+
+            numReqs++
+            var creq = http.request(u, cres => {
+                thisResp.code = cres.statusCode
+                cres.setEncoding("utf8")
+                var s = ""
+                cres.on("data", d => s += d)
+                cres.on("end", () => {
+                    thisResp.body = JSON.parse(s)
+                    oneUp()
+                })
+            })
+            if (Object.keys(this.data))
+                creq.end(JSON.stringify(this.data))
+            else creq.end()
+        })
+        oneUp()
+    }
+
     error(code:number, text:string)
     {
         info.log("HTTP error " + code + ": " + text)
@@ -858,13 +901,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
         }
     },
 
-    info: ar => {
-        loadScript(() => {
-            ar.ok({ error: "not implemented" })
-            //TDev.RT.Node.getRuntimeInfoAsync(ar.cmd.slice(1).join("/")).done(
-            //    resp => ar.ok(resp), err => ar.exception(err))
-        })
-    },
+    info: ar => ar.forwardToWorkers(),
 
     logs: ar => {
         ar.ok({
@@ -1137,7 +1174,6 @@ function getMime(filename:string)
 }
 
 var app;
-var wsServer;
 var needsStop = false
 var scriptLoadPromise : any;
 var rootDir = ""
@@ -1169,9 +1205,16 @@ class Worker {
             }, 1000)
     }
 
+    public description()
+    {
+        return this.socketPath || this.port
+    }
+
     public init()
     {
+        info.log("worker start " + this.description())
         this.child.on("exit", () => {
+            info.log("worker exit " + this.description())
             this.child = null
         })
     }
@@ -1205,7 +1248,7 @@ function loadScriptCoreAsync()
 
     if (useFileSockets) {
         var sockPath = "tdsh." + crypto.randomBytes(16).toString("hex")
-        env.PORT = isWin ? "\\\\.\\" + sockPath : "/tmp/." + sockPath
+        env.PORT = isWin ? "\\\\.\\pipe\\" + sockPath : "/tmp/." + sockPath
         w.socketPath = env.PORT
     } else {
         w.port = portNum++
@@ -1701,7 +1744,7 @@ function handleReq(req, resp)
         var u = w.getUrl()
         u.method = req.method
         u.headers = req.headers
-        u.path = req.path
+        u.path = req.url
 
         var creq = http.request(u, cres => {
             resp.writeHead(cres.statusCode, cres.headers)
@@ -2022,7 +2065,6 @@ function main()
                     sock.end()
                 }
             }
-            else if (wsServer) wsServer.upgradeCallback(req, sock, body)
             else sock.end()
         })
     })

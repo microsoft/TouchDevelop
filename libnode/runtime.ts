@@ -83,8 +83,6 @@ module TDev.RT.Node {
         else
             mkAgent = p => p == "https:" ? new AgentSSL({ maxSockets: maxSock, keepAlive: true }) : new Agent({ maxSockets: maxSock, keepAlive: true })
 
-        console.log("creating new HTTP agent")
-
         httpAgent = http.globalAgent = mkAgent("http:")
         httpsAgent = https.globalAgent = mkAgent("https:")
     }
@@ -644,29 +642,60 @@ module TDev.RT.Node {
         (<any>TDev.RT.Buffer).fromNodeBuffer = buf => TDev.RT.Buffer.fromTypedArray(buf);
     }
 
-    /*
-    export function loadScriptAsync(wsServer: WebSocketServerWrapper)
+    function getRuntimeInfoAsync(which:string)
     {
-        host = new RunnerHost(wsServer);
-        var rt = <TheNodeRuntime> host.currentRt;
-        Runtime.theRuntime = rt;
-        var initProm = new PromiseInv()
-        rt.initPromise = initProm
-        host.initFromPrecompiled();
-        host.currentGuid = rt.compiled.scriptGuid;
-        logInfo("initializing data");
-        Browser.localProxy = true;
-        return rt.initDataAsync().then(() => {
-            logInfo("starting server script")
-            rt.setState(RtState.AtAwait, "start server");
-            rt.queueInits()
-            rt.queueAsyncStd(() => {
-                // this will be only executed once all _init() actions are done
-                initProm.success(null)
-            })
+        var needed = Util.toDictionary(which.split(/,/), s => s)
+        if (needed["tdlog"]) {
+            var msgs = Util.getLogMsgs()
+            msgs.reverse()
+        }
+        return Promise.as({
+            applog: needed["applog"] ? App.logs() : undefined,
+            tdlog: msgs,
+            crashes: needed["crashes"] ? (host ? host.crashes : []) : undefined,
         })
     }
-    */
+
+    var httpActions:any = {
+        info: (args, req, resp) => getRuntimeInfoAsync(args[0] || "").done(r => resp.send(200, r)),
+    }
+
+    function specialHttpRequest(req, resp)
+    {
+        resp.send = (code, msg) => {
+            if (typeof msg == "string") msg = { message: msg }
+            var buf = new Buffer(JSON.stringify(msg), "utf8")
+            resp.writeHead(code, { 
+                    'content-length': buf.length, 
+                    'content-type': 'application/json'
+            })
+            resp.end(buf)
+        }
+
+        var key = process.env['TD_DEPLOYMENT_KEY']
+        if (!key) {
+            resp.send(500, "key not setup")
+            return
+        }
+
+        var words = req.url.replace(/^\//, "").split(/\//)
+        if (words[0] != "-tdevmgmt-") resp.send(404, "only /-tdevmgmt-/ supported")
+        else if (words[1] != key) resp.send(403, "wrong key")
+        else if (httpActions.hasOwnProperty(words[2]))
+            httpActions[words[2]](words.slice(3), req, resp)
+        else
+            resp.send(404, "no such API " + words[2])
+    }
+
+    export function handleHttpRequest(req, resp) 
+    {
+        if (/^\/-tdevmgmt-\//.test(req.url))
+            specialHttpRequest(req, resp)
+        else {
+            var rt = <TheNodeRuntime> Runtime.theRuntime
+            rt.requestHandler(req, resp)
+        }
+    }
 
     export function startServerAsync()
     {
@@ -682,16 +711,13 @@ module TDev.RT.Node {
             else sock.end()
         })
 
-        app.on("request", (req, resp) => {
-            var rt = <TheNodeRuntime> Runtime.theRuntime
-            rt.requestHandler(req, resp)
-        })
+        app.on("request", handleHttpRequest)
 
         app.on("listening", () => {
-            Util.log("listenting on " + port)
             ret.success(app)
         })
 
+        Util.log("listenting on " + port)
         app.listen(port)
 
         return ret
@@ -732,28 +758,4 @@ module TDev.RT.Node {
         })
     }
 
-    export interface RunApi {
-        req: any // http.ServerRequest
-        resp: any // http.ServerResponse
-        path: string
-    }
-
-    export function runtimeOpAsync(cmd:string, data:any)
-    {
-        return Promise.as({ error: "not implemented" })
-    }
-
-    export function getRuntimeInfoAsync(which:string)
-    {
-        var needed = Util.toDictionary(which.split(/,/), s => s)
-        if (needed["tdlog"]) {
-            var msgs = Util.getLogMsgs()
-            msgs.reverse()
-        }
-        return Promise.as({
-            applog: needed["applog"] ? App.logs() : undefined,
-            tdlog: msgs,
-            crashes: needed["crashes"] ? (host ? host.crashes : []) : undefined,
-        })
-    }
 }

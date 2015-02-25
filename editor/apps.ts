@@ -1089,7 +1089,17 @@ module TDev.AppExport
                 HTML.mkButton(lf("crashes"), () => {
                     HTML.showProgressNotification(lf("loading server crashes"), true);
                     mgmtRequestAsync(wa, "info/crashes")
-                        .done(resp => showCrashes(resp.crashes));
+                        .done(resp => {
+                            var crashes = resp.crashes
+                            if (resp.workers) {
+                                crashes = []
+                                resp.workers.forEach(r => {
+                                    if (r.body && r.body.crashes)
+                                        crashes.pushRange(r.body.crashes)
+                                })
+                            }
+                            showCrashes(crashes)
+                        });
                 }),
                 []))
         }
