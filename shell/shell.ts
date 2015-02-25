@@ -22,6 +22,7 @@ var inNodeWebkit = false;
 var dataDir : string = ".";
 var useFileSockets = true
 var allowEditor = false;
+var numWorkers = 1;
 
 (<any>http.globalAgent).options.keepAlive = true;
 
@@ -1234,12 +1235,9 @@ class Worker {
 var workers = []
 var portNum = 10000;
 
-function loadScriptCoreAsync()
+function startWorker()
 {
     var isWin = /^win/.test(os.platform())
-
-    workers.forEach(w => w.shutdown())
-    workers = []
 
     var w = new Worker()
     workers.push(w)
@@ -1261,6 +1259,21 @@ function loadScriptCoreAsync()
         env: env
     })
     w.init()
+}
+
+function loadScriptCoreAsync()
+{
+    workers.forEach(w => w.shutdown())
+    workers = []
+
+    if (numWorkers < 0) {
+        numWorkers = Math.round(os.cpus().length * -numWorkers)
+    }
+    numWorkers = Math.round(numWorkers)
+    if (numWorkers <= 0) numWorkers = 1
+
+    for (var i = 0; i < numWorkers; ++i)
+        startWorker()
 
     return {
         then: f => f(),
@@ -1900,6 +1913,7 @@ function main()
         console.error("  --latest          -- use latest (potentially unstable) TouchDevelop version")
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
+        console.error("  --workers NUMBER  -- number of worker servers to start (-w); negative to multiply by number of cores")
         console.error("  NAME=VALUE        -- set environment variable for the script")
 
         process.exit(1)
@@ -1919,6 +1933,11 @@ function main()
             case "--controller":
                 args.shift()
                 controllerUrl = args.shift()
+                break;
+            case "-w":
+            case "--workers":
+                args.shift()
+                numWorkers = parseFloat(args.shift()) || 1
                 break;
             case "-p":
             case "--port":
