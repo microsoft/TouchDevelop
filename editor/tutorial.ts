@@ -1791,7 +1791,6 @@ module TDev
                 this.disableUpdate = false;
                 this.fromReply = true;
                 this.update();
-                this.notify("runBack");
             });
         }
 
