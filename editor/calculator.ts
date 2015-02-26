@@ -4231,7 +4231,7 @@ module TDev
                 setF({
                     tick: Ticks.calcBtnBackspace,
                     title: lf("backspace this"),
-                    description: lf("we think it's not quite right"),
+                    description: lf("let's change this"),
                 })
                 return;
             }
