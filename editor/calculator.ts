@@ -1316,7 +1316,7 @@ module TDev
 
             return typeof t.getLiteral() == "string" ||
                    t.getThing() instanceof AST.LocalDef ||
-                   t.getProperty() instanceof AST.PropertyDecl;
+                   (t.getProperty() && t.getProperty().canRename());
         }
 
         private inlineEditElement(t:AST.Token):HTMLElement
