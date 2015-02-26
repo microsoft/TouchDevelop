@@ -1,17 +1,14 @@
 ![](https://az31353.vo.msecnd.net/c04/uxoj.png)
 # TouchDevelop
 
-TouchDevelop is a touch-friendly app creation environment for iPad, iPhone,
-Android, Windows, Mac, Linux developed with <3 at Microsoft Research. Our
-mobile-friendly editor makes coding fun, even on your phone or tablet!
-
+TouchDevelop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
+[![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
 [![Beta Status](https://www.touchdevelop.com/badges/release/beta)](https://www.touchdevelop.com/app/beta)
 [![latest Status](https://www.touchdevelop.com/badges/release/latest)](https://www.touchdevelop.com/app/latest)
 [![Cloud Status](https://www.touchdevelop.com/badges/release/cloud)](https://www.touchdevelop.com/)
 
-[![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
 [![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
 [![devDependency Status](https://david-dm.org/Microsoft/TouchDevelop/dev-status.svg)](https://david-dm.org/Microsoft/TouchDevelop#info=devDependencies)
@@ -20,7 +17,7 @@ mobile-friendly editor makes coding fun, even on your phone or tablet!
 **This repo contains the source code of the TouchDevelop editor.** If you are
 intending to write TouchDevelop scripts, you want to go to
 `touchdevelop.com`:
-* **stable:** https://www.touchdevelop.com/app
+* **stable:** https://www.touchdevelop.com/app/
 * **beta:** https://www.touchdevelop.com/app/beta
 
 If you want to always run the latest build,
@@ -112,8 +109,6 @@ export TD_SOURCE_MAPS=1 # optional, will slow down your build
 ````
 jake local
 ````
-
-
 
 * run packaged as a [nwjs] app:
 
