@@ -180,6 +180,7 @@ module TDev.AST {
         public renderedAsId:string;
         public renderState:any; //RenderState;
         public loopVariable():LocalDef { return null }
+        public setupForEdit() { }
 
         // if this instanceof Block, these are attached at the beginning of the body, and otherwise after the the current statement
         public diffStmts:Stmt[];
@@ -1211,12 +1212,15 @@ module TDev.AST {
         constructor(public local:LocalDef) {
             super();
 
+            this.setupForEdit()
+        }
+
+        public setupForEdit() { 
             var name = new FieldName();
             name.data = this.getName();
             this.exprHolder.tokens = [ <AST.Token> name ].concat(propertyRefsForKind(this.local.getKind()));
             this.exprHolder.parsed = new AST.Literal(); // placeholder
             this.exprHolder.locals = [];
-
         }
 
         public calcNode() {
@@ -1246,10 +1250,11 @@ module TDev.AST {
                 // Propagate the kind, if any.
                 if (toks.length > 1) {
                     var k = this.exprHolder.getKind();
-                    this.local.setKind(k);
+                    if (isProperKind(k) && k != this.local.getKind()) {
+                        this.local.setKind(k);
+                        TypeChecker.tcApp(Script);
+                    }
                 }
-
-                TypeChecker.tcApp(Script);
             }
 
             if (toks.length > 1 && toks[1] instanceof AST.PropertyRef)
@@ -3523,6 +3528,11 @@ module TDev.AST {
             }
         }
         return r;
+    }
+
+    export function isProperKind(k:Kind)
+    {
+        return k && k != api.core.Unknown && !(k instanceof MultiplexKind)
     }
 
     // -------------------------------------------------------------------------------------------------------

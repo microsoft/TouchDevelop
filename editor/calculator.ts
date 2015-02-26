@@ -778,10 +778,8 @@ module TDev
                 if (/^e\s*\d*$/.test(loc.getName()))
                     this.autoLocal = loc;
             }
-            if (s instanceof AST.RecordField) {
-                var rf = <AST.RecordField> s;
-                rf.setConsistentState(rf.getName(), rf.dataKind);
-            }
+
+            s.setupForEdit()
 
             var ch = Util.childNodes(s.renderedAs);
             this.isElse = s.renderedAs.getFlag("elseDoNothing") || s.renderedAs.getFlag("elseIf");
