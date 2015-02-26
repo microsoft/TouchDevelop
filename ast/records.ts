@@ -284,6 +284,7 @@ module TDev.AST {
                 c.text = l;
                 this.commentBlock.push(c);
             });
+            this.commentBlock.parent = this;
 
             this.setConsistentState(name, k);
         }
@@ -331,8 +332,12 @@ module TDev.AST {
                 // until the user starts inputting a new one. Not the best UI
                 // interaction, but that'll do for now.
                 if (toks.length > 1) {
-                    this.setKind(this.exprHolder.getKind());
-                    this.def().clearPropertyCaches();
+                    var k = this.exprHolder.getKind()
+                    // k may be null if we didn't typecheck tokens yet
+                    if (k) {
+                        this.setKind(k);
+                        this.def().clearPropertyCaches();
+                    }
                 }
 
                 // Re-check everything, this gives proper error messages.
@@ -342,6 +347,7 @@ module TDev.AST {
                 // For cosmetic reasons.
                 (<AST.PropertyRef>toks[1]).skipArrow = true;
             }
+            this.propertyDeflStrings = undefined;
             super.notifyChange();
         }
 
