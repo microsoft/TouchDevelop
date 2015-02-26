@@ -3020,7 +3020,7 @@ module TDev
                 });
                 var final = header.editor ? finalExternal : finalClassic;
 
-                if (worldInfo.baseId && !worldInfo.baseUserId) {
+                if (Cloud.isOnline() && worldInfo.baseId && !worldInfo.baseUserId) {
                     // it seems that there are even cases like this in the cloud, let's just fix it
                     return Browser.TheApiCacheMgr.getAsync(worldInfo.baseId, true).then(scriptInfo => {
                         if (scriptInfo)
