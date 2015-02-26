@@ -2663,6 +2663,7 @@ module TDev
                 var k = <AST.RecordEntryKind>kk;
                 if (!(k instanceof AST.RecordEntryKind)) return false;
                 if (!k.record || k.record.recordType != AST.RecordType.Object) return false;
+                if (k.record.parentLibrary() && !k.record.parentLibrary().isThis()) return false
                 return true;
             }
 
