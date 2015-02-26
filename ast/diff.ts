@@ -154,6 +154,8 @@ module TDev.AST.Diff {
             super.visitThingRef(t)
             if (t.def instanceof LocalDef)
                 this.use("local:" + t.def.getName())
+            else if (t.def instanceof SingletonDef)
+                this.use("singl:" + t.def.getName())
         }
 
         visitLiteral(l:Literal)
@@ -403,6 +405,9 @@ module TDev.AST.Diff {
 
     function matchBlocks(oldStmts:Stmt[], newStmts:Stmt[], opts:Options)
     {
+        if (oldStmts.length == 0 && newStmts.length == 0)
+            return
+
         oldStmts.forEach(s => {
             s.diffFeatures = DiffFeatureDetector.run(s, opts)
         })
