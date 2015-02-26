@@ -2271,6 +2271,9 @@ div.decl > div.stmt {
 #leftPaneContent {
     top: 0;
 }
+#teamPaneContent[data-collab^="yes"] + .sideTabContent > .decl {
+    padding-top: 0;
+}
 
 /* leftPaneContent has to have class sideTabContent, which means it has to have
  * position: absolute, so we set the top property in a manner that's consistent
