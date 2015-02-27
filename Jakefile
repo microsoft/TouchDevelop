@@ -104,6 +104,17 @@ function mkSimpleTask(production, dependencies, target) {
     });
 }
 
+// runs madoko and generates the html file
+function mdkTask(production, dependencies, target) {
+    return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
+      var task = this;
+      console.log("[M] "+production);
+      jake.exec("node node_modules/.bin/madoko " + production, { printStdout: true }, function () {
+          task.complete();
+      });
+    });
+}
+
 // A series of compile-and-run rules that generate various files for the build
 // system.
 function runAndComplete(cmds, task) {
@@ -137,6 +148,8 @@ file('build/pkgshell.js', [ 'build/package.js' ], { async: true }, function () {
     ], this);
 });
 
+// Portal
+mdkTask('build/portal/portal.html', ['portal/portal.mdk'], 'portal/portal.mdk');
 
 // These dependencies have been hand-crafted by reading the various [refs.ts]
 // files. The dependencies inside the same folder are coarse-grained: for
@@ -344,18 +357,21 @@ task('log', [], { async: false }, function () {
 
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
+desc('build the TypeScript projects')
 task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts', 'log' ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");
 });
 
+desc('clean up the build folders and files')
 task('clean', [], function () {
     // XXX do this in a single call? check out https://github.com/mde/utilities/blob/master/lib/file.js
     generated.forEach(function (f) { jake.rmRf(f); });
     jake.rmRf('build/');
 });
 
+desc('run local test suite')
 task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
@@ -365,6 +381,7 @@ task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, func
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
+desc('upload current build to the cloud')
 task('upload', [], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
@@ -390,6 +407,10 @@ task('upload', [], { async : true }, function() {
   }
 })
 
+desc('build portal html pages')
+task('portal', ['build/portal/portal.html']);
+
+desc('build and launch local server')
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
   jake.mkdirP('build/local/node_modules')
