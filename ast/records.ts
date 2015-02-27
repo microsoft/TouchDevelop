@@ -284,21 +284,23 @@ module TDev.AST {
                 c.text = l;
                 this.commentBlock.push(c);
             });
+            this.commentBlock.parent = this;
 
-            this.setConsistentState(name, k);
+            this.setKind(k)
+            super.setName(name)
+            this.setupForEdit()
         }
 
         // The calculator will call this method before editing us, so that our
         // exprholder is not left in a stale state from a previous
         // (unsuccessful) edit.
-        public setConsistentState(name: string, k: Kind) {
+        public setupForEdit() {
 
-            this.exprHolder.tokens = [ <AST.Token> new FieldName() ].concat(propertyRefsForKind(k));
+            this.exprHolder.tokens = [ <AST.Token> new FieldName() ].concat(propertyRefsForKind(this.dataKind));
             this.exprHolder.parsed = new AST.Literal(); // placeholder
             this.exprHolder.locals = [];
 
-            this.setName(name);
-            this.setKind(k);
+            this.setName(this.getName())
         }
 
         public calcNode() {
@@ -325,23 +327,32 @@ module TDev.AST {
                     Script.notifyChangeAll();
                 }
 
+                var needTc = false
+
                 // Update the type of the field (if there's a valid type there).
                 // Right now, we are unable to write back the proper kind as a
                 // series of tokens, so don't erase the previously stored kind
                 // until the user starts inputting a new one. Not the best UI
                 // interaction, but that'll do for now.
                 if (toks.length > 1) {
-                    this.setKind(this.exprHolder.getKind());
-                    this.def().clearPropertyCaches();
+                    var newk = this.exprHolder.getKind()
+                    // k may be null if we didn't typecheck tokens yet
+                    if (isProperKind(newk) && newk != this.dataKind) {
+                        this.setKind(newk);
+                        this.def().clearPropertyCaches();
+                        needTc = true
+                    }
                 }
 
                 // Re-check everything, this gives proper error messages.
-                TypeChecker.tcApp(Script);
+                if (needTc)
+                    TypeChecker.tcApp(Script);
             }
             if (toks.length > 1 && toks[1] instanceof AST.PropertyRef) {
                 // For cosmetic reasons.
                 (<AST.PropertyRef>toks[1]).skipArrow = true;
             }
+            this.propertyDeflStrings = undefined;
             super.notifyChange();
         }
 

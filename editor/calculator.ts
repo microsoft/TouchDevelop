@@ -778,10 +778,8 @@ module TDev
                 if (/^e\s*\d*$/.test(loc.getName()))
                     this.autoLocal = loc;
             }
-            if (s instanceof AST.RecordField) {
-                var rf = <AST.RecordField> s;
-                rf.setConsistentState(rf.getName(), rf.dataKind);
-            }
+
+            s.setupForEdit()
 
             var ch = Util.childNodes(s.renderedAs);
             this.isElse = s.renderedAs.getFlag("elseDoNothing") || s.renderedAs.getFlag("elseIf");
@@ -1318,7 +1316,7 @@ module TDev
 
             return typeof t.getLiteral() == "string" ||
                    t.getThing() instanceof AST.LocalDef ||
-                   t.getProperty() instanceof AST.PropertyDecl;
+                   (t.getProperty() && t.getProperty().canRename());
         }
 
         private inlineEditElement(t:AST.Token):HTMLElement
@@ -2665,6 +2663,7 @@ module TDev
                 var k = <AST.RecordEntryKind>kk;
                 if (!(k instanceof AST.RecordEntryKind)) return false;
                 if (!k.record || k.record.recordType != AST.RecordType.Object) return false;
+                if (k.record.parentLibrary() && !k.record.parentLibrary().isThis()) return false
                 return true;
             }
 
