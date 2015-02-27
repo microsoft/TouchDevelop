@@ -469,43 +469,43 @@ module TDev.RT {
         }
 
         //? Restarts the app and pops a restart dialog
-        export function restart(message : string, r: ResumeCtx): void
-        {
+        export function restart(message: string, r: ResumeCtx): void {
             var rt = r.rt;
             var score = Bazaar.cachedScore(rt);
             var scriptId = rt.currentScriptId;
-            rt.stopAsync()
-                .done(() => {
-                    if (scriptId) {
-                        var m = new ModalDialog();
-                        m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
-                        if (score > 0)
-                            m.add(div('wall-dialog-large wall-dialog-text-center', lf("your best score: {0}", score)));
-                        m.add(div('wall-dialog-body wall-dialog-extra-space wall-dialog-text-center',
-                            HTML.mkButton(lf("play again"), () => {
-                                tick(Ticks.runtimePlayAgain);
-                                m.dismiss();
-                                rt.rerun()
-                            }, 'wall-dialog-button-huge'),
-                            Browser.notifyBackToHost ? HTML.mkButton(lf("back"), () => {
-                                tick(Ticks.runtimeBack);
-                                m.dismiss();
-                                Util.externalNotify("exit");
-                            }) : null
-                        ));
-                        if (score > 0) {
-                            Bazaar.loadLeaderboardItemsAsync(rt.currentScriptId)
-                                .done((els: HTMLElement[]) => {
-                                    if (els && els.length > 0) {
-                                        m.add(div('wall-dialog-body wall-dialog-extra-space ', els));
-                                        m.setScroll();
-                                    }
-                                }, e => { });
+            rt.stopAsync().done(() => {
+                var m = new ModalDialog();
+                m.canDismiss = !scriptId;
+                m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
+                if (score > 0)
+                    m.add(div('wall-dialog-large wall-dialog-text-center', lf("your best score: {0}", score)));
+                m.add(div('wall-dialog-body wall-dialog-extra-space wall-dialog-text-center',
+                    HTML.mkButton(lf("play again"),() => {
+                        tick(Ticks.runtimePlayAgain);
+                        m.dismiss();
+                        rt.rerun()
+                    }, 'wall-dialog-button-huge'),
+                    !scriptId ? HTML.mkButton(lf("dismiss"),() => {
+                        m.dismiss();
+                    }) : null,
+                    scriptId && Browser.notifyBackToHost ? HTML.mkButton(lf("back"),() => {
+                        tick(Ticks.runtimeBack);
+                        m.dismiss();
+                        Util.externalNotify("exit");
+                    }) : null
+                    ));
+                if (score > 0 && scriptId) {
+                    Bazaar.loadLeaderboardItemsAsync(scriptId)
+                        .done((els: HTMLElement[]) => {
+                        if (els && els.length > 0) {
+                            m.add(div('wall-dialog-body wall-dialog-extra-space ', els));
+                            m.setScroll();
                         }
-                        m.fullWhite();
-                        m.show();
-                    }
-                });
+                    }, e => { });
+                }
+                m.fullWhite();
+                m.show();
+            });
         }
 
         //? Aborts the execution if the condition is false.
