@@ -943,15 +943,17 @@ module TDev
                 })
             ));
 
-            m.add(div('wall-dialog-header', lf("next tutorials...")));
-            var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
-            m.add(loadingMoreTutorials);
-            Browser.TheHub.tutorialsByUpdateIdAsync()
-                .done(progs => {
+            var moreTutorialsId = this.topic.moreTutorials();
+            var nextTutorials = this.topic.nextTutorials();
+            if (!/none/i.test(nextTutorials[0]) && !/none/i.test(moreTutorialsId[0])) {
+                m.add(div('wall-dialog-header', lf("next tutorials...")));
+                var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
+                m.add(loadingMoreTutorials);
+                Browser.TheHub.tutorialsByUpdateIdAsync()
+                    .done(progs => {
                     loadingMoreTutorials.removeSelf();
                     var moreTutorials = <HTMLUListElement>createElement('ul', 'tutorial-list');
-                    var moreTutorialsId = this.topic.moreTutorials();
-                    var nextTutorials = this.topic.nextTutorials();
+
                     var tutLength = 8 - (moreTutorialsId ? 1 : 0);
                     var allTutorials = HelpTopic.getAllTutorials();
                     var score = (ht: HelpTopic) => {
@@ -970,13 +972,14 @@ module TDev
                         nextTutorials.push(tut.id);
                     }
                     nextTutorials.forEach(tutid =>
-                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid, (h) => { m.dismiss() }))));
+                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid,(h) => { m.dismiss() }))));
                     if (moreTutorialsId)
                         moreTutorials.appendChild(createElement('li', '', Browser.TheHub.topicTile(moreTutorialsId, lf("More"))));
                     m.add(div('wall-dialog-body', moreTutorials));
-                }, e => {
-                    loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
+                    }, e => {
+                        loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
                 });
+            }
 
             this.addHocFinishPixel(m);
             m.fullWhite();
