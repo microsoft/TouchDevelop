@@ -115,6 +115,7 @@ module TDev { export module Browser {
 
         public applySizes()
         {
+            this.updateSidePane();
             this.updateScroll();
         }
 
