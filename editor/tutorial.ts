@@ -1532,15 +1532,21 @@ module TDev
             }
 
             if (ins == null) {
+                var complete = () => {
+                    TipManager.setTip(null);
+                    TheEditor.calculator.applyInstruction(null);
+                    this.stepCompleted();
+                };
                 if (!step.data.command || step.data.command == "none" || step.data.command == "empty") {
-                    TipManager.setTip(null)
-                    TheEditor.calculator.applyInstruction(null)
-                    this.stepCompleted()
-                    return
+                    complete();
+                    return;
                 }
 
                 TheEditor.calculator.applyInstruction(null)
                 switch (step.data.command) {
+                    case "delay":
+                        Util.setTimeout(3000, () => complete());
+                        return;
                     case "run":
                         this.waitingFor = "run"
                         TipManager.setTip({
