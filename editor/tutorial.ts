@@ -917,9 +917,8 @@ module TDev
                 })
             ));
 
-            var moreTutorialsId = this.topic.moreTutorials();
             var nextTutorials = this.topic.nextTutorials();
-            if (!/none/i.test(nextTutorials[0]) && !/none/i.test(moreTutorialsId[0])) {
+            if (!/none/i.test(nextTutorials[0])) {
                 m.add(div('wall-dialog-header', lf("next tutorials...")));
                 var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
                 m.add(loadingMoreTutorials);
@@ -947,6 +946,7 @@ module TDev
                     }
                     nextTutorials.forEach(tutid =>
                         moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid,(h) => { m.dismiss() }))));
+                    var moreTutorialsId = this.topic.moreTutorials();
                     if (moreTutorialsId)
                         moreTutorials.appendChild(createElement('li', '', Browser.TheHub.topicTile(moreTutorialsId, lf("More"))));
                     m.add(div('wall-dialog-body', moreTutorials));
