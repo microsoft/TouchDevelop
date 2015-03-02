@@ -108,8 +108,9 @@ function mkSimpleTask(production, dependencies, target) {
 function mdkTask(production, dependencies, target) {
     return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
       var task = this;
+	  jake.mkdirP('build/portal')
       console.log("[M] "+production);
-      jake.exec("node node_modules/.bin/madoko " + production, { printStdout: true }, function () {
+      jake.exec("node node_modules/madoko/lib/cli.js --verbose --odir=build/portal " + target, { printStdout: true }, function () {
           task.complete();
       });
     });

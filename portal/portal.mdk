@@ -1,7 +1,6 @@
 [INCLUDE=bootstrap]
 Title      : Bootstrap demo document
 Theme      : darkly
-Css        : nav-example.css
 ~Col       : .col-lg-4
 
 ~ Begin Container
