@@ -1352,8 +1352,8 @@ module TDev { export module Browser {
                     githubuser = <HTMLInputElement>textEntry(lf("github user"), HTML.mkTextInput("text", lf("github user")),
                         lf("Your GitHub user."));
 
-                    minecraftuser = dbg ? <HTMLInputElement>textEntry(lf("Minecraft user"), HTML.mkTextInput("text", lf("minecraft user")),
-                        lf("Your Minecraft user.")) : undefined;
+                    minecraftuser = <HTMLInputElement>textEntry(lf("Minecraft user"), HTML.mkTextInput("text", lf("minecraft user")),
+                        lf("Your Minecraft user."));
 
                     location = <HTMLInputElement>textEntry(lf("location"), HTML.mkTextInput("text", lf("location")),
                         lf("Where in the world are you?"))

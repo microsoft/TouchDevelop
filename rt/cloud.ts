@@ -410,6 +410,7 @@ module TDev.Cloud {
         location?: string;
         twitterhandle?: string;
         githubuser?: string;
+        minecraftuser?: string;
         editorMode?: string;
         school?: string;
         wallpaper?: string;

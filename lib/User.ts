@@ -141,6 +141,18 @@ module TDev.RT {
             this.loadFirst(r, user => user ? user.haspicture : undefined);
         }
 
+        //? Gets the user settings if any. Supported fields are nickname, editormode, twitterhandle, githubuser, minecraftuser
+        //@ cachedAsync cap(network) returns(JsonObject)
+        public settings(r: ResumeCtx) {
+            this.loadFirst(r, (user : Cloud.UserSettings) => user ? JsonObject.wrap({
+                nickname: user.nickname,
+                editormode: user.editorMode,
+                twitterhandle: user.twitterhandle,
+                githubuser: user.githubuser,
+                minecraftuser: user.minecraftuser
+            }) : undefined);
+        }
+
         //? Gets the url of the user picture where original is the unmodified user picture, square is 50x50, small has 50px width, normal has 100px width, large has roughly 200px width
         //@ [which].deflStrings("original", "square", "small", "normal", "large")
         //@ cachedAsync cap(network) returns(string)
