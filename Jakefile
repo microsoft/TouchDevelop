@@ -421,7 +421,7 @@ task('local', [ 'default' ], { async: true }, function() {
   if (process.env.TD_SHELL_DEBUG)
     node = "node-debug"
   jake.exec(
-    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome' ],
+    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../..' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
