@@ -8342,6 +8342,7 @@ module TDev { export module Browser {
             var cached = localStorage["showcaseIds"]
             if (cached)
                 f(JSON.parse(cached).ids)
+            if (Cloud.isOffline()) return;
             if (listCached) return
             listCached = true
             Util.httpGetTextAsync("https://tdshowcase.blob.core.windows.net/export/current.json?nocache=" + Util.guidGen())
@@ -8350,6 +8351,9 @@ module TDev { export module Browser {
                         localStorage["showcaseIds"] = text
                         f(JSON.parse(text).ids)
                     }
+                },(err) => {
+                    // log and ignore
+                    Util.reportError("showcase", err, false);
                 })
         }
 
