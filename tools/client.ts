@@ -78,6 +78,11 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
 
     var purl:any = /^http(s?):/.test(uri) ? url.parse(uri) : { hostname: 'www.touchdevelop.com', path: '/api/' + uri }
     purl.method = body ? 'PUT' : 'GET'
+    if (body && !Buffer.isBuffer(body) && typeof body == "object") {
+        body = JSON.stringify(body)
+        purl.method = "POST"
+        purl.headers = { 'content-type': 'application/json; charset=utf8' }
+    }
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
     } else {
@@ -3442,6 +3447,7 @@ function tdupload(args:string[])
                 "the source maps will be useless there.");
     var key = args.shift()
     var lbl = args.shift()
+    var channel = args.shift()
 
     if (!/^\d\d\d\d\d\d\d\d\d\d\d/.test(lbl))
         lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
@@ -3469,7 +3475,8 @@ function tdupload(args:string[])
             "build/officemix.js",
         ]
 
-    args.forEach(p => {
+    var liteId = ""
+    var uploadFiles = () => args.forEach(p => {
         if (!fs.existsSync(p))
             return;
         fs.readFile(p, (err, data) => {
@@ -3480,15 +3487,55 @@ function tdupload(args:string[])
 
             var fileName = path.basename(p)
             var mime = getMime(p)
-            var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
-            url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
-            url += "&contentType=" + encodeURIComponent(mime)
 
-            tdevGet(url, (resp) => {
-                console.log(fileName + ": " + resp)
-            }, 1, data)
+            if (liteUrl) {
+                var isText = /^(text\/.*|application\/(javascript|json))$/.test(mime)
+                var encoding = isText ? "utf8" : "base64"
+                var content = isText ? data.toString("utf8") : data.toString("base64")
+                tdevGet(liteUrl + "api/" + liteId + "/files" + key, resp => {
+                    console.log(fileName + ": " + resp)
+                }, 1, {
+                    encoding: encoding,
+                    filename: fileName,
+                    contentType: mime,
+                    content: content,
+                })
+            } else {
+                var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
+                url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
+                url += "&contentType=" + encodeURIComponent(mime)
+
+                tdevGet(url, (resp) => {
+                    console.log(fileName + ": " + resp)
+                }, 1, data)
+            }
         })
     })
+
+    var mm = /^(http.*)(\?access_token=.*)/.exec(key)
+
+    if (mm) {
+        var liteUrl = mm[1]
+        key = mm[2]
+
+        tdevGet(liteUrl + "api/releases" + key, resp => {
+            var d = JSON.parse(resp)
+            console.log(d)
+            liteId = d.id
+            if (liteId) {
+                if (channel)
+                    tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
+                        console.log("channel: " + resp)
+                    }, 1, { name: channel })
+                uploadFiles()
+            }
+        }, 1, {
+            releaseid: lbl
+        })
+
+    } else {
+        uploadFiles()
+    }
 }
 
 var cmds = {
