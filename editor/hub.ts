@@ -10,6 +10,13 @@ module TDev.Browser {
         wallpaperArtId?: string;
         tutorialsTopic?: string; // topics of tutorial pages
         requiresShell?: boolean;
+
+        scriptSearch?: string; // seed when searching script
+
+        showcase?: boolean;
+        art?: boolean;
+        tags?: boolean;
+        top?: boolean;
     }
 
     export var hubThemes: StringMap<HubTheme> = {
@@ -2025,6 +2032,14 @@ module TDev.Browser {
                     "myart": lf("my art"),
                 };
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
+            }
+
+            var theme = EditorSettings.hubTheme();
+            if (theme) {
+                if (!theme.showcase) delete sects["showcase"];
+                if (!theme.art) delete sects["myart"];
+                if (!theme.tags) delete sects["tags"];
+                if (!theme.top) delete sects["top"];
             }
 
             if (SizeMgr.portraitMode) {
