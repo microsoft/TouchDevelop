@@ -458,6 +458,17 @@ module TDev
             TDev.Ticker.disable()
         }
 
+        if ((<any>window).tdlite) {
+            Cloud.lite = true;
+            if ((<any>window).tdlite == "url") {
+                mx = /^(https?:\/\/[^\/]+)/.exec(document.URL);
+                (<any>window).rootUrl = mx[1]
+            } else {
+                (<any>window).rootUrl = (<any>window).tdlite;
+            }
+            TDev.Ticker.disable()
+        }
+
         if (/httplog=1/.test(document.URL)) {
             HttpLog.enabled = true;
         }
