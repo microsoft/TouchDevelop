@@ -3030,8 +3030,8 @@ module TDev
 
                 return final();
             }).then(() => {
-                if (!shouldRun && !EditorSettings.editorMode())
-                    return EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
+                if (!shouldRun && !Browser.EditorSettings.editorMode())
+                    return Browser.EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
                 else return Promise.as();
             }).then(() => {
                 if (!Script) return;
@@ -3775,7 +3775,7 @@ module TDev
 
                             var editorMode = ht.templateEditorMode();
                             if (editorMode)
-                                EditorSettings.showChooseEditorModeAsync(EditorSettings.parseEditorMode(editorMode)).done();
+                                Browser.EditorSettings.showChooseEditorModeAsync(Browser.EditorSettings.parseEditorMode(editorMode)).done();
                         }
 
                         // we've got kicked out of the editor in the meantime?
@@ -4264,13 +4264,13 @@ module TDev
 
         private setMode(refresh = false)
         {
-            var prevMode = EditorSettings.editorMode();
+            var prevMode = Browser.EditorSettings.editorMode();
 
-            if (prevMode == EditorMode.block) {
+            if (prevMode == Browser.EditorMode.block) {
                 AST.proMode = false
                 AST.blockMode = true
                 AST.legacyMode = false
-            } else if (prevMode == EditorMode.pro) {
+            } else if (prevMode == Browser.EditorMode.pro) {
                 AST.proMode = true
                 AST.blockMode = false
                 AST.legacyMode = false
@@ -5630,136 +5630,6 @@ module TDev
         public loadLibsAsync(app:AST.App)
         {
             return Promise.join(app.libraries().map((l) => this.loadLibAsync(l)));
-        }
-    }
-
-    export enum EditorMode {
-        unknown,
-        block,
-        classic,
-        pro
-    }
-
-    export module EditorSettings {
-        export var BLOCK_MODE = "block";
-        export var PRO_MODE = "pro";
-        export var CLASSIC_MODE = "classic";
-
-        export function parseEditorMode(mode: string): EditorMode {
-            if (!mode) return EditorMode.unknown;
-            mode = mode.trim().toLowerCase();
-            if (mode === BLOCK_MODE) return EditorMode.block;
-            else if (mode === CLASSIC_MODE) return EditorMode.classic;
-            else if (mode === PRO_MODE) return EditorMode.pro;
-            else return EditorMode.unknown;
-        }
-
-        export function wallpaper(): string {
-            return localStorage.getItem("editorWallpaper") || "";
-        }
-
-        export function setWallpaper(id: string, upload : boolean) {
-            var previous = EditorSettings.wallpaper();
-            if (previous != id) {
-                if (!id) localStorage.removeItem("editorWallpaper")
-                else localStorage.setItem("editorWallpaper", id);
-                if (upload)
-                    uploadWallpaper();
-            }
-
-            [elt("hubRoot"), elt("slRoot")].forEach(e => {
-                if (id) e.style.backgroundImage = HTML.cssImage(HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + id));
-                else e.style.backgroundImage = "";
-            });
-        }
-
-        function uploadWallpaper() {
-            var m = wallpaper();
-            if (Cloud.getUserId() && Cloud.isOnline()) {
-                Util.log('updating wallpaper to ' + m);
-                Cloud.postUserSettingsAsync({ wallpaper: m })
-                    .done(() => { HTML.showProgressNotification(lf("wallpaper saved"), true); }, (e) => { });
-            }
-        }
-
-        export function setEditorMode(mode: EditorMode, upload : boolean) {
-            var previous = EditorSettings.editorMode();
-            if (previous != mode) {
-                if (mode == EditorMode.unknown)
-                    localStorage.removeItem("editorMode");
-                else
-                    localStorage.setItem("editorMode", EditorMode[mode]);
-                if(upload)
-                    uploadEditorMode();
-            }
-        }
-
-        export function editorModeText(mode: EditorMode) : string {
-            switch (mode) {
-                case EditorMode.block: return lf("beginner");
-                case EditorMode.classic: return lf("coder");
-                case EditorMode.pro: return lf("expert");
-                default: return "";
-            }
-        }
-
-        export function editorMode(): EditorMode {
-            return parseEditorMode(localStorage.getItem("editorMode"));
-        }
-
-        function uploadEditorMode() {
-            var m = editorMode();
-            if (Cloud.getUserId() && Cloud.isOnline() && m != EditorMode.unknown) {
-                Util.log('updating skill level to ' + EditorMode[m]);
-                Cloud.postUserSettingsAsync({ editorMode: EditorMode[m] })
-                    .done(() => { HTML.showProgressNotification(lf("skill level saved"), true); }, (e) => { });
-            }
-        }
-
-        export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
-            var current = editorMode();
-            return div(cls, current < EditorMode.pro ? lf("Ready for more options?") : lf("Too many options?"), HTML.mkLinkButton(lf("Change skill level!"), () => {
-                tick(tk);
-                EditorSettings.showChooseEditorModeAsync().done(() => {
-                    if (current != editorMode()) editor.refreshMode();
-                });
-            }));
-        }
-
-        export function createChooseSkillLevelElements(click? : () => void): HTMLElement[] {
-            var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
-                { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
-                { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
-            return modes.map((mode, index) => {
-                var pic = div('pic');
-                pic.style.background = HTML.cssImage("https://az31353.vo.msecnd.net/pub/" + mode.id);
-                pic.style.backgroundSize = "cover";
-
-                return div('editor-mode', pic, HTML.mkButton(EditorSettings.editorModeText(mode.n), () => {
-                    tick(mode.tick);
-                    EditorSettings.setEditorMode(mode.n, true);
-                    if (click) click();
-                }, 'title'), div('descr', mode.descr));
-            });
-        }
-
-        export function showChooseEditorModeAsync(preferredMode = EditorMode.unknown): Promise {
-            if (preferredMode != EditorMode.unknown && EditorSettings.editorMode() <= preferredMode) return Promise.as();
-
-            TipManager.setTip(null)
-            return new Promise((onSuccess, onError, onProgress) => {
-                var m = new ModalDialog();
-                m.onDismiss = () => onSuccess(undefined);
-                m.add(div('wall-dialog-header', lf("choose your coding skill level")));
-                m.add(div('wall-dialog-body', lf("TouchDevelop will adapt to the coding experience to your skill level. You can change your skill level again in the hub.")));
-                var current = EditorSettings.editorModeText(EditorSettings.editorMode());
-                if (current)
-                    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
-                m.add(div('wall-dialog-body', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
-                m.add(Editor.mkHelpLink("skill levels"));
-                m.fullWhite();
-                m.show();
-            });
         }
     }
 
