@@ -3748,7 +3748,6 @@ module TDev
             ht.initAsync().done((app:AST.App) => {
                 this.addIntelliProfile(new AST.IntelliProfile()).allowAllLibraries = false;
                 Util.setTimeout(10, () => {
-                // ht.reloadAppAsync().done((app:AST.App) => {
                     if (!Script) return;
                     var st = new StepTutorial(app, ht, firstTime, Script.localGuid);
                     if (st.isEnabled()) {
@@ -3756,8 +3755,9 @@ module TDev
                         st.disableUpdate = true;
                         st.updateProfile(this.intelliProfile)
 
-                        // only enable split screen selectively
-                        if ((AST.blockMode || this.widgetEnabled("splitScreen")) && !this.intelliProfile.hasKey("flag:nosplit"))
+                        // always split screen in block/legacy or if user did not explicitely denied it.
+                        if ((AST.blockMode || AST.legacyMode || this.widgetEnabled("splitScreen"))
+                            && !this.intelliProfile.hasKey("flag:nosplit"))
                             this.setSplitScreen(true, true);
 
                         if (firstTime) {
