@@ -4,7 +4,7 @@ module TDev.AST {
     export module Merge {
         //var mergeLog = Util.log;
         var mergeLog = (x) => {return};
-        var getTime = () => {return new Date().getTime()};
+        var getTime = () => Util.perfNow();
         var seqTime = [];
         var sccTime = 0;
         var treeTime = [];
@@ -287,8 +287,8 @@ module TDev.AST {
             return s.split(/\s+/).map((y:string) => {var t = new Literal(); t.data = y; return t});
         }
 
-        export function merge3(o:Stmt, a:Stmt, b:Stmt, noprint=false) : Stmt {
-            if(!noprint) {
+        export function merge3(o:Stmt, a:Stmt, b:Stmt, datacollector?:(IMergeData)=>void) : Stmt {
+            if(datacollector) {
                 sccTime = 0;
                 imTime = 0;
                 seqTime = [0,0,0,0,0,0,0,0,0,0];
@@ -417,7 +417,7 @@ module TDev.AST {
                     return v;
                 }
 
-                var result : App = <App>merge3(mapper(arrO),mapper(arrA),mapper(arrB),true);
+                var result : App = <App>merge3(mapper(arrO),mapper(arrA),mapper(arrB));
 
                 return result.things.map((x:Decl)=>tmap[x.getStableName()]);
             }
@@ -1327,11 +1327,35 @@ module TDev.AST {
             );
 
             var end = getTime();
-            // TODO XXX - print this?
-            if(!noprint) mergeLog(">>> Merge: "+getTime()+" >>> TOTAL TIME: "+(end-start)+", NODE-LEVEL TIME: "+(end-end1)+", seqTime ="+seqTime+" ("+seqTime+"), treeTime = "+treeTime+", sccTime = "+sccTime+", numChecks = "+numChecks);
+
+            if (datacollector) {
+                var mergedata = <IMergeData> {};
+                mergedata.totaltime = (end - start);
+                mergedata.nodeleveltime = (end - end1);
+                mergedata.seqtime = seqTime;
+                mergedata.treetime = treeTime;
+                mergedata.scctime = sccTime;
+                mergedata.numchecks = numChecks;
+                mergedata.deviceinfo = Browser.platformCaps;
+                mergedata.releaseid = Cloud.currentReleaseId;
+
+                datacollector(mergedata);
+                // TODO XXX - print this?
+                //mergeLog(">>> Merge: " + getTime() + " >>> TOTAL TIME: " + mergedata.totaltime + ", NODE-LEVEL TIME: " + mergedata.nodeleveltime + ", seqTime =" + seqTime + " (" + seqTime + "), treeTime = " + treeTime + ", sccTime = " + sccTime + ", numChecks = " + numChecks);
+            }
             return rtemp;
         }
 
+        export interface IMergeData {
+            totaltime: number;
+            nodeleveltime: number;
+            seqtime: number[];
+            treetime: number[];
+            scctime: number;
+            numchecks: number;
+            deviceinfo: string[];
+            releaseid: string;
+        }
 
         export var theO = undefined;
         export var theA = undefined;
