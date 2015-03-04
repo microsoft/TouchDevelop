@@ -3064,12 +3064,10 @@ module TDev
                 var ed = this.consumeRtEditor()
 
                 if (!shouldRun) {
-                    var st = Script.editorState
-                    if (st.splitScreen)
-                        this.setSplitScreen(true, true)
-
                     this.setMode()
-
+                    var st = Script.editorState
+                    if (st.splitScreen || AST.blockMode)
+                        this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
                     this.renderDefaultDecl();
@@ -3756,7 +3754,7 @@ module TDev
                         st.updateProfile(this.intelliProfile)
 
                         // always split screen in block/legacy or if user did not explicitely denied it.
-                        if ((AST.blockMode || AST.legacyMode || this.widgetEnabled("splitScreen"))
+                        if ((AST.blockMode || this.widgetEnabled("splitScreen"))
                             && !this.intelliProfile.hasKey("flag:nosplit"))
                             this.setSplitScreen(true, true);
 
