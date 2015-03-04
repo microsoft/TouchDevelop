@@ -3615,6 +3615,10 @@ var sectMakers = lf("makers");
 var sectTouchDevelop = lf("touchdevelop");
 var sectOthers = lf("others");
 
+/*
+    editorMode: 1 = block, 2 = coder, 3 = expert
+*/
+
 var templates: ScriptTemplate[] = [{
     title: lf("blank"),
     id: 'blank',
@@ -3669,7 +3673,9 @@ var templates: ScriptTemplate[] = [{
     section: sectBeginners,
     scriptid: 'mdrw',
     editorMode: 1,
-}, /*{
+}, 
+
+/*{
     title: lf("blank boostrap app"),
     id: 'blankbootstrapapp',
     icon: 'ArrowLR',
@@ -3749,6 +3755,15 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'zqbpa',
     editorMode: 2,
 }, {
+    title: lf("blank docs"),
+    id: 'blankdocs',
+    icon: 'Controller',
+    name: 'ADJ docs',
+    description: lf("An empty documentation page."),
+    section: sectTouchDevelop,
+    scriptid: 'krvn',
+    editorMode: 3,
+}, {
     title: lf("blank tutorial"),
     id: 'blanktutorial',
     icon: 'Controller',
@@ -3757,7 +3772,7 @@ var templates: ScriptTemplate[] = [{
     section: sectTouchDevelop,
     scriptid: 'yujva',
     editorMode: 3,
-}, , {
+}, {
     title: lf("blank script plugin"),
     id: 'blankscriptplugin',
     icon: 'Brush',
@@ -3775,8 +3790,16 @@ var templates: ScriptTemplate[] = [{
     section: sectOthers,
     scriptid: 'zbxb',
     editorMode: 3,
-}
-];
+}, {
+    title: lf("physics game starter"),
+    id: 'physicsgamestarter',
+    icon: 'Controller',
+    name: 'ADJ game',
+    description: lf("Boiler plate code to create a game."),
+    section: sectOthers,
+    scriptid: 'kkwd',
+    editorMode: 2,
+}];
 
 export function main()
 {

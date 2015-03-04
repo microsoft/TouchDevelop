@@ -11,9 +11,17 @@ A bug must have an issue tracking it in the issue tracker that has been approved
 Features or design changes (things that add new or improved functionality to TouchDevelop) may be accepted, but will need to first be approved (marked as "Milestone == Community" by a TouchDevelop coordinator with the message "Approved") in the suggestion issue.
 
 ## Legal
-You will need to complete a Contributor License Agreement (CLA). Briefly, this agreement testifies that you are granting us permission to use the submitted change according to the terms of the project's license, and that the work being submitted is under appropriate copyright.
 
-Please submit a Contributor License Agreement (CLA) before submitting a pull request. Download the agreement ([Microsoft Contribution License Agreement.docx](https://www.codeplex.com/Download?ProjectName=typescript&DownloadId=822190) or [Microsoft Contribution License Agreement.pdf](https://www.codeplex.com/Download?ProjectName=typescript&DownloadId=921298)), sign, scan, and email it back to <cla@microsoft.com>. Be sure to include your github user name along with the agreement. Once we have received the signed CLA, we'll review the request. Please note that we're currently only accepting pull requests of bug fixes rather than new features.
+Before we can accept your pull-request you'll need to sign a [Contribution License Agreement (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement). 
+You can download ours [here](https://www.codeplex.com/Download?ProjectName=typescript&DownloadId=921298).
+
+**However, you don't have to do this up-front. You can simply clone, fork, and submit your pull-request as usual.**
+
+When your pull-request is created, we classify it. If the change is trivial, i.e. you just fixed a typo, then the PR is labelled with ``cla-not-required``. 
+Otherwise it's classified as ``cla-required``. In that case, the system will also also tell you how you can sign the CLA. 
+	Once you signed a CLA, the current and all future pull-requests will be labelled as cla-signed.
+
+Signing the CLA might sound scary but it's actually super simple and can be done in less than a minute.
 
 ## Housekeeping
 Your pull request should:

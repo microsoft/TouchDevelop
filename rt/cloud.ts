@@ -414,6 +414,7 @@ module TDev.Cloud {
         editorMode?: string;
         school?: string;
         wallpaper?: string;
+        hubtheme?: string;
     }
     export function getUserInstalledAsync() : Promise // of InstalledHeaders
     {

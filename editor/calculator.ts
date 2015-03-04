@@ -3807,7 +3807,7 @@ module TDev
 
             var calcw = Math.min(7, Calculator.keypadW());
             var pageSize = calcw - 1;
-            var firstPageSize = EditorSettings.editorMode() <= EditorMode.block
+            var firstPageSize = AST.blockMode
                 ? Math.min(pageSize, 4) // var, if, for, while
                 : pageSize;
 

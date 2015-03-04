@@ -254,7 +254,7 @@ module TDev
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech())
                     ) : undefined,
-                EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
+                Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
             this.description.className = "variableDesc";

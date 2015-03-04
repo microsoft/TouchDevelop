@@ -325,10 +325,16 @@ module TDev {
 
         public hideSidePane()
         {
-            if (!this.autoHide() || this.paneState < 0) return;
+            var pane = this.sidePane();
+            if (!this.autoHide()) {
+                pane.style.display = "block";
+                pane.style.opacity = "1";
+                return;
+            }
+            if (this.paneState < 0) return;
+
             Screen.popModalHash("side");
             elt("root").setFlag("pane-hidden", true);
-            var pane = this.sidePane();
             this.paneState = -1;
             Util.hidePopup(pane, () => {
                 if (this.paneState < 0 && this.autoHide())

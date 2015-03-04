@@ -590,7 +590,7 @@ module TDev
 
             sections.forEach(displayThings)
 
-            items.push(EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptExplorer, "formHint marginBottom marginTop"));
+            items.push(Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptExplorer, "formHint marginBottom marginTop"));
 
             this.setChildren(items);
 
