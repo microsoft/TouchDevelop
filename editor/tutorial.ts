@@ -1268,8 +1268,8 @@ module TDev
         {
             var tip =
                div('tip tip-tl', div('tipInner',
-                    div('tipTitle', lf("tap there to continue coding")),
-                    div('tipDescr', this.currentCommandArg() || "")))
+                    div('tipTitle', lf("tap there")),
+                    div('tipDescr', lf("to continue coding"))))
 
             tip.style.bottom = "calc(50% - 3em)";
             tip.style.right = "calc(50% - 3em)";
@@ -1386,13 +1386,13 @@ module TDev
                 TipManager.scheduleTip({
                     tick: Ticks.wallStop,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || ""
+                    description: lf("to continue coding")
                 })
              else
                 TipManager.scheduleTip({
                     tick: Ticks.wallBack,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || ""
+                    description: lf("to continue coding")
                 })
         }
 
@@ -1552,7 +1552,7 @@ module TDev
                         TipManager.setTip({
                             tick: TheEditor.calculator.stmt ? Ticks.calcSearchRun : Ticks.codeRun,
                             title: lf("tap there to run your app"),
-                            description: this.currentCommandArg() || lf("let's see what it does!")
+                            description: this.currentCommandArg() || ""
                         })
                         return;
                     case "publish":
