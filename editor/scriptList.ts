@@ -7267,8 +7267,8 @@ module TDev { export module Browser {
         
 
         private updateCommentsHeader(el : HTMLElement) {
-            this.withUpdate(el, (u: JsonGroup) => {
-                el.setChildren([Host.expandableTextBox(u.description)]);
+            this.withUpdate(el,(u: JsonGroup) => {
+                Browser.setInnerHTML(el, new MdComments().formatText(u.description));
                 if (!this.isMine()) {
                     Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
                         .done(() => {}, e => {
