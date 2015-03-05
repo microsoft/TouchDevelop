@@ -2434,7 +2434,8 @@ module TDev
                     return e;
                 })
                 libs.sort((a, b) => b.score - a.score)
-                var maxLibs = 5;
+                // always show all libraries in block/legacy mode
+                var maxLibs = (AST.blockMode || AST.legacyMode) ? 1e6 : 5;
                 if (libs.length > maxLibs)
                     libs = libs.slice(0, maxLibs)
                 else
