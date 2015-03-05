@@ -193,6 +193,16 @@ module TDev.RT {
             return Collection.fromArray(this.a.slice(Math.floor(start), Math.floor(end)), this.typeInfo);
         }
 
+        //? Gets the first element if any
+        public first(): T {
+            return this.at(0);
+        }
+
+        //? Gets the last element if any
+        public last(): T {
+            return this.at(this.count() - 1);
+        }
+
         public jsonExportKey(ctx: JsonExportCtx) {
             return null; // conservative - recursion is possible if wrapped type is recursive
         }
