@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A task created with `async` keyword
-    //@ icon("HourGlass") stem("task")
+    //@ stem("task")
     export class Task<T>
         extends RTValue
     {

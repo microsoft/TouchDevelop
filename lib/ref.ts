@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A reference to a value
-    //@ stem("ref") icon("Package")
+    //@ stem("ref") icon("fa-gift")
     export class Ref<T>
         extends RTValue
     {

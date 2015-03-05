@@ -42,7 +42,7 @@ var reqNo = 0
 http.globalAgent.maxSockets = 15;
 https.globalAgent.maxSockets = 15;
 
-function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
+function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, contentType = null)
 {
     var currReq = reqNo++;
     var isDone = false
@@ -82,6 +82,9 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
         body = JSON.stringify(body)
         purl.method = "POST"
         purl.headers = { 'content-type': 'application/json; charset=utf8' }
+    }
+    if (contentType) {
+        purl.headers = { 'content-type': contentType }
     }
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
@@ -3454,6 +3457,20 @@ function tdupload(args:string[])
 
     console.log("releaseid:" + lbl)
 
+    if (key == "direct") {
+        var atokF = "access_token.txt"
+        if (!fs.existsSync(atokF)) {
+            console.warn("Access token not found.");
+            console.log("Open the following link in your browser:");
+            console.log("   https://www.touchdevelop.com/oauth/dialog?client_id=upload&response_type=token");
+            console.log("Log in with your admin credentials, and save the access token in a text file with the following name.");
+            console.log("   ./" + atokF)
+            console.log("The token will be valid for up to one year. Do not share or check in the access token --- it identifies you personally.");
+            return
+        }
+        var td_tok = "?access_token=" + fs.readFileSync(atokF, "utf8").replace(/\s/g, "").replace(/^#access_token=/, "")
+    }
+
     if (args.length == 0)
         args = [
             "build/main.js",
@@ -3500,6 +3517,11 @@ function tdupload(args:string[])
                     contentType: mime,
                     content: content,
                 })
+            } else if (td_tok) {
+                var url = "https://www.touchdevelop.com/app/" + lbl + "/" + fileName + td_tok
+                tdevGet(url, (resp) => {
+                    console.log(fileName + ": " + resp)
+                }, 1, data, mime)
             } else {
                 var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
                 url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
