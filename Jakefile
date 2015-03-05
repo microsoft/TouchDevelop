@@ -386,7 +386,7 @@ desc('upload current build to the cloud')
 task('upload', [], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
-    var uploadKey = process.env.TD_UPLOAD_KEY;
+    var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     console.log("[I] uploading v" + buildVersion)
     jake.exec([ 'node build/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
       { printStdout: true, printStderr: true },
@@ -394,12 +394,7 @@ task('upload', [], { async : true }, function() {
 
   };
   if (!process.env.TRAVIS) {
-    if (process.env.TD_UPLOAD_KEY && process.env.TD_UPLOAD_USER) {
-      upload(process.env.TD_UPLOAD_USER);
-    } else {
-      console.log("[I] not in travis, skipping upload");
-      task.complete();
-    }
+    upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
