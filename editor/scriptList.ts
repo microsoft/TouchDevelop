@@ -151,7 +151,7 @@ module TDev { export module Browser {
                     var mode = EditorSettings.parseEditorMode(settings.editorMode);
                     if (mode != EditorMode.unknown)
                         EditorSettings.setEditorMode(mode, false);
-                   // EditorSettings.setHubTheme(settings.hubtheme, false);
+                    EditorSettings.setHubTheme(settings.hubtheme, false);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                 }, e => { });
         }
