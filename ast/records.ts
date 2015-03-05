@@ -559,10 +559,7 @@ module TDev.AST {
         private props:IProperty[];
 
         public icon(): string {
-            if (this.record.recordType === RecordType.Table)
-                return "svg:Subtract,white";
-            else
-                return "svg:PageCurl,white";
+            return RecordDef.GetIcon(this.record.recordType)
         }
 
         public parentLibrary() : AST.LibraryRef { return this.getRecord().parentLibrary() }
@@ -1246,13 +1243,13 @@ module TDev.AST {
         {
             switch (rt) {
                 case AST.RecordType.Object:
-                    return "svg:PageCurl,white";
+                    return "svg:fa-list-alt,white";
                 case AST.RecordType.Table:
-                    return "svg:ThreeColumn,white";
+                    return "svg:fa-table,white";
                 case AST.RecordType.Decorator:
-                    return "svg:Clover,white";
+                    return "svg:fa-subscript,white";
                 case AST.RecordType.Index:
-                    return "svg:BulletList,white";
+                    return "svg:fa-th-list,white";
                 default: Util.die();
             }
         }

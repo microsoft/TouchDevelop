@@ -1389,7 +1389,7 @@ module TDev { export module Browser {
             this.show();
             this.topTitle = header;
 
-            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:BulletList,black", header, null, Ticks.editBtnSideSearch, () => {
+            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
                 if (!this.sidePaneVisibleNow()) this.showSidePane();
             })]);
 
@@ -2598,7 +2598,7 @@ module TDev { export module Browser {
             var label = div("sdTabTileLabel", span(null, t.getName()));
             var img = null;
             if (t.bgIcon())
-                img = HTML.mkImg(t.bgIcon() + ",black,clip=80");
+                img = HTML.mkImg(t.bgIcon() + ",black,clip=20");
             return [div("sdTabTileReplacementIcon", img), label];
         }
 
@@ -3069,7 +3069,7 @@ module TDev { export module Browser {
         public getName() { return lf("history"); }
         private script(): ScriptInfo { return <ScriptInfo>this.parent; }
         public bgIcon() {
-            return "svg:Clock";
+            return "svg:fa-history";
         }
 
         // this thing is somewhat internals, for Oregon people
@@ -3260,7 +3260,7 @@ module TDev { export module Browser {
         public getName() { return lf("code"); }
         private script(): ScriptInfo { return <ScriptInfo>this.parent; }
         public bgIcon() {
-            return "svg:AlignLeft";
+            return "svg:indent";
         }
 
         public initTab() {
@@ -3916,7 +3916,7 @@ module TDev { export module Browser {
         public getId() { return "forks"; }
         public getName() { return lf("forks"); }
 
-        public bgIcon() { return "svg:ShareThis"; }
+        public bgIcon() { return "svg:code-fork"; }
         public noneText() { return lf("no forks, install, edit and re-publish script to create one!"); }
         // public bgIcon() => "svg:WritePage";
         inlineText(cc:JsonIdObject)
@@ -4841,7 +4841,7 @@ module TDev { export module Browser {
         }
         public getId() { return "art"; }
         public getName() { return lf("art"); }
-        public bgIcon() { return "svg:snowflake"; } // TODO: Art icon
+        public bgIcon() { return "svg:paint-brush"; } // TODO: Art icon
         public hideOnEmpty() { return false; }
         public noneText() { return lf("no art published by this user"); }
 
@@ -6403,7 +6403,7 @@ module TDev { export module Browser {
         public inlineIsTile() { return false; }
         public getId() { return "consumers"; }
         public getName() { return lf("consumers"); }
-        public bgIcon() { return "svg:pizza"; }
+        public bgIcon() { return "svg:cutlery"; }
         public noneText() { return lf("no consumers of this library"); }
 
         public tabBox(c:JsonScript):HTMLElement
@@ -6945,7 +6945,7 @@ module TDev { export module Browser {
         }
         public getName() { return lf("scripts"); }
         public getId() { return "scripts"; }
-        public bgIcon() { return "svg:Space"; }
+        public bgIcon() { return "svg:globe"; }
 
         public initTab() {
             var infoDiv = div('sdExpandableText',

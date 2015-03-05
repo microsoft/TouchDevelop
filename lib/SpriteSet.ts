@@ -3,7 +3,7 @@
 module TDev { export module RT {
 
     //? A collection of sprites
-    //@ stem("sprites") icon("spriteset") ctx(general,gckey,enumerable)
+    //@ stem("sprites") icon("fa-list-ol") ctx(general,gckey,enumerable)
     export class SpriteSet
         extends RTValue
         implements ObjSet
