@@ -1001,10 +1001,10 @@ module TDev { export module Browser {
             descr.value = "";
 
             var school = HTML.mkTextInput("text", lf("enter the school name"));
-            school.value = lf("enter the school name");
+            school.value = "";
 
             var grade = HTML.mkTextInput("text", lf("enter class grade"));
-            grade.value = lf("enter the class grade");
+            grade.value = "";
 
             var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
             HTML.setCheckboxValue(allowExport, false);
