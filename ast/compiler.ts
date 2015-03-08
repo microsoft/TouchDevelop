@@ -2185,6 +2185,7 @@ module TDev.AST
             // this will actually only ever turn once
             while (this.innerActions.length > 0) {
                 var aa = this.innerActions.shift();
+                aa.visitorState = true
                 this.dispatch(aa);
             }
         }
