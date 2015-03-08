@@ -793,7 +793,6 @@ module TDev.AST {
                     (<Decl>result).deleted = getChange(x => (<Decl>x).deleted);
                     // TODO - do we need to handle this parent separately?
                     (<Decl>result).wasAutoNamed = getChange(x => (<Decl>x).wasAutoNamed);
-                    (<Decl>result).visitorState = getChange(x => (<Decl>x).visitorState);
                     (<Decl>result).diffStatus = getChange(x => (<Decl>x).diffStatus);
                     (<Decl>result).diffAltDecl = getChange(x => (<Decl>x).diffAltDecl);
                 } else if(test(Stmt)) {
