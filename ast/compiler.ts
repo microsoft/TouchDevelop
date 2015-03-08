@@ -1053,7 +1053,20 @@ module TDev.AST
             return res;
         }
 
-        public visitComment(c:Comment) { return []; }
+        public visitComment(c:Comment) {
+            if (this.options.usedProperties.hasOwnProperty("appconsumerenderedcomments")) {
+                var par = (<CodeBlock>c.parent).stmts
+                var idx = par.indexOf(c)
+                if (par[idx - 1] instanceof Comment)
+                    return []; // not first
+                var end = idx
+                while (par[end] instanceof Comment)
+                    end++
+                var d = Step.renderDocs(par.slice(idx, end))
+                return [new JsExprStmt(JsCall.direct("s.rt.saveComment", [new JsLiteral(this.stringLiteral(d))]))]
+            }
+            return [];
+        }
 
         private callString(prop:IProperty, args:JsExpr[], ctxArg:JsExpr, astref: Call) : JsExpr
         {

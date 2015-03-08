@@ -288,6 +288,7 @@ module TDev
         private restartQueued = false;
         public tutorialState: TutorialState = null;
         public editorObj: RT.Editor;
+        public renderedComments:string = "";
 
         public sessions: Revisions.Sessions;
         public authValidator: RT.StringConverter<string>;
@@ -1875,6 +1876,7 @@ module TDev
         }
 
         public killTempState() {
+            this.renderedComments = ""
             this.sessions.unlink();   // sessions can have backlinks
             this.compiled.resetData(this.datas); // all globals need to be cleared
         }
@@ -1942,6 +1944,11 @@ module TDev
                 return this.runMap;
             else
                 return undefined;
+        }
+
+        public saveComment(cmt:string)
+        {
+            this.renderedComments += cmt
         }
 
         private lastBreak = 0;
