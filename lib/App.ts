@@ -132,7 +132,7 @@ module TDev.RT {
                     if (el.innerText.toLowerCase().indexOf(terms) > -1) {
                         el.style.display = 'block';
                     } else el.style.display = 'none';
-                });
+            });
             if (this.chartsEl.style.display == 'block' && !this.pendingChartUpdate) {
                 this.pendingChartUpdate = true;
                 Util.setTimeout(this.refreshRate, () => {
@@ -141,6 +141,8 @@ module TDev.RT {
                 });
             }
         }
+
+        public onMessages : (els: HTMLElement[]) => void;
 
         private temp: HTMLElement;
         public append(msgs: LogMessage[]) {
@@ -158,7 +160,12 @@ module TDev.RT {
                 var txt = Util.htmlEscape(msg)
                     .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>");
 
-                res.push("<div class='logMsg' data-level='" + levelToClass(lvl.level) + "' data-timestamp='" + lvl.timestamp + "'>"
+                var crash: RuntimeCrash = undefined;
+                if (lvl.meta && lvl.meta && lvl.meta.kind === 'crash')
+                    crash = <RuntimeCrash>lvl.meta;
+                res.push("<div class='logMsg' data-level='" + levelToClass(lvl.level) + "' data-timestamp='" + lvl.timestamp + "'"
+                    + (crash ? " data-crash='" + Util.htmlEscape(JSON.stringify(crash)) + "'" : "")
+                    + ">"
                     + (lvl.elapsed ? (lvl.elapsed + '&gt; ') : '')
                     + (lvl.category ? (Util.htmlEscape(lvl.category) + ': ') : '')
                     + txt
@@ -167,6 +174,8 @@ module TDev.RT {
             var temp = div(''); Browser.setInnerHTML(temp, res.join(""));
 
             var nodes = Util.childNodes(temp);
+            if (this.onMessages) this.onMessages(nodes);
+
             var todrop = this.logsEl.childElementCount + nodes.length - this.maxItems;
             while(todrop-- > 0 && this.logsEl.firstElementChild)
                 this.logsEl.removeChild(this._reversed ? this.logsEl.lastElementChild : this.logsEl.firstElementChild);
@@ -460,43 +469,43 @@ module TDev.RT {
         }
 
         //? Restarts the app and pops a restart dialog
-        export function restart(message : string, r: ResumeCtx): void
-        {
+        export function restart(message: string, r: ResumeCtx): void {
             var rt = r.rt;
             var score = Bazaar.cachedScore(rt);
             var scriptId = rt.currentScriptId;
-            rt.stopAsync()
-                .done(() => {
-                    if (scriptId) {
-                        var m = new ModalDialog();
-                        m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
-                        if (score > 0)
-                            m.add(div('wall-dialog-large wall-dialog-text-center', lf("your best score: {0}", score)));
-                        m.add(div('wall-dialog-body wall-dialog-extra-space wall-dialog-text-center',
-                            HTML.mkButton(lf("play again"), () => {
-                                tick(Ticks.runtimePlayAgain);
-                                m.dismiss();
-                                rt.rerun()
-                            }, 'wall-dialog-button-huge'),
-                            Browser.notifyBackToHost ? HTML.mkButton(lf("back"), () => {
-                                tick(Ticks.runtimeBack);
-                                m.dismiss();
-                                Util.externalNotify("exit");
-                            }) : null
-                        ));
-                        if (score > 0) {
-                            Bazaar.loadLeaderboardItemsAsync(rt.currentScriptId)
-                                .done((els: HTMLElement[]) => {
-                                    if (els && els.length > 0) {
-                                        m.add(div('wall-dialog-body wall-dialog-extra-space ', els));
-                                        m.setScroll();
-                                    }
-                                }, e => { });
+            rt.stopAsync().done(() => {
+                var m = new ModalDialog();
+                m.canDismiss = !scriptId;
+                m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
+                if (score > 0)
+                    m.add(div('wall-dialog-large wall-dialog-text-center', lf("your best score: {0}", score)));
+                m.add(div('wall-dialog-body wall-dialog-extra-space wall-dialog-text-center',
+                    HTML.mkButton(lf("play again"),() => {
+                        tick(Ticks.runtimePlayAgain);
+                        m.dismiss();
+                        rt.rerun()
+                    }, 'wall-dialog-button-huge'),
+                    !scriptId ? HTML.mkButton(lf("dismiss"),() => {
+                        m.dismiss();
+                    }) : null,
+                    scriptId && Browser.notifyBackToHost ? HTML.mkButton(lf("back"),() => {
+                        tick(Ticks.runtimeBack);
+                        m.dismiss();
+                        Util.externalNotify("exit");
+                    }) : null
+                    ));
+                if (score > 0 && scriptId) {
+                    Bazaar.loadLeaderboardItemsAsync(scriptId)
+                        .done((els: HTMLElement[]) => {
+                        if (els && els.length > 0) {
+                            m.add(div('wall-dialog-body wall-dialog-extra-space ', els));
+                            m.setScroll();
                         }
-                        m.fullWhite();
-                        m.show();
-                    }
-                });
+                    }, e => { });
+                }
+                m.fullWhite();
+                m.show();
+            });
         }
 
         //? Aborts the execution if the condition is false.
@@ -600,23 +609,35 @@ module TDev.RT {
         //@ uiAsync betaOnly
         export function show_logs(filter : string, r : ResumeCtx) {
             r.resume();
-            showAppLogAsync(filter).done(() => { }, e => { });
+            showAppLogAsync(undefined, filter).done(() => { }, e => { });
         }
 
-        export function showAppLogAsync(filter? : string): Promise {
+        export function showAppLogAsync(msgs?: LogMessage[], filter? : string, onMessages? : (els : HTMLElement[]) => void): Promise {
             var view = new AppLogView();
+            view.onMessages = onMessages;
             view.charts(true);
             view.reversed(true);
             view.append(App.logs());
             view.setFilter(filter);
+            if (msgs) view.append(msgs);
             view.attachLogEvents();
             return view.showAsync().then(() => view.removeLogEvents(), () => view.removeLogEvents());
         }
 
-        export function showLog(msgs: LogMessage[]) {
+        export function showLog(msgs: LogMessage[], onMessages?: (els: HTMLElement[]) => void) {
             var view = new AppLogView();
+            view.onMessages = onMessages;
             view.append(msgs);
             view.showAsync().done(() => { }, e => { });
+        }
+
+        //? Get HTML-rendered content of all comments 'executed' since last call
+        //@ dbgOnly
+        export function consume_rendered_comments(s:IStackFrame):string
+        {
+            var r = s.rt.renderedComments
+            s.rt.renderedComments = ""
+            return r
         }
     }
 }

@@ -412,7 +412,7 @@ module TDev.RT {
     }
 
     //? A snapshot of the gamepad state
-    //@ immutable icon('controller')
+    //@ immutable icon('fa-gamepad')
     //@ robust
     export class Gamepad_ extends RTValue {
         constructor(private gp: Gamepad) {

@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? A number (possibly negative and/or fractional)
-    //@ stem("x") icon("123") immutable isData builtin ctx(general,indexkey,cloudfield,json)
+    //@ stem("x") icon("fa-calculator") immutable isData builtin ctx(general,indexkey,cloudfield,json)
     //@ robust
     //@ idempotent
     export module Number_

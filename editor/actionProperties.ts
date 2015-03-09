@@ -155,7 +155,7 @@ module TDev
                   showSettings && icl ? this.offlineAction : null,
                   showSettings && icl ? this.queryAction : null,
                   !showSettings || offloadDisabled? null : this.offloadBox,
-                  EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillActionProperties, "formHint marginBottom"),
+                  Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillActionProperties, "formHint marginBottom"),
                   ];
             this.setChildren(propDivs);
         }

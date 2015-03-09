@@ -133,7 +133,9 @@ module TDev {
             previousHeight = h;
             previousWidth = w;
 
-            portraitMode = w*1.02 < h;
+            // in desktop, we lower the threshold so that TD goes into portrait mode when it is docked on a side of the scrreen
+            var portraitThreshold = Browser.isDesktop ? 0.98 : 1.2;
+            portraitMode = w * portraitThreshold < h;
 
             if (Browser.isCellphone)
                 phoneMode = true;

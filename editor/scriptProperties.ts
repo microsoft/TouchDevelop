@@ -209,12 +209,6 @@ module TDev
                     div("varLabel", lf("export")),
                     btn("cordova", lf("Cordova app")),
                     btn("azure", lf("Azure web site")),
-                    /*
-                    btn("win8", null),
-                    btn("wp8", null),
-                    btn("android", "Android"),
-                    btn("ios", "iPhone/iPad"),
-                    */
                     btn("html5", "HTML5 web app")
                     ),
                 this.dataSection = divId("dataManagement", "formLine",
@@ -260,7 +254,7 @@ module TDev
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech())
                     ) : undefined,
-                EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
+                Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
             this.description.className = "variableDesc";

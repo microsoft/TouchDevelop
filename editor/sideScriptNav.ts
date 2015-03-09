@@ -132,7 +132,7 @@ module TDev
                 r.appendChild(d);
             }
             if (!isParent && app.isDocsTopic())
-                addBtn(HTML.mkRoundButton("svg:movie,black", lf("preview"), Ticks.sidePreview, () => {
+                addBtn(HTML.mkRoundButton("svg:film,black", lf("preview"), Ticks.sidePreview, () => {
                     var topic = HelpTopic.fromScript(app)
                     var d =
                     elt('leftPaneContent').setChildren([
@@ -187,16 +187,16 @@ module TDev
 
             if (!isParent && TheEditor.widgetEnabled("updateButton") &&
                 (TheEditor.scriptUpdateId || TheEditor.librariesNeedUpdate()))
-                addBtn(HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdate, () => {
-                    TheEditor.updateScript();
+                addBtn(HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdate, () => {
+                    this.editor.updateScript();
                 }));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
-                addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs, () => {
-                    TheEditor.showAppLog(app);
+                addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs,() => {
+                    this.editor.showAppLog(app);
                 }));
             if (!isParent && TheEditor.widgetEnabled("errorsButton"))
                 addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors, () => {
-                    TheEditor.searchFor(":m");
+                    this.editor.searchFor(":m");
                 }));
 
             if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") &&
@@ -284,7 +284,7 @@ module TDev
                     if (decl instanceof AST.LibraryRef) {
                         var lib = <AST.LibraryRef>decl;
                         if (lib.needsUpdate && this.editor.widgetEnabled("updateButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdateOne,
+                            var runbtn = HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdateOne,
                                     () => { TheEditor.updateLibraries([lib]) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (this.editor.widgetEnabled("editLibraryButton")) {
@@ -590,7 +590,7 @@ module TDev
 
             sections.forEach(displayThings)
 
-            items.push(EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptExplorer, "formHint marginBottom marginTop"));
+            items.push(Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptExplorer, "formHint marginBottom marginTop"));
 
             this.setChildren(items);
 

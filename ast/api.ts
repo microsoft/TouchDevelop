@@ -449,24 +449,6 @@ module TDev {
             | Network
             ,
 
-        WinRT =
-            Accelerometer
-            | Camera
-            | CloudServices
-            | Compass
-            | Contacts
-            | Gyroscope
-            | Location
-            | Maps
-            | Media
-            | Orientation
-            | Search
-            | Translation
-            | MusicAndSounds
-            | Network
-            | Hawaii
-            ,
-
         AppStudio =
             Accelerometer
             | MusicAndSounds
@@ -530,9 +512,8 @@ module TDev {
         UsesStackFrame      = 0x00000002,
 
         Web                 = 0x00000010,
-        WinRT               = 0x00000020,
         Wab                 = 0x00000040,
-        WebAll              = ImplementationStatus.Web | ImplementationStatus.WinRT | ImplementationStatus.Wab
+        WebAll              = ImplementationStatus.Web | ImplementationStatus.Wab
     }
 
 
@@ -1472,7 +1453,6 @@ module TDev {
             this._implStatus = this._implStatus & ~ImplementationStatus.WebAll;
             for (var i = 0; i < platforms.length; ++i)
                 switch (platforms[i]) {
-                    case "winrt": this._implStatus |= ImplementationStatus.WinRT; break;
                     case "wab": this._implStatus |= ImplementationStatus.Wab; break;
                     case "": break;
                     default: this.md_oops("unknown platform for stub " + platforms[i])

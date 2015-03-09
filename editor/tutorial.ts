@@ -256,36 +256,6 @@ module TDev
                     op.calcButton = Ticks.btnCut;
                     op.label = lf("need to delete this")
                     return;
-                } else if (stmt instanceof AST.ActionParameter) {
-                    var param = <AST.ActionParameter>stmt;
-                    var param0 = <AST.ActionParameter>param.diffAltStmt;
-                    if (param.getName() != param0.getName()) {
-                        op = new TutorialInstruction()
-                        op.stmt = param0
-                        op.targetName = param.getName()
-                        return;
-                    }
-                    if (param.getKind().toString() != param0.getKind().toString()) {
-                        op = new TutorialInstruction();
-                        op.stmt = param0
-                        op.targetKind = param.getKind()
-                        return;
-                    }
-                } else if (stmt instanceof AST.RecordField) {
-                    var field = <AST.RecordField>stmt;
-                    var field0 = <AST.RecordField>field.diffAltStmt;
-                    if (field.getName() != field0.getName()) {
-                        op = new TutorialInstruction()
-                        op.stmt = field0
-                        op.targetName = field.getName()
-                        return;
-                    }
-                    if (field.dataKind.toString() != field0.dataKind.toString()) {
-                        op = new TutorialInstruction();
-                        op.stmt = field0
-                        op.targetKind = field.dataKind
-                        return;
-                    }
                 } else {
                     var eh = stmt.calcNode()
                     if (eh && eh.diffTokens) {
@@ -411,7 +381,11 @@ module TDev
                                 if (typeof d[i].getLiteral() == "string" &&
                                     d[i + 3] &&
                                     typeof d[i + 3].getLiteral() == "string") {
-                                    op.editString = d[i + 3].getLiteral()
+                                    var lv = d[i + 3].getLiteral()
+                                    if (d[i] instanceof AST.FieldName)
+                                        op.localName = lv
+                                    else
+                                        op.editString = lv
                                     op.addToken = d[i + 3]
                                 } else if (d[i].getThing() instanceof AST.PlaceholderDef && !d[i + 2]) {
                                     // the next token will delete the placeholder def
@@ -943,15 +917,16 @@ module TDev
                 })
             ));
 
-            m.add(div('wall-dialog-header', lf("next tutorials...")));
-            var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
-            m.add(loadingMoreTutorials);
-            Browser.TheHub.tutorialsByUpdateIdAsync()
-                .done(progs => {
+            var nextTutorials = this.topic.nextTutorials();
+            if (!/none/i.test(nextTutorials[0])) {
+                m.add(div('wall-dialog-header', lf("next tutorials...")));
+                var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
+                m.add(loadingMoreTutorials);
+                Browser.TheHub.tutorialsByUpdateIdAsync()
+                    .done(progs => {
                     loadingMoreTutorials.removeSelf();
                     var moreTutorials = <HTMLUListElement>createElement('ul', 'tutorial-list');
-                    var moreTutorialsId = this.topic.moreTutorials();
-                    var nextTutorials = this.topic.nextTutorials();
+
                     var tutLength = 8 - (moreTutorialsId ? 1 : 0);
                     var allTutorials = HelpTopic.getAllTutorials();
                     var score = (ht: HelpTopic) => {
@@ -970,13 +945,15 @@ module TDev
                         nextTutorials.push(tut.id);
                     }
                     nextTutorials.forEach(tutid =>
-                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid, (h) => { m.dismiss() }))));
+                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid,(h) => { m.dismiss() }))));
+                    var moreTutorialsId = this.topic.moreTutorials();
                     if (moreTutorialsId)
                         moreTutorials.appendChild(createElement('li', '', Browser.TheHub.topicTile(moreTutorialsId, lf("More"))));
                     m.add(div('wall-dialog-body', moreTutorials));
-                }, e => {
-                    loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
+                    }, e => {
+                        loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
                 });
+            }
 
             this.addHocFinishPixel(m);
             m.fullWhite();
@@ -1291,8 +1268,8 @@ module TDev
         {
             var tip =
                div('tip tip-tl', div('tipInner',
-                    div('tipTitle', lf("tap there to continue coding")),
-                    div('tipDescr', this.currentCommandArg() || "")))
+                    div('tipTitle', lf("tap there")),
+                    div('tipDescr', lf("to continue coding"))))
 
             tip.style.bottom = "calc(50% - 3em)";
             tip.style.right = "calc(50% - 3em)";
@@ -1409,13 +1386,13 @@ module TDev
                 TipManager.scheduleTip({
                     tick: Ticks.wallStop,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || ""
+                    description: lf("to continue coding")
                 })
              else
                 TipManager.scheduleTip({
                     tick: Ticks.wallBack,
                     title: lf("tap there"),
-                    description: this.currentCommandArg() || ""
+                    description: lf("to continue coding")
                 })
         }
 
@@ -1555,21 +1532,27 @@ module TDev
             }
 
             if (ins == null) {
+                var complete = () => {
+                    TipManager.setTip(null);
+                    TheEditor.calculator.applyInstruction(null);
+                    this.stepCompleted();
+                };
                 if (!step.data.command || step.data.command == "none" || step.data.command == "empty") {
-                    TipManager.setTip(null)
-                    TheEditor.calculator.applyInstruction(null)
-                    this.stepCompleted()
-                    return
+                    complete();
+                    return;
                 }
 
                 TheEditor.calculator.applyInstruction(null)
                 switch (step.data.command) {
+                    case "delay":
+                        Util.setTimeout(3000, () => complete());
+                        return;
                     case "run":
                         this.waitingFor = "run"
                         TipManager.setTip({
                             tick: TheEditor.calculator.stmt ? Ticks.calcSearchRun : Ticks.codeRun,
                             title: lf("tap there to run your app"),
-                            description: this.currentCommandArg() || lf("let's see what it does!")
+                            description: this.currentCommandArg() || ""
                         })
                         return;
                     case "publish":
@@ -1791,7 +1774,6 @@ module TDev
                 this.disableUpdate = false;
                 this.fromReply = true;
                 this.update();
-                this.notify("runBack");
             });
         }
 

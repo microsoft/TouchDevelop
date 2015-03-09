@@ -115,6 +115,7 @@ module TDev { export module Browser {
 
         public applySizes()
         {
+            this.updateSidePane();
             this.updateScroll();
         }
 
@@ -150,6 +151,7 @@ module TDev { export module Browser {
                     var mode = EditorSettings.parseEditorMode(settings.editorMode);
                     if (mode != EditorMode.unknown)
                         EditorSettings.setEditorMode(mode, false);
+                    EditorSettings.setHubTheme(settings.hubtheme, false);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                 }, e => { });
         }
@@ -683,26 +685,6 @@ module TDev { export module Browser {
 
                     var translateNag = !!localStorage["translateNagged"];
 
-                    var benchmarksNagged = false;
-                    var benchmarksNagVector = localStorage["benchmarksNagVector"];
-                    var nagVector: { [version: string]: boolean; } = null;
-                    if (benchmarksNagVector) {
-                        try {
-                            nagVector = JSON.parse(benchmarksNagVector);
-                        } catch (e) { }
-                        if (nagVector != null) {
-                            if (!!nagVector[<string>Cloud.currentReleaseId])
-                                benchmarksNagged = true;
-                        }
-                    }
-                    if (!Cloud.getUserId() ||
-                        !TDev.isBeta ||
-                        dbg) // don't nag dbg users, as those do not represent general population
-                        benchmarksNagged = true;
-
-                    if(Math.random() > 0.05) // only 5% of users get nagged
-                        benchmarksNagged = true;
-
                     if (!Cloud.lite && dbg &&
                         !!Cloud.getUserId() && !translateNag
                         && (<any>window).userScore > 30 && Math.random() < 0.1) { // only 20% get nagged of powerusers
@@ -718,28 +700,6 @@ module TDev { export module Browser {
                                     tick(Ticks.translateNagOk);
                                     RT.Web.browseAsync("https://touchdeveloptranslator.azurewebsites.net/#").done();
                                 }))
-                        ]);
-                        m.show();
-                    } else if (!Cloud.lite && !benchmarksNagged && EditorSettings.editorMode() >= EditorMode.classic) {
-                        if (nagVector == null) nagVector = {};
-                        nagVector[<string>Cloud.currentReleaseId] = true;
-                        localStorage["benchmarksNagVector"] = JSON.stringify(nagVector);
-                        tick(Ticks.benchmarksNagDisplay);
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("Help the TouchDevelop community!")),
-                            div("wall-dialog-body", lf("You can help us by running a TouchDevelop benchmark to test how well we perform on your device.")),
-                            div("wall-dialog-buttons",
-                                HTML.mkButton(lf("no, thanks"), () => {
-                                    m.dismiss();
-                                    tick(Ticks.benchmarksNagDismiss);
-                                }),
-                                HTML.mkButton(lf("run benchmark"), () => {
-                                    tick(Ticks.benchmarksNagRunOne);
-                                    m.dismiss();
-                                    TestMgr.Benchmarker.runTDBenchmarksWithDialog(false).done();
-                                })
-                                )
                         ]);
                         m.show();
                     }
@@ -1242,8 +1202,6 @@ module TDev { export module Browser {
             else if (e.kind == "art") return this.getArtInfoById(e.id);
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
-            else if (e.kind == "run") return this.getRunInfoById(e.id, null);
-            else if (e.kind == "runbucket") return this.getRunBucketInfoById(e.id);
             else return null;
         }
 
@@ -1431,7 +1389,7 @@ module TDev { export module Browser {
             this.show();
             this.topTitle = header;
 
-            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:BulletList,black", header, null, Ticks.editBtnSideSearch, () => {
+            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
                 if (!this.sidePaneVisibleNow()) this.showSidePane();
             })]);
 
@@ -1735,26 +1693,6 @@ module TDev { export module Browser {
                     TheApiCacheMgr.store(id, c, id);
                     si.loadFromJson(c);
                 }
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
-        public getRunInfoById(id: string, scriptId: string) {
-            var si = <RunInfo>this.getLocation(id);
-            if (!si) {
-                si = new RunInfo(this);
-                si.loadFromWeb(id, scriptId);
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
-        public getRunBucketInfoById(id: string) {
-            var si = <RunBucketInfo>this.getLocation(id);
-            if (!si) {
-                si = new RunBucketInfo(this);
-                si.loadFromWeb(id);
                 this.saveLocation(si);
             }
             return si;
@@ -2660,7 +2598,7 @@ module TDev { export module Browser {
             var label = div("sdTabTileLabel", span(null, t.getName()));
             var img = null;
             if (t.bgIcon())
-                img = HTML.mkImg(t.bgIcon() + ",black,clip=80");
+                img = HTML.mkImg(t.bgIcon() + ",black,clip=20");
             return [div("sdTabTileReplacementIcon", img), label];
         }
 
@@ -3027,80 +2965,6 @@ module TDev { export module Browser {
         }
     }
 
-    export class StoreAppsTab
-        extends BrowserTab {
-        constructor(par: BrowserPage, private name : string, private path : string, private logo : string) {
-            super(par)
-        }
-        public getId() : string { return this.path; }
-        public getName() : string { return this.name; }
-
-        private mkBox(b: Host, c: JsonStoreApp) {
-            var cont = [];
-            var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-            addNum(c.users, "svg:person");
-            addNum(c.launches, "svg:play");
-
-            var time = c.time;
-            var timeStr = Util.timeSince(time) + " :: /" + c.scriptid;
-
-            var icon = div("sdIcon", HTML.mkImg(c.iconurl));
-            icon.style.backgroundColor = ScriptIcons.stableColorFromName(c.storeid);
-            var nameBlock = dirAuto(div("sdName", c.title));
-            var hd = div("sdNameBlock", nameBlock);
-
-            var numbers = div("sdNumbers", cont);
-            var author = div("sdAuthorInner", c.publisher);
-            var addInfo = div("sdAddInfoInner", timeStr);
-            var res = div("sdHeaderOuter sdBigHeader",
-                            div("sdHeader", icon,
-                                div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers)));
-            return res.withClick(() => {
-                window.location.href = c.url;
-            });
-        }
-
-        public tabBox(c: JsonStoreApp)
-        {
-            return this.mkBox(this.browser(), c);
-        }
-
-        public initTab() {
-            this.tabContent.setChildren([ScriptIcons.getWinLogo(this.logo, 2, '#000'), Editor.mkHelpLink("export to app")]);
-
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            this.tabContent.appendChildren([loadingDiv]);
-            Cloud.getPrivateApiAsync(this.parent.publicId + "/" + this.path)
-                .done((lst : any) => {
-                    loadingDiv.removeSelf();
-                    var apps : JsonStoreApp[] = lst.items;
-                    var boxes = apps.map(app => this.tabBox(app));
-                    this.tabContent.appendChildren(boxes);
-                },
-                (e) => {
-                    loadingDiv.removeSelf();
-                    var status = e.status;
-                    if (status == 403) {
-                        this.tabContent.appendChildren(div('', 'you are not allowed to see this data'));
-                    } else {
-                        this.tabContent.appendChildren(div('', 'failed to load apps; are you connected to internet?'));
-                    }
-                });
-        }
-    }
-
-    export class WindowsStoreAppsTab extends StoreAppsTab {
-        constructor(par : BrowserPage) {
-            super(par, "Windows Store", "windowsstoreapps", "win8");
-        }
-    }
-
-    export class WindowsPhoneStoreAppsTab extends StoreAppsTab {
-        constructor(par : BrowserPage) {
-            super(par, "Windows Phone Store", "windowsphonestoreapps", "wp8");
-        }
-    }
-
     export class KeysTab
         extends BrowserTab
     {
@@ -3205,7 +3069,7 @@ module TDev { export module Browser {
         public getName() { return lf("history"); }
         private script(): ScriptInfo { return <ScriptInfo>this.parent; }
         public bgIcon() {
-            return "svg:Clock";
+            return "svg:fa-history";
         }
 
         // this thing is somewhat internals, for Oregon people
@@ -3396,7 +3260,7 @@ module TDev { export module Browser {
         public getName() { return lf("code"); }
         private script(): ScriptInfo { return <ScriptInfo>this.parent; }
         public bgIcon() {
-            return "svg:AlignLeft";
+            return "svg:indent";
         }
 
         public initTab() {
@@ -3423,15 +3287,6 @@ module TDev { export module Browser {
                         return;
                     }
 
-                    this.tabContent.appendChild(
-                        div(
-                            null,
-                            HTML.mkButton(lf("open in editor"),
-                                () => {
-                                    tickArg(Ticks.coverageOpenInEditor, "script");
-                                    RunInfo.openScriptInEditor(this.browser(), s.getAnyId(), null, null, null, null);
-                                })));
-
                     var app = AST.Parser.parseScript(scriptText);
                     AST.TypeChecker.tcScript(app);
                     var renderer = new EditorRenderer();
@@ -3450,9 +3305,8 @@ module TDev { export module Browser {
     export class InsightsTab extends BrowserMultiTab {
         constructor(par: ScriptInfo) {
             super(par,
-                lf("This tab contains additional information about this script: the source code (code), the edit history (history), the reference art (art), the given hearts (hearts), the code coverage (coverage), the profiling data (profile), detailed crash reports (buckets)"),
-                CodeTab, HistoryTab, ArtTab, ConsumersTab, SuccessorsTab, CrowdCodeCoverageTab, CrowdCodeProfileTab, RunBucketsTab,
-                DerivativesTab);
+                lf("This tab contains additional information about this script"),
+                CodeTab, HistoryTab, ArtTab, ConsumersTab, SuccessorsTab, DerivativesTab);
         }
 
         public bgIcon() {
@@ -3475,452 +3329,6 @@ module TDev { export module Browser {
 
         public getName() { return lf("insights"); }
         public getId() { return "insights"; }
-    }
-
-    export class CrowdCodeCoverageTab
-        extends BrowserTab {
-        constructor(par: BrowserPage) {
-            super(par)
-        }
-        public inlineIsTile() { return false; }
-        public getId() { return "coverage"; }
-        public getName() { return lf("coverage"); }
-        private script(): ScriptInfo { return <ScriptInfo>this.parent; }
-        public bgIcon() {
-            return "svg:Globe";
-        }
-
-        public initTab() {
-            tickArg(Ticks.coverageShown, "script");
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var statusDiv = div('', '');
-            var desc = "This tab shows which statements that got executed (covered) by someone."
-            this.tabContent.setChildren([div("sdTabDescription", desc), Editor.mkHelpLink("coverage", "about coverage"), loadingDiv, statusDiv]);
-            var s = this.script();
-            var coveragePromise = Cloud.getCoverageDataAsync(s.publicId, TDev.AST.Compiler.version).then(a =>
-                a.length > 0 ? a[0] : undefined);
-
-            s.getScriptTextAsync()
-                .then((scriptText: string) => {
-                    if (!scriptText) {
-                        loadingDiv.removeSelf();
-                        Browser.setInnerHTML(statusDiv, 'could not get script info; are you connected to internet?');
-                        return;
-                    }
-                    return coveragePromise.then(coverage => {
-                        var app = AST.Parser.parseScript(scriptText);
-                        AST.TypeChecker.tcScript(app);
-                        AST.Compiler.annotateWithIds(app);
-                        var renderer = new EditorRenderer();
-
-                        loadingDiv.removeSelf();
-                        if (coverage) {
-                            Browser.setInnerHTML(statusDiv, coverage.count + " successful runs by " + coverage.users + " users contributed coverage data anonymously");
-                            this.tabContent.appendChild(
-                                div(
-                                    null,
-                                    HTML.mkButton(lf("open in editor"),
-                                        () => {
-                                            tickArg(Ticks.coverageOpenInEditor, "script");
-                                            RunInfo.openScriptInEditor(this.browser(), s.getAnyId(), RunBitMap.fromJSON(coverage.astnodes), null, null, null);
-                                        })));
-                            new ScriptDebuggingAnnotator(RunBitMap.fromJSON(coverage.astnodes), null, null).dispatch(app);
-                            var elts = renderer.declDiv(app);
-                            this.tabContent.appendChild(elts);
-                        } else {
-                            Browser.setInnerHTML(statusDiv, "no crowd coverage information available yet");
-                        }
-                    }, e =>
-                    {
-                        loadingDiv.removeSelf();
-                        Browser.setInnerHTML(statusDiv, "crowd coverage information not available; are you offline?");
-                    });
-                }).done();
-        }
-    }
-
-    export class CrowdCodeProfileTab
-        extends BrowserTab {
-        constructor(par: BrowserPage) {
-            super(par)
-        }
-        public inlineIsTile() { return false; }
-        public getId() { return "profile"; }
-        public getName() { return lf("profile"); }
-        private script(): ScriptInfo { return <ScriptInfo>this.parent; }
-        public bgIcon() {
-            return "svg:timer";
-        }
-
-        public initTab() {
-            tickArg(Ticks.profileShown, "script");
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var statusDiv = div('', '');
-            var desc = "This tab contains information about performance characteristics of this script."
-            this.tabContent.setChildren([div("sdTabDescription", desc), Editor.mkHelpLink("profiling", "about profile"), loadingDiv, statusDiv]);
-            var s = this.script();
-            var profilePromise = Cloud.getProfileDataAsync(s.publicId, TDev.AST.Compiler.version).then(a => {
-                if (a.length == 0) return undefined;
-                var profile = <TDev.AST.ProfilingDataCollection>(a[0]);
-                var c = profile.count;
-                if (c > 1) {
-                    var astnodes = profile.astnodes;
-                    Object.keys(astnodes).forEach((k) => {
-                        var d = astnodes[k];
-                        d.count /= c;
-                        d.duration /= c;
-                    });
-                }
-                return profile;
-            });
-            s.getScriptTextAsync()
-                .then((scriptText: string) => {
-                    if (!scriptText) {
-                        loadingDiv.removeSelf();
-                        Browser.setInnerHTML(statusDiv, "could not get script info");
-                        return;
-                    }
-                    return profilePromise.then(profile => {
-                        var app = AST.Parser.parseScript(scriptText);
-                        AST.TypeChecker.tcScript(app);
-                        AST.Compiler.annotateWithIds(app);
-                        var renderer = new EditorRenderer();
-
-                        loadingDiv.removeSelf();
-                        if (profile) {
-                            Browser.setInnerHTML(statusDiv, profile.count + "  runs by " + profile.users + " users contributed profile data anonymously");
-                            this.tabContent.appendChild(
-                                div(
-                                    null,
-                                    HTML.mkButton(lf("open in editor"),
-                                        () => {
-                                            tickArg(Ticks.profileOpenInEditor, "script");
-                                            RunInfo.openScriptInEditor(this.browser(), s.getAnyId(), null, null, null, profile);
-                                        })));
-                            new ProfilingResultsAnnotator(profile).dispatch(app);
-                            var elts = renderer.declDiv(app);
-                            this.tabContent.appendChild(elts);
-                        } else {
-                            Browser.setInnerHTML(statusDiv, "no crowd profile information available yet");
-                        }
-                    }, e =>
-                    {
-                        loadingDiv.removeSelf();
-                        Browser.setInnerHTML(statusDiv, "crowd profile information not available; are you offline?");
-                    });
-                }).done();
-        }
-    }
-
-    export class RunCodeCoverageTab
-        extends BrowserTab {
-        constructor(par: RunInfo) {
-            super(par)
-        }
-        public inlineIsTile() { return false; }
-        public getId() { return "coverage-map"; }
-        public getName() { return lf("coverage map"); }
-        private runInfo() { return <RunInfo>(this.parent); }
-
-        public initTab() {
-            tickArg(Ticks.coverageShown, "run");
-            var desc = "This tab shows which statements got executed (covered) before the script crashed; blue: covered; red: condition=false; green: condition=true"
-            this.tabContent.setChildren([div("sdTabDescription", desc)]);
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var statusDiv = div('', '');
-            this.tabContent.appendChildren([loadingDiv, statusDiv]);
-
-            this.runInfo().getScriptASTAsync().done((app: AST.App) => {
-                if (!app) {
-                    loadingDiv.removeSelf();
-                    statusDiv.innerHTML = "could not get script info";
-                    return;
-                }
-
-                this.runInfo().withUpdate(this.tabContent, (v: JsonRun) => {
-                    loadingDiv.removeSelf();
-                    if (!v.runmap) {
-                        statusDiv.innerHTML = "sorry, this run does not contain a coverage map";
-                        return;
-                    }
-
-                    statusDiv.removeSelf();
-                    this.tabContent.appendChildren([div(null, HTML.mkButton(lf("open in editor"), () => { this.runInfo().openInEditor(); }))]);
-                    new ScriptDebuggingAnnotator(RunBitMap.fromJSON(v.runmap), v.stack, v.error).dispatch(app);
-                    var renderer = new EditorRenderer();
-                    var elts = renderer.declDiv(app);
-                    this.tabContent.appendChild(elts);
-                });
-            });
-        }
-    }
-
-    export class StackTraceTab
-        extends BrowserTab {
-        constructor(par: RunInfo) {
-            super(par)
-        }
-        public inlineIsTile() { return false; }
-        public getId() { return "stack-trace"; }
-        public getName() { return lf("stack trace"); }
-        private runInfo() { return <RunInfo>(this.parent); }
-
-
-        public initTab() {
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var statusDiv = div('', '');
-            this.tabContent.setChildren([loadingDiv, statusDiv]);
-            var renderer = new EditorRenderer();
-            function mkBox(decl: AST.Decl, stmt?: AST.Stmt) {
-                if (!stmt) return DeclRender.mkBox(decl);
-
-                var res = DeclRender.mkBoxEx(decl, "codeLocation");
-                var descDiv = <HTMLElement> (<any>res).theDesc;
-                Browser.setInnerHTML(descDiv, renderer.dispatch(stmt));
-                return res;
-                return div(null, res);
-            }
-            function mkMoreBox() {
-                var de: DeclEntry = new DeclEntry("... there is more");
-                var res = DeclRender.mkBox(<any>de);
-                return div(null, res);
-            }
-
-            this.runInfo().getScriptASTAsync().done((app: AST.App) => {
-                loadingDiv.removeSelf();
-                if (!app) {
-                    statusDiv.innerHTML = "could not get script info";
-                    return;
-                }
-                statusDiv.removeSelf();
-                this.tabContent.appendChild(div(null, HTML.mkButton(lf("open in editor"), () => this.runInfo().openInEditor())));
-
-                this.runInfo().withUpdate(this.tabContent, (v: JsonRun) => {
-                    if (!v.stack) return
-
-                    var maxSize = 50;
-                    var path = v.stack.path;
-                    var thereIsMore = false;
-
-                    if (v.stack.path.length > maxSize) {
-                        path = path.slice(0, maxSize);
-                        thereIsMore = true;
-                    }
-
-                    path.map(ix => v.stack.pack[ix]).forEach((obj: ICallNode, i: number) => {
-                        var pc = obj.id;
-                        var node = app.findAstNodeById(pc);
-
-                        if (node) {
-                            var decl: AST.Decl;
-                            var stmt: AST.Stmt;
-
-                            if (node.node instanceof AST.Decl) decl = <AST.Decl>node.node;
-                            else if (node.node instanceof AST.Stmt) {
-                                decl = node.decl;
-                                stmt = <AST.Stmt>node.node;
-                            }
-
-                            if (decl) {
-                                var elts = mkBox(decl, stmt);
-                                return this.tabContent.appendChild(elts);
-                            }
-                        }
-
-                        var decl = app.things.filter(t => t.getName() == obj.action)[0];
-                        if (!decl) return;
-                        var elts = mkBox(decl);
-                        this.tabContent.appendChild(elts);
-                    });
-
-                    if (thereIsMore) {
-                        this.tabContent.appendChild(mkMoreBox());
-                    }
-                });
-            });
-        }
-    }
-
-    export class RunBucketsTab
-        extends ListTab
-    {
-        constructor(par: BrowserPage) {
-            super(par, "/runbuckets");
-        }
-
-        public getId() { return "buckets"; }
-        public getName() { return lf("buckets"); }
-        public noneText() { return lf("no buckets for this script yet"); }
-
-        public bgIcon() {
-            return "svg:trash";
-        }
-
-        // public bgIcon() => "svg:WritePage";
-        inlineText(b: JsonIdObject) {
-            var c = <JsonRunBucket>b;
-            return <any[]>["a bucket for ", span("sdBold",c.publicationname)];
-        }
-
-        public tabBox(cc: JsonIdObject) {
-            var b = <JsonRunBucket>cc;
-            return this.runBucketBox(b);
-        }
-
-        public runBucketBox(c: JsonRunBucket): HTMLElement {
-            return this.browser().getRunBucketInfoById(c.id).mkSmallBox();
-
-            //var uid = this.browser().getCreatorInfo(c);
-            //var r: HTMLElement = null;
-
-            //var delBtn: HTMLElement = null;
-            //function deleteCmt() => {
-            //    if (Cloud.isOffline()) {
-            //        Cloud.showModalOnlineInfo('could not delete bucket');
-            //        return;
-            //    }
-            //    ModalDialog.ask("are you sure you want to delete this bucket?", "delete it", () => {
-            //        delBtn.setFlag("working", true);
-            //        Util.httpRequestAsync(Cloud.getPrivateApiUrl(c.id), "DELETE", undefined).then(() => {
-            //            r.removeSelf();
-            //        }, (e: any) => {
-            //            delBtn.setFlag("working", false);
-            //            World.handlePostingError(e, "delete comment");
-            //        }).done();
-            //    });
-            //}
-
-            //if (c.userid == Cloud.getUserId()) {
-            //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
-            //}
-
-            //var likeBtn = div("sdCmtBtnOuter");
-            //function setLikeBtn(s: number, f: () => void ) {
-            //    var btn: HTMLElement;
-            //    if (s < 0)
-            //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart, #000"), "add")
-            //    else
-            //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), "remove")
-            //    if (Math.abs(s) < 2) btn.setFlag("working", true);
-            //    likeBtn.setChildren([btn.withClick(f)]);
-            //}
-            //ScriptInfo.setupLike(c.id, setLikeBtn);
-
-            //var r = div("sdCmt",
-            //            div("sdCmtTopic",
-            //                span("sdBold", c.error || "Unknown error").withClick(() => {
-            //                    var b = this.browser();
-            //                    b.loadDetails(b.getRunBucketInfoById(c.id))
-            //                }),
-            //                div("sdCmtMeta",
-            //                    Util.timeSince(c.time),
-            //                    " - " + c.runs + (c.runs == 1 ? " run " : " runs "),
-            //                    " - encountered " + (c.cumulativeruns == 1 ? " once " : (c.cumulativeruns + " times ")),
-            //                    span("sdCmtId", " :: /" + c.id),
-            //                div("sdCmtBtns", likeBtn, delBtn)),
-            //                this.parent.getPublicationId() == c.publicationid ? null
-            //                  : <any[]>[" on ", div("sdCmtScriptName", c.publicationname).withClick(() => {
-            //                      var b = this.browser();
-            //                      b.loadDetails(b.getScriptInfoById(c.publicationid))
-            //                  })])
-            //            );
-            //return r;
-        }
-
-        topContainer():HTMLElement
-        {
-            return div(null, Editor.mkHelpLink("publishing run", "about buckets"), super.topContainer());
-        }
-    }
-
-    export class RunsTab
-        extends ListTab
-    {
-        constructor(par: BrowserPage) {
-            super(par, "/runs");
-        }
-
-        public bgIcon() {
-            return "svg:fire";
-        }
-
-        public getId() { return "runs"; }
-        public getName() { return lf("runs"); }
-        public noneText() { return lf("no runs in this bucket, sorry :("); }
-        // public bgIcon() => "svg:WritePage";
-        inlineText(b: JsonIdObject) {
-            var c = <JsonRun>b;
-            return <any[]>["a run for ", span("sdBold", c.publicationname)];
-        }
-
-        public tabBox(cc: JsonIdObject) {
-            var b = <JsonRun>cc;
-            return this.runBox(b);
-        }
-
-        public runBox(c: JsonRun): HTMLElement {
-
-            return this.browser().getRunInfoById(c.id, c.publicationid).mkSmallBox();
-
-            var uid = this.browser().getCreatorInfo(c);
-            var r: HTMLElement = null;
-
-            var delBtn: HTMLElement = null;
-            var deleteCmt = () => {
-                if (Cloud.anonMode(lf("deleting runs"))) return;
-                ModalDialog.ask("are you sure you want to delete this run?", "delete it", () => {
-                    delBtn.setFlag("working", true);
-                    Util.httpRequestAsync(Cloud.getPrivateApiUrl(c.id), "DELETE", undefined).then(() => {
-                        r.removeSelf();
-                    }, (e: any) => {
-                        delBtn.setFlag("working", false);
-                        World.handlePostingError(e, "delete run");
-                    }).done();
-                });
-            }
-
-            if (c.userid == Cloud.getUserId()) {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
-            }
-
-            var likeBtn = div("sdCmtBtnOuter");
-            function setLikeBtn(s: number, h : string, f: () => void ) {
-                var btn: HTMLElement;
-                if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), h)
-                else
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), h)
-                if (Math.abs(s) < 2) btn.setFlag("working", true);
-                likeBtn.setChildren([btn.withClick(f)]);
-            }
-            ScriptInfo.setupLike(c.id, setLikeBtn);
-
-            r = div("sdCmt",
-                        div("sdCmtTopic",
-                            span("sdBold", c.error || "unknown error").withClick(() => {
-                                var b = this.browser();
-                                b.loadDetails(b.getRunInfoById(c.id, c.publicationid))
-                            }),
-                            div("sdCmtMeta",
-                                Util.timeSince(c.time),
-                                " - compiler version: " + c.compilerversion,
-                                (c.runmap && c.runmap.length > 0) ? " - coverage map " : " - no coverage map ",
-                                (c.stack && c.stack.pack) ? " - stack trace " : " - no stack trace ",
-                                span("sdCmtId", " :: /" + c.id),
-                            div("sdCmtBtns", likeBtn, delBtn)),
-                            (this.parent.parent && this.parent.getPublicationId() == c.publicationid) ? null
-                              : <any[]>[" on ", div("sdCmtScriptName", c.publicationname).withClick(() => {
-                                  var b = this.browser();
-                                  b.loadDetails(b.getScriptInfoById(c.publicationid))
-                              })],
-                            (this.parent.getPublicationId() == c.userid) ? null
-                              : <any[]>[" by ", div("sdCmtScriptName", c.anonymous? "someone" : c.username).withClick(() => {
-                                  var b = this.browser();
-                                  b.loadDetails(b.getUserInfoById(c.userid, c.username))
-                              })]
-                        ));
-            return r;
-        }
     }
 
     export class CommentsTab
@@ -4508,7 +3916,7 @@ module TDev { export module Browser {
         public getId() { return "forks"; }
         public getName() { return lf("forks"); }
 
-        public bgIcon() { return "svg:ShareThis"; }
+        public bgIcon() { return "svg:code-fork"; }
         public noneText() { return lf("no forks, install, edit and re-publish script to create one!"); }
         // public bgIcon() => "svg:WritePage";
         inlineText(cc:JsonIdObject)
@@ -5433,7 +4841,7 @@ module TDev { export module Browser {
         }
         public getId() { return "art"; }
         public getName() { return lf("art"); }
-        public bgIcon() { return "svg:snowflake"; } // TODO: Art icon
+        public bgIcon() { return "svg:paint-brush"; } // TODO: Art icon
         public hideOnEmpty() { return false; }
         public noneText() { return lf("no art published by this user"); }
 
@@ -6006,7 +5414,7 @@ module TDev { export module Browser {
                 var bigIcon = div("hubTileScreenShot");
 
                 var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
-                if (ss) {
+                if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
                     bigIcon.style.backgroundImage = HTML.cssImage(ss);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
@@ -6082,7 +5490,7 @@ module TDev { export module Browser {
                 pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
             }
             if (World.updateFor(this.cloudHeader)) {
-                updateB = mkBtn(Ticks.browseEdit, "svg:Recycle,white", lf("update"), null, () => { this.update() });
+                updateB = mkBtn(Ticks.browseEdit, "svg:fa-refresh,white", lf("update"), null, () => { this.update() });
             } else {
                 editB.className = "sdBigButton sdBigButtonFull";
             }
@@ -6995,7 +6403,7 @@ module TDev { export module Browser {
         public inlineIsTile() { return false; }
         public getId() { return "consumers"; }
         public getName() { return lf("consumers"); }
-        public bgIcon() { return "svg:pizza"; }
+        public bgIcon() { return "svg:cutlery"; }
         public noneText() { return lf("no consumers of this library"); }
 
         public tabBox(c:JsonScript):HTMLElement
@@ -7296,7 +6704,7 @@ module TDev { export module Browser {
         constructor(par: UserInfo) {
             super(par,
                 "Informations about apps, keys and cloud sessions.",
-                WindowsStoreAppsTab, WindowsPhoneStoreAppsTab, KeysTab, CloudSessionsTab
+                KeysTab, CloudSessionsTab
                 );
         }
 
@@ -7326,7 +6734,7 @@ module TDev { export module Browser {
         constructor(par: UserInfo) {
             super(par,
                 "More information about art, score, groups, subscribers, subscriptions and given hearts.",
-                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, RunBucketsTab);
+                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab);
         }
 
         public bgIcon() {
@@ -7537,7 +6945,7 @@ module TDev { export module Browser {
         }
         public getName() { return lf("scripts"); }
         public getId() { return "scripts"; }
-        public bgIcon() { return "svg:Space"; }
+        public bgIcon() { return "svg:globe"; }
 
         public initTab() {
             var infoDiv = div('sdExpandableText',
@@ -7758,7 +7166,7 @@ module TDev { export module Browser {
                 this.description = u.description;
                 this.userid = u.userid;
 
-                if (u.pictureid) {
+                if (u.pictureid && !Browser.lowMemory) {
                     icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
@@ -7788,7 +7196,7 @@ module TDev { export module Browser {
 
             return this.withUpdate(d, (u: JsonGroup) => {
                 this.name = u.name;
-                if (u.pictureid) {
+                if (u.pictureid && !Browser.lowMemory) {
                     d.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
                     d.style.backgroundRepeat = 'no-repeat';
                     d.style.backgroundPosition = 'center';
@@ -7859,8 +7267,8 @@ module TDev { export module Browser {
         
 
         private updateCommentsHeader(el : HTMLElement) {
-            this.withUpdate(el, (u: JsonGroup) => {
-                el.setChildren([Host.expandableTextBox(u.description)]);
+            this.withUpdate(el,(u: JsonGroup) => {
+                Browser.setInnerHTML(el, new MdComments().formatText(u.description));
                 if (!this.isMine()) {
                     Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
                         .done(() => {}, e => {
@@ -8082,7 +7490,6 @@ module TDev { export module Browser {
         }
     }
 
-
     export class ForumInfo
         extends BrowserPage {
 
@@ -8119,498 +7526,6 @@ module TDev { export module Browser {
 
         public initTab() {
         }
-    }
-
-
-    export class RunBucketInfo
-        extends BrowserPage
-    {
-
-        constructor(par: Host) {
-            super(par)
-        }
-
-        public persistentId() { return "runbucket:" + this.publicId; }
-        public getTitle() { return "bucket " + this.publicId; }
-
-        public getId() { return "overview"; }
-        public getName() { return lf("overview"); }
-
-        public loadFromWeb(id: string) {
-            this.publicId = id;
-        }
-
-        public mkBoxCore(big: boolean) {
-            var nameBlock = div("sdName");
-            var hd = div("sdNameBlock", nameBlock);
-            var author = div("dsAuthor");
-
-            var icon = div("sdIcon", HTML.mkImg("svg:trash,white"));
-            icon.style.background = "#ccff00";
-
-            var numbers = div("sdNumbers");
-            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
-            var pubId = div("sdAddInfoOuter", addInfoInner);
-            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, pubId, numbers)));
-
-            if (big)
-                res.className += " sdBigHeader";
-
-            return this.withUpdate(res, (u: JsonRunBucket) => {
-                nameBlock.setChildren([u.error || lf("unknown error")]);
-                dirAuto(nameBlock);
-                author.setChildren(["-- ", u.username]);
-                addInfoInner.setChildren([Util.timeSince(u.time) + lf(" on ") + u.publicationname]);
-
-                var cont = <any[]>[];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.runs, "runs");
-                addNum(u.cumulativeruns, "total");
-                numbers.setChildren(cont);
-            });
-        }
-
-        public mkTile(sz: number) {
-            var d = div("hubTile hubTileSize" + sz);
-            return this.withUpdate(d, (u: JsonRunBucket) => {
-
-                var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.runs, "runs");
-                addNum(u.cumulativeruns, "total");
-
-                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
-                //nums.style.background = d.style.background;
-
-                d.setChildren([div("hubTileIcon", HTML.mkImg("svg:callout,white")),
-                               div("hubTileTitleBar",
-                                   div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
-                                     div("hubTileSubtitle",
-                                        div("hubTileAuthor", spanDirAuto(u.username), nums)))])
-            });
-            return d;
-        }
-
-        public initTab() {
-            var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : t.inlineContentContainer);
-            var hd = div("sdDesc");
-            var desc = "This is the view of a bucket. A bucket is a group of similar runs that cause crashes. View our crash root cause analysis in the coverage tab."
-            ch.unshift(hd);
-
-            this.tabContent.setChildren(ch);
-
-            this.withUpdate(this.tabContent, (c: JsonRunBucket) => {
-                hd.setChildren([div("sdTabDescription", desc), Host.expandableTextBox(c.error)]);
-            });
-        }
-
-        public mkTabsCore(): BrowserTab[]{
-            return [this, new RunsTab(this), new CommentsTab(this), new RunBucketCodeCoverageUnionTab(this)];
-        }
-
-        public match(terms: string[], fullName: string) {
-            if (terms.length == 0) return 1;
-
-            var json: JsonRunBucket = TheApiCacheMgr.getCached(this.publicId);
-            if (!json) return 0; // not loaded yet
-
-            var s = this.publicId + " " + json.publicationid + " " + json.username + " " + json.error;
-            return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
-        }
-
-        public mkSmallBox(): HTMLElement {
-            return this.mkBoxCore(false).withClick(() => {
-                var json = TheApiCacheMgr.getCached(this.publicId);
-                if (!json || json.nestinglevel == 0) this.parentBrowser.loadDetails(this)
-                else this.parentBrowser.loadDetails(this.parentBrowser.getRunBucketInfoById(json.id));
-            });
-        }
-
-
-    }
-
-    export class RunBucketCodeCoverageUnionTab
-        extends RunsTab {
-        constructor(par: RunBucketInfo) {
-            super(par)
-        }
-        public getId() { return "coverage"; }
-        public getName() { return lf("coverage"); }
-        private bucketInfo() { return <RunBucketInfo>(this.parent); }
-        public bgIcon() {
-            return "svg:Globe";
-        }
-
-        private scriptPromise: Promise;
-        private runMaps: { union: IStringSet; intersection: IStringSet; } = { union: null, intersection: null };
-        private stacks: { tops: IStringSet; full: IStringSet; } = { tops: null, full: null };
-
-        public getTileContent(c: string): any[]{
-            return BrowserMultiTab.generateReplacementTileContents(this);
-        }
-
-        private openScriptInEditor(scriptId: string, annotator: ScriptDebuggingBugginessAnnotator) {
-            var doEdit = () => {
-                tickArg(Ticks.coverageOpenInEditor, "bucket");
-                this.browser().getScriptInfoById(scriptId).editAsync().then(() => {
-                    RunInfo.prepareScript(Script);
-                    if (annotator)
-                    {
-                        annotator.dispatch(Script);
-                        TheEditor.refreshScriptNav();
-                        new ScriptBugginessFeatureSurvey().addTo(TheEditor.getSpyManager());
-                        if (annotator.topRatedId) TheEditor.goToLocation(CodeLocation.fromNodeId(annotator.topRatedId));
-                        else TheEditor.refreshDecl();
-                    }
-                }).done();
-            }
-
-            if (!this.browser().getInstalledByPubId(scriptId)) {
-                ModalDialog.ask("To open the script in editor, you need to install it first. Continue and install the script?",
-                    "OK", doEdit);
-            } else doEdit();
-        }
-
-        public initTab() {
-            tickArg(Ticks.coverageShown, "bucket");
-            var count = 0;
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var statusDiv = div('', '');
-            var desc = "Here you can see the root cause analysis results. Red colors represent areas that are more likely to be connected to the crash";
-            this.tabContent.setChildren([div("sdTabDescription", desc), loadingDiv, statusDiv]);
-            var progress = (done: boolean) => {
-                if (loadingDiv) {
-                    loadingDiv.removeSelf();
-                    loadingDiv = undefined;
-                }
-                if (!done)
-                    Browser.setInnerHTML(statusDiv, "loading... " + count + " runs found so far");
-                else if (count)
-                    Browser.setInnerHTML(statusDiv, count + " runs used for root cause analysis");
-                else
-                    Browser.setInnerHTML(statusDiv, "root cause analysis not available for this script");
-            };
-            // this is a curried pseudo-recursive function
-            var loader = (currentCont: string = null) => () => this.loadMoreElementsAnd(currentCont, (runs: JsonRun[], cont: string) => {
-                if (runs.length == 0) {
-                    progress(true);
-                    return;
-                } else {
-                    progress(false);
-                }
-
-                count += runs.length;
-                var scriptId = runs[0].publicationid;
-                var errorMessage = runs[0].error;
-
-                if (!this.scriptPromise) {
-                    this.scriptPromise = this.
-                        browser().
-                        getScriptInfoById(scriptId).
-                        getScriptTextAsync().
-                        then((scriptText: string) => {
-                            if (!scriptText) return;
-                            var app = AST.Parser.parseScript(scriptText);
-                            AST.TypeChecker.tcScript(app);
-                            AST.Compiler.annotateWithIds(app);
-                            return app;
-                        });
-                }
-
-                var timer2load = TDev.RT.Perf.start("bucketCoverage:loadingNetwork");
-
-                this.scriptPromise.then((ast: AST.App) => {
-                    if (!ast) {
-                        progress(true);
-                        Browser.setInnerHTML(statusDiv, "could not get script info; are you offline?");
-                        return;
-                    }
-                    var accum = TDev.accumulateRunMaps(
-                        runs.map(json => <IRun><any>{ stack: json.stack, runmap: RunBitMap.fromJSON(json.runmap) }),
-                        ast,
-                        this.runMaps.union,
-                        this.runMaps.intersection);
-                    this.runMaps = accum;
-
-                    var accStacks = TDev.accumulateStacks(
-                        runs.map(json => <IRun><any>{ stack: json.stack, runmap: RunBitMap.fromJSON(json.runmap) }),
-                        ast,
-                        this.stacks.tops,
-                        this.stacks.full);
-                    this.stacks = accStacks;
-
-                    var normalCoveragePromise = TDev.getNormalCoverageAsync(scriptId, ast, AST.Compiler.version);
-
-                    return normalCoveragePromise.then(normal => {
-
-                        TDev.RT.Perf.stop(timer2load);
-
-                        var timer2analyze = TDev.RT.Perf.start("bucketCoverage:analysis");
-                        var smallSlice = new SmallBackSlicer(setToArray(this.stacks.tops).map(it => < AST.Stmt > ast.findAstNodeById(it).node), this.runMaps.union).doit();
-                        TDev.RT.Perf.stop(timer2analyze);
-
-                        var annotator = new ScriptDebuggingBugginessAnnotator(normal, this.runMaps, this.stacks, smallSlice, errorMessage);
-                        annotator.dispatch(ast);
-
-                        var renderer = new EditorRenderer();
-                        var elts = renderer.declDiv(ast);
-
-                        this.tabContent.appendChild(div(null, HTML.mkButton(lf("open in editor"), () => this.openScriptInEditor(scriptId, annotator))));
-                        this.tabContent.appendChild(elts);
-
-                        if (cont && cont != currentCont) {
-                            Util.setTimeout(Browser.isWebkit ? 100 : 1, loader(cont));
-                        } else {
-                            progress(true);
-                        }
-                    });
-                }).done(undefined, e =>
-                {
-                    progress(true);
-                    Browser.setInnerHTML(statusDiv, "root cause analysis not available; are you offline?");
-                });
-            });
-
-            loader()(); // this is intended.
-        }
-    }
-
-    export class RunInfo
-        extends BrowserPage {
-
-        constructor(par: Host) {
-            super(par)
-        }
-
-        public persistentId() { return "run:" + this.publicId; }
-        public getTitle() { return "run " + this.publicId; }
-
-        public getId() { return "overview"; }
-        public getName() { return lf("overview"); }
-
-        private scriptId: string;
-        public getScriptIdAsync() {
-            if (this.scriptId) return Promise.as(this.scriptId);
-            else return TheApiCacheMgr.getAsync(this.publicId).then((daRun: JsonRun) => (this.scriptId = daRun.publicationid));
-        }
-        public loadFromWeb(id: string, scriptId: string) {
-            this.publicId = id;
-            this.scriptId = scriptId;
-        }
-
-        static prepareScript(script: AST.App) {
-            AST.TypeChecker.tcScript(script);
-            AST.Compiler.annotateWithIds(script);
-            return script;
-        }
-
-        static openScriptInEditor(host: Host, scriptId: string, runBitMap: RunBitMap, stackTrace: IPackedStackTrace, errorMessage: string, profilingData: AST.ProfilingDataCollection) {
-            var doEdit = (si:ScriptInfo) => {
-                if (!si)
-                    si = host.getScriptInfoById(scriptId)
-                si.editAsync().then(() => {
-                    RunInfo.prepareScript(Script);
-                    if (runBitMap || stackTrace)
-                    {
-                        new ScriptDebuggingAnnotator(runBitMap, stackTrace, errorMessage).dispatch(Script);
-                        if (stackTrace) {
-                            var fakeStackTrace = PackedStackTrace.toFakeStackTrace(stackTrace);
-                            if (fakeStackTrace.length > 0) TheEditor.showStackTrace(fakeStackTrace);
-                        }
-                        else {
-                            TheEditor.refreshDecl();
-                        }
-                    }
-                    if (profilingData)
-                    {
-                        new ProfilingResultsAnnotator(profilingData).dispatch(Script);
-                        TheEditor.refreshDecl();
-                    }
-                }).done();
-            }
-
-            if (/-/.test(scriptId)) {
-                var si = host.getInstalledByGuid(scriptId)
-                doEdit(si)
-            } else if (!host.getInstalledByPubId(scriptId)) {
-                ModalDialog.ask("To open the script in the editor, you need to install the script first. Do you want to install the script?",
-                    "OK", () => doEdit(null));
-            } else doEdit(null);
-        }
-
-        public openInEditor() {
-            tickArg(Ticks.coverageOpenInEditor, "run");
-            TheApiCacheMgr.getAnd(this.publicId,(daRun: JsonRun) =>
-                this.getScriptIdAsync().then( (scriptId: string) =>
-                    RunInfo.openScriptInEditor(this.parentBrowser, scriptId, RunBitMap.fromJSON(daRun.runmap), daRun.stack, daRun.error, null)));
-        }
-
-        private _scriptASTPromise : Promise;
-        public getScriptASTAsync() {
-            if(!this._scriptASTPromise) {
-                this._scriptASTPromise = this.getScriptIdAsync().then(scriptId => {
-                    return this.parentBrowser.
-                        getScriptInfoById(this.scriptId).
-                        getScriptTextAsync().
-                        then((scriptText: string) => {
-                            if (!scriptText) return;
-                            var app = AST.Parser.parseScript(scriptText);
-                            AST.TypeChecker.tcScript(app);
-                            AST.Compiler.annotateWithIds(app);
-                            return app;
-                        });
-                }, () => undefined);
-            }
-            return this._scriptASTPromise;
-        }
-
-        private mkIcon() {
-            var icon = div("sdIcon", HTML.mkImg("svg:fire,white"));
-            icon.style.background = "#ffcc00";
-            return icon;
-        }
-
-        public mkBoxCore(big: boolean) {
-            var nameBlock = div("sdName");
-            var hd = div("sdNameBlock", nameBlock);
-            var author = div("dsAuthor");
-
-            var icon = this.mkIcon();
-
-            var numbers = div("sdNumbers");
-            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
-            var pubId = div("sdAddInfoOuter", addInfoInner);
-            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, pubId, numbers)));
-
-            if (big)
-                res.className += " sdBigHeader";
-
-            return this.withUpdate(res, (u: JsonRun) => {
-                nameBlock.setChildren([u.error || lf("unknown error")]);
-                dirAuto(nameBlock);
-                author.setChildren([u.anonymous? lf("anonymous") : u.username]);
-                addInfoInner.setChildren([Util.timeSince(u.time) + lf(" on ") + u.publicationname]);
-            });
-        }
-
-        private innerMkSmallBox() {
-            var nameBlock = div("sdName");
-            var hd = div("sdNameBlock", nameBlock);
-
-            var icon = div("sdIcon", HTML.mkImg("svg:fire,white"));
-            icon.style.background = "#ffcc00";
-
-            var addInfoInner = div("sdAddInfoInner", ":: /" + this.publicId);
-            var pubId = div("sdAddInfoOuter", addInfoInner);
-            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, pubId)));
-
-            return this.withUpdate(res, (u: JsonRun) => {
-                nameBlock.setChildren([Util.timeSince(u.time)]);
-                dirAuto(nameBlock);
-                addInfoInner.appendChild(span(null, " by " + (u.anonymous ? "someone" : Util.htmlEscape(u.username))));
-                addInfoInner.appendChild(span(null, !!u.runmap ? " (with coverage data) " : " (no coverage data)"));
-
-                if (!u.anonymous) {
-                    icon.setChildren([this.browser().getUserInfoById(u.userid, u.username).userPicture()]);
-                    icon.style.background = "#ffffff";
-                }
-
-                //var delBtn: HTMLElement = null;
-                //function deleteCmt() => {
-                //    if (Cloud.isOffline()) {
-                //        Cloud.showModalOnlineInfo('could not delete run');
-                //        return;
-                //    }
-                //    ModalDialog.ask("are you sure you want to delete this run?", "delete it", () => {
-                //        delBtn.setFlag("working", true);
-                //        Util.httpRequestAsync(Cloud.getPrivateApiUrl(u.id), "DELETE", undefined).then(() => {
-                //            res.removeSelf();
-                //        }, (e: any) => {
-                //            delBtn.setFlag("working", false);
-                //            World.handlePostingError(e, "delete run");
-                //        }).done();
-                //    });
-                //}
-
-                //if (u.userid == Cloud.getUserId()) {
-                //    delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), "delete").withClick(deleteCmt);
-                //}
-
-                //var likeBtn = div("sdCmtBtnOuter");
-                //function setLikeBtn(s: number, f: () => void ) {
-                //    var btn: HTMLElement;
-                //    if (s < 0)
-                //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), "add")
-                //    else
-                //        btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), "remove")
-                //    if (Math.abs(s) < 2) btn.setFlag("working", true);
-                //    likeBtn.setChildren([btn.withClick(f)]);
-                //}
-                //ScriptInfo.setupLike(u.id, setLikeBtn);
-
-                //addInfoInner.appendChild(div("sdCmtBtns", likeBtn, delBtn));
-            });
-        }
-
-        public mkTile(sz: number) {
-            var d = div("hubTile hubTileSize" + sz);
-            return this.withUpdate(d, (u: JsonRun) => {
-
-                var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-
-                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
-                //nums.style.background = d.style.background;
-
-                d.setChildren([div("hubTileIcon", HTML.mkImg("svg:callout,white")),
-                               div("hubTileTitleBar",
-                                     div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
-                                     div("hubTileSubtitle",
-                                        div("hubTileAuthor", spanDirAuto(u.username), nums)))])
-            });
-            return d;
-        }
-
-        public initTab() {
-            var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : t.inlineContentContainer);
-            var hd = div("sdDesc");
-            ch.unshift(hd);
-
-            this.tabContent.setChildren(ch);
-
-            this.withUpdate(this.tabContent, (c: JsonRun) => {
-                hd.setChildren([
-                    div(null, "bucket: ", this.browser().getRunBucketInfoById(c.bucketid).mkSmallBox()),
-                    c.anonymous ? null : div(null, "user: ", this.browser().getUserInfoById(c.userid, c.username).mkSmallBox()),
-                    div(null, "script: ", this.browser().getScriptInfoById(c.publicationid).mkSmallBox()),
-                    div(null, Host.expandableTextBox(ScriptInfo.userPlatformDisplayText(c.userplatform)))
-                ]);
-            });
-        }
-
-        public mkTabsCore(): BrowserTab[] {
-            return [this, new RunCodeCoverageTab(this), new StackTraceTab(this), new CommentsTab(this)];
-        }
-
-        public match(terms: string[], fullName: string) {
-            if (terms.length == 0) return 1;
-
-            var json: JsonRunBucket = TheApiCacheMgr.getCached(this.publicId);
-            if (!json) return 0; // not loaded yet
-
-            var s = this.publicId + " " + json.publicationid + " " + json.username + " " + json.error;
-            return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
-        }
-
-        public mkSmallBox(): HTMLElement {
-            return this.innerMkSmallBox().withClick(() => {
-                var json = TheApiCacheMgr.getCached(this.publicId);
-                if (!json || json.nestinglevel == 0) this.parentBrowser.loadDetails(this)
-                else this.parentBrowser.loadDetails(this.parentBrowser.getRunInfoById(json.id, json.publicationid));
-            });
-        }
-
-
     }
 
     export class CommentInfo
@@ -9428,6 +8343,7 @@ module TDev { export module Browser {
             var cached = localStorage["showcaseIds"]
             if (cached)
                 f(JSON.parse(cached).ids)
+            if (Cloud.isOffline()) return;
             if (listCached) return
             listCached = true
             Util.httpGetTextAsync("https://tdshowcase.blob.core.windows.net/export/current.json?nocache=" + Util.guidGen())
@@ -9436,6 +8352,9 @@ module TDev { export module Browser {
                         localStorage["showcaseIds"] = text
                         f(JSON.parse(text).ids)
                     }
+                },(err) => {
+                    // log and ignore
+                    Util.reportError("showcase", err, false);
                 })
         }
 

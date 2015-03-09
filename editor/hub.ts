@@ -1,8 +1,198 @@
 ///<reference path='refs.ts'/>
 
-module TDev { export module Browser {
+module TDev.Browser {
 
     export var TheHub: Hub;
+
+    export interface HubTheme {
+        description: string;
+        logoArtId: string;
+        wallpaperArtId?: string;
+        tutorialsTopic?: string; // topics of tutorial pages
+        requiresShell?: boolean;
+
+        scriptSearch?: string; // seed when searching script
+
+        showcase?: boolean;
+        art?: boolean;
+        tags?: boolean;
+        top?: boolean;
+    }
+
+    export var hubThemes: StringMap<HubTheme> = {
+        'arduino': {
+            description: 'Environment to program Arduino boards',
+            logoArtId: 'kzajxznr',
+            wallpaperArtId: 'kzajxznr',
+            tutorialsTopic: 'arduinotutorials',
+            requiresShell: true
+        }
+    };
+
+    export enum EditorMode {
+        unknown,
+        block,
+        classic,
+        pro
+    }
+
+    export module EditorSettings {
+        export var BLOCK_MODE = "block";
+        export var PRO_MODE = "pro";
+        export var CLASSIC_MODE = "classic";
+
+        export function parseEditorMode(mode: string): EditorMode {
+            if (!mode) return EditorMode.unknown;
+            mode = mode.trim().toLowerCase();
+            if (mode === BLOCK_MODE) return EditorMode.block;
+            else if (mode === CLASSIC_MODE) return EditorMode.classic;
+            else if (mode === PRO_MODE) return EditorMode.pro;
+            else return EditorMode.unknown;
+        }
+
+        export function wallpaper(): string {
+            return localStorage.getItem("editorWallpaper") || "";
+        }
+
+        export function setWallpaper(id: string, upload: boolean) {
+            var previous = EditorSettings.wallpaper();
+            if (previous != id) {
+                if (!id) localStorage.removeItem("editorWallpaper")
+                else localStorage.setItem("editorWallpaper", id);
+                if (upload)
+                    uploadWallpaper();
+                updateWallpaper();
+            }
+        }
+
+        function updateWallpaper() {
+            var id = wallpaper();
+            if (!id) {
+                var theme = hubTheme();
+                if (theme) id = theme.wallpaperArtId;
+            }
+
+            [elt("hubRoot"), elt("slRoot")].forEach(e => {
+                if (id) e.style.backgroundImage = HTML.cssImage(HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + id));
+                else e.style.backgroundImage = "";
+            });
+        }
+
+        function uploadWallpaper() {
+            var m = wallpaper();
+            if (Cloud.getUserId() && Cloud.isOnline()) {
+                Util.log('updating wallpaper to ' + m);
+                Cloud.postUserSettingsAsync({ wallpaper: m })
+                    .done(() => { HTML.showProgressNotification(lf("wallpaper saved"), true); },(e) => { });
+            }
+        }
+
+        export function setEditorMode(mode: EditorMode, upload: boolean) {
+            var previous = EditorSettings.editorMode();
+            if (previous != mode) {
+                if (mode == EditorMode.unknown)
+                    localStorage.removeItem("editorMode");
+                else
+                    localStorage.setItem("editorMode", EditorMode[mode]);
+                if (upload)
+                    uploadEditorMode();
+            }
+        }
+
+        export function editorModeText(mode: EditorMode): string {
+            switch (mode) {
+                case EditorMode.block: return lf("beginner");
+                case EditorMode.classic: return lf("coder");
+                case EditorMode.pro: return lf("expert");
+                default: return "";
+            }
+        }
+
+        export function editorMode(): EditorMode {
+            return parseEditorMode(localStorage.getItem("editorMode"));
+        }
+
+        function uploadEditorMode() {
+            var m = editorMode();
+            if (Cloud.getUserId() && Cloud.isOnline() && m != EditorMode.unknown) {
+                Util.log('updating skill level to ' + EditorMode[m]);
+                Cloud.postUserSettingsAsync({ editorMode: EditorMode[m] })
+                    .done(() => { HTML.showProgressNotification(lf("skill level saved"), true); },(e) => { });
+            }
+        }
+
+        export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
+            var current = editorMode();
+            return div(cls, current < EditorMode.pro ? lf("Ready for more options?") : lf("Too many options?"), HTML.mkLinkButton(lf("Change skill level!"),() => {
+                tick(tk);
+                EditorSettings.showChooseEditorModeAsync().done(() => {
+                    if (current != editorMode()) editor.refreshMode();
+                });
+            }));
+        }
+
+        export function createChooseSkillLevelElements(click?: () => void): HTMLElement[] {
+            var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
+                { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
+                { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
+            return modes.map((mode, index) => {
+                var pic = div('pic');
+                pic.style.background = HTML.cssImage("https://az31353.vo.msecnd.net/pub/" + mode.id);
+                pic.style.backgroundSize = "cover";
+
+                return div('editor-mode', pic, HTML.mkButton(EditorSettings.editorModeText(mode.n),() => {
+                    tick(mode.tick);
+                    EditorSettings.setEditorMode(mode.n, true);
+                    if (click) click();
+                }, 'title'), div('descr', mode.descr));
+            });
+        }
+
+        export function showChooseEditorModeAsync(preferredMode = EditorMode.unknown): Promise {
+            if (preferredMode != EditorMode.unknown && EditorSettings.editorMode() <= preferredMode) return Promise.as();
+
+            TipManager.setTip(null)
+            return new Promise((onSuccess, onError, onProgress) => {
+                var m = new ModalDialog();
+                m.onDismiss = () => onSuccess(undefined);
+                m.add(div('wall-dialog-header', lf("choose your coding skill level")));
+                m.add(div('wall-dialog-body', lf("TouchDevelop will adapt to the coding experience to your skill level. You can change your skill level again in the hub.")));
+                var current = EditorSettings.editorModeText(EditorSettings.editorMode());
+                if (current)
+                    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
+                m.add(div('wall-dialog-body', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
+                m.add(Editor.mkHelpLink("skill levels"));
+                m.fullWhite();
+                m.show();
+            });
+        }
+
+        export function setHubTheme(theme: string, upload: boolean) {
+            var previous = localStorage.getItem("hubTheme");
+            if (previous !== theme) {
+                if (!theme)
+                    localStorage.removeItem("hubTheme");
+                else
+                    localStorage.setItem("hubTheme", theme);
+                if (upload)
+                    uploadHubTheme();
+                updateWallpaper();
+            }
+        }
+
+        export function hubTheme(): HubTheme {
+            var key = localStorage.getItem("hubTheme");
+            return key ? Browser.hubThemes[key] : undefined;
+        }
+
+        function uploadHubTheme() {
+            var m = localStorage.getItem("hubTheme");
+            if (Cloud.getUserId() && Cloud.isOnline()) {
+                Cloud.postUserSettingsAsync({ hubtheme: m || "" })
+                    .done(() => { HTML.showProgressNotification(lf("hub theme saved"), true); },(e) => { });
+            }
+        }
+    }
 
     export interface ScriptTemplate {
         title: string;
@@ -127,6 +317,8 @@ module TDev { export module Browser {
         }
 
         private paralax() {
+            if (Browser.noAnimations) return;
+
             if (this.vertical) {
                 var dx = -this.mainContent.scrollTop / 10;
                 Util.setTransform(this.bglogo, "translate(0px," + dx + "px)")
@@ -150,9 +342,6 @@ module TDev { export module Browser {
                     ]);
 
                 Host.tryUpdate();
-
-                if (!Cloud.isAccessTokenExpired())
-                    TestMgr.runBetaTests();
             }
         }
 
@@ -309,19 +498,6 @@ module TDev { export module Browser {
             this.showSections();
 
             switch(h[1]) {
-                case "test":
-                    TestMgr.testAllScripts();
-                    break;
-                case "singlebenchmark":
-                    HistoryMgr.instance.setHash(this.screenId() + ":singlebenchmark", null)
-                    if (!Cloud.isAccessTokenExpired())
-                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(false);
-                    break;
-                case "benchmarksuite":
-                    HistoryMgr.instance.setHash(this.screenId() + ":benchmarksuite", null)
-                    if (!Cloud.isAccessTokenExpired())
-                        TestMgr.Benchmarker.runTDBenchmarksWithDialog(true);
-                    break;
                 case "joingroup":
                     var code = h[2];
                     HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)
@@ -739,7 +915,7 @@ module TDev { export module Browser {
                 var img = this.findImgForTutorial(app);
                 var imgUrl = img ? img.url : top.json.screenshot;
 
-                if (imgUrl) {
+                if (imgUrl && !Browser.lowMemory) {
                     var picDiv = tile
                     picDiv.style.backgroundColor = '#eee';
                     picDiv.style.backgroundImage = HTML.cssImage(imgUrl);
@@ -887,9 +1063,11 @@ module TDev { export module Browser {
                 Util.setHash('#topic:tutorials');
             }, t, true, 3, dirAuto(div("hubTileOver", lf("Create your own apps"))));
 
-            elt.style.backgroundSize = 'contain';
-            elt.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/zxddkvgm');
-            elt.style.backgroundRepeat = 'no-repeat';
+            if (!Browser.lowMemory) {
+                elt.style.backgroundSize = 'contain';
+                elt.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/zxddkvgm');
+                elt.style.backgroundRepeat = 'no-repeat';
+            }
             elt.className += " tutorialBtn";
 
             return elt
@@ -1344,7 +1522,7 @@ module TDev { export module Browser {
             Util.httpGetJsonAsync(Cloud.getPrivateApiUrl("me/settings")).done((settings) => {
                 Browser.setInnerHTML(dialogBody, "")
 
-                var nickname, website, twitterhandle, githubuser, location, area, aboutme, realname, gender, yearofbirth,
+                var nickname, website, twitterhandle, githubuser, minecraftuser, location, area, aboutme, realname, gender, yearofbirth,
                     culture, howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
                     school;
 
@@ -1363,6 +1541,9 @@ module TDev { export module Browser {
 
                     githubuser = <HTMLInputElement>textEntry(lf("github user"), HTML.mkTextInput("text", lf("github user")),
                         lf("Your GitHub user."));
+
+                    minecraftuser = <HTMLInputElement>textEntry(lf("Minecraft user"), HTML.mkTextInput("text", lf("minecraft user")),
+                        lf("Your Minecraft user."));
 
                     location = <HTMLInputElement>textEntry(lf("location"), HTML.mkTextInput("text", lf("location")),
                         lf("Where in the world are you?"))
@@ -1505,6 +1686,7 @@ module TDev { export module Browser {
                                     location: location === undefined ? undefined : location.value,
                                     twitterhandle: twitterhandle === undefined ? undefined : twitterhandle.value,
                                     githubuser: githubuser === undefined ? undefined : githubuser.value,
+                                    minecraftuser: minecraftuser === undefined ? undefined : minecraftuser.value,
                                     school: school ? school.value : undefined,
                                 }).done(resp => {
                                     progressBar.stop();
@@ -1542,6 +1724,7 @@ module TDev { export module Browser {
                 if (realname) realname.value = settings.realname || "";
                 if (twitterhandle) twitterhandle.value = settings.twitterhandle || "";
                 if (githubuser) githubuser.value = settings.githubuser || "";
+                if (minecraftuser) minecraftuser.value = settings.minecraftuser || "";
                 if (email) email.value = settings.email || "";
                 if (school) school.value = settings.school || "";
 
@@ -1626,8 +1809,7 @@ module TDev { export module Browser {
 
         // Takes care of the painful, non-trivial task of fetching all the
         // tutorials. For each tutorial found, we call [k] with it.
-        private fetchAllTutorials(k: (t: ITutorial) => void) {
-            var helpTopic = HelpTopic.findById("tutorials");
+        private fetchAllTutorials(helpTopic: HelpTopic, k: (t: ITutorial) => void) {
             helpTopic.initAsync().then(() => {
                 // The list of tutorials is represented as an app, with a single
                 // action, whose body is a list of comments...
@@ -1659,7 +1841,9 @@ module TDev { export module Browser {
 
         private showSimplifiedLearn(container:HTMLElement) {
             var buttons = [];
-            this.fetchAllTutorials((tutorial: ITutorial) => {
+            var theme = EditorSettings.hubTheme();
+            var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
+            this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
                 if (buttons.length > 6)
                     return;
@@ -1668,7 +1852,7 @@ module TDev { export module Browser {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
                 btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                if (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot) {
+                if (!Browser.lowMemory && (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot)) {
                     btn.style.backgroundImage = tutorial.topic.json.iconArtId
                         ? ArtUtil.artUrl(tutorial.topic.json.iconArtId, true)
                         : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
@@ -1679,7 +1863,7 @@ module TDev { export module Browser {
                 if (buttons.length == 6) {
                     buttons.push(this.createSkillButton());
                     buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
-                        Util.setHash('#topic:tutorials');
+                        Util.setHash('#topic:' + helpTopic.id);
                     }, Ticks.noEvent, false, 1));
                     this.layoutTiles(container, buttons);
                 }
@@ -1848,6 +2032,14 @@ module TDev { export module Browser {
                     "myart": lf("my art"),
                 };
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
+            }
+
+            var theme = EditorSettings.hubTheme();
+            if (theme) {
+                if (!theme.showcase) delete sects["showcase"];
+                if (!theme.art) delete sects["myart"];
+                if (!theme.tags) delete sects["tags"];
+                if (!theme.top) delete sects["top"];
             }
 
             if (SizeMgr.portraitMode) {
@@ -2069,4 +2261,4 @@ module TDev { export module Browser {
             })
         }
     }
-} }
+}

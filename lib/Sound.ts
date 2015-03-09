@@ -2,7 +2,7 @@
 
 module TDev.RT {
     //? A sound effect
-    //@ stem("snd") icon("SoundHigh") ctx(general,gckey,walltap)
+    //@ stem("snd") icon("fa-headphones") ctx(general,gckey,walltap)
     export class Sound
         extends RTValue
     {

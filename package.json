@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "source-map": "^0.2.0",
-    "tsd": "^0.5.7"
+    "tsd": "^0.5.7",
+    "madoko":  "latest"
   },
   "scripts": {
     "test": "jake test --trace"

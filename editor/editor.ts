@@ -166,13 +166,25 @@ module TDev
             return d;
         }
 
+        public showAppView(logs? : LogMessage[]) {
+            TDev.RT.App.showAppLogAsync(logs, undefined, els => {
+                els.filter(el => el.dataset['crash']).forEach(el => {
+                    el.withClick(() => {
+                        var crash = JSON.parse(el.dataset['crash']);
+                        ModalDialog.dismissCurrent();
+                        TheEditor.showStackTrace(crash.stack);
+                    });
+                });
+            }).done()
+        }
+
         public additionalButtons(): HTMLElement[]{
             this.pauseBtnDiv = div("inlineBlock")
             this.updatePause()
 
             var btns = [this.pauseBtnDiv];
             if (ScriptEditorWorldInfo.status != "published" && TheEditor.widgetEnabled("wallLogsButton"))
-                btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => TDev.RT.App.showAppLogAsync().done()));
+                btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
             return btns;
         }
 
@@ -549,13 +561,6 @@ module TDev
             return Meta.packageScriptAsync(this.currentRt, id, options);
         }
 
-        static scriptProfiledCache: { [scriptId: string]: Promise/*of Profiled*/; } = {}
-        static getScriptProfiledAsync(scriptId: string): Promise { // of Profiled
-            var p = EditorHost.scriptProfiledCache[scriptId];
-            if (!p) EditorHost.scriptProfiledCache[scriptId] = p = Cloud.getProfiledAsync(scriptId, TDev.AST.Compiler.version);
-            return p;
-        }
-
         resetAnnotators() {
             new ProfilingResultsAnnotator(null).visitApp(Script);
             new ScriptDebuggingAnnotator(null, null, null).visitApp(Script);
@@ -572,14 +577,6 @@ module TDev
                     profilingData.maximumEps = this.currentRt.eventQ.maximumEps;
                     profilingData.averageEps = this.currentRt.eventQ.averageEps;
                 }
-                EditorHost.getScriptProfiledAsync(scriptId)
-                    .then(profiled=> {
-                        var p = profiled.count < 20 ? 1 - .90 * profiled.count / 20 : .1; // probability of uploading profiling information; this is after the probability of getting instrumented for profiling; the combined probability converges to 1%
-                        if (Random.normalized() < p)
-                            return Cloud.postProfilingDataAsync(scriptId, profilingData)
-                                .then(() => profiled.count++);
-                    })
-                    .done(undefined, () => { }); // ignore network errors
             }
             if (profilingData.show) {
                 this.resetAnnotators();
@@ -587,26 +584,8 @@ module TDev
             }
         }
 
-        static scriptCoveredCache: { [scriptId: string]: Promise/*of Covered*/; } = { }
-        static getScriptCoveredAsync(scriptId: string): Promise { // of Covered
-            var p = EditorHost.scriptCoveredCache[scriptId];
-            if (!p) EditorHost.scriptCoveredCache[scriptId] = p = Cloud.getCoveredAsync(scriptId, TDev.AST.Compiler.version);
-            return p;
-        }
-
         public attachCoverageInfo(coverageData: CoverageData, showCoverage: boolean): void {
             if (!coverageData) return;
-
-            var scriptId = this.currentRt.currentScriptId;
-            if (scriptId)
-                EditorHost.getScriptCoveredAsync(scriptId)
-                    .then(covered => {
-                        var p = covered.count < 90 ? .5 - .49 * covered.count / 90 : .01; // probability of uploading coverage information
-                        if (Random.normalized() < p)
-                            return Cloud.postCoverageDataAsync(scriptId, coverageData)
-                                .then(() => covered.count++);
-                    })
-                    .done(undefined, () => { }); // ignore network errors
 
             if (showCoverage) {
                 this.resetAnnotators();
@@ -1061,16 +1040,15 @@ module TDev
                                     logs.push(RT.App.createInfoMessage(wa.website + " -- server log -- " + r.worker + " missing; " + r.code));
                             })
                         else addOne(resp, "")
-                        TDev.RT.App.showLog(logs);
+                        this.host.showAppView(logs);
                     }, e => {
                         logs.push(RT.App.createInfoMessage(''));
                         logs.push(RT.App.createInfoMessage('--- error while retreiving web site logs ---'));
                         logs.push(RT.App.createInfoMessage(e.message || ""));
-                        TDev.RT.App.showLog(logs);
+                        this.host.showAppView(logs);
                     });
             }
-            else
-                TDev.RT.App.showAppLogAsync().done();
+            else this.host.showAppView();
         }
 
         public showRunningStmt() {
@@ -1093,6 +1071,7 @@ module TDev
             addNewButton: 1,
             undoButton: 1,
             // refactoring
+            promoteRefactoring: 1,
             fixItButton: 1,
             splitScreen: 1,
         }
@@ -1103,7 +1082,6 @@ module TDev
             actionSettings: 1,
             publishAsHidden: 1,
             // refactoring
-            promoteRefactoring: 1,
             simplify: 1,
             // ui
             splitButton: 1,
@@ -1118,6 +1096,8 @@ module TDev
             eventsSection: 1,
             artSection:1,
             librariesSection: 1,
+            // statements
+            comment: 1,
         }
         static proWidgets: StringMap<number> = {
             //navigation
@@ -1257,8 +1237,9 @@ module TDev
             this.refreshDecl();
         }
 
-        public renderDecl(decl: AST.Decl, transparent : boolean = false) {
-            this.goToLocation(new CodeLocation(decl), !transparent);
+        // [fromCloud]: was this triggered by a collaboration pull?
+        public renderDecl(decl: AST.Decl, transparent : boolean = false, fromCloud=false) {
+            this.goToLocation(new CodeLocation(decl), !transparent, fromCloud);
         }
 
         public bindLibrary(lib: AST.LibraryRef, scr: Browser.ScriptInfo) {
@@ -1270,13 +1251,14 @@ module TDev
             return this.host.wallVisible;
         }
 
-        public goToLocation(loc: CodeLocation, useAnim = true) {
+        public goToLocation(loc: CodeLocation, useAnim = true, fromCloud=false) {
             if (!this.currentSideTab)
                 this.setupNavPane();
 
             this.searchTab.saveLocation();
             this.selector.clear();
-            this.dismissModalPane();
+            if (!fromCloud)
+                this.dismissModalPane();
             this.loadLocation(loc, useAnim);
             this.searchTab.saveLocation();
             try {
@@ -1618,7 +1600,6 @@ module TDev
                     crashOnInvalid: /crashOnInvalid/.test(document.URL),
                     commonSubexprElim: /commonSubexprElim/.test(document.URL),
                     constantPropagation: /constantPropagation/.test(document.URL),
-                    coverage: true,
                     azureSite: Azure.getDestinationAppUrl(app),
                 };
                 Object.keys(opts).forEach((k) => {
@@ -1736,20 +1717,6 @@ module TDev
                     Runtime.stopPendingScriptsAsync().done(run1)
                 else run1()
             };
-
-            if (!this.stepTutorial && !TestMgr.Benchmarker.unitTimeReported()) {
-                if (TDev.RT.Perf.unit() < 0) {
-                    if (++Editor.runCount > 5 && Math.random() < .20) {
-                        TestMgr.Benchmarker.measureUnitTimeAsync().done(() => {
-                            TestMgr.Benchmarker.reportUnitTime();
-                            run();
-                        });
-                        return;
-                    }
-                }
-                else
-                    TestMgr.Benchmarker.reportUnitTime();
-            }
 
             if (!this.parentScript && Script.usesCloudLibs() && !Azure.getDestinationAppUrl(Script)) {
                 AppExport.setupAzure()
@@ -2276,18 +2243,6 @@ module TDev
                 var a = Script.mainAction();
                 if (!a) return;
                 else this.runAction(a, null, { profiling: true, showProfiling: true });
-            }
-
-            if (!this.stepTutorial && !TestMgr.Benchmarker.unitTimeReported()) {
-                if (TDev.RT.Perf.unit() < 0) {
-                    TestMgr.Benchmarker.measureUnitTimeAsync().done(() => {
-                        TestMgr.Benchmarker.reportUnitTime();
-                        run();
-                    });
-                    return;
-                }
-                else
-                    TestMgr.Benchmarker.reportUnitTime();
             }
             run();
         }
@@ -2825,7 +2780,7 @@ module TDev
             })
         }
 
-        public renderDefaultDecl(transparent : boolean = false)
+        public renderDefaultDecl(transparent : boolean = false, fromCloud = false)
         {
             if (!this.currentSideTab)
                 this.setupNavPane();
@@ -2844,7 +2799,7 @@ module TDev
             if (!a) a = Script.actions()[0];
             if (!a) a = Script;
 
-            this.renderDecl(a, transparent);
+            this.renderDecl(a, transparent, true);
         }
 
         public wallShown()
@@ -3075,7 +3030,7 @@ module TDev
                 });
                 var final = header.editor ? finalExternal : finalClassic;
 
-                if (worldInfo.baseId && !worldInfo.baseUserId) {
+                if (Cloud.isOnline() && worldInfo.baseId && !worldInfo.baseUserId) {
                     // it seems that there are even cases like this in the cloud, let's just fix it
                     return Browser.TheApiCacheMgr.getAsync(worldInfo.baseId, true).then(scriptInfo => {
                         if (scriptInfo)
@@ -3085,8 +3040,8 @@ module TDev
 
                 return final();
             }).then(() => {
-                if (!shouldRun && !EditorSettings.editorMode())
-                    return EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
+                if (!shouldRun && !Browser.EditorSettings.editorMode())
+                    return Browser.EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
                 else return Promise.as();
             }).then(() => {
                 if (!Script) return;
@@ -3119,12 +3074,10 @@ module TDev
                 var ed = this.consumeRtEditor()
 
                 if (!shouldRun) {
-                    var st = Script.editorState
-                    if (st.splitScreen)
-                        this.setSplitScreen(true, true)
-
                     this.setMode()
-
+                    var st = Script.editorState
+                    if (st.splitScreen || AST.blockMode)
+                        this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
                     this.renderDefaultDecl();
@@ -3803,7 +3756,6 @@ module TDev
             ht.initAsync().done((app:AST.App) => {
                 this.addIntelliProfile(new AST.IntelliProfile()).allowAllLibraries = false;
                 Util.setTimeout(10, () => {
-                // ht.reloadAppAsync().done((app:AST.App) => {
                     if (!Script) return;
                     var st = new StepTutorial(app, ht, firstTime, Script.localGuid);
                     if (st.isEnabled()) {
@@ -3811,8 +3763,9 @@ module TDev
                         st.disableUpdate = true;
                         st.updateProfile(this.intelliProfile)
 
-                        // only enable split screen selectively
-                        if ((AST.blockMode || this.widgetEnabled("splitScreen")) && !this.intelliProfile.hasKey("flag:nosplit"))
+                        // always split screen in block/legacy or if user did not explicitely denied it.
+                        if ((AST.blockMode || this.widgetEnabled("splitScreen"))
+                            && !this.intelliProfile.hasKey("flag:nosplit"))
                             this.setSplitScreen(true, true);
 
                         if (firstTime) {
@@ -3832,7 +3785,7 @@ module TDev
 
                             var editorMode = ht.templateEditorMode();
                             if (editorMode)
-                                EditorSettings.showChooseEditorModeAsync(EditorSettings.parseEditorMode(editorMode)).done();
+                                Browser.EditorSettings.showChooseEditorModeAsync(Browser.EditorSettings.parseEditorMode(editorMode)).done();
                         }
 
                         // we've got kicked out of the editor in the meantime?
@@ -4044,18 +3997,10 @@ module TDev
             World.cancelSync();
             Cloud.setAccessToken(undefined);
             return this.resetWorldAsync().then(() => {
-                if (Browser.win8)
-                    Browser.TheHost.clearMeAsync(true).then(() =>
-                    {
-                        progressBar.stop();
-                        progressDialog.dismiss();
-                    }).done();
-                else {
-                    // don't stop progress; keep animation running until we actually navigate away
-                    window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
-                    if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
-                    Util.navigateInWindow(url);
-                }
+                // don't stop progress; keep animation running until we actually navigate away
+                window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
+                if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
+                Util.navigateInWindow(url);
             });
         }
 
@@ -4214,17 +4159,12 @@ module TDev
                         })),
                         div("wall-dialog-body", chaosOfflineEdit),
                         div("wall-dialog-body",
-                            HTML.mkButton(lf("perf cloud data"), () => {
-                                TestMgr.Benchmarker.displayPerfData();
-                            }),
                             !LocalShell.mgmtUrl("") ? null :
                                 HTML.mkButton(lf("save offline caches"), () =>
                                     LocalProxy.saveCachesAsync().done())
                             ),
                         div("wall-dialog-body", HTML.mkCheckBox("enable new intelli prediction",
                             (v) => { TheEditor.calculator.enableNewPredictor = v; }, TheEditor.calculator.enableNewPredictor)),
-                        (dbg ? HTML.mkButtonTick(lf("run tests"), Ticks.hubTests, () => { TestMgr.testAllScripts(); }) : null),
-                        (!Util.localTranslationTracking && dbg ? HTML.mkButtonTick(lf("run benchmarks"), Ticks.hubBenchmarks, () => { TestMgr.Benchmarker.runBenchmarksButtonAsync(); }) : null),
                         (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
@@ -4334,13 +4274,13 @@ module TDev
 
         private setMode(refresh = false)
         {
-            var prevMode = EditorSettings.editorMode();
+            var prevMode = Browser.EditorSettings.editorMode();
 
-            if (prevMode == EditorMode.block) {
+            if (prevMode == Browser.EditorMode.block) {
                 AST.proMode = false
                 AST.blockMode = true
                 AST.legacyMode = false
-            } else if (prevMode == EditorMode.pro) {
+            } else if (prevMode == Browser.EditorMode.pro) {
                 AST.proMode = true
                 AST.blockMode = false
                 AST.legacyMode = false
@@ -4415,9 +4355,6 @@ module TDev
             if (Browser.webAppBooster) {
                 api.core.currentPlatform = PlatformCapabilityManager.current(); // based on supported features
                 api.core.currentPlatformImpl = ImplementationStatus.Wab;
-            } else if (Browser.win8) {
-                api.core.currentPlatform = PlatformCapability.WinRT;
-                api.core.currentPlatformImpl = ImplementationStatus.WinRT;
             } else {
                 api.core.currentPlatform = PlatformCapabilityManager.current();
                 api.core.currentPlatformImpl = ImplementationStatus.Web;
@@ -5178,16 +5115,6 @@ module TDev
                 }),
                 HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
                 HTML.mkButton(lf("GitHub"),() => { RT.Web.browseAsync("https://github.com/Microsoft/TouchDevelop").done(); })
-                /*
-                HTML.mkButton(lf("email"), () => {
-                    if (Browser.win8) {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App Early Preview for Windows 8");
-                    } else if (Browser.isWP8app) {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop App for Windows Phone 8 with cloud services v" + relId);
-                    } else {
-                        window.open("mailto:touchdevelop@microsoft.com?subject=Feedback about TouchDevelop Web App v" + relId);
-                    }
-                }) */
                 ));
 
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
@@ -5713,136 +5640,6 @@ module TDev
         public loadLibsAsync(app:AST.App)
         {
             return Promise.join(app.libraries().map((l) => this.loadLibAsync(l)));
-        }
-    }
-
-    export enum EditorMode {
-        unknown,
-        block,
-        classic,
-        pro
-    }
-
-    export module EditorSettings {
-        export var BLOCK_MODE = "block";
-        export var PRO_MODE = "pro";
-        export var CLASSIC_MODE = "classic";
-
-        export function parseEditorMode(mode: string): EditorMode {
-            if (!mode) return EditorMode.unknown;
-            mode = mode.trim().toLowerCase();
-            if (mode === BLOCK_MODE) return EditorMode.block;
-            else if (mode === CLASSIC_MODE) return EditorMode.classic;
-            else if (mode === PRO_MODE) return EditorMode.pro;
-            else return EditorMode.unknown;
-        }
-
-        export function wallpaper(): string {
-            return localStorage.getItem("editorWallpaper") || "";
-        }
-
-        export function setWallpaper(id: string, upload : boolean) {
-            var previous = EditorSettings.wallpaper();
-            if (previous != id) {
-                if (!id) localStorage.removeItem("editorWallpaper")
-                else localStorage.setItem("editorWallpaper", id);
-                if (upload)
-                    uploadWallpaper();
-            }
-
-            [elt("hubRoot"), elt("slRoot")].forEach(e => {
-                if (id) e.style.backgroundImage = HTML.cssImage(HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + id));
-                else e.style.backgroundImage = "";
-            });
-        }
-
-        function uploadWallpaper() {
-            var m = wallpaper();
-            if (Cloud.getUserId() && Cloud.isOnline()) {
-                Util.log('updating wallpaper to ' + m);
-                Cloud.postUserSettingsAsync({ wallpaper: m })
-                    .done(() => { HTML.showProgressNotification(lf("wallpaper saved"), true); }, (e) => { });
-            }
-        }
-
-        export function setEditorMode(mode: EditorMode, upload : boolean) {
-            var previous = EditorSettings.editorMode();
-            if (previous != mode) {
-                if (mode == EditorMode.unknown)
-                    localStorage.removeItem("editorMode");
-                else
-                    localStorage.setItem("editorMode", EditorMode[mode]);
-                if(upload)
-                    uploadEditorMode();
-            }
-        }
-
-        export function editorModeText(mode: EditorMode) : string {
-            switch (mode) {
-                case EditorMode.block: return lf("beginner");
-                case EditorMode.classic: return lf("coder");
-                case EditorMode.pro: return lf("expert");
-                default: return "";
-            }
-        }
-
-        export function editorMode(): EditorMode {
-            return parseEditorMode(localStorage.getItem("editorMode"));
-        }
-
-        function uploadEditorMode() {
-            var m = editorMode();
-            if (Cloud.getUserId() && Cloud.isOnline() && m != EditorMode.unknown) {
-                Util.log('updating skill level to ' + EditorMode[m]);
-                Cloud.postUserSettingsAsync({ editorMode: EditorMode[m] })
-                    .done(() => { HTML.showProgressNotification(lf("skill level saved"), true); }, (e) => { });
-            }
-        }
-
-        export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
-            var current = editorMode();
-            return div(cls, current < EditorMode.pro ? lf("Ready for more options?") : lf("Too many options?"), HTML.mkLinkButton(lf("Change skill level!"), () => {
-                tick(tk);
-                EditorSettings.showChooseEditorModeAsync().done(() => {
-                    if (current != editorMode()) editor.refreshMode();
-                });
-            }));
-        }
-
-        export function createChooseSkillLevelElements(click? : () => void): HTMLElement[] {
-            var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
-                { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
-                { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
-            return modes.map((mode, index) => {
-                var pic = div('pic');
-                pic.style.background = HTML.cssImage("https://az31353.vo.msecnd.net/pub/" + mode.id);
-                pic.style.backgroundSize = "cover";
-
-                return div('editor-mode', pic, HTML.mkButton(EditorSettings.editorModeText(mode.n), () => {
-                    tick(mode.tick);
-                    EditorSettings.setEditorMode(mode.n, true);
-                    if (click) click();
-                }, 'title'), div('descr', mode.descr));
-            });
-        }
-
-        export function showChooseEditorModeAsync(preferredMode = EditorMode.unknown): Promise {
-            if (preferredMode != EditorMode.unknown && EditorSettings.editorMode() <= preferredMode) return Promise.as();
-
-            TipManager.setTip(null)
-            return new Promise((onSuccess, onError, onProgress) => {
-                var m = new ModalDialog();
-                m.onDismiss = () => onSuccess(undefined);
-                m.add(div('wall-dialog-header', lf("choose your coding skill level")));
-                m.add(div('wall-dialog-body', lf("TouchDevelop will adapt to the coding experience to your skill level. You can change your skill level again in the hub.")));
-                var current = EditorSettings.editorModeText(EditorSettings.editorMode());
-                if (current)
-                    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
-                m.add(div('wall-dialog-body', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
-                m.add(Editor.mkHelpLink("skill levels"));
-                m.fullWhite();
-                m.show();
-            });
         }
     }
 

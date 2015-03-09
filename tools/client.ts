@@ -42,7 +42,7 @@ var reqNo = 0
 http.globalAgent.maxSockets = 15;
 https.globalAgent.maxSockets = 15;
 
-function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
+function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, contentType = null)
 {
     var currReq = reqNo++;
     var isDone = false
@@ -78,6 +78,14 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null)
 
     var purl:any = /^http(s?):/.test(uri) ? url.parse(uri) : { hostname: 'www.touchdevelop.com', path: '/api/' + uri }
     purl.method = body ? 'PUT' : 'GET'
+    if (body && !Buffer.isBuffer(body) && typeof body == "object") {
+        body = JSON.stringify(body)
+        purl.method = "POST"
+        purl.headers = { 'content-type': 'application/json; charset=utf8' }
+    }
+    if (contentType) {
+        purl.headers = { 'content-type': contentType }
+    }
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
     } else {
@@ -3442,11 +3450,26 @@ function tdupload(args:string[])
                 "the source maps will be useless there.");
     var key = args.shift()
     var lbl = args.shift()
+    var channel = args.shift()
 
     if (!/^\d\d\d\d\d\d\d\d\d\d\d/.test(lbl))
         lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
 
     console.log("releaseid:" + lbl)
+
+    if (key == "direct") {
+        var atokF = "access_token.txt"
+        if (!fs.existsSync(atokF)) {
+            console.warn("Access token not found.");
+            console.log("Open the following link in your browser:");
+            console.log("   https://www.touchdevelop.com/oauth/dialog?client_id=upload&response_type=token");
+            console.log("Log in with your admin credentials, and save the access token in a text file with the following name.");
+            console.log("   ./" + atokF)
+            console.log("The token will be valid for up to one year. Do not share or check in the access token --- it identifies you personally.");
+            return
+        }
+        var td_tok = "?access_token=" + fs.readFileSync(atokF, "utf8").replace(/\s/g, "").replace(/^#access_token=/, "")
+    }
 
     if (args.length == 0)
         args = [
@@ -3469,7 +3492,8 @@ function tdupload(args:string[])
             "build/officemix.js",
         ]
 
-    args.forEach(p => {
+    var liteId = ""
+    var uploadFiles = () => args.forEach(p => {
         if (!fs.existsSync(p))
             return;
         fs.readFile(p, (err, data) => {
@@ -3480,15 +3504,60 @@ function tdupload(args:string[])
 
             var fileName = path.basename(p)
             var mime = getMime(p)
-            var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
-            url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
-            url += "&contentType=" + encodeURIComponent(mime)
 
-            tdevGet(url, (resp) => {
-                console.log(fileName + ": " + resp)
-            }, 1, data)
+            if (liteUrl) {
+                var isText = /^(text\/.*|application\/(javascript|json))$/.test(mime)
+                var encoding = isText ? "utf8" : "base64"
+                var content = isText ? data.toString("utf8") : data.toString("base64")
+                tdevGet(liteUrl + "api/" + liteId + "/files" + key, resp => {
+                    console.log(fileName + ": " + resp)
+                }, 1, {
+                    encoding: encoding,
+                    filename: fileName,
+                    contentType: mime,
+                    content: content,
+                })
+            } else if (td_tok) {
+                var url = "https://www.touchdevelop.com/app/" + lbl + "/" + fileName + td_tok
+                tdevGet(url, (resp) => {
+                    console.log(fileName + ": " + resp)
+                }, 1, data, mime)
+            } else {
+                var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
+                url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
+                url += "&contentType=" + encodeURIComponent(mime)
+
+                tdevGet(url, (resp) => {
+                    console.log(fileName + ": " + resp)
+                }, 1, data)
+            }
         })
     })
+
+    var mm = /^(http.*)(\?access_token=.*)/.exec(key)
+
+    if (mm) {
+        var liteUrl = mm[1]
+        key = mm[2]
+
+        tdevGet(liteUrl + "api/releases" + key, resp => {
+            var d = JSON.parse(resp)
+            console.log(d)
+            liteId = d.id
+            if (liteId) {
+                if (channel)
+                    tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
+                        console.log("channel: " + resp)
+                    }, 1, { name: channel })
+                uploadFiles()
+            }
+        }, 1, {
+            releaseid: lbl
+        })
+
+    } else {
+        uploadFiles()
+    }
 }
 
 var cmds = {
@@ -3568,6 +3637,10 @@ var sectMakers = lf("makers");
 var sectTouchDevelop = lf("touchdevelop");
 var sectOthers = lf("others");
 
+/*
+    editorMode: 1 = block, 2 = coder, 3 = expert
+*/
+
 var templates: ScriptTemplate[] = [{
     title: lf("blank"),
     id: 'blank',
@@ -3622,7 +3695,9 @@ var templates: ScriptTemplate[] = [{
     section: sectBeginners,
     scriptid: 'mdrw',
     editorMode: 1,
-}, /*{
+}, 
+
+/*{
     title: lf("blank boostrap app"),
     id: 'blankbootstrapapp',
     icon: 'ArrowLR',
@@ -3648,22 +3723,22 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'ripnb',
     editorMode: 3,
 }, {
-    title: lf("blank express web site"),
-    id: 'blankexpresswebsite',
+    title: lf("blank web api"),
+    id: 'blankwebapi',
     icon: 'Stacks',
-    name: 'ADJ web',
-    description: lf("An Express web site."),
+    name: 'ADJ api',
+    description: lf("A web API using node.js and restify."),
     section: sectAzure,
-    scriptid: 'ludeb',
+    scriptid: 'qexxc',
     editorMode: 3,
 }, {
-    title: lf("blank restify web site"),
-    id: 'blankrestifywebsite',
+    title: lf("blank azure web api"),
+    id: 'blankazurewebapi',
     icon: 'Stacks',
-    name: 'ADJ web',
-    description: lf("A Restify web api."),
+    name: 'azure ADJ api',
+    description: lf("A web API using azure services, node.js and restify."),
     section: sectAzure,
-    scriptid: 'hzdib',
+    scriptid: 'gexxa',
     editorMode: 3,
 }, {
     title: lf("blank node library"),
@@ -3702,6 +3777,15 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'zqbpa',
     editorMode: 2,
 }, {
+    title: lf("blank docs"),
+    id: 'blankdocs',
+    icon: 'Controller',
+    name: 'ADJ docs',
+    description: lf("An empty documentation page."),
+    section: sectTouchDevelop,
+    scriptid: 'krvn',
+    editorMode: 3,
+}, {
     title: lf("blank tutorial"),
     id: 'blanktutorial',
     icon: 'Controller',
@@ -3710,7 +3794,7 @@ var templates: ScriptTemplate[] = [{
     section: sectTouchDevelop,
     scriptid: 'yujva',
     editorMode: 3,
-}, , {
+}, {
     title: lf("blank script plugin"),
     id: 'blankscriptplugin',
     icon: 'Brush',
@@ -3728,8 +3812,16 @@ var templates: ScriptTemplate[] = [{
     section: sectOthers,
     scriptid: 'zbxb',
     editorMode: 3,
-}
-];
+}, {
+    title: lf("physics game starter"),
+    id: 'physicsgamestarter',
+    icon: 'Controller',
+    name: 'ADJ game',
+    description: lf("Boiler plate code to create a game."),
+    section: sectOthers,
+    scriptid: 'kkwd',
+    editorMode: 2,
+}];
 
 export function main()
 {

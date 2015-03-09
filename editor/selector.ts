@@ -49,30 +49,18 @@ module TDev
         public phoneNarrow() { return true }
 
         static insertionButtons() {
-            switch (EditorSettings.editorMode()) {
-            case EditorMode.block:
-                return [
-                    { name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
-                          node: "if true then { }" },
-                    { name: "for",  desc: lf("repeat code"), tick: Ticks.codeFor,
-                          node: "for 0 <= i < 4 do { }" },
-                    { name: "while", desc: lf("simple loop"), tick: Ticks.codeWhile,
-                          node: "while true do { }" },
-                    ];
-            default:
-                return [
-                    { name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
-                          node: "if \\u0001need_Boolean\\u003Acondition then { }" },
-                    { name: "for",  desc: lf("repeat code"), tick: Ticks.codeFor,
-                          node: "for 0 <= i < \\u0001need_Number do { }" },
-                    { name: "for each", desc: lf("repeat on collection"),  tick: Ticks.codeForEach,
-                          node: "foreach e in \\u0001need_Collection\\u005bString\\u005d\\u003Acollection do { }" },
-                    { name: "while", desc: lf("simple loop"), tick: Ticks.codeWhile,
-                          node: "while \\u0001need_Boolean\\u003Aloop_condition do { }" },
-                    { name: "boxed", desc: lf("UI widget"), tick: Ticks.codeBoxed,
-                          node: "do box { }" },
-                    ];
-            }
+            return [
+                { name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
+                        node: "if \\u0001need_Boolean\\u003Acondition then { }" },
+                { name: "for",  desc: lf("repeat code"), tick: Ticks.codeFor,
+                        node: "for 0 <= i < \\u0001need_Number do { }" },
+                { name: "while", desc: lf("simple loop"), tick: Ticks.codeWhile,
+                        node: "while \\u0001need_Boolean\\u003Aloop_condition do { }" },
+                { name: "for each", desc: lf("repeat on collection"),  tick: Ticks.codeForEach,
+                        node: "foreach e in \\u0001need_Collection\\u005bString\\u005d\\u003Acollection do { }" },
+                { name: "boxed", desc: lf("UI widget"), tick: Ticks.codeBoxed,
+                        node: "do box { }" },
+                ];
         }
 
         public init(e:Editor)
@@ -676,7 +664,7 @@ module TDev
             this.unselect();
         }
 
-        public getStmtIntelliItems()
+        public getStmtIntelliItems() : IntelliItem[]
         {
             var res:IntelliItem[] = [];
             var add = (ib:any) => {
@@ -705,7 +693,8 @@ module TDev
                 TheEditor.calculator.newVar()
             };
             Selector.insertionButtons().forEach(add);
-            add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
+            if (this.editor.widgetEnabled("comment"))
+                add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
 
             return res;
         }

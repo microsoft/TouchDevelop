@@ -738,7 +738,7 @@ module TDev
         private setupIntelliProfile()
         {
             this.showAsync = asyncEnabled;
-            if (TheEditor.intelliProfile && !TheEditor.widgetEnabled("async")) {
+            if (!TheEditor.widgetEnabled("async")) {
                 this.showAsync = false;
             }
         }
@@ -778,10 +778,8 @@ module TDev
                 if (/^e\s*\d*$/.test(loc.getName()))
                     this.autoLocal = loc;
             }
-            if (s instanceof AST.RecordField) {
-                var rf = <AST.RecordField> s;
-                rf.setConsistentState(rf.getName(), rf.dataKind);
-            }
+
+            s.setupForEdit()
 
             var ch = Util.childNodes(s.renderedAs);
             this.isElse = s.renderedAs.getFlag("elseDoNothing") || s.renderedAs.getFlag("elseIf");
@@ -1318,7 +1316,7 @@ module TDev
 
             return typeof t.getLiteral() == "string" ||
                    t.getThing() instanceof AST.LocalDef ||
-                   t.getProperty() instanceof AST.PropertyDecl;
+                   (t.getProperty() && t.getProperty().canRename());
         }
 
         private inlineEditElement(t:AST.Token):HTMLElement
@@ -2436,7 +2434,8 @@ module TDev
                     return e;
                 })
                 libs.sort((a, b) => b.score - a.score)
-                var maxLibs = 5;
+                // always show all libraries in block/legacy mode
+                var maxLibs = (AST.blockMode || AST.legacyMode) ? 1e6 : 5;
                 if (libs.length > maxLibs)
                     libs = libs.slice(0, maxLibs)
                 else
@@ -2665,6 +2664,7 @@ module TDev
                 var k = <AST.RecordEntryKind>kk;
                 if (!(k instanceof AST.RecordEntryKind)) return false;
                 if (!k.record || k.record.recordType != AST.RecordType.Object) return false;
+                if (k.record.parentLibrary() && !k.record.parentLibrary().isThis()) return false
                 return true;
             }
 
@@ -3808,16 +3808,19 @@ module TDev
 
             var calcw = Math.min(7, Calculator.keypadW());
             var pageSize = calcw - 1;
+            var firstPageSize = AST.blockMode
+                ? Math.min(pageSize, 4) // var, if, for, while
+                : pageSize;
 
             var firstPage:IntelliItem[] = stmtItems.slice(0);
             var usage = (a:IntelliItem) => api.core.stmtUsage(a.usageKey).count();
             if (TheEditor.intelliProfile)
                 firstPage = stmtItems.filter(it => (usage(it) >= 1) || TheEditor.intelliProfile.hasKey(it.usageKey))
 
-            if (firstPage.length > pageSize) {
+            if (firstPage.length > firstPageSize) {
                 var cmpStmt = (a:IntelliItem, b:IntelliItem) => usage(b) - usage(a);
                 firstPage.sort(cmpStmt);
-                firstPage = firstPage.slice(0, pageSize);
+                firstPage = firstPage.slice(0, firstPageSize);
                 firstPage = stmtItems.filter(it => firstPage.indexOf(it) >= 0)
             }
 
@@ -3825,7 +3828,7 @@ module TDev
             var pages:IntelliItem[][] = [];
 
             var currPage = 0;
-            var pages = Util.chopArray(remainingItems, pageSize);
+            var pages = Util.chopArray(remainingItems, firstPageSize);
             pages.unshift(firstPage);
 
             var setupTop = ():void => {
@@ -4228,7 +4231,7 @@ module TDev
                 setF({
                     tick: Ticks.calcBtnBackspace,
                     title: lf("backspace this"),
-                    description: lf("we think it's not quite right"),
+                    description: lf("let's change this"),
                 })
                 return;
             }

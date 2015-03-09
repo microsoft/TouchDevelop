@@ -2,8 +2,8 @@
  * Instructions for updating this file.
  * - this file must be updated everytime a new cross-folder dependency is added
  *   into any of the [refs.ts] file. For instance, if suddenly you add a
- *   reference to [../storage/whatever.ts] in [build/libwinRT.ts], then you must
- *   update the dependencies of the [build/libwinRT.d.ts] task.
+ *   reference to [../storage/whatever.ts] in [build/libwab.ts], then you must
+ *   update the dependencies of the [build/libwab.d.ts] task.
  **/
 var assert = require('assert');
 var child_process = require("child_process");
@@ -104,6 +104,18 @@ function mkSimpleTask(production, dependencies, target) {
     });
 }
 
+// runs madoko and generates the html file
+function mdkTask(production, dependencies, target) {
+    return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
+      var task = this;
+	  jake.mkdirP('build/portal')
+      console.log("[M] "+production);
+      jake.exec("node node_modules/madoko/lib/cli.js --verbose --odir=build/portal " + target, { printStdout: true }, function () {
+          task.complete();
+      });
+    });
+}
+
 // A series of compile-and-run rules that generate various files for the build
 // system.
 function runAndComplete(cmds, task) {
@@ -137,6 +149,8 @@ file('build/pkgshell.js', [ 'build/package.js' ], { async: true }, function () {
     ], this);
 });
 
+// Portal
+mdkTask('build/portal/portal.html', ['portal/portal.mdk'], 'portal/portal.mdk');
 
 // These dependencies have been hand-crafted by reading the various [refs.ts]
 // files. The dependencies inside the same folder are coarse-grained: for
@@ -161,11 +175,6 @@ mkSimpleTask('build/ast.d.ts', [
     'build/rt.d.ts',
     'ast'
 ], "ast/refs.ts");
-mkSimpleTask('build/libwinRT.d.ts', [
-    'build/rt.d.ts',
-    'build/browser.d.ts',
-    'libwinRT'
-], "libwinRT/refs.ts");
 mkSimpleTask('build/libwab.d.ts', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
@@ -189,7 +198,6 @@ mkSimpleTask('build/editor.d.ts', [
     'build/rt.d.ts',
     'build/ast.d.ts',
     'build/storage.d.ts',
-    'build/libwinRT.d.ts',
     'build/libwab.d.ts',
     'build/libcordova.d.ts',
     'intellitrain',
@@ -219,7 +227,6 @@ mkSimpleTask('build/runner.d.ts', [
     'rt/typings.d.ts',
     'build/rt.d.ts',
     'build/storage.d.ts',
-    'build/libwinRT.d.ts',
     'build/libwab.d.ts',
     'build/libnode.d.ts',
     'build/libcordova.d.ts',
@@ -258,7 +265,6 @@ var concatMap = {
     "build/runtime.js": [
         "build/rt",
         "build/storage",
-        "build/libwinRT",
         "build/libwab",
         "build/libnode",
         "build/libcordova",
@@ -270,7 +276,6 @@ var concatMap = {
         "build/api.js",
         "generated/langs.js",
         "build/storage",
-        "build/libwinRT",
         "build/libwab",
         "build/libcordova",
         "build/pkgshell.js",
@@ -359,18 +364,21 @@ task('log', [], { async: false }, function () {
 
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
+desc('build the TypeScript projects')
 task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts', 'log' ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");
 });
 
+desc('clean up the build folders and files')
 task('clean', [], function () {
     // XXX do this in a single call? check out https://github.com/mde/utilities/blob/master/lib/file.js
     generated.forEach(function (f) { jake.rmRf(f); });
     jake.rmRf('build/');
 });
 
+desc('run local test suite')
 task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
@@ -380,10 +388,11 @@ task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, func
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
+desc('upload current build to the cloud')
 task('upload', [], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
-    var uploadKey = process.env.TD_UPLOAD_KEY;
+    var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     console.log("[I] uploading v" + buildVersion)
     jake.exec([ 'node build/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
       { printStdout: true, printStderr: true },
@@ -391,12 +400,7 @@ task('upload', [], { async : true }, function() {
 
   };
   if (!process.env.TRAVIS) {
-    if (process.env.TD_UPLOAD_KEY && process.env.TD_UPLOAD_USER) {
-      upload(process.env.TD_UPLOAD_USER);
-    } else {
-      console.log("[I] not in travis, skipping upload");
-      task.complete();
-    }
+    upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
@@ -405,6 +409,10 @@ task('upload', [], { async : true }, function() {
   }
 })
 
+desc('build portal html pages')
+task('portal', ['build/portal/portal.html']);
+
+desc('build and launch local server')
 task('local', [ 'default' ], { async: true }, function() {
   var task = this;
   jake.mkdirP('build/local/node_modules')
@@ -414,7 +422,7 @@ task('local', [ 'default' ], { async: true }, function() {
   if (process.env.TD_SHELL_DEBUG)
     node = "node-debug"
   jake.exec(
-    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. --usehome ' + (process.env.TD_SHELL_ARGS || "") ],
+    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. ' + (process.env.TD_SHELL_ARGS || "") ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );

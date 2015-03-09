@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A collection of objects
-    //@ stem("coll") icon("NumberedList")
+    //@ stem("coll") icon("fa-list-ol")
     //@ enumerable serializable ctx(general,json)
     export class Collection<T>
         extends RTValue
@@ -191,6 +191,16 @@ module TDev.RT {
         //@ readsMutable [result].writesMutable
         public slice(start: number, end: number): Collection<T> {
             return Collection.fromArray(this.a.slice(Math.floor(start), Math.floor(end)), this.typeInfo);
+        }
+
+        //? Gets the first element if any
+        public first(): T {
+            return this.at(0);
+        }
+
+        //? Gets the last element if any
+        public last(): T {
+            return this.at(this.count() - 1);
         }
 
         public jsonExportKey(ctx: JsonExportCtx) {

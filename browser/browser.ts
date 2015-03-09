@@ -51,7 +51,6 @@ module TDev {
         export var isGenStubs = false;
         export var mobileWebkit = false;
         export var touchStart = false;
-        export var win8 = false;
         export var webRunner = false;
         export var webAppImplicit = false;
         export var webAppBooster = false;
@@ -83,6 +82,7 @@ module TDev {
         export var notifyBackToHost = false;
         export var logToHost = false;
         export var noNetwork = false;
+        export var lowMemory = false;
 
         export var loadingDone = false;
 
@@ -133,7 +133,6 @@ module TDev {
             if (!isNodeJS) {
                 webRunner = !!(<any>window).webRunner;
                 webAppImplicit = !!(<any>window).webAppImplicit;
-                win8 = !!(<any>window).WinJS && !!(<any> window).WinJS.Application;
                 deviceMotion = !!(<any>window).DeviceMotionEvent;
                 deviceOrientation = !!(<any>window).DeviceOrientationEvent;
                 deviceHeading = deviceOrientation;
@@ -146,13 +145,6 @@ module TDev {
                 logToHost = true;
             if (flags.indexOf("noNetwork") >= 0)
                 noNetwork = true;
-
-            // does HTML need to be sanitized?
-            if (!!window.toStaticHTML && win8) {
-                setInnerHTML = function (el : HTMLElement, html: string) {
-                    el.innerHTML = window.toStaticHTML(html);
-                }
-            }
 
             if (/Silk|Kindle/.test(userAgent)) {
                 if (/ Android [123]\./.test(userAgent))
@@ -319,6 +311,7 @@ module TDev {
             if (/Linux armv7/.test(userAgent)) {
                 noAnimations = true;
                 noStorage = true; // I/O very slow
+                lowMemory = true; // limited amount of memory
             }
 
             browserShortName = browserName(browser);
@@ -341,15 +334,11 @@ module TDev {
             if (/Windows NT 5.1/.test(userAgent)) { addCap("win"); addCap("winXP"); }
             if (/Windows NT 6.0/.test(userAgent)) { addCap("win"); addCap("winVista"); }
             if (/Windows NT 6.1/.test(userAgent)) { addCap("win"); addCap("win7"); }
-            if (win8) { addCap("winRTapp"); }
             if (webAppBooster) { addCap("webAppBooster"); }
             if (isMobileSafari || (isMobile && (browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11))) { audioDataUrls = false; }
 
             if (mobileWebkit)
                 touchStart = true;
-
-            if (win8)
-                canLogin = false
 
             canWriteLocalStorage = false;
 

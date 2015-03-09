@@ -62,9 +62,11 @@ module TDev
             this._help.setChildren([document.createTextNode(s)]);
         }
 
-        public setBackgroundImage(url : string) {
-            this._theButton.style.backgroundImage = HTML.cssImage( url.replace("https://az31353.vo.msecnd.net/pub/", "https://az31353.vo.msecnd.net/thumb/") );
-            this._theButton.style.backgroundSize = 'cover';
+        public setBackgroundImage(url: string) {
+            if (!Browser.lowMemory) {
+                this._theButton.style.backgroundImage = HTML.cssImage(url.replace("https://az31353.vo.msecnd.net/pub/", "https://az31353.vo.msecnd.net/thumb/"));
+                this._theButton.style.backgroundSize = 'cover';
+            }
         }
 
         private setCallback(t:Ticks, f:(s:string)=>void)

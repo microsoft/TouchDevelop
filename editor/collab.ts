@@ -351,6 +351,7 @@ module TDev {
         var cloudtype_post = Revisions.Parser.MakeProperty("post", cloudtype_deltatable, "ast");
         var cloudtype_merge = Revisions.Parser.MakeProperty("merge", cloudtype_deltatable, "ast");
         var cloudtype_desc = Revisions.Parser.MakeProperty("desc", cloudtype_deltatable, "string");
+        var cloudtype_stats = Revisions.Parser.MakeProperty("stats", cloudtype_deltatable, "string");
 
 
 
@@ -594,11 +595,12 @@ module TDev {
                 AstSession.user_delete_item(items[pos - 1]);
                 var ukeys = [items[pos].uid];
                 var merge_lval = AstSession.user_get_lval(cloudtype_merge, ukeys, lkeys);
-                var desc_lval = AstSession.user_get_lval(cloudtype_desc, ukeys, lkeys);
+                var stats_lval = AstSession.user_get_lval(cloudtype_stats, ukeys, lkeys);
                 Util.assert(!AstSession.user_get_value(merge_lval));
                 var pre = AstSession.user_get_value(AstSession.user_get_lval(cloudtype_pre, ukeys, lkeys));
                 var post = AstSession.user_get_value(AstSession.user_get_lval(cloudtype_post, ukeys, lkeys));
-                cloud_ast = mergeAsts(pre, post, cloud_ast);
+                cloud_ast = mergeAsts(pre, post, cloud_ast,
+                    (data) => AstSession.user_modify_lval(stats_lval, JSON.stringify(data)));
                 AstSession.user_modify_lval(merge_lval, cloud_ast);
                 pos++;
             }
@@ -666,7 +668,7 @@ module TDev {
             return (pos != -1) ? full.substr(0, pos) : full;
         }
 
-        function mergeAsts(o_ast: string[], a_ast: string[], b_ast: string[]) {
+        function mergeAsts(o_ast: string[], a_ast: string[], b_ast: string[], datacollector?: (IMergeData) => void) {
 
             //  take shortcuts based on merge function equivalences
             if (astEquals(o_ast, b_ast)     // easy merge: deltas are consecutive edits
@@ -684,9 +686,13 @@ module TDev {
             var name = randomsuffix();
             var mergedesc = "m(" + versionname(o_ast) + "," + versionname(a_ast) + "," + versionname(b_ast) + ")";
 
+            var timer1 = Util.perfNow();
+
             var b = (<any>TDev).AST.Parser.parseScript(bs);
             var o = (<any>TDev).AST.Parser.parseScript(os);
             var a = (<any>TDev).AST.Parser.parseScript(as);
+
+            
 
             // (<any>TDev).AST.TypeChecker.tcApp(t1);
             //  (<any>TDev).AST.TypeChecker.tcApp(t2);
@@ -705,9 +711,11 @@ module TDev {
             (<any>TDev).TheEditor.initIds(o);
             (<any>TDev).TheEditor.initIds(a);
 
+            var timer2 = Util.perfNow();
+
             //console.log(">> merging: \n" + t3.serialize() + "\n---------\n" + t4.serialize() + "\n-----------\n" + t2.serialize());
 
-            var merged = (<any>TDev).AST.Merge.merge3(o, a, b);
+            var merged = (<any>TDev).AST.Merge.merge3(o, a, b, datacollector);
             var mergeds = merged.serialize();
 
             Util.assert(merged.things.length > 0 || a.things.length == 0 || b.things.length == 0);

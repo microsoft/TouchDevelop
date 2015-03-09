@@ -331,6 +331,8 @@ module TDev {
                             }
                         }
                         this.context.updateStatus();
+                        if (!cs.loadtask.isPending())
+                            this.context.afterload();
                         return cs.loadtask;
                     }
                     this.disconnect(false, "unload previous session");

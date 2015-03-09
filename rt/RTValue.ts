@@ -145,7 +145,7 @@ module TDev.RT {
         API overriding logic
         ~~~~~~~~~~~~~~~~~~~~
 
-        Each API target is given a prefix. At the moment there are two: "Wab" and "WinRT".
+        Each API target is given a prefix. At the moment there are one (WinRT is deprecated): "Wab".
         In the following <prefix> refers to one of them.
 
         1. Overriding functions in modules
@@ -244,8 +244,6 @@ module TDev.RT {
                 this.copySpecificImpls("Node")
             else if (Browser.inCordova)
                 this.copySpecificImpls("Cordova")
-            else if (Browser.win8)
-                this.copySpecificImpls("WinRT")
             else if (Browser.webAppBooster)
                 this.copySpecificImpls("Wab")
         }

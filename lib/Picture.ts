@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A picture
-    //@ stem("pic") icon("Photo") walltap enumerable
+    //@ stem("pic") icon("fa-file-image-o") walltap enumerable
     export class Picture
         extends RTValue
     {

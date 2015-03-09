@@ -203,6 +203,7 @@ module TDev
         if (/nodbg/.test(url)) dbg = false;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
         if (/nohub/.test(url)) TDev.noHub = true;
+        if (/lowMemory/.test(url)) Browser.lowMemory = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
@@ -457,6 +458,17 @@ module TDev
             TDev.Ticker.disable()
         }
 
+        if ((<any>window).tdlite) {
+            Cloud.lite = true;
+            if ((<any>window).tdlite == "url") {
+                mx = /^(https?:\/\/[^\/]+)/.exec(document.URL);
+                (<any>window).rootUrl = mx[1]
+            } else {
+                (<any>window).rootUrl = (<any>window).tdlite;
+            }
+            TDev.Ticker.disable()
+        }
+
         if (/httplog=1/.test(document.URL)) {
             HttpLog.enabled = true;
         }
@@ -514,11 +526,6 @@ module TDev
                 statusMsg("global init deviceready");
                 initAsync().done();
             }, false)
-        }
-        else if (Browser.win8) {
-            statusMsg("global init 3");
-            // done elsewhere
-            // initWin8();
         } else if ((<any>window).browserSupported) {
             statusMsg("global init 4");
             initJs();

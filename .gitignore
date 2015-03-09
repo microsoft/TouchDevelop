@@ -13,6 +13,7 @@ shell/npm/package.json
 results.html
 results.json
 build/
+temp/
 
 # visual studio
 *.suo

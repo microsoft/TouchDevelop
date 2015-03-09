@@ -2,7 +2,7 @@
 module TDev.RT {
     //? A user account
     //@ ctx(general,indexkey,cloudfield,walltap,json) serializable
-    //@ icon("Person") immutable isData ctx(general) serializable
+    //@ icon("fa-user") immutable isData ctx(general) serializable
     export class User
         extends RTValue {
         private _id: string = undefined;
@@ -139,6 +139,26 @@ module TDev.RT {
         //@ cachedAsync cap(network) returns(boolean)
         public has_picture(r: ResumeCtx) {
             this.loadFirst(r, user => user ? user.haspicture : undefined);
+        }
+
+        //? Gets the user settings if accessible. Currently, only the current user. Supported fields are editormode, twitterhandle, githubuser, minecraftuser
+        //@ cachedAsync cap(editorOnly,network) returns(JsonObject)
+        public settings(r: ResumeCtx) {
+            var currentUserId = Cloud.getUserId();
+            if (this._id != currentUserId) {
+                r.resumeVal(Web.json("{}"));
+                return;
+            }
+
+            r.rt.host.askSourceAccessAsync("settings", "your twitter handle, github user or minecraft user.", false)
+                .then(allowed => {
+                if (!allowed) return Promise.as(undefined);
+                else return Cloud.getUserSettingsAsync().then((user: Cloud.UserSettings) => user ? JsonObject.wrap({
+                    twitterhandle: user.twitterhandle,
+                    githubuser: user.githubuser,
+                    minecraftuser: user.minecraftuser
+                }) : undefined);
+            }).done(se => r.resumeVal(se));
         }
 
         //? Gets the url of the user picture where original is the unmodified user picture, square is 50x50, small has 50px width, normal has 100px width, large has roughly 200px width

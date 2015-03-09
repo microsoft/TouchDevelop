@@ -299,6 +299,16 @@ module TDev {
         public sidePaneVisible() { return !this.autoHide() || this.sidePane().style.display == "block"; }
         public sidePaneVisibleNow() { return !this.autoHide() || this.paneState > 0; }
 
+        public updateSidePane() {
+            var pane = this.sidePane();
+            if (!this.autoHide()) {
+                pane.style.display = "block";
+                pane.style.opacity = "1";
+            } else if (this.autoHide() && this.paneState < 0) {
+                pane.style.display = "none";
+            }
+        }
+
         public showSidePane()
         {
             if (!this.autoHide() || this.paneState > 0) return;
@@ -315,10 +325,16 @@ module TDev {
 
         public hideSidePane()
         {
-            if (!this.autoHide() || this.paneState < 0) return;
+            var pane = this.sidePane();
+            if (!this.autoHide()) {
+                pane.style.display = "block";
+                pane.style.opacity = "1";
+                return;
+            }
+            if (this.paneState < 0) return;
+
             Screen.popModalHash("side");
             elt("root").setFlag("pane-hidden", true);
-            var pane = this.sidePane();
             this.paneState = -1;
             Util.hidePopup(pane, () => {
                 if (this.paneState < 0 && this.autoHide())

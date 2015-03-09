@@ -176,6 +176,7 @@ module TDev
             if (this.prepopulate) {
                 this.searchBox.value = this.prepopulate;
                 this.prepopulate = null;
+                this.lastSearchValue = "";
                 focus = true;
                 selectAll = true;
             }
@@ -505,6 +506,7 @@ module TDev
             var autoOnlineSearch = (!isSpecificKind || verbOverride) && terms.length > 0 && allTerms.length > 1 && items.length < 15;
 
             if (verb || autoOnlineSearch) {
+                this.autoUpdate.lastValue = "";
                 this.autoUpdate.update = (s) => this.runOnlineSearchAsync(verbOverride, s);
                 this.autoUpdate.keypress();
             }

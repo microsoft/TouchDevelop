@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A song
-    //@ icon("Music") walltap
+    //@ icon("fa-headphones") walltap
     export class Song
         extends RTValue
     {
