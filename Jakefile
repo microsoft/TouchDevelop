@@ -232,7 +232,6 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
-mkSimpleTask('build/ace.js', [], "www/ace/refs.ts");
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
@@ -360,13 +359,7 @@ task('log', [], { async: false }, function () {
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
 desc('build the TypeScript projects')
-task('default', [
-  'css-prefixes',
-  'build/client.js',
-  'build/officemix.d.ts',
-  'build/ace.js',
-  'log'
-].concat(Object.keys(concatMap)), {
+task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts', 'log' ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");

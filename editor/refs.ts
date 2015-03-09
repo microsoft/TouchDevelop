@@ -46,7 +46,6 @@
 ///<reference path='azure.ts'/>
 ///<reference path='plugins.ts'/>
 ///<reference path='external.ts'/>
-///<reference path='messages.ts'/>
 ///<reference path='../intellitrain/train.ts'/>
 ///<reference path='../intellitrain/astutil.ts'/>
 ///<reference path='../intellitrain/features.ts'/>

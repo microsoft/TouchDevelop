@@ -6,86 +6,28 @@
   <title>Ace Editor</title>
   <style type="text/css" media="screen">
     body {
-      font-family: sans-serif;
-    }
-
-    .vbox {
-      display: flex;
-      display: -webkit-flex;
-      flex-direction: column;
-      -webkit-flex-direction: column;
-      flex: 1;
-      -webkit-flex: 1;
-    }
-
-    .hbox {
-      display: flex;
-      display: -webkit-flex;
-      flex: 1;
-      -webkit-flex: 1;
-    }
-
-    #main {
-      margin: 0;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
+        overflow: hidden;
     }
 
     #editor {
-      margin: 0;
-      flex: 1;
-    }
-
-    #commands, #commands li {
-      display: inline-block;
-      margin: 0;
-      padding: 0;
-    }
-
-    #commands li {
-      padding-right: .5em;
-    }
-
-    #toolbox {
-      padding: .5em;
-    }
-
-    #editor {
-      flex: 3;
-    }
-
-    #log {
-      margin: 0;
-      padding-left: .8em;
-      flex: 1;
-      overflow: auto;
+        margin: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
   </style>
-  <!-- The compiled ace-main.ts file. Served from build/ -->
-  <script src="../ace.js" type="text/javascript" charset="utf-8"></script>
-  <!-- The Ace editor. Served from www/. -->
   <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="main.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 
-<div id="main" class="vbox">
-<div id="toolbox">
-  <ul id="commands">
-    <li><button id="command-save">save</button></li>
-    <li><button id="command-compile">compile</button></li>
-  </ul>
-</div>
-<div class="hbox">
 <pre id="editor">using namespace std;
 
 int main() {
     cout &lt;&lt; "hello world" &lt;&lt; endl;
 }</pre>
-<pre id="log"></pre>
-</div>
-</div>
+
 </body>
 </html>

@@ -27,16 +27,11 @@ module TDev {
     }
 
     export module External {
-        var theChannel: Channel = null;
-
         class Channel {
-            constructor(private iframe: HTMLIFrameElement) {
-                this.post({ type: MessageType.Init, data: null });
+            constructor() {
             }
 
-            private post(message: Message) {
-                // FIXME
-                this.iframe.contentWindow.postMessage(message, "*");
+            public register(iframe: HTMLElement) {
             }
         }
 
@@ -45,7 +40,8 @@ module TDev {
             iframeDiv.setChildren([]);
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
-                theChannel = new Channel(iframe);
+                var channel = new Channel();
+                channel.register(iframe);
             });
             iframe.setAttribute("src", editor.root);
             iframeDiv.appendChild(iframe);
