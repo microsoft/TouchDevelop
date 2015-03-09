@@ -959,14 +959,24 @@ module TDev { export module Browser {
                             if (group) {
                                 showBtn();
                                 groupid = group.id;
+                                var groupInfo = this.getGroupInfoById(groupid);
                                 errorDiv.setChildren([
-                                    div('wall-dialog-header', 'found group'),
-                                    this.getGroupInfoById(group.id).mkSmallBox()
+                                    div('wall-dialog-header', lf("for group")),
+                                    groupInfo.mkSmallBox()
                                 ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
                                 if (group.allowappstatistics)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
+
+                                if (!!Cloud.getUserId())
+                                    Cloud.getPublicApiAsync("me/groups?count=100")
+                                        .done((groups: JsonList) => {
+                                            if (groups.items.some(gr => gr.id == groupid)) {
+                                                Util.log('user already member of group, opening');
+                                                TheHost.loadDetails(groupInfo);
+                                            }
+                                        }, () => { });
                             } else {
                                 hideBtn();
                                 if (lastCode.expiration > Date.now() / 1000)
