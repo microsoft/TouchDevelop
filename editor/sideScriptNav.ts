@@ -187,7 +187,7 @@ module TDev
 
             if (!isParent && TheEditor.widgetEnabled("updateButton") &&
                 (TheEditor.scriptUpdateId || TheEditor.librariesNeedUpdate()))
-                addBtn(HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdate, () => {
+                addBtn(HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdate, () => {
                     this.editor.updateScript();
                 }));
             if (onlyParent && TheEditor.widgetEnabled("logsButton"))
@@ -284,7 +284,7 @@ module TDev
                     if (decl instanceof AST.LibraryRef) {
                         var lib = <AST.LibraryRef>decl;
                         if (lib.needsUpdate && this.editor.widgetEnabled("updateButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:Recycle,black", lf("update"), Ticks.sideUpdateOne,
+                            var runbtn = HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdateOne,
                                     () => { TheEditor.updateLibraries([lib]) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (this.editor.widgetEnabled("editLibraryButton")) {
