@@ -4985,12 +4985,18 @@ module TDev
                 ModalDialog.ask(lf("Are you sure you want to stop following the tutorial?"),
                     lf("leave tutorial"), () => this.leaveTutorial());
                 });
+            var nextBtn = btn("forward", Ticks.tutorialNextStep, () => {
+                if (this.stepTutorial)
+                    this.stepTutorial.notify("delay");
+            });
+            nextBtn.style.display = "none";
             var docButtons = div("inlineDocsButtons",
                         btn("Star", Ticks.sideTutorialRedisplay, () => {
                             Script.editorState.tutorialRedisplayed = (Script.editorState.tutorialRedisplayed || 0) + 1
                             if (this.stepTutorial)
                                 this.stepTutorial.startAsync().done();
                         }),
+                        nextBtn,
                         cancelBtn
             );
             header.appendChild(docButtons);
