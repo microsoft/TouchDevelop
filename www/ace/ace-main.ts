@@ -26,6 +26,8 @@ module TDev {
     });
 
     function processMessage(message: External.Message) {
+        log("[message] "+message.type);
+
         switch (message.type) {
             case External.MessageType.Init:
                 setupEditor();
