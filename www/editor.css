@@ -1779,6 +1779,7 @@ span.errorSq .kw
     text-align: right;
     flex: 1;
     padding-right: .2em;
+    font-weight: bold;
 }
 
 #externalEditorFrame {

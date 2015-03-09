@@ -2085,7 +2085,7 @@ module TDev
             });
             elt("externalEditorChrome").setChildren([
                 back,
-                div("tdLite", [ "TouchDevelop" ])
+                div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
 
