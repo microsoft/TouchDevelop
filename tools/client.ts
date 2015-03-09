@@ -3439,8 +3439,17 @@ function getMime(filename:string)
         case "manifest": return "text/cache-manifest";
         case "json": return "application/json";
         case "svg": return "image/svg+xml";
+        case "eot": return "application/vnd.ms-fontobject";
+        case "ttf": return "font/ttf";
+        case "woff": return "application/font-woff";
+        case "woff2": return "application/font-woff2";
         default: return "application/octet-stream";
     }
+}
+
+function uploadfile(args:string[])
+{
+    tdupload([args[0], "nolbl", "files"].concat(args.slice(1)))
 }
 
 function tdupload(args:string[])
@@ -3502,7 +3511,7 @@ function tdupload(args:string[])
                 return
             }
 
-            var fileName = path.basename(p)
+            var fileName = liteId == "upload" ? p : path.basename(p)
             var mime = getMime(p)
 
             if (liteUrl) {
@@ -3540,20 +3549,25 @@ function tdupload(args:string[])
         var liteUrl = mm[1]
         key = mm[2]
 
-        tdevGet(liteUrl + "api/releases" + key, resp => {
-            var d = JSON.parse(resp)
-            console.log(d)
-            liteId = d.id
-            if (liteId) {
-                if (channel)
-                    tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
-                        console.log("channel: " + resp)
-                    }, 1, { name: channel })
-                uploadFiles()
-            }
-        }, 1, {
-            releaseid: lbl
-        })
+        if (channel == "files") {
+            liteId = "upload"
+            uploadFiles()
+        } else {
+            tdevGet(liteUrl + "api/releases" + key, resp => {
+                var d = JSON.parse(resp)
+                console.log(d)
+                liteId = d.id
+                if (liteId) {
+                    if (channel)
+                        tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
+                            console.log("channel: " + resp)
+                        }, 1, { name: channel })
+                    uploadFiles()
+                }
+            }, 1, {
+                releaseid: lbl
+            })
+        }
 
     } else {
         uploadFiles()
@@ -3608,6 +3622,7 @@ var cmds = {
     "addstats": { f:addstats, a:'', h:'query detailed stats'},
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
+    "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
 }
 
