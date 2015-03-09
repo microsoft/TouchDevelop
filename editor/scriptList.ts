@@ -5490,7 +5490,7 @@ module TDev { export module Browser {
                 pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
             }
             if (World.updateFor(this.cloudHeader)) {
-                updateB = mkBtn(Ticks.browseEdit, "svg:Recycle,white", lf("update"), null, () => { this.update() });
+                updateB = mkBtn(Ticks.browseEdit, "svg:fa-refresh,white", lf("update"), null, () => { this.update() });
             } else {
                 editB.className = "sdBigButton sdBigButtonFull";
             }

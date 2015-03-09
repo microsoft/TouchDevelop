@@ -471,6 +471,7 @@ module TDev.AST
         azureSite?: string;
         problemCallback?: (prob: string) => void;
         apiKeys?: StringMap<string>;
+        usedProperties?:StringMap<boolean>;
     }
 
     export class Compiler
@@ -1052,7 +1053,20 @@ module TDev.AST
             return res;
         }
 
-        public visitComment(c:Comment) { return []; }
+        public visitComment(c:Comment) {
+            if (this.options.usedProperties.hasOwnProperty("appconsumerenderedcomments")) {
+                var par = (<CodeBlock>c.parent).stmts
+                var idx = par.indexOf(c)
+                if (par[idx - 1] instanceof Comment)
+                    return []; // not first
+                var end = idx
+                while (par[end] instanceof Comment)
+                    end++
+                var d = Step.renderDocs(par.slice(idx, end))
+                return [new JsExprStmt(JsCall.direct("s.rt.saveComment", [new JsLiteral(this.stringLiteral(d))]))]
+            }
+            return [];
+        }
 
         private callString(prop:IProperty, args:JsExpr[], ctxArg:JsExpr, astref: Call) : JsExpr
         {
@@ -1754,6 +1768,8 @@ module TDev.AST
 
         public visitRecordDef(r:RecordDef)
         {
+            if (!this.shouldCompile(r)) return
+
             var mkEntry = "Ent_" + r.getStableName();
             var mkTable = "Tbl_" + r.getStableName();
 
@@ -2041,8 +2057,15 @@ module TDev.AST
             this.inlineCurrentAction = false;
         }
 
+        private shouldCompile(d:Decl)
+        {
+            return d.visitorState === true;
+        }
+
         public visitAction(a:Action)
         {
+            if (!this.shouldCompile(a)) return
+
             this.numActions++;
             if (this.options.inlining && a.canBeInlined) {
                 this.numInlinedFunctions++;
@@ -2162,6 +2185,7 @@ module TDev.AST
             // this will actually only ever turn once
             while (this.innerActions.length > 0) {
                 var aa = this.innerActions.shift();
+                aa.visitorState = true
                 this.dispatch(aa);
             }
         }
@@ -2394,6 +2418,7 @@ module TDev.AST
 
         public visitGlobalDef(d:GlobalDef)
         {
+            if (!this.shouldCompile(d)) return
 
             if (d.isResource && !!d.url) {
                 var resourceId = this.globalVarId(d)
@@ -2537,6 +2562,9 @@ module TDev.AST
 
         static getCompiledScript(a: App, options: CompilerOptions, initialBreakpoints?: Hashtable): CompiledScript // TODO: get rid of Hashtable here
         {
+            var prep = new PreCompiler(options)
+            prep.run(a)
+            
             var cs = new CompiledScript();
             a.clearRecompiler();
             var compiled = [];
@@ -2690,6 +2718,7 @@ module TDev.AST
                 }
                 //if (this.options.packaging && l.isCloud()) return
                 l.getPublicActions().forEach((act:Action) => {
+                    if (!this.shouldCompile(act)) return
                     var an = this.stringLiteral(act.getName());
                     this.wr("    lib[" + an + "] = cs.mkLibProxyFactory(bnd, " + ln + ", " + an + ");\n");
                 });
@@ -2889,7 +2918,7 @@ module TDev.AST
                 this.wr("cs.hasLocalData = 1;\n");
             if (this.needsScriptText)
                 this.wr("var scriptText = " + this.stringLiteral(a.serialize()) + ";\n");
-            if (this.options.isTopLevel)
+            if (this.options.isTopLevel && this.options.usedProperties.hasOwnProperty("appreflect"))
                 this.wr("cs.reflectionInfo = { actions: " + JSON.stringify(Json.reflectionInfo(a)) + " };\n");
             if (this.options.packaging && this.options.artResolver) {
                 if (a.iconArtId)
@@ -3012,5 +3041,26 @@ module TDev.AST
             this.doCall(c, PropertyFlags.None)
         }
 
+    }
+
+    class PreCompiler
+        extends DeepVisitor
+    {
+        constructor(public options:CompilerOptions)
+        {
+            super()
+            this.options.usedProperties = {}
+        }
+
+        useKind(k:Kind)
+        {
+            var r = k.getRecord()
+            if (r) this.runOnDecl(r)
+        }
+
+        useBuiltinProperty(p:IProperty)
+        {
+            this.options.usedProperties[p.usageKey().toLowerCase()] = true
+        }
     }
 }

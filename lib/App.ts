@@ -630,5 +630,14 @@ module TDev.RT {
             view.append(msgs);
             view.showAsync().done(() => { }, e => { });
         }
+
+        //? Get HTML-rendered content of all comments 'executed' since last call
+        //@ dbgOnly
+        export function consume_rendered_comments(s:IStackFrame):string
+        {
+            var r = s.rt.renderedComments
+            s.rt.renderedComments = ""
+            return r
+        }
     }
 }

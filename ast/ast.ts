@@ -4163,7 +4163,12 @@ module TDev.AST {
         {
             var p = n.prop
             if (!p) return;
-            var d = p.forwardsTo();
+
+            var d:Decl = null
+            if (n.getCall())
+                d = n.getCall().calledExtensionAction()
+            if (!d)
+                d = p.forwardsTo();
 
             if (d) {
                 this.runOnDecl(d);
