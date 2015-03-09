@@ -2075,11 +2075,17 @@ module TDev
         }
 
         private setupExternalButtons() {
+            var back = document.createElement("a");
+            back.textContent = "← back";
+            back.setAttribute("href", "#");
+            back.addEventListener("click", event => {
+                this.goToHub("list:installed-scripts:foobar:overview");
+                event.stopPropagation();
+                event.preventDefault();
+            });
             elt("externalEditorChrome").setChildren([
-                Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => {
-                    this.goToHub("list:installed-scripts:foobar:overview");
-                }),
-                div("tdLite", [ "TouchDevelop Lite" ])
+                back,
+                div("tdLite", [ "TouchDevelop" ])
             ])
         }
 
@@ -3015,6 +3021,7 @@ module TDev
                 var finalExternal = () => scr.then(script => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
+                    External.loadAndSetup(editor);
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });
