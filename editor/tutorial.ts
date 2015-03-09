@@ -1370,6 +1370,12 @@ module TDev
                 TipManager.showScheduled();
             }
 
+            if (cmd == "delay") {
+                document.getElementById("btn-tutorialNextStep").style.display = "none";
+                this.stepCompleted();
+                return;
+            }
+
             if (/^plugin:/.test(cmd)) {
                 if (this.waitingFor == cmd)
                     // plugin started, waiting to finish
@@ -1545,7 +1551,19 @@ module TDev
                 TheEditor.calculator.applyInstruction(null)
                 switch (step.data.command) {
                     case "delay":
-                        Util.setTimeout(3000, () => complete());
+                        this.waitingFor = "delay";
+                        TipManager.setTip(null);
+                        // (<any>TheEditor).hideStmtEditor();
+                        // TheEditor.showVideo();
+                        TheEditor.resetSidePane();
+                        document.getElementById("btn-tutorialNextStep").style.display = "inline-block";
+                        Util.setTimeout(3000, () => {
+                            TipManager.setTip({
+                                tick: Ticks.tutorialNextStep,
+                                title: lf("tap here to move on to the next step"),
+                                description: lf("move on to the next step"),
+                            });
+                        });
                         return;
                     case "run":
                         this.waitingFor = "run"
