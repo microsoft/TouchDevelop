@@ -758,8 +758,7 @@ module TDev { export module Browser {
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
                                 Browser.isWP8app ? null :
-                                div("introThumb introLarge",
-                                    HTML.mkImg(baseUrl + "tutorial/beta.png")),
+                                div("introThumb introLarge", ArtUtil.artImg("kkqqysxz", false)),
                                 div("wall-dialog-body",
                                     Util.fmt("Run the beta version of TouchDevelop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
