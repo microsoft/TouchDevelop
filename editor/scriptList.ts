@@ -3794,6 +3794,7 @@ module TDev { export module Browser {
             cmts.allowVideos = false;
             var formattedText = cmts.formatText(c.text)
             Browser.setInnerHTML(textDiv, formattedText);
+            HTML.fixWp8Links(textDiv);
             dirAuto(textDiv);
 
             // parsing any pub id
@@ -5713,8 +5714,10 @@ module TDev { export module Browser {
                 var uid = this.browser().getCreatorInfo(this.jsonScript);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
 
-                if (this.app.isLibrary)
-                    Browser.setInnerHTML(descDiv, (new MdComments()).formatText(this.jsonScript.description));
+                if (this.app.isLibrary) {
+                    Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
+                    HTML.fixWp8Links(descDiv);
+                }
                 else
                     descDiv.setChildren([Host.expandableTextBox(this.jsonScript.description)]);
 
@@ -7278,6 +7281,7 @@ module TDev { export module Browser {
         private updateCommentsHeader(el : HTMLElement) {
             this.withUpdate(el,(u: JsonGroup) => {
                 Browser.setInnerHTML(el, new MdComments().formatText(u.description));
+                HTML.fixWp8Links(el);
                 if (!this.isMine()) {
                     Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
                         .done(() => {}, e => {
