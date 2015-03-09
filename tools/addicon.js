@@ -1,3 +1,15 @@
+/*
+Adding icons:
+Download http://fortawesome.github.io/Font-Awesome/assets/font-awesome-4.3.0.zip
+Unzip to 'c:/dev/temp/Font-Awesome'
+Go to http://fortawesome.github.io/Font-Awesome/icons/
+Find the icon you want
+From the root github folder run:
+  node tools/addicon.js iconname
+Use "svg:fa-iconanme,black" in the code.
+
+*/
+
 var fs = require('fs')
 
 var faPath = 'c:/dev/temp/Font-Awesome'
