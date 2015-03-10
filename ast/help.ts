@@ -631,7 +631,7 @@ module TDev {
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||
                 macro == "stcode" || macro == "storder" || macro == "stdelete" || macro == "stcheckpoint" || macro == "sthashtags" ||
                 macro == "stnocheers" || macro == "steditormode" || macro == "stnexttutorials" || macro == "stmoretutorials" ||
-                macro == "translations"
+                macro == "translations" || macro == "stpixeltracking"
                 ) {
                 if (this.designTime)
                     return "{" + macro + (arg ? ":" + Util.htmlEscape(arg) : "") + "}";
@@ -1536,6 +1536,12 @@ module TDev {
 
         public templateEditorMode(): string {
             var m = /\{steditormode:([^\}]+)\}/i.exec(this.json.text);
+            if (m) return m[1];
+            return "";
+        }
+
+        public pixelTrackingUrl(): string {
+            var m = /\{stpixeltracking:([^\}]+)\}/i.exec(this.json.text);
             if (m) return m[1];
             return "";
         }
