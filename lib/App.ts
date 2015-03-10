@@ -374,6 +374,11 @@ module TDev.RT {
         var logger:Logger;
         var transports: AppLogTransport[] = [];
 
+        export function clearLogs() {
+            logger = null;
+            transports = [];        
+        }
+
         export function rt_start(rt: Runtime): void
         {
             logger = rt.liveMode() ? null : new Logger();
