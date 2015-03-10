@@ -769,7 +769,9 @@ module TDev
                 var anon = Script.editorState.tutorialAnonymousId;
                 if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
                 trackUrl += "?scriptid=" + this.progressId + "&index=" + prog.index + "&total=" + prog.numSteps + "&completed=" + !!prog.completed + "&time=" + prog.lastUsed + "&anonid=" + anon;
-                var pixel = HTML.mkImg(trackUrl, "tracking-pixel");
+                var pixel = <HTMLImageElement> document.createElement("img");
+                pixel.className = "tracking-pixel";
+                pixel.src = trackUrl;
                 pixel.onload = (el) => pixel.removeSelf();
                 pixel.onerror = (el) => pixel.removeSelf();
                 elt("root").appendChild(pixel);
