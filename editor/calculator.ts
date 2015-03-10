@@ -435,7 +435,9 @@ module TDev
             this.fixCursorPosition();
             var tokens = this.expr.tokens;
 
-            if (this.stmt instanceof AST.RecordField && tokens.length == 0) {
+            if ((this.stmt instanceof AST.RecordField || this.stmt instanceof AST.ActionParameter)
+                && tokens.length == 0)
+            {
                 TheEditor.dismissSidePane();
                 return;
             }
