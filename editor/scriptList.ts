@@ -1072,8 +1072,7 @@ module TDev { export module Browser {
                 currentScreen.hide()
             stub.scriptName = this.newScriptName(stub.scriptName);
             return TheEditor.prepareForLoadAsync(lf("creating script"), () =>
-                TheEditor
-                    .newScriptAndLoadAsync(stub, t));
+                TheEditor.newScriptAndLoadAsync(stub, t));
         }
 
         public getInstalledByPubId(id:string)

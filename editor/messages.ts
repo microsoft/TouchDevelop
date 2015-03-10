@@ -15,5 +15,17 @@ module TDev {
         export interface Message {
             type: MessageType;
         }
+
+        export interface Message_Init extends Message {
+            type: MessageType;
+            text: string;
+            state: string;
+        }
+
+        export interface Message_Save extends Message {
+            type: MessageType;
+            text: string;
+            state: string;
+        }
     }
 }

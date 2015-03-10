@@ -14,6 +14,8 @@ module TDev {
 
     // Written once when we receive the first (trusted) message.
     var outer: Window = null;
+    // Also written once at initialization-time.
+    var editor: AceAjax.Editor = null;
 
     window.addEventListener("message", (event) => {
         if (!(event.origin in allowedOrigins))
@@ -26,11 +28,11 @@ module TDev {
     });
 
     function receive(message: External.Message) {
-        log("[message] "+message.type);
+        console.log("[inner message]", message);
 
         switch (message.type) {
             case External.MessageType.Init:
-                setupEditor();
+                setupEditor(<External.Message_Init> message);
                 setupButtons();
                 break;
         }
@@ -43,17 +45,23 @@ module TDev {
         outer.postMessage(message, "*");
     }
 
-    function setupEditor() {
-        var editor = ace.edit("editor");
+    function setupEditor(message: External.Message_Init) {
+        editor = ace.edit("editor");
         editor.setTheme("ace/theme/twilight");
         editor.getSession().setMode("ace/mode/c_cpp");
+        editor.setValue(message.text);
 
         log("[end] setupEditor");
     }
 
     function setupButtons() {
         document.querySelector("#command-save").addEventListener("click", () => {
-            post({ type: External.MessageType.Save });
+            var message: External.Message_Save = {
+                type: External.MessageType.Save,
+                text: editor.getValue(),
+                state: ""
+            };
+            post(message);
         });
         document.querySelector("#command-compile").addEventListener("click", () => {
             post({ type: External.MessageType.Compile });

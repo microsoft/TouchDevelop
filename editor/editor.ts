@@ -3006,7 +3006,7 @@ module TDev
 
                 var scr = Promise.as(script)
 
-                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script)) {
+                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script) && !header.editor) {
                     ProgressOverlay.setProgress("upgrading script text for future merges");
                     scr = this.addIdsAsync(header, worldInfo.baseId, script)
                 }
@@ -3020,10 +3020,10 @@ module TDev
                     ProgressOverlay.setProgress("parsing script text");
                     return this.loadScriptTextAsync(worldInfo, scriptN, editorState, true);
                 });
-                var finalExternal = () => scr.then(script => {
+                var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
-                    External.loadAndSetup(editor);
+                    External.loadAndSetup(editor, scriptText);
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });

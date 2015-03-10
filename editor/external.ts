@@ -31,31 +31,54 @@ module TDev {
     export module External {
         export var TheChannel: Channel = null;
 
+        interface SavedScript {
+            state: string;
+            text: string;
+        }
+
+        var emptyScript: SavedScript = { state: "", text: "" };
+
         export class Channel {
             constructor(private editor: ExternalEditor, private iframe: HTMLIFrameElement) {
-                this.post({ type: MessageType.Init });
             }
 
-            private post(message: Message) {
+            public post(message: Message) {
                 // FIXME: shouldn't use *
                 this.iframe.contentWindow.postMessage(message, "*");
             }
 
             public receive(event) {
-                console.log("[external] new message", event);
+                console.log("[outer message]", event);
                 if (event.origin != this.editor.origin)
                     return;
 
-                var message = <Message> event.data;
+                switch ((<Message> event.data).type) {
+                    case MessageType.Save: {
+                        var message = <Message_Save> event.data;
+                        break;
+                    }
+
+                    default:
+                        console.error("[external] unexpected message type", message.type);
+                        break;
+                }
             }
         }
 
-        export function loadAndSetup(editor: ExternalEditor) {
+        export function loadAndSetup(editor: ExternalEditor, scriptText: string) {
+            // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
+
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
+                var script: SavedScript = script ? JSON.parse(scriptText) : emptyScript;
                 TheChannel = new Channel(editor, iframe);
+                TheChannel.post({
+                    type: MessageType.Init,
+                    text: script.text,
+                    state: script.state
+                });
             });
             iframe.setAttribute("src", editor.origin + editor.path);
             iframeDiv.appendChild(iframe);
