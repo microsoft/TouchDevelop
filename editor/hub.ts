@@ -999,7 +999,8 @@ module TDev.Browser {
                     name: "TouchDevelop",
                     description: "The touch editor you love and know!",
                     id: "touchdevelop",
-                    root: ""
+                    origin: "",
+                    path: "",
                 }]).forEach(k => {
                     var icon = div("sdIcon");
                     icon.style.backgroundColor = ScriptIcons.stableColorFromName(k.name);

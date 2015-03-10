@@ -2079,6 +2079,7 @@ module TDev
             back.textContent = "← back";
             back.setAttribute("href", "#");
             back.addEventListener("click", event => {
+                External.TheChannel = null;
                 this.goToHub("list:installed-scripts:foobar:overview");
                 event.stopPropagation();
                 event.preventDefault();

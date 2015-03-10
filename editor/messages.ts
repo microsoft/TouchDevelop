@@ -14,7 +14,6 @@ module TDev {
 
         export interface Message {
             type: MessageType;
-            data: any;
         }
     }
 }

@@ -7,16 +7,18 @@ module TDev {
         description: string;
         // An internal ID
         id: string;
-        // A URL that points to the inner iframe to be displayed in lieu of the
-        // original TouchDevelop editor.
-        root: string;
+        // The domain root for the external editor.
+        origin: string;
+        // The path from the domain root to the editor main document.
+        path: string;
     }
 
     export var externalEditors: ExternalEditor[] = [ {
-        name: "Ace Editor",
-        description: "A test editor",
+        name: "C++ Editor",
+        description: "Directly write C++ code using Ace",
         id: "ace",
-        root: "http://localhost:4242/editor/local/ace/editor.html"
+        origin: "http://localhost:4242",
+        path: "/editor/local/ace/editor.html"
     } ];
 
     // Assumes that [id] is a valid external editor id.
@@ -27,16 +29,24 @@ module TDev {
     }
 
     export module External {
-        var theChannel: Channel = null;
+        export var TheChannel: Channel = null;
 
-        class Channel {
-            constructor(private iframe: HTMLIFrameElement) {
-                this.post({ type: MessageType.Init, data: null });
+        export class Channel {
+            constructor(private editor: ExternalEditor, private iframe: HTMLIFrameElement) {
+                this.post({ type: MessageType.Init });
             }
 
             private post(message: Message) {
-                // FIXME
+                // FIXME: shouldn't use *
                 this.iframe.contentWindow.postMessage(message, "*");
+            }
+
+            public receive(event) {
+                console.log("[external] new message", event);
+                if (event.origin != this.editor.origin)
+                    return;
+
+                var message = <Message> event.data;
             }
         }
 
@@ -45,9 +55,9 @@ module TDev {
             iframeDiv.setChildren([]);
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
-                theChannel = new Channel(iframe);
+                TheChannel = new Channel(editor, iframe);
             });
-            iframe.setAttribute("src", editor.root);
+            iframe.setAttribute("src", editor.origin + editor.path);
             iframeDiv.appendChild(iframe);
         }
     }

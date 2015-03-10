@@ -22,17 +22,25 @@ module TDev {
         if (!outer)
             outer = event.source;
 
-        processMessage(<External.Message>event.data);
+        receive(<External.Message>event.data);
     });
 
-    function processMessage(message: External.Message) {
+    function receive(message: External.Message) {
         log("[message] "+message.type);
 
         switch (message.type) {
             case External.MessageType.Init:
                 setupEditor();
+                setupButtons();
                 break;
         }
+    }
+
+    function post(message: External.Message) {
+        if (!outer)
+            console.error("Invalid state");
+        // FIXME
+        outer.postMessage(message, "*");
     }
 
     function setupEditor() {
@@ -43,4 +51,12 @@ module TDev {
         log("[end] setupEditor");
     }
 
+    function setupButtons() {
+        document.querySelector("#command-save").addEventListener("click", () => {
+            post({ type: External.MessageType.Save });
+        });
+        document.querySelector("#command-compile").addEventListener("click", () => {
+            post({ type: External.MessageType.Compile });
+        });
+    }
 }
