@@ -2079,8 +2079,8 @@ module TDev
             back.textContent = "← back";
             back.setAttribute("href", "#");
             back.addEventListener("click", event => {
+                this.goToHub("list:installed-scripts:script:"+External.TheChannel.guid+":overview");
                 External.TheChannel = null;
-                this.goToHub("list:installed-scripts:foobar:overview");
                 event.stopPropagation();
                 event.preventDefault();
             });
@@ -3023,7 +3023,7 @@ module TDev
                 var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
-                    External.loadAndSetup(editor, scriptText);
+                    External.loadAndSetup(editor, scriptText, header.guid);
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });

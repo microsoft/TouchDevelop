@@ -39,7 +39,10 @@ module TDev {
         var emptyScript: SavedScript = { state: "", text: "" };
 
         export class Channel {
-            constructor(private editor: ExternalEditor, private iframe: HTMLIFrameElement) {
+            constructor(
+                private editor: ExternalEditor,
+                private iframe: HTMLIFrameElement,
+                public guid: string) {
             }
 
             public post(message: Message) {
@@ -55,6 +58,16 @@ module TDev {
                 switch ((<Message> event.data).type) {
                     case MessageType.Save: {
                         var message = <Message_Save> event.data;
+                        World.getInstalledHeaderAsync(this.guid).then(header => {
+                            var script: SavedScript = {
+                                state: message.state,
+                                text: message.text
+                            };
+                            World.setInstalledScriptAsync(header, JSON.stringify(script), "").then(() => {
+                                // FIXME define and send Message_SaveAck
+                                console.log("[external] script saved properly");
+                            });
+                        });
                         break;
                     }
 
@@ -65,15 +78,15 @@ module TDev {
             }
         }
 
-        export function loadAndSetup(editor: ExternalEditor, scriptText: string) {
+        export function loadAndSetup(editor: ExternalEditor, scriptText: string, guid: string) {
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
 
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
-                var script: SavedScript = script ? JSON.parse(scriptText) : emptyScript;
-                TheChannel = new Channel(editor, iframe);
+                var script: SavedScript = scriptText ? JSON.parse(scriptText) : emptyScript;
+                TheChannel = new Channel(editor, iframe, guid);
                 TheChannel.post({
                     type: MessageType.Init,
                     text: script.text,

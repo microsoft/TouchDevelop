@@ -50,6 +50,7 @@ module TDev {
         editor.setTheme("ace/theme/twilight");
         editor.getSession().setMode("ace/mode/c_cpp");
         editor.setValue(message.text);
+        editor.clearSelection();
 
         log("[end] setupEditor");
     }

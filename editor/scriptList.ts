@@ -5776,7 +5776,10 @@ module TDev { export module Browser {
 
             this.getScriptTextAsync()
                 .done((scriptText:string) => {
-                if (!scriptText) return;
+                if (!scriptText)
+                    return;
+                if (this.cloudHeader && this.cloudHeader.editor)
+                    return;
 
                 var oldPlatform = this.app && this.app.getPlatform();
 
