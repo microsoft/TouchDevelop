@@ -210,11 +210,12 @@ module TDev.Cloud {
         Object.keys(data).forEach(id => {
             var oldProgress = oldData[id];
             var progress = data[id];
-            if (oldProgress &&
-                (!oldProgress.guid || !progress.guid) &&
+            var uploaded = oldProgress && (!oldProgress.guid || !progress.guid || oldProgress.guid == progress.guid) &&
                 (oldProgress.index === undefined || progress.index === undefined || oldProgress.index <= progress.index) &&
-                (oldProgress.completed === undefined || progress.completed === undefined || oldProgress.completed >= progress.completed ))
+                (oldProgress.completed === undefined || progress.completed === undefined || oldProgress.completed <= progress.completed);                
+            if (uploaded) {
                 delete oldData[id];
+            }
         });
         window.localStorage.setItem("progress",  JSON.stringify(oldData))
     }
@@ -604,9 +605,10 @@ module TDev.Cloud {
         });
     }
     export function postPendingProgressAsync() {
-        if (!getUserId() || !getAccessToken() || isOffline() || dbg) return Promise.as();
+        if (!getUserId() || !getAccessToken() || isOffline()) return Promise.as();
         var data = loadPendingProgress();
         if (Object.keys(data).length == 0) return Promise.as();
+        Util.log('progress: ' + JSON.stringify(data));
         return Cloud.postPrivateApiAsync("me/progress", data)
             .then(
                 () => clearPendingProgress(data),
