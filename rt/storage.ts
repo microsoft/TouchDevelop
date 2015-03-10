@@ -41,7 +41,7 @@ module TDev {
         }
 
         // uses an in-memory object or localstorage
-        var memoryStorage: any = {};
+        var memoryStorage: StringMap<string> = {};
         class MemoryTable implements Table {
             public getValueAsync(key: string): Promise {
                 var v = memoryStorage[this.tableName + "-" + key];
@@ -65,13 +65,13 @@ module TDev {
                 });
                 return Promise.as(results);
             }
-            public setItemsAsync(items: any): Promise {
+            public setItemsAsync(items: any): Promise { // of string
                 Object.keys(items).forEach((k) => {
                     var v = items[k];
                     if (typeof v === "string")
                         memoryStorage[this.tableName + "-" + k] = v;
                     else
-                        memoryStorage.removeItem(this.tableName + "-" + k);
+                        delete memoryStorage[this.tableName + "-" + k];
                 });
                 return Promise.as();
             }
