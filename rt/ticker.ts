@@ -38,6 +38,7 @@ module TDev {
         tutorialTranslateScript,
         tutorialKeepEditing,
         tutorialMoreTutorials,
+        tutorialNextStep,
 
         dodStart,
         dodDrop,

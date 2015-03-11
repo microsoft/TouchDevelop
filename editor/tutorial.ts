@@ -737,6 +737,7 @@ module TDev
             this.lastModalDuration = undefined
             if (modalDuration) modalDuration /= 1000;
             var playDuration = this.currentStep > 0 ? TheEditor.lastPlayDuration() : undefined;
+
             Cloud.postPrivateApiAsync("progress", {
                 progressId: this.progressId,
                 index: this.currentStep,
@@ -746,18 +747,56 @@ module TDev
                 goalTips: goalTips,
                 modalDuration: modalDuration,
                 playDuration: playDuration,
-            }).done(undefined, () => { }); // don't wait, don't report error
+            }).done(undefined,() => { }); // don't wait, don't report error
+
             var data = <{ [id: string]: Cloud.Progress; }>{};
             var n = Math.round(Util.now() / 1000)
-            data[this.progressId] = {
+            var prog = {
                 guid: this.guid,
                 index: this.currentStep,
                 lastUsed: n,
                 numSteps: this.steps.length,
                 completed: this.currentStep >= this.steps.length ? n : undefined
             };
+            data[this.progressId] = prog;
             Cloud.storeProgress(data);
             Cloud.postPendingProgressAsync().done();
+
+            // create a new tracking pixel and add it to the tree
+            var trackUrl = this.topic.pixelTrackingUrl();
+            if (trackUrl) {
+                // generate new id on demand
+                var anon = Script.editorState.tutorialAnonymousId;
+                if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
+                trackUrl += "?scriptid=" + this.progressId + "&index=" + prog.index + "&total=" + prog.numSteps + "&completed=" + !!prog.completed + "&time=" + prog.lastUsed + "&anonid=" + anon;
+                var pixel = <HTMLImageElement> document.createElement("img");
+                pixel.className = "tracking-pixel";
+                pixel.src = trackUrl;
+                pixel.onload = (el) => pixel.removeSelf();
+                pixel.onerror = (el) => pixel.removeSelf();
+                elt("root").appendChild(pixel);
+            }
+
+            // pushing directly into event hubs
+            var eventHubsInfo = this.topic.eventHubsTracking();
+            if (eventHubsInfo) {
+                var anon = Script.editorState.tutorialAnonymousId;
+                if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
+                var client = new XMLHttpRequest();
+                var url = 'https://' + eventHubsInfo.namespace + '.servicebus.windows.net/' + eventHubsInfo.hub + '/publishers/' + anon + '/messages?timeout=60&api-version=2014-01';
+                Util.log('event hubs: ' + url);
+                client.open('POST', url);
+                client.setRequestHeader('Authorization', eventHubsInfo.token);
+                client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
+                client.send(JSON.stringify({
+                    anonid: anon,
+                    scriptid: this.progressId,
+                    index: prog.index,
+                    total: prog.numSteps,
+                    completed: !!prog.completed,
+                    time: prog.lastUsed
+                }));
+            }
         }
 
         public showDiff()
@@ -1370,6 +1409,12 @@ module TDev
                 TipManager.showScheduled();
             }
 
+            if (cmd == "delay") {
+                document.getElementById("btn-tutorialNextStep").style.display = "none";
+                this.stepCompleted();
+                return;
+            }
+
             if (/^plugin:/.test(cmd)) {
                 if (this.waitingFor == cmd)
                     // plugin started, waiting to finish
@@ -1545,7 +1590,19 @@ module TDev
                 TheEditor.calculator.applyInstruction(null)
                 switch (step.data.command) {
                     case "delay":
-                        Util.setTimeout(3000, () => complete());
+                        this.waitingFor = "delay";
+                        TipManager.setTip(null);
+                        // (<any>TheEditor).hideStmtEditor();
+                        // TheEditor.showVideo();
+                        TheEditor.resetSidePane();
+                        document.getElementById("btn-tutorialNextStep").style.display = "inline-block";
+                        Util.setTimeout(3000, () => {
+                            TipManager.setTip({
+                                tick: Ticks.tutorialNextStep,
+                                title: lf("tap here to move on to the next step"),
+                                description: lf("move on to the next step"),
+                            });
+                        });
                         return;
                     case "run":
                         this.waitingFor = "run"
