@@ -2081,6 +2081,7 @@ module TDev.AST {
         tutorialMode?: string;
         tutorialNumSteps?: number;
         tutorialUpdateKey?: string;
+        tutorialAnonymousId?: string;
 
         deployWebsite?: string;
         parentScriptGuid?: string;

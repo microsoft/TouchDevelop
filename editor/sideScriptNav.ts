@@ -201,9 +201,9 @@ module TDev
 
             if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") &&
                 (Azure.getWebsiteAuthForApp(app) || app.usesCloudLibs() || Script.usesCloudLibs())) {
-                addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("deploy"), Ticks.sideDeployWebSite, () => {
+                addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("deploy"), Ticks.sideDeployWebSite,() => {
+                    TDev.RT.App.clearLogs();
                     var wa = Azure.getWebsiteAuthForApp(app)
-
                     var recompile = Promise.as()
                     if (app != Script)
                         recompile =

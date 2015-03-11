@@ -758,8 +758,7 @@ module TDev { export module Browser {
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
                                 Browser.isWP8app ? null :
-                                div("introThumb introLarge",
-                                    HTML.mkImg(baseUrl + "tutorial/beta.png")),
+                                div("introThumb introLarge", ArtUtil.artImg("kkqqysxz", false)),
                                 div("wall-dialog-body",
                                     Util.fmt("Run the beta version of TouchDevelop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
@@ -959,14 +958,24 @@ module TDev { export module Browser {
                             if (group) {
                                 showBtn();
                                 groupid = group.id;
+                                var groupInfo = this.getGroupInfoById(groupid);
                                 errorDiv.setChildren([
-                                    div('wall-dialog-header', 'found group'),
-                                    this.getGroupInfoById(group.id).mkSmallBox()
+                                    div('wall-dialog-header', lf("for group")),
+                                    groupInfo.mkSmallBox()
                                 ]);
                                 if (group.allowexport)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
                                 if (group.allowappstatistics)
                                     errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
+
+                                if (!!Cloud.getUserId())
+                                    Cloud.getPublicApiAsync("me/groups?count=100")
+                                        .done((groups: JsonList) => {
+                                            if (groups.items.some(gr => gr.id == groupid)) {
+                                                Util.log('user already member of group, opening');
+                                                TheHost.loadDetails(groupInfo);
+                                            }
+                                        }, () => { });
                             } else {
                                 hideBtn();
                                 if (lastCode.expiration > Date.now() / 1000)
@@ -1001,10 +1010,10 @@ module TDev { export module Browser {
             descr.value = "";
 
             var school = HTML.mkTextInput("text", lf("enter the school name"));
-            school.value = lf("enter the school name");
+            school.value = "";
 
             var grade = HTML.mkTextInput("text", lf("enter class grade"));
-            grade.value = lf("enter the class grade");
+            grade.value = "";
 
             var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
             HTML.setCheckboxValue(allowExport, false);
@@ -3785,6 +3794,7 @@ module TDev { export module Browser {
             cmts.allowVideos = false;
             var formattedText = cmts.formatText(c.text)
             Browser.setInnerHTML(textDiv, formattedText);
+            HTML.fixWp8Links(textDiv);
             dirAuto(textDiv);
 
             // parsing any pub id
@@ -5704,8 +5714,10 @@ module TDev { export module Browser {
                 var uid = this.browser().getCreatorInfo(this.jsonScript);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
 
-                if (this.app.isLibrary)
-                    Browser.setInnerHTML(descDiv, (new MdComments()).formatText(this.jsonScript.description));
+                if (this.app.isLibrary) {
+                    Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
+                    HTML.fixWp8Links(descDiv);
+                }
                 else
                     descDiv.setChildren([Host.expandableTextBox(this.jsonScript.description)]);
 
@@ -7269,6 +7281,7 @@ module TDev { export module Browser {
         private updateCommentsHeader(el : HTMLElement) {
             this.withUpdate(el,(u: JsonGroup) => {
                 Browser.setInnerHTML(el, new MdComments().formatText(u.description));
+                HTML.fixWp8Links(el);
                 if (!this.isMine()) {
                     Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
                         .done(() => {}, e => {

@@ -2955,6 +2955,7 @@ module TDev
             Util.assert(header.status != "deleted");
             var editorState:string;
 
+            TDev.RT.App.clearLogs();
             Util.log("loadScriptAsync: " + header.guid);
             return World.getInstalledHeaderAsync(header.guid)
             .then(resp => {
