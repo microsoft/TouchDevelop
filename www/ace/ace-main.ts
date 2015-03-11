@@ -12,8 +12,10 @@ module TDev {
         "http://www.touchdevelop.com": null,
     };
 
-    // Written once when we receive the first (trusted) message.
+    // Both of these are written once when we receive the first (trusted)
+    // message.
     var outer: Window = null;
+    var origin: string = null;
     // Also written once at initialization-time.
     var editor: AceAjax.Editor = null;
 
@@ -21,8 +23,10 @@ module TDev {
         if (!(event.origin in allowedOrigins))
             return;
 
-        if (!outer)
+        if (!outer || !origin) {
             outer = event.source;
+            origin = event.origin;
+        }
 
         receive(<External.Message>event.data);
     });
@@ -41,8 +45,7 @@ module TDev {
     function post(message: External.Message) {
         if (!outer)
             console.error("Invalid state");
-        // FIXME
-        outer.postMessage(message, "*");
+        outer.postMessage(message, origin);
     }
 
     function setupEditor(message: External.Message_Init) {

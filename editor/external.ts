@@ -46,8 +46,7 @@ module TDev {
             }
 
             public post(message: Message) {
-                // FIXME: shouldn't use *
-                this.iframe.contentWindow.postMessage(message, "*");
+                this.iframe.contentWindow.postMessage(message, this.editor.origin);
             }
 
             public receive(event) {
