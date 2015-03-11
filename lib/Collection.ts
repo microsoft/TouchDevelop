@@ -308,41 +308,23 @@ module TDev.RT {
 
         //? Ask user to pick an entry from this collection
         //@ uiAsync returns(T)
-        public pick_entry(text: string, r: ResumeCtx)  {
+        public pick_entry(text: string, r: ResumeCtx) {
             var rt = r.rt;
-            var getView = (o:any) => {
+            var getView = (o: any) => {
                 if (o.getIndexCard) return o.getIndexCard(r.stackframe)
                 else if (o.getViewCore) return o.getViewCore(r.stackframe, null)
                 else if (o.toString) return o.toString()
                 else return o + ""
             };
-            if (rt.useModalWallDialogs()) {
-                var m = new ModalDialog();
-                var chosen = null;
-                var btns = this.a.map((o: any) => div('modalDialogChooseItem', getView(o)).withClick(() => {
-                    chosen = o;
-                    m.dismiss();
-                }));
-                m.add([div("wall-dialog-header", text)/* ,div("wall-dialog-body", caption)*/]);
-                m.onDismiss = () => r.resumeVal(chosen);
-                m.choose(btns);
-            } else {
-                var btnsDiv: HTMLElement;
-                var btns2 = this.a.map((o: any) => {
-                    var btn = HTML.mkButtonElt("wall-button", getView(o));
-                    Util.clickHandler(btn, () =>
-                    {
-                        r.resumeVal(o);
-                        btnsDiv.removeSelf();
-                    });
-                    return btn;
-                });
-                var elt = div("wall-dialog",
-                    [div("wall-dialog-header", text),
-                        /*div("wall-dialog-body", caption),*/
-                        btnsDiv = div("wall-dialog-buttons", btns2)]);
-                rt.postHtml(elt, rt.current.pc);
-            }
+            var m = new ModalDialog();
+            var chosen = null;
+            var btns = this.a.map((o: any) => div('modalDialogChooseItem', getView(o)).withClick(() => {
+                chosen = o;
+                m.dismiss();
+            }));
+            m.add([div("wall-dialog-header", text)/* ,div("wall-dialog-body", caption)*/]);
+            m.onDismiss = () => r.resumeVal(chosen);
+            m.choose(btns);
         }
 
         //? Computes the sum of the key of the elements in the collection

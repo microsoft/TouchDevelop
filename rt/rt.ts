@@ -526,13 +526,6 @@ module TDev
         ////////////////////////////////////////////////////////////////////////
         // Wall methods
         ////////////////////////////////////////////////////////////////////////
-        public useModalWallDialogs(): boolean {
-
-            if (this.rendermode)
-                Util.userError(lf("cannot ask user in page display code"));
-            return this.host.isFullScreen() ||
-                !this.mayPostToWall(this.getCurrentPage());
-        }
 
         public mayPostToWall(p: WallPage): boolean {
             return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
