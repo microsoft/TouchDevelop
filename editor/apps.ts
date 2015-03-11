@@ -1228,16 +1228,6 @@ module TDev.AppExport
         wa.destinationAppUrl = wa.destinationAppUrl.replace(/\/*$/, "/")
         m.add(div("wall-dialog-header", lf("hooray! your web site is deployed")));
         m.add(div('share-url', HTML.mkA('', wa.destinationAppUrl, 'tdwebapp', wa.destinationAppUrl)));
-
-        var lnk = RT.Link.mk(wa.destinationAppUrl, RT.LinkKind.hyperlink)
-        lnk.set_title(wa.website + " #touchdevelop")
-        var options = <RT.ShareManager.ShareOptions> {
-            header: "share this web site",
-            noDismiss: true,
-            justButtons: true
-        };
-        RT.ShareManager.addShareButtons(m, lnk, options)
-
         m.addOk("close", () => {
             m.dismiss();
         });
