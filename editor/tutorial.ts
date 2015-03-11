@@ -847,10 +847,15 @@ module TDev
 
         private nowPublish()
         {
-            if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script)
+            TheEditor.leaveTutorial(); // always leave tutorial
+
+            // not generally signed in
+            if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script) return;
+
+            // author explicitely wanted to skip step
+            if (!this.topic || /none/i.test(this.topic.nextTutorials()[0]))
                 return;
 
-            TheEditor.leaveTutorial();
             World.getInstalledHeaderAsync(Script.localGuid).done((h: Cloud.Header) => {
                 if (h.status == "published") return Promise.as();
 
