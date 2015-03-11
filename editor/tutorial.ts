@@ -776,6 +776,27 @@ module TDev
                 pixel.onerror = (el) => pixel.removeSelf();
                 elt("root").appendChild(pixel);
             }
+
+            // pushing directly into event hubs
+            var eventHubsInfo = this.topic.eventHubsTracking();
+            if (eventHubsInfo) {
+                var anon = Script.editorState.tutorialAnonymousId;
+                if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
+                var client = new XMLHttpRequest();
+                var url = 'https://' + eventHubsInfo.namespace + '.servicebus.windows.net/' + eventHubsInfo.hub + '/publishers/' + anon + '/messages?timeout=60&api-version=2014-01';
+                Util.log('event hubs: ' + url);
+                client.open('POST', url);
+                client.setRequestHeader('Authorization', eventHubsInfo.token);
+                client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
+                client.send(JSON.stringify({
+                    anonid: anon,
+                    scriptid: this.progressId,
+                    index: prog.index,
+                    total: prog.numSteps,
+                    completed: !!prog.completed,
+                    time: prog.lastUsed
+                }));
+            }
         }
 
         public showDiff()
