@@ -1,6 +1,18 @@
 ///<reference path='../typings/node/node.d.ts'/>
 
 import fs = require('fs');
+
+var fileLog: (msg: string) => void = undefined;
+if (process.env["TD_SHELL_LOG_FILE"]) {
+    var logPath = process.env["TD_SHELL_LOG_FILE"];
+    fileLog = (msg) => {
+        var fl = fs.openSync(logPath, "a");
+        var b = new Buffer(msg + '\r\n');
+        fs.writeSync(fl, b, 0, b.length, 0);
+        fs.closeSync(fl);
+    }
+}
+
 import url = require('url');
 import http = require('http');
 import https = require('https');
@@ -49,10 +61,9 @@ class Logger {
     logIdx = -1;
     logMsgs:LogMessage[] = [];
     logSz = 1000;
-
-    constructor(public level:number)
-    {
-    }
+    
+    constructor(public name : string, public level:number)
+    {}
 
     addMsg(s:string)
     {
@@ -60,6 +71,7 @@ class Logger {
             timestamp: Date.now(),
             msg: s
         }
+        if (fileLog) fileLog(s);
         if (!inAzure) console.log(s)
         if (this.logIdx >= 0) {
             this.logMsgs[this.logIdx++] = m;
@@ -104,9 +116,9 @@ class Logger {
     }
 }
 
-var error = new Logger(3)
-var info = new Logger(6)
-var debug = new Logger(7)
+var error = new Logger("error", 3)
+var info = new Logger("info", 6)
+var debug = new Logger("debug", 7)
 
 class ApiRequest {
     data:any = {}
@@ -249,7 +261,6 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
 
             g.on('end', () => {
                 var total = Buffer.concat(bufs)
-                //console.log("download file: " + u + " " + total.length)
                 f(null, total, (<any>res).headers)
             })
 
@@ -1494,7 +1505,6 @@ function proxyEditor(cmds:string[], req, resp)
                     s = (<any>s).replace(/(browsers|error)Url = .*/g, (a, b) => b + "Url = \"" + selfUrl + "/" + specRel + "/" + b + "\"")
                 }
                 s = s.replace(/localProxy = ".*"/, 'localProxy = "yes"')
-                //console.log(specRel)
                 if (rel == "local") {
                     s = s.replace(/betaFriendlyId = ".*"/, "betaFriendlyId = \"(local)\"")
                 } else if (specRel == "current") {
@@ -1782,7 +1792,7 @@ function respawnLoop()
                     console.error("Too many failures, aborting. Please retry manually.");
                     process.exit();
                 } else {
-                    console.log("Failure, retrying in 5s...");
+                    debug.log("Failure, retrying in 5s...");
                     setTimeout(startOne, 5000);
                 }
             }
