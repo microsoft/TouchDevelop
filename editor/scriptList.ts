@@ -5440,9 +5440,30 @@ module TDev { export module Browser {
                                div("hubTileTitleBar",
                                      div("hubTileTitle", spanDirAuto(this.app.getName())),
                                      div("hubTileSubtitle",
-                                        div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
+                                         div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
+                this.addTutorialProgress(d);
             });
             return d;
+        }
+
+        public addTutorialProgress(d: HTMLElement) {
+            if (this.cloudHeader)
+                World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
+                    if (!text) return;
+                    var prog = <AST.AppEditorState>JSON.parse(text);
+                    var num = prog.tutorialNumSteps - (prog.tutorialStep || 0);
+                    if (prog.tutorialId && num > 0) {
+                        var starSpan = span("bold",((prog.tutorialStep || 0) + 1) + "★");
+                        var ofSteps = prog.tutorialNumSteps ? " of " + (prog.tutorialNumSteps + 1) : "";
+                        d.appendChild(div("tutProgress",
+                            ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
+                                div(lf("steps done"), lf("done!"), div("label", starSpan))
+                                :
+                                div("steps", starSpan, ofSteps,
+                                    div("label", lf("tutorial progress"))))
+                            ))
+                    }
+                });
         }
 
         public willWork() {

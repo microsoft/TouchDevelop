@@ -753,7 +753,7 @@ module TDev.Browser {
                 })
         }
 
-        public tutorialsByUpdateIdAsync()
+        public tutorialsByUpdateIdAsync(): Promise // StringMap<AST.HeaderWithState>
         {
             return this.browser().getTutorialsStateAsync().then((headers:AST.HeaderWithState[]) => {
                 var res = {}
@@ -807,7 +807,7 @@ module TDev.Browser {
         // - once this is done, we call [finish]
         // - because we may have found the tutorial we wanted in the process, we
         //   return a new value for [top]
-        private findTutorial(templateId: string, finish) {
+        private findTutorial(templateId: string, finish: (res: { app: AST.App; headers: StringMap<AST.HeaderWithState> }, top: HelpTopic) => void) {
             var top = HelpTopic.findById("t:" + templateId)
 
             if (!this.headerByTutorialId || Date.now() - this.headerByTutorialIdUpdated > 3000) {
@@ -816,7 +816,7 @@ module TDev.Browser {
             }
 
             if (top) {
-                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish(res, top));
+                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish({ app: res[0], headers: res[1] }, top));
             } else {
                 var fetchingId = null
                 var fetchId = id => {
@@ -830,7 +830,7 @@ module TDev.Browser {
                             fetchId(j.updateid);
                         else {
                             top = HelpTopic.fromJsonScript(j);
-                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish(res, top));
+                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish({ app: res[0], headers: res[1] }, top));
                         }
                     })
                 }
@@ -869,20 +869,20 @@ module TDev.Browser {
         {
             var tileOuter = div("tutTileOuter")
 
-            var startTutorial = (top, header: Cloud.Header) => {
+            var startTutorial = (top : HelpTopic, header: Cloud.Header) => {
                 Util.log("tutorialTile.start: " + templateId)
                 if (f)
                     f(header);
                 this.startTutorial(top, header);
             };
 
-            var finish = (res, top: HelpTopic) => {
+            var finish = (res: { app: AST.App; headers: StringMap<AST.HeaderWithState> }, top: HelpTopic) => {
                 var isHelpTopic = !!top;
                 var tile = div("tutTile")
                 tileOuter.setChildren([tile])
 
-                var app:AST.App = res[0]
-                var progs = res[1]
+                var app:AST.App = res.app
+                var progs = res.headers
 
                 var titleText = top.json.name.replace(/ (tutorial|walkthrough)$/i, "");
                 var descText = top.json.description.replace(/ #(docs|tutorials|stepbystep)\b/ig, " ")
@@ -1827,12 +1827,12 @@ module TDev.Browser {
                         // Copied from [tutorialTitle], and (hopefully) simplified.
                         this.findTutorial(id, (res, topic: HelpTopic) => {
                             var key = topic.updateKey();
-                            var header = res[1][key]; // may be null or undefined
+                            var header = res.headers[key]; // may be null or undefined
                             k({
                                 title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
                                 header: header,
                                 topic: topic,
-                                app: res[0],
+                                app: res.app,
                             });
                         });
                     }
