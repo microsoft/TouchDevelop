@@ -20,12 +20,12 @@
        "type": "MIT"
   }],
   "bugs":"http://github.com/microsoft/TouchDevelop/issues",
-  "repositories": [{
+  "repository": {
     "type": "git",
     "url": "http://github.com/microsoft/TouchDevelop.git",
     "path": "node-webkit"
-  }],
+  },
   "dependencies": {
-    "faye-websocket": "0.8.1"
+    "faye-websocket": "0.9.*"
   }
 }
