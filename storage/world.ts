@@ -423,7 +423,8 @@ module TDev {
                 time("readdb1");
                 if (syncVersion != mySyncVersion) return canceled;
                 data.items = data.indexTable.getItemsAsync(data.keys)
-                data.scriptVersionsInCloudItems = data.scriptsTable.getItemsAsync(data.keys.map((guid) => guid + "-scriptVersionInCloud"));
+                if (!Cloud.lite)
+                    data.scriptVersionsInCloudItems = data.scriptsTable.getItemsAsync(data.keys.map((guid) => guid + "-scriptVersionInCloud"));
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
                 time("readdb2");
