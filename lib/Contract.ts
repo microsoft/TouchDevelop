@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Correctness helpers
+    //@ skill(3)
     export module Contract
     {
         //? Specifies a precondition contract for the action; if the condition is false, execution fails. Does nothing for published scripts.

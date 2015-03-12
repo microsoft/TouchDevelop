@@ -2,6 +2,7 @@
 
 module TDev.RT {
     //? Pictures and music...
+    //@ skill(2)
     export module Media
     {
 

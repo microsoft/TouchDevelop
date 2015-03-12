@@ -1,8 +1,5 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
-
-
-
     //? A cloud data session
     //@ ctx(general) stem("session") cap(cloudData) serializable
     export class CloudSession
@@ -143,7 +140,7 @@ module TDev.RT {
     }
 
     //? Cloud session management
-    //@ cap(cloudData)
+    //@ cap(cloudData) skill(3)
     export module CloudData {
 
 

@@ -2,6 +2,7 @@
 
 module TDev.RT {
     //? Arithmetic and bitwise operations on 32 bit integers
+    //@ skill(3)
     export module Bits
     {
         //? Add two unsigned 32 bit numbers

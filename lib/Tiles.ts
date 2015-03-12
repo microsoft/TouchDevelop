@@ -12,7 +12,7 @@ module TDev.RT {
     }
 
     //? tiles and notifications for Windows and Windows Phone
-    //@ cap(tiles)
+    //@ cap(tiles) skill(3)
     export module Tiles
     {
         export var updateTileAsync = (fragment : string, data : ITileData) : Promise =>

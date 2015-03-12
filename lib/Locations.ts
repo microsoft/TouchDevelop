@@ -1,9 +1,9 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Geo coordinates
+    //@ skill(3)
     export module Locations
     {
-
         //? Creates a new geo coordinate location
         export function create_location(latitude:number, longitude:number) : Location_ { return Location_.mk(latitude, longitude, undefined, undefined, undefined, undefined, undefined) }
 

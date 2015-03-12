@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Play, stop or resume songs, ...
+    //@ skill(3)
     export module Player
     {
         var _rt: Runtime;

@@ -530,6 +530,7 @@ module TDev {
         public generalFlags = PropertyFlags.None;
         public _isImmutable = false;
 
+        public minSkill = 0; 
         public _stemName:string;
         public isData:boolean;
         public isBuiltin:boolean;
@@ -574,6 +575,8 @@ module TDev {
         public isExtensionEnabled() { return false }
         public isImmutable() { return this._isImmutable }
 
+        // 1 block, 2 coder, 3 pro
+        public md_skill(sk: number) { this.minSkill = sk; }
         public md_stem(n: string) { this._stemName = n; }
         public md_obsolete() { this.isObsolete = true; }
         public md_isData() { this.isData = true; }
