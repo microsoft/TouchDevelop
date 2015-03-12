@@ -1859,6 +1859,7 @@ module TDev.Browser {
                         : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
                     btn.style.backgroundSize = "cover";
                 }
+                ScriptInfo.addTutorialProgress(btn, tutorial.header);
                 buttons.push(btn);
 
                 if (buttons.length == 6) {
