@@ -1380,7 +1380,9 @@ module TDev.AST
             var code = ""
 
             function localName(l:LocalDef) {
-                return Api.runtimeName(l.getName().replace(/[?]/g, ""))
+                var r = Api.runtimeName(l.getName().replace(/[?]/g, ""))
+                if (r == "s" || r == "lib") return "_" + r
+                return r
             }
 
             function unterm(t:JsExpr)
