@@ -1037,7 +1037,8 @@ module TDev.Browser {
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
                         icon.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
-                        icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
+                        // missing icons
+                        // icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
 
                         var nameBlock = div("sdName", lf_static(template.title, true));
                         var hd = div("sdNameBlock", nameBlock);
