@@ -314,6 +314,7 @@ module TDev
         public webState: RT.Web.State = <any>{};
 
         private state: RtState = RtState.Stopped;
+        private stateMsg: string = undefined;
         // when an event is executing, no other event can start
         private eventExecuting = false;
         // used to prevent recursive invocations of mainLoop
@@ -1067,6 +1068,7 @@ module TDev
                 HistoryMgr.instance.clearModalStack();
             }
             if (this.state != RtState.Stopped) {
+                this.setState(RtState.Stopped, "stopAsync");
                 if (!isPause) {
                     this.versionNumber++;
                     if (this.eventQ) this.eventQ.clear();
@@ -1077,7 +1079,6 @@ module TDev
                     ProgressOverlay.hide()
                 this.asyncStack = [];
                 this.asyncTasks = [];
-                this.setState(RtState.Stopped, "stopAsync");
                 this.compiled.stopFn(this);
                 if (!isPause && !this.resumeAllowed && !this.handlingException) {
                     var profilingData = this.compiled._getProfilingResults();
@@ -1468,6 +1469,7 @@ module TDev
             if (this.state == RtState.Stopped || s == RtState.Stopped)
                 Util.log("runtime state: {0} -> {1}, {2}", this.state, s, msg)
             this.state = s;
+            this.stateMsg = msg;
         }
 
         private getResumeCtxCore(isBlocking: boolean, cont: IContinuationFunction) {
@@ -2031,8 +2033,8 @@ module TDev
                 return;
             }
 
-            // var lastBreak = Date.now();
             var continueLater = false;
+            var continueLaterVersion = 0;
             var numCheck = 0;
 
             this.mainLoopRunning = true;
@@ -2080,6 +2082,7 @@ module TDev
                         var now = Date.now();
                         if (now - this.lastBreak > (Browser.isNodeJS ? 1000 : 50)) {
                             continueLater = true;
+                            continueLaterVersion = this.versionNumber;
                             break;
                         }
                         numCheck = 0;
@@ -2090,7 +2093,7 @@ module TDev
             }
 
             this.mainLoopRunning = false;
-            if (continueLater) {
+            if (continueLater && continueLaterVersion == this.versionNumber && this.state != RtState.Stopped) {
                 this.setState(RtState.Paused, "continue later");
                 var ver = this.versionNumber;
                 var curr = this.current
