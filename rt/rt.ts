@@ -456,8 +456,6 @@ module TDev
             else return [r.result];
         }
 
-        private isReplaying = false;
-
         private eventCategory: string = null;
         private eventVariable: string = null;
         public setNextEvent(c: string, v: string) {
@@ -469,19 +467,6 @@ module TDev
             this.eventVariable = null;
         }
 
-
-
-        private replayStartTime: number;
-        private currentOffset: number;
-        public startReplay() {
-            this.isReplaying = true;
-            this.replayStartTime = new Date().getTime();
-        }
-        public stopReplayAsync() {
-            var p = this.stopAsync();
-            this.isReplaying = false;
-            return p;
-        }
         public currentTime() {
             return Util.perfNow();
         }
