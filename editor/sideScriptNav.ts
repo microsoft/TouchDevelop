@@ -195,7 +195,8 @@ module TDev
                     this.editor.showAppLog(app);
                 }));
             if (!isParent && TheEditor.widgetEnabled("errorsButton"))
-                addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors, () => {
+                addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors,() => {
+                    this.editor.typeCheckNow();
                     this.editor.searchFor(":m");
                 }));
 
