@@ -124,7 +124,7 @@ function runAndComplete(cmds, task) {
     });
 }
 
-mkSimpleTask('build/genmeta.js', [ 'tools', ], "tools/genmeta.ts");
+mkSimpleTask('build/genmeta.js', [ 'tools', 'generated/help.cache' ], "tools/genmeta.ts");
 file('build/api.js', expand([ "build/genmeta.js", "lib" ]), { async: true }, function () {
     console.log("[P] generating build/api.js, localization.json and topiclist.json");
     runAndComplete([
