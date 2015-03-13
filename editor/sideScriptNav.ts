@@ -72,7 +72,7 @@ module TDev
         {
             if (!app) app = Script
 
-            TheEditor.saveStateAsync({ forReal: true }).then(() => {
+            TheEditor.saveStateAsync({ forReal: true, forPublishing: true }).then(() => {
                 TheEditor.queueNavRefresh();
                 World.getInstalledHeaderAsync(app.localGuid).then((h: Cloud.Header) => {
                     if (h.status == "published") {
