@@ -3064,5 +3064,14 @@ module TDev.AST
         {
             this.options.usedProperties[p.usageKey().toLowerCase()] = true
         }
+
+        secondaryRun(app: App)
+        {
+            app.libraries().forEach(l => {
+                if (l.isTutorial()) {
+                    l.getPublicActions().forEach(a => this.runOnDecl(a))
+                }
+            })
+        }
     }
 }

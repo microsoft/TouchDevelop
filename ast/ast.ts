@@ -4216,6 +4216,10 @@ module TDev.AST {
             });
         }
 
+        secondaryRun(app: App)
+        {
+        }
+
         run(app: App)
         {
             DeepVisitor.clearVisitorState(app);
@@ -4239,6 +4243,7 @@ module TDev.AST {
                         this.useAction(a);
                 })
 
+            this.secondaryRun(app);
 
             this.traverseActions();
 
