@@ -20,13 +20,22 @@ module TDev.Browser {
     }
 
     export var hubThemes: StringMap<HubTheme> = {
+        'minecraft': {
+            description: 'Learn to code with Mineacraft',
+            logoArtId: 'eopyzwpm',
+            wallpaperArtId: 'abqqsurv',
+            tutorialsTopic: 'ysxp',
+            requiresShell: true,
+            scriptSearch: '#minecraft',
+        },
         'arduino': {
-            description: 'Environment to program Arduino boards',
+            description: 'Program Arduino boards',
             logoArtId: 'kzajxznr',
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
-            requiresShell: true
-        }
+            requiresShell: true,
+            scriptSearch: '#arduino',
+        },
     };
 
     export enum EditorMode {
