@@ -739,8 +739,7 @@ module TDev.AppExport
         return wa
     }
 
-    function chooseWebsiteCoreAsync(azureResults:any[]):Promise
-    {
+    function chooseWebsiteCoreAsync(azureResults: any[]): Promise {
         var r = new PromiseInv()
         var m = new ModalDialog()
 
@@ -756,13 +755,25 @@ module TDev.AppExport
         var keys = Object.keys(auths).map(k => auths[k])
         keys.sort((a, b) => Util.stringCompare(a.website, b.website))
 
+        // populate data from local editor if any
+        if (LocalShell.mgmtUrl("")) {
+            var wa = <Azure.WebsiteAuth> {
+                deploymentKey: LocalShell.deploymentKey(),
+                key: 'custom:local',
+                website: 'local',
+                webspace: 'custom',
+                destinationAppUrl: LocalShell.url()
+            };
+            keys.splice(0, 0, wa);
+        }
+
         var boxes = keys.map(wa =>
             websiteBox(wa)
                 .withClick(() => {
-                    m.dismiss()
-                    r.success(setDeploymentWebsiteAsync(wa))
-                })
-        )
+                m.dismiss()
+                r.success(setDeploymentWebsiteAsync(wa))
+            })
+            )
 
         if (getManagementCerificate()) {
             if (!azureResults)
