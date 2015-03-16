@@ -200,9 +200,8 @@ module TDev
                     this.editor.searchFor(":m");
                 }));
 
-            if (onlyParent && isBeta && TheEditor.widgetEnabled("deployButton") &&
-                (Azure.getWebsiteAuthForApp(app) || app.usesCloudLibs() || Script.usesCloudLibs())) {
-                addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("deploy"), Ticks.sideDeployWebSite,() => {
+            if (onlyParent && TheEditor.widgetEnabled("deployButton")) {
+                addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("export"), Ticks.sideDeployWebSite,() => {
                     TDev.RT.App.clearLogs();
                     var wa = Azure.getWebsiteAuthForApp(app)
                     var recompile = Promise.as()
@@ -218,18 +217,21 @@ module TDev
                                 Script = res.prevScript
                             })
 
-                    recompile
-                    .then(() => AppExport.deployLocalWebappAsync(app, wa))
-                    .then(
-                        () => AppExport.showStatus(wa),
-                        err => {
-                            if (app == Script)
-                                AppExport.setupAzure()
-                            else
-                                ModalDialog.info(lf("deployment not configured"),
+                    if (app.isCloud) {
+                        recompile
+                            .then(() => AppExport.deployLocalWebappAsync(app, wa))
+                            .done(
+                            () => AppExport.showStatus(wa),
+                            err => {
+                                if (app == Script)
+                                    AppExport.setupAzure()
+                                else
+                                    ModalDialog.info(lf("deployment not configured"),
                                         lf("Go to the main script and try to deploy from there."))
-                        })
-                    .done()
+                            });
+                    } else {
+                        recompile.done(() => AppExport.deployCordova(app, this.editor.getBaseScriptId()));
+                    }
                 }));
             }
 
