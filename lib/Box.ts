@@ -2,6 +2,7 @@
 module TDev { export module RT {
 
     //? Current box element in the page.
+    //@ skill(2)
     export module Box
     {
         var R = HTML;
@@ -387,7 +388,7 @@ module TDev { export module RT {
     }
 
     //? Current html element in the page.
-    //@ betaOnly
+    //@ betaOnly skill(2)
     export module Dom {
         //? Use CSS for layout and import additional CSS stylesheets. Use string art resource to import urls.
         //@ betaOnly

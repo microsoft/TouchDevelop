@@ -605,10 +605,6 @@ module TDev
             return TheEditor.debugSupported();
         }
 
-        public publishRunHelpLink(title: string) {
-            return Editor.mkHelpLink("publishing run", title);
-        }
-
         public fixErrorIn(stableName:string, error:string)
         {
             this.hideWallAsync().then(() => {
@@ -3046,6 +3042,11 @@ module TDev
                 else return Promise.as();
             }).then(() => {
                 if (!Script) return;
+                // if the script is not edited and it requires split screen, load split screen mode from meta
+                if (header.status === "published" && !!Script.splitScreen) {
+                    Util.log('published script used split mode, splitting...');
+                    this.setSplitScreen(true);
+                }
 
                 this.currentRt = new Runtime();
                 this.setupPlayButton();
@@ -4401,6 +4402,8 @@ module TDev
         {
             Ticker.dbg("Editor.saveStateAsync");
             if (!!Script) {
+                if (opts.forPublishing)
+                    Script.splitScreen = !!Script.editorState.splitScreen
                 if (!opts.isRevert && !!this.currentCodeView)
                     this.currentCodeView.commit();
                 Script.setStableNames();
@@ -5427,6 +5430,7 @@ module TDev
         isRevert?: boolean;
         clearScript?: boolean;
         wasUpgraded?: boolean;
+        forPublishing?: boolean;
     }
 
     export class SearchForNode

@@ -314,6 +314,7 @@ module TDev
         public webState: RT.Web.State = <any>{};
 
         private state: RtState = RtState.Stopped;
+        private stateMsg: string = undefined;
         // when an event is executing, no other event can start
         private eventExecuting = false;
         // used to prevent recursive invocations of mainLoop
@@ -456,8 +457,6 @@ module TDev
             else return [r.result];
         }
 
-        private isReplaying = false;
-
         private eventCategory: string = null;
         private eventVariable: string = null;
         public setNextEvent(c: string, v: string) {
@@ -469,19 +468,6 @@ module TDev
             this.eventVariable = null;
         }
 
-
-
-        private replayStartTime: number;
-        private currentOffset: number;
-        public startReplay() {
-            this.isReplaying = true;
-            this.replayStartTime = new Date().getTime();
-        }
-        public stopReplayAsync() {
-            var p = this.stopAsync();
-            this.isReplaying = false;
-            return p;
-        }
         public currentTime() {
             return Util.perfNow();
         }
@@ -526,13 +512,6 @@ module TDev
         ////////////////////////////////////////////////////////////////////////
         // Wall methods
         ////////////////////////////////////////////////////////////////////////
-        public useModalWallDialogs(): boolean {
-
-            if (this.rendermode)
-                Util.userError(lf("cannot ask user in page display code"));
-            return this.host.isFullScreen() ||
-                !this.mayPostToWall(this.getCurrentPage());
-        }
 
         public mayPostToWall(p: WallPage): boolean {
             return !this.headlessPluginMode && (!p.isAuto() || this.rendermode || p.crashed)
@@ -1089,6 +1068,7 @@ module TDev
                 HistoryMgr.instance.clearModalStack();
             }
             if (this.state != RtState.Stopped) {
+                this.setState(RtState.Stopped, "stopAsync");
                 if (!isPause) {
                     this.versionNumber++;
                     if (this.eventQ) this.eventQ.clear();
@@ -1099,7 +1079,6 @@ module TDev
                     ProgressOverlay.hide()
                 this.asyncStack = [];
                 this.asyncTasks = [];
-                this.setState(RtState.Stopped, "stopAsync");
                 this.compiled.stopFn(this);
                 if (!isPause && !this.resumeAllowed && !this.handlingException) {
                     var profilingData = this.compiled._getProfilingResults();
@@ -1490,6 +1469,7 @@ module TDev
             if (this.state == RtState.Stopped || s == RtState.Stopped)
                 Util.log("runtime state: {0} -> {1}, {2}", this.state, s, msg)
             this.state = s;
+            this.stateMsg = msg;
         }
 
         private getResumeCtxCore(isBlocking: boolean, cont: IContinuationFunction) {
@@ -2053,8 +2033,8 @@ module TDev
                 return;
             }
 
-            // var lastBreak = Date.now();
             var continueLater = false;
+            var continueLaterVersion = 0;
             var numCheck = 0;
 
             this.mainLoopRunning = true;
@@ -2102,6 +2082,7 @@ module TDev
                         var now = Date.now();
                         if (now - this.lastBreak > (Browser.isNodeJS ? 1000 : 50)) {
                             continueLater = true;
+                            continueLaterVersion = this.versionNumber;
                             break;
                         }
                         numCheck = 0;
@@ -2112,7 +2093,7 @@ module TDev
             }
 
             this.mainLoopRunning = false;
-            if (continueLater) {
+            if (continueLater && continueLaterVersion == this.versionNumber && this.state != RtState.Stopped) {
                 this.setState(RtState.Paused, "continue later");
                 var ver = this.versionNumber;
                 var curr = this.current

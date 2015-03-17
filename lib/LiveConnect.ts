@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? OneDrive, OneNote operations
+    //@ skill(3)
     export module CloudStorage {
         //? Prompts the user to upload a picture to OneDrive. If the filename is empty, a default filename gets generated.
         //@ async returns(CloudPicture) cap(cloudservices)

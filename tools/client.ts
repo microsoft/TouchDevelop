@@ -3651,6 +3651,7 @@ var sectAzure = lf("web sites");
 var sectMakers = lf("makers");
 var sectTouchDevelop = lf("touchdevelop");
 var sectOthers = lf("others");
+var sectMinecraft = "Minecraft";
 
 /*
     editorMode: 1 = block, 2 = coder, 3 = expert
@@ -3687,7 +3688,7 @@ var templates: ScriptTemplate[] = [{
     title: lf("blank turtle"),
     id: 'blankturtle',
     icon: 'Controller',
-    name: 'ADJ drawing',
+    name: 'ADJ turtle',
     description: lf("An turtle app."),
     section: sectBeginners,
     scriptid: 'oobxb',
@@ -3710,8 +3711,25 @@ var templates: ScriptTemplate[] = [{
     section: sectBeginners,
     scriptid: 'mdrw',
     editorMode: 1,
-}, 
-
+}, {
+    title: lf("blank minecraft pi"),
+    id: 'blankminecraftpi',
+    icon: 'NineColumn',
+    name: 'ADJ craft',
+    description: lf("A Minecraft Pi app."),
+    section: sectMinecraft,
+    scriptid: 'cptje',
+    editorMode: 1,
+}, {
+    title: lf("blank minecraft steve"),
+    id: 'blankminecraftsteve',
+    icon: 'NineColumn',
+    name: 'ADJ steve',
+    description: lf("A Minecraft Steve app."),
+    section: sectMinecraft,
+    scriptid: 'qzky',
+    editorMode: 1,
+},
 /*{
     title: lf("blank boostrap app"),
     id: 'blankbootstrapapp',

@@ -765,38 +765,54 @@ module TDev
             // create a new tracking pixel and add it to the tree
             var trackUrl = this.topic.pixelTrackingUrl();
             if (trackUrl) {
-                // generate new id on demand
-                var anon = Script.editorState.tutorialAnonymousId;
-                if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
-                trackUrl += "?scriptid=" + this.progressId + "&index=" + prog.index + "&total=" + prog.numSteps + "&completed=" + !!prog.completed + "&time=" + prog.lastUsed + "&anonid=" + anon;
-                var pixel = <HTMLImageElement> document.createElement("img");
-                pixel.className = "tracking-pixel";
-                pixel.src = trackUrl;
-                pixel.onload = (el) => pixel.removeSelf();
-                pixel.onerror = (el) => pixel.removeSelf();
-                elt("root").appendChild(pixel);
+                var anon = this.loadAnonymousId();
+                if (anon) {
+                    trackUrl += "?scriptid=" + this.progressId + "&index=" + prog.index + "&total=" + prog.numSteps + "&completed=" + !!prog.completed + "&time=" + prog.lastUsed + "&anonid=" + anon;
+                    var pixel = <HTMLImageElement> document.createElement("img");
+                    pixel.className = "tracking-pixel";
+                    pixel.src = trackUrl;
+                    pixel.onload = (el) => pixel.removeSelf();
+                    pixel.onerror = (el) => pixel.removeSelf();
+                    elt("root").appendChild(pixel);
+                }
             }
 
             // pushing directly into event hubs
             var eventHubsInfo = this.topic.eventHubsTracking();
             if (eventHubsInfo) {
-                var anon = Script.editorState.tutorialAnonymousId;
-                if (!anon) anon = Script.editorState.tutorialAnonymousId = Util.guidGen();
-                var client = new XMLHttpRequest();
-                var url = 'https://' + eventHubsInfo.namespace + '.servicebus.windows.net/' + eventHubsInfo.hub + '/publishers/' + anon + '/messages?timeout=60&api-version=2014-01';
-                Util.log('event hubs: ' + url);
-                client.open('POST', url);
-                client.setRequestHeader('Authorization', eventHubsInfo.token);
-                client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
-                client.send(JSON.stringify({
-                    anonid: anon,
-                    scriptid: this.progressId,
-                    index: prog.index,
-                    total: prog.numSteps,
-                    completed: !!prog.completed,
-                    time: prog.lastUsed
-                }));
+                var anon = this.loadAnonymousId();
+                if (anon) {
+                    var client = new XMLHttpRequest();
+                    var url = 'https://' + eventHubsInfo.namespace + '.servicebus.windows.net/' + eventHubsInfo.hub + '/publishers/' + anon + '/messages?timeout=60&api-version=2014-01';
+                    Util.log('event hubs: ' + url);
+                    client.open('POST', url);
+                    client.setRequestHeader('Authorization', eventHubsInfo.token);
+                    client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
+                    client.send(JSON.stringify({
+                        anonid: anon,
+                        scriptid: this.progressId,
+                        index: prog.index,
+                        total: prog.numSteps,
+                        completed: !!prog.completed,
+                        time: prog.lastUsed
+                    }));
+                }
             }
+        }
+
+        private loadAnonymousId(): string {
+            if (!Script || !this.topic.json) return "";
+
+            var anon = Script.editorState.tutorialAnonymousId;
+            if (!anon) {
+                var ids = JSON.parse(localStorage["tutorialAnonymousIds"] || "{}");
+                anon = ids[this.topic.json.userid];
+                if (!anon) {
+                    anon = Script.editorState.tutorialAnonymousId = ids[this.topic.json.userid] = Util.guidGen();
+                    localStorage["tutorialAnonymousIds"] = JSON.stringify(ids);
+                }
+            }
+            return anon;
         }
 
         public showDiff()
@@ -847,10 +863,15 @@ module TDev
 
         private nowPublish()
         {
-            if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script)
+            TheEditor.leaveTutorial(); // always leave tutorial
+
+            // not generally signed in
+            if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script) return;
+
+            // author explicitely wanted to skip step
+            if (!this.topic || /none/i.test(this.topic.nextTutorials()[0]))
                 return;
 
-            TheEditor.leaveTutorial();
             World.getInstalledHeaderAsync(Script.localGuid).done((h: Cloud.Header) => {
                 if (h.status == "published") return Promise.as();
 

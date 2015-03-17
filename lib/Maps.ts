@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Maps, location to address, address to location
+    //@ skill(3)
     export module Maps
     {
         //? Creates a Bing map. Use 'post to wall' to display it.

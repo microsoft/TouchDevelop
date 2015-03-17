@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Phone numbers, vibrate, etc...
+    //@ skill(2)
     export module Phone
     {
         //? Starts a phone call

@@ -2134,7 +2134,8 @@ module TDev.AST {
             this.version = App.currentVersion;
         }
 
-        static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds" ];
+        // split screen is used as a hit when loaded in the editor, serialized when publishing
+        static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen" ];
 
         public nodeType() { return "app"; }
         public things:Decl[] = [];
@@ -2189,7 +2190,8 @@ module TDev.AST {
         public isDocsTopic() { return this.comment && /#docs/i.test(this.comment); }
         public isTutorial() { return this.isDocsTopic() && this.allActions().some(a => /^#\d/.test(a.getName())) }
         public allowExport:boolean;
-        public hasIds:boolean;
+        public hasIds: boolean;
+        public splitScreen: boolean;
         private stillParsing:boolean = true;
         public accept(v:NodeVisitor) { return v.visitApp(this); }
         public children() { return this.things; }
@@ -4214,6 +4216,10 @@ module TDev.AST {
             });
         }
 
+        secondaryRun(app: App)
+        {
+        }
+
         run(app: App)
         {
             DeepVisitor.clearVisitorState(app);
@@ -4237,6 +4243,7 @@ module TDev.AST {
                         this.useAction(a);
                 })
 
+            this.secondaryRun(app);
 
             this.traverseActions();
 

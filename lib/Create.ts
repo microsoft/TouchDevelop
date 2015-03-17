@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 
 //? Create collections of items.
-//@ robust
+//@ robust skill(2)
 module TDev.RT.Create
 {
     //? Creates an empty collection of arbitrary type
