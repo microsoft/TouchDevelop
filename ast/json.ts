@@ -713,6 +713,7 @@ module TDev.AST.Json
                 type: n.getKind(),
                 isReadonly: n.readonly,
                 isTransient: n.isTransient,
+                isCloudEnabled: n.cloudEnabled,
             }
 
             if (n.isResource) {
@@ -1327,6 +1328,7 @@ module TDev.AST.Json
                     tw.boolOptAttr("readonly", n.isReadonly);
                     tw.boolOptAttr("is_resource", n.nodeType == "art");
                     tw.boolOptAttr("transient", n.isTransient);
+                    tw.boolOptAttr("cloudenabled", n.isCloudEnabled);
                     if (!!n.url) tw.stringAttr("url", n.url);
                 tw.endBlock();
             },

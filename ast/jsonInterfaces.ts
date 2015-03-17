@@ -207,6 +207,7 @@ module TDev.AST.Json
         type:JTypeRef;
         isReadonly:boolean;
         isTransient:boolean;
+        isCloudEnabled:boolean;
     }
 
     export interface JArt extends JGlobalDef { url: string; }
