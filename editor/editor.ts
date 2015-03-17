@@ -4113,21 +4113,16 @@ module TDev
                     (v) => RuntimeSettings.setLocation(v), RuntimeSettings.location())),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("play sounds and music"),
                     (v) => RuntimeSettings.setSounds(v), RuntimeSettings.sounds())),
+                div("wall-dialog-body",
+                    HTML.mkButton(lf("show diagnostic log"),() => {
+                        m.dismiss();
+                        Editor.showLog();
+                    }), lf("internal log used for diagnostics.")
+                    ),
+                div("wall-dialog-body", zoomSlide, zoomLabel),
                 betaDiv,
                 div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"),
-                    (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
-                div("wall-dialog-body", zoomSlide, zoomLabel),
-                div("wall-dialog-body",
-                        HTML.mkButton(lf("run platform tests"), () => {
-                            Util.setHash("hub:test");
-                        }), lf("check if everything works")
-                    ),
-                 div("wall-dialog-body",
-                        HTML.mkButton(lf("show diagnostic log"), () => {
-                            m.dismiss();
-                            Editor.showLog();
-                        }), lf("internal log used for diagnostics.")
-                    )
+                    (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline()))
             ])
 
             if (TDev.dbg) {
@@ -4162,10 +4157,7 @@ module TDev
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
             }
-            m.add([
-                div("wall-dialog-buttons",
-                    HTML.mkButton(lf("close"), () => m.dismiss())),
-            ]);
+            m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));
 
             m.setScroll();
             m.fullWhite();
