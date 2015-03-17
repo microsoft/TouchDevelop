@@ -419,11 +419,6 @@ module TDev.Browser {
                 return
             }
 
-            // do not run test suite in beta
-            var betaFriendlyId = (<any>window).betaFriendlyId;
-            if(betaFriendlyId)
-                window.localStorage["betaTestsRunFor"] = betaFriendlyId;
-
             if (t) {
                 this.createScriptFromTemplate(t);
             } else {
@@ -485,12 +480,16 @@ module TDev.Browser {
                 // temporary fix
                 if (h[2] == 'jumpingbird') h[2] = 'jumpingbirdtutorial';
                 Util.log('follow: {0}', h[2]);
+                // if specified, force the current editor mode
+                var editorMode = Browser.EditorSettings.parseEditorMode(h[3]);
+                if (editorMode && !Browser.EditorSettings.editorMode())
+                    Browser.EditorSettings.setEditorMode(editorMode, false);
                 this.browser().clearAsync(true)
                     .done(() => {
                     // try finding built-in topic first
                     var bt = HelpTopic.findById(h[2]);
                     if (bt) {
-                        Util.log('found built-in topic');
+                        Util.log('found built-in topic ' + bt.id);
                         TopicInfo.mk(bt).follow();
                     }
                     else {
@@ -501,16 +500,19 @@ module TDev.Browser {
                                 return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
                             }
                             else return Promise.as(res);
-                        })
-                            .done(j => {
+                        }).done(j => {
                             if (j && j.kind == "script") {
+                                Util.log('following ' + j.id);
                                 var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
                                 ti.follow();
-                            } else Util.setHash("hub");
+                            } else {
+                                Util.log('followed script not found');
+                                Util.setHash("hub");
+                            }
                         }, e => {
                                 Util.log('follow route error: {0}, {1}' + h[2], e.message);
                                 Util.setHash("hub");
-                            });
+                       });
                     }
                 });
                 return;
