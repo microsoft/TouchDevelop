@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? time and dates
-    //@ robust skill(2)
+    //@ robust
     export module Time
     {
         var _rt : Runtime;

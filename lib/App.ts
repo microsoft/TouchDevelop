@@ -489,7 +489,7 @@ module TDev.RT {
                     HTML.mkButton(lf("play again"),() => {
                         tick(Ticks.runtimePlayAgain);
                         m.dismiss();
-                        rt.rerun()
+                        rt.rerunAsync().done();
                     }, 'wall-dialog-button-huge'),
                     !scriptId ? HTML.mkButton(lf("dismiss"),() => {
                         m.dismiss();

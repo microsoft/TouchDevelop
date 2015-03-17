@@ -1755,10 +1755,12 @@ module TDev
         private startMk: any;
         private startArgs: any[];
 
-        public rerun() {
-            Util.assert(this.isStopped(), "rerun-isStopped")
-            this.initPageStack();
-            this.run(this.startMk, this.startArgs);
+        public rerunAsync() : Promise {
+            return this.stopAsync().then(() => {
+                Util.assert(this.isStopped(), "rerun-isStopped")
+                this.initPageStack();
+                this.run(this.startMk, this.startArgs);
+            });
         }
 
         public run(mk: any, args: any[]) {
