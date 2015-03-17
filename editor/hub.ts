@@ -484,23 +484,35 @@ module TDev.Browser {
             if ((h[1] == "follow" || h[1] == "follow-tile") && /^\w+$/.test(h[2])) {
                 // temporary fix
                 if (h[2] == 'jumpingbird') h[2] = 'jumpingbirdtutorial';
+                Util.log('follow: {0}', h[2]);
                 this.browser().clearAsync(true)
-                .done(() => {
+                    .done(() => {
                     // try finding built-in topic first
                     var bt = HelpTopic.findById(h[2]);
-                    if (bt)
+                    if (bt) {
+                        Util.log('found built-in topic');
                         TopicInfo.mk(bt).follow();
-                    else
+                    }
+                    else {
                         TheApiCacheMgr.getAsync(h[2], true)
+                            .then((res: JsonIdObject) => {
+                            if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
+                                Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
+                                return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
+                            }
+                            else return Promise.as(res);
+                        })
                             .done(j => {
-                                if (j && j.kind == "script") {
-                                    var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
+                            if (j && j.kind == "script") {
+                                var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
                                 ti.follow();
-                                } else Util.setHash("hub");
-                            }, e => {
+                            } else Util.setHash("hub");
+                        }, e => {
+                                Util.log('follow route error: {0}, {1}' + h[2], e.message);
                                 Util.setHash("hub");
                             });
-                    });
+                    }
+                });
                 return;
             }
 
