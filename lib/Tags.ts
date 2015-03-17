@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? 2D barcodes, QR codes and NFC tags
+    //@ skill(3)
     export module Tags
     {
         export var sendNFC = (writeTag:boolean, type : string, value: string, sent : (id : number) => void, transferred : () => void) =>

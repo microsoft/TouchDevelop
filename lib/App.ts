@@ -307,6 +307,7 @@ module TDev.RT {
     }
 
     //? Interact with the app runtime
+    //@ skill(3)
     export module App
     {
         export function createInfoMessage(s: string) : LogMessage {

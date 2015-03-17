@@ -1,9 +1,9 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Emails, sms, contacts, calendar, ...
+    //@ skill(2)
     export module Social
     {
-
         //? Opens the mail client
         //@ flow(SinkSharing) uiAsync
         export function send_email(to:string, subject:string, body:string, r : ResumeCtx) : void

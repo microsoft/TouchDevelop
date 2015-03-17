@@ -413,7 +413,10 @@ module TDev.AST
             if (expr.tokens.some((t) => t.getThing() instanceof LocalDef && t.getText() == "\u0007locals_marker"))
                 expr.locals = this.snapshotLocals();
 
-            Util.assert(expr.getKind() != null);
+            if (!Util.check(expr.getKind() != null, "expr type unset")) {
+                expr._kind = api.core.Unknown
+            }
+
             if (!expr.getError() && tp != null && !expr.getKind().equals(tp)) {
                 var msg = this.expectsMessage(whoExpects, tp.toString())
                 if (expr.getKind() != this.core.Unknown)
@@ -1295,7 +1298,9 @@ module TDev.AST
                 this.typeHint = prevHint;
             }
 
-            Util.assert(expr.getKind() != null);
+            if (!Util.check(expr.getKind() != null, "expr type unset2")) {
+                expr._kind = api.core.Unknown
+            }
             if (tp != null && expr.getKind() !== tp) {
                 var code = "TD103: "
                 var suff = ""

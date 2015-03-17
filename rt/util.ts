@@ -749,13 +749,20 @@ module TDev{
     }
 
     export function userError(msg:string, pc = "", statusCode?:number) : any
-    {
+    {    
         var e = new Error(msg);
         (<any>e).programCounter = pc;
         (<any>e).isUserError = true;
         if (statusCode)
-            (<any>e).statusCode = 500;
-        throw e;
+            (<any>e).statusCode = statusCode;
+        try {
+            throw e;
+        }
+        catch (err) {
+            Util.log('error: {0}, {1}, {2}', msg, pc, statusCode);
+            Util.log(err.stack + "");
+            throw e;
+        }
     }
 
     export function syntaxError(msg:string, declName:string) : any

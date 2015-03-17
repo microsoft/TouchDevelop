@@ -47,7 +47,7 @@ module TDev {
 
         export function canSplitScreen()
         {
-            return !phoneMode && windowWidth*1.2 > windowHeight;
+            return !phoneMode && !portraitMode && windowWidth*1.2 > windowHeight;
         }
 
         export function setSplitScreen(isSplit:boolean)

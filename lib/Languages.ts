@@ -188,6 +188,7 @@ module TDev.RT {
     }
 
     //? Translation, speech to text, ...
+    //@ skill(2)
     export module Languages
     {
 

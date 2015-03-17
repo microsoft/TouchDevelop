@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Create invalid values
+    //@ skill(3)
     export module Invalid
     {
 

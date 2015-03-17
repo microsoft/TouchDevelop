@@ -138,6 +138,7 @@ module TDev.RT {
     }
 
     //? Search and browse the web...
+    //@ skill(2)
     export module Web {
         export interface MessageWaiter {
             origin: string;

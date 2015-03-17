@@ -2412,18 +2412,18 @@ module TDev
                 });
             } else {
                 var maxScore = 1;
-                var singl:AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons());
+                var singl: AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons().filter(sg => sg.isBrowsable()));
+                var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
                 var libSingl:IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
-                    if (s.isBrowsable()) {
-                        var sc = s.usage.count() + 1e-20;
-                        sc *= s.usageMult();
-                        var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
-                        if (sc > maxScore) maxScore = sc;
-                        e.decl = s;
-                        if (s.getName() == AST.libSymbol)
-                            libSingl = e;
-                    }
+                    var sc = s.usage.count() + 1e-20;
+                    sc *= s.usageMult();
+                    var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
+                    if (sc > maxScore) maxScore = sc;
+                    if (skill < s.getKind().minSkill) e.score -= 1e10;
+                    e.decl = s;
+                    if (s.getName() == AST.libSymbol)
+                        libSingl = e;
                 });
 
                 var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
@@ -3873,9 +3873,9 @@ module TDev
             TheEditor.adjustCodeViewSize(this.stmt);
         }
 
-        private sortedIntelliItems()
+        private sortedIntelliItems() : IntelliItem[]
         {
-            var items0 = this.currentIntelliItems;
+            var items0 = this.currentIntelliItems.filter(ii => ii.score > 0);
             var usedProfile = false;
             if (TheEditor.intelliProfile) {
                 var prof = TheEditor.intelliProfile;

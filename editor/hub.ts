@@ -20,13 +20,22 @@ module TDev.Browser {
     }
 
     export var hubThemes: StringMap<HubTheme> = {
+        'minecraft': {
+            description: 'Learn to code with Mineacraft',
+            logoArtId: 'eopyzwpm',
+            wallpaperArtId: 'abqqsurv',
+            tutorialsTopic: 'ysxp',
+            requiresShell: true,
+            scriptSearch: '#minecraft',
+        },
         'arduino': {
-            description: 'Environment to program Arduino boards',
+            description: 'Program Arduino boards',
             logoArtId: 'kzajxznr',
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
-            requiresShell: true
-        }
+            requiresShell: true,
+            scriptSearch: '#arduino',
+        },
     };
 
     export enum EditorMode {
@@ -475,23 +484,35 @@ module TDev.Browser {
             if ((h[1] == "follow" || h[1] == "follow-tile") && /^\w+$/.test(h[2])) {
                 // temporary fix
                 if (h[2] == 'jumpingbird') h[2] = 'jumpingbirdtutorial';
+                Util.log('follow: {0}', h[2]);
                 this.browser().clearAsync(true)
-                .done(() => {
+                    .done(() => {
                     // try finding built-in topic first
                     var bt = HelpTopic.findById(h[2]);
-                    if (bt)
+                    if (bt) {
+                        Util.log('found built-in topic');
                         TopicInfo.mk(bt).follow();
-                    else
+                    }
+                    else {
                         TheApiCacheMgr.getAsync(h[2], true)
+                            .then((res: JsonIdObject) => {
+                            if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
+                                Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
+                                return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
+                            }
+                            else return Promise.as(res);
+                        })
                             .done(j => {
-                                if (j && j.kind == "script") {
-                                    var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
+                            if (j && j.kind == "script") {
+                                var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
                                 ti.follow();
-                                } else Util.setHash("hub");
-                            }, e => {
+                            } else Util.setHash("hub");
+                        }, e => {
+                                Util.log('follow route error: {0}, {1}' + h[2], e.message);
                                 Util.setHash("hub");
                             });
-                    });
+                    }
+                });
                 return;
             }
 
@@ -753,7 +774,7 @@ module TDev.Browser {
                 })
         }
 
-        public tutorialsByUpdateIdAsync()
+        public tutorialsByUpdateIdAsync(): Promise // StringMap<AST.HeaderWithState>
         {
             return this.browser().getTutorialsStateAsync().then((headers:AST.HeaderWithState[]) => {
                 var res = {}
@@ -807,7 +828,7 @@ module TDev.Browser {
         // - once this is done, we call [finish]
         // - because we may have found the tutorial we wanted in the process, we
         //   return a new value for [top]
-        private findTutorial(templateId: string, finish) {
+        private findTutorial(templateId: string, finish: (res: { app: AST.App; headers: StringMap<AST.HeaderWithState> }, top: HelpTopic) => void) {
             var top = HelpTopic.findById("t:" + templateId)
 
             if (!this.headerByTutorialId || Date.now() - this.headerByTutorialIdUpdated > 3000) {
@@ -816,7 +837,7 @@ module TDev.Browser {
             }
 
             if (top) {
-                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish(res, top));
+                Promise.join([Promise.as(null), this.headerByTutorialId]).done(res => finish({ app: res[0], headers: res[1] }, top));
             } else {
                 var fetchingId = null
                 var fetchId = id => {
@@ -830,7 +851,7 @@ module TDev.Browser {
                             fetchId(j.updateid);
                         else {
                             top = HelpTopic.fromJsonScript(j);
-                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish(res, top));
+                            Promise.join([top.initAsync(), this.headerByTutorialId]).done(res => finish({ app: res[0], headers: res[1] }, top));
                         }
                     })
                 }
@@ -869,20 +890,20 @@ module TDev.Browser {
         {
             var tileOuter = div("tutTileOuter")
 
-            var startTutorial = (top, header: Cloud.Header) => {
+            var startTutorial = (top : HelpTopic, header: Cloud.Header) => {
                 Util.log("tutorialTile.start: " + templateId)
                 if (f)
                     f(header);
                 this.startTutorial(top, header);
             };
 
-            var finish = (res, top: HelpTopic) => {
+            var finish = (res: { app: AST.App; headers: StringMap<AST.HeaderWithState> }, top: HelpTopic) => {
                 var isHelpTopic = !!top;
                 var tile = div("tutTile")
                 tileOuter.setChildren([tile])
 
-                var app:AST.App = res[0]
-                var progs = res[1]
+                var app:AST.App = res.app
+                var progs = res.headers
 
                 var titleText = top.json.name.replace(/ (tutorial|walkthrough)$/i, "");
                 var descText = top.json.description.replace(/ #(docs|tutorials|stepbystep)\b/ig, " ")
@@ -1038,7 +1059,8 @@ module TDev.Browser {
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
                         icon.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
-                        icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
+                        // missing icons
+                        // icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
 
                         var nameBlock = div("sdName", lf_static(template.title, true));
                         var hd = div("sdNameBlock", nameBlock);
@@ -1827,12 +1849,12 @@ module TDev.Browser {
                         // Copied from [tutorialTitle], and (hopefully) simplified.
                         this.findTutorial(id, (res, topic: HelpTopic) => {
                             var key = topic.updateKey();
-                            var header = res[1][key]; // may be null or undefined
+                            var header = res.headers[key]; // may be null or undefined
                             k({
                                 title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
                                 header: header,
                                 topic: topic,
-                                app: res[0],
+                                app: res.app,
                             });
                         });
                     }
@@ -1859,6 +1881,7 @@ module TDev.Browser {
                         : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
                     btn.style.backgroundSize = "cover";
                 }
+                ScriptInfo.addTutorialProgress(btn, tutorial.header);
                 buttons.push(btn);
 
                 if (buttons.length == 6) {

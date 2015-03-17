@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Support for interactive tutorials.
+    //@ skill(3)
     export module Tutorial
     {
         //? Signal that the step is done.

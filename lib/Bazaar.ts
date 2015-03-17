@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Browse and review scripts from the bazaar
+    //@ skill(3)
     export module Bazaar
     {
         //? Returns a user object for a specified user id

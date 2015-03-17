@@ -24,133 +24,64 @@ module TDev.RT {
         //? Prompts the user with a ok button
         //@ tandre2
         //@ uiAsync
-        export function prompt(text:string, r: ResumeCtx) : void
-        {
+        export function prompt(text: string, r: ResumeCtx): void {
             var rt = r.rt;
-            if (rt.useModalWallDialogs()) {
-                var m = new ModalDialog();
-                m.add([body(text),
-                         div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => m.dismiss())])
-                        ]);
-                m.onDismiss = () => r.resume();
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [body(text),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => {
-                                Screen.popModalHash("wall");
-                                r.resume();
-                            })])
-                        ]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    r.resume();
-                });
-            }
+            var m = new ModalDialog();
+            m.add([body(text),
+                div("wall-dialog-buttons",
+                    [R.mkButtonOnce("ok",() => m.dismiss())])
+            ]);
+            m.onDismiss = () => r.resume();
+            m.show();
         }
 
         //? Prompts the user with ok and cancel buttons
         //@ returns(boolean)
         //@ tandre2
         //@ uiAsync
-        export function ask_boolean(text:string, caption:string, r:ResumeCtx)
-        {
+        export function ask_boolean(text: string, caption: string, r: ResumeCtx) {
             var rt = r.rt;
-            if (rt.useModalWallDialogs()) {
-                var value = false;
-                var m = new ModalDialog();
-                m.add([div("wall-dialog-header", text),
-                         body(caption),
-                         div("wall-dialog-buttons",
-                            [R.mkButton(lf("no"), () => {
-                                value = false;
-                                m.dismiss();
-                            }),
-                            R.mkButton(lf("yes"), () => {
-                                    value = true;
-                                    m.dismiss();
-                            })])
-                             ]);
-                m.onDismiss = () => r.resumeVal(value);
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [div("wall-dialog-header", text),
-                         body(caption),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("no", () => {
-                                Screen.popModalHash("wall");
-                                r.resumeVal(false)
-                            }, true),
-                            R.mkButtonOnce("yes", () => {
-                                    Screen.popModalHash("wall");
-                                    r.resumeVal(true)
-                            }, true)])
-                        ]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    r.resumeVal(false);
-                });
-            }
+            var value = false;
+            var m = new ModalDialog();
+            m.add([div("wall-dialog-header", text),
+                body(caption),
+                div("wall-dialog-buttons",
+                    [R.mkButton(lf("no"),() => {
+                        value = false;
+                        m.dismiss();
+                    }),
+                        R.mkButton(lf("yes"),() => {
+                            value = true;
+                            m.dismiss();
+                        })])
+            ]);
+            m.onDismiss = () => r.resumeVal(value);
+            m.show();
         }
 
         //? Prompts the user to input a number
         //@ returns(number)
         //@ tandre2
         //@ uiAsync
-        export function ask_number(text:string, r:ResumeCtx)
-        {
+        export function ask_number(text: string, r: ResumeCtx) {
             var rt = r.rt;
             var t = R.mkTextInput("number", lf("enter a decimal number"));
             t.value = "";
-            if (rt.useModalWallDialogs()) {
-                var value = 0;
-                var m = new ModalDialog();
-                m.add([
-                    body(text),
-                    div("wall-dialog-input", t),
-                    div("wall-dialog-buttons",
-                        [R.mkButton(lf("ok"), () => {
-                            value = t.valueAsNumber;
-                            if (!isFinite(value)) value = parseFloat(t.value); // Firefox
-                            if (!isFinite(value)) value = undefined;
-                            m.dismiss();
-                        })])
-                    ]);
-                m.onDismiss = () => r.resumeVal(value);
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [body(text),
-                         div("wall-dialog-input", t),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => {
-                                Screen.popModalHash("wall");
-                                btns.removeSelf();
-                                var x = t.valueAsNumber;
-                                if (!isFinite(x)) x = parseFloat(t.value); // Firefox
-                                if (!isFinite(x)) x = undefined;
-                                t.blur();
-                                t.setAttribute("readonly", "true");
-                                // popup keyboard takes a while to dissapear in wp
-                                Util.setTimeout(500, () => r.resumeVal(x));
-                            })])
-                        ]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    t.blur();
-                    t.setAttribute("readonly", "true");
-                    Util.setTimeout(500, () => r.resumeVal(undefined));
-                });
-            }
+            var value = 0;
+            var m = new ModalDialog();
+            m.add([
+                body(text),
+                div("wall-dialog-input", t),
+                div("wall-dialog-buttons",
+                    [R.mkButton(lf("ok"),() => {
+                        value = t.valueAsNumber;
+                        if (!isFinite(value)) value = parseFloat(t.value); // Firefox
+                        if (!isFinite(value)) value = undefined;
+                        m.dismiss();
+                    })])
+            ]);
+            m.onDismiss = () => r.resumeVal(value);
+            m.show();
             Util.setKeyboardFocus(t);
         }
 
@@ -158,48 +89,22 @@ module TDev.RT {
         //@ returns(string)
         //@ tandre2
         //@ uiAsync
-        export function ask_string(text:string, r:ResumeCtx)
-        {
+        export function ask_string(text: string, r: ResumeCtx) {
             var rt = r.rt;
             var t = R.mkTextArea("variableDesc");
             t.value = "";
-            if (rt.useModalWallDialogs()) {
-                var value = "";
-                var m = new ModalDialog();
-                m.add([body(text),
-                         div("wall-dialog-input", t),
-                         div("wall-dialog-buttons",
-                            [R.mkButton(lf("ok"),  () => {
-                                value = t.value;
-                                m.dismiss();
-                            })])
-                        ]);
-                m.onDismiss = () => r.resumeVal(value);
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [body(text),
-                         div("wall-dialog-input", t),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => {
-                                Screen.popModalHash("wall");
-                                t.blur();
-                                t.setAttribute("readonly", "true");
-                                var v = t.value;
-                                // popup keyboard takes a while to dissapear in wp
-                                Util.setTimeout(500, () => r.resumeVal(v));
-                            })])
-                        ]);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    t.blur();
-                    t.setAttribute("readonly", "true");
-                    // popup keyboard takes a while to dissapear in wp
-                    Util.setTimeout(500, () => r.resumeVal(""));
-                });
-                rt.postHtml(elt, rt.current.pc);                
-            }
+            var value = "";
+            var m = new ModalDialog();
+            m.add([body(text),
+                div("wall-dialog-input", t),
+                div("wall-dialog-buttons",
+                    [R.mkButton(lf("ok"),() => {
+                        value = t.value;
+                        m.dismiss();
+                    })])
+            ]);
+            m.onDismiss = () => r.resumeVal(value);
+            m.show();
             Util.setKeyboardFocusTextArea(t);
         }
 
@@ -226,37 +131,18 @@ module TDev.RT {
         //@ returns(number)
         //@ tandre2
         //@ uiAsync
-        export function pick_string(text:string, caption:string, values:Collection<string>, r:ResumeCtx)
-        {
+        export function pick_string(text: string, caption: string, values: Collection<string>, r: ResumeCtx) {
             var rt = r.rt;
-            if (rt.useModalWallDialogs()) {
-                var m = new ModalDialog();
-                var index = -1;
-                var btns = values.a.map((st: string, i: number) => div('modalDialogChooseItem', st).withClick(() => {
-                    index = i;
-                    m.dismiss();
-                }));
-                m.add([div("wall-dialog-header", text),
-                         body(caption)]);
-                m.onDismiss = () => r.resumeVal(index);
-                m.choose(btns);
-            } else {
-                var btnsDiv : HTMLElement;
-                var btns2 = values.a.map((st:string, i:number) => R.mkButton(st, () => {
-                    r.resumeVal(i);
-                    Screen.popModalHash("wall");
-                    btnsDiv.removeSelf();
-                }));
-                var elt = div("wall-dialog",
-                        [div("wall-dialog-header", text),
-                         body(caption),
-                         btnsDiv = div("wall-dialog-buttons", btns2)]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btnsDiv.removeSelf();
-                    r.resumeVal(-1);
-                });
-            }
+            var m = new ModalDialog();
+            var index = -1;
+            var btns = values.a.map((st: string, i: number) => div('modalDialogChooseItem', st).withClick(() => {
+                index = i;
+                m.dismiss();
+            }));
+            m.add([div("wall-dialog-header", text),
+                body(caption)]);
+            m.onDismiss = () => r.resumeVal(index);
+            m.choose(btns);
         }
 
         //? Prompts the user to pick a time. Returns a datetime whose time is set, the date is undefined.
@@ -270,53 +156,25 @@ module TDev.RT {
             var t = R.mkTextInput("time", lf("enter a time"));
             t.style.borderStyle = 'hidden';
             t.style.borderColor = 'red';
-            t.onkeyup = (ev : Event) => {
+            t.onkeyup = (ev: Event) => {
                 t.style.borderStyle = String_.to_time(t.value) != null ? 'hidden' : 'solid';
             };
-            if (rt.useModalWallDialogs()) {
-                var value: DateTime = undefined;
-                var m = new ModalDialog();
-                m.add([div("wall-dialog-header", text),
-                         body(caption),
-                         div("wall-dialog-input", t),
-                         body("Enter a time like 15:43 or 3:43pm or 15:43:20 or 3:43:20pm"),
-                         div("wall-dialog-buttons",
-                            [R.mkButton(lf("ok"), () => {
-                                var tt = String_.to_time(t.value);
-                                if (tt != null)
-                                    value = Time.today().add_seconds(tt);
-                                m.dismiss();
-                            })])
-                        ]);
-                m.onDismiss = () => r.resumeVal(value);
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [div("wall-dialog-header", text),
-                         body(caption),
-                         div("wall-dialog-input", t),
-                         body("Enter a time like 15:43 or 3:43pm or 15:43:20 or 3:43:20pm"),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => {
-                                Screen.popModalHash("wall");
-                                t.blur();
-                                t.setAttribute("readonly", "true");
-                                var tt = String_.to_time(t.value);
-                                var ti = (tt != null) ? Time.today().add_seconds(tt) : undefined;
-                                // popup keyboard takes a while to dissapear in wp
-                                Util.setTimeout(500, () => r.resumeVal(ti));
-                            })])
-                        ]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    t.blur();
-                    t.setAttribute("readonly", "true");
-                    // popup keyboard takes a while to dissapear in wp
-                    Util.setTimeout(500, () => r.resumeVal(undefined));
-                });
-            }
+            var value: DateTime = undefined;
+            var m = new ModalDialog();
+            m.add([div("wall-dialog-header", text),
+                body(caption),
+                div("wall-dialog-input", t),
+                body("Enter a time like 15:43 or 3:43pm or 15:43:20 or 3:43:20pm"),
+                div("wall-dialog-buttons",
+                    [R.mkButton(lf("ok"),() => {
+                        var tt = String_.to_time(t.value);
+                        if (tt != null)
+                            value = Time.today().add_seconds(tt);
+                        m.dismiss();
+                    })])
+            ]);
+            m.onDismiss = () => r.resumeVal(value);
+            m.show();
             Util.setKeyboardFocus(t);
         }
 
@@ -334,45 +192,19 @@ module TDev.RT {
             t.onkeyup = (ev: Event) => {
                 t.style.borderStyle = DateTime.parse(t.value) != null ? 'hidden' : 'solid';
             };
-            if (rt.useModalWallDialogs()) {
-                var value: DateTime = undefined;
-                var m = new ModalDialog();
-                m.add([div("wall-dialog-header", text),
-                         body(caption),
-                         div("wall-dialog-input", t),
-                         div("wall-dialog-buttons",
-                            [R.mkButton(lf("ok"), () => {
-                                value = DateTime.parse(t.value);
-                                m.dismiss();
-                            })])
-                ]);
-                m.onDismiss = () => r.resumeVal(value);
-                m.show();
-            } else {
-                var btns;
-                var elt = div("wall-dialog",
-                        [div("wall-dialog-header", text),
-                         body(caption),
-                         div("wall-dialog-input", t),
-                         btns = div("wall-dialog-buttons",
-                            [R.mkButtonOnce("ok", () => {
-                                Screen.popModalHash("wall");
-                                t.blur();
-                                t.setAttribute("readonly", "true");
-                                var dt = DateTime.parse(t.value);
-                                // popup keyboard takes a while to dissapear in wp
-                                Util.setTimeout(500, () => r.resumeVal(dt));
-                            })])
-                        ]);
-                rt.postHtml(elt, rt.current.pc);
-                Screen.pushModalHash("wall", () => {
-                    btns.removeSelf();
-                    t.blur();
-                    t.setAttribute("readonly", "true");
-                    // popup keyboard takes a while to dissapear in wp
-                    Util.setTimeout(500, () => r.resumeVal(undefined));
-                });
-            }
+            var value: DateTime = undefined;
+            var m = new ModalDialog();
+            m.add([div("wall-dialog-header", text),
+                body(caption),
+                div("wall-dialog-input", t),
+                div("wall-dialog-buttons",
+                    [R.mkButton(lf("ok"),() => {
+                        value = DateTime.parse(t.value);
+                        m.dismiss();
+                    })])
+            ]);
+            m.onDismiss = () => r.resumeVal(value);
+            m.show();
             Util.setKeyboardFocus(t);
         }
 

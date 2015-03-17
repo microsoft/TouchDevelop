@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 
 //? Create collections of items.
-//@ robust
+//@ robust skill(3)
 module TDev.RT.Collections
 {
 

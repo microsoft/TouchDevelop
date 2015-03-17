@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev { export module RT {
     //? Access to the radio
+    //@ skill(3)
     export module Radio
     {
         //? Indicates if the radio is on
