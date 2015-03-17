@@ -5716,6 +5716,9 @@ module TDev
                     case "pub":
                         hs = ["hub", "pub", hs[1] ];
                         break;
+                    case "follow":
+                        hs = ["hub", "follow", hs[1], hs[2]];
+                        break;
                     case "print":
                         Promise.join(hs[1].split(/,/).map(EditorHistoryMgr.findOnlineById))
                             .then(HelpTopic.printManyAsync)

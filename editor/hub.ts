@@ -419,29 +419,29 @@ module TDev.Browser {
                 return
             }
 
-            if (t) {
-                this.createScriptFromTemplate(t);
-            } else {
-                this.tutorialsByUpdateIdAsync().done(tutorials => {
-                    var h:AST.HeaderWithState = tutorials[top.updateKey()]
-                    if (!h) {
-                        TopicInfo.followTopic(top)
-                        return
-                    }
+            if (t) this.createScriptFromTemplate(t);
+            else this.followOrContinueTutorial(top, tutorialMode);
+        }
+
+        private followOrContinueTutorial(top: HelpTopic, tutorialMode?: string) {
+            this.tutorialsByUpdateIdAsync()
+                .done(tutorials => {
+                var h: AST.HeaderWithState = tutorials[top.updateKey()]
+                if (!h || h.status == "deleted") {
+                    Util.log('follow, not previous script found, starting new');
+                    TopicInfo.followTopic(top, tutorialMode)
+                } else {
                     var st = h.editorState
                     ModalDialog.askMany(lf("resume tutorial?"),
                         "We have detected you already got " + ((st.tutorialStep || 0) + 1) +
                         (st.tutorialNumSteps ? " of " + (st.tutorialNumSteps + 1) : "") +
                         " trophies in this tutorial.",
-                        { "start over": () => {
-                                TopicInfo.followTopic(top, tutorialMode)
-                           },
-                           "resume my tutorial": () => {
-                               this.browser().createInstalled(h).edit();
-                           }
+                        {
+                            "start over": () => { TopicInfo.followTopic(top, tutorialMode) },
+                            "resume my tutorial": () => { this.browser().createInstalled(h).edit(); }
                         })
-                })
-            }
+                }
+            })
         }
 
         public loadHash(h: string[]) {
@@ -490,7 +490,7 @@ module TDev.Browser {
                     var bt = HelpTopic.findById(h[2]);
                     if (bt) {
                         Util.log('found built-in topic ' + bt.id);
-                        TopicInfo.mk(bt).follow();
+                        this.followOrContinueTutorial(bt);
                     }
                     else {
                         TheApiCacheMgr.getAsync(h[2], true)
@@ -503,8 +503,7 @@ module TDev.Browser {
                         }).done(j => {
                             if (j && j.kind == "script") {
                                 Util.log('following ' + j.id);
-                                var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
-                                ti.follow();
+                                this.followOrContinueTutorial(HelpTopic.fromJsonScript(j));
                             } else {
                                 Util.log('followed script not found');
                                 Util.setHash("hub");
