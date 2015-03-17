@@ -61,7 +61,15 @@ module TDev {
             bodyItem[guid + "-scriptVersionInCloud"] = undefined;
             return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
-        function setInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header, script: string, editorState: string, scriptState: string, cloudScriptVersion: string) : Promise {
+        function setInstalledAsync(
+            indexTable: Storage.Table,
+            scriptsTable: Storage.Table,
+            header: Cloud.Header,
+            script: string,
+            editorState: string,
+            scriptState: string,
+            cloudScriptVersion: string
+        ) : Promise {
             var headerItem = {}
             if (script && (!header.meta || header.meta.comment === undefined))
                 header.meta = getScriptMeta(script);
@@ -819,6 +827,11 @@ module TDev {
             if (!Util.check(!!guid)) return Promise.as(undefined);
             return getScriptsTablePromise().then((scriptsTable) => scriptsTable.getValueAsync(guid + "-editorState"));
         }
+        export function getInstalledScriptVersionInCloud(guid: string) : Promise // of string
+        {
+            if (!Util.check(!!guid)) return Promise.as(undefined);
+            return getScriptsTablePromise().then((scriptsTable) => scriptsTable.getValueAsync(guid + "-scriptVersionInCloud"));
+        }
         export function getAnyScriptAsync(guid: string) : Promise // of string (script text)
         {
             if (/-/.test(guid)) return getInstalledScriptAsync(guid);
@@ -836,7 +849,13 @@ module TDev {
                 })
             );
         }
-        export function setInstalledScriptAsync(header: Cloud.Header, script: string, editorState: string, scriptState: string = null) : Promise // of void
+        export function setInstalledScriptAsync(
+            header: Cloud.Header,
+            script: string,
+            editorState: string,
+            scriptState: string = null,
+            scriptVersionInCloud = null
+        ) : Promise // of void
         {
             if (!Util.check(!!header)) return Promise.as(undefined);
             log("setting " + header.guid);
@@ -844,7 +863,7 @@ module TDev {
                 indexTable: getIndexTablePromise(),
                 scriptsTable: getScriptsTablePromise(),
             }).then(function (data/*: SyncData*/) {
-                return setInstalledAsync(data.indexTable, data.scriptsTable, header, script, editorState, scriptState, null);
+                return setInstalledAsync(data.indexTable, data.scriptsTable, header, script, editorState, scriptState, scriptVersionInCloud);
             });
         }
 

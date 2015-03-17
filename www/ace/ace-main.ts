@@ -63,7 +63,9 @@ module TDev {
             var message: External.Message_Save = {
                 type: External.MessageType.Save,
                 text: editor.getValue(),
-                state: ""
+                state: {
+                    lastSave: Date.now()
+                },
             };
             post(message);
         });

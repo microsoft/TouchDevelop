@@ -31,12 +31,14 @@ module TDev {
     export module External {
         export var TheChannel: Channel = null;
 
-        interface SavedScript {
-            state: string;
-            text: string;
+        // The metadata that we save about a script. Stored as a string (JSON).
+        interface SavedScriptState {
+            editorState: string;
+            baseVersion: string;
         }
 
-        var emptyScript: SavedScript = { state: "", text: "" };
+        var emptyState: SavedScriptState = { editorState: "", baseVersion: null };
+        var emptyScript = "";
 
         export class Channel {
             constructor(
@@ -58,11 +60,12 @@ module TDev {
                     case MessageType.Save: {
                         var message = <Message_Save> event.data;
                         World.getInstalledHeaderAsync(this.guid).then(header => {
-                            var script: SavedScript = {
-                                state: message.state,
-                                text: message.text
+                            var script = message.text;
+                            var state: SavedScriptState = {
+                                editorState: message.state,
+                                baseVersion: null,
                             };
-                            World.setInstalledScriptAsync(header, JSON.stringify(script), "").then(() => {
+                            World.setInstalledScriptAsync(header, script, "", null, JSON.stringify(state)).then(() => {
                                 // FIXME define and send Message_SaveAck
                                 console.log("[external] script saved properly");
                             });
@@ -77,19 +80,25 @@ module TDev {
             }
         }
 
-        export function loadAndSetup(editor: ExternalEditor, scriptText: string, guid: string) {
+        // The [scriptVersionInCloud] name is the one that's used by [world.ts];
+        // actually, it hasn't much to do, really, with the script version
+        // that's in the cloud. It's more of an unused field (in the new "lite
+        // cloud" context) that we use to store extra information attached to
+        // the script.
+        export function loadAndSetup(editor: ExternalEditor, scriptText: string, guid: string, scriptVersionInCloud: string) {
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
 
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
-                var script: SavedScript = scriptText ? JSON.parse(scriptText) : emptyScript;
+                var script: string = scriptText || emptyScript;
+                var state: SavedScriptState = scriptVersionInCloud ? JSON.parse(scriptVersionInCloud) : emptyState;
                 TheChannel = new Channel(editor, iframe, guid);
                 TheChannel.post({
                     type: MessageType.Init,
-                    text: script.text,
-                    state: script.state
+                    text: script,
+                    state: state
                 });
             });
             iframe.setAttribute("src", editor.origin + editor.path);
