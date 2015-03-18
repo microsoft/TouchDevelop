@@ -4117,12 +4117,9 @@ module TDev
                     HTML.mkButton(lf("show diagnostic log"),() => {
                         m.dismiss();
                         Editor.showLog();
-                    }), lf("internal log used for diagnostics.")
-                    ),
+                    })),
                 div("wall-dialog-body", zoomSlide, zoomLabel),
-                betaDiv,
-                div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"),
-                    (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline()))
+                betaDiv
             ])
 
             if (TDev.dbg) {
@@ -4144,6 +4141,7 @@ module TDev
                                     no: () => logContentsAsync(false)
                             });
                         })),
+                        div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"), (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
                         div("wall-dialog-body", chaosOfflineEdit),
                         div("wall-dialog-body",
                             !LocalShell.mgmtUrl("") ? null :
