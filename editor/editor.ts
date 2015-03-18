@@ -2728,6 +2728,7 @@ module TDev
 
         private loadPluginsAsync()
         {
+            if (!Script) return Promise.as();
             var ids = Script.editorState.buttonPlugins
             if (!ids) return Promise.as()
             return Promise.join(Object.keys(ids).map(id => Plugins.installButtonPluginAsync(id)));
