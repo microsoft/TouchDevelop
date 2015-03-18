@@ -4162,14 +4162,13 @@ module TDev.AST {
             super.visitChildren(r);
         }
 
-        visitPropertyRef(n:PropertyRef)
+        private visitDeclOrProp(c:Call, p:IProperty)
         {
-            var p = n.prop
-            if (!p) return;
-
             var d:Decl = null
-            if (n.getCall())
-                d = n.getCall().calledExtensionAction()
+
+            if (c)
+                d = c.calledExtensionAction()
+
             if (!d)
                 d = p.forwardsTo();
 
@@ -4178,6 +4177,29 @@ module TDev.AST {
             } else {
                 this.useBuiltinProperty(p);
             }
+        }
+
+        visitOperator(o:Operator)
+        {
+            var c = o.call
+            if (c) {
+                if (c._assignmentInfo && c._assignmentInfo.targets) {
+                    c._assignmentInfo.targets.forEach(t => {
+                        var setter = t.getLiftedSetter()
+                        if (setter) this.visitDeclOrProp(mkFakeCall(PropertyRef.mkProp(setter), []), setter)
+                    })
+                }
+            }
+
+            super.visitOperator(o)
+        }
+
+        visitPropertyRef(n:PropertyRef)
+        {
+            var p = n.prop
+            if (!p) return;
+
+            this.visitDeclOrProp(n.getCall(), p)
         }
 
         visitActionParameter(ap:ActionParameter)
