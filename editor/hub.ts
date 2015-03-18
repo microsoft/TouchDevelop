@@ -431,15 +431,8 @@ module TDev.Browser {
                     Util.log('follow, not previous script found, starting new');
                     TopicInfo.followTopic(top, tutorialMode)
                 } else {
-                    var st = h.editorState
-                    ModalDialog.askMany(lf("resume tutorial?"),
-                        "We have detected you already got " + ((st.tutorialStep || 0) + 1) +
-                        (st.tutorialNumSteps ? " of " + (st.tutorialNumSteps + 1) : "") +
-                        " trophies in this tutorial.",
-                        {
-                            "start over": () => { TopicInfo.followTopic(top, tutorialMode) },
-                            "resume my tutorial": () => { this.browser().createInstalled(h).edit(); }
-                        })
+                    var st = h.editorState;
+                    this.browser().createInstalled(h).edit()
                 }
             })
         }
