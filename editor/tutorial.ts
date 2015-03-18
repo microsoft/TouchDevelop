@@ -782,22 +782,38 @@ module TDev
             if (eventHubsInfo) {
                 var anon = this.loadAnonymousId();
                 if (anon) {
-                    var client = new XMLHttpRequest();
                     var url = 'https://' + eventHubsInfo.namespace + '.servicebus.windows.net/' + eventHubsInfo.hub + '/publishers/' + anon + '/messages?timeout=60&api-version=2014-01';
-                    Util.log('event hubs: ' + url);
-                    client.open('POST', url);
-                    client.setRequestHeader('Authorization', eventHubsInfo.token);
-                    client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
-                    client.send(JSON.stringify({
+                    var token = eventHubsInfo.token;
+                    var payload = {
                         anonid: anon,
                         scriptid: this.progressId,
                         index: prog.index,
                         total: prog.numSteps,
                         completed: !!prog.completed,
                         time: prog.lastUsed
-                    }));
+                    }
+                    this.postEventHubsData(url, token, payload);
                 }
             }
+        }
+
+        private postEventHubsData(url: string, token: string, payload: any, retry = 5) {
+            Util.log('event hubs: ' + url);
+
+            function tryAgain() {
+                if (client.status != 401 && --retry > 0) {
+                    Util.log('retrying events hub');
+                    Util.setTimeout(1000 * (10 - retry),() => this.postEventHubsData(url, token, payload, retry));
+                }
+            }
+            var client = new XMLHttpRequest();
+            client.open('POST', url);
+            client.timeout = 30;
+            client.setRequestHeader('Authorization', token);
+            client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
+            client.ontimeout = tryAgain;
+            client.onerror = tryAgain;
+            client.send(JSON.stringify(payload));
         }
 
         private loadAnonymousId(): string {
