@@ -7,6 +7,8 @@ module TDev {
         document.getElementById("log").textContent += message + "\n";
     }
 
+    // ---------- Communication protocol
+
     var allowedOrigins = {
         "http://localhost:4242": null,
         "http://www.touchdevelop.com": null,
@@ -16,8 +18,12 @@ module TDev {
     // message.
     var outer: Window = null;
     var origin: string = null;
+
     // Also written once at initialization-time.
     var editor: AceAjax.Editor = null;
+
+    // A global that remembers the current version we're editing
+    var currentVersion: string;
 
     window.addEventListener("message", (event) => {
         if (!(event.origin in allowedOrigins))
@@ -38,6 +44,7 @@ module TDev {
             case External.MessageType.Init:
                 setupEditor(<External.Message_Init> message);
                 setupButtons();
+                mergeIfNeeded(<External.Message_Init> message);
                 break;
         }
     }
@@ -48,23 +55,59 @@ module TDev {
         outer.postMessage(message, origin);
     }
 
+    // ---------- Revisions
+
+    function mergeIfNeeded(message: External.Message_Init) {
+        if (message.merge) {
+            log("[merge] merge request, base = "+message.merge.base.baseSnapshot +
+                ", theirs = "+message.merge.theirs.baseSnapshot +
+                ", mine = "+message.script.baseSnapshot);
+        }
+        currentVersion = message.script.baseSnapshot;
+        log("[revisions] current version is "+currentVersion);
+    }
+
+    // ---------- UI functions
+
+    interface EditorState {
+        lastSave: Date;
+    }
+
+    function loadEditorState(s: string): EditorState {
+        try {
+            return JSON.parse(s);
+        } catch (e) {
+            return { lastSave: null };
+        }
+    }
+
+    function saveEditorState(s: EditorState): string {
+        return JSON.stringify(s);
+    }
+
     function setupEditor(message: External.Message_Init) {
+        var state = loadEditorState(message.script.editorState);
+
         editor = ace.edit("editor");
         editor.setTheme("ace/theme/twilight");
         editor.getSession().setMode("ace/mode/c_cpp");
-        editor.setValue(message.text);
+        editor.setValue(message.script.scriptText);
         editor.clearSelection();
 
-        log("[end] setupEditor");
+
+        log("[loaded] version from " + state.lastSave);
     }
 
     function setupButtons() {
         document.querySelector("#command-save").addEventListener("click", () => {
             var message: External.Message_Save = {
                 type: External.MessageType.Save,
-                text: editor.getValue(),
-                state: {
-                    lastSave: Date.now()
+                script: {
+                    scriptText: editor.getValue(),
+                    editorState: saveEditorState({
+                        lastSave: new Date()
+                    }),
+                    baseSnapshot: currentVersion,
                 },
             };
             post(message);

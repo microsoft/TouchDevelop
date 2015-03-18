@@ -31,15 +31,6 @@ module TDev {
     export module External {
         export var TheChannel: Channel = null;
 
-        // The metadata that we save about a script. Stored as a string (JSON).
-        interface SavedScriptState {
-            editorState: string;
-            baseVersion: string;
-        }
-
-        var emptyState: SavedScriptState = { editorState: "", baseVersion: null };
-        var emptyScript = "";
-
         export class Channel {
             constructor(
                 private editor: ExternalEditor,
@@ -59,13 +50,11 @@ module TDev {
                 switch ((<Message> event.data).type) {
                     case MessageType.Save: {
                         var message = <Message_Save> event.data;
-                        World.getInstalledHeaderAsync(this.guid).then(header => {
-                            var script = message.text;
-                            var state: SavedScriptState = {
-                                editorState: message.state,
-                                baseVersion: null,
-                            };
-                            World.setInstalledScriptAsync(header, script, "", null, JSON.stringify(state)).then(() => {
+                        World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
+                            var scriptText = message.script.scriptText;
+                            var editorState = message.script.editorState;
+                            header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
+                            World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
                                 // FIXME define and send Message_SaveAck
                                 console.log("[external] script saved properly");
                             });
@@ -80,25 +69,36 @@ module TDev {
             }
         }
 
+        export interface ScriptData {
+            guid: string;
+            scriptText: string;
+            editorState: string;
+            scriptVersionInCloud: string;
+            baseSnapshot: string;
+        };
+
         // The [scriptVersionInCloud] name is the one that's used by [world.ts];
         // actually, it hasn't much to do, really, with the script version
         // that's in the cloud. It's more of an unused field (in the new "lite
         // cloud" context) that we use to store extra information attached to
         // the script.
-        export function loadAndSetup(editor: ExternalEditor, scriptText: string, guid: string, scriptVersionInCloud: string) {
+        export function loadAndSetup(editor: ExternalEditor, data: ScriptData) {
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
 
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
-                var script: string = scriptText || emptyScript;
-                var state: SavedScriptState = scriptVersionInCloud ? JSON.parse(scriptVersionInCloud) : emptyState;
-                TheChannel = new Channel(editor, iframe, guid);
+                TheChannel = new Channel(editor, iframe, data.guid);
+                var extra = JSON.parse(data.scriptVersionInCloud);
                 TheChannel.post({
                     type: MessageType.Init,
-                    text: script,
-                    state: state
+                    script: {
+                        scriptText: data.scriptText,
+                        editorState: data.editorState,
+                        baseSnapshot: data.baseSnapshot,
+                    },
+                    merge: ("mine" in extra) ? extra : null
                 });
             });
             iframe.setAttribute("src", editor.origin + editor.path);

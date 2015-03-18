@@ -9,6 +9,8 @@ module TDev {
         export var getScriptMeta : (s:string) => any;
         export var sanitizeScriptTextForCloud : (s:string) => string;
         export var waitForUpdate = (id:string) => false;
+        export var kPendingMerge = "!!!PENDINGMERGE!!!";
+
         var currentUserInfo:any = null;
         var currentUserPromise = new PromiseInv();
         var localStorage = window.localStorage;
@@ -71,7 +73,7 @@ module TDev {
             cloudScriptVersion: string
         ) : Promise {
             var headerItem = {}
-            if (script && (!header.meta || header.meta.comment === undefined))
+            if (script && !header.editor && (!header.meta || header.meta.comment === undefined))
                 header.meta = getScriptMeta(script);
             headerItem[header.guid] = JSON.stringify(header);
             var bodyItem = {}
@@ -121,36 +123,81 @@ module TDev {
             return Util.httpGetJsonAsync(blobcontainer + snapshotId)
         }
 
+        // [header] is coming from the cloud; we need to update our local
+        // storage to merge data from the cloud
         function downloadInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header) : Promise {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is newer");
             if (Cloud.lite)
                 return getScriptBlobAsync(header.scriptVersion.baseSnapshot)
-                    .then(resp =>
+                    .then(theirs =>
                         indexTable.getValueAsync(header.guid)
                             .then(str => str ? JSON.parse(str) : null)
                             .then(hd => {
                                 var baseVer, currVer;
+                                // [hd] is the local header; if the [instanceId]
+                                // is "cloud", then no local modifications were
+                                // performed, i.e. the local header is *exactly*
+                                // baseSnapshot
                                 if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot) {
+                                    // We need to merge, because there's been a fork.  The base
+                                    // header is [hd.scriptVersion.baseSnapshot], "theirs" is
+                                    // [header], and "mine" is [hd].
                                     log(header.guid + "/" + header.scriptId + ": " + header.name + " merging based on " + hd.scriptVersion.baseSnapshot);
                                     return getScriptBlobAsync(hd.scriptVersion.baseSnapshot)
                                         .then(r => { baseVer = r })
+                                        // Note: the [guid] is the same for both [header] and [hd].
+                                        // The line below is getting the local script.
                                         .then(() => scriptsTable.getItemsAsync([header.guid + "-script", header.guid + "-editorState"]))
                                         .then(r => { currVer = { script: r[header.guid + "-script"], editorState: r[header.guid + "-editorState"] } })
                                         .then(() => {
-                                            header.scriptVersion.instanceId = Cloud.getWorldId()
-                                            header.scriptVersion.time = getCurrentTime();
-                                            header.scriptVersion.version++;
-                                            return {
-                                                script:      mergeScripts(baseVer.script, currVer.script, resp.script),
-                                                editorState: mergeEditorStates(baseVer.editorState, currVer.editorState, resp.editorState),
+                                            if (header.editor) {
+                                                // Don't update the header: merely record the fact
+                                                // that we've seen a new version go by from the
+                                                // cloud, and record in the extra field the contents
+                                                // of that version (so that we don't have to hit the
+                                                // cloud again to get it later on).
+                                                header = hd; // FIXME properly pass a value instead of updating in-place
+                                                return {
+                                                    script: currVer.script,
+                                                    editorState: currVer.editorState,
+                                                    extra: {
+                                                        theirs: {
+                                                            scriptText: theirs.script,
+                                                            editorState: theirs.editorState,
+                                                            baseSnapshot: header.scriptVersion.baseSnapshot
+                                                        },
+                                                        base: {
+                                                            scriptText: baseVer.script,
+                                                            editorState: baseVer.editorState,
+                                                            baseSnapshot: hd.scriptVersion.baseSnapshot
+                                                        },
+                                                    }
+                                                };
+                                            } else {
+                                                // Our new header is the one that we took in from the
+                                                // cloud, except that some modifications were performed.
+                                                // Hence, we modify the [instanceId] so that it no
+                                                // longer says "cloud". Since the [baseSnapshot] is
+                                                // still the one from the cloud header, this means that
+                                                // we've been creating a new version *on top of* the
+                                                // cloud header. This new version has not been synced to
+                                                // the cloud, and therefore does not have a
+                                                // [baseSnapshot] yet.
+                                                header.scriptVersion.instanceId = Cloud.getWorldId()
+                                                header.scriptVersion.time = getCurrentTime();
+                                                header.scriptVersion.version++;
+                                                return {
+                                                    script:      mergeScripts(baseVer.script, currVer.script, theirs.script),
+                                                    editorState: mergeEditorStates(baseVer.editorState, currVer.editorState, theirs.editorState),
+                                                }
                                             }
                                         })
                                 } else {
-                                    return resp
+                                    return theirs
                                 }
                             }))
                     .then(resp =>
-                        setInstalledAsync(indexTable, scriptsTable, header, resp.script, resp.editorState, null, null))
+                        setInstalledAsync(indexTable, scriptsTable, header, resp.script, resp.editorState, null, JSON.stringify(resp.extra || {})))
                     .then(() => header.scriptVersion.instanceId == "cloud" ? Promise.as() : uploadInstalledAsync(indexTable, scriptsTable, header))
 
             return Cloud.getUserInstalledBodyAsync(header.guid).then(function (installedBodies: Cloud.InstalledBodies) {
@@ -917,7 +964,7 @@ module TDev {
             })
         }
 
-        export function updateInstalledScriptAsync(hd:Cloud.Header, script:string, state:string, background = false)
+        export function updateInstalledScriptAsync(hd:Cloud.Header, script:string, state:string, background = false, scriptVersionInCloud = "")
         {
             if (!background) {
                 hd.status = "unpublished";
@@ -927,7 +974,7 @@ module TDev {
             hd.scriptVersion.time = getCurrentTime();
             hd.scriptVersion.version++;
             hd.meta = null // recompute
-            return World.setInstalledScriptAsync(hd, script, state, "")
+            return World.setInstalledScriptAsync(hd, script, state, "", scriptVersionInCloud)
         }
 
         export var switchToChannel = (ch:string) => {

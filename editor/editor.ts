@@ -2975,8 +2975,9 @@ module TDev
                     World.getInstalledScriptVersionInCloud(header.guid)
                 ])
             }).then((arr: string[]) => {
+                // Assigning to the variable defined above.
+                editorState = arr[1];
                 var script = arr[0];
-                var editorState = arr[1];
                 var scriptVersionInCloud = arr[2];
                 if (!header.editor && !script) {
                     Util.navigateInWindow((<any>window).errorUrl + "#logout")
@@ -3028,7 +3029,13 @@ module TDev
                 var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
-                    External.loadAndSetup(editor, scriptText, header.guid, scriptVersionInCloud);
+                    External.loadAndSetup(editor, {
+                        scriptText: scriptText,
+                        guid: header.guid,
+                        scriptVersionInCloud: scriptVersionInCloud,
+                        editorState: editorState,
+                        baseSnapshot: header.scriptVersion.baseSnapshot,
+                    });
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });

@@ -4,6 +4,18 @@
 
 module TDev {
     export module External {
+        export interface SavedScript {
+            scriptText: string;
+            editorState: string;
+            baseSnapshot: string;
+        }
+
+        // The pending merge data, if any.
+        export interface PendingMerge {
+            base: SavedScript;
+            theirs: SavedScript;
+        }
+
         export enum MessageType {
             Init,
             Metadata, AckMetadata,
@@ -17,15 +29,14 @@ module TDev {
         }
 
         export interface Message_Init extends Message {
-            type: MessageType;
-            text: string;
-            state: any;
+            type: MessageType; // == MessageType.Init
+            script: SavedScript;
+            merge?: PendingMerge;
         }
 
         export interface Message_Save extends Message {
-            type: MessageType;
-            text: string;
-            state: any;
+            type: MessageType; // == MessageType.Save
+            script: SavedScript;
         }
     }
 }
