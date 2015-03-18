@@ -493,25 +493,31 @@ module TDev.Browser {
                         this.followOrContinueTutorial(bt);
                     }
                     else {
-                        TheApiCacheMgr.getAsync(h[2], true)
-                            .then((res: JsonIdObject) => {
-                            if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
-                                Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
-                                return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
-                            }
-                            else return Promise.as(res);
-                        }).done(j => {
-                            if (j && j.kind == "script") {
-                                Util.log('following ' + j.id);
-                                this.followOrContinueTutorial(HelpTopic.fromJsonScript(j));
-                            } else {
-                                Util.log('followed script not found');
-                                Util.setHash("hub");
-                            }
-                        }, e => {
-                                Util.log('follow route error: {0}, {1}' + h[2], e.message);
-                                Util.setHash("hub");
-                       });
+                        ProgressOverlay.show(lf("loading tutorial"),() => {
+                            TheApiCacheMgr.getAsync(h[2], true)
+                                .then((res: JsonIdObject) => {
+                                if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
+                                    Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
+                                    return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
+                                }
+                                else return Promise.as(res);
+                            })
+                                .done(j => {
+                                ProgressOverlay.hide();
+                                if (j && j.kind == "script") {
+                                    Util.log('following ' + j.id);
+                                    this.followOrContinueTutorial(HelpTopic.fromJsonScript(j));
+                                } else {
+                                    Util.log('followed script not found');
+                                    Util.setHash("hub");
+                                }
+                            },
+                                e => {
+                                    ProgressOverlay.hide();
+                                    Util.log('follow route error: {0}, {1}' + h[2], e.message);
+                                    Util.setHash("hub");
+                                });
+                        });
                     }
                 });
                 return;
