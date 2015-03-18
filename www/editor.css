@@ -5352,6 +5352,10 @@ img.tracking-pixel {
   text-align: center;
 }
 
+.sdIcon .tutProgress {
+    width:100%;
+}
+
 .tutProgress .steps {
   font-size: 0.8em;
   font-weight: bold;

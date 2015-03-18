@@ -963,10 +963,8 @@ module TDev.Browser {
                     var ofSteps = prog.tutorialNumSteps ? " of " + (prog.tutorialNumSteps + 1) : ""
                     tile.appendChild(div("tutProgress",
                         ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
-                            div(lf("steps done"), lf("done!"), div("label", starSpan))
-                            :
-                            div("steps", starSpan, ofSteps,
-                                            div("label", lf("tutorial progress")))),
+                            div("steps", lf("done!"), div("label", starSpan))
+                            : div("steps", starSpan, ofSteps, div("label", lf("tutorial progress")))),
                             div("restart", HTML.mkButton(lf("start over"), () => startTutorial(top, null)))))
                 }
 
