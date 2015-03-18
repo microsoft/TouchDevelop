@@ -76,12 +76,17 @@ module TDev.RT {
     //? A web socket
     //@ stem("ws") ctx(general) dbgOnly
     export class WebSocket_
-        extends RTValue {
+        extends RTDisposableValue {
 
         private msgs = [];
 
-        constructor (private ws: WebSocket, private rt: Runtime) {
-            super()
+        constructor (private ws: WebSocket, rt : Runtime) {
+            super(rt)
+        }
+
+        public dispose() {
+            this.close();
+            super.dispose();
         }
 
         static mk(ws: WebSocket, rt : Runtime) {
