@@ -167,19 +167,19 @@ The `client.js` is built by default.
 The `-master` branch contains the latest version and may break from time to
 time. Whenever `-master` feels stable enough, we merge it into `-stable`.
 
-(Note to developers: by running the following commands.)
+(Note to developers: by running the following commands.
 
 ```bash
 git checkout stable
 git fetch
 git merge origin/master
 git push
-```
+```)
 
 Whenever an urgent bug-fix needs to be applied on stable, we first commit it to
 `-master`, then backport it on `-stable` via cherry-picking.
 
-(Note to developers: by running the following commands.)
+(Note to developers: by running the following commands.
 
 ```bash
 git checkout stable
@@ -188,7 +188,7 @@ git log origin/master
 # write down sha-1 id of the commit you need
 git cherry-pick [the-sha-1-id]
 git push
-```
+```)
 
 ## The various directories in the tree
 
