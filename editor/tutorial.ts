@@ -800,7 +800,7 @@ module TDev
         private postEventHubsData(url: string, token: string, payload: any, retry = 5) {
             Util.log('event hubs: ' + url);
 
-            function tryAgain() {
+            var tryAgain = () => {
                 if (client.status != 401 && --retry > 0) {
                     Util.log('retrying events hub');
                     Util.setTimeout(1000 * (10 - retry),() => this.postEventHubsData(url, token, payload, retry));
