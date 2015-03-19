@@ -792,13 +792,14 @@ module TDev
                         completed: !!prog.completed,
                         time: prog.lastUsed
                     }
-                    this.postEventHubsData(url, token, payload);
+                    this.postEventHubsData(url, token, payload, 5);
                 }
             }
         }
 
-        private postEventHubsData(url: string, token: string, payload: any, retry = 5) {
+        private postEventHubsData(url: string, token: string, payload: any, retry : number) {
             Util.log('event hubs: ' + url);
+            Util.log('event hubs token: ' + token);
 
             var tryAgain = () => {
                 if (client.status != 401 && --retry > 0) {
@@ -808,7 +809,6 @@ module TDev
             }
             var client = new XMLHttpRequest();
             client.open('POST', url);
-            client.timeout = 30;
             client.setRequestHeader('Authorization', token);
             client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
             client.ontimeout = tryAgain;
