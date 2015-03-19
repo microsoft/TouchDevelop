@@ -1208,7 +1208,7 @@ module TDev
                     m.add(div('wall-dialog-buttons tutDialogButons',
                         // TODO: mine tutorial locale
                         /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"),() => { this.replyDialog() }) : null,
-                        previousStep >= 0 ? HTML.mkButton(lf("go to previous step"),() => { this.replyAsync(previousStep).done(() => { m.dismiss(); }); }) : null,
+                        TheEditor.widgetEnabled("tutorialGoToPreviousStep") && previousStep >= 0 ? HTML.mkButton(lf("go to previous step"),() => { this.replyAsync(previousStep).done(() => { m.dismiss(); }); }) : null,
                         HTML.mkButton(lf("let's do it!"), () => m.dismiss())
                         )
                     );

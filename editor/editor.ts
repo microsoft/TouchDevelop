@@ -1077,6 +1077,7 @@ module TDev
             scriptPropertiesManagement: 1,
             scriptPropertiesSettings: 1,
             scriptPropertiesExport: 1,
+            tutorialGoToPreviousStep : 1,
             // sections
             dataSection: 1,
             eventsSection: 1,
