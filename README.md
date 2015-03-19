@@ -165,9 +165,11 @@ The `client.js` is built by default.
 ## Branches
 
 The `-master` branch contains the latest version and may break from time to
-time. Whenever `-master` feels stable enough, we merge it into `-stable`.
+time. Whenever `-master` feels stable enough, we merge it into `-stable` by running this command.
 
-(Note to developers: by running the following commands.)
+    jake push-master
+
+(Note to developers: or by running the following commands.)
 
 ```bash
 git checkout stable
