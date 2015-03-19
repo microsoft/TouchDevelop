@@ -497,19 +497,4 @@ task('cordova', [ 'default' ], {}, function () {
    'www/editor.css'].forEach(function (f) { jake.cpR(f, 'build/cordova/'); });
 });
 
-task('push-master', [ 'default' ], { async : true }, function () {
-	var task = this;
-	var cmds = [
-		'git pull',
-		'git checkout stable', 
-		'git fetch', 
-		'git merge origin/master', 
-		'git push',
-		'git checkout master'
-	];
-	jake.exec(cmds, { printStdout: true }, function() { 
-		task.complete();
-	});
-});
-
 // vim: ft=javascript
