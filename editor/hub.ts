@@ -1372,7 +1372,8 @@ module TDev.Browser {
                     d.canDismiss = false;
                 d.show();
             } else {
-                Storage.showTemporaryWarning();
+                if (EditorSettings.editorMode() > EditorMode.block)
+                    Storage.showTemporaryWarning();
             }
         }
 

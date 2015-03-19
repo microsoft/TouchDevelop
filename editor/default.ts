@@ -29,7 +29,8 @@ module TDev
             if (window.localStorage["lastExceptionMessage"]) {
                 var msg = window.localStorage["lastExceptionMessage"];
                 window.localStorage["lastExceptionMessage"] = "";
-                upd = div("app-updated", lf("Something went wrong and we reloaded the app"));
+                if (TDev.Browser.EditorSettings.editorMode() > TDev.Browser.EditorMode.block)
+                    upd = div("app-updated", lf("Something went wrong and we reloaded the app"));
             }
 
             if (!upd && window.localStorage["appUpdated"]) {
