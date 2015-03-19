@@ -498,6 +498,7 @@ module TDev
         }
 
         public backBtnHandler() {
+            TheEditor.onBack();
             if (SizeMgr.splitScreen) {
                 this.currentRt.popPage()
             } else {
@@ -1633,7 +1634,17 @@ module TDev
         }
 
         static runCount = 0;
+        public onBack = () => {};
         public runAction(a: AST.Decl, args: any[]= null, opts: AST.CompilerOptions = {}) {
+            if (Collab.AstSession && Collab.AstSession.loaded) {
+                var old = Collab.getAutomaticPullEnabled();
+                Collab.setAutomaticPullEnabled(false);
+                this.onBack = () => {
+                    Collab.setAutomaticPullEnabled(old);
+                };
+            } else {
+                this.onBack = () => {};
+            }
             TipManager.setTip(null); // clear any tip
             var run0 = () => {
                 this.spyManager.onRunAction(<AST.Action>a);
