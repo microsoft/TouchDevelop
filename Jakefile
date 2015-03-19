@@ -348,7 +348,7 @@ Object.keys(concatMap).forEach(function (f) {
 });
 
 task('log', [], { async: false }, function () {
-  if (process.env.TRAVIS_COMMIT_RANGE) {
+  if (process.env.TRAVIS_COMMIT) {
     console.log("[I] dumping commit info to build/buildinfo.json");
     fs.writeFileSync('build/buildinfo.json', JSON.stringify({
       commit: process.env.TRAVIS_COMMIT,
