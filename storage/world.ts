@@ -589,20 +589,9 @@ module TDev {
         }
         export function saveAsync(guid: string, onNotLoggedIn: () => void = undefined, onBadTime: (number) => void = undefined): Promise // of PostUserInstalledResponse
         {
-            if (!Cloud.getUserId()) {
-                var r = HTML.showSaveNotification("sign in to backup your work", 3000);
-                r.className += " not-logged-in";
-                r.withClick(() => {
-                    Cloud.authenticateAsync(lf("cloud backup")).done(ok => {
-                    })
-                })
+            if (!Cloud.getUserId() || Cloud.isOffline())
+                Util.log('save skipped: not auth or offline');
                 return Promise.as();
-            }
-
-            if (Cloud.isOffline()) {
-                HTML.showSaveNotification("cannot back up to cloud - you appear to be offline", 3000);
-                return Promise.as();
-            }
 
             var mySyncVersion = new Object();
             syncVersion = mySyncVersion;
