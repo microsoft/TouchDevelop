@@ -982,16 +982,17 @@ module TDev
             }
 
 
-            m.add(div('wall-dialog-body hoc-notice',
-                this.hourOfCode ? span('hoc-link', lf("get my Hour of Code™ certificate")).withClick(() => {
-                    tick(Ticks.hourOfCodeFinal);
-                    this.openHocFinish();
-                }) : null,
-                HTML.mkButton(lf("keep editing"), () => {
-                    willNowPublish = true;
-                    m.dismiss();
-                })
-            ));
+            m.add(div('wall-dialog-buttons', HTML.mkButton(lf("keep editing"),() => {
+                willNowPublish = true;
+                m.dismiss();
+            })));
+            if (this.hourOfCode)
+                m.add(div('wall-dialog-body hoc-notice',
+                    span('hoc-link', lf("get my Hour of Code™ certificate")).withClick(() => {
+                        tick(Ticks.hourOfCodeFinal);
+                        this.openHocFinish();
+                    })                
+                ));
 
             var nextTutorials = this.topic.nextTutorials();
             if (!/none/i.test(nextTutorials[0])) {
