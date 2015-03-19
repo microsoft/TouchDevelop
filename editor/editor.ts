@@ -2735,6 +2735,7 @@ module TDev
 
         private loadPluginsAsync()
         {
+            if (!Script) return Promise.as();
             var ids = Script.editorState.buttonPlugins
             if (!ids) return Promise.as()
             return Promise.join(Object.keys(ids).map(id => Plugins.installButtonPluginAsync(id)));
@@ -4137,21 +4138,13 @@ module TDev
                     (v) => RuntimeSettings.setLocation(v), RuntimeSettings.location())),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("play sounds and music"),
                     (v) => RuntimeSettings.setSounds(v), RuntimeSettings.sounds())),
-                betaDiv,
-                div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"),
-                    (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
-                div("wall-dialog-body", zoomSlide, zoomLabel),
                 div("wall-dialog-body",
-                        HTML.mkButton(lf("run platform tests"), () => {
-                            Util.setHash("hub:test");
-                        }), lf("check if everything works")
-                    ),
-                 div("wall-dialog-body",
-                        HTML.mkButton(lf("show diagnostic log"), () => {
-                            m.dismiss();
-                            Editor.showLog();
-                        }), lf("internal log used for diagnostics.")
-                    )
+                    HTML.mkButton(lf("show diagnostic log"),() => {
+                        m.dismiss();
+                        Editor.showLog();
+                    })),
+                div("wall-dialog-body", zoomSlide, zoomLabel),
+                betaDiv
             ])
 
             if (TDev.dbg) {
@@ -4173,6 +4166,7 @@ module TDev
                                     no: () => logContentsAsync(false)
                             });
                         })),
+                        div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"), (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
                         div("wall-dialog-body", chaosOfflineEdit),
                         div("wall-dialog-body",
                             !LocalShell.mgmtUrl("") ? null :
@@ -4186,10 +4180,7 @@ module TDev
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
             }
-            m.add([
-                div("wall-dialog-buttons",
-                    HTML.mkButton(lf("close"), () => m.dismiss())),
-            ]);
+            m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));
 
             m.setScroll();
             m.fullWhite();
@@ -5747,6 +5738,9 @@ module TDev
                         break;
                     case "pub":
                         hs = ["hub", "pub", hs[1] ];
+                        break;
+                    case "follow":
+                        hs = ["hub", "follow", hs[1], hs[2]];
                         break;
                     case "print":
                         Promise.join(hs[1].split(/,/).map(EditorHistoryMgr.findOnlineById))
