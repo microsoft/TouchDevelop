@@ -45,6 +45,11 @@ module TDev
             }
 
             TheEditor.historyMgr.initialHash();
+
+            window.addEventListener("message", event => {
+                if (External.TheChannel)
+                    External.TheChannel.receive(event);
+            });
         });
     }
 

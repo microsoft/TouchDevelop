@@ -103,7 +103,7 @@ module TDev
             this.edit(n);
             // For new record fields, just like for [var] declarations, we edit
             // the field name right away.
-            if (n instanceof AST.RecordField)
+            if (n instanceof AST.RecordField || n instanceof AST.ActionParameter)
                 TheEditor.calculator.inlineEdit(TheEditor.calculator.expr.tokens[0]);
         }
 

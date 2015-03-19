@@ -2071,11 +2071,18 @@ module TDev
         }
 
         private setupExternalButtons() {
+            var back = document.createElement("a");
+            back.textContent = "← back";
+            back.setAttribute("href", "#");
+            back.addEventListener("click", event => {
+                this.goToHub("list:installed-scripts:script:"+External.TheChannel.guid+":overview");
+                External.TheChannel = null;
+                event.stopPropagation();
+                event.preventDefault();
+            });
             elt("externalEditorChrome").setChildren([
-                Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => {
-                    this.goToHub("list:installed-scripts:foobar:overview");
-                }),
-                div("tdLite", [ "TouchDevelop Lite" ])
+                back,
+                div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
 
@@ -2963,10 +2970,16 @@ module TDev
             .then(() => {
                 this.undoMgr.clear();
                 Ticker.dbg("Editor.loadScriptAsync.getHeader");
-                return Promise.join([World.getInstalledScriptAsync(header.guid), World.getInstalledEditorStateAsync(header.guid)])
+                return Promise.join([
+                    World.getInstalledScriptAsync(header.guid),
+                    World.getInstalledEditorStateAsync(header.guid),
+                    World.getInstalledScriptVersionInCloud(header.guid)
+                ])
             }).then((arr: string[]) => {
-                var script = arr[0]
-                editorState = arr[1]
+                // Assigning to the variable defined above.
+                editorState = arr[1];
+                var script = arr[0];
+                var scriptVersionInCloud = arr[2];
                 if (!header.editor && !script) {
                     Util.navigateInWindow((<any>window).errorUrl + "#logout")
                     return new PromiseInv();
@@ -2976,8 +2989,12 @@ module TDev
                 Ticker.dbg("Editor.loadScriptAsync.setHeader");
                 if (!header.editor && (!header.meta || header.meta.comment === undefined))
                     header.meta = World.getScriptMeta(script);
-                return World.setInstalledScriptAsync(header, null, null).then(() => script);
-            }).then((script: string) => {
+                return World.setInstalledScriptAsync(header, null, null).then(
+                    () => [script, scriptVersionInCloud]
+                );
+            }).then((arr: string[]) => {
+                var script = arr[0];
+                var scriptVersionInCloud = arr[1];
                 var worldInfo = <EditorWorldInfo>{
                     guid: header.guid,
                     status: header.status,
@@ -2996,7 +3013,7 @@ module TDev
 
                 var scr = Promise.as(script)
 
-                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script)) {
+                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script) && !header.editor) {
                     ProgressOverlay.setProgress("upgrading script text for future merges");
                     scr = this.addIdsAsync(header, worldInfo.baseId, script)
                 }
@@ -3010,9 +3027,16 @@ module TDev
                     ProgressOverlay.setProgress("parsing script text");
                     return this.loadScriptTextAsync(worldInfo, scriptN, editorState, true);
                 });
-                var finalExternal = () => scr.then(script => {
+                var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
+                    External.loadAndSetup(editor, {
+                        scriptText: scriptText,
+                        guid: header.guid,
+                        scriptVersionInCloud: scriptVersionInCloud,
+                        editorState: editorState,
+                        baseSnapshot: header.scriptVersion.baseSnapshot,
+                    });
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });

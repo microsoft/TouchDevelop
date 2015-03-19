@@ -82,6 +82,10 @@ module TDev
                 this.updateActionName();
                 this.theAction.notifyChange();
                 TheEditor.refreshDecl();
+
+                // Jump directly into the parameter definition and edit its name.
+                TheEditor.editNode(empt);
+                TheEditor.calculator.inlineEdit(TheEditor.calculator.expr.tokens[0]);
             });
             return ee;
         }
