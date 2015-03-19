@@ -1,8 +1,7 @@
 ![](https://az31353.vo.msecnd.net/c04/uxoj.png)
 # TouchDevelop
 
-TouchDevelop is a touch-friendly, cross-platform, mobile-first app creation
-environment developed with <3 at Microsoft Research.
+TouchDevelop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
@@ -27,9 +26,9 @@ If you want to always run the latest build,
 The make sure which version you're running, tap the small
 copyright/legal/version bar in the bottom right, and then the **latest changes**
 button. This will give you the changes that went into your current version, and
-in particular if the fix for your submitted issue is in.  If the expected change
-is not there, try reloading the page. Keep in mind that the build process takes
-a few minutes.
+in particular if the fix for your submitted issue is in.  If the expected
+change is not there, try reloading the page. Keep in mind that the build
+process takes a few minutes.
 
 Other pages of interest:
 * landing page: [https://www.touchdevelop.com](https://www.touchdevelop.com)
@@ -91,7 +90,7 @@ npm install
 
 ## Building
 
-There's various ways to build and run TouchDevelop:
+There's different way to build and run TouchDevelop:
 
 * just build:
 
@@ -131,7 +130,7 @@ jake clean
 
 ## Editing
 
-You can use your favorite editor to edit the TypeScript files. Here are a couple tips:
+You can use your favorite editor to edit the TypeScript file. Here are a couple tips:
 
 * Visual Studio 2013+: open the ``vs.sln``, then open the ``vsrefs.ts`` file to open the repo as a virtual folder.
 * Atom: there are a number of packages that will give you TypeScript coloring
@@ -161,34 +160,6 @@ Find out about other commands directly:
     node build/client.js
 
 The `client.js` is built by default.
-
-## Branches
-
-The `-master` branch contains the latest version and may break from time to
-time. Whenever `-master` feels stable enough, we merge it into `-stable`.
-
-(Note to developers: by running the following commands.
-
-```bash
-git checkout stable
-git fetch
-git merge origin/master
-git push
-```)
-
-Whenever an urgent bug-fix needs to be applied on stable, we first commit it to
-`-master`, then backport it on `-stable` via cherry-picking.
-
-(Note to developers: by running the following commands.
-
-```bash
-git checkout stable
-git fetch
-git log origin/master
-# write down sha-1 id of the commit you need
-git cherry-pick [the-sha-1-id]
-git push
-```)
 
 ## The various directories in the tree
 
@@ -259,8 +230,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Third Party Programs: The software may include third party programs that
-Microsoft, not the third party, licenses to you under this agreement.
-Notices, if any, for the third party programs are included for your
-information only.
