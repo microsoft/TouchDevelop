@@ -7,6 +7,9 @@
   "installed": {
     "node/node.d.ts": {
       "commit": "23b6edd28c0f5ccbe9e01bcfc84963d07b921ff7"
+    },
+    "ace/ace.d.ts": {
+      "commit": "3b2ed809b9e8f7dc4fcc1d80199129a0b73fb277"
     }
   }
 }

@@ -1072,8 +1072,7 @@ module TDev { export module Browser {
                 currentScreen.hide()
             stub.scriptName = this.newScriptName(stub.scriptName);
             return TheEditor.prepareForLoadAsync(lf("creating script"), () =>
-                TheEditor
-                    .newScriptAndLoadAsync(stub, t));
+                TheEditor.newScriptAndLoadAsync(stub, t));
         }
 
         public getInstalledByPubId(id:string)
@@ -5798,7 +5797,10 @@ module TDev { export module Browser {
 
             this.getScriptTextAsync()
                 .done((scriptText:string) => {
-                if (!scriptText) return;
+                if (!scriptText)
+                    return;
+                if (this.cloudHeader && this.cloudHeader.editor)
+                    return;
 
                 var oldPlatform = this.app && this.app.getPlatform();
 
