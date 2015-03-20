@@ -1237,8 +1237,10 @@ module TDev
             } else if (!step) {
                 this.keepTinkering(false)
                 return Promise.as();
-            } else
+            } else {
+                this.disableUpdate = false;
                 return Promise.as();
+            }
         }
 
         static addTranslatedDocs(m: ModalDialog, elementDiv: HTMLElement, manualTranslation : boolean, translatedDocs: string) {
