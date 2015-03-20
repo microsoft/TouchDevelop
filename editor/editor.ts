@@ -498,6 +498,7 @@ module TDev
         }
 
         public backBtnHandler() {
+            TheEditor.onBack();
             if (SizeMgr.splitScreen) {
                 this.currentRt.popPage()
             } else {
@@ -1087,6 +1088,7 @@ module TDev
             scriptPropertiesManagement: 1,
             scriptPropertiesSettings: 1,
             scriptPropertiesExport: 1,
+            tutorialGoToPreviousStep : 1,
             // sections
             dataSection: 1,
             eventsSection: 1,
@@ -1642,7 +1644,17 @@ module TDev
         }
 
         static runCount = 0;
+        public onBack = () => {};
         public runAction(a: AST.Decl, args: any[]= null, opts: AST.CompilerOptions = {}) {
+            if (Collab.AstSession && Collab.AstSession.loaded) {
+                var old = Collab.getAutomaticPullEnabled();
+                Collab.setAutomaticPullEnabled(false);
+                this.onBack = () => {
+                    Collab.setAutomaticPullEnabled(old);
+                };
+            } else {
+                this.onBack = () => {};
+            }
             TipManager.setTip(null); // clear any tip
             var run0 = () => {
                 this.spyManager.onRunAction(<AST.Action>a);
@@ -2076,16 +2088,24 @@ module TDev
             this.backBtnDiv.setChildren([
                 this.hasModalPane() ?
                     Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    TDev.noHub ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
+                    // don't show "my scripts" back button in tutorial / block mode
+                    (TDev.noHub || (this.stepTutorial && AST.blockMode)) ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
             ])
         }
 
         private setupExternalButtons() {
+            var back = document.createElement("a");
+            back.textContent = "← back";
+            back.setAttribute("href", "#");
+            back.addEventListener("click", event => {
+                this.goToHub("list:installed-scripts:script:"+External.TheChannel.guid+":overview");
+                External.TheChannel = null;
+                event.stopPropagation();
+                event.preventDefault();
+            });
             elt("externalEditorChrome").setChildren([
-                Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => {
-                    this.goToHub("list:installed-scripts:foobar:overview");
-                }),
-                div("tdLite", [ "TouchDevelop Lite" ])
+                back,
+                div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
 
@@ -2738,6 +2758,7 @@ module TDev
 
         private loadPluginsAsync()
         {
+            if (!Script) return Promise.as();
             var ids = Script.editorState.buttonPlugins
             if (!ids) return Promise.as()
             return Promise.join(Object.keys(ids).map(id => Plugins.installButtonPluginAsync(id)));
@@ -2972,10 +2993,16 @@ module TDev
             .then(() => {
                 this.undoMgr.clear();
                 Ticker.dbg("Editor.loadScriptAsync.getHeader");
-                return Promise.join([World.getInstalledScriptAsync(header.guid), World.getInstalledEditorStateAsync(header.guid)])
+                return Promise.join([
+                    World.getInstalledScriptAsync(header.guid),
+                    World.getInstalledEditorStateAsync(header.guid),
+                    World.getInstalledScriptVersionInCloud(header.guid)
+                ])
             }).then((arr: string[]) => {
-                var script = arr[0]
-                editorState = arr[1]
+                // Assigning to the variable defined above.
+                editorState = arr[1];
+                var script = arr[0];
+                var scriptVersionInCloud = arr[2];
                 if (!header.editor && !script) {
                     Util.navigateInWindow((<any>window).errorUrl + "#logout")
                     return new PromiseInv();
@@ -2985,8 +3012,12 @@ module TDev
                 Ticker.dbg("Editor.loadScriptAsync.setHeader");
                 if (!header.editor && (!header.meta || header.meta.comment === undefined))
                     header.meta = World.getScriptMeta(script);
-                return World.setInstalledScriptAsync(header, null, null).then(() => script);
-            }).then((script: string) => {
+                return World.setInstalledScriptAsync(header, null, null).then(
+                    () => [script, scriptVersionInCloud]
+                );
+            }).then((arr: string[]) => {
+                var script = arr[0];
+                var scriptVersionInCloud = arr[1];
                 var worldInfo = <EditorWorldInfo>{
                     guid: header.guid,
                     status: header.status,
@@ -3005,7 +3036,7 @@ module TDev
 
                 var scr = Promise.as(script)
 
-                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script)) {
+                if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script) && !header.editor) {
                     ProgressOverlay.setProgress("upgrading script text for future merges");
                     scr = this.addIdsAsync(header, worldInfo.baseId, script)
                 }
@@ -3019,9 +3050,16 @@ module TDev
                     ProgressOverlay.setProgress("parsing script text");
                     return this.loadScriptTextAsync(worldInfo, scriptN, editorState, true);
                 });
-                var finalExternal = () => scr.then(script => {
+                var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
+                    External.loadAndSetup(editor, {
+                        scriptText: scriptText,
+                        guid: header.guid,
+                        scriptVersionInCloud: scriptVersionInCloud,
+                        editorState: editorState,
+                        baseSnapshot: header.scriptVersion.baseSnapshot,
+                    });
                     ProgressOverlay.hide();
                     return new PromiseInv();
                 });
@@ -4123,21 +4161,13 @@ module TDev
                     (v) => RuntimeSettings.setLocation(v), RuntimeSettings.location())),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("play sounds and music"),
                     (v) => RuntimeSettings.setSounds(v), RuntimeSettings.sounds())),
-                betaDiv,
-                div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"),
-                    (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
-                div("wall-dialog-body", zoomSlide, zoomLabel),
                 div("wall-dialog-body",
-                        HTML.mkButton(lf("run platform tests"), () => {
-                            Util.setHash("hub:test");
-                        }), lf("check if everything works")
-                    ),
-                 div("wall-dialog-body",
-                        HTML.mkButton(lf("show diagnostic log"), () => {
-                            m.dismiss();
-                            Editor.showLog();
-                        }), lf("internal log used for diagnostics.")
-                    )
+                    HTML.mkButton(lf("show diagnostic log"),() => {
+                        m.dismiss();
+                        Editor.showLog();
+                    })),
+                div("wall-dialog-body", zoomSlide, zoomLabel),
+                betaDiv
             ])
 
             if (TDev.dbg) {
@@ -4159,6 +4189,7 @@ module TDev
                                     no: () => logContentsAsync(false)
                             });
                         })),
+                        div("wall-dialog-body", HTML.mkCheckBox(lf("force offline mode"), (v) => Cloud.setTouchDevelopOnline(!v), !Cloud.isTouchDevelopOnline())),
                         div("wall-dialog-body", chaosOfflineEdit),
                         div("wall-dialog-body",
                             !LocalShell.mgmtUrl("") ? null :
@@ -4172,10 +4203,7 @@ module TDev
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
             }
-            m.add([
-                div("wall-dialog-buttons",
-                    HTML.mkButton(lf("close"), () => m.dismiss())),
-            ]);
+            m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));
 
             m.setScroll();
             m.fullWhite();
@@ -5733,6 +5761,9 @@ module TDev
                         break;
                     case "pub":
                         hs = ["hub", "pub", hs[1] ];
+                        break;
+                    case "follow":
+                        hs = ["hub", "follow", hs[1], hs[2]];
                         break;
                     case "print":
                         Promise.join(hs[1].split(/,/).map(EditorHistoryMgr.findOnlineById))

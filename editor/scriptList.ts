@@ -1072,8 +1072,7 @@ module TDev { export module Browser {
                 currentScreen.hide()
             stub.scriptName = this.newScriptName(stub.scriptName);
             return TheEditor.prepareForLoadAsync(lf("creating script"), () =>
-                TheEditor
-                    .newScriptAndLoadAsync(stub, t));
+                TheEditor.newScriptAndLoadAsync(stub, t));
         }
 
         public getInstalledByPubId(id:string)
@@ -5347,6 +5346,7 @@ module TDev { export module Browser {
             var setNumbers = (js:any, opts:DataOptions) => {
                 if (opts.isSame) return;
                 setLocal();
+                ScriptInfo.addTutorialProgress(icon, this.cloudHeader, true);
 
                 if (!this.jsonScript) return;
 
@@ -5446,7 +5446,7 @@ module TDev { export module Browser {
             return d;
         }
 
-        static addTutorialProgress(d: HTMLElement, header : Cloud.Header) {
+        static addTutorialProgress(d: HTMLElement, header : Cloud.Header, small = false) {
             if (!header || !header.guid) return;
             World.getInstalledEditorStateAsync(header.guid).done(text => {
                 if (!text) return;
@@ -5454,13 +5454,12 @@ module TDev { export module Browser {
                 var num = prog.tutorialNumSteps - (prog.tutorialStep || 0);
                 if (prog.tutorialId && num > 0) {
                     var starSpan = span("bold",((prog.tutorialStep || 0) + 1) + "★");
-                    var ofSteps = prog.tutorialNumSteps ? " of " + (prog.tutorialNumSteps + 1) : "";
+                    var ofSteps = prog.tutorialNumSteps ? (small ? "/" : lf(" of ")) + (prog.tutorialNumSteps + 1) : "";
                     d.appendChild(div("tutProgress",
                         ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
-                            div(lf("steps done"), lf("done!"), div("label", starSpan))
-                            :
-                            div("steps", starSpan, ofSteps,
-                                div("label", lf("tutorial progress"))))
+                            div("steps", lf("done!"), div("label", starSpan))
+                            : div("steps", starSpan, ofSteps,
+                                small ? undefined : div("label", lf("tutorial progress"))))
                         ))
                 }
             });
@@ -5798,7 +5797,10 @@ module TDev { export module Browser {
 
             this.getScriptTextAsync()
                 .done((scriptText:string) => {
-                if (!scriptText) return;
+                if (!scriptText)
+                    return;
+                if (this.cloudHeader && this.cloudHeader.editor)
+                    return;
 
                 var oldPlatform = this.app && this.app.getPlatform();
 

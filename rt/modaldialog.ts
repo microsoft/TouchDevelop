@@ -69,7 +69,10 @@ module TDev
 
         public add(v:any)
         {
-            this.dialog.appendChildren([v]);
+            if (v && Array.isArray(v))
+                this.dialog.appendChildren(v);
+            else
+                this.dialog.appendChildren([v]);
         }
 
         public addClass(c:string)

@@ -419,34 +419,22 @@ module TDev.Browser {
                 return
             }
 
-            // do not run test suite in beta
-            var betaFriendlyId = (<any>window).betaFriendlyId;
-            if(betaFriendlyId)
-                window.localStorage["betaTestsRunFor"] = betaFriendlyId;
+            if (t) this.createScriptFromTemplate(t);
+            else this.followOrContinueTutorial(top, tutorialMode);
+        }
 
-            if (t) {
-                this.createScriptFromTemplate(t);
-            } else {
-                this.tutorialsByUpdateIdAsync().done(tutorials => {
-                    var h:AST.HeaderWithState = tutorials[top.updateKey()]
-                    if (!h) {
-                        TopicInfo.followTopic(top)
-                        return
-                    }
-                    var st = h.editorState
-                    ModalDialog.askMany(lf("resume tutorial?"),
-                        "We have detected you already got " + ((st.tutorialStep || 0) + 1) +
-                        (st.tutorialNumSteps ? " of " + (st.tutorialNumSteps + 1) : "") +
-                        " trophies in this tutorial.",
-                        { "start over": () => {
-                                TopicInfo.followTopic(top, tutorialMode)
-                           },
-                           "resume my tutorial": () => {
-                               this.browser().createInstalled(h).edit();
-                           }
-                        })
-                })
-            }
+        private followOrContinueTutorial(top: HelpTopic, tutorialMode?: string) {
+            this.tutorialsByUpdateIdAsync()
+                .done(tutorials => {
+                var h: AST.HeaderWithState = tutorials[top.updateKey()]
+                if (!h || h.status == "deleted") {
+                    Util.log('follow, not previous script found, starting new');
+                    TopicInfo.followTopic(top, tutorialMode)
+                } else {
+                    var st = h.editorState;
+                    this.browser().createInstalled(h).edit()
+                }
+            })
         }
 
         public loadHash(h: string[]) {
@@ -485,32 +473,44 @@ module TDev.Browser {
                 // temporary fix
                 if (h[2] == 'jumpingbird') h[2] = 'jumpingbirdtutorial';
                 Util.log('follow: {0}', h[2]);
+                // if specified, force the current editor mode
+                var editorMode = Browser.EditorSettings.parseEditorMode(h[3]);
+                if (editorMode && !Browser.EditorSettings.editorMode())
+                    Browser.EditorSettings.setEditorMode(editorMode, false);
                 this.browser().clearAsync(true)
                     .done(() => {
                     // try finding built-in topic first
                     var bt = HelpTopic.findById(h[2]);
                     if (bt) {
-                        Util.log('found built-in topic');
-                        TopicInfo.mk(bt).follow();
+                        Util.log('found built-in topic ' + bt.id);
+                        this.followOrContinueTutorial(bt);
                     }
                     else {
-                        TheApiCacheMgr.getAsync(h[2], true)
-                            .then((res: JsonIdObject) => {
-                            if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
-                                Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
-                                return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
-                            }
-                            else return Promise.as(res);
-                        })
-                            .done(j => {
-                            if (j && j.kind == "script") {
-                                var ti = TopicInfo.mk(HelpTopic.fromJsonScript(j))
-                                ti.follow();
-                            } else Util.setHash("hub");
-                        }, e => {
-                                Util.log('follow route error: {0}, {1}' + h[2], e.message);
-                                Util.setHash("hub");
-                            });
+                        ProgressOverlay.show(lf("loading tutorial"),() => {
+                            TheApiCacheMgr.getAsync(h[2], true)
+                                .then((res: JsonIdObject) => {
+                                if (res && res.kind == "script" && res.id != (<JsonScript>res).updateid) {
+                                    Util.log('follow topic updated to ' + (<JsonScript>res).updateid);
+                                    return TheApiCacheMgr.getAsync((<JsonScript>res).updateid, true);
+                                }
+                                else return Promise.as(res);
+                            })
+                                .done(j => {
+                                ProgressOverlay.hide();
+                                if (j && j.kind == "script") {
+                                    Util.log('following ' + j.id);
+                                    this.followOrContinueTutorial(HelpTopic.fromJsonScript(j));
+                                } else {
+                                    Util.log('followed script not found');
+                                    Util.setHash("hub");
+                                }
+                            },
+                                e => {
+                                    ProgressOverlay.hide();
+                                    Util.log('follow route error: {0}, {1}' + h[2], e.message);
+                                    Util.setHash("hub");
+                                });
+                        });
                     }
                 });
                 return;
@@ -962,10 +962,8 @@ module TDev.Browser {
                     var ofSteps = prog.tutorialNumSteps ? " of " + (prog.tutorialNumSteps + 1) : ""
                     tile.appendChild(div("tutProgress",
                         ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
-                            div(lf("steps done"), lf("done!"), div("label", starSpan))
-                            :
-                            div("steps", starSpan, ofSteps,
-                                            div("label", lf("tutorial progress")))),
+                            div("steps", lf("done!"), div("label", starSpan))
+                            : div("steps", starSpan, ofSteps, div("label", lf("tutorial progress")))),
                             div("restart", HTML.mkButton(lf("start over"), () => startTutorial(top, null)))))
                 }
 
@@ -1020,7 +1018,8 @@ module TDev.Browser {
                     name: "TouchDevelop",
                     description: "The touch editor you love and know!",
                     id: "touchdevelop",
-                    root: ""
+                    origin: "",
+                    path: "",
                 }]).forEach(k => {
                     var icon = div("sdIcon");
                     icon.style.backgroundColor = ScriptIcons.stableColorFromName(k.name);
@@ -1373,7 +1372,8 @@ module TDev.Browser {
                     d.canDismiss = false;
                 d.show();
             } else {
-                Storage.showTemporaryWarning();
+                if (EditorSettings.editorMode() > EditorMode.block)
+                    Storage.showTemporaryWarning();
             }
         }
 

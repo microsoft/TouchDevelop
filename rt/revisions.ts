@@ -1162,6 +1162,10 @@ module TDev {
                 w.receiveMessage(RT.WebSocketMessage.mkError(msg));
             });
 
+            this.onClose((code, reason) => {
+                w.gotClose()
+            })
+
             return w;
         }
     }
