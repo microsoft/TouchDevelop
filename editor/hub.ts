@@ -1103,8 +1103,8 @@ module TDev.Browser {
             TipManager.setTip(null)
             TipManager.setTip({
                 tick: Ticks.hubFirstTutorial,
-                title: lf("tap there"),
-                description: lf("we'll guide you step by step"),
+                title: lf("Tap here"),
+                description: lf("We'll guide you step by step"),
                 //forceTop: true,
             })
         }
@@ -1894,7 +1894,7 @@ module TDev.Browser {
 
         private createSkillButton(): HTMLElement {
             var editorMode = EditorSettings.editorMode();
-            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
+            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose Skill");
             var skill = this.mkFnBtn(skillTitle,() => {
                 EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
             }, Ticks.hubChooseSkill, true);
