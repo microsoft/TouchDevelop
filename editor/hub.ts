@@ -2040,18 +2040,18 @@ module TDev.Browser {
         private updateSections()
         {
             var sects = {
-                "recent": lf("my scripts"),
-                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
-                "showcase": lf("showcase"),
-                "social": lf("social"),
+                "recent": lf("My Scripts"),
+                "misc": this.isBeginner() ? lf("Tutorials") : lf("Learn"),
+                "showcase": lf("Showcase"),
+                "social": lf("Social"),
             };
             if (!this.isBeginner()) {
                 var extra = {
-                    "top": lf("top & new"),
-                    "tags": lf("categories"),
+                    "top": lf("Top & New"),
+                    "tags": lf("Categories"),
                     //"new": lf("new"),
                     //"art": lf("art"),
-                    "myart": lf("my art"),
+                    "myart": lf("My Art"),
                 };
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
