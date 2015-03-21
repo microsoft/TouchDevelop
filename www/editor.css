@@ -4617,7 +4617,7 @@ span.videoCaption
 .tip
 {
   position: absolute;
-  font-size:1.1em;
+  font-size: 1em;
   max-width: 15em;
   padding: 0.3em 0.4em;
   background-color: rgba(0,30,240,0.85);
