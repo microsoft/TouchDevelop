@@ -3981,7 +3981,10 @@ right:4.5em;
   height: 100%;
 }
 
-.hubTileTitle { margin-top: 0.3em; }
+.hubTileTitle { 
+  margin-top: 0.2em; 
+  margin-bottom: 0.2em; 
+}
 .hubTileAuthor { margin-bottom: 0.3em; }
 
 .hubTileAuthor,
