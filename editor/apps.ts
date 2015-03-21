@@ -560,6 +560,8 @@ module TDev.AppExport
 
     function getAzureConfigAsync(wa:Azure.WebsiteAuth)
     {
+        if (wa.webspace == "custom") 
+            return mgmtRequestAsync(wa, "getconfig")
         var cert = getManagementCerificate()
         if (!cert) return needCertAsync();
 
@@ -1159,6 +1161,14 @@ module TDev.AppExport
                         elt.value = newS
                         return
                     }
+                    if (wa.webspace == "custom") {
+                        mgmtRequestAsync(wa, "setconfig", { AppSettings: newVars })
+                        .done(() => {
+                            ModalDialog.info(lf("config set!"), lf("things are good"))
+                        })
+                        return
+                    }
+
                     deployApiAsync("setazureconfig", { webspace: wa.webspace, website: wa.website,
                         config: {
                             AppSettings: newVars,

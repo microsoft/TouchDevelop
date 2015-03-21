@@ -715,11 +715,16 @@ function deployAr(ar:ApiRequest, isScript:boolean)
 
     if (isScript && blobChannel) {
         var n = Math.round((Date.now()/1000))
+        var did = crypto.randomBytes(8).toString("hex")
         var id = (100000000000 - n) + "." + crypto.randomBytes(8).toString("hex")
         setBlobJson(id, ar.data, err => {
             if (err) ar.exception(err)
             else
-                setBlobJson("ch-" + blobChannel, { blob: id, time: n }, err => {
+                setBlobJson("ch-" + blobChannel, { 
+                    blob: id, 
+                    time: n,
+                    did: did,
+                }, err => {
                     if (err) ar.exception(err)
                     else {
                         blobDeployCallback = final
@@ -1082,7 +1087,51 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                 });
             });
         });
-    }
+    },
+
+    getconfig: ar => {
+        if (!blobChannel) {
+            ar.error(400, "get config only available when deployed via azure storage")
+            return
+        }
+
+        getBlobJson("cfg-" + blobChannel, (err, cdata) => {
+            if (!cdata) cdata = { AppSettings: [] }
+            ar.ok(cdata)
+        })
+    },
+
+    setconfig: ar => {
+        if (!blobChannel) {
+            ar.error(400, "set config only available when deployed via azure storage")
+            return
+        }
+
+        getBlobJson("cfg-" + blobChannel, (err, cdata) => {
+            if (!cdata) cdata = {}
+            Object.keys(ar.data).forEach(k => cdata[k] = ar.data[k])
+            setBlobJson("cfg-" + blobChannel, cdata, err => {
+                if (err) {
+                    ar.exception(err)
+                    return
+                }
+
+                getBlobJson("ch-" + blobChannel, (err, data) => {
+                    if (err) {
+                        ar.exception(err)
+                        return
+                    }
+                    data.did = crypto.randomBytes(8).toString("hex")
+                    setBlobJson("ch-" + blobChannel, data, err => {
+                        if (err)
+                            ar.exception(err)
+                        else
+                            ar.ok(cdata)
+                    })
+                })
+            })
+        })
+    },
 }
 
 export interface ProxyRequest {
@@ -1273,6 +1322,7 @@ function startWorker()
     workers.push(w)
 
     var env = JSON.parse(JSON.stringify(process.env))
+    Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
 
     if (useFileSockets) {
         var sockPath = "tdsh." + crypto.randomBytes(16).toString("hex")
@@ -1925,6 +1975,7 @@ var blobSvc;
 var containerName = 'tddeployments'
 var updateDelay = 3000;
 var lastAzureDeployment = "";
+var additionalEnv:StringMap<string> = {}
 var updateWatchdog = 0;
 var blobDeployCallback;
 
@@ -1938,6 +1989,16 @@ function getBlobJson(name, f) {
     })
 }
 
+function applyConfig(cfg) {
+    if (!cfg) return
+
+    if (cfg.AppSettings) {
+        cfg.AppSettings.forEach(s => {
+            additionalEnv[s.Name] = s.Value
+        })
+    }
+}
+
 function checkUpdate()
 {
     var n = Date.now()
@@ -1949,25 +2010,29 @@ function checkUpdate()
     }
 
     getBlobJson("ch-" + blobChannel, (err, d) => {
-        if (d && d.blob && d.blob != lastAzureDeployment) {
+        if (d && d.blob && d.did != lastAzureDeployment) {
             info.log("new deployment, " + d.blob)
-            getBlobJson(d.blob, (err, data) => {
-                lastAzureDeployment = d.blob
-                if (data) {
-                    deploy(data, (err, resp) => {
-                        var f = blobDeployCallback
-                        blobDeployCallback = null
-                        if (f) f(err, resp)
-                        if (err)
-                            error.log("cannot deploy: " + err)
-                        else
-                            info.log(resp)
+            getBlobJson("cfg-" + blobChannel, (err, cfg) => {
+                if (!err) applyConfig(cfg)
+
+                getBlobJson(d.blob, (err, data) => {
+                    lastAzureDeployment = d.did
+                    if (data) {
+                        deploy(data, (err, resp) => {
+                            var f = blobDeployCallback
+                            blobDeployCallback = null
+                            if (f) f(err, resp)
+                            if (err)
+                                error.log("cannot deploy: " + err)
+                            else
+                                info.log(resp)
+                            reset()
+                        })
+                    } else {
+                        error.log("cannot fetch deployment: " + err.message)
                         reset()
-                    })
-                } else {
-                    error.log("cannot fetch deployment: " + err.message)
-                    reset()
-                }
+                    }
+                })
             })
         } else {
             if (err && err.statusCode != 404)
@@ -2122,6 +2187,10 @@ function main()
     }
 
     config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
+
+    if (process.env['TD_DEPLOYMENT_KEY']) {
+        config.deploymentKey = process.env['TD_DEPLOYMENT_KEY']
+    }
 
     info.log("Deployment key: " + config.deploymentKey);
 
