@@ -100,9 +100,20 @@ module TDev.RT {
                 App.logEvent(App.DEBUG, "ws", "error: " + ev.message, undefined);
                 this.receiveMessage(WebSocketMessage.mkError(ev.message));
             }, false);
-            this.ws.addEventListener("message", (data) => {
-                this.receiveMessage(WebSocketMessage.mk(data.data));
+            this.ws.addEventListener("message", ev => {
+                this.receiveMessage(WebSocketMessage.mk(ev.data));
             }, false);
+            this.ws.addEventListener("close", ev => {
+                this.gotClose()
+            }, false);
+        }
+
+        public gotClose()
+        {
+            var closeMsg = WebSocketMessage.mkError("closed")
+            while (this.msgs[0] && !(this.msgs[0] instanceof WebSocketMessage)) {
+                this.receiveMessage(closeMsg)
+            }
         }
 
         public receiveMessage(msg: WebSocketMessage) {
@@ -123,11 +134,12 @@ module TDev.RT {
         //? Gets the ready state of the web socket, "connection", "closed", "closing", "open"
         public ready_state(): string {
             var rs = this.ws.readyState;
+            // WebSocket constants may not be available in node
             switch (rs) {
-                case WebSocket.CONNECTING: return "connecting";
-                case WebSocket.CLOSED: return "closed";
-                case WebSocket.CLOSING: return "closing";
-                case WebSocket.OPEN: return "open";
+                case 0: return "connecting";
+                case 1: return "open";
+                case 2: return "closing";
+                case 3: return "closed";
                 default: return rs.toString();
             }
         }
@@ -143,6 +155,8 @@ module TDev.RT {
             var d = this.msgs[0];
             if (d && d instanceof WebSocketMessage)
                 r.resumeVal(this.msgs.shift());
+            else if (this.ready_state() == "closed")
+                r.resumeVal(WebSocketMessage.mkError("closed"))
             else
                 this.msgs.push((msg : WebSocketMessage) => r.resumeVal(msg));
         }

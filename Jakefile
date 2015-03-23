@@ -232,6 +232,7 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
+mkSimpleTask('build/ace.js', [ "www/ace/ace-main.ts" ], "www/ace/refs.ts");
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
@@ -359,7 +360,13 @@ task('log', [], { async: false }, function () {
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
 desc('build the TypeScript projects')
-task('default', [ 'css-prefixes', 'build/client.js', 'build/officemix.d.ts', 'log' ].concat(Object.keys(concatMap)), {
+task('default', [
+  'css-prefixes',
+  'build/client.js',
+  'build/officemix.d.ts',
+  'build/ace.js',
+  'log'
+].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
 },function () {
     console.log("[I] build completed.");
@@ -399,7 +406,13 @@ task('upload', [], { async : true }, function() {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
     assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
     var buildVersion = 80100 + parseInt(process.env.TRAVIS_BUILD_NUMBER || - 80000);
-    upload(buildVersion);
+    if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != "false") {
+      // don't upload
+    } else {
+      if (process.env.TRAVIS_BRANCH != "master")
+        buildVersion = process.env.TRAVIS_BRANCH + buildVersion
+      upload(buildVersion);
+    }
   }
 })
 
