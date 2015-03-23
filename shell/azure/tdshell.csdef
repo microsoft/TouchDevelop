@@ -26,6 +26,9 @@
     </Endpoints>
     <Runtime executionContext="limited">
       <Environment>
+        <Variable name="PORT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpIn']/@port" />
+        </Variable>
         <Variable name="HTTP_PORT">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpIn']/@port" />
         </Variable>
