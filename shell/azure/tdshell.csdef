@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
-<ServiceDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="tdshell" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition">
+<ServiceDefinition 
+  xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  schemaVersion="2014-06.2.4"
+  name="tdshell" 
+  >
   <WorkerRole name="ShellRole">
     <ConfigurationSettings>
       <Setting name="AZURE_STORAGE_ACCOUNT" />

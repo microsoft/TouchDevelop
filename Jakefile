@@ -64,6 +64,15 @@ function expand(dependencies) {
   return acc;
 }
 
+// for use with child_process.exec/execFile
+function execCallback(task) {
+  return function (error, stdout, stderr) {
+    if (stdout) console.log(stdout.toString());
+    if (stderr) console.error(stderr.toString());
+    if (error) task.fail(error);
+    else task.complete();
+  }
+}
 
 // This function tries to be "smart" about the target.
 // - if the target is of the form "foobar/refs.ts", the output is bundled with
@@ -455,6 +464,15 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
   );
 });
 
+
+task('azure', [ 'build/shell.js' ], { async: true }, function() {
+  child_process.execFile(
+    "C:/Program Files/Microsoft SDKs/Azure/.NET SDK/v2.5/bin/cspack.exe",
+    [ "tdshell.csdef",
+      "/out:../../build/tdshell.cspkg", 
+      "/roleFiles:ShellRole;files.txt" ], { cwd: 'shell/azure' }, execCallback(this))
+});
+  
 task('nw-npm', {async : true }, function() {
   var task = this;
   jake.mkdirP('build/nw');
@@ -463,14 +481,7 @@ task('nw-npm', {async : true }, function() {
    'node-webkit/client.ico',
    'node-webkit/package.json',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
-  child_process.exec('npm install', { cwd: 'build/nw' },
-      function (error, stdout, stderr) {
-        if (stdout) console.log(stdout.toString());
-        if (stderr) console.error(stderr.toString());
-        if (error) task.fail(error);
-        else task.complete();
-      }
-    );
+  child_process.exec('npm install', { cwd: 'build/nw' }, execCallback(task))
 })
 
 task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
