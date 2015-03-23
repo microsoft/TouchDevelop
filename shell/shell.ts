@@ -1274,6 +1274,7 @@ class Worker {
     public socketPath: string;
     public port: number;
     public child: child_process.ChildProcess
+    public isready: boolean;
 
     public shutdown()
     {
@@ -1281,8 +1282,8 @@ class Worker {
                 if (this.child) this.child.kill()
                 setTimeout(() => {
                     if (this.child) this.child.kill("SIGKILL")
-                }, 1000)
-            }, 1000)
+                }, 2000)
+            }, 2000)
     }
 
     public description()
@@ -1290,13 +1291,35 @@ class Worker {
         return this.socketPath || this.port
     }
 
-    public init()
+    public init(cb:()=>void)
     {
         info.log("worker start " + this.description())
         this.child.on("exit", () => {
             info.log("worker exit " + this.description())
             this.child = null
+            this.isready = false
         })
+
+        var ping = () => {
+            var u = this.getUrl()
+            u.path = "/-tdevmgmt-/" + config.deploymentKey + "/ready"
+            var creq = http.request(u, cres => {
+                if (cres.statusCode == 200) {
+                    if (!this.isready) {
+                        info.log("worker ready, " + this.description())
+                        this.isready = true
+                        cb()
+                    }
+                } else {
+                    setTimeout(ping, 1000)
+                }
+            })
+            creq.on("error", err => {
+                setTimeout(ping, 1000)
+            })
+            creq.end()
+        }
+        ping()
     }
 
     public getUrl():any
@@ -1311,15 +1334,14 @@ class Worker {
     }
 }
 
-var workers = []
+var workers:Worker[] = []
 var portNum = 10000;
 
-function startWorker()
+function startWorker(cb)
 {
     var isWin = /^win/.test(os.platform())
 
     var w = new Worker()
-    workers.push(w)
 
     var env = JSON.parse(JSON.stringify(process.env))
     Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
@@ -1338,22 +1360,31 @@ function startWorker()
     w.child = child_process.fork("./script/compiled.js", [], {
         env: env
     })
-    w.init()
+    w.init(cb)
+
+    return w
 }
 
 function loadScriptCoreAsync()
 {
-    workers.forEach(w => w.shutdown())
-    workers = []
-
     if (numWorkers < 0) {
         numWorkers = Math.round(os.cpus().length * -numWorkers)
     }
     numWorkers = Math.round(numWorkers)
     if (numWorkers <= 0) numWorkers = 1
 
+    var newWorkers:Worker[] = []
+
+    var numW = numWorkers
+    var oneUp = () => {
+        if (--numW == 0) {
+            workers.forEach(w => w.shutdown())
+            workers = newWorkers
+        }
+    }
+
     for (var i = 0; i < numWorkers; ++i)
-        startWorker()
+        newWorkers.push(startWorker(oneUp))
 
     return {
         then: f => f(),

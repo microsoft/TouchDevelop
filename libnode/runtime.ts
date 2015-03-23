@@ -658,6 +658,7 @@ module TDev.RT.Node {
 
     var httpActions:any = {
         info: (args, req, resp) => getRuntimeInfoAsync(args[0] || "").done(r => resp.send(200, r)),
+        ready: (args, req, resp) => resp.send(200, { ready: true }),
     }
 
     function specialHttpRequest(req, resp)
