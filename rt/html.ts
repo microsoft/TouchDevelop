@@ -1073,7 +1073,7 @@ module TDev.HTML {
             else {
                 var kk = html5Attributes[an]
                 if (kk == 1) {
-                    if (!/^(http|\/|\.\/|#|mailto:)/.test(av))
+                    if (!/^(http|\/|\.\/|#|mailto:)/i.test(av))
                         htmlOops("bad URL", html, t)
                 } else if (kk == 2) {
                 } else {
