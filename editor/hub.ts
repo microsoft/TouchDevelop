@@ -993,10 +993,11 @@ module TDev.Browser {
             if (Cloud.lite)
                 this.chooseEditorAsync().done((editor) => {
                     if (editor === undefined) {
+                        // user canceled
                     } else if (editor != "touchdevelop") {
                         var stub: World.ScriptStub = {
                             editorName: editor,
-                            scriptName: lf("{0} external script", TopicInfo.getAwesomeAdj()),
+                            scriptName: lf("{0} {1} script", TopicInfo.getAwesomeAdj(), editor),
                             scriptText: "",
                         };
                         this.browser().openNewScriptAsync(stub);
