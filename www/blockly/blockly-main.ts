@@ -59,6 +59,8 @@ module TDev {
             console.log("[merge] merge request, base = "+message.merge.base.baseSnapshot +
                 ", theirs = "+message.merge.theirs.baseSnapshot +
                 ", mine = "+message.script.baseSnapshot);
+        } else {
+            console.log("[merge] no merge requested");
         }
         currentVersion = message.script.baseSnapshot;
         console.log("[revisions] current version is "+currentVersion);
@@ -88,19 +90,19 @@ module TDev {
         Blockly.inject(document.querySelector("#editor"), {
             toolbox: document.querySelector("#blockly-toolbox")
         });
-        console.log("Loading", text);
         var text = message.script.scriptText || "<xml></xml>";
         var xml = Blockly.Xml.textToDom(text);
         Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
 
-        console.log("[loaded] version from " + state.lastSave);
+        console.log("[loaded] cloud version " + message.script.baseSnapshot +
+            "(dated from: "+state.lastSave+")");
     }
 
     function setupButtons() {
         document.querySelector("#command-save").addEventListener("click", () => {
             var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
             var text = Blockly.Xml.domToPrettyText(xml);
-            console.log("Saving", text);
+            console.log("[saving] on top of: ", currentVersion);
             var message: External.Message_Save = {
                 type: External.MessageType.Save,
                 script: {
