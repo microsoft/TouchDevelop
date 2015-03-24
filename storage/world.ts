@@ -634,9 +634,10 @@ module TDev {
         }
         export function saveAsync(guid: string, onNotLoggedIn: () => void = undefined, onBadTime: (number) => void = undefined): Promise // of PostUserInstalledResponse
         {
-            if (!Cloud.getUserId() || Cloud.isOffline())
+            if (!Cloud.getUserId() || Cloud.isOffline()) {
                 Util.log('save skipped: not auth or offline');
                 return Promise.as();
+            }
 
             var mySyncVersion = new Object();
             syncVersion = mySyncVersion;
@@ -666,7 +667,7 @@ module TDev {
                 if (status == 400)
                     throw new Error("Cloud precondition violated" + info);
                 else if (status == 403 ||
-                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet                
+                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
                     {
                     HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)
