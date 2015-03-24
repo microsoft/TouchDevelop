@@ -18,10 +18,14 @@ module TDev {
 
         export enum MessageType {
             Init,
-            Metadata, AckMetadata,
-            Save, AckSave,
-            Compile, AckCompile,
+            Metadata, MetadataAck,
+            Save, SaveAck,
+            Compile, CompileAck,
             Merge
+        };
+
+        export enum SaveLocation {
+            Local, Cloud
         };
 
         export interface Message {
@@ -37,6 +41,12 @@ module TDev {
         export interface Message_Save extends Message {
             type: MessageType; // == MessageType.Save
             script: SavedScript;
+        }
+
+        export interface Message_SaveAck extends Message {
+            type: MessageType; // == MessageType.SaveAck
+            where: SaveLocation;
+            newBaseSnapshot?: string; // non-null iff where == Cloud
         }
     }
 }
