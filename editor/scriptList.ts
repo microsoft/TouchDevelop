@@ -5026,6 +5026,7 @@ module TDev { export module Browser {
             super(par)
         }
         public isLibrary() { return this.app && this.app.isLibrary; }
+        public isCloud() { return this.app && this.app.isCloud; }
         public persistentId() { return "script:" + (this.cloudHeader ? this.getGuid() : this.publicId); }
         public getTitle() { return this.app ? this.app.getName() : super.getTitle(); }
 
@@ -5916,7 +5917,7 @@ module TDev { export module Browser {
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
 
-            if (!this.isLibrary()) {
+            if (!this.isLibrary() && !this.isCloud()) {
                 var appStudioDiv = div("wall-dialog-buttons text-left")
                 appStudioDiv.style.height = "2.8em";
                 m.add(appStudioDiv)
