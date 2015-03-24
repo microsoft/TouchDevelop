@@ -269,7 +269,7 @@ module TDev {
                         if (Cloud.lite) {
                             if (!resp.numErrors) {
                                 var header = resp.headers[0]
-                                if (body.script)
+                                if (!header.editor && body.script)
                                     header.meta = getScriptMeta(body.script)
                                 return setInstalledAsync(indexTable, scriptsTable, header, null, null, null, null)
                                     .then(() => resp)
