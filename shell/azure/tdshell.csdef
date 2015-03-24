@@ -30,7 +30,7 @@
       <InputEndpoint name="HttpIn" protocol="tcp" port="80" />
       <InputEndpoint name="HttpsIn" protocol="tcp" port="443" />
     </Endpoints>
-    <Runtime executionContext="limited">
+    <Runtime executionContext="elevated">
       <Environment>
         <Variable name="PORT">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpIn']/@port" />
@@ -55,7 +55,7 @@
         </Variable>
       </Environment>
       <EntryPoint>
-        <ProgramEntryPoint commandLine="start_worker.cmd 1&lt;&amp;2 &gt;&gt; log.txt" setReadyOnProcessStart="true" />
+        <ProgramEntryPoint commandLine="start_worker.cmd 1&lt;&amp;2 &gt;&gt; log.txt" setReadyOnProcessStart="true"/>
       </EntryPoint>
     </Runtime>
   </WorkerRole>

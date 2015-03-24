@@ -1,3 +1,4 @@
 setup_worker.cmd;setup_worker.cmd
 start_worker.cmd;start_worker.cmd
-server.js;server.js
+showlog.js;showlog.js
+../../build/shell.js;shell.js
