@@ -19,6 +19,12 @@ module TDev {
         id: "ace",
         origin: "http://localhost:4242",
         path: "/editor/local/ace/editor.html"
+    }, {
+        name: "Blockly editor",
+        description: "Great block-based environment!",
+        id: "blockly",
+        origin: "http://localhost:4242",
+        path: "/editor/local/blockly/editor.html"
     } ];
 
     // Assumes that [id] is a valid external editor id.
@@ -90,7 +96,7 @@ module TDev {
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
                 TheChannel = new Channel(editor, iframe, data.guid);
-                var extra = JSON.parse(data.scriptVersionInCloud);
+                var extra = JSON.parse(data.scriptVersionInCloud || "{}");
                 TheChannel.post({
                     type: MessageType.Init,
                     script: {
