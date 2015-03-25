@@ -67,27 +67,45 @@ module TDev {
                             header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
                             // Writes into local storage.
                             World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
-                                // FIXME define and send Message_SaveAck with param local
                                 console.log("[external] script saved properly");
-                            }).then(() => {
                                 this.post(<Message_SaveAck>{
                                     type: MessageType.SaveAck,
                                     where: SaveLocation.Local,
+                                    status: Status.Ok,
                                 });
                             });
                             // Schedules a cloud sync; set the right state so
                             // that [scheduleSaveToCloudAsync] writes the
                             // baseSnapshot where we can read it back.
                             localStorage["editorScriptToSaveDirty"] = this.guid;
-                            TheEditor.scheduleSaveToCloudAsync().then(() => {
-                                // FIXME send Message_SaveAck with cloud param +
-                                // last save date
-                                var newBaseSnapshot = ScriptEditorWorldInfo.baseSnapshot;
-                                console.log("[external] new base version ", newBaseSnapshot);
+                            TheEditor.scheduleSaveToCloudAsync().then((response: Cloud.PostUserInstalledResponse) => {
+                                if (!response || !response.headers[0]) {
+                                    this.post(<Message_SaveAck>{
+                                        type: MessageType.SaveAck,
+                                        where: SaveLocation.Cloud,
+                                        status: Status.Error,
+                                        error: "unknown early error",
+                                    });
+                                    return;
+                                }
+
+                                if (response.numErrors) {
+                                    this.post(<Message_SaveAck>{
+                                        type: MessageType.SaveAck,
+                                        where: SaveLocation.Cloud,
+                                        status: Status.Error,
+                                        error: (<any> response.headers[0]).error,
+                                    });
+                                    return;
+                                }
+
+                                var newCloudSnapshot = response.headers[0].scriptVersion.baseSnapshot;
+                                console.log("[external] accepted, new cloud version ", newCloudSnapshot);
                                 this.post(<Message_SaveAck>{
                                     type: MessageType.SaveAck,
                                     where: SaveLocation.Cloud,
-                                    newBaseSnapshot: newBaseSnapshot
+                                    status: Status.Ok,
+                                    newBaseSnapshot: newCloudSnapshot
                                 });
                             });
                         });
@@ -115,18 +133,6 @@ module TDev {
         // cloud" context) that we use to store extra information attached to
         // the script.
         export function loadAndSetup(editor: ExternalEditor, data: ScriptData) {
-            // The [scheduleSaveToCloudAsync] method on [Editor] needs the
-            // [guid] field of this global to match for us to read back the
-            // [baseSnapshot] field afterwards.
-            ScriptEditorWorldInfo = <EditorWorldInfo>{
-                guid: data.guid,
-                baseId: null,
-                baseUserId: null,
-                status: null,
-                version: null,
-                baseSnapshot: null,
-            };
-
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
@@ -143,7 +149,7 @@ module TDev {
                         editorState: data.editorState,
                         baseSnapshot: data.baseSnapshot,
                     },
-                    merge: ("mine" in extra) ? extra : null
+                    merge: ("theirs" in extra) ? extra : null
                 });
             });
             iframe.setAttribute("src", editor.origin + editor.path);

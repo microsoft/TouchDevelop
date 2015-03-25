@@ -43,6 +43,10 @@ module TDev {
                 setupButtons();
                 mergeIfNeeded(<External.Message_Init> message);
                 break;
+
+            case External.MessageType.SaveAck:
+                saveAck(<External.Message_SaveAck> message);
+                break;
         }
     }
 
@@ -53,6 +57,32 @@ module TDev {
     }
 
     // ---------- Revisions
+
+    function prefix(where: External.SaveLocation) {
+        switch (where) {
+            case External.SaveLocation.Cloud:
+                return("☁  [cloud]");
+            case External.SaveLocation.Local:
+                return("⌂ [local]");
+        }
+    }
+
+    function saveAck(message: External.Message_SaveAck) {
+        switch (message.status) {
+            case External.Status.Error:
+                statusMsg(prefix(message.where)+" error: "+message.error, message.status);
+                break;
+            case External.Status.Ok:
+                if (message.where == External.SaveLocation.Cloud) {
+                    statusMsg(prefix(message.where)+" successfully saved "+
+                        "(from "+currentVersion+" to "+message.newBaseSnapshot+")", message.status);
+                    currentVersion = message.newBaseSnapshot;
+                } else {
+                    statusMsg(prefix(message.where)+" successfully saved", message.status);
+                }
+                break;
+        }
+    }
 
     function mergeIfNeeded(message: External.Message_Init) {
         if (message.merge) {
@@ -70,6 +100,15 @@ module TDev {
 
     interface EditorState {
         lastSave: Date;
+    }
+
+    function statusMsg(s: string, st: External.Status) {
+        var elt = <HTMLElement> document.querySelector("#status");
+        if (st == External.Status.Error)
+            elt.classList.add("error");
+        else
+            elt.classList.remove("error");
+        elt.textContent = s;
     }
 
     function loadEditorState(s: string): EditorState {

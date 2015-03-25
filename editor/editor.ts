@@ -2454,7 +2454,7 @@ module TDev
         private scheduled: boolean;
         private numSchedules = 0;
 
-        public scheduleSaveToCloudAsync(): TDev.Promise {
+        public scheduleSaveToCloudAsync(): TDev.Promise { // of Cloud.PostUserInstalledResponse (possibly null)
             this.numSchedules++;
             if (World.syncIsActive() || this.scheduled) return Promise.as();
             this.scheduled = true;
@@ -2498,6 +2498,9 @@ module TDev
                             //Ticker.dbg("save-clr2");
                         }
                         localStorage.removeItem("editorScriptToSaveDirty");
+                        // The [External] module wants to examine the actual
+                        // response to take the appropriate course of action.
+                        return Promise.as(response);
                     }, e => {
                         //Ticker.dbg("save-clr-exn");
                         this.scheduled = false;
