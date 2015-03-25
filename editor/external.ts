@@ -5,7 +5,7 @@ module TDev {
         // Both these two fields are for our UI
         name: string;
         description: string;
-        // An internal ID
+        // Unique
         id: string;
         // The domain root for the external editor.
         origin: string;
@@ -45,6 +45,11 @@ module TDev {
             }
 
             public post(message: Message) {
+                // The notification that the script has been successfully saved
+                // to cloud may take a while to arrive; the user may have
+                // discarded the editor in the meanwhile.
+                if (!this.iframe || !this.iframe.contentWindow)
+                    return;
                 this.iframe.contentWindow.postMessage(message, this.editor.origin);
             }
 
@@ -64,6 +69,11 @@ module TDev {
                             World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
                                 // FIXME define and send Message_SaveAck with param local
                                 console.log("[external] script saved properly");
+                            }).then(() => {
+                                this.post(<Message_SaveAck>{
+                                    type: MessageType.SaveAck,
+                                    where: SaveLocation.Local,
+                                });
                             });
                             // Schedules a cloud sync; set the right state so
                             // that [scheduleSaveToCloudAsync] writes the
@@ -72,8 +82,13 @@ module TDev {
                             TheEditor.scheduleSaveToCloudAsync().then(() => {
                                 // FIXME send Message_SaveAck with cloud param +
                                 // last save date
-                                var newBaseVersion = ScriptEditorWorldInfo.baseSnapshot;
-                                console.log("[external] new base version ", newBaseVersion);
+                                var newBaseSnapshot = ScriptEditorWorldInfo.baseSnapshot;
+                                console.log("[external] new base version ", newBaseSnapshot);
+                                this.post(<Message_SaveAck>{
+                                    type: MessageType.SaveAck,
+                                    where: SaveLocation.Cloud,
+                                    newBaseSnapshot: newBaseSnapshot
+                                });
                             });
                         });
                         break;
@@ -121,7 +136,7 @@ module TDev {
             iframe.addEventListener("load", function () {
                 TheChannel = new Channel(editor, iframe, data.guid);
                 var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-                TheChannel.post({
+                TheChannel.post(<Message_Init>{
                     type: MessageType.Init,
                     script: {
                         scriptText: data.scriptText,

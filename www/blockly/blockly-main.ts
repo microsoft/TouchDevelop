@@ -99,7 +99,7 @@ module TDev {
             var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
             var text = Blockly.Xml.domToPrettyText(xml);
             console.log("[saving] on top of: ", currentVersion);
-            var message: External.Message_Save = {
+            post(<External.Message_Save>{
                 type: External.MessageType.Save,
                 script: {
                     scriptText: text,
@@ -108,8 +108,7 @@ module TDev {
                     }),
                     baseSnapshot: currentVersion,
                 },
-            };
-            post(message);
+            });
         });
         document.querySelector("#command-compile").addEventListener("click", () => {
             post({ type: External.MessageType.Compile });
