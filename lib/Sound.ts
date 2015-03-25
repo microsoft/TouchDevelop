@@ -194,8 +194,10 @@ module TDev.RT {
 
         private syncAudioProperties(audio : HTMLAudioElement)
         {
-            audio.volume = this._volume;
-            audio.playbackRate = 1 + this._pitch / 2;
+            try {
+                audio.volume = this._volume;
+                audio.playbackRate = 1 + this._pitch / 2;
+            } catch (e) { }
         }
 
         //? Gets the panning, ranging from -1.0 (full left) to 1.0 (full right).

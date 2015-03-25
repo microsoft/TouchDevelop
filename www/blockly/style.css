@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.vbox {
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+.hbox {
+  display: flex;
+  display: -webkit-flex;
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+#main {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#editor {
+  margin: 0;
+  flex: 1;
+}
+
+#commands, #commands li {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+#commands li {
+  padding-right: .5em;
+}
+
+#toolbox {
+  padding: .5em;
+}
+
+#editor {
+  flex: 3;
+}
+

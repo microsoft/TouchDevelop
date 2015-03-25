@@ -19,6 +19,12 @@ module TDev {
         id: "ace",
         origin: "http://localhost:4242",
         path: "/editor/local/ace/editor.html"
+    }, {
+        name: "Blockly editor",
+        description: "Great block-based environment!",
+        id: "blockly",
+        origin: "http://localhost:4242",
+        path: "/editor/local/blockly/editor.html"
     } ];
 
     // Assumes that [id] is a valid external editor id.
@@ -54,9 +60,20 @@ module TDev {
                             var scriptText = message.script.scriptText;
                             var editorState = message.script.editorState;
                             header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
+                            // Writes into local storage.
                             World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
-                                // FIXME define and send Message_SaveAck
+                                // FIXME define and send Message_SaveAck with param local
                                 console.log("[external] script saved properly");
+                            });
+                            // Schedules a cloud sync; set the right state so
+                            // that [scheduleSaveToCloudAsync] writes the
+                            // baseSnapshot where we can read it back.
+                            localStorage["editorScriptToSaveDirty"] = this.guid;
+                            TheEditor.scheduleSaveToCloudAsync().then(() => {
+                                // FIXME send Message_SaveAck with cloud param +
+                                // last save date
+                                var newBaseVersion = ScriptEditorWorldInfo.baseSnapshot;
+                                console.log("[external] new base version ", newBaseVersion);
                             });
                         });
                         break;
@@ -83,14 +100,27 @@ module TDev {
         // cloud" context) that we use to store extra information attached to
         // the script.
         export function loadAndSetup(editor: ExternalEditor, data: ScriptData) {
+            // The [scheduleSaveToCloudAsync] method on [Editor] needs the
+            // [guid] field of this global to match for us to read back the
+            // [baseSnapshot] field afterwards.
+            ScriptEditorWorldInfo = <EditorWorldInfo>{
+                guid: data.guid,
+                baseId: null,
+                baseUserId: null,
+                status: null,
+                version: null,
+                baseSnapshot: null,
+            };
+
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
 
+            // Load the editor; send the initial message.
             var iframe = document.createElement("iframe");
             iframe.addEventListener("load", function () {
                 TheChannel = new Channel(editor, iframe, data.guid);
-                var extra = JSON.parse(data.scriptVersionInCloud);
+                var extra = JSON.parse(data.scriptVersionInCloud || "{}");
                 TheChannel.post({
                     type: MessageType.Init,
                     script: {

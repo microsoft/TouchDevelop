@@ -4430,8 +4430,10 @@ module TDev
         {
             Ticker.dbg("Editor.saveStateAsync");
             if (!!Script) {
-                if (opts.forPublishing)
+                if (opts.forPublishing && Script.splitScreen != !!Script.editorState.splitScreen) {
                     Script.splitScreen = !!Script.editorState.splitScreen
+                    this.undoMgr.pushMainUndoState();
+                }
                 if (!opts.isRevert && !!this.currentCodeView)
                     this.currentCodeView.commit();
                 Script.setStableNames();

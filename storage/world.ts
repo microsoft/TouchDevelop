@@ -134,28 +134,22 @@ module TDev {
                             .then(str => str ? JSON.parse(str) : null)
                             .then(hd => {
                                 var baseVer, currVer;
-                                // [hd] is the local header; if the [instanceId]
-                                // is "cloud", then no local modifications were
-                                // performed, i.e. the local header is *exactly*
-                                // baseSnapshot
+                                // [hd] is the local header; if the [instanceId] is "cloud", then no local modifications were performed, i.e. the
+                                // local header is *exactly* baseSnapshot
                                 if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot) {
-                                    // We need to merge, because there's been a fork.  The base
-                                    // header is [hd.scriptVersion.baseSnapshot], "theirs" is
+                                    // We need to merge, because there's been a fork.  The base header is [hd.scriptVersion.baseSnapshot], "theirs" is
                                     // [header], and "mine" is [hd].
                                     log(header.guid + "/" + header.scriptId + ": " + header.name + " merging based on " + hd.scriptVersion.baseSnapshot);
                                     return getScriptBlobAsync(hd.scriptVersion.baseSnapshot)
                                         .then(r => { baseVer = r })
-                                        // Note: the [guid] is the same for both [header] and [hd].
-                                        // The line below is getting the local script.
+                                        // Note: the [guid] is the same for both [header] and [hd].  The line below is getting the local script.
                                         .then(() => scriptsTable.getItemsAsync([header.guid + "-script", header.guid + "-editorState"]))
                                         .then(r => { currVer = { script: r[header.guid + "-script"], editorState: r[header.guid + "-editorState"] } })
                                         .then(() => {
                                             if (header.editor) {
-                                                // Don't update the header: merely record the fact
-                                                // that we've seen a new version go by from the
-                                                // cloud, and record in the extra field the contents
-                                                // of that version (so that we don't have to hit the
-                                                // cloud again to get it later on).
+                                                // Don't update the header: merely record the fact that we've seen a new version go by from the cloud,
+                                                // and record in the extra field the contents of that version (so that we don't have to hit the cloud
+                                                // again to get it later on).
                                                 header = hd; // FIXME properly pass a value instead of updating in-place
                                                 return {
                                                     script: currVer.script,
@@ -174,15 +168,11 @@ module TDev {
                                                     }
                                                 };
                                             } else {
-                                                // Our new header is the one that we took in from the
-                                                // cloud, except that some modifications were performed.
-                                                // Hence, we modify the [instanceId] so that it no
-                                                // longer says "cloud". Since the [baseSnapshot] is
-                                                // still the one from the cloud header, this means that
-                                                // we've been creating a new version *on top of* the
-                                                // cloud header. This new version has not been synced to
-                                                // the cloud, and therefore does not have a
-                                                // [baseSnapshot] yet.
+                                                // Our new header is the one that we took in from the cloud, except that some modifications were
+                                                // performed.  Hence, we modify the [instanceId] so that it no longer says "cloud". Since the
+                                                // [baseSnapshot] is still the one from the cloud header, this means that we've been creating a new
+                                                // version *on top of* the cloud header. This new version has not been synced to the cloud, and
+                                                // therefore does not have a [baseSnapshot] yet.
                                                 header.scriptVersion.instanceId = Cloud.getWorldId()
                                                 header.scriptVersion.time = getCurrentTime();
                                                 header.scriptVersion.version++;
@@ -269,7 +259,7 @@ module TDev {
                         if (Cloud.lite) {
                             if (!resp.numErrors) {
                                 var header = resp.headers[0]
-                                if (body.script)
+                                if (!header.editor && body.script)
                                     header.meta = getScriptMeta(body.script)
                                 return setInstalledAsync(indexTable, scriptsTable, header, null, null, null, null)
                                     .then(() => resp)
@@ -644,9 +634,10 @@ module TDev {
         }
         export function saveAsync(guid: string, onNotLoggedIn: () => void = undefined, onBadTime: (number) => void = undefined): Promise // of PostUserInstalledResponse
         {
-            if (!Cloud.getUserId() || Cloud.isOffline())
+            if (!Cloud.getUserId() || Cloud.isOffline()) {
                 Util.log('save skipped: not auth or offline');
                 return Promise.as();
+            }
 
             var mySyncVersion = new Object();
             syncVersion = mySyncVersion;
@@ -676,7 +667,7 @@ module TDev {
                 if (status == 400)
                     throw new Error("Cloud precondition violated" + info);
                 else if (status == 403 ||
-                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet                
+                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
                     {
                     HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)

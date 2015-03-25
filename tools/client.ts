@@ -3721,13 +3721,13 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'cptje',
     editorMode: 1,
 }, {
-    title: lf("blank minecraft steve"),
-    id: 'blankminecraftsteve',
+    title: lf("blank creeper"),
+    id: 'blankcreeper',
     icon: 'NineColumn',
-    name: 'ADJ steve',
-    description: lf("A Minecraft Steve app."),
+    name: 'ADJ creeper',
+    description: lf("A Minecraft creeper app."),
     section: sectMinecraft,
-    scriptid: 'qzky',
+    scriptid: 'alati',
     editorMode: 1,
 },
 /*{
