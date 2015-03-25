@@ -720,7 +720,7 @@ function deployAr(ar:ApiRequest, isScript:boolean)
         setBlobJson(id, ar.data, err => {
             if (err) ar.exception(err)
             else
-                setBlobJson("ch-" + blobChannel, { 
+                setBlobJson("000ch-" + blobChannel, { 
                     blob: id, 
                     time: n,
                     did: did,
@@ -1095,7 +1095,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             return
         }
 
-        getBlobJson("cfg-" + blobChannel, (err, cdata) => {
+        getBlobJson("000cfg-" + blobChannel, (err, cdata) => {
             if (!cdata) cdata = { AppSettings: [] }
             ar.ok(cdata)
         })
@@ -1107,22 +1107,22 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             return
         }
 
-        getBlobJson("cfg-" + blobChannel, (err, cdata) => {
+        getBlobJson("000cfg-" + blobChannel, (err, cdata) => {
             if (!cdata) cdata = {}
             Object.keys(ar.data).forEach(k => cdata[k] = ar.data[k])
-            setBlobJson("cfg-" + blobChannel, cdata, err => {
+            setBlobJson("000cfg-" + blobChannel, cdata, err => {
                 if (err) {
                     ar.exception(err)
                     return
                 }
 
-                getBlobJson("ch-" + blobChannel, (err, data) => {
+                getBlobJson("000ch-" + blobChannel, (err, data) => {
                     if (err) {
                         ar.exception(err)
                         return
                     }
                     data.did = crypto.randomBytes(8).toString("hex")
-                    setBlobJson("ch-" + blobChannel, data, err => {
+                    setBlobJson("000ch-" + blobChannel, data, err => {
                         if (err)
                             ar.exception(err)
                         else
@@ -2040,10 +2040,10 @@ function checkUpdate()
         if (updateWatchdog == n) updateWatchdog = 0
     }
 
-    getBlobJson("ch-" + blobChannel, (err, d) => {
+    getBlobJson("000ch-" + blobChannel, (err, d) => {
         if (d && d.blob && d.did != lastAzureDeployment) {
             info.log("new deployment, " + d.blob)
-            getBlobJson("cfg-" + blobChannel, (err, cfg) => {
+            getBlobJson("000cfg-" + blobChannel, (err, cfg) => {
                 if (!err) applyConfig(cfg)
 
                 getBlobJson(d.blob, (err, data) => {
