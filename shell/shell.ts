@@ -1294,10 +1294,26 @@ class Worker {
     public init(cb:()=>void)
     {
         info.log("worker start " + this.description())
-        this.child.on("exit", () => {
-            info.log("worker exit " + this.description())
+        this.child.on("exit", code => {
+            info.log("worker exit " + code + " : " + this.description())
             this.child = null
             this.isready = false
+        })
+
+        this.child.on("error", err => {
+            error.log(err.message || err)
+            this.child = null
+            this.isready = false
+        })
+
+        this.child.stderr.setEncoding("utf8")
+        this.child.stderr.on("data", d => {
+            info.log("CHILD_ERR: " + d.replace(/\n$/, ""))
+        })
+
+        this.child.stdout.setEncoding("utf8")
+        this.child.stdout.on("data", d => {
+            debug.log("CHILD: " + d.replace(/\n$/, ""))
         })
 
         var ping = () => {
@@ -1358,7 +1374,8 @@ function startWorker(cb)
     debug.log("forking child script")
 
     w.child = child_process.fork("./script/compiled.js", [], {
-        env: env
+        env: env,
+        silent: true,
     })
     w.init(cb)
 
