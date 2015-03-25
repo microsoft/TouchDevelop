@@ -365,14 +365,14 @@ function processFileEntry(fe:FileEntry, f)
     }
 }
 
-function lazyRequire(args: string[], finish: (md: any) => void) {
+function lazyRequire(pkg: string, finish: (md: any) => void) {
     try {
-        var md = require(args[0].split('@')[0]);
+        var md = require(pkg.split('@')[0]);
         finish(md);
     }
     catch (e) {
-        executeNpm(args, function () {
-            var md = require(args[0].split('@')[0]);
+        executeNpm(["install", pkg], function () {
+            var md = require(pkg.split('@')[0]);
             finish(md);            
         });
     }
@@ -752,7 +752,7 @@ var socketCmds:StringMap<(ws, data)=>void> = {
 
     serial: (ws, data) => {
         socketCmds['kill'](ws, data)
-        lazyRequire(["serialport"], function (serialport) {
+        lazyRequire("serialport@1.6.1", function (serialport) {
             debug.log('opening serial ' + data.name);
             if (data.options.delimiter) data.options.parser = serialport.parsers.readline(data.options.delimiter);
             ws.serialPort = new serialport.SerialPort(data.name, data.options);
@@ -848,27 +848,35 @@ function mgmtSocket(ws)
     })
 }
 
-var pluginCmds:StringMap<(ar:ApiRequest)=>void> = {
-    mkdir:      ar => mkDirP(dataPath(path.join(ar.data.name, "dummy")), ar.data.mode, () => { ar.pluginCb()(undefined, undefined); }),
+var pluginCmds: StringMap<(ar: ApiRequest) => void> = {
+    mkdir: ar => mkDirP(dataPath(path.join(ar.data.name, "dummy")), ar.data.mode,() => { ar.pluginCb()(undefined, undefined); }),
     writeFile: ar => {
         mkDirP(dataPath(ar.data.name));
         return fs.writeFile(dataPath(ar.data.name), ar.data.data, "utf8", <any>ar.pluginCb())
     },
-    readFile:   ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
-    readDir:    ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
+    readFile: ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
+    readDir: ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
     writeFiles: ar => {
         ar.data.files.forEach((f: FileEntry) => f.path = dataPath(f.path));
         deployAr(ar, false);
     },
-    shell:      ar => {
-      ar.data.cwd = dataPath(ar.data.cwd);
-      runCommand(ar.data, r => ar.ok(r))
+    shell: ar => {
+        ar.data.cwd = dataPath(ar.data.cwd);
+        runCommand(ar.data, r => ar.ok(r))
     },
-    open:       ar => openUrl(ar.data.url, () => ar.ok({})),
-    pythonEnv: ar => initPython(false, (err?) => {
+    open: ar => openUrl(ar.data.url,() => ar.ok({})),
+    pythonEnv: ar => initPython(false,(err?) => {
         if (err) ar.exception(err)
-            else ar.ok({})
+        else ar.ok({})
     }),
+    seriallist: ar => {
+        lazyRequire("serialport@1.6.1", function (serialport) {
+            serialport.list((err, data) => {
+                if (err) ar.exception(err);
+                else ar.ok(data);
+            });
+        });
+    }
 }
 
 function hasAutoUpdate() {

@@ -591,7 +591,7 @@ module TDev.RT {
         }
 
         //? Runs a shell command. This action is only available when the script is running from a local web server.
-        //@ betaOnly [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv", "socket")
+        //@ [cmd].deflStrings("shell", "mkdir", "writeFile", "readFile", "readDir", "writeFiles", "pythonEnv", "socket", "seriallist")
         //@ cap(shell) returns(JsonObject) async
         export function run_command(cmd: string, data: JsonObject, r: ResumeCtx) {
             var proxyAsync = r.rt.host.localProxyAsync;
@@ -600,7 +600,7 @@ module TDev.RT {
                 return;
             }
 
-            r.rt.host.askSourceAccessAsync(lf("execute shell commands or manipulate files"),
+            r.rt.host.askSourceAccessAsync(lf("execute shell commands or manipulate files."),
                 lf("the shell and/or the file system. This script may be harmful for your computer. Do not allow this if you do not trust the source of this script."), false, true)
                 .then((allow :boolean) => {
                     if (!allow) return Promise.as(JsonObject.wrap({ error: 'denied', reason: lf("The user denied access to shell execution.") }));
