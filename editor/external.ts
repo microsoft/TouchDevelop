@@ -45,6 +45,11 @@ module TDev {
             }
 
             public post(message: Message) {
+                // The notification that the script has been successfully saved
+                // to cloud may take a while to arrive; the user may have
+                // discarded the editor in the meanwhile.
+                if (!this.iframe || !this.iframe.contentWindow)
+                    return;
                 this.iframe.contentWindow.postMessage(message, this.editor.origin);
             }
 
