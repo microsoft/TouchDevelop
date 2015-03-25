@@ -333,7 +333,7 @@ module TDev
         public getScriptGuid(): string { return this.host.currentGuid; }
         public getScriptName(): string { return this.compiled.scriptTitle; }
         public getScriptColor(): string { return this.compiled.scriptColor; }
-        public disposables: RT.RTDisposableValue[] = [];
+        public disposables: RT.Disposable[] = [];
 
 
         // Session related getters
@@ -1844,15 +1844,17 @@ module TDev
                 return Promise.join([this.compiled.initArtAsync(this.datas), loadSession]);
         }
 
+        public addDisposableHandler(handler: () => void) {
+            var binding = new RT.DisposableHandler(handler);
+            this.disposables.push(binding);
+            return binding;
+        }
+
         public killDisposables() {
             // dispose more data
             this.disposables.forEach(d => {
-                try {
-                    d.dispose();
-                }
-                catch (e) {
-                    Util.reportError('', e, false);
-                }
+                try { d.dispose(); }
+                catch (e) { Util.reportError('', e, false); }
             });
             this.disposables = [];
         }
@@ -3077,7 +3079,8 @@ module TDev
         }
 
         export function logError(err: any, meta?: any) {
-            App.logException(err, meta);
+            if (err)
+                App.logException(err, meta);
         }
 
         export function checkAndLog(err:any, meta?: any):boolean
