@@ -5568,6 +5568,19 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 
 /*
  *
+ * Editor fonts
+ *
+ *
+ */
+
+@media only screen and (min-device-width: 992px) {
+    #scriptEditor .decl {
+        font-size:80%;
+    }
+}
+
+/*
+ *
  * BLOCKS
  *
  *
