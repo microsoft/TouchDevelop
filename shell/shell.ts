@@ -365,6 +365,19 @@ function processFileEntry(fe:FileEntry, f)
     }
 }
 
+function lazyRequire(args: string[], finish: (md: any) => void) {
+    try {
+        var md = require(args[0].split('@')[0]);
+        finish(md);
+    }
+    catch (e) {
+        executeNpm(args, function () {
+            var md = require(args[0].split('@')[0]);
+            finish(md);            
+        });
+    }
+}
+
 function executeNpm(args:string[], finish:()=>void)
 {
     // NPM_JS_PATH defined in Azure Web Sites
@@ -725,10 +738,38 @@ var socketCmds:StringMap<(ws, data)=>void> = {
             ws.currSock.destroy()
             ws.currSock = null
         }
+
+        if (ws.serialPort) {
+            debug.log('closing serialport');
+            try { ws.serialPort.close(); } catch (e) { }
+            ws.serialPort = null;
+        }
     },
 
     log: (ws, data) => {
         logListeners.push(ws)
+    },
+
+    serial: (ws, data) => {
+        socketCmds['kill'](ws, data)
+        lazyRequire(["serialport"], function (serialport) {
+            debug.log('opening serial ' + data.name);
+            if (data.options.delimiter) data.options.parser = serialport.parsers.readline(data.options.delimiter);
+            ws.serialPort = new serialport.SerialPort(data.name, data.options);
+            ws.serialPort.on("open", function () {
+                debug.log('serial: ' + data.name + ' connected');
+                ws.sendJson({ op: "connected" })
+            });
+            ws.serialPort.on('data', function (data) {
+                debug.log('serial: recv ' + JSON.stringify(data));
+                ws.sendJson({ op: "recv", data: data })
+            });
+            ws.serialPort.on("error", err => {
+                error.log('serial error: ' + JSON.stringify(err));
+                ws.serialPort = null
+                ws.sendError(err)
+            })
+        });
     },
 
     connect: (ws, data) => {
@@ -749,10 +790,14 @@ var socketCmds:StringMap<(ws, data)=>void> = {
     },
 
     send: (ws, data) => {
-        if (!ws.currSock)
-            ws.sendError("no socket open")
-        else
+        if (ws.currSock)
             ws.currSock.write(data.data, "utf8")
+        else if (ws.serialPort) {
+            debug.log('serial write: ' + data.data);
+            ws.serialPort.write(data.data);
+        }
+        else
+            ws.sendError("no socket open")
     },
 }
 
