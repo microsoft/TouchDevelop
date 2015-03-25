@@ -1035,7 +1035,7 @@ module TDev.AppExport
         var sub = getManagementCerificate()
         var m = new ModalDialog()
 
-        m.add(div('wall-dialog-header', "export to azure web site"));
+        m.add(div('wall-dialog-header', "export to node.js+azure web site"));
         m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web sites</a> let you deploy and scale modern websites and web apps in seconds."));
         var err = div(null)
         m.add(err)
