@@ -54,5 +54,10 @@ module TDev {
             error?: string; // non-null iff status == Error
             newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
         }
+
+        export interface Message_Merge extends Message {
+            type: MessageType; // == MessageType.Merge
+            merge: PendingMerge;
+        }
     }
 }

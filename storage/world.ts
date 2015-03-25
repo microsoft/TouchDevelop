@@ -150,6 +150,7 @@ module TDev {
                                                 var ret = {
                                                     script: currVer.script,
                                                     editorState: currVer.editorState,
+                                                    // This must be exactly an <External.PendingMerge>
                                                     extra: {
                                                         theirs: {
                                                             scriptText: theirs.script,
