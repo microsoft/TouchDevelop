@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: sans-serif;
 }
 
 .vbox {
@@ -8,15 +9,11 @@ body {
   display: -webkit-flex;
   flex-direction: column;
   -webkit-flex-direction: column;
-  flex: 1;
-  -webkit-flex: 1;
 }
 
 .hbox {
   display: flex;
   display: -webkit-flex;
-  flex: 1;
-  -webkit-flex: 1;
 }
 
 #main {
@@ -31,6 +28,10 @@ body {
 #editor {
   margin: 0;
   flex: 1;
+}
+
+#commands {
+    flex: 1;
 }
 
 #commands, #commands li {
@@ -51,3 +52,18 @@ body {
   flex: 3;
 }
 
+#status:first-letter {
+    font-size: 200%;
+}
+
+#status:not(:first-letter) {
+    font-weight: bold;
+}
+
+#status.error {
+    color: #a40000;
+}
+
+#status:not(.error) {
+    color: #4e9a06;
+}

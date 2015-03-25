@@ -24,6 +24,10 @@ module TDev {
             Merge
         };
 
+        export enum Status {
+            Ok, Error
+        };
+
         export enum SaveLocation {
             Local, Cloud
         };
@@ -46,7 +50,9 @@ module TDev {
         export interface Message_SaveAck extends Message {
             type: MessageType; // == MessageType.SaveAck
             where: SaveLocation;
-            newBaseSnapshot?: string; // non-null iff where == Cloud
+            status: Status;
+            error?: string; // non-null iff status == Error
+            newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
         }
     }
 }

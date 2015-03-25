@@ -147,11 +147,7 @@ module TDev {
                                         .then(r => { currVer = { script: r[header.guid + "-script"], editorState: r[header.guid + "-editorState"] } })
                                         .then(() => {
                                             if (header.editor) {
-                                                // Don't update the header: merely record the fact that we've seen a new version go by from the cloud,
-                                                // and record in the extra field the contents of that version (so that we don't have to hit the cloud
-                                                // again to get it later on).
-                                                header = hd; // FIXME properly pass a value instead of updating in-place
-                                                return {
+                                                var ret = {
                                                     script: currVer.script,
                                                     editorState: currVer.editorState,
                                                     extra: {
@@ -167,6 +163,11 @@ module TDev {
                                                         },
                                                     }
                                                 };
+                                                // Don't update the header: merely record the fact that we've seen a new version go by from the cloud,
+                                                // and record in the extra field the contents of that version (so that we don't have to hit the cloud
+                                                // again to get it later on).
+                                                header = hd; // FIXME properly pass a value instead of updating in-place, so that we don't have to bind ret before
+                                                return ret;
                                             } else {
                                                 // Our new header is the one that we took in from the cloud, except that some modifications were
                                                 // performed.  Hence, we modify the [instanceId] so that it no longer says "cloud". Since the
