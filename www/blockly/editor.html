@@ -11,11 +11,30 @@
   </head>
   <body>
     <div id="main" class="vbox">
-      <div id="toolbox">
-        <ul id="commands">
-          <li><button id="command-save">save</button></li>
-          <li><button id="command-compile">compile</button></li>
-        </ul>
+      <div id="toolbox" class="hbox">
+        <div id="commands" class="hbox">
+          <a href="#" class="roundbutton" id="command-quit">
+            <div class="roundsymbol">⬅</div>
+            <div class="roundlabel">quit</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-save">
+            <div class="roundsymbol">💾</div>
+            <div class="roundlabel">save</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-compile">
+            <div class="roundsymbol">⚡</div>
+            <div class="roundlabel">flash</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-run">
+            <div class="roundsymbol">▶</div>
+            <div class="roundlabel">run</div>
+          </a>
+        </div>
+        <div id="merge-commands" class="hbox">
+        </div>
+        <div id="log">
+            <div id="status">✔ loaded</div>
+        </div>
       </div>
       <div id="editor"></div>
     </div>

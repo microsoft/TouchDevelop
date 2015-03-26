@@ -3650,7 +3650,7 @@ var lf = (x:string) => x;
 var sectTemplates = 'templates';
 var sectBeginners = lf("beginners");
 var sectCordova = lf("apps");
-var sectAzure = lf("web sites");
+var sectAzure = lf("web apps");
 var sectMakers = lf("makers");
 var sectTouchDevelop = lf("touchdevelop");
 var sectOthers = lf("others");
@@ -3721,7 +3721,7 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ craft',
     description: lf("A Minecraft Pi app."),
     section: sectMinecraft,
-    scriptid: 'cptje',
+    scriptid: 'uggce',
     editorMode: 1,
 }, {
     title: lf("blank creeper"),
@@ -3730,7 +3730,7 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ creeper',
     description: lf("A Minecraft creeper app."),
     section: sectMinecraft,
-    scriptid: 'alati',
+    scriptid: 'ehtt',
     editorMode: 1,
 },
 /*{
@@ -3759,22 +3759,31 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'ripnb',
     editorMode: 3,
 }, {
-    title: lf("blank web api"),
+    title: lf("blank web app"),
     id: 'blankwebapi',
     icon: 'Stacks',
     name: 'ADJ api',
-    description: lf("A web API using node.js and restify."),
+    description: lf("A web app using Node.js and Restify."),
     section: sectAzure,
     scriptid: 'qexxc',
     editorMode: 3,
 }, {
-    title: lf("blank azure web api"),
+    title: lf("blank azure web app"),
     id: 'blankazurewebapi',
     icon: 'Stacks',
     name: 'azure ADJ api',
-    description: lf("A web API using azure services, node.js and restify."),
+    description: lf("A web app using Azure Services, Node.js and Restify."),
     section: sectAzure,
     scriptid: 'gexxa',
+    editorMode: 3,
+}, {
+    title: lf("blank azure event hubs app"),
+    id: 'blankazureeventhubs',
+    icon: 'Stacks',
+    name: 'azure ADJ event api',
+    description: lf("A web app that uploads data to Azure Event Hubs."),
+    section: sectAzure,
+    scriptid: 'otkma',
     editorMode: 3,
 }, {
     title: lf("blank node library"),

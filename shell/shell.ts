@@ -412,9 +412,22 @@ function processFileEntry(fe:FileEntry, f)
     }
 }
 
+function lazyRequire(pkg: string, finish: (md: any) => void) {
+    try {
+        var md = require(pkg.split('@')[0]);
+        finish(md);
+    }
+    catch (e) {
+        executeNpm(["install", pkg], function () {
+            var md = require(pkg.split('@')[0]);
+            finish(md);            
+        });
+    }
+}
+
 function executeNpm(args:string[], finish:()=>void)
 {
-    // NPM_JS_PATH defined in Azure Web Sites
+    // NPM_JS_PATH defined in Azure Web Apps
     var p = process.env["NPM_JS_PATH"] || path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
     if (!fs.existsSync(p))
         p = path.join(path.dirname(process.execPath).replace("/bin", "/lib"), "node_modules/npm/bin/npm-cli.js")
@@ -796,10 +809,38 @@ var socketCmds:StringMap<(ws, data)=>void> = {
             ws.currSock.destroy()
             ws.currSock = null
         }
+
+        if (ws.serialPort) {
+            debug.log('closing serialport');
+            try { ws.serialPort.close(); } catch (e) { }
+            ws.serialPort = null;
+        }
     },
 
     log: (ws, data) => {
         logListeners.push(ws)
+    },
+
+    serial: (ws, data) => {
+        socketCmds['kill'](ws, data)
+        lazyRequire("serialport@1.6.1", function (serialport) {
+            debug.log('opening serial ' + data.name);
+            if (data.options.delimiter) data.options.parser = serialport.parsers.readline(data.options.delimiter);
+            ws.serialPort = new serialport.SerialPort(data.name, data.options);
+            ws.serialPort.on("open", function () {
+                debug.log('serial: ' + data.name + ' connected');
+                ws.sendJson({ op: "connected" })
+            });
+            ws.serialPort.on('data', function (data) {
+                debug.log('serial: recv ' + JSON.stringify(data));
+                ws.sendJson({ op: "recv", data: data })
+            });
+            ws.serialPort.on("error", err => {
+                error.log('serial error: ' + JSON.stringify(err));
+                ws.serialPort = null
+                ws.sendError(err)
+            })
+        });
     },
 
     connect: (ws, data) => {
@@ -820,10 +861,14 @@ var socketCmds:StringMap<(ws, data)=>void> = {
     },
 
     send: (ws, data) => {
-        if (!ws.currSock)
-            ws.sendError("no socket open")
-        else
+        if (ws.currSock)
             ws.currSock.write(data.data, "utf8")
+        else if (ws.serialPort) {
+            debug.log('serial write: ' + data.data);
+            ws.serialPort.write(data.data);
+        }
+        else
+            ws.sendError("no socket open")
     },
 }
 
@@ -874,27 +919,35 @@ function mgmtSocket(ws)
     })
 }
 
-var pluginCmds:StringMap<(ar:ApiRequest)=>void> = {
-    mkdir:      ar => mkDirP(dataPath(path.join(ar.data.name, "dummy")), ar.data.mode, () => { ar.pluginCb()(undefined, undefined); }),
+var pluginCmds: StringMap<(ar: ApiRequest) => void> = {
+    mkdir: ar => mkDirP(dataPath(path.join(ar.data.name, "dummy")), ar.data.mode,() => { ar.pluginCb()(undefined, undefined); }),
     writeFile: ar => {
         mkDirP(dataPath(ar.data.name));
         return fs.writeFile(dataPath(ar.data.name), ar.data.data, "utf8", <any>ar.pluginCb())
     },
-    readFile:   ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
-    readDir:    ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
+    readFile: ar => fs.readFile(dataPath(ar.data.name), "utf8", ar.pluginCb(true)),
+    readDir: ar => fs.readdir(dataPath(ar.data.name), ar.pluginCb(true)),
     writeFiles: ar => {
         ar.data.files.forEach((f: FileEntry) => f.path = dataPath(f.path));
         deployAr(ar, false);
     },
-    shell:      ar => {
-      ar.data.cwd = dataPath(ar.data.cwd);
-      runCommand(ar.data, r => ar.ok(r))
+    shell: ar => {
+        ar.data.cwd = dataPath(ar.data.cwd);
+        runCommand(ar.data, r => ar.ok(r))
     },
-    open:       ar => openUrl(ar.data.url, () => ar.ok({})),
-    pythonEnv: ar => initPython(false, (err?) => {
+    open: ar => openUrl(ar.data.url,() => ar.ok({})),
+    pythonEnv: ar => initPython(false,(err?) => {
         if (err) ar.exception(err)
-            else ar.ok({})
+        else ar.ok({})
     }),
+    seriallist: ar => {
+        lazyRequire("serialport@1.6.1", function (serialport) {
+            serialport.list((err, data) => {
+                if (err) ar.exception(err);
+                else ar.ok(data);
+            });
+        });
+    }
 }
 
 function hasAutoUpdate() {

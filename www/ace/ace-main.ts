@@ -74,11 +74,7 @@ module TDev {
     }
 
     function loadEditorState(s: string): EditorState {
-        try {
-            return JSON.parse(s);
-        } catch (e) {
-            return { lastSave: null };
-        }
+        return JSON.parse(s || "{ \"lastSave\": null }");
     }
 
     function saveEditorState(s: EditorState): string {

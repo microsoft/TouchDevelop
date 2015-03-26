@@ -492,6 +492,7 @@ task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
   console.log('[I] building nw packages')
   var nwBuilder = require('node-webkit-builder');
   var nw = new nwBuilder({
+      version: '0.12.0',
       files: 'build/nw/**',
       platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',

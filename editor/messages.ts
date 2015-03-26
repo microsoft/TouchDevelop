@@ -16,12 +16,21 @@ module TDev {
             theirs: SavedScript;
         }
 
+        // [Quit] has no attached data, so not defining a special interface
         export enum MessageType {
             Init,
-            Metadata, AckMetadata,
-            Save, AckSave,
-            Compile, AckCompile,
-            Merge
+            Metadata, MetadataAck,
+            Save, SaveAck,
+            Compile, CompileAck,
+            Merge, Quit
+        };
+
+        export enum Status {
+            Ok, Error
+        };
+
+        export enum SaveLocation {
+            Local, Cloud
         };
 
         export interface Message {
@@ -37,6 +46,19 @@ module TDev {
         export interface Message_Save extends Message {
             type: MessageType; // == MessageType.Save
             script: SavedScript;
+        }
+
+        export interface Message_SaveAck extends Message {
+            type: MessageType; // == MessageType.SaveAck
+            where: SaveLocation;
+            status: Status;
+            error?: string; // non-null iff status == Error
+            newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
+        }
+
+        export interface Message_Merge extends Message {
+            type: MessageType; // == MessageType.Merge
+            merge: PendingMerge;
         }
     }
 }

@@ -2088,23 +2088,12 @@ module TDev
             this.backBtnDiv.setChildren([
                 this.hasModalPane() ?
                     Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    // don't show "my scripts" back button in tutorial / block mode
-                    (TDev.noHub || (this.stepTutorial && AST.blockMode)) ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
+                    TDev.noHub ? null : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
             ])
         }
 
         private setupExternalButtons() {
-            var back = document.createElement("a");
-            back.textContent = "← back";
-            back.setAttribute("href", "#");
-            back.addEventListener("click", event => {
-                this.goToHub("list:installed-scripts:script:"+External.TheChannel.guid+":overview");
-                External.TheChannel = null;
-                event.stopPropagation();
-                event.preventDefault();
-            });
             elt("externalEditorChrome").setChildren([
-                back,
                 div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
@@ -2464,7 +2453,7 @@ module TDev
         private scheduled: boolean;
         private numSchedules = 0;
 
-        public scheduleSaveToCloudAsync(): TDev.Promise {
+        public scheduleSaveToCloudAsync(): TDev.Promise { // of Cloud.PostUserInstalledResponse (possibly null)
             this.numSchedules++;
             if (World.syncIsActive() || this.scheduled) return Promise.as();
             this.scheduled = true;
@@ -2508,6 +2497,9 @@ module TDev
                             //Ticker.dbg("save-clr2");
                         }
                         localStorage.removeItem("editorScriptToSaveDirty");
+                        // The [External] module wants to examine the actual
+                        // response to take the appropriate course of action.
+                        return Promise.as(response);
                     }, e => {
                         //Ticker.dbg("save-clr-exn");
                         this.scheduled = false;
@@ -3911,7 +3903,7 @@ module TDev
             return this.saveStateAsync({ forReal: true, clearScript: true });
         }
 
-        private goToHub(hash) {
+        public goToHub(hash) {
             this.hide(true);
             Util.setHash(hash);
         }

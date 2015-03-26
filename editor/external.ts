@@ -5,7 +5,7 @@ module TDev {
         // Both these two fields are for our UI
         name: string;
         description: string;
-        // An internal ID
+        // Unique
         id: string;
         // The domain root for the external editor.
         origin: string;
@@ -45,6 +45,11 @@ module TDev {
             }
 
             public post(message: Message) {
+                // The notification that the script has been successfully saved
+                // to cloud may take a while to arrive; the user may have
+                // discarded the editor in the meanwhile.
+                if (!this.iframe || !this.iframe.contentWindow)
+                    return;
                 this.iframe.contentWindow.postMessage(message, this.editor.origin);
             }
 
@@ -62,22 +67,66 @@ module TDev {
                             header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
                             // Writes into local storage.
                             World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
-                                // FIXME define and send Message_SaveAck with param local
                                 console.log("[external] script saved properly");
+                                this.post(<Message_SaveAck>{
+                                    type: MessageType.SaveAck,
+                                    where: SaveLocation.Local,
+                                    status: Status.Ok,
+                                });
                             });
                             // Schedules a cloud sync; set the right state so
                             // that [scheduleSaveToCloudAsync] writes the
                             // baseSnapshot where we can read it back.
                             localStorage["editorScriptToSaveDirty"] = this.guid;
-                            TheEditor.scheduleSaveToCloudAsync().then(() => {
-                                // FIXME send Message_SaveAck with cloud param +
-                                // last save date
-                                var newBaseVersion = ScriptEditorWorldInfo.baseSnapshot;
-                                console.log("[external] new base version ", newBaseVersion);
+                            TheEditor.scheduleSaveToCloudAsync().then((response: Cloud.PostUserInstalledResponse) => {
+                                if (!response || !response.headers[0]) {
+                                    this.post(<Message_SaveAck>{
+                                        type: MessageType.SaveAck,
+                                        where: SaveLocation.Cloud,
+                                        status: Status.Error,
+                                        error: "unknown early error",
+                                    });
+                                    return;
+                                }
+
+                                if (response.numErrors) {
+                                    this.post(<Message_SaveAck>{
+                                        type: MessageType.SaveAck,
+                                        where: SaveLocation.Cloud,
+                                        status: Status.Error,
+                                        error: (<any> response.headers[0]).error,
+                                    });
+                                    World.getInstalledScriptVersionInCloud(this.guid).then((json: string) => {
+                                        var m: PendingMerge = JSON.parse(json || "{}");
+                                        if ("theirs" in m) {
+                                            this.post(<Message_Merge>{
+                                                type: MessageType.Merge,
+                                                merge: m
+                                            });
+                                        } else {
+                                            console.log("[external] got confused");
+                                        }
+                                    });
+                                    return;
+                                }
+
+                                var newCloudSnapshot = response.headers[0].scriptVersion.baseSnapshot;
+                                console.log("[external] accepted, new cloud version ", newCloudSnapshot);
+                                this.post(<Message_SaveAck>{
+                                    type: MessageType.SaveAck,
+                                    where: SaveLocation.Cloud,
+                                    status: Status.Ok,
+                                    newBaseSnapshot: newCloudSnapshot
+                                });
                             });
                         });
                         break;
                     }
+
+                    case MessageType.Quit:
+                        TheEditor.goToHub("list:installed-scripts:script:"+this.guid+":overview");
+                        TheChannel = null;
+                        break;
 
                     default:
                         console.error("[external] unexpected message type", message.type);
@@ -100,18 +149,6 @@ module TDev {
         // cloud" context) that we use to store extra information attached to
         // the script.
         export function loadAndSetup(editor: ExternalEditor, data: ScriptData) {
-            // The [scheduleSaveToCloudAsync] method on [Editor] needs the
-            // [guid] field of this global to match for us to read back the
-            // [baseSnapshot] field afterwards.
-            ScriptEditorWorldInfo = <EditorWorldInfo>{
-                guid: data.guid,
-                baseId: null,
-                baseUserId: null,
-                status: null,
-                version: null,
-                baseSnapshot: null,
-            };
-
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
@@ -121,14 +158,14 @@ module TDev {
             iframe.addEventListener("load", function () {
                 TheChannel = new Channel(editor, iframe, data.guid);
                 var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-                TheChannel.post({
+                TheChannel.post(<Message_Init>{
                     type: MessageType.Init,
                     script: {
                         scriptText: data.scriptText,
                         editorState: data.editorState,
                         baseSnapshot: data.baseSnapshot,
                     },
-                    merge: ("mine" in extra) ? extra : null
+                    merge: ("theirs" in extra) ? extra : null
                 });
             });
             iframe.setAttribute("src", editor.origin + editor.path);

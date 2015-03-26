@@ -151,11 +151,11 @@ module TDev
                   !showSettings || ev ? null : div("formHint",
                     Script.isLibrary ? lf("Private actions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
+                  !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   ev ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
                   ev || act.isPage() ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
                   ActionProperties.copyCutRefs(lf("the current action"), this.theAction.action),
 
-                  !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   showSettings && icl ? this.offlineAction : null,
                   showSettings && icl ? this.queryAction : null,
                   !showSettings || offloadDisabled? null : this.offloadBox,

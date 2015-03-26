@@ -249,10 +249,23 @@ module TDev.RT {
         }
     }
 
+    // An object that represents a resource that should be freed deterministically
+    export interface Disposable {
+        dispose();
+    }
+
+    export class DisposableHandler implements RT.Disposable {
+        constructor(public handler: () => void) {
+        }
+        public dispose() {
+            this.handler();
+        }
+    }
+
     /// A runtime value that should be explicitely stopped.
     /// Reference counted in the runtime. Inherited class must call the 'dispose' base class.
     export class RTDisposableValue
-        extends RTValue {
+        extends RTValue implements Disposable {
         constructor(public rt : Runtime) {
             super();
             this.rt.disposables.push(this); // ref counting
