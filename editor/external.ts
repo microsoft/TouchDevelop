@@ -123,6 +123,11 @@ module TDev {
                         break;
                     }
 
+                    case MessageType.Quit:
+                        TheEditor.goToHub("list:installed-scripts:script:"+this.guid+":overview");
+                        TheChannel = null;
+                        break;
+
                     default:
                         console.error("[external] unexpected message type", message.type);
                         break;

@@ -2084,17 +2084,7 @@ module TDev
         }
 
         private setupExternalButtons() {
-            var back = document.createElement("a");
-            back.textContent = "← back";
-            back.setAttribute("href", "#");
-            back.addEventListener("click", event => {
-                this.goToHub("list:installed-scripts:script:"+External.TheChannel.guid+":overview");
-                External.TheChannel = null;
-                event.stopPropagation();
-                event.preventDefault();
-            });
             elt("externalEditorChrome").setChildren([
-                back,
                 div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
@@ -3904,7 +3894,7 @@ module TDev
             return this.saveStateAsync({ forReal: true, clearScript: true });
         }
 
-        private goToHub(hash) {
+        public goToHub(hash) {
             this.hide(true);
             Util.setHash(hash);
         }

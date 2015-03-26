@@ -16,12 +16,13 @@ module TDev {
             theirs: SavedScript;
         }
 
+        // [Quit] has no attached data, so not defining a special interface
         export enum MessageType {
             Init,
             Metadata, MetadataAck,
             Save, SaveAck,
             Compile, CompileAck,
-            Merge
+            Merge, Quit
         };
 
         export enum Status {

@@ -93,7 +93,7 @@ module TDev {
             ", theirs = "+merge.theirs.baseSnapshot +
             ", mine = "+currentVersion);
         var mkButton = function (label: string, text: string) {
-            var b = document.createElement("button");
+            var b = document.createElement("a");
             b.textContent = "load "+label;
             b.addEventListener("click", () => {
                 loadBlockly(text);
@@ -109,7 +109,7 @@ module TDev {
         var mineButton = mkButton("mine", mineText);
         var theirsButton = mkButton("theirs", merge.theirs.scriptText);
         var baseButton = mkButton("base", merge.base.scriptText);
-        var mergeButton = document.createElement("button");
+        var mergeButton = document.createElement("a");
         mergeButton.textContent = "finish merge";
         mergeButton.addEventListener("click", function () {
             currentVersion = merge.theirs.baseSnapshot;
@@ -181,6 +181,8 @@ module TDev {
             dirty = true;
         });
 
+        // That's triggered when the user closes or reloads the whole page, but
+        // doesn't help if the user hits the "back" button in our UI.
         window.addEventListener("beforeunload", function (e) {
             if (dirty) {
                 var confirmationMessage = "Some of your changes have not been saved. Quit anyway?";
@@ -215,11 +217,17 @@ module TDev {
     }
 
     function setupButtons() {
+        document.querySelector("#command-quit").addEventListener("click", () => {
+            doSave();
+            post({ type: External.MessageType.Quit });
+        });
         document.querySelector("#command-save").addEventListener("click", () => {
             doSave();
         });
         document.querySelector("#command-compile").addEventListener("click", () => {
             post({ type: External.MessageType.Compile });
+        });
+        document.querySelector("#command-run").addEventListener("click", () => {
         });
     }
 }

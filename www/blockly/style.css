@@ -35,7 +35,7 @@ body {
     margin-left: 3em;
 }
 
-#commands button, #merge-commands button {
+#commands a, #merge-commands a {
   padding-right: .5em;
   margin-right: 1em;
 }
@@ -58,4 +58,31 @@ body {
 
 #status:not(.error) {
     color: #4e9a06;
+}
+
+/* Buttons */
+.roundbutton {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    color: black;
+    text-decoration: none;
+}
+
+.roundsymbol {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid black;
+    border-radius: 50%;
+    margin: .2rem;
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 1.4rem;
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
+}
+
+.roundlabel {
+    font-size: 60%;
+    text-align: center;
 }
