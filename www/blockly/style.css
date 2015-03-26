@@ -30,18 +30,14 @@ body {
   flex: 1;
 }
 
-#commands {
+#merge-commands {
     flex: 1;
+    margin-left: 3em;
 }
 
-#commands, #commands li {
-  display: inline-block;
-  margin: 0;
-  padding: 0;
-}
-
-#commands li {
+#commands button, #merge-commands button {
   padding-right: .5em;
+  margin-right: 1em;
 }
 
 #toolbox {
@@ -50,10 +46,6 @@ body {
 
 #editor {
   flex: 3;
-}
-
-#status:first-letter {
-    font-size: 200%;
 }
 
 #status:not(:first-letter) {

@@ -96,6 +96,17 @@ module TDev {
                                         status: Status.Error,
                                         error: (<any> response.headers[0]).error,
                                     });
+                                    World.getInstalledScriptVersionInCloud(this.guid).then((json: string) => {
+                                        var m: PendingMerge = JSON.parse(json || "{}");
+                                        if ("theirs" in m) {
+                                            this.post(<Message_Merge>{
+                                                type: MessageType.Merge,
+                                                merge: m
+                                            });
+                                        } else {
+                                            console.log("[external] got confused");
+                                        }
+                                    });
                                     return;
                                 }
 
