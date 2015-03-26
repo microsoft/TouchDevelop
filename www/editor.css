@@ -1775,6 +1775,29 @@ span.errorSq .kw
     font-weight: bold;
 }
 
+#externalEditorChrome .back {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+}
+
+#externalEditorChrome .arrow {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid black;
+    border-radius: 50%;
+    margin: .2rem;
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+#externalEditorChrome .txt {
+    font-size: 60%;
+    text-align: center;
+}
+
 .tdLite {
     text-align: right;
     flex: 1;
