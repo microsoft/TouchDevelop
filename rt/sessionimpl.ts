@@ -3371,7 +3371,9 @@ module TDev {
                 this.hasPartialData = this.rt.compiled.hasPartialData;
                 this.hasLocalData = this.rt.compiled.hasLocalData;
 
-                this.setupWebSockets();
+                if (this.rt.compiled.hostCloudData)
+                    this.setupWebSockets();
+
                 this.getMetaData();
             }
 

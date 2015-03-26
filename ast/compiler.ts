@@ -459,6 +459,7 @@ module TDev.AST
         hasCloudData?: boolean;
         hasLocalData?: boolean;
         hasPartialData?: boolean;
+        hostCloudData?: boolean;
         optimizeLoops?: boolean;
         crashOnInvalid?: boolean;
         inlining?: boolean;
@@ -2962,6 +2963,8 @@ module TDev.AST
                 this.wr("cs.azureSite = " + this.stringLiteral(this.options.azureSite) + ";\n");
             if (this.options.hasLocalData)
                 this.wr("cs.hasLocalData = 1;\n");
+            if (this.options.hostCloudData)
+                this.wr("cs.hostCloudData = 1;\n");
             if (this.needsScriptText)
                 this.wr("var scriptText = " + this.stringLiteral(a.serialize()) + ";\n");
             if (this.options.isTopLevel && this.options.usedProperties.hasOwnProperty("appreflect"))

@@ -2678,6 +2678,7 @@ module TDev
         public hasCloudData: boolean;
         public hasLocalData: boolean;
         public hasPartialData: boolean;
+        public hostCloudData: boolean;
         public azureSite: string;
         public scriptGuid: string;
 
