@@ -48,15 +48,22 @@ body {
   flex: 3;
 }
 
-#status:not(:first-letter) {
+#log {
+    overflow: auto;
+    width: 500px;
+    height: 50px;
+    font-size: 60%;
+}
+
+.status:not(:first-letter) {
     font-weight: bold;
 }
 
-#status.error {
+.status.error {
     color: #a40000;
 }
 
-#status:not(.error) {
+.status:not(.error) {
     color: #4e9a06;
 }
 

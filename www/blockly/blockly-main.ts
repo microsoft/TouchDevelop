@@ -92,12 +92,19 @@ module TDev {
         console.log("[merge] merge request, base = "+merge.base.baseSnapshot +
             ", theirs = "+merge.theirs.baseSnapshot +
             ", mine = "+currentVersion);
-        var mkButton = function (label: string, text: string) {
+        var mkButton = function (symbol: string, label: string, f: () => void) {
             var b = document.createElement("a");
-            b.textContent = "load "+label;
-            b.addEventListener("click", () => {
-                loadBlockly(text);
-            });
+            b.classList.add("roundbutton");
+            b.setAttribute("href", "#");
+            var s = document.createElement("div");
+            s.classList.add("roundsymbol");
+            s.textContent = symbol;
+            b.appendChild(s);
+            var l = document.createElement("div");
+            l.classList.add("roundlabel");
+            l.textContent = label;
+            b.appendChild(l);
+            b.addEventListener("click", f);
             return b;
         };
         var box = document.querySelector("#merge-commands");
@@ -106,16 +113,15 @@ module TDev {
                 box.removeChild(box.firstChild);
         };
         var mineText = saveBlockly();
-        var mineButton = mkButton("mine", mineText);
-        var theirsButton = mkButton("theirs", merge.theirs.scriptText);
-        var baseButton = mkButton("base", merge.base.scriptText);
-        var mergeButton = document.createElement("a");
-        mergeButton.textContent = "finish merge";
-        mergeButton.addEventListener("click", function () {
+        var mineButton = mkButton("🔍", "see mine", () => loadBlockly(mineText));
+        var theirsButton = mkButton("🔍", "see theirs", () => loadBlockly(merge.theirs.scriptText));
+        var baseButton = mkButton("🔍", "see base", () => loadBlockly(merge.base.scriptText));
+        var mergeButton = mkButton("👍", "finish merge", () => {
             currentVersion = merge.theirs.baseSnapshot;
             clearMerge();
             doSave();
         });
+        clearMerge();
         [ mineButton, theirsButton, baseButton, mergeButton ].forEach(button => {
             box.appendChild(button);
             box.appendChild(document.createTextNode(" "));
@@ -137,12 +143,16 @@ module TDev {
     }
 
     function statusMsg(s: string, st: External.Status) {
-        var elt = <HTMLElement> document.querySelector("#status");
+        var box = <HTMLElement> document.querySelector("#log");
+        var elt = document.createElement("div");
+        elt.classList.add("status");
         if (st == External.Status.Error)
             elt.classList.add("error");
         else
             elt.classList.remove("error");
         elt.textContent = s;
+        box.appendChild(elt);
+        box.scrollTop = box.scrollHeight;
     }
 
     function loadEditorState(s: string): EditorState {
