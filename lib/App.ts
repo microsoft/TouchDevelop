@@ -155,7 +155,7 @@ module TDev.RT {
             }
 
             var res = [];
-            msgs.forEach((lvl, index) => {
+            msgs.filter(msg => !!msg).forEach((lvl, index) => {
                 var msg = lvl.msg;
                 var txt = Util.htmlEscape(msg)
                     .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>");
@@ -525,7 +525,7 @@ module TDev.RT {
         //? When exported server-side, retreives the value of a setting stored on the server. If not optional, fails if missing. Returns invalid if missing.
         export function server_setting(key : string, optional : boolean, s : IStackFrame) : string {
             if (!optional)
-                Util.userError(lf("only supported on exported web sites"), s.pc);
+                Util.userError(lf("only supported on exported node.js apps"), s.pc);
             return undefined;
         }
 

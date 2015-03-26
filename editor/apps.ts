@@ -445,7 +445,7 @@ module TDev.AppExport
         var m = new ModalDialog();
         m.add(div('wall-dialog-header', lf("azure publish profile import")));
         m.addHTML(
-            lf("Paste your .PublishSettings file here. You can get it by first creating an Azure Website and then clicking on 'Download the publish profile' in 'quick glance' section on the right of the DASHBOARD tab.")
+            lf("Paste your .PublishSettings file here. You can get it by first creating an Azure Web App and then clicking on 'Download the publish profile' in 'quick glance' section on the right of the DASHBOARD tab.")
         )
         var err = div(null)
         m.add(err)
@@ -784,7 +784,7 @@ module TDev.AppExport
                                             r.success(chooseWebsiteAsync(true))
                                         }))
 
-            boxes.push(mkNavBtn("Add,#aaa", "white", lf("create new azure website"),
+            boxes.push(mkNavBtn("Add,#aaa", "white", lf("create new azure web app"),
                                     lf("using your imported management certificate"))
                         .withClick(() => {
                                         m.dismiss()
@@ -845,7 +845,7 @@ module TDev.AppExport
                 if (cancel) return
                 loading.dismiss()
 
-                // remove old azure web sites
+                // remove old azure web apps
                 var auths = Azure.getWebsiteAuths()
                 Object.keys(auths).forEach(ws => {
                     if (auths[ws].webspace !== 'custom') delete auths[ws];
@@ -867,7 +867,7 @@ module TDev.AppExport
         var createStorageCb = HTML.mkCheckBox(lf("create azure storage")); HTML.setCheckboxValue(createStorageCb, true);
         var createServiceBusCb = HTML.mkCheckBox(lf("create azure service bus")); HTML.setCheckboxValue(createServiceBusCb, true);
 
-        m.add(div("wall-dialog-header", lf("create azure website")))
+        m.add(div("wall-dialog-header", lf("create azure web app")))
 
         var err = div(null)
         m.add(err)
@@ -1035,8 +1035,8 @@ module TDev.AppExport
         var sub = getManagementCerificate()
         var m = new ModalDialog()
 
-        m.add(div('wall-dialog-header', "export to node.js+azure web site"));
-        m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web sites</a> let you deploy and scale modern websites and web apps in seconds."));
+        m.add(div('wall-dialog-header', "export to node.js+azure web app"));
+        m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web apps</a> let you deploy and scale modern websites and web apps in seconds."));
         var err = div(null)
         m.add(err)
 

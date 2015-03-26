@@ -380,7 +380,7 @@ function lazyRequire(pkg: string, finish: (md: any) => void) {
 
 function executeNpm(args:string[], finish:()=>void)
 {
-    // NPM_JS_PATH defined in Azure Web Sites
+    // NPM_JS_PATH defined in Azure Web Apps
     var p = process.env["NPM_JS_PATH"] || path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
     if (!fs.existsSync(p))
         p = path.join(path.dirname(process.execPath).replace("/bin", "/lib"), "node_modules/npm/bin/npm-cli.js")
