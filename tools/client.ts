@@ -3718,7 +3718,7 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ craft',
     description: lf("A Minecraft Pi app."),
     section: sectMinecraft,
-    scriptid: 'cptje',
+    scriptid: 'uggce',
     editorMode: 1,
 }, {
     title: lf("blank creeper"),
@@ -3727,7 +3727,7 @@ var templates: ScriptTemplate[] = [{
     name: 'ADJ creeper',
     description: lf("A Minecraft creeper app."),
     section: sectMinecraft,
-    scriptid: 'alati',
+    scriptid: 'ehtt',
     editorMode: 1,
 },
 /*{
@@ -3772,6 +3772,15 @@ var templates: ScriptTemplate[] = [{
     description: lf("A web app using Azure Services, Node.js and Restify."),
     section: sectAzure,
     scriptid: 'gexxa',
+    editorMode: 3,
+}, {
+    title: lf("blank azure event hubs app"),
+    id: 'blankazureeventhubs',
+    icon: 'Stacks',
+    name: 'azure ADJ event api',
+    description: lf("A web app that uploads data to Azure Event Hubs."),
+    section: sectAzure,
+    scriptid: 'otkma',
     editorMode: 3,
 }, {
     title: lf("blank node library"),
