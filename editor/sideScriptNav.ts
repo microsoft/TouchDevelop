@@ -217,7 +217,7 @@ module TDev
                                 Script = res.prevScript
                             })
 
-                    if (app.isCloud) {
+                    if (app.usesCloudLibs()) {
                         recompile
                             .then(() => AppExport.deployLocalWebappAsync(app, wa))
                             .done(
