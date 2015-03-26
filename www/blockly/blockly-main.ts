@@ -167,7 +167,12 @@ module TDev {
         var text = s || "<xml></xml>";
         var xml = Blockly.Xml.textToDom(text);
         Blockly.mainWorkspace.clear();
-        Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
+        try {
+            Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
+        } catch (e) {
+            console.error("Cannot load saved Blockly script. Too recent?");
+            console.error(e);
+        }
     }
 
     function saveBlockly(): string {
