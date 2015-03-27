@@ -207,6 +207,23 @@ module TDev.RT {
         //@ dbgOnly uiAsync returns(boolean)
         //@ writesMutable
         export function authenticate(access_token: string, r: ResumeCtx) {
+            r.rt.authAccessToken = access_token
+            if (!access_token)
+                r.resumeVal(false)
+            else
+                r.rt.queryServiceAsync("-internal-/me", {})
+                .done(resp => {
+                    if (resp.userid) {
+                        r.rt.authUserId = resp.userid
+                        r.resumeVal(true)
+                    } else {
+                        r.resumeVal(false)
+                    }
+                }, err => {
+                    r.resumeVal(false)
+                })
+
+            /*
             r.rt.sessions.setAccessToken(access_token);
             r.rt.sessions.connectCurrent(r.rt.sessions.getNodeSessionDescriptor("tbd"));
             var cs = r.rt.sessions.getCurrentSession();
@@ -228,6 +245,7 @@ module TDev.RT {
                 }
                 return true; // keep listening
             });
+            */
         }
 
 

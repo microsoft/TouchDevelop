@@ -3461,6 +3461,8 @@ function tdupload(args:string[])
     var lbl = args.shift()
     var channel = args.shift()
 
+    if (!lbl) lbl = process.env.USERNAME
+
     if (!/^\d\d\d\d\d\d\d\d\d\d\d/.test(lbl))
         lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
 
@@ -3488,6 +3490,7 @@ function tdupload(args:string[])
             "build/browser.js",
             "build/browser.js.map",
             "build/noderunner.js",
+            "build/noderuntime.js",
             "build/buildinfo.json",
             "www/default.css",
             "www/editor.css",

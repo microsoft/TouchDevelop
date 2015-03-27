@@ -459,6 +459,7 @@ module TDev.AST
         hasCloudData?: boolean;
         hasLocalData?: boolean;
         hasPartialData?: boolean;
+        hostCloudData?: boolean;
         optimizeLoops?: boolean;
         crashOnInvalid?: boolean;
         inlining?: boolean;
@@ -2562,12 +2563,53 @@ module TDev.AST
             Json.setStableId(a, "0.");
         }
 
+        static getCompiledCode(that:CompiledScript, options:CompilerOptions)
+        {
+            Object.keys(that.libScripts).forEach((name:string) => { that.libScripts[name].primaryName = null })
+
+            var res = ""
+
+            if (options.cloud) {
+                res += "require('./noderuntime.js')\n" +
+                       "var TDev     = global.TDev;\n" +
+                       "var window   = global.TDev.window;\n" +
+                       "var document = global.TDev.window.document;\n"
+            } else {
+                res += "var TDev;\n" +
+                       "if (!TDev) TDev = {};\n"
+            }
+
+            res += "\nTDev.precompiledScript = {\n"
+            var first = true;
+            Object.keys(that.libScripts).forEach((name:string) => {
+                if (!first)
+                    res += ",\n\n// **************************************************************\n"
+                first = false;
+
+                res += Util.jsStringLiteral(name) + ": ";
+                var cs = <CompiledScript>that.libScripts[name];
+                if (cs.primaryName) res += Util.jsStringLiteral(cs.primaryName);
+                else {
+                    cs.primaryName = name;
+                    res += cs.code
+                }
+            })
+            res += "}\n"
+
+            if (options.cloud) {
+                res += "\nTDev.RT.Node.runMainAsync().done();\n"
+            }
+
+            return res;
+        }
+
         static getCompiledScript(a: App, options: CompilerOptions, initialBreakpoints?: Hashtable): CompiledScript // TODO: get rid of Hashtable here
         {
             var prep = new PreCompiler(options)
             prep.run(a)
             
             var cs = new CompiledScript();
+            cs.getCompiledCode = () => Compiler.getCompiledCode(cs, options);
             a.clearRecompiler();
             var compiled = [];
             a.setStableNames();
@@ -2802,6 +2844,9 @@ module TDev.AST
             if (this.options.cloud && this.options.isTopLevel) {
                 this.pipPackages = TypeChecker.combinePipPackages(a);
 
+                if (!a.isCloud)
+                    this.wr("cs.autoRouting = true;\n")
+
                 this.wr("cs.setupRestRoutes = function(rt) {\n")
                 var host = /^https?:\/\/(.+?)\/?$/i.exec(this.options.azureSite)[1];
                 a.librariesAndThis()
@@ -2813,13 +2858,16 @@ module TDev.AST
 
                         if (a.getName() == "_init") {
                             this.wr("  rt.addRestInit(" + ref + ");\n")
-                                                    } else {
+                        } else {
                             var name = (l.isThis() || l.getName() == "*") ? "" : l.getName() + "/"
                             if (a.getName() != "*")
                                 name += a.getName()
                             name = name.replace(/\/+$/, "")
                             this.wr("  rt.addRestRoute(" + this.stringLiteral(name) + ", " + ref + ");\n")
                         }
+
+                        if (l.isThis() && a.getName() == "main")
+                            this.wr("  rt.setMainAction(" + ref + ");\n")
                     })
                 })
                 this.wr("  rt.nodeModules = {};\n")
@@ -2918,6 +2966,8 @@ module TDev.AST
                 this.wr("cs.azureSite = " + this.stringLiteral(this.options.azureSite) + ";\n");
             if (this.options.hasLocalData)
                 this.wr("cs.hasLocalData = 1;\n");
+            if (this.options.hostCloudData)
+                this.wr("cs.hostCloudData = 1;\n");
             if (this.needsScriptText)
                 this.wr("var scriptText = " + this.stringLiteral(a.serialize()) + ";\n");
             if (this.options.isTopLevel && this.options.usedProperties.hasOwnProperty("appreflect"))
@@ -3068,7 +3118,7 @@ module TDev.AST
         secondaryRun(app: App)
         {
             app.libraries().forEach(l => {
-                if (l.isTutorial()) {
+                if (l.isTutorial() || l.isCloud()) {
                     l.getPublicActions().forEach(a => this.runOnDecl(a))
                 }
             })

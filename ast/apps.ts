@@ -219,6 +219,7 @@ module TDev.AST.Apps {
         if (options.compileServer) {
             opts.packaging = false
             opts.cloud = true
+            opts.javascript = true
 
             compiled = AST.Compiler.getCompiledScript(app, opts)
             var serverCode = compiled.getCompiledCode();
@@ -271,24 +272,29 @@ module TDev.AST.Apps {
         })
 
 
-        var promise = Promise.as();
         var baseUrl = options.baseUrl
 
-        if (options.downloadLocalFilesFrom) {
-            promise = Promise.join(
-                ["default.css", "browser.js", "runtime.js"].map(fn =>
-                    Util.httpGetTextAsync(options.downloadLocalFilesFrom + fn).then(content => {
+        var addFileAsync = (fn:string, pref?:string) => {
+            if (!pref) pref = options.filePrefix
+            if (options.downloadLocalFilesFrom) {
+                return Util.httpGetTextAsync(options.downloadLocalFilesFrom + fn).then(content => {
                         instructions.files.push({
-                            path: options.filePrefix + fn,
+                            path: pref + fn,
                             content: content
                         });
-                    })))
-        } else {
-            ["default.css", "browser.js", "runtime.js"].forEach(n => instructions.files.push({
-                    path: options.filePrefix + n,
-                    url: theBase + n
-            }));
+                    })
+            } else {
+                instructions.files.push({
+                        path: pref + fn,
+                        url: theBase + fn
+                });
+                return Promise.as()
+            }
         }
+
+        var lst = ["default.css", "browser.js", "runtime.js"].map(n => addFileAsync(n))
+        if (options.compileServer)
+            lst.push(addFileAsync("noderuntime.js", "script/"));
 
         // these 2 files are not stored in cdn, they are rewritten in the cloud
         [ "error", "browsers"].forEach(n => instructions.files.push({
@@ -298,7 +304,7 @@ module TDev.AST.Apps {
 
         instructions.meta.isCloud = app.isCloud;
 
-        return promise.then(() => instructions);
+        return Promise.join(lst).then(() => instructions);
     }
 
     var densitySizes: StringMap<number> = {

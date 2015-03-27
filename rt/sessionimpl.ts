@@ -1379,6 +1379,9 @@ module TDev {
                                 if (!this.closed && !this.faulted)
                                     this.SaveAndSend();
                             }, this.sendinterval);
+                            var h = <any>this.intervalhandle
+                            // this shouldn't keep the node.js event loop running
+                            if (h.unref) h.unref()
                         }
                     },
                     (error) => {
@@ -3368,7 +3371,9 @@ module TDev {
                 this.hasPartialData = this.rt.compiled.hasPartialData;
                 this.hasLocalData = this.rt.compiled.hasLocalData;
 
-                this.setupWebSockets();
+                if (this.rt.compiled.hostCloudData)
+                    this.setupWebSockets();
+
                 this.getMetaData();
             }
 

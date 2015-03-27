@@ -16,7 +16,9 @@ module TDev.RT.Node {
     var http = require("http")
     var https = require("https")
     var zlib = require("zlib")
+    var path = require("path")
     var Buffer;
+    var webSocketModule;
 
     function setupGlobalAgent() {
         var maxSock = 15
@@ -82,8 +84,6 @@ module TDev.RT.Node {
         else
             mkAgent = p => p == "https:" ? new AgentSSL({ maxSockets: maxSock, keepAlive: true }) : new Agent({ maxSockets: maxSock, keepAlive: true })
 
-        console.log("creating new HTTP agent")
-
         httpAgent = http.globalAgent = mkAgent("http:")
         httpsAgent = https.globalAgent = mkAgent("https:")
     }
@@ -92,9 +92,16 @@ module TDev.RT.Node {
     export var mkAgent : (protocol:string) => any;
 
 
-    export var logInfo: (s:string) => void;
-    export var logError: (s:string) => void;
-    export var handleError: (err:any) => void;
+    export var logInfo: (s:string) => void = s => Util.log(s);
+    export var logError: (s:string) => void = s => Util.log("error: " + s);
+    export var handleError: (err:any) => void = err => {
+        if (err.rtProtectHandled)
+            return
+        if (host)
+            host.exceptionHandler(err)
+        else
+            RT.App.logException(err)
+    }
 
     class FsTable implements Storage.Table
     {
@@ -190,6 +197,7 @@ module TDev.RT.Node {
     {
         private routes:any = {}
         private restInits:any[] = [];
+        private mainActionRef:any = null;
         public nodeModules: any = {};
         public initPromise:Promise;
         public requestHandler: (req:any, resp:any) => void;
@@ -204,7 +212,10 @@ module TDev.RT.Node {
         }
 
         public getUserId(): string {
-            return Cloud.getUserId();
+            var req = this.getRestRequest()
+            if (req && req._user) return req._user.id();
+            return null;
+            // return Cloud.getUserId();
         }
 
         public postBoxedText(s:string) : TDev.WallBox
@@ -306,18 +317,30 @@ module TDev.RT.Node {
             this.restInits.push(fn)
         }
 
+        public setMainAction(fn:(s:IStackFrame) => any)
+        {
+            this.mainActionRef = fn;
+        }
+
+        public hasInits() { return this.restInits.length > 0 }
+
         public queueInits()
         {
-            this.restInits.forEach(fn => {
+            var queue = fn => {
                 var lifted = (bot, retAddr) => {
-                    App.log("running an _init action")
+                    // App.log("running an _init action")
                     var lc = fn(bot)
                     return lc.invoke(lc, retAddr)
                 }
                 var ev = new Event_()
                 ev.addHandler(<any>lifted)
                 this.queueLocalEvent(ev)
-            })
+            }
+
+            if (this.hasInits())
+                this.restInits.forEach(queue)
+            else if (this.mainActionRef)
+                queue(this.mainActionRef)
         }
 
 
@@ -331,6 +354,53 @@ module TDev.RT.Node {
 
             this.host.exceptionHandler(e);
             this.restartAfterException()
+        }
+
+        public handleRpc(req, resp)
+        {
+            req.tdResponse = resp
+            req.tdQueryString = querystring.parse(req.url.replace(/^[^\?]*\??/, ""))
+            var sr = ServerRequest.mk(req)
+            sr._api_path = req.url.replace(/^\/-tdevrpc-\//, "")
+
+            if (sr._api_path == "-internal-/ping") {
+                error(resp, 200, { v: req.tdQueryString['v'] || "",
+                                   now: Date.now() })
+                return
+            }
+
+            var clientUserId = ""
+            var rt = this
+            if (rt.authValidator) {
+                var m = /^\s*Bearer\s+(.+)/.exec(req.headers['authorization'])
+                if (m) {
+                    var token = m[1]
+                    rt.wrapFromHandler(() => {
+                        clientUserId = rt.runUserAction(rt.authValidator, [token])
+                        if (clientUserId && !/:/.test(clientUserId))
+                            Util.userError("user id returned from validator has to have a namespace (eg., fb:123456)")
+                    })
+                    if (!clientUserId) {
+                        Util.log("invalid authorization attempt, " + token)
+                        error(resp, 403)
+                        return
+                    } else {
+                        Util.log("authorized as " + clientUserId);
+                        sr._user = User.mk(clientUserId)
+                    }
+                }
+            }
+
+            if (sr._api_path == "-internal-/me") {
+                if (!clientUserId) {
+                    error(resp, 403)
+                } else {
+                    error(resp, 200, { userid: clientUserId })
+                }
+                return
+            }
+
+            this.dispatchServerRequest(sr)
         }
     }
 
@@ -381,7 +451,7 @@ module TDev.RT.Node {
 
     var host: RunnerHost;
 
-    export function httpRequestStreamAsync(url_:string, method:string = "GET", body:string = undefined, contentType:string = null) : Promise
+    export function httpRequestStreamAsync(url_:string, method:string = "GET", body:string = undefined, contentType:any = null) : Promise
     {
         var parsed = url.parse(url_)
         parsed.method = method.toUpperCase()
@@ -397,8 +467,13 @@ module TDev.RT.Node {
 
         var ret = new PromiseInv()
 
-        if (contentType)
-            req.setHeader("content-type", contentType)
+        var headers = contentType || {}
+
+        if (typeof headers == "string")
+            headers = { "Content-Type": headers }
+
+        Object.keys(headers).forEach(k => req.setHeader(k, headers[k]))
+
 
         req.on("error", err => {
             //console.log(err)
@@ -429,7 +504,7 @@ module TDev.RT.Node {
         return ret
     }
 
-    function httpRequestAsync(url_:string, method:string = "GET", body:string = undefined, contentType:string = null) : Promise
+    function httpRequestAsync(url_:string, method:string = "GET", body:string = undefined, contentType:any = null) : Promise
     {
         return httpRequestStreamAsync(url_, method, body, contentType)
             .then(g => {
@@ -530,6 +605,8 @@ module TDev.RT.Node {
     export function setup(): void {
         if (!Browser.isNodeJS) return
 
+        process.on('uncaughtException', handleError)
+
         Buffer = global.Buffer;
 
         Browser.canIndexedDB = false;
@@ -624,40 +701,7 @@ module TDev.RT.Node {
         (<any>TDev.RT.Buffer).fromNodeBuffer = buf => TDev.RT.Buffer.fromTypedArray(buf);
     }
 
-    export function loadScriptAsync(wsServer: WebSocketServerWrapper)
-    {
-        host = new RunnerHost(wsServer);
-        var rt = <TheNodeRuntime> host.currentRt;
-        Runtime.theRuntime = rt;
-        var initProm = new PromiseInv()
-        rt.initPromise = initProm
-        host.initFromPrecompiled();
-        host.currentGuid = rt.compiled.scriptGuid;
-        logInfo("initializing data");
-        Browser.localProxy = true;
-                return rt.initDataAsync().then(() => {
-            logInfo("starting server script")
-            rt.setState(RtState.AtAwait, "start server");
-            rt.queueInits()
-            rt.queueAsyncStd(() => {
-                // this will be only executed once all _init() actions are done
-                initProm.success(null)
-            })
-        })
-    }
-
-    export interface RunApi {
-        req: any // http.ServerRequest
-        resp: any // http.ServerResponse
-        path: string
-    }
-
-    export function runtimeOpAsync(cmd:string, data:any)
-    {
-        return Promise.as({ error: "not implemented" })
-    }
-
-    export function getRuntimeInfoAsync(which:string)
+    function getRuntimeInfoAsync(which:string)
     {
         var needed = Util.toDictionary(which.split(/,/), s => s)
         if (needed["tdlog"]) {
@@ -670,4 +714,186 @@ module TDev.RT.Node {
             crashes: needed["crashes"] ? (host ? host.crashes : []) : undefined,
         })
     }
+
+    var httpActions:any = {
+        info: (args, req, resp) => getRuntimeInfoAsync(args[0] || "").done(r => resp.send(200, r)),
+        ready: (args, req, resp) => resp.send(200, { ready: true }),
+    }
+
+    function specialHttpRequest(req, resp)
+    {
+        resp.send = (code, msg) => {
+            if (typeof msg == "string") msg = { message: msg }
+            var buf = new Buffer(JSON.stringify(msg), "utf8")
+            resp.writeHead(code, { 
+                    'content-length': buf.length, 
+                    'content-type': 'application/json'
+            })
+            resp.end(buf)
+        }
+
+        var key = process.env['TD_DEPLOYMENT_KEY']
+        if (!key) {
+            resp.send(500, "key not setup")
+            return
+        }
+
+        var words = req.url.replace(/^\//, "").split(/\//)
+        if (words[0] != "-tdevmgmt-") resp.send(404, "only /-tdevmgmt-/ supported")
+        else if (words[1] != key) resp.send(403, "wrong key")
+        else if (httpActions.hasOwnProperty(words[2]))
+            httpActions[words[2]](words.slice(3), req, resp)
+        else
+            resp.send(404, "no such API " + words[2])
+    }
+
+    function error(resp, code:number, data?:any)
+    {
+        resp.writeHead(code)
+        if (typeof data == "object")
+            data = JSON.stringify(data)
+        if (data)
+            resp.end(data)
+        else
+            resp.end()
+    }
+
+    function getMime(filename:string)
+    {
+        var ext = path.extname(filename).slice(1)
+        switch (ext) {
+            case "txt": return "text/plain";
+            case "html":
+            case "htm": return "text/html";
+            case "css": return "text/css";
+            case "ts": return "text/plain";
+            case "js": return "application/javascript";
+            case "jpg":
+            case "jpeg": return "image/jpeg";
+            case "png": return "image/png";
+            case "ico": return "image/x-icon";
+            case "manifest": return "text/cache-manifest";
+            case "json": return "application/json";
+            case "svg": return "image/svg+xml";
+            default: return "application/octet-stream";
+        }
+    }
+
+    function serveStaticFile(req, resp) 
+    {
+        var m = /\/app\/([^?]*)/.exec(req.url)
+        var p = m[1] || "index.html"
+        var pp = path.normalize("/static/" + p).replace(/\\/g, "/")
+        if (/^\/static\//.test(pp)) {
+            pp = "." + pp
+            fs.exists(pp, yes => {
+                if (!yes) error(resp, 404)
+                else {
+                    var inp = fs.createReadStream(pp)
+                    var mime = getMime(pp)
+                    if (/^(text\/|application\/(json|javascript)|image\/svg)/.test(mime)) {
+                        var gzip = zlib.createGzip()
+                        resp.writeHead(200, {
+                            "Content-Encoding": "gzip",
+                            "Content-Type": mime,
+                        })
+                        inp.pipe(gzip).pipe(resp)
+                    } else {
+                        resp.writeHead(200, {
+                            "Content-Type": mime,
+                        })
+                        inp.pipe(resp)
+                    }
+                }
+            })
+        } else error(resp, 403)
+    }
+
+    export function handleHttpRequest(req, resp) 
+    {
+        if (/^\/-tdevmgmt-\//.test(req.url))
+            specialHttpRequest(req, resp)
+        else {
+            var rt = <TheNodeRuntime> Runtime.theRuntime
+            if (rt.compiled.autoRouting) {
+                if (/^\/-tdevrpc-\//.test(req.url)) {
+                    rt.handleRpc(req, resp)
+                } else {
+                    // "/" and "/app" redirect to "/app/"
+                    if (/^\/(app)?(\?|$)/.test(req.url)) {
+                        resp.writeHead(302, { "Location": "/app/" })
+                        resp.end()
+                    } else if (/^\/app\//.test(req.url)) {
+                        serveStaticFile(req, resp)
+                    } else {
+                        rt.requestHandler(req, resp)
+                    }
+                } 
+            } else {
+                rt.requestHandler(req, resp)
+            }
+        }
+    }
+
+    export function startServerAsync()
+    {
+        var ret = new PromiseInv()
+        var port = process.env.PORT || 4242
+
+        var app = http.createServer();
+
+        app.on("upgrade", (req, sock, body) => {
+            var rt = <TheNodeRuntime> Runtime.theRuntime
+            if (rt.wsServer && rt.wsServer.isReal())
+                rt.wsServer.upgradeCallback(req, sock, body)
+            else sock.end()
+        })
+
+        app.on("request", handleHttpRequest)
+
+        app.on("listening", () => {
+            ret.success(app)
+        })
+
+        Util.log("listenting on " + port)
+        app.listen(port)
+
+        return ret
+    }
+
+    export function runMainAsync()
+    {
+        if (require.resolve("faye-websocket"))
+            webSocketModule = require("faye-websocket")
+        var wsServer = new WebSocketServerWrapper(webSocketModule)
+
+        host = new RunnerHost(wsServer);
+        var rt = <TheNodeRuntime> host.currentRt;
+        Runtime.theRuntime = rt;
+        var initProm = new PromiseInv()
+        rt.initPromise = initProm
+        host.initFromPrecompiled();
+        host.currentGuid = rt.compiled.scriptGuid;
+
+        Util.log("initializing data");
+        Browser.localProxy = true;
+
+        return rt.initDataAsync().then(() => {
+            Util.log("starting server script")
+            rt.setState(RtState.AtAwait, "start server");
+            var autoStart = rt.hasInits() || rt.compiled.autoRouting
+            rt.queueInits()
+            rt.queueAsyncStd(() => {
+                // this will be only executed once all _init() actions are done
+                if (autoStart)
+                    initProm.success(startServerAsync())
+                else {
+                    Util.log("main finished")
+                    initProm.success(null)
+                }
+            })
+            return initProm
+        })
+    }
+
 }

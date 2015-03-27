@@ -261,7 +261,7 @@ module TDev
     export class Runtime
     {
         // shell/package.ts depends on the exact format of the next line
-        static shellVersion = 24;
+        static shellVersion = 28;
 
         // this is not to be set from the editor - only in the exported app
         static initialUrl: string;
@@ -292,6 +292,8 @@ module TDev
 
         public sessions: Revisions.Sessions;
         public authValidator: RT.StringConverter<string>;
+        public authAccessToken:string;
+        public authUserId:string;
 
         public runtimeKind() {
             return this.devMode ? "editor" : "website"
@@ -302,6 +304,9 @@ module TDev
         }
 
         public getUserId() {
+            if (this.authUserId)
+                return this.authUserId
+
             if (this.sessions.isNodeClient()) {
                 return (<Revisions.NodeSession>this.sessions.getCurrentSession()).clientUserId;
             }
@@ -1331,7 +1336,18 @@ module TDev
             return action.invoke.apply(action, [action, next].concat(args));
         }
 
+        public queryServiceAsync(path:string, req:any, site = "")
+        {
+            var hdrs = {}
+            hdrs["Content-type"] = "application/json;charset=UTF-8"
+            if (this.authAccessToken)
+                hdrs["Authorization"] = "Bearer " + this.authAccessToken
 
+            if (!site) site = this.compiled.azureSite
+
+            return Util.httpRequestAsync(site + "-tdevrpc-/" + path, "POST", JSON.stringify(req), hdrs)
+                   .then((s) => s ? JSON.parse(s) : {})
+        }
 
         // Remote service call -- action not tagged as "offline available"
         public callService(isQuery: boolean, site: string, service: string, libName: string, actionName: string, paramNames: string[], returnNames: string[],
@@ -1352,6 +1368,22 @@ module TDev
                     req[paramNames[i]] = Runtime.toRestArgument(args[i], prev);
                 }
 
+                this.queryServiceAsync(encodeURIComponent(service) + "/" + encodeURIComponent(actionName), req, site)
+                .done(resp => {
+                        var results = returnNames.map((n) => resp[n]);
+                        results = results.map((v, i) => Runtime.fromRestArgument(v, returnTypes[i], s))
+                        if (results.length == 1)
+                            s.result = results[0];
+                        else
+                            s.results = results;
+
+                        // Resume await
+                        ctx.resume();
+                    }, (err: any) => {
+                        TDev.Runtime.theRuntime.handleException(err);
+                })
+
+                /*
                 var ses = (<Revisions.NodeSession>rt.sessions.getCurrentSession());
 
                 if (!ses.hasNodeConnection()) {
@@ -1379,6 +1411,7 @@ module TDev
                     }, (err: any) => {
                         TDev.Runtime.theRuntime.handleException(err);
                     });
+                */
             };
 
             return {
@@ -2172,17 +2205,19 @@ module TDev
                 return null;
             }
             var res = rt.getEventFrame(f, this.args, ev.isBlocking);
-            rt.current.currentHandler = this.binding;
-            if (ev.finalCallback) {
-                var cb = ev.finalCallback
-                ev.finalCallback = null
-                rt.current.returnAddr = s => {
-                    cb(s);
-                    return Runtime.pumpEvents(s)
+            if (rt.current) {
+                rt.current.currentHandler = this.binding;
+                if (ev.finalCallback) {
+                    var cb = ev.finalCallback
+                    ev.finalCallback = null
+                    rt.current.returnAddr = s => {
+                        cb(s);
+                        return Runtime.pumpEvents(s)
+                    }
                 }
-            }
-            if (ev.errorHandler) {
-                rt.current.errorHandler = ev.errorHandler
+                if (ev.errorHandler) {
+                    rt.current.errorHandler = ev.errorHandler
+                }
             }
             return res
         }
@@ -2678,6 +2713,8 @@ module TDev
         public hasCloudData: boolean;
         public hasLocalData: boolean;
         public hasPartialData: boolean;
+        public hostCloudData: boolean;
+        public autoRouting: boolean;
         public azureSite: string;
         public scriptGuid: string;
 
@@ -2767,29 +2804,7 @@ module TDev
                 });
         }
 
-        public getCompiledCode()
-        {
-            Object.keys(this.libScripts).forEach((name:string) => { this.libScripts[name].primaryName = null })
-
-            var res = "var TDev;\nif (!TDev) TDev = {};\nTDev.precompiledScript = {\n"
-            var first = true;
-            Object.keys(this.libScripts).forEach((name:string) => {
-                if (!first)
-                    res += ",\n\n// **************************************************************\n"
-                first = false;
-
-                res += Util.jsStringLiteral(name) + ": ";
-                var cs = <CompiledScript>this.libScripts[name];
-                if (cs.primaryName) res += Util.jsStringLiteral(cs.primaryName);
-                else {
-                    cs.primaryName = name;
-                    res += cs.code
-                }
-            })
-            res += "}\n"
-
-            return res;
-        }
+        public getCompiledCode():string { return null } // overridden from the Compiler
 
         public initFromPrecompiled(script:any = null)
         {

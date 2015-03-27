@@ -298,6 +298,12 @@ module TDev.RT {
 
             return "unknown"
         }
+        
+        //? Return URL of the cloud backend service if any.
+        public backend_url(s:IStackFrame) : string
+        {
+            return s.rt.compiled.azureSite
+        }
 
         //? Initial URL used to launch the website; invalid when `->runtime kind` is "editor"
         public initial_url() : string

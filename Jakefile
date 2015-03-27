@@ -64,6 +64,15 @@ function expand(dependencies) {
   return acc;
 }
 
+// for use with child_process.exec/execFile
+function execCallback(task) {
+  return function (error, stdout, stderr) {
+    if (stdout) console.log(stdout.toString());
+    if (stderr) console.error(stderr.toString());
+    if (error) task.fail(error);
+    else task.complete();
+  }
+}
 
 // This function tries to be "smart" about the target.
 // - if the target is of the form "foobar/refs.ts", the output is bundled with
@@ -246,6 +255,7 @@ mkSimpleTask('build/blockly.js', [ "www/blockly/blockly-main.ts" ], "www/blockly
 //   the ".js" compiled file ends up in the concatenation
 var concatMap = {
     "build/noderunner.js": [
+        "tools/node_prelude.js",
         "build/browser",
         "build/rt",
         "build/ast",
@@ -254,6 +264,14 @@ var concatMap = {
         "build/libnode",
         "build/pkgshell.js",
         "build/nrunner.js",
+    ],
+    "build/noderuntime.js": [
+        "tools/node_prelude.js",
+        "build/browser",
+        "build/rt",
+        "build/storage",
+        "build/libnode",
+        "build/runner",
     ],
     "build/runtime.js": [
         "build/rt",
@@ -335,11 +353,8 @@ function mapCat(files, dest) {
 
 Object.keys(concatMap).forEach(function (f) {
     var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
-    var prelude = f == "build/noderunner.js" ? ["tools/node_prelude.js"] : [];
     var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
-    var toConcat = prelude.concat(
-      concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
-    );
+    var toConcat = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
     file(f, buildDeps, { parallelLimit: branchingFactor }, function () {
       if (f == "build/main.js" && process.env.TD_SOURCE_MAPS)
         mapCat(toConcat, f);
@@ -431,7 +446,7 @@ task('local', [ 'default' ], { async: true }, function() {
   if (process.env.TD_SHELL_DEBUG)
     node = "node-debug"
   jake.exec(
-    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../..' ],
+    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. ' + (process.env.TD_SHELL_ARGS || "") ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); }
   );
@@ -451,6 +466,16 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
   );
 });
 
+
+task('azure', [ 'build/shell.js' ], { async: true }, function() {
+  jake.mkdirP("build/azure")
+  child_process.execFile(
+    "C:/Program Files/Microsoft SDKs/Azure/.NET SDK/v2.5/bin/cspack.exe",
+    [ "tdshell.csdef",
+      "/out:../../build/azure/tdshell.cspkg", 
+      "/roleFiles:ShellRole;files.txt" ], { cwd: 'shell/azure' }, execCallback(this))
+});
+  
 task('nw-npm', {async : true }, function() {
   var task = this;
   jake.mkdirP('build/nw');
@@ -459,14 +484,7 @@ task('nw-npm', {async : true }, function() {
    'node-webkit/client.ico',
    'node-webkit/package.json',
    'build/shell.js'].forEach(function(f) { jake.cpR(f, 'build/nw') })
-  child_process.exec('npm install', { cwd: 'build/nw' },
-      function (error, stdout, stderr) {
-        if (stdout) console.log(stdout.toString());
-        if (stderr) console.error(stderr.toString());
-        if (error) task.fail(error);
-        else task.complete();
-      }
-    );
+  child_process.exec('npm install', { cwd: 'build/nw' }, execCallback(task))
 })
 
 task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
