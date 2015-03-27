@@ -107,6 +107,16 @@ module TDev {
 
                                 var newCloudSnapshot = response.headers[0].scriptVersion.baseSnapshot;
                                 console.log("[external] accepted, new cloud version ", newCloudSnapshot);
+                                // Note: currently, [response.retry] is always false. The reason is,
+                                // every call of us to [updateInstalledScriptAsync] is immediately
+                                // followed by a call to [scheduleSaveToCloudAsync]. Furthermore,
+                                // the latter function has its own tracking mechanism where updates
+                                // are delayed, and it sort-of knows if it missed an update and
+                                // should retry. In that case, it doesn't return until the second
+                                // update has been processed, and we only get called after the cloud
+                                // is, indeed, in sync. (If we were to offer external editors a way
+                                // to decide whether to save to cloud or not, then this would no
+                                // longer be true.)
                                 this.post(<Message_SaveAck>{
                                     type: MessageType.SaveAck,
                                     where: SaveLocation.Cloud,
