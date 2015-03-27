@@ -324,7 +324,7 @@ module TDev{
         return httpRequestAsync(url, "DELETE");
     }
 
-    export var httpRequestAsync = (url:string, method:string = "GET", body:string = undefined, contentType:string = null) : Promise => {
+    export var httpRequestAsync = (url:string, method:string = "GET", body:string = undefined, contentTypeOrHeaders:any = null) : Promise => {
         // TODO: clean up dependency between cloud and Util
         if (Cloud.isOffline()) return Cloud.offlineErrorAsync();
 
@@ -349,19 +349,27 @@ module TDev{
                 }
             }
 
+            var headers = contentTypeOrHeaders || {}
+
+            if (typeof headers == "string")
+                headers = { "Content-Type": headers }
+
             if (HttpLog.enabled)
                 HttpLog.log({
                     url: url,
                     method: method,
                     contentText: body,
-                    headers: contentType ? [{ name: "Content-Type", value: contentType }] : []
+                    headers: Object.keys(headers).map(k => { return { name: k, value: headers[k] } })
                 })
 
             client = new XMLHttpRequest();
             client.onreadystatechange = ready;
             client.open(method, url);
-            if (contentType)
-                client.setRequestHeader("Content-Type", contentType)
+            
+            Object.keys(headers).forEach(k => {
+                client.setRequestHeader(k, headers[k])
+            })
+
             if (body === undefined)
                 client.send();
             else

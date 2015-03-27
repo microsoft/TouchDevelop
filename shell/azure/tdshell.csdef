@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<ServiceDefinition 
+  xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  schemaVersion="2014-06.2.4"
+  name="tdshell" 
+  >
+  <WorkerRole name="ShellRole">
+    <ConfigurationSettings>
+      <Setting name="AZURE_STORAGE_ACCOUNT" />
+      <Setting name="AZURE_STORAGE_ACCESS_KEY" />
+      <Setting name="TD_DEPLOYMENT_KEY" />
+      <Setting name="TD_BLOB_DEPLOY_CHANNEL" />
+    </ConfigurationSettings>
+    <Imports/>
+    <Startup>
+      <Task commandLine="setup_worker.cmd 1&lt;&amp;2 &gt;&gt; log.txt" executionContext="elevated">
+        <Environment>
+        <Variable name="AZURE_STORAGE_ACCOUNT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCOUNT']/@value" />
+        </Variable>
+        <Variable name="AZURE_STORAGE_ACCESS_KEY">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCESS_KEY']/@value" />
+        </Variable>
+        </Environment>
+      </Task>
+    </Startup>
+    <Endpoints>
+      <InputEndpoint name="HttpIn" protocol="tcp" port="80" />
+      <InputEndpoint name="HttpsIn" protocol="tcp" port="443" />
+    </Endpoints>
+    <Runtime executionContext="elevated">
+      <Environment>
+        <Variable name="PORT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpIn']/@port" />
+        </Variable>
+        <Variable name="HTTP_PORT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpIn']/@port" />
+        </Variable>
+        <Variable name="HTTPS_PORT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/Endpoints/Endpoint[@name='HttpsIn']/@port" />
+        </Variable>
+        <Variable name="AZURE_STORAGE_ACCOUNT">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCOUNT']/@value" />
+        </Variable>
+        <Variable name="AZURE_STORAGE_ACCESS_KEY">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCESS_KEY']/@value" />
+        </Variable>
+        <Variable name="TD_DEPLOYMENT_KEY">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='TD_DEPLOYMENT_KEY']/@value" />
+        </Variable>
+        <Variable name="TD_BLOB_DEPLOY_CHANNEL">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='TD_BLOB_DEPLOY_CHANNEL']/@value" />
+        </Variable>
+      </Environment>
+      <EntryPoint>
+        <ProgramEntryPoint commandLine="start_worker.cmd 1&lt;&amp;2 &gt;&gt; log.txt" setReadyOnProcessStart="true"/>
+      </EntryPoint>
+    </Runtime>
+  </WorkerRole>
+</ServiceDefinition>

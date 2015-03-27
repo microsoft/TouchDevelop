@@ -560,6 +560,8 @@ module TDev.AppExport
 
     function getAzureConfigAsync(wa:Azure.WebsiteAuth)
     {
+        if (wa.webspace == "custom") 
+            return mgmtRequestAsync(wa, "getconfig")
         var cert = getManagementCerificate()
         if (!cert) return needCertAsync();
 
@@ -653,7 +655,13 @@ module TDev.AppExport
             didRedeploy = true
             msg.setChildren(lf("redeploying shell..."));
             return getProfile()
-                .then(() => wa.userPWD ? Util.httpPostJsonAsync(deployEndpoint("deploytdconfig"), mkFtp()) : null)
+                .then(() => {
+                    if (!wa.userPWD) return null
+                    var d:any = mkFtp()
+                    d.pkgShell = (<any>TDev).pkgShell
+                    d.shellVersion = Runtime.shellVersion
+                    return Util.httpPostJsonAsync(deployEndpoint("deploytdconfig"), d)
+                })
                 .then(resp => {
                     if (isDeployError(resp)) return
                     if (resp && resp.config && resp.config.deploymentKey) return final(resp.config)
@@ -1100,7 +1108,17 @@ module TDev.AppExport
                 HTML.mkButton(lf("crashes"), () => {
                     HTML.showProgressNotification(lf("loading server crashes"), true);
                     mgmtRequestAsync(wa, "info/crashes")
-                        .done(resp => showCrashes(resp.crashes));
+                        .done(resp => {
+                            var crashes = resp.crashes
+                            if (resp.workers) {
+                                crashes = []
+                                resp.workers.forEach(r => {
+                                    if (r.body && r.body.crashes)
+                                        crashes.pushRange(r.body.crashes)
+                                })
+                            }
+                            showCrashes(crashes)
+                        });
                 }),
                 []))
         }
@@ -1149,6 +1167,14 @@ module TDev.AppExport
                         elt.value = newS
                         return
                     }
+                    if (wa.webspace == "custom") {
+                        mgmtRequestAsync(wa, "setconfig", { AppSettings: newVars })
+                        .done(() => {
+                            ModalDialog.info(lf("config set!"), lf("things are good"))
+                        })
+                        return
+                    }
+
                     deployApiAsync("setazureconfig", { webspace: wa.webspace, website: wa.website,
                         config: {
                             AppSettings: newVars,

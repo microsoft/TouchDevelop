@@ -1020,13 +1020,23 @@ module TDev
                 HTML.showProgressNotification(lf("loading server logs"), true);
                 AppExport.mgmtRequestAsync(wa, "info/applog,tdlog")
                     .done(resp => {
-                        logs.push(RT.App.createInfoMessage(''));
-                        logs.push(RT.App.createInfoMessage('---------------------'));
-                        logs.push(RT.App.createInfoMessage(wa.website + " -- server log"));
-                        logs = logs.concat(resp.applog);
-                        logs.push(RT.App.createInfoMessage('---------------------'));
-                        logs.push(RT.App.createInfoMessage(wa.website + " -- touchdevelop log"));
-                        logs = logs.concat(resp.tdlog);
+                        var addOne = (resp, suff) => {
+                            logs.push(RT.App.createInfoMessage(''));
+                            logs.push(RT.App.createInfoMessage('---------------------'));
+                            logs.push(RT.App.createInfoMessage(wa.website + " -- server log -- " + suff));
+                            logs = logs.concat(resp.applog);
+                            logs.push(RT.App.createInfoMessage('---------------------'));
+                            logs.push(RT.App.createInfoMessage(wa.website + " -- touchdevelop log -- " + suff));
+                            logs = logs.concat(resp.tdlog);
+                        }
+                        if (resp.workers)
+                            resp.workers.forEach(r => {
+                                if (r.body && r.body.applog)
+                                    addOne(r.body, r.worker)
+                                else
+                                    logs.push(RT.App.createInfoMessage(wa.website + " -- server log -- " + r.worker + " missing; " + r.code));
+                            })
+                        else addOne(resp, "")
                         this.host.showAppView(logs);
                     }, e => {
                         logs.push(RT.App.createInfoMessage(''));

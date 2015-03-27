@@ -27,12 +27,17 @@ import net = require("net");
 
 var config:any;
 var currentReqNo = 0;
-declare var TDev;
 var inAzure = false;
 var controllerUrl = "";
 var isNpm = false;
 var inNodeWebkit = false;
 var dataDir : string = ".";
+var useFileSockets = true
+var allowEditor = false;
+var numWorkers = 1;
+var blobChannel = "";
+
+(<any>http.globalAgent).options.keepAlive = true;
 
 function dataPath(p : string) : string {
   p = p || "";
@@ -50,7 +55,6 @@ interface TdState {
 }
 
 var tdstate:TdState;
-var wsModule:any;
 
 interface LogMessage {
     timestamp: number;
@@ -127,6 +131,49 @@ class ApiRequest {
 
     constructor(public req:http.ServerRequest, public resp:http.ServerResponse)
     {
+    }
+
+    forwardToWorkers()
+    {
+        var respArr = []
+        var numReqs = 1
+
+        var oneUp = () => {
+            if (--numReqs == 0) this.ok({ workers: respArr })
+        }
+
+        workers.forEach((w, i) => {
+            var thisResp:any = {
+                worker: w.description(),
+            }
+            respArr[i] = thisResp
+
+            if (!w.child) {
+                thisResp.code = -1
+                return
+            }
+
+            var u = w.getUrl()
+            u.method = this.req.method
+            u.headers = this.req.headers
+            u.path = this.req.url
+
+            numReqs++
+            var creq = http.request(u, cres => {
+                thisResp.code = cres.statusCode
+                cres.setEncoding("utf8")
+                var s = ""
+                cres.on("data", d => s += d)
+                cres.on("end", () => {
+                    thisResp.body = JSON.parse(s)
+                    oneUp()
+                })
+            })
+            if (Object.keys(this.data))
+                creq.end(JSON.stringify(this.data))
+            else creq.end()
+        })
+        oneUp()
     }
 
     error(code:number, text:string)
@@ -674,13 +721,37 @@ function runCommand(d:RunCliOptions, f) {
 
 function deployAr(ar:ApiRequest, isScript:boolean)
 {
+    var final = (err, resp) => {
+        if (err) ar.ok({ status: "error", message: err + "" })
+        else ar.ok(resp)
+    }
+
+    if (isScript && blobChannel) {
+        var n = Math.round((Date.now()/1000))
+        var did = crypto.randomBytes(8).toString("hex")
+        var id = (100000000000 - n) + "." + crypto.randomBytes(8).toString("hex")
+        setBlobJson(id, ar.data, err => {
+            if (err) ar.exception(err)
+            else
+                setBlobJson("000ch-" + blobChannel, { 
+                    blob: id, 
+                    time: n,
+                    did: did,
+                }, err => {
+                    if (err) ar.exception(err)
+                    else {
+                        blobDeployCallback = final
+                        checkUpdate()
+                    }
+                })
+        })
+        return
+    }
+
     if (!isScript)
         tdstate.downloadedFiles = {}
 
-    deploy(ar.data, (err, resp) => {
-        if (err) ar.ok({ status: "error", message: err + "" })
-        else ar.ok(resp)
-    }, isScript)
+    deploy(ar.data, final, isScript)
 }
 
 var socketCmds:StringMap<(ws, data)=>void> = {
@@ -919,19 +990,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
         }
     },
 
-    info: ar => {
-        loadScript(() => {
-            TDev.RT.Node.getRuntimeInfoAsync(ar.cmd.slice(1).join("/")).done(
-                resp => ar.ok(resp), err => ar.exception(err))
-        })
-    },
-
-    runtime: ar => {
-        loadScript(() => {
-            TDev.RT.Node.runtimeOpAsync(ar.cmd.slice(1).join("/"), ar.data)
-                .done(resp => ar.ok(resp), err => ar.exception(err))
-        })
-    },
+    info: ar => ar.forwardToWorkers(),
 
     logs: ar => {
         ar.ok({
@@ -1081,7 +1140,51 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                 });
             });
         });
-    }
+    },
+
+    getconfig: ar => {
+        if (!blobChannel) {
+            ar.error(400, "get config only available when deployed via azure storage")
+            return
+        }
+
+        getBlobJson("000cfg-" + blobChannel, (err, cdata) => {
+            if (!cdata) cdata = { AppSettings: [] }
+            ar.ok(cdata)
+        })
+    },
+
+    setconfig: ar => {
+        if (!blobChannel) {
+            ar.error(400, "set config only available when deployed via azure storage")
+            return
+        }
+
+        getBlobJson("000cfg-" + blobChannel, (err, cdata) => {
+            if (!cdata) cdata = {}
+            Object.keys(ar.data).forEach(k => cdata[k] = ar.data[k])
+            setBlobJson("000cfg-" + blobChannel, cdata, err => {
+                if (err) {
+                    ar.exception(err)
+                    return
+                }
+
+                getBlobJson("000ch-" + blobChannel, (err, data) => {
+                    if (err) {
+                        ar.exception(err)
+                        return
+                    }
+                    data.did = crypto.randomBytes(8).toString("hex")
+                    setBlobJson("000ch-" + blobChannel, data, err => {
+                        if (err)
+                            ar.exception(err)
+                        else
+                            ar.ok(cdata)
+                    })
+                })
+            })
+        })
+    },
 }
 
 export interface ProxyRequest {
@@ -1204,7 +1307,6 @@ function getMime(filename:string)
 }
 
 var app;
-var wsServer;
 var needsStop = false
 var scriptLoadPromise : any;
 var rootDir = ""
@@ -1214,11 +1316,6 @@ function loadScript(f)
     scriptLoadPromise.done(f)
 }
 
-function initScript(f)
-{
-    scriptLoadPromise.then(() => TDev.Runtime.theRuntime.initPromise).done(f)
-}
-
 function reloadScript()
 {
     scriptLoadPromise = loadScriptCoreAsync();
@@ -1226,85 +1323,168 @@ function reloadScript()
 
 var logException = (msg:string) => {}
 
-function loadScriptCoreAsync()
-{
-    if (needsStop) {
-        needsStop = false
-        return global.TDev.Runtime.stopPendingScriptsAsync().thenalways(() => loadScriptCoreAsync())
+class Worker {
+    public socketPath: string;
+    public port: number;
+    public child: child_process.ChildProcess
+    public isready: boolean;
+
+    public shutdown()
+    {
+        setTimeout(() => {
+                if (this.child) this.child.kill()
+                setTimeout(() => {
+                    if (this.child) this.child.kill("SIGKILL")
+                }, 2000)
+            }, 2000)
     }
 
-    debug.log("handling script files")
+    public description()
+    {
+        return this.socketPath || this.port
+    }
 
-    global.TDev = {};
-    if (!global.window)
-        global.window = {};
-    if (!global.document)
-        global.document = global.window.document = { URL: "http://localhost/" }
-    global.window.isNodeJS = true;
+    public init(cb:()=>void)
+    {
+        info.log("worker start " + this.description())
+        this.child.on("exit", code => {
+            info.log("worker exit " + code + " : " + this.description())
+            this.child = null
+            this.isready = false
+        })
 
-    var files = ["./static/browser.js", "./static/runtime.js", "./script/compiled.js"]
-    var total = ""
-    files.forEach(f => {
-        total += fs.readFileSync(f, "utf8") + "\n"
-    })
-    total = total.replace(/^var TDev;/mg, "")
-    total = total.replace(/^  TDev;/mg, "  TDev_fake;") // minified
-    fs.writeFileSync("script/total.js", total, "utf8")
+        this.child.on("error", err => {
+            error.log(err.message || err)
+            this.child = null
+            this.isready = false
+        })
 
-    debug.log("require " + rootDir + "/script/total.js");
+        this.child.stderr.setEncoding("utf8")
+        this.child.stderr.on("data", d => {
+            info.log("CHILD_ERR: " + d.replace(/\n$/, ""))
+        })
 
-    var name = (<any>require).resolve(rootDir + "/script/total.js")
-    delete require.cache[name];
-    require(rootDir + "/script/total.js")
+        this.child.stdout.setEncoding("utf8")
+        this.child.stdout.on("data", d => {
+            debug.log(d.replace(/\n$/, ""))
+        })
 
-    debug.log("loading script");
-
-    var res = new TDev.PromiseInv();
-    loadWsModule(() => {
-        var WebSocketServer = wsModule.server;
-        if (wsServer) {
-            debug.log("shutting down websockets");
-            wsServer.closeConnections()
+        var ping = () => {
+            var u = this.getUrl()
+            u.path = "/-tdevmgmt-/" + config.deploymentKey + "/ready"
+            var creq = http.request(u, cres => {
+                if (cres.statusCode == 200) {
+                    if (!this.isready) {
+                        info.log("worker ready, " + this.description())
+                        this.isready = true
+                        cb()
+                    }
+                } else {
+                    setTimeout(ping, 1000)
+                }
+            })
+            creq.on("error", err => {
+                setTimeout(ping, 1000)
+            })
+            creq.end()
         }
-        debug.log("loading new websockets server");
-        wsServer = new TDev.WebSocketServerWrapper(wsModule)
+        ping()
+    }
 
-        needsStop = true
-        TDev.RT.Node.logInfo = s => info.log(s)
-        TDev.RT.Node.logError = s => error.log(s)
-        TDev.RT.Node.handleError = handleError;
-        logException = msg => {
-            try {
-                TDev.RT.App.logException(msg)
-            } catch (e) {
+    public getUrl():any
+    {
+        if (this.socketPath)
+            return { socketPath: this.socketPath }
+        else
+            return {
+                hostname: "127.0.0.1",
+                port: this.port
             }
+    }
+}
+
+var workers:Worker[] = []
+var portNum = 10000;
+
+function startWorker(cb)
+{
+    var isWin = /^win/.test(os.platform())
+
+    var w = new Worker()
+
+    var env = JSON.parse(JSON.stringify(process.env))
+    Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
+
+    if (useFileSockets) {
+        var sockPath = "tdsh." + crypto.randomBytes(16).toString("hex")
+        env.PORT = isWin ? "\\\\.\\pipe\\" + sockPath : "/tmp/." + sockPath
+        w.socketPath = env.PORT
+    } else {
+        w.port = portNum++
+        env.PORT = w.port
+    }
+
+    debug.log("forking child script")
+
+    w.child = child_process.fork("./script/compiled.js", [], {
+        env: env,
+        silent: true,
+    })
+    w.init(cb)
+
+    return w
+}
+
+function loadScriptCoreAsync()
+{
+    if (numWorkers < 0) {
+        numWorkers = Math.round(os.cpus().length * -numWorkers)
+    }
+    numWorkers = Math.round(numWorkers)
+    if (numWorkers <= 0) numWorkers = 1
+
+    var newWorkers:Worker[] = []
+
+    var numW = numWorkers
+    var oneUp = () => {
+        if (--numW == 0) {
+            workers.forEach(w => w.shutdown())
+            workers = newWorkers
+        }
+    }
+
+    for (var i = 0; i < numWorkers; ++i)
+        newWorkers.push(startWorker(oneUp))
+
+    return {
+        then: f => f(),
+        done: f => f()
+    }
+}
+
+var loadedModules:any = {}
+
+function loadModule(name:string, f:(mod)=>void)
+{
+    if (loadedModules.hasOwnProperty(name))
+        f(loadedModules[name])
+    else {
+        var finish = () => {
+            var mod = require(name)
+            loadedModules[name] = mod
+            debug.log("module " + name + " loaded")
+            f(mod)
         }
 
-        TDev.RT.App.addTransport(logTransport)
-
-        res.success(TDev.RT.Node.loadScriptAsync(wsServer))
-    })
-
-    return res
+        if (fs.existsSync(rootDir + "/node_modules/" + name))
+            finish()
+        else
+            executeNpm(["install", name], finish)
+    }
 }
 
 function loadWsModule(f:()=>void)
 {
-    if (wsModule)
-        f()
-    else {
-        var finish = () => {
-            wsModule = require("faye-websocket")
-            global.WebSocket = wsModule.Client
-            debug.log("Faye websocket loaded")
-            f()
-        }
-
-        if (fs.existsSync(rootDir + "/node_modules/faye-websocket"))
-            finish()
-        else
-            executeNpm(["install", "faye-websocket"], finish)
-    }
 }
 
 var lastCtrlResponse = Date.now();
@@ -1685,13 +1865,11 @@ function proxyEditor(cmds:string[], req, resp)
     }
 }
 
-function handleReq(req, resp)
+function specHandleReq(req, resp)
 {
     var ar = new ApiRequest(req, resp);
-
     try {
         var u = url.parse(req.url);
-
         var uu = u.pathname
         if (uu == "/") uu = "index.html";
         if (!/^[\/\\]/.test(uu)) uu = "/" + uu
@@ -1715,14 +1893,16 @@ function handleReq(req, resp)
                 }
             }
             return
-        } else if (cmd[0] == "editor" && process.env["TD_ALLOW_EDITOR"] === "true") {
+        } else if (cmd[0] == "editor" && allowEditor) {
             proxyEditor(cmd.slice(1), req, resp)
             return
-        } else if (cmd[0] == "favicon.ico" && process.env["TD_ALLOW_EDITOR"] === "true") {
+        } else if (cmd[0] == "favicon.ico" && allowEditor) {
             proxyEditor(["cache", encodeURIComponent("https://www.touchdevelop.com/favicon.ico")], req, resp)
-        } else if (!scriptLoadPromise) {
-            ar.error(404, "No script deployed")
         } else {
+            ar.error(404, "No script deployed")
+        } 
+        
+        /*{
             initScript(() => {
                 var rt = TDev.Runtime.theRuntime
                 if (rt.requestHandler)
@@ -1742,12 +1922,60 @@ function handleReq(req, resp)
                     })
                 }
             })
-        }
-
-
+        }*/
 
     } catch (e) {
         ar.exception(e)
+    }
+}
+
+function pickWorker()
+{
+    return workers[Math.floor(Math.random() * workers.length)]
+}
+
+
+function forwardWebSocket(req, sock, body)
+{
+    var w = pickWorker()
+    var u = w.getUrl()
+    if (u.socketPath)
+        u.path = u.socketPath
+    var fwd = net.connect(u, () => {
+        var hds = req.method + " " + req.url + " HTTP/1.1\r\n"
+        Object.keys(req.headers).forEach(h => {
+            hds += h + ": " + req.headers[h] + "\r\n"
+        })
+        hds += "\r\n"
+        fwd.write(hds)
+        if (body)
+            fwd.write(body)
+        sock.pipe(fwd)
+        fwd.pipe(sock)
+    })
+}
+
+
+function handleReq(req, resp)
+{
+    if (/^\/-tdevmgmt-/.test(req.url))
+        specHandleReq(req, resp)
+    else if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
+        specHandleReq(req, resp)
+    else if (workers.length == 0)
+        specHandleReq(req, resp) // 404
+    else {
+        var w = pickWorker()
+        var u = w.getUrl()
+        u.method = req.method
+        u.headers = req.headers
+        u.path = req.url
+
+        var creq = http.request(u, cres => {
+            resp.writeHead(cres.statusCode, cres.headers)
+            cres.pipe(resp);
+        })
+        req.pipe(creq);
     }
 }
 
@@ -1869,6 +2097,93 @@ function shellSha()
     return _shellSha;
 }
 
+
+var blobSvc;
+var containerName = 'tddeployments'
+var updateDelay = 3000;
+var lastAzureDeployment = "";
+var additionalEnv:StringMap<string> = {}
+var updateWatchdog = 0;
+var blobDeployCallback;
+
+function setBlobJson(name, json, f) {
+    blobSvc.createBlockBlobFromText(containerName, name, JSON.stringify(json, null, 2), f)
+}
+
+function getBlobJson(name, f) {
+    blobSvc.getBlobToText(containerName, name, (err, data) => {
+        f(err, data ? JSON.parse(data) : null)
+    })
+}
+
+function applyConfig(cfg) {
+    if (!cfg) return
+
+    if (cfg.AppSettings) {
+        cfg.AppSettings.forEach(s => {
+            additionalEnv[s.Name] = s.Value
+        })
+    }
+}
+
+function checkUpdate()
+{
+    var n = Date.now()
+    if (n - updateWatchdog < 25000)
+        return
+    updateWatchdog = n
+    var reset = () => {
+        if (updateWatchdog == n) updateWatchdog = 0
+    }
+
+    getBlobJson("000ch-" + blobChannel, (err, d) => {
+        if (d && d.blob && d.did != lastAzureDeployment) {
+            info.log("new deployment, " + d.blob)
+            getBlobJson("000cfg-" + blobChannel, (err, cfg) => {
+                if (!err) applyConfig(cfg)
+
+                getBlobJson(d.blob, (err, data) => {
+                    lastAzureDeployment = d.did
+                    if (data) {
+                        deploy(data, (err, resp) => {
+                            var f = blobDeployCallback
+                            blobDeployCallback = null
+                            if (f) f(err, resp)
+                            if (err)
+                                error.log("cannot deploy: " + err)
+                            else
+                                info.log(resp)
+                            reset()
+                        })
+                    } else {
+                        error.log("cannot fetch deployment: " + err.message)
+                        reset()
+                    }
+                })
+            })
+        } else {
+            if (err && err.statusCode != 404)
+                console.log(err)
+            reset()
+        }
+    })
+}
+
+function loadAzureStorage(f)
+{
+    loadModule("azure-storage", az => {
+        if (!blobSvc)
+            blobSvc = az.createBlobService()
+        blobSvc.createContainerIfNotExists(containerName, err => {
+            if (err)
+                throw err;
+            setInterval(checkUpdate, updateDelay)
+        })
+        checkUpdate()
+        f()
+    })
+}
+
 function main()
 {
     inAzure = !!process.env.PORT;
@@ -1897,7 +2212,13 @@ function main()
         console.error("  --latest          -- use latest (potentially unstable) TouchDevelop version")
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
+        console.error("  --workers NUMBER  -- number of worker servers to start (-w); negative to multiply by number of cores")
         console.error("  NAME=VALUE        -- set environment variable for the script")
+        console.error("")
+        console.error("Supported environment variable options:")
+        console.error("TD_ALLOW_EDITOR         -- set to 'true' to proxy editor at /editor/")
+        console.error("TD_LOCAL_EDITOR_PATH    -- serve files from path at /editor/local")
+        console.error("TD_BLOB_DEPLOY_CHANNEL  -- deploy from Azure blob storage, using named channel")
 
         process.exit(1)
     }
@@ -1916,6 +2237,11 @@ function main()
             case "--controller":
                 args.shift()
                 controllerUrl = args.shift()
+                break;
+            case "-w":
+            case "--workers":
+                args.shift()
+                numWorkers = parseFloat(args.shift()) || 1
                 break;
             case "-p":
             case "--port":
@@ -1989,10 +2315,15 @@ function main()
 
     config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
 
+    if (process.env['TD_DEPLOYMENT_KEY']) {
+        config.deploymentKey = process.env['TD_DEPLOYMENT_KEY']
+    }
+
     info.log("Deployment key: " + config.deploymentKey);
 
     var startUrl = undefined;
     if (process.env['TD_ALLOW_EDITOR']) {
+        allowEditor = true;
         startUrl = "http://localhost:" + port + "/editor/"
         if (process.env["TD_LOCAL_EDITOR_PATH"]) startUrl += "local";
         else if (useLatest) startUrl += "latest";
@@ -2033,6 +2364,10 @@ function main()
     }
 
     var reload = () => {
+        if (!tdstate.numDeploys) {
+            startUp();
+            return
+        }
         info.log('reloading script...');
         try {
             reloadScript()
@@ -2047,11 +2382,18 @@ function main()
         }
     }
 
+    blobChannel = process.env['TD_BLOB_DEPLOY_CHANNEL']
+
     app = http.createServer(handleReq);
-    app.on("upgrade", (req, sock, body) => {
-        loadWsModule(() => {
-            if (wsModule.isWebSocket(req) &&
-                req.url.slice(0, 12)  == "/-tdevmgmt-/")
+    app.on("upgrade", (req, sock, body) =>
+        loadModule("faye-websocket", wsModule => {
+            global.WebSocket = wsModule.Client
+            if (!wsModule.isWebSocket(req)) {
+                sock.end()
+                return
+            }
+
+            if (req.url.slice(0, 12)  == "/-tdevmgmt-/")
             {
                 if (req.url.slice(-config.deploymentKey.length) == config.deploymentKey) {
                     debug.log("starting mgmt socket")
@@ -2060,19 +2402,21 @@ function main()
                     debug.log("invalid key for socket")
                     sock.end()
                 }
+            } else if (workers.length > 0) {
+                forwardWebSocket(req, sock, body)
+            } else {
+                sock.end()
             }
-            else if (wsServer) wsServer.upgradeCallback(req, sock, body)
-            else sock.end()
-        })
-    })
+        }))
 
     if (scriptId) {
         shouldStart = false;
         runScript(scriptId, startUp, reload)
-    } else if (tdstate.numDeploys > 0) {
-        reload()
     } else {
-        startUp()
+        if (blobChannel)
+            loadAzureStorage(startUp)
+        else
+            reload()
     }
 }
 
