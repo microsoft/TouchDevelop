@@ -212,7 +212,10 @@ module TDev.RT.Node {
         }
 
         public getUserId(): string {
-            return Cloud.getUserId();
+            var req = this.getRestRequest()
+            if (req && req._user) return req._user.id();
+            return null;
+            // return Cloud.getUserId();
         }
 
         public postBoxedText(s:string) : TDev.WallBox
@@ -359,6 +362,29 @@ module TDev.RT.Node {
             req.tdQueryString = querystring.parse(req.url.replace(/^[^\?]*\??/, ""))
             var sr = ServerRequest.mk(req)
             sr._api_path = req.url.replace(/^\/-tdevrpc-\//, "")
+
+            var rt = this
+            if (rt.authValidator) {
+                var m = /^\s*Bearer\s+(.+)/.exec(req.headers['authorization'])
+                if (m) {
+                    var token = m[1]
+                    var clientUserId = ""
+                    rt.wrapFromHandler(() => {
+                        clientUserId = rt.runUserAction(rt.authValidator, [token])
+                        if (clientUserId && !/:/.test(clientUserId))
+                            Util.userError("user id returned from validator has to have a namespace (eg., fb:123456)")
+                    })
+                    if (!clientUserId) {
+                        Util.log("invalid authorization attempt, " + token)
+                        error(resp, 403)
+                        return
+                    } else {
+                        Util.log("authorized as " + clientUserId);
+                        sr._user = User.mk(clientUserId)
+                    }
+                }
+            }
+
             this.dispatchServerRequest(sr)
         }
     }
@@ -410,7 +436,7 @@ module TDev.RT.Node {
 
     var host: RunnerHost;
 
-    export function httpRequestStreamAsync(url_:string, method:string = "GET", body:string = undefined, contentType:string = null) : Promise
+    export function httpRequestStreamAsync(url_:string, method:string = "GET", body:string = undefined, contentType:any = null) : Promise
     {
         var parsed = url.parse(url_)
         parsed.method = method.toUpperCase()
@@ -426,8 +452,13 @@ module TDev.RT.Node {
 
         var ret = new PromiseInv()
 
-        if (contentType)
-            req.setHeader("content-type", contentType)
+        var headers = contentType || {}
+
+        if (typeof headers == "string")
+            headers = { "Content-Type": headers }
+
+        Object.keys(headers).forEach(k => req.setHeader(k, headers[k]))
+
 
         req.on("error", err => {
             //console.log(err)
@@ -458,7 +489,7 @@ module TDev.RT.Node {
         return ret
     }
 
-    function httpRequestAsync(url_:string, method:string = "GET", body:string = undefined, contentType:string = null) : Promise
+    function httpRequestAsync(url_:string, method:string = "GET", body:string = undefined, contentType:any = null) : Promise
     {
         return httpRequestStreamAsync(url_, method, body, contentType)
             .then(g => {

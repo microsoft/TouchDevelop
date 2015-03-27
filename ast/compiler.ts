@@ -3118,7 +3118,7 @@ module TDev.AST
         secondaryRun(app: App)
         {
             app.libraries().forEach(l => {
-                if (l.isTutorial()) {
+                if (l.isTutorial() || l.isCloud()) {
                     l.getPublicActions().forEach(a => this.runOnDecl(a))
                 }
             })

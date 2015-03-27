@@ -207,6 +207,9 @@ module TDev.RT {
         //@ dbgOnly uiAsync returns(boolean)
         //@ writesMutable
         export function authenticate(access_token: string, r: ResumeCtx) {
+            r.rt.authAccessToken = access_token
+            r.resumeVal(true)
+            /*
             r.rt.sessions.setAccessToken(access_token);
             r.rt.sessions.connectCurrent(r.rt.sessions.getNodeSessionDescriptor("tbd"));
             var cs = r.rt.sessions.getCurrentSession();
@@ -228,6 +231,7 @@ module TDev.RT {
                 }
                 return true; // keep listening
             });
+            */
         }
 
 

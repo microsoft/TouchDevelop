@@ -292,6 +292,7 @@ module TDev
 
         public sessions: Revisions.Sessions;
         public authValidator: RT.StringConverter<string>;
+        public authAccessToken:string;
 
         public runtimeKind() {
             return this.devMode ? "editor" : "website"
@@ -1352,8 +1353,14 @@ module TDev
                     req[paramNames[i]] = Runtime.toRestArgument(args[i], prev);
                 }
 
-                Util.httpPostRealJsonAsync(site + "-tdevrpc-/" + encodeURIComponent(service) + "/" + encodeURIComponent(actionName),
-                    req)
+                var hdrs = {}
+                hdrs["Content-type"] = "application/json;charset=UTF-8"
+                if (rt.authAccessToken)
+                    hdrs["Authorization"] = "Bearer " + rt.authAccessToken
+
+                Util.httpRequestAsync(site + "-tdevrpc-/" + encodeURIComponent(service) + "/" + encodeURIComponent(actionName),
+                    "POST", JSON.stringify(req), hdrs)
+                .then((s) => s ? JSON.parse(s) : {})
                 .done(resp => {
                         var results = returnNames.map((n) => resp[n]);
                         results = results.map((v, i) => Runtime.fromRestArgument(v, returnTypes[i], s))
@@ -2190,17 +2197,19 @@ module TDev
                 return null;
             }
             var res = rt.getEventFrame(f, this.args, ev.isBlocking);
-            rt.current.currentHandler = this.binding;
-            if (ev.finalCallback) {
-                var cb = ev.finalCallback
-                ev.finalCallback = null
-                rt.current.returnAddr = s => {
-                    cb(s);
-                    return Runtime.pumpEvents(s)
+            if (rt.current) {
+                rt.current.currentHandler = this.binding;
+                if (ev.finalCallback) {
+                    var cb = ev.finalCallback
+                    ev.finalCallback = null
+                    rt.current.returnAddr = s => {
+                        cb(s);
+                        return Runtime.pumpEvents(s)
+                    }
                 }
-            }
-            if (ev.errorHandler) {
-                rt.current.errorHandler = ev.errorHandler
+                if (ev.errorHandler) {
+                    rt.current.errorHandler = ev.errorHandler
+                }
             }
             return res
         }
