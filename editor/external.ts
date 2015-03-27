@@ -149,6 +149,18 @@ module TDev {
         // cloud" context) that we use to store extra information attached to
         // the script.
         export function loadAndSetup(editor: ExternalEditor, data: ScriptData) {
+            // The [scheduleSaveToCloudAsync] method on [Editor] needs the
+            // [guid] field of this global to match for us to read back the
+            // [baseSnapshot] field afterwards.
+            ScriptEditorWorldInfo = <EditorWorldInfo>{
+                guid: data.guid,
+                baseId: null,
+                baseUserId: null,
+                status: null,
+                version: null,
+                baseSnapshot: null,
+            };
+
             // Clear leftover iframes.
             var iframeDiv = document.getElementById("externalEditorFrame");
             iframeDiv.setChildren([]);
