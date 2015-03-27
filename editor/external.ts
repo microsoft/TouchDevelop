@@ -111,7 +111,8 @@ module TDev {
                                     type: MessageType.SaveAck,
                                     where: SaveLocation.Cloud,
                                     status: Status.Ok,
-                                    newBaseSnapshot: newCloudSnapshot
+                                    newBaseSnapshot: newCloudSnapshot,
+                                    cloudIsInSync: !response.retry,
                                 });
                             });
                         });

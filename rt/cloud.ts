@@ -467,6 +467,9 @@ module TDev.Cloud {
         delay: number;
         numErrors?: number;
         headers?: Header[];
+        // true if a newer version of the script has been written between the moment we sent the
+        // data to the cloud and the moment it came back; the client code should re-attempt to save
+        retry?: boolean;
     }
 
     export interface PostApiGroupsBody {

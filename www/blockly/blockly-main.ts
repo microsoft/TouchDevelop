@@ -75,8 +75,10 @@ module TDev {
                 break;
             case External.Status.Ok:
                 if (message.where == External.SaveLocation.Cloud) {
-                    statusMsg(prefix(message.where)+" successfully saved "+
-                        "(from "+currentVersion+" to "+message.newBaseSnapshot+")", message.status);
+                    statusMsg(prefix(message.where)+" successfully saved version (cloud in sync? "+
+                        message.cloudIsInSync +", "+
+                        "from "+currentVersion+" to "+message.newBaseSnapshot+")",
+                        message.status);
                     currentVersion = message.newBaseSnapshot;
                 } else {
                     statusMsg(prefix(message.where)+" successfully saved", message.status);

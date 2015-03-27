@@ -54,6 +54,8 @@ module TDev {
             status: Status;
             error?: string; // non-null iff status == Error
             newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
+            cloudIsInSync?: boolean; // true if the version we just wrote in the cloud
+                                     // is the latest version currently stored locally
         }
 
         export interface Message_Merge extends Message {
