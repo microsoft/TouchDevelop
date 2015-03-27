@@ -1366,7 +1366,7 @@ class Worker {
 
         this.child.stdout.setEncoding("utf8")
         this.child.stdout.on("data", d => {
-            debug.log("CHILD: " + d.replace(/\n$/, ""))
+            debug.log(d.replace(/\n$/, ""))
         })
 
         var ping = () => {

@@ -219,6 +219,7 @@ module TDev.AST.Apps {
         if (options.compileServer) {
             opts.packaging = false
             opts.cloud = true
+            opts.javascript = true
 
             compiled = AST.Compiler.getCompiledScript(app, opts)
             var serverCode = compiled.getCompiledCode();
