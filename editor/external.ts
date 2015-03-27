@@ -79,15 +79,10 @@ module TDev {
                             // baseSnapshot where we can read it back.
                             localStorage["editorScriptToSaveDirty"] = this.guid;
                             TheEditor.scheduleSaveToCloudAsync().then((response: Cloud.PostUserInstalledResponse) => {
-                                if (!response || !response.headers[0]) {
-                                    this.post(<Message_SaveAck>{
-                                        type: MessageType.SaveAck,
-                                        where: SaveLocation.Cloud,
-                                        status: Status.Error,
-                                        error: "unknown early error",
-                                    });
+                                // Reading the code of [scheduleSaveToCloudAsync], an early falsy return
+                                // means that a sync is already scheduled.
+                                if (!response)
                                     return;
-                                }
 
                                 if (response.numErrors) {
                                     this.post(<Message_SaveAck>{
