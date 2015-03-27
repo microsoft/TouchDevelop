@@ -363,12 +363,18 @@ module TDev.RT.Node {
             var sr = ServerRequest.mk(req)
             sr._api_path = req.url.replace(/^\/-tdevrpc-\//, "")
 
+            if (sr._api_path == "-internal-/ping") {
+                error(resp, 200, { v: req.tdQueryString['v'] || "",
+                                   now: Date.now() })
+                return
+            }
+
+            var clientUserId = ""
             var rt = this
             if (rt.authValidator) {
                 var m = /^\s*Bearer\s+(.+)/.exec(req.headers['authorization'])
                 if (m) {
                     var token = m[1]
-                    var clientUserId = ""
                     rt.wrapFromHandler(() => {
                         clientUserId = rt.runUserAction(rt.authValidator, [token])
                         if (clientUserId && !/:/.test(clientUserId))
@@ -383,6 +389,15 @@ module TDev.RT.Node {
                         sr._user = User.mk(clientUserId)
                     }
                 }
+            }
+
+            if (sr._api_path == "-internal-/me") {
+                if (!clientUserId) {
+                    error(resp, 403)
+                } else {
+                    error(resp, 200, { userid: clientUserId })
+                }
+                return
             }
 
             this.dispatchServerRequest(sr)
@@ -732,10 +747,15 @@ module TDev.RT.Node {
             resp.send(404, "no such API " + words[2])
     }
 
-    function error(resp, code)
+    function error(resp, code:number, data?:any)
     {
         resp.writeHead(code)
-        resp.end()
+        if (typeof data == "object")
+            data = JSON.stringify(data)
+        if (data)
+            resp.end(data)
+        else
+            resp.end()
     }
 
     function getMime(filename:string)

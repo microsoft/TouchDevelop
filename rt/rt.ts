@@ -293,6 +293,7 @@ module TDev
         public sessions: Revisions.Sessions;
         public authValidator: RT.StringConverter<string>;
         public authAccessToken:string;
+        public authUserId:string;
 
         public runtimeKind() {
             return this.devMode ? "editor" : "website"
@@ -303,6 +304,9 @@ module TDev
         }
 
         public getUserId() {
+            if (this.authUserId)
+                return this.authUserId
+
             if (this.sessions.isNodeClient()) {
                 return (<Revisions.NodeSession>this.sessions.getCurrentSession()).clientUserId;
             }
@@ -1332,7 +1336,18 @@ module TDev
             return action.invoke.apply(action, [action, next].concat(args));
         }
 
+        public queryServiceAsync(path:string, req:any, site = "")
+        {
+            var hdrs = {}
+            hdrs["Content-type"] = "application/json;charset=UTF-8"
+            if (this.authAccessToken)
+                hdrs["Authorization"] = "Bearer " + this.authAccessToken
 
+            if (!site) site = this.compiled.azureSite
+
+            return Util.httpRequestAsync(site + "-tdevrpc-/" + path, "POST", JSON.stringify(req), hdrs)
+                   .then((s) => s ? JSON.parse(s) : {})
+        }
 
         // Remote service call -- action not tagged as "offline available"
         public callService(isQuery: boolean, site: string, service: string, libName: string, actionName: string, paramNames: string[], returnNames: string[],
@@ -1353,14 +1368,7 @@ module TDev
                     req[paramNames[i]] = Runtime.toRestArgument(args[i], prev);
                 }
 
-                var hdrs = {}
-                hdrs["Content-type"] = "application/json;charset=UTF-8"
-                if (rt.authAccessToken)
-                    hdrs["Authorization"] = "Bearer " + rt.authAccessToken
-
-                Util.httpRequestAsync(site + "-tdevrpc-/" + encodeURIComponent(service) + "/" + encodeURIComponent(actionName),
-                    "POST", JSON.stringify(req), hdrs)
-                .then((s) => s ? JSON.parse(s) : {})
+                this.queryServiceAsync(encodeURIComponent(service) + "/" + encodeURIComponent(actionName), req, site)
                 .done(resp => {
                         var results = returnNames.map((n) => resp[n]);
                         results = results.map((v, i) => Runtime.fromRestArgument(v, returnTypes[i], s))
