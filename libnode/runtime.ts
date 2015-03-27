@@ -16,6 +16,7 @@ module TDev.RT.Node {
     var http = require("http")
     var https = require("https")
     var zlib = require("zlib")
+    var path = require("path")
     var Buffer;
     var webSocketModule;
 
@@ -96,7 +97,10 @@ module TDev.RT.Node {
     export var handleError: (err:any) => void = err => {
         if (err.rtProtectHandled)
             return
-        RT.App.logException(err)
+        if (host)
+            host.exceptionHandler(err)
+        else
+            RT.App.logException(err)
     }
 
     class FsTable implements Storage.Table
@@ -347,6 +351,15 @@ module TDev.RT.Node {
 
             this.host.exceptionHandler(e);
             this.restartAfterException()
+        }
+
+        public handleRpc(req, resp)
+        {
+            req.tdResponse = resp
+            req.tdQueryString = querystring.parse(req.url.replace(/^[^\?]*\??/, ""))
+            var sr = ServerRequest.mk(req)
+            sr._api_path = req.url.replace(/^\/-tdevrpc-\//, "")
+            this.dispatchServerRequest(sr)
         }
     }
 
@@ -688,13 +701,86 @@ module TDev.RT.Node {
             resp.send(404, "no such API " + words[2])
     }
 
+    function error(resp, code)
+    {
+        resp.writeHead(code)
+        resp.end()
+    }
+
+    function getMime(filename:string)
+    {
+        var ext = path.extname(filename).slice(1)
+        switch (ext) {
+            case "txt": return "text/plain";
+            case "html":
+            case "htm": return "text/html";
+            case "css": return "text/css";
+            case "ts": return "text/plain";
+            case "js": return "application/javascript";
+            case "jpg":
+            case "jpeg": return "image/jpeg";
+            case "png": return "image/png";
+            case "ico": return "image/x-icon";
+            case "manifest": return "text/cache-manifest";
+            case "json": return "application/json";
+            case "svg": return "image/svg+xml";
+            default: return "application/octet-stream";
+        }
+    }
+
+    function serveStaticFile(req, resp) 
+    {
+        var m = /\/app\/([^?]*)/.exec(req.url)
+        var p = m[1] || "index.html"
+        var pp = path.normalize("/static/" + p).replace(/\\/g, "/")
+        if (/^\/static\//.test(pp)) {
+            pp = "." + pp
+            fs.exists(pp, yes => {
+                if (!yes) error(resp, 404)
+                else {
+                    var inp = fs.createReadStream(pp)
+                    var mime = getMime(pp)
+                    if (/^(text\/|application\/(json|javascript)|image\/svg)/.test(mime)) {
+                        var gzip = zlib.createGzip()
+                        resp.writeHead(200, {
+                            "Content-Encoding": "gzip",
+                            "Content-Type": mime,
+                        })
+                        inp.pipe(gzip).pipe(resp)
+                    } else {
+                        resp.writeHead(200, {
+                            "Content-Type": mime,
+                        })
+                        inp.pipe(resp)
+                    }
+                }
+            })
+        } else error(resp, 403)
+    }
+
     export function handleHttpRequest(req, resp) 
     {
         if (/^\/-tdevmgmt-\//.test(req.url))
             specialHttpRequest(req, resp)
         else {
             var rt = <TheNodeRuntime> Runtime.theRuntime
-            rt.requestHandler(req, resp)
+            if (rt.compiled.autoRouting) {
+                if (/^\/-tdevrpc-\//.test(req.url)) {
+                    rt.handleRpc(req, resp)
+                } else {
+                    // "/" and "/app" redirect to "/app/"
+                    if (/^\/(app)?(\?|$)/.test(req.url)) {
+                        resp.writeHead(302, { "Location": "/app/" })
+                        resp.end()
+                    } else if (/^\/app\//.test(req.url)) {
+                        serveStaticFile(req, resp)
+                    } else {
+                        rt.requestHandler(req, resp)
+                    }
+                } 
+            } else {
+                rt.requestHandler(req, resp)
+            }
         }
     }
 
@@ -744,7 +830,7 @@ module TDev.RT.Node {
         return rt.initDataAsync().then(() => {
             Util.log("starting server script")
             rt.setState(RtState.AtAwait, "start server");
-            var autoStart = rt.hasInits()
+            var autoStart = rt.hasInits() || rt.compiled.autoRouting
             rt.queueInits()
             rt.queueAsyncStd(() => {
                 // this will be only executed once all _init() actions are done

@@ -2844,6 +2844,9 @@ module TDev.AST
             if (this.options.cloud && this.options.isTopLevel) {
                 this.pipPackages = TypeChecker.combinePipPackages(a);
 
+                if (a.usesCloudLibs() && !a.isCloud)
+                    this.wr("cs.autoRouting = true;\n")
+
                 this.wr("cs.setupRestRoutes = function(rt) {\n")
                 var host = /^https?:\/\/(.+?)\/?$/i.exec(this.options.azureSite)[1];
                 a.librariesAndThis()

@@ -1352,6 +1352,23 @@ module TDev
                     req[paramNames[i]] = Runtime.toRestArgument(args[i], prev);
                 }
 
+                Util.httpPostRealJsonAsync(site + "-tdevrpc-/" + encodeURIComponent(service) + "/" + encodeURIComponent(actionName),
+                    req)
+                .done(resp => {
+                        var results = returnNames.map((n) => resp[n]);
+                        results = results.map((v, i) => Runtime.fromRestArgument(v, returnTypes[i], s))
+                        if (results.length == 1)
+                            s.result = results[0];
+                        else
+                            s.results = results;
+
+                        // Resume await
+                        ctx.resume();
+                    }, (err: any) => {
+                        TDev.Runtime.theRuntime.handleException(err);
+                })
+
+                /*
                 var ses = (<Revisions.NodeSession>rt.sessions.getCurrentSession());
 
                 if (!ses.hasNodeConnection()) {
@@ -1379,6 +1396,7 @@ module TDev
                     }, (err: any) => {
                         TDev.Runtime.theRuntime.handleException(err);
                     });
+                */
             };
 
             return {
@@ -2679,6 +2697,7 @@ module TDev
         public hasLocalData: boolean;
         public hasPartialData: boolean;
         public hostCloudData: boolean;
+        public autoRouting: boolean;
         public azureSite: string;
         public scriptGuid: string;
 
