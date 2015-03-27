@@ -6,7 +6,7 @@ module TDev {
 
     // ---------- Communication protocol
 
-    var allowedOrigins = {
+    var allowedOrigins: { [index: string]: any } = {
         "http://localhost:4242": null,
         "http://www.touchdevelop.com": null,
     };
@@ -15,9 +15,6 @@ module TDev {
     // message.
     var outer: Window = null;
     var origin: string = null;
-
-    // Also written once at initialization-time.
-    var editor = null;
 
     // A global that remembers the current version we're editing
     var currentVersion: string;
