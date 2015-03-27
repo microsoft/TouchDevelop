@@ -541,11 +541,12 @@ module TDev {
                     default: return MdComments.error("unknown variable " + arg);
                 }
             } else if (macro == "pic") {
-                var m = /^([\w ]+)(:(\d+)x(\d+))?(:.*)?/.exec(arg);
+                var m = /^((https:\/\/[^:]+)|([\w ]+))(:(\d+)x(\d+))?(:.*)?/i.exec(arg);
                 if (m) {
-                    var artId = m[1]
-                    var width = parseFloat(m[3] || "12")
-                    var height = parseFloat(m[4] || "12")
+                    var url = m[2];
+                    var artId = m[3];
+                    var width = parseFloat(m[4] || "12");
+                    var height = parseFloat(m[5] || "12");
                     if (width > 30) {
                         height = 30 / width * height;
                         width = 30;
@@ -554,18 +555,27 @@ module TDev {
                         width = 20 / height * width;
                         height = 20;
                     }
-                    var caption = m[5]
-                    artId = MdComments.findArtId(artId);
-                    var url = HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId))
+                    var caption = m[6];
+                    if (artId && !url) {
+                        artId = MdComments.findArtId(artId);
+                        url = Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId);
+                    }
+                    var urlsafe = HTML.proxyResource(url);
+                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url);
                     var r = "<div class='md-img'><div class='md-img-inner'>";
-                    r += Util.fmt("<img src=\"{0}\" alt='picture' style='height:{1}em'/></div>", url, artId, height);
+                    r += Util.fmt("<img src=\"{0}\" alt='picture' style='height:{1}em'/></div>", urlsafe, height);
                     if (caption) {
                         r += "<div class='md-caption'>" + this.formatText(caption.slice(1)) + "</div>";
                     }
                     r += "</div>";
                     return r;
-                } else
-                    return MdComments.error(lf("invalid picture id"));
+                } else {
+                    m = /^(:(\d+)x(\d+))?(:.*)?/.exec(arg);
+                    if (m) {
+                        
+                    } else
+                        return MdComments.error(lf("invalid picture id"));
+                }
             } else if (macro == "pici") {
                 var artId = MdComments.findArtId(arg);
                 var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId)));
