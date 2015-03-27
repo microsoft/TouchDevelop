@@ -655,7 +655,13 @@ module TDev.AppExport
             didRedeploy = true
             msg.setChildren(lf("redeploying shell..."));
             return getProfile()
-                .then(() => wa.userPWD ? Util.httpPostJsonAsync(deployEndpoint("deploytdconfig"), mkFtp()) : null)
+                .then(() => {
+                    if (!wa.userPWD) return null
+                    var d:any = mkFtp()
+                    d.pkgShell = (<any>TDev).pkgShell
+                    d.shellVersion = Runtime.shellVersion
+                    return Util.httpPostJsonAsync(deployEndpoint("deploytdconfig"), d)
+                })
                 .then(resp => {
                     if (isDeployError(resp)) return
                     if (resp && resp.config && resp.config.deploymentKey) return final(resp.config)

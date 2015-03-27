@@ -884,9 +884,9 @@ var deployHandlers = {
                 jsFile: jsPath,
                 timestamp: Date.now(),
                 timestampText: new Date().toString(),
-                shellVersion: TDev.Runtime.shellVersion,
+                shellVersion: ar.data.shellVersion || TDev.Runtime.shellVersion,
             }
-            var files = (<any>TDev).pkgShell
+            var files = ar.data.pkgShell || (<any>TDev).pkgShell
             var names = Object.keys(files)
             var sendOne = (i:number) => {
                 if (i < names.length) {
