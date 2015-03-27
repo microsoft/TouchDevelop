@@ -191,10 +191,16 @@ module TDev {
             toolbox: document.querySelector("#blockly-toolbox")
         });
         loadBlockly(message.script.scriptText);
-        Blockly.addChangeListener(() => {
-            statusMsg("✎ local changes", External.Status.Ok);
-            dirty = true;
-        });
+        // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual
+        // firing of the event, meaning that the call to [inject] above schedule a change event to
+        // be fired immediately after the current function is done. To make sure our change handler
+        // does not receive that initial event, we schedule it for slightly later.
+        window.setTimeout(() => {
+            Blockly.addChangeListener(() => {
+                statusMsg("✎ local changes", External.Status.Ok);
+                dirty = true;
+            });
+        }, 1);
 
         // That's triggered when the user closes or reloads the whole page, but
         // doesn't help if the user hits the "back" button in our UI.
