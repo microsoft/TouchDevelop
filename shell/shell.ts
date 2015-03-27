@@ -1929,6 +1929,32 @@ function specHandleReq(req, resp)
     }
 }
 
+function pickWorker()
+{
+    return workers[Math.floor(Math.random() * workers.length)]
+}
+
+
+function forwardWebSocket(req, sock, body)
+{
+    var w = pickWorker()
+    var u = w.getUrl()
+    if (u.socketPath)
+        u.path = u.socketPath
+    var fwd = net.connect(u, () => {
+        var hds = req.method + " " + req.url + " HTTP/1.1\r\n"
+        Object.keys(req.headers).forEach(h => {
+            hds += h + ": " + req.headers[h] + "\r\n"
+        })
+        hds += "\r\n"
+        fwd.write(hds)
+        if (body)
+            fwd.write(body)
+        sock.pipe(fwd)
+        fwd.pipe(sock)
+    })
+}
+
 
 function handleReq(req, resp)
 {
@@ -1939,7 +1965,7 @@ function handleReq(req, resp)
     else if (workers.length == 0)
         specHandleReq(req, resp) // 404
     else {
-        var w = workers[Math.floor(Math.random() * workers.length)]
+        var w = pickWorker()
         var u = w.getUrl()
         u.method = req.method
         u.headers = req.headers
@@ -2362,8 +2388,12 @@ function main()
     app.on("upgrade", (req, sock, body) =>
         loadModule("faye-websocket", wsModule => {
             global.WebSocket = wsModule.Client
-            if (wsModule.isWebSocket(req) &&
-                req.url.slice(0, 12)  == "/-tdevmgmt-/")
+            if (!wsModule.isWebSocket(req)) {
+                sock.end()
+                return
+            }
+
+            if (req.url.slice(0, 12)  == "/-tdevmgmt-/")
             {
                 if (req.url.slice(-config.deploymentKey.length) == config.deploymentKey) {
                     debug.log("starting mgmt socket")
@@ -2372,8 +2402,11 @@ function main()
                     debug.log("invalid key for socket")
                     sock.end()
                 }
+            } else if (workers.length > 0) {
+                forwardWebSocket(req, sock, body)
+            } else {
+                sock.end()
             }
-            else sock.end()
         }))
 
     if (scriptId) {
