@@ -423,6 +423,7 @@ module TDev {
         browseSendPullRequest,
         browsePublicationNotes,
         browseListBugs,
+        browseListReleases,
         browseShare,
         browseListMyScripts,
         browseListNew,

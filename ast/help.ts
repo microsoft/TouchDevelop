@@ -228,6 +228,20 @@ module TDev {
         ispositive: boolean;
     }
 
+    export interface JsonRelease extends JsonPublication
+    {
+        releaseid:string;
+        labels:JsonReleaseLabel[];
+    }
+
+    export interface JsonReleaseLabel
+    {
+        name: string;
+        userid: string;
+        time: number;
+        releaseid: string;
+    }
+
     export interface JsonEtag
     {
         id:string;

@@ -1210,6 +1210,7 @@ module TDev { export module Browser {
             else if (e.kind == "art") return this.getArtInfoById(e.id);
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
+            else if (e.kind == "release") return this.getReleaseInfoById(e.id);
             else return null;
         }
 
@@ -1372,6 +1373,10 @@ module TDev { export module Browser {
                     header = lf("my groups");
                     if (Cloud.getUserId()) path = Cloud.getUserId() + "/groups";
                     else path = null;
+                    break;
+                case "releases":
+                    tick(Ticks.browseListReleases)
+                    header = lf("releases");
                     break;
                 case "showcase-mgmt":
                     header = "show-mgmt";
@@ -1721,6 +1726,17 @@ module TDev { export module Browser {
             var si = <GroupInfo>this.getLocation(id);
             if (!si) {
                 si = new GroupInfo(this);
+                si.loadFromWeb(id);
+                this.saveLocation(si);
+            }
+            return si;
+        }
+
+        public getReleaseInfoById(id:string)
+        {
+            var si = <ReleaseInfo>this.getLocation(id);
+            if (!si) {
+                si = new ReleaseInfo(this);
                 si.loadFromWeb(id);
                 this.saveLocation(si);
             }
@@ -2303,11 +2319,18 @@ module TDev { export module Browser {
             });
         }
 
-        public invalidate(path:string)
+        public invalidate(path:string, rec = false)
         {
             this.forEachEntry((e) => {
-                if (Util.startsWith(e.path, path))
+                if (Util.startsWith(e.path, path)) {
+                    if (rec && e.currentData && e.currentData.etags) {
+                        e.currentData.etags.forEach(i => {
+                            var ee = this.entriesByPath[i.id]
+                            if (ee) ee.invalidate()
+                        })
+                    }
                     e.invalidate()
+                }
             })
         }
 
@@ -8475,6 +8498,105 @@ module TDev { export module Browser {
                     listCached = false
                     return resp ? resp.info : "bad response"
                 })
+        }
+    }
+
+    export class ReleaseInfo
+        extends BrowserPage {
+        private name: string;
+        public description: string;
+        public userid:string;
+
+        constructor(par: Host) {
+            super(par)
+        }
+        public persistentId() { return "release:" + this.publicId; }
+        public getTitle() { return this.name || super.getTitle(); }
+
+        public getName() { return lf("settings"); }
+        public getId() { return "settings"; }
+        public isMine() { return this.userid == Cloud.getUserId(); }
+
+        public loadFromWeb(id: string) {
+            Util.assert(!!id)
+            this.publicId = id;
+        }
+
+        public mkBoxCore(big: boolean) {
+            var icon = div("sdIcon", HTML.mkImg("svg:fa-upload,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var res = div("sdHeaderOuter",
+                            div("sdHeader", icon, 
+                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                                    )));
+
+            if (big)
+                res.className += " sdBigHeader";
+
+
+            return this.withUpdate(res, (u:JsonRelease) => {
+                var nm = u.releaseid.replace(/^\d\d\d\d\d\d\d+-[^\-]+-/, "")
+                var labs = u.labels.map(l => l.name).join(", ")
+                if (labs) nm += " (" + labs + ")"
+                nameBlock.setChildren([ nm ])
+                author.setChildren([u.username]);
+                addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(u.time)]);
+            });
+        }
+
+        public mkTabsCore(): BrowserTab[] {
+            var tabs: BrowserTab[] = [
+                this
+            ];
+            return tabs;
+        }
+
+
+        public initTab() {
+            this.withUpdate(this.tabContent, (u:JsonRelease) => {
+                var ch = ["current", "beta", "cloud"].map(n => HTML.mkButton("make " + n, () => {
+                    var doit = () =>
+                        Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
+                        .done(r => this.reload())
+                    if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit)
+                    else doit()
+                }))
+
+                ch.unshift(div(null,
+                    HTML.mkButtonElt("sdBigButton sdBigButtonFull", div("sdBigButtonIcon", HTML.mkImg("svg:fa-rocket,white")),
+                        div("sdBigButtonDesc", lf("launch")))
+                        .withClick(() => 
+                            Util.navigateInWindow(Cloud.getServiceUrl() + "/app/?r=" + this.publicId))
+                    ));
+
+                ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
+                u.labels.forEach(l => {
+                    ch.push(div(null, "label: " + l.name + " by /" + l.userid + " on " + Util.timeSince(l.time)))
+                })
+
+                this.tabContent.setChildren(ch)
+            });
+        }
+
+        private reload()
+        {
+            this.invalidateCaches();
+            TheEditor.historyMgr.reload(HistoryMgr.windowHash());
+        }
+
+        private invalidateCaches() {
+            TheApiCacheMgr.invalidate("releases", true);
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/releases");
+            TheApiCacheMgr.invalidate(this.publicId);
         }
     }
 

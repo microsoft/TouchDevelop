@@ -3577,6 +3577,23 @@ function tdupload(args:string[])
     }
 }
 
+function setlabel(args:string[])
+{
+    var mm = /^(http.*)(\?access_token=.*)/.exec(args[0])
+
+    if (!mm || !args[2]) return
+
+    var liteUrl = mm[1]
+    var key = mm[2]
+
+    var liteId = args[1]
+    var channel = args[2]
+
+    tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
+        console.log("channel: " + resp)
+    }, 1, { name: channel })
+}
+
 var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
@@ -3627,6 +3644,7 @@ var cmds = {
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
     "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
+    "setlabel": { f:setlabel, a:'KEY RELID LABEL', h:'set release label'},
 }
 
 export interface ScriptTemplate {

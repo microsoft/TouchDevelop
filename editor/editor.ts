@@ -4193,6 +4193,7 @@ module TDev
                         (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
+                        (Cloud.lite && dbg ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                 ]);
             }
             m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));
