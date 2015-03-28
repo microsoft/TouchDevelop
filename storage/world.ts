@@ -473,7 +473,7 @@ module TDev {
                 _profileCount = data.installedHeaders.profileCount || 0;
                 blobcontainer = data.installedHeaders.blobcontainer
                 Random.addCloudEntropy(data.installedHeaders.random)
-                if (data.installedHeaders.time) {
+                if (!Cloud.lite && data.installedHeaders.time) {
                     var now = new Date().getTime();
                     var seconds = (now - data.installedHeaders.time * 1000) / 1000;
                     if (Math.abs(seconds) > 120) {
