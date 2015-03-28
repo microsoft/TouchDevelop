@@ -39,8 +39,8 @@ var generated = [
 // A list of targets we compile with the --noImplicitAny flag.
 var noImplicitAny = {
   "build/browser.d.ts": null,
+  "build/blockly.js": null
 };
-
 
 // On Windows, merely changing a file in the directory does *not* change that
 // directory's mtime, meaning that we can't depend on a directory, but rather

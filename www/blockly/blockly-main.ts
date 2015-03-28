@@ -6,7 +6,7 @@ module TDev {
 
     // ---------- Communication protocol
 
-    var allowedOrigins = {
+    var allowedOrigins: { [index: string]: any } = {
         "http://localhost:4242": null,
         "http://www.touchdevelop.com": null,
     };
@@ -16,11 +16,9 @@ module TDev {
     var outer: Window = null;
     var origin: string = null;
 
-    // Also written once at initialization-time.
-    var editor = null;
-
     // A global that remembers the current version we're editing
     var currentVersion: string;
+    var inMerge: boolean = false;
 
     window.addEventListener("message", (event) => {
         if (!(event.origin in allowedOrigins))
@@ -78,8 +76,10 @@ module TDev {
                 break;
             case External.Status.Ok:
                 if (message.where == External.SaveLocation.Cloud) {
-                    statusMsg(prefix(message.where)+" successfully saved "+
-                        "(from "+currentVersion+" to "+message.newBaseSnapshot+")", message.status);
+                    statusMsg(prefix(message.where)+" successfully saved version (cloud in sync? "+
+                        message.cloudIsInSync +", "+
+                        "from "+currentVersion+" to "+message.newBaseSnapshot+")",
+                        message.status);
                     currentVersion = message.newBaseSnapshot;
                 } else {
                     statusMsg(prefix(message.where)+" successfully saved", message.status);
@@ -117,11 +117,13 @@ module TDev {
         var theirsButton = mkButton("🔍", "see theirs", () => loadBlockly(merge.theirs.scriptText));
         var baseButton = mkButton("🔍", "see base", () => loadBlockly(merge.base.scriptText));
         var mergeButton = mkButton("👍", "finish merge", () => {
+            inMerge = false;
             currentVersion = merge.theirs.baseSnapshot;
             clearMerge();
             doSave();
         });
         clearMerge();
+        inMerge = true;
         [ mineButton, theirsButton, baseButton, mergeButton ].forEach(button => {
             box.appendChild(button);
             box.appendChild(document.createTextNode(" "));
@@ -213,8 +215,7 @@ module TDev {
         });
 
         window.setInterval(() => {
-            if (dirty)
-                doSave();
+            doSave();
         }, 5000);
 
         console.log("[loaded] cloud version " + message.script.baseSnapshot +
@@ -222,6 +223,9 @@ module TDev {
     }
 
     function doSave() {
+        if (!dirty || inMerge)
+            return;
+
         var text = saveBlockly();
         console.log("[saving] on top of: ", currentVersion);
         post(<External.Message_Save>{

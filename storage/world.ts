@@ -213,6 +213,7 @@ module TDev {
                     return removeInstalledAsync(indexTable, scriptsTable, header.guid);
             });
         }
+
         function publishInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header) : Promise {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is to be published");
             return indexTable.getValueAsync(header.guid)
@@ -241,7 +242,11 @@ module TDev {
             });
         }
         function uploadInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header): Promise { // of PostUserInstalledResponse
-            log(header.guid + "/" + header.scriptId + ": " + header.name + " is dirty");
+            // A conservative estimate of the version we are saving. We compare all three fields at
+            // the same time. (It may be the case that in-between the various asynchronous steps
+            // below, a newer version gets written and it's innocuous, but we err on the safe side.)
+            var conservativeVersion = JSON.stringify(header.scriptVersion);
+            log(header.guid + "/" + header.scriptId + ": " + header.name + " is dirty, attempting to save version " + conservativeVersion);
             return Promise.join({
                     script: scriptsTable.getValueAsync(header.guid + "-script"),
                     editorState: scriptsTable.getValueAsync(header.guid + "-editorState")
@@ -258,14 +263,36 @@ module TDev {
                 body.editorState = data.editorState;
                 return Cloud.postUserInstalledAsync(<Cloud.InstalledBodies>{ bodies: [body] })
                     .then(resp => {
-                        if (Cloud.lite) {
-                            if (!resp.numErrors) {
-                                var header = resp.headers[0]
-                                if (!header.editor && body.script)
-                                    header.meta = getScriptMeta(body.script)
-                                return setInstalledAsync(indexTable, scriptsTable, header, null, null, null, null)
-                                    .then(() => resp)
-                            }
+                        if (Cloud.lite && !resp.numErrors) {
+                            var header = resp.headers[0]
+                            if (!header.editor && body.script)
+                                header.meta = getScriptMeta(body.script)
+                            // [setInstalledAsync] is not interrupted until it performs the
+                            // actual call to [setItemsAsync], so that's the right time to check
+                            // whether the version has changed in the meanwhile. This check
+                            // assumes that all clients of the [World] module are well-behaved
+                            // and always call [updateInstalledAsync], which takes care of
+                            // bumping the version number in a monotonic fashion.
+                            return getInstalledHeaderAsync(header.guid).then((h: Cloud.Header) => {
+                                var currentVersion = JSON.stringify(h.scriptVersion);
+                                // This should be equal or greater than currentVersion. Anything
+                                // else means I've missed something!
+                                log("actually saving? version is now "+currentVersion);
+                                if (currentVersion != conservativeVersion) {
+                                    // Someone wrote a new version in local storage; so all we
+                                    // remember is that this local version now needs to be saved on
+                                    // top of the newer version that's in the cloud. Client code
+                                    // must retry to save.
+                                    h.scriptVersion.baseSnapshot = resp.headers[0].scriptVersion.baseSnapshot;
+                                    resp.retry = true;
+                                    return setInstalledAsync(indexTable, scriptsTable, h, null, null, null, null)
+                                        .then(() => resp)
+                                } else {
+                                    // That header in the cloud is fine, that's our new header.
+                                    return setInstalledAsync(indexTable, scriptsTable, header, null, null, null, null)
+                                        .then(() => resp)
+                                }
+                            });
                         }
                         return Promise.as(resp)
                     })
