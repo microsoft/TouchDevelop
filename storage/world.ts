@@ -241,11 +241,10 @@ module TDev {
             });
         }
         function uploadInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header): Promise { // of PostUserInstalledResponse
-            // A conservative estimate of the version we are saving. (It may be
-            // the case that in-between the various asynchronous steps below, a
-            // newer version gets written and it's innocuous, but we err on the
-            // safe side.)
-            var conservativeVersion = header.scriptVersion.version;
+            // A conservative estimate of the version we are saving. We compare all three fields at
+            // the same time. (It may be the case that in-between the various asynchronous steps
+            // below, a newer version gets written and it's innocuous, but we err on the safe side.)
+            var conservativeVersion = JSON.stringify(header.scriptVersion);
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is dirty, attempting to save version " + conservativeVersion);
             return Promise.join({
                     script: scriptsTable.getValueAsync(header.guid + "-script"),
@@ -274,11 +273,11 @@ module TDev {
                             // and always call [updateInstalledAsync], which takes care of
                             // bumping the version number in a monotonic fashion.
                             return getInstalledHeaderAsync(header.guid).then((h: Cloud.Header) => {
-                                var currentVersion = h.scriptVersion.version;
+                                var currentVersion = JSON.stringify(h.scriptVersion);
                                 // This should be equal or greater than currentVersion. Anything
                                 // else means I've missed something!
                                 log("actually saving? version is now "+currentVersion);
-                                if (currentVersion > conservativeVersion) {
+                                if (currentVersion != conservativeVersion) {
                                     // Someone wrote a new version in local storage; so all we
                                     // remember is that this local version now needs to be saved on
                                     // top of the newer version that's in the cloud. Client code
