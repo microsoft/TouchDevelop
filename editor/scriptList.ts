@@ -534,7 +534,7 @@ module TDev { export module Browser {
                             }
                         });
                     } else if (/^\d{9,64}$/i.test(terms[0])) {
-                        Cloud.getPrivateApiAsync(terms[0])
+                        Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + terms[0] : terms[0])
                             .done((rc : JsonCode) => {
                                 if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
                             }, e => {});
@@ -909,7 +909,7 @@ module TDev { export module Browser {
             var btn = HTML.mkButton(lf("join group"), () => {
                 hideBtn();
                 progressBar.start();
-                Cloud.postPrivateApiAsync(codeid, {})
+                Cloud.postPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid, {})
                     .done(() => {
                         progressBar.stop();
                         m.dismiss();
@@ -946,7 +946,7 @@ module TDev { export module Browser {
                 var lastCode : JsonCode = null;
                 if (/\d{9,64}/.test(codeid)) {
                     progressBar.start();
-                    Cloud.getPrivateApiAsync(codeid)
+                    Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid)
                         .then((code: JsonCode) => {
                             lastCode = code;
                             if(code.verb == 'JoinGroup')
@@ -8597,6 +8597,9 @@ module TDev { export module Browser {
                 u.labels.forEach(l => {
                     ch.push(div(null, "label: " + l.name + " by /" + l.userid + " on " + Util.timeSince(l.time)))
                 })
+
+                var uid = this.browser().getCreatorInfo(u)
+                ch.push(ScriptInfo.labeledBox(lf("uploader"), uid.mkSmallBox()))
 
                 this.tabContent.setChildren(ch)
             });
