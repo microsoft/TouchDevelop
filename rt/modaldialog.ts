@@ -351,6 +351,30 @@ module TDev
             return m;
         }
 
+        static editText(lbl:string, text:string, updateAsync:(s:string)=>Promise)
+        {
+            var m = new ModalDialog();
+
+            var btns = div("wall-dialog-buttons",
+                HTML.mkButton(lf("update"), () => {
+                    btns.removeSelf()
+                    updateAsync(inp.value)
+                        .done(() => m.dismiss())
+                }),
+                HTML.mkButton(lf("cancel"), () => m.dismiss()))
+
+            var inp = HTML.mkTextInput("text", "")
+            inp.value = text
+
+            m.add(div("wall-dialog-header", lbl))
+            m.add(div(null, inp))
+            m.add(btns)
+
+            m.show()
+
+            return m
+        }
+
         public noChrome()
         {
             this.outerDialog.className += " modalNoChrome";

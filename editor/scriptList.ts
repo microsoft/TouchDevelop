@@ -6725,6 +6725,21 @@ module TDev { export module Browser {
                 ));
             ch.unshift(hd);
 
+            if (Cloud.isLiteAdmin()) {
+                ch.unshift(div(null,
+                    HTML.mkButton(lf("permissions"),
+                        () => {
+                            var path = this.publicId + "/permissions"
+                            Cloud.getPrivateApiAsync(path)
+                            .done(resp => {
+                                ModalDialog.editText(lf("permissions"), resp.permissions,
+                                    t => {
+                                        return Cloud.postPrivateApiAsync(path, { permissions: t })
+                                    })
+                            })
+                        })))
+            }
+
             this.tabContent.setChildren(ch);
 
             this.withUpdate(hd, (u: JsonUser) => {

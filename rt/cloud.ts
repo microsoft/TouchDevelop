@@ -3,6 +3,11 @@ module TDev.Cloud {
 
     export var lite = false;
 
+    export function isLiteAdmin()
+    {
+        return dbg && lite;
+    }
+
     export function getServiceUrl() { return <string>((<any>window).rootUrl); }
 
     export function mkLegalDiv() {
