@@ -91,16 +91,22 @@ module TDev {
                                         status: Status.Error,
                                         error: (<any> response.headers[0]).error,
                                     });
-                                    World.getInstalledScriptVersionInCloud(this.guid).then((json: string) => {
-                                        var m: PendingMerge = JSON.parse(json || "{}");
-                                        if ("theirs" in m) {
-                                            this.post(<Message_Merge>{
-                                                type: MessageType.Merge,
-                                                merge: m
-                                            });
-                                        } else {
-                                            console.log("[external] got confused");
-                                        }
+                                    // Couldn't sync! Chances are high that we need to do a merge.
+                                    // Because [syncAsync] is not called on a regular basis when an
+                                    // external editor is open, we need to trigger the download of
+                                    // the newer version from the cloud *now*.
+                                    World.syncAsync().then(() => {
+                                        World.getInstalledScriptVersionInCloud(this.guid).then((json: string) => {
+                                            var m: PendingMerge = JSON.parse(json || "{}");
+                                            if ("theirs" in m) {
+                                                this.post(<Message_Merge>{
+                                                    type: MessageType.Merge,
+                                                    merge: m
+                                                });
+                                            } else {
+                                                console.log("[external] cloud error was not because of a due merge");
+                                            }
+                                        });
                                     });
                                     return;
                                 }

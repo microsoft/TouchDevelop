@@ -18,6 +18,7 @@ module TDev {
 
     // A global that remembers the current version we're editing
     var currentVersion: string;
+    var inMerge: boolean = false;
 
     window.addEventListener("message", (event) => {
         if (!(event.origin in allowedOrigins))
@@ -116,11 +117,13 @@ module TDev {
         var theirsButton = mkButton("🔍", "see theirs", () => loadBlockly(merge.theirs.scriptText));
         var baseButton = mkButton("🔍", "see base", () => loadBlockly(merge.base.scriptText));
         var mergeButton = mkButton("👍", "finish merge", () => {
+            inMerge = false;
             currentVersion = merge.theirs.baseSnapshot;
             clearMerge();
             doSave();
         });
         clearMerge();
+        inMerge = true;
         [ mineButton, theirsButton, baseButton, mergeButton ].forEach(button => {
             box.appendChild(button);
             box.appendChild(document.createTextNode(" "));
@@ -212,8 +215,7 @@ module TDev {
         });
 
         window.setInterval(() => {
-            if (dirty)
-                doSave();
+            doSave();
         }, 5000);
 
         console.log("[loaded] cloud version " + message.script.baseSnapshot +
@@ -221,6 +223,9 @@ module TDev {
     }
 
     function doSave() {
+        if (!dirty || inMerge)
+            return;
+
         var text = saveBlockly();
         console.log("[saving] on top of: ", currentVersion);
         post(<External.Message_Save>{

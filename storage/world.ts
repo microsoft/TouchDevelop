@@ -213,6 +213,7 @@ module TDev {
                     return removeInstalledAsync(indexTable, scriptsTable, header.guid);
             });
         }
+
         function publishInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header) : Promise {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is to be published");
             return indexTable.getValueAsync(header.guid)
