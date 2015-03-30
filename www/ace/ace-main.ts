@@ -111,5 +111,8 @@ module TDev {
         document.querySelector("#command-compile").addEventListener("click", () => {
             post({ type: External.MessageType.Compile });
         });
+        document.querySelector("#command-quit").addEventListener("click", () => {
+            post({ type: External.MessageType.Quit });
+        });
     }
 }
