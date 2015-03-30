@@ -5,7 +5,7 @@
 module TDev {
     export module External {
 
-        // The base class for messages. This is what get sent via [postMessage].
+        // The base class for messages. This is what gets sent via [postMessage].
         // Discriminating on the actual value of the [type] field will tell you
         // which one of the [Message_*] interfaces below you can cast into
         // (TypeScript doesn't, quite regrettably, have sum types.)
