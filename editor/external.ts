@@ -140,6 +140,14 @@ module TDev {
                         TheChannel = null;
                         break;
 
+                    case MessageType.Compile:
+                        this.post(<Message_CompileAck>{
+                            type: MessageType.CompileAck,
+                            status: Status.Error,
+                            error: "Not implemented"
+                        });
+                        break;
+
                     default:
                         console.error("[external] unexpected message type", message.type);
                         break;

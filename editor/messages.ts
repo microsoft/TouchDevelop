@@ -4,38 +4,22 @@
 
 module TDev {
     export module External {
-        export interface SavedScript {
-            scriptText: string;
-            editorState: string;
-            baseSnapshot: string;
+
+        // The base class for messages. This is what get sent via [postMessage].
+        // Discriminating on the actual value of the [type] field will tell you
+        // which one of the [Message_*] interfaces below you can cast into
+        // (TypeScript doesn't, quite regrettably, have sum types.)
+        export interface Message {
+            type: MessageType;
         }
 
-        // The pending merge data, if any.
-        export interface PendingMerge {
-            base: SavedScript;
-            theirs: SavedScript;
-        }
-
-        // [Quit] has no attached data, so not defining a special interface
         export enum MessageType {
             Init,
             Metadata, MetadataAck,
             Save, SaveAck,
             Compile, CompileAck,
-            Merge, Quit
+            Merge, Quit // [Quit] has no attached data, so not defining a special interface
         };
-
-        export enum Status {
-            Ok, Error
-        };
-
-        export enum SaveLocation {
-            Local, Cloud
-        };
-
-        export interface Message {
-            type: MessageType;
-        }
 
         export interface Message_Init extends Message {
             type: MessageType; // == MessageType.Init
@@ -54,14 +38,56 @@ module TDev {
             status: Status;
             error?: string; // non-null iff status == Error
             newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
-            cloudIsInSync?: boolean; // same remark as above; furthermore, true if the version we just
-                                     // wrote in the cloud is the latest version currently stored
-                                     // locally
+            cloudIsInSync?: boolean; // non-null iff status == Ok && where == Cloud
+                                     // true means the version we just wrote in
+                                     // the cloud is the latest version
+                                     // currently stored locally
         }
 
         export interface Message_Merge extends Message {
             type: MessageType; // == MessageType.Merge
             merge: PendingMerge;
+        }
+
+        export interface Message_Compile extends Message {
+            type: MessageType; // == MessageType.Compile
+            text: string;
+            language: Language;
+        }
+
+        export interface Message_CompileAck extends Message {
+            type: MessageType; // == MessageType.Message_CompileAck
+            status: Status;
+            error?: string; // non-null iff status == Error
+        }
+
+        // A saved script has some text (this is what ends up published when the
+        // user hits "publish"), an associated editor state (doesn't get
+        // published), and is saved on top of a cloud-assigned [baseVersion].
+        export interface SavedScript {
+            scriptText: string;
+            editorState: string;
+            baseSnapshot: string;
+        }
+
+        // In case local and remote modifications have been posted on top of the same cloud
+        // version, the editor needs to merge, and can then save on top of the
+        // new cloud version.
+        export interface PendingMerge {
+            base: SavedScript;
+            theirs: SavedScript;
+        }
+
+        export enum Status {
+            Ok, Error
+        };
+
+        export enum SaveLocation {
+            Local, Cloud
+        };
+
+        export enum Language {
+            TouchDevelop, CPlusPlus
         }
     }
 }
