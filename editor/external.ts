@@ -179,6 +179,7 @@ module TDev {
 
             // Load the editor; send the initial message.
             var iframe = document.createElement("iframe");
+            iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
             iframe.addEventListener("load", function () {
                 TheChannel = new Channel(editor, iframe, data.guid);
                 var extra = JSON.parse(data.scriptVersionInCloud || "{}");
