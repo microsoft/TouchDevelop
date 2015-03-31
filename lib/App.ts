@@ -5,6 +5,10 @@ module TDev.RT {
         logException? : (err: any, meta? : any) => void;
     }
 
+    export interface AppNativeHost {
+        exec(msg: any, cb : (result : any) => void);
+    }
+
     //? A custom logger
     //@ stem("logger")
     export class AppLogger extends RTValue {
@@ -650,6 +654,26 @@ module TDev.RT {
             var r = s.rt.renderedComments
             s.rt.renderedComments = ""
             return r
+        }
+
+
+        //? Invokes the host to execute a command described in the message and returns the response. If not available or errored, returns invalid.
+        //@ async readsMutable returns(JsonObject) dbgOnly
+        export function host_exec(message: JsonObject, r : ResumeCtx) {
+
+            var host = <AppNativeHost>(<any>window).touchDevelopHost;
+            if (!host || !host.exec) {
+                r.resumeVal(undefined);
+                return;
+            }
+
+            try {
+                host.exec(message.value(), (result) => { r.resumeVal(JsonObject.wrap(result)); });
+            }
+            catch (e) {
+                App.logEvent(App.DEBUG, "app", "posting message to host failed", undefined);
+                r.resumeVal(undefined);
+            }
         }
     }
 }
