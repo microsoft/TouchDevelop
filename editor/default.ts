@@ -460,7 +460,7 @@ module TDev
 
         if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            (<any>window).rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://tdscratch.azurewebsites.net"
+            (<any>window).rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://mbitmain.azurewebsites.net"
             TDev.Ticker.disable()
         }
 

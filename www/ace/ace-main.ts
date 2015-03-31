@@ -11,7 +11,7 @@ module TDev {
 
     var allowedOrigins = {
         "http://localhost:4242": null,
-        "http://www.touchdevelop.com": null,
+        "https://www.touchdevelop.com": null,
         "https://mbitmain.azurewebsites.net": null
     };
 
