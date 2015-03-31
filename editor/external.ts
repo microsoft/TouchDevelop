@@ -15,7 +15,7 @@ module TDev {
 
     export var externalEditors: ExternalEditor[] = [ {
         name: "C++ Editor",
-        description: "Directly write C++ code using Ace",
+        description: "Directly write C++ code using Ace (OUTDATED)",
         id: "ace",
         origin: "http://localhost:4242",
         path: "/editor/local/ace/editor.html"
