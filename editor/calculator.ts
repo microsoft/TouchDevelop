@@ -3689,13 +3689,11 @@ module TDev
 
             var setHelp = (args:any) => {
                 didIt = true
-                this.apiHelpDiv.setChildren(div("calcApiHelpInner",
-                    args,
-                    div('calcApiHelpMore', lf("help..."))
-                    ).withClick(() => {
-                        if (TheEditor.widgetEnabled("calcApiHelp"))
-                            TheEditor.displayHelp();
-                        }))
+                this.apiHelpDiv.setChildren(div("calcApiHelpInner", args));
+                if (TheEditor.widgetEnabled("calcApiHelp"))
+                    this.apiHelpDiv.appendChild(
+                        div('calcApiHelpMore', lf("help...")).withClick(() => TheEditor.displayHelp())
+                    );
             }
 
             this.findCallAndArg(this.expr.parsed, results);
