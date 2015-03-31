@@ -2978,10 +2978,17 @@ module TDev
             Util.log("loadScriptAsync: " + header.guid);
             return World.getInstalledHeaderAsync(header.guid)
             .then(resp => {
+                if (!resp) {
+                    Util.log("script not found, syncing...");
+                    return World.syncAsync().then(() => World.getInstalledHeaderAsync(header.guid));
+                }
+                else return resp;
+            })
+            .then(resp => {            
                 header = resp;
                 if (!header) Util.oops(lf("script not installed"));
+                return this.saveStateAsync({ forReal: true });
             })
-            .then(() => this.saveStateAsync({ forReal: true }))
             .then(() => {
                 this.undoMgr.clear();
                 Ticker.dbg("Editor.loadScriptAsync.getHeader");
