@@ -65,7 +65,7 @@ module TDev.RT {
         //@ uiAsync
         export function ask_number(text: string, r: ResumeCtx) {
             var rt = r.rt;
-            var t = R.mkTextInput("number", lf("enter a decimal number"));
+            var t = R.mkTextInput("number", lf("enter a number"));
             t.value = "";
             var value = 0;
             var m = new ModalDialog();
