@@ -163,6 +163,29 @@ module TDev.HTML {
         return ta;
     }
 
+    export function setupDragAndDrop(r: HTMLElement, onFiles : (files : FileList) => void) {
+        if (!Browser.dragAndDrop) return;
+
+        r.addEventListener('dragover', function (e) {
+            if (e.dataTransfer.types[0] == 'Files') {
+                if (e.preventDefault) e.preventDefault(); // Necessary. Allows us to drop.
+                e.dataTransfer.dropEffect = 'copy';  // See the section on the DataTransfer object.
+                return false;
+            }
+        }, false);
+        r.addEventListener('drop',(e) => {
+            if (e.dataTransfer.files[0]) {
+                e.stopPropagation(); // Stops some browsers from redirecting.
+                e.preventDefault();
+                onFiles(e.dataTransfer.files);
+            }
+            return false;
+        }, false);
+        r.addEventListener('dragend',(e) => {
+            return false;
+        }, false);
+    }
+
     export function mkButtonElt(cl:string, ...children:any[]) {
         var elt = <HTMLElement> document.createElement("button");
         if (cl != null)
