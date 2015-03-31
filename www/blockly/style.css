@@ -93,3 +93,7 @@ body {
     font-size: 60%;
     text-align: center;
 }
+
+.blocklyMainBackground {
+  fill: white !important;
+}
