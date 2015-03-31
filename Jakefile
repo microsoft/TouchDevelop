@@ -407,7 +407,7 @@ task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, func
 
 // this task runs as a "after_success" step in the travis-ci automation
 desc('upload current build to the cloud')
-task('upload', [], { async : true }, function() {
+task('upload', [ "build/client.js" ], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
