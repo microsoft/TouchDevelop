@@ -165,7 +165,11 @@ class ApiRequest {
                 var s = ""
                 cres.on("data", d => s += d)
                 cres.on("end", () => {
-                    thisResp.body = JSON.parse(s)
+                    try {
+                      thisResp.body = JSON.parse(s)
+                    } catch (e) {
+                      thisResp.body = s
+                    }
                     oneUp()
                 })
             })

@@ -3482,8 +3482,24 @@ function tdupload(args:string[])
         var td_tok = "?access_token=" + fs.readFileSync(atokF, "utf8").replace(/\s/g, "").replace(/^#access_token=/, "")
     }
 
+    // Recursively enumerates in each entry that's a directory
+    var expand = function (fileList) {
+        return Array.prototype.concat.apply([],
+            fileList.map(f => {
+                if (!fs.existsSync(f))
+                    return [];
+                else if (path.basename(f)[0] == ".")
+                    return [];
+                else if (fs.statSync(f).isDirectory())
+                    return expand(fs.readdirSync(f).map(x => f + "/" + x));
+                else
+                    return [f];
+            })
+        )
+    };
+
     if (args.length == 0)
-        args = [
+        args = expand([
             "build/main.js",
             "build/main.js.map",
             "build/runtime.js",
@@ -3492,17 +3508,14 @@ function tdupload(args:string[])
             "build/noderunner.js",
             "build/noderuntime.js",
             "build/buildinfo.json",
-            "www/default.css",
-            "www/editor.css",
-            "www/index.html",
-            "www/browsers.html",
-            "www/app.manifest",
             "webapp/webapp.html",
-            "www/error.html",
+            "www",
             "build/touchdevelop.tgz",
             "officemix/officemix.html",
             "build/officemix.js",
-        ]
+            "build/ace.js",
+            "build/blockly.js",
+        ])
 
     var liteId = ""
     var uploadFiles = () => args.forEach(p => {
@@ -3514,7 +3527,8 @@ function tdupload(args:string[])
                 return
             }
 
-            var fileName = liteId == "upload" ? p : path.basename(p)
+            // Strip the leading directory name, unless we are uploading a single file.
+            var fileName = liteId == "upload" ? p : p.split("/").splice(1).join("/")
             var mime = getMime(p)
 
             if (liteUrl) {

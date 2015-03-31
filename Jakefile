@@ -117,7 +117,7 @@ function mkSimpleTask(production, dependencies, target) {
 function mdkTask(production, dependencies, target) {
     return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
       var task = this;
-	  jake.mkdirP('build/portal')
+      jake.mkdirP('build/portal')
       console.log("[M] "+production);
       jake.exec("node node_modules/madoko/lib/cli.js --verbose --odir=build/portal " + target, { printStdout: true }, function () {
           task.complete();
@@ -391,9 +391,9 @@ task('default', [
 
 desc('clean up the build folders and files')
 task('clean', [], function () {
-    // XXX do this in a single call? check out https://github.com/mde/utilities/blob/master/lib/file.js
-    generated.forEach(function (f) { jake.rmRf(f); });
-    jake.rmRf('build/');
+  // XXX do this in a single call? check out https://github.com/mde/utilities/blob/master/lib/file.js
+  generated.forEach(function (f) { jake.rmRf(f); });
+  jake.rmRf('build/');
 });
 
 desc('run local test suite')
@@ -407,7 +407,7 @@ task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, func
 
 // this task runs as a "after_success" step in the travis-ci automation
 desc('upload current build to the cloud')
-task('upload', [], { async : true }, function() {
+task('upload', [ "build/client.js" ], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
@@ -472,10 +472,10 @@ task('azure', [ 'build/shell.js' ], { async: true }, function() {
   child_process.execFile(
     "C:/Program Files/Microsoft SDKs/Azure/.NET SDK/v2.5/bin/cspack.exe",
     [ "tdshell.csdef",
-      "/out:../../build/azure/tdshell.cspkg", 
+      "/out:../../build/azure/tdshell.cspkg",
       "/roleFiles:ShellRole;files.txt" ], { cwd: 'shell/azure' }, execCallback(this))
 });
-  
+
 task('nw-npm', {async : true }, function() {
   var task = this;
   jake.mkdirP('build/nw');

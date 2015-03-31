@@ -13,23 +13,35 @@ module TDev {
         path: string;
     }
 
-    export var externalEditors: ExternalEditor[] = [ {
-        name: "C++ Editor",
-        description: "Directly write C++ code using Ace",
-        id: "ace",
-        origin: "http://localhost:4242",
-        path: "/editor/local/ace/editor.html"
-    }, {
-        name: "Blockly editor",
-        description: "Great block-based environment!",
-        id: "blockly",
-        origin: "http://localhost:4242",
-        path: "/editor/local/blockly/editor.html"
-    } ];
+    var externalEditorsCache: ExternalEditor[] = null;
+
+    export function getExternalEditors(): ExternalEditor[] {
+        if (!externalEditorsCache) {
+            // Detect at run-time where we're running from!
+            var url = Ticker.mainJsName.replace(/main.js$/, "");
+            var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
+            var origin = match[1];
+            var path = match[2];
+            externalEditorsCache = [ {
+                name: "C++ Editor",
+                description: "Directly write C++ code using Ace (OUTDATED)",
+                id: "ace",
+                origin: origin,
+                path: path+"ace/editor.html"
+            }, {
+                name: "Blockly editor",
+                description: "Great block-based environment!",
+                id: "blockly",
+                origin: origin,
+                path: path+"blockly/editor.html"
+            } ];
+        }
+        return externalEditorsCache;
+    }
 
     // Assumes that [id] is a valid external editor id.
     export function editorById(id: string): ExternalEditor {
-        var r = externalEditors.filter(x => x.id == id);
+        var r = getExternalEditors().filter(x => x.id == id);
         Util.assert(r.length == 1);
         return r[0];
     }
@@ -55,8 +67,10 @@ module TDev {
 
             public receive(event) {
                 console.log("[outer message]", event);
-                if (event.origin != this.editor.origin)
+                if (event.origin != this.editor.origin) {
+                    console.error("[outer message] not from the right origin!", event.origin, this.editor.origin);
                     return;
+                }
 
                 switch ((<Message> event.data).type) {
                     case MessageType.Save: {
