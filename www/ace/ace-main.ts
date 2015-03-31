@@ -12,6 +12,7 @@ module TDev {
     var allowedOrigins = {
         "http://localhost:4242": null,
         "http://www.touchdevelop.com": null,
+        "https://mbitmain.azurewebsites.net": null
     };
 
     // Both of these are written once when we receive the first (trusted)

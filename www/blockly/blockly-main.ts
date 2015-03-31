@@ -9,6 +9,7 @@ module TDev {
     var allowedOrigins: { [index: string]: any } = {
         "http://localhost:4242": null,
         "http://www.touchdevelop.com": null,
+        "https://mbitmain.azurewebsites.net": null
     };
 
     // Both of these are written once when we receive the first (trusted)
@@ -21,8 +22,10 @@ module TDev {
     var inMerge: boolean = false;
 
     window.addEventListener("message", (event) => {
-        if (!(event.origin in allowedOrigins))
+        if (!(event.origin in allowedOrigins)) {
+            console.error("[inner message] not from the right origin!", event.origin);
             return;
+        }
 
         if (!outer || !origin) {
             outer = event.source;

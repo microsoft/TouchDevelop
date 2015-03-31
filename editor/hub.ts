@@ -1015,7 +1015,7 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
 
                 var elts = [];
-                externalEditors.concat([{
+                getExternalEditors().concat([{
                     name: "TouchDevelop",
                     description: "The touch editor you love and know!",
                     id: "touchdevelop",
