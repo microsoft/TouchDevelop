@@ -8,7 +8,8 @@ module TDev {
 
     var allowedOrigins: { [index: string]: any } = {
         "http://localhost:4242": null,
-        "http://www.touchdevelop.com": null,
+        "https://www.touchdevelop.com": null,
+        "https://mbitmain.azurewebsites.net": null
     };
 
     // Both of these are written once when we receive the first (trusted)
@@ -21,8 +22,10 @@ module TDev {
     var inMerge: boolean = false;
 
     window.addEventListener("message", (event) => {
-        if (!(event.origin in allowedOrigins))
+        if (!(event.origin in allowedOrigins)) {
+            console.error("[inner message] not from the right origin!", event.origin);
             return;
+        }
 
         if (!outer || !origin) {
             outer = event.source;
@@ -49,6 +52,9 @@ module TDev {
             case External.MessageType.Merge:
                 promptMerge((<External.Message_Merge> message).merge);
                 break;
+
+            case External.MessageType.CompileAck:
+                compileAck(<External.Message_CompileAck> message);
         }
     }
 
@@ -84,6 +90,17 @@ module TDev {
                 } else {
                     statusMsg(prefix(message.where)+" successfully saved", message.status);
                 }
+                break;
+        }
+    }
+
+    function compileAck(message: External.Message_CompileAck) {
+        switch (message.status) {
+            case External.Status.Error:
+                statusMsg("compilation error: "+message.error, message.status);
+                break;
+            case External.Status.Ok:
+                statusMsg("compilation successful", message.status);
                 break;
         }
     }
@@ -250,7 +267,11 @@ module TDev {
             doSave();
         });
         document.querySelector("#command-compile").addEventListener("click", () => {
-            post({ type: External.MessageType.Compile });
+            post(<External.Message_Compile> {
+                type: External.MessageType.Compile,
+                text: "", // TODO
+                language: External.Language.TouchDevelop
+            });
         });
         document.querySelector("#command-run").addEventListener("click", () => {
         });

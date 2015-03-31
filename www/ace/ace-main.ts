@@ -11,7 +11,8 @@ module TDev {
 
     var allowedOrigins = {
         "http://localhost:4242": null,
-        "http://www.touchdevelop.com": null,
+        "https://www.touchdevelop.com": null,
+        "https://mbitmain.azurewebsites.net": null
     };
 
     // Both of these are written once when we receive the first (trusted)
@@ -110,6 +111,9 @@ module TDev {
         });
         document.querySelector("#command-compile").addEventListener("click", () => {
             post({ type: External.MessageType.Compile });
+        });
+        document.querySelector("#command-quit").addEventListener("click", () => {
+            post({ type: External.MessageType.Quit });
         });
     }
 }
