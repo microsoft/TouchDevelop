@@ -33,29 +33,6 @@ module TDev.RT {
             });
         }
 
-        export var facebookLike = (text : string, url : string, fburl : string) : HTMLElement =>
-        {
-            var r = div('');
-            if (Cloud.isOnline() && !Browser.isMobile && !Browser.inCordova && !Browser.localProxy && !Cloud.isRestricted()) {
-                r.innerHTML =
-                  TDev.RT.ShareManager.createTwitterTweet(text, url)
-                  + "&nbsp;&nbsp;" +
-                  TDev.RT.ShareManager.createFacebookLike(fburl || url);
-            }
-            return r;
-        }
-
-        export var createFacebookLike = (url : string) : string =>
-        {
-            return "<iframe src='//www.facebook.com/plugins/like.php?href=" + encodeURI(url) +
-                  "&amp;layout=button_count&amp;show_faces=false&amp;width=100&amp;action=like&amp;font=segoe+ui&amp;colorscheme=light" +
-                  "&amp;height=20' scrolling='no' frameborder='0' style='border:none; overflow:hidden; width:80px; height:20px;' allowTransparency='true'></iframe>";
-        }
-
-        export var createTwitterTweet = (text : string, url: string): string => {
-            return "<iframe src='//platform.twitter.com/widgets/tweet_button.html?url=" + encodeURI(url) + "&amp;text=" + encodeURI(text) + "&amp;count=none'style='border:none;overflow:hidden;width:56px;height:20px;' frameBorder='0' scrolling='no' allowTransparency='true'></iframe>"
-        }
-
         export interface ShareButton {
             text: string;
             handler: () => void;

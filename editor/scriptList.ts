@@ -2790,14 +2790,9 @@ module TDev { export module Browser {
 
             var url = Cloud.getServiceUrl() + "/" + id;
             var text = this.twitterMessage();
-            var r: HTMLElement;
-            if (Cloud.isOffline())
-                r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'package').withClick(() => {
+            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'package').withClick(() => {
                     TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
                 });
-            else
-                //r = div("sdCmtBtn", HTML.mkImg("svg:Package,#000"), 'share').withClick(() => {});
-                r = TDev.RT.ShareManager.facebookLike(text, url, null);
             return r;
         }
     }
