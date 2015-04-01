@@ -79,6 +79,18 @@ module TDev {
                             var scriptText = message.script.scriptText;
                             var editorState = message.script.editorState;
                             header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
+
+                            var metadata = message.script.metadata;
+                            Object.keys(metadata).forEach(k => {
+                                var v = metadata[k];
+                                if (k == "name")
+                                    v = v || "unnamed";
+                                header.meta[k] = v;
+                            });
+                            // [name] deserves a special treatment because it
+                            // appears both on the header and in the metadata.
+                            header.name = metadata.name;
+
                             // Writes into local storage.
                             World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
                                 console.log("[external] script saved properly");
@@ -88,6 +100,7 @@ module TDev {
                                     status: Status.Ok,
                                 });
                             });
+
                             // Schedules a cloud sync; set the right state so
                             // that [scheduleSaveToCloudAsync] writes the
                             // baseSnapshot where we can read it back.
@@ -175,6 +188,7 @@ module TDev {
             editorState: string;
             scriptVersionInCloud: string;
             baseSnapshot: string;
+            metadata: Metadata;
         };
 
         // The [scriptVersionInCloud] name is the one that's used by [world.ts];
@@ -207,11 +221,7 @@ module TDev {
                 var extra = JSON.parse(data.scriptVersionInCloud || "{}");
                 TheChannel.post(<Message_Init>{
                     type: MessageType.Init,
-                    script: {
-                        scriptText: data.scriptText,
-                        editorState: data.editorState,
-                        baseSnapshot: data.baseSnapshot,
-                    },
+                    script: data,
                     merge: ("theirs" in extra) ? extra : null
                 });
             });

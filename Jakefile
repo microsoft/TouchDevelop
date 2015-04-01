@@ -241,8 +241,14 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
-mkSimpleTask('build/ace.js', [ "www/ace/ace-main.ts" ], "www/ace/refs.ts");
-mkSimpleTask('build/blockly.js', [ "www/blockly/blockly-main.ts" ], "www/blockly/refs.ts");
+mkSimpleTask('build/ace.js', [
+    "www/ace/ace-main.ts",
+    "editor/messages.ts"
+], "www/ace/refs.ts");
+mkSimpleTask('build/blockly.js', [
+    "www/blockly/blockly-main.ts",
+    "editor/messages.ts"
+], "www/blockly/refs.ts");
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened

@@ -68,6 +68,12 @@ module TDev {
             scriptText: string;
             editorState: string;
             baseSnapshot: string;
+            metadata: Metadata; // Must be set to the correct value every time.
+        }
+
+        export interface Metadata {
+            name: string;
+            description: string;
         }
 
         // In case local and remote modifications have been posted on top of the same cloud

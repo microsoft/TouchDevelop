@@ -12,6 +12,8 @@ module TDev {
         "https://mbitmain.azurewebsites.net": null
     };
 
+    var $ = (s: string) => document.querySelector(s);
+
     // Both of these are written once when we receive the first (trusted)
     // message.
     var outer: Window = null;
@@ -124,15 +126,29 @@ module TDev {
             b.addEventListener("click", f);
             return b;
         };
-        var box = document.querySelector("#merge-commands");
+        var box = $("#merge-commands");
         var clearMerge = () => {
             while (box.firstChild)
                 box.removeChild(box.firstChild);
         };
         var mineText = saveBlockly();
-        var mineButton = mkButton("🔍", "see mine", () => loadBlockly(mineText));
-        var theirsButton = mkButton("🔍", "see theirs", () => loadBlockly(merge.theirs.scriptText));
-        var baseButton = mkButton("🔍", "see base", () => loadBlockly(merge.base.scriptText));
+        var mineName = getName();
+        var mineDescription = getDescription();
+        var mineButton = mkButton("🔍", "see mine", () => {
+          loadBlockly(mineText);
+          setName(mineName);
+          setDescription(mineDescription);
+        });
+        var theirsButton = mkButton("🔍", "see theirs", () => {
+          loadBlockly(merge.theirs.scriptText);
+          setName(merge.theirs.metadata.name);
+          setDescription(merge.theirs.metadata.description);
+        });
+        var baseButton = mkButton("🔍", "see base", () => {
+          loadBlockly(merge.base.scriptText);
+          setName(merge.base.metadata.name);
+          setDescription(merge.base.metadata.description);
+        });
         var mergeButton = mkButton("👍", "finish merge", () => {
             inMerge = false;
             currentVersion = merge.theirs.baseSnapshot;
@@ -162,7 +178,7 @@ module TDev {
     }
 
     function statusMsg(s: string, st: External.Status) {
-        var box = <HTMLElement> document.querySelector("#log");
+        var box = <HTMLElement> $("#log");
         var elt = document.createElement("div");
         elt.classList.add("status");
         if (st == External.Status.Error)
@@ -200,14 +216,30 @@ module TDev {
         return text;
     }
 
+    function setDescription(x: string) {
+        (<HTMLInputElement> $("#script-description")).value = (x || "");
+    }
+
+    function setName(x: string) {
+        (<HTMLInputElement> $("#script-name")).value = x;
+    }
+
+    function getDescription() {
+        return (<HTMLInputElement> $("#script-description")).value;
+    }
+
+    function getName() {
+        return (<HTMLInputElement> $("#script-name")).value;
+    }
+
     var dirty = false;
 
     // Called once at startup
     function setupEditor(message: External.Message_Init) {
         var state = loadEditorState(message.script.editorState);
 
-        Blockly.inject(document.querySelector("#editor"), {
-            toolbox: document.querySelector("#blockly-toolbox")
+        Blockly.inject($("#editor"), {
+            toolbox: $("#blockly-toolbox")
         });
         loadBlockly(message.script.scriptText);
         // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual
@@ -220,6 +252,17 @@ module TDev {
                 dirty = true;
             });
         }, 1);
+        $("#script-name").addEventListener("input", () => {
+            statusMsg("✎ local changes", External.Status.Ok);
+            dirty = true;
+        });
+        $("#script-description").addEventListener("input", () => {
+            statusMsg("✎ local changes", External.Status.Ok);
+            dirty = true;
+        });
+
+        setName(message.script.metadata.name);
+        setDescription(message.script.metadata.description);
 
         // That's triggered when the user closes or reloads the whole page, but
         // doesn't help if the user hits the "back" button in our UI.
@@ -240,7 +283,7 @@ module TDev {
     }
 
     function doSave() {
-        if (!dirty || inMerge)
+        if (!dirty)
             return;
 
         var text = saveBlockly();
@@ -253,27 +296,31 @@ module TDev {
                     lastSave: new Date()
                 }),
                 baseSnapshot: currentVersion,
+                metadata: {
+                    name: getName(),
+                    description: getDescription()
+                }
             },
         });
         dirty = false;
     }
 
     function setupButtons() {
-        document.querySelector("#command-quit").addEventListener("click", () => {
+        $("#command-quit").addEventListener("click", () => {
             doSave();
             post({ type: External.MessageType.Quit });
         });
-        document.querySelector("#command-save").addEventListener("click", () => {
+        $("#command-save").addEventListener("click", () => {
             doSave();
         });
-        document.querySelector("#command-compile").addEventListener("click", () => {
+        $("#command-compile").addEventListener("click", () => {
             post(<External.Message_Compile> {
                 type: External.MessageType.Compile,
                 text: "", // TODO
                 language: External.Language.TouchDevelop
             });
         });
-        document.querySelector("#command-run").addEventListener("click", () => {
+        $("#command-run").addEventListener("click", () => {
         });
     }
 }

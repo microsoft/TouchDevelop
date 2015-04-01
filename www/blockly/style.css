@@ -40,6 +40,14 @@ body {
   margin-right: 1em;
 }
 
+#metadata {
+  padding-right: 2em;
+}
+
+#metadata > div:first-child {
+  padding-bottom: 1ex;
+}
+
 #toolbox {
   padding: .5em;
 }

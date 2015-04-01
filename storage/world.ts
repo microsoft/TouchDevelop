@@ -80,8 +80,9 @@ module TDev {
             if (script && !header.editor && (!header.meta || header.meta.comment === undefined))
                 header.meta = getScriptMeta(script);
             if (header.editor && (!header.meta || !header.meta.name)) {
-                Util.log("ERROR pre-condition not met for [setInstalledAsync]");
+                Util.log("ERROR pre-condition not met for [setInstalledAsync]; bailing");
                 debugger;
+                return Promise.as();
             }
             headerItem[header.guid] = JSON.stringify(header);
             var bodyItem = {}
@@ -164,12 +165,14 @@ module TDev {
                                                         theirs: {
                                                             scriptText: theirs.script,
                                                             editorState: theirs.editorState,
-                                                            baseSnapshot: header.scriptVersion.baseSnapshot
+                                                            baseSnapshot: header.scriptVersion.baseSnapshot,
+                                                            metadata: header.meta,
                                                         },
                                                         base: {
                                                             scriptText: baseVer.script,
                                                             editorState: baseVer.editorState,
-                                                            baseSnapshot: hd.scriptVersion.baseSnapshot
+                                                            baseSnapshot: hd.scriptVersion.baseSnapshot,
+                                                            metadata: hd.meta,
                                                         },
                                                     }
                                                 };

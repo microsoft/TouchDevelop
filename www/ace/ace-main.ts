@@ -22,6 +22,7 @@ module TDev {
 
     // Also written once at initialization-time.
     var editor: AceAjax.Editor = null;
+    var scriptName: string = null;
 
     // A global that remembers the current version we're editing
     var currentVersion: string;
@@ -91,6 +92,7 @@ module TDev {
         editor.setValue(message.script.scriptText);
         editor.clearSelection();
 
+        scriptName = message.script.metadata.name;
 
         log("[loaded] version from " + state.lastSave);
     }
@@ -105,6 +107,10 @@ module TDev {
                         lastSave: new Date()
                     }),
                     baseSnapshot: currentVersion,
+                    metadata: {
+                        name: scriptName,
+                        description: ""
+                    }
                 },
             };
             post(message);

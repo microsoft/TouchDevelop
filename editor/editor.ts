@@ -2984,7 +2984,7 @@ module TDev
                 }
                 else return resp;
             })
-            .then(resp => {            
+            .then(resp => {
                 header = resp;
                 if (!header) Util.oops(lf("script not installed"));
                 return this.saveStateAsync({ forReal: true });
@@ -3058,6 +3058,7 @@ module TDev
                         scriptVersionInCloud: scriptVersionInCloud,
                         editorState: editorState,
                         baseSnapshot: header.scriptVersion.baseSnapshot,
+                        metadata: header.meta,
                     });
                     ProgressOverlay.hide();
                     return new PromiseInv();
