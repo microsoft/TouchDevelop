@@ -183,6 +183,7 @@ module TDev {
         screenshotthumburl:string;
         screenshoturl:string;
         mergeids:string[];
+        editor?: string;
     }
 
     export interface JsonHistoryItem

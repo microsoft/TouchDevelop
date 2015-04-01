@@ -4,5 +4,4 @@
 ///<reference path='runtime.ts'/>
 ///<reference path='DeviceOrientation.ts'/>
 ///<reference path='Web.ts'/>
-///<reference path='ShareManager.ts'/>
 ///<reference path='Sound.ts'/>

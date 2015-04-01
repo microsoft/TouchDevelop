@@ -270,7 +270,7 @@ module TDev.Browser {
         extends Screen {
         constructor () {
             super()
-            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox, this.facebookLikeContainer, this.dingDingBox);
+            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox, this.dingDingBox);
             this.topBox = div(null, this.topContainer);
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
             this.templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
@@ -278,7 +278,6 @@ module TDev.Browser {
                 t.source = HelpTopic.shippedScripts[t.scriptid]
             })
         }
-        private facebookLikeContainer = div("hubFacebookLike");
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
         private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,black"));
@@ -344,12 +343,6 @@ module TDev.Browser {
                 currentScreen = this;
                 setGlobalScript(null);
                 TheEditor.historyMgr.setHash("hub", "");
-
-                if (Cloud.isOnline() && this.facebookLikeContainer.childNodes.length == 0)
-                    this.facebookLikeContainer.setChildren([
-                        TDev.RT.ShareManager.facebookLike("TouchDevelop - create apps everywhere, on all your devices!", Cloud.getServiceUrl(), "http://www.facebook.com/touchdevelop")
-                    ]);
-
                 Host.tryUpdate();
             }
         }

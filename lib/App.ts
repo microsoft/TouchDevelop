@@ -5,10 +5,6 @@ module TDev.RT {
         logException? : (err: any, meta? : any) => void;
     }
 
-    export interface AppNativeHost {
-        exec(msg: any, cb : (result : any) => void);
-    }
-
     //? A custom logger
     //@ stem("logger")
     export class AppLogger extends RTValue {
@@ -657,21 +653,22 @@ module TDev.RT {
         }
 
 
-        //? Invokes the host to execute a command described in the message and returns the response. If not available or errored, returns invalid.
-        //@ async readsMutable returns(JsonObject) dbgOnly
-        export function host_exec(message: JsonObject, r : ResumeCtx) {
+        //? Invokes the host to execute a command described in the message and returns the response. There is no restriction on the format of the request and response. If not available or errored, returns invalid.
+        //@ async readsMutable returns(string) dbgOnly
+        export function host_exec(message: string, r : ResumeCtx) {
 
-            var host = <AppNativeHost>(<any>window).touchDevelopHost;
-            if (!host || !host.exec) {
+            var exec = (<any>window).touchDevelopExec;
+            if (!exec) {
+                App.log("window.touchDevelopExec function not defined");
                 r.resumeVal(undefined);
                 return;
             }
 
             try {
-                host.exec(message.value(), (result) => { r.resumeVal(JsonObject.wrap(result)); });
+                exec(message, (result) => { r.resumeVal(result); });
             }
             catch (e) {
-                App.logEvent(App.DEBUG, "app", "posting message to host failed", undefined);
+                App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
                 r.resumeVal(undefined);
             }
         }

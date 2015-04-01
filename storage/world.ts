@@ -63,6 +63,7 @@ module TDev {
             bodyItem[guid + "-scriptVersionInCloud"] = undefined;
             return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
+
         function setInstalledAsync(
             indexTable: Storage.Table,
             scriptsTable: Storage.Table,
@@ -73,8 +74,15 @@ module TDev {
             cloudScriptVersion: string
         ) : Promise {
             var headerItem = {}
+            // In the case of a regular script, we can recover the metadata from
+            // the script body. In the case of an external editor, we demand
+            // that the caller properly set the metadata.
             if (script && !header.editor && (!header.meta || header.meta.comment === undefined))
                 header.meta = getScriptMeta(script);
+            if (header.editor && (!header.meta || !header.meta.name)) {
+                Util.log("ERROR pre-condition not met for [setInstalledAsync]");
+                debugger;
+            }
             headerItem[header.guid] = JSON.stringify(header);
             var bodyItem = {}
             // protz: I believe we can get rid of this assert now that we have
@@ -93,6 +101,7 @@ module TDev {
 
             return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
+
         function setCloudScriptVersionAsync(scriptsTable: Storage.Table, guid: string, cloudScriptVersion: string) : Promise {
             var bodyItem = {}
             bodyItem[guid + "-scriptVersionInCloud"] = typeof cloudScriptVersion === "string" ? cloudScriptVersion : undefined;
@@ -982,7 +991,8 @@ module TDev {
             hd.scriptVersion.instanceId = Cloud.getWorldId()
             hd.scriptVersion.time = getCurrentTime();
             hd.scriptVersion.version++;
-            hd.meta = null // recompute
+            if (!hd.editor)
+                hd.meta = null // recompute
             return World.setInstalledScriptAsync(hd, script, state, "", scriptVersionInCloud)
         }
 
