@@ -6030,27 +6030,30 @@ module TDev { export module Browser {
                         waitList.push(World.getInstalledScriptAsync(guid).then((scriptText: string) => {
                             var canPublish = true;
                             var madeUpdate = false;
-                            var app = AST.Parser.parseScript(scriptText)
-                            if (guid == this.getGuid())
-                                pullMergeIds = app.parentIds; // store those for later before they get cleared by publishing
-                            app.libraries().forEach((l: AST.LibraryRef) => {
-                                if (l.pubid) return;
-                                var hd = <Cloud.Header>headers[l.guid];
-                                if (!hd) {
-                                    HTML.showErrorNotification(lf("cannot find library reference {0} in {1}", l.getName(), app.getName()))
-                                    canPublish = false;
-                                    return;
-                                }
+                            if (!header.editor) {
+                                // This is a regular TouchDevelop script
+                                var app = AST.Parser.parseScript(scriptText)
+                                if (guid == this.getGuid())
+                                    pullMergeIds = app.parentIds; // store those for later before they get cleared by publishing
+                                app.libraries().forEach((l: AST.LibraryRef) => {
+                                    if (l.pubid) return;
+                                    var hd = <Cloud.Header>headers[l.guid];
+                                    if (!hd) {
+                                        HTML.showErrorNotification(lf("cannot find library reference {0} in {1}", l.getName(), app.getName()))
+                                        canPublish = false;
+                                        return;
+                                    }
 
-                                if (hd.status == "published") {
-                                    l.guid = "";
-                                    l.pubid = hd.scriptId;
-                                    madeUpdate = true;
-                                } else {
-                                    trigger(l.guid);
-                                    canPublish = false;
-                                }
-                            })
+                                    if (hd.status == "published") {
+                                        l.guid = "";
+                                        l.pubid = hd.scriptId;
+                                        madeUpdate = true;
+                                    } else {
+                                        trigger(l.guid);
+                                        canPublish = false;
+                                    }
+                                });
+                            }
 
                             var savePromise = Promise.as();
 
@@ -6058,8 +6061,9 @@ module TDev { export module Browser {
                                 // don't mess up with version number and instance id - this may conflict with the editor
                                 header.scriptVersion.instanceId = Cloud.getWorldId()
                                 header.scriptVersion.time = World.getCurrentTime();
-                                header.meta = app.toMeta()
-                                savePromise = World.setInstalledScriptAsync(header, app.serialize(), null)
+                                if (!header.editor)
+                                    header.meta = app.toMeta();
+                                savePromise = World.setInstalledScriptAsync(header, app.serialize(), null);
                             }
 
                             if (canPublish)
@@ -6283,7 +6287,7 @@ module TDev { export module Browser {
         }
 
         private uninstall()
-        {       
+        {
             Editor.updateEditorStateAsync(this.getGuid(),(st) => {
 
                 var isownedgroupscript = st
@@ -7361,7 +7365,7 @@ module TDev { export module Browser {
                 })
                 .then(() => ProgressOverlay.hide(), e => { ProgressOverlay.hide(); throw e; });
         }
-        
+
 
         private updateCommentsHeader(el : HTMLElement) {
             this.withUpdate(el,(u: JsonGroup) => {
@@ -8574,7 +8578,7 @@ module TDev { export module Browser {
             var pubId = div("sdAddInfoOuter", addInfoInner);
 
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon, 
+                            div("sdHeader", icon,
                                 div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
                                     )));
 
@@ -8613,7 +8617,7 @@ module TDev { export module Browser {
                 ch.unshift(div(null,
                     HTML.mkButtonElt("sdBigButton sdBigButtonFull", div("sdBigButtonIcon", HTML.mkImg("svg:fa-rocket,white")),
                         div("sdBigButtonDesc", lf("launch")))
-                        .withClick(() => 
+                        .withClick(() =>
                             Util.navigateInWindow(Cloud.getServiceUrl() + "/app/?r=" + this.publicId))
                     ));
 
