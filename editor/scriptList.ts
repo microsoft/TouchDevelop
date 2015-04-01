@@ -1214,7 +1214,8 @@ module TDev { export module Browser {
             else if (e.kind == "art") return this.getArtInfoById(e.id);
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
-            else if (e.kind == "release") return this.getReleaseInfoById(e.id);
+            else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
+            else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo)
             else return null;
         }
 
@@ -1649,6 +1650,17 @@ module TDev { export module Browser {
             return si;
         }
 
+        public getArtInfoById(id:string)
+        {
+            var si = <ArtInfo>this.getLocation(id);
+            if (!si) {
+                si = new ArtInfo(this);
+                si.loadFromWeb(id);
+                this.saveLocation(si);
+            }
+            return si;
+        }
+
         public getScriptInfoById(id:string)
         {
             var si = <ScriptInfo>this.getLocation(id);
@@ -1736,23 +1748,12 @@ module TDev { export module Browser {
             return si;
         }
 
-        public getReleaseInfoById(id:string)
+        public getSpecificInfoById(id:string, cl:any)
         {
-            var si = <ReleaseInfo>this.getLocation(id);
+            var si = this.getLocation(id);
             if (!si) {
-                si = new ReleaseInfo(this);
-                si.loadFromWeb(id);
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
-        public getArtInfoById(id:string)
-        {
-            var si = <ArtInfo>this.getLocation(id);
-            if (!si) {
-                si = new ArtInfo(this);
-                si.loadFromWeb(id);
+                si = new cl(this);
+                (<any>si).loadFromWeb(id);
                 this.saveLocation(si);
             }
             return si;
@@ -2732,6 +2733,12 @@ module TDev { export module Browser {
         public reportAbuse(big:boolean):HTMLElement
         {
             if (!big || !this.getPublicationId()) return null;
+
+            if (Cloud.lite) {
+                return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report/delete")).withClick(() => {
+                    AbuseReportInfo.abuseOrDelete(this.getPublicationId())
+                });
+            }
 
             return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
                 window.open(Cloud.getServiceUrl() + "/user/report/" + this.getPublicationId())
@@ -4258,6 +4265,26 @@ module TDev { export module Browser {
         }
     }
 
+    export class AbuseReportsTab
+        extends ListTab
+    {
+        constructor(par:BrowserPage) {
+            super(par, "/abusereports")
+            this.isEmpty = true;
+        }
+        public getId() { return "abusereports"; }
+        public getName() { return lf("abuse reports"); }
+
+        public bgIcon() { return "svg:fa-flag"; }
+        public noneText() { return lf("no abuse reports!"); }
+        public hideOnEmpty() { return true }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            return AbuseReportInfo.box(<JsonAbuseReport>cc)
+        }
+    }
+
     export class ScriptHeartsTab
         extends ListTab
     {
@@ -4410,6 +4437,10 @@ module TDev { export module Browser {
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
                     lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
+            case "abusereport":
+                return div(null, lab(lf("abuse report")),
+                                 lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
+                
             // missing: tag, crash buckets
             default:
                 debugger;
@@ -4654,6 +4685,7 @@ module TDev { export module Browser {
            //  new CommentsTab(this),
              , new ScriptsTab(this, lf("no scripts using this art"))
            //  new SubscribersTab(this)
+             , new AbuseReportsTab(this)
             ];
         }
 
@@ -5380,7 +5412,7 @@ module TDev { export module Browser {
 
                 if (big && !isTopic) facebook.setChildren(this.facebookLike())
 
-                if (abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
+                if (!Cloud.isRestricted() && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
                     updateHideButton();
                 }
 
@@ -5512,6 +5544,7 @@ module TDev { export module Browser {
                     new ScriptHeartsTab(this),
                     new TagsTab(this),
                     new InsightsTab(this),
+                    new AbuseReportsTab(this),
                 ];
             return r;
         }
@@ -5599,6 +5632,8 @@ module TDev { export module Browser {
                             })
                         });
                     }
+
+                    if (Cloud.isRestricted()) return
 
                     // group mode?
                     if(!st.collabSessionId) {
@@ -7206,7 +7241,12 @@ module TDev { export module Browser {
                                 return d.mkBox().withClick(() => {
                                     m.dismiss()
                                     Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
-                                    .then(() => ModalDialog.info(lf("password is reset"), p))
+                                    .then(() => {
+                                        var m = ModalDialog.info(lf("password is reset"), lf("new password:"))
+                                        var inp = HTML.mkTextInput("text", "")
+                                        inp.value = p
+                                        m.add(div(null, inp))
+                                    })
                                     .done()
                                 })
                             })
@@ -7632,6 +7672,143 @@ module TDev { export module Browser {
         }
     }
 
+    export class AbuseReportInfo
+        extends BrowserPage
+    {
+        constructor(par:Host) {
+            super(par)
+        }
+        public persistentId() { return "abusereport:" + this.publicId; }
+        //public getTitle() { return "report " + this.publicId; }
+
+        public getId() { return "abusereport"; }
+        public getName() { return lf("abuse report"); }
+
+        public loadFromWeb(id:string)
+        {
+            this.publicId = id;
+        }
+
+        public mkBoxCore(big:boolean)
+        {
+            var icon = div("sdIcon", HTML.mkImg("svg:fa-flag,white"));
+            icon.style.background = "#e72a2a";
+            var textBlock = div("sdCommentBlockInner");
+            var author = div("sdCommentAuthor");
+            var hd = div("sdCommentBlock", textBlock, author);
+
+            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, pubId)));
+
+            if (big)
+                res.className += " sdBigHeader";
+
+            return this.withUpdate(res, (u:JsonAbuseReport) => {
+                textBlock.setChildren([ u.text ]);
+                author.setChildren(["-- ", u.username]);
+                addInfoInner.setChildren([Util.timeSince(u.time) + " on " + u.publicationname]);
+            });
+        }
+
+        static box(c:JsonAbuseReport)
+        {
+            var b = TheHost;
+            var uid = b.getCreatorInfo(c);
+            var textDiv = div('sdSmallerTextBox', c.text);
+            var r = div("sdCmt sdCmtTop", uid.thumbnail(),
+                        div("sdCmtTopic",
+                            span("sdBold", c.username),
+                            c.resolution ? div("sdCmtResolved", c.resolution) : null
+                            //" on ", div("sdCmtScriptName", c.publicationname).withClick(() => b.loadDetails(b.getReferencedPubInfo(c)))
+                            ),
+                        textDiv,
+                        div("sdCmtMeta", [
+                                Util.timeSince(c.time),
+                                span("sdCmtId", " :: /" + c.id),
+                                //div("sdCmtBtns", delBtn),
+                            ]));
+
+            return r;
+        }
+
+        public mkSmallBox():HTMLElement
+        {
+            return this.mkBoxCore(false).withClick(() => 
+                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid)));
+        }
+
+        public initTab()
+        {
+            this.withUpdate(this.tabContent, (c:JsonAbuseReport) => {
+                this.tabContent.setChildren([
+                    ScriptInfo.labeledBox(lf("report on"), this.browser().getReferencedPubInfo(c).mkSmallBox()),
+                    AbuseReportInfo.box(c) ]);
+            });
+        }
+
+        public mkBigBox():HTMLElement { return null; }
+
+        public mkTabsCore():BrowserTab[] { return [this]; }
+
+        static abuseOrDelete(pubid:string)
+        {
+            Cloud.getPrivateApiAsync(pubid + "/candelete")
+            .then((resp:CanDeleteResponse) => {
+                var b = TheHost
+                var godelete = () => {
+                    ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname),
+                                    lf("delete"),
+                                    () => {
+                                        Cloud.deletePrivateApiAsync(pubid)
+                                        .then(() => HTML.showProgressNotification(lf("gone.")))
+                                        .done()
+                                        // TODO show it's gone in the UI
+                                    })
+                }
+                var viewreports = () => {
+                    m.dismiss()
+                    var inf = b.getAnyInfoByEtag({ id: pubid, kind: resp.publicationkind, ETag: "" });
+                    b.loadDetails(inf, "abusereports")
+                }
+
+                if (resp.publicationuserid == Cloud.getUserId()) {
+                    godelete()
+                } else {
+                    var m = new ModalDialog()
+                    var inp = HTML.mkTextInput("text", lf("Reason (eg., bad language, bullying, etc)"))
+                    var err = div(null)
+
+                    m.add([
+                        div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
+                        div("", inp),
+                        err,
+                        div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
+                                lf("No abuse reports so far.")),
+                        div("wall-dialog-buttons", [
+                            HTML.mkButton(lf("cancel"), () => m.dismiss()),
+                            !resp.hasabusereports ? null : HTML.mkButton(lf("view reports"), viewreports),
+                            !resp.candelete ? null : HTML.mkButton(lf("delete"), godelete),
+                            HTML.mkButton(lf("report"), () => {
+                                if (inp.value.trim().length < 5)
+                                    err.setChildren(lf("Need some reason."))
+                                else {
+                                    m.dismiss()
+                                    Cloud.postPrivateApiAsync(pubid + "/abusereports", { text: inp.value })
+                                    .then(() => HTML.showProgressNotification(lf("reported.")))
+                                    .done()
+                                }
+                            }),
+                        ]),
+                    ])
+                    m.show()
+                }
+            })
+            .done()
+        }
+
+    }
+
     export class CommentInfo
         extends BrowserPage
     {
@@ -7727,7 +7904,7 @@ module TDev { export module Browser {
 
         private _comments:CommentsTab;
 
-        public mkTabsCore():BrowserTab[] { return [this]; }
+        public mkTabsCore():BrowserTab[] { return [this, new AbuseReportsTab(this)]; }
 
         public bugCompareTo(other:CommentInfo, order:string) {
             var j0:JsonComment = TheApiCacheMgr.getCached(this.publicId)
