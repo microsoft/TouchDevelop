@@ -708,11 +708,12 @@ module TDev.RT.Node {
             var msgs = Util.getLogMsgs()
             msgs.reverse()
         }
-        return Promise.as({
+        var r = {
             applog: needed["applog"] ? App.logs() : undefined,
             tdlog: msgs,
             crashes: needed["crashes"] ? (host ? host.crashes : []) : undefined,
-        })
+        }
+        return Promise.as(r)
     }
 
     var httpActions:any = {
@@ -725,6 +726,7 @@ module TDev.RT.Node {
         resp.send = (code, msg) => {
             if (typeof msg == "string") msg = { message: msg }
             var buf = new Buffer(JSON.stringify(msg), "utf8")
+            Util.log("worker request buffer len=" + buf.length + " code " + code)
             resp.writeHead(code, { 
                     'content-length': buf.length, 
                     'content-type': 'application/json'
@@ -741,8 +743,10 @@ module TDev.RT.Node {
         var words = req.url.replace(/^\//, "").split(/\//)
         if (words[0] != "-tdevmgmt-") resp.send(404, "only /-tdevmgmt-/ supported")
         else if (words[1] != key) resp.send(403, "wrong key")
-        else if (httpActions.hasOwnProperty(words[2]))
+        else if (httpActions.hasOwnProperty(words[2])) {
+            Util.log("worker request, " + words[2])
             httpActions[words[2]](words.slice(3), req, resp)
+        }
         else
             resp.send(404, "no such API " + words[2])
     }

@@ -153,6 +153,7 @@ module TDev { export module Browser {
                         EditorSettings.setEditorMode(mode, false);
                     EditorSettings.setHubTheme(settings.hubtheme, false);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
+                    Cloud.litePermissions = settings.permissions;
                 }, e => { });
         }
 
@@ -6725,7 +6726,7 @@ module TDev { export module Browser {
                 ));
             ch.unshift(hd);
 
-            if (Cloud.isLiteAdmin()) {
+            if (Cloud.hasPermission("admin")) {
                 ch.unshift(div(null,
                     HTML.mkButton(lf("permissions"),
                         () => {

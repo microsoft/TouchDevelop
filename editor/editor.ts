@@ -4169,6 +4169,10 @@ module TDev
                 betaDiv
             ])
 
+            m.add([div("wall-dialog-body", [
+                        (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
+                   ])])
+
             if (TDev.dbg) {
                 var chaosOfflineEdit = HTML.mkCheckBox(lf("chaos offline mode"), (v) => Cloud.setChaosOffline(v), Cloud.isChaosOffline());
                 m.add([
@@ -4200,7 +4204,6 @@ module TDev
                         (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
-                        (Cloud.isLiteAdmin() ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                 ]);
             }
             m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));

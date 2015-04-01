@@ -2,10 +2,12 @@
 module TDev.Cloud {
 
     export var lite = false;
-
-    export function isLiteAdmin()
+    export var litePermissions:string = null;
+    
+    export function hasPermission(perm:string)
     {
-        return dbg && lite;
+        if (!litePermissions) return false // typical fast path
+        return litePermissions.indexOf("," + perm + ",") >= 0 || litePermissions.indexOf(",admin,") >= 0
     }
 
     export function getServiceUrl() { return <string>((<any>window).rootUrl); }
@@ -421,6 +423,7 @@ module TDev.Cloud {
         school?: string;
         wallpaper?: string;
         hubtheme?: string;
+        permissions?: string;
     }
     export function getUserInstalledAsync() : Promise // of InstalledHeaders
     {
@@ -518,6 +521,29 @@ module TDev.Cloud {
             url += "&mergeids=" + encodeURIComponent(mergeIds)
         return Util.httpPostJsonAsync(getPrivateApiUrl(url), Cloud.lite ? meta : "")
     }
+    export function postUserInstalledCompileAsync(guid:string, cppSource:string) : Promise
+    {
+        var r = new PromiseInv()
+        var pollUrl = ""
+        var poll = () => {
+            Util.httpGetJsonAsync(pollUrl).done(
+                json => r.success(json),
+                err => Util.setTimeout(1000, poll))
+        }
+
+        Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
+            config: "microbit",
+            source: cppSource
+        })
+        .then(resp => {
+            pollUrl = resp.statusurl
+            poll()
+        })
+        .done()
+
+        return r
+    }
+
     export function postApiBatch(bundle: any) : Promise // of BatchResponses
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl(null), bundle);
@@ -549,7 +575,7 @@ module TDev.Cloud {
         return Util.httpGetJsonAsync(getPrivateApiUrl("me/keys"));
     }
     export function getUserSettingsAsync(): Promise {
-            return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings"));
+            return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"));
     }
     export function postUserSettingsAsync(body: UserSettings) : Promise // of void
     {
