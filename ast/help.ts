@@ -319,6 +319,7 @@ module TDev {
         publicationuserid: string;
         candelete:boolean;
         candeletekind:boolean;
+        canmanage:boolean;
         hasabusereports:boolean;
     }
 

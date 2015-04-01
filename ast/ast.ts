@@ -2165,6 +2165,7 @@ module TDev.AST {
 
         public htmlColor()
         {
+            if (Cloud.isRestricted()) return "#85BB65"
             if (!this.color) return ScriptIcons.stableColorFromName(this.getName());
             else return "#" + this.color.replace("#", "").slice(-6);
         }

@@ -7691,8 +7691,8 @@ module TDev { export module Browser {
 
         public mkBoxCore(big:boolean)
         {
-            var icon = div("sdIcon", HTML.mkImg("svg:fa-flag,white"));
-            icon.style.background = "#e72a2a";
+            var icon = div("sdIcon");
+            icon.style.background = "#aaa";
             var textBlock = div("sdCommentBlockInner");
             var author = div("sdCommentAuthor");
             var hd = div("sdCommentBlock", textBlock, author);
@@ -7705,6 +7705,16 @@ module TDev { export module Browser {
                 res.className += " sdBigHeader";
 
             return this.withUpdate(res, (u:JsonAbuseReport) => {
+                if (u.resolution == "ignored") {
+                    icon.setChildren(HTML.mkImg("svg:fa-check-square-o,white"))
+                    icon.style.background = "#308919";
+                } else if (u.resolution == "deleted") {
+                    icon.setChildren(HTML.mkImg("svg:fa-trash,white"))
+                    icon.style.background = "#308919";
+                } else {
+                    icon.setChildren(HTML.mkImg("svg:fa-flag,white"))
+                    icon.style.background = "#e72a2a";
+                }
                 textBlock.setChildren([ u.text ]);
                 author.setChildren(["-- ", u.username]);
                 addInfoInner.setChildren([Util.timeSince(u.time) + " on " + u.publicationname]);
@@ -7716,7 +7726,7 @@ module TDev { export module Browser {
             var b = TheHost;
             var uid = b.getCreatorInfo(c);
             var textDiv = div('sdSmallerTextBox', c.text);
-            var r = div("sdCmt sdCmtTop", uid.thumbnail(),
+            var r = div("sdCmt sdCmtTop " + (c.resolution == "ignored" ? "disabledItem" : ""), uid.thumbnail(),
                         div("sdCmtTopic",
                             span("sdBold", c.username),
                             c.resolution ? div("sdCmtResolved", c.resolution) : null
@@ -7729,13 +7739,17 @@ module TDev { export module Browser {
                                 //div("sdCmtBtns", delBtn),
                             ]));
 
+            r.withClick(() => {
+
+            })
+
             return r;
         }
 
         public mkSmallBox():HTMLElement
         {
             return this.mkBoxCore(false).withClick(() => 
-                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid)));
+                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, this.publicId)));
         }
 
         public initTab()
@@ -7751,7 +7765,7 @@ module TDev { export module Browser {
 
         public mkTabsCore():BrowserTab[] { return [this]; }
 
-        static abuseOrDelete(pubid:string)
+        static abuseOrDelete(pubid:string, abuseid:string = "")
         {
             Cloud.getPrivateApiAsync(pubid + "/candelete")
             .then((resp:CanDeleteResponse) => {
@@ -7771,25 +7785,39 @@ module TDev { export module Browser {
                     var inf = b.getAnyInfoByEtag({ id: pubid, kind: resp.publicationkind, ETag: "" });
                     b.loadDetails(inf, "abusereports")
                 }
+                var goignore = () => {
+                    m.dismiss()
+                    Cloud.postPrivateApiAsync(abuseid, { resolution: "ignored" })
+                    .then(() => HTML.showProgressNotification(lf("ignored.")))
+                    .done()
+                }
 
-                if (resp.publicationuserid == Cloud.getUserId()) {
+                if (!abuseid && resp.publicationuserid == Cloud.getUserId()) {
                     godelete()
                 } else {
                     var m = new ModalDialog()
                     var inp = HTML.mkTextInput("text", lf("Reason (eg., bad language, bullying, etc)"))
                     var err = div(null)
 
-                    m.add([
-                        div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
-                        div("", inp),
-                        err,
-                        div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
-                                lf("No abuse reports so far.")),
+                    if (abuseid) {
+                        m.add([
+                            div("wall-dialog-header", lf("resolve report about '{0}'", resp.publicationname)),
+                        ])
+                    } else {
+                        m.add([
+                            div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
+                            div("", inp),
+                            err,
+                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
+                                    lf("No abuse reports so far.")),
+                        ])
+                    }
+
+                    m.add(
                         div("wall-dialog-buttons", [
                             HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                            !resp.hasabusereports ? null : HTML.mkButton(lf("view reports"), viewreports),
-                            !resp.candelete ? null : HTML.mkButton(lf("delete"), godelete),
-                            HTML.mkButton(lf("report"), () => {
+                            resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
+                            !abuseid && HTML.mkButton(lf("report"), () => {
                                 if (inp.value.trim().length < 5)
                                     err.setChildren(lf("Need some reason."))
                                 else {
@@ -7799,8 +7827,9 @@ module TDev { export module Browser {
                                     .done()
                                 }
                             }),
-                        ]),
-                    ])
+                            abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), goignore),
+                            resp.candelete && HTML.mkButton(lf("delete publication"), godelete),
+                        ]))
                     m.show()
                 }
             })
