@@ -5822,7 +5822,8 @@ module TDev { export module Browser {
                 .done((scriptText:string) => {
                 if (!scriptText)
                     return;
-                if (this.cloudHeader && this.cloudHeader.editor)
+                if (this.cloudHeader && this.cloudHeader.editor ||
+                    this.jsonScript && this.jsonScript.editor)
                     return;
 
                 var oldPlatform = this.app && this.app.getPlatform();
