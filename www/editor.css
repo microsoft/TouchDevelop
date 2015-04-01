@@ -4337,33 +4337,12 @@ width: 50%;
   width: 28em;
 }
 
-
-.hubFacebookLike {
-  position: absolute;
-  right: 1.5em;
-  top: 3.6em;
-}
-
-.hubContent .hubFacebookLike {
-  right: 2.8em;
-}
-
 .hubContent .hubLogo {
   right: 2.2em;
 }
 
-.portrait .hubFacebookLike {
-  right: 0.7em;
-}
-
 .portrait .hubLogo {
   right: 0.2em;
-}
-
-.introFacebookLike {
-  position: absolute;
-  right: 1em;
-  bottom: 0.5em;
 }
 
 .introThumb {

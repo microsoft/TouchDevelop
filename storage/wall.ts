@@ -221,10 +221,6 @@ module TDev {
             var betaNote = betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
             betaNote += "<b>" + appName + "</b>" + author;
 
-            //var like = "<span class='beta-underline'>like</span>&nbsp;&nbsp;";
-            //if (Browser.webRunner)
-            //    like = "<div class='bottomSocialWidget'>" + RT.ShareManager.createFacebookLike(shareLink() || Cloud.getServiceUrl()) + "</div>";
-
             Browser.setInnerHTML(copyrights,
                                 //"<span class='beta-underline'>share</span>&nbsp;&nbsp;" +
                                 //betaNote + "&nbsp;&nbsp;" +
