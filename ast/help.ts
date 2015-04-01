@@ -225,6 +225,13 @@ module TDev {
         resolved?: string;
     }
 
+    export interface JsonAbuseReport extends JsonPubOnPub
+    {
+        text:string; // report text
+        resolution:string;
+        publicationuserid:string;
+    }
+
     export interface JsonReview extends JsonPubOnPub
     {
         ispositive: boolean;
@@ -304,6 +311,16 @@ module TDev {
         tracks?: JsonVideoTrack[];
         // localized video streams
         sources: JsonVideoSource[];
+    }
+
+    export interface CanDeleteResponse {
+        publicationkind: string;
+        publicationname: string;
+        publicationuserid: string;
+        candelete:boolean;
+        candeletekind:boolean;
+        canmanage:boolean;
+        hasabusereports:boolean;
     }
 
     export class MdComments
