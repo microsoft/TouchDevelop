@@ -1031,7 +1031,7 @@ module TDev { export module Browser {
                     div('', div('', lf("group description")), descr),
                     div('', div('', lf("school name")), school),
                     div('', div('', lf("class grade")), grade),
-                    EditorSettings.editorMode() == EditorMode.pro ? div('', allowExport) : undefined
+                    (!Cloud.isRestricted() && EditorSettings.editorMode() == EditorMode.pro) ? div('', allowExport) : undefined
                     ),
                 div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
@@ -1044,7 +1044,8 @@ module TDev { export module Browser {
                             grade: grade.value,
                             allowexport: HTML.getCheckboxValue(allowExport),
                             allowappstatistics: false,
-                            userplatform: Browser.platformCaps
+                            userplatform: Browser.platformCaps,
+                            isclass: Cloud.isRestricted(),
                         };
                         progressBar.start();
                         cancelBtn.removeSelf();
@@ -1060,6 +1061,8 @@ module TDev { export module Browser {
                             }).then(() => {
                                 progressBar.stop();
                                 m.dismiss();
+                                if (Cloud.isRestricted())
+                                    return Promise.as()
                                 return groupInfo.changePictureAsync();
                             })
                             .done(() => TheHost.loadDetails(groupInfo, "settings"));
@@ -7173,6 +7176,8 @@ module TDev { export module Browser {
 
         public tabBox(cc:JsonIdObject):HTMLElement
         {
+            var grp:JsonGroup = TheApiCacheMgr.getCached(this.parent.publicId)
+
             var c = <JsonUser>cc;
             TheApiCacheMgr.store(c.id, c);
             var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
@@ -7188,6 +7193,26 @@ module TDev { export module Browser {
                             });
                     });
                 }));
+
+                if (grp && grp.isclass) {
+                    user.appendChild(HTML.mkButton(lf("reset password"), () => {
+                        Cloud.getPrivateApiAsync(c.id + "/resetpassword")
+                        .done(resp => {
+                            var boxes = resp.passwords.map(p => {
+                                var d = new DeclEntry(p)
+                                d.icon = "svg:lock,white"
+                                return d.mkBox().withClick(() => {
+                                    m.dismiss()
+                                    Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
+                                    .then(() => ModalDialog.info(lf("password is reset"), p))
+                                    .done()
+                                })
+                            })
+                            var m = new ModalDialog()
+                            m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
+                        })
+                    }));
+                }
             }
             return user;
         }
@@ -7379,10 +7404,11 @@ module TDev { export module Browser {
 
                 ad.setChildren([]);
                 if (this.isMine()) {
-                    ad.appendChild(HTML.mkButton(lf("change picture"), () => {
-                        tick(Ticks.groupChangePicture);
-                        this.changePictureAsync().done(() => this.browser().loadDetails(this, "settings"));
-                    }));
+                    if (!Cloud.isRestricted())
+                        ad.appendChild(HTML.mkButton(lf("change picture"), () => {
+                            tick(Ticks.groupChangePicture);
+                            this.changePictureAsync().done(() => this.browser().loadDetails(this, "settings"));
+                        }));
                     if(u.isrestricted) {
                         Cloud.getPrivateApiAsync(this.publicId + "/code")
                             .done((r : Cloud.ApiGroupCodeResponse ) => {

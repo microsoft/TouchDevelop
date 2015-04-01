@@ -135,6 +135,7 @@ module TDev {
         allowexport: boolean;
         allowappstatistics: boolean;
         isrestricted : boolean;
+        isclass: boolean;
         pictureid : string;
         comments : number;
         positivereviews : number;

@@ -10,6 +10,11 @@ module TDev.Cloud {
         return litePermissions.indexOf("," + perm + ",") >= 0 || litePermissions.indexOf(",admin,") >= 0
     }
 
+    export function isRestricted()
+    {
+        return !!lite;
+    }
+
     export function getServiceUrl() { return <string>((<any>window).rootUrl); }
 
     export function mkLegalDiv() {
@@ -488,6 +493,7 @@ module TDev.Cloud {
         allowexport: boolean;
         allowappstatistics: boolean;
         userplatform: string[];
+        isclass?: boolean;
     }
     export interface PostApiGroupsResponse {
         id: string;
