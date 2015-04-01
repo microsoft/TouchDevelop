@@ -807,13 +807,19 @@ module TDev
                     Util.setTimeout(1000 * (10 - retry),() => this.postEventHubsData(url, token, payload, retry));
                 }
             }
-            var client = new XMLHttpRequest();
-            client.open('POST', url);
-            client.setRequestHeader('Authorization', token);
-            client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
-            client.ontimeout = tryAgain;
-            client.onerror = tryAgain;
-            client.send(JSON.stringify(payload));
+
+            try {
+                var client = new XMLHttpRequest();
+                client.open('POST', url);
+                client.setRequestHeader('Authorization', token);
+                client.setRequestHeader("Content-Type", 'application/atom+xml;type=entry;charset=utf-8');
+                client.ontimeout = tryAgain;
+                client.onerror = tryAgain;
+                client.send(JSON.stringify(payload));
+            }
+            catch (e) {
+                Util.reportError("tutorialeventhubs", e, false);
+            }
         }
 
         private loadAnonymousId(): string {
