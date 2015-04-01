@@ -36,7 +36,7 @@ module TDev.RT {
         export var facebookLike = (text : string, url : string, fburl : string) : HTMLElement =>
         {
             var r = div('');
-            if (Cloud.isOnline() && !Browser.isMobile && !Browser.inCordova && !Browser.localProxy) {
+            if (Cloud.isOnline() && !Browser.isMobile && !Browser.inCordova && !Browser.localProxy && !Cloud.isRestricted()) {
                 r.innerHTML =
                   TDev.RT.ShareManager.createTwitterTweet(text, url)
                   + "&nbsp;&nbsp;" +

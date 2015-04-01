@@ -6693,12 +6693,12 @@ module TDev { export module Browser {
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             new UserScoreTab(this),
-             new ScreenShotTab(this),
+             Cloud.isRestricted() ? null : new UserScoreTab(this),
+             Cloud.isRestricted() ? null : new ScreenShotTab(this),
              new ScriptsTab(this),
              new UserSocialTab(this),
             ];
-            if (this.isMe())
+            if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
             return tabs;
         }
@@ -6749,11 +6749,13 @@ module TDev { export module Browser {
             this.withUpdate(hd, (u: JsonUser) => {
                 hd.setChildren([Host.expandableTextBox(u.about)]);
                 if (this.isMe()) {
-                    var scoreDiv = Browser.ScriptInfo.mkNum(u.score, "svg:Award,white,clip=110");
-                    var scoreBtn = HTML.mkButtonElt("wall-button", scoreDiv);
-                    Util.clickHandler(scoreBtn, () => {
-                        Util.setHash("#list:installed-scripts:user:" + this.publicId + ":score")
-                    });
+                    if (u.score) {
+                        var scoreDiv = Browser.ScriptInfo.mkNum(u.score, "svg:Award,white,clip=110");
+                        var scoreBtn = HTML.mkButtonElt("wall-button", scoreDiv);
+                        Util.clickHandler(scoreBtn, () => {
+                            Util.setHash("#list:installed-scripts:user:" + this.publicId + ":score")
+                        });
+                    }
                     accountButtons.appendChildren([scoreBtn, HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())]);
                 }
             });
@@ -7344,7 +7346,7 @@ module TDev { export module Browser {
             var tabs: BrowserTab[] = [
                 new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
                 new GroupUsersTab(this),
-                this.collaborations = new CollaborationsTab(this),
+                this.collaborations = Cloud.isRestricted() ? null : new CollaborationsTab(this),
                 new GroupUserProgressTab(this),
                 this
             ];
