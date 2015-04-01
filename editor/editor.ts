@@ -4056,7 +4056,7 @@ module TDev
             progressBar.start();
 
             // initially, delay served for testing; but then without it, it would just look like the screen flickering too much (often too fast)
-            Promise.delay(1000, () => Cloud.isOnlineWithPingAsync().then((isOnline: boolean) =>
+            Promise.delay(100, () => Cloud.isOnlineWithPingAsync().then((isOnline: boolean) =>
                 {
                     progressBar.stop();
                     progressDialog.dismiss();
@@ -5728,6 +5728,7 @@ module TDev
                     ))
                     return;
                 window.localStorage["everLoggedIn"] = "yes";
+                Browser.TheHost.initMeAsync().done()
                 h = h.substr(0, i);
             }
 
