@@ -4171,6 +4171,7 @@ module TDev
 
             m.add([div("wall-dialog-body", [
                         (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
+                        (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
                    ])])
 
             if (TDev.dbg) {
@@ -4206,6 +4207,7 @@ module TDev
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
             }
+
             m.add(div("wall-dialog-buttons", HTML.mkButton(lf("close"), () => m.dismiss())));
 
             m.setScroll();
