@@ -24,7 +24,7 @@ module TDev.Browser {
             description: 'Learn to code with Mineacraft',
             logoArtId: 'eopyzwpm',
             wallpaperArtId: 'abqqsurv',
-            tutorialsTopic: 'ysxp',
+            tutorialsTopic: 'minecraftpitutorials',
             requiresShell: true,
             scriptSearch: '#minecraft',
         },
