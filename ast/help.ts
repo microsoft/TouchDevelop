@@ -183,7 +183,7 @@ module TDev {
         screenshotthumburl:string;
         screenshoturl:string;
         mergeids:string[];
-        editor?: string;
+        editor?: string; // convention where empty means touchdevelop, for backwards compatibility
     }
 
     export interface JsonHistoryItem

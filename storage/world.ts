@@ -850,17 +850,26 @@ module TDev {
                     var item = items[guid];
                     return item.status == "published" && item.scriptId == scriptId;
                 });
-                if (matchingGuids.length > 0) return items[matchingGuids[0]];
-                return ScriptCache.getScriptAsync(scriptId).then((text) => {
+                if (matchingGuids.length > 0)
+                    return items[matchingGuids[0]];
+                return Promise.join({
+                    text: ScriptCache.getScriptAsync(scriptId),
+                    json: (<any>Browser).TheApiCacheMgr.getAsync(scriptId),
+                }).then(data => {
+                    var text: string = data.text;
+                    var json = data.json;
                     if (!text) {
                         HTML.showErrorNotification("cannot get script /" + scriptId);
                         return new PromiseInv(); // stall
+                    } else {
+                        return installAsync("published", scriptId, userId, {
+                            scriptText: text,
+                            // This is a script stub that uses the different
+                            // convention
+                            editorName: json.editor || "touchdevelop",
+                            scriptName: json.name,
+                        });
                     }
-                    return installAsync("published", scriptId, userId, {
-                        scriptText: text,
-                        editorName: "touchdevelop",
-                        scriptName: getScriptMeta(text).name,
-                    })
                 });
             });
         }
