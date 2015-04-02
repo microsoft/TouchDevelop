@@ -854,7 +854,7 @@ module TDev {
                     return items[matchingGuids[0]];
                 return Promise.join({
                     text: ScriptCache.getScriptAsync(scriptId),
-                    json: (<any>Browser).TheApiCacheMgr.getAsync(scriptId),
+                    json: (<any>Browser).TheApiCacheMgr.getAsync(scriptId, true),
                 }).then(data => {
                     var text: string = data.text;
                     var json = data.json;
