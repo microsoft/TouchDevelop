@@ -52,10 +52,6 @@ body {
   padding: .5em;
 }
 
-#editor {
-  flex: 3;
-}
-
 #log {
     overflow: auto;
     width: 500px;

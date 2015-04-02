@@ -239,7 +239,8 @@ module TDev {
         var state = loadEditorState(message.script.editorState);
 
         Blockly.inject($("#editor"), {
-            toolbox: $("#blockly-toolbox")
+            toolbox: $("#blockly-toolbox"),
+            scrollbars: false
         });
         loadBlockly(message.script.scriptText);
         // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual
@@ -309,9 +310,6 @@ module TDev {
         $("#command-quit").addEventListener("click", () => {
             doSave();
             post({ type: External.MessageType.Quit });
-        });
-        $("#command-save").addEventListener("click", () => {
-            doSave(true);
         });
         $("#command-compile").addEventListener("click", () => {
             post(<External.Message_Compile> {
