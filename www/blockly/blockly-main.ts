@@ -282,8 +282,8 @@ module TDev {
             "(dated from: "+state.lastSave+")");
     }
 
-    function doSave() {
-        if (!dirty)
+    function doSave(force = false) {
+        if (!dirty && !force)
             return;
 
         var text = saveBlockly();
@@ -311,7 +311,7 @@ module TDev {
             post({ type: External.MessageType.Quit });
         });
         $("#command-save").addEventListener("click", () => {
-            doSave();
+            doSave(true);
         });
         $("#command-compile").addEventListener("click", () => {
             post(<External.Message_Compile> {

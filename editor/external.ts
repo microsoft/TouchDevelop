@@ -167,13 +167,48 @@ module TDev {
                         TheChannel = null;
                         break;
 
-                    case MessageType.Compile:
-                        this.post(<Message_CompileAck>{
-                            type: MessageType.CompileAck,
-                            status: Status.Error,
-                            error: "Not implemented"
+                    case MessageType.Compile: {
+                        var message1 = <Message_Compile> event.data;
+                        var cpp = "";
+                        switch (message1.language) {
+                            case Language.CPlusPlus:
+                                cpp = message1.text;
+                                break;
+                            case Language.TouchDevelop:
+                                cpp = 'int main () { }';
+                                break;
+                        }
+                        Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
+                            // Success.
+                            console.log(json);
+                            if (json.success) {
+                                this.post(<Message_CompileAck>{
+                                    type: MessageType.CompileAck,
+                                    status: Status.Ok
+                                });
+                                document.location.href = json.hexurl;
+                            } else {
+                                var errorMsg = "unknown error";
+                                if (json.mbedresponse)
+                                    errorMsg = "error code " + json.mbedresponse.code +
+                                        "errors " + json.mbedresponse.errors;
+                                this.post(<Message_CompileAck>{
+                                    type: MessageType.CompileAck,
+                                    status: Status.Error,
+                                    error: errorMsg
+                                });
+                            }
+                        }, (json: string) => {
+                            // Failure
+                            console.log(json);
+                            this.post(<Message_CompileAck>{
+                                type: MessageType.CompileAck,
+                                status: Status.Error,
+                                error: "early error"
+                            });
                         });
                         break;
+                    }
 
                     default:
                         console.error("[external] unexpected message type", message.type);
