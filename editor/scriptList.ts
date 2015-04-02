@@ -4404,14 +4404,16 @@ module TDev { export module Browser {
         }
 
         public getId() { return "notifications"; }
-        public getName() { return lf("notifications"); }
+        public getName() { return this.parent instanceof GroupInfo ? lf("activity") : lf("notifications"); }
 
         public bgIcon() { return "svg:ExclamationCircleAlt"; }
         public noneText() { return lf("nothin' goin' on"); }
 
         public topContainer():HTMLElement
         {
-            return div("sdListLabel", spanDirAuto(lf("notifications")))
+            if (this.parent instanceof NotificationsPage)
+                return div("sdListLabel", spanDirAuto(lf("notifications")))
+            return div("sdListLabel", spanDirAuto(lf("members activity")))
         }
 
         public tabBox(c:JsonPublication):HTMLElement
@@ -4427,7 +4429,7 @@ module TDev { export module Browser {
 
             switch (kind) {
             case "script":
-                return div(null, lab(notkind == "subscribed" ? lf("published") : lf("forked")))
+                return div(null, lab(notkind == "onmine" ? lf("forked") : lf("published")))
             case "comment":
                 //return div(null, lab(own ? lf("wrote") : lf("reply")))
                 return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
@@ -7420,6 +7422,8 @@ module TDev { export module Browser {
                 new GroupUserProgressTab(this),
                 this
             ];
+            if (Cloud.lite)
+                tabs.unshift(new NotificationsTab(this))
             return tabs;
         }
 
