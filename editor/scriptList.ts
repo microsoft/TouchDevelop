@@ -1933,7 +1933,7 @@ module TDev { export module Browser {
     // this is not a promise - it may trigger updates twice
     export class ApiCacheEntry
     {
-        public currentData:any;
+        public currentData:any = null;
         public etag:string;
         private callbacks = [];
         private state = EntryState.stale;
@@ -1982,15 +1982,18 @@ module TDev { export module Browser {
             this.state = EntryState.current;
         }
 
-        public invalidate()
+        public invalidate(poke = false)
         {
             this.state = EntryState.stale;
+            if (poke) this.refresh()
         }
 
         public got404()
         {
             if (/^me\/reviewed/.test(this.path))
                 this.gotData({ id: "" }, "");
+            else
+                this.gotData(false, "");
         }
 
         public gotData(data:any, etag:string)
@@ -1998,8 +2001,7 @@ module TDev { export module Browser {
             var wasSame = false;
             this.etag = etag;
             var newDataStr = JSON.stringify(data)
-            if (!!this.currentData)
-                wasSame = newDataStr == JSON.stringify(this.currentData);
+            wasSame = newDataStr == JSON.stringify(this.currentData);
             this.mgr.logData(wasSame ? 1 : newDataStr.length)
             this.hardSerialized = 0
             this.currentData = data;
@@ -2051,13 +2053,13 @@ module TDev { export module Browser {
         {
             if (this.state == EntryState.fetching)
                 this.callbacks.push(f);
-            if (!!this.currentData)
+            if (this.currentData != null)
                 f(this.currentData, this.currentOptions());
         }
 
         public attachAutoUpdate(elt:HTMLElement)
         {
-            if (this.currentData)
+            if (this.currentData != null)
                 (<any>elt).autoUpdate(elt, this.currentData, this.currentOptions());
             this.attachedIds.push(elt.id);
         }
@@ -2078,7 +2080,7 @@ module TDev { export module Browser {
         public updateWithJson(j:SerializedApiCacheEntry)
         {
             this.lastUse = j.lastUse;
-            if (j.currentData) {
+            if (j.currentData != null) {
                 this.etag = j.etag
                 this.currentData = j.currentData
                 this.hardSerialized = 0
@@ -2324,17 +2326,24 @@ module TDev { export module Browser {
             });
         }
 
-        public invalidate(path:string, rec = false)
+        public refetch(path:string, rec = false)
+        {
+            this.invalidate(path, rec, true)
+        }
+
+        public invalidate(path:string, rec = false, poke = false)
         {
             this.forEachEntry((e) => {
                 if (Util.startsWith(e.path, path)) {
                     if (rec && e.currentData && e.currentData.etags) {
                         e.currentData.etags.forEach(i => {
                             var ee = this.entriesByPath[i.id]
-                            if (ee) ee.invalidate()
+                            if (ee) ee.invalidate(poke)
                         })
                     }
-                    e.invalidate()
+                    e.invalidate(poke)
+                } else if (e.currentData && e.currentData.publicationid == path) {
+                    e.invalidate(poke)
                 }
             })
         }
@@ -2442,7 +2451,7 @@ module TDev { export module Browser {
             var first = true;
             for (var i = 0; i < entries.length; ++i) {
                 var entry = entries[i]
-                if (!entry.currentData) continue;
+                if (entry.currentData == null) continue;
 
                 var s:string;
                 if (forLocal && entry.hardSerialized == 1) {
@@ -2741,7 +2750,7 @@ module TDev { export module Browser {
             }
 
             return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
-                window.open(Cloud.getServiceUrl() + "/user/report/" + this.getPublicationId())
+                AbuseReportInfo.abuseOrDelete(this.getPublicationId())
             });
 
         }
@@ -2845,6 +2854,8 @@ module TDev { export module Browser {
             var count = this.nextCount(cont);
             var path = this.getUrl() + (/\?/.test(this.getUrl()) ? "&" : "?") + "count=" + count + (!cont ? "" : "&continuation=" + cont);
             TheApiCacheMgr.getAnd(path, (l:JsonList) => {
+                if (!l) l = { items: [], etags: [], continuation: "" }
+
                 if (!cont) {
                     this.resetEltsSoFar();
                     this.eltsSoFar = [];
@@ -3887,7 +3898,7 @@ module TDev { export module Browser {
             }
 
             var reportAbuse = () => {
-                window.open(Cloud.getServiceUrl() + "/user/report/" + c.id)
+                AbuseReportInfo.abuseOrDelete(c.id)
             }
 
             if (c.userid == Cloud.getUserId() || (this.canDeleteAny && this.canDeleteAny())) {
@@ -4565,7 +4576,7 @@ module TDev { export module Browser {
 
         static mkBox(b: Host, c: JsonScreenShot) {
             var reportAbuse = () => {
-                window.open(Cloud.getServiceUrl() + "/user/report/" + c.id)
+                AbuseReportInfo.abuseOrDelete(c.id)
             }
             var d = div("sdScreen", HTML.mkImg(c.thumburl));
             d.withClick(() => {
@@ -5100,6 +5111,22 @@ module TDev { export module Browser {
             return c;
         }
 
+        public withUpdate(elt:HTMLElement, update:(data:any)=>void)
+        {
+            // this needs to deal with the fake jsonScript created from local header
+            this.getJsonScriptPromise()
+
+            if (this.publicId)
+                super.withUpdate(elt, d => {
+                    this.jsonScript = d
+                    update(d)
+                })
+            else
+                update(this.getJsonScriptPromise().currentData)
+
+            return elt
+        }
+
         public editAsync() : Promise
         {
             TheEditor.lastListPath = this.browser().getApiPath()
@@ -5255,9 +5282,11 @@ module TDev { export module Browser {
             if (!!id)
                 this.cloudHeader = this.browser().getInstalledByPubId(id);
             this.getJsonScriptPromise().whenUpdated((j:JsonScript,opts:DataOptions) => {
-                if (opts.isDefinitive && j.updateid && j.id !== j.updateid && j.updatetime > j.time)
-                    World.rememberUpdate(j.id, j.updateid);
-                if(!opts.isSame) this.loadJsonScriptCore(j);
+                if (j.id) {
+                    if (opts.isDefinitive && j.updateid && j.id !== j.updateid && j.updatetime > j.time)
+                        World.rememberUpdate(j.id, j.updateid);
+                    if(!opts.isSame) this.loadJsonScriptCore(j);
+                }
             });
         }
 
@@ -5308,9 +5337,10 @@ module TDev { export module Browser {
                 res.className += " sdBigHeader";
 
             var setLocal = () => {
-                nameBlock.setChildren([this.app.getName()]);
+                var deleted = (<any>this.jsonScript) === false
+                nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
-                icon.style.backgroundColor = this.app.htmlColor();
+                icon.style.backgroundColor = deleted ? "#999999" : this.app.htmlColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
 
                 var time = 0;
@@ -5398,8 +5428,7 @@ module TDev { export module Browser {
                 abuseDiv.setChildren([btn]);
             }
 
-            var setNumbers = (js:any, opts:DataOptions) => {
-                if (opts.isSame) return;
+            var setNumbers = () => {
                 setLocal();
                 ScriptInfo.addTutorialProgress(icon, this.cloudHeader, true);
 
@@ -5450,9 +5479,8 @@ module TDev { export module Browser {
             }
 
             setLocal();
-            this.getJsonScriptPromise().whenUpdated(setNumbers);
 
-            return res;
+            return this.withUpdate(res, setNumbers)
         }
 
         public mkTile(sz:number)
@@ -5777,14 +5805,15 @@ module TDev { export module Browser {
                 return ScriptInfo.labeledBox(hd, this.browser().getScriptInfoById(id).mkSmallBox());
             }
 
-            this.getJsonScriptPromise().whenUpdated((js,opts) => {
-                if (opts.isSame) return;
+            this.withUpdate(descDiv, () => {
+                if (!this.jsonScript) return;
+
                 this.buildTopic();
 
                 if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
                     basisDiv.setChildren(scriptBox(lf("base"), this.cloudHeader.scriptId));
 
-                if (basisDiv.childNodes.length == 0 && js.rootid != js.id)
+                if (basisDiv.childNodes.length == 0 && this.jsonScript.rootid != this.jsonScript.id)
                     basisDiv.setChildren(ScriptInfo.labeledBox(lf("base"), null));
 
                 remainingContainer.setChildren([authorDiv, basisDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
@@ -7767,6 +7796,10 @@ module TDev { export module Browser {
 
         static abuseOrDelete(pubid:string, abuseid:string = "")
         {
+            if (!Cloud.lite) {
+                window.open(Cloud.getServiceUrl() + "/user/report/" + pubid)
+                return
+            }
             Cloud.getPrivateApiAsync(pubid + "/candelete")
             .then((resp:CanDeleteResponse) => {
                 var b = TheHost
@@ -7775,7 +7808,10 @@ module TDev { export module Browser {
                                     lf("delete"),
                                     () => {
                                         Cloud.deletePrivateApiAsync(pubid)
-                                        .then(() => HTML.showProgressNotification(lf("gone.")))
+                                        .then(() => {
+                                            TheApiCacheMgr.refetch(pubid)
+                                            HTML.showProgressNotification(lf("gone."))
+                                        })
                                         .done()
                                         // TODO show it's gone in the UI
                                     })
@@ -7785,10 +7821,13 @@ module TDev { export module Browser {
                     var inf = b.getAnyInfoByEtag({ id: pubid, kind: resp.publicationkind, ETag: "" });
                     b.loadDetails(inf, "abusereports")
                 }
-                var goignore = () => {
+                var setstatus = (status:string) => {
                     m.dismiss()
-                    Cloud.postPrivateApiAsync(abuseid, { resolution: "ignored" })
-                    .then(() => HTML.showProgressNotification(lf("ignored.")))
+                    Cloud.postPrivateApiAsync(abuseid, { resolution: status })
+                    .then(() => {
+                        TheApiCacheMgr.refetch(abuseid)
+                        HTML.showProgressNotification(lf("resolution updated."))
+                    })
                     .done()
                 }
 
@@ -7827,7 +7866,8 @@ module TDev { export module Browser {
                                     .done()
                                 }
                             }),
-                            abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), goignore),
+                            abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), () => setstatus("ignored")),
+                            abuseid && resp.canmanage && HTML.mkButton(lf("unignore report"), () => setstatus("active")),
                             resp.candelete && HTML.mkButton(lf("delete publication"), godelete),
                         ]))
                     m.show()
@@ -7873,9 +7913,14 @@ module TDev { export module Browser {
                 res.className += " sdBigHeader";
 
             return this.withUpdate(res, (u:JsonComment) => {
-                textBlock.setChildren([ u.text ]);
-                author.setChildren(["-- ", u.username]);
-                addInfoInner.setChildren([Util.timeSince(u.time) + " on " + u.publicationname]);
+                var del = (<any>u) === false
+
+                textBlock.setChildren([ del ? lf("deleted comment") : u.text ]);
+                author.setChildren(["-- ", u.username || ""]);
+                addInfoInner.setChildren(del ? [] : [Util.timeSince(u.time) + " on " + u.publicationname]);
+                if (del) {
+                    icon.style.background = "#999";
+                }
                 if (u.publicationname == "general discussion" || u.publicationname == "bug reports and feature requests") {
                     icon.setChildren([HTML.mkImg("svg:callout,white")])
                     icon.style.background = "#080";
