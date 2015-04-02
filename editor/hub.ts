@@ -50,6 +50,13 @@ module TDev.Browser {
         export var PRO_MODE = "pro";
         export var CLASSIC_MODE = "classic";
 
+        export function init() {
+            if (window && window.location) {
+                var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
+                if (m) EditorSettings.setHubTheme(m[2], false);
+            }
+        }
+
         export function parseEditorMode(mode: string): EditorMode {
             if (!mode) return EditorMode.unknown;
             mode = mode.trim().toLowerCase();
@@ -81,8 +88,8 @@ module TDev.Browser {
                 if (theme) id = theme.wallpaperArtId;
             }
 
-            [elt("hubRoot"), elt("slRoot")].forEach(e => {
-                if (id) e.style.backgroundImage = HTML.cssImage(HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + id));
+            [elt("hubRoot"), elt("slRoot")].filter(e => !!e).forEach(e => {
+                if (id) e.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(id));
                 else e.style.backgroundImage = "";
             });
         }
@@ -177,8 +184,11 @@ module TDev.Browser {
         }
 
         export function setHubTheme(theme: string, upload: boolean) {
+            if (!!theme && !Browser.hubThemes[theme]) return;
+
             var previous = localStorage.getItem("hubTheme");
             if (previous !== theme) {
+                Util.log('theme: ' + theme);
                 if (!theme)
                     localStorage.removeItem("hubTheme");
                 else
@@ -190,7 +200,7 @@ module TDev.Browser {
         }
 
         export function hubTheme(): HubTheme {
-            var key = localStorage.getItem("hubTheme");
+            var key = localStorage.getItem("hubTheme");       
             return key ? Browser.hubThemes[key] : undefined;
         }
 

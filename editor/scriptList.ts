@@ -151,7 +151,8 @@ module TDev { export module Browser {
                     var mode = EditorSettings.parseEditorMode(settings.editorMode);
                     if (mode != EditorMode.unknown)
                         EditorSettings.setEditorMode(mode, false);
-                    EditorSettings.setHubTheme(settings.hubtheme, false);
+                    if (settings.hubtheme)
+                        EditorSettings.setHubTheme(settings.hubtheme, false);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     Cloud.litePermissions = settings.permissions;
                 }, e => { });

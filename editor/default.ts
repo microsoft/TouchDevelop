@@ -15,6 +15,7 @@ module TDev
         allScreens = [TheEditor, Browser.TheHost, Browser.TheHub, TheLoadingScreen];
 
         SVG.loadScriptIcons(ScriptIcons.getScriptIcons());
+        TDev.Browser.EditorSettings.init();
 
         Util.log("initialize api cache");
         return Promise.as()
