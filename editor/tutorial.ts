@@ -52,6 +52,31 @@ module TDev
             }
         }
 
+        var assignmentPos = -1
+        for (var i = 0; i < toks.length; i += 2) {
+            if (toks[i] == null && toks[i + 1].getOperator() == ":=")
+                assignmentPos = i
+        }
+        
+        if (assignmentPos > 0) {
+            var dels:AST.Token[] = []
+            var adds:AST.Token[] = []
+            var keeps:AST.Token[] = []
+            for (var i = 0; i < assignmentPos + 2; i += 2) {
+                if (toks[i] == null) adds.push(toks[i], toks[i + 1])
+                else if (toks[i + 1] == null) dels.push(toks[i], toks[i + 1])
+                else keeps.push(toks[i], toks[i + 1])
+            }
+
+            if (keeps.length == 0) {
+                var newTokens = adds.concat(dels).concat(toks.slice(assignmentPos + 2))
+                toks.splice(0, toks.length)
+                toks.pushRange(newTokens)
+                return
+            }
+
+        }
+
         for (var i = 0; i < toks.length; i += 2) {
             if (toks[i + 1] == null) {
                 var p = skipDeletes(i + 2)
