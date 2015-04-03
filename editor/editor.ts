@@ -4464,8 +4464,8 @@ module TDev
                         try {
                             new AST.InitIdVisitor(false).expectSet(Script)
                         } catch (err) {
-                            (<any>err).bugAttachments = [script2];
-                            Util.reportError("saveStateAsync", err, false)
+                            //(<any>err).bugAttachments = [script2];
+                            //Util.reportError("saveStateAsync", err, false)
                             reported = true
                         }
                     }
