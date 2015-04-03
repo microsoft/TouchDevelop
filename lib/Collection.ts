@@ -229,11 +229,11 @@ module TDev.RT {
 
             if (typeof this.typeInfo == "string") {
                 if (this.typeInfo === "number")
-                    json.forEach(n => { if (typeof n === "number") this.a.push(n) })
+                    json.forEach(n => { if (typeof n === "number") this.a.push(<any>n) })
                 else if (this.typeInfo === "string")
-                    json.forEach(n => { if (typeof n === "string") this.a.push(n) })
+                    json.forEach(n => { if (typeof n === "string") this.a.push(<any>n) })
                 else if (this.typeInfo === "boolean")
-                    json.forEach(n => { if (typeof n === "boolean") this.a.push(n) })
+                    json.forEach(n => { if (typeof n === "boolean") this.a.push(<any>n) })
                 else
                     Util.userError("json import is not supported for Collection of " + this.typeInfo);
             } else if (this.typeInfo instanceof RecordSingleton) {
