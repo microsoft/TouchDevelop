@@ -1,6 +1,5 @@
 ///<reference path='../../editor/messages.ts'/>
-
-var Blockly: any;
+///<reference path='blockly.d.ts'/>
 
 module TDev {
 
