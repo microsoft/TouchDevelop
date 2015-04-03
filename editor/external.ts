@@ -175,7 +175,9 @@ module TDev {
                                 cpp = message1.text;
                                 break;
                             case Language.TouchDevelop:
-                                cpp = 'int main () { }';
+                                // the guid is here only for testing; the real generation should be deterministic for best results
+                                cpp = "// " + Util.guidGen() + "\n" +
+                                      "int main () { }\n";
                                 break;
                         }
                         Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
