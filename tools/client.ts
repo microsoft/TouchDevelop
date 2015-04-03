@@ -3486,9 +3486,14 @@ function tdupload(args:string[])
     var expand = function (fileList) {
         return Array.prototype.concat.apply([],
             fileList.map(f => {
+                var ext = path.extname(f);
                 if (!fs.existsSync(f))
                     return [];
-                else if (path.basename(f)[0] == ".")
+                else if (f == "www/blockly/blockly" || f == "www/blockly/closure-library")
+                    // Checked-out git repositories
+                    return [];
+                else if (path.basename(f)[0] == "." || ext == ".ts" || ext == ".md")
+                    // Skip .ts and .md for upload
                     return [];
                 else if (fs.statSync(f).isDirectory())
                     return expand(fs.readdirSync(f).map(x => f + "/" + x));
