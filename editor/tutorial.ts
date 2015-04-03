@@ -542,6 +542,7 @@ module TDev
                 var rp = rec.getRecordPersistence()
                 if (rp != rec0.getRecordPersistence()) {
                     setPers(rp);
+                    op.stmt = rec0.recordPersistence
                 } else {
                     findFirst(rec.keys)
                     findFirst(rec.values)
@@ -1837,7 +1838,8 @@ module TDev
 
             this.expectedKind = ins.targetKind;
 
-            if (TheEditor.hasModalPane() && (!currStmt || (ins.stmt != currStmt && !TheEditor.codeVisible()))) {
+            if (TheEditor.hasModalPane() && 
+                (!currStmt || (ins.stmt != currStmt && (currStmt instanceof AST.RecordPersistenceKind || !TheEditor.codeVisible())))) {
                 TipManager.setTip({
                     tick: Ticks.calcSearchBack,
                     title: lf("tap there"),

@@ -20,6 +20,11 @@ module TDev
             super.init(e);
         }
 
+        public editedStmt():AST.Stmt
+        {
+            return this.record ? this.record.recordPersistence : null
+        }
+
         public edit(s:AST.Stmt)
         {
             // [s] is either a [RecordKind] or a [RecordPersistenceKind]. Both
