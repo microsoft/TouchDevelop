@@ -284,7 +284,7 @@ module TDev
                         return;
                     op = new TutorialInstruction()
                     op.stmt = stmt;
-                    op.calcButton = stmt.isExecutableStmt() ? Ticks.btnCut : Ticks.codeDelete;
+                    op.calcButton = Ticks.btnCut
                     op.label = lf("need to delete this")
                     return;
                 } else if (differentLoopVars(stmt)) {

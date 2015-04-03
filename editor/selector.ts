@@ -132,7 +132,7 @@ module TDev
 
         public deleteButton()
         {
-            return div(null, HTML.mkButtonTick(lf("delete"), Ticks.codeDelete, () => {
+            return div(null, HTML.mkButtonTick(lf("delete"), Ticks.btnCut, () => {
                 this.deleteSelection();
                 TheEditor.dismissSidePane();
             }))
