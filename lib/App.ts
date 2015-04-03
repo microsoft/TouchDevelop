@@ -394,7 +394,10 @@ module TDev.RT {
 
         export function rt_start(rt: Runtime): void
         {
-            logger = rt.liveMode() ? null : new Logger();
+            if (rt.liveMode())
+                logger = null
+            else if (!logger)
+                logger = new Logger();
             transports = [];
         }
 
