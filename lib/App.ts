@@ -269,7 +269,7 @@ module TDev.RT {
         //? Indicates if the `app->host_exec` action can be used to run host commands.
         //@ betaOnly
         public has_host(): boolean {
-            return !!(<any>window).touchDevelopExec;
+            return !!(<any>window).mcefQuery || !!(<any>window).touchDevelopExec;
         }
 
         //? Where are we running from: "editor", "website", "nodejs", "mobileapp", "plugin"
@@ -661,7 +661,21 @@ module TDev.RT {
 
         //? Invokes the host to execute a command described in the message and returns the response. There is no restriction on the format of the request and response. If not available or errored, returns invalid.
         //@ async readsMutable returns(string) betaOnly
-        export function host_exec(message: string, r : ResumeCtx) {
+        export function host_exec(message: string, r: ResumeCtx) {
+            var mcefQuery = (<any>window).mcefQuery;
+            if (mcefQuery) {
+                mcefQuery({
+                    request: message,
+                    persistent: false,
+                    onSuccess: function (response) {
+                        r.resumeVal(response);
+                    },
+                    onFailure: function (error_code, error_message) {                        
+                        r.resumeVal(JSON.stringify({ error: error_code, message: error_message }));
+                    }
+                });
+                return;
+            }
 
             var exec = (<any>window).touchDevelopExec;
             if (!exec) {
