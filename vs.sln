@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ts", "ts", "{DEB60A00-BDAC-
 		CONTRIBUTING.md = CONTRIBUTING.md
 		www\index.html = www\index.html
 		Jakefile = Jakefile
+		package.json = package.json
 		README.md = README.md
 		tsd.json = tsd.json
 		vsrefs.ts = vsrefs.ts

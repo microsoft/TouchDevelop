@@ -1094,8 +1094,12 @@ module TDev.Browser {
 
         private startTutorialButton(t:Ticks)
         {
-            var elt = this.mkFnBtn(lf("Tutorials"), () => {
-                Util.setHash('#topic:tutorials');
+            var elt = this.mkFnBtn(lf("Tutorials"),() => {
+                var topic = "tutorials";
+                var theme = EditorSettings.hubTheme();
+                if (theme && theme.tutorialsTopic)
+                    topic = theme.tutorialsTopic;
+                Util.setHash('#topic:' + topic);
             }, t, true, 3, dirAuto(div("hubTileOver", lf("Create your own apps"))));
 
             if (!Browser.lowMemory) {

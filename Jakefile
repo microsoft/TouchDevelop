@@ -402,8 +402,16 @@ task('clean', [], function () {
   jake.rmRf('build/');
 });
 
+desc('display info about installed tools')
+task('info', [], { async: true }, function () {
+  var task = this;
+  jake.exec([ 'tsc --version' ],
+    { printStdout: true, printStderr: true },
+    function() { task.complete(); });
+});
+
 desc('run local test suite')
-task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
+task('test', [ 'info', 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
