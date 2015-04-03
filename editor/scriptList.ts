@@ -279,6 +279,8 @@ module TDev { export module Browser {
                 .filter((s) => !!s);
             var searchMode = terms.length > 0;
             var allHelpBtn = null;
+            var theme = EditorSettings.hubTheme();
+            if (theme && theme.scriptSearch) terms.push(theme.scriptSearch);
 
             if (!searchMode) {
                 if (this.apiPath == "help") {
