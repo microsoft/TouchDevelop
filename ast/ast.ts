@@ -4262,7 +4262,7 @@ module TDev.AST {
                 app.things.forEach((d) => this.runOnDecl(d))
             else
                 app.allActions().forEach((a:Action) => {
-                    if (a.isEvent() || !a.isPrivate)
+                    if (a.isEvent() || (!a.isPrivate || a.isTest()))
                         this.useAction(a);
                 })
 
