@@ -2,7 +2,8 @@
 module TDev.RT {
     export interface AppLogTransport {
         log? : (level : number, category : string, msg: string, meta?: any) => void;
-        logException? : (err: any, meta? : any) => void;
+        logException?: (err: any, meta?: any) => void;
+        logTick?: (category: string, id: string) => void;
     }
 
     //? A custom logger
@@ -44,6 +45,12 @@ module TDev.RT {
                 default: ilevel = App.INFO; break;
             }
             App.logEvent(ilevel, this.category, message, meta ? meta.value() : undefined);
+        }
+
+        //? Register an event tick in any registered performance logger.
+        public tick(id: string) {
+            if (!id) return;
+            App.logTick(this.category, id);
         }
     }
 
@@ -462,6 +469,16 @@ module TDev.RT {
                 logger.addMsg(level, category, message, meta)
                 Util.log((category || "log") + ": " + message);
             }
+        }
+
+        export function logTick(category: string, id: string) {
+            transports.filter(transport => !!transport.logTick).forEach(transport => {
+                try {
+                    transport.logTick(category, id);
+                } catch (err) {
+                    Util.log('log: transport failed ');
+                }
+            });
         }
 
         export function logs() : LogMessage[]
