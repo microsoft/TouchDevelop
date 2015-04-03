@@ -246,6 +246,10 @@ module TDev.AST.Diff {
                 if (/^numberLiteral:/.test(k) || /^op:[0-9]/.test(k))
                     f[k] = f[k] * 0.2
             })
+            if (opt.tutorialMode && f["var"]) {
+                f["commands"] = f["var"]
+                f["var"] = 0
+            }
             return f
         }
 
@@ -415,7 +419,7 @@ module TDev.AST.Diff {
             s.diffFeatures = DiffFeatureDetector.run(s, opts)
             // adding statements at the bottom should be cheaper
             if (opts.tutorialMode)
-                s.diffFeatures.positionWeight = (newStmts.length - i) / newStmts.length;
+                s.diffFeatures.positionWeight = ((newStmts.length - i) / newStmts.length) * 0.5;
             else
                 s.diffFeatures.positionWeight = 0
         })
