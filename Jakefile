@@ -113,18 +113,6 @@ function mkSimpleTask(production, dependencies, target) {
     });
 }
 
-// runs madoko and generates the html file
-function mdkTask(production, dependencies, target) {
-    return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
-      var task = this;
-      jake.mkdirP('build/portal')
-      console.log("[M] "+production);
-      jake.exec("node node_modules/madoko/lib/cli.js --verbose --odir=build/portal " + target, { printStdout: true }, function () {
-          task.complete();
-      });
-    });
-}
-
 // A series of compile-and-run rules that generate various files for the build
 // system.
 function runAndComplete(cmds, task) {
@@ -157,9 +145,6 @@ file('build/pkgshell.js', [ 'build/package.js' ], { async: true }, function () {
         "node build/package.js"
     ], this);
 });
-
-// Portal
-mdkTask('build/portal/portal.html', ['portal/portal.mdk'], 'portal/portal.mdk');
 
 // These dependencies have been hand-crafted by reading the various [refs.ts]
 // files. The dependencies inside the same folder are coarse-grained: for
@@ -402,8 +387,16 @@ task('clean', [], function () {
   jake.rmRf('build/');
 });
 
+desc('display info about installed tools')
+task('info', [], { async: true }, function () {
+  var task = this;
+  jake.exec([ 'tsc --version' ],
+    { printStdout: true, printStderr: true },
+    function() { task.complete(); });
+});
+
 desc('run local test suite')
-task('test', [ 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
+task('test', [ 'info', 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],

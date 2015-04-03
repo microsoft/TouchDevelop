@@ -16,6 +16,7 @@ module TDev.Browser {
         art?: boolean;
         tags?: boolean;
         top?: boolean;
+        social?: boolean;
 
         editorMode?: string;
         scriptTemplates?: string[];
@@ -28,7 +29,8 @@ module TDev.Browser {
             wallpaperArtId: 'abqqsurv',
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
-            scriptTemplates: ['blankminecraftpi', 'blankcreeper']
+            scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+
         },
         'arduino': {
             description: 'Program Arduino boards',
@@ -1092,8 +1094,12 @@ module TDev.Browser {
 
         private startTutorialButton(t:Ticks)
         {
-            var elt = this.mkFnBtn(lf("Tutorials"), () => {
-                Util.setHash('#topic:tutorials');
+            var elt = this.mkFnBtn(lf("Tutorials"),() => {
+                var topic = "tutorials";
+                var theme = EditorSettings.hubTheme();
+                if (theme && theme.tutorialsTopic)
+                    topic = theme.tutorialsTopic;
+                Util.setHash('#topic:' + topic);
             }, t, true, 3, dirAuto(div("hubTileOver", lf("Create your own apps"))));
 
             if (!Browser.lowMemory) {
@@ -2075,6 +2081,7 @@ module TDev.Browser {
                 if (!theme.art) delete sects["myart"];
                 if (!theme.tags) delete sects["tags"];
                 if (!theme.top) delete sects["top"];
+                if (!theme.social) delete sects["social"];
             }
 
             if (SizeMgr.portraitMode) {
