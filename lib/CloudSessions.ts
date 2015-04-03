@@ -140,7 +140,7 @@ module TDev.RT {
     }
 
     //? Cloud session management
-    //@ cap(cloudData) skill(3)
+    //@ cap(cloudData) skill(2)
     export module CloudData {
 
 
