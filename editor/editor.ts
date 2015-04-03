@@ -4602,9 +4602,9 @@ module TDev
             Script.addDecl(n);
             n.freshlyCreated();
             this.initIds(n, false);
+            this.typeCheckNow();
             this.renderDecl(n);
             this.queueNavRefresh();
-            this.typeCheckNow();
         }
 
         public freshSoundResource(name: string = "snd", url? : string) {
