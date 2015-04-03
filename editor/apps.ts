@@ -742,7 +742,7 @@ module TDev.AppExport
         if (!wa)
             return div(null, "<none>")
 
-        return mkNavBtn("GlobeAS,white", "#08f", wa.website, wa.destinationAppUrl);
+        return mkNavBtn(wa.webspace == "custom" ? "fa-laptop,white" : "fa-cloud,white", "#08f", wa.website, wa.destinationAppUrl);
     }
 
     function websiteAuthFromAzure(a:any)
