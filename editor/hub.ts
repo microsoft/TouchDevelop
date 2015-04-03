@@ -56,7 +56,7 @@ module TDev.Browser {
         export function init() {
             if (window && window.location) {
                 var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
-                if (m) EditorSettings.setHubTheme(m[2], false);
+                EditorSettings.setHubTheme(m ? m[2] : "", false);
             }
         }
 
