@@ -533,15 +533,20 @@ module TDev.Cloud {
         var pollUrl = ""
         var poll = () => {
             Util.httpGetJsonAsync(pollUrl).done(
-                json => r.success(json),
+                json => {
+                    HTML.showProgressNotification(lf("compilation finished"));
+                    r.success(json)
+                },
                 err => Util.setTimeout(1000, poll))
         }
 
+        HTML.showProgressNotification(lf("starting compilation"));
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: "microbit",
             source: cppSource
         })
         .then(resp => {
+            HTML.showProgressNotification(lf("program accepted, compiling"));
             pollUrl = resp.statusurl
             poll()
         })
