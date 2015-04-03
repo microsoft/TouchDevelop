@@ -153,7 +153,7 @@ module TDev
                     else
                         toRename = Script.actions().filter(a => /^do stuff(\s*\d*)/.test(a.getName()))[0]
                 } else if (this.data.template instanceof AST.RecordDef) {
-                    toRename = Script.records().filter(r => r.recordType == (<AST.RecordDef>this.data.template).recordType && /^thing\s*\d*/.test(r.getCoreName()))[0]
+                    toRename = Script.records().filter(r => r.recordType == (<AST.RecordDef>this.data.template).recordType && /^thing\s*\d*/i.test(r.getCoreName()))[0]
                 } else if (this.data.template instanceof AST.GlobalDef) {
                     toRename = Script.variables().filter(r => /^v\s*\d*/.test(r.getName()))[0]
                 }
@@ -168,7 +168,7 @@ module TDev
                 if (toRename) {
                     op.decl = toRename
                     op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header :
-                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).values :
+                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).recordNameHolder :
                               toRename instanceof AST.GlobalDef ? (<AST.GlobalDef>toRename) : null
                     op.targetName = this.data.declName()
                 } else {
@@ -1862,11 +1862,19 @@ module TDev
                     })
                 }
             } else if (ins.targetName) {
-                TipManager.setTip({
-                    el: elt("renameBox") || elt("renameBox2"),
-                    title: lf("enter text: ") + ins.targetName,
-                    description: lf("tap [ok] when done"),
-                })
+                var trg = elt("renameBox") || elt("renameBox2")
+                if (trg)
+                    TipManager.setTip({
+                        el: trg,
+                        title: lf("enter text: ") + ins.targetName,
+                        description: lf("tap [ok] when done"),
+                    })
+                else
+                    TipManager.setTip({
+                        el: elt("inlineEditCloseBtn"),
+                        title: lf("type: ") + ins.targetName,
+                        description: lf("tap here when done"),
+                    })
             } else if (ins.targetKind) {
                 if (VariableProperties.kindSelectorVisible) {
                     // waiting for notifyKindList()

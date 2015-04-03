@@ -1249,6 +1249,8 @@ module TDev
                 if (TheEditor.autoHide())
                     this.switchToNormalKeypad();
                 this.display();
+                if (this.stmt instanceof AST.RecordNameHolder)
+                    TheEditor.dismissSidePane();
             };
             res.dismiss.id = "inlineEditCloseBtn";
             res.onDismiss = () => this.checkNextDisplay();
