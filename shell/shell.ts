@@ -37,8 +37,6 @@ var allowEditor = false;
 var numWorkers = 1;
 var blobChannel = "";
 
-(<any>http.globalAgent).options.keepAlive = true;
-
 function dataPath(p : string) : string {
   p = p || "";
   return dataDir ? path.join(dataDir, p) : p;
@@ -1993,13 +1991,16 @@ function handleReq(req, resp)
         var u = w.getUrl()
         u.method = req.method
         u.headers = req.headers
+        if (u.headers['connection'] == "close")
+            delete u.headers['connection'];
         u.path = req.url
 
         var creq = http.request(u, cres => {
             resp.writeHead(cres.statusCode, cres.headers)
             cres.pipe(resp);
         })
-        req.pipe(creq);
+
+        req.pipe(creq)
     }
 }
 
@@ -2214,7 +2215,7 @@ function main()
     agent.keepAlive = true;
     if (agent.options) agent.options.keepAlive = true;
     agent.keepAliveMsecs = 20000;
-    agent.maxSockets = 15;
+    // don't limit maxSockets - they might be long-living
 
     inAzure = !!process.env.PORT;
     var port = process.env.PORT || 4242;
