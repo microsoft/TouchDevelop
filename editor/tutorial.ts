@@ -27,6 +27,68 @@ module TDev
         public inlineActionNames:AST.LocalDef[];
     }
 
+    function reorderDiffTokens(toks:AST.Token[])
+    {
+        function skipDeletes(p:number) {
+            while (p < toks.length && toks[p + 1] == null)
+                p += 2;
+            return p
+        }
+
+        function moveToken(trg:number, src:number) {
+            if (src == trg) return
+            Util.assert(trg < src)
+            var t0 = toks[src + 0]
+            var t1 = toks[src + 1]
+            toks.splice(src, 2)
+            toks.splice(trg, 0, t0, t1)
+        }
+
+        if (toks[0] instanceof AST.FieldName && toks[1] == null) {
+            var p = skipDeletes(2)
+            if (toks[p + 1] instanceof AST.FieldName) {
+                moveToken(2, p)
+                return
+            }
+        }
+
+        var assignmentPos = -1
+        for (var i = 0; i < toks.length; i += 2) {
+            if (toks[i] == null && toks[i + 1].getOperator() == ":=")
+                assignmentPos = i
+        }
+        
+        if (assignmentPos > 0) {
+            var dels:AST.Token[] = []
+            var adds:AST.Token[] = []
+            var keeps:AST.Token[] = []
+            for (var i = 0; i < assignmentPos + 2; i += 2) {
+                if (toks[i] == null) adds.push(toks[i], toks[i + 1])
+                else if (toks[i + 1] == null) dels.push(toks[i], toks[i + 1])
+                else keeps.push(toks[i], toks[i + 1])
+            }
+
+            if (keeps.length == 0) {
+                var newTokens = adds.concat(dels).concat(toks.slice(assignmentPos + 2))
+                toks.splice(0, toks.length)
+                toks.pushRange(newTokens)
+                return
+            }
+
+        }
+
+        for (var i = 0; i < toks.length; i += 2) {
+            if (toks[i + 1] == null) {
+                var p = skipDeletes(i + 2)
+                if (toks[i] instanceof AST.PropertyRef &&
+                    toks[p + 1] instanceof AST.PropertyRef) {
+                    moveToken(i, p)
+                    return
+                }
+            }
+        }
+    }
+
     export class Step {
         public text: string;
         public autorunDone = false;
@@ -247,7 +309,7 @@ module TDev
                         return;
                     op = new TutorialInstruction()
                     op.stmt = stmt;
-                    op.calcButton = stmt.isExecutableStmt() ? Ticks.btnCut : Ticks.codeDelete;
+                    op.calcButton = Ticks.btnCut
                     op.label = lf("need to delete this")
                     return;
                 } else if (differentLoopVars(stmt)) {
@@ -260,6 +322,7 @@ module TDev
                     var eh = stmt.calcNode()
                     if (eh && eh.diffTokens) {
                         var d = eh.diffTokens
+                        reorderDiffTokens(d)
                         Util.assert(!op)
                         op = new TutorialInstruction()
                         op.stmt = stmt.diffAltStmt

@@ -162,7 +162,6 @@ module TDev {
         codeWhile,
         codeUninstallScript,
         codeBackFromSearch,
-        codeDelete,
 
         actionPropPrivate,
         actionPropTest,
