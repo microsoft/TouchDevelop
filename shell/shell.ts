@@ -32,7 +32,7 @@ var controllerUrl = "";
 var isNpm = false;
 var inNodeWebkit = false;
 var dataDir : string = ".";
-var useFileSockets = true
+var useFileSockets = false;
 var allowEditor = false;
 var numWorkers = 1;
 var blobChannel = "";
@@ -172,6 +172,11 @@ class ApiRequest {
                     }
                     oneUp()
                 })
+            })
+            creq.on("error", err => {
+                thisResp.code = -1
+                thisResp.body = err.message || (err + "")
+                oneUp()
             })
             if (Object.keys(this.data))
                 creq.end(JSON.stringify(this.data))
@@ -1325,6 +1330,16 @@ function reloadScript()
     scriptLoadPromise = loadScriptCoreAsync();
 }
 
+function findFreePort(cb:(p:number)=>void) {
+  var port = Math.floor(Math.random() * 50000 + 10000)
+  var tester = net.createServer()
+  tester.on("error", err => findFreePort(cb))
+  tester.listen(port, err => {
+    tester.once('close', () => cb(port))
+    tester.close()
+  })
+}
+
 var logException = (msg:string) => {}
 
 class Worker {
@@ -1408,9 +1423,8 @@ class Worker {
 }
 
 var workers:Worker[] = []
-var portNum = 10000;
 
-function startWorker(cb)
+function startWorker(cb0, cb)
 {
     var isWin = /^win/.test(os.platform())
 
@@ -1419,24 +1433,30 @@ function startWorker(cb)
     var env = JSON.parse(JSON.stringify(process.env))
     Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
 
+    var fin = () => {
+        debug.log("forking child script, " + w.description())
+
+        w.child = child_process.fork("./script/compiled.js", [], {
+            env: env,
+            silent: true,
+        })
+        w.init(cb)
+
+        cb0(w)
+    }
+
     if (useFileSockets) {
         var sockPath = "tdsh." + crypto.randomBytes(16).toString("hex")
         env.PORT = isWin ? "\\\\.\\pipe\\" + sockPath : "/tmp/." + sockPath
         w.socketPath = env.PORT
+        fin()
     } else {
-        w.port = portNum++
-        env.PORT = w.port
+        findFreePort(num => {
+            w.port = num
+            env.PORT = w.port
+            fin()
+        })
     }
-
-    debug.log("forking child script")
-
-    w.child = child_process.fork("./script/compiled.js", [], {
-        env: env,
-        silent: true,
-    })
-    w.init(cb)
-
-    return w
 }
 
 function loadScriptCoreAsync()
@@ -1458,7 +1478,7 @@ function loadScriptCoreAsync()
     }
 
     for (var i = 0; i < numWorkers; ++i)
-        newWorkers.push(startWorker(oneUp))
+        startWorker(w => newWorkers.push(w), oneUp)
 
     return {
         then: f => f(),
@@ -2190,6 +2210,12 @@ function loadAzureStorage(f)
 
 function main()
 {
+    var agent = (<any>http).globalAgent;
+    agent.keepAlive = true;
+    if (agent.options) agent.options.keepAlive = true;
+    agent.keepAliveMsecs = 20000;
+    agent.maxSockets = 15;
+
     inAzure = !!process.env.PORT;
     var port = process.env.PORT || 4242;
 
