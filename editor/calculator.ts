@@ -2791,7 +2791,7 @@ module TDev
             mk(lf("replace all in action"), lf("in this action"), Ticks.calcReplaceInAction, () => this.replaceToks(toks, ReplacementScope.Action))
             // TODO replace all in selection
 
-            if (toks.every(t => /^[0-9]$/.test(t.getOperator()) || !!t.getLiteral())) {
+            if (AST.proMode || toks.every(t => /^[0-9]$/.test(t.getOperator()) || !!t.getLiteral())) {
                 mk(lf("extract to parameter"), lf("abstract over"), Ticks.calcPromoteToParameter, () => { this.promoteToParameter(); });
             }
         }
