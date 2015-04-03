@@ -16,6 +16,7 @@ module TDev.Browser {
         art?: boolean;
         tags?: boolean;
         top?: boolean;
+        social?: boolean;
 
         editorMode?: string;
         scriptTemplates?: string[];
@@ -28,7 +29,8 @@ module TDev.Browser {
             wallpaperArtId: 'abqqsurv',
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
-            scriptTemplates: ['blankminecraftpi', 'blankcreeper']
+            scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+
         },
         'arduino': {
             description: 'Program Arduino boards',
@@ -2075,6 +2077,7 @@ module TDev.Browser {
                 if (!theme.art) delete sects["myart"];
                 if (!theme.tags) delete sects["tags"];
                 if (!theme.top) delete sects["top"];
+                if (!theme.social) delete sects["social"];
             }
 
             if (SizeMgr.portraitMode) {
