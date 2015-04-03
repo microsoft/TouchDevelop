@@ -9,7 +9,6 @@ module TDev.Browser {
         logoArtId: string;
         wallpaperArtId?: string;
         tutorialsTopic?: string; // topics of tutorial pages
-        requiresShell?: boolean;
 
         scriptSearch?: string; // seed when searching script
 
@@ -17,6 +16,9 @@ module TDev.Browser {
         art?: boolean;
         tags?: boolean;
         top?: boolean;
+
+        editorMode?: string;
+        scriptTemplates?: string[];
     }
 
     export var hubThemes: StringMap<HubTheme> = {
@@ -25,15 +27,14 @@ module TDev.Browser {
             logoArtId: 'eopyzwpm',
             wallpaperArtId: 'abqqsurv',
             tutorialsTopic: 'minecraftpitutorials',
-            requiresShell: true,
             scriptSearch: '#minecraft',
+            scriptTemplates: ['blankminecraftpi', 'blankcreeper']
         },
         'arduino': {
             description: 'Program Arduino boards',
             logoArtId: 'kzajxznr',
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
-            requiresShell: true,
             scriptSearch: '#arduino',
         },
     };
@@ -125,7 +126,12 @@ module TDev.Browser {
         }
 
         export function editorMode(): EditorMode {
-            return parseEditorMode(localStorage.getItem("editorMode"));
+            var mode = localStorage.getItem("editorMode");
+            if (!mode) {
+                var theme = hubTheme();
+                if (theme) mode = theme.editorMode;
+            }
+            return parseEditorMode(mode);
         }
 
         function uploadEditorMode() {
@@ -766,9 +772,11 @@ module TDev.Browser {
         {
             var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
             var currentCap = PlatformCapabilityManager.current();
+            var theme = EditorSettings.hubTheme();
             return this.templates
                 .filter(template => {
                     if (template.editorMode && template.editorMode > editorMode) return false;
+                    if (theme && theme.scriptTemplates && theme.scriptTemplates.indexOf(template.id) < 0) return false;
                     if (!template.caps) return true;
                     else {
                         var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
