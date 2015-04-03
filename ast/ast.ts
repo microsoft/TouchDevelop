@@ -4785,6 +4785,12 @@ module TDev.AST {
             return this.hasTokenUsage(p) || this.hasKey(p.usageKey()) || (this.allowAllLibraries && p instanceof LibraryRefAction);
         }
 
+        public hasFlag(flg:string)
+        {
+            if (!this.properties) return false;
+            return this.hasKey("flag:" + flg)
+        }
+
         public hasDecl(p:Decl)
         {
             if (!this.properties) return true;

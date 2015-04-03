@@ -1767,6 +1767,9 @@ module TDev
 
         private findDefault(p:PropertyParameter)
         {
+            if (TheEditor.intelliProfile && TheEditor.intelliProfile.hasFlag("nodefaults"))
+                return [AST.mkPlaceholder(p)]
+
             return AST.Fixer.findDefault(p, this.getLocals())
         }
 
