@@ -4262,7 +4262,7 @@ module TDev.AST {
                 app.things.forEach((d) => this.runOnDecl(d))
             else
                 app.allActions().forEach((a:Action) => {
-                    if (a.isEvent() || !a.isPrivate)
+                    if (a.isEvent() || (!a.isPrivate || a.isTest()))
                         this.useAction(a);
                 })
 
@@ -4783,6 +4783,12 @@ module TDev.AST {
         {
             if (!this.properties) return true;
             return this.hasTokenUsage(p) || this.hasKey(p.usageKey()) || (this.allowAllLibraries && p instanceof LibraryRefAction);
+        }
+
+        public hasFlag(flg:string)
+        {
+            if (!this.properties) return false;
+            return this.hasKey("flag:" + flg)
         }
 
         public hasDecl(p:Decl)
