@@ -2575,7 +2575,7 @@ module TDev { export module Browser {
 
         public initWebsocketAsync()
         {
-            if (!useWebsockets || !Cloud.lite) return Promise.as()
+            if (!ApiCacheMgr.useWebsockets || !Cloud.lite) return Promise.as()
 
             var r = new PromiseInv()
 
