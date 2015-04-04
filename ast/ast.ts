@@ -2985,6 +2985,7 @@ module TDev.AST {
         public assignmentInfo() : AssignmentInfo { return null; }
         public isRefValue() { return false }
         public allowRefUse() { return false }
+        public isEscapeDef() { return false }
     }
 
     export class Literal
@@ -3154,6 +3155,11 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitThingRef(this); }
         public forceLocal = false;
         public getThing():Decl { return this.def; }
+
+        public isEscapeDef()
+        {
+            return this.def instanceof PlaceholderDef && !!(<PlaceholderDef>this.def).escapeDef
+        }
 
         public writeTo(tw:TokenWriter)
         {
@@ -4262,7 +4268,7 @@ module TDev.AST {
                 app.things.forEach((d) => this.runOnDecl(d))
             else
                 app.allActions().forEach((a:Action) => {
-                    if (a.isEvent() || !a.isPrivate)
+                    if (a.isEvent() || (!a.isPrivate || a.isTest()))
                         this.useAction(a);
                 })
 
@@ -4783,6 +4789,12 @@ module TDev.AST {
         {
             if (!this.properties) return true;
             return this.hasTokenUsage(p) || this.hasKey(p.usageKey()) || (this.allowAllLibraries && p instanceof LibraryRefAction);
+        }
+
+        public hasFlag(flg:string)
+        {
+            if (!this.properties) return false;
+            return this.hasKey("flag:" + flg)
         }
 
         public hasDecl(p:Decl)

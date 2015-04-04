@@ -2,15 +2,20 @@
 module TDev.RT {
     export interface AppLogTransport {
         log? : (level : number, category : string, msg: string, meta?: any) => void;
-        logException? : (err: any, meta? : any) => void;
+        logException?: (err: any, meta?: any) => void;
+        logTick?: (category: string, id: string) => void;
+        logMeasure?: (category: string, start: number, end: number) => void;
     }
 
     //? A custom logger
     //@ stem("logger")
     export class AppLogger extends RTValue {
-        constructor(private category : string) {
+        public created: number;
+        public parent: AppLogger;
+        constructor(public category : string) {
             super();
             this.category = this.category || "";
+            this.created = Util.perfNow() / 1000;
         }
 
         //? Logs a debug message
@@ -44,6 +49,32 @@ module TDev.RT {
                 default: ilevel = App.INFO; break;
             }
             App.logEvent(ilevel, this.category, message, meta ? meta.value() : undefined);
+        }
+
+        //? Register an event tick in any registered performance logger.
+        public tick(id: string) {
+            if (!id) return;
+            App.logTick(this.category, id);
+        }
+
+        //? Starts a timed sub-logger. The task name is concatenated to the current logger category.
+        //@ betaOnly
+        public start(task: string): AppLogger {            
+            var name = this.category;
+            if (name) name += ".";
+            name += task;
+            var logger = new AppLogger(name);
+            logger.parent = this;
+            return logger;
+        }
+
+        //? Ends a time sub-logger and reports the time.
+        //@ betaOnly
+        public end() {
+            if (this.parent) {
+                App.logMeasure(this.category, this.created, Util.perfNow() / 1000);
+                this.parent = undefined;
+            }
         }
     }
 
@@ -394,7 +425,10 @@ module TDev.RT {
 
         export function rt_start(rt: Runtime): void
         {
-            logger = rt.liveMode() ? null : new Logger();
+            if (rt.liveMode())
+                logger = null
+            else if (!logger)
+                logger = new Logger();
             transports = [];
         }
 
@@ -455,7 +489,7 @@ module TDev.RT {
                 try {
                     transport.log(level, category, message, meta);
                 } catch (err) {
-                    Util.log('log: transport failed ');
+                    Util.log('transport failed ');
                 }
             });
             if (logger) {
@@ -464,6 +498,26 @@ module TDev.RT {
             }
         }
 
+        export function logTick(category: string, id: string) {
+            transports.filter(transport => !!transport.logTick).forEach(transport => {
+                try {
+                    transport.logTick(category, id);
+                } catch (err) {
+                    Util.log('transport failed');
+                }
+            });
+        }
+
+        export function logMeasure(path: string, start: number, end: number) {
+            App.logEvent(App.DEBUG, path, lf("elapsed: {0}", (end - start).toFixed(2)), { elapsed: end - start });
+            transports.filter(transport => !!transport.logMeasure).forEach(transport => {
+                try {
+                    transport.logMeasure(path, start, end);
+                } catch (err) {
+                    Util.log('transport failed');
+                }
+            });
+        }
         export function logs() : LogMessage[]
         {
             if (logger)

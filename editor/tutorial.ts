@@ -52,6 +52,31 @@ module TDev
             }
         }
 
+        var assignmentPos = -1
+        for (var i = 0; i < toks.length; i += 2) {
+            if (toks[i] == null && toks[i + 1].getOperator() == ":=")
+                assignmentPos = i
+        }
+        
+        if (assignmentPos > 0) {
+            var dels:AST.Token[] = []
+            var adds:AST.Token[] = []
+            var keeps:AST.Token[] = []
+            for (var i = 0; i < assignmentPos + 2; i += 2) {
+                if (toks[i] == null) adds.push(toks[i], toks[i + 1])
+                else if (toks[i + 1] == null) dels.push(toks[i], toks[i + 1])
+                else keeps.push(toks[i], toks[i + 1])
+            }
+
+            if (keeps.length == 0) {
+                var newTokens = adds.concat(dels).concat(toks.slice(assignmentPos + 2))
+                toks.splice(0, toks.length)
+                toks.pushRange(newTokens)
+                return
+            }
+
+        }
+
         for (var i = 0; i < toks.length; i += 2) {
             if (toks[i + 1] == null) {
                 var p = skipDeletes(i + 2)
@@ -128,7 +153,7 @@ module TDev
                     else
                         toRename = Script.actions().filter(a => /^do stuff(\s*\d*)/.test(a.getName()))[0]
                 } else if (this.data.template instanceof AST.RecordDef) {
-                    toRename = Script.records().filter(r => r.recordType == (<AST.RecordDef>this.data.template).recordType && /^thing\s*\d*/.test(r.getCoreName()))[0]
+                    toRename = Script.records().filter(r => r.recordType == (<AST.RecordDef>this.data.template).recordType && /^thing\s*\d*/i.test(r.getCoreName()))[0]
                 } else if (this.data.template instanceof AST.GlobalDef) {
                     toRename = Script.variables().filter(r => /^v\s*\d*/.test(r.getName()))[0]
                 }
@@ -143,7 +168,7 @@ module TDev
                 if (toRename) {
                     op.decl = toRename
                     op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header :
-                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).values :
+                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).recordNameHolder :
                               toRename instanceof AST.GlobalDef ? (<AST.GlobalDef>toRename) : null
                     op.targetName = this.data.declName()
                 } else {
@@ -517,6 +542,7 @@ module TDev
                 var rp = rec.getRecordPersistence()
                 if (rp != rec0.getRecordPersistence()) {
                     setPers(rp);
+                    op.stmt = rec0.recordPersistence
                 } else {
                     findFirst(rec.keys)
                     findFirst(rec.values)
@@ -1812,7 +1838,8 @@ module TDev
 
             this.expectedKind = ins.targetKind;
 
-            if (TheEditor.hasModalPane() && (!currStmt || (ins.stmt != currStmt && !TheEditor.codeVisible()))) {
+            if (TheEditor.hasModalPane() && 
+                (!currStmt || (ins.stmt != currStmt && (currStmt instanceof AST.RecordPersistenceKind || !TheEditor.codeVisible())))) {
                 TipManager.setTip({
                     tick: Ticks.calcSearchBack,
                     title: lf("tap there"),
@@ -1837,11 +1864,19 @@ module TDev
                     })
                 }
             } else if (ins.targetName) {
-                TipManager.setTip({
-                    el: elt("renameBox") || elt("renameBox2"),
-                    title: lf("enter text: ") + ins.targetName,
-                    description: lf("tap [ok] when done"),
-                })
+                var trg = elt("renameBox") || elt("renameBox2")
+                if (trg)
+                    TipManager.setTip({
+                        el: trg,
+                        title: lf("enter text: ") + ins.targetName,
+                        description: lf("tap [ok] when done"),
+                    })
+                else
+                    TipManager.setTip({
+                        el: elt("inlineEditCloseBtn"),
+                        title: lf("type: ") + ins.targetName,
+                        description: lf("tap here when done"),
+                    })
             } else if (ins.targetKind) {
                 if (VariableProperties.kindSelectorVisible) {
                     // waiting for notifyKindList()

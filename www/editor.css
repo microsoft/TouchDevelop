@@ -5720,7 +5720,8 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 
 
 .stmt-inlineStmt {
-    display: inline;
+    /* there is already inline-block inside, we shouldn't use inline here */
+    display: inline-block;
     /* This is to override the [data-nest] selector which is more specific in
      * the CSS cascade, quite unfortunately. */
     border-width: 0 !important;

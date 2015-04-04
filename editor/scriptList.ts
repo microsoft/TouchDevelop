@@ -5572,7 +5572,7 @@ module TDev { export module Browser {
                     new ScriptHeartsTab(this),
                     new TagsTab(this),
                     new InsightsTab(this),
-                    new AbuseReportsTab(this),
+                    Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;
         }
@@ -6372,7 +6372,7 @@ module TDev { export module Browser {
                 TipManager.setTip(null);
 
                 Promise.join([
-                    this.browser().deletePaneAnimAsync(),
+                    // this.browser().deletePaneAnimAsync(),
                     World.uninstallAsync(this.getGuid())
                 ]).done(() => {
                     this.cloudHeader = null;
