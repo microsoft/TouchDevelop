@@ -1292,10 +1292,6 @@ module TDev { export module Browser {
                     if (!t && HelpTopic.contextTopics)
                         t = HelpTopic.contextTopics.filter(t => t.id == h[3])[0]
                     if (t) pg = TopicInfo.mk(t);
-                } else if (h[1] == "edits") {
-                    this.show()
-                    HistoryTab.anyHistory(h[2])
-                    return;
                 } else if (h[1] == "ldscr") {
                     this.show();
                     TheEditor.historyMgr.setHash("list:ldscr:" + h[2], "Script parse test");
@@ -3207,37 +3203,6 @@ module TDev { export module Browser {
         private script(): ScriptInfo { return <ScriptInfo>this.parent; }
         public bgIcon() {
             return "svg:fa-history";
-        }
-
-        // this thing is somewhat internals, for Oregon people
-        static anyHistory(path:string)
-        {
-            var m = /^([a-z]*)\/([a-f0-9-]+)$/.exec(path)
-            if (!m) return;
-            var u = m[1]
-            var guid = m[2]
-
-            TheEditor.historyMgr.setHash("list:edits:" + path, "History");
-
-            if (!Cloud.getAccessToken()) {
-                ModalDialog.info("need access token", "you need to be logged in");
-                return
-            }
-
-            var allItems:JsonHistoryItem[] = []
-            var getItems = (cont:string) => {
-                Cloud.getPrivateApiAsync(u + "/installed/" + guid + "/history?count=100" + cont)
-                .done((resp) => {
-                    allItems.pushRange(resp.items)
-                    if (resp.continuation) {
-                        getItems("&continuation=" + resp.continuation)
-                    } else {
-                        HistoryTab.showMicroEditsAsync(u, guid, allItems)
-                        .done(s => ModalDialog.showText(s))
-                    }
-                })
-            };
-            getItems("")
         }
 
         static historicalTextAsync(uid:string, guid:string, it:JsonHistoryItem)
