@@ -1209,7 +1209,7 @@ module TDev.AST
             t._lastTypechecker = this;
 
             if (t.def instanceof PlaceholderDef) {
-                if (!(<PlaceholderDef>t.def).escapeDef)
+                if (!t.isEscapeDef())
                     this.markError(t, (<PlaceholderDef>t.def).longError());
             } else {
                 if (!!t.def && !t.def.deleted && t.data != t.def.getName())

@@ -2985,6 +2985,7 @@ module TDev.AST {
         public assignmentInfo() : AssignmentInfo { return null; }
         public isRefValue() { return false }
         public allowRefUse() { return false }
+        public isEscapeDef() { return false }
     }
 
     export class Literal
@@ -3154,6 +3155,11 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitThingRef(this); }
         public forceLocal = false;
         public getThing():Decl { return this.def; }
+
+        public isEscapeDef()
+        {
+            return this.def instanceof PlaceholderDef && !!(<PlaceholderDef>this.def).escapeDef
+        }
 
         public writeTo(tw:TokenWriter)
         {

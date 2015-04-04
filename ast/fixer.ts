@@ -44,9 +44,10 @@ module TDev.AST.Fixer
             } else {
                 rec(e.args[0], 1000)
                 r.push(mkPropRef(p.getName()))
-                if (e.args.length > 1) {
+                var args = e.args.slice(1).filter(a => !a.isEscapeDef())
+                if (args.length > 0) {
                     pushOp("(")
-                    e.args.slice(1).forEach((ee, i) => {
+                    args.forEach((ee, i) => {
                         if (i > 0) pushOp(",")
                         rec(ee, -1)
                     })
