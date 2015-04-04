@@ -20,7 +20,6 @@ module TDev
         private testAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("test action"));
         private queryAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("read only"));
         private offlineAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("offline available"));
-        private offloadBox = HTML.mkTickCheckBox(Ticks.actionPropOffload, lf("offload to server"));
         private syncBox:HTMLElement;
         private inParms = div("paramList", []);
         private outParms = div("paramList", []);
@@ -97,7 +96,6 @@ module TDev
             HTML.setCheckboxValue(this.testAction, this.theAction.action.isTest());
             HTML.setCheckboxValue(this.queryAction, this.theAction.action.isQuery);
             HTML.setCheckboxValue(this.offlineAction, this.theAction.action.isOffline);
-            HTML.setCheckboxValue(this.offloadBox, this.theAction.action.isOffloaded);
             HTML.setCheckboxValue(this.syncBox, this.theAction.action.isAtomic)
         }
 
@@ -141,7 +139,6 @@ module TDev
             var icl = pa !== undefined && pa.isCloud;
             this.actionName.readOnly = ev;
             var act = this.theAction.action;
-            var offloadDisabled = ev || !dbg || !Util.cloudRun || !act.canBeOffloaded();
             var showSettings = TheEditor.widgetEnabled("actionSettings");
             var propDivs =
                  [div("prop-spacer"),
@@ -158,7 +155,6 @@ module TDev
 
                   showSettings && icl ? this.offlineAction : null,
                   showSettings && icl ? this.queryAction : null,
-                  !showSettings || offloadDisabled? null : this.offloadBox,
                   Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillActionProperties, "formHint marginBottom"),
                   ];
             this.setChildren(propDivs);

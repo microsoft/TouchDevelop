@@ -1236,9 +1236,6 @@ module TDev.AST {
             return v;
         }
 
-        canBeOffloaded(): boolean { return true; }
-
-
         static GetIcon(rt: AST.RecordType):string
         {
             switch (rt) {

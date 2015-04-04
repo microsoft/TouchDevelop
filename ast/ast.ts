@@ -37,13 +37,6 @@ module TDev.AST {
         uniqueAstId = (len) => r.uniqueId(len);
     }
 
-    export enum CanBeOffloadedState {
-        No = 0x0000,
-        Yes = 0x0001,
-        Unknown = 0x0002,
-        AssumeYes = 0x0003,
-    }
-
     export class AstNode
     {
         public nodeId:number = currentNodeId++;
@@ -108,22 +101,6 @@ module TDev.AST {
             var k = parseFloat(n.substr(prefix.length)) || 2;
             while (nameExists(prefix + k)) k++;
             return prefix + k;
-        }
-
-
-
-        public canBeOffloaded(): boolean {
-            var res = true;
-            if (!this.isPlaceholder()) {
-                var children = this.children();
-                for (var i = 0; i < children.length; i++) {
-                    if (!children[i].canBeOffloaded()) {
-                        res = false;
-                        break;
-                    }
-                }
-            }
-            return res;
         }
     }
 
@@ -522,7 +499,6 @@ module TDev.AST {
         public allowAddOf(n:Stmt) { return n instanceof ActionParameter }
 
         // no need to offload parameters
-        public canBeOffloaded() { return false; }
         public nodeType() { return "parameterBlock"; }
 
         public children()
@@ -619,7 +595,6 @@ module TDev.AST {
             this.parentDef.notifyChange();
         }
         public fields():RecordField[] { return <RecordField[]>this.stmts; }
-        public canBeOffloaded() { return false; }
         public nodeType() { return "fieldBlock"; }
     }
 
@@ -1314,8 +1289,6 @@ module TDev.AST {
             super.notifyChange();
             this.action.notifyChange();
         }
-
-        public canBeOffloaded(): boolean { return false; }
     }
 
 
@@ -1388,8 +1361,6 @@ module TDev.AST {
         }
         public nodeType() { return "decl"; }
         public accept(v:NodeVisitor) { return v.visitDecl(this); }
-
-        public canBeOffloaded(): boolean { return false; }
     }
 
     export class PropertyDecl
@@ -1575,8 +1546,6 @@ module TDev.AST {
             return RecordPersistence.Temporary;
         }
 
-        public canBeOffloaded() { return true; }
-
         public notifyChange() {
             super.notifyChange();
 
@@ -1601,7 +1570,6 @@ module TDev.AST {
         public getDescription(skip?:boolean) { return this.getKind().getHelp(!skip); }
         public isBrowsable() { return this._isBrowsable; }
         public usageMult() { return 1; }
-        public canBeOffloaded() { return this.getName() !== "art"; }
         public usageKey() {
             return Util.tagify(this.getKind().getName());
         }
@@ -1717,10 +1685,6 @@ module TDev.AST {
                    "code";
         }
 
-        // flag to indicate whether to offload the action.
-        // When Util.cloudRun is set, the editor allows to select a sequence of stmts,
-        // extracts them to a new action, and set the offload flag of the new action to true.
-        public isOffloaded: boolean;
         public isAtomic: boolean = false;
         public canBeInlined: boolean = false;
 
@@ -1951,54 +1915,6 @@ module TDev.AST {
             var s = new StatsComputer()
             s.dispatch(this)
             return s;
-        }
-
-        // cache of canBeOffloaded()
-        // Invariant: canBeOffloadedCache == false means the node cannot be offloaded
-        public canBeOffloadedCache: CanBeOffloadedState = CanBeOffloadedState.Unknown;
-
-        public canBeOffloaded(): boolean {
-
-            if (this.canBeOffloadedCache != CanBeOffloadedState.Unknown) return !!this.canBeOffloadedCache;
-            try {
-                // need to compute whether the action can be offloaded
-                // first get all methods that are called by this
-                var methodFinder = new MethodFinder();
-                methodFinder.traverse(this);
-                var called = methodFinder.called.filter((a) => a.canBeOffloadedCache === CanBeOffloadedState.Unknown);
-                if (called.indexOf(this) < 0) called.push(this);
-                called.forEach((a) => a.canBeOffloadedCache = CanBeOffloadedState.AssumeYes);
-                var changed = true;
-                // go through all methods and mark those that cannot be offloaded, until no change
-                while (changed) {
-                    changed = false;
-                    for (var i = 0; i < called.length; i++) {
-                        var a = called[i];
-                        if (a.canBeOffloadedCache === CanBeOffloadedState.No) continue;
-                        Util.assert(a.canBeOffloadedCache === CanBeOffloadedState.AssumeYes);
-                        var res = true;
-                        if (a.body)
-                            res = a.body.canBeOffloaded();
-                        else if (a instanceof LibraryRefAction) {
-                            var lib = <LibraryRefAction>a;
-                            if (lib.template)
-                                res = lib.template.canBeOffloaded();
-                        }
-                        if (!res) {
-                            changed = true;
-                            a.canBeOffloadedCache = CanBeOffloadedState.No;
-                        }
-                    }
-                }
-                // The remaining actions are offloadable
-                called.forEach(function (a) {
-                    if (a.canBeOffloadedCache === CanBeOffloadedState.AssumeYes)
-                        a.canBeOffloadedCache = CanBeOffloadedState.Yes;
-                })
-                return !!this.canBeOffloadedCache;
-            } catch (e) {
-                return false;
-            }
         }
 
         public freshlyCreated()
@@ -2901,14 +2817,6 @@ module TDev.AST {
             });
             return r;
         }
-
-        public canBeOffloaded(): boolean {
-            if (this.parsed) {
-                return this.parsed.canBeOffloaded();
-            } else {
-                return super.canBeOffloaded();
-            }
-        }
     }
 
     // -------------------------------------------------------------------------------------------------------
@@ -3035,8 +2943,6 @@ module TDev.AST {
                 return "";
             }
         }
-
-        public canBeOffloaded(): boolean { return true; }
     }
 
     export class Operator
@@ -3129,7 +3035,6 @@ module TDev.AST {
                 return true;
             return false;
         }
-        public canBeOffloaded(): boolean { return this.prop.canBeOffloaded(); }
         public getCall() { return this.call }
     }
 
@@ -3173,7 +3078,6 @@ module TDev.AST {
 
         public forSearch() { return this.getText().toLowerCase() }
         public matches(d:AstNode) { return this.def == d; }
-        public canBeOffloaded(): boolean { return this.def.canBeOffloaded(); }
     }
 
     export class AssignmentInfo
@@ -3335,29 +3239,6 @@ module TDev.AST {
                 return act.extensionForward();
 
             return null
-        }
-
-        public canBeOffloaded(): boolean {
-            var act = this.calledAction();
-            var prop = this.prop();
-
-            for (var i = 0; i < this.args.length; i++) {
-                if (!this.args[i].canBeOffloaded()) return false;
-            }
-
-            if (prop == api.core.TupleProp ||
-                prop == api.core.AssignmentProp ||
-                prop == api.core.StringConcatProp ||
-                prop == api.core.AndProp ||
-                prop == api.core.OrProp) {
-                return true;
-            }
-
-            if (act) {
-                if (act.isPage()) { return false; }
-                else return act.canBeOffloaded();
-            }
-            return this.prop().canBeOffloaded();
         }
 
         public awaits()

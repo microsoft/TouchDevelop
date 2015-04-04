@@ -165,7 +165,6 @@ module TDev {
 
         actionPropPrivate,
         actionPropTest,
-        actionPropOffload,
         actionPropAtomic,
 
         btnPaste,
