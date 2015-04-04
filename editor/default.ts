@@ -48,6 +48,9 @@ module TDev
 
             TheEditor.historyMgr.initialHash();
 
+            // needs to be done again after login
+            Browser.TheApiCacheMgr.initWebsocketAsync().done();
+
             window.addEventListener("message", event => {
                 if (External.TheChannel)
                     External.TheChannel.receive(event);

@@ -1955,6 +1955,21 @@ module TDev { export module Browser {
             return reqObj;
         }
 
+        public gotRespObj(resp:Cloud.BatchResponse)
+        {
+            if (resp.code == 304)
+                this.gotData(this.currentData, this.etag);
+            else if (resp.code == 200)
+                this.gotData(resp.body, resp.ETag);
+            else if (resp.code == 404)
+                this.got404();
+            else {
+                if (resp.code == 400 && window.localStorage["everLoggedIn"] && !Cloud.isOffline() && !Cloud.getAccessToken())
+                    Login.show();
+                TheApiCacheMgr.handleError("wrong code " + resp.code, this)
+            }
+        }
+
         public isCurrent() { return this.state == EntryState.current; }
 
         public fetch()
@@ -2125,6 +2140,14 @@ module TDev { export module Browser {
         private currentSerializationId = -1;
         private unflushedDataSize = 0;
 
+        private websocket:WebSocket;
+        private websocketReady:WebSocket;
+        private websocketAuthenticated:boolean;
+        private websocketLastOpen:number;
+        private websocketMsgCount = 0;
+        private websocketWaiters:StringMap<ApiCacheEntry> = {};
+
+
         static maxLocalStorageSize = 512*1024;
         static maxEntrySize = 32*1024;
         static maxHardStorageSize = 4*1024*1024;
@@ -2250,17 +2273,7 @@ module TDev { export module Browser {
                         var resp = resps.array[i];
                         if (!resp)
                             this.handleError("no such entry", entry);
-                        else if (resp.code == 304)
-                            entry.gotData(entry.currentData, entry.etag);
-                        else if (resp.code == 200)
-                            entry.gotData(resp.body, resp.ETag);
-                        else if (resp.code == 404)
-                            entry.got404();
-                        else {
-                            if (resp.code == 400 && window.localStorage["everLoggedIn"] && !Cloud.isOffline() && !Cloud.getAccessToken())
-                                Login.show();
-                            this.handleError("wrong code " + resp.code, entry);
-                        }
+                        else entry.gotRespObj(resp)
                     });
                 },
                 (err:any) => {
@@ -2280,12 +2293,20 @@ module TDev { export module Browser {
 
         public queueRequest(entry:ApiCacheEntry)
         {
+            if (this.websocketReady) {
+                var obj = entry.getReqObj();
+                obj.reqid = ++this.websocketMsgCount + "";
+                this.websocketWaiters[obj.reqid] = entry;
+                this.websocketReady.send(JSON.stringify(obj))
+                return
+            }
+
             if (this.pendingReqs.length == 0)
                 Util.setTimeout(1, () => this.flushRequests());
             this.pendingReqs.push(entry);
         }
 
-        private handleError(err: any, entry: ApiCacheEntry) {
+        public handleError(err: any, entry: ApiCacheEntry) {
             entry.gotError(err);
 
             if (this.offlineErrorReported) return;
@@ -2539,6 +2560,70 @@ module TDev { export module Browser {
             } catch (e) { }
         }
 
+        public closeWebsocket()
+        {
+            if (this.websocket) {
+                var ws = this.websocket
+                this.websocket = null
+                this.websocketReady = null
+                // let any responses come back
+                Util.setTimeout(5000, () => { ws.close() })
+            }
+        }
+
+        static useWebsockets = false;
+
+        public initWebsocketAsync()
+        {
+            if (!useWebsockets || !Cloud.lite) return Promise.as()
+
+            var r = new PromiseInv()
+
+            if (this.websocket && !this.websocketAuthenticated && Cloud.getAccessToken()) {
+                this.closeWebsocket()
+            }
+
+            if (!this.websocket) {
+                var ws = new WebSocket(Cloud.getPrivateApiUrl("socket").replace(/^http/, "ws"))
+                this.websocketLastOpen = Date.now()
+                this.websocket = ws
+                this.websocketAuthenticated = !!Cloud.getAccessToken()
+                ws.onopen = () => {
+                    if (ws == this.websocket) {
+                        this.websocketReady = ws
+                        r.success(null)
+                    }
+                }
+                ws.onerror = () => {
+                    if (this.websocket != ws)
+                        return // some stale stuff
+
+                    this.closeWebsocket()
+
+                    if (r.isPending())
+                        r.success(null) // couldn't open for the first time - don't try again
+                    else {
+                        // if it was open for at least 10s, try again
+                        if (Date.now() - this.websocketLastOpen > 10000)
+                            this.initWebsocketAsync().done()
+                    }
+                }
+                ws.onmessage = (evt) => {
+                    var d = <Cloud.BatchResponse>JSON.parse(evt.data)
+                    if (d.reqid) {
+                        var entry = this.websocketWaiters[d.reqid]
+                        if (entry) {
+                            delete this.websocketWaiters[d.reqid]
+                            entry.gotRespObj(d)
+                        }
+                    }
+                }
+
+                return r
+
+            } else return Promise.as()
+        }
+
         public initAsync()
         {
             this.hardStorage = Storage.getTableAsync("ApiCache")
@@ -2561,7 +2646,8 @@ module TDev { export module Browser {
                     this.unflushedDataSize = s ? s.length : 0
                     if (this.unflushedDataSize > 128)
                         return this.flushToHardStorageAsync();
-                });
+                })
+                .then(() => this.initWebsocketAsync())
         }
 
         public save()

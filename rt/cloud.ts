@@ -468,6 +468,7 @@ module TDev.Cloud {
         code: number;
         body: any;
         ETag: string;
+        reqid?: string;
     }
     export interface BatchResponses
     {
