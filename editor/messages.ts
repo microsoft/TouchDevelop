@@ -18,7 +18,8 @@ module TDev {
             Metadata, MetadataAck,
             Save, SaveAck,
             Compile, CompileAck,
-            Merge, Quit // [Quit] has no attached data, so not defining a special interface
+            Merge, Quit, // [Quit] has no attached data, so not defining a special interface
+            Upgrade
         };
 
         export interface Message_Init extends Message {
@@ -51,7 +52,7 @@ module TDev {
 
         export interface Message_Compile extends Message {
             type: MessageType; // == MessageType.Compile
-            text: string;
+            text: any; // string if language == CPlusPlus, TDev.AST.Json.JApp if language == TouchDevelop
             language: Language;
         }
 
@@ -59,6 +60,11 @@ module TDev {
             type: MessageType; // == MessageType.Message_CompileAck
             status: Status;
             error?: string; // non-null iff status == Error
+        }
+
+        export interface Message_Upgrade extends Message {
+            type: MessageType; // == MessageType.Message_Upgrade
+            ast: any // AST.Json.JApp
         }
 
         // A saved script has some text (this is what ends up published when the

@@ -167,7 +167,7 @@ module TDev {
                         TheChannel = null;
                         break;
 
-                    case MessageType.Compile: {
+                    case MessageType.Compile:
                         var message1 = <Message_Compile> event.data;
                         var cpp = "";
                         switch (message1.language) {
@@ -210,7 +210,12 @@ module TDev {
                             });
                         });
                         break;
-                    }
+
+                    case MessageType.Upgrade:
+                        var message2 = <Message_Upgrade> event.data;
+                        var text = AST.Json.serialize(message2.ast);
+                        console.log(text);
+                        break;
 
                     default:
                         console.error("[external] unexpected message type", message.type);
