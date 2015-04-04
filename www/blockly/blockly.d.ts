@@ -2,7 +2,7 @@ declare module Blockly {
     class Block {
         static obtain(workspace: Workspace, prototypeName?: string): Block;
 
-        // If type is equals to "foo_bar" and [Foo_BarBlock] exists, then you
+        // If type is equals to "foo_bar" and [FooBarBlock] exists, then you
         // may cast to it.
         type: string;
         id: string;
@@ -10,9 +10,14 @@ declare module Blockly {
         // Returns null if the field does not exist on the specified block.
         getFieldValue(field: string): string;
         setFieldValue(newValue: string, field: string): void;
+        // Returns null if the input does not exist on the specified block, or
+        // is disconnected.
+        getInputTargetBlock(field: string): Block;
+        // Returns null if no next block or is disconnected.
+        getNextBlock(): Block;
     }
 
-    class Controls_IfBlock extends Block {
+    class ControlsIfBlock extends Block {
         elseIfCount_: number;
         elseCount_: number;
     }

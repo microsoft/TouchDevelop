@@ -1,5 +1,6 @@
 ///<reference path='../../editor/messages.ts'/>
 ///<reference path='blockly.d.ts'/>
+///<reference path='compiler.ts'/>
 
 module TDev {
 
@@ -313,8 +314,20 @@ module TDev {
         $("#command-compile").addEventListener("click", () => {
             post(<External.Message_Compile> {
                 type: External.MessageType.Compile,
-                text: "", // TODO
+                text: compile(Blockly.mainWorkspace, {
+                    name: getName(),
+                    description: getDescription()
+                }),
                 language: External.Language.TouchDevelop
+            });
+        });
+        $("#command-graduate").addEventListener("click", () => {
+            post(<External.Message_Upgrade> {
+                type: External.MessageType.Upgrade,
+                ast: compile(Blockly.mainWorkspace, {
+                    name: getName(),
+                    description: getDescription()
+                }),
             });
         });
         $("#command-run").addEventListener("click", () => {

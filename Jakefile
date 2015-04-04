@@ -232,6 +232,7 @@ mkSimpleTask('build/ace.js', [
 ], "www/ace/refs.ts");
 mkSimpleTask('build/blockly.js', [
     "www/blockly/blockly-main.ts",
+    "www/blockly/compiler.ts",
     "editor/messages.ts"
 ], "www/blockly/refs.ts");
 

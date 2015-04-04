@@ -1,5 +1,3 @@
-///<reference path='refs.ts'/>
-
 // The current version of this file can be retrived by:
 // GET /api/language/webast
 
@@ -28,7 +26,7 @@ module TDev.AST.Json
 
     /*abstract*/ export interface JNode
     {
-        nodeType:string; // name of interface with leading J and with lower-case first letter
+        nodeType:string; // name of interface without leading J and with lower-case first letter
         id:string; // do not depend on the particular format of these strings
     }
 
