@@ -5484,6 +5484,12 @@ module TDev
             super()
         }
 
+        public visitRecordField(f:AST.RecordField)
+        {
+            super.visitRecordField(f)
+            this.dispatch(f.commentBlock)
+        }
+
         public visitAction(node:AST.Action)
         {
             super.visitAction(node)

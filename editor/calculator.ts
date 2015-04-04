@@ -1249,6 +1249,7 @@ module TDev
                 if (TheEditor.autoHide())
                     this.switchToNormalKeypad();
                 this.display();
+                TheEditor.selector.positionButtonRows();
                 if (this.stmt instanceof AST.RecordNameHolder)
                     TheEditor.dismissSidePane();
             };

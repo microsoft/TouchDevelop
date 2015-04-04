@@ -114,6 +114,8 @@ module TDev
             if (!stmt) {
                 if (off <= 0) stmt = this.selectionBlock.stmts[this.selectionBegin];
                 else stmt = this.selectionBlock.stmts[this.selectionEnd];
+                if (stmt instanceof AST.FieldComment)
+                    stmt = stmt.parent.parent
             }
 
             var idx = stmt.parentBlock().stmts.indexOf(stmt);
@@ -737,6 +739,7 @@ module TDev
             return (this.selectionBlock instanceof AST.CodeBlock ||
                     this.selectedStmt instanceof AST.OptionalParameter ||
                     this.selectionBlock instanceof AST.FieldBlock)
+                && !(this.selectedStmt instanceof AST.FieldComment)
                 && !TheEditor.isDebuggerMode()
                 && TheEditor.widgetEnabled("copyPaste");
         }
