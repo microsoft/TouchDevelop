@@ -619,6 +619,11 @@ module TDev.RT.Node {
             return webRequestAsync(this)
         }
 
+        Util.perfNow = () => {
+            var t = process.hrtime();
+            return t[0] * 1e3 + t[1] * 1e-6;
+        }
+
         TDev.Ticker.disable()
         TDev.Util.initGenericExtensions();
         TDev.RT.RTValue.initApis();
