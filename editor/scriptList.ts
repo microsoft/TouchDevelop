@@ -6372,7 +6372,7 @@ module TDev { export module Browser {
                 TipManager.setTip(null);
 
                 Promise.join([
-                    this.browser().deletePaneAnimAsync(),
+                    // this.browser().deletePaneAnimAsync(),
                     World.uninstallAsync(this.getGuid())
                 ]).done(() => {
                     this.cloudHeader = null;
