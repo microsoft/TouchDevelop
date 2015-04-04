@@ -2895,7 +2895,7 @@ module TDev { export module Browser {
 
             var url = Cloud.getServiceUrl() + "/" + id;
             var text = this.twitterMessage();
-            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'package').withClick(() => {
+            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'share').withClick(() => {
                     TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
                 });
             return r;
