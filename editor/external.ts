@@ -214,7 +214,11 @@ module TDev {
                     case MessageType.Upgrade:
                         var message2 = <Message_Upgrade> event.data;
                         var text = AST.Json.serialize(message2.ast);
-                        console.log(text);
+                        Browser.TheHost.openNewScriptAsync({
+                            editorName: "touchdevelop",
+                            scriptName: message2.name,
+                            scriptText: text
+                        });
                         break;
 
                     default:

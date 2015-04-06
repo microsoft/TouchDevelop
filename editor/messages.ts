@@ -64,6 +64,7 @@ module TDev {
 
         export interface Message_Upgrade extends Message {
             type: MessageType; // == MessageType.Message_Upgrade
+            name: string;
             ast: any // AST.Json.JApp
         }
 

@@ -328,6 +328,7 @@ module TDev {
                     name: getName(),
                     description: getDescription()
                 }),
+                name: getName()+" (converted)",
             });
         });
         $("#command-run").addEventListener("click", () => {

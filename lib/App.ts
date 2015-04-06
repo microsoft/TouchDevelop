@@ -300,7 +300,7 @@ module TDev.RT {
         //? Indicates if the `app->host_exec` action can be used to run host commands.
         //@ betaOnly
         public has_host(): boolean {
-            return !!(<any>window).mcefQuery || !!(<any>window).touchDevelopExec;
+            return Browser.isHosted;
         }
 
         //? Where are we running from: "editor", "website", "nodejs", "mobileapp", "plugin"
@@ -713,39 +713,44 @@ module TDev.RT {
             return r
         }
 
+        export function hostExecAsync(message: string): Promise {
+            return new Promise((onSuccess, onError, onProgress) => {
+                var mcefQuery = (<any>window).mcefQuery;
+                if (mcefQuery) {
+                    mcefQuery({
+                        request: message,
+                        persistent: false,
+                        onSuccess: function (response) {
+                            onSuccess(response);
+                        },
+                        onFailure: function (error_code, error_message) {
+                            onSuccess(JSON.stringify({ error: error_code, message: error_message }));
+                        }
+                    });
+                    return;
+                }
+
+                var exec = (<any>window).touchDevelopExec;
+                if (!exec) {
+                    App.log("window.touchDevelopExec function not defined");
+                    onSuccess(undefined);
+                    return;
+                }
+
+                try {
+                    exec(message,(result) => { onSuccess(result); });
+                }
+                catch (e) {
+                    App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
+                    onSuccess(undefined);
+                }
+            });
+        }
 
         //? Invokes the host to execute a command described in the message and returns the response. There is no restriction on the format of the request and response. If not available or errored, returns invalid.
         //@ async readsMutable returns(string) betaOnly
         export function host_exec(message: string, r: ResumeCtx) {
-            var mcefQuery = (<any>window).mcefQuery;
-            if (mcefQuery) {
-                mcefQuery({
-                    request: message,
-                    persistent: false,
-                    onSuccess: function (response) {
-                        r.resumeVal(response);
-                    },
-                    onFailure: function (error_code, error_message) {                        
-                        r.resumeVal(JSON.stringify({ error: error_code, message: error_message }));
-                    }
-                });
-                return;
-            }
-
-            var exec = (<any>window).touchDevelopExec;
-            if (!exec) {
-                App.log("window.touchDevelopExec function not defined");
-                r.resumeVal(undefined);
-                return;
-            }
-
-            try {
-                exec(message, (result) => { r.resumeVal(result); });
-            }
-            catch (e) {
-                App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
-                r.resumeVal(undefined);
-            }
+            return hostExecAsync(message).done(resp => r.resumeVal(resp));
         }
     }
 }
