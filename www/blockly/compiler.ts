@@ -10,6 +10,11 @@ import B = Blockly;
 
 // A series of utility functions for constructing various J* AST nodes.
 module Helpers {
+  function assert(x: boolean) {
+    if (!x)
+      throw "Assertion failure";
+  }
+
   // Digits are operators...
   export function mkDigit(x: string): J.JOperator {
     return mkOp(x);
@@ -18,7 +23,7 @@ module Helpers {
   export function mkOp(x: string): J.JOperator {
     return {
       nodeType: "operator",
-      id: "TODO",
+      id: null,
       op: x
     };
   }
@@ -28,7 +33,7 @@ module Helpers {
   export function mkDef(x: string, t: string): J.JLocalDef {
     return {
       nodeType: "localDef",
-      id: "TODO",
+      id: null,
       name: x,
       type: <any> t, // the interface is a lie
     };
@@ -38,7 +43,7 @@ module Helpers {
   export function mkLocalRef(x: string): J.JLocalRef {
     return {
       nodeType: "localRef",
-      id: "TODO",
+      id: null,
       name: x,
       localId: null // same here
     }
@@ -52,7 +57,7 @@ module Helpers {
   export function mkExprHolder(defs: J.JLocalDef[], toks: J.JToken[]): J.JExprHolder {
     return {
       nodeType: "exprHolder",
-      id: "TODO",
+      id: null,
       tokens: toks,
       tree: null,
       locals: defs,
@@ -63,7 +68,7 @@ module Helpers {
   export function mkExprStmt(expr: J.JExpr): J.JStmt {
     return {
       nodeType: "exprStmt",
-      id: "TODO",
+      id: null,
       expr: expr,
     };
   }
@@ -71,10 +76,43 @@ module Helpers {
   export function mkWhile(condition: J.JToken[], body: J.JStmt[]): J.JStmt {
     return {
       nodeType: "while",
-      id: "TODO",
+      id: null,
       condition: mkExprHolder([], condition),
       body: body
     };
+  }
+
+  export function mkSimpleIf(condition: J.JToken[], thenBranch: J.JStmt[]): J.JIf {
+    return {
+      nodeType: "if",
+      id: null,
+      condition: mkExprHolder([], condition),
+      thenBody: thenBranch,
+      elseBody: null,
+      isElseIf: false,
+    };
+  }
+
+  // This function takes care of generating an if node *and* de-constructing the
+  // else branch to abide by the TouchDevelop representation (see comments in
+  // [jsonInterfaces.ts]).
+  export function mkIf(condition: J.JToken[], thenBranch: J.JStmt[], elseBranch: J.JStmt[]): J.JIf[] {
+    var ifNode = mkSimpleIf(condition, thenBranch)
+
+    // The transformation into a "flat" if / else if / else sequence is only
+    // valid if the else branch it itself such a sequence.
+    var fitForFlattening = elseBranch.length && elseBranch.every((s: J.JStmt, i: number) =>
+      s.nodeType == "if" && (i == 0 || (<J.JIf> s).isElseIf)
+    );
+    if (fitForFlattening) {
+      var first = <J.JIf> elseBranch[0];
+      assert(!first.isElseIf);
+      first.isElseIf = true;
+      return [ifNode].concat(<J.JIf[]> elseBranch);
+    } else {
+      ifNode.elseBody = elseBranch;
+      return [ifNode];
+    }
   }
 
   // Generate the AST for:
@@ -92,7 +130,7 @@ module Helpers {
   export function mkAction(name: string, body: J.JStmt[]): J.JAction {
     return {
       nodeType: "action",
-      id: "TODO",
+      id: null,
       name: name,
       body: body,
       inParameters: [],
@@ -106,10 +144,10 @@ module Helpers {
     };
   }
 
-  export function mkApp(name: string, description: string, actions: J.JAction[]) {
+  export function mkApp(name: string, description: string, actions: J.JAction[]): J.JApp {
     return {
       nodeType: "app",
-      id: "TODO",
+      id: null,
 
       textVersion: "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex",
       jsonVersion: "v0.1,resolved",
@@ -164,7 +202,7 @@ var precedenceTable: { [index: string]: number } = {
 };
 
 // Convert a blockly "OP" field into a TouchDevelop operator.
-// TODO: unary minus, power
+// TODO: power
 var opToTok: { [index: string]: string } = {
   "ADD": "+",
   "MINUS": "-",
@@ -213,8 +251,19 @@ function compileExpression(b: B.Block): Expr {
 // Statements
 ///////////////////////////////////////////////////////////////////////////////
 
-function compileControlsIf(b: B.ControlsIfBlock): J.JStmt {
-  throw "Not implemented";
+function compileControlsIf(b: B.ControlsIfBlock): J.JStmt[] {
+  var stmts: J.JIf[] = [];
+  for (var i = 0; i <= (b.elseIfCount_ || 0); ++i) {
+    var cond = compileExpression(b.getInputTargetBlock("IF"+i)).tokens;
+    var thenBranch = compileStatements(b.getInputTargetBlock("DO"+i));
+    stmts.push(Helpers.mkSimpleIf(cond, thenBranch));
+    if (i > 0)
+      stmts[stmts.length - 1].isElseIf = true;
+  }
+  if (b.elseCount_) {
+    stmts[stmts.length - 1].elseBody = compileStatements(b.getInputTargetBlock("ELSE"));
+  }
+  return stmts;
 }
 
 function compileControlsFor(b: B.Block): J.JStmt[] {
@@ -254,7 +303,7 @@ function compileStatements(b: B.Block): J.JStmt[] {
   while (b) {
     switch (b.type) {
       case 'controls_if':
-        // stmts.push(compileControlsIf(<B.ControlsIfBlock> b));
+        stmts = stmts.concat(compileControlsIf(<B.ControlsIfBlock> b));
         break;
 
       case 'controls_for':
