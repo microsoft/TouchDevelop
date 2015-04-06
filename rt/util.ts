@@ -204,8 +204,6 @@ module TDev{
 
     export var eventLogging = false;
     export var mouseLogging = false;
-    export var cloudRun = false;
-    export var cloudRunwHeapOpt = false;
 
     export function wordLength(s:string)
     {

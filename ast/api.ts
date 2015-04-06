@@ -1268,8 +1268,6 @@ module TDev {
         canCacheSearch():boolean;
         getArrow():string;
         showIntelliButton():boolean;
-
-        canBeOffloaded(): boolean;
     }
 
     export interface IPropertyWithCache
@@ -1607,24 +1605,6 @@ module TDev {
         {
             if (this.useFullName) return this.parentKind.getPropPrefix() + this.getArrow() + this._name;
             else return this._name;
-        }
-
-        public canBeOffloaded(): boolean {
-            if (this.getName() == "post to wall") return false;
-
-            // allow record operations to be offloaded
-            if (this.parentKind.getRecord()) return true;
-
-            var parentName = this.parentKind.getName();
-            var canBeOffloadedList = ["Collections","Colors", "Invalid", "Math", "Time",
-                                      "Web", "Boolean", "Color", "DateTime", "Json Object",
-                                      "Link", "Link Collection", "Location", "Location Collection",
-                                      "Number", "Number Collection", "Number Map", "Place Collection", "String",
-                                      "String Collection", "String Map", "Vector3", "Web Request", "Web Response","Xml Object"]
-            if (canBeOffloadedList.indexOf(parentName) >= 0 ||
-                parentName == "Places" && this._name != "check in")
-                return true;
-            return false;
         }
 
         public isRefMethod()

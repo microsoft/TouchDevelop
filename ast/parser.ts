@@ -926,8 +926,7 @@ module TDev { export module AST {
                     this.currentAction._isPage = true;
                 this.skipOp(";");
             } else if (tag == "offloaded") {
-                if (this.currentAction)
-                    this.currentAction.isOffloaded = true;
+                // obsolete
                 this.skipOp(";");
             } else if (tag == "async") {
                 if (this.currentAction)

@@ -1533,11 +1533,6 @@ module TDev
             if (this.doingRefresh || !this.lastDecl || !Script) return;
             try {
                 this.doingRefresh = true;
-                if (Util.cloudRun) {
-                    var a = this.currentAction();
-                    // reset the canBeOffloadedCache
-                    if (a) a.canBeOffloadedCache = AST.CanBeOffloadedState.Unknown;
-                }
                 this.currentCodeView.render(this.lastDecl);
 
                 // This destroys all of our collaboration info, so we need to
@@ -1548,11 +1543,6 @@ module TDev
                     Util.reportError("CollabFeature", e);
                 }
 
-                // when editing an action, the offload flag of the action may change. Need to refresh the side tab.
-                if (Util.cloudRun && this.currentSideTab) {
-                    this.currentSideTab.navRefreshPending = true;
-                    this.currentSideTab.refresh();
-                }
                 this.updateTutorial()
             } finally {
                 this.doingRefresh = false;
@@ -5567,10 +5557,6 @@ module TDev
         {
             var action = <AST.Action>decl;
             Util.assert(action instanceof AST.Action);
-
-            if (Util.cloudRun) {
-                action.isOffloaded = action.isOffloaded && action.canBeOffloaded();
-            }
 
             var render = () => {
                 Util.time("render-action", () => {

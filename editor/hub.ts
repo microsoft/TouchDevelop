@@ -7,7 +7,9 @@ module TDev.Browser {
     export interface HubTheme {
         description: string;
         logoArtId: string;
+
         wallpaperArtId?: string;
+
         tutorialsTopic?: string; // topics of tutorial pages
 
         scriptSearch?: string; // seed when searching script
@@ -26,7 +28,7 @@ module TDev.Browser {
         'minecraft': {
             description: 'Learn to code with Mineacraft',
             logoArtId: 'eopyzwpm',
-            wallpaperArtId: 'abqqsurv',
+            wallpaperArtId: 'ohilyzjk',
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
@@ -92,7 +94,10 @@ module TDev.Browser {
             }
 
             [elt("hubRoot"), elt("slRoot")].filter(e => !!e).forEach(e => {
-                if (id) e.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(id));
+                if (id) {
+                    e.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(id));
+                    e.style.backgroundRepeat = 'repeat'
+                }
                 else e.style.backgroundImage = "";
             });
         }

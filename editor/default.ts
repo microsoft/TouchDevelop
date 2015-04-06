@@ -203,11 +203,6 @@ module TDev
         // the "debugger" statement in the handler is also not triggered - we're are assuming the debugger
         // was attached to begin with and it caught the exception
         if (/debuggerExceptions/.test(url)) debuggerExceptions = true;
-        if (/cloudRun/.test(url)) Util.cloudRun = true;
-        if (/cloudRunwHeapOpt/.test(url)) {
-            Util.cloudRun = true;
-            Util.cloudRunwHeapOpt = true;
-        }
         if (/withTracing/.test(url)) withTracing = true;
         if (/dbg=[1t]/.test(url) || window.localStorage["dbg"]) dbg = true;
         if (/nodbg/.test(url)) dbg = false;

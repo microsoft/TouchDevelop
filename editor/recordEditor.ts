@@ -84,11 +84,11 @@ module TDev
             defbuttons.className += " defbuttons";
 
             this.setChildren([
+                div("varLabel", lf("record definition")),
+                defbuttons,
                 div("varLabel", lf("record category")),
                 kindbox,
                 this.persistenceDiv,
-                div("varLabel", lf("record definition")),
-                defbuttons,
             ]);
 
             if (s instanceof AST.RecordPersistenceKind)

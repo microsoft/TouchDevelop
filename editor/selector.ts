@@ -222,26 +222,7 @@ module TDev
                 btns.push(
                   div("selHeader", lf("extract selection into action")),
                      this.extractedName = HTML.mkTextInput("text", lf("action name")),
-                     mkBtn("extract", "Ctrl-E", Ticks.codeExtractAction, () => { this.extract(false) }));
-
-                var act = TDev.TheEditor.currentAction();
-                if (Util.cloudRun && !act.isOffloaded) {
-                    var canBeOffloaded = true;
-                    try {
-                        var selected = this.copyOutSelection();
-                        for (var i = 0; i < selected.length; i++) {
-                            if (!(selected[i].canBeOffloaded())) {
-                                canBeOffloaded = false;
-                                break;
-                            }
-                        }
-                    } catch (e) {
-                        canBeOffloaded = false;
-                    }
-                    if (canBeOffloaded) {
-                        btns.push(mkBtn(lf("offload"), "Ctrl-L", Ticks.codeExtractAction, () => { this.extract(true) }));
-                    }
-                }
+                     mkBtn("extract", "Ctrl-E", Ticks.codeExtractAction, () => { this.extract() }));
 
                 btns.push(div("selHeader", lf("surround with")));
                 this.extractedName.value = Script.freshName(extractedName);
@@ -288,9 +269,7 @@ module TDev
             Util.setTimeout(50, () => btn.focus());
         }
 
-        // The offload flag decides whether to set the offload of the new action.
-        // offload = true means the new action will be offloaded to execute
-        private extract(offload:boolean)
+        private extract()
         {
             var stmts = this.copyOutSelection();
 
@@ -304,7 +283,6 @@ module TDev
                                          callPlaceholder,
                                          Script.freshName(this.extractedName.value));
             extr.run();
-            extr.extractedAction.isOffloaded = offload;
             TheEditor.initIds(extr.extractedAction)
             Script.addDecl(extr.extractedAction);
             TheEditor.queueNavRefresh();
@@ -443,9 +421,6 @@ module TDev
                     this.emptySelection();
                 else
                     this.applySelection();
-            }
-            if (Util.cloudRun) {
-                this.setupButtons(false);
             }
         }
 

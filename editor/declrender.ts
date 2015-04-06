@@ -65,12 +65,6 @@ module TDev
                 if (a.isEvent()) return "#007fff";
                 if (a.isPage()) return "#00008B";
                 if (a.isActionTypeDef()) return recordColor;
-                if (Util.cloudRun) {
-                    a.canBeOffloadedCache = AST.CanBeOffloadedState.Unknown;
-                    // recompute isOffloaded since the action or those it calls may change
-                    a.isOffloaded = /^cloud/.test(a.getName()) || (a.isOffloaded && a.canBeOffloaded());
-                    if (a.isOffloaded) return "#800000";
-                }
                 return actionColor;
             },
 

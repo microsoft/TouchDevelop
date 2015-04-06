@@ -1292,10 +1292,6 @@ module TDev { export module Browser {
                     if (!t && HelpTopic.contextTopics)
                         t = HelpTopic.contextTopics.filter(t => t.id == h[3])[0]
                     if (t) pg = TopicInfo.mk(t);
-                } else if (h[1] == "edits") {
-                    this.show()
-                    HistoryTab.anyHistory(h[2])
-                    return;
                 } else if (h[1] == "ldscr") {
                     this.show();
                     TheEditor.historyMgr.setHash("list:ldscr:" + h[2], "Script parse test");
@@ -2895,7 +2891,7 @@ module TDev { export module Browser {
 
             var url = Cloud.getServiceUrl() + "/" + id;
             var text = this.twitterMessage();
-            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), 'package').withClick(() => {
+            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), lf("share")).withClick(() => {
                     TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
                 });
             return r;
@@ -3209,37 +3205,6 @@ module TDev { export module Browser {
             return "svg:fa-history";
         }
 
-        // this thing is somewhat internals, for Oregon people
-        static anyHistory(path:string)
-        {
-            var m = /^([a-z]*)\/([a-f0-9-]+)$/.exec(path)
-            if (!m) return;
-            var u = m[1]
-            var guid = m[2]
-
-            TheEditor.historyMgr.setHash("list:edits:" + path, "History");
-
-            if (!Cloud.getAccessToken()) {
-                ModalDialog.info("need access token", "you need to be logged in");
-                return
-            }
-
-            var allItems:JsonHistoryItem[] = []
-            var getItems = (cont:string) => {
-                Cloud.getPrivateApiAsync(u + "/installed/" + guid + "/history?count=100" + cont)
-                .done((resp) => {
-                    allItems.pushRange(resp.items)
-                    if (resp.continuation) {
-                        getItems("&continuation=" + resp.continuation)
-                    } else {
-                        HistoryTab.showMicroEditsAsync(u, guid, allItems)
-                        .done(s => ModalDialog.showText(s))
-                    }
-                })
-            };
-            getItems("")
-        }
-
         static historicalTextAsync(uid:string, guid:string, it:JsonHistoryItem)
         {
             if (Cloud.lite)
@@ -3385,65 +3350,11 @@ module TDev { export module Browser {
         }
     }
 
-    export class CodeTab
-        extends BrowserTab
-    {
-        constructor(par:BrowserPage)
-        {
-            super(par)
-        }
-        public inlineIsTile() { return false; }
-        public getId() { return "code"; }
-        public getName() { return lf("code"); }
-        private script(): ScriptInfo { return <ScriptInfo>this.parent; }
-        public bgIcon() {
-            return "svg:indent";
-        }
-
-        public initTab() {
-            var loadingDiv = div('bigLoadingMore', 'loading...');
-            var baseDiffDiv = div('diffLink');
-            this.tabContent.setChildren([baseDiffDiv, loadingDiv]);
-
-            Promise.delay(Browser.isWebkit ? 100 : 1, () => // make sure the 'loading...' is shown while compute-intensive tasks are going on
-            {
-                var s = this.script();
-
-                if (s.publicId)
-                    TheApiCacheMgr.getAsync(s.publicId + "/base", true).then(d => {
-                        var baseId = d.id;
-                        Browser.setInnerHTML(baseDiffDiv, "show differences from base <a href=\"" + Cloud.getServiceUrl() + "/diff/" + encodeURIComponent(baseId) + "/" + encodeURIComponent(s.publicId) + "\">/" + encodeURIComponent(baseId) + "</a>");
-                    }).done();
-
-                return s.getScriptTextAsync().then((scriptText: string) =>
-                {
-                    loadingDiv.removeSelf();
-
-                    if (!scriptText) {
-                        this.tabContent.appendChild(div(null, "script text not available; are you offline?"));
-                        return;
-                    }
-
-                    var app = AST.Parser.parseScript(scriptText);
-                    AST.TypeChecker.tcScript(app);
-                    var renderer = new EditorRenderer();
-                    var elts = renderer.declDiv(app);
-                    this.tabContent.appendChild(elts);
-
-                    if (!Browser.isCellphone)
-                        this.tabContent.appendChild(div(null, HTML.mkButton(lf("for print/email"), () => {
-                            ScriptProperties.printScript(app);
-                        })));
-                });
-            }).done();
-        }
-    }
-
     export class InsightsTab extends BrowserMultiTab {
         constructor(par: ScriptInfo) {
             super(par,
                 lf("This tab contains additional information about this script"),
-                CodeTab, HistoryTab, ArtTab, ConsumersTab, SuccessorsTab, DerivativesTab);
+                ScreenShotTab, ScriptHeartsTab, TagsTab, ArtTab, ConsumersTab, SuccessorsTab, DerivativesTab);
         }
 
         public bgIcon() {
@@ -4664,6 +4575,7 @@ module TDev { export module Browser {
         public getName() { return lf("screens"); }
 
         public inlineIsTile() { return false; }
+        public noneText() { return lf("no screenshots yet!"); }
 
         static mkBox(b: Host, c: JsonScreenShot) {
             var reportAbuse = () => {
@@ -5648,15 +5560,13 @@ module TDev { export module Browser {
         {
             var r:BrowserTab[];
             if (!this.publicId)
-                r = [this, new CodeTab(this), new HistoryTab(this)];
+                r = [this, new HistoryTab(this)];
             else
                 r =
                 [
                     this,
-                    new ScreenShotTab(this),
                     new CommentsTab(this),
-                    new ScriptHeartsTab(this),
-                    new TagsTab(this),
+                    new HistoryTab(this),
                     new InsightsTab(this),
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
@@ -5688,8 +5598,6 @@ module TDev { export module Browser {
 
             var pinB = null
             var updateB = null
-            var shareB = null
-            if (this.publicId) shareB = mkBtn(Ticks.browseShare, "svg:package,white", lf("share"), null, () => { this.share(); });
             var editB = mkBtn(Ticks.browseEdit, "svg:edit,white", lf("edit"), null, () => { this.edit() });
             if (TDev.RT.Wab && this.getGuid() && TDev.RT.Wab.isSupportedAction(TDev.RT.Wab.Action.UPDATE_TILE)) {
                 pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
@@ -5727,10 +5635,10 @@ module TDev { export module Browser {
 
             var uninstall:HTMLElement;
             var editWithGroup:HTMLElement;
-            var groupDiv: HTMLElement = div("");
+            var btns: HTMLElement;
 
             if (this.cloudHeader) {
-                uninstall = div(null, ScriptInfo.mkSimpleBtnConfirm(lf("uninstall"), () => this.uninstall()))
+                uninstall = ScriptInfo.mkSimpleBtnConfirm(lf("uninstall"), () => this.uninstall())
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -5751,19 +5659,18 @@ module TDev { export module Browser {
 
                     // group mode?
                     if(!st.collabSessionId) {
-                        uninstall.appendChild(HTML.mkButton(lf("edit with group"), () => {
+                        btns.appendChild(HTML.mkButton(lf("edit with group"), () => {
                             Meta.chooseGroupAsync({ header: lf("choose a group") })
                                 .done((group : GroupInfo) => {
                                     if (group) group.addScriptAsync(this).done(() => this.edit());
                                 });
                         }));
                     } else if (st.groupId) {
-                        groupDiv.setChildren([
+                        btns.appendChild(
                             ScriptInfo.labeledBox(
                                 lf("belongs to"),
                                 Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
-                            )
-                        ]);
+                            ));
                     }
                 })
             }
@@ -5772,7 +5679,7 @@ module TDev { export module Browser {
                 var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush, () => (<ScriptInfo>this.parent).mergeScript())
                 var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase, () => (<ScriptInfo>this.parent).diffToBase())
             }
-            return div("sdRunBtns", updateB, editB, runB, likePub, shareB, pinB, uninstall, groupDiv, div(null, pull, diff, this.showcaseBtns()));
+            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, pull, diff, this.showcaseBtns());
         }
 
         private showcaseBtns()
