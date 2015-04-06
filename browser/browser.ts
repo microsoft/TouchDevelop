@@ -35,6 +35,7 @@ module TDev {
         export var isWindows8plus = false;
         export var isCompiledApp = false;
         export var isWP8app = false;
+        export var isHosted = false;
         export var browser = BrowserSoftware.unknown;
         export var browserVersion = 0;
         export var browserVersion2 = 0; // not set for pinned iOS apps; look at webkitVersion instead
@@ -112,6 +113,11 @@ module TDev {
 
         export function detect() {
             startTimestamp = new Date().getTime(); // no Util here
+
+            if ((<any>window).touchDevelopExec || (<any>window).mcefQuery) {
+                isHosted = true;
+                Browser.screenshots = true;
+            }
 
             if ((<any>window).isNodeJS) {
                 isNodeJS = true

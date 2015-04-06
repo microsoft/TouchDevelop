@@ -470,6 +470,19 @@ module TDev.RT {
 
     export module ScreenshotManager {
         export var toScreenshotURLAsync = (rt: RuntimeHost): Promise => { // string {
+            // TODO: move somewhere else
+            if (App.env().has_host()) {
+                var durl: string;
+                return App.hostExecAsync("screen.min")
+                    .then(() => new Promise((onSuccess, onError, onProcess) => {
+                        Util.setTimeout(100,() => onSuccess(undefined));
+                    })).then(() => App.hostExecAsync("screen.screenshot"))
+                    .then((url) => {
+                        durl = url;
+                        return App.hostExecAsync("screen.show");
+                    }).then(() => durl);
+            }
+
             var c = rt.toScreenshotCanvas();
             try {
                 var data = c ? c.toDataURL('image/png') : undefined;
