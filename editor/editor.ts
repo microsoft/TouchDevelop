@@ -5661,6 +5661,7 @@ module TDev
                 entry.app = AST.Parser.parseScript(s);
                 if (l.guid) entry.app.localGuid = l.guid;
                 AST.TypeChecker.tcScript(entry.app);
+                entry.app.things.forEach(t => { t.isExternal = true })
                 return entry.app;
             }
 

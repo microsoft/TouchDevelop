@@ -848,11 +848,13 @@ module TDev.AST
                     node.setError(lf("TD126: libraries cannot define global events"));
             }
 
-            if (this.topApp.isCloud && node.isPage())
-                node.setError(lf("TD177: cloud libraries cannot define pages"));
+            if (!node.isExternal) {
+                if (this.topApp.isCloud && node.isPage())
+                    node.setError(lf("TD177: cloud libraries cannot define pages"));
 
-            if (this.topApp.isCloud && !node.isPrivate && node.isAtomic)
-                node.setError(lf("TD178: cloud libraries cannot define atomic actions"));
+                if (this.topApp.isCloud && !node.isPrivate && node.isAtomic)
+                    node.setError(lf("TD178: cloud libraries cannot define atomic actions"));
+            }
 
             if (!!node.getError()) node._hasErrors = true;
 

@@ -1322,6 +1322,7 @@ module TDev.AST {
         public visitorState:any;
         public diffStatus:number;
         public diffAltDecl:Decl;
+        public isExternal:boolean;
         constructor() {
             super()
         }
@@ -4409,6 +4410,7 @@ module TDev.AST {
                         if (lib.guid) app.localGuid = lib.guid;
                         app.setPlatform(PlatformCapability.All);
                         var numErr = TypeChecker.tcScript(app, true);
+                        app.things.forEach(t => { t.isExternal = true })
                         if (numErr > 0) {
                             problem("Library " + id + " has errors");
                             res.numLibErrors++;
