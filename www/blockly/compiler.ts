@@ -20,6 +20,14 @@ module Helpers {
     return mkOp(x);
   }
 
+  export function mkBooleanLiteral(x: string): J.JBooleanLiteral {
+    return {
+      nodeType: "booleanLiteral",
+      id: null,
+      value: x
+    };
+  }
+
   export function mkStringLiteral(x: string): J.JStringLiteral {
     return {
       nodeType: "stringLiteral",
@@ -66,11 +74,9 @@ module Helpers {
     }
   }
 
-  // TouchDevelop conflates variable binding and series of tokens. So every series
-  // of tokens is flagged with the variables that are introduced at this stage.
-  // This is not the traditional notion of binding, though: the variable's scope
-  // is not limited to the tokens, but rather extends until the end of the parent
-  // block.
+  // [defs] are the variables that this expression binds; this means that this
+  // expression *introduces* new variables, whose scope runs until the end of
+  // the parent block (see comments for [JExprHolder]).
   export function mkExprHolder(defs: J.JLocalDef[], toks: J.JToken[]): J.JExprHolder {
     return {
       nodeType: "exprHolder",
@@ -282,7 +288,7 @@ function compileText(b: B.Block): Expr {
 
 function compileBoolean(b: B.Block): Expr {
   return {
-    tokens: [Helpers.mkOp(b.getFieldValue("BOOL").toLowerCase())],
+    tokens: [Helpers.mkBooleanLiteral(b.getFieldValue("BOOL").toLowerCase())],
     prec: 0
   };
 }
@@ -306,7 +312,7 @@ function compileExpression(b: B.Block): Expr {
       return compileArithmetic(b);
     case "logic_boolean":
       return compileBoolean(b);
-    case "logic_not":
+    case "logic_negate":
       return compileNot(b);
     case "variables_get":
       return compileVariableGet(b);

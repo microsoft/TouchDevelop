@@ -3,6 +3,17 @@
 
 module TDev.AST.Json
 {
+    // This module describes an AST for TouchDevelop scripts. The documentation
+    // is severely lacking, so the best way to figure things out is to write a
+    // TouchDevelop script, and type (in the console):
+    //
+    //   "TDev.AST.Json.dump(TDev.Script)"
+    //
+    // which will dump the currently-edited script in this representation. The
+    // converse operation is:
+    //
+    //   "TDev.AST.Json.serialize(yourJsonAst)"
+
     // These two interfaces are never used. Actually, whenever a field has type
     // [JNodeRef], this is a lie, and its type is [string].
     export interface JNodeRef { dummyNodeRef: number; }
@@ -36,8 +47,20 @@ module TDev.AST.Json
     /*abstract*/ export interface JToken extends JNode { }
     /*abstract*/ export interface JExpr extends JToken { }
 
+    // This corresponds to the [operator] syntactic class defined in the
+    // OOPSLA'15 submission. When adopting the "hybrid AST" point of view,
+    // an expression is decomposed as a series of tokens. The [JOperator]
+    // interface covers operators (assignment, comparison, boolean and
+    // arithmetic operators), but also *digits*.
+    //
+    // For instance, "1 + 10 = 11" will generate:
+    //   [JOperator 1; JOperator +; JOperator 0; JOperator =; JOperator 1; JOperator 1]
     export interface JOperator extends JToken { op:string; }
 
+    // A reference to a "property", i.e. something defined for an object of that
+    // type. There is no good way of figuring out what should the [parent] be
+    // when generating such properties; probably the best way is to dump a
+    // TouchDevelop AST.
     export interface JPropertyRef extends JToken
     {
         name:string;
@@ -49,11 +72,12 @@ module TDev.AST.Json
     export interface JStringLiteral extends JExpr { value:string; }
     export interface JBooleanLiteral extends JExpr { value:boolean; }
 
-    // Note that in tokens[] numbers are represented as sequences of JOperator nodes.
-    // If parsing 'stringForm' yields 'value', 'stringForm' is used
-    // Otherwise stringified form of 'value' is used
+    // A number literal is only used when adopting the "tree" view for
+    // expressions (see comment on [JExprHolder]).
     export interface JNumberLiteral extends JExpr {
         value:number;
+        // If parsing 'stringForm' yields 'value', 'stringForm' is used
+        // Otherwise stringified form of 'value' is used
         stringForm?:string;
     }
 
@@ -83,6 +107,25 @@ module TDev.AST.Json
         args:JExpr[];
     }
 
+    // Expressions can be represented in two different manners.
+    // - The first one is as a series of tokens. This would correspond to the
+    //   "hybrid AST" described in the OOPSLA'15 submission. In that
+    //   representation, the [tree] field is null and the [tokens] field
+    //   contains the list of tokens.
+    // - The second one is as an actual AST, with a proper tree structure. In
+    //   that case, the [tokens] field is null and [tree] must contain a proper
+    //   tree.
+    //
+    // TouchDevelop conflates variable binding and expressions. This means that
+    // every expression is flagged with the variables that are introduced at
+    // this stage. For instance, "var x = 1" will be translated as a
+    // [JExprHolder] where [locals] contains a [JLocalDef x], and either:
+    // - [tokens] is [JLocalRef x; JOperator :=; JOperator 1], or
+    // - [tree] is [JCall { name: ":=", parent: "Unknown", args: [JLocalRef x, JNumberLiteral 1] }]
+    //
+    // This is not the traditional notion of binding! The variable's scope is
+    // not limited to the tokens, but rather extends until the end of the parent
+    // block.
     export interface JExprHolder extends JNode
     {
         // if tokens is unset, will try to use tree
