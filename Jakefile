@@ -410,12 +410,17 @@ desc('upload current build to the cloud')
 task('upload', [ "build/client.js" ], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
-    var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     console.log("[I] uploading v" + buildVersion)
-    jake.exec([ 'node build/client.js tdupload ' + uploadKey + ' ' + buildVersion ],
-      { printStdout: true, printStderr: true },
-      function() { task.complete(); });
-
+	var procs = [];
+	if (process.env.TD_UPLOAD_LITE_KEY) {
+		console.log("[I] uploading to lite")
+		procs.push('node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion + ' latest');
+	}
+	var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
+	procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
+	jake.exec(procs,
+	  { printStdout: true, printStderr: true },
+	  function() { task.complete(); });
   };
   if (!process.env.TRAVIS) {
     upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);

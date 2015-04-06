@@ -20,6 +20,22 @@ module Helpers {
     return mkOp(x);
   }
 
+  export function mkNumberLiteral(x: number): J.JNumberLiteral {
+    return {
+      nodeType: "numberLiteral",
+      id: null,
+      value: x
+    };
+  }
+
+  export function mkBooleanLiteral(x: boolean): J.JBooleanLiteral {
+    return {
+      nodeType: "booleanLiteral",
+      id: null,
+      value: x
+    };
+  }
+
   export function mkStringLiteral(x: string): J.JStringLiteral {
     return {
       nodeType: "stringLiteral",
@@ -36,12 +52,31 @@ module Helpers {
     };
   }
 
-  export function mkPropertyRef(x: string): J.JPropertyRef {
+  // A map from "classic" [JPropertyRef]s to their proper [parent].
+  var knownPropertyRefs: { [index: string]: string } = {
+    "post to wall": "String",
+    ":=": "Unknown",
+  };
+  ["=", "≠", "<", "≤", ">", "≥"].forEach(x => knownPropertyRefs[x] = "Number");
+  ["and", "or", "not"].forEach(x => knownPropertyRefs[x] = "Boolean");
+
+  export function mkPropertyRef(x: string, p: string): J.JPropertyRef {
     return {
       nodeType: "propertyRef",
       id: null,
       name: x,
-      parent: null,
+      parent: <any> p, // again, [jsonInterfaces.ts] is lying about what [JTypeRef] actually is
+    };
+  }
+
+  // Assumes its parameter [p] is in the [knownPropertyRefs] table.
+  export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
+    return {
+        nodeType: "call",
+        id: null,
+        name: p,
+        parent: knownPropertyRefs[p],
+        args: args,
     };
   }
 
@@ -66,23 +101,21 @@ module Helpers {
     }
   }
 
-  // TouchDevelop conflates variable binding and series of tokens. So every series
-  // of tokens is flagged with the variables that are introduced at this stage.
-  // This is not the traditional notion of binding, though: the variable's scope
-  // is not limited to the tokens, but rather extends until the end of the parent
-  // block.
-  export function mkExprHolder(defs: J.JLocalDef[], toks: J.JToken[]): J.JExprHolder {
+  // [defs] are the variables that this expression binds; this means that this
+  // expression *introduces* new variables, whose scope runs until the end of
+  // the parent block (see comments for [JExprHolder]).
+  export function mkExprHolder(defs: J.JLocalDef[], tree: J.JExpr): J.JExprHolder {
     return {
       nodeType: "exprHolder",
       id: null,
-      tokens: toks,
-      tree: null,
+      tokens: null,
+      tree: tree,
       locals: defs,
     };
   }
 
   // Injection of expressions into statements is explicit in TouchDevelop.
-  export function mkExprStmt(expr: J.JExpr): J.JStmt {
+  export function mkExprStmt(expr: J.JExprHolder): J.JStmt {
     return {
       nodeType: "exprStmt",
       id: null,
@@ -90,20 +123,21 @@ module Helpers {
     };
   }
 
-  export function mkWhile(condition: J.JToken[], body: J.JStmt[]): J.JStmt {
+  export function mkWhile(condition: J.JExprHolder, body: J.JStmt[]): J.JStmt {
     return {
       nodeType: "while",
       id: null,
-      condition: mkExprHolder([], condition),
+      condition: condition,
       body: body
     };
   }
 
-  export function mkSimpleIf(condition: J.JToken[], thenBranch: J.JStmt[]): J.JIf {
+  // An if-statement that has no [else] branch.
+  export function mkSimpleIf(condition: J.JExprHolder, thenBranch: J.JStmt[]): J.JIf {
     return {
       nodeType: "if",
       id: null,
-      condition: mkExprHolder([], condition),
+      condition: condition,
       thenBody: thenBranch,
       elseBody: null,
       isElseIf: false,
@@ -113,7 +147,7 @@ module Helpers {
   // This function takes care of generating an if node *and* de-constructing the
   // else branch to abide by the TouchDevelop representation (see comments in
   // [jsonInterfaces.ts]).
-  export function mkIf(condition: J.JToken[], thenBranch: J.JStmt[], elseBranch: J.JStmt[]): J.JIf[] {
+  export function mkIf(condition: J.JExprHolder, thenBranch: J.JStmt[], elseBranch: J.JStmt[]): J.JIf[] {
     var ifNode = mkSimpleIf(condition, thenBranch)
 
     // The transformation into a "flat" if / else if / else sequence is only
@@ -134,13 +168,10 @@ module Helpers {
 
   // Generate the AST for:
   //   [var x: t := e]
-  export function mkDefAndAssign(x: string, t: string, e: J.JToken[]): J.JStmt {
+  export function mkDefAndAssign(x: string, t: string, e: J.JExpr): J.JStmt {
     var def: J.JLocalDef = mkDef(x, t);
-    var toks = (<J.JToken[]> [
-      mkLocalRef(x),
-      mkOp(":="),
-    ]).concat(e);
-    var expr = mkExprHolder([def], toks);
+    var assign = mkSimpleCall(":=", [mkLocalRef(x), e]);
+    var expr = mkExprHolder([def], assign);
     return mkExprStmt(expr);
   }
 
@@ -193,42 +224,14 @@ function inferType(b: B.Block): J.JTypeRef {
 ///////////////////////////////////////////////////////////////////////////////
 // Expressions
 //
-// Expressions are compiled (per the hybrid AST model) into a series of tokens.
-// Furthermore, we return the expression's precedence so that the caller knows
-// whether to wrap the expression in parentheses or not.
+// Expressions are now directly compiled as a tree. This requires knowing, for
+// each property ref, the right value for its [parent] property.
 ///////////////////////////////////////////////////////////////////////////////
 
-interface Expr {
-  tokens: J.JToken[];
-  prec: number;
+function compileNumber(b: B.Block): J.JExpr {
+  return Helpers.mkNumberLiteral(parseInt(b.getFieldValue("NUM")));
 }
 
-function compileNumber(b: B.Block): Expr {
-  var n = b.getFieldValue("NUM")+"";
-  var toks: J.JOperator[] = [];
-  for (var i = 0; i < n.length; ++i)
-    toks.push(Helpers.mkOp(n[i]));
-  return {
-    tokens: toks,
-    prec: 0
-  };
-}
-
-// 0 is for atomic tokens
-var precedenceTable: { [index: string]: number } = {
-  "*": 1,
-  "/": 1,
-  "+": 2,
-  "-": 2,
-  "<": 3,
-  "<=": 3,
-  ">": 3,
-  ">=": 3,
-  "=": 4,
-  "!=": 4,
-};
-
-// Convert a blockly "OP" field into a TouchDevelop operator.
 var opToTok: { [index: string]: string } = {
   "ADD": "+",
   "MINUS": "-",
@@ -236,53 +239,52 @@ var opToTok: { [index: string]: string } = {
   "DIVIDE": "/",
   //"POWER": "", // TODO
   "EQ":  "=",
-  "NEQ": "!=",
+  "NEQ": "≠",
   "LT":  "<",
-  "LTE": "<=",
+  "LTE": "≤",
   "GT": ">",
-  "GTE": ">=",
+  "GTE": "≥",
+  "AND": "and",
+  "OR": "or",
 };
 
-function wrapParentheses(e: J.JToken[]): J.JToken[] {
-  return [<J.JToken> Helpers.mkOp("(")].concat(e).concat([Helpers.mkOp(")")]);
-}
 
-function compileArithmetic(b: B.Block): Expr {
+function compileArithmetic(b: B.Block): J.JExpr {
   var bOp = b.getFieldValue("OP");
-  var prec = precedenceTable[opToTok[bOp]];
-  var op = Helpers.mkOp(opToTok[bOp]);
-  var left = compileExpression(b.getInputTargetBlock("A"));
-  var right = compileExpression(b.getInputTargetBlock("B"));
-  // All our operators are left-associative, phew!
-  var leftTokens = left.prec > prec ? wrapParentheses(left.tokens) : left.tokens;
-  var rightTokens = right.prec >= prec ? wrapParentheses(right.tokens) : right.tokens;
-  return {
-    prec: prec,
-    tokens: leftTokens.concat([op]).concat(rightTokens)
-  };
+  var left = b.getInputTargetBlock("A");
+  var right = b.getInputTargetBlock("B");
+  return Helpers.mkSimpleCall(opToTok[bOp], [compileExpression(left), compileExpression(right)]);
 }
 
-function compileVariableGet(b: B.Block): Expr {
-  return {
-    tokens: [Helpers.mkLocalRef(b.getFieldValue("VAR"))],
-    prec: 0
-  };
+function compileVariableGet(b: B.Block): J.JExpr {
+  return Helpers.mkLocalRef(b.getFieldValue("VAR"));
 }
 
-function compileText(b: B.Block): Expr {
-  return {
-    tokens: [Helpers.mkStringLiteral(b.getFieldValue("TEXT"))],
-    prec: 0
-  };
+function compileText(b: B.Block): J.JExpr {
+  return Helpers.mkStringLiteral(b.getFieldValue("TEXT"));
 }
 
-function compileExpression(b: B.Block): Expr {
+function compileBoolean(b: B.Block): J.JExpr {
+  return Helpers.mkBooleanLiteral(b.getFieldValue("BOOL") == "TRUE");
+}
+
+function compileNot(b: B.Block): J.JExpr {
+  var e = compileExpression(b.getInputTargetBlock("BOOL"));
+  return Helpers.mkSimpleCall("not", [e]);
+}
+
+function compileExpression(b: B.Block): J.JExpr {
   switch (b.type) {
     case "math_number":
       return compileNumber(b);
     case "math_arithmetic":
+    case "logic_operation":
     case "logic_compare":
       return compileArithmetic(b);
+    case "logic_boolean":
+      return compileBoolean(b);
+    case "logic_negate":
+      return compileNot(b);
     case "variables_get":
       return compileVariableGet(b);
     case "text":
@@ -300,9 +302,9 @@ function compileExpression(b: B.Block): Expr {
 function compileControlsIf(b: B.ControlsIfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
   for (var i = 0; i <= b.elseifCount_; ++i) {
-    var cond = compileExpression(b.getInputTargetBlock("IF"+i)).tokens;
+    var cond = compileExpression(b.getInputTargetBlock("IF"+i));
     var thenBranch = compileStatements(b.getInputTargetBlock("DO"+i));
-    stmts.push(Helpers.mkSimpleIf(cond, thenBranch));
+    stmts.push(Helpers.mkSimpleIf(Helpers.mkExprHolder([], cond), thenBranch));
     if (i > 0)
       stmts[stmts.length - 1].isElseIf = true;
   }
@@ -322,34 +324,26 @@ function compileControlsFor(b: B.Block): J.JStmt[] {
   // TODO: use an actual for-loop when bFrom = 0 and bBy = 1
   return [
     // var VAR: Number = FROM
-    Helpers.mkDefAndAssign(bVar, "Number", compileExpression(bFrom).tokens),
+    Helpers.mkDefAndAssign(bVar, "Number", compileExpression(bFrom)),
     // while
     Helpers.mkWhile(
-      // VAR <
-      [<J.JToken> Helpers.mkLocalRef(bVar), Helpers.mkOp("<=")]
-      // TO
-        .concat(compileExpression(bTo).tokens),
+      // VAR <= TO
+      Helpers.mkExprHolder([],
+        Helpers.mkSimpleCall("≤", [Helpers.mkLocalRef(bVar), compileExpression(bTo)])),
       // DO
       compileStatements(bDo).concat([
-        Helpers.mkExprStmt(Helpers.mkExprHolder([], [
-          // VAR :=
-          <J.JToken> Helpers.mkLocalRef(bVar), Helpers.mkOp(":=")
-          // BY
-        ].concat(compileExpression(bBy).tokens).concat([
-          // + VAR
-          Helpers.mkOp("+"), Helpers.mkLocalRef(bVar)
-        ])))
-      ])
-    )
+        Helpers.mkExprStmt(
+          Helpers.mkExprHolder([],
+            // VAR :=
+            Helpers.mkSimpleCall(":=", [Helpers.mkLocalRef(bVar),
+              // VAR + BY
+              Helpers.mkSimpleCall("+", [Helpers.mkLocalRef(bVar), compileExpression(bBy)])])))]))
   ];
 }
 
 function compilePrint(b: B.Block): J.JStmt {
-  var text = compileExpression(b.getInputTargetBlock("TEXT")).tokens;
-  var tokens = text.concat([
-    Helpers.mkPropertyRef("post to wall"),
-  ]);
-  return Helpers.mkExprStmt(Helpers.mkExprHolder([], tokens));
+  var text = compileExpression(b.getInputTargetBlock("TEXT"));
+  return Helpers.mkExprStmt(Helpers.mkExprHolder([], Helpers.mkSimpleCall("post to wall", [text])));
 }
 
 function compileStatements(b: B.Block): J.JStmt[] {

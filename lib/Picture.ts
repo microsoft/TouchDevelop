@@ -1498,12 +1498,20 @@ module TDev.RT {
         //@ picAsync
         public flip_horizontal(r:ResumeCtx): void
         {
-            this.loadFirst(r, () => {
+            this.loadFirst(r,() => {
+                this.commitImageData();
                 this.changed();
+                var temp = <HTMLCanvasElement>document.createElement("canvas");
+                temp.width = this.canvas.width;
+                temp.height = this.canvas.height;
+                var tempCtx = temp.getContext("2d");
+                tempCtx.drawImage(this.canvas, 0, 0);                
+
                 this.ctx.save();
-                this.ctx.translate(this.canvas.width, 0);
+                this.ctx.translate(temp.width, 0);
                 this.ctx.scale(-1, 1);
-                this.ctx.drawImage(this.canvas, 0, 0);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(temp, 0, 0);
                 this.ctx.restore();
             });
         }
@@ -1514,11 +1522,20 @@ module TDev.RT {
         public flip_vertical(r:ResumeCtx): void
         {
             this.loadFirst(r, () => {
+                this.commitImageData();
                 this.changed();
+
+                var temp = <HTMLCanvasElement>document.createElement("canvas");
+                temp.width = this.canvas.width;
+                temp.height = this.canvas.height;
+                var tempCtx = temp.getContext("2d");
+                tempCtx.drawImage(this.canvas, 0, 0);                
+
                 this.ctx.save();
                 this.ctx.translate(0, this.canvas.height);
                 this.ctx.scale(1, -1);
-                this.ctx.drawImage(this.canvas, 0, 0);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(temp, 0, 0);
                 this.ctx.restore();
             });
         }
