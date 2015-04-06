@@ -1352,13 +1352,13 @@ class Worker {
                 if (this.child) this.child.kill()
                 setTimeout(() => {
                     if (this.child) this.child.kill("SIGKILL")
-                }, 2000)
-            }, 2000)
+                }, 5000)
+            }, 30000)
     }
 
     public description()
     {
-        return this.socketPath || this.port
+        return "port:" + (this.socketPath || this.port) + ", pid:" + (this.child ? this.child.pid : "?")
     }
 
     public init(cb:()=>void)
@@ -2260,7 +2260,7 @@ function main()
         return
     }
 
-    debug.log("starting with " + args.join(" "))
+    debug.log("starting with " + args.join(" ") + ", pid: " + process.pid)
 
     while (args.length > 0) {
         switch (args[0]) {
