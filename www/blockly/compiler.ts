@@ -20,11 +20,28 @@ module Helpers {
     return mkOp(x);
   }
 
+  export function mkStringLiteral(x: string): J.JStringLiteral {
+    return {
+      nodeType: "stringLiteral",
+      id: null,
+      value: x
+    };
+  }
+
   export function mkOp(x: string): J.JOperator {
     return {
       nodeType: "operator",
       id: null,
       op: x
+    };
+  }
+
+  export function mkPropertyRef(x: string): J.JPropertyRef {
+    return {
+      nodeType: "propertyRef",
+      id: null,
+      name: x,
+      parent: null,
     };
   }
 
@@ -197,6 +214,7 @@ function compileNumber(b: B.Block): Expr {
   };
 }
 
+// 0 is for atomic tokens
 var precedenceTable: { [index: string]: number } = {
   "*": 1,
   "/": 1,
@@ -211,13 +229,12 @@ var precedenceTable: { [index: string]: number } = {
 };
 
 // Convert a blockly "OP" field into a TouchDevelop operator.
-// TODO: power
 var opToTok: { [index: string]: string } = {
   "ADD": "+",
   "MINUS": "-",
   "MULTIPLY": "*",
   "DIVIDE": "/",
-  "POWER": "",
+  //"POWER": "", // TODO
   "EQ":  "=",
   "NEQ": "!=",
   "LT":  "<",
@@ -232,8 +249,6 @@ function wrapParentheses(e: J.JToken[]): J.JToken[] {
 
 function compileArithmetic(b: B.Block): Expr {
   var bOp = b.getFieldValue("OP");
-  if (bOp == "POWER")
-    throw "TODO";
   var prec = precedenceTable[opToTok[bOp]];
   var op = Helpers.mkOp(opToTok[bOp]);
   var left = compileExpression(b.getInputTargetBlock("A"));
@@ -254,6 +269,13 @@ function compileVariableGet(b: B.Block): Expr {
   };
 }
 
+function compileText(b: B.Block): Expr {
+  return {
+    tokens: [Helpers.mkStringLiteral(b.getFieldValue("TEXT"))],
+    prec: 0
+  };
+}
+
 function compileExpression(b: B.Block): Expr {
   switch (b.type) {
     case "math_number":
@@ -263,6 +285,8 @@ function compileExpression(b: B.Block): Expr {
       return compileArithmetic(b);
     case "variables_get":
       return compileVariableGet(b);
+    case "text":
+      return compileText(b);
   }
   throw (b.type + " is not an expression block or is not supported");
   // unreachable
@@ -320,6 +344,14 @@ function compileControlsFor(b: B.Block): J.JStmt[] {
   ];
 }
 
+function compilePrint(b: B.Block): J.JStmt {
+  var text = compileExpression(b.getInputTargetBlock("TEXT")).tokens;
+  var tokens = text.concat([
+    Helpers.mkPropertyRef("post to wall"),
+  ]);
+  return Helpers.mkExprStmt(Helpers.mkExprHolder([], tokens));
+}
+
 function compileStatements(b: B.Block): J.JStmt[] {
   var stmts: J.JStmt[] = [];
   while (b) {
@@ -330,6 +362,10 @@ function compileStatements(b: B.Block): J.JStmt[] {
 
       case 'controls_for':
         stmts = stmts.concat(compileControlsFor(b));
+        break;
+
+      case 'text_print':
+        stmts.push(compilePrint(b));
         break;
 
       default:
