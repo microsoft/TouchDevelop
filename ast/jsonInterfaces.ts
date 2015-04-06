@@ -1,12 +1,10 @@
-// The current version of this file can be retrived by:
+// The current version of this file can be retrieved by:
 // GET /api/language/webast
 
 module TDev.AST.Json
 {
-    // General notes:
-    //   "foo?:number;" denotes an optional number field called 'foo' (and not 'foo?')
-
-    // these two are in reality just strings
+    // These two interfaces are never used. Actually, whenever a field has type
+    // [JNodeRef], this is a lie, and its type is [string].
     export interface JNodeRef { dummyNodeRef: number; }
     export interface JTypeRef { dummyTypeRef: number; }
 
@@ -123,6 +121,34 @@ module TDev.AST.Json
         condition:JExprHolder;
         body:JStmt[];
     }
+
+    // Sequences of if / else if / else statements are not represented the usual
+    // way. That is, instead of having a structured AST:
+    //
+    // if
+    // |- condition1
+    // |- then-branch1 = ...
+    // |- else-branch = if
+    //                  |- condition2
+    //                  |- then-branch2
+    //                  |- else-branch2
+    //
+    // the TouchDevelop AST adopts the following (unusual) representation.
+    //
+    // if
+    // |- condition1
+    // |- then-branch1 = ...
+    // |- else-branch = null
+    // if
+    // |- condition2
+    // |- then-branch2
+    // |- else-branch2
+    // |- isElseIf = true
+    //
+    // This is NOT equivalent to the representation above (condition2 may
+    // subsume condition1), so the extra flag "isElseIf" is set and (I suppose)
+    // gets some special treatment when it comes to running / compiling the
+    // program.
     export interface JIf extends JStmt
     {
         condition:JExprHolder;
@@ -130,6 +156,7 @@ module TDev.AST.Json
         elseBody:JStmt[];
         isElseIf:boolean;
     }
+
     export interface JBoxed extends JStmt { body:JStmt[]; }
     export interface JExprStmt extends JStmt { expr:JExprHolder; }
     export interface JInlineActions extends JExprStmt { actions:JInlineAction[]; }
