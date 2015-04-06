@@ -20,7 +20,7 @@ module Helpers {
     return mkOp(x);
   }
 
-  export function mkBooleanLiteral(x: string): J.JBooleanLiteral {
+  export function mkBooleanLiteral(x: boolean): J.JBooleanLiteral {
     return {
       nodeType: "booleanLiteral",
       id: null,
@@ -288,7 +288,7 @@ function compileText(b: B.Block): Expr {
 
 function compileBoolean(b: B.Block): Expr {
   return {
-    tokens: [Helpers.mkBooleanLiteral(b.getFieldValue("BOOL").toLowerCase())],
+    tokens: [Helpers.mkBooleanLiteral(b.getFieldValue("BOOL") == "TRUE")],
     prec: 0
   };
 }
