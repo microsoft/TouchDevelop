@@ -213,7 +213,7 @@ module TDev.Browser {
         }
 
         export function hubTheme(): HubTheme {
-            var key = localStorage.getItem("hubTheme");       
+            var key = localStorage.getItem("hubTheme");
             return key ? Browser.hubThemes[key] : undefined;
         }
 
