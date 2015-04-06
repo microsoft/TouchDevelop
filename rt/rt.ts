@@ -1910,9 +1910,14 @@ module TDev
 
         public quietlyHandleError(e:any)
         {
+            this.augmentException(e);
+
+            var foundSome = false
+
             for (var s = this.current; s; s = s.previous) {
                 if (s.isDetached) break
                 if (s.errorHandler) (() => {
+                    foundSome = true
                     var s0 = s
                     Util.setTimeout(0, () => {
                         try {
@@ -1924,22 +1929,42 @@ module TDev
                 })()
             }
 
-            return false
-        }
-
-
-        public handleException(e:any)
-        {
-            if (this.quietlyHandleError(e))
-                return
-
-            this.handlingException = true;
+            // this most likely doesn't work very well
             if (e.programCounter)
                 this.errorPC = e.programCounter;
 
-            this.compiled.extractAllRunMaps(this);
+            return foundSome
+        }
 
-            this.host.exceptionHandler(e);
+        public augmentException(e:any)
+        {
+            if (typeof e !== "object") return
+
+            var st = e.stack
+
+            if (st !== undefined && !e.tdStack) {
+                e.tdStack = this.getStackTrace().map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } })
+                var compr = StackUtil.compress(e.tdStack)
+                if (compr)
+                    e.tdCompressedStack = "StK" + compr
+
+                st = st.replace(/^\s*at a_\S+\$\d.*\n/gm, "")
+                if (e.tdCompressedStack) st = st.replace(/^\s*at /m, (t) => t + e.tdCompressedStack + " (td.js:42:42)\n" + t)
+                e.stack = st
+            }
+        }
+
+        public handleException(e:any)
+        {
+            var handled = this.quietlyHandleError(e)
+
+            this.handlingException = true;
+
+            if (!handled) {
+                this.compiled.extractAllRunMaps(this);
+                this.host.exceptionHandler(e);
+            }
+
             this.stopAsync().done()
         }
 

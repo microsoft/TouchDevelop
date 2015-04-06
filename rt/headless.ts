@@ -197,19 +197,18 @@ module TDev {
         {
             e.includeSource = true;
 
+            this.currentRt.augmentException(e);
+
             var bug = TDev.Ticker.mkBugReport(e, "runtime error");
 
             var msg = bug.exceptionMessage;
 
             var crash:any = {
                 time: Date.now(),
-                stack: this.currentRt.getStackTrace().map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } }),
+                stack: e.tdStack,
+                compressedStack: e.tdCompressedStack,
                 msg: msg,
             }
-
-            var compr = StackUtil.compress(crash.stack)
-            if (compr)
-                crash.compressedStack = "StK" + compr
 
             this.fillCrashInfo(crash)
             this.crashes.push(crash)
@@ -218,12 +217,10 @@ module TDev {
 
             this.respondToCrash(bug);
 
-            if (!e.isUserError)
+            if (!Browser.isNodeJS && !e.isUserError)
                 TDev.Util.sendErrorReport(bug);
 
             this.lastError = TDev.Ticker.bugReportToString(bug);
-
-            // TDev.Util.log("ERROR: " + this.lastError);
         }
 
         constructor()

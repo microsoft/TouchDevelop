@@ -789,10 +789,6 @@ module TDev {
             }
 
             try {
-                RT.App.log("CRASH " + r.exceptionMessage)
-            } catch (e) { }
-
-            try {
                 r.eventTrace = getRecentEvents().map((e) => {
                     var s = 1000000000 + (r.timestamp - e.timestamp) + "";
                     s = s.slice(-9);
