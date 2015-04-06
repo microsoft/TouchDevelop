@@ -476,7 +476,7 @@ module TDev.RT.Node {
 
 
         req.on("error", err => {
-            //console.log(err)
+            err.socketUrl = url_;
             ret.error(err)
         })
 
@@ -492,7 +492,7 @@ module TDev.RT.Node {
                 ret.success(g)
 
             } else {
-                ret.error("bad status code " + res.statusCode)
+                ret.error(new Error("bad status code " + res.statusCode + " for " + url_))
             }
         })
 
@@ -563,7 +563,8 @@ module TDev.RT.Node {
 
         req.on("error", err => {
             //console.log(err)
-            App.log("Web request error: " + err)
+            App.log("Web request error: " + err + " for " + r.url())
+            err.socketUrl = r.url()
             ret.error(err)
         })
 
@@ -864,7 +865,7 @@ module TDev.RT.Node {
             ret.success(app)
         })
 
-        Util.log("listenting on " + port)
+        Util.log("listenting on " + port + " from pid " + process.pid)
         app.listen(port)
 
         return ret
