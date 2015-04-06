@@ -186,12 +186,15 @@ interface Expr {
   prec: number;
 }
 
-function compileNumber(b: B.Block): J.JOperator[] {
+function compileNumber(b: B.Block): Expr {
   var n = b.getFieldValue("NUM")+"";
   var toks: J.JOperator[] = [];
   for (var i = 0; i < n.length; ++i)
     toks.push(Helpers.mkOp(n[i]));
-  return toks;
+  return {
+    tokens: toks,
+    prec: 0
+  };
 }
 
 var precedenceTable: { [index: string]: number } = {
@@ -199,6 +202,12 @@ var precedenceTable: { [index: string]: number } = {
   "/": 1,
   "+": 2,
   "-": 2,
+  "<": 3,
+  "<=": 3,
+  ">": 3,
+  ">=": 3,
+  "=": 4,
+  "!=": 4,
 };
 
 // Convert a blockly "OP" field into a TouchDevelop operator.
@@ -209,6 +218,12 @@ var opToTok: { [index: string]: string } = {
   "MULTIPLY": "*",
   "DIVIDE": "/",
   "POWER": "",
+  "EQ":  "=",
+  "NEQ": "!=",
+  "LT":  "<",
+  "LTE": "<=",
+  "GT": ">",
+  "GTE": ">=",
 };
 
 function wrapParentheses(e: J.JToken[]): J.JToken[] {
@@ -232,15 +247,22 @@ function compileArithmetic(b: B.Block): Expr {
   };
 }
 
+function compileVariableGet(b: B.Block): Expr {
+  return {
+    tokens: [Helpers.mkLocalRef(b.getFieldValue("VAR"))],
+    prec: 0
+  };
+}
+
 function compileExpression(b: B.Block): Expr {
   switch (b.type) {
     case "math_number":
-      return {
-        tokens: compileNumber(b),
-        prec: 0
-      };
+      return compileNumber(b);
     case "math_arithmetic":
+    case "logic_compare":
       return compileArithmetic(b);
+    case "variables_get":
+      return compileVariableGet(b);
   }
   throw (b.type + " is not an expression block or is not supported");
   // unreachable
