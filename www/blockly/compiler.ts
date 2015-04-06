@@ -216,8 +216,10 @@ function compileNumber(b: B.Block): Expr {
 
 // 0 is for atomic tokens
 var precedenceTable: { [index: string]: number } = {
+  "and": 1,
   "*": 1,
   "/": 1,
+  "or": 2,
   "+": 2,
   "-": 2,
   "<": 3,
@@ -241,9 +243,11 @@ var opToTok: { [index: string]: string } = {
   "LTE": "<=",
   "GT": ">",
   "GTE": ">=",
+  "AND": "and",
+  "OR": "or",
 };
 
-function wrapParentheses(e: J.JToken[]): J.JToken[] {
+function parenthesize(e: J.JToken[]): J.JToken[] {
   return [<J.JToken> Helpers.mkOp("(")].concat(e).concat([Helpers.mkOp(")")]);
 }
 
@@ -254,8 +258,8 @@ function compileArithmetic(b: B.Block): Expr {
   var left = compileExpression(b.getInputTargetBlock("A"));
   var right = compileExpression(b.getInputTargetBlock("B"));
   // All our operators are left-associative, phew!
-  var leftTokens = left.prec > prec ? wrapParentheses(left.tokens) : left.tokens;
-  var rightTokens = right.prec >= prec ? wrapParentheses(right.tokens) : right.tokens;
+  var leftTokens = left.prec > prec ? parenthesize(left.tokens) : left.tokens;
+  var rightTokens = right.prec >= prec ? parenthesize(right.tokens) : right.tokens;
   return {
     prec: prec,
     tokens: leftTokens.concat([op]).concat(rightTokens)
@@ -276,13 +280,34 @@ function compileText(b: B.Block): Expr {
   };
 }
 
+function compileBoolean(b: B.Block): Expr {
+  return {
+    tokens: [Helpers.mkOp(b.getFieldValue("BOOL").toLowerCase())],
+    prec: 0
+  };
+}
+
+function compileNot(b: B.Block): Expr {
+  var e = compileExpression(b.getInputTargetBlock("BOOL"));
+  var toks = e.prec > 0 ? parenthesize(e.tokens) : e.tokens;
+  return {
+    tokens: [<J.JToken> Helpers.mkOp("not")].concat(toks),
+    prec: 0
+  };
+}
+
 function compileExpression(b: B.Block): Expr {
   switch (b.type) {
     case "math_number":
       return compileNumber(b);
     case "math_arithmetic":
+    case "logic_operation":
     case "logic_compare":
       return compileArithmetic(b);
+    case "logic_boolean":
+      return compileBoolean(b);
+    case "logic_not":
+      return compileNot(b);
     case "variables_get":
       return compileVariableGet(b);
     case "text":
