@@ -20,7 +20,7 @@ module TDev.AST.Json
         if (a.hasIds) {
             var s0 = new InitIdVisitor(false)
             s0.dispatch(a)
-            var s1 = new IdFromStableSetter(prefix)
+            var s1 = new IdFromStableSetter()
             s1.dispatch(a)
         } else {
             var i = new IdSetter(prefix);
@@ -49,7 +49,7 @@ module TDev.AST.Json
     class IdFromStableSetter
         extends NodeVisitor
     {
-        constructor(private prefix = "") {
+        constructor() {
             super()
         }
         private currId = 0;

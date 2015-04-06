@@ -1,6 +1,50 @@
 ///<reference path='refs.ts'/>
 
 module TDev {
+    export module StackUtil {
+        var idChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+        export function combineIds(a:string, b:string)
+        {
+            if (!a || a == "this") a = "";
+            if (!b || b == "this") b = "";
+
+            var maxLen = 8
+            var buf = new Uint32Array(maxLen)
+            var ptr = 0
+
+            var add = (s:string) => {
+                for (var i = 0; i < s.length; ++i) {
+                    buf[ptr] = buf[ptr] * 13 + s.charCodeAt(i)
+                    if (++ptr >= maxLen) ptr = 0
+                }
+            }
+
+            add(a)
+            add(b)
+
+            var r = ""
+            for (var i = 0; i < maxLen; ++i) {
+                r += idChars[buf[i] % 62]
+            }
+            return r
+        }
+
+        export function compress(trace:IStackFrame[])
+        {
+            if (!trace) return ""
+
+            trace = trace.filter(f => !!f.pc)
+            if (trace.length > 10)
+                trace = trace.slice(-10)
+            var r = ""
+            trace.forEach((f, i) => {
+                r += combineIds(f.pc, f.d ? f.d.libName : "")
+            })
+            return r
+        }
+    }
+
     export interface CrashStackFrame
     {
         pc: string;
@@ -157,14 +201,19 @@ module TDev {
 
             var msg = bug.exceptionMessage;
 
-            var crash = {
+            var crash:any = {
                 time: Date.now(),
                 stack: this.currentRt.getStackTrace().map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } }),
-                msg: msg
+                msg: msg,
             }
+
+            var compr = StackUtil.compress(crash.stack)
+            if (compr)
+                crash.compressedStack = "StK" + compr
 
             this.fillCrashInfo(crash)
             this.crashes.push(crash)
+
             TDev.RT.App.logException(e, crash);
 
             this.respondToCrash(bug);

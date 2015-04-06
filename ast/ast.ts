@@ -4919,4 +4919,28 @@ module TDev.AST {
                 new InitIdVisitor(false).dispatch(app)
         }
     }
+
+
+    export function decompressStack(compressed:string):IStackFrame[]
+    {
+        var stmtById:StringMap<IStackFrame> = {}
+
+        var add = (rtid:string, rt:Stmt) => {
+            visitStmts(rt, s => {
+                stmtById[StackUtil.combineIds(s.getStableName(), rtid)] = <any> { pc: s.getStableName(), d: { libName: rtid } }
+            })
+        }
+        add("", Script)
+        Script.libraries().forEach(l => {
+            if (l.resolved) add(l.getStableName(), l.resolved)
+        })
+
+        var r = []
+        for (var i = 0; i < compressed.length; i += 8) {
+            var fr = compressed.slice(i, i + 8)
+            if (stmtById.hasOwnProperty(fr))
+                r.push(stmtById[fr])
+        }
+        return r
+    }
 }

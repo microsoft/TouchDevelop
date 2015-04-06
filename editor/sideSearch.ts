@@ -229,6 +229,21 @@ module TDev
 
             specialCommand = specialCommand.toLowerCase()
 
+            if (!specialCommand && refs.length == 0) {
+                var stkM = /^StK([a-zA-Z0-9]+)$/.exec(terms[0])
+                if (stkM && stkM[1].length % 8 == 0) {
+                    var frames = AST.decompressStack(stkM[1])
+                    if (frames.length > 0) {
+                        AST.Compiler.annotateWithIds(Script)
+                        TheEditor.overrideStackTrace(frames)
+                        specialCommand = "stack"
+                        terms.shift()
+                    } else {
+                        HTML.showProgressNotification(lf("Stack trace not understood."))
+                    }
+                }
+            }
+
             function locMatches(loc:CodeLocation, doScore = false) {
                 if (terms.length > 0) {
                     var str = loc.decl.getName() + " ";

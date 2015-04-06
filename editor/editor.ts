@@ -1966,12 +1966,17 @@ module TDev
             }
         }
 
+        public overrideStackTrace(overrideTrace: IStackFrame[])
+        {
+            this._overridenStackTrace = overrideTrace;
+        }
+
         public showStackTrace(overrideTrace ?: IStackFrame[])
         {
             Ticker.dbg("Editor.showStackTrace");
             if (!this.scriptCompiled)
                 this.recompileScript();
-            this._overridenStackTrace = overrideTrace;
+            this.overrideStackTrace(overrideTrace)
             this.showStackTraceAgain();
         }
 

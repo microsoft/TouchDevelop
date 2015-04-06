@@ -477,7 +477,8 @@ module TDev.RT {
                     Util.log('log: transport failed ');
                 }
             });
-            logEvent(ERROR, "crash", err.message || err, meta);
+            var loc = meta && meta.compressedStack ? " at " + meta.compressedStack : ""
+            logEvent(ERROR, "crash", (err.message || err) + loc, meta);
         }
 
         export function logEvent(level: number, category: string, message: string, meta: any): void {
