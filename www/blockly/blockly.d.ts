@@ -18,7 +18,7 @@ declare module Blockly {
     }
 
     class ControlsIfBlock extends Block {
-        elseIfCount_: number;
+        elseifCount_: number;
         elseCount_: number;
     }
 

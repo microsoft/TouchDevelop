@@ -299,7 +299,7 @@ function compileExpression(b: B.Block): Expr {
 
 function compileControlsIf(b: B.ControlsIfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
-  for (var i = 0; i <= (b.elseIfCount_ || 0); ++i) {
+  for (var i = 0; i <= b.elseifCount_; ++i) {
     var cond = compileExpression(b.getInputTargetBlock("IF"+i)).tokens;
     var thenBranch = compileStatements(b.getInputTargetBlock("DO"+i));
     stmts.push(Helpers.mkSimpleIf(cond, thenBranch));
