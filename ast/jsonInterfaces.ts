@@ -102,6 +102,8 @@ module TDev.AST.Json
         type:JTypeRef;
     }
 
+    // It seems like TouchDevelop has an extra invariant that a [JCall] must
+    // *always* be wrapped in a [JExprHolder].
     export interface JCall extends JPropertyRef, JExpr
     {
         args:JExpr[];
