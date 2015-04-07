@@ -2490,6 +2490,9 @@ module TDev
                         //Ticker.dbg("save-stop " + id)
                         if (!Util.check(this.scheduled, "save-sch2")) return Promise.as();
 
+                        if (!response)
+                            return Promise.as();
+
                         if (Cloud.lite && !response.numErrors && ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid == guid) {
                             ScriptEditorWorldInfo.baseSnapshot = response.headers[0].scriptVersion.baseSnapshot
                         }
