@@ -196,6 +196,7 @@ module TDev
         }
 
         public takeScreenshot() {
+            if (!Script) return;
             if (ScriptEditorWorldInfo.status !== "published") {
                 ModalDialog.info(lf("Oops, your script is not published"),
                                  lf("You need to publish your script in order to upload screenshots."));
@@ -203,6 +204,7 @@ module TDev
             }
             if (Cloud.anonMode(lf("publishing screenshots"))) return;
 
+            var baseId = ScriptEditorWorldInfo.baseId;
             RT.ScreenshotManager.toScreenshotURLAsync(this)
                 .done((data: string) => {
                     if (!data) {
@@ -221,7 +223,7 @@ module TDev
                             div("wall-dialog-body", lf("The encoded screenshot is too big.")),
                         ]);
                         m.show();
-                    } else if (base64content && ScriptEditorWorldInfo.baseId) {
+                    } else if (base64content && baseId) {
                         var previewImage = HTML.mkImg(data);
                         previewImage.setAttribute('class', 'wall-media');
                         var m = new ModalDialog();
@@ -232,7 +234,7 @@ module TDev
                                 HTML.mkButton(lf("publish"), () => {
                                     m.dismiss();
                                     HTML.showProgressNotification(lf("uploading screenshot..."));
-                                    Cloud.postPrivateApiAsync(ScriptEditorWorldInfo.baseId + "/screenshots",
+                                    Cloud.postPrivateApiAsync(baseId + "/screenshots",
                                         {
                                             kind: "screenshot",
                                             contentType: contentType,
