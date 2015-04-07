@@ -33,6 +33,7 @@ module TDev
         errorHandler?:(err:any,th:IStackFrame)=>void;
         isDetached?:boolean;
         isAsync?:boolean;
+        loggerContext?:any;
     }
 
     export interface IContinuationFunction

@@ -1,10 +1,16 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
+    // meta in messages coming from a logger will be augmented with the following
+    export interface StdMeta {
+        contextId: string;
+        contextDuration: number;
+    }
+
     export interface AppLogTransport {
         log? : (level : number, category : string, msg: string, meta?: any) => void;
         logException?: (err: any, meta?: any) => void;
-        logTick?: (category: string, id: string) => void;
-        logMeasure?: (category: string, start: number, end: number) => void;
+        logTick?: (category: string, id: string, meta: any) => void;
+        logMeasure?: (category: string, id: string, value: number, meta: any) => void;
     }
 
     //? A custom logger
@@ -15,7 +21,7 @@ module TDev.RT {
         constructor(public category : string) {
             super();
             this.category = this.category || "";
-            this.created = Util.perfNow() / 1000;
+            this.created = Util.perfNow()
         }
 
         //? Logs a debug message
@@ -51,11 +57,99 @@ module TDev.RT {
             App.logEvent(ilevel, this.category, message, meta ? meta.value() : undefined);
         }
 
-        //? Register an event tick in any registered performance logger.
-        public tick(id: string) {
-            if (!id) return;
-            App.logTick(this.category, id);
+        static findContext(s: IStackFrame) : any
+        {
+            while (s && !s.loggerContext) {
+                s = s.previous
+                if (s && s.isDetached) {
+                    s = null
+                    break
+                }
+            }
+            if (s) return s.loggerContext
+            return null
         }
+
+        public contextInfo(s: IStackFrame) : StdMeta
+        {
+            var c = AppLogger.findContext(s)
+            if (!c) {
+                return { contextId: "", contextDuration: Util.perfNow() - this.created }
+            } else {
+                return { contextId: c.id, contextDuration: Util.perfNow() - c.created }
+            }
+        }
+
+        private augmentMeta(meta: JsonObject, s: IStackFrame) : any
+        {
+            var i = this.contextInfo(s)
+            var v = meta ? meta.value() : null
+            if (!v) return i
+            else {
+                v = Util.jsonClone(v)
+                v.contextId = i.contextId
+                v.contextDuration = i.contextDuration
+                return v
+            }
+        }
+
+        //? The unique id of current context, or empty if in global scope.
+        //@ betaOnly
+        public context_id(s: IStackFrame) : string
+        {
+            return this.contextInfo(s).contextId
+        }
+
+        //? How long the current logger has been executing for in milliseconds.
+        //@ betaOnly
+        public logger_duration(s: IStackFrame) : number
+        {
+            return Util.perfNow() - this.created
+        }
+
+        //? How long the current context has been executing for in milliseconds.
+        //@ betaOnly
+        public context_duration(s: IStackFrame) : number
+        {
+            return this.contextInfo(s).contextDuration
+        }
+
+        //? Log a custom event tick in any registered performance logger.
+        //@ betaOnly
+        public tick(id: string, s: IStackFrame)
+        {
+            if (!id) return;
+            App.logTick(this.category, id, this.augmentMeta(null, s));
+        }
+
+        //? Log a custom event tick, including specified meta information, in any registered performance logger.
+        //@ betaOnly
+        public custom_tick(id: string, meta: JsonObject, s: IStackFrame)
+        {
+            if (!id) return;
+            App.logTick(this.category, id, this.augmentMeta(meta, s));
+        }
+
+        //? Log a measure in any registered performance logger.
+        //@ betaOnly
+        public measure(id: string, value: number, s: IStackFrame)
+        {
+            if (!id) return;
+            App.logMeasure(this.category, id, value, this.augmentMeta(null, s))
+        }
+
+        //? Start new logging context when you're starting a new task (eg, handling a request)
+        //@ betaOnly
+        public new_context(s:IStackFrame)
+        {
+            var prev = AppLogger.findContext(s)
+            s.loggerContext = { 
+                id: prev ? prev.id + "." + ++prev.numCh : Random.uniqueId(8),
+                created: Util.perfNow(), 
+                numCh: 0, 
+            }
+        }
+
 
         //? Starts a timed sub-logger. The task name is concatenated to the current logger category.
         //@ betaOnly
@@ -72,7 +166,7 @@ module TDev.RT {
         //@ betaOnly
         public end() {
             if (this.parent) {
-                App.logMeasure(this.category, this.created, Util.perfNow() / 1000);
+                App.logMeasure(this.category, "LoggerStop", Util.perfNow() - this.created, null);
                 this.parent = undefined;
             }
         }
@@ -505,21 +599,25 @@ module TDev.RT {
             }
         }
 
-        export function logTick(category: string, id: string) {
+        export function logTick(category: string, id: string, meta:any) {
+            App.logEvent(App.DEBUG, category, id, meta);
             transports.filter(transport => !!transport.logTick).forEach(transport => {
                 try {
-                    transport.logTick(category, id);
+                    transport.logTick(category, id, meta);
                 } catch (err) {
                     Util.log('transport failed');
                 }
             });
         }
 
-        export function logMeasure(path: string, start: number, end: number) {
-            App.logEvent(App.DEBUG, path, lf("elapsed: {0}", (end - start).toFixed(2)), { elapsed: end - start });
+        export function logMeasure(category:string, id: string, value: number, meta: any) {
+            var lmeta = Util.jsonClone(meta)
+            lmeta.measureId = id
+            lmeta.measureValue = value
+            App.logEvent(App.DEBUG, category, id + ": " + value, lmeta);
             transports.filter(transport => !!transport.logMeasure).forEach(transport => {
                 try {
-                    transport.logMeasure(path, start, end);
+                    transport.logMeasure(category, id, value, meta);
                 } catch (err) {
                     Util.log('transport failed');
                 }
