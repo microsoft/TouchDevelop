@@ -97,12 +97,12 @@ module Helpers {
 
   // Generates a local definition for [x] at type [t]; this is not enough to
   // properly define a variable, though (see [mkDefAndAssign]).
-  export function mkDef(x: string, t: string): J.JLocalDef {
+  export function mkDef(x: string, t: J.JTypeRef): J.JLocalDef {
     return {
       nodeType: "localDef",
       id: null,
       name: x,
-      type: mkTypeRef(t)
+      type: t
     };
   }
 
@@ -183,7 +183,7 @@ module Helpers {
 
   // Generate the AST for:
   //   [var x: t := e]
-  export function mkDefAndAssign(x: string, t: string, e: J.JExpr): J.JStmt {
+  export function mkDefAndAssign(x: string, t: J.JTypeRef, e: J.JExpr): J.JStmt {
     var def: J.JLocalDef = mkDef(x, t);
     var assign = mkSimpleCall(":=", [mkLocalRef(x), e]);
     var expr = mkExprHolder([def], assign);
@@ -232,8 +232,24 @@ module Helpers {
   }
 }
 
-function inferType(b: B.Block): J.JTypeRef {
-  throw "TODO";
+import H = Helpers;
+
+function inferType(e: Environment, b: B.Block): J.JTypeRef {
+  switch (b.type) {
+    case "math_number":
+    case "math_arithmetic":
+      return H.mkTypeRef("Number");
+    case "logic_operation":
+    case "logic_compare":
+    case "logic_boolean":
+    case "logic_negate":
+      return H.mkTypeRef("Boolean");
+    case "text":
+      return H.mkTypeRef("String");
+    case "variables_get":
+      return lookup(e, b.getFieldValue("VAR")).type;
+  }
+  return H.mkTypeRef("Unknown");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,7 +260,7 @@ function inferType(b: B.Block): J.JTypeRef {
 ///////////////////////////////////////////////////////////////////////////////
 
 function compileNumber(e: Environment, b: B.Block): J.JExpr {
-  return Helpers.mkNumberLiteral(parseInt(b.getFieldValue("NUM")));
+  return H.mkNumberLiteral(parseInt(b.getFieldValue("NUM")));
 }
 
 var opToTok: { [index: string]: string } = {
@@ -268,26 +284,26 @@ function compileArithmetic(e: Environment, b: B.Block): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
-  return Helpers.mkSimpleCall(opToTok[bOp], [compileExpression(e, left), compileExpression(e, right)]);
+  return H.mkSimpleCall(opToTok[bOp], [compileExpression(e, left), compileExpression(e, right)]);
 }
 
 function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   assert(lookup(e, name) != null);
-  return Helpers.mkLocalRef(name);
+  return H.mkLocalRef(name);
 }
 
 function compileText(e: Environment, b: B.Block): J.JExpr {
-  return Helpers.mkStringLiteral(b.getFieldValue("TEXT"));
+  return H.mkStringLiteral(b.getFieldValue("TEXT"));
 }
 
 function compileBoolean(e: Environment, b: B.Block): J.JExpr {
-  return Helpers.mkBooleanLiteral(b.getFieldValue("BOOL") == "TRUE");
+  return H.mkBooleanLiteral(b.getFieldValue("BOOL") == "TRUE");
 }
 
 function compileNot(e: Environment, b: B.Block): J.JExpr {
   var expr = compileExpression(e, b.getInputTargetBlock("BOOL"));
-  return Helpers.mkSimpleCall("not", [expr]);
+  return H.mkSimpleCall("not", [expr]);
 }
 
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
@@ -354,7 +370,7 @@ function compileControlsIf(e: Environment, b: B.ControlsIfBlock): J.JStmt[] {
   for (var i = 0; i <= b.elseifCount_; ++i) {
     var cond = compileExpression(e, b.getInputTargetBlock("IF"+i));
     var thenBranch = compileStatements(e, b.getInputTargetBlock("DO"+i));
-    stmts.push(Helpers.mkSimpleIf(Helpers.mkExprHolder([], cond), thenBranch));
+    stmts.push(H.mkSimpleIf(H.mkExprHolder([], cond), thenBranch));
     if (i > 0)
       stmts[stmts.length - 1].isElseIf = true;
   }
@@ -371,31 +387,53 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bBy = b.getInputTargetBlock("BY");
   var bDo = b.getInputTargetBlock("DO");
 
-  var e1 = extend(e, { name: bVar, type: Helpers.mkTypeRef("Number") });
+  var e1 = extend(e, { name: bVar, type: H.mkTypeRef("Number") });
 
   // TODO: use an actual for-loop when bFrom = 0 and bBy = 1
   return [
     // var VAR: Number = FROM
-    Helpers.mkDefAndAssign(bVar, "Number", compileExpression(e, bFrom)),
+    H.mkDefAndAssign(bVar, H.mkTypeRef("Number"), compileExpression(e, bFrom)),
     // while
-    Helpers.mkWhile(
+    H.mkWhile(
       // VAR <= TO
-      Helpers.mkExprHolder([],
-        Helpers.mkSimpleCall("≤", [Helpers.mkLocalRef(bVar), compileExpression(e1, bTo)])),
+      H.mkExprHolder([],
+        H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e1, bTo)])),
       // DO
       compileStatements(e1, bDo).concat([
-        Helpers.mkExprStmt(
-          Helpers.mkExprHolder([],
+        H.mkExprStmt(
+          H.mkExprHolder([],
             // VAR :=
-            Helpers.mkSimpleCall(":=", [Helpers.mkLocalRef(bVar),
+            H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
               // VAR + BY
-              Helpers.mkSimpleCall("+", [Helpers.mkLocalRef(bVar), compileExpression(e1, bBy)])])))]))
+              H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e1, bBy)])])))]))
   ];
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
   var text = compileExpression(e, b.getInputTargetBlock("TEXT"));
-  return Helpers.mkExprStmt(Helpers.mkExprHolder([], Helpers.mkSimpleCall("post to wall", [text])));
+  return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
+}
+
+function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Environment } {
+  var bVar = b.getFieldValue("VAR");
+  var bExpr = b.getInputTargetBlock("VALUE");
+  var expr = compileExpression(e, bExpr);
+  var binding = lookup(e, bVar);
+  if (binding) {
+    // Assignment
+    return {
+      env: e,
+      stmt: H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [H.mkLocalRef(bVar), expr])))
+    };
+  } else {
+    // Definition
+    var t = inferType(e, b);
+    var e1 = extend(e, { name: bVar, type: t });
+    return {
+      env: e1,
+      stmt: H.mkDefAndAssign(bVar, t, expr)
+    };
+  }
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -413,6 +451,13 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
       case 'text_print':
         stmts.push(compilePrint(e, b));
+        break;
+
+      case 'variables_set':
+        var r = compileSetOrDef(e, b);
+        stmts.push(r.stmt);
+        // This function also return a possibly-extended environment.
+        e = r.env;
         break;
 
       default:
@@ -436,9 +481,9 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var actions = b.getTopBlocks(true).map((b: B.Block, i: number) => {
     var body = compileStatements(empty, b);
     var name = "main"+(i == 0 ? "" : i);
-    return Helpers.mkAction(name, body);
+    return H.mkAction(name, body);
   });
-  return Helpers.mkApp(options.name, options.description, actions);
+  return H.mkApp(options.name, options.description, actions);
 }
 
 function compile(b: B.Workspace, options: CompileOptions): J.JApp {
