@@ -9,7 +9,7 @@ module TDev.RT.Wab {
     }
 
     export module ScreenshotManagerWab {
-        export function toScreenshotURLAsync(rt: RuntimeHost): Promise {
+        export function toScreenshotURLAsync(rt: RuntimeHost, background : boolean): Promise {
             return sendRequestAsync({ action: Action.SCREENSHOT })
                 .then((response: UriResponse) => {
                     if (response.status === Status.OK)

@@ -90,6 +90,10 @@ button.navItem
   width: 100%;
 }
 
+.navItem.nested {
+    margin-left:1em;
+}
+
 .navItemInner {
   position: relative;
   height: 3.15em;
