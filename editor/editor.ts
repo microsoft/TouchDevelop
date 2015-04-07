@@ -205,7 +205,7 @@ module TDev
             if (Cloud.anonMode(lf("publishing screenshots"))) return;
 
             var baseId = ScriptEditorWorldInfo.baseId;
-            RT.ScreenshotManager.toScreenshotURLAsync(this)
+            RT.ScreenshotManager.toScreenshotURLAsync(this, false)
                 .done((data: string) => {
                     if (!data) {
                         ModalDialog.info(lf("Oops, we could not take the screenshot"),
@@ -324,11 +324,18 @@ module TDev
         private takeScreenshotMaybe() : boolean {
             if (this.currentRt && !this.currentRt.isStopped()) {
                 if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
-                    var canvas = this.toScreenshotCanvas();
-                    if (canvas)
-                        TheEditor.setLastScreenshot(canvas);
+                    if (Browser.screenshots && Browser.isHosted)
+                        TDev.RT.ScreenshotManager.toScreenshotURLAsync(this.currentRt.host, true)
+                            .done(url => {
+                            if (url) TheEditor.setLastScreenshotDataUri(url);
+                        });
+                    else {
+                        var canvas = this.toScreenshotCanvas();
+                        if (canvas)
+                            TheEditor.setLastScreenshotCanvas(canvas);
+                    }
+                    return true;
                 }
-                return true;
             }
             return false;
         }
@@ -923,22 +930,29 @@ module TDev
 
         // we keep the last screenshot around for publishing
         private lastScreenshotId : number;
-        private lastScreenshotCanvas : HTMLCanvasElement;
+        private lastScreenshotCanvas: HTMLCanvasElement;
+        private lastScreenshotDataUri: string;
         public lastScreenshotUri() : string {
             if (this.hasLastScreenshot()) {
                 try {
-                    return this.lastScreenshotCanvas.toDataURL('image/png');
+                    return this.lastScreenshotDataUri || this.lastScreenshotCanvas.toDataURL('image/png');
                 } catch(e) { } // CORS issues
             }
             return undefined;
         }
         public hasLastScreenshot() {
             return this.lastScreenshotId == this.undoMgr.currentId()
-                && this.lastScreenshotCanvas;
+                && (this.lastScreenshotCanvas || this.lastScreenshotDataUri);
         }
-        public setLastScreenshot(canvas : HTMLCanvasElement) {
+        public setLastScreenshotCanvas(canvas : HTMLCanvasElement) {
             this.lastScreenshotId = this.undoMgr.currentId();
             this.lastScreenshotCanvas = canvas;
+            this.lastScreenshotDataUri = undefined;
+        }
+        public setLastScreenshotDataUri(dataUri: string) {
+            this.lastScreenshotId = this.undoMgr.currentId();
+            this.lastScreenshotCanvas = undefined;
+            this.lastScreenshotDataUri = dataUri;
         }
 
         public refreshScriptNav() {
@@ -2534,7 +2548,7 @@ module TDev
             this.intelliProfile = null;
             this.displayLeft([]);
             this.complainedAboutMissingAPIs = false;
-            this.setLastScreenshot(null);
+            this.setLastScreenshotCanvas(null);
             this.searchBox.value = ""
             this.setReadOnly(false);
             this.scriptCompiled = false;
@@ -3914,7 +3928,7 @@ module TDev
             */
 
             this.dismissSidePane();
-            this.setLastScreenshot(null);
+            this.setLastScreenshotCanvas(null);
             this.libExtractor.reset();
             Plugins.stopAllPlugins();
             return this.saveStateAsync({ forReal: true, clearScript: true });
