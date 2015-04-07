@@ -5460,8 +5460,8 @@ module TDev { export module Browser {
                 }
                 if (/#docs/i.test(this.jsonScript.description))
                     cont.push(div("sdNumber", " \u24D8"));
-                if (!this.willWork())
-                    cont.push(span("sdNumber symbol", "⚠"));
+                //if (!this.willWork())
+                //    cont.push(span("sdNumber symbol", "⚠"));
                 numbers.setChildren(cont);
                 author.setChildren([ this.jsonScript.username ]);
 
