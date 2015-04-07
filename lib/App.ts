@@ -76,7 +76,10 @@ module TDev.RT {
             if (!c) {
                 return { contextId: "", contextDuration: Util.perfNow() - this.created }
             } else {
-                return { contextId: c.id, contextDuration: Util.perfNow() - c.created }
+                var tm = Util.perfNow() - c.created
+                if (c.root.pauseOffset)
+                    tm -= c.root.pauseOffset
+                return { contextId: c.id, contextDuration: tm }
             }
         }
 
@@ -98,6 +101,30 @@ module TDev.RT {
         public context_id(s: IStackFrame) : string
         {
             return this.contextInfo(s).contextId
+        }
+
+        //? Stop counting time in all current contexts
+        //@ betaOnly
+        public context_pause(s: IStackFrame)
+        {
+            var c = AppLogger.findContext(s)
+            if (c) {
+                c.root.pauseStart = Util.perfNow()
+            }
+        }
+
+        //? Start counting time again in all current contexts
+        //@ betaOnly
+        public context_resume(s: IStackFrame)
+        {
+            var c = AppLogger.findContext(s)
+            if (c) {
+                c = c.root
+                if (c.pauseStart) {
+                    c.pauseOffset = Util.perfNow() - c.pauseStart
+                    c.pauseStart = 0
+                }
+            }
         }
 
         //? How long the current logger has been executing for in milliseconds.
@@ -143,11 +170,15 @@ module TDev.RT {
         public new_context(s:IStackFrame)
         {
             var prev = AppLogger.findContext(s)
-            s.loggerContext = { 
+            var ctx:any = { 
                 id: prev ? prev.id + "." + ++prev.numCh : Random.uniqueId(8),
                 created: Util.perfNow(), 
                 numCh: 0, 
             }
+            if (prev)
+                ctx.root = prev.root
+            else ctx.root = ctx
+            s.loggerContext = ctx
         }
 
 
