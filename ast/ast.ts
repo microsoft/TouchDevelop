@@ -2067,6 +2067,7 @@ module TDev.AST {
         public diffRemovedThings:Decl[];
         public npmModules: StringMap<string> = {};
         public bowerModules: StringMap<string> = {};
+        public clientScripts: StringMap<string> = {};
         public cordovaPlugins: StringMap<string> = {};
         public pipPackages: StringMap<string> = {};
         public touchDevelopPlugins: StringMap<string> = {};

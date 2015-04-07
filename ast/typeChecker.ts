@@ -1632,6 +1632,8 @@ module TDev.AST
                             this.importCordova(t, plugin, v); break;
                         case "bower":
                             this.importBower(t, plugin, v); break;
+                        case "client":
+                            this.importClientScript(t, plugin, v); break;
                         case "pip":
                             if (!this.topApp.canUseCapability(PlatformCapability.Npm))
                                 this.unsupportedCapability(plugin, PlatformCapability.Npm);
@@ -1682,6 +1684,13 @@ module TDev.AST
                     plugins[plugin] = newOne
                 } else
                     plugins[plugin] = v;
+            }
+        }
+
+        private importClientScript(t: Call, mod: string, v: string) {
+            if (mod && v != null) {
+                var imports = this.topApp.clientScripts;
+                imports[mod] = v;
             }
         }
 
