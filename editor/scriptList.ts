@@ -5104,8 +5104,16 @@ module TDev { export module Browser {
                 loadingDiv.removeSelf();
                 if (!scriptText) return;
 
-                var app = sc.app || AST.Parser.parseScript(scriptText);
                 var divs = []
+                var app = AST.Parser.parseScript(scriptText);
+
+                if (app.getPlatformRaw() & PlatformCapability.Current) {
+                } else if (app.getPlatform()) {
+                    var caps = lf("This script uses the following capabilities: ") +
+                        AST.App.capabilityName(app.getPlatform())
+                    divs.push(Host.expandableTextBox(caps))
+                }
+
                 var seen: any = {}
                 app.libraries().forEach((lr: AST.LibraryRef) => {
                     var b = this.browser();
@@ -5115,6 +5123,7 @@ module TDev { export module Browser {
                         divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
                     }
                 });
+
                 var stats = ""
                 var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
                 stats += ScriptInfo.userPlatformDisplayText(uplat);
@@ -5844,7 +5853,6 @@ module TDev { export module Browser {
             var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
             var commentsDiv = div(null);
-            var capsDiv = div(null);
             var wontWork = div(null);
             var likesDiv = div("inlineBlock");
             var runBtns = div(null);
@@ -5857,7 +5865,6 @@ module TDev { export module Browser {
                 descDiv,
                 docsButtonDiv,
                 remainingContainer,
-                capsDiv,
                 wontWork,
             ]);
 
@@ -5907,14 +5914,6 @@ module TDev { export module Browser {
 
                 // if (this.cloudHeader)
                 runBtns.setChildren([this.mkButtons()]);
-
-                if (this.app.getPlatformRaw() & PlatformCapability.Current) {
-                    capsDiv.setChildren([])
-                } else if (this.app.getPlatform()) {
-                    var caps = lf("This script uses the following capabilities: ") +
-                               AST.App.capabilityName(this.app.getPlatform())
-                    capsDiv.setChildren(Host.expandableTextBox(caps))
-                }
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
