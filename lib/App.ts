@@ -79,7 +79,7 @@ module TDev.RT {
                 var tm = Util.perfNow() - c.created
                 if (c.root.pauseOffset)
                     tm -= c.root.pauseOffset
-                return { contextId: c.id, contextDuration: tm }
+                return { contextId: c.id, contextDuration: Math.round(tm) }
             }
         }
 
