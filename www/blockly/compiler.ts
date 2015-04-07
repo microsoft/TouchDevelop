@@ -7,12 +7,10 @@
 
 // Currently remaining items:
 // - boolean/ternary
-// - remove boolean/null
 // - assess which ones of text/* we need
 // - loops
 // - math
 // - decide on our list structure
-// - set variable (infer if fresh declaration or assignment)
 // - functions
 
 import J = TDev.AST.Json;

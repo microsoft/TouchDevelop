@@ -1754,52 +1754,7 @@ span.errorSq .kw
 }
 
 #externalEditorContainer {
-    display: -webkit-flex;
-    display: flex;
-
     height: 100%;
-
-    flex-direction: column;
-    -webkit-flex-direction: column;
-    flex: 1;
-    -webkit-flex: 1;
-}
-
-#externalEditorChrome {
-    display: -webkit-flex;
-    display: flex;
-
-    flex-direction: row;
-    -webkit-flex-direction: row;
-}
-
-#externalEditorChrome a {
-    text-decoration: none;
-    color: black;
-    font-weight: bold;
-}
-
-#externalEditorChrome .back {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-}
-
-#externalEditorChrome .arrow {
-    width: 2rem;
-    height: 2rem;
-    border: 2px solid black;
-    border-radius: 50%;
-    margin: .2rem;
-    margin-bottom: 0;
-    text-align: center;
-    font-size: 1.4rem;
-}
-
-#externalEditorChrome .txt {
-    font-size: 60%;
-    text-align: center;
 }
 
 .tdLite {
@@ -1807,15 +1762,6 @@ span.errorSq .kw
     flex: 1;
     padding-right: .2em;
     font-weight: bold;
-}
-
-#externalEditorFrame {
-    display: flex;
-    display: -webkit-flex;
-    flex: 1;
-    -webkit-flex: 1;
-    flex-direction: column;
-    -webkit-flex-direction: column;
 }
 
 #externalEditorFrame > iframe {
@@ -1998,14 +1944,22 @@ div.decl > div.stmt {
 }
 
 
-.sideTabScroll,
-.sideTabContent {
+.sideTabScroll, .sideTabContent:not(#leftPaneContent) {
     width: 100%;
     position: absolute;
     left: 0;
     overflow: hidden;
     top: 0;
     height: 100%;
+}
+
+/* Various comments.
+ * 1) The left pane is visually displayed on the right.
+ * 2) The right pane is the one that appears on the left.
+ * 3) The #leftPane has been converted to CSS flexible boxes, so no games with
+ * absolute positioning for that one. */
+#leftPaneContent {
+    position: relative;
 }
 
 .sideTabScroll {
@@ -2088,16 +2042,21 @@ div.decl > div.stmt {
 
 /* Status bar */
 
-.teamStatus {
-  display: -webkit-flex;
-  display: flex;
-}
-
-.teamConnection {
+.vbox {
   display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-flex-direction: column;
+}
+
+.hbox {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+}
+
+.flex1 {
   flex: 1;
   -webkit-flex: 1;
 }
@@ -2124,14 +2083,7 @@ div.decl > div.stmt {
   color: #A52A2A;
 }
 
-.teamOnOff {
-  flex: 1;
-  -webkit-flex: 1;
-}
-
 .teamUsers {
-  flex: 1;
-  -webkit-flex: 1;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -2208,8 +2160,6 @@ div.decl > div.stmt {
 /* Messages area */
 
 .teamMsgs {
-  -webkit-flex: 1;
-  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -2296,11 +2246,8 @@ div.decl > div.stmt {
 
 
 /* Show the various UI elements if collaboration is enabled. */
-#teamPaneContent[data-collab^="yes"] {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
+#teamPaneContent[data-collab^="no"] {
+    display: none;
 }
 #leftPaneContent {
     top: 0;
@@ -2309,25 +2256,12 @@ div.decl > div.stmt {
     padding-top: 0;
 }
 
-/* leftPaneContent has to have class sideTabContent, which means it has to have
- * position: absolute, so we set the top property in a manner that's consistent
- * with the state (expanded/collapsed) of the chat area above. If you change
- * these values, change the corresponding ones below. */
-#teamPaneContent[data-collapsed^="no"] + #leftPaneContent[data-collab^="yes"] {
-    top: 12em;
-}
-#teamPaneContent[data-collapsed^="yes"] + #leftPaneContent[data-collab^="yes"] {
-    top: 5.5em;
-}
-
 #teamPaneContent[data-collapsed^="yes"] > .teamMsgs:not(:empty) + .teamTextbox {
     display: none;
 }
 
 /* Expanded state: significant height, scrollbars. */
 #teamPaneContent {
-    /* Hidden by default unless the collaboration feature is enabled (see above) */
-    display:none;
     background-color:#fff;
     border-bottom: 1px dotted #ccc;
     padding-top:0.2em;
