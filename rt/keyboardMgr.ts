@@ -219,6 +219,10 @@ module TDev {
 
         private numPush = 1;
 
+        public commandHandler(h:string)
+        {
+        }
+
         public popState(event:any) {
             Ticker.dbg("popState: " + event.state);
 
@@ -228,7 +232,16 @@ module TDev {
                 return
             }
 
-            this.back();
+            var h = HistoryMgr.windowHash()
+            if (/^#cmd:/.test(h)) {
+                var nh = this.topHash()
+                this.whenSafe(() => {
+                    this.pushState(nh)
+                    this.commandHandler(h)
+                })
+            } else {
+                this.back();
+            }
         }
 
         public back()
@@ -340,6 +353,10 @@ module TDev {
                 if (this.paneState < 0 && this.autoHide())
                     pane.style.display = "none";
             });
+        }
+
+        public hashCommandHandler(h:string)
+        {
         }
 
     }

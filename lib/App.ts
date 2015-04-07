@@ -190,7 +190,7 @@ module TDev.RT {
                 var msg = lvl.msg;
                 var txt = Util.htmlEscape(msg)
                     .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>")
-                    //.replace(/\b(StK[A-Za-z0-9]{8,500})/g, (m) => " <a href='#cmd:search:" + m + "'>" + m + "</a>")
+                    .replace(/\b(StK[A-Za-z0-9]{8,500})/g, (m) => " <a href='#cmd:search:" + m + "'>" + m + "</a>")
 
                 var crash: RuntimeCrash = undefined;
                 if (lvl.meta && lvl.meta && lvl.meta.kind === 'crash')

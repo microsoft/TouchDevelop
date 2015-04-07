@@ -1921,6 +1921,20 @@ module TDev
                 this.searchFor(":plugin")
         }
 
+        public hashCommandHandler(h:string)
+        {
+            var m = /^#cmd:([^:]+):(.*)/.exec(h)
+            if (!m) return
+            var cmd = m[1]
+            var arg = m[2]
+            switch (cmd) {
+            case "search":
+                ModalDialog.dismissCurrent()
+                this.searchFor(arg)
+                break
+            }
+        }
+
         public searchFor(s:string)
         {
             this.searchBox.value = s;
@@ -5719,6 +5733,11 @@ module TDev
                 if (!text) return undefined;
                 return HelpTopic.fromScriptText(id, text)
             })
+        }
+
+        public commandHandler(h:string)
+        {
+            currentScreen.hashCommandHandler(h)
         }
 
         public reload(h:string)
