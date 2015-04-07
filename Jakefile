@@ -391,6 +391,11 @@ task('clean', [], function () {
 desc('display info about installed tools')
 task('info', [], { async: true }, function () {
   var task = this;
+  
+  if (process.env.TRAVIS) {
+	  assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
+  }
+
   jake.exec([ 'tsc --version' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); });
