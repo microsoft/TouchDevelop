@@ -522,7 +522,7 @@ module TDev
                     widget: lf("recordsSection"),
                     things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel),
                     createOne: () => [
-                        { decl: this.editor.freshObject(), displayName: 'object', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A row of data") },
+                        { decl: this.editor.freshObject(), displayName: 'object type', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A structure of user-data") },
                         { decl: this.editor.freshTable(), displayName: ' ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddTable, description: lf("A table of user-defined rows")},
                         { decl: this.editor.freshIndex(), displayName: '  ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddIndex, description: lf("An indexed table of user-defined rows")}
                    ],
