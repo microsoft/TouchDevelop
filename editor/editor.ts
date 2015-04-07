@@ -4238,9 +4238,9 @@ module TDev
                       divId("editorContainer", null,
                         divId("leftBtnRow", "btnRow"),
                         divId("scriptMainPanes", "scriptMainPanes",
-                          divId("leftPane", "pane",
+                          divId("leftPane", "pane vbox",
                             divId("teamPaneContent", "teamContent vbox"),
-                            divId("leftPaneContent", "sideTabContent")
+                            divId("leftPaneContent", "sideTabContent flex1")
                             ),
                           divId("stmtEditorPaneInner", null),
                           divId("rightPane", "pane")
@@ -4728,13 +4728,10 @@ module TDev
             var ch = <HTMLElement> stmtEd.firstChild
             if (s && ch && ch.offsetHeight) {
                 var stmtEdtHeight = ch.offsetHeight + 3;
-                var chatHeight = this.teamElt ? this.teamElt.offsetHeight : 0;
-                this.codeInner.style.height = this.codeOuter.offsetHeight - chatHeight - stmtEdtHeight + "px";
-                // elt("rightPane").style.height = codeOuter.offsetHeight - stmtEdtHeight + "px";
+                this.codeInner.style.marginBottom = stmtEdtHeight + "px";
                 Util.ensureVisible(s.renderedAs, this.codeInner, 2.5 * SizeMgr.topFontSize);
             } else {
-                this.codeInner.style.height = "100%";
-                // elt("rightPane").style.height = "100%";
+                this.codeInner.style.marginBottom = "0";
             }
         }
 

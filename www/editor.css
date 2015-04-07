@@ -1751,38 +1751,6 @@ span.errorSq .kw
 
 #externalEditorContainer {
     height: 100%;
-
-    flex: 1;
-    -webkit-flex: 1;
-}
-
-#externalEditorChrome a {
-    text-decoration: none;
-    color: black;
-    font-weight: bold;
-}
-
-#externalEditorChrome .back {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-}
-
-#externalEditorChrome .arrow {
-    width: 2rem;
-    height: 2rem;
-    border: 2px solid black;
-    border-radius: 50%;
-    margin: .2rem;
-    margin-bottom: 0;
-    text-align: center;
-    font-size: 1.4rem;
-}
-
-#externalEditorChrome .txt {
-    font-size: 60%;
-    text-align: center;
 }
 
 .tdLite {
@@ -1972,14 +1940,22 @@ div.decl > div.stmt {
 }
 
 
-.sideTabScroll,
-.sideTabContent {
+.sideTabScroll, .sideTabContent:not(#leftPaneContent) {
     width: 100%;
     position: absolute;
     left: 0;
     overflow: hidden;
     top: 0;
     height: 100%;
+}
+
+/* Various comments.
+ * 1) The left pane is visually displayed on the right.
+ * 2) The right pane is the one that appears on the left.
+ * 3) The #leftPane has been converted to CSS flexible boxes, so no games with
+ * absolute positioning for that one. */
+#leftPaneContent {
+    position: relative;
 }
 
 .sideTabScroll {
@@ -2274,17 +2250,6 @@ div.decl > div.stmt {
 }
 #teamPaneContent[data-collab^="yes"] + .sideTabContent > .decl {
     padding-top: 0;
-}
-
-/* leftPaneContent has to have class sideTabContent, which means it has to have
- * position: absolute, so we set the top property in a manner that's consistent
- * with the state (expanded/collapsed) of the chat area above. If you change
- * these values, change the corresponding ones below. */
-#teamPaneContent[data-collapsed^="no"] + #leftPaneContent[data-collab^="yes"] {
-    top: 12em;
-}
-#teamPaneContent[data-collapsed^="yes"] + #leftPaneContent[data-collab^="yes"] {
-    top: 5.5em;
 }
 
 #teamPaneContent[data-collapsed^="yes"] > .teamMsgs:not(:empty) + .teamTextbox {
