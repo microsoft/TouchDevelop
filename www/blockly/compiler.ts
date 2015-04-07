@@ -77,16 +77,20 @@ module Helpers {
     };
   }
 
-  // Assumes its parameter [p] is in the [knownPropertyRefs] table.
-  export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
-    assert(knownPropertyRefs[p] != undefined);
+  export function mkCall(name: string, parent: string, args: J.JExpr[]): J.JExpr {
     return {
         nodeType: "call",
         id: null,
-        name: p,
-        parent: knownPropertyRefs[p],
+        name: name,
+        parent: parent,
         args: args,
     };
+  }
+
+  // Assumes its parameter [p] is in the [knownPropertyRefs] table.
+  export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
+    assert(knownPropertyRefs[p] != undefined);
+    return mkCall(p, knownPropertyRefs[p], args);
   }
 
   export function mkTypeRef(t: string): J.JTypeRef {
@@ -189,14 +193,19 @@ module Helpers {
     return mkExprStmt(expr);
   }
 
-  export function mkAction(name: string, body: J.JStmt[]): J.JAction {
+  export function mkAction(
+    name: string,
+    body: J.JStmt[],
+    inParams: J.JLocalDef[] = [],
+    outParams: J.JLocalDef[] = []): J.JAction
+  {
     return {
       nodeType: "action",
       id: null,
       name: name,
       body: body,
-      inParameters: [],
-      outParameters: [],
+      inParameters: inParams,
+      outParameters: outParams,
       isPrivate: false,
       isOffline: false,
       isQuery: false,
@@ -233,6 +242,9 @@ module Helpers {
 
 import H = Helpers;
 
+// Infers the expected type of an expression by looking at the untranslated
+// block and figuring out, from the look of it, what type of expression it
+// holds.
 function inferType(e: Environment, b: B.Block): J.JTypeRef {
   switch (b.type) {
     case "math_number":
@@ -305,6 +317,14 @@ function compileNot(e: Environment, b: B.Block): J.JExpr {
   return H.mkSimpleCall("not", [expr]);
 }
 
+function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
+  var f = b.getFieldValue("NAME");
+  var args = b.arguments_.map((x: any, i: number) => {
+    return compileExpression(e, b.getInputTargetBlock("ARG"+i));
+  });
+  return H.mkCall(f, "code", args);
+}
+
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
   switch (b.type) {
     case "math_number":
@@ -321,6 +341,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
+    case "procedures_callreturn":
+      return compileCall(e, <B.DefOrCallBlock> b);
   }
   throw (b.type + " is not an expression block or is not supported");
   // unreachable
@@ -364,7 +386,7 @@ var empty: Environment = {
 // Statements
 ///////////////////////////////////////////////////////////////////////////////
 
-function compileControlsIf(e: Environment, b: B.ControlsIfBlock): J.JStmt[] {
+function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
   for (var i = 0; i <= b.elseifCount_; ++i) {
     var cond = compileExpression(e, b.getInputTargetBlock("IF"+i));
@@ -442,7 +464,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   while (b) {
     switch (b.type) {
       case 'controls_if':
-        append(stmts, compileControlsIf(e, <B.ControlsIfBlock> b));
+        append(stmts, compileControlsIf(e, <B.IfBlock> b));
         break;
 
       case 'controls_for':
@@ -468,6 +490,22 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   return stmts;
 }
 
+function compileFunction(e: Environment, b: B.DefOrCallBlock): J.JAction {
+  assert(isFunctionDefinition(b));
+
+  var fName = b.getFieldValue("NAME");
+  var inParams: J.JLocalDef[] = [];
+  var outParams: J.JLocalDef[] = [];
+  e = b.arguments_.reduce((e: Environment, name: string) => {
+    var t = H.mkTypeRef("Unknown");
+    inParams.push(H.mkDef(name, t));
+    return extend(e, { name: name, type: t });
+  }, e);
+
+  var body = compileStatements(e, b.getInputTargetBlock("STACK"));
+  return H.mkAction(fName, body, inParams, outParams);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Top-level definitions for compiling an entire blockly workspace
@@ -477,11 +515,22 @@ interface CompileOptions {
   description: string;
 }
 
+function isFunctionDefinition(b: B.Block) {
+  return (b.type == "procedures_defreturn" ||
+      b.type == "procedures_defnoreturn");
+}
+
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
-  var actions = b.getTopBlocks(true).map((b: B.Block, i: number) => {
-    var body = compileStatements(empty, b);
-    var name = "main"+(i == 0 ? "" : i);
-    return H.mkAction(name, body);
+  var i = 0;
+  var actions = b.getTopBlocks(true).map((b: B.Block) => {
+    if (isFunctionDefinition(b)) {
+      return compileFunction(empty, <B.DefOrCallBlock> b);
+    } else {
+      var body = compileStatements(empty, b);
+      var name = "main"+(i == 0 ? "" : i);
+      i++;
+      return H.mkAction(name, body);
+    }
   });
   return H.mkApp(options.name, options.description, actions);
 }
