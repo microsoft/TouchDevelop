@@ -445,6 +445,7 @@ module TDev {
 
         recordAddKey,
         recordAddValue,
+        recordAddAction,
         recordPersTemporary,
         recordPersLocal,
         recordPersCloud,

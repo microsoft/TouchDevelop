@@ -488,10 +488,10 @@ module TDev.AST {
             this.stmts = [];
         }
         public allowEmpty() { return true; }
-        public emptyStmt()
+        public emptyStmt(name? : string, kind? : Kind)
         {
             var isOut = (<ActionHeader>this.parent).outParameters == this;
-            var r = new ActionParameter(mkLocal((<AST.ActionHeader>this.parent).action.nameLocal(isOut ? "r" : "p"), api.core.Number));
+            var r = new ActionParameter(mkLocal((<AST.ActionHeader>this.parent).action.nameLocal(name || (isOut ? "r" : "p")), kind || api.core.Number));
             r.parent = this;
             return r;
         }
