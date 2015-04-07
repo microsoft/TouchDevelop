@@ -93,7 +93,7 @@ module TDev.RT.Node {
 
 
     export var logInfo: (s:string) => void = s => Util.log(s);
-    export var logError: (s:string) => void = s => Util.log("error: " + s);
+    export var logError: (s:string) => void = s => Util.log(s);
     export var handleError: (err:any) => void = err => {
         if (err.rtProtectHandled)
             return
@@ -346,13 +346,11 @@ module TDev.RT.Node {
 
         public handleException(e:any)
         {
-            if (this.quietlyHandleError(e))
-                return
+            var handled = this.quietlyHandleError(e)
 
-            if (e.programCounter)
-                this.errorPC = e.programCounter;
+            if (!handled)
+                this.host.exceptionHandler(e);
 
-            this.host.exceptionHandler(e);
             this.restartAfterException()
         }
 
@@ -426,8 +424,6 @@ module TDev.RT.Node {
                 var ses = <Revisions.ServerSession>this.currentRt.sessions.CurrentSession;
                 ses.abortCurrentTransaction(bug);
             }
-
-            logError("CRASH DETAILS: " + bug.exceptionMessage + "\n" + bug.stackTrace)
         }
 
         public log(s: string) {

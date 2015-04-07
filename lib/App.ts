@@ -189,7 +189,8 @@ module TDev.RT {
             msgs.filter(msg => !!msg).forEach((lvl, index) => {
                 var msg = lvl.msg;
                 var txt = Util.htmlEscape(msg)
-                    .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>");
+                    .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>")
+                    //.replace(/\b(StK[A-Za-z0-9]{8,500})/g, (m) => " <a href='#cmd:search:" + m + "'>" + m + "</a>")
 
                 var crash: RuntimeCrash = undefined;
                 if (lvl.meta && lvl.meta && lvl.meta.kind === 'crash')
@@ -477,8 +478,13 @@ module TDev.RT {
                     Util.log('log: transport failed ');
                 }
             });
-            var loc = meta && meta.compressedStack ? " at " + meta.compressedStack : ""
-            logEvent(ERROR, "crash", (err.message || err) + loc, meta);
+            var msg = err.stack
+            if (!msg) {
+                msg = err.message || (err + "")
+                if (err.tdCompressedStack)
+                    msg += " at " + err.tdCompressedStack
+            }
+            logEvent(ERROR, "crash", msg, meta);
         }
 
         export function logEvent(level: number, category: string, message: string, meta: any): void {
