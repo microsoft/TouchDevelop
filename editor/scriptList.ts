@@ -5079,6 +5079,71 @@ module TDev { export module Browser {
         }
     }
 
+    export class ScriptDetailsTab
+        extends BrowserTab
+    {
+        constructor(parent : ScriptInfo) {
+            super(parent);
+        }
+
+        public getName() { return lf("details"); }
+        public getId() { return "details"; }
+        public script() { return <ScriptInfo>this.parent; }
+
+        public inlineIsTile() { return false; }
+        public bgIcon() { return ""; }
+        public noneText() { return ""; }
+
+        public initTab() {
+            var loadingDiv = div('bigLoadingMore', 'loading...');
+            this.tabContent.setChildren([loadingDiv]);
+
+            var sc = this.script();
+            sc.getScriptTextAsync()
+                .done((scriptText: string) => {
+                loadingDiv.removeSelf();
+                if (!scriptText) return;
+
+                var app = sc.app || AST.Parser.parseScript(scriptText);
+                var divs = []
+                var seen: any = {}
+                app.libraries().forEach((lr: AST.LibraryRef) => {
+                    var b = this.browser();
+                    var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
+                    if (scriptInfo && !seen[scriptInfo.persistentId()]) {
+                        seen[scriptInfo.persistentId()] = 1;
+                        divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
+                    }
+                });
+                var stats = ""
+                var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
+                stats += ScriptInfo.userPlatformDisplayText(uplat);
+
+                var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
+                descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
+                var stmts = 0
+                descs.forEach((d) => { stmts += d.stmtCount })
+                if (sc.jsonScript && sc.jsonScript.time) {
+                    var d = new Date(sc.jsonScript.time * 1000)
+                    stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
+                        d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                }
+                stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                descs.slice(0, 20).forEach((d, i) => {
+                    if (i > 0)
+                        stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
+                    else
+                        stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
+                })
+                if (descs.length > 20)
+                    stats += ", ...";
+                divs.push(Host.expandableTextBox(stats));
+
+                this.tabContent.setChildren(divs);
+            });
+        }
+    }
+
     export class ScriptInfo
         extends BrowserPage
     {
@@ -5106,6 +5171,7 @@ module TDev { export module Browser {
         public getDescription() {
             return this.app ? this.app.getDescription() : "";
         }
+        public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
         static compareScripts(a: ScriptInfo, b: ScriptInfo) : number {
             var c = b.lastScore - a.lastScore;
@@ -5565,6 +5631,7 @@ module TDev { export module Browser {
                 r =
                 [
                     this,
+                    this.editor() ? null : new ScriptDetailsTab(this),
                     new CommentsTab(this),
                     new HistoryTab(this),
                     new InsightsTab(this),
@@ -5777,8 +5844,6 @@ module TDev { export module Browser {
             var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
             var commentsDiv = div(null);
-            var libsDiv = div(null);
-            var infoDiv = div(null);
             var capsDiv = div(null);
             var wontWork = div(null);
             var likesDiv = div("inlineBlock");
@@ -5792,8 +5857,6 @@ module TDev { export module Browser {
                 descDiv,
                 docsButtonDiv,
                 remainingContainer,
-                libsDiv,
-                infoDiv,
                 capsDiv,
                 wontWork,
             ]);
@@ -5898,44 +5961,6 @@ module TDev { export module Browser {
                 this.app.localGuid = this.getGuid();
                 if (oldPlatform)
                     this.app.setPlatform(oldPlatform);
-                var libDivs = []
-                var seen:any = {}
-                this.app.libraries().forEach((lr:AST.LibraryRef) => {
-                    var b = this.browser();
-                    var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
-                    if (scriptInfo && !seen[scriptInfo.persistentId()]) {
-                        seen[scriptInfo.persistentId()] = 1;
-                        libDivs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
-                    }
-                });
-                libsDiv.setChildren(libDivs);
-
-
-                if (EditorSettings.editorMode() == EditorMode.pro) {
-                    var stats = ""
-                    var uplat = this.jsonScript ? this.jsonScript.userplatform : null;
-                            stats += ScriptInfo.userPlatformDisplayText(uplat);
-
-                            var descs: AST.StatsComputer[] = this.app.allActions().map((a) => a.getStats());
-                            descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
-                    var stmts = 0
-                    descs.forEach((d) => { stmts += d.stmtCount })
-                    if (this.jsonScript && this.jsonScript.time) {
-                                var d = new Date(this.jsonScript.time * 1000)
-                        stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
-                                    d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
-                    }
-                            stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
-                    descs.slice(0, 20).forEach((d, i) => {
-                                if (i > 0)
-                                    stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
-                        else
-                                    stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
-                    })
-                    if (descs.length > 20)
-                        stats += ", ...";
-                    infoDiv.setChildren([Host.expandableTextBox(stats)]);
-                }
 
                 if (this.app.isLibrary)
                     descDiv.appendChildren(ScriptProperties.libraryDocs(this.app, this.app.getName(), false));
