@@ -317,6 +317,15 @@ module TDev
                     var d = declIt(e);
                     if (e.hasErrors())
                         d.setFlag("errors", true);
+                    if (e.getKind()) {
+                        var subDecls = byKind[e.getKind().toString()];
+                        if (subDecls) subDecls.forEach(se => {
+                            var sd = declIt(se);
+                            sd.classList.add("nested");
+                            if (se.hasErrors())
+                                sd.setFlag("errors", true);
+                        });
+                    }
                 });
             }
 
@@ -413,23 +422,12 @@ module TDev
             var byKind:StringMap<AST.Decl[]> = {}
             var unsorted = normalActions.filter(a => {
                 var k = a.getExtensionKind()
-                if (!k) return true
+                if (!k || k.parentLibrary() || !<AST.RecordDef>k.getRecord() || (<AST.RecordDef>k.getRecord()).recordType != AST.RecordType.Object) return true
                 var key = k.toString()
                 if (!byKind.hasOwnProperty(key))
                     byKind[key] = []
                 byKind[key].push(a)
                 return false
-            })
-
-            var names = Object.keys(byKind)
-            names.sort(Util.stringCompare)
-            var kindSects = names.map(name => {
-                return <ThingSection>{
-                    label: name,
-                    things: byKind[name],
-                    createOne: null,
-                    newName: lf("action")
-                }
             })
 
             var sections: ThingSection[] = [
@@ -479,6 +477,57 @@ module TDev
                     }],
                     addOne: addEvent,
                 }, <ThingSection>{
+                    label: lf("vars"),
+                    widget: "dataSection",
+                    initiallyHidden: AST.blockMode,
+                    things: vars.filter((v) => !v.isResource),
+                    // Unknown triggers set kind dialog immedietely - tutorial doesn't support it
+                    createOne: () => [{
+                        decl: this.editor.freshVar((AST.blockMode || TheEditor.stepTutorial) ? api.core.Number : api.core.Unknown),
+                        tick: Ticks.sideAddVariable,
+                        displayName: 'data',
+                        description: lf("A global variable")
+                    }],
+                    newName: lf("global variable"),
+                }, <ThingSection>{
+                    label: lf("records"),
+                    widget: "recordsSection",
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Object || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Decorator),
+                    createOne: () => [
+                        { decl: this.editor.freshObject(), displayName: 'object type', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A structure of user-data") },
+                    ],
+                }, <ThingSection>{
+                    label: lf("database"),
+                    widget: "databaseSection",
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && ((<AST.RecordDef>t).recordType == TDev.AST.RecordType.Table || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Index)),
+                    createOne: () => [
+                        { decl: this.editor.freshTable(), displayName: ' ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddTable, description: lf("A table of user-defined rows")},
+                        { decl: this.editor.freshIndex(), displayName: '  ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddIndex, description: lf("An indexed table of user-defined rows")}
+                   ],
+                }, <ThingSection>{
+                    label: lf("art"),
+                    widget: "artSection",
+                    things: vars.filter((v) => v.isResource),
+                    createOne: () => [
+                        { decl: this.editor.freshPictureResource(), displayName: 'picture resource', tick: Ticks.sideAddResource, description: lf("A picture from the web") },
+                        { decl: this.editor.freshSoundResource(), displayName: 'sound resource', tick: Ticks.sideAddResource, description: lf("A sound from the web") },
+                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: true, displayName: 'string resource', tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web") },
+                        { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: 'color resource', tick: Ticks.sideAddResource, description: lf("A color constant") },
+                        { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden: true, displayName: 'number resource', tick: Ticks.sideAddResource, description: lf("A number constant") }
+                    ],
+                    newName: lf("art resource")
+                }, <ThingSection>{
+                    label: lf("action types"),
+                    widget: "actionTypesSection",
+                    initiallyHidden: !AST.proMode,
+                    things: things.filter((t) => t instanceof AST.Action && (<AST.Action>t).isActionTypeDef()),
+                    createOne: () => [{
+                        decl: this.editor.freshActionTypeDef(),
+                        tick: Ticks.sideAddActionTypeDef,
+                        displayName: 'callback',
+                        description: lf("A signature definition of an action")
+                    }],
+                }, <ThingSection>{
                     label: lf("libraries"),
                     widget: "librariesSection",
                     things: things.filter((t) => t instanceof AST.LibraryRef),
@@ -492,56 +541,8 @@ module TDev
                     addOne: addLibrary,
                     newName: lf("lib"),
                     tutorialHidden: true
-                }, <ThingSection>{
-                    label: lf("data"),
-                    widget: "dataSection",
-                    initiallyHidden: AST.blockMode,
-                    things: vars.filter((v) => !v.isResource),
-                    // Unknown triggers set kind dialog immedietely - tutorial doesn't support it
-                    createOne: () => [{
-                        decl: this.editor.freshVar((AST.blockMode || TheEditor.stepTutorial) ? api.core.Number : api.core.Unknown),
-                        tick: Ticks.sideAddVariable,
-                        displayName: 'data',
-                        description: lf("A global variable")
-                    }],
-                    newName: lf("global variable"),
-                }, <ThingSection>{
-                    label: lf("art"),
-                    widget: "artSection",
-                    things: vars.filter((v) => v.isResource),
-                    createOne: () => [
-                        { decl: this.editor.freshPictureResource(), displayName: 'picture resource', tick: Ticks.sideAddResource, description: lf("A picture from the web") },
-                        { decl: this.editor.freshSoundResource(), displayName: 'sound resource', tick: Ticks.sideAddResource, description: lf("A sound from the web")},
-                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: true, displayName: 'string resource', tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web")},
-                        { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: 'color resource', tick: Ticks.sideAddResource, description: lf("A color constant")},
-                        { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden:true, displayName: 'number resource', tick: Ticks.sideAddResource, description: lf("A number constant") }
-                    ],
-                    newName: lf("art resource")
-                }, <ThingSection>{
-                    label: lf("records"),
-                    widget: lf("recordsSection"),
-                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel),
-                    createOne: () => [
-                        { decl: this.editor.freshObject(), displayName: 'object', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A row of data") },
-                        { decl: this.editor.freshTable(), displayName: ' ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddTable, description: lf("A table of user-defined rows")},
-                        { decl: this.editor.freshIndex(), displayName: '  ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddIndex, description: lf("An indexed table of user-defined rows")}
-                   ],
-                }, <ThingSection>{
-                    label: lf("action types"),
-                    widget: lf("actionTypesSection"),
-                    initiallyHidden: !AST.proMode,
-                    things: things.filter((t) => t instanceof AST.Action && (<AST.Action>t).isActionTypeDef()),
-                    createOne: () => [{
-                        decl: this.editor.freshActionTypeDef(),
-                        tick: Ticks.sideAddActionTypeDef,
-                        displayName: 'callback',
-                        description: lf("A signature definition of an action")
-                    }],
                 },
             ]
-
-            var c = sections.shift()
-            sections = [c].concat(kindSects).concat(sections)
 
             function addNew() {
                 Util.assert(!debugMode);

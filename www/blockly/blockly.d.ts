@@ -2,8 +2,7 @@ declare module Blockly {
     class Block {
         static obtain(workspace: Workspace, prototypeName?: string): Block;
 
-        // If type is equals to "foo_bar" and [FooBarBlock] exists, then you
-        // may cast to it.
+        // May allow downcasting (see below).
         type: string;
         id: string;
 
@@ -17,9 +16,15 @@ declare module Blockly {
         getNextBlock(): Block;
     }
 
-    class ControlsIfBlock extends Block {
+    // if type == controls_if
+    class IfBlock extends Block {
         elseifCount_: number;
         elseCount_: number;
+    }
+
+    // if type is one of "procedures_def{,no}return", or "procedures_call{,no}return"
+    class DefOrCallBlock extends Block {
+        arguments_: string[];
     }
 
     class Workspace {

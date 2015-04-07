@@ -25,6 +25,7 @@ module TDev
         private renderer = new TDev.EditorRenderer();
         private mkKey = div("varHalf");
         private mkVal = div("varHalf");
+        private mkAct = div("varHalf");
         private exported: HTMLElement;
         public getTick() { return Ticks.viewRecordInit; }
 
@@ -66,6 +67,7 @@ module TDev
 
             this.mkKey.setChildren([this.mkField(true)]);
             this.mkVal.setChildren([this.mkField(false)]);
+            this.mkAct.setChildren([this.mkAction()]);
             this.recordType.setChildren([
                     this.mkTypeBox(
                         this.theRecord.recordType,
@@ -88,6 +90,30 @@ module TDev
 
             if (tc)
                 TheEditor.updateTutorial()
+        }
+
+        private mkAction() {
+            if (this.theRecord.recordType != AST.RecordType.Object) return null;
+
+            var b = HTML.mkButtonTick(lf("add action"), Ticks.recordAddAction,() => {
+                this.commit();
+                // create fresh action
+                var decl = this.editor.freshAsyncAction();
+                this.editor.addNode(decl);
+                // add this parameter
+                var header = decl.header;
+                var blk = header.inParameters;
+                var empt = blk.emptyStmt("this", this.theRecord.entryKind);
+                this.editor.initIds(empt, true)
+                var newCh = blk.stmts.concat([empt]);
+                blk.setChildren(newCh);
+
+                decl.notifyChange();                
+                this.editor.typeCheckNow();
+                this.editor.refreshDecl();
+                this.editor.queueNavRefresh();
+            });
+            return b;
         }
 
         private mkField(key:boolean)
@@ -274,6 +300,7 @@ module TDev
                                   this.fields,
                                   this.mkKey,
                                   this.mkVal,
+                                  this.mkAct,
                                   ]);
 
             this.editor.displayLeft([this.formRoot]);

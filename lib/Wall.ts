@@ -113,7 +113,7 @@ module TDev.RT {
         //@ readsMutable [result].writesMutable quickAsync
         export function screenshot(r : ResumeCtx) //: Picture
         {
-            ScreenshotManager.toScreenshotURLAsync(r.rt.host)
+            ScreenshotManager.toScreenshotURLAsync(r.rt.host, true)
                 .then((data: string) => {
                     if (data != null)
                         return Picture.fromUrl(data)
@@ -469,7 +469,7 @@ module TDev.RT {
     }
 
     export module ScreenshotManager {
-        export var toScreenshotURLAsync = (rt: RuntimeHost): Promise => { // string {
+        export var toScreenshotURLAsync = (rt: RuntimeHost, background : boolean): Promise => { // string {
             // TODO: move somewhere else
             if (App.env().has_host()) {
                 var durl: string;
@@ -479,7 +479,7 @@ module TDev.RT {
                     })).then(() => App.hostExecAsync("screen.screenshot"))
                     .then((url) => {
                         durl = url;
-                        return App.hostExecAsync("screen.show");
+                        return background ? Promise.as() : App.hostExecAsync("screen.show");
                     }).then(() => durl);
             }
 
