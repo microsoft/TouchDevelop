@@ -479,21 +479,7 @@ module TDev
                     }],
                     addOne: addEvent,
                 }, <ThingSection>{
-                    label: lf("libraries"),
-                    widget: "librariesSection",
-                    things: things.filter((t) => t instanceof AST.LibraryRef),
-                    initiallyHidden: AST.blockMode,
-                    createOne: () => [{
-                        decl: this.editor.freshLibrary(),
-                        displayName: 'library',
-                        tick: Ticks.sideAddLibrary,
-                        description: lf("A reference to a library script")
-                    }],
-                    addOne: addLibrary,
-                    newName: lf("lib"),
-                    tutorialHidden: true
-                }, <ThingSection>{
-                    label: lf("data"),
+                    label: lf("vars"),
                     widget: "dataSection",
                     initiallyHidden: AST.blockMode,
                     things: vars.filter((v) => !v.isResource),
@@ -519,16 +505,22 @@ module TDev
                     newName: lf("art resource")
                 }, <ThingSection>{
                     label: lf("records"),
-                    widget: lf("recordsSection"),
-                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel),
+                    widget: "recordsSection",
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Object || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Decorator),
                     createOne: () => [
                         { decl: this.editor.freshObject(), displayName: 'object type', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A structure of user-data") },
+                    ],
+                }, <ThingSection>{
+                    label: lf("database"),
+                    widget: "databaseSection",
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && ((<AST.RecordDef>t).recordType == TDev.AST.RecordType.Table || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Index)),
+                    createOne: () => [
                         { decl: this.editor.freshTable(), displayName: ' ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddTable, description: lf("A table of user-defined rows")},
                         { decl: this.editor.freshIndex(), displayName: '  ', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddIndex, description: lf("An indexed table of user-defined rows")}
                    ],
                 }, <ThingSection>{
                     label: lf("action types"),
-                    widget: lf("actionTypesSection"),
+                    widget: "actionTypesSection",
                     initiallyHidden: !AST.proMode,
                     things: things.filter((t) => t instanceof AST.Action && (<AST.Action>t).isActionTypeDef()),
                     createOne: () => [{
@@ -537,6 +529,20 @@ module TDev
                         displayName: 'callback',
                         description: lf("A signature definition of an action")
                     }],
+                }, <ThingSection>{
+                    label: lf("libraries"),
+                    widget: "librariesSection",
+                    things: things.filter((t) => t instanceof AST.LibraryRef),
+                    initiallyHidden: AST.blockMode,
+                    createOne: () => [{
+                        decl: this.editor.freshLibrary(),
+                        displayName: 'library',
+                        tick: Ticks.sideAddLibrary,
+                        description: lf("A reference to a library script")
+                    }],
+                    addOne: addLibrary,
+                    newName: lf("lib"),
+                    tutorialHidden: true
                 },
             ]
 
