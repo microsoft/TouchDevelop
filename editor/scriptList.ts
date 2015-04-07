@@ -5771,32 +5771,34 @@ module TDev { export module Browser {
         {
             this.browser().treatAsScript[this.publicId] = true;
 
-            var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
+            // don't show these for scripts
+            // var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
+
             var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
+            var commentsDiv = div(null);
             var libsDiv = div(null);
-            var infoDiv = div(null)
-            var capsDiv = div(null)
+            var infoDiv = div(null);
+            var capsDiv = div(null);
             var wontWork = div(null);
-            var likesDiv = div(null);
+            var likesDiv = div("inlineBlock");
+            var runBtns = div(null);
             var basisDiv = div("inlineBlock");
-            ch.shift();
-            var screens = ch.shift();
             var remainingContainer = div(null);
             var docsButtonDiv = div(null);
-            ch.unshift(remainingContainer);
+
+            this.tabContent.setChildren([
+                runBtns,
+                descDiv,
+                docsButtonDiv,
+                remainingContainer,
+                libsDiv,
+                infoDiv,
+                capsDiv,
+                wontWork,
+            ]);
+
             remainingContainer.setChildren([authorDiv]);
-            ch.unshift(screens);
-            ch.unshift(docsButtonDiv);
-            ch.unshift(likesDiv);
-            ch.unshift(descDiv);
-            ch.unshift(wontWork);
-            var runBtns = div(null);
-            ch.unshift(runBtns);
-            ch.push(libsDiv);
-            ch.push(infoDiv);
-            ch.push(capsDiv);
-            this.tabContent.setChildren(ch);
 
             var scriptBox = (hd:string, id:string) => {
                 if (!id || id == this.publicId) return null;
@@ -5814,7 +5816,7 @@ module TDev { export module Browser {
                 if (basisDiv.childNodes.length == 0 && this.jsonScript.rootid != this.jsonScript.id)
                     basisDiv.setChildren(ScriptInfo.labeledBox(lf("base"), null));
 
-                remainingContainer.setChildren([authorDiv, basisDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
+                remainingContainer.setChildren([likesDiv, authorDiv, basisDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
 
                 var uid = this.browser().getCreatorInfo(this.jsonScript);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
@@ -5857,18 +5859,20 @@ module TDev { export module Browser {
                         lf("This script is using the following capabilities that might be missing on your current device: {0}",
                                              AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
                 }
-                /*
                 if (this.publicId) {
                     // display a lis of buble headers
-                    TheApiCacheMgr.getAnd(this.publicId + "/reviews?count=30", (list : JsonList) => {
-                        likesDiv.setChildren(list.items.map((review : JsonReview) => {
-                            var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
-                            var el = info.thumbnail(false, () => { this.parentBrowser.loadDetails(info)  });
-                            el.classList.add('teamHead');
-                            return el;
-                        }));
+                    TheApiCacheMgr.getAnd(this.publicId + "/reviews?count=12",(list: JsonList) => {
+                        likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} hearts", this.jsonScript.cumulativepositivereviews), div('inlineBlock',
+                            list.items.slice(0, 12).map((review : JsonReview) => {
+                                var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
+                                var el = info.thumbnail(false, () => { this.parentBrowser.loadDetails(info)  });
+                                el.classList.add('teamHead');
+                                return el;
+                            })
+                          )
+                        ));
                     });
-                } */
+                }
             });
 
             if (this.publicId) {
