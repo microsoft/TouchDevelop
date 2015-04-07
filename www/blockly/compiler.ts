@@ -67,7 +67,7 @@ module Helpers {
     "post to wall": "String",
     ":=": "Unknown",
   };
-  ["=", "≠", "<", "≤", ">", "≥"].forEach(x => knownPropertyRefs[x] = "Number");
+  ["=", "≠", "<", "≤", ">", "≥", "+", "-", "/", "*"].forEach(x => knownPropertyRefs[x] = "Number");
   ["and", "or", "not"].forEach(x => knownPropertyRefs[x] = "Boolean");
 
   export function mkPropertyRef(x: string, p: string): J.JPropertyRef {
@@ -81,6 +81,7 @@ module Helpers {
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
   export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
+    assert(knownPropertyRefs[p] != undefined);
     return {
         nodeType: "call",
         id: null,
@@ -420,7 +421,8 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
   var expr = compileExpression(e, bExpr);
   var binding = lookup(e, bVar);
   if (binding) {
-    // Assignment
+    // Assignment. It's ok if we assign an expression of the wrong type, as
+    // TouchDevelop will flag it as an error.
     return {
       env: e,
       stmt: H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [H.mkLocalRef(bVar), expr])))
