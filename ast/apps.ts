@@ -138,7 +138,7 @@ module TDev.AST.Apps {
         var isCloud = options.compileServer && (options.skipClient || app.isCloud);
         var opts:CompilerOptions = {
             packaging: true,
-            javascript: isCloud || !!options.cordova,
+            javascript: true,  // always on for compiled web apps
             scriptId: options.scriptId,
             authorId: options.userId,
             scriptGuid: app.localGuid,

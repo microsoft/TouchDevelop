@@ -616,8 +616,8 @@ module TDev.RT {
             r.resume()
         }
 
-        //? Imports a dependent package which may be versioned. Package managers may be Node.JS npm, Apache cordova, Python Pip and TouchDevelop plugins.
-        //@ name("import") [manager].deflStrings("npm", "cordova", "touchdevelop", "pip") [version].defl("*")
+        //? Imports a dependent package which may be versioned. Package managers may be Node.JS npm, Bower, Apache cordova, Python Pip and TouchDevelop plugins. Bower packages are not available within the touchdevelop.com domain.
+        //@ name("import") [manager].deflStrings("npm", "cordova", "bower", "touchdevelop", "pip") [version].defl("*")
         export function import_(manager : string, module: string, version: string): void {
         }
 

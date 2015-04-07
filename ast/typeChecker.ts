@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD197:
+// Next available error: TD198:
 
 module TDev.AST
 {
@@ -1630,6 +1630,8 @@ module TDev.AST
                             if (!this.topApp.canUseCapability(PlatformCapability.Cordova))
                                 this.unsupportedCapability(plugin, PlatformCapability.Cordova);
                             this.importCordova(t, plugin, v); break;
+                        case "bower":
+                            this.importBower(t, plugin, v); break;
                         case "pip":
                             if (!this.topApp.canUseCapability(PlatformCapability.Npm))
                                 this.unsupportedCapability(plugin, PlatformCapability.Npm);
@@ -1680,6 +1682,21 @@ module TDev.AST
                     plugins[plugin] = newOne
                 } else
                     plugins[plugin] = v;
+            }
+        }
+
+        private importBower(t: Call, mod: string, v: string) {
+            if (mod && v != null) {
+                var imports = this.topApp.bowerModules
+                if (imports.hasOwnProperty(mod)) {
+                    if (imports[mod] == "error") return;
+                    var newOne = TypeChecker.combineNpmVersions(imports[mod], v)
+                    if (newOne == "error")
+                        this.markError(t, lf("TD197: bower module '{0}' versions '{1}' and '{2}' conflict", mod, imports[mod], v))
+                    imports[mod] = newOne;
+                }
+                else
+                    imports[mod] = v
             }
         }
 

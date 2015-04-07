@@ -391,6 +391,11 @@ task('clean', [], function () {
 desc('display info about installed tools')
 task('info', [], { async: true }, function () {
   var task = this;
+  
+  if (process.env.TRAVIS) {
+	  assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
+  }
+
   jake.exec([ 'tsc --version' ],
     { printStdout: true, printStderr: true },
     function() { task.complete(); });
@@ -426,7 +431,7 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
     upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);
   } else {
     assert(process.env.TRAVIS_BUILD_NUMBER, "missing travis build number");
-    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key");
+    assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
     var buildVersion = 80100 + parseInt(process.env.TRAVIS_BUILD_NUMBER || - 80000);
     if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != "false") {
       // don't upload
