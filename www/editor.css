@@ -1750,23 +1750,10 @@ span.errorSq .kw
 }
 
 #externalEditorContainer {
-    display: -webkit-flex;
-    display: flex;
-
     height: 100%;
 
-    flex-direction: column;
-    -webkit-flex-direction: column;
     flex: 1;
     -webkit-flex: 1;
-}
-
-#externalEditorChrome {
-    display: -webkit-flex;
-    display: flex;
-
-    flex-direction: row;
-    -webkit-flex-direction: row;
 }
 
 #externalEditorChrome a {
@@ -1803,15 +1790,6 @@ span.errorSq .kw
     flex: 1;
     padding-right: .2em;
     font-weight: bold;
-}
-
-#externalEditorFrame {
-    display: flex;
-    display: -webkit-flex;
-    flex: 1;
-    -webkit-flex: 1;
-    flex-direction: column;
-    -webkit-flex-direction: column;
 }
 
 #externalEditorFrame > iframe {
@@ -2084,16 +2062,21 @@ div.decl > div.stmt {
 
 /* Status bar */
 
-.teamStatus {
-  display: -webkit-flex;
-  display: flex;
-}
-
-.teamConnection {
+.vbox {
   display: -webkit-flex;
   display: flex;
   flex-direction: column;
   -webkit-flex-direction: column;
+}
+
+.hbox {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+}
+
+.flex1 {
   flex: 1;
   -webkit-flex: 1;
 }
@@ -2120,14 +2103,7 @@ div.decl > div.stmt {
   color: #A52A2A;
 }
 
-.teamOnOff {
-  flex: 1;
-  -webkit-flex: 1;
-}
-
 .teamUsers {
-  flex: 1;
-  -webkit-flex: 1;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -2204,8 +2180,6 @@ div.decl > div.stmt {
 /* Messages area */
 
 .teamMsgs {
-  -webkit-flex: 1;
-  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -2292,11 +2266,8 @@ div.decl > div.stmt {
 
 
 /* Show the various UI elements if collaboration is enabled. */
-#teamPaneContent[data-collab^="yes"] {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
+#teamPaneContent[data-collab^="no"] {
+    display: none;
 }
 #leftPaneContent {
     top: 0;
@@ -2322,8 +2293,6 @@ div.decl > div.stmt {
 
 /* Expanded state: significant height, scrollbars. */
 #teamPaneContent {
-    /* Hidden by default unless the collaboration feature is enabled (see above) */
-    display:none;
     background-color:#fff;
     border-bottom: 1px dotted #ccc;
     padding-top:0.2em;

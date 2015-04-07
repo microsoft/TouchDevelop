@@ -3581,8 +3581,8 @@ module TDev
         private showCollabView() {
             /* Building the status box */
 
-            var statusbox = div('teamStatus');
-            var connection = div('teamConnection');
+            var statusbox = div('teamStatus hbox');
+            var connection = div('teamConnection vbox flex1');
 
             // The active / inactive links are hidden/shown via CSS
             var linkActive = createElement('a', 'teamLinkActive', lf("enabled"));
@@ -3613,7 +3613,7 @@ module TDev
                 TDev.Collab.setAutomaticPushEnabled(false);
                 TDev.Collab.setAutomaticPullEnabled(false);
             }
-            var onoff = div('teamOnOff',
+            var onoff = div('teamOnOff flex1',
               span('', lf("code sync ")),
               linkActive,
               linkInactive
@@ -3621,7 +3621,7 @@ module TDev
 
             var usersbox = div('teamUsersBox');
             var userscount = div('teamUsersCount');
-            var users = div('teamUsers');
+            var users = div('teamUsers flex1');
             usersbox.setChildren([userscount, users]);
             statusbox.setChildren([connection, onoff, users]);
 
@@ -3638,7 +3638,7 @@ module TDev
 
             /* Building the message list and associated event listeners */
 
-            var messages = div('teamMsgs');
+            var messages = div('teamMsgs flex1');
 
             // The chat is collapsed either when the user hits escape, or when
             // the user click-focuses into the code area.
@@ -4239,7 +4239,7 @@ module TDev
                         divId("leftBtnRow", "btnRow"),
                         divId("scriptMainPanes", "scriptMainPanes",
                           divId("leftPane", "pane",
-                            divId("teamPaneContent", "teamContent"),
+                            divId("teamPaneContent", "teamContent vbox"),
                             divId("leftPaneContent", "sideTabContent")
                             ),
                           divId("stmtEditorPaneInner", null),
@@ -4249,9 +4249,9 @@ module TDev
                         divId("stmtEditorPane", null),
                         divId("stmtEditorLeftTop", null)),
 
-                      divId("externalEditorContainer", null,
-                        divId("externalEditorChrome", null),
-                        divId("externalEditorFrame", null)),
+                      divId("externalEditorContainer", "vbox",
+                        divId("externalEditorChrome", "hbox"),
+                        divId("externalEditorFrame", "vbox flex1")),
 
                       divId("wallOverlay", null));
             r.style.display = "none";
