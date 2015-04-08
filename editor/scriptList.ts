@@ -5106,6 +5106,15 @@ module TDev { export module Browser {
 
                 var divs = []
                 var app = AST.Parser.parseScript(scriptText);
+                AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
+
+
+                if (sc.jsonScript && sc.jsonScript.time) {
+                    var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
+                    var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
+
+                    divs.push(div('', pull, diff));
+                }
 
                 if (app.getPlatformRaw() & PlatformCapability.Current) {
                 } else if (app.getPlatform()) {
@@ -5113,6 +5122,20 @@ module TDev { export module Browser {
                         AST.App.capabilityName(app.getPlatform())
                     divs.push(Host.expandableTextBox(caps))
                 }
+
+                var basisDiv = div("inlineBlock");
+                divs.push(basisDiv);
+                var ch = sc.getCloudHeader();
+                if (sc.publicId) {
+                    TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
+                        var j = <JsonScript>d;
+                        if (opts.isDefinitive)
+                            TheApiCacheMgr.store(j.id, j);
+                        divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
+                    });
+                }
+                else if (ch && ch.status != "published" && ch.scriptId)
+                    divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
 
                 var seen: any = {}
                 app.libraries().forEach((lr: AST.LibraryRef) => {
@@ -5147,6 +5170,10 @@ module TDev { export module Browser {
                 if (descs.length > 20)
                     stats += ", ...";
                 divs.push(Host.expandableTextBox(stats));
+
+                var render = new EditorRenderer();
+                var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                divs.push(code);
 
                 this.tabContent.setChildren(divs);
             });
@@ -5641,7 +5668,6 @@ module TDev { export module Browser {
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    new CommentsTab(this),
                     new HistoryTab(this),
                     new InsightsTab(this),
                     Cloud.lite ? new AbuseReportsTab(this) : null,
@@ -5659,7 +5685,7 @@ module TDev { export module Browser {
         }
 
 
-        private mkButtons()
+        private mkButtons(groupDiv : HTMLElement)
         {
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
@@ -5742,20 +5768,16 @@ module TDev { export module Browser {
                                 });
                         }));
                     } else if (st.groupId) {
-                        btns.appendChild(
+                        groupDiv.appendChild(
                             ScriptInfo.labeledBox(
-                                lf("belongs to"),
+                                lf("with group"),
                                 Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
                             ));
                     }
                 })
             }
 
-            if (EditorSettings.editorMode() != EditorMode.block && this.jsonScript && this.jsonScript.time) {
-                var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush, () => (<ScriptInfo>this.parent).mergeScript())
-                var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase, () => (<ScriptInfo>this.parent).diffToBase())
-            }
-            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, pull, diff, this.showcaseBtns());
+            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns());
         }
 
         private showcaseBtns()
@@ -5852,11 +5874,10 @@ module TDev { export module Browser {
 
             var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
-            var commentsDiv = div(null);
             var wontWork = div(null);
             var likesDiv = div("inlineBlock");
             var runBtns = div(null);
-            var basisDiv = div("inlineBlock");
+            var commentsDiv = div(null);
             var remainingContainer = div(null);
             var docsButtonDiv = div(null);
 
@@ -5865,6 +5886,7 @@ module TDev { export module Browser {
                 descDiv,
                 docsButtonDiv,
                 remainingContainer,
+                commentsDiv,
                 wontWork,
             ]);
 
@@ -5880,13 +5902,7 @@ module TDev { export module Browser {
 
                 this.buildTopic();
 
-                if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
-                    basisDiv.setChildren(scriptBox(lf("base"), this.cloudHeader.scriptId));
-
-                if (basisDiv.childNodes.length == 0 && this.jsonScript.rootid != this.jsonScript.id)
-                    basisDiv.setChildren(ScriptInfo.labeledBox(lf("base"), null));
-
-                remainingContainer.setChildren([likesDiv, authorDiv, basisDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
+                remainingContainer.setChildren([likesDiv, authorDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
 
                 var uid = this.browser().getCreatorInfo(this.jsonScript);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
@@ -5913,7 +5929,7 @@ module TDev { export module Browser {
                 }
 
                 // if (this.cloudHeader)
-                runBtns.setChildren([this.mkButtons()]);
+                runBtns.setChildren([this.mkButtons(remainingContainer)]);
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
@@ -5935,16 +5951,19 @@ module TDev { export module Browser {
                         ));
                     });
                 }
-            });
 
-            if (this.publicId) {
-                TheApiCacheMgr.getAndEx(this.publicId + "/base", (d, opts) => {
-                    var j = <JsonScript>d;
-                    if (opts.isDefinitive)
-                        TheApiCacheMgr.store(j.id, j);
-                    basisDiv.setChildren([scriptBox(lf("base"), j.id)]);
-                });
-            }
+                if (this.publicId) {
+                    if (!this.commentsTab) {
+                        this.commentsTab = new CommentsTab(this);
+                        this.commentsTab.initElements();
+                        this.commentsTab.tabLoaded = true;
+                        this.commentsTab.initTab();
+                    }
+                    commentsDiv.setChildren([
+                        this.commentsTab.topContainer(),
+                        this.commentsTab.tabContent])
+                }
+            });
 
             this.getScriptTextAsync()
                 .done((scriptText:string) => {
