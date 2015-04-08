@@ -1948,6 +1948,10 @@ module TDev
                 ModalDialog.dismissCurrent()
                 this.searchFor(arg)
                 break
+            case "logfilter":
+                var lv = RT.AppLogView.current
+                if (lv) lv.setFilter(arg)
+                break
             }
         }
 

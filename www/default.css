@@ -96,6 +96,14 @@ textarea {
     font-weight:normal;
 }
 
+.modalDialog .logView .logMsg .logMeta a {
+  color: inherit;
+}
+
+.logMeta {
+  font-size: 0.8em;
+}
+
 .logView .logMsg {
     white-space:pre-wrap;
 }

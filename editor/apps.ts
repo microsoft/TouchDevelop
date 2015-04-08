@@ -1536,7 +1536,7 @@ module TDev.AppExport
         var instructions: AST.Apps.DeploymentInstructions;
         function status(cmd: string) {
             cmdDiv.setChildren([">" + cmd]);
-            logger.info(cmd);
+            logger.info(cmd, null);
         }
 
         function cli(descr: string, command: string, cwd: string = undefined, ignoreErrors = false): Promise {
@@ -1546,11 +1546,11 @@ module TDev.AppExport
                 command: command,
                 cwd: cwd
             }).then(resp => {
-                if (resp.code) logger.info(lf("{0} exited with {1}", command, resp.code));
-                if (resp.stdout) logger.debug(resp.stdout);
+                if (resp.code) logger.info(lf("{0} exited with {1}", command, resp.code), null);
+                if (resp.stdout) logger.debug(resp.stdout, null);
                 if (resp.stderr) {
-                    if (ignoreErrors) logger.debug(resp.stderr);
-                    else logger.error(resp.stderr);
+                    if (ignoreErrors) logger.debug(resp.stderr, null);
+                    else logger.error(resp.stderr, null);
                 }
                 return resp;
             });
@@ -1559,7 +1559,7 @@ module TDev.AppExport
         function mkDir(path:string, mode: string) {
             if (cancelled) return new PromiseInv();
             if (!path) return Promise.as();
-            logger.debug('mkdir "' + path + '"');
+            logger.debug('mkdir "' + path + '"', null);
             return LocalShell.mgmtRequestAsync("plugin/mkdir", {
                 minVersion: Runtime.shellVersion,
                 name: path.replace('\\','/'),
@@ -1573,13 +1573,13 @@ module TDev.AppExport
             files = files.filter(f => !!f);
             if (files.length == 0) return Promise.as();
 
-            files.forEach(f => logger.debug(lf("writing {0}", f.path)));
+            files.forEach(f => logger.debug(lf("writing {0}", f.path), null));
             return LocalShell.mgmtRequestAsync("writefiles", {
                 minVersion: Runtime.shellVersion,
                 files: files
             }).then(resp => {
                 if (resp.status != "ok") {
-                    logger.error(resp.message)
+                    logger.error(resp.message, null)
                     return new PromiseInv();
                 }
             })

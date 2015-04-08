@@ -25,28 +25,28 @@ module TDev.RT {
         }
 
         //? Logs a debug message
-        public debug(message: string) {
-            this.log("debug", message, undefined);
+        public debug(message: string, s:IStackFrame) {
+            this.log("debug", message, undefined, s);
         }
 
         //? Logs an informational message
-        public info(message: string) {
-            this.log("info", message, undefined);
+        public info(message: string, s:IStackFrame) {
+            this.log("info", message, undefined, s);
         }
 
         //? Logs a warning message
-        public warning(message: string) {
-            this.log("warning", message, undefined);
+        public warning(message: string, s:IStackFrame) {
+            this.log("warning", message, undefined, s);
         }
 
         //? Logs an error message
-        public error(message: string) {
-            this.log("error", message, undefined);
+        public error(message: string, s:IStackFrame) {
+            this.log("error", message, undefined, s);
         }
 
         //? Logs a new message with optional metadata. The level follows the syslog convention.
         //@ [level].deflStrings("info", "debug", "warning", "error") [meta].deflExpr('invalid->json_object')
-        public log(level: string, message: string, meta: JsonObject) {
+        public log(level: string, message: string, meta: JsonObject, s:IStackFrame) {
             var ilevel : number;
             switch (level.trim().toLowerCase()) {
                 case 'debug': ilevel = App.DEBUG; break;
@@ -54,7 +54,7 @@ module TDev.RT {
                 case 'error': ilevel = App.ERROR; break;
                 default: ilevel = App.INFO; break;
             }
-            App.logEvent(ilevel, this.category, message, meta ? meta.value() : undefined);
+            App.logEvent(ilevel, this.category, message, this.augmentMeta(meta ? meta.value() : undefined, s));
         }
 
         static findContext(s: IStackFrame) : any
@@ -74,7 +74,7 @@ module TDev.RT {
         {
             var c = AppLogger.findContext(s)
             if (!c) {
-                return { contextId: "", contextDuration: Util.perfNow() - this.created }
+                return null
             } else {
                 var tm = Util.perfNow() - c.created
                 if (c.root.pauseOffset)
@@ -87,6 +87,7 @@ module TDev.RT {
         {
             var i = this.contextInfo(s)
             var v = meta ? meta.value() : null
+            if (!i) return v
             if (!v) return i
             else {
                 v = Util.jsonClone(v)
@@ -100,7 +101,9 @@ module TDev.RT {
         //@ betaOnly
         public context_id(s: IStackFrame) : string
         {
-            return this.contextInfo(s).contextId
+            var i = this.contextInfo(s)
+            if (!i) return ""
+            return i.contextId
         }
 
         //? Stop counting time in all current contexts
@@ -138,7 +141,10 @@ module TDev.RT {
         //@ betaOnly
         public context_duration(s: IStackFrame) : number
         {
-            return this.contextInfo(s).contextDuration
+            var i = this.contextInfo(s)
+            if (i)
+                return i.contextDuration
+            return Util.perfNow() - this.created
         }
 
         //? Log a custom event tick in any registered performance logger.
@@ -212,8 +218,11 @@ module TDev.RT {
         public maxItems = Browser.isMobile ? 200 : 2000;
         public refreshRate = Browser.isMobile ? 500 : 100;
 
+        static current:AppLogView;
+
         constructor() {
             // search bar
+            AppLogView.current = this;
             this.searchBox = HTML.mkTextInput("text", lf("Filter..."), "search");
             this.searchBox.classList.add("logSearchInput");
             Util.onInputChange(this.searchBox, v => this.update());
@@ -282,7 +291,7 @@ module TDev.RT {
         private pendingChartUpdate = false;
         private update() {
             var els = Util.childNodes(this.logsEl);
-            var terms = this.searchBox.value;
+            var terms = this.searchBox.value.toLowerCase();
             if (!terms) els.forEach(el => el.style.display = 'block');
             else els.forEach(el => {
                     if (el.innerText.toLowerCase().indexOf(terms) > -1) {
@@ -316,6 +325,13 @@ module TDev.RT {
                 var txt = Util.htmlEscape(msg)
                     .replace(/https?:\/\/[^\s\r\n"'`]+/ig, (m) => "<a href=\"" + m + "\" target='_blank' rel='nofollow'>" + m + "</a>")
                     .replace(/\b(StK[A-Za-z0-9]{8,500})/g, (m) => " <a href='#cmd:search:" + m + "'>" + m + "</a>")
+
+                if (lvl.meta && lvl.meta.contextId) {
+                    var searchTerm = Util.htmlEscape(lvl.meta.contextId.replace(/\..*/, ""))
+                    txt += " <span class='logMeta'>[<a href='#cmd:logfilter:" + searchTerm + "'>" + 
+                           Util.htmlEscape(lvl.meta.contextId) + 
+                           "</a>: " + Math.round(lvl.meta.contextDuration) + "ms]</span>"
+                }
 
                 var crash: RuntimeCrash = undefined;
                 if (lvl.meta && lvl.meta && lvl.meta.kind === 'crash')
