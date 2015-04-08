@@ -240,13 +240,15 @@ module TDev
                                             contentType: contentType,
                                             content: base64content,
                                             userplatform: Browser.platformCaps
-                                        }).then(() => {
+                                        }).done((resp : JsonScreenShot) => {
                                             HTML.showProgressNotification(lf("screenshot uploaded"), true);
+                                            Cloud.postCommentAsync(baseId, lf("{0} added a screenshot {1}", ((<any>window).userName || ""), "/" + resp.id))
+                                                .done(() => { },() => { });
                                             Browser.Hub.askToEnableNotifications();
                                         }, e => {
                                             HTML.showProgressNotification(lf("screenshot upload failed"), true);
                                             World.handlePostingError(e, lf("post screenshot"));
-                                        }).done();
+                                        });
                                 })),
                             previewImage
                         ]);
