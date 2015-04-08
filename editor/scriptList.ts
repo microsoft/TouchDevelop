@@ -2935,6 +2935,7 @@ module TDev { export module Browser {
         }
 
         public getUrl() { return this.parent.getPublicationId() + this.urlSuff; }
+        public getParentId() { return this.parent.getPublicationId(); }
 
         public resetEltsSoFar() { }
 
@@ -2946,8 +2947,9 @@ module TDev { export module Browser {
         }
         public loadMoreElementsAnd(cont:string, f:(items:any[], cont:string)=>void)
         {
-            var id = this.parent.getPublicationId();
+            var id = this.getParentId();
             if (!id) return;
+
             var count = this.nextCount(cont);
             var path = this.getUrl() + (/\?/.test(this.getUrl()) ? "&" : "?") + "count=" + count + (!cont ? "" : "&continuation=" + cont);
             TheApiCacheMgr.getAnd(path, (l:JsonList) => {
@@ -3446,61 +3448,59 @@ module TDev { export module Browser {
         }
         static bugUsers = [ "gxfb", "wonm", "ajlk", "bqsl", "ikyp", "pboj", "jeiv", "expza" ]
 
-        public finalListElt():HTMLElement
-        {
+        public finalListElt(): HTMLElement {
             if (!this.isForum() && this.parent instanceof ScriptInfo) {
+
                 var js = this.script().jsonScript
-                if (js.rootid == js.id)
+                if (js.id && js.rootid == js.id)
                     return div(null)
+                var cont = div(null)
+                var getFor = (id: string) => {
+                    Util.assert(!!id, "missing comment id");
+                    TheApiCacheMgr.getAsync(id + "/base").done(resp => {
+                        if (!resp) return
+                        var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
+                        var loadMore = (cont: string) => {
+                            var dd = div(null, HTML.mkButton(lf("load more"),() => {
+                                dd.setChildren("loading...")
+                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
+                                    dd.setChildren(lst.items.map(j => this.tabBox(j)))
+                                    if (lst.continuation)
+                                        dd.appendChild(loadMore(lst.continuation))
+                                })
+                            }))
+                            return dd
+                        }
 
-                   var cont = div(null)
+                        TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
+                            d.className = ""
+                            if (lst.items.length > 0) {
+                                var ch = lst.items.map(j => this.tabBox(j))
+                                //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
+                                if (lst.continuation)
+                                    ch.push(loadMore(lst.continuation))
+                                d.setChildren(ch)
+                            } else {
+                                d.setChildren([])
+                            }
+                        })
 
-                   var getFor = (id: string) => {
-                       Util.assert(!!id, "missing comment id");
-                       TheApiCacheMgr.getAsync(id + "/base").done(resp => {
-                           if (!resp) return
-                           var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
-                           var loadMore = (cont: string) => {
-                               var dd = div(null, HTML.mkButton(lf("load more"),() => {
-                                   dd.setChildren("loading...")
-                                   TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
-                                       dd.setChildren(lst.items.map(j => this.tabBox(j)))
-                                       if (lst.continuation)
-                                           dd.appendChild(loadMore(lst.continuation))
-                                   })
-                               }))
-                               return dd
-                           }
+                        var si = this.browser().getScriptInfo(resp)
+                        var hd = si.mkSmallBox();
+                        hd.className += " sdBaseHeader"
+                        var btn = div("sdBaseCorner",
+                            div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
+                            div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
+                        hd.appendChild(btn)
+                        cont.appendChild(div(null, hd, d))
 
-                           TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
-                               d.className = ""
-                               if (lst.items.length > 0) {
-                                   var ch = lst.items.map(j => this.tabBox(j))
-                                   //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
-                                   if (lst.continuation)
-                                       ch.push(loadMore(lst.continuation))
-                                   d.setChildren(ch)
-                               } else {
-                                   d.setChildren([])
-                               }
-                           })
+                        if (resp.rootid != resp.id) getFor(resp.id)
+                    })
+                }
 
-                           var si = this.browser().getScriptInfo(resp)
-                           var hd = si.mkSmallBox();
-                           hd.className += " sdBaseHeader"
-                           var btn = div("sdBaseCorner",
-                               div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
-                               div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
-                           hd.appendChild(btn)
-                           cont.appendChild(div(null, hd, d))
+                getFor(this.getParentId())
 
-                           if (resp.rootid != resp.id) getFor(resp.id)
-                       })
-                   }
-
-                   getFor(this.getParentId())
-
-               return cont
+                return cont
             } else {
                 return div(null)
             }
@@ -3512,7 +3512,7 @@ module TDev { export module Browser {
             var text =  HTML.mkTextArea();
             var postBtn = div(null);
             text.rows = 1;
-            text.placeholder =  reply ? lf("Reply...") : lf("Say something...");
+            text.placeholder =  reply ? lf("Reply...") : lf("Post a comment...");
             var postDiv:HTMLElement = div("commentPost", div(null, text), postBtn);
 
             var post = () => {
@@ -3766,6 +3766,7 @@ module TDev { export module Browser {
 
         private getNestedComments(elt:HTMLElement, id:string, cont:string)
         {
+            Util.assert(!!id, "missing nested replies");
             elt.setChildren([lf("loading replies...")]);
             var count = this.nestedCommentsCount(cont);
             TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
