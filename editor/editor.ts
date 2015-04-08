@@ -328,13 +328,10 @@ module TDev
                 if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
                     if (Browser.screenshots && Browser.isHosted)
                         TDev.RT.ScreenshotManager.toScreenshotURLAsync(this.currentRt.host, true)
-                            .done(url => {
-                            if (url) TheEditor.setLastScreenshotDataUri(url);
-                        });
+                            .done(url => TheEditor.setLastScreenshotDataUri(url));
                     else {
                         var canvas = this.toScreenshotCanvas();
-                        if (canvas)
-                            TheEditor.setLastScreenshotCanvas(canvas);
+                        TheEditor.setLastScreenshotCanvas(canvas);
                     }
                     return true;
                 }
