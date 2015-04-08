@@ -101,6 +101,16 @@ module TDev.AST.Apps {
 
         if (!options.userId) options.userId = "unknown"
         if (!options.filePrefix) options.filePrefix = ""
+        var isCloud = options.compileServer && (options.skipClient || app.isCloud);
+        var opts: CompilerOptions = {
+            packaging: true,
+            javascript: true,  // always on for compiled web apps
+            scriptId: options.scriptId,
+            authorId: options.userId,
+            scriptGuid: app.localGuid,
+            azureSite: options.azureSite,
+            apiKeys: options.apiKeys,
+        }
 
         var setProp = (s:string, v:string) => {
             html = html.replace(s.replace(/{.*}/, ""), Util.fmt(s, v))
@@ -113,6 +123,15 @@ module TDev.AST.Apps {
             files : [],
             apiKeys:{}
         };
+
+        if (!isCloud) {
+            var head = Object.keys(app.imports.clientScripts).map(url => {
+                if (/\.css$/i.test(url)) return Util.fmt('<link rel="stylesheet" href="{0:url}">', url);
+                if (/\.js$/i.test(url)) return Util.fmt('<script type="text/javascript" src="{0:url}"></script>', url);
+            });
+            html = html.replace("</head>", "    " + head.join("\n    ") + "\n</head>")
+        }
+
         if (options.cordova) {
             html = html.replace("</head>", "    <script src='cordova.js'></script>\n</head>")
             instructions.cordova = <CordovaInstructions>{
@@ -135,16 +154,6 @@ module TDev.AST.Apps {
 
         var theBase = "https://az31353.vo.msecnd.net/app/" + options.relId + "/c/";
 
-        var isCloud = options.compileServer && (options.skipClient || app.isCloud);
-        var opts:CompilerOptions = {
-            packaging: true,
-            javascript: true,  // always on for compiled web apps
-            scriptId: options.scriptId,
-            authorId: options.userId,
-            scriptGuid: app.localGuid,
-            azureSite: options.azureSite,
-            apiKeys: options.apiKeys,
-        }
 
         AST.TypeChecker.tcApp(app)
         var compiled = AST.Compiler.getCompiledScript(app, opts)
