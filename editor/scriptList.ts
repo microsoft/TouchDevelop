@@ -1216,6 +1216,7 @@ module TDev { export module Browser {
             else if (e.kind == "comment") return this.getCommentInfoById(e.id);
             else if (e.kind == "art") return this.getArtInfoById(e.id);
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
+            else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
             else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo)
@@ -1644,6 +1645,17 @@ module TDev { export module Browser {
             if (!si) {
                 si = new UserInfo(this);
                 si.loadFromWeb(id, username);
+                this.saveLocation(si);
+            }
+            return si;
+        }
+
+        public getScreenshotInfoById(id: string)
+        {
+            var si = <ScreenshotInfo>this.getLocation(id);
+            if (!si) {
+                si = new ScreenshotInfo(this);
+                si.loadFromWeb(id);
                 this.saveLocation(si);
             }
             return si;
@@ -4644,6 +4656,152 @@ module TDev { export module Browser {
                     this.inlineContent.setChildren(ch);
                 }
             });
+        }
+    }
+
+    export class ScreenshotInfo
+        extends BrowserPage {
+        public screenshot: JsonScreenShot;
+
+        constructor(par: Host) {
+            super(par)
+        }
+        public persistentId() { return "screenshot:" + this.publicId; }
+        public getTitle() { return this.screenshot ? lf("screenshot of {0}", this.screenshot.publicationname) : lf("screenshot"); }
+        public getId() { return "overview"; }
+        public getName() { return lf("overview"); }
+
+        public loadFromJson(a: JsonScreenShot) {
+            this.loadFromWeb(a.id);
+            this.screenshot = a;
+        }
+
+        public loadFromWeb(id: string) {
+            this.publicId = id;
+        }
+
+        public getJsonAsync() {
+            if (!this.screenshot) {
+                var r: JsonScreenShot = TheApiCacheMgr.getCached(this.publicId);
+                if (r)
+                    this.loadFromJson(r);
+                else {
+                    return TheApiCacheMgr.getAsync(this.publicId).then((a: JsonScreenShot) => {
+                        this.loadFromJson(a);
+                    });
+                }
+            }
+            return Promise.as();
+        }
+
+        public mkTabsCore(): BrowserTab[] {
+            return [this];
+        }
+
+        public mkTile(sz: number) {
+            var d = div("hubTile hubArtTile hubTileSize" + sz);
+            d.style.background = ScriptIcons.stableColorFromName(this.publicId);
+            return this.withUpdate(d,(a: JsonScreenShot) => {
+                this.loadFromJson(a);
+
+                var cont = [];
+                var img: HTMLElement = null;
+                var picDiv = d;
+                var picMode = 'cover';
+
+                picDiv.style.backgroundImage = HTML.cssImage(a.pictureurl);
+                picDiv.style.backgroundRepeat = 'no-repeat';
+                    picDiv.style.backgroundPosition = 'center';
+                    picDiv.style.backgroundSize = picMode;
+
+                d.setChildren([img,
+                    div("hubTileTitleBar",
+                    div("hubTileTitle", spanDirAuto(a.publicationname)),
+                    div("hubTileSubtitle",
+                        div("hubTileAuthor", spanDirAuto(a.username))))])
+            });
+            return d;
+        }
+
+        public mkBoxCore(big: boolean) {
+            var icon = div("sdIcon");
+            var nameBlock = dirAuto(div("sdName", lf("screenshot")));
+            var hd = div("sdNameBlock", nameBlock);
+            var author = div("sdAuthorInner");
+            var addInfo = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfo);
+            var res = div("sdHeaderOuter",
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), this.reportAbuse(big))));
+            if (big)
+                res.className += " sdBigHeader";
+
+            return this.withUpdate(res,(a: JsonScreenShot) => {
+                this.loadFromJson(a);
+
+                var time = 0;
+                if (a) time = a.time;
+                var timeStr = "";
+                if (time) timeStr = Util.timeSince(time) + " :: ";
+                if (this.publicId) timeStr += "/" + this.publicId;
+                addInfo.setChildren([timeStr]);
+
+                nameBlock.setChildren([this.getTitle()]);
+                dirAuto(nameBlock);
+                var img = null;
+                img = HTML.mkImg(a.thumburl);
+                img.className += " checker";
+                icon.setChildren([img]);
+
+                author.setChildren([a.username]);
+            });
+        }
+
+        public initTab() {
+            var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : t.inlineContentContainer);
+            var id = div("sdImg");
+            var runBtns = div(null);
+            var remainingContainer = div(null);
+
+            ch.unshift(remainingContainer);
+            ch.unshift(id);
+            if (TDev.dbg)
+                ch.unshift(runBtns);
+
+            var scriptDiv = div("inlineBlock");
+            var authorDiv = div("inlineBlock");
+            remainingContainer.setChildren([authorDiv, scriptDiv]);
+
+            this.tabContent.setChildren(ch);
+
+            this.withUpdate(id,(a: JsonScreenShot) => {
+                this.loadFromJson(a);
+
+                    var img = HTML.mkImg(a.pictureurl);
+                    img.className += " checker";
+                    id.setChildren([img]);
+
+                var uid = this.browser().getCreatorInfo(a);
+                authorDiv.setChildren([ScriptInfo.labeledBox(lf("taker"), uid.mkSmallBox())]);
+                scriptDiv.setChildren([ScriptInfo.labeledBox(lf("of script"), this.browser().getScriptInfoById(a.publicationid).mkSmallBox())]);
+            });
+        }
+
+        public match(terms: string[], fullName: string) {
+            if (terms.length == 0) return 1;
+
+            var json: JsonScreenShot = TheApiCacheMgr.getCached(this.publicId);
+            if (!json) return 0; // not loaded yet
+
+            var lowerName = "screenshot " + json.publicationname.toLowerCase();
+            var r = IntelliItem.matchString(lowerName, terms, 10000, 1000, 100);
+            if (r > 0) {
+                if (lowerName.replace(/[^a-z0-9]/g, "") == fullName)
+                    r += 100000;
+                return r;
+            }
+            var s = lowerName + " " + this.publicId;
+            return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
         }
     }
 
