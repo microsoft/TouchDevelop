@@ -5106,6 +5106,7 @@ module TDev { export module Browser {
 
                 var divs = []
                 var app = AST.Parser.parseScript(scriptText);
+                AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
 
                 if (app.getPlatformRaw() & PlatformCapability.Current) {
                 } else if (app.getPlatform()) {
@@ -5161,6 +5162,10 @@ module TDev { export module Browser {
                 if (descs.length > 20)
                     stats += ", ...";
                 divs.push(Host.expandableTextBox(stats));
+
+                var render = new CopyRenderer();
+                var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                divs.push(code);
 
                 this.tabContent.setChildren(divs);
             });
