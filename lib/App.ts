@@ -647,7 +647,7 @@ module TDev.RT {
         }
 
         export function logTick(category: string, id: string, meta:any) {
-            App.logEvent(App.DEBUG, category, id, meta);
+            App.logEvent(App.INFO, category, id, meta);
             transports.filter(transport => !!transport.logTick).forEach(transport => {
                 try {
                     transport.logTick(category, id, meta);
@@ -661,7 +661,7 @@ module TDev.RT {
             var lmeta = Util.jsonClone(meta)
             lmeta.measureId = id
             lmeta.measureValue = value
-            App.logEvent(App.DEBUG, category, id + ": " + value, lmeta);
+            App.logEvent(App.INFO, category, id + ": " + value, lmeta);
             transports.filter(transport => !!transport.logMeasure).forEach(transport => {
                 try {
                     transport.logMeasure(category, id, value, meta);
