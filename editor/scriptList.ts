@@ -3412,9 +3412,20 @@ module TDev { export module Browser {
         public forumName:string;
         public forumId:string;
 
+        public getParentId() {
+            if (this.isForum()) return this.forumId;
+            if (this.parent.publicId) return this.parent.publicId;
+            if (this.parent instanceof ScriptInfo) {
+                var sc = this.script();
+                return sc.getPublicationIdOrBaseId();
+            }
+            Util.check(false, "unknown id");
+            return undefined;
+        }
+
         public getUrl() {
             if (this.forumName) return this.forumId ? this.forumId + "/comments?bylatestnestedcomments=true" : "comments";
-            return this.parent.getPublicationId() + "/comments?bylatestnestedcomments=true";
+            return this.getParentId() + "/comments?bylatestnestedcomments=true";
         }
 
         public bgIcon() { return "svg:Email"; }
@@ -3444,48 +3455,50 @@ module TDev { export module Browser {
 
                    var cont = div(null)
 
-                   var getFor = (id:string) =>
+                   var getFor = (id: string) => {
+                       Util.assert(!!id, "missing comment id");
                        TheApiCacheMgr.getAsync(id + "/base").done(resp => {
-                            if (!resp) return
-                            var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
-                            var loadMore = (cont:string) => {
-                                var dd = div(null, HTML.mkButton(lf("load more"), () => {
-                                    dd.setChildren("loading...")
-                                    TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont, (lst:JsonList) => {
-                                        dd.setChildren(lst.items.map(j => this.tabBox(j)))
-                                        if (lst.continuation)
-                                            dd.appendChild(loadMore(lst.continuation))
-                                    })
-                                }))
-                                return dd
-                            }
+                           if (!resp) return
+                           var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
+                           var loadMore = (cont: string) => {
+                               var dd = div(null, HTML.mkButton(lf("load more"),() => {
+                                   dd.setChildren("loading...")
+                                   TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
+                                       dd.setChildren(lst.items.map(j => this.tabBox(j)))
+                                       if (lst.continuation)
+                                           dd.appendChild(loadMore(lst.continuation))
+                                   })
+                               }))
+                               return dd
+                           }
 
-                            TheApiCacheMgr.getAnd(resp.id + "/comments", (lst:JsonList) => {
-                                d.className = ""
-                                if (lst.items.length > 0) {
-                                    var ch = lst.items.map(j => this.tabBox(j))
-                                    //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
-                                    if (lst.continuation)
-                                        ch.push(loadMore(lst.continuation))
-                                    d.setChildren(ch)
-                                } else {
-                                    d.setChildren([])
-                                }
-                            })
+                           TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
+                               d.className = ""
+                               if (lst.items.length > 0) {
+                                   var ch = lst.items.map(j => this.tabBox(j))
+                                   //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
+                                   if (lst.continuation)
+                                       ch.push(loadMore(lst.continuation))
+                                   d.setChildren(ch)
+                               } else {
+                                   d.setChildren([])
+                               }
+                           })
 
-                            var si = this.browser().getScriptInfo(resp)
-                            var hd = si.mkSmallBox();
-                            hd.className += " sdBaseHeader"
-                            var btn = div("sdBaseCorner",
-                                div(null, HTML.mkButton(lf("diff curr"), () => this.script().diffToId(resp.id))),
-                                div(null, HTML.mkButton(lf("diff prev"), () => si.diffToBase())))
-                            hd.appendChild(btn)
-                            cont.appendChild(div(null, hd, d))
+                           var si = this.browser().getScriptInfo(resp)
+                           var hd = si.mkSmallBox();
+                           hd.className += " sdBaseHeader"
+                           var btn = div("sdBaseCorner",
+                               div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
+                               div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
+                           hd.appendChild(btn)
+                           cont.appendChild(div(null, hd, d))
 
-                            if (resp.rootid != resp.id) getFor(resp.id)
+                           if (resp.rootid != resp.id) getFor(resp.id)
                        })
+                   }
 
-                    getFor(js.id)
+                   getFor(this.getParentId())
 
                return cont
             } else {
@@ -3495,6 +3508,7 @@ module TDev { export module Browser {
 
         private mkCommentPostWidget(reply:boolean, id:string, initialText : string = null):HTMLElement
         {
+            Util.assert(!!id, "missing comment id");
             var text =  HTML.mkTextArea();
             var postBtn = div(null);
             text.rows = 1;
@@ -3719,7 +3733,7 @@ module TDev { export module Browser {
                 else {
                     var t = CommentsTab.topCommentInitialText;
                     CommentsTab.topCommentInitialText = undefined;
-                    this._topContainer = this.mkCommentPostWidget(false, this.forumId || this.parent.getPublicationId(), t);
+                    this._topContainer = this.mkCommentPostWidget(false, this.getParentId() , t);
                 }
                 if (this.forumName == lf("issues"))
                     this.addBugControls();
@@ -5305,6 +5319,9 @@ module TDev { export module Browser {
                         });
                     }
 
+                    if (sc.jsonScript && sc.jsonScript.updateid && sc.jsonScript.id != sc.jsonScript.updateid)
+                        divs.push(ScriptInfo.labeledBox(lf("update"), this.browser().getScriptInfoById(sc.jsonScript.updateid).mkSmallBox()));
+
                     var basisDiv = div("inlineBlock");
                     divs.push(basisDiv);
                     var ch = sc.getCloudHeader();
@@ -5441,6 +5458,12 @@ module TDev { export module Browser {
 
         public getGuid() { return this.cloudHeader ? this.cloudHeader.guid : ""; }
         public getAnyId() { return this.getGuid() || this.publicId; }
+        public getPublicationIdOrBaseId() {
+            if (this.publicId) return this.publicId;
+            if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
+                return this.cloudHeader.scriptId;
+            return undefined;
+        }
         public getCloudHeader() { return this.cloudHeader; }
         public getDescription() {
             return this.app ? this.app.getDescription() : "";
@@ -6125,12 +6148,10 @@ module TDev { export module Browser {
                 return ScriptInfo.labeledBox(hd, this.browser().getScriptInfoById(id).mkSmallBox());
             }
 
-            this.withUpdate(descDiv, () => {
+            this.withUpdate(descDiv,() => {
                 if (!this.jsonScript) return;
 
                 this.buildTopic();
-
-                remainingContainer.setChildren([scriptBox(lf("update"), this.jsonScript.updateid)]);
 
                 if (this.app.isLibrary) {
                     Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
@@ -6140,14 +6161,14 @@ module TDev { export module Browser {
                     descDiv.setChildren([Host.expandableTextBox(this.jsonScript.description)]);
 
                 if (this.correspondingTopic && !this.cloudHeader) {
-                    docsButtonDiv.setChildren([HTML.mkButton(lf("view as docs"), () => {
+                    docsButtonDiv.setChildren([HTML.mkButton(lf("view as docs"),() => {
                         this.browser().treatAsScript[this.publicId] = false;
                         TheEditor.historyMgr.reload(HistoryMgr.windowHash());
                     })])
                 }
 
                 if (this.correspondingTopic) {
-                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"), () => {
+                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"),() => {
                         tick(Ticks.browseFollowTopic)
                         this.correspondingTopic.follow()
                     })])
@@ -6160,10 +6181,10 @@ module TDev { export module Browser {
                     wontWork.className = "sdWarning";
                     wontWork.setChildren([span("symbol", "⚠"),
                         lf("This script is using the following capabilities that might be missing on your current device: {0}",
-                                             AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
+                            AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
                 }
 
-                if (this.publicId) {
+                if (this.getPublicationIdOrBaseId()) {
                     if (!this.commentsTab) {
                         this.commentsTab = new CommentsTab(this);
                         this.commentsTab.initElements();
