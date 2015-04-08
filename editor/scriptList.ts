@@ -5257,84 +5257,109 @@ module TDev { export module Browser {
             this.tabContent.setChildren([loadingDiv]);
 
             var sc = this.script();
-            sc.getScriptTextAsync()
-                .done((scriptText: string) => {
-                loadingDiv.removeSelf();
-                if (!scriptText) return;
+            sc.withUpdate(loadingDiv,() => {
+                sc.getScriptTextAsync()
+                    .done((scriptText: string) => {
+                    loadingDiv.removeSelf();
+                    if (!scriptText) return;
 
-                var divs = []
-                var app = AST.Parser.parseScript(scriptText);
-                AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
+                    var divs = []
+                    var app = AST.Parser.parseScript(scriptText);
+                    AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
 
 
-                if (sc.jsonScript && sc.jsonScript.time) {
-                    var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
-                    var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
+                    if (sc.jsonScript && sc.jsonScript.time) {
+                        var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
+                        var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
 
-                    divs.push(div('', pull, diff));
-                }
-
-                if (app.getPlatformRaw() & PlatformCapability.Current) {
-                } else if (app.getPlatform()) {
-                    var caps = lf("This script uses the following capabilities: ") +
-                        AST.App.capabilityName(app.getPlatform())
-                    divs.push(Host.expandableTextBox(caps))
-                }
-
-                var basisDiv = div("inlineBlock");
-                divs.push(basisDiv);
-                var ch = sc.getCloudHeader();
-                if (sc.publicId) {
-                    TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
-                        var j = <JsonScript>d;
-                        if (opts.isDefinitive)
-                            TheApiCacheMgr.store(j.id, j);
-                        divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
-                    });
-                }
-                else if (ch && ch.status != "published" && ch.scriptId)
-                    divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
-
-                var seen: any = {}
-                app.libraries().forEach((lr: AST.LibraryRef) => {
-                    var b = this.browser();
-                    var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
-                    if (scriptInfo && !seen[scriptInfo.persistentId()]) {
-                        seen[scriptInfo.persistentId()] = 1;
-                        divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
+                        divs.push(div('', pull, diff));
                     }
+
+                    if (app.getPlatformRaw() & PlatformCapability.Current) {
+                    } else if (app.getPlatform()) {
+                        var caps = lf("This script uses the following capabilities: ") +
+                            AST.App.capabilityName(app.getPlatform())
+                        divs.push(Host.expandableTextBox(caps))
+                    }
+
+                    if (sc.jsonScript) {
+                        var uid = this.browser().getCreatorInfo(sc.jsonScript);
+                        divs.push(div("inlineBlock", ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())));
+                    }
+
+                    var likesDiv = div("inlineBlock");
+                    divs.push(likesDiv);
+                    if (sc.publicId) {
+                        // display a lis of buble headers
+                        TheApiCacheMgr.getAnd(sc.publicId + "/reviews?count=12",(list: JsonList) => {
+                            if (list.items.length > 0)
+                                likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} heart{0:s}", sc.jsonScript.cumulativepositivereviews), div('inlineBlock',
+                                    list.items.slice(0, 12).map((review: JsonReview) => {
+                                        var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
+                                        var el = info.thumbnail(false,() => { this.parent.browser().loadDetails(info) });
+                                        el.classList.add('teamHead');
+                                        return el;
+                                    })
+                                    )
+                            ));
+                        });
+                    }
+
+                    var basisDiv = div("inlineBlock");
+                    divs.push(basisDiv);
+                    var ch = sc.getCloudHeader();
+                    if (sc.publicId) {
+                        TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
+                            var j = <JsonScript>d;
+                            if (opts.isDefinitive)
+                                TheApiCacheMgr.store(j.id, j);
+                            divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
+                        });
+                    }
+                    else if (ch && ch.status != "published" && ch.scriptId)
+                        divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
+
+                    var seen: any = {}
+                    app.libraries().forEach((lr: AST.LibraryRef) => {
+                        var b = this.browser();
+                        var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
+                        if (scriptInfo && !seen[scriptInfo.persistentId()]) {
+                            seen[scriptInfo.persistentId()] = 1;
+                            divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
+                        }
+                    });
+
+                    var stats = ""
+                    var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
+                    stats += ScriptInfo.userPlatformDisplayText(uplat);
+
+                    var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
+                    descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
+                    var stmts = 0
+                    descs.forEach((d) => { stmts += d.stmtCount })
+                    if (sc.jsonScript && sc.jsonScript.time) {
+                        var d = new Date(sc.jsonScript.time * 1000)
+                        stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
+                            d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                    }
+                    stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                    descs.slice(0, 20).forEach((d, i) => {
+                        if (i > 0)
+                            stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
+                        else
+                            stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
+                    })
+                    if (descs.length > 20)
+                        stats += ", ...";
+                    divs.push(Host.expandableTextBox(stats));
+
+                    TheEditor.refreshMode();
+                    var render = new EditorRenderer();
+                    var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                    divs.push(code);
+
+                    this.tabContent.setChildren(divs);
                 });
-
-                var stats = ""
-                var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
-                stats += ScriptInfo.userPlatformDisplayText(uplat);
-
-                var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
-                descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
-                var stmts = 0
-                descs.forEach((d) => { stmts += d.stmtCount })
-                if (sc.jsonScript && sc.jsonScript.time) {
-                    var d = new Date(sc.jsonScript.time * 1000)
-                    stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
-                        d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
-                }
-                stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
-                descs.slice(0, 20).forEach((d, i) => {
-                    if (i > 0)
-                        stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
-                    else
-                        stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
-                })
-                if (descs.length > 20)
-                    stats += ", ...";
-                divs.push(Host.expandableTextBox(stats));
-
-                TheEditor.refreshMode();
-                var render = new EditorRenderer();
-                var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
-                divs.push(code);
-
-                this.tabContent.setChildren(divs);
             });
         }
     }
@@ -6031,10 +6056,8 @@ module TDev { export module Browser {
             // don't show these for scripts
             // var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
 
-            var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
             var wontWork = div(null);
-            var likesDiv = div("inlineBlock");
             var runBtns = div(null);
             var commentsDiv = div(null);
             var remainingContainer = div(null);
@@ -6049,8 +6072,6 @@ module TDev { export module Browser {
                 wontWork,
             ]);
 
-            remainingContainer.setChildren([authorDiv]);
-
             var scriptBox = (hd:string, id:string) => {
                 if (!id || id == this.publicId) return null;
                 return ScriptInfo.labeledBox(hd, this.browser().getScriptInfoById(id).mkSmallBox());
@@ -6061,10 +6082,7 @@ module TDev { export module Browser {
 
                 this.buildTopic();
 
-                remainingContainer.setChildren([likesDiv, authorDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
-
-                var uid = this.browser().getCreatorInfo(this.jsonScript);
-                authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
+                remainingContainer.setChildren([scriptBox(lf("update"), this.jsonScript.updateid)]);
 
                 if (this.app.isLibrary) {
                     Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
@@ -6095,21 +6113,6 @@ module TDev { export module Browser {
                     wontWork.setChildren([span("symbol", "⚠"),
                         lf("This script is using the following capabilities that might be missing on your current device: {0}",
                                              AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
-                }
-                if (this.publicId) {
-                    // display a lis of buble headers
-                    TheApiCacheMgr.getAnd(this.publicId + "/reviews?count=12",(list: JsonList) => {
-                        if (list.items.length > 0)
-                            likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} heart{0:s}", this.jsonScript.cumulativepositivereviews), div('inlineBlock',
-                                list.items.slice(0, 12).map((review : JsonReview) => {
-                                    var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
-                                    var el = info.thumbnail(false, () => { this.parentBrowser.loadDetails(info)  });
-                                    el.classList.add('teamHead');
-                                    return el;
-                                })
-                              )
-                            ));
-                    });
                 }
 
                 if (this.publicId) {
