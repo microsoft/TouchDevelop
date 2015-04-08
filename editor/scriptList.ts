@@ -5672,7 +5672,7 @@ module TDev { export module Browser {
         }
 
 
-        private mkButtons()
+        private mkButtons(groupDiv : HTMLElement)
         {
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
@@ -5755,9 +5755,9 @@ module TDev { export module Browser {
                                 });
                         }));
                     } else if (st.groupId) {
-                        btns.appendChild(
+                        groupDiv.appendChild(
                             ScriptInfo.labeledBox(
-                                lf("belongs to"),
+                                lf("with group"),
                                 Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
                             ));
                     }
@@ -5920,7 +5920,7 @@ module TDev { export module Browser {
                 }
 
                 // if (this.cloudHeader)
-                runBtns.setChildren([this.mkButtons()]);
+                runBtns.setChildren([this.mkButtons(remainingContainer)]);
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
