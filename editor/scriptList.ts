@@ -5331,7 +5331,7 @@ module TDev { export module Browser {
 
                     var stats = ""
                     var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
-                    stats += ScriptInfo.userPlatformDisplayText(uplat);
+                    stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
 
                     var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
                     descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
@@ -5361,6 +5361,41 @@ module TDev { export module Browser {
                     this.tabContent.setChildren(divs);
                 });
             });
+        }
+
+        static userPlatformDisplayText(uplat: string[]) {
+            if (!uplat) return "";
+
+            var hasPlat = (n) => uplat.indexOf(n) >= 0;
+
+            var pubFrom = "Published from ";
+            if (hasPlat("wp8app")) pubFrom += "Windows Phone 8 app";
+            else if (hasPlat("legacywindowsphoneapp")) pubFrom += "Windows Phone 7 app";
+            else {
+                if (hasPlat("ie10") || hasPlat("ie11")) pubFrom += "Internet Explorer";
+                else if (hasPlat("chrome")) pubFrom += "Chrome";
+                else if (hasPlat("safari")) pubFrom += "Safari";
+                else if (hasPlat("firefox")) pubFrom += "Firefox";
+
+                if (hasPlat("win8plus")) {
+                    pubFrom += " on Windows 8";
+                    if (hasPlat("touch")) pubFrom += " tablet";
+                }
+                else if (hasPlat("ie10.phone") && !hasPlat("wp8app")) pubFrom += " on Windows Phone 8";
+                else if (hasPlat("win")) pubFrom += " on Windows";
+                else if (hasPlat("macOSX")) pubFrom += " on Mac";
+                else if (hasPlat("iPad")) pubFrom += " on iPad";
+                else if (hasPlat("iPod")) pubFrom += " on iPod";
+                else if (hasPlat("iPhone")) pubFrom += " on iPhone";
+                else if (hasPlat("android")) {
+                    pubFrom += " on Android";
+                    if (hasPlat("cellphone")) pubFrom += " phone";
+                    else if (hasPlat("touch")) pubFrom += " tablet";
+                }
+                else if (hasPlat("x11")) pubFrom += " on Linux";
+            }
+            return pubFrom + ". ";
+
         }
     }
 
@@ -6146,41 +6181,6 @@ module TDev { export module Browser {
                 if (this.app.isLibrary)
                     descDiv.appendChildren(ScriptProperties.libraryDocs(this.app, this.app.getName(), false));
             });
-        }
-
-        static userPlatformDisplayText(uplat: string[]) {
-            if (!uplat) return "";
-
-            var hasPlat = (n) => uplat.indexOf(n) >= 0;
-
-            var pubFrom = "Published from ";
-            if (hasPlat("wp8app")) pubFrom += "Windows Phone 8 app";
-            else if (hasPlat("legacywindowsphoneapp")) pubFrom += "Windows Phone 7 app";
-            else {
-                if (hasPlat("ie10") || hasPlat("ie11")) pubFrom += "Internet Explorer";
-                else if (hasPlat("chrome")) pubFrom += "Chrome";
-                else if (hasPlat("safari")) pubFrom += "Safari";
-                else if (hasPlat("firefox")) pubFrom += "Firefox";
-
-                if (hasPlat("win8plus")) {
-                    pubFrom += " on Windows 8";
-                    if (hasPlat("touch")) pubFrom += " tablet";
-                }
-                else if (hasPlat("ie10.phone") && !hasPlat("wp8app")) pubFrom += " on Windows Phone 8";
-                else if (hasPlat("win")) pubFrom += " on Windows";
-                else if (hasPlat("macOSX")) pubFrom += " on Mac";
-                else if (hasPlat("iPad")) pubFrom += " on iPad";
-                else if (hasPlat("iPod")) pubFrom += " on iPod";
-                else if (hasPlat("iPhone")) pubFrom += " on iPhone";
-                else if (hasPlat("android")) {
-                    pubFrom += " on Android";
-                    if (hasPlat("cellphone")) pubFrom += " phone";
-                    else if (hasPlat("touch")) pubFrom += " tablet";
-                }
-                else if (hasPlat("x11")) pubFrom += " on Linux";
-            }
-            return pubFrom + ". ";
-
         }
 
         private addShare(m:ModalDialog, options:RT.ShareManager.ShareOptions)
