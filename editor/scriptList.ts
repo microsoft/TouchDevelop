@@ -5641,7 +5641,6 @@ module TDev { export module Browser {
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    new CommentsTab(this),
                     new HistoryTab(this),
                     new InsightsTab(this),
                     Cloud.lite ? new AbuseReportsTab(this) : null,
@@ -5852,11 +5851,11 @@ module TDev { export module Browser {
 
             var authorDiv = div("inlineBlock");
             var descDiv = div("sdDesc");
-            var commentsDiv = div(null);
             var wontWork = div(null);
             var likesDiv = div("inlineBlock");
             var runBtns = div(null);
             var basisDiv = div("inlineBlock");
+            var commentsDiv = div(null);
             var remainingContainer = div(null);
             var docsButtonDiv = div(null);
 
@@ -5865,6 +5864,7 @@ module TDev { export module Browser {
                 descDiv,
                 docsButtonDiv,
                 remainingContainer,
+                commentsDiv,
                 wontWork,
             ]);
 
@@ -5934,6 +5934,18 @@ module TDev { export module Browser {
                           )
                         ));
                     });
+                }
+
+                if (this.publicId) {
+                    if (!this.commentsTab) {
+                        this.commentsTab = new CommentsTab(this);
+                        this.commentsTab.initElements();
+                        this.commentsTab.tabLoaded = true;
+                        this.commentsTab.initTab();
+                    }
+                    commentsDiv.setChildren([
+                        this.commentsTab.topContainer(),
+                        this.commentsTab.tabContent])
                 }
             });
 
