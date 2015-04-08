@@ -5329,6 +5329,7 @@ module TDev { export module Browser {
                     stats += ", ...";
                 divs.push(Host.expandableTextBox(stats));
 
+                TheEditor.refreshMode();
                 var render = new EditorRenderer();
                 var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
                 divs.push(code);
