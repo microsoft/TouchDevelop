@@ -5114,6 +5114,20 @@ module TDev { export module Browser {
                     divs.push(Host.expandableTextBox(caps))
                 }
 
+                var basisDiv = div("inlineBlock");
+                divs.push(basisDiv);
+                var ch = sc.getCloudHeader();
+                if (sc.publicId) {
+                    TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
+                        var j = <JsonScript>d;
+                        if (opts.isDefinitive)
+                            TheApiCacheMgr.store(j.id, j);
+                        divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
+                    });
+                }
+                else if (ch && ch.status != "published" && ch.scriptId)
+                    divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
+
                 var seen: any = {}
                 app.libraries().forEach((lr: AST.LibraryRef) => {
                     var b = this.browser();
@@ -5854,7 +5868,6 @@ module TDev { export module Browser {
             var wontWork = div(null);
             var likesDiv = div("inlineBlock");
             var runBtns = div(null);
-            var basisDiv = div("inlineBlock");
             var commentsDiv = div(null);
             var remainingContainer = div(null);
             var docsButtonDiv = div(null);
@@ -5880,13 +5893,7 @@ module TDev { export module Browser {
 
                 this.buildTopic();
 
-                if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
-                    basisDiv.setChildren(scriptBox(lf("base"), this.cloudHeader.scriptId));
-
-                if (basisDiv.childNodes.length == 0 && this.jsonScript.rootid != this.jsonScript.id)
-                    basisDiv.setChildren(ScriptInfo.labeledBox(lf("base"), null));
-
-                remainingContainer.setChildren([likesDiv, authorDiv, basisDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
+                remainingContainer.setChildren([likesDiv, authorDiv, scriptBox(lf("update"), this.jsonScript.updateid)]);
 
                 var uid = this.browser().getCreatorInfo(this.jsonScript);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
@@ -5948,15 +5955,6 @@ module TDev { export module Browser {
                         this.commentsTab.tabContent])
                 }
             });
-
-            if (this.publicId) {
-                TheApiCacheMgr.getAndEx(this.publicId + "/base", (d, opts) => {
-                    var j = <JsonScript>d;
-                    if (opts.isDefinitive)
-                        TheApiCacheMgr.store(j.id, j);
-                    basisDiv.setChildren([scriptBox(lf("base"), j.id)]);
-                });
-            }
 
             this.getScriptTextAsync()
                 .done((scriptText:string) => {
