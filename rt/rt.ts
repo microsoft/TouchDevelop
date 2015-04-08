@@ -2670,6 +2670,12 @@ module TDev
         usageLevel?: number;
     }
 
+    export interface CompiledImports {
+        npmModules: StringMap<string>;
+        cordovaPlugins: StringMap<string>;
+        pipPackages: StringMap<string>;
+    }
+
     export interface ApiKey {
         url: string;
         value: string;
@@ -2729,10 +2735,10 @@ module TDev
         public libs:any;
         public libBindings:any;
         public mainActionName:string;
-        public packageResources : PackageResource[] = [];
-        public npmModules: StringMap<string> = {};
-        public cordovaPlugins: StringMap<string> = {};
-        public pipPackages: StringMap<string> = {};
+        public packageResources: PackageResource[] = [];
+        public imports: CompiledImports = {
+            npmModules: {}, cordovaPlugins: {}, pipPackages: {}
+        };
         public authorId: string;
         public scriptId: string;
         public baseScriptId: string;

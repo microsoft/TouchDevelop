@@ -128,10 +128,7 @@ module TDev.AST
         {
             var ctx = new TypeChecker();
             ctx.topApp = a;
-            a.npmModules = {};
-            a.cordovaPlugins = {};
-            a.touchDevelopPlugins = {};
-            a.pipPackages = {};
+            a.imports = new AppImports();
             var prev = Script;
             ctx.storeLocalsAt = TypeChecker.lastStoreLocalsAt;
             ctx.ignoreLibErrors = ignoreLibErrors;
@@ -1497,26 +1494,6 @@ module TDev.AST
             }
         }
 
-        static combinePipVersions(v0: string, v1: string) {
-            if (v0 === v1) return v0
-
-            if (v0 === undefined || (v1 && v0 === "*")) return v1
-            if (v1 === undefined || (v0 && v1 === "*")) return v0
-
-            // TODO
-            return "error"
-        }
-
-        static combineNpmVersions(v0:string, v1:string)
-        {
-            if (v0 === v1) return v0
-
-            if (v0 === undefined || (v1 && v0 === "*")) return v1
-            if (v1 === undefined || (v0 && v1 === "*")) return v0
-
-            return "error"
-        }
-
         private lintJavaScript(js:string, isAsync:boolean)
         {
             var toks:string[] = Lexer.tokenize(js).map(l => {
@@ -1625,25 +1602,25 @@ module TDev.AST
                         case "npm":
                             if (!this.topApp.canUseCapability(PlatformCapability.Npm))
                                 this.unsupportedCapability(plugin, PlatformCapability.Npm);
-                            this.importNpm(t, plugin, v); break;
+                            this.topApp.imports.importNpm(this, t, plugin, v); break;
                         case "cordova":
                             if (!this.topApp.canUseCapability(PlatformCapability.Cordova))
                                 this.unsupportedCapability(plugin, PlatformCapability.Cordova);
-                            this.importCordova(t, plugin, v); break;
+                            this.topApp.imports.importCordova(this, t, plugin, v); break;
                         case "bower":
-                            this.importBower(t, plugin, v); break;
+                            this.topApp.imports.importBower(this, t, plugin, v); break;
                         case "client":
-                            this.importClientScript(t, plugin, v); break;
+                            this.topApp.imports.importClientScript(this, t, plugin, v); break;
                         case "pip":
                             if (!this.topApp.canUseCapability(PlatformCapability.Npm))
                                 this.unsupportedCapability(plugin, PlatformCapability.Npm);
-                            this.importPip(t, plugin, v); break;
+                            this.topApp.imports.importPip(this, t, plugin, v); break;
                         case "touchdevelop": {
                             if (!/^\/?[a-z]{4,}$/.test(v)) this.markError(t, lf("TD190: version must be a published script id"));
                             else {
                                 if (!this.topApp.canUseCapability(PlatformCapability.EditorOnly))
                                     this.unsupportedCapability(plugin, PlatformCapability.EditorOnly);
-                                this.importTouchDevelop(t, plugin, v.replace(/^\/?/, ""));
+                                this.topApp.imports.importTouchDevelop(this, t, plugin, v.replace(/^\/?/, ""));
                             }
                             break;
                         }
@@ -1651,140 +1628,6 @@ module TDev.AST
                 }
                 break;
             }
-        }
-
-        private importTouchDevelop(t: Call, plugin: string, scriptId: string) {
-            if (scriptId) {
-                this.topApp.touchDevelopPlugins[scriptId] = "1";
-            }
-        }
-
-        private importPip(t : Call, pkg : string, v : string) {
-            if (pkg) {
-                var pkgs = this.topApp.pipPackages;
-                if (pkgs.hasOwnProperty(pkg)) {
-                    if (pkgs[pkg] == "error") return;
-                    var newOne = TypeChecker.combinePipVersions(pkgs[pkg], v)
-                    if (newOne == "error")
-                        this.markError(t, lf("TD196: pip package '{0}' versions '{1}' and '{2}' conflict", pkg, pkgs[pkg], v))
-                    pkgs[pkg] = newOne
-                } else
-                    pkgs[pkg] = v;
-            }
-        }
-
-        private importCordova(t : Call, plugin: string, v: string) {
-            if (plugin) {
-                var plugins = this.topApp.cordovaPlugins
-                if (plugins.hasOwnProperty(plugin)) {
-                    if (plugins[plugin] == "error") return;
-                    var newOne = TypeChecker.combineNpmVersions(plugins[plugin], v)
-                    if (newOne == "error")
-                        this.markError(t, lf("TD187: cordova plugin '{0}' versions '{1}' and '{2}' conflict", plugin, plugins[plugin], v))
-                    plugins[plugin] = newOne
-                } else
-                    plugins[plugin] = v;
-            }
-        }
-
-        private importClientScript(t: Call, mod: string, v: string) {
-            if (mod && v != null) {
-                var imports = this.topApp.clientScripts;
-                imports[mod] = v;
-            }
-        }
-
-        private importBower(t: Call, mod: string, v: string) {
-            if (mod && v != null) {
-                var imports = this.topApp.bowerModules
-                if (imports.hasOwnProperty(mod)) {
-                    if (imports[mod] == "error") return;
-                    var newOne = TypeChecker.combineNpmVersions(imports[mod], v)
-                    if (newOne == "error")
-                        this.markError(t, lf("TD197: bower module '{0}' versions '{1}' and '{2}' conflict", mod, imports[mod], v))
-                    imports[mod] = newOne;
-                }
-                else
-                    imports[mod] = v
-            }
-        }
-
-        private importNpm(t: Call, mod: string, v: string) {
-            if (mod && v != null) {
-                var imports = this.topApp.npmModules
-                if (imports.hasOwnProperty(mod)) {
-                    if (imports[mod] == "error") return;
-                    var newOne = TypeChecker.combineNpmVersions(imports[mod], v)
-                    if (newOne == "error")
-                        this.markError(t, lf("TD180: npm module '{0}' versions '{1}' and '{2}' conflict", mod, imports[mod], v))
-                    imports[mod] = newOne;
-                }
-                else
-                    imports[mod] = v
-            }
-        }
-
-        static combineNpmModules(topApp:App) : StringMap<string>
-        {
-            var imports:StringMap<string> = {}
-            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
-                Object.keys(l.resolved.npmModules).forEach(k => {
-                    var v = l.resolved.npmModules[k]
-                    if (imports.hasOwnProperty(k)) {
-                        imports[k] = TypeChecker.combineNpmVersions(imports[k], v)
-                    } else {
-                        imports[k] = v
-                    }
-                })
-            })
-            return imports
-        }
-
-        static combinePipPackages(topApp: App) : StringMap<string> {
-            var imports: StringMap<string> = {}
-            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
-                Object.keys(l.resolved.pipPackages).forEach(k => {
-                    var v = l.resolved.pipPackages[k]
-                    if (imports.hasOwnProperty(k)) {
-                        imports[k] = TypeChecker.combinePipVersions(imports[k], v)
-                    } else {
-                        imports[k] = v
-                    }
-                })
-            })
-            return imports
-        }
-
-        static combineCordovaPlugins(topApp: App) : StringMap<string> {
-            var plugins: StringMap<string> = {
-                "org.apache.cordova.console": "*",
-                "com.msopentech.websql": "*",
-                "org.apache.cordova.inappbrowser": "*",
-            }
-            Object.keys(topApp.cordovaPlugins)
-                .filter(k => topApp.cordovaPlugins.hasOwnProperty(k))
-                .forEach(k => plugins[k] = TypeChecker.combineNpmVersions(plugins[k], topApp.cordovaPlugins[k]));
-            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
-                Object.keys(l.resolved.cordovaPlugins).forEach(k => {
-                    var v = l.resolved.cordovaPlugins[k]
-                    if (plugins.hasOwnProperty(k)) {
-                        plugins[k] = TypeChecker.combineNpmVersions(plugins[k], v)
-                    } else {
-                        plugins[k] = v
-                    }
-                })
-            })
-            return plugins
-        }
-
-        static combineTouchDevelopPlugins(topApp: App) : StringMap<string> {
-            var plugins: StringMap<string> = {};
-            Object.keys(topApp.touchDevelopPlugins)
-                .forEach(k => plugins[k] = "1");
-            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
-                Object.keys(l.resolved.touchDevelopPlugins).forEach(k => plugins[k] = "1");
-            })
-            return plugins
         }
 
         public visitCall(t:Call)
@@ -1896,14 +1739,8 @@ module TDev.AST
             var imports = prop.getImports();
             if (imports) imports.forEach(imp => {
                 switch (imp.manager) {
-                    case "cordova":
-                        var plugins = this.topApp.cordovaPlugins
-                        plugins[imp.name] = TypeChecker.combineNpmVersions(plugins[imp.name], imp.version);
-                        break;
-                    case "npm":
-                        var modules = this.topApp.npmModules;
-                        modules[imp.name] = TypeChecker.combineNpmVersions(modules[imp.name], imp.version);
-                        break;
+                    case "cordova": this.topApp.imports.importCordova(this, null, imp.name, imp.version); break;
+                    case "npm": this.topApp.imports.importNpm(this, null, imp.name, imp.version); break;
                     default:
                         Util.assert(false, imp.manager + " not supported");
                         break;

@@ -179,7 +179,7 @@ module TDev.AST.Apps {
                 Util.assert(opts.javascript, "javascript should have been on");
                 instructions.files.push({
                     path: options.filePrefix + "cordovaPlugins.json",
-                    content: JSON.stringify(compiled.cordovaPlugins, null, 2)
+                    content: JSON.stringify(compiled.imports.cordovaPlugins, null, 2)
                 });
                 Object.keys(options.cordova.platforms).forEach(p => {
                     if (options.cordova.platforms[p].build) {
@@ -188,8 +188,8 @@ module TDev.AST.Apps {
                     }
                 });
                 instructions.cordova.plugins =
-                    Object.keys(compiled.cordovaPlugins)
-                    .map(k => k + (/^https?:\/\//.test(k) || /^\*?$/.test(compiled.cordovaPlugins[k]) ? "" : "@" + compiled.cordovaPlugins[k]));
+                    Object.keys(compiled.imports.cordovaPlugins)
+                    .map(k => k + (/^https?:\/\//.test(k) || /^\*?$/.test(compiled.imports.cordovaPlugins[k]) ? "" : "@" + compiled.imports.cordovaPlugins[k]));
             }
             compiled.packageResources.forEach(pr => {
                 instructions.files.push({
@@ -225,13 +225,13 @@ module TDev.AST.Apps {
             var serverCode = compiled.getCompiledCode();
 
             // update node-webkit/package.json as well
-            compiled.npmModules["faye-websocket"] = "0.8.1";
+            compiled.imports.npmModules["faye-websocket"] = "0.8.1";
 
             var pkgJson = {
                 name: "td-" + app.getName().replace(/[^a-zA-Z0-9]/g, "-"),
                 version: "0.0.0",
                 private: true,
-                dependencies: compiled.npmModules
+                dependencies: compiled.imports.npmModules
             }
             instructions.files.push({
                 path: "package.json",
@@ -243,13 +243,13 @@ module TDev.AST.Apps {
                 content: serverCode,
             })
 
-            var pipPkgs = Object.keys(compiled.pipPackages);
+            var pipPkgs = Object.keys(compiled.imports.pipPackages);
             if (pipPkgs.length > 0) {
                 instructions.files.push({
                     path: "requirements.txt",
                     content: pipPkgs.map(pkg => {
                         var r = pkg;
-                        var v = compiled.pipPackages[pkg] || "";
+                        var v = compiled.imports.pipPackages[pkg] || "";
                         if (v != "*" && !/^(==|>=)/.test(v)) r += "==" + v;
                         return r;
                     }).join('\n')

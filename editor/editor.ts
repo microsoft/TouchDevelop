@@ -3200,7 +3200,7 @@ module TDev
             var plugins:StringMap<number> = {}
             Script.librariesAndThis().forEach(l => {
                 if (l.resolved) {
-                    Object.keys(l.resolved.touchDevelopPlugins).forEach(p => plugins[p] = 1)
+                    Object.keys(l.resolved.imports.touchDevelopPlugins).forEach(p => plugins[p] = 1)
                 }
             })
             return plugins

@@ -522,9 +522,7 @@ module TDev.AST
         private cloudstateJsonExport = "";
         private cloudstateJsonImport = "";
         private persistentvars = [];
-        public npmModules: StringMap<string> = {};
-        public cordovaPlugins: StringMap<string> = {};
-        public pipPackages: StringMap<string> = {};
+        public imports: AppImports = new AppImports();
         public packageResources: PackageResource[] = [];
         private mapExprToVar: { [id: number]: JsTmpRef } = {};
 
@@ -1416,7 +1414,7 @@ module TDev.AST
                 })
                 code += "  }\n"
 
-                var imp = this.currentApp.npmModules
+                var imp = this.currentApp.imports.npmModules
                 var impKeys = Object.keys(imp);
                 if (impKeys.length > 0) {
                     //code += "var __window = window; window = undefined;\ntry {\n"; // window is undefined in node.js
@@ -2545,9 +2543,7 @@ module TDev.AST
             cs.optStatistics.numStatements += comp.numStatements;
             cs.optStatistics.termsReused += comp.termsReused;
             cs.optStatistics.constantsPropagated += comp.constantsPropagated;
-            cs.npmModules = comp.npmModules
-            cs.cordovaPlugins = comp.cordovaPlugins
-            cs.pipPackages = comp.pipPackages
+            cs.imports = comp.imports;
         }
 
         static annotateWithIds(a: App) {
@@ -2838,11 +2834,11 @@ module TDev.AST
             }
 
             if (!this.options.cloud && this.options.isTopLevel) {
-                this.cordovaPlugins = TypeChecker.combineCordovaPlugins(a);
+                this.imports.cordovaPlugins = AppImports.combineCordovaPlugins(a);
             }
 
             if (this.options.cloud && this.options.isTopLevel) {
-                this.pipPackages = TypeChecker.combinePipPackages(a);
+                this.imports.pipPackages = AppImports.combinePipPackages(a);
 
                 if (!a.isCloud)
                     this.wr("cs.autoRouting = true;\n")
@@ -2871,8 +2867,8 @@ module TDev.AST
                     })
                 })
                 this.wr("  rt.nodeModules = {};\n")
-                var imports = TypeChecker.combineNpmModules(a)
-                var deps = this.npmModules
+                var imports = AppImports.combineNpmModules(a)
+                var deps = this.imports.npmModules
                 Object.keys(imports).forEach(k => {
                     if (imports[k] == "error") {
                         this.wr("  TDev.Util.syntaxError(" + this.stringLiteral("node.js module version conflict on " + k) + ");\n");

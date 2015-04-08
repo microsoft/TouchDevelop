@@ -2037,6 +2037,167 @@ module TDev.AST {
         None, Coverage, Profiling, Crash
     }
 
+    export class AppImports implements CompiledImports {
+        public npmModules: StringMap<string> = {};
+        public bowerModules: StringMap<string> = {};
+        public clientScripts: StringMap<string> = {};
+        public cordovaPlugins: StringMap<string> = {};
+        public pipPackages: StringMap<string> = {};
+        public touchDevelopPlugins: StringMap<string> = {};
+
+        public importTouchDevelop(tc : TypeChecker, t: Call, plugin: string, scriptId: string) {
+            if (scriptId) {
+                this.touchDevelopPlugins[scriptId] = "1";
+            }
+        }
+
+        public importPip(tc : TypeChecker, t: Call, pkg: string, v: string) {
+            if (pkg) {
+                var pkgs = this.pipPackages;
+                if (pkgs.hasOwnProperty(pkg)) {
+                    if (pkgs[pkg] == "error") return;
+                    var newOne = AppImports.combinePipVersions(pkgs[pkg], v)
+                    if (newOne == "error")
+                        tc.markError(t, lf("TD196: pip package '{0}' versions '{1}' and '{2}' conflict", pkg, pkgs[pkg], v))
+                    pkgs[pkg] = newOne
+                } else
+                    pkgs[pkg] = v;
+            }
+        }
+
+        public importCordova(tc : TypeChecker, t: Call, plugin: string, v: string) {
+            if (plugin) {
+                var plugins = this.cordovaPlugins
+                if (plugins.hasOwnProperty(plugin)) {
+                    if (plugins[plugin] == "error") return;
+                    var newOne = AppImports.combineNpmVersions(plugins[plugin], v)
+                    if (newOne == "error")
+                        tc.markError(t, lf("TD187: cordova plugin '{0}' versions '{1}' and '{2}' conflict", plugin, plugins[plugin], v))
+                    plugins[plugin] = newOne
+                } else
+                    plugins[plugin] = v;
+            }
+        }
+
+        static combineNpmModules(topApp: App): StringMap<string> {
+            var imports: StringMap<string> = {}
+            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
+                Object.keys(l.resolved.imports.npmModules).forEach(k => {
+                    var v = l.resolved.imports.npmModules[k]
+                    if (imports.hasOwnProperty(k)) {
+                        imports[k] = AppImports.combineNpmVersions(imports[k], v)
+                    } else {
+                        imports[k] = v
+                    }
+                })
+            })
+            return imports
+        }
+
+        static combinePipPackages(topApp: App): StringMap<string> {
+            var imports: StringMap<string> = {}
+            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
+                Object.keys(l.resolved.imports.pipPackages).forEach(k => {
+                    var v = l.resolved.imports.pipPackages[k]
+                    if (imports.hasOwnProperty(k)) {
+                        imports[k] = AppImports.combinePipVersions(imports[k], v)
+                    } else {
+                        imports[k] = v
+                    }
+                })
+            })
+            return imports
+        }
+
+        static combineCordovaPlugins(topApp: App): StringMap<string> {
+            var plugins: StringMap<string> = {
+                "org.apache.cordova.console": "*",
+                "com.msopentech.websql": "*",
+                "org.apache.cordova.inappbrowser": "*",
+            }
+            Object.keys(topApp.imports.cordovaPlugins)
+                .filter(k => topApp.imports.cordovaPlugins.hasOwnProperty(k))
+                .forEach(k => plugins[k] = AppImports.combineNpmVersions(plugins[k], topApp.imports.cordovaPlugins[k]));
+            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
+                Object.keys(l.resolved.imports.cordovaPlugins).forEach(k => {
+                    var v = l.resolved.imports.cordovaPlugins[k]
+                    if (plugins.hasOwnProperty(k)) {
+                        plugins[k] = AppImports.combineNpmVersions(plugins[k], v)
+                    } else {
+                        plugins[k] = v
+                    }
+                })
+            })
+            return plugins
+        }
+
+        static combineTouchDevelopPlugins(topApp: App): StringMap<string> {
+            var plugins: StringMap<string> = {};
+            Object.keys(topApp.imports.touchDevelopPlugins)
+                .forEach(k => plugins[k] = "1");
+            topApp.librariesAndThis().filter(l => !!l.resolved).forEach(l => {
+                Object.keys(l.resolved.imports.touchDevelopPlugins).forEach(k => plugins[k] = "1");
+            })
+            return plugins
+        }
+
+        public importClientScript(tc : TypeChecker, t: Call, mod: string, v: string) {
+            if (mod && v != null) {
+                var imports = this.clientScripts;
+                imports[mod] = v;
+            }
+        }
+
+        public importNpm(tc : TypeChecker, t: Call, mod: string, v: string) {
+            if (mod && v != null) {
+                var imports = this.npmModules
+                if (imports.hasOwnProperty(mod)) {
+                    if (imports[mod] == "error") return;
+                    var newOne = AppImports.combineNpmVersions(imports[mod], v)
+                    if (newOne == "error")
+                        tc.markError(t, lf("TD180: npm module '{0}' versions '{1}' and '{2}' conflict", mod, imports[mod], v))
+                    imports[mod] = newOne;
+                }
+                else
+                    imports[mod] = v
+            }
+        }
+
+        public importBower(tc : TypeChecker, t: Call, mod: string, v: string) {
+            if (mod && v != null) {
+                var imports = this.bowerModules
+                if (imports.hasOwnProperty(mod)) {
+                    if (imports[mod] == "error") return;
+                    var newOne = AppImports.combineNpmVersions(imports[mod], v)
+                    if (newOne == "error")
+                        tc.markError(t, lf("TD197: bower module '{0}' versions '{1}' and '{2}' conflict", mod, imports[mod], v))
+                    imports[mod] = newOne;
+                }
+                else
+                    imports[mod] = v
+            }
+        }
+
+        static combinePipVersions(v0: string, v1: string) {
+            if (v0 === v1) return v0
+
+            if (v0 === undefined || (v1 && v0 === "*")) return v1
+            if (v1 === undefined || (v0 && v1 === "*")) return v0
+
+            // TODO
+            return "error"
+        }
+
+        static combineNpmVersions(v0: string, v1: string) {
+            if (v0 === v1) return v0
+
+            if (v0 === undefined || (v1 && v0 === "*")) return v1
+            if (v1 === undefined || (v0 && v1 === "*")) return v0
+
+            return "error"
+        }
+    }
+
     export class App
         extends Decl
     {
@@ -2064,13 +2225,8 @@ module TDev.AST {
         private languageFeatures = LanguageFeature.Current;
         private usedIds:any = {};
         public syntheticIds:StringMap<boolean> = {};
-        public diffRemovedThings:Decl[];
-        public npmModules: StringMap<string> = {};
-        public bowerModules: StringMap<string> = {};
-        public clientScripts: StringMap<string> = {};
-        public cordovaPlugins: StringMap<string> = {};
-        public pipPackages: StringMap<string> = {};
-        public touchDevelopPlugins: StringMap<string> = {};
+        public diffRemovedThings: Decl[];
+        public imports = new AppImports();
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;

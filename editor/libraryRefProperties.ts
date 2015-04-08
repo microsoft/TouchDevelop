@@ -126,7 +126,7 @@ module TDev
         private pluginIds()
         {
             if (this.theLibrary.resolved)
-                return Object.keys(this.theLibrary.resolved.touchDevelopPlugins)
+                return Object.keys(this.theLibrary.resolved.imports.touchDevelopPlugins)
             return []
         }
 

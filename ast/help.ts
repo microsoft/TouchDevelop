@@ -623,10 +623,12 @@ module TDev {
                 if (!Script) return MdComments.error(lf("import can only be used from a script context"));
                 var r = "";
                 [
-                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.npmModules},
-                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.pipPackages},
-                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.cordovaPlugins},
-                 {name:'touchdevelop', url:'#pub:{0:q}', pkgs:Script.touchDevelopPlugins}
+                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.imports.npmModules},
+                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.imports.cordovaPlugins},
+                 {name: 'bower', url: 'https://www.npmjs.com/package/{0:q}/', pkgs: Script.imports.bowerModules },
+                 {name:'client', url: '{0}', pkgs: Script.imports.clientScripts },
+                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.imports.pipPackages},
+                 {name:'touchdevelop', url:'#pub:{0:q}', pkgs:Script.imports.touchDevelopPlugins}
                 ].forEach(imports => {
                     var keys = Object.keys(imports.pkgs);
                     if (keys.length > 0) {
