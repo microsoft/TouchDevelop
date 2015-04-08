@@ -5319,6 +5319,25 @@ module TDev { export module Browser {
                     else if (ch && ch.status != "published" && ch.scriptId)
                         divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
 
+                    if (sc.getCloudHeader() && !Cloud.isRestricted()) {
+                        var groupDiv = div("inlineBlock");
+                        divs.push(groupDiv);
+                        World.getInstalledEditorStateAsync(sc.getGuid()).done(text => {
+                            if (!text) return;
+                            // tutorial state
+                            var st = <AST.AppEditorState>JSON.parse(text)
+
+                            // group mode?
+                            if (st.collabSessionId && st.groupId) {
+                                groupDiv.appendChild(
+                                    ScriptInfo.labeledBox(
+                                        lf("with group"),
+                                        Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
+                                        ));
+                            }
+                        })
+                    }
+
                     var seen: any = {}
                     app.libraries().forEach((lr: AST.LibraryRef) => {
                         var b = this.browser();
@@ -5881,7 +5900,7 @@ module TDev { export module Browser {
         {
             var r:BrowserTab[];
             if (!this.publicId)
-                r = [this, new HistoryTab(this)];
+                r = [this, new ScriptDetailsTab(this), new HistoryTab(this)];
             else
                 r =
                 [
@@ -5904,7 +5923,7 @@ module TDev { export module Browser {
         }
 
 
-        private mkButtons(groupDiv : HTMLElement)
+        private mkButtons()
         {
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
@@ -5986,12 +6005,6 @@ module TDev { export module Browser {
                                     if (group) group.addScriptAsync(this).done(() => this.edit());
                                 });
                         }));
-                    } else if (st.groupId) {
-                        groupDiv.appendChild(
-                            ScriptInfo.labeledBox(
-                                lf("with group"),
-                                Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
-                            ));
                     }
                 })
             }
@@ -6141,7 +6154,7 @@ module TDev { export module Browser {
                 }
 
                 // if (this.cloudHeader)
-                runBtns.setChildren([this.mkButtons(remainingContainer)]);
+                runBtns.setChildren([this.mkButtons()]);
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
