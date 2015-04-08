@@ -9,6 +9,8 @@
     <script type="application/javascript" src="blockly/blockly_uncompressed.js"></script>
     <script type="application/javascript" src="blockly/blocks_compressed.js"></script>
     <script type="application/javascript" src="blockly/msg/js/en.js"></script>
+    <!-- Microbit-specific blocks -->
+    <script type="application/javascript" src="blocks-microbit.js"></script>
     <!-- Compiled version of blockly-main.ts -->
     <script type="application/javascript" src="../blockly.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
@@ -47,7 +49,120 @@
       <div id="editor"></div>
     </div>
     <xml id="blockly-toolbox" style="display: none">
-    <category name="Logic">
+      <category name="Basic">
+        <block type="text"></block>
+        <block type="math_number"></block>
+        <block type="math_number1"></block>
+        <block type="microbug_show_letter">
+          <value name="letter">
+            <block type="text">
+              <field name="TEXT"></field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_pause">
+          <value name="pause">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_print_message">
+          <value name="message">
+            <block type="text">
+              <field name="TEXT">BBC Bug</field>
+            </block>
+          </value>
+          <value name="pausetime">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+      </category>
+      <category name="LED">
+        <block type="microbug_clear_display"></block>
+
+        <block type="microbug_plot">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_unplot">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_point">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_eye_on"></block>
+        <block type="microbug_eye_off"></block>
+        <block type="microbug_set_eye"></block>
+        <block type="microbug_toggle_eye"></block>
+        <block type="microbug_get_eye"></block>
+      </category>
+      <category name="Images">
+        <block type="microbug_make_StringImage">
+          <value name="NAME">
+            <block type="text">
+              <field name="TEXT">BBC Bug</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_scroll_string_image">
+          <value name="speed">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <!-- <block type="microbug_show_image"></block> -->
+        <block type="microbug_show_image_offset">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
+        <!-- <block type="microbug_scroll_image"></block> -->
+        <block type="microbug_build_image"></block>
+        <block type="microbug_build_big_image"></block>
+        <!-- <block type="microbug_set_image_point"></block>
+            <block type="microbug_get_image_point"></block> -->
+      </category>
+      <category name="Input">
+        <block type="microbug_get_button"></block>
+        <block type="microbug_logic_button_states"></block>
+      </category>
       <category name="If">
         <block type="controls_if"></block>
         <block type="controls_if">
@@ -57,151 +172,57 @@
           <mutation elseif="1" else="1"></mutation>
         </block>
       </category>
-      <category name="Boolean">
+      <category name="Loops">
+        <block type="controls_repeat_ext">
+          <value name="TIMES">
+            <block type="math_number">
+              <field name="NUM">3</field>
+            </block>
+          </value>
+        </block>
+        <block type="controls_whileUntil"></block>
+        <block type="controls_for">
+          <value name="FROM">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="TO">
+            <block type="math_number">
+              <field name="NUM">10</field>
+            </block>
+          </value>
+          <value name="BY">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+        </block>
+        <block type="microbug_forever"></block>
+      </category>
+      <category name="Logic">
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
         <block type="logic_boolean"></block>
-        <!-- <block type="logic_null"></block> -->
-        <block type="logic_ternary"></block>
+        <block type="microbug_logic_onoff_states"></block>
       </category>
-    </category>
-    <category name="Text">
-      <block type="text"></block>
-      <block type="text_join"></block>
-      <block type="text_append">
-        <value name="TEXT">
-          <block type="text"></block>
-        </value>
-      </block>
-      <block type="text_length"></block>
-      <block type="text_isEmpty"></block>
-      <block type="text_indexOf">
-        <value name="VALUE">
-          <block type="variables_get">
-            <field name="VAR">text</field>
-          </block>
-        </value>
-      </block>
-      <block type="text_charAt">
-        <value name="VALUE">
-          <block type="variables_get">
-            <field name="VAR">text</field>
-          </block>
-        </value>
-      </block>
-      <block type="text_getSubstring">
-        <value name="STRING">
-          <block type="variables_get">
-            <field name="VAR">text</field>
-          </block>
-        </value>
-      </block>
-      <block type="text_changeCase"></block>
-      <block type="text_trim"></block>
-      <block type="text_print"></block>
-      <block type="text_prompt_ext">
-        <value name="TEXT">
-          <block type="text"></block>
-        </value>
-      </block>
-    </category>
-    <category name="Loops">
-      <block type="controls_repeat_ext">
-        <value name="TIMES">
-          <block type="math_number">
-            <field name="NUM">10</field>
-          </block>
-        </value>
-      </block>
-      <block type="controls_whileUntil"></block>
-      <block type="controls_for">
-        <field name="VAR">i</field>
-        <value name="FROM">
-          <block type="math_number">
-            <field name="NUM">1</field>
-          </block>
-        </value>
-        <value name="TO">
-          <block type="math_number">
-            <field name="NUM">10</field>
-          </block>
-        </value>
-        <value name="BY">
-          <block type="math_number">
-            <field name="NUM">1</field>
-          </block>
-        </value>
-      </block>
-      <block type="controls_forEach"></block>
-      <block type="controls_flow_statements"></block>
-    </category>
-    <category name="Math">
-      <block type="math_number"></block>
-      <block type="math_arithmetic"></block>
-      <block type="math_single"></block>
-      <block type="math_trig"></block>
-      <block type="math_constant"></block>
-      <block type="math_number_property"></block>
-      <block type="math_change">
-        <value name="DELTA">
-          <block type="math_number">
-            <field name="NUM">1</field>
-          </block>
-        </value>
-      </block>
-      <block type="math_round"></block>
-      <block type="math_on_list"></block>
-      <block type="math_modulo"></block>
-      <block type="math_constrain">
-        <value name="LOW">
-          <block type="math_number">
-            <field name="NUM">1</field>
-          </block>
-        </value>
-        <value name="HIGH">
-          <block type="math_number">
-            <field name="NUM">100</field>
-          </block>
-        </value>
-      </block>
-      <block type="math_random_int">
-        <value name="FROM">
-          <block type="math_number">
-            <field name="NUM">1</field>
-          </block>
-        </value>
-        <value name="TO">
-          <block type="math_number">
-            <field name="NUM">100</field>
-          </block>
-        </value>
-      </block>
-      <block type="math_random_float"></block>
-    </category>
-    <category name="Lists">
-      <block type="lists_create_empty"></block>
-      <block type="lists_create_with"></block>
-      <block type="lists_repeat">
-        <value name="NUM">
-          <block type="math_number">
-            <field name="NUM">5</field>
-          </block>
-        </value>
-      </block>
-      <block type="lists_length"></block>
-      <block type="lists_isEmpty"></block>
-      <block type="lists_indexOf"></block>
-      <block type="lists_getIndex"></block>
-      <block type="lists_setIndex"></block>
-    </category>
-    <category name="Variables" custom="VARIABLE"></category>
-    <category name="Functions" custom="PROCEDURE"></category>
-    <sep></sep>
-    <category name="Library">
-      <category name="BBC-Microbit">
+      <category name="Maths">
+        <block type="math_arithmetic"></block>
       </category>
-    </category>
+      <category name="Variables">
+        <block type="variables_set"></block>
+        <block type="variables_get"></block>
+      </category>
+      <category name="Comment">
+        <block type="microbug_comment">
+          <value name="comment">
+            <block type="text">
+              <field name="TEXT"></field>
+            </block>
+          </value>
+        </block>
+      </category>
     </xml>
   </body>
 </html>
