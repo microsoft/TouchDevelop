@@ -5108,6 +5108,14 @@ module TDev { export module Browser {
                 var app = AST.Parser.parseScript(scriptText);
                 AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
 
+
+                if (sc.jsonScript && sc.jsonScript.time) {
+                    var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
+                    var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
+
+                    divs.push(div('', pull, diff));
+                }
+
                 if (app.getPlatformRaw() & PlatformCapability.Current) {
                 } else if (app.getPlatform()) {
                     var caps = lf("This script uses the following capabilities: ") +
@@ -5769,11 +5777,7 @@ module TDev { export module Browser {
                 })
             }
 
-            if (EditorSettings.editorMode() != EditorMode.block && this.jsonScript && this.jsonScript.time) {
-                var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush, () => (<ScriptInfo>this.parent).mergeScript())
-                var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase, () => (<ScriptInfo>this.parent).diffToBase())
-            }
-            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, pull, diff, this.showcaseBtns());
+            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns());
         }
 
         private showcaseBtns()
