@@ -5940,15 +5940,16 @@ module TDev { export module Browser {
                 if (this.publicId) {
                     // display a lis of buble headers
                     TheApiCacheMgr.getAnd(this.publicId + "/reviews?count=12",(list: JsonList) => {
-                        likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} hearts", this.jsonScript.cumulativepositivereviews), div('inlineBlock',
-                            list.items.slice(0, 12).map((review : JsonReview) => {
-                                var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
-                                var el = info.thumbnail(false, () => { this.parentBrowser.loadDetails(info)  });
-                                el.classList.add('teamHead');
-                                return el;
-                            })
-                          )
-                        ));
+                        if (list.items.length > 0)
+                            likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} heart{0:s}", this.jsonScript.cumulativepositivereviews), div('inlineBlock',
+                                list.items.slice(0, 12).map((review : JsonReview) => {
+                                    var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
+                                    var el = info.thumbnail(false, () => { this.parentBrowser.loadDetails(info)  });
+                                    el.classList.add('teamHead');
+                                    return el;
+                                })
+                              )
+                            ));
                     });
                 }
 
