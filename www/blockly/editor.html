@@ -89,48 +89,58 @@
       </category>
       <category name="LED">
         <block type="microbug_clear_display"></block>
+        <block type="microbug_set_led">
+          <value name="id">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="brightness">
+            <block type="microbug_logic_onoff_states"></block>
+          </value>
+        </block>
 
-        <block type="microbug_plot">
-          <value name="x">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-          <value name="y">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-        </block>
-        <block type="microbug_unplot">
-          <value name="x">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-          <value name="y">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-        </block>
-        <block type="microbug_point">
-          <value name="x">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-          <value name="y">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
-        </block>
-        <block type="microbug_eye_on"></block>
-        <block type="microbug_eye_off"></block>
-        <block type="microbug_set_eye"></block>
-        <block type="microbug_toggle_eye"></block>
-        <block type="microbug_get_eye"></block>
+        <!-- <block type="microbug_plot"> -->
+        <!--   <value name="x"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="y"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
+        <!-- <block type="microbug_unplot"> -->
+        <!--   <value name="x"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="y"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
+        <!-- <block type="microbug_point"> -->
+        <!--   <value name="x"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="y"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
+        <!-- <block type="microbug_eye_on"></block> -->
+        <!-- <block type="microbug_eye_off"></block> -->
+        <!-- <block type="microbug_set_eye"></block> -->
+        <!-- <block type="microbug_toggle_eye"></block> -->
+        <!-- <block type="microbug_get_eye"></block> -->
       </category>
       <category name="Images">
         <block type="microbug_make_StringImage">

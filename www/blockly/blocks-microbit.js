@@ -23,6 +23,25 @@ Blockly.Blocks['microbug_event'] = {
   }
 };
 
+Blockly.Blocks['microbug_set_led'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(120);
+    this.appendValueInput("id")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("set led #");
+    this.appendValueInput("brightness")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("to");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
 // Blockly.Blocks['microbug_scroll_string'] = {
 //   init: function() {
 //     this.setHelpUrl('http://www.example.com/');
@@ -439,7 +458,7 @@ Blockly.Blocks['microbug_forever'] = {
     this.setColour(120);
     this.appendDummyInput()
         .appendField("forever");
-    this.appendStatementInput("NAME")
+    this.appendStatementInput("DO")
         .setCheck("null");
     this.setInputsInline(true);
     this.setPreviousStatement(true, "null");

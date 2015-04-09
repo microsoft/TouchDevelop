@@ -229,8 +229,9 @@ module TDev {
                         var message2 = <Message_Upgrade> event.data;
                         var ast = message2.ast;
                         addMicrobitLibrary(ast);
+                        console.log("Attempting to serialize", ast);
                         var text = AST.Json.serialize(ast);
-                        console.log(text, ast);
+                        console.log("Attempting to edit script text", text);
                         Browser.TheHost.openNewScriptAsync({
                             editorName: "touchdevelop",
                             scriptName: message2.name,

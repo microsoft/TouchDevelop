@@ -8,7 +8,6 @@
 // TODO:
 // - loops: repeat n times, repeat, forever, simplified for loop
 // - logic: on/off
-// - comments
 // - basic, led, images, input: adapt API
 
 import J = TDev.AST.Json;
@@ -174,12 +173,22 @@ module Helpers {
     };
   }
 
-  export function mkWhile(condition: J.JExprHolder, body: J.JStmt[]): J.JStmt {
+  export function mkWhile(condition: J.JExprHolder, body: J.JStmt[]): J.JWhile {
     return {
       nodeType: "while",
       id: null,
       condition: condition,
       body: body
+    };
+  }
+
+  export function mkFor(index: string, bound: J.JExprHolder, body: J.JStmt[]): J.JFor {
+    return {
+      nodeType: "for",
+      id: null,
+      index: mkDef(index, mkTypeRef("Number")),
+      body: body,
+      bound: bound
     };
   }
 
@@ -386,6 +395,10 @@ function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
   return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
+function compileOnOff(e: Environment, b: B.Block): J.JExpr {
+  return H.mkNumberLiteral(b.getFieldValue("STATE") == "ON" ? 1 : 0);
+}
+
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
   switch (b.type) {
     case "math_number":
@@ -402,6 +415,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
+    case "microbug_logic_onoff_states":
+      return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
   }
@@ -491,6 +506,26 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   ];
 }
 
+function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
+  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"));
+  var body = compileStatements(e, b.getInputTargetBlock("DO")); 
+  return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
+}
+
+function compileControlsWhileUntil(e: Environment, b: B.Block): J.JStmt {
+  var until = b.getFieldValue('MODE') == 'UNTIL';
+  var cond = compileExpression(e, b.getInputTargetBlock("BOOL"));
+  var body = compileStatements(e, b.getInputTargetBlock("DO")); 
+  var finalCond = until ? H.mkSimpleCall("not", [cond]) : cond;
+  return H.mkWhile(H.mkExprHolder([], finalCond), body);
+}
+
+function compileForever(e: Environment, b: B.Block): J.JStmt {
+  return H.mkWhile(
+    H.mkExprHolder([], H.mkBooleanLiteral(true)),
+    compileStatements(e, b.getInputTargetBlock("DO")));
+}
+
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
   var text = compileExpression(e, b.getInputTargetBlock("TEXT"));
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
@@ -518,10 +553,15 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
     };
   }
 }
+function compileSetLed(e: Environment, b: B.Block): J.JStmt {
+  var arg1 = compileExpression(e, b.getInputTargetBlock("id"));
+  var arg2 = compileExpression(e, b.getInputTargetBlock("brightness"));
+  return H.mkExprStmt(H.mkExprHolder([], H.stdCall("set led", [arg1, arg2])));
+}
 
 function compileDisplay(e: Environment, b: B.Block): J.JStmt {
   var arg = compileExpression(e, b.getInputTargetBlock("ARG"));
-  return H.mkExprHolder([], H.stdCall("display", [arg]));
+  return H.mkExprStmt(H.mkExprHolder([], H.stdCall("display", [arg])));
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
@@ -578,6 +618,22 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
       case 'microbug_comment':
         stmts.push(compileComment(e, b));
+        break;
+
+      case 'microbug_forever':
+        stmts.push(compileForever(e, b));
+        break;
+
+      case 'controls_repeat_ext':
+        stmts.push(compileControlsRepeat(e, b));
+        break;
+
+      case 'controls_whileUntil':
+        stmts.push(compileControlsWhileUntil(e, b));
+        break;
+
+      case 'microbug_set_led':
+        stmts.push(compileSetLed(e, b));
         break;
 
       default:
