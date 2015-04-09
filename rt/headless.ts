@@ -206,14 +206,14 @@ module TDev {
             var crash:any = {
                 time: Date.now(),
                 stack: e.tdStack,
-                compressedStack: e.tdCompressedStack,
                 msg: msg,
+                meta: e.tdMeta,
             }
 
             this.fillCrashInfo(crash)
             this.crashes.push(crash)
 
-            TDev.RT.App.logException(e, crash);
+            TDev.RT.App.logException(e);
 
             this.respondToCrash(bug);
 

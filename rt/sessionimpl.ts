@@ -2818,7 +2818,7 @@ module TDev {
                     this.RemoveFromDiskAsync(this.cleanOutstandingLayers()).thenalways(() => {
                         // if we don't have the promise for that rpc anymore (e.g. client reconnected), just throw the exception
                         if (opid === -1 || this.returnMap[opid] === undefined) {
-                            TDev.Runtime.theRuntime.handleException(res);
+                            TDev.Runtime.theRuntime.handleException(res, null);
 
                     // otherwise throw an error on the promise related to this rpc call
                     } else {

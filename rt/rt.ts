@@ -109,6 +109,20 @@ module TDev
         }
     }
 
+    export class StackSnapshot
+        extends StackFrameBase
+    {
+        constructor(previous:IStackFrame) {
+            super(previous.rt)
+            this.previous = previous;
+            this.pc = previous.pc
+            this.d = previous.d
+            this.name = previous.name
+            this.stackDepth = previous.stackDepth
+        }
+    }
+
+
     export class ResumeCtx
     {
         private shownProgress:boolean;
@@ -1381,7 +1395,7 @@ module TDev
                         // Resume await
                         ctx.resume();
                     }, (err: any) => {
-                        TDev.Runtime.theRuntime.handleException(err);
+                        TDev.Runtime.theRuntime.handleException(err, s);
                 })
 
                 /*
@@ -1610,11 +1624,16 @@ module TDev
             }
         }
 
+        public runInlineJavascript(f:()=>void)
+        {
+            f()
+        }
+
         public wrap(s: IStackFrame, f: any): any {
             if (this.isStopped())
                 return () => { };
 
-            if (!s) s == this.current
+            if (!s) s = this.current
             var rt = s.rt
             Util.assert(rt == this)
 
@@ -1628,8 +1647,7 @@ module TDev
                     f.apply(this, arguments)
 
                 } catch (e) {
-                    rt.handleException(e)
-                    e.rtProtectHandled = true
+                    e.tdStackFrame = s
                     throw e
                 }
             }
@@ -1701,7 +1719,7 @@ module TDev
                     VisibilityManager.attachToVisibilityChange(this);
                 this.mainLoop(frame, "resume execution");
             } catch (e) {
-                this.handleException(e)
+                this.handleException(e, this.current)
             }
         }
 
@@ -1769,9 +1787,10 @@ module TDev
         }
 
         static handleUserError(err: any) {
-            if (Runtime.theRuntime && Runtime.theRuntime.state != RtState.Stopped && !Runtime.theRuntime.handlingException) {
+            var rt = Runtime.theRuntime
+            if (rt && rt.state != RtState.Stopped && !rt.handlingException) {
                 if (err.isUserError || err.wabStatus) {
-                    Runtime.theRuntime.handleException(err);
+                    rt.handleException(err, rt.current);
                     return true;
                 }
             }
@@ -1846,14 +1865,14 @@ module TDev
                                     }
                                     this.mainLoop(entryPt, "Runtime.run");
                                 } catch (e) {
-                                    this.handleException(e)
+                                    this.handleException(e, this.current)
                                 }
                             });
                         } catch (e) {
-                            this.handleException(e)
-                     }
+                            this.handleException(e, this.current)
+                        }
                 }, (e) => {
-                    this.handleException(e);
+                    this.handleException(e, null);
                 });
             });
 
@@ -1915,7 +1934,7 @@ module TDev
 
             var foundSome = false
 
-            for (var s = this.current; s; s = s.previous) {
+            for (var s = e.tdStackFrame; s; s = s.previous) {
                 if (s.isDetached) break
                 if (s.errorHandler) (() => {
                     foundSome = true
@@ -1941,22 +1960,32 @@ module TDev
         {
             if (typeof e !== "object") return
 
+            var s = this.current
+            if (e.tdStackFrame) s = e.tdStackFrame
+
             var st = e.stack
 
             if (st !== undefined && !e.tdStack) {
-                e.tdStack = this.getStackTrace().map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } })
+                e.tdStack = this.getStackTrace(s).map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } })
+                if (!e.tdMeta) e.tdMeta = {}
                 var compr = StackUtil.compress(e.tdStack)
-                if (compr)
-                    e.tdCompressedStack = "StK" + compr
+                if (compr) {
+                    compr = "StK" + compr
+                    e.tdMeta.compressedStack = compr
+                }
 
                 st = st.replace(/^\s*at a_\S+\$\d.*\n/gm, "")
-                if (e.tdCompressedStack) st = st.replace(/^\s*at /m, (t) => t + e.tdCompressedStack + " (td.js:42:42)\n" + t)
-                e.stack = st
+                if (compr) st = st.replace(/^\s*at /m, (t) => t + compr + " (td.js:42:42)\n" + t)
+                try {
+                    e.stack = st
+                } catch (fail) { }
             }
         }
 
-        public handleException(e:any)
+        public handleException(e:any, s:IStackFrame)
         {
+            if (!e.tdStackFrame)
+                e.tdStackFrame = s
             var handled = this.quietlyHandleError(e)
 
             this.handlingException = true;
@@ -1969,13 +1998,14 @@ module TDev
             this.stopAsync().done()
         }
 
-        public getStackTrace()
+        public getStackTrace(init?:IStackFrame)
         {
             var locs:IStackFrame[] = []
 
-            if (this.errorPC)
+            if (!init && this.errorPC)
                 locs.push(<any>{ pc: this.errorPC })
-            for (var s = this.current; s; s = s.previous) {
+
+            for (var s = init || this.current; s; s = s.previous) {
                 locs.push(s)
             }
             return locs;
@@ -2010,7 +2040,7 @@ module TDev
                 this.setState(prevState, "runUserAction from handler restore")
                 this.current = prevCurr
             } catch (e) {
-                this.handleException(e)
+                this.handleException(e, this.current)
             }
         }
 
@@ -2152,7 +2182,7 @@ module TDev
                     }
                 }
             } catch (e) {
-                this.handleException(e)
+                this.handleException(e, this.current)
             }
 
             this.mainLoopRunning = false;
