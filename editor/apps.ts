@@ -1625,6 +1625,9 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) ? Promise.as() :
             cli(lf("installing cordova..."), "npm install -g cordova"))
         .then(() => {
+            instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g io-deploy") : Promise.as()
+        })
+        .then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
             return runNpm ? cli(lf("installing jimp..."), "npm install jimp") : Promise.as();
