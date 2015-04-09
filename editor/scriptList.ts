@@ -280,7 +280,7 @@ module TDev { export module Browser {
             var searchMode = terms.length > 0;
             var allHelpBtn = null;
             var theme = EditorSettings.hubTheme();
-            if (theme && theme.scriptSearch) terms.push(theme.scriptSearch);
+            if (theme && /scripts/.test(this.apiPath) && theme.scriptSearch) terms.push(theme.scriptSearch);
 
             if (!searchMode) {
                 if (this.apiPath == "help") {
