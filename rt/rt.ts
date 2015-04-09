@@ -21,6 +21,7 @@ module TDev
         stackDepth:number;
         name:string;
         pc:string;
+        prevPC?:string;
         // this is used in the asyncStack
         continueAt?:IContinuationFunction;
         currentHandler?:RT.EventBinding;
@@ -108,20 +109,6 @@ module TDev
             this.stackDepth = previous.stackDepth;
         }
     }
-
-    export class StackSnapshot
-        extends StackFrameBase
-    {
-        constructor(previous:IStackFrame) {
-            super(previous.rt)
-            this.previous = previous;
-            this.pc = previous.pc
-            this.d = previous.d
-            this.name = previous.name
-            this.stackDepth = previous.stackDepth
-        }
-    }
-
 
     export class ResumeCtx
     {
@@ -1724,12 +1711,13 @@ module TDev
         }
 
         static mkStackFrame(prev: IStackFrame, ret: any) {
-            return <IStackFrame>{
+            return <IStackFrame> <any>{
                 previous: prev,
+                prevPC: prev.pc,
                 d: prev.d,
                 rt: prev.rt,
                 libs: prev.libs,
-                returnAddr: ret
+                returnAddr: ret,
             };
         }
 
@@ -2006,6 +1994,8 @@ module TDev
                 locs.push(<any>{ pc: this.errorPC })
 
             for (var s = init || this.current; s; s = s.previous) {
+                s = Util.flatClone(s)
+                if (s.prevPC && s.previous) s.previous.pc = s.prevPC
                 locs.push(s)
             }
             return locs;
