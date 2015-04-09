@@ -866,6 +866,7 @@ module TDev.RT {
 
         export function hostExecAsync(message: string): Promise {
             return new Promise((onSuccess, onError, onProgress) => {
+                // minecraft support
                 var mcefQuery = (<any>window).mcefQuery;
                 if (mcefQuery) {
                     mcefQuery({
@@ -875,26 +876,50 @@ module TDev.RT {
                             onSuccess(response);
                         },
                         onFailure: function (error_code, error_message) {
+                            App.logEvent(App.DEBUG, "app", "mcefQuery failed", undefined);
                             onSuccess(JSON.stringify({ error: error_code, message: error_message }));
                         }
                     });
                     return;
                 }
 
-                var exec = (<any>window).touchDevelopExec;
-                if (!exec) {
-                    App.log("window.touchDevelopExec function not defined");
-                    onSuccess(undefined);
+                // cordova support
+                var cordova = (<any>window).cordova;
+                if (cordova && cordova.exec) {
+                    try {
+                        var payload = JSON.parse(message);
+                        cordova.exec(function (result) {
+                                onSuccess(JSON.stringify(result));
+                            },
+                            function (error) {
+                                onSuccess(JSON.stringify({ error: error }));                            
+                            },
+                            payload.service,
+                            payload.action,
+                            payload.arguments);
+                    }
+                    catch (e) {
+                        App.logEvent(App.DEBUG, "app", "window.cordova.exec failed", undefined);
+                        onSuccess(undefined);
+                    }
                     return;
                 }
 
-                try {
-                    exec(message,(result) => { onSuccess(result); });
+                // generic callback support
+                var exec = (<any>window).touchDevelopExec;
+                if (exec) {
+                    try {
+                        exec(message,(result) => { onSuccess(result); });
+                    }
+                    catch (e) {
+                        App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
+                        onSuccess(undefined);
+                    }
+                    return;
                 }
-                catch (e) {
-                    App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
-                    onSuccess(undefined);
-                }
+
+                App.log("no host found");
+                onSuccess(undefined);
             });
         }
 
