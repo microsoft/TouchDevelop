@@ -183,6 +183,14 @@ module Helpers {
     };
   }
 
+  export function mkComment(text: string): J.JComment {
+    return {
+      nodeType: "comment",
+      id: null,
+      text: text
+    };
+  }
+
   // An if-statement that has no [else] branch.
   export function mkSimpleIf(condition: J.JExprHolder, thenBranch: J.JStmt[]): J.JIf {
     return {
@@ -516,6 +524,12 @@ function compileDisplay(e: Environment, b: B.Block): J.JStmt {
   return H.mkExprHolder([], H.stdCall("display", [arg]));
 }
 
+function compileComment(e: Environment, b: B.Block): J.JStmt {
+  var arg = compileExpression(e, b.getInputTargetBlock("comment"));
+  assert(arg.nodeType == "stringLiteral");
+  return H.mkComment((<J.JStringLiteral> arg).value);
+}
+
 function compileEvent(e: Environment, b: B.Block): J.JStmt {
   var bId = b.getInputTargetBlock("ID");
   var bBody = b.getInputTargetBlock("HANDLER");
@@ -560,6 +574,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(r.stmt);
         // This function also return a possibly-extended environment.
         e = r.env;
+        break;
+
+      case 'microbug_comment':
+        stmts.push(compileComment(e, b));
         break;
 
       default:

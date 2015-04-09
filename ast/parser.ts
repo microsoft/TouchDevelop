@@ -68,7 +68,7 @@ module TDev { export module AST {
             if (name == "this")
                 return this.currentApp.thisLibRef;
 
-            var existing = this.currentApp.libraries().filter((l) => l.getName() == name)[0];
+            var existing = this.currentApp && this.currentApp.libraries().filter((l) => l.getName() == name)[0];
             if (existing) return existing;
 
             if (this.libRefs.hasOwnProperty(name))
