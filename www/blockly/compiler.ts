@@ -5,13 +5,11 @@
 //                A compiler from Blocky to TouchDevelop                     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Currently remaining items:
-// - boolean/ternary
-// - assess which ones of text/* we need
-// - loops
-// - math
-// - decide on our list structure
-// - functions
+// TODO:
+// - loops: repeat n times, repeat, forever, simplified for loop
+// - logic: on/off
+// - comments
+// - basic, led, images, input: adapt API
 
 import J = TDev.AST.Json;
 import B = Blockly;
@@ -77,7 +75,7 @@ module Helpers {
     };
   }
 
-  export function mkCall(name: string, parent: string, args: J.JExpr[]): J.JExpr {
+  export function mkCall(name: string, parent: J.JTypeRef, args: J.JExpr[]): J.JCall {
     return {
         nodeType: "call",
         id: null,
@@ -87,15 +85,39 @@ module Helpers {
     };
   }
 
+  var librarySymbol = "♻";
+  var librarySingleton: J.JSingletonRef = {
+    nodeType: "singletonRef",
+    id: null,
+    name: librarySymbol,
+    type: mkTypeRef(librarySymbol)
+  };
+
+  // A library "♻ foobar" is actually a call to the method "foobar" of the
+  // global singleton object "♻".
+  export function mkLibrary(name: string): J.JCall {
+    return mkCall(name, mkTypeRef(librarySymbol), [librarySingleton]);
+  }
+
+  // Call function [name] from the standard bbc-microbit library with arguments
+  // [args].
+  export function stdCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef("bbc-microbit"), [<J.JExpr> mkLibrary("bbc-microbit")].concat(args));
+  }
+
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
   export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
     assert(knownPropertyRefs[p] != undefined);
-    return mkCall(p, knownPropertyRefs[p], args);
+    return mkCall(p, mkTypeRef(knownPropertyRefs[p]), args);
   }
 
   export function mkTypeRef(t: string): J.JTypeRef {
     // The interface is a lie -- actually, this type is just string.
     return <any> t;
+  }
+
+  export function mkGTypeRef(t: string): J.JTypeRef {
+    return <any> JSON.stringify(<J.JGenericTypeInstance> { g: t });
   }
 
   // Generates a local definition for [x] at type [t]; this is not enough to
@@ -133,10 +155,21 @@ module Helpers {
   }
 
   // Injection of expressions into statements is explicit in TouchDevelop.
-  export function mkExprStmt(expr: J.JExprHolder): J.JStmt {
+  export function mkExprStmt(expr: J.JExprHolder): J.JExprStmt {
     return {
       nodeType: "exprStmt",
       id: null,
+      expr: expr,
+    };
+  }
+
+  // Refinement of the above function for [J.JInlineActions], a subclass of
+  // [J.JExprStmt]
+  export function mkInlineActions(actions: J.JInlineAction[], expr: J.JExprHolder): J.JInlineActions {
+    return {
+      nodeType: "inlineActions",
+      id: null,
+      actions: actions,
       expr: expr,
     };
   }
@@ -191,6 +224,28 @@ module Helpers {
     var assign = mkSimpleCall(":=", [mkLocalRef(x), e]);
     var expr = mkExprHolder([def], assign);
     return mkExprStmt(expr);
+  }
+
+  export function mkInlineAction(
+    name: string,
+    body: J.JStmt[],
+    isImplicit: boolean,
+    reference: J.JLocalDef,
+    inParams: J.JLocalDef[] = [],
+    outParams: J.JLocalDef[] = []): J.JInlineAction
+  {
+    return {
+      nodeType: "inlineAction",
+      id: null,
+      name: name,
+      body: body,
+      inParameters: inParams,
+      outParameters: outParams,
+      locals: null,
+      reference: reference,
+      isImplicit: isImplicit,
+      isOptional: false,
+    }
   }
 
   export function mkAction(
@@ -322,7 +377,7 @@ function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
   var args = b.arguments_.map((x: any, i: number) => {
     return compileExpression(e, b.getInputTargetBlock("ARG"+i));
   });
-  return H.mkCall(f, "code", args);
+  return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
@@ -458,6 +513,25 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
   }
 }
 
+function compileDisplay(e: Environment, b: B.Block): J.JStmt {
+  var arg = compileExpression(e, b.getInputTargetBlock("ARG"));
+  return H.mkExprHolder([], H.stdCall("display", [arg]));
+}
+
+function compileEvent(e: Environment, b: B.Block): J.JStmt {
+  var bId = b.getInputTargetBlock("ID");
+  var bBody = b.getInputTargetBlock("HANDLER");
+  var id = compileExpression(e, bId);
+  var body = compileStatements(e, bBody);
+  var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
+  return H.mkInlineActions(
+    [ H.mkInlineAction("_body_", body, true, def) ],
+    H.mkExprHolder(
+      [ def ],
+      H.stdCall("on", [id, H.mkLocalRef("_body_")])));
+
+}
+
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   var stmts: J.JStmt[] = [];
   var append = <T> (a: T[], es: T[]) => a.push.apply(a, es);
@@ -473,6 +547,14 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
       case 'text_print':
         stmts.push(compilePrint(e, b));
+        break;
+
+      case 'microbug_display':
+        stmts.push(compileDisplay(e, b));
+        break;
+
+      case 'microbug_event':
+        stmts.push(compileEvent(e, b));
         break;
 
       case 'variables_set':
@@ -491,8 +573,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 }
 
 function compileFunction(e: Environment, b: B.DefOrCallBlock): J.JAction {
-  assert(isFunctionDefinition(b));
-
+  // currently broken
   var fName = b.getFieldValue("NAME");
   var inParams: J.JLocalDef[] = [];
   var outParams: J.JLocalDef[] = [];
@@ -515,24 +596,16 @@ interface CompileOptions {
   description: string;
 }
 
-function isFunctionDefinition(b: B.Block) {
-  return (b.type == "procedures_defreturn" ||
-      b.type == "procedures_defnoreturn");
-}
-
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
-  var i = 0;
-  var actions = b.getTopBlocks(true).map((b: B.Block) => {
-    if (isFunctionDefinition(b)) {
-      return compileFunction(empty, <B.DefOrCallBlock> b);
-    } else {
-      var body = compileStatements(empty, b);
-      var name = "main"+(i == 0 ? "" : i);
-      i++;
-      return H.mkAction(name, body);
-    }
+  var stmts: J.JStmt[] = [];
+  b.getTopBlocks(true).forEach((b: B.Block) => {
+    // TODO: wrap in "on event start" if outer block is not of type event.
+    // Each "on ..." event handler is compiled in its own empty environment.
+    // This is akin to a function definition.
+    stmts = stmts.concat(compileStatements(empty, b));
   });
-  return H.mkApp(options.name, options.description, actions);
+  var action = H.mkAction("main", stmts);
+  return H.mkApp(options.name, options.description, [ action ]);
 }
 
 function compile(b: B.Workspace, options: CompileOptions): J.JApp {
