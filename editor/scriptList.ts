@@ -5999,7 +5999,7 @@ module TDev { export module Browser {
 
             var uninstall:HTMLElement;
             var editWithGroup:HTMLElement;
-            var btns: HTMLElement;
+            var btns: HTMLElement = div("sdRunBtns");
 
             if (this.cloudHeader) {
                 uninstall = ScriptInfo.mkSimpleBtnConfirm(lf("uninstall"), () => this.uninstall())
@@ -6033,7 +6033,8 @@ module TDev { export module Browser {
                 })
             }
 
-            return btns = div("sdRunBtns", updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns());
+            btns.setChildren([updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns()]);
+            return btns;
         }
 
         private showcaseBtns()

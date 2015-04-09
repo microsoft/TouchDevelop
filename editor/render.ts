@@ -114,6 +114,8 @@ module TDev
 
         public attachHandlers()
         {
+            if (!this.stmts) return;
+
             var dod = Browser.dragAndDrop ? new DragAndDropContext() : undefined;
             this.stmts.forEach((s) => {
                 var e = <HTMLElement> document.getElementById(s.renderedAsId);
