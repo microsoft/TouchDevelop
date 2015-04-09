@@ -248,7 +248,6 @@ module TDev
                     HTML.mkButton(lf("editor settings"), () => TheEditor.popupMenu()),
                     HTML.mkButton(lf("compiled JS"), () => TheEditor.showCurrentJs()),
                     HTML.mkButton(lf("compiled JS (debug)"), () => TheEditor.showCurrentJs({ debugging: true })),
-                    HTML.mkButton(lf("deploy REST"), () => this.deployRestApp()),
                     HTML.mkButton(lf("to JSON"), () => this.dumpToJson()),
                     HTML.mkButton(lf("rebuild session cache"), () => TheEditor.currentRt.sessions.resetCurrentSession()),
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
@@ -703,45 +702,6 @@ module TDev
                         return findCommonAsync(aa, aa, bb, bb)
                     }
                 })
-        }
-
-        private deployRestApp() {
-            return TheEditor.saveStateAsync({ forReal: true }).then(() => {
-                var m0 = new ModalDialog();
-                var progressBar0 = HTML.mkProgressBar();
-                m0.add(progressBar0);
-                m0.add(div("wall-dialog-header", lf("export as REST service")));
-
-                var url = HTML.mkTextInput("text", lf("deploy url"));
-                url.value = window.localStorage["rest_deploy_url"] || "";
-                var path = HTML.mkTextInput("text", lf("deploy path"));
-                path.value = window.localStorage["rest_deploy_path"] || "";
-
-                m0.add(div("wall-dialog-body", "url: ", url));
-                m0.add(div("wall-dialog-body", "path: ", path));
-                var msg = div("wall-dialog-body");
-                m0.add(msg);
-                m0.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("export"), () => {
-                        window.localStorage["rest_deploy_url"] = url.value;
-                        window.localStorage["rest_deploy_path"] = path.value;
-                        msg.setChildren("please wait...");
-                        progressBar0.start();
-                        Util.httpPostJsonAsync(url.value + "/deploy", {
-                            compiled: AST.Compiler.getCompiledScript(Script, {
-                                packaging: true,
-                                rest: true,
-                                authorId: Cloud.getUserId(),
-                            }).getCompiledCode(),
-                            path: path.value
-                        }).done((resp) => {
-                            msg.setChildren(JSON.stringify(resp));
-                            progressBar0.stop();
-                        })
-                    })))
-
-                m0.show();
-            });
         }
 
         private isActive() { return !!this.theScript; }
