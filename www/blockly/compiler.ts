@@ -99,10 +99,10 @@ module Helpers {
     return mkCall(name, mkTypeRef(librarySymbol), [librarySingleton]);
   }
 
-  // Call function [name] from the standard bbc-microbit library with arguments
+  // Call function [name] from the standard microbit library with arguments
   // [args].
   export function stdCall(name: string, args: J.JExpr[]): J.JCall {
-    return mkCall(name, mkTypeRef("bbc-microbit"), [<J.JExpr> mkLibrary("bbc-microbit")].concat(args));
+    return mkCall(name, mkTypeRef("microbit"), [<J.JExpr> mkLibrary("microbit")].concat(args));
   }
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
@@ -227,7 +227,6 @@ module Helpers {
   }
 
   export function mkInlineAction(
-    name: string,
     body: J.JStmt[],
     isImplicit: boolean,
     reference: J.JLocalDef,
@@ -237,7 +236,6 @@ module Helpers {
     return {
       nodeType: "inlineAction",
       id: null,
-      name: name,
       body: body,
       inParameters: inParams,
       outParameters: outParams,
@@ -265,7 +263,7 @@ module Helpers {
       isOffline: false,
       isQuery: false,
       isTest: false,
-      isAsync: false,
+      isAsync: true,
       description: "Action converted from a Blockly script",
     };
   }
@@ -525,10 +523,10 @@ function compileEvent(e: Environment, b: B.Block): J.JStmt {
   var body = compileStatements(e, bBody);
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
-    [ H.mkInlineAction("_body_", body, true, def) ],
+    [ H.mkInlineAction(body, true, def) ],
     H.mkExprHolder(
       [ def ],
-      H.stdCall("on", [id, H.mkLocalRef("_body_")])));
+      H.stdCall("on", [id])));
 
 }
 

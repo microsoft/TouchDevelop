@@ -28,6 +28,12 @@ module TDev.AST.Json
         }
     }
 
+    export function addIdsAndDumpNode(a:AstNode): JNode {
+        var i = new IdSetter("");
+        i.dispatch(a);
+        return (new Dumper()).toJson(a);
+    }
+
     export function dump(a:App):JApp
     {
         try {

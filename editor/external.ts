@@ -49,6 +49,29 @@ module TDev {
     export module External {
         export var TheChannel: Channel = null;
 
+        import J = AST.Json;
+
+        // This function modifies its argument by adding an extra [J.JLibrary]
+        // to its [decls] field that references the Microbit library.
+        function addMicrobitLibrary(app: J.JApp) {
+            var lib = <AST.LibraryRef> AST.Parser.parseDecl(
+                'meta import microbit {'+
+                '  guid "d73926f2-4b76-4d8a-89f5-d42fd4983ce6"'+
+                '  usage {'+
+                '    action `async` on(@event: String, body: Action)'+
+                '    action `async` set_led(id: Number, brightness: Number)'+
+                '    action `async` on_button(side: String, dir: String, body: Action)'+
+                '    action `async` button_pressed(side: String) returns(r: Boolean)'+
+                '    action `async` start_scrolling(s: String)'+
+                '    action `async` stop_scrolling()'+
+                '    action `async` display(s: String)'+
+                '  }'+
+                '}'
+            );
+            var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
+            app.decls.push(jLib);
+        }
+
         export class Channel {
             constructor(
                 private editor: ExternalEditor,
@@ -213,7 +236,10 @@ module TDev {
 
                     case MessageType.Upgrade:
                         var message2 = <Message_Upgrade> event.data;
-                        var text = AST.Json.serialize(message2.ast);
+                        var ast = message2.ast;
+                        addMicrobitLibrary(ast);
+                        var text = AST.Json.serialize(ast);
+                        console.log(text, ast);
                         Browser.TheHost.openNewScriptAsync({
                             editorName: "touchdevelop",
                             scriptName: message2.name,
@@ -273,6 +299,9 @@ module TDev {
             });
             iframe.setAttribute("src", editor.origin + editor.path);
             iframeDiv.appendChild(iframe);
+
+            // Change the hash and the window title.
+            TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
         }
     }
 }
