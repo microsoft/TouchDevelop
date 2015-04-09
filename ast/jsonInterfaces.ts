@@ -95,6 +95,18 @@ module TDev.AST.Json
         type:JTypeRef;
     }
 
+    // A singleton (probably) references one of the top-level categories such as
+    // libraries or data. When trying to call "♻ l →  foo(x1, x2)", one may
+    // understand that the following call takes place:
+    //   ♻ -> l -> foo(x1, x2)
+    // and the following AST is generated:
+    //   JCall { name: foo, parent: l, args: [
+    //     JCall { name: l, parent: ♻, args: [ JSingletonRef ♻ ] },
+    //     x1,
+    //     x2
+    //  ]}
+    // this is surprising, because when calling "1 + 2", we generate a call that
+    // has two arguments only.
     export interface JSingletonRef extends JExpr
     {
         name:string;

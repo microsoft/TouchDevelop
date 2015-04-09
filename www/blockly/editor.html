@@ -53,32 +53,39 @@
         <block type="text"></block>
         <block type="math_number"></block>
         <block type="math_number1"></block>
-        <block type="microbug_show_letter">
-          <value name="letter">
+        <block type="microbug_display">
+          <value name="ARG">
             <block type="text">
               <field name="TEXT"></field>
             </block>
           </value>
         </block>
-        <block type="microbug_pause">
-          <value name="pause">
-            <block type="math_number">
-              <field name="NUM">100</field>
-            </block>
-          </value>
-        </block>
-        <block type="microbug_print_message">
-          <value name="message">
+        <block type="microbug_event">
+          <value name="ID">
             <block type="text">
-              <field name="TEXT">BBC Bug</field>
-            </block>
-          </value>
-          <value name="pausetime">
-            <block type="math_number">
-              <field name="NUM">100</field>
+              <field name="TEXT">start</field>
             </block>
           </value>
         </block>
+        <!-- <block type="microbug_pause"> -->
+        <!--   <value name="pause"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">100</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
+        <!-- <block type="microbug_print_message"> -->
+        <!--   <value name="message"> -->
+        <!--     <block type="text"> -->
+        <!--       <field name="TEXT">BBC Bug</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="pausetime"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">100</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
       </category>
       <category name="LED">
         <block type="microbug_clear_display"></block>

@@ -4,6 +4,25 @@ goog.provide('Blockly.Blocks.microbug');
 
 goog.require('Blockly.Blocks');
 
+// https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xxv26z
+Blockly.Blocks['microbug_event'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(120);
+    this.appendDummyInput()
+        .appendField("on");
+    this.appendValueInput("ID")
+        .setCheck("String")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("event");
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
+    this.setInputsInline(true);
+    this.setTooltip('');
+  }
+};
+
 // Blockly.Blocks['microbug_scroll_string'] = {
 //   init: function() {
 //     this.setHelpUrl('http://www.example.com/');
@@ -114,13 +133,13 @@ Blockly.Blocks['microbug_print_message'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
-Blockly.Blocks['microbug_show_letter'] = {
+Blockly.Blocks['microbug_display'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("show letter");
-    this.appendValueInput("letter")
+        .appendField("display");
+    this.appendValueInput("ARG")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
     this.setInputsInline(true);
