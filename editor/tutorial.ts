@@ -1076,12 +1076,14 @@ module TDev
 
                     var tutLength = 8 - (moreTutorialsId ? 1 : 0);
                     var allTutorials = HelpTopic.getAllTutorials();
+                    var theme = Browser.EditorSettings.hubTheme();
                     var score = (ht: HelpTopic) => {
                         var sc = 0;
                         if (this.hourOfCode && ht.isHourOfCode()) sc += 100;
                         if (/jetpack/i.test(ht.id)) sc += 25;
                         if (/jump/i.test(ht.id)) sc += 20;
                         if (progs[ht.updateKey()]) sc -= 50;
+                        if (theme && theme.scriptSearch) sc += ht.hashTags().indexOf(theme.scriptSearch) > -1 ? 200 : 0;
                         return sc;
                     };
                     allTutorials.stableSort((a, b) => {

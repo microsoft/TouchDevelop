@@ -30,6 +30,7 @@ module TDev.Browser {
             logoArtId: 'eopyzwpm',
             //wallpaperArtId: 'ohilyzjk',
             tutorialsTopic: 'minecraftpitutorials',
+
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
 
