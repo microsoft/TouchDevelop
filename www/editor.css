@@ -2768,6 +2768,10 @@ a.md-bigbutton:hover {
     height: 100%;
 }
 
+.sdImg img {
+    max-width: 100%;
+}
+
 div.iconThumb {
     width:auto;
     height:100%;
