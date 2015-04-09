@@ -24,16 +24,19 @@ module TDev.Browser {
         scriptTemplates?: string[];
     }
 
-    export var hubThemes: StringMap<HubTheme> = {
+    export var hubThemes: StringMap<HubTheme> = {        
         'minecraft': {
-            description: 'Learn to code with Mineacraft',
+            description: 'Learn to code with Minecraft',
             logoArtId: 'eopyzwpm',
-            //wallpaperArtId: 'ohilyzjk',
             tutorialsTopic: 'minecraftpitutorials',
-
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
-
+        },
+        'rpi': {
+            description: 'Learn to code with Raspberry Pi',
+            logoArtId: 'eopyzwpm',
+            tutorialsTopic: 'minecraftpitutorials',
+            scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
         },
         'arduino': {
             description: 'Program Arduino boards',
@@ -58,8 +61,12 @@ module TDev.Browser {
 
         export function init() {
             if (window && window.location) {
-                var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
-                EditorSettings.setHubTheme(m ? m[2] : "", false);
+                if (Browser.isRaspberryPiDebian)
+                    EditorSettings.setHubTheme('rpi', false);
+                else {
+                    var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
+                    EditorSettings.setHubTheme(m ? m[2] : "", false);
+                }
             }
         }
 

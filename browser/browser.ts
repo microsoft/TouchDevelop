@@ -33,6 +33,7 @@ module TDev {
         export var isAndroid = false;
         export var isMacOSX = false;
         export var isWindows8plus = false;
+        export var isRaspberryPiDebian = false;
         export var isCompiledApp = false;
         export var isWP8app = false;
         export var isHosted = false;
@@ -315,6 +316,7 @@ module TDev {
 
             // raspberry pi
             if (/Linux armv7/.test(userAgent)) {
+                isRaspberryPiDebian = true;
                 noAnimations = true;
                 noStorage = true; // I/O very slow
                 lowMemory = true; // limited amount of memory
