@@ -56,16 +56,7 @@ module TDev {
         function addMicrobitLibrary(app: J.JApp) {
             var lib = <AST.LibraryRef> AST.Parser.parseDecl(
                 'meta import microbit {'+
-                '  guid "d73926f2-4b76-4d8a-89f5-d42fd4983ce6"'+
-                '  usage {'+
-                '    action `async` on(@event: String, body: Action)'+
-                '    action `async` set_led(id: Number, brightness: Number)'+
-                '    action `async` on_button(side: String, dir: String, body: Action)'+
-                '    action `async` button_pressed(side: String) returns(r: Boolean)'+
-                '    action `async` start_scrolling(s: String)'+
-                '    action `async` stop_scrolling()'+
-                '    action `async` display(s: String)'+
-                '  }'+
+                '  pub "tpdjbe"'+
                 '}'
             );
             var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
