@@ -612,6 +612,11 @@ module TDev.RT {
         }
 
         export function logException(err: any, meta? : any): void {
+            if (err.tdIsSecondary) {
+                logEvent(DEBUG, "secondary-crash", err.message || err + "", null)
+                return
+            }
+
             if (err.tdMeta) {
                 if (meta)
                     Object.keys(meta).forEach(k => {

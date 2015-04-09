@@ -33,7 +33,7 @@ module TDev
         rendermode?:any;
         errorHandler?:(err:any,th:IStackFrame)=>void;
         isDetached?:boolean;
-        isAsync?:boolean;
+        asyncTask?:RT.Task<any>;
         loggerContext?:any;
     }
 
@@ -71,8 +71,8 @@ module TDev
         public pc:string;
         public serverRequest:RT.ServerRequest;
         public errorHandler:(err:any,th:IStackFrame)=>void;
-        public isAsync:boolean;
         public isDetached:boolean;
+        public prevPC:string;
 
         constructor(public rt:Runtime) {
         }
@@ -104,6 +104,7 @@ module TDev
             this.pc = "";
             this.libs = libs;
             this.previous = previous;
+            this.prevPC = previous.pc;
             this.d = this.rt.datas[this.libRefName];
             this.name = this.libActionName;
             this.stackDepth = previous.stackDepth;
@@ -271,7 +272,6 @@ module TDev
         public host: RuntimeHost;
         private handlingException = false;
         public current: IStackFrame;
-        public errorPC: string;
         private returnedFrom: IStackFrame;
         public validatorAction: string;
         public validatorActionFlags: string;
@@ -1162,7 +1162,7 @@ module TDev
         public enterAsync(t: RT.Task<any>, s: IStackFrame) {
             this.current.continueAt = s.returnAddr;
             this.asyncStack.push(this.current)
-            s.isAsync = true
+            s.asyncTask = t
             s.returnAddr = (s: IStackFrame) => {
                 var prev = s.rt.returnedFrom
                 t.resume(prev.results || prev.result)
@@ -1595,8 +1595,8 @@ module TDev
 
         private nextAsyncTask(): IContinuationFunction {
             if (this.asyncStack.length > 0) {
-                // isAsync should be always true here
-                if (this.current.isAsync)
+                // asyncTask should always be set here
+                if (this.current.asyncTask)
                     this.current.isDetached = true
                 var f = this.asyncStack.pop()
                 this.current = f;
@@ -1812,8 +1812,6 @@ module TDev
 
             this.tutorialState = null
             Runtime.stopPendingScriptsAsync().done(() => {
-                this.errorPC = undefined;
-
                 Runtime.theRuntime = this;
 
                 if (this.eventQ)
@@ -1916,30 +1914,37 @@ module TDev
             }
         }
 
-        public quietlyHandleError(e:any)
+        public quietlyHandleError(e:any, s?:IStackFrame)
         {
             this.augmentException(e);
 
             var foundSome = false
 
-            for (var s = e.tdStackFrame; s; s = s.previous) {
-                if (s.isDetached) break
+            var isSecondary = !!s
+            if (!s) s = e.tdStackFrame
+
+            for (; s; s = s.previous) {
+                if (s.isDetached) {
+                    s.asyncTask.setException(e)
+                    break
+                }
                 if (s.errorHandler) (() => {
                     foundSome = true
                     var s0 = s
+                    var h = s.errorHandler
+                    s.errorHandler = null
                     Util.setTimeout(0, () => {
                         try {
-                            s0.errorHandler(e, s0)
+                            var prev = e.tdIsSecondary
+                            e.tdIsSecondary = isSecondary
+                            h(e, s0)
+                            e.tdIsSecondary = prev
                         } catch (exn) {
                             this.host.exceptionHandler(exn);
                         }
                     })
                 })()
             }
-
-            // this most likely doesn't work very well
-            if (e.programCounter)
-                this.errorPC = e.programCounter;
 
             return foundSome
         }
@@ -1954,7 +1959,7 @@ module TDev
             var st = e.stack
 
             if (st !== undefined && !e.tdStack) {
-                e.tdStack = this.getStackTrace(s).map(n => { return { pc: n.pc, name: n.name, d: { libName: (n.d ? n.d.libName : undefined) } } })
+                e.tdStack = this.getStackTrace(s, true)
                 if (!e.tdMeta) e.tdMeta = {}
                 var compr = StackUtil.compress(e.tdStack)
                 if (compr) {
@@ -1986,18 +1991,27 @@ module TDev
             this.stopAsync().done()
         }
 
-        public getStackTrace(init?:IStackFrame)
+        public getStackTrace(init?:IStackFrame, strip = false)
         {
             var locs:IStackFrame[] = []
 
-            if (!init && this.errorPC)
-                locs.push(<any>{ pc: this.errorPC })
-
             for (var s = init || this.current; s; s = s.previous) {
-                s = Util.flatClone(s)
-                if (s.prevPC && s.previous) s.previous.pc = s.prevPC
-                locs.push(s)
+                var ns
+                if (strip)
+                    ns = <any> {
+                        pc: s.pc, 
+                        prevPC: s.prevPC,
+                        name: s.name, 
+                        d: { libName: (s.d ? s.d.libName : undefined) } 
+                    }
+                else
+                    ns = Util.flatClone(s)
+                locs.push(ns)
             }
+            locs.forEach((l, i) => {
+                if (l.prevPC && locs[i + 1])
+                    locs[i + 1].pc = l.prevPC
+            })
             return locs;
         }
 

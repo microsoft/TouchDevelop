@@ -8,11 +8,21 @@ module TDev.RT {
         private _completed:boolean = false;
         private _value:T;
         private _awaitQueue:ResumeCtx[];
+        private _exn:any;
 
         //? Check if the task is done yet
         public completed() : boolean
         {
             return this._completed;
+        }
+
+        public setException(e:any)
+        {
+            this._exn = e;
+
+            var q = this.consumeQueue()
+            if (!q) return
+            q.forEach(r => r.rt.quietlyHandleError(e, r.stackframe))
         }
 
         public resume(v:T)
@@ -27,7 +37,9 @@ module TDev.RT {
         //@ async returns(T)
         public await(r:ResumeCtx)
         {
-            if (this._completed) {
+            if (this._exn) {
+                r.rt.quietlyHandleError(this._exn, r.stackframe)
+            } else if (this._completed) {
                 // r.resumeVal(this._value);
                 r.rt.queueAsyncEvent(() => {
                     return r.rt.continueStackFrame(this._value, r.stackframe)
@@ -68,11 +80,18 @@ module TDev.RT {
             }
         }
 
-        private runAwaiters()
+        private consumeQueue():ResumeCtx[]
         {
             var q = this._awaitQueue
-            if (!q) return;
+            if (!q) return null
             this._awaitQueue = null
+            return q
+        }
+
+        private runAwaiters()
+        {
+            var q = this.consumeQueue()
+            if (!q) return
             q.forEach(r => {
                 r.rt.queueAsyncEvent(() => {
                     return r.rt.continueStackFrame(this._value, r.stackframe)

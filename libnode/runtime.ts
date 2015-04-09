@@ -411,30 +411,21 @@ module TDev.RT.Node {
         public runInlineJavascript(f:()=>void)
         {
             var frame = this.current
-            var outer = (<any>process).domain
             var d = domain.create()
             d.on("error", err => {
-                if (outer) {
-                    err.tdStackFrame = frame
-                    outer.emit('error', err)
-                } else {
-                    this.handleException(err, frame)
-                }
+                this.handleException(err, frame)
             })
 
-            if (outer) d.run(f)
-            else {
-                var exn = null
-                d.run(() => {
-                    try {
-                        f()
-                    } catch (e) {
-                        e.tdStackFrame = frame
-                        exn = e
-                    }
-                })
-                if (exn) throw exn
-            }
+            var exn = null
+            d.enter()
+                try {
+                    f()
+                } catch (e) {
+                    e.tdStackFrame = frame
+                    exn = e
+                }
+            d.exit()
+            if (exn) throw exn
         }
 
     }
