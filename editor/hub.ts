@@ -28,7 +28,7 @@ module TDev.Browser {
         'minecraft': {
             description: 'Learn to code with Mineacraft',
             logoArtId: 'eopyzwpm',
-            wallpaperArtId: 'ohilyzjk',
+            //wallpaperArtId: 'ohilyzjk',
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
@@ -1897,12 +1897,22 @@ module TDev.Browser {
                     this.startTutorial(tutorial.topic, tutorial.header);
                 }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
                 btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                if (!Browser.lowMemory && (tutorial.topic.json.iconArtId || tutorial.topic.json.screenshot)) {
-                    btn.style.backgroundImage = tutorial.topic.json.iconArtId
-                        ? ArtUtil.artUrl(tutorial.topic.json.iconArtId, true)
-                        : HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
-                    btn.style.backgroundSize = "cover";
-                }
+                if (!Browser.lowMemory)
+                    if (tutorial.topic.json.screenshot) {
+                        btn.style.backgroundImage = HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
+                        btn.style.backgroundSize = "cover";
+                        btn.style.backgroundPosition = 'center';
+                    } else {
+                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1",(res: JsonList) => {
+                            var sc = res.items[0];
+                            if (sc) {
+                                btn.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(sc.id, false));
+                                btn.style.backgroundSize = "cover";
+                                btn.style.backgroundPosition = 'center';
+                            }
+                        });
+                    }
+
                 ScriptInfo.addTutorialProgress(btn, tutorial.header);
                 buttons.push(btn);
 
