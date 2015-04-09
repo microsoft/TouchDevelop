@@ -473,10 +473,7 @@ module TDev.RT {
             // TODO: move somewhere else
             if (App.env().has_host()) {
                 var durl: string;
-                return App.hostExecAsync("screen.min")
-                    .then(() => new Promise((onSuccess, onError, onProcess) => {
-                        Util.setTimeout(100,() => onSuccess(undefined));
-                    })).then(() => App.hostExecAsync("screen.screenshot"))
+                return App.hostExecAsync("screen.screenshot")
                     .then((url) => {
                         durl = url;
                         return background ? Promise.as() : App.hostExecAsync("screen.show");
