@@ -434,6 +434,8 @@ module TDev {
         browseListArt,
         browseListMyArt,
         browseListTags,
+        browseListSearch,
+        browseListUsers,
         browseFollowTopic,
 
         introSlideGetStarted,

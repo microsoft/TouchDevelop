@@ -1386,6 +1386,15 @@ module TDev { export module Browser {
                 case "showcase-mgmt":
                     header = "show-mgmt";
                     break;
+                case "search":
+                    tick(Ticks.browseListSearch);
+                    header = lf("search");
+                    break;
+                case "users":
+                    tick(Ticks.browseListUsers);
+                    header = lf("users");
+                    break;
+
                 default:
                     if (/^bugs\//.test(path)) {
                         tick(Ticks.browseListBugs);
@@ -1395,7 +1404,9 @@ module TDev { export module Browser {
                         tick(Ticks.browseListTags);
                         Ticker.rawTick("browseListTag_" + MdComments.shrink(header));
                     } else {
-                        Ticker.rawTick("browseListOther_" + MdComments.shrink(header));
+                        header = lf("my scripts");
+                        this.apiPath = path = "installed-scripts"
+                        //Ticker.rawTick("browseListOther_" + MdComments.shrink(header));
                     }
                     break;
             }
