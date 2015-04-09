@@ -17,6 +17,7 @@ module TDev.RT.Node {
     var https = require("https")
     var zlib = require("zlib")
     var path = require("path")
+    var domain = require("domain")
     var Buffer;
     var webSocketModule;
 
@@ -344,12 +345,18 @@ module TDev.RT.Node {
         }
 
 
-        public handleException(e:any)
+        public handleException(e:any, s:IStackFrame)
         {
+            if (e.rtProtectHandled) return 
+            if (!e.tdStackFrame)
+                e.tdStackFrame = s
+
             var handled = this.quietlyHandleError(e)
 
             if (!handled)
                 this.host.exceptionHandler(e);
+
+            e.rtProtectHandled = true;
 
             this.restartAfterException()
         }
@@ -400,6 +407,27 @@ module TDev.RT.Node {
 
             this.dispatchServerRequest(sr)
         }
+
+        public runInlineJavascript(f:()=>void)
+        {
+            var frame = this.current
+            var d = domain.create()
+            d.on("error", err => {
+                this.handleException(err, frame)
+            })
+
+            var exn = null
+            d.enter()
+                try {
+                    f()
+                } catch (e) {
+                    e.tdStackFrame = frame
+                    exn = e
+                }
+            d.exit()
+            if (exn) throw exn
+        }
+
     }
 
     export class RunnerHost
@@ -644,11 +672,11 @@ module TDev.RT.Node {
         setupGlobalAgent()
 
         Promise.errorHandler = (ctx, err) => {
-            if (Runtime.theRuntime && !Runtime.theRuntime.isStopped()) {
-                Runtime.theRuntime.handleException(err);
-            } else {
+            var outer = (<any>process).domain
+            if (outer)
+                outer.emit('error', err)
+            else
                 handleError(err)
-            }
             return new TDev.PromiseInv();
         }
 

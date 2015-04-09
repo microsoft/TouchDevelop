@@ -612,6 +612,19 @@ module TDev.RT {
         }
 
         export function logException(err: any, meta? : any): void {
+            if (err.tdIsSecondary) {
+                logEvent(DEBUG, "secondary-crash", err.message || err + "", null)
+                return
+            }
+
+            if (err.tdMeta) {
+                if (meta)
+                    Object.keys(meta).forEach(k => {
+                        err.tdMeta[k] = meta[k]
+                    })
+                meta = err.tdMeta
+            }
+
             transports.filter(transport => !!transport.logException).forEach(transport => {
                 try {
                     transport.logException(err, meta);
@@ -622,8 +635,8 @@ module TDev.RT {
             var msg = err.stack
             if (!msg) {
                 msg = err.message || (err + "")
-                if (err.tdCompressedStack)
-                    msg += " at " + err.tdCompressedStack
+                if (err.tdMeta && err.tdMeta.compressedStack)
+                    msg += " at " + err.tdMeta.compressedStack
             }
             logEvent(ERROR, "crash", msg, meta);
         }

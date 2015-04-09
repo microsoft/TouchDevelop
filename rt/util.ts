@@ -757,7 +757,7 @@ module TDev{
     export function userError(msg:string, pc = "", statusCode?:number) : any
     {    
         var e = new Error(msg);
-        (<any>e).programCounter = pc;
+        // (<any>e).programCounter = pc;
         (<any>e).isUserError = true;
         if (statusCode)
             (<any>e).statusCode = statusCode;

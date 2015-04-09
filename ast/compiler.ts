@@ -1436,7 +1436,7 @@ module TDev.AST
                 //    this.problem("javascript async/resume() mismatch, " + theCode)
                 code += c.args[2].getStringLiteral()
                 code += "\n\n  }\n"
-                code += "  _userCode();\n"
+                code += "  s.rt.runInlineJavascript(_userCode);\n"
                 if (!isAsync)
                     code += "  _saveResults();\n"
                 code += "})"
