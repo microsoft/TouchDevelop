@@ -1100,13 +1100,13 @@ var apiHandlers = {
         case "touchdevelop-rpi.sh":
             hr.writeHead(200, { "Content-Type": "text/plain" });
             hr.end(
-                "sudo apt-get -y update\n" +
+                "mkdir TouchDevelop\n" +
+                "cd TouchDevelop\n" +
                 "wget http://node-arm.herokuapp.com/node_latest_armhf.deb\n" +
                 "sudo dpkg -i node_latest_armhf.deb\n" +
                 "sudo npm install -g http://aka.ms/touchdevelop.tgz\n" +
-                "wget -O $HOME/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
-                "wget -O $HOME/.local/applications https://www.touchdevelop.com/api/language/touchdevelop.desktop\n" +
-                "wget -O $HOME/Desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
+                "wget -O $HOME/TouchDevelop/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png" +
+                "wget -O $HOME/Desktop/touchdevelop.desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
             break;
 
         // linux desktop shortcut, mainly for raspberry pi
@@ -1114,16 +1114,16 @@ var apiHandlers = {
             hr.writeHead(200, { "Content-Type": "text/plain" });
             hr.end(
                 "[Desktop Entry]\n" +
-                "Encoding=UTF-8" +
+                "Encoding=UTF-8\n" +
                 "Version=1.0\n" +
-                "Name[en_US]=TouchDevelop\n" +
+                "Name=TouchDevelop\n" +
                 "GenericName=Microsoft TouchDevelop\n" +
                 "Exec=touchdevelop\n" +
                 "Terminal=true\n" +
-                "Icon[en_US]=$HOME/TouchDevelop.png\n" +
+                "Icon=$HOME/TouchDevelop/TouchDevelop.png\n" +
                 "Type=Application\n" +
                 "Categories=Programming;Games\n" +
-                "Comment[en_US]=Mod Minecraft Pi using TouchDevelop!", "utf-8");
+                "Comment=Learn to code using TouchDevelop!", "utf-8");
             break;
 
         default:
