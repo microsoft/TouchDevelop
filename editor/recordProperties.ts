@@ -295,7 +295,7 @@ module TDev
 
 
             this.formRoot.setChildren([
-                                  Editor.mkHelpButton("records"),
+                                  Editor.mkHelpLink("records"),
                                   this.exported,
                                   this.fields,
                                   this.mkKey,

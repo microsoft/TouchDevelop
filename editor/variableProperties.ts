@@ -192,7 +192,7 @@ module TDev
                 saveBox.style.display = "none";
 
             this.formRoot.setChildren([
-                                  Editor.mkHelpButton(a.isResource ? "art" : "data"),
+                                  Editor.mkHelpLink(a.isResource ? "art" : "data"),
                                   div("varLabel", a.isResource ? lf("art resource") : lf("global variable")),
                                   this.variableName,
                                   // div("varLabel", lf("of type")),

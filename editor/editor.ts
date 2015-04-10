@@ -1888,14 +1888,6 @@ module TDev
             Util.setHash("#topic:" + t)
         }
 
-        static mkHelpButton(topic:string, lbl = "help on " + topic)
-        {
-            var btn = HTML.mkRoundButton("svg:Question,black", lbl, Ticks.noEvent, () => Editor.goToTopic(topic))
-            btn.setAttribute("aria-label", topic);
-            var r = div("float-help-button", btn);
-            return r;
-        }
-
         static mkHelpLinkBtn(topic: string, lbl = lf("read more..."))
         {
             var btn = HTML.mkLinkButton(lbl, () => Editor.goToTopic(topic))

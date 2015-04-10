@@ -209,7 +209,7 @@ module TDev
             this.theLibrary = a;
 
             this.formRoot.setChildren(<any[]>[
-                                  Editor.mkHelpButton("libraries"),
+                                  Editor.mkHelpLink("libraries"),
                                   div("varLabel", lf("library reference")),
                                   div("varHalf",
                                     div("formHint", lf("known here as:")),
