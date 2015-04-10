@@ -115,7 +115,7 @@ module TDev {
         export function detect() {
             startTimestamp = new Date().getTime(); // no Util here
 
-            if ((<any>window).touchDevelopExec || (<any>window).mcefQuery) {
+            if ((<any>window).touchDevelopExec || (<any>window).mcefQuery || (<any>window).cordova) {
                 isHosted = true;
                 Browser.screenshots = true;
             }
