@@ -6144,14 +6144,12 @@ module TDev { export module Browser {
             var wontWork = div(null);
             var runBtns = div(null);
             var commentsDiv = div(null);
-            var remainingContainer = div(null);
             var docsButtonDiv = div(null);
 
             this.tabContent.setChildren([
                 runBtns,
                 descDiv,
                 docsButtonDiv,
-                remainingContainer,
                 commentsDiv,
                 wontWork,
             ]);
