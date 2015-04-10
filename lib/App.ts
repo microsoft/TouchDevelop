@@ -4,6 +4,7 @@ module TDev.RT {
     export interface StdMeta {
         contextId: string;
         contextDuration: number;
+        contextUser: string;
     }
 
     export interface AppLogTransport {
@@ -79,22 +80,53 @@ module TDev.RT {
                 var tm = Util.perfNow() - c.created
                 if (c.root.pauseOffset)
                     tm -= c.root.pauseOffset
-                return { contextId: c.id, contextDuration: Math.round(tm) }
+                var r = { contextId: c.id, contextDuration: Math.round(tm), contextUser: "" }
+                for (var p = c; p; p = p.prev)
+                    if (!r.contextUser) r.contextUser = p.userid || ""
+                return r
+            }
+        }
+
+        public setMetaFromContext(v: any, s: IStackFrame)
+        {
+            var i = this.contextInfo(s)
+            if (i) {
+                v.contextId = i.contextId
+                v.contextDuration = i.contextDuration
+                v.contextUser = i.contextUser
             }
         }
 
         private augmentMeta(meta: JsonObject, s: IStackFrame) : any
         {
-            var i = this.contextInfo(s)
             var v = meta ? meta.value() : null
-            if (!i) return v
-            if (!v) return i
-            else {
-                v = Util.jsonClone(v)
-                v.contextId = i.contextId
-                v.contextDuration = i.contextDuration
-                return v
-            }
+
+            if (!AppLogger.findContext(s)) return v
+
+            if (v) v = Util.jsonClone(v)
+            else v = {}
+
+            this.setMetaFromContext(v, s)
+
+            return v
+        }
+
+        //? Get the userid attached to the current context, or empty.
+        //@ betaOnly
+        public set_context_user(userid:string, s: IStackFrame)
+        {
+            var c = AppLogger.findContext(s)
+            if (!c) Util.userError("No current context")
+            if (c) c.userid = userid
+        }
+
+        //? Get the userid attached to the current context, or empty.
+        //@ betaOnly
+        public context_user(s: IStackFrame) : string
+        {
+            var i = this.contextInfo(s)
+            if (!i || !i.contextUser) return ""
+            return i.contextUser
         }
 
         //? The unique id of current context, or empty if in global scope.
@@ -178,6 +210,7 @@ module TDev.RT {
             var prev = AppLogger.findContext(s)
             var ctx:any = { 
                 id: prev ? prev.id + "." + ++prev.numCh : Random.uniqueId(8),
+                prev: prev,
                 created: Util.perfNow(), 
                 numCh: 0, 
             }
@@ -611,6 +644,10 @@ module TDev.RT {
             logEvent(INFO, "", message, undefined);
         }
 
+        function transportFailed(tp:string, err:any) {
+            Util.log(tp + ": transport failed. " + (err.stack || err.message || err))
+        }
+
         export function logException(err: any, meta? : any): void {
             if (err.tdIsSecondary) {
                 logEvent(DEBUG, "secondary-crash", err.message || err + "", null)
@@ -629,7 +666,7 @@ module TDev.RT {
                 try {
                     transport.logException(err, meta);
                 } catch (err) {
-                    Util.log('log: transport failed ');
+                    transportFailed("logException", err)
                 }
             });
             var msg = err.stack
@@ -650,7 +687,7 @@ module TDev.RT {
                 try {
                     transport.log(level, category, message, meta);
                 } catch (err) {
-                    Util.log('transport failed ');
+                    transportFailed("logEvent", err)
                 }
             });
             if (logger) {
@@ -665,7 +702,7 @@ module TDev.RT {
                 try {
                     transport.logTick(category, id, meta);
                 } catch (err) {
-                    Util.log('transport failed');
+                    transportFailed("logTick", err)
                 }
             });
         }
@@ -679,7 +716,7 @@ module TDev.RT {
                 try {
                     transport.logMeasure(category, id, value, meta);
                 } catch (err) {
-                    Util.log('transport failed');
+                    transportFailed("logMeasure", err)
                 }
             });
         }

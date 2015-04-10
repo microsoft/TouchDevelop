@@ -197,7 +197,9 @@ module TDev {
         {
             e.includeSource = true;
 
-            this.currentRt.augmentException(e);
+            try {
+                this.currentRt.augmentException(e);
+            } catch (ee) {}
 
             var bug = TDev.Ticker.mkBugReport(e, "runtime error");
 

@@ -1916,7 +1916,9 @@ module TDev
 
         public quietlyHandleError(e:any, s?:IStackFrame)
         {
-            this.augmentException(e);
+            try {
+                this.augmentException(e);
+            } catch (ee) {}
 
             var foundSome = false
 
@@ -1961,6 +1963,8 @@ module TDev
             if (st !== undefined && !e.tdStack) {
                 e.tdStack = this.getStackTrace(s, true)
                 if (!e.tdMeta) e.tdMeta = {}
+                if (s)
+                    new RT.AppLogger("dummy").setMetaFromContext(e.tdMeta, s)
                 var compr = StackUtil.compress(e.tdStack)
                 if (compr) {
                     compr = "StK" + compr
