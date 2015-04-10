@@ -8334,17 +8334,16 @@ module TDev { export module Browser {
 
             var setLikeBtn = (s:number, h:string, f:()=>void) => {
                 var btn:HTMLElement;
-                var cntDiv = showCount ? div("sdDocsCount") : null;
                 if (s < 0)
-                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:wholeheart,#000"), h)
+                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
                 else
-                    btn = div("sdDocsBtn", cntDiv, HTML.mkImg("svg:wholeheart,#EAC117"), h)
+                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#EAC117"))
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
                     TheApiCacheMgr.getAnd(id, (s:JsonScript) => {
                         var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
-                        cntDiv.setChildren(n + "");
+                        btn.appendChild(span('', n + ""));
                     })
             }
             ScriptInfo.setupLike(id, setLikeBtn);
