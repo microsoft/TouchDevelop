@@ -230,6 +230,7 @@ module TDev {
         sideAddObject,
         sideAddTable,
         sideAddIndex,
+        sideAddDecorator,
         sideAddResource,
         sideAddVariable,
         sideAddAnything,

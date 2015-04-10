@@ -4652,6 +4652,7 @@ module TDev
         public freshObject() { return this.freshRecord('Object'); }
         public freshTable() { return this.freshRecord('Table'); }
         public freshIndex() { return this.freshRecord('Index'); }
+        public freshDecorator() { return this.freshRecord('Decorator'); }
         public freshRecord(type : string)
         {
             var name = Script.freshName(lf("Thing"));
