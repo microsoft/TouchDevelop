@@ -3782,6 +3782,7 @@ module TDev { export module Browser {
             var count = this.nestedCommentsCount(cont);
             TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
                 var items = <JsonComment[]>lst.items;
+                if (!items) return; // comment did not load
                 if (!cont && items.length > count) // first load
                 {
                     var boxes = items.slice(0, count).map((cmt) => this.commentBox(cmt));
@@ -6143,11 +6144,13 @@ module TDev { export module Browser {
             var descDiv = div("sdDesc");
             var wontWork = div(null);
             var runBtns = div(null);
+            var authorDiv = div(null);
             var commentsDiv = div(null);
             var docsButtonDiv = div(null);
 
             this.tabContent.setChildren([
                 runBtns,
+                authorDiv,
                 descDiv,
                 docsButtonDiv,
                 commentsDiv,
@@ -6187,6 +6190,13 @@ module TDev { export module Browser {
 
                 // if (this.cloudHeader)
                 runBtns.setChildren([this.mkButtons()]);
+
+                var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username);
+                var authorHead = author.thumbnail(false,() => { this.browser().loadDetails(author); });
+                authorHead.classList.add("teamHead");
+                authorDiv.setChildren([
+                        lf("by"), authorHead, this.jsonScript.username
+                ]);
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
