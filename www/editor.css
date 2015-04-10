@@ -2772,6 +2772,10 @@ a.md-bigbutton:hover {
     max-width: 100%;
 }
 
+.sdScriptAuthor {
+    background: #f0efef;
+}
+
 div.iconThumb {
     width:auto;
     height:100%;
@@ -3250,6 +3254,10 @@ div.sdTabTileLabel {
   font-size: 1em;
   text-align: left;
   display: inline-block;
+}
+
+.phone .sdBigButtonFull {
+  width:13.5em;
 }
 
 .sdBigButtonHalf {
