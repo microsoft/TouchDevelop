@@ -2774,6 +2774,24 @@ a.md-bigbutton:hover {
 
 .sdScriptAuthor {
     background: #f0efef;
+    margin-right:0.5em;
+    padding-right:0.5em;
+    max-width: 50em;
+}
+
+.sdAuthorLabel {
+    vertical-align:top;
+    display:inline-block;
+    margin-top:0.5em;
+    margin-left:0.5em;
+    cursor:pointer;
+}
+
+.sdAuthorLabel .svg
+{
+    width:1.4em;
+    height:1.4em;
+    margin-right:0.3em;
 }
 
 div.iconThumb {

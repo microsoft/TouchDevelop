@@ -2912,9 +2912,9 @@ module TDev { export module Browser {
             var id = this.getPublicationId();
             if (!id) return null;
 
-            var url = Cloud.getServiceUrl() + "/" + id;
+            var url = "http://tdev.ly/" + id;
             var text = this.twitterMessage();
-            var r = div("sdReportAbuse", HTML.mkImg("svg:Package,#000,clip=100"), lf("share")).withClick(() => {
+            var r = div("sdAuthorLabel", HTML.mkImg("svg:Package,#000,clip=100"), lf("share")).withClick(() => {
                     TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
                 });
             return r;
@@ -5813,8 +5813,6 @@ module TDev { export module Browser {
 
                 if (!this.jsonScript) return;
 
-                if (big && !isTopic) facebook.setChildren(this.facebookLike())
-
                 if (!Cloud.isRestricted() && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
                     updateHideButton();
                 }
@@ -5839,7 +5837,8 @@ module TDev { export module Browser {
                 //if (!this.willWork())
                 //    cont.push(span("sdNumber symbol", "⚠"));
                 numbers.setChildren(cont);
-                author.setChildren([ this.jsonScript.username ]);
+                if (!big)
+                    author.setChildren([ this.jsonScript.username ]);
 
                 if (screenShot && this.jsonScript.screenshotthumburl) {
                     res.className += " sdHasScriptShot";
@@ -6144,13 +6143,13 @@ module TDev { export module Browser {
             var descDiv = div("sdDesc");
             var wontWork = div(null);
             var runBtns = div(null);
-            var authorDiv = div(null);
+            var authorDiv = div("sdScriptAuthor");
             var commentsDiv = div(null);
             var docsButtonDiv = div(null);
 
             this.tabContent.setChildren([
-                runBtns,
                 authorDiv,
+                runBtns,
                 descDiv,
                 docsButtonDiv,
                 commentsDiv,
@@ -6192,10 +6191,13 @@ module TDev { export module Browser {
                 runBtns.setChildren([this.mkButtons()]);
 
                 var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username);
-                var authorHead = author.thumbnail(false,() => { this.browser().loadDetails(author); });
+                var authorHead = author.thumbnail(false);
                 authorHead.classList.add("teamHead");
                 authorDiv.setChildren([
-                        lf("by"), authorHead, this.jsonScript.username
+                    div("inlineBlock", authorHead, div("sdAuthorLabel", this.jsonScript.username))
+                        .withClick(() => { this.browser().loadDetails(author); })
+                    ,
+                    div("floatright", this.facebookLike())
                 ]);
 
                 if (!this.willWork()) {
