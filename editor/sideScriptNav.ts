@@ -317,7 +317,7 @@ module TDev
                     var d = declIt(e);
                     if (e.hasErrors())
                         d.setFlag("errors", true);
-                    if (e.getKind()) {
+                    if (e instanceof AST.RecordDef && e.getKind()) {
                         var subDecls = byKind[e.getKind().toString()];
                         if (subDecls) subDecls.forEach(se => {
                             var sd = declIt(se);
