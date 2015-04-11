@@ -1844,8 +1844,9 @@ export function updatehelp(args:string[])
                                     /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(d.url))
                         var findImg = t => pics.filter(d => t.test(d.name))[0]
                         var img = findImg(/screenshot/i) || findImg(/background/i);
-                        if (img)
-                            desc.screenshot = img.url
+                        if (img) desc.screenshot = img.url
+                        else if (scr.screenshotids && scr.screenshotids[0])
+                            desc.screenshot = 'https://az31353.vo.msecnd.net/pub/' + scr.screenshotids[0];
                         oneDone()
                     })
 
