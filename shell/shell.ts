@@ -2235,6 +2235,7 @@ function main()
     agent.keepAlive = true;
     if (agent.options) agent.options.keepAlive = true;
     agent.keepAliveMsecs = 20000;
+    agent.maxSockets = Infinity; 
     // don't limit maxSockets - they might be long-living
 
     inAzure = !!process.env.PORT;
