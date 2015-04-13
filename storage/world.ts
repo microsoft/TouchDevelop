@@ -725,8 +725,8 @@ module TDev {
                     Cloud.showModalOnlineInfo("could not " + action);
                     return;
                 }
-                else if (e.status == 503) {
-                    ModalDialog.info("could not " + action, "Did you post a lot recently? Please try again later.");
+                else if ((!Cloud.lite && e.status == 503) || (Cloud.lite && e.status == 429)) {
+                    ModalDialog.info(lf("could not {0}", action), lf("Did you post a lot recently? Please try again later."));
                     return;
                 }
                 else if (e.status == 403) {
