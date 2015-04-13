@@ -7,7 +7,7 @@ module TDev {
     import J = AST.Json
 
     export class JsonAstVisitor<T, U> {
-      public visit(env: T, n: { nodeType: string }): U {
+      public visit(env: T, n: J.JNode): U {
           switch (n.nodeType) {
             case "numberLiteral":
               return this.visitNumberLiteral(env, (<J.JNumberLiteral> n).value);
