@@ -28,6 +28,7 @@ import net = require("net");
 var config:any;
 var currentReqNo = 0;
 var inAzure = false;
+var trustXff = false;
 var controllerUrl = "";
 var isNpm = false;
 var inNodeWebkit = false;
@@ -1421,6 +1422,7 @@ class Worker {
 }
 
 var workers:Worker[] = []
+var totalWorkers = 0;
 
 function startWorker(cb0, cb)
 {
@@ -1430,6 +1432,7 @@ function startWorker(cb0, cb)
 
     var env = JSON.parse(JSON.stringify(process.env))
     Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
+    env['TD_WORKER_ID'] = ++totalWorkers;
 
     var fin = () => {
         debug.log("forking child script, " + w.description())
@@ -1956,6 +1959,22 @@ function pickWorker()
     return workers[Math.floor(Math.random() * workers.length)]
 }
 
+function setupHeaders(req)
+{
+    if (!trustXff) {
+        req.headers['x-forwarded-for'] = req.connection.remoteAddress
+        req.headers['x-forwarded-proto'] = req.connection.encrypted ? "https" : "http"
+    } else {
+        var fw = req.headers['x-forwarded-for']
+        if (fw) {
+            // IIS (or IISNode) likes to include port number in X-Forwarded-For header
+            var m = /^(\d+\.\d+\.\d+\.\d+):\d+$/.exec(fw)
+            if (m) req.headers['x-forwarded-for'] = m[1]
+        }
+        if (!req.headers['x-forwarded-proto'] && req.headers['x-arr-ssl'] && process.env['IISNODE_VERSION'])
+            req.headers['x-forwarded-proto'] = 'https'
+    }
+}
 
 function forwardWebSocket(req, sock, body)
 {
@@ -1964,6 +1983,7 @@ function forwardWebSocket(req, sock, body)
     if (u.socketPath)
         u.path = u.socketPath
     var fwd = net.connect(u, () => {
+        setupHeaders(req)
         var hds = req.method + " " + req.url + " HTTP/1.1\r\n"
         Object.keys(req.headers).forEach(h => {
             hds += h + ": " + req.headers[h] + "\r\n"
@@ -1980,6 +2000,8 @@ function forwardWebSocket(req, sock, body)
 
 function handleReq(req, resp)
 {
+    setupHeaders(req)
+
     if (/^\/-tdevmgmt-/.test(req.url))
         specHandleReq(req, resp)
     else if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
@@ -2248,9 +2270,17 @@ function main()
         console.error("TD_ALLOW_EDITOR         -- set to 'true' to proxy editor at /editor/")
         console.error("TD_LOCAL_EDITOR_PATH    -- serve files from path at /editor/local")
         console.error("TD_BLOB_DEPLOY_CHANNEL  -- deploy from Azure blob storage, using named channel")
+        console.error("TD_WORKERS              -- same as --workers option")
+        console.error("TD_TRUST_XFF            -- if non-empty trust X-Forwarded-For header")
+        console.error("")
+        console.error("Azure Web Apps compatibility:")
+        console.error("IISNODE_VERSION         -- same as TD_TRUST_XFF")
+        console.error("PORT                    -- same as --port $PORT --internet and disable console logging")
 
         process.exit(1)
     }
+
+    trustXff = !! (process.env['TD_TRUST_XFF'] || process.env['IISNODE_VERSION'])
 
     if (!inAzure && !inNodeWebkit && __dirname != process.cwd()) {
         if (isNpm) process.env["TD_ALLOW_EDITOR"] = "true"
@@ -2259,6 +2289,10 @@ function main()
     }
 
     debug.log("starting with " + args.join(" ") + ", pid: " + process.pid)
+
+    if (process.env['TD_WORKERS']) {
+        numWorkers = parseFloat(process.env['TD_WORKERS']) || 1
+    }
 
     while (args.length > 0) {
         switch (args[0]) {
