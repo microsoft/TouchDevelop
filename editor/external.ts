@@ -190,8 +190,7 @@ module TDev {
                                 break;
                             case Language.TouchDevelop:
                                 // the guid is here only for testing; the real generation should be deterministic for best results
-                                cpp = "// " + Util.guidGen() + "\n" +
-                                      "int main () { }\n";
+                                cpp = Microbit.compile(message1.text);
                                 break;
                         }
                         Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
