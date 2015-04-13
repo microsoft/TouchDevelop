@@ -1,66 +1,107 @@
+///<reference path='../refs.ts'/>
+
 module TDev {
 
-    export module Microbit {
+  export module Microbit {
 
-        export class JsonAstVisitor<T, U> {
-            public visitNodeRef(env: T, n: JNodeRef): U { throw "Not implemented" }
-            public visitTypeRef(env: T, n: JTypeRef): U { throw "Not implemented"; }
-            public visitGenericTypeInstance(env: T, n: JGenericTypeInstance): U { return this.visitTypeRef(n); }
-            public visitUserType(env: T, n: JUserType): U { return this.visitTypeRef(n); }
-            public visitLibraryType(env: T, n: JLibraryType): U { return this.visitUserType(n); }
-            public visitNode(env: T, n: JNode): U { throw "Not implemented"; }
-            public visitDecl(env: T, n: JDecl): U { return this.visitNode(n); }
-            public visitToken(env: T, n: JToken): U { return this.visitNode(n); }
-            public visitExpr(env: T, n: JExpr): U { return this.visitToken(n); }
-            public visitOperator(env: T, n: JOperator): U { return this.visitToken(n); }
-            public visitPropertyRef(env: T, n: JPropertyRef): U { return this.visitToken(n); }
-            public visitStringLiteral(env: T, n: JStringLiteral): U { return this.visitExpr(n); }
-            public visitBooleanLiteral(env: T, n: JBooleanLiteral): U { return this.visitExpr(n); }
-            public visitNumberLiteral(env: T, n: JNumberLiteral): U { return this.visitExpr(n); }
-            public visitLocalRef(env: T, n: JLocalRef): U { return this.visitExpr(n); }
-            public visitPlaceholder(env: T, n: JPlaceholder): U { return this.visitExpr(n); }
-            public visitSingletonRef(env: T, n: JSingletonRef): U { return this.visitExpr(n); }
-            public visitCall(env: T, n: JCall): U { return this.visitExpr(n); }
-            public visitExprHolder(env: T, n: JExprHolder): U { return this.visitNode(n); }
-            public visitStmt(env: T, n: JStmt): U { return this.visitNode(n); }
-            public visitComment(env: T, n: JComment): U { return this.visitStmt(n); }
-            public visitFor(env: T, n: JFor): U { return this.visitStmt(n); }
-            public visitForeach(env: T, n: JForeach): U { return this.visitStmt(n); }
-            public visitCondition(env: T, n: JCondition): U { return this.visitNode(n); }
-            public visitWhere(env: T, n: JWhere): U { return this.visitCondition(n); }
-            public visitWhile(env: T, n: JWhile): U { return this.visitStmt(n); }
-            public visitIf(env: T, n: JIf): U { return this.visitStmt(n); }
-            public visitBoxed(env: T, n: JBoxed): U { return this.visitStmt(n); }
-            public visitExprStmt(env: T, n: JExprStmt): U { return this.visitStmt(n); }
-            public visitInlineActions(env: T, n: JInlineActions): U { return this.visitExprStmt(n); }
-            public visitInlineAction(env: T, n: JInlineAction): U { return this.visitNode(n); }
-            public visitOptionalParameter(env: T, n: JOptionalParameter): U { return this.visitNode(n); }
-            public visitActionBase(env: T, n: JActionBase): U { return this.visitDecl(n); }
-            public visitActionType(env: T, n: JActionType): U { return this.visitActionBase(n); }
-            public visitAction(env: T, n: JAction): U { return this.visitActionBase(n); }
-            public visitPage(env: T, n: JPage): U { return this.visitActionBase(n); }
-            public visitEvent(env: T, n: JEvent): U { return this.visitActionBase(n); }
-            public visitLibAction(env: T, n: JLibAction): U { return this.visitActionBase(n); }
-            public visitLibAbstractType(env: T, n: JLibAbstractType): U { return this.visitDecl(n); }
-            public visitLibActionType(env: T, n: JLibActionType): U { return this.visitActionBase(n); }
-            public visitGlobalDef(env: T, n: JGlobalDef): U { return this.visitDecl(n); }
-            public visitArt(env: T, n: JArt): U { return this.visitGlobalDef(n); }
-            public visitData(env: T, n: JData): U { return this.visitGlobalDef(n); }
-            public visitLibrary(env: T, n: JLibrary): U { return this.visitDecl(n); }
-            public visitBinding(env: T, n: JBinding): U { return this.visitNode(n); }
-            public visitTypeBinding(env: T, n: JTypeBinding): U { return this.visitBinding(n); }
-            public visitActionBinding(env: T, n: JActionBinding): U { return this.visitBinding(n); }
-            public visitResolveClause(env: T, n: JResolveClause): U { return this.visitNode(n); }
-            public visitRecord(env: T, n: JRecord): U { return this.visitDecl(n); }
-            public visitRecordField(env: T, n: JRecordField): U { return this.visitNode(n); }
-            public visitRecordKey(env: T, n: JRecordKey): U { return this.visitRecordField(n); }
-            public visitLocalDef(env: T, n: JLocalDef): U { return this.visitNode(n); }
-            public visitApp(env: T, n: JApp): U { return this.visitNode(n); }
-            public visitPropertyParameter(env: T, n: JPropertyParameter): U { throw "Not implemented"; }
-            public visitProperty(env: T, n: JProperty): U { throw "Not implemented"; }
-            public visitTypeDef(env: T, n: JTypeDef): U { throw "Not implemented"; }
-            public visitApis(env: T, n: JApis): U { throw "Not implemented"; }
-        }
+    import J = AST.Json
+
+    export class JsonAstVisitor<T, U> {
+      public visit(env: T, n: { nodeType: string }): U {
+          switch (n.nodeType) {
+            case "numberLiteral":
+              return this.visitNumberLiteral(env, (<J.JNumberLiteral> n).value);
+            case "booleanLiteral":
+              return this.visitBooleanLiteral(env, (<J.JBooleanLiteral> n).value);
+            case "stringLiteral":
+              return this.visitStringLiteral(env, (<J.JStringLiteral> n).value);
+            case "operator":
+              return this.visitOperator(env, (<J.JOperator> n).op);
+            case "propertyRef":
+              var n9 = <J.JPropertyRef> n;
+              return this.visitPropertyRef(env, n9.name, <any> n9.parent);
+            case "call":
+              return this.visitCall(env, (<J.JCall> n).args);
+            case "singletonRef":
+              return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
+            case "localDef":
+              var n1 = <J.JLocalDef> n;
+              return this.visitLocalDef(env, n1.name, <any> n1.type);
+            case "localRef":
+              return this.visitLocalRef(env, (<J.JLocalRef> n).name);
+            case "exprHolder":
+              return this.visitExprHolder(env, (<J.JExprHolder> n).tree);
+            case "exprStmt":
+              return this.visitExprStmt(env, (<J.JExprStmt> n).expr);
+            case "inlineActions":
+              var n8 = <J.JInlineActions> n;
+              return this.visitInlineActions(env, n8.expr, n8.actions);
+            case "while":
+              var n3 = <J.JWhile> n;
+              return this.visitWhile(env, n3.condition, n3.body);
+            case "for":
+              var n4 = <J.JFor> n;
+              return this.visitFor(env, n4.index, n4.bound, n4.body);
+            case "comment":
+              return this.visitComment(env, (<J.JComment> n).text);
+            case "if":
+              var n5 = <J.JIf> n;
+              return this.visitIf(env, n5.condition, n5.thenBody, n5.elseBody, n5.isElseIf);
+            case "inlineAction":
+              var n6 = <J.JInlineAction> n;
+              return this.visitInlineAction(env, n6.reference, n6.inParameters, n6.outParameters, n6.body);
+            case "action":
+              var n7 = <J.JAction> n;
+              return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body);
+            case "app":
+              return this.visitApp(env, (<J.JApp> n).decls);
+          }
+      }
+
+      public visitNumberLiteral(env: T, v: number): U                     { throw "Not implemented"; }
+      public visitStringLiteral(env: T, v: string): U                     { throw "Not implemented"; }
+      public visitBooleanLiteral(env: T, v: boolean): U                   { throw "Not implemented"; }
+      public visitOperator(env: T, op: string): U                         { throw "Not implemented"; }
+      public visitPropertyRef(
+        env: T,
+        name: string,
+        parent: string): U                                                { throw "Not implemented"; }
+      public visitCall(env: T, args: J.JExpr[]): U                        { throw "Not implemented"; }
+      public visitSingletonRef(env: T, name: string): U                   { throw "Not implemented"; }
+      public visitLocalDef(env: T, name: string, type: string): U         { throw "Not implemented"; }
+      public visitLocalRef(env: T, name: string): U                       { throw "Not implemented"; }
+      public visitExprHolder(env: T, expr: J.JExpr): U                    { throw "Not implemented"; }
+      public visitExprStmt(env: T, expr: J.JExpr): U                      { throw "Not implemented"; }
+      public visitInlineActions(
+        env: T,
+        expr: J.JExpr,
+        actions: J.JInlineAction[]): U                                    { throw "Not implemented"; }
+      public visitWhile(env: T, cond: J.JExprHolder, body: J.JStmt[]): U  { throw "Not implemented"; }
+      public visitFor(
+        env: T,
+        index: J.JLocalDef,
+        bound: J.JExprHolder,
+        body: J.JStmt[]): U                                               { throw "Not implemented"; }
+      public visitComment(env: T, c: string): U                           { throw "Not implemented"; }
+      public visitIf(
+        env: T,
+        cond: J.JExprHolder,
+        thenBranch: J.JStmt[],
+        elseBranch: J.JStmt[],
+        isElseIf: boolean): U                                             { throw "Not implemented"; }
+      public visitInlineAction(env: T,
+        reference: J.JLocalDef,
+        inParams: J.JLocalDef[],
+        outParams: J.JLocalDef[],
+        body: J.JStmt[]): U                                                 { throw "Not implemented"; }
+      public visitAction(
+        env: T,
+        name: string,
+        inParams: J.JLocalDef[],
+        outParams: J.JLocalDef[],
+        body: J.JStmt[]): U                                                 { throw "Not implemented"; }
+      public visitApp(env: T, decls: J.JDecl[]): U                        { throw "Not implemented"; }
     }
+  }
 
 }
