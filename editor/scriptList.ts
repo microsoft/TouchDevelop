@@ -3579,7 +3579,8 @@ module TDev { export module Browser {
                     }
                 }, (e: any) => {
                     cmtBox.setFlag("working", false);
-                    postDiv.setChildren([inner]);
+                    postDiv.className = "commentPost";
+                    postDiv.setChildren([div(null, text), postBtn]);
                     if (e && e.status == 400)
                         ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
                     else

@@ -3569,13 +3569,6 @@ div.sdTabTileLabel {
   animation-iteration-count: infinite;                      /*CSSpref*/  -webkit-animation-iteration-count: infinite;  -moz-animation-iteration-count: infinite;
 }
 
-.sdCmtPosting .svg {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right:0.2em;
-}
-
 .sdCmtBtn .svg {
   display: inline-block;
   width: 2.5em;
