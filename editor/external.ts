@@ -56,7 +56,7 @@ module TDev {
         function addMicrobitLibrary(app: J.JApp) {
             var lib = <AST.LibraryRef> AST.Parser.parseDecl(
                 'meta import microbit {'+
-                '  pub "tpdjbe"'+
+                '  pub "hfezhm"'+
                 '}'
             );
             var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
