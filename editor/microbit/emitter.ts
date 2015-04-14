@@ -107,6 +107,9 @@ module TDev {
         return { env: e, code: code.join("\n") };
       }
 
+//       public visitInlineActions(env: EmitterEnv, e: J.JExpr, actions: J.JInlineAction[]) {
+//       }
+
       public visitAction(
         env: EmitterEnv,
         name: string,
@@ -117,11 +120,11 @@ module TDev {
         if (outParams.length > 1)
           throw "Not supported (multiple return parameters)";
 
-        var e2 = H.indent(e2);
+        var env2 = H.indent(env);
         var bodyText = [
           outParams.length ? H.mkDecl(outParams[0]) : "",
           // Discarding the environment (end-of-scope)
-          this.visitStmts(e2, body).code,
+          this.visitStmts(env2, body).code,
           H.mkReturn(inParams, outParams),
         ].join("\n");
         var head = H.mkSignature(name, inParams, outParams);
