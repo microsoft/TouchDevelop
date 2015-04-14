@@ -83,6 +83,23 @@ module TDev {
             });
         }
 
+        var cppPrelude =
+            '#include "mbed.h"\n'+
+            '#include <string>\n'+
+            'DigitalOut led2(LED2), led1(LED1);\n'+
+            'Serial pc(USBTX, USBRX);\n'+
+            'typedef void (*callback)();\n'+
+            'void microbit_register(const string& event, callback f) {\n'+
+            '    if (event == "start")\n'+
+            '        f();\n'+
+            '}\n'+
+            'void microbit_set_led(int led, int val) {\n'+
+            '    if (led == 2)\n'+
+            '        led2 = val;\n'+
+            '    else if (led == 1)\n'+
+            '        led1 = val;\n'+
+            '}\n';
+
         export class Channel {
             constructor(
                 private editor: ExternalEditor,
@@ -216,6 +233,8 @@ module TDev {
                                 break;
                         }
                         cpp.then((cpp: string) => {
+                            console.log(cpp);
+                            cpp = cppPrelude + cpp;
                             Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
                                 // Success.
                                 console.log(json);
@@ -227,9 +246,12 @@ module TDev {
                                     document.location.href = json.hexurl;
                                 } else {
                                     var errorMsg = "unknown error";
-                                    if (json.mbedresponse)
-                                        errorMsg = "error code " + json.mbedresponse.code +
-                                            "errors " + json.mbedresponse.errors;
+                                    if (json.mbedresponse) {
+                                        var messages = json.mbedresponse.result.data.new_messages.filter(m =>
+                                            m.severity == "error"
+                                        );
+                                        errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+                                    }
                                     this.post(<Message_CompileAck>{
                                         type: MessageType.CompileAck,
                                         status: Status.Error,

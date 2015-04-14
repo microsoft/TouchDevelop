@@ -59,6 +59,10 @@ body {
     font-size: 60%;
 }
 
+.status {
+    white-space: pre-wrap;
+}
+
 .status:not(:first-letter) {
     font-weight: bold;
 }

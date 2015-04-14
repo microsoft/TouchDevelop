@@ -7,11 +7,13 @@ module TDev {
     import J = AST.Json
 
     export module Helpers {
+      export var librarySymbol = "♻";
+
       var kStringType = "shared_ptr<string>";
 
       // Compute a unique name from a user-provided name and a
       // TouchDevelop-generated unique id.
-      function mangle(name: string, id: string) {
+      export function mangle(name: string, id: string) {
           return name + id;
       }
 
@@ -51,7 +53,7 @@ module TDev {
           throw "Not supported (multiple return parameters)";
         var retType = outParams.length ? mkType(outParams[0].type) : "void";
         return [
-          retType, name, "(",
+          retType, " ", name, "(",
           inParams.map(mkParam).join(", "),
           ")",
         ].join("");
