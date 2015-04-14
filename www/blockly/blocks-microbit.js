@@ -4,6 +4,21 @@ goog.provide('Blockly.Blocks.microbit');
 
 goog.require('Blockly.Blocks');
 
+Blockly.Blocks['microbit_wait'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(120);
+    this.appendValueInput("VAL")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("wait");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xxv26z
 Blockly.Blocks['microbit_event'] = {
   init: function() {

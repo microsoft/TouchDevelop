@@ -508,14 +508,14 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
   var bound = compileExpression(e, b.getInputTargetBlock("TIMES"));
-  var body = compileStatements(e, b.getInputTargetBlock("DO")); 
+  var body = compileStatements(e, b.getInputTargetBlock("DO"));
   return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
 }
 
 function compileControlsWhileUntil(e: Environment, b: B.Block): J.JStmt {
   var until = b.getFieldValue('MODE') == 'UNTIL';
   var cond = compileExpression(e, b.getInputTargetBlock("BOOL"));
-  var body = compileStatements(e, b.getInputTargetBlock("DO")); 
+  var body = compileStatements(e, b.getInputTargetBlock("DO"));
   var finalCond = until ? H.mkSimpleCall("not", [cond]) : cond;
   return H.mkWhile(H.mkExprHolder([], finalCond), body);
 }
@@ -553,15 +553,10 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
     };
   }
 }
-function compileSetLed(e: Environment, b: B.Block): J.JStmt {
-  var arg1 = compileExpression(e, b.getInputTargetBlock("id"));
-  var arg2 = compileExpression(e, b.getInputTargetBlock("brightness"));
-  return H.mkExprStmt(H.mkExprHolder([], H.stdCall("set led", [arg1, arg2])));
-}
 
-function compileDisplay(e: Environment, b: B.Block): J.JStmt {
-  var arg = compileExpression(e, b.getInputTargetBlock("ARG"));
-  return H.mkExprStmt(H.mkExprHolder([], H.stdCall("display", [arg])));
+function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[]) {
+  var args = inputs.map(x => compileExpression(e, b.getInputTargetBlock(x)));
+  return H.mkExprStmt(H.mkExprHolder([], H.stdCall(f, args)));
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
@@ -601,14 +596,6 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compilePrint(e, b));
         break;
 
-      case 'microbit_display':
-        stmts.push(compileDisplay(e, b));
-        break;
-
-      case 'microbit_event':
-        stmts.push(compileEvent(e, b));
-        break;
-
       case 'variables_set':
         var r = compileSetOrDef(e, b);
         stmts.push(r.stmt);
@@ -633,8 +620,21 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         break;
 
       case 'microbit_set_led':
-        stmts.push(compileSetLed(e, b));
+        stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
         break;
+
+      case 'microbit_wait':
+        stmts.push(compileStdBlock(e, b, "wait", ["VAL"]));
+        break;
+
+      case 'microbit_display':
+        stmts.push(compileStdBlock(e, b, "display", ["ARG"]));
+        break;
+
+      case 'microbit_event':
+        stmts.push(compileEvent(e, b));
+        break;
+
 
       default:
         throw (b.type + " is not a statement block or is not supported");
