@@ -19,6 +19,8 @@ module TDev.RT {
     export class AppLogger extends RTValue {
         public created: number;
         public parent: AppLogger;
+        public minLevel = App.DEBUG;
+
         constructor(public category : string) {
             super();
             this.category = this.category || "";
@@ -45,17 +47,38 @@ module TDev.RT {
             this.log("error", message, undefined, s);
         }
 
+        private stringToLevel(level:string)
+        {
+            switch (level.trim().toLowerCase()) {
+            case 'debug': return App.DEBUG;
+            case 'warning': return App.WARNING;
+            case 'error': return App.ERROR;
+            default: return App.INFO;
+            }
+        }
+
         //? Logs a new message with optional metadata. The level follows the syslog convention.
         //@ [level].deflStrings("info", "debug", "warning", "error") [meta].deflExpr('invalid->json_object')
         public log(level: string, message: string, meta: JsonObject, s:IStackFrame) {
-            var ilevel : number;
-            switch (level.trim().toLowerCase()) {
-                case 'debug': ilevel = App.DEBUG; break;
-                case 'warning': ilevel = App.WARNING; break;
-                case 'error': ilevel = App.ERROR; break;
-                default: ilevel = App.INFO; break;
-            }
+            var ilevel = this.stringToLevel(level);
+            if (ilevel > this.minLevel) return
             App.logEvent(ilevel, this.category, message, this.augmentMeta(meta ? meta.value() : undefined, s));
+        }
+
+        //? Set minimum logging level for this logger (defaults to "debug").
+        //@ [level].deflStrings("info", "debug", "warning", "error")
+        //@ betaOnly
+        public set_verbosity(level: string, s:IStackFrame) {
+            this.minLevel = this.stringToLevel(level)
+        }
+
+        //? Get the current logging level for this logger (defaults to "debug").
+        //@ betaOnly
+        public verbosity(s:IStackFrame) : string {
+            if (this.minLevel == App.DEBUG) return "debug";
+            if (this.minLevel == App.WARNING) return "warning";
+            if (this.minLevel == App.ERROR) return "error";
+            return "info";
         }
 
         static findContext(s: IStackFrame) : any
