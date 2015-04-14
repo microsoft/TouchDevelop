@@ -1971,11 +1971,18 @@ module TDev
                     e.tdMeta.compressedStack = compr
                 }
 
-                st = st.replace(/^\s*at a_\S+\$\d.*\n/gm, "")
-                if (compr) st = st.replace(/^\s*at /m, (t) => t + compr + " (td.js:42:42)\n" + t)
-                try {
-                    e.stack = st
-                } catch (fail) { }
+                if (compr) {
+                    e.tdMeta.originalStack = st
+                    //st = st.replace(/^\s*at a_\S+\$\d.*\n/gm, "")
+                    st = st.replace(/^\s*at a_\S+\$\d[^]*/m, "")
+                    //st = st.replace(/\s+at .*mainLoop .*\n[^]*/gm, "")
+                    st = st.replace(/((compiled|noderuntime).js):\d+:\d+/g, (t, f) => f + ":1:1")
+                    st = st.replace(/^\s*at /m, t => t + compr + " (td.js:42:42)\n" + t)
+                    try {
+                        e.stack = st
+                    } catch (fail) { }
+                }
+
             }
         }
 
