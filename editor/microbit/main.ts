@@ -5,7 +5,8 @@ module TDev {
 
     export module Microbit {
         export function compile(a: J.JApp): string {
-            return (new Emitter()).visit(emptyEnv, a).code;
+            lift(a);
+            return (new Emitter()).visit(emptyEnv, a);
         }
     }
 }

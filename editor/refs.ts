@@ -55,3 +55,5 @@
 ///<reference path='microbit/main.ts'/>
 ///<reference path='microbit/visitor.ts'/>
 ///<reference path='microbit/emitter.ts'/>
+///<reference path='microbit/helpers.ts'/>
+///<reference path='microbit/lambda_lifter.ts'/>

@@ -167,12 +167,12 @@ Blockly.Blocks['microbit_print_message'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
-Blockly.Blocks['microbit_display'] = {
+Blockly.Blocks['microbit_scroll'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("display");
+        .appendField("scroll");
     this.appendValueInput("ARG")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
