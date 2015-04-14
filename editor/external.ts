@@ -63,6 +63,22 @@ module TDev {
             app.decls.push(jLib);
         }
 
+        // Takes a [JApp] and runs its through various hoops to make sure
+        // everything is type-checked and resolved properly.
+        function roundtrip(a: J.JApp): Promise { // of J.JApp
+            addMicrobitLibrary(a);
+            var text = J.serialize(a);
+            return AST.loadScriptAsync((id: string) => {
+                if (id == "")
+                    return Promise.as(text);
+                else
+                    return World.getAnyScriptAsync(id);
+            }, "").then((resp: AST.LoadScriptResult) => {
+                // The function writes its result in a global
+                return Promise.as(J.dump(Script));
+            });
+        }
+
         export class Channel {
             constructor(
                 private editor: ExternalEditor,
@@ -183,43 +199,47 @@ module TDev {
 
                     case MessageType.Compile:
                         var message1 = <Message_Compile> event.data;
-                        var cpp = "";
+                        var cpp;
                         switch (message1.language) {
                             case Language.CPlusPlus:
-                                cpp = message1.text;
+                                cpp = Promise.as(message1.text);
                                 break;
                             case Language.TouchDevelop:
                                 // the guid is here only for testing; the real generation should be deterministic for best results
-                                cpp = Microbit.compile(message1.text);
+                                cpp = roundtrip(message1.text).then((a: J.JApp) => {
+                                    return Promise.as(Microbit.compile(a));
+                                });
                                 break;
                         }
-                        Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
-                            // Success.
-                            console.log(json);
-                            if (json.success) {
-                                this.post(<Message_CompileAck>{
-                                    type: MessageType.CompileAck,
-                                    status: Status.Ok
-                                });
-                                document.location.href = json.hexurl;
-                            } else {
-                                var errorMsg = "unknown error";
-                                if (json.mbedresponse)
-                                    errorMsg = "error code " + json.mbedresponse.code +
-                                        "errors " + json.mbedresponse.errors;
+                        cpp.then((cpp: string) => {
+                            Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
+                                // Success.
+                                console.log(json);
+                                if (json.success) {
+                                    this.post(<Message_CompileAck>{
+                                        type: MessageType.CompileAck,
+                                        status: Status.Ok
+                                    });
+                                    document.location.href = json.hexurl;
+                                } else {
+                                    var errorMsg = "unknown error";
+                                    if (json.mbedresponse)
+                                        errorMsg = "error code " + json.mbedresponse.code +
+                                            "errors " + json.mbedresponse.errors;
+                                    this.post(<Message_CompileAck>{
+                                        type: MessageType.CompileAck,
+                                        status: Status.Error,
+                                        error: errorMsg
+                                    });
+                                }
+                            }, (json: string) => {
+                                // Failure
+                                console.log(json);
                                 this.post(<Message_CompileAck>{
                                     type: MessageType.CompileAck,
                                     status: Status.Error,
-                                    error: errorMsg
+                                    error: "early error"
                                 });
-                            }
-                        }, (json: string) => {
-                            // Failure
-                            console.log(json);
-                            this.post(<Message_CompileAck>{
-                                type: MessageType.CompileAck,
-                                status: Status.Error,
-                                error: "early error"
                             });
                         });
                         break;
@@ -229,7 +249,7 @@ module TDev {
                         var ast = message2.ast;
                         addMicrobitLibrary(ast);
                         console.log("Attempting to serialize", ast);
-                        var text = AST.Json.serialize(ast);
+                        var text = J.serialize(ast);
                         console.log("Attempting to edit script text", text);
                         Browser.TheHost.openNewScriptAsync({
                             editorName: "touchdevelop",

@@ -13,6 +13,10 @@ module TDev.AST.Json
     // converse operation is:
     //
     //   "TDev.AST.Json.serialize(yourJsonAst)"
+    //
+    // Beware: the composition of these two operations is *not* the
+    // identity. In particular, [dump] will resolve implicit optional arguments,
+    // while [serialize] expects them to be left out.
 
     // These two interfaces are never used. Actually, whenever a field has type
     // [JNodeRef], this is a lie, and its type is [string].
