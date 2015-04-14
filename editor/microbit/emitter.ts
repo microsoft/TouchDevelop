@@ -29,21 +29,18 @@ module TDev {
     module Helpers {
       var kStringType = "shared_ptr<string>";
 
-      // For input parameters of functions, we pass scalar values by copy, and
-      // strings and arrays by reference (using [shared_ptr]s). For output
-      // parameters of functions, because of the caller-allocates TouchDevelop
-      // convention, we must pass references to scalar values, but keep the
-      // [shared_ptr]'s as-is, because they already achieve the desired semantics.
-      export function mkType(t: J.JTypeRef, isOut: boolean) {
+      // To stay as close as possible to the usual TouchDevelop semantics, we
+      // pass scalar values by copy, and strings and arrays by reference (using
+      // [shared_ptr]s).
+      export function mkType(t: J.JTypeRef) {
         var t1: string = <any> t;
-        var amp = isOut ? "&" : "";
         switch (t1) {
           case "number":
-            return "int"+amp;
+            return "int";
           case "string":
             return kStringType;
           case "boolean":
-            return "bool"+amp;
+            return "bool";
           default:
             throw "Unsupported type: " + t1;
         }
@@ -51,15 +48,17 @@ module TDev {
         return null;
       }
 
-      export function mkParam(p: J.JLocalDef, isOut: boolean) {
-        return mkType(p.type, isOut)+" "+p.name;
+      export function mkParam(p: J.JLocalDef) {
+        return mkType(p.type)+" "+p.name;
       }
 
       export function mkSignature(name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+        if (outParams.length > 1)
+          throw "Not supported (multiple return parameters)";
+        var retType = outParams.length ? mkType(outParams[0].type) : "void";
         return [
-          "void ", name, "(",
-          inParams.map(p => mkParam(p, false)).join(", "),
-          outParams.map(p => mkParam(p, true)).join(", "),
+          retType, name, "(",
+          inParams.map(mkParam).join(", "),
           ")",
         ].join("");
       }
@@ -67,6 +66,18 @@ module TDev {
       var c = 0;
       export function mkHandlerName() {
         return "__handler"+(c++);
+      }
+
+      // Generate the return instruction for the function with said parameters.
+      // Currently uses [return], but XXX will change later when in CPS.
+      export function mkReturn(inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+        if (!outParams.length)
+          return "";
+        return "return "+outParams[0].name+";";
+      }
+
+      export function mkDecl(d: J.JLocalDef) {
+        return mkParam(d)+";";
       }
 
       export function indent(e: EmitterEnv) {
@@ -103,9 +114,16 @@ module TDev {
         outParams: J.JLocalDef[],
         body: J.JStmt[])
       {
+        if (outParams.length > 1)
+          throw "Not supported (multiple return parameters)";
+
         var e2 = H.indent(e2);
-        // Discarding the environment (end-of-scope)
-        var bodyText = this.visitStmts(e2, body).code;
+        var bodyText = [
+          outParams.length ? H.mkDecl(outParams[0]) : "",
+          // Discarding the environment (end-of-scope)
+          this.visitStmts(e2, body).code,
+          H.mkReturn(inParams, outParams),
+        ].join("\n");
         var head = H.mkSignature(name, inParams, outParams);
         return { env: env, code: head + "\n{\n" + body + "\n}\n" };
       }
