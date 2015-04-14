@@ -55,7 +55,10 @@ module TDev {
               return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body);
             case "app":
               return this.visitApp(env, (<J.JApp> n).decls);
+            case "library":
+              return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
           }
+          throw "Unsupported node: "+n.nodeType;
       }
 
       public visitNumberLiteral(env: T, v: number): U                     { throw "Not implemented"; }
@@ -101,7 +104,10 @@ module TDev {
         outParams: J.JLocalDef[],
         body: J.JStmt[]): U                                                 { throw "Not implemented"; }
       public visitApp(env: T, decls: J.JDecl[]): U                        { throw "Not implemented"; }
+      public visitLibrary(env: T, name: string): U                        { throw "Not implemented"; }
     }
   }
 
 }
+
+// vim: set ts=2 sw=2 sts=2:

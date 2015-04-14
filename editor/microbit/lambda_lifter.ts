@@ -23,8 +23,26 @@ module TDev {
         return as;
       }
 
+      // [InlineActions] are just at the level of statements.
+      public visitExpr(env, e: J.JNode) {
+        return [];
+      }
+
+      public visitExprStmt(env, expr) {
+          return [];
+      }
+
       public visitInlineActions(env, e: J.JExpr, actions: J.JInlineAction[]) {
-        return this.visitMany(e, actions).concat(actions);
+        // No need to visit [e], as expressions do not contain [JInlineActions].
+        return this.visitMany(env, actions).concat(actions);
+      }
+
+      public visitInlineAction(env, r, i, o, body: J.JStmt[]) {
+        return this.visitMany(env, body);
+      }
+
+      public visitWhile(env, cond, body: J.JStmt[]) {
+          return this.visitMany(env, body);
       }
 
       public visitAction(
@@ -35,6 +53,10 @@ module TDev {
         body: J.JStmt[])
       {
         return this.visitMany(env, body);
+      }
+
+      public visitLibrary(env, name) {
+        return [];
       }
 
       public visitApp(e, decls: J.JDecl[]) {
@@ -68,3 +90,5 @@ module TDev {
     }
   }
 }
+
+// vim: set ts=2 sw=2 sts=2:
