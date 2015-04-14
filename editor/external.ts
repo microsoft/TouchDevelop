@@ -74,8 +74,12 @@ module TDev {
                 else
                     return World.getAnyScriptAsync(id);
             }, "").then((resp: AST.LoadScriptResult) => {
+                // Otherwise, eventually, this will result in our script being
+                // saved in the TouchDevelop format...
+                var s = Script;
+                Script = null;
                 // The function writes its result in a global
-                return Promise.as(J.dump(Script));
+                return Promise.as(J.dump(s));
             });
         }
 
