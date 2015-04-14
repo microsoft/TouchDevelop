@@ -415,7 +415,7 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "microbug_logic_onoff_states":
+    case "microbit_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
@@ -601,11 +601,11 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compilePrint(e, b));
         break;
 
-      case 'microbug_display':
+      case 'microbit_display':
         stmts.push(compileDisplay(e, b));
         break;
 
-      case 'microbug_event':
+      case 'microbit_event':
         stmts.push(compileEvent(e, b));
         break;
 
@@ -616,11 +616,11 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         e = r.env;
         break;
 
-      case 'microbug_comment':
+      case 'microbit_comment':
         stmts.push(compileComment(e, b));
         break;
 
-      case 'microbug_forever':
+      case 'microbit_forever':
         stmts.push(compileForever(e, b));
         break;
 
@@ -632,7 +632,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsWhileUntil(e, b));
         break;
 
-      case 'microbug_set_led':
+      case 'microbit_set_led':
         stmts.push(compileSetLed(e, b));
         break;
 
