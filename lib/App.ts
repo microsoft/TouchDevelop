@@ -421,7 +421,7 @@ module TDev.RT {
             Object.keys(this.series).forEach(key => {
                 var serie = this.series[key];
                 var points = serie.points;
-                if (points.length < 2) {
+                if (points.length < 5) {
                     if (serie.d) serie.d.removeSelf();
                     delete this.series[key];
                 }
