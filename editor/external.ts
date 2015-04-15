@@ -217,7 +217,8 @@ module TDev {
                         }
                         cpp.then((cpp: string) => {
                             console.log(cpp);
-                            cpp = "#include \"prelude.h\"\n" + cpp;
+                            cpp = "// version = 1\n"+
+                                  "#include \"prelude.h\"\n" + cpp;
                             Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
                                 // Success.
                                 console.log(json);
