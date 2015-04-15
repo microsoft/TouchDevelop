@@ -21,14 +21,16 @@ module TDev {
               var n9 = <J.JPropertyRef> n;
               return this.visitPropertyRef(env, n9.name, <any> n9.parent);
             case "call":
-              return this.visitCall(env, (<J.JCall> n).args);
+              var n10 = <J.JCall> n;
+              return this.visitCall(env, n10.name, n10.args);
             case "singletonRef":
               return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
             case "localDef":
               var n1 = <J.JLocalDef> n;
-              return this.visitLocalDef(env, n1.name, <any> n1.type);
+              return this.visitLocalDef(env, n1.name, n1.id, n1.type);
             case "localRef":
-              return this.visitLocalRef(env, (<J.JLocalRef> n).name);
+              var n11 = <J.JLocalRef> n;
+              return this.visitLocalRef(env, n11.name, <any> n11.localId);
             case "exprHolder":
               return this.visitExprHolder(env, (<J.JExprHolder> n).tree);
             case "exprStmt":
@@ -55,7 +57,10 @@ module TDev {
               return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body);
             case "app":
               return this.visitApp(env, (<J.JApp> n).decls);
+            case "library":
+              return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
           }
+          throw "Unsupported node: "+n.nodeType;
       }
 
       public visitNumberLiteral(env: T, v: number): U                     { throw "Not implemented"; }
@@ -66,10 +71,14 @@ module TDev {
         env: T,
         name: string,
         parent: string): U                                                { throw "Not implemented"; }
-      public visitCall(env: T, args: J.JExpr[]): U                        { throw "Not implemented"; }
+      public visitCall(env: T, name: string, args: J.JExpr[]): U          { throw "Not implemented"; }
       public visitSingletonRef(env: T, name: string): U                   { throw "Not implemented"; }
-      public visitLocalDef(env: T, name: string, type: string): U         { throw "Not implemented"; }
-      public visitLocalRef(env: T, name: string): U                       { throw "Not implemented"; }
+      public visitLocalDef(
+        env: T,
+        name: string,
+        id: string,
+        type: J.JTypeRef): U                                              { throw "Not implemented"; }
+      public visitLocalRef(env: T, name: string, id: string): U           { throw "Not implemented"; }
       public visitExprHolder(env: T, expr: J.JExpr): U                    { throw "Not implemented"; }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw "Not implemented"; }
       public visitInlineActions(
@@ -93,15 +102,18 @@ module TDev {
         reference: J.JLocalDef,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[]): U                                                 { throw "Not implemented"; }
+        body: J.JStmt[]): U                                               { throw "Not implemented"; }
       public visitAction(
         env: T,
         name: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[]): U                                                 { throw "Not implemented"; }
+        body: J.JStmt[]): U                                               { throw "Not implemented"; }
       public visitApp(env: T, decls: J.JDecl[]): U                        { throw "Not implemented"; }
+      public visitLibrary(env: T, name: string): U                        { throw "Not implemented"; }
     }
   }
 
 }
+
+// vim: set ts=2 sw=2 sts=2:
