@@ -31,11 +31,11 @@ module TDev {
       export function mkType(t: J.JTypeRef) {
         var t1: string = <any> t;
         switch (t1) {
-          case "number":
+          case "Number":
             return "int";
-          case "string":
+          case "String":
             return kStringType;
-          case "boolean":
+          case "Boolean":
             return "bool";
           default:
             throw "Unsupported type: " + t1;

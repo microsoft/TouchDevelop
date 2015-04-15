@@ -45,6 +45,14 @@ module TDev {
           return this.visitMany(env, body);
       }
 
+      public visitIf(env, cond, thenBranch: J.JStmt[], elseBranch: J.JStmt[], isElseIf) {
+        return this.visitMany(env, thenBranch).concat(this.visitMany(env, elseBranch || []));
+      }
+
+      public visitFor(env, index, bound, body: J.JStmt[]) {
+          return this.visitMany(env, body);
+      }
+
       public visitAction(
         env,
         name: string,

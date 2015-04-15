@@ -30,10 +30,30 @@ module TDev {
       );
     }
 
+    function checkButtonPressedArgs(args: J.JExpr[]) {
+      var value = (x: J.JExpr) =>
+        (x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || "");
+      var mkNumberLiteral = (x: number): J.JNumberLiteral => {
+        return {
+          nodeType: "numberLiteral",
+          id: null,
+          value: x
+        };
+      };
+      // XXX this will change once we have the actual hardware
+      if (value(args[0]) == "left")
+        return [mkNumberLiteral(1)];
+      else if (value(args[0]) == "right")
+        return [mkNumberLiteral(2)];
+      else
+        throw "Unknown button!";
+    }
+
     var knownMicrobitCalls: { [index: string]: string } = {
       "on": "microbit_register",
       "wait": "wait_ms",
       "set led": "microbit_set_led",
+      "button pressed": "microbit_button_pressed",
     };
 
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
@@ -88,21 +108,54 @@ module TDev {
         return env.indent + "while ("+condCode+") {\n" + bodyCode + "\n" + env.indent + "}";
       }
 
+      public visitFor(env: EmitterEnv, index: J.JLocalDef, bound: J.JExprHolder, body: J.JStmt[]) {
+        var indexCode = this.visit(env, index) + " = 1";
+        var testCode = H.mangleDef(index) + " <= " + this.visit(env, bound);
+        var incrCode = "++"+H.mangleDef(index);
+        var bodyCode = this.visitMany(indent(env), body);
+        return (
+          env.indent + "for ("+indexCode+"; "+testCode+"; "+incrCode+") {\n" +
+            bodyCode + "\n" +
+          env.indent + "}"
+        );
+      }
+
+      public visitIf(
+          env: EmitterEnv,
+          cond: J.JExprHolder,
+          thenBranch: J.JStmt[],
+          elseBranch: J.JStmt[],
+          isElseIf: boolean)
+      {
+        return [
+          env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
+          this.visitMany(indent(env), thenBranch) + "\n",
+          env.indent, "}",
+          elseBranch ? " else {\n" : "",
+          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n": "",
+          elseBranch ? env.indent + "}" : ""
+        ].join("");
+      }
+
       public visitCall(env: EmitterEnv, name: string, args: J.JExpr[]) {
         var receiver = args[0];
         args = args.splice(1);
-        var argsCode = args.map(a => this.visit(env, a));
 
         var mkCall = (f: string) => {
+          var argsCode = args.map(a => this.visit(env, a));
           return f + "(" + argsCode.join(", ") + ")";
         };
 
         if (isMicrobitLibrary(receiver)) {
           if (!(name in knownMicrobitCalls))
             throw "Unknown microbit call: "+name;
+          // Some special-cases.
+          if (name == "button pressed") {
+            args = checkButtonPressedArgs(args);
+          }
           return mkCall(knownMicrobitCalls[name]);
         } else if (name == ":=") {
-          return this.visit(env, receiver) + " = " + argsCode[0];
+          return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
         } else {
           throw "Unknown call "+name;
         }
