@@ -395,6 +395,10 @@ function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
   return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
+function compileButtonPressed(e: Environment, b: B.Block): J.JExpr {
+  return compileStdCall(e, b, "button pressed", ["id"]);
+}
+
 function compileOnOff(e: Environment, b: B.Block): J.JExpr {
   return H.mkNumberLiteral(b.getFieldValue("STATE") == "ON" ? 1 : 0);
 }
@@ -415,6 +419,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
+    case "microbit_button_pressed":
+      return compileButtonPressed(e, b);
     case "microbit_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
@@ -554,9 +560,13 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
   }
 }
 
-function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[]) {
+function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[]) {
   var args = inputs.map(x => compileExpression(e, b.getInputTargetBlock(x)));
-  return H.mkExprStmt(H.mkExprHolder([], H.stdCall(f, args)));
+  return H.stdCall(f, args);
+}
+
+function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[]) {
+  return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f, inputs)));
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
@@ -677,7 +687,7 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
     stmts = stmts.concat(compileStatements(empty, b));
   });
 
-  var def: J.JLocalDef = H.mkDef("errno", H.mkTypeRef("number"));
+  var def: J.JLocalDef = H.mkDef("errno", H.mkTypeRef("Number"));
   var assign = H.mkSimpleCall(":=", [H.mkLocalRef("errno"), H.mkNumberLiteral(0)]);
   var expr = H.mkExprHolder([def], assign);
   stmts.push(H.mkExprStmt(expr));

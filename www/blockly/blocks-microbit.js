@@ -57,6 +57,24 @@ Blockly.Blocks['microbit_set_led'] = {
   }
 };
 
+Blockly.Blocks['microbit_button_pressed'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(210);
+    this.appendValueInput("id")
+        .setCheck("String")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("button");
+    this.appendDummyInput()
+        .appendField("is pressed");
+    this.setInputsInline(true);
+    this.setOutput(true);
+    this.setTooltip('');
+  }
+};
+
+// -----------------------------------------------------------------------------
+
 // Blockly.Blocks['microbit_scroll_string'] = {
 //   init: function() {
 //     this.setHelpUrl('http://www.example.com/');
@@ -179,22 +197,6 @@ Blockly.Blocks['microbit_scroll'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-
-//https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#oxk4nt
-Blockly.Blocks['microbit_get_button'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("get button");
-    this.appendValueInput("id")
-        .setCheck("String");
-//        .appendField("id");
-    this.setInputsInline(true);
-    this.setOutput(true);
     this.setTooltip('');
   }
 };
