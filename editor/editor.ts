@@ -2043,7 +2043,7 @@ module TDev
             Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                 console.log(json);
                 if (!json.success) {
-                    ModalDialog.info(lf("Compilation error"), External.makeOutMbedErrorMsg(json));
+                    ModalDialog.showText(External.makeOutMbedErrorMsg(json), lf("Compilation error"));
                 } else {
                     document.location.href = json.hexurl;
                 }
