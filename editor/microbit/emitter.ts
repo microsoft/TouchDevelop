@@ -32,7 +32,7 @@ module TDev {
 
     var knownMicrobitCalls: { [index: string]: string } = {
       "on": "microbit_register",
-      "wait": "wait",
+      "wait": "wait_ms",
       "set led": "microbit_set_led",
     };
 
@@ -53,6 +53,13 @@ module TDev {
       }
 
       public visitLocalRef(env: EmitterEnv, name: string, id: string) {
+        // In our translation, referring to a TouchDevelop identifier never
+        // requires adding a reference operator (&). Things passed by reference
+        // are either:
+        // - function pointers (a.k.a. "handlers" in TouchDevelop lingo), for
+        //   which C and C++ accept both "f" and "&f" (we hence use the former)
+        // - arrays, strings, user-defined objects, which are in fact of type
+        //   "shared_ptr<T>", no "&" operator here.
         return H.mangle(name, id);
       }
 
@@ -95,7 +102,7 @@ module TDev {
             throw "Unknown microbit call: "+name;
           return mkCall(knownMicrobitCalls[name]);
         } else if (name == ":=") {
-          return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
+          return this.visit(env, receiver) + " = " + argsCode[0];
         } else {
           throw "Unknown call "+name;
         }
