@@ -735,15 +735,15 @@ module TDev.RT.Node {
             });
         }
 
-        var origConnect = net.Socket.connect
-        net.Socket.connect = function (options) {
+        var origConnect = net.Socket.prototype.connect
+        net.Socket.prototype.connect = function (options) {
             if (options && typeof options.host == "string")
                 this.tdHost = options.host
             return origConnect.apply(this, arguments)
         }
 
-        var origDestroy = net.Socket._destroy
-        net.Socket._destroy = function (exn) {
+        var origDestroy = net.Socket.prototype._destroy
+        net.Socket.prototype._destroy = function (exn) {
             if (typeof exn == "object" && this.tdHost) {
                 if (!exn.tdMeta) exn.tdMeta = {}
                 exn.tdMeta.socketHost = this.tdHost
