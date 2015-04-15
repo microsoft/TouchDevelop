@@ -3588,7 +3588,10 @@ function tdupload(args:string[])
                     uploadFiles()
                 }
             }, 1, {
-                releaseid: lbl
+                releaseid: lbl,
+                commit: process.env['TRAVIS_COMMIT'],
+                branch: process.env['TRAVIS_BRANCH'],
+                buildnumber: process.env['TRAVIS_BUILD_NUMBER'],
             })
         }
 
