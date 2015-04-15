@@ -59,16 +59,11 @@ module TDev {
         ].join("");
       }
 
-      // Generate the return instruction for the function with said parameters.
-      // Currently uses [return], but XXX will change later when in CPS.
-      export function mkReturn(inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
-        if (!outParams.length)
-          return "";
-        return "return "+outParams[0].name+";";
-      }
-
-      export function mkDecl(d: J.JLocalDef) {
-        return mkParam(d)+";";
+      // Generate the return instruction for the function.  Currently uses
+      // [return], but XXX will change later when in CPS. Possibly parameterized
+      // over whether we're in an atomic action or not.
+      export function mkReturn(exprCode: string) {
+        return "return "+exprCode+";";
       }
     }
   }

@@ -27,7 +27,7 @@ module TDev {
               return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
             case "localDef":
               var n1 = <J.JLocalDef> n;
-              return this.visitLocalDef(env, n1.name, <any> n1.type, n1.id);
+              return this.visitLocalDef(env, n1.name, n1.id, n1.type);
             case "localRef":
               var n11 = <J.JLocalRef> n;
               return this.visitLocalRef(env, n11.name, <any> n11.localId);
@@ -77,7 +77,7 @@ module TDev {
         env: T,
         name: string,
         id: string,
-        type: string): U                                                  { throw "Not implemented"; }
+        type: J.JTypeRef): U                                              { throw "Not implemented"; }
       public visitLocalRef(env: T, name: string, id: string): U           { throw "Not implemented"; }
       public visitExprHolder(env: T, expr: J.JExpr): U                    { throw "Not implemented"; }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw "Not implemented"; }

@@ -676,10 +676,19 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
     // This is akin to a function definition.
     stmts = stmts.concat(compileStatements(empty, b));
   });
-  var action = H.mkAction("main", stmts);
+
+  var def: J.JLocalDef = H.mkDef("errno", H.mkTypeRef("number"));
+  var assign = H.mkSimpleCall(":=", [H.mkLocalRef("errno"), H.mkNumberLiteral(0)]);
+  var expr = H.mkExprHolder([def], assign);
+  stmts.push(H.mkExprStmt(expr));
+
+  var action = H.mkAction("main", stmts, [], [def]);
+
   return H.mkApp(options.name, options.description, [ action ]);
 }
 
 function compile(b: B.Workspace, options: CompileOptions): J.JApp {
   return compileWorkspace(b, options);
 }
+
+// vim: set ts=2 sw=2 sts=2:

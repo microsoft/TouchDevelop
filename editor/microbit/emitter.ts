@@ -56,6 +56,10 @@ module TDev {
         return H.mangle(name, id);
       }
 
+      public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
+        return H.mkType(type)+" "+H.mangle(name, id);
+      }
+
       public visitStringLiteral(env: EmitterEnv, s: string) {
         return '"'+s.replace(/"\\/, c => {
           if (c == '"') return '\"';
@@ -79,14 +83,22 @@ module TDev {
 
       public visitCall(env: EmitterEnv, name: string, args: J.JExpr[]) {
         var receiver = args[0];
-
-        var f = isMicrobitLibrary(args[0])
-          ? knownMicrobitCalls[name]
-          : this.visit(env, receiver)+"::"+name;
-
         args = args.splice(1);
         var argsCode = args.map(a => this.visit(env, a));
-        return f + "(" + argsCode.join(", ") + ")";
+
+        var mkCall = (f: string) => {
+          return f + "(" + argsCode.join(", ") + ")";
+        };
+
+        if (isMicrobitLibrary(receiver)) {
+          if (!(name in knownMicrobitCalls))
+            throw "Unknown microbit call: "+name;
+          return mkCall(knownMicrobitCalls[name]);
+        } else if (name == ":=") {
+          return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
+        } else {
+          throw "Unknown call "+name;
+        }
       }
 
       public visitAction(
@@ -99,10 +111,11 @@ module TDev {
         if (outParams.length > 1)
           throw "Not supported (multiple return parameters)";
 
+        var env2 = indent(env);
         var bodyText = [
-          outParams.length ? H.mkDecl(outParams[0]) : "",
-          this.visitMany(indent(env), body),
-          H.mkReturn(inParams, outParams),
+          outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
+          this.visitMany(env2, body),
+          outParams.length ? env2.indent + H.mkReturn(H.mangleDef(outParams[0])) : "",
         ].filter(x => x != "").join("\n");
         var head = H.mkSignature(name, inParams, outParams);
         return head + " {\n" + bodyText + "\n}";
