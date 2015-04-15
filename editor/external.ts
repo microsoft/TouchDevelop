@@ -51,6 +51,22 @@ module TDev {
 
         import J = AST.Json;
 
+        export function wrapCpp(cpp: string) {
+            return ("// version = 1\n#include \"prelude.h\"\n" + cpp);
+        }
+
+        export function makeOutMbedErrorMsg(json: any) {
+            var errorMsg = "unknown error";
+            // This JSON format is *very* unstructured...
+            if (json.mbedresponse) {
+                var messages = json.mbedresponse.result.data.new_messages.filter(m =>
+                    m.severity == "error" || m.type == "Error"
+                );
+                errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+            }
+            return errorMsg;
+        }
+
         // This function modifies its argument by adding an extra [J.JLibrary]
         // to its [decls] field that references the Microbit library.
         function addMicrobitLibrary(app: J.JApp) {
@@ -217,9 +233,7 @@ module TDev {
                         }
                         cpp.then((cpp: string) => {
                             console.log(cpp);
-                            cpp = "// version = 1\n"+
-                                  "#include \"prelude.h\"\n" + cpp;
-                            Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
+                            Cloud.postUserInstalledCompileAsync(this.guid, wrapCpp(cpp)).then(json => {
                                 // Success.
                                 console.log(json);
                                 if (json.success) {
@@ -229,13 +243,7 @@ module TDev {
                                     });
                                     document.location.href = json.hexurl;
                                 } else {
-                                    var errorMsg = "unknown error";
-                                    if (json.mbedresponse) {
-                                        var messages = json.mbedresponse.result.data.new_messages.filter(m =>
-                                            m.severity == "error"
-                                        );
-                                        errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
-                                    }
+                                    var errorMsg = makeOutMbedErrorMsg(json);
                                     this.post(<Message_CompileAck>{
                                         type: MessageType.CompileAck,
                                         status: Status.Error,

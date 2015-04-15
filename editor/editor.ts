@@ -2038,13 +2038,32 @@ module TDev
         }
         */
 
+        private compile() {
+            var cpp = External.wrapCpp(Microbit.compile(AST.Json.dump(Script)));
+            Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
+                console.log(json);
+                if (!json.success) {
+                    ModalDialog.info(lf("Compilation error"), External.makeOutMbedErrorMsg(json));
+                } else {
+                    document.location.href = json.hexurl;
+                }
+            }, json => {
+                ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
+            });
+        }
 
         public setupPlayButton()
         {
+            var children = [];
             if (this.currentRt && this.currentRt.canResume())
-                this.playBtnDiv.setChildren([Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution())]);
+                children = [ Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution()) ];
             else
-                this.playBtnDiv.setChildren([Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction())]);
+                children = [ Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
+
+            if (Cloud.lite)
+                children.push(Editor.mkTopMenuItem("svg:bolt,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", () => this.compile()));
+
+            this.playBtnDiv.setChildren(children);
 
             this.calculator.searchApi.updateRunButton();
         }

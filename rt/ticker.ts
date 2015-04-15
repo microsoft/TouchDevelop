@@ -499,7 +499,9 @@ module TDev {
         collabRealMerge,
         collabPostChatMessage,
         collabStartCollaboration,
-        collabStopCollaboration
+        collabStopCollaboration,
+
+        codeCompile
     }
 
     export interface TickEvent
