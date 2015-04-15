@@ -409,10 +409,21 @@ module TDev.RT.Node {
             this.dispatchServerRequest(sr)
         }
 
+        public augmentException(e:any)
+        {
+            var d = (<any>process).domain
+            if (typeof e == "object" && !e.tdStackFrame && d && d.tdStackFrame) {
+                e.tdStackFrame = d.tdStackFrame
+            }
+
+            super.augmentException(e)
+        }
+
         public runInlineJavascript(f:()=>void)
         {
             var frame = this.current
             var d = domain.create()
+            d.tdStackFrame = frame
             d.on("error", err => {
                 this.handleException(err, frame)
             })

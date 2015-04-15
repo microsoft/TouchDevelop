@@ -692,6 +692,11 @@ module TDev.RT {
                 return
             }
 
+            try {
+                if (Runtime.theRuntime)
+                    Runtime.theRuntime.augmentException(err)
+            } catch (e) { }
+
             if (err.tdMeta) {
                 if (meta)
                     Object.keys(meta).forEach(k => {

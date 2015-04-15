@@ -1960,7 +1960,7 @@ module TDev
 
             var st = e.stack
 
-            if (st !== undefined && !e.tdStack) {
+            if (s && st !== undefined && !e.tdStack) {
                 e.tdStack = this.getStackTrace(s, true)
                 if (!e.tdMeta) e.tdMeta = {}
                 if (s)
