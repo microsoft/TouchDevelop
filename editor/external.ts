@@ -59,7 +59,7 @@ module TDev {
             var errorMsg = "unknown error";
             // This JSON format is *very* unstructured...
             if (json.mbedresponse) {
-                var messages = json.mbedresponse.result.data.new_messages.filter(m =>
+                var messages = json.messages.filter(m =>
                     m.severity == "error" || m.type == "Error"
                 );
                 errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
