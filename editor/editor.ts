@@ -4207,7 +4207,7 @@ module TDev
                 m.add([
                     div("wall-dialog-body", "under the hood (dbg): ",
                         HTML.mkButton(lf("throw"), () => {
-                            Util.die();
+                            throw new Error("fake error, " + Util.guidGen())
                         })),
                         div("wall-dialog-body", HTML.mkButton(lf("log database contents"), () => {
                             var logContentsAsync = (details) => {

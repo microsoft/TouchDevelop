@@ -12,6 +12,9 @@ module TDev.RT {
         logException?: (err: any, meta?: any) => void;
         logTick?: (category: string, id: string, meta: any) => void;
         logMeasure?: (category: string, id: string, value: number, meta: any) => void;
+
+        id?: string;
+        domain?: any;
     }
 
     //? A custom logger
@@ -614,7 +617,7 @@ module TDev.RT {
         }
 
         var logger:Logger;
-        var transports: AppLogTransport[] = [];
+        export var transports: AppLogTransport[] = [];
 
         export function clearLogs() {
             logger = null;
@@ -667,8 +670,20 @@ module TDev.RT {
             logEvent(INFO, "", message, undefined);
         }
 
-        function transportFailed(tp:string, err:any) {
+        export function transportFailed(t:AppLogTransport, tp:string, err:any) {
+            if (t.id) tp = " (" + t.id + ")"
             Util.log(tp + ": transport failed. " + (err.stack || err.message || err))
+        }
+
+        export var runTransports = (id:string, run:(t:AppLogTransport) => void) =>
+        {
+            transports.forEach(transport => {
+                try {
+                    run(transport)
+                } catch (err) {
+                    transportFailed(transport, id, err)
+                }
+            });
         }
 
         export function logException(err: any, meta? : any): void {
@@ -685,13 +700,8 @@ module TDev.RT {
                 meta = err.tdMeta
             }
 
-            transports.filter(transport => !!transport.logException).forEach(transport => {
-                try {
-                    transport.logException(err, meta);
-                } catch (err) {
-                    transportFailed("logException", err)
-                }
-            });
+            runTransports("logException", t => t.logException && t.logException(err, meta))
+
             var msg = err.stack
             if (!msg) {
                 msg = err.message || (err + "")
@@ -706,13 +716,8 @@ module TDev.RT {
             category = category || "";
             message = message || "";
 
-            transports.filter(transport => !!transport.log).forEach(transport => {
-                try {
-                    transport.log(level, category, message, meta);
-                } catch (err) {
-                    transportFailed("logEvent", err)
-                }
-            });
+            runTransports("logEvent", t => t.log && t.log(level, category, message, meta))
+
             if (logger) {
                 logger.addMsg(level, category, message, meta)
                 Util.log((category || "log") + ": " + message);
@@ -721,13 +726,7 @@ module TDev.RT {
 
         export function logTick(category: string, id: string, meta:any) {
             App.logEvent(App.INFO, category, id, meta);
-            transports.filter(transport => !!transport.logTick).forEach(transport => {
-                try {
-                    transport.logTick(category, id, meta);
-                } catch (err) {
-                    transportFailed("logTick", err)
-                }
-            });
+            runTransports("logTick", t => t.logTick && t.logTick(category, id, meta))
         }
 
         export function logMeasure(category:string, id: string, value: number, meta: any) {
@@ -735,14 +734,9 @@ module TDev.RT {
             lmeta.measureId = id
             lmeta.measureValue = value
             App.logEvent(App.INFO, category, id + ": " + value, lmeta);
-            transports.filter(transport => !!transport.logMeasure).forEach(transport => {
-                try {
-                    transport.logMeasure(category, id, value, meta);
-                } catch (err) {
-                    transportFailed("logMeasure", err)
-                }
-            });
+            runTransports("logMeasure", t => t.logMeasure && t.logMeasure(category, id, value, meta))
         }
+
         export function logs() : LogMessage[]
         {
             if (logger)

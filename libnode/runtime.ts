@@ -18,6 +18,7 @@ module TDev.RT.Node {
     var zlib = require("zlib")
     var path = require("path")
     var domain = require("domain")
+    var net = require("net")
     var Buffer;
     var webSocketModule;
 
@@ -712,6 +713,43 @@ module TDev.RT.Node {
             return setting;
         }
         TDev.RT.Web.proxy = (url) => url;
+
+        App.runTransports = (id:string, run:(t:AppLogTransport) => void) =>
+        {
+            App.transports.forEach(transport => {
+                var d = transport.domain
+                if (!d) {
+                    transport.domain = d = domain.create()
+                    d.on("error", err => {
+                        App.transportFailed(transport, id, err)
+                    })
+                }
+
+                d.enter()
+                try {
+                    run(transport)
+                } catch (err) {
+                    App.transportFailed(transport, id, err)
+                }
+                d.exit()
+            });
+        }
+
+        var origConnect = net.Socket.connect
+        net.Socket.connect = function (options) {
+            if (options && typeof options.host == "string")
+                this.tdHost = options.host
+            return origConnect.apply(this, arguments)
+        }
+
+        var origDestroy = net.Socket._destroy
+        net.Socket._destroy = function (exn) {
+            if (typeof exn == "object" && this.tdHost) {
+                if (!exn.tdMeta) exn.tdMeta = {}
+                exn.tdMeta.socketHost = this.tdHost
+            }
+            return origDestroy.apply(this, arguments)
+        }
 
         //var buf = Buffer.prototype
         //buf.subarray = buf.slice;
