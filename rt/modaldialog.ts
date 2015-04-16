@@ -11,10 +11,12 @@ module TDev
         private id = Random.uniqueId();
         private logView: TDev.RT.AppLogView;
 
-        constructor()
+        constructor(header = "")
         {
             this.floating = div("modalDialogInner", this.dialog);
             this.outerDialog = div("modalDialogOuter", div("modalDialogMid", this.floating));
+            if (header)
+                this.add(div("wall-dialog-header", header))
         }
 
         public opacity = 0.85;
@@ -65,6 +67,11 @@ module TDev
         public empty()
         {
             this.dialog.setChildren([])
+        }
+
+        public addBody(v:any)
+        {
+            this.add(div("wall-dialog-body", v))
         }
 
         public add(v:any)
@@ -423,7 +430,7 @@ module TDev
             search.id = "chooseSearch"
             search.placeholder = options.searchHint || (options.queryAsync ? lf("Type to search online...") : lf("Type to search..."));
             var autoKeyboard = KeyboardAutoUpdate.mkInput(search, Util.catchErrors("chooseSearch", () => refresh(true)));
-            search.onkeyup = (ev: KeyboardEvent) => { autoKeyboard.keypress(); }
+            autoKeyboard.attach()
             var limitedMode = !!options.mkSeeMore;
 
             if (limitedMode && boxes.every((b) => !(<any>b).initiallyHidden))

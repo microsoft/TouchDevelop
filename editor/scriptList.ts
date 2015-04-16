@@ -996,7 +996,7 @@ module TDev { export module Browser {
                     setError(lf("the invitation code must be a number between 9 and 64 characters long"));
                 }
             }));
-            Util.onInputChange(name, () => autoKeyboard.keypress());
+            autoKeyboard.attach()
 
             m.show();
             autoKeyboard.keypress();

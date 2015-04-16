@@ -151,9 +151,7 @@ module TDev.AppExport
                     }).done();
                 }
                 var nameInputAuto = KeyboardAutoUpdate.mkInput(nameInput, () => previewUrl());
-                nameInput.onkeyup = () => {
-                    nameInputAuto.keypress();
-                };
+                nameInputAuto.attach()
                 function addShare(url:string, name:string)
                 {
                     var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)

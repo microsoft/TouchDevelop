@@ -3205,21 +3205,36 @@ module TDev{
         updateValue: string = null;
         // make it slightly slower on phones, faster on desktop
         public delay = Browser.isDesktop ? 300 : Browser.isCellphone ? 800 : 500;
+        public element:Util.HTMLElementWithValue;
 
         constructor(private read : () => string, public update:(s:string)=>void)
         {
         }
 
+        static createInput(placeholder:string, update: (s: string) => void ) : KeyboardAutoUpdate
+        {
+            var up = KeyboardAutoUpdate.mkInput(HTML.mkTextInput("text", placeholder), update)
+            up.attach()
+            return up
+        }
+
         static mkInput(textbox: HTMLInputElement, update: (s: string) => void ) : KeyboardAutoUpdate
         {
             var kb = new KeyboardAutoUpdate(() => textbox.value, update);
+            kb.element = textbox;
             return kb;
         }
 
         static mkTextArea(textbox: HTMLTextAreaElement, update: (s: string) => void ) : KeyboardAutoUpdate
         {
             var kb = new KeyboardAutoUpdate(() => textbox.value, update);
+            kb.element = textbox;
             return kb;
+        }
+
+        public attach()
+        {
+            Util.onInputChange(this.element, () => this.keypress())
         }
 
         public keypress()

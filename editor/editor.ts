@@ -2167,10 +2167,12 @@ module TDev
 
             this.searchBox = HTML.mkTextInput("text", lf("Search code..."), "search");
             this.keyMgr.attach(this.searchBox);
-            this.searchBox.onkeyup = () => {
+            Util.onInputChange(this.searchBox, () => {
                 if (this.currentSideTab == this.searchTab)
                     this.searchTab.searchKey()
-            };
+                else
+                    this.searchFor(this.searchBox.value);
+            });
             this.searchBox.onclick = () => {
                 this.showSidePane();
                 if (this.searchBox.value)
@@ -4134,6 +4136,28 @@ module TDev
             return window.localStorage["always_beta"] === "yes";
         }
 
+        static liteCrashFiles()
+        {
+            var m = new ModalDialog(lf("enter bug file id"))
+
+            var up = KeyboardAutoUpdate.createInput(lf("file id"), (v) => {
+                v = v.trim()
+                if (/^\d{12}/.test(v))
+                    Cloud.getPrivateApiAsync("bug/file/" + encodeURIComponent(v))
+                        .done(resp => {
+                            res.setChildren(HTML.mkA("", resp.url, "_blank", v))
+                        })
+                else
+                    res.setChildren([ lf("File id should start with a bunch of numbers.") ])
+            })
+
+            m.addBody(up.element)
+            var res = div("wall-dialog-body")
+            m.add(res)
+            m.addOk(lf("dismiss"), () => m.dismiss())
+            m.show()
+        }
+
         public popupMenu()
         {
             var m = new ModalDialog();
@@ -4213,6 +4237,7 @@ module TDev
             m.add([div("wall-dialog-body", [
                         (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                         (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"),() => { Util.setHash("#list:users") }) : null),
+                        (Cloud.hasPermission("bug") ? HTML.mkButton(lf("crash files"),() => { Editor.liteCrashFiles() }) : null),
                         (Cloud.hasPermission("admin") ? HTML.mkButton(lf("generate codes"),() => {
                             TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
                                 .done(function (r) {
