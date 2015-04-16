@@ -1145,8 +1145,9 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                     debug.log("image type: " +  mimeType);
                     ar.data.files.forEach(target => {
                         try {
-                            new Jimp(srcdata, mimeType,(jimg) => {
+                            new Jimp(srcdata, mimeType, function() {
                                 try {
+                                    var jimg = this;
                                     debug.log("writing " + target.path);
                                     var w = jimg.bitmap.width;
                                     var h = jimg.bitmap.height;
