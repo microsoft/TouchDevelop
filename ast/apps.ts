@@ -198,7 +198,7 @@ module TDev.AST.Apps {
                 });
                 instructions.cordova.plugins =
                     Object.keys(compiled.imports.cordovaPlugins)
-                    .map(k => k + (/^https?:\/\//.test(k) || /^\*?$/.test(compiled.imports.cordovaPlugins[k]) ? "" : "@" + compiled.imports.cordovaPlugins[k]));
+                    .map(k => k + (!k || /^https?:\/\//.test(k) || /^\*?$/.test(compiled.imports.cordovaPlugins[k]) ? "" : "@" + compiled.imports.cordovaPlugins[k]));
             }
             compiled.packageResources.forEach(pr => {
                 instructions.files.push({
