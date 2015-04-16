@@ -1798,18 +1798,24 @@ module TDev
             }
 
             if (ins.addButton) {
-                if (ScriptNav.addAnythingVisible) {
-                    TipManager.setTip({
-                        tick: ins.addButton,
-                        title: lf("tap there"),
-                        description: ins.label,
-                    })
-                } else {
-                    if (!hasDeclList()) return
+                if (!ScriptNav.addAnythingVisible) {
+                    if (!hasDeclList()) return;
                     TipManager.setTip({
                         tick: Ticks.sideAddAnything,
                         title: lf("tap there"),
                         description: ins.label
+                    })
+                } else if (!elt("btn-" + Ticker.tickName(ins.addButton))) {
+                    TipManager.setTip({
+                        tick: Ticks.sideMoreOptions,
+                        title: lf("tap there"),
+                        description: lf("We need more options")
+                    });
+                } else {
+                    TipManager.setTip({
+                        tick: ins.addButton,
+                        title: lf("tap there"),
+                        description: ins.label,
                     })
                 }
                 return
