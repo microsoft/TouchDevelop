@@ -51,7 +51,7 @@ module TDev {
 
     var knownMicrobitCalls: { [index: string]: string } = {
       "on": "microbit_register",
-      "wait": "wait_ms",
+      "busy wait ms": "wait_ms",
       "set led": "microbit_set_led",
       "button pressed": "microbit_button_pressed",
     };
