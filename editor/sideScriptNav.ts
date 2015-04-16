@@ -578,6 +578,7 @@ module TDev
                 m.choose(boxes, {
                     header: lf("create a new ..."),
                     mkSeeMore: DeclEntry.mkSeeMore,
+                    afterRefresh: () => TheEditor.updateTutorial(),
                     includeSearch: true,
                 });
                 TheEditor.updateTutorial()

@@ -1099,9 +1099,13 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
     },
 
     resizeimages: ar => {
-        var Jimp = require('jimp');
+
         var src = ar.data.src;
         var todo = ar.data.files.length;
+        info.log("resizing " + src + " in " + todo + " sizes", src, todo);
+
+        var Jimp = require('jimp');
+        var pngjs = require('pngjs');
 
         function crop(img, x, y, w, h) {
             var bitmap = [];
@@ -1129,22 +1133,47 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                 ar.ok({ status: "error", message: src + ' does not exist' });
                 return;
             }
-            ar.data.files.forEach(target => {
-                var img = new Jimp(src, () => {
-                    var w = img.bitmap.width;
-                    var h = img.bitmap.height;
-                    var tw = target.width;
-                    var th = target.height;
-                    if (w/tw > h/th) {
-                        var dx = Math.floor((w - h*tw/th) / 2);
-                        crop(img, dx, 0, w - 2*dx, h)
-                    } else {
-                        var dy = Math.floor((h - w*th/tw) / 2);
-                        crop(img, 0, dy, w, h-2*dy)
-                    }
-                    img.resize(tw, th);
-                    mkDirP(target.path);
-                    img.write(target.path, () => onedone());
+            fs.readFile(src, function (err, srcdata) {
+                if (err) {
+                    ar.ok({ status: "error", message: JSON.stringify(err) });
+                    return;
+                }
+                debug.log("size: " + Math.ceil(srcdata.length / 1e3) + "Kb");
+                var png = new pngjs.PNG();
+                png.parse(srcdata,(errpng, pngdata) => {
+                    var mimeType = errpng ? "image/jpeg" : "image/png";
+                    debug.log("image type: " +  mimeType);
+                    ar.data.files.forEach(target => {
+                        try {
+                            new Jimp(srcdata, mimeType,(jimg) => {
+                                try {
+                                    debug.log("writing " + target.path);
+                                    var w = jimg.bitmap.width;
+                                    var h = jimg.bitmap.height;
+                                    var tw = target.width;
+                                    var th = target.height;
+                                    if (w / tw > h / th) {
+                                        var dx = Math.floor((w - h * tw / th) / 2);
+                                        crop(jimg, dx, 0, w - 2 * dx, h)
+                                    } else {
+                                        var dy = Math.floor((h - w * th / tw) / 2);
+                                        crop(jimg, 0, dy, w, h - 2 * dy)
+                                    }
+                                    jimg.resize(tw, th);
+                                    mkDirP(target.path);
+                                    jimg.write(target.path,() => onedone());
+                                } catch (e) {
+                                    debug.log("resize error: " + e);
+                                    debug.log(e.stack);
+                                    onedone();
+                                }
+                            });
+                        } catch (e) {
+                            debug.log("resize error: " + e);
+                            debug.log(e.stack);
+                            onedone();
+                        }
+                    });
                 });
             });
         });

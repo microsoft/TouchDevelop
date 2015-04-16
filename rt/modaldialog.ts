@@ -465,10 +465,11 @@ module TDev
                 });
                 if (limitedMode) {
                     var b = options.mkSeeMore(needKbd ? lf("you can also search") : lf("there is {0} more option{0:s}", skipCnt))
-                    res.push(b.withClick(() => {
+                    HTML.setTickCallback(b, Ticks.sideMoreOptions, () => {
                         limitedMode = false;
-                        refresh(options.initialEmptyQuery);
-                    }));
+                        refresh(options.initialEmptyQuery);                        
+                    });
+                    res.push(b);
                 }
                 list.setChildren(res);
 
@@ -491,6 +492,9 @@ module TDev
                             }
                     }).done();
                 }
+
+                if (options.afterRefresh)
+                    options.afterRefresh();
             }
 
             if (!options.noBackground)
@@ -558,6 +562,7 @@ module TDev
         initialEmptyQuery?: boolean;
         header?: any;
         mkSeeMore?: (lbl: string) => HTMLElement;
+        afterRefresh?: () => void;
         includeSearch?: boolean; // overrides default of 6+ items
         dontStretchDown?: boolean;
         adjustListSize?: boolean;

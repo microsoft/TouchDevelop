@@ -223,6 +223,24 @@ module TDev.AST.Apps {
                         })
                 }
             })
+            if (app.getIconArtId()) {
+                instructions.files.push({
+                    path: '',
+                    url: HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + app.getIconArtId()),
+                    kind: "picture",
+                    sourceName:"icon",
+                    isUnused: false,
+                })
+            }
+            if (app.splashArtId) {
+                instructions.files.push({
+                    path: '',
+                    url: HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + app.splashArtId),
+                    kind: "picture",
+                    sourceName:"splash",
+                    isUnused: false,
+                })
+            }
         }
 
         if (options.compileServer) {

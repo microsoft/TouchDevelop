@@ -634,7 +634,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         break;
 
       case 'microbit_wait':
-        stmts.push(compileStdBlock(e, b, "wait", ["VAL"]));
+        stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
         break;
 
       case 'microbit_scroll':

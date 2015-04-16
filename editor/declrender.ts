@@ -33,7 +33,7 @@ module TDev
 
         static mkSeeMore(lbl:string)
         {
-            var d = new DeclEntry("see more options");
+            var d = new DeclEntry(lf("see more options"));
             d.description = lbl
             return d.mkBox()
         }

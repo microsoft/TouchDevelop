@@ -276,6 +276,8 @@ module TDev {
         sideTutorialCancel,
         sideTutorialRedisplay,
 
+        sideMoreOptions,
+
         appsCreateAzureWebsite,
         appsDeployWebsite,
 
