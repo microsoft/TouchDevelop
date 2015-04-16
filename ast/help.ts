@@ -239,8 +239,13 @@ module TDev {
 
     export interface JsonRelease extends JsonPublication
     {
+        name: string;
         releaseid:string;
         labels:JsonReleaseLabel[];
+        buildnumber: number;
+        version: string;
+        commit: string;
+        branch: string;
     }
 
     export interface JsonReleaseLabel

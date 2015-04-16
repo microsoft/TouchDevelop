@@ -9106,7 +9106,7 @@ module TDev { export module Browser {
 
 
             return this.withUpdate(res, (u:JsonRelease) => {
-                var nm = u.releaseid.replace(/^\d\d\d\d\d\d\d+-[^\-]+-/, "")
+                var nm = u.name
                 var labs = u.labels.map(l => l.name).join(", ")
                 if (labs) nm += " (" + labs + ")"
                 nameBlock.setChildren([ nm ])
@@ -9140,9 +9140,13 @@ module TDev { export module Browser {
                             Util.navigateInWindow(Cloud.getServiceUrl() + "/app/?r=" + this.publicId))
                     ));
 
+                if (u.commit)
+                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank", 
+                    lf("github:{0} (on {1})", u.commit.slice(0, 8), u.branch))))
+
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
                 u.labels.forEach(l => {
-                    ch.push(div(null, "label: " + l.name + " by /" + l.userid + " on " + Util.timeSince(l.time)))
+                    ch.push(div(null, "label: " + l.name + " by /" + l.userid + ", " + Util.timeSince(l.time)))
                 })
 
                 var uid = this.browser().getCreatorInfo(u)
