@@ -175,23 +175,26 @@ module TDev
                     if (this.data.template instanceof AST.Action) {
                         var act = <AST.Action>this.data.template
                         op.addButton = act.isPage() ? Ticks.sideAddPage : Ticks.sideAddAction;
-                        op.label = "need to add " + (act.isPage() ? "page" : "action");
+                        op.label = lf("we need a new {0}", act.isPage() ? lf("page") : lf("action"));
                     } else if (this.data.template instanceof AST.RecordDef) {
                         var rec = <AST.RecordDef>this.data.template
                         if (rec.recordType == AST.RecordType.Table) {
                             op.addButton = Ticks.sideAddTable;
-                            op.label = "we need to create a table"
+                            op.label = lf("we need a new table")
                         } else if (rec.recordType == AST.RecordType.Index) {
                             op.addButton = Ticks.sideAddIndex;
-                            op.label = "we need a new index"
+                            op.label = lf("we need a new index")
+                        } else if (rec.recordType == AST.RecordType.Decorator) {
+                            op.addButton = Ticks.sideAddDecorator;
+                            op.label = lf("we need a new decorator")
                         } else {
                             op.addButton = Ticks.sideAddObject;
-                            op.label = "we need a new object"
+                            op.label = lf("we need a new object")
                         }
                     } else if (this.data.template instanceof AST.GlobalDef) {
                         var glb = <AST.GlobalDef>this.data.template
                         op.addButton = Ticks.sideAddVariable
-                        op.label = "we need to create a variable"
+                        op.label = lf("we need to a new variable")
                     } else {
                         Util.oops("declaration type not supported in tutorial")
                     }
