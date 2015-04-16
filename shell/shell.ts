@@ -1145,22 +1145,28 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                     debug.log("image type: " +  mimeType);
                     ar.data.files.forEach(target => {
                         try {
-                            new Jimp(srcdata, mimeType,(img) => {
-                                debug.log("writing " + target.path);
-                                var w = img.bitmap.width;
-                                var h = img.bitmap.height;
-                                var tw = target.width;
-                                var th = target.height;
-                                if (w / tw > h / th) {
-                                    var dx = Math.floor((w - h * tw / th) / 2);
-                                    crop(img, dx, 0, w - 2 * dx, h)
-                                } else {
-                                    var dy = Math.floor((h - w * th / tw) / 2);
-                                    crop(img, 0, dy, w, h - 2 * dy)
+                            new Jimp(srcdata, mimeType,(jimg) => {
+                                try {
+                                    debug.log("writing " + target.path);
+                                    var w = jimg.bitmap.width;
+                                    var h = jimg.bitmap.height;
+                                    var tw = target.width;
+                                    var th = target.height;
+                                    if (w / tw > h / th) {
+                                        var dx = Math.floor((w - h * tw / th) / 2);
+                                        crop(jimg, dx, 0, w - 2 * dx, h)
+                                    } else {
+                                        var dy = Math.floor((h - w * th / tw) / 2);
+                                        crop(jimg, 0, dy, w, h - 2 * dy)
+                                    }
+                                    jimg.resize(tw, th);
+                                    mkDirP(target.path);
+                                    jimg.write(target.path,() => onedone());
+                                } catch (e) {
+                                    debug.log("resize error: " + e);
+                                    debug.log(e.stack);
+                                    onedone();
                                 }
-                                img.resize(tw, th);
-                                mkDirP(target.path);
-                                img.write(target.path,() => onedone());
                             });
                         } catch (e) {
                             debug.log("resize error: " + e);
