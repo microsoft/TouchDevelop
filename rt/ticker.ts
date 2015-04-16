@@ -529,6 +529,7 @@ module TDev {
         worldId: string;
         kind: string;
         attachments: string[];
+        tdVersion?: string;
     }
 
     export interface TicksReport {
@@ -728,6 +729,7 @@ module TDev {
                 timestamp: Util.now(),
                 platform: [],
                 attachments: [],
+                tdVersion: (<any>window).tdVersion || "",
             }
 
             if (fillEditorInfoBugReport)

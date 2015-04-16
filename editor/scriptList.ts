@@ -9142,7 +9142,7 @@ module TDev { export module Browser {
 
                 if (u.commit)
                   ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank", 
-                    lf("github:{0} (on {1})", u.commit.slice(0, 8), u.branch))))
+                    lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
 
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
                 u.labels.forEach(l => {
