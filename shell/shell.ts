@@ -1099,12 +1099,13 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
     },
 
     resizeimages: ar => {
-        var Jimp = require('jimp');
-        var pngjs = require("pngjs");
 
         var src = ar.data.src;
         var todo = ar.data.files.length;
-        info.log("resizing {0} in {1} format{1:s}", src, todo);
+        info.log("resizing " + src + " in " + todo + " sizes", src, todo);
+
+        var Jimp = require('jimp');
+        var pngjs = require('pngjs');
 
         function crop(img, x, y, w, h) {
             var bitmap = [];
@@ -1137,10 +1138,11 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                     ar.ok({ status: "error", message: JSON.stringify(err) });
                     return;
                 }
+                debug.log("size: " + Math.ceil(srcdata.length / 1e3) + "Kb");
                 var png = new pngjs.PNG();
-                png.parse(srcdata,(err, pngdata) => {
-                    var mimeType = err ? "image/jpeg" : "image/png";
-                    debug.log("image type: {0}", mimeType);
+                png.parse(srcdata,(errpng, pngdata) => {
+                    var mimeType = errpng ? "image/jpeg" : "image/png";
+                    debug.log("image type: " +  mimeType);
                     ar.data.files.forEach(target => {
                         try {
                             var img = new Jimp(srcdata, mimeType,() => {
@@ -1160,7 +1162,9 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                                 img.write(target.path,() => onedone());
                             });
                         } catch (e) {
-                            ar.ok({ status: "error", message: JSON.stringify(e) });
+                            debug.log("resize error: " + e);
+                            debug.log(e.stack);
+                            onedone();
                         }
                     });
                 });

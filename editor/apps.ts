@@ -1570,7 +1570,7 @@ module TDev.AppExport
         function writeFiles(files: TDev.AST.Apps.DeploymentFile[]) {
             if (cancelled) return new PromiseInv();
 
-            files = files.filter(f => !!f);
+            files = files.filter(f => !!f && !!f.path);
             if (files.length == 0) return Promise.as();
 
             files.forEach(f => logger.debug(lf("writing {0}", f.path), null));
