@@ -1622,15 +1622,17 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
             return cli(lf("checking cordova..."), "cordova --version", undefined, true);
-        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) ? Promise.as() :
-            cli(lf("installing cordova..."), "npm install -g cordova"))
-        .then(() => {
-            instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g io-deploy") : Promise.as()
-        })
-        .then(() => {
+        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) 
+            ? Promise.as()
+            : cli(lf("installing cordova..."), "npm install -g cordova")
+            .then(() => instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g io-deploy") : Promise.as())
+        ).then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
-            return runNpm ? cli(lf("installing jimp..."), "npm install jimp") : Promise.as();
+            return runNpm
+                ? cli(lf("installing jimp..."), "npm install jimp")
+                  .then(() => cli(lf("installing pngjs..."), "npm install pngjs"))
+                : Promise.as();
         }).then(() => mkDir(dir, "777"))
         .then(() => cli(lf("creating project"), "cordova create " + dir, undefined, true))
         .then(() => Promise.sequentialMap(Object.keys(instructions.cordova.platforms),

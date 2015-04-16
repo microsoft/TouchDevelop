@@ -1100,8 +1100,11 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
 
     resizeimages: ar => {
         var Jimp = require('jimp');
+        var pngjs = require("pngjs");
+
         var src = ar.data.src;
         var todo = ar.data.files.length;
+        info.log("resizing {0} in {1} format{1:s}", src, todo);
 
         function crop(img, x, y, w, h) {
             var bitmap = [];
@@ -1129,22 +1132,37 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
                 ar.ok({ status: "error", message: src + ' does not exist' });
                 return;
             }
-            ar.data.files.forEach(target => {
-                var img = new Jimp(src, () => {
-                    var w = img.bitmap.width;
-                    var h = img.bitmap.height;
-                    var tw = target.width;
-                    var th = target.height;
-                    if (w/tw > h/th) {
-                        var dx = Math.floor((w - h*tw/th) / 2);
-                        crop(img, dx, 0, w - 2*dx, h)
-                    } else {
-                        var dy = Math.floor((h - w*th/tw) / 2);
-                        crop(img, 0, dy, w, h-2*dy)
-                    }
-                    img.resize(tw, th);
-                    mkDirP(target.path);
-                    img.write(target.path, () => onedone());
+            fs.readFile(src, function (err, srcdata) {
+                if (err) {
+                    ar.ok({ status: "error", message: JSON.stringify(err) });
+                    return;
+                }
+                var png = new pngjs.PNG();
+                png.parse(srcdata,(err, pngdata) => {
+                    var mimeType = err ? "image/jpeg" : "image/png";
+                    debug.log("image type: {0}", mimeType);
+                    ar.data.files.forEach(target => {
+                        try {
+                            var img = new Jimp(srcdata, mimeType,() => {
+                                var w = img.bitmap.width;
+                                var h = img.bitmap.height;
+                                var tw = target.width;
+                                var th = target.height;
+                                if (w / tw > h / th) {
+                                    var dx = Math.floor((w - h * tw / th) / 2);
+                                    crop(img, dx, 0, w - 2 * dx, h)
+                                } else {
+                                    var dy = Math.floor((h - w * th / tw) / 2);
+                                    crop(img, 0, dy, w, h - 2 * dy)
+                                }
+                                img.resize(tw, th);
+                                mkDirP(target.path);
+                                img.write(target.path,() => onedone());
+                            });
+                        } catch (e) {
+                            ar.ok({ status: "error", message: JSON.stringify(e) });
+                        }
+                    });
                 });
             });
         });
