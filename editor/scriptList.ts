@@ -3908,6 +3908,18 @@ module TDev { export module Browser {
                         },
                         e => {});
             }
+            
+            // parsing youtube links
+            c.text.replace(/https?:\/\/(youtu\.be\/([^\s]+))|(www\.youtube\.com\/watch\?v=([^\s]+))/gi,(m, m2, id1, m3, id2) => {
+                var ytid = id1 || id2;
+                var d = div('md-video-link');
+                d.dataset['youtubeid'] = ytid;
+                setInnerHTML(d, SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid)));
+                d.withClick(() => {
+                    d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=https://www.touchdevelop.com' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
+                });
+                nestedPubs.appendChild(d);
+            });
 
             var translateBtn: HTMLElement = null;
             var translateCmt = () => {

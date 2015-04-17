@@ -1504,6 +1504,11 @@ div.md-video-link > svg {
   left:0em;
 }
 
+.sdCmt div.md-video-link {
+    margin-top:0.5em;
+    max-width:60%;
+}
+
 .greyed
 {
     color: #6c6c6c;
