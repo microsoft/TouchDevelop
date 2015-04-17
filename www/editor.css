@@ -3275,7 +3275,7 @@ div.sdTabTileLabel {
 }
 
 .phone .sdBigButtonFull {
-  width:13.5em;
+  width:11.5em;
 }
 
 .sdBigButtonHalf {
@@ -3300,6 +3300,11 @@ div.sdTabTileLabel {
   top: 0.8em;
   left: 4em;
   font-size: 2em;
+}
+
+.phone .sdBigButtonFull .sdBigButtonDesc
+{
+    left:3em;
 }
 
 .sdBigButtonFull .sdBigButtonLongDesc {
