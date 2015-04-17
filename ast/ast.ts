@@ -1930,19 +1930,29 @@ module TDev.AST {
             this.modelParameter = new ActionParameter(l);
         }
 
-        private propertyDeflStrings:any;
-
+        private propertyDeflStrings: StringMap<string[]>;
+        private _propertyDelfStringArtIds: StringMap<StringMap<string>>;
         public mkPP(name:string, k:Kind) {
             if (!this.propertyDeflStrings) {
                 this.propertyDeflStrings = {}
-                this.getDescription().replace(/\{hints:([^:{}]*):([^{}]*)/g, (mtch, arg, vals) => {
-                    this.propertyDeflStrings[arg] = vals.split(/,/)
+                var descr = this.getDescription();
+                descr.replace(/\{hints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals : string) => {
+                    this.propertyDeflStrings[arg] = vals.split(',');
+                    return ""
+                })
+                descr.replace(/\{pichints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
+                    if (!this._propertyDelfStringArtIds) this._propertyDelfStringArtIds = {};
+                    this._propertyDelfStringArtIds[arg] = Util.splitKeyValues(vals);
                     return ""
                 })
             }
             var r = super.mkPP(name, k)
             var v = this.propertyDeflStrings[name]
             if (v) r.setDeflStrings(v)
+            if (this._propertyDelfStringArtIds) {
+                var vids = this._propertyDelfStringArtIds[name];
+                if (vids) r.setDeflStringArtIds(vids);
+            }
             return r
         }
     }

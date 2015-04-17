@@ -1691,6 +1691,11 @@ module TDev {
             }
         }
 
+        public setDeflStringArtIds(v: StringMap<string>)
+        {
+            this._stringValueArtIds = v;
+        }
+
         public md_deflStrings(...v:string[])
         {
             this.setDeflStrings(v)
@@ -1701,7 +1706,8 @@ module TDev {
 
         public _kind:Kind;
         public parentProperty:IProperty;
-        private _stringValues:string[];
+        private _stringValues: string[];
+        private _stringValueArtIds: StringMap<string>;
         public _flags:ParameterFlags = 0;
 
         public getKind() { return this._kind || api.core.Nothing; }
@@ -1711,11 +1717,15 @@ module TDev {
         {
             return this._stringValues;
         }
+        public getStringValueArtIds(): StringMap<string> {
+            return this._stringValueArtIds;
+        }
 
         public substFor(par:ParametricKind):PropertyParameter
         {
             var r = new PropertyParameter(this.getName(), par.subst(this._kind))
             r._stringValues = this._stringValues;
+            r._stringValueArtIds = this._stringValueArtIds;
             r._flags = this._flags;
             return r
         }

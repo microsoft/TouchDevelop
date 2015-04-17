@@ -205,6 +205,16 @@ module TDev{
     export var eventLogging = false;
     export var mouseLogging = false;
 
+    export function splitKeyValues(text: string, sep: string = ',', valSep = '='): StringMap<string> {
+        var result: StringMap<string> = {};
+        if (text)
+            text.split(sep).forEach(function (x) {
+                var arr = x.split(valSep);
+                if (arr[1]) result[arr[0]] = arr[1];
+            });
+        return result;
+    }
+
     export function wordLength(s:string)
     {
         var max = 0

@@ -107,9 +107,12 @@ module TDev
             }
             else {
                 var de = new DeclEntry(this.getName());
-                if (this.iconOverride) de.icon = this.iconOverride;
                 de.color = this.getColor();
                 de.description = this.getDesc();
+                if (this.imageOverride) {
+                    de.icon = this.imageOverride;
+                    de.color = 'white';
+                } else if (this.iconOverride) de.icon = this.iconOverride;
                 box = DeclRender.mkBox(<any> de);
             }
             if (!!this.isAttachedTo)

@@ -394,8 +394,8 @@ div.calcDebug {
 
 .calcButton .svg,
 .calcButton img {
-  height: 50%;
-  width: 50%;
+  max-height: 50%;
+  max-width: 50%;
 }
 
 .calcButton
