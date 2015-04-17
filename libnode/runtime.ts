@@ -642,8 +642,6 @@ module TDev.RT.Node {
     export function setup(): void {
         if (!Browser.isNodeJS) return
 
-        process.on('uncaughtException', handleError)
-
         Buffer = global.Buffer;
 
         Browser.canIndexedDB = false;
@@ -660,6 +658,7 @@ module TDev.RT.Node {
             var t = process.hrtime();
             return t[0] * 1e3 + t[1] * 1e-6;
         }
+
 
         TDev.Ticker.disable()
         TDev.Util.initGenericExtensions();
@@ -778,6 +777,8 @@ module TDev.RT.Node {
         };
 
         (<any>TDev.RT.Buffer).fromNodeBuffer = buf => TDev.RT.Buffer.fromTypedArray(buf);
+
+        process.on('uncaughtException', handleError)
     }
 
     function getRuntimeInfoAsync(which:string)

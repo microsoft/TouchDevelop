@@ -6,9 +6,6 @@
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='jsonapi.ts'/>
 
-var window;
-var navigator;
-
 import fs = require('fs');
 import url = require('url');
 import http = require('http');
@@ -31,7 +28,9 @@ export var verbose = false;
 export var slave = false;
 var reqId = 0;
 var restConfig:RestConfig;
+
 var authKey = "";
+var liteStorage = "";
 
 
 class ApiRequest
@@ -42,6 +41,7 @@ class ApiRequest
     startCompute:number;
     _isAuthorized = false;
     addInfo = "";
+    args:string;
 
     constructor(public request:http.ServerRequest, public response:http.ServerResponse)
     {
@@ -286,32 +286,6 @@ function getAstInfo(flags:TDev.StringMap<string>)
     return r;
 }
 
-function httpGetJsonAsync(u:string)
-{
-    return httpGetTextAsync(u).then(s => JSON.parse(s))
-}
-
-function httpGetTextAsync(u:string)
-{
-    var r = new TDev.PromiseInv()
-    var p = url.parse(u);
-
-    https.get(u, (res:http.ClientResponse) => {
-        if (res.statusCode == 200) {
-            (<any>res).setEncoding('utf8');
-
-            var d = "";
-            res.on('data', (c) => { d += c });
-            res.on('end', () => r.success(d))
-
-        } else {
-            r.error("JSON get error " + u)
-        }
-    });
-
-    return r
-}
-
 function httpGetBufferAsync(u:string)
 {
     var r = new TDev.PromiseInv()
@@ -360,7 +334,7 @@ function getAstInfoWithLibs(ar:ApiRequest, opts:TDev.StringMap<string>)
     else
         TDev.Promise.join(Object.keys(missing).map(k =>
             (/^[a-z]+$/.test(k) ?
-                httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(k)).then(v => v, err => null)
+                TDev.Util.httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(k)).then(v => v, err => null)
             : TDev.Promise.as(null))
             .then(resp => {
                 if (resp && resp.rootid)
@@ -751,6 +725,152 @@ var deployHandlers = {
     },
 }
 
+function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
+    var r = <TDev.QueryRequest>ar.data;
+
+    var m = /^([^?]*)(\?(.*))?/.exec(r.path)
+    var opts:any = m[3] ? querystring.parse(m[3]) : {}
+    if (opts.format)
+        ar.spaces = 2;
+    var hr = ar.response
+    var html = (content:string, css = true) => {
+        hr.writeHead(200, { "Content-Type": "text/html" });
+        hr.end(htmlFrame(TDev.Script.getName(), content, css), "utf-8")
+    }
+    ar.addInfo = m[1];
+
+    function detect(unreach) {
+        var v = new TDev.AST.PlatformDetector();
+        if (opts.req)
+            v.requiredPlatform = TDev.AST.App.fromCapabilityList(opts.req.split(/,/))
+        v.includeUnreachable = unreach
+        v.run(TDev.Script);
+        return {
+            platforms: TDev.AST.App.capabilityString(v.platform).split(",").filter(s => !!s),
+            errors: v.errors
+        }
+    }
+
+    switch (m[1]) {
+    case "webast":
+        ar.ok(TDev.AST.Json.dump(TDev.Script))
+        break;
+
+    case "pretty":
+        html(prettyScript(tcRes, !!opts.libErrors))
+        break;
+
+    case "pretty-docs":
+    case "docs":
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => html(top))
+        break;
+
+    case "docs-info":
+        TDev.HelpTopic.fromScript(TDev.Script).docInfoAsync().done(resp => ar.ok(resp))
+        break;
+
+    case "newsletter":
+        TDev.HelpTopic.fromScript(TDev.Script).printedAsync(true).done(text => {
+            if (opts.bare) {
+                hr.writeHead(200, { "Content-Type": "text/plain" });
+                hr.end(text, "utf-8")
+            } else {
+                html(text, false)
+            }
+        })
+        break;
+
+    case "tutorial-info":
+        ar.ok(TDev.AST.Step.tutorialInfo(TDev.Script))
+        break;
+
+    case "platforms":
+        ar.ok({
+            numErrors: tcRes.numErrors,
+            reachable: detect(false),
+            everything: detect(true)
+        })
+        break;
+
+    case "features":
+        ar.ok({
+            features: getScriptFeatures()
+        })
+        break;
+
+    case "libinfo":
+        getAstInfoWithLibs(ar, opts)
+        break;
+
+    case "astinfo":
+        ar.ok(getAstInfo(opts))
+        break;
+
+    case "text":
+        hr.writeHead(200, { "Content-Type": "text/plain" });
+        hr.end(TDev.Script.serialize(), "utf-8");
+        break;
+
+    case "compile":
+        TDev.Script.setStableNames();
+        var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
+                packaging: true,
+                scriptId: r.id
+        });
+
+        ar.ok({ compiled: cs.getCompiledCode(),
+                resources: cs.packageResources })
+        break;
+
+    case "package": (() => {
+        var user = ""
+        if (opts.token) {
+            var jwt = decodeJWT(opts.token, "Export your scripts")
+            if (jwt.tdUser)
+                user = "/" + encodeURIComponent(jwt.tdUser)
+            else {
+                ar.ok({ error: jwt.error || "bad token" })
+                return
+            }
+        }
+        TDev.Util.httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(r.id) + "/canexportapp" + user)
+            .then(v => {
+                if (v.canExport)
+                    return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
+                        relId: relId,
+                        scriptId: r.id,
+                        runtimeFlags: opts.flags,
+                    })
+                else
+                    return TDev.Promise.as({
+                        error: "you cannot export this script: " + v.reason
+                    })
+            }, err => {
+                return { error: "cannot determine if you can export this script" }
+            })
+            .then(ins => ar.ok(ins))
+            .done()
+        })();
+        break;
+
+    case "nodepackage":
+        TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
+            relId: relId,
+            scriptId: r.id,
+            filePrefix: "static/",
+            compileServer: true,
+            skipClient: true,
+            azureSite: "http://localhost",
+            runtimeFlags: opts.flags,
+        }).done(ins => ar.ok(ins))
+        break;
+
+    default:
+        ar.notFound();
+        break;
+    }
+}
+
 var tgzBufferPromise = null;
 function getTgzAsync()
 {
@@ -970,150 +1090,15 @@ var apiHandlers = {
     },
 
     "query": (ar:ApiRequest) => {
-        var r = <TDev.QueryRequest>ar.data;
-        parseScript(ar, (tcRes) => {
-            var m = /^([^?]*)(\?(.*))?/.exec(r.path)
-            var opts:any = m[3] ? querystring.parse(m[3]) : {}
-            if (opts.format)
-                ar.spaces = 2;
-            var hr = ar.response
-            var html = (content:string, css = true) => {
-                hr.writeHead(200, { "Content-Type": "text/html" });
-                hr.end(htmlFrame(TDev.Script.getName(), content, css), "utf-8")
-            }
-            ar.addInfo = m[1];
+        parseScript(ar, (tcRes) => handleQuery(ar, tcRes))
+    },
 
-            function detect(unreach) {
-                var v = new TDev.AST.PlatformDetector();
-                if (opts.req)
-                    v.requiredPlatform = TDev.AST.App.fromCapabilityList(opts.req.split(/,/))
-                v.includeUnreachable = unreach
-                v.run(TDev.Script);
-                return {
-                    platforms: TDev.AST.App.capabilityString(v.platform).split(",").filter(s => !!s),
-                    errors: v.errors
-                }
-            }
+    "q": (ar:ApiRequest) => {
+        var w = ar.args.split(/\//)
+        ar.data = { path: w[1], id: w[0] }
 
-            switch (m[1]) {
-            case "webast":
-                ar.ok(TDev.AST.Json.dump(TDev.Script))
-                break;
-
-            case "pretty":
-                html(prettyScript(tcRes, !!opts.libErrors))
-                break;
-
-            case "pretty-docs":
-            case "docs":
-                renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => html(top))
-                break;
-
-            case "docs-info":
-                TDev.HelpTopic.fromScript(TDev.Script).docInfoAsync().done(resp => ar.ok(resp))
-                break;
-
-            case "newsletter":
-                TDev.HelpTopic.fromScript(TDev.Script).printedAsync(true).done(text => {
-                    if (opts.bare) {
-                        hr.writeHead(200, { "Content-Type": "text/plain" });
-                        hr.end(text, "utf-8")
-                    } else {
-                        html(text, false)
-                    }
-                })
-                break;
-
-            case "tutorial-info":
-                ar.ok(TDev.AST.Step.tutorialInfo(TDev.Script))
-                break;
-
-            case "platforms":
-                ar.ok({
-                    numErrors: tcRes.numErrors,
-                    reachable: detect(false),
-                    everything: detect(true)
-                })
-                break;
-
-            case "features":
-                ar.ok({
-                    features: getScriptFeatures()
-                })
-                break;
-
-            case "libinfo":
-                getAstInfoWithLibs(ar, opts)
-                break;
-
-            case "astinfo":
-                ar.ok(getAstInfo(opts))
-                break;
-
-            case "text":
-                hr.writeHead(200, { "Content-Type": "text/plain" });
-                hr.end(TDev.Script.serialize(), "utf-8");
-                break;
-
-            case "compile":
-                TDev.Script.setStableNames();
-                var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
-                        packaging: true,
-                        scriptId: r.id
-                });
-
-                ar.ok({ compiled: cs.getCompiledCode(),
-                        resources: cs.packageResources })
-                break;
-
-            case "package": (() => {
-                var user = ""
-                if (opts.token) {
-                    var jwt = decodeJWT(opts.token, "Export your scripts")
-                    if (jwt.tdUser)
-                        user = "/" + encodeURIComponent(jwt.tdUser)
-                    else {
-                        ar.ok({ error: jwt.error || "bad token" })
-                        return
-                    }
-                }
-                httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(r.id) + "/canexportapp" + user)
-                    .then(v => {
-                        if (v.canExport)
-                            return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
-                                relId: relId,
-                                scriptId: r.id,
-                                runtimeFlags: opts.flags,
-                            })
-                        else
-                            return TDev.Promise.as({
-                                error: "you cannot export this script: " + v.reason
-                            })
-                    }, err => {
-                        return { error: "cannot determine if you can export this script" }
-                    })
-                    .then(ins => ar.ok(ins))
-                    .done()
-                })();
-                break;
-
-            case "nodepackage":
-                TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
-                    relId: relId,
-                    scriptId: r.id,
-                    filePrefix: "static/",
-                    compileServer: true,
-                    skipClient: true,
-                    azureSite: "http://localhost",
-                    runtimeFlags: opts.flags,
-                }).done(ins => ar.ok(ins))
-                break;
-
-            default:
-                ar.notFound();
-                break;
-            }
-        })
+        TDev.AST.reset();
+        TDev.AST.loadScriptAsync(getScriptAsync, w[0]).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
     },
 
     "addids": (ar:ApiRequest) => {
@@ -1312,7 +1297,8 @@ function handleApi(req:http.ServerRequest, resp:http.ServerResponse)
             ar.data = buf ? JSON.parse(buf) : {};
             var firstWord = uu.replace(/\/.*/, "");
 
-            var h = apiHandlers[uu];
+            var h = apiHandlers[firstWord];
+            ar.args = uu.replace(/^[^\/]+\//, "")
 
             var mm = /^deploy\/(.*)/.exec(uu)
             if (mm) {
@@ -1899,16 +1885,23 @@ var scriptCacheSize = 0
 
 function getScriptAsync(id:string)
 {
-    var s = TDev.HelpTopic.shippedScripts
-    if (s.hasOwnProperty(id)) return TDev.Promise.as(s[id])
+    if (!liteStorage) {
+        var s = TDev.HelpTopic.shippedScripts
+        if (s.hasOwnProperty(id)) return TDev.Promise.as(s[id])
+    }
+
     if (scriptCache.hasOwnProperty(id)) return TDev.Promise.as(scriptCache[id])
 
     if (!/^[a-z]+$/.test(id)) return null
 
-    console.log("fetching script " + id)
+    if (verbose)
+        console.log("fetching script " + id)
 
-    return httpGetTextAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(id) + "/text?original=true&ids=true")
-        .then(text => {
+    var p = liteStorage ? 
+        TDev.Util.httpGetJsonAsync(liteStorage + "/scripttext/" + id).then(resp => resp ? resp.text : null, err => null)
+        : TDev.Util.httpGetTextAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(id) + "/text?original=true&ids=true")
+
+    return p.then(text => {
             if (text) {
                 scriptCacheSize += text.length
                 if (scriptCacheSize > 10000000) {
@@ -1928,8 +1921,9 @@ export function globalInit()
     TDev.Browser.loadingDone = true;
     TDev.Browser.detect();
 
+    TDev.RT.Node.setup();
+
     TDev.Promise.errorHandler = reportBug;
-    TDev.Util.perfNow = () => Date.now();
 
     TDev.Ticker.fillEditorInfoBugReport = (b:TDev.BugReport) => {
         try {
@@ -1943,7 +1937,7 @@ export function globalInit()
         }
     };
 
-    process.on('uncaughtException', (err) => reportBug("uncaughtException", err));
+    // process.on('uncaughtException', (err) => reportBug("uncaughtException", err));
 
     var mm = /\/(\d\d\d\d\d\d\d\d\d+-[a-f0-9\.]+-[a-z0-9]+)\//.exec(jsPath)
     relId = mm ? mm[1] : "local"
@@ -1981,33 +1975,8 @@ export function globalInit()
         }
     }
 
-    window = <any>{};
-    window.removeEventListener = () => {};
-    window.setTimeout = setTimeout;
-
-    var ls = <any>{};
-    window.localStorage = ls;
-    ls.getItem = (s) => ls[s]
-    ls.setItem = (s, v) => ls[s] = v + ""
-    ls.removeItem = (s) => delete ls[s]
-
-    navigator = <any>{};
-    window.navigator = navigator;
-
-    TDev.Random.strongEntropySource = (buf) => {
-        var b2 = crypto.randomBytes(buf.length);
-        for (var i = 0; i < buf.length; ++i)
-            b2[i] = buf[i];
-    };
-
-    TDev.Ticker.disable()
-
-    TDev.Util.initGenericExtensions();
-
     TDev.AST.Lexer.init();
-
     TDev.HelpTopic.getScriptAsync = getScriptAsync;
-
     TDev.api.initFrom();
 
     authKey = process.env['TD_DEPLOYMENT_KEY'] || ""
