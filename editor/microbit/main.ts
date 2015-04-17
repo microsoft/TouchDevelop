@@ -15,7 +15,7 @@ module TDev {
     // main app or one of said libraries.
     function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string } {
       lift(a);
-      var e = new Emitter();
+      var e = new Emitter(libs);
       e.visit(emptyEnv, a);
       return e;
     }
@@ -38,8 +38,10 @@ module TDev {
         var code = [];
         libs.concat([a]).forEach((a: J.JApp) => {
           var r = compile1(libs, a);
-          prototypes.push(r.prototypes);
-          code.push(r.code);
+          if (r.prototypes)
+            prototypes.push(r.prototypes);
+          if (r.code)
+            code.push(r.code);
         });
         return Promise.as(prototypes.join("\n") + "\n\n" + code.join("\n"));
       });

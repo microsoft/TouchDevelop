@@ -21,12 +21,12 @@ module TDev {
       };
     }
 
-    function isMicrobitLibrary(e: J.JExpr) {
+    function isLibrary(e: J.JExpr) {
       return (
         e.nodeType == "call" &&
-        (<J.JCall> e).name == "microbit" &&
         (<J.JCall> e).args[0].nodeType == "singletonRef" &&
-        (<J.JSingletonRef> (<J.JCall> e).args[0]).name == H.librarySymbol
+        (<J.JSingletonRef> (<J.JCall> e).args[0]).name == H.librarySymbol &&
+        (<J.JCall> e).name
       );
     }
 
@@ -41,7 +41,7 @@ module TDev {
         (<J.JStringLiteral> (<J.JExprHolder> (<J.JExprStmt> nonComments[0]).expr).tree).value;
       var matches = value && value.match(/^shim:(.*)/);
       if (matches)
-        return matches[0];
+        return matches[1];
       else
         return null;
     }
@@ -65,18 +65,18 @@ module TDev {
         throw new Error("Unknown button!");
     }
 
-    var knownMicrobitCalls: { [index: string]: string } = {
-      "on": "microbit_register",
-      "busy wait ms": "wait_ms",
-      "set led": "microbit_set_led",
-      "button pressed": "microbit_button_pressed",
-      "debug": "pc.printf",
-    };
-
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
 
+      // Output "parameters", written to at the end.
       public prototypes = "";
       public code = "";
+
+      // All the libraries needed to compile this [JApp].
+      constructor(
+        private libs: J.JApp[]
+      ) {
+        super();
+      }
 
       public visitMany(e: EmitterEnv, ss: J.JNode[]) {
         var code = [];
@@ -161,6 +161,22 @@ module TDev {
         ].join("");
       }
 
+      private lookupLibraryCall(receiver: J.JExpr, name: string) {
+        var n = isLibrary(receiver);
+        if (!n)
+          return;
+        // I expect all libraries and all library calls to be properly resolved.
+        var lib = this.libs.filter(l => l.name == n)[0];
+        var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
+        var s = isShimBody((<J.JAction> action).body);
+        if (s) {
+          return s;
+        } else {
+          // XXX most likely wrong
+          return n + "_" + name;
+        }
+      }
+
       public visitCall(env: EmitterEnv, name: string, args: J.JExpr[]) {
         var receiver = args[0];
         args = args.splice(1);
@@ -170,19 +186,16 @@ module TDev {
           return f + "(" + argsCode.join(", ") + ")";
         };
 
-        if (isMicrobitLibrary(receiver)) {
-          if (!(name in knownMicrobitCalls))
-            throw new Error("Unknown microbit call: "+name);
-          // Some special-cases.
-          if (name == "button pressed") {
-            args = checkButtonPressedArgs(args);
-          }
-          return mkCall(knownMicrobitCalls[name]);
-        } else if (name == ":=") {
+        var resolvedName = this.lookupLibraryCall(receiver, name);
+        // XXX do something more modular
+        if (resolvedName == "microbit_button_pressed")
+          args = checkButtonPressedArgs(args);
+        if (resolvedName)
+          return mkCall(resolvedName);
+        else if (name == ":=")
           return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
-        } else {
+        else
           throw new Error("Unknown call "+name);
-        }
       }
 
       public visitAction(
@@ -195,7 +208,7 @@ module TDev {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
         if (isShimBody(body))
-          return "";
+          return null;
 
         var env2 = indent(env);
         var bodyText = [
