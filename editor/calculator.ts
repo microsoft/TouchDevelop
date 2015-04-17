@@ -3645,7 +3645,7 @@ module TDev
             if (!pp) return
             var stringValues = pp.getStringValues()
             if (!stringValues || stringValues.length <= 1) return
-            var picStringValues = pp.getStringValueArtIds() || {};
+            var picStringValues = Browser.lowMemory ? {} : (pp.getStringValueArtIds() || {});
             stringValues.forEach((s, i) => {
                 var e = this.mkIntelliItem(1e8 - i, Ticks.calcInsertStringParamterValue);
                 var isNum = pp.getKind() == api.core.Number
@@ -3655,7 +3655,10 @@ module TDev
                 e.iconOverride = "svg:NumberedList,white";
                 e.colorOverride = "rgb(0, 204, 153)";
                 var spic = picStringValues[s];
-                if (spic) e.imageOverride = ArtUtil.artUrl(spic, true);
+                if (spic) {
+                    e.imageOverride = ArtUtil.artUrl(spic, true);
+                    e.descOverride = e.nameOverride;
+                }
                 e.cbOverride = () => {
                     this.unselect();
                     var toks = this.expr.tokens
