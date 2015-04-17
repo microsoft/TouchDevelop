@@ -227,7 +227,7 @@ module TDev {
                             case Language.TouchDevelop:
                                 // the guid is here only for testing; the real generation should be deterministic for best results
                                 cpp = roundtrip(message1.text).then((a: J.JApp) => {
-                                    return Promise.as(Microbit.compile(a));
+                                    return Microbit.compile(a);
                                 });
                                 break;
                         }

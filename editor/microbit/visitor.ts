@@ -60,57 +60,57 @@ module TDev {
             case "library":
               return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
           }
-          throw "Unsupported node: "+n.nodeType;
+          throw new Error("Unsupported node: "+n.nodeType);
       }
 
-      public visitNumberLiteral(env: T, v: number): U                     { throw "Not implemented"; }
-      public visitStringLiteral(env: T, v: string): U                     { throw "Not implemented"; }
-      public visitBooleanLiteral(env: T, v: boolean): U                   { throw "Not implemented"; }
-      public visitOperator(env: T, op: string): U                         { throw "Not implemented"; }
+      public visitNumberLiteral(env: T, v: number): U                     { throw new Error("Not implemented"); }
+      public visitStringLiteral(env: T, v: string): U                     { throw new Error("Not implemented"); }
+      public visitBooleanLiteral(env: T, v: boolean): U                   { throw new Error("Not implemented"); }
+      public visitOperator(env: T, op: string): U                         { throw new Error("Not implemented"); }
       public visitPropertyRef(
         env: T,
         name: string,
-        parent: string): U                                                { throw "Not implemented"; }
-      public visitCall(env: T, name: string, args: J.JExpr[]): U          { throw "Not implemented"; }
-      public visitSingletonRef(env: T, name: string): U                   { throw "Not implemented"; }
+        parent: string): U                                                { throw new Error("Not implemented"); }
+      public visitCall(env: T, name: string, args: J.JExpr[]): U          { throw new Error("Not implemented"); }
+      public visitSingletonRef(env: T, name: string): U                   { throw new Error("Not implemented"); }
       public visitLocalDef(
         env: T,
         name: string,
         id: string,
-        type: J.JTypeRef): U                                              { throw "Not implemented"; }
-      public visitLocalRef(env: T, name: string, id: string): U           { throw "Not implemented"; }
-      public visitExprHolder(env: T, expr: J.JExpr): U                    { throw "Not implemented"; }
-      public visitExprStmt(env: T, expr: J.JExpr): U                      { throw "Not implemented"; }
+        type: J.JTypeRef): U                                              { throw new Error("Not implemented"); }
+      public visitLocalRef(env: T, name: string, id: string): U           { throw new Error("Not implemented"); }
+      public visitExprHolder(env: T, expr: J.JExpr): U                    { throw new Error("Not implemented"); }
+      public visitExprStmt(env: T, expr: J.JExpr): U                      { throw new Error("Not implemented"); }
       public visitInlineActions(
         env: T,
         expr: J.JExpr,
-        actions: J.JInlineAction[]): U                                    { throw "Not implemented"; }
-      public visitWhile(env: T, cond: J.JExprHolder, body: J.JStmt[]): U  { throw "Not implemented"; }
+        actions: J.JInlineAction[]): U                                    { throw new Error("Not implemented"); }
+      public visitWhile(env: T, cond: J.JExprHolder, body: J.JStmt[]): U  { throw new Error("Not implemented"); }
       public visitFor(
         env: T,
         index: J.JLocalDef,
         bound: J.JExprHolder,
-        body: J.JStmt[]): U                                               { throw "Not implemented"; }
-      public visitComment(env: T, c: string): U                           { throw "Not implemented"; }
+        body: J.JStmt[]): U                                               { throw new Error("Not implemented"); }
+      public visitComment(env: T, c: string): U                           { throw new Error("Not implemented"); }
       public visitIf(
         env: T,
         cond: J.JExprHolder,
         thenBranch: J.JStmt[],
         elseBranch: J.JStmt[],
-        isElseIf: boolean): U                                             { throw "Not implemented"; }
+        isElseIf: boolean): U                                             { throw new Error("Not implemented"); }
       public visitInlineAction(env: T,
         reference: J.JLocalDef,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[]): U                                               { throw "Not implemented"; }
+        body: J.JStmt[]): U                                               { throw new Error("Not implemented"); }
       public visitAction(
         env: T,
         name: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[]): U                                               { throw "Not implemented"; }
-      public visitApp(env: T, decls: J.JDecl[]): U                        { throw "Not implemented"; }
-      public visitLibrary(env: T, name: string): U                        { throw "Not implemented"; }
+        body: J.JStmt[]): U                                               { throw new Error("Not implemented"); }
+      public visitApp(env: T, decls: J.JDecl[]): U                        { throw new Error("Not implemented"); }
+      public visitLibrary(env: T, name: string): U                        { throw new Error("Not implemented"); }
     }
   }
 

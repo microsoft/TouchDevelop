@@ -15,7 +15,7 @@ import B = Blockly;
 
 function assert(x: boolean) {
   if (!x)
-    throw "Assertion failure";
+    throw new Error("Assertion failure");
 }
 
 // A series of utility functions for constructing various J* AST nodes.
@@ -426,7 +426,7 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
   }
-  throw (b.type + " is not an expression block or is not supported");
+  throw new Error((b.type + " is not an expression block or is not supported"));
   // unreachable
   return null;
 }
@@ -647,7 +647,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
 
       default:
-        throw (b.type + " is not a statement block or is not supported");
+        throw new Error(b.type + " is not a statement block or is not supported");
     }
     b = b.getNextBlock();
   }

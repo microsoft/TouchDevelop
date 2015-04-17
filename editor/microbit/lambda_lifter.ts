@@ -53,6 +53,10 @@ module TDev {
           return this.visitMany(env, body);
       }
 
+      public visitComment(env, c) {
+        return [];
+      }
+
       public visitAction(
         env,
         name: string,
