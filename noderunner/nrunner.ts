@@ -25,163 +25,14 @@ export interface RestConfig {
     clientKey:string;
 }
 
-var WebSocket: any;
-
-function shimWebSocket() {
-  WebSocket = require('faye-websocket').Client;
-}
-
 export var jsPath = '@@RELEASED_FILE@@';
 export var relId = 'local';
 export var verbose = false;
 export var slave = false;
 var reqId = 0;
 var restConfig:RestConfig;
-var needsWebSocket = true;
+var authKey = "";
 
-export class NodeRuntime
-    extends TDev.Runtime
-{
-    constructor(public nodeHost:RunnerHost)
-    {
-        super()
-    }
-
-    public initPageStack()
-    {
-    }
-
-    public postBoxedText(s:string) : TDev.WallBox
-    {
-        TDev.Util.log("WALL: " + s);
-
-        this.nodeHost.result.wallMessages.push(s);
-
-        return undefined;
-    }
-
-    public postBoxedTextWithTap(s:string, rtV: any) : TDev.WallBox
-    {
-        return this.postBoxedText(s);
-    }
-
-    public runtimeKind() { return "nodejs" }
-}
-
-export class RunnerHost
-    extends TDev.HeadlessHost
-    implements TDev.RuntimeHost
-{
-
-
-    public result:TDev.ExecutionResult =
-        {
-            crashReport: null,
-            wallMessages: [],
-            state: null
-        };
-
-    public init(rt:TDev.Runtime)
-    {
-        this.currentRt = rt;
-    }
-
-    public respondToCrash(bug:TDev.BugReport)
-    {
-        this.result.crashReport = bug;
-        this.onProgramEnd();
-    }
-
-    constructor()
-    {
-        super();
-        this.currentRt = new NodeRuntime(this);
-    }
-
-    runAsync(action:string, state:any)
-    {
-        return new TDev.Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
-            var rt = this.currentRt;
-            var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {});
-            var actionName = action || TDev.Script.mainAction().getName();
-            var act = TDev.Script.findActionByName(actionName);
-            var varFinder = new TDev.AST.VariableFinder();
-            varFinder.traverse(act, true);
-
-            rt.initFrom(cs);
-            rt.setHost(this);
-
-            if (!window.localStorage) window.localStorage = <any>{};
-            window.localStorage["access_token"] = state.accessToken;
-
-            if (state.cloudState) { // offloaded code uses cloud data
-                window.localStorage["userid"] = state.cloudState.userid;
-                window.localStorage["rs_access_token"] = state.cloudState.rsAccessToken;
-                TDev.Util.log("rs_access_token = " + state.cloudState.rsAccessToken);
-                // connect to session
-                //rt.sessions.setEditorScriptContext(state.cloudState.userid, state.cloudState.guid, state.cloudState.scriptName, state.cloudState.script);
-                TDev.Util.log(" session status = " + rt.sessions.getCurrentSession().user_get_connectionstatus(true));
-            }
-
-            var dataPromise = TDev.Promise.as();
-            var args = []
-
-            /*
-            if (state) {
-                dataPromise =
-                    rt.initDataAsync().then(() => {
-                        rt.deserializeDataAsync(state, (ctx, add) => {
-                            args = add.map((d) => ctx.fromJson(d))
-                        })
-                    })
-            }
-            */
-
-            function run(host) {
-                dataPromise.done(() => {
-                    host.showWall();
-                    rt.initPageStack();
-
-                    host.onProgramEnd = () => {
-                        var res = host.currentRt.getActionResults();
-                        if (!res) res = [];
-                        //host.result.state = state.heapOpt ? host.currentRt.serializeData((ctx) => res.map((d) => ctx.toJson(d)), false, undefined, varFinder.readGlobals, varFinder.writtenGlobals, true)
-                        //                                 : host.currentRt.serializeData((ctx) => res.map((d) => ctx.toJson(d)))
-                        TDev.Util.log("finished " + actionName);
-                        if (rt.sessions.getLastSession()) {
-                            rt.sessions.yieldSession();
-                            rt.sessions.disconnect();
-                            //rt.sessions.setScriptContext("", "", "", ""); // disconnect
-                        }
-                        onSuccess(host.result);
-                    };
-
-                    var fn = cs.actionsByName[actionName];
-                    rt.run(fn, args);
-                })
-            }
-            if (rt.sessions.getLastSession()) {
-                rt.sessions.getLastSession().user_issue_fence(() => run(this), true);
-            } else run(this);
-        });
-    }
-}
-
-function runScriptAsync(text:string, action:string = null, state = undefined)
-{
-    TDev.Script = TDev.AST.Parser.parseScript(text);
-    TDev.Script.isTopLevel = true;
-    TDev.Script.localGuid = TDev.Util.guidGen();
-    TDev.AST.TypeChecker.tcApp(TDev.Script);
-
-    TDev.RT.RTValue.initApis();
-
-    var host = new RunnerHost();
-    // TODO: unique GUID per web app?
-    host.currentGuid = "404ccebb-4bbd-4692-9d6d-094519aaf915";
-
-    return host.runAsync(action, state);
-}
 
 class ApiRequest
 {
@@ -215,13 +66,6 @@ class ApiRequest
         }
         this.response.writeHead(200, { "Content-Type": "application/json" });
         this.response.end(res, "utf-8")
-    }
-
-    crashed(bug:string)
-    {
-        console.log("script crashed 400");
-        this.response.writeHead(400, "Script crashed");
-        this.response.end(bug, "utf-8");
     }
 
     deployErr(exn:any)
@@ -970,13 +814,6 @@ function decodeJWT(token:string, aud:string)
 }
 
 var apiHandlers = {
-    "run": (ar:ApiRequest) => {
-        var r = <TDev.ExecutionRequest>ar.data;
-        runScriptAsync(r.script, r.actionName, r.state).done((result) => {
-            ar.ok(result);
-        }, ar.errHandler());
-    },
-
     "deps": (ar:ApiRequest) => {
         var r = <TDev.DepsRequest>ar.data;
         var res = <TDev.DepsResponse> { libraryIds: [] };
@@ -1465,6 +1302,12 @@ function handleApi(req:http.ServerRequest, resp:http.ServerResponse)
             var uu = u.pathname.replace(/^\//, "");
             var qs = querystring.parse(u.query)
 
+            if (authKey && qs['access_token'] != authKey) {
+                resp.writeHead(403)
+                resp.end("Bad auth")
+                return
+            }
+
             uu = uu.replace(/^api\//, "");
             ar.data = buf ? JSON.parse(buf) : {};
             var firstWord = uu.replace(/\/.*/, "");
@@ -1577,12 +1420,7 @@ function startServer(port:number)
             reqId++;
             if (verbose)
                 console.log('%s %s', req.method, req.url);
-
-            var u = url.parse(req.url);
-            var pp = path.normalize(u.pathname).replace(/\\/g, "/").replace(/^\/*/, "");
-            var m = /^([^\/]*)/.exec(pp);
-            if (m && (m[1] == "api" || m[1] == "deploy"))
-                handleApi(req, resp);
+            handleApi(req, resp);
         } catch (err) {
             reportBug("noderunner", err);
         }
@@ -2128,13 +1966,11 @@ export function globalInit()
         serverPort = parseInt(file);
         if (process.argv[3] == 'silent') {
             verbose = false;
-            needsWebSocket = false;
         }
 
         if (process.argv[3] == 'slave') {
             verbose = false;
             slave = true;
-            needsWebSocket = false;
             var lastReqId = 0;
             setInterval(() => {
                 if (lastReqId == reqId) {
@@ -2144,8 +1980,6 @@ export function globalInit()
             }, 1000*600);
         }
     }
-
-    if (file == "compress" || file == "scrub" || file == "feat" || file == "astinfo" || file == "addids" || file == "mergetest") needsWebSocket = false;
 
     window = <any>{};
     window.removeEventListener = () => {};
@@ -2166,9 +2000,6 @@ export function globalInit()
             b2[i] = buf[i];
     };
 
-    if (needsWebSocket)
-        shimWebSocket();
-
     TDev.Ticker.disable()
 
     TDev.Util.initGenericExtensions();
@@ -2178,6 +2009,8 @@ export function globalInit()
     TDev.HelpTopic.getScriptAsync = getScriptAsync;
 
     TDev.api.initFrom();
+
+    authKey = process.env['TD_DEPLOYMENT_KEY'] || ""
 
     if (serverPort) {
         startServer(serverPort)
@@ -2197,10 +2030,7 @@ export function globalInit()
     } else if (process.argv[2] == "mergetest") {
         mergetest(process.argv.slice(3))
     } else {
-        var text = fs.readFileSync(process.argv[2], "utf8");
-        runScriptAsync(text).done((v) => {
-            console.log(v)
-        })
+        console.log("invalid usage")
     }
 }
 
