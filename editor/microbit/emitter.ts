@@ -30,6 +30,22 @@ module TDev {
       );
     }
 
+    function isShimBody(body: J.JStmt[]) {
+      var nonComments = body.filter((x: J.JStmt) => x.nodeType != "comment");
+      // If only we had that wonderful thing called pattern-matching...
+      var value =
+        nonComments.length &&
+        nonComments[0].nodeType == "exprStmt" &&
+        (<J.JExprStmt> nonComments[0]).expr.nodeType == "exprHolder" &&
+        (<J.JExprHolder> (<J.JExprStmt> nonComments[0]).expr).tree.nodeType == "stringLiteral" &&
+        (<J.JStringLiteral> (<J.JExprHolder> (<J.JExprStmt> nonComments[0]).expr).tree).value;
+      var matches = value && value.match(/^shim:(.*)/);
+      if (matches)
+        return matches[0];
+      else
+        return null;
+    }
+
     function checkButtonPressedArgs(args: J.JExpr[]) {
       var value = (x: J.JExpr) =>
         (x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || "");
@@ -46,7 +62,7 @@ module TDev {
       else if (value(args[0]) == "right")
         return [mkNumberLiteral(2)];
       else
-        throw "Unknown button!";
+        throw new Error("Unknown button!");
     }
 
     var knownMicrobitCalls: { [index: string]: string } = {
@@ -54,14 +70,22 @@ module TDev {
       "busy wait ms": "wait_ms",
       "set led": "microbit_set_led",
       "button pressed": "microbit_button_pressed",
+      "debug": "pc.printf",
     };
 
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
+
+      public prototypes = "";
+      public code = "";
 
       public visitMany(e: EmitterEnv, ss: J.JNode[]) {
         var code = [];
         ss.forEach((s: J.JNode) => { code.push(this.visit(e, s)) });
         return code.join("\n");
+      }
+
+      public visitComment(env: EmitterEnv, c: string) {
+        return "// "+c.replace("\n", "\n"+env.indent+"// ");
       }
 
       public visitExprStmt(env: EmitterEnv, expr: J.JExpr) {
@@ -148,7 +172,7 @@ module TDev {
 
         if (isMicrobitLibrary(receiver)) {
           if (!(name in knownMicrobitCalls))
-            throw "Unknown microbit call: "+name;
+            throw new Error("Unknown microbit call: "+name);
           // Some special-cases.
           if (name == "button pressed") {
             args = checkButtonPressedArgs(args);
@@ -157,7 +181,7 @@ module TDev {
         } else if (name == ":=") {
           return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
         } else {
-          throw "Unknown call "+name;
+          throw new Error("Unknown call "+name);
         }
       }
 
@@ -169,7 +193,9 @@ module TDev {
         body: J.JStmt[])
       {
         if (outParams.length > 1)
-          throw "Not supported (multiple return parameters)";
+          throw new Error("Not supported (multiple return parameters)");
+        if (isShimBody(body))
+          return "";
 
         var env2 = indent(env);
         var bodyText = [
@@ -185,7 +211,7 @@ module TDev {
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
-          if (f.nodeType == "action")
+          if (f.nodeType == "action" && !isShimBody((<J.JAction> f).body))
             return H.mkSignature(f.name, (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else
             return null;
@@ -196,12 +222,17 @@ module TDev {
           if (d.nodeType == "action") {
             return this.visit(e, d);
           } else if (!(d.nodeType == "library" && d.name == "microbit")) {
-            throw "Untranslated declaration" + d;
+            throw new Error("Untranslated declaration" + d);
           }
           return null;
         }).filter(x => x != null);
 
-        return forwardDeclarations.concat(userFunctions).join("\n");
+        // By convention, because we're forced to return a string, write the
+        // output parameters in the member variables.
+        this.prototypes = forwardDeclarations.join("\n");
+        this.code = userFunctions.join("\n");
+
+        return this.prototypes + "\n" + this.code;
       }
     }
   }

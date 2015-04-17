@@ -2039,16 +2039,18 @@ module TDev
         */
 
         private compile() {
-            var cpp = External.wrapCpp(Microbit.compile(AST.Json.dump(Script)));
-            Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
-                console.log(json);
-                if (!json.success) {
-                    ModalDialog.showText(External.makeOutMbedErrorMsg(json), lf("Compilation error"));
-                } else {
-                    document.location.href = json.hexurl;
-                }
-            }, json => {
-                ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
+            Microbit.compile(AST.Json.dump(Script)).then((cpp: string) => {
+                cpp = External.wrapCpp(cpp);
+                Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
+                    console.log(json);
+                    if (!json.success) {
+                        ModalDialog.showText(External.makeOutMbedErrorMsg(json), lf("Compilation error"));
+                    } else {
+                        document.location.href = json.hexurl;
+                    }
+                }, json => {
+                    ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
+                });
             });
         }
 

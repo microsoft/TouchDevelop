@@ -38,7 +38,7 @@ module TDev {
           case "Boolean":
             return "bool";
           default:
-            throw "Unsupported type: " + t1;
+            throw new Error("Unsupported type: " + t1);
         }
         // unreachable
         return null;
@@ -50,7 +50,7 @@ module TDev {
 
       export function mkSignature(name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
         if (outParams.length > 1)
-          throw "Not supported (multiple return parameters)";
+          throw new Error("Not supported (multiple return parameters)");
         var retType = outParams.length ? mkType(outParams[0].type) : "void";
         return [
           retType, " ", name, "(",
