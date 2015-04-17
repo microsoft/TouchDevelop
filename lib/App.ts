@@ -995,10 +995,89 @@ module TDev.RT {
             });
         }
 
+        export function hostSubscribeAsync(rt : Runtime, message: string, handler : TextAction): Promise {
+            return new Promise((onSuccess, onError, onProgress) => {
+                var ev = new Event_();
+                var binding = ev.addHandler(handler);
+                // minecraft support
+                var mcefQuery = (<any>window).mcefQuery;
+                if (mcefQuery) {
+                    try {
+                        mcefQuery({
+                            request: message,
+                            persistent: true,
+                            onSuccess: function (response) {
+                                rt.queueLocalEvent(ev, [response], false, false);
+                            },
+                            onFailure: function (error_code, error_message) {
+                                App.logEvent(App.DEBUG, "app", "mcefQuery failed: " + error_code, undefined);
+                            }
+                        });
+                    } catch (e) {
+                        onSuccess(undefined);
+                        return;
+                    }
+                    onSuccess(binding);
+                    return;
+                }
+
+                // cordova support
+                var cordova = (<any>window).cordova;
+                if (cordova && cordova.exec) {
+                    try {
+                        var payload = JSON.parse(message);
+                        cordova.exec(function (result) {
+                            rt.queueLocalEvent(ev, [JSON.stringify(result)], false, false);
+                        },
+                        function (error) {
+                            App.logEvent(App.DEBUG, "app", "cordova.exec failed: " + error, undefined);
+                        },
+                        payload.service,
+                        payload.action,
+                        payload.arguments);
+                    }
+                    catch (e) {
+                        App.logEvent(App.DEBUG, "app", "cordova.exec failed: " + e, undefined);
+                        onSuccess(undefined);
+                        return;
+                    }
+                    onSuccess(binding);
+                    return;
+                }
+
+                // generic callback support
+                var exec = (<any>window).touchDevelopExec;
+                if (exec) {
+                    try {
+                        exec(message,(result) => {
+                            rt.queueLocalEvent(ev, [JSON.stringify(result)], false, false);
+                        });
+                    }
+                    catch (e) {
+                        App.logEvent(App.DEBUG, "app", "touchDevelopExec failed", undefined);
+                        onSuccess(undefined);
+                        return;
+                    }
+
+                    onSuccess(binding);
+                    return;
+                }
+
+                App.log("no host found");
+                onSuccess(undefined);
+            });
+        }
+
         //? Invokes the host to execute a command described in the message and returns the response. There is no restriction on the format of the request and response. If not available or errored, returns invalid.
         //@ async readsMutable returns(string) betaOnly
         export function host_exec(message: string, r: ResumeCtx) {
             return hostExecAsync(message).done(resp => r.resumeVal(resp));
+        }
+
+        //? Invokes the host to register an event listener described in the message.
+        //@ async readsMutable returns(EventBinding) betaOnly
+        export function host_subscribe(message: string, handler: TextAction, r: ResumeCtx) {
+            return hostSubscribeAsync(r.rt, message, handler).done(resp => r.resumeVal(resp));
         }
     }
 }
