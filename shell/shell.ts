@@ -1428,10 +1428,12 @@ class Worker {
                         cb()
                     }
                 } else {
+                    debug.log("ping failed, " + cres.statusCode)
                     setTimeout(ping, 1000)
                 }
             })
             creq.on("error", err => {
+                debug.log("ping failed, " + err.message)
                 setTimeout(ping, 1000)
             })
             creq.end()

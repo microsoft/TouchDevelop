@@ -30,8 +30,8 @@ var reqId = 0;
 var restConfig:RestConfig;
 
 var authKey = "";
-var liteStorage = "";
-
+var liteStorage = process.env['TDC_LITE_STORAGE'] || "";
+var apiEndpoint = process.env['TDC_API_ENDPOINT'] || "https://www.touchdevelop.com/api/";
 
 class ApiRequest
 {
@@ -334,7 +334,7 @@ function getAstInfoWithLibs(ar:ApiRequest, opts:TDev.StringMap<string>)
     else
         TDev.Promise.join(Object.keys(missing).map(k =>
             (/^[a-z]+$/.test(k) ?
-                TDev.Util.httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(k)).then(v => v, err => null)
+                TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(k)).then(v => v, err => null)
             : TDev.Promise.as(null))
             .then(resp => {
                 if (resp && resp.rootid)
@@ -833,7 +833,7 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
                 return
             }
         }
-        TDev.Util.httpGetJsonAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(r.id) + "/canexportapp" + user)
+        TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(r.id) + "/canexportapp" + user)
             .then(v => {
                 if (v.canExport)
                     return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
@@ -1023,6 +1023,7 @@ var apiHandlers = {
             ar.ok({
                 textVersion: TDev.AST.App.currentVersion,
                 releaseid: relId,
+                tdVersion: process.env['TDC_VERSION'],
             });
             break;
 
@@ -1099,6 +1100,11 @@ var apiHandlers = {
 
         TDev.AST.reset();
         TDev.AST.loadScriptAsync(getScriptAsync, w[0]).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
+    },
+
+    "query2": (ar:ApiRequest) => {
+        TDev.AST.reset();
+        TDev.AST.loadScriptAsync(getScriptAsync, ar.data.id).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
     },
 
     "addids": (ar:ApiRequest) => {
@@ -1287,6 +1293,11 @@ function handleApi(req:http.ServerRequest, resp:http.ServerResponse)
             var uu = u.pathname.replace(/^\//, "");
             var qs = querystring.parse(u.query)
 
+            if (/^-tdevmgmt-\//.test(uu)) {
+                ar.ok({})
+                return
+            }
+
             if (authKey && qs['access_token'] != authKey) {
                 resp.writeHead(403)
                 resp.end("Bad auth")
@@ -1374,12 +1385,14 @@ function reportBug(ctx: string, err: any) {
     if (!slave)
         console.error(TDev.Ticker.bugReportToString(bug));
     bug.exceptionConstructor = "NJS " + bug.exceptionConstructor;
+    bug.tdVersion = process.env['TDC_VERSION']
 
-    var bugRequest = https.request({
-        hostname: 'www.touchdevelop.com',
-        path: '/api/bug',
-        method: 'POST',
-    }, (res: http.ClientResponse) => {
+    var opts = <any>url.parse(apiEndpoint)
+    opts.path = '/api/bug'
+    opts.method = 'POST'
+
+    var bugRequest = https.request(opts,
+    (res: http.ClientResponse) => {
         if (res.statusCode == 200) {
             if (!slave)
                 console.log("bug logged succesfully");
@@ -1412,7 +1425,7 @@ function startServer(port:number)
         }
     }).listen(port, 'localhost');
 
-    console.log("listening on localhost:%d", port);
+    console.log("listening on localhost:%d; things are good", port);
 }
 
 function randomInt(max:number) : number {
@@ -1979,7 +1992,7 @@ export function globalInit()
     TDev.HelpTopic.getScriptAsync = getScriptAsync;
     TDev.api.initFrom();
 
-    authKey = process.env['TD_DEPLOYMENT_KEY'] || ""
+    authKey = process.env['TDC_AUTH_KEY'] || ""
 
     if (serverPort) {
         startServer(serverPort)
