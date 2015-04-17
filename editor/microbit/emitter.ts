@@ -26,7 +26,7 @@ module TDev {
         e.nodeType == "call" &&
         (<J.JCall> e).args[0].nodeType == "singletonRef" &&
         (<J.JSingletonRef> (<J.JCall> e).args[0]).name == H.librarySymbol &&
-        (<J.JCall> e).name
+        (<J.JCall> e).name || null
       );
     }
 
@@ -46,23 +46,31 @@ module TDev {
         return null;
     }
 
-    function checkButtonPressedArgs(args: J.JExpr[]) {
-      var value = (x: J.JExpr) =>
-        (x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || "");
-      var mkNumberLiteral = (x: number): J.JNumberLiteral => {
-        return {
-          nodeType: "numberLiteral",
-          id: null,
-          value: x
-        };
+    function isStringLiteral(x: J.JNode) {
+      return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || null;
+    }
+
+    function mkNumberLiteral (x: number): J.JNumberLiteral {
+      return {
+        nodeType: "numberLiteral",
+        id: null,
+        value: x
       };
-      // XXX this will change once we have the actual hardware
-      if (value(args[0]) == "left")
-        return [mkNumberLiteral(1)];
-      else if (value(args[0]) == "right")
-        return [mkNumberLiteral(2)];
-      else
-        throw new Error("Unknown button!");
+    }
+
+    // Rewrites arguments for some selected C++ functions. For instance, as we
+    // don't have enums, the constant string "left" needs to be translated into
+    // the right number constant.
+    function translateArgsIfNeeded(call: string, args: J.JExpr[]) {
+      switch (call) {
+        case "microbit_button_pressed":
+          if (isStringLiteral(args[0]) == "left")
+            return [mkNumberLiteral(1)];
+          else if (isStringLiteral(args[1]) == "right")
+            return [mkNumberLiteral(2)];
+          throw new Error(call+": unknown button");
+      }
+      return args;
     }
 
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
@@ -187,15 +195,14 @@ module TDev {
         };
 
         var resolvedName = this.lookupLibraryCall(receiver, name);
-        // XXX do something more modular
-        if (resolvedName == "microbit_button_pressed")
-          args = checkButtonPressedArgs(args);
+        args = translateArgsIfNeeded(resolvedName, args);
+
         if (resolvedName)
           return mkCall(resolvedName);
         else if (name == ":=")
           return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
         else
-          throw new Error("Unknown call "+name);
+          throw new Error("Unknown call: "+name);
       }
 
       public visitAction(
@@ -245,7 +252,7 @@ module TDev {
         this.prototypes = forwardDeclarations.join("\n");
         this.code = userFunctions.join("\n");
 
-        return this.prototypes + "\n" + this.code;
+        return forwardDeclarations.concat(userFunctions).join("\n");
       }
     }
   }
