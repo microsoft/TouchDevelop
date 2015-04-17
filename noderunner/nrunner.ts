@@ -32,6 +32,7 @@ var restConfig:RestConfig;
 var authKey = "";
 var liteStorage = process.env['TDC_LITE_STORAGE'] || "";
 var apiEndpoint = process.env['TDC_API_ENDPOINT'] || "https://www.touchdevelop.com/api/";
+var accessToken = process.env['TDC_ACCESS_TOKEN'] || "";
 
 class ApiRequest
 {
@@ -334,7 +335,7 @@ function getAstInfoWithLibs(ar:ApiRequest, opts:TDev.StringMap<string>)
     else
         TDev.Promise.join(Object.keys(missing).map(k =>
             (/^[a-z]+$/.test(k) ?
-                TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(k)).then(v => v, err => null)
+                TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(k) + accessToken).then(v => v, err => null)
             : TDev.Promise.as(null))
             .then(resp => {
                 if (resp && resp.rootid)
@@ -752,6 +753,12 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
     }
 
     switch (m[1]) {
+    /*
+    case "crash":
+        throw new Error("induced crash")
+        break;
+    */
+
     case "webast":
         ar.ok(TDev.AST.Json.dump(TDev.Script))
         break;
@@ -833,7 +840,7 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
                 return
             }
         }
-        TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(r.id) + "/canexportapp" + user)
+        TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(r.id) + "/canexportapp" + user + accessToken)
             .then(v => {
                 if (v.canExport)
                     return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
@@ -1387,28 +1394,10 @@ function reportBug(ctx: string, err: any) {
     bug.exceptionConstructor = "NJS " + bug.exceptionConstructor;
     bug.tdVersion = process.env['TDC_VERSION']
 
-    var opts = <any>url.parse(apiEndpoint)
-    opts.path = '/api/bug'
-    opts.method = 'POST'
-
-    var bugRequest = https.request(opts,
-    (res: http.ClientResponse) => {
-        if (res.statusCode == 200) {
-            if (!slave)
-                console.log("bug logged succesfully");
-            res.on("data", () => {})
-            res.on("end", () => {})
-        } else {
-            console.error("error logging bug: " + bug.exceptionConstructor + " resp: " + res.statusCode);
-            // console.error(res);
-        }
-    });
-
-    bugRequest.on("error", (err) => {
-        console.error("cannot post bug: " + err.message);
-    });
-    bugRequest.write(JSON.stringify(bug));
-    bugRequest.end();
+    TDev.Util.httpPostRealJsonAsync(apiEndpoint + "bug" + accessToken, bug)
+        .done(() => {}, err => {
+            console.error("cannot post bug: " + err.message);
+        })
 }
 
 
