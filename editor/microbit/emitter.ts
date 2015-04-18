@@ -7,6 +7,8 @@ module TDev {
     import J = AST.Json
     import H = Helpers
 
+    // --- Environments
+
     export interface EmitterEnv {
       indent: string;
     }
@@ -21,7 +23,15 @@ module TDev {
       };
     }
 
-    function isLibrary(e: J.JExpr) {
+
+    // --- Pattern-matching.
+    // Because there's no pattern-matching in TypeScript, these slightly
+    // cumbersome functions match on the node types, and either return [null] or
+    // the thing we were looking for. The pattern is written as a comment to the
+    // function.
+
+    // JCall { args: [ JSingletonRef { name = ♻ } ], name = NAME } -> NAME
+    function isLibrary(e: J.JExpr): string {
       return (
         e.nodeType == "call" &&
         (<J.JCall> e).args[0].nodeType == "singletonRef" &&
@@ -30,7 +40,16 @@ module TDev {
       );
     }
 
-    function isShimBody(body: J.JStmt[]) {
+    // JSingletonRef { name = "code" } -> true
+    function isScopedCall(e: J.JExpr): boolean {
+      return (
+        e.nodeType == "singletonRef" &&
+        (<J.JSingletonRef> e).name == "code" || null
+      );
+    }
+
+    // [ JExprStmt { expr: JExprHolder { tree: JStringLiteral { value: VALUE }}}, ... ] -> VALUE
+    function isShimBody(body: J.JStmt[]): string {
       var nonComments = body.filter((x: J.JStmt) => x.nodeType != "comment");
       // If only we had that wonderful thing called pattern-matching...
       var value =
@@ -46,9 +65,14 @@ module TDev {
         return null;
     }
 
+    // JStringLiteral { value: VALUE } -> VALUE
     function isStringLiteral(x: J.JNode) {
       return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || null;
     }
+
+
+    // --- Helper functions.
+    // For constructing / modifying AST nodes.
 
     function mkNumberLiteral (x: number): J.JNumberLiteral {
       return {
@@ -56,6 +80,14 @@ module TDev {
         id: null,
         value: x
       };
+    }
+
+    function mangleLocalName(n) {
+      return n.replace(/\W/g, "_");
+    }
+
+    function mangleLibraryName(l, n) {
+      return mangleLocalName(l)+"_"+mangleLocalName(n);
     }
 
     // Rewrites arguments for some selected C++ functions. For instance, as we
@@ -73,6 +105,9 @@ module TDev {
       return args;
     }
 
+
+    // --- The code emitter.
+
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
 
       // Output "parameters", written to at the end.
@@ -81,6 +116,7 @@ module TDev {
 
       // All the libraries needed to compile this [JApp].
       constructor(
+        private libRef: J.JCall,
         private libs: J.JApp[]
       ) {
         super();
@@ -169,33 +205,47 @@ module TDev {
         ].join("");
       }
 
-      private lookupLibraryCall(receiver: J.JExpr, name: string) {
+      private resolveCall(receiver: J.JExpr, name: string) {
+        // Is this a call in the current scope?
+        var scoped = isScopedCall(receiver);
+        if (scoped)
+          if (this.libRef)
+            // If compiling a library, no scope actually means the library's scope.
+            return this.resolveCall(this.libRef, name);
+          else
+            // Call to a function from the current script.
+            return mangleLocalName(name);
+
+        // Is this a call to a library?
         var n = isLibrary(receiver);
-        if (!n)
-          return;
-        // I expect all libraries and all library calls to be properly resolved.
-        var lib = this.libs.filter(l => l.name == n)[0];
-        var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
-        var s = isShimBody((<J.JAction> action).body);
-        if (s) {
-          return s;
-        } else {
-          // XXX most likely wrong
-          return n + "_" + name;
+        if (n) {
+          // I expect all libraries and all library calls to be properly resolved.
+          var lib = this.libs.filter(l => l.name == n)[0];
+          var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
+          var s = isShimBody((<J.JAction> action).body);
+          if (s)
+            // Call to a built-in C++ function
+            return s;
+          else
+            // Actually call to a library function
+            return mangleLibraryName(n, name);
         }
+
+        // Something else (e.g. operator)
+        return null;
       }
 
       public visitCall(env: EmitterEnv, name: string, args: J.JExpr[]) {
         var receiver = args[0];
         args = args.splice(1);
 
+        var resolvedName = this.resolveCall(receiver, name);
+        args = translateArgsIfNeeded(resolvedName, args);
+
         var mkCall = (f: string) => {
           var argsCode = args.map(a => this.visit(env, a));
           return f + "(" + argsCode.join(", ") + ")";
         };
-
-        var resolvedName = this.lookupLibraryCall(receiver, name);
-        args = translateArgsIfNeeded(resolvedName, args);
 
         if (resolvedName)
           return mkCall(resolvedName);
@@ -203,6 +253,13 @@ module TDev {
           return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
         else
           throw new Error("Unknown call: "+name);
+      }
+
+      private mangleActionName(n: string) {
+        if (this.libRef)
+          return mangleLibraryName(this.libRef.name, n);
+        else
+          return mangleLocalName(n);
       }
 
       public visitAction(
@@ -223,7 +280,7 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(name, inParams, outParams);
+        var head = H.mkSignature(this.mangleActionName(name), inParams, outParams);
         return head + " {\n" + bodyText + "\n}";
       }
 
@@ -232,7 +289,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && !isShimBody((<J.JAction> f).body))
-            return H.mkSignature(f.name, (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return H.mkSignature(this.mangleActionName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else
             return null;
         }).filter(x => x != null);

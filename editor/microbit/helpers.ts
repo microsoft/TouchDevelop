@@ -14,7 +14,7 @@ module TDev {
       // Compute a unique name from a user-provided name and a
       // TouchDevelop-generated unique id.
       export function mangle(name: string, id: string) {
-          return name + id;
+          return name + "_" + id;
       }
 
       export function mangleDef(d: J.JLocalDef) {
@@ -45,7 +45,7 @@ module TDev {
       }
 
       export function mkParam(p: J.JLocalDef) {
-        return mkType(p.type)+" "+p.name;
+        return mkType(p.type)+" "+mangleDef(p);
       }
 
       export function mkSignature(name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {

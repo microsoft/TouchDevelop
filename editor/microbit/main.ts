@@ -14,8 +14,24 @@ module TDev {
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
     function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string } {
+      var i = libs.indexOf(a);
+      var libRef: J.JCall = null;
+      if (i >= 0) {
+        libRef = {
+          nodeType: "call",
+          id: null,
+          args: [<J.JSingletonRef> {
+            nodeType: "singletonRef",
+            id: null,
+            name: "♻",
+          }],
+          name: libs[i].name,
+          parent: null,
+        };
+      }
+
       lift(a);
-      var e = new Emitter(libs);
+      var e = new Emitter(libRef, libs);
       e.visit(emptyEnv, a);
       return e;
     }
