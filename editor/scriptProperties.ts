@@ -574,9 +574,9 @@ module TDev
                 h.scriptId ? Browser.TheApiCacheMgr.getAsync(h.scriptId, true)
                     .then(r => infos[h.scriptId] = r)
                 : Promise.as()))
-                .then(() =>
+                .then(() => 
                     Meta.chooseScriptAsync({
-                        header: lf("pick a script to merge the changes info"),
+                        header: lf("pick a script to merge the changes into"),
                         filter: s => {
                             if (s.getCloudHeader()) {
                                 var id = s.getCloudHeader().scriptId
