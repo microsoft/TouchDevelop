@@ -274,15 +274,13 @@ module TDev.Browser {
         export function tutorialStart() { playSound('sjmgbwrv', 1); }
 
         export function startTutorial() {
-            //keyboardSounds = true;
-            // caching
-            //TDev.RT.Sound.fromArtId('aonptkth').done(undefined, () => {});
             tutorialStart();
-            TDev.RT.Sound.fromArtId('ncoqavnw').done(undefined, () => {});
         }
 
         function playSound(id : string, volume : number = 0.2)
         {
+            if (Browser.lowMemory) return;
+
             var snd = <TDev.RT.Sound>sounds[id];
             if(snd) snd.playAsync().done();
             else {
