@@ -735,7 +735,7 @@ module TDev.RT {
         }
 
         export function logMeasure(category:string, id: string, value: number, meta: any) {
-            var lmeta = Util.jsonClone(meta)
+            var lmeta = Util.jsonClone(meta) || {};
             lmeta.measureId = id
             lmeta.measureValue = value
             App.logEvent(App.INFO, category, id + ": " + value, lmeta);
