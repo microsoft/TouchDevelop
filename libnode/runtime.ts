@@ -939,7 +939,7 @@ module TDev.RT.Node {
             ret.success(app)
         })
 
-        Util.log("listenting on " + port + " from pid " + process.pid)
+        Util.log("listening on " + port + " from pid " + process.pid)
         app.listen(port)
 
         return ret
