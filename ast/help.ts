@@ -232,6 +232,15 @@ module TDev {
         publicationuserid:string;
     }
 
+    export interface JsonPubList extends JsonPublication
+    {
+        name: string;
+        description:string;
+        pictureid : string;
+        comments : number;
+        positivereviews : number;
+    }
+
     export interface JsonReview extends JsonPubOnPub
     {
         ispositive: boolean;
