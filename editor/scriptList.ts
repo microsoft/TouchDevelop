@@ -3093,6 +3093,17 @@ module TDev { export module Browser {
                 else this.tabContent.appendChildren(this.finalListElt())
             });
         }
+
+        public showDialog() {
+            this.initElements();
+            this.initTab();
+            var m = new ModalDialog();
+            m.add(this.tabContent);
+            m.fullWhite();
+            m.stretchWide();
+            m.setScroll();
+            m.show();
+        }
     }
 
     export class CloudSessionsTab
@@ -7286,10 +7297,10 @@ module TDev { export module Browser {
                     row.dataset["userid"] = c.id;
                 }
                 var cell = document.createElement("td");
+                cell.style.width = '14em';
                 row.appendChild(cell);
                 var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
                 user.setFlag('slim', true);
-                user.style.width = '21em';
                 cell.appendChild(user);
                 this.progressTable.appendChild(row);
                 return row;
@@ -7755,6 +7766,10 @@ module TDev { export module Browser {
 
                 ad.setChildren([]);
                 if (this.isMine()) {
+                    ad.appendChild(HTML.mkButton(lf("progress"),() => {
+                        var tab = new GroupUserProgressTab(this);
+                        tab.showDialog();
+                    }));
                     if (!Cloud.isRestricted())
                         ad.appendChild(HTML.mkButton(lf("change picture"), () => {
                             tick(Ticks.groupChangePicture);
