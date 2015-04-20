@@ -1727,9 +1727,9 @@ module TDev.AST {
         {
             var desc = this.getInlineHelp();
             if (desc) return desc;
-            return this.isActionTypeDef() ? lf("an action type definition")
+            return this.isActionTypeDef() ? lf("an function type definition")
                  : this.isEvent() ? lf("an event handler")
-                 : this.isPage() ? lf("a page") : lf("an action")
+                 : this.isPage() ? lf("a page") : lf("a function")
         }
 
         // IProperty
