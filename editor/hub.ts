@@ -1205,11 +1205,11 @@ module TDev.Browser {
                     this.hide();
                     if (s == "recent") this.browser().showList("installed-scripts", item);
                     else if (s == "myart") {
-                        if (Cloud.getUserId())
-                            this.browser().showList("myart", item);
+                        if (Cloud.getUserId()) this.browser().showList("myart", item);
                     } else if (s == "art") this.browser().showList("art", item);
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
+                    else if (s == "lists") this.browser().showList("lists", item);
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -1305,17 +1305,24 @@ module TDev.Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
-                    elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
+                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                    if (!this.isBeginner()) {
-                        elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                        elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
-                        elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                        elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
-                    } else {
-                        elements.push(this.mkFnBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    }
+                if (!this.isBeginner()) {
+                    elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                    elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                    elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                    elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
+                } else {
+                    elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                }
+            } else if (s == "lists") {
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
+                    () => { this.hide(); this.browser().showList("lists", null) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
+                addFnBtn(lf("Create list"), Ticks.hubCreateList,
+                    () => { this.createList(); });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:script,white")));                
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
@@ -1330,11 +1337,6 @@ module TDev.Browser {
                     addFnBtn(lf("New Scripts"), Ticks.hubSeeMoreNewScripts,
                         () => { this.hide(); this.browser().showList("new-scripts", null) });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:star,white")));
-                    if (Cloud.lite) {
-                        addFnBtn(lf("Create list"), Ticks.hubCreateList,
-                            () => { this.createList(); });
-                        elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:script,white")));
-                    }
                 }
             }
 
@@ -2146,6 +2148,7 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
+                sects["lists"] = lf("lists")
             }
 
             if (SizeMgr.portraitMode) {
@@ -2269,6 +2272,12 @@ module TDev.Browser {
                 else if (s == "social") {
                     if (Cloud.getUserId())
                         this.browser().getLocationList(Cloud.getUserId() + "/groups?count=6", (items, cont) => this.addPageTiles(s, c, items));
+                    else
+                        this.addPageTiles(s, c, []);
+                }
+                else if (s == "lists") {
+                    if (Cloud.getUserId())
+                        this.browser().getLocationList(Cloud.getUserId() + "/lists?count=6",(items, cont) => this.addPageTiles(s, c, items));
                     else
                         this.addPageTiles(s, c, []);
                 }

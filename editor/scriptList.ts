@@ -1395,7 +1395,10 @@
                     tick(Ticks.browseListUsers);
                     header = lf("users");
                     break;
-
+                case "lists":
+                    tick(Ticks.browseListLists);
+                    header = lf("lists");
+                    break;
                 default:
                     if (/^bugs\//.test(path)) {
                         tick(Ticks.browseListBugs);
@@ -5925,11 +5928,12 @@
                 //nums.style.background = this.app.htmlColor();
 
                 var smallIcon = div("hubTileSmallIcon");
-                var bigIcon = div("hubTileScreenShot");
+                var bigIcon = null;
 
                 var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
                 if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
+                    bigIcon = div("hubTileScreenShot");
                     bigIcon.style.backgroundImage = HTML.cssImage(ss);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
                     bigIcon.style.backgroundPosition = 'center';
@@ -9245,7 +9249,7 @@
             this.publicId = id;
         }
         
-        public mkBoxCore(big: boolean) {
+        public mkBoxCore(big: boolean) : HTMLElement {
             var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
             icon.style.background = "#1731B8";
             var nameBlock = div("sdName");
@@ -9269,7 +9273,7 @@
             return this.withUpdate(res,(u: JsonPubList) => {
                 this.json = u;
                 if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    icon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(u.pictureid));
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
@@ -9279,6 +9283,49 @@
                 author.setChildren([this.json.username]);
                 addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(this.json.time)]);
             });
+        }
+
+        public mkTile(sz: number) : HTMLElement {
+            var d = div("hubTile hubTileSize" + sz);
+            d.style.background = "#1731B8";
+            return this.withUpdate(d, (u: JsonPubList) => {                
+                this.json = u;
+
+                var cont = [];
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                addNum(this.json.positivereviews, "♥");
+                if (sz > 1) {
+                    addNum(this.json.comments, "✉");
+                }
+
+                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
+                //nums.style.background = this.app.htmlColor();
+
+                var smallIcon = div("hubTileSmallIcon");
+                var bigIcon = null;
+
+                if (this.json.pictureid && !Browser.lowMemory) {
+                    bigIcon = div("hubTileScreenShot");
+                    bigIcon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(this.json.pictureid));
+                    bigIcon.style.backgroundRepeat = 'no-repeat';
+                    bigIcon.style.backgroundPosition = 'center';
+                    bigIcon.style.backgroundSize = 'cover';
+                    smallIcon.setChildren([HTML.mkImg("svg:script")]);
+                    smallIcon.style.background = "#1731B8";
+                }
+
+                d.setChildren([div("hubTileIcon", HTML.mkImg("svg:script,white")),
+                    bigIcon,
+                    smallIcon,
+                    div("hubTileTitleBar",
+                        div("hubTileTitle", spanDirAuto(this.json.name)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(this.json.username), nums)))])
+            });
+        }
+
+        public mkTabsCore(): BrowserTab[]{
+            return [this];
         }
 
         public initTab() {

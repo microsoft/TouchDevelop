@@ -371,6 +371,7 @@ module TDev {
         hubSeeMoreDocs,
         hubSeeMoreCloud,
         hubSeeMoreGroups,
+        hubSeeMoreLists,
         hubMyScriptsShowcase,
         hubMyScriptsTemplate,
         hubNotifications,
@@ -440,6 +441,7 @@ module TDev {
         browseListTags,
         browseListSearch,
         browseListUsers,
+        browseListLists,
         browseFollowTopic,
 
         introSlideGetStarted,
