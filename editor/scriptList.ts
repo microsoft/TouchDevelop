@@ -6910,7 +6910,9 @@
 
         public userBar(): HTMLElement {
             var authorDiv = div('sdScriptAuthor');
-            this.withUpdate(authorDiv,(d) => {
+            this.withUpdate(authorDiv,(u:JsonUser) => {
+                this.userName = u.name;
+                this.userScore = u.score;
                 var authorHead = this.thumbnail(false);
                 authorHead.classList.add("teamHead");
                 authorDiv.setChildren([
@@ -8572,7 +8574,10 @@
                 requestDocs
             ])
 
-            allTopDiv.setChildren([ super.mkBigBox() ])
+            allTopDiv.setChildren([
+                super.mkBigBox(),
+                this.browser().getUserInfoById(this.topic.json.userid || "jeiv", '').userBar()
+            ])
 
             this.tabContent.setChildren([
                 allTopDiv,
