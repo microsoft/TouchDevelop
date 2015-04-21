@@ -9333,9 +9333,9 @@
             return [this];
         }
 
-        private listTab: PubListListTab;
+        private listTab: PubListTab;
         public initTab() {
-            this.listTab = new PubListListTab(this);
+            this.listTab = new PubListTab(this);
             this.listTab.initElements();
             this.listTab.initTab();
 
@@ -9350,6 +9350,25 @@
                     Browser.TheApiCacheMgr.invalidate(this.publicId);
                     Browser.TheApiCacheMgr.invalidate(this.publicId + "/scripts");
                 }, e => World.handlePostingError(e, lf("add script to list")));
+        }
+    }
+
+    export class PubListTab
+        extends ListTab {
+        constructor(par: BrowserPage) {
+            super(par, "/scripts");
+            this.isEmpty = true;
+        }
+
+        public needsJsonScript() { return true; }
+        public inlineIsTile() { return false; }
+        public getId() { return "scripts"; }
+        public getName() { return lf("scripts"); }
+        public bgIcon() { return "svg:script"; }
+        public noneText() { return lf("no scripts for this list"); }
+
+        public tabBox(c: JsonScript): HTMLElement {
+            return this.browser().getScriptInfo(c).mkSmallBox();
         }
     }
 
