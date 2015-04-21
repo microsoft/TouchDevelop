@@ -1218,8 +1218,9 @@
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
+            else if (e.kind == "list") return this.getSpecificInfoById(e.id, PubListInfo);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
-            else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo)
+            else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo);
             else return null;
         }
 
@@ -1710,6 +1711,17 @@
             var si = <GroupInfo>this.getLocation(c.id);
             if (!si) {
                 si = new GroupInfo(this);
+                TheApiCacheMgr.store(c.id, c);
+                si.loadFromWeb(c.id);
+                this.saveLocation(si);
+            }
+            return si;
+        }
+
+        public getPubListInfo(c: JsonPubList) {
+            var si = <PubListInfo>this.getLocation(c.id);
+            if (!si) {
+                si = new PubListInfo(this);
                 TheApiCacheMgr.store(c.id, c);
                 si.loadFromWeb(c.id);
                 this.saveLocation(si);
@@ -9216,6 +9228,64 @@
         }
     }
 
+    export class PubListInfo
+        extends BrowserPage {
+        private json: JsonPubList;
+
+        constructor(par: Host) {
+            super(par)
+        }
+        public persistentId() { return "pub:" + this.publicId; }
+        public getTitle() { return this.json ? this.json.name : this.publicId; }
+        public getId() { return "overview"; }
+        public getName() { return lf("overview"); }
+
+        public loadFromWeb(id: string) {
+            Util.assert(!!id);
+            this.publicId = id;
+        }
+        
+        public mkBoxCore(big: boolean) {
+            var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var res = div("sdHeaderOuter",
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                        )));
+
+            if (big)
+                res.className += " sdBigHeader";
+
+
+            return this.withUpdate(res,(u: JsonPubList) => {
+                this.json = u;
+                if (u.pictureid && !Browser.lowMemory) {
+                    icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    icon.style.backgroundRepeat = 'no-repeat';
+                    icon.style.backgroundPosition = 'center';
+                    icon.style.backgroundSize = 'contain';
+                    icon.setChildren([]);
+                }
+                nameBlock.setChildren([this.json.name])
+                author.setChildren([this.json.username]);
+                addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(this.json.time)]);
+            });
+        }
+
+        public initTab() {
+            // TODO: display scripts
+        }
+    }
+
     export class PubListListTab
         extends ListTab {
         constructor(par: BrowserPage) {
@@ -9228,8 +9298,8 @@
         public noneText() { return lf("no lists yet!"); }
 
         public tabBox(cc: JsonIdObject): HTMLElement {
-            var c = <JsonScript>cc;
-            return this.browser().getScriptInfo(c).mkSmallBox();
+            var c = <JsonPubList>cc;
+            return this.browser().getPubListInfo(c).mkSmallBox();
         }
     }
 }

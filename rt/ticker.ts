@@ -341,6 +341,7 @@ module TDev {
         hubCreateScript,
         hubCreateGame,
         hubCreateGroup,
+        hubCreateList,
         hubJoinGroup,
         hubUploadPicture,
         hubUploadSound,
