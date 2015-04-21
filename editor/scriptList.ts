@@ -1,6 +1,6 @@
 ///<reference path='refs.ts'/>
 
-module TDev { export module Browser {
+    module TDev.Browser {
 
     export var TheHost:Host;
     export var TheApiCacheMgr:ApiCacheMgr;
@@ -3390,7 +3390,14 @@ module TDev { export module Browser {
         constructor(par: ScriptInfo) {
             super(par,
                 lf("This tab contains additional information about this script"),
-                ScreenShotTab, ScriptHeartsTab, TagsTab, ArtTab, ConsumersTab, SuccessorsTab, DerivativesTab);
+                ScreenShotTab,
+                ScriptHeartsTab,
+                Cloud.lite ? PubListListTab : null,
+                TagsTab,               
+                ArtTab,
+                ConsumersTab,
+                SuccessorsTab,
+                DerivativesTab);
         }
 
         public bgIcon() {
@@ -7167,6 +7174,7 @@ module TDev { export module Browser {
         constructor(par: UserInfo) {
             super(par,
                 "More information about art, score, groups, subscribers, subscriptions and given hearts.",
+                Cloud.lite ? PubListListTab : null,
                 ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab);
         }
 
@@ -9196,5 +9204,20 @@ module TDev { export module Browser {
         }
     }
 
+    export class PubListListTab
+        extends ListTab {
+        constructor(par: BrowserPage) {
+            super(par, "/lists")
+        }
+        public getId() { return "lists"; }
+        public getName() { return lf("lists"); }
 
-} }
+        public bgIcon() { return "svg:script"; }
+        public noneText() { return lf("no lists yet!"); }
+
+        public tabBox(cc: JsonIdObject): HTMLElement {
+            var c = <JsonScript>cc;
+            return this.browser().getScriptInfo(c).mkSmallBox();
+        }
+    }
+}
