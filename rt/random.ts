@@ -41,19 +41,19 @@ module TDev.Random {
         for (var i = 0; i < 64; ++i) {
             var s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)
             var ch = (e & f) ^ (~e & g)
-            var temp1 = h + s1 + ch + sha256_k[i] + w[i]
+            var temp1 = (h + s1 + ch + sha256_k[i] + w[i]) | 0
             var s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
             var maj = (a & b) ^ (a & c) ^ (b & c)
-            var temp2 = s0 + maj
+            var temp2 = (s0 + maj) | 0
 
             h = g
             g = f
             f = e
-            e = d + temp1
+            e = (d + temp1) | 0
             d = c
             c = b
             b = a
-            a = temp1 + temp2
+            a = (temp1 + temp2) | 0
         }
 
         hs[0] += a
