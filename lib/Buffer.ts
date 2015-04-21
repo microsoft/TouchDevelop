@@ -233,6 +233,13 @@ module TDev.RT {
             return this.buffer.length;
         }
 
+        //? Return the SHA-256 hash of the buffer encoded as lowercase hex
+        //@ betaOnly
+        public sha256():string
+        {
+            return Random.sha256buffer(this.buffer)
+        }
+
         //? Return a new buffer consiting of the current and `other` in sequence
         public concat(other:Buffer) : Buffer
         {
