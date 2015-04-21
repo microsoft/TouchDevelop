@@ -18,8 +18,9 @@ module TDev.Random {
         return (v >>> b) | (v << (32 - b));
     }
 
-    function sha256round(w:Uint32Array)
+    function sha256round(hs:Uint32Array, w:Uint32Array)
     {
+        Util.assert(hs.length == 8);
         Util.assert(w.length == 64);
 
         for (var i = 16; i < 64; ++i) {
@@ -28,41 +29,100 @@ module TDev.Random {
             w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
         }
 
-        var a = w[0];
-        var b = w[1];
-        var c = w[2];
-        var d = w[3];
-        var e = w[4];
-        var f = w[5];
-        var g = w[6];
-        var h = w[7];
+        var a = hs[0];
+        var b = hs[1];
+        var c = hs[2];
+        var d = hs[3];
+        var e = hs[4];
+        var f = hs[5];
+        var g = hs[6];
+        var h = hs[7];
 
         for (var i = 0; i < 64; ++i) {
             var s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)
             var ch = (e & f) ^ (~e & g)
-            var temp1 = h + s1 + ch + sha256_k[i] + w[i]
+            var temp1 = (h + s1 + ch + sha256_k[i] + w[i]) | 0
             var s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
             var maj = (a & b) ^ (a & c) ^ (b & c)
-            var temp2 = s0 + maj
+            var temp2 = (s0 + maj) | 0
 
             h = g
             g = f
             f = e
-            e = d + temp1
+            e = (d + temp1) | 0
             d = c
             c = b
             b = a
-            a = temp1 + temp2
+            a = (temp1 + temp2) | 0
         }
 
-        w[0] += a
-        w[1] += b
-        w[2] += c
-        w[3] += d
-        w[4] += e
-        w[5] += f
-        w[6] += g
-        w[7] += h
+        hs[0] += a
+        hs[1] += b
+        hs[2] += c
+        hs[3] += d
+        hs[4] += e
+        hs[5] += f
+        hs[6] += g
+        hs[7] += h
+    }
+
+    export function sha256buffer(buf:Uint8Array)
+    {
+        var h = new Uint32Array(8);
+        h[0] = 0x6a09e667
+        h[1] = 0xbb67ae85
+        h[2] = 0x3c6ef372
+        h[3] = 0xa54ff53a
+        h[4] = 0x510e527f
+        h[5] = 0x9b05688c
+        h[6] = 0x1f83d9ab
+        h[7] = 0x5be0cd19
+
+        var work = new Uint32Array(64);
+
+        var chunkLen = 16 * 4;
+
+        function addBuf(buf:Uint8Array) {
+            var end = buf.length - (chunkLen - 1)
+            for (var i = 0; i < end; i += chunkLen) {
+                for (var j = 0; j < 16; j++) {
+                    var off = (j << 2) + i
+                    work[j] = (buf[off] << 24) | (buf[off + 1] << 16) | (buf[off + 2] << 8) | buf[off + 3]
+                }
+                sha256round(h, work)
+            }
+        }
+
+        addBuf(buf)
+
+        var padSize = 64 - (buf.length + 9) % 64
+        if (padSize == 64) padSize = 0
+        var endPos = buf.length - (buf.length % chunkLen)
+        var padBuf = new Uint8Array((buf.length - endPos) + 1 + padSize + 8)
+        var dst = 0
+        while (endPos < buf.length) padBuf[dst++] = buf[endPos++]
+        padBuf[dst++] = 0x80
+        while (padSize-- > 0)
+            padBuf[dst++] = 0x00
+        var len = buf.length * 8
+        dst = padBuf.length
+        while (len > 0) {
+            padBuf[--dst] = len & 0xff
+            len >>= 8
+        }
+
+        addBuf(padBuf)
+
+        var res = ""
+        for (var i = 0; i < h.length; ++i)
+            res += ("000000000" + h[i].toString(16)).slice(-8)
+
+        return res.toLowerCase()
+    }
+
+    export function sha256string(s:string)
+    {
+        return sha256buffer(Util.stringToUint8Array(Util.toUTF8(s)))
     }
 
     export class RC4 {
