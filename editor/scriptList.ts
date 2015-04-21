@@ -2743,7 +2743,7 @@
         constructor(parent: BrowserPage, desc: any, ...childClasses: any[]) {
             super(parent);
             if (desc) this.initialTabContent = div("sdTabDescription", desc);
-            this.subTabs = childClasses.map(clazz => <BrowserTab>new clazz(parent));
+            this.subTabs = childClasses.filter(clazz => !!clazz).map(clazz => <BrowserTab>new clazz(parent));
             this.subTabs.forEach(tab => { tab.initElements(); tab.initInline(); });
         }
 
@@ -6174,7 +6174,7 @@
             var descDiv = div("sdDesc");
             var wontWork = div(null);
             var runBtns = div(null);
-            var authorDiv = div("sdScriptAuthor");
+            var authorDiv = div(null);
             var commentsDiv = div(null);
             var docsButtonDiv = div(null);
 
@@ -6221,15 +6221,8 @@
                 // if (this.cloudHeader)
                 runBtns.setChildren([this.mkButtons()]);
 
-                var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username);
-                var authorHead = author.thumbnail(false);
-                authorHead.classList.add("teamHead");
-                authorDiv.setChildren([
-                    div("inlineBlock", authorHead, div("sdAuthorLabel", this.jsonScript.username))
-                        .withClick(() => { this.browser().loadDetails(author); })
-                    ,
-                    div("floatright", this.facebookLike())
-                ]);
+                var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username).userBar();
+                authorDiv.setChildren(author)
 
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
@@ -6913,6 +6906,21 @@
             Util.assert(!!id)
             this.publicId = id;
             this.userName = name;
+        }
+
+        public userBar(): HTMLElement {
+            var authorDiv = div('sdScriptAuthor');
+            this.withUpdate(authorDiv,(d) => {
+                var authorHead = this.thumbnail(false);
+                authorHead.classList.add("teamHead");
+                authorDiv.setChildren([
+                    div("inlineBlock", authorHead, div("sdAuthorLabel", this.userName))
+                        .withClick(() => { this.browser().loadDetails(this); })
+                    ,
+                    div("floatright", this.facebookLike())
+                    ]);
+            });
+            return authorDiv;
         }
 
         public userPicture(thumb = false)
@@ -7760,7 +7768,6 @@
             ch.unshift(ad);
             ch.unshift(hd);
 
-            var authorDiv = div("inlineBlock");
             remainingContainer.setChildren([authorDiv]);
 
             this.tabContent.setChildren(ch);
