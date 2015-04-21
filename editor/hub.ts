@@ -1294,7 +1294,6 @@ module TDev.Browser {
                 noFnBreak = true;
                 while(elements.length < 5) {
                     var oneSlot = this.mkFnBtn(lf("Your art will appear here"), () => {
-                        this.showTutorialTip()
                     }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
                     oneSlot.className += " scriptSlot";
                     elements.push(oneSlot)
@@ -1317,6 +1316,14 @@ module TDev.Browser {
                     elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                 }
             } else if (s == "lists") {
+                noFnBreak = true;
+                while (elements.length < 5) {
+                    var oneSlot = this.mkFnBtn(lf("Your list will appear here"),() => {
+                    }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
+                    oneSlot.className += " scriptSlot";
+                    elements.push(oneSlot)
+                }
+
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
                     () => { this.hide(); this.browser().showList("lists", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
