@@ -150,6 +150,42 @@ module TDev.Meta {
         });
     }
 
+    export interface ChooseListOptions extends ModalChooseOptions {
+    }
+
+    export function chooseListAsync(options: ChooseListOptions = {}): Promise {
+        var r = new PromiseInv();
+
+        Browser.TheHost.getLocationList("me/lists?count=100",(itms: Browser.BrowserPage[], cont: string) => {
+            var m = new ModalDialog();
+            var selected = false;
+            var converter = (s: Browser.PubListInfo) => {
+                return s.mkSmallBoxNoClick().withClick(() => {
+                    selected = true;
+                    m.dismiss();
+                    r.success(s);
+                });
+            };
+
+            var boxes = []
+            for (var i = 0; i < itms.length; ++i) {
+                var p = itms[i];
+                if (p instanceof Browser.PubListInfo) {
+                    var s = <Browser.PubListInfo>p;
+                    var b = converter(s);
+                    if (!!b) boxes.push(b);
+                }
+            }
+
+            m.onDismiss = () => {
+                if (!selected) r.success(null)
+            };
+            m.choose(boxes, options)
+        }, true);
+
+        return r;
+    }
+
     export interface ChooseGroupOptions extends ModalChooseOptions
     {
     }

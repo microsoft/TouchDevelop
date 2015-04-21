@@ -422,6 +422,7 @@ module TDev {
         browsePublish,
         browsePush,
         browseDiffBase,
+        browseAddScriptToList,
         browseUpdate,
         browseSendPullRequest,
         browsePublicationNotes,

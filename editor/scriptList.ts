@@ -5344,8 +5344,13 @@
                     if (sc.jsonScript && sc.jsonScript.time) {
                         var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
                         var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
-
-                        divs.push(div('', pull, diff));
+                        var list = Cloud.lite ? HTML.mkButtonTick(lf("add to list"), Ticks.browseAddScriptToList,() => {
+                            Meta.chooseListAsync().done((info: PubListInfo) => {
+                                var si = (<ScriptInfo>this.parent);
+                                if (info) info.addScriptAsync(si).done();
+                            });
+                        }) : null;
+                        divs.push(div('', pull, diff, list));
                     }
 
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
@@ -9239,7 +9244,7 @@
         constructor(par: Host) {
             super(par)
         }
-        public persistentId() { return "pub:" + this.publicId; }
+        public persistentId() { return "publist:" + this.publicId; }
         public getTitle() { return this.json ? this.json.name : this.publicId; }
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
@@ -9328,8 +9333,23 @@
             return [this];
         }
 
+        private listTab: PubListListTab;
         public initTab() {
-            // TODO: display scripts
+            this.listTab = new PubListListTab(this);
+            this.listTab.initElements();
+            this.listTab.initTab();
+
+            this.tabContent.setChildren([
+                this.listTab.tabContent
+            ]);
+        }
+
+        public addScriptAsync(si: ScriptInfo) : Promise {
+            return Cloud.postPrivateApiAsync(si.publicId + "/lists/" + this.publicId, {})
+                .then(() => {
+                    Browser.TheApiCacheMgr.invalidate(this.publicId);
+                    Browser.TheApiCacheMgr.invalidate(this.publicId + "/scripts");
+                }, e => World.handlePostingError(e, lf("add script to list")));
         }
     }
 
