@@ -9244,7 +9244,7 @@
         constructor(par: Host) {
             super(par)
         }
-        public persistentId() { return "publist:" + this.publicId; }
+        public persistentId() { return "list:" + this.publicId; }
         public getTitle() { return this.json ? this.json.name : this.publicId; }
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
