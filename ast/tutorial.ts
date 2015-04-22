@@ -54,7 +54,10 @@ module TDev.AST
         use(d:Decl)
         {
             if (!d) return
-            this.usedDecls[d.getCoreName()] = d
+            if (!this.usedDecls.hasOwnProperty(d.getCoreName())) {
+                this.usedDecls[d.getCoreName()] = d
+                this.dispatch(d)
+            }
         }
 
         useKind(k:Kind)
