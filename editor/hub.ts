@@ -731,7 +731,7 @@ module TDev.Browser {
                     createBtn = HTML.mkButton(lf("create"),() => {
                         createBtn.removeSelf();
                         progress.start();
-                        Cloud.postPrivateApiAsync("lists", { name: nameBox.value })
+                        Cloud.postPrivateApiAsync("publists", { name: nameBox.value })
                             .done((l: JsonPubList) => {
                                 progress.stop();
                                 m.dismiss();
@@ -1210,7 +1210,7 @@ module TDev.Browser {
                     } else if (s == "art") this.browser().showList("art", item);
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
-                    else if (s == "lists") this.browser().showList("lists", item);
+                    else if (s == "publists") this.browser().showList("publists", item);
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -1316,7 +1316,7 @@ module TDev.Browser {
                 } else {
                     elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                 }
-            } else if (s == "lists") {
+            } else if (s == "publists") {
                 noFnBreak = true;
                 while (elements.length < 5) {
                     var oneSlot = this.mkFnBtn(lf("Your list will appear here"),() => {
@@ -1326,7 +1326,7 @@ module TDev.Browser {
                 }
 
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
-                    () => { this.hide(); this.browser().showList("lists", null) });
+                    () => { this.hide(); this.browser().showList("publists", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create list"), Ticks.hubCreateList,
                     () => { this.createList(); });
@@ -2157,7 +2157,7 @@ module TDev.Browser {
             if (Cloud.lite) {
                 delete sects["tags"];
                 if (!this.isBeginner()) {
-                    sects["lists"] = lf("lists")
+                    sects["publists"] = lf("lists")
                 }
             }
 
@@ -2285,9 +2285,9 @@ module TDev.Browser {
                     else
                         this.addPageTiles(s, c, []);
                 }
-                else if (s == "lists") {
+                else if (s == "publists") {
                     if (Cloud.getUserId())
-                        this.browser().getLocationList(Cloud.getUserId() + "/lists?count=6",(items, cont) => this.addPageTiles(s, c, items));
+                        this.browser().getLocationList(Cloud.getUserId() + "/publists?count=6",(items, cont) => this.addPageTiles(s, c, items));
                     else
                         this.addPageTiles(s, c, []);
                 }
