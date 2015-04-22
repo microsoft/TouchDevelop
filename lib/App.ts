@@ -1075,7 +1075,7 @@ module TDev.RT {
         }
 
         //? Invokes the host to register an event listener described in the message.
-        //@ async readsMutable returns(EventBinding) betaOnly
+        //@ async readsMutable returns(EventBinding) betaOnly ignoreReturnValue
         export function host_subscribe(message: string, handler: TextAction, r: ResumeCtx) {
             return hostSubscribeAsync(r.rt, message, handler).done(resp => r.resumeVal(resp));
         }
