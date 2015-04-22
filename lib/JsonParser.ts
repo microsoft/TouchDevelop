@@ -262,7 +262,7 @@ module TDev.RT {
                 catch(e)
                 {
                     if (log)
-                        log(lf("error parsing json {0} {1}", s, e.message));
+                        log(lf("error parsing json {0} {1}", s.length > 100 ? s.slice(0,100) + "..." : s, e.message));
                     return undefined;
                 }
             }
