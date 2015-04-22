@@ -532,6 +532,7 @@ module TDev
 
             if (this.data.template instanceof AST.Action) {
                 if ((<AST.Action>currAction).isAtomic != (<AST.Action>this.data.template).isAtomic) {
+                    TheEditor.intelliProfile.incr("actionSettings")
                     op = new TutorialInstruction()
                     op.calcButton = Ticks.actionPropAtomic
                     op.stmt = (<AST.Action>currAction).header
