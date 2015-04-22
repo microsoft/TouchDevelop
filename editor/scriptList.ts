@@ -1218,7 +1218,7 @@
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
-            else if (e.kind == "list") return this.getSpecificInfoById(e.id, PubListInfo);
+            else if (e.kind == "publist") return this.getSpecificInfoById(e.id, PubListInfo);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
             else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo);
             else return null;
@@ -1395,7 +1395,7 @@
                     tick(Ticks.browseListUsers);
                     header = lf("users");
                     break;
-                case "lists":
+                case "publists":
                     tick(Ticks.browseListLists);
                     header = lf("lists");
                     break;
@@ -9363,8 +9363,8 @@
 
         public invalidateCaches() {
             TheApiCacheMgr.invalidate(this.publicId + "/scripts");
-            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/lists");
-            TheApiCacheMgr.invalidate("/lists");
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/publists");
+            TheApiCacheMgr.invalidate("/publists");
         }
 
         private listTab: PubListTab;
@@ -9427,7 +9427,7 @@
         }
 
         public addScriptAsync(si: ScriptInfo) : Promise {
-            return Cloud.postPrivateApiAsync(si.publicId + "/lists/" + this.publicId, {})
+            return Cloud.postPrivateApiAsync(si.publicId + "/publists/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();
                 }, e => World.handlePostingError(e, lf("add script to list")));
@@ -9454,7 +9454,7 @@
             if (list.isMine()) {
                 el = div('', el, div('', HTML.mkButtonOnce(lf("remove"),() => {
                     HTML.showProgressNotification(lf("removing script..."));
-                    Cloud.deletePrivateApiAsync(c.id + "/lists/" + this.parent.publicId)
+                    Cloud.deletePrivateApiAsync(c.id + "/publists/" + this.parent.publicId)
                     .done(() => {
                         list.invalidateCaches();
                         el.removeSelf(); 
@@ -9468,9 +9468,9 @@
     export class PubListListTab
         extends ListTab {
         constructor(par: BrowserPage) {
-            super(par, "/lists")
+            super(par, "/publists")
         }
-        public getId() { return "lists"; }
+        public getId() { return "publists"; }
         public getName() { return lf("lists"); }
 
         public bgIcon() { return "svg:script"; }

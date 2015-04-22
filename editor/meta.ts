@@ -156,7 +156,7 @@ module TDev.Meta {
     export function chooseListAsync(options: ChooseListOptions = {}): Promise {
         var r = new PromiseInv();
 
-        Browser.TheHost.getLocationList("me/lists?count=100",(itms: Browser.BrowserPage[], cont: string) => {
+        Browser.TheHost.getLocationList("me/publists?count=100",(itms: Browser.BrowserPage[], cont: string) => {
             var m = new ModalDialog();
             var selected = false;
             var converter = (s: Browser.PubListInfo) => {
