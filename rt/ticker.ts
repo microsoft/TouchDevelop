@@ -731,7 +731,7 @@ module TDev {
                 timestamp: Util.now(),
                 platform: [],
                 attachments: [],
-                tdVersion: (<any>window).tdVersion || "",
+                tdVersion: Cloud.config.tdVersion || "",
             }
 
             if (fillEditorInfoBugReport)

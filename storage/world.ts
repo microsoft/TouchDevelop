@@ -17,7 +17,6 @@ module TDev {
         var getIndexTablePromise = () => Storage.getTableAsync("Index");
         var getScriptsTablePromise = () => Storage.getTableAsync("Scripts");
         var getTracesTablePromise = () => Storage.getTableAsync("Traces");
-        var blobcontainer = ""
 
         interface SyncData {
             indexTable: Storage.Table;
@@ -130,7 +129,7 @@ module TDev {
 
         export function getScriptBlobAsync(snapshotId:string)
         {
-            return Util.httpGetJsonAsync(blobcontainer + snapshotId)
+            return Util.httpGetJsonAsync(Cloud.config.workspaceUrl + snapshotId)
         }
 
         // [header] is coming from the cloud; we need to update our local
@@ -483,7 +482,6 @@ module TDev {
                 _askToEnableEmailNotifications = !data.installedHeaders.emailNotifications;
                 _profileIndex = data.installedHeaders.profileIndex || 0;
                 _profileCount = data.installedHeaders.profileCount || 0;
-                blobcontainer = data.installedHeaders.blobcontainer
                 Random.addCloudEntropy(data.installedHeaders.random)
                 if (!Cloud.lite && data.installedHeaders.time) {
                     var now = new Date().getTime();

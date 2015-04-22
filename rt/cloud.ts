@@ -3,6 +3,26 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:string = null;
+
+    export interface ClientConfig {
+        workspaceUrl: string;
+        searchUrl: string;
+        searchApiKey: string;
+        rootUrl: string;
+        liteVersion: string;
+
+        tdVersion?: string;
+        releaseid?: string;
+        releaseLabel?: string;
+    }
+
+    export var config: ClientConfig = {
+        searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
+        searchUrl: "https://tdsearch.search.windows.net",
+        workspaceUrl: null,
+        rootUrl: "https://www.touchdevelop.com",
+        liteVersion: null,
+    }
     
     export function hasPermission(perm:string)
     {
@@ -15,7 +35,7 @@ module TDev.Cloud {
         return !!lite;
     }
 
-    export function getServiceUrl() { return <string>((<any>window).rootUrl); }
+    export function getServiceUrl() { return config.rootUrl; }
 
     export function mkLegalDiv() {
         var link = (text: string, lnk: string) =>
