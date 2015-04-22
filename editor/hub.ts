@@ -727,7 +727,7 @@ module TDev.Browser {
                 div("wall-dialog-header", lf("create a new list")),
                 div("wall-dialog-body", lf("Organize your scripts with lists!")),
                 div("wall-dialog-line-textbox", nameBox),
-                div("wall-dialog-buttons",
+               div("wall-dialog-buttons",
                     createBtn = HTML.mkButton(lf("create"),() => {
                         createBtn.removeSelf();
                         progress.start();
@@ -736,6 +736,7 @@ module TDev.Browser {
                                 progress.stop();
                                 m.dismiss();
                                 var info = this.browser().getPubListInfo(l);
+                                info.invalidateCaches();
                                 this.browser().loadDetails(info);
                             }, e => {
                                 progress.stop();

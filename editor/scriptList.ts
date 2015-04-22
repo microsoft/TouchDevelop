@@ -9254,6 +9254,8 @@
             this.publicId = id;
         }
         
+        public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
+
         public mkBoxCore(big: boolean) : HTMLElement {
             var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
             icon.style.background = "#1731B8";
@@ -9333,22 +9335,75 @@
             return [this];
         }
 
+        public invalidateCaches() {
+            TheApiCacheMgr.invalidate(this.publicId + "/scripts");
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/lists");
+            TheApiCacheMgr.invalidate("/lists");
+        }
+
         private listTab: PubListTab;
         public initTab() {
             this.listTab = new PubListTab(this);
-            this.listTab.initElements();
-            this.listTab.initTab();
+
+            var author = div(null);
+            var btn = div(null);
+            var descr = div(null);
+            var scripts = div(null);
 
             this.tabContent.setChildren([
-                this.listTab.tabContent
+                author,
+                descr,
+                btn,
+                scripts
             ]);
+
+            this.withUpdate(this.tabContent,(u: JsonPubList) => {
+                this.json = u;
+                author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar()]);
+                descr.setChildren([Host.expandableTextBox(this.json.description)]);
+
+                if (this.isMine()) {
+                    btn.appendChild(HTML.mkButton(lf("add script"),() => {
+                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, header: "add a script to your list", searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
+                            if (info) this.addScriptAsync(info).done(() => {
+                                this.browser().loadDetails(this);
+                            });
+                        });
+                    }));
+                    btn.appendChild(HTML.mkButton(lf("delete list"),() => {
+                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete list"),() => {
+                            HTML.showProgressNotification(lf("deleting list..."));
+                            Cloud.deletePrivateApiAsync(this.publicId)
+                                .done(() => {
+                                this.invalidateCaches();
+                                Util.setHash("list:lists");
+                            }, e => World.handlePostingError(e, lf("delete list")));
+                        });
+                    }));
+                    if (!Cloud.isRestricted())
+                        btn.appendChild(HTML.mkButton(lf("change picture"),() => {
+                            Meta.chooseArtPictureAsync({ title: lf("change the list picture"), initialQuery: "list" })
+                                .then((a: JsonArt) => {
+                                if (a) {
+                                    HTML.showProgressNotification(lf("updating picture..."));
+                                    return Cloud.postPrivateApiAsync(this.publicId, { pictureid: a.id })
+                                }
+                                return Promise.as(undefined);
+                                }).done(() => this.browser().loadDetails(this, "overview"));
+                        }));
+                }
+
+                this.listTab.initElements();
+                this.listTab.initTab();
+                scripts.setChildren([this.listTab.tabContent]);
+                this.listTab.tabContent;
+            });
         }
 
         public addScriptAsync(si: ScriptInfo) : Promise {
             return Cloud.postPrivateApiAsync(si.publicId + "/lists/" + this.publicId, {})
                 .then(() => {
-                    Browser.TheApiCacheMgr.invalidate(this.publicId);
-                    Browser.TheApiCacheMgr.invalidate(this.publicId + "/scripts");
+                    this.invalidateCaches();
                 }, e => World.handlePostingError(e, lf("add script to list")));
         }
     }
@@ -9368,7 +9423,19 @@
         public noneText() { return lf("no scripts for this list"); }
 
         public tabBox(c: JsonScript): HTMLElement {
-            return this.browser().getScriptInfo(c).mkSmallBox();
+            var el = this.browser().getScriptInfo(c).mkSmallBox();
+            var list = <PubListInfo>this.parent;
+            if (list.isMine()) {
+                el = div('', el, div('', HTML.mkButtonOnce(lf("remove"),() => {
+                    HTML.showProgressNotification(lf("removing script..."));
+                    Cloud.deletePrivateApiAsync(c.id + "/lists/" + this.parent.publicId)
+                    .done(() => {
+                        list.invalidateCaches();
+                        el.removeSelf(); 
+                    }, e => World.handlePostingError(e, lf("remove script")));
+                })));
+            }
+            return el;
         }
     }
 
@@ -9385,6 +9452,7 @@
 
         public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonPubList>cc;
+
             return this.browser().getPubListInfo(c).mkSmallBox();
         }
     }
