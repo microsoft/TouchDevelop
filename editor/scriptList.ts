@@ -6203,7 +6203,7 @@
             // don't show these for scripts
             // var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
 
-            var descDiv = div("sdDesc");
+            var descDiv = div(null);
             var metaDiv = div(null);
             var wontWork = div(null);
             var runBtns = div(null);
@@ -6231,12 +6231,15 @@
 
                 this.buildTopic();
 
-                if (this.app.isLibrary) {
-                    Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
-                    HTML.fixWp8Links(descDiv);
+                if (this.jsonScript.description) {
+                    descDiv.classList.add('sdDesc');
+                    if (this.app.isLibrary) {
+                        Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
+                        HTML.fixWp8Links(descDiv);
+                    }
+                    else
+                        descDiv.setChildren([Host.expandableTextBox(this.jsonScript.description)]);
                 }
-                else
-                    descDiv.setChildren([Host.expandableTextBox(this.jsonScript.description)]);
 
                 if (this.correspondingTopic && !this.cloudHeader) {
                     docsButtonDiv.setChildren([HTML.mkButton(lf("view as docs"),() => {
