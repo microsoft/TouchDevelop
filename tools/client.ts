@@ -3453,6 +3453,45 @@ function uploadfile(args:string[])
     tdupload([args[0], "nolbl", "files"].concat(args.slice(1)))
 }
 
+function uploadwf(args:string[])
+{
+    var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
+    if (!mm) {
+        console.log("invalid or missing $TD_UPLOAD_KEY")
+        return
+    }
+
+    if (args.length < 2) {
+        console.log("usage: uploadwf webpath filename")
+        return
+    }
+
+    var liteUrl = mm[1]
+    var key = mm[2]
+
+    var content = fs.readFileSync(args[1], "utf8")
+    var mime = getMime(args[1])
+
+    var isText = /^(text\/.*|application\/(javascript|json))$/.test(mime)
+    var encoding = isText ? "utf8" : "base64"
+    tdevGet(liteUrl + "api/webfiles" + key, resp => {
+        var rr = JSON.parse(resp)
+        console.log(rr)
+        if (args[2]) {
+            tdevGet(liteUrl + "api/" + rr.id + "/label" + key, resp => {
+                console.log(resp)
+            }, 1, {
+                name: args[2]
+            })
+        }
+    }, 1, {
+        encoding: "utf8",
+        filename: args[0],
+        contentType: mime,
+        content: content,
+    })
+}
+
 function tdupload(args:string[])
 {
     if (process.env.TD_SOURCE_MAPS && !process.env.TRAVIS)
@@ -3666,6 +3705,7 @@ var cmds = {
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
     "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
+    "uploadwf": { f:uploadwf, a:'PATH FILE [LABEL]', h:'upload a webfile'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
     "setlabel": { f:setlabel, a:'KEY RELID LABEL', h:'set release label'},
 }

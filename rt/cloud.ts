@@ -13,6 +13,7 @@ module TDev.Cloud {
 
         tdVersion?: string;
         releaseid?: string;
+        relid?: string;
         releaseLabel?: string;
     }
 

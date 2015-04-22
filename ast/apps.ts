@@ -326,7 +326,7 @@ module TDev.AST.Apps {
         // these 2 files are not stored in cdn, they are rewritten in the cloud
         [ "error", "browsers"].forEach(n => instructions.files.push({
             path: options.filePrefix + n + ".html",
-            url: "https://www.touchdevelop.com/app/." + n + "?releaseid=" + options.relId
+            url: Cloud.getServiceUrl() + "/app/." + n + "?releaseid=" + options.relId
         }))
 
         instructions.meta.isCloud = app.isCloud;

@@ -82,12 +82,8 @@ module TDev {
       };
     }
 
-    function mangleLocalName(n) {
-      return n.replace(/\W/g, "_");
-    }
-
     function mangleLibraryName(l, n) {
-      return mangleLocalName(l)+"_"+mangleLocalName(n);
+      return H.mangleName(l)+"_"+H.mangleName(n);
     }
 
     // Rewrites arguments for some selected C++ functions. For instance, as we
@@ -98,7 +94,7 @@ module TDev {
         case "microbit_button_pressed":
           if (isStringLiteral(args[0]) == "left")
             return [mkNumberLiteral(1)];
-          else if (isStringLiteral(args[1]) == "right")
+          else if (isStringLiteral(args[0]) == "right")
             return [mkNumberLiteral(2)];
           throw new Error(call+": unknown button");
       }
@@ -214,7 +210,7 @@ module TDev {
             return this.resolveCall(this.libRef, name);
           else
             // Call to a function from the current script.
-            return mangleLocalName(name);
+            return H.mangleName(name);
 
         // Is this a call to a library?
         var n = isLibrary(receiver);
@@ -259,7 +255,7 @@ module TDev {
         if (this.libRef)
           return mangleLibraryName(this.libRef.name, n);
         else
-          return mangleLocalName(n);
+          return H.mangleName(n);
       }
 
       public visitAction(
