@@ -154,6 +154,9 @@ module TDev {
         data: string; // groupid for group invitation codes
     }
 
+    export interface JsonScriptMeta {
+        youtubeid?: string;
+    }
 
     export interface JsonScript extends JsonPublication
     {
@@ -184,6 +187,7 @@ module TDev {
         screenshoturl:string;
         mergeids:string[];
         editor?: string; // convention where empty means touchdevelop, for backwards compatibility
+        meta?: JsonScriptMeta; // only in lite, bag of metadata
     }
 
     export interface JsonHistoryItem
@@ -372,6 +376,16 @@ module TDev {
         static error(msg:string)
         {
             return "<span class='md-error'>" + Util.htmlEscape(msg) + " </span>";
+        }
+
+        static parseYouTubeIds(text: string) : string[] {
+            var links = [];
+            if (text)
+                text.replace(/https?:\/\/(youtu\.be\/([^\s]+))|(www\.youtube\.com\/watch\?v=([^\s]+))/gi,(m, m2, id1, m3, id2) => {
+                    var ytid = id1 || id2;
+                    links.push(ytid);
+                });
+            return links;
         }
 
         static proxyVideos(v: JsonVideo) {

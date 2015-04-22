@@ -2156,7 +2156,9 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
-                sects["publists"] = lf("lists")
+                if (!this.isBeginner()) {
+                    sects["publists"] = lf("lists")
+                }
             }
 
             if (SizeMgr.portraitMode) {
