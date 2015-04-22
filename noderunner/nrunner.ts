@@ -33,6 +33,7 @@ var authKey = "";
 var liteStorage = process.env['TDC_LITE_STORAGE'] || "";
 var apiEndpoint = process.env['TDC_API_ENDPOINT'] || "https://www.touchdevelop.com/api/";
 var accessToken = process.env['TDC_ACCESS_TOKEN'] || "";
+var ccfg = TDev.Cloud.config;
 
 class ApiRequest
 {
@@ -772,6 +773,13 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => html(top))
         break;
 
+    case "raw-docs":
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => {
+            hr.writeHead(200, { "Content-Type": "text/plain" });
+            hr.end(top, "utf-8")
+        })
+        break;
+
     case "docs-info":
         TDev.HelpTopic.fromScript(TDev.Script).docInfoAsync().done(resp => ar.ok(resp))
         break;
@@ -953,7 +961,10 @@ var apiHandlers = {
     },
 
     "css": (ar:ApiRequest) => {
-        ar.ok(<TDev.CssResponse> { css: TDev.CopyRenderer.css })
+        ar.ok(<TDev.CssResponse> { 
+            css: TDev.CopyRenderer.css,
+            relid: ccfg.relid,
+        })
     },
 
     "oauth": (ar:ApiRequest) => {
@@ -1012,6 +1023,7 @@ var apiHandlers = {
         })
 
         ar.ok(<TDev.DocTopicsResponse>{
+            relid: ccfg.relid,
             topics: topics,
             topicsExt: topicsExt
         });
@@ -1030,7 +1042,8 @@ var apiHandlers = {
             ar.ok({
                 textVersion: TDev.AST.App.currentVersion,
                 releaseid: relId,
-                tdVersion: process.env['TDC_VERSION'],
+                relid: ccfg.relid,
+                tdVersion: ccfg.tdVersion,
             });
             break;
 
@@ -1392,7 +1405,7 @@ function reportBug(ctx: string, err: any) {
     if (!slave)
         console.error(TDev.Ticker.bugReportToString(bug));
     bug.exceptionConstructor = "NJS " + bug.exceptionConstructor;
-    bug.tdVersion = process.env['TDC_VERSION']
+    bug.tdVersion = ccfg.tdVersion
 
     TDev.Util.httpPostRealJsonAsync(apiEndpoint + "bug" + accessToken, bug)
         .done(() => {}, err => {

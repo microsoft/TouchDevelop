@@ -678,6 +678,11 @@ module TDev.RT.Node {
         window.navigator = navigator;
         navigator.userAgent = "NodeJS " + process.version
 
+        if (process.env['TD_CLIENT_CONFIG']) {
+            var obj = JSON.parse(process.env['TD_CLIENT_CONFIG'])
+            Object.keys(obj).forEach(k => Cloud.config[k] = obj[k])
+        }
+
         Util.logSz = 3000;
 
         setupGlobalAgent()

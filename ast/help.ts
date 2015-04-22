@@ -356,12 +356,12 @@ module TDev {
 
         public topicLink(id:string)
         {
-            return (this.useExternalLinks ? "https://www.touchdevelop.com/docs/" : "#topic:") + MdComments.shrink(id);
+            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/docs/" : "#topic:") + MdComments.shrink(id);
         }
 
         public appLink(id:string)
         {
-            return (this.useExternalLinks ? "https://www.touchdevelop.com/app/" : "") + id
+            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/app/" : "") + id
         }
 
         static shrink(s:string)
@@ -876,7 +876,7 @@ module TDev {
                     false))
                     continue;
 
-                var tdev = "https://www.touchdevelop.com/";
+                var tdev = Cloud.getServiceUrl() + "/";
                 if (allowRepl && (
                     applySpan(/^\{\#(\w+)\}/g, (m) => "<a name='" + quote(m[1]) + "'></a>") ||
                     applySpan(/^\[([^\[\]]*)\]\s*\(([^ \(\)\s]+)\)/, (m) => {
