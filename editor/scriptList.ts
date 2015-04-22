@@ -3556,7 +3556,7 @@
             var text =  HTML.mkTextArea();
             var postBtn = div(null);
             text.rows = 1;
-            text.placeholder =  reply ? lf("Reply...") : lf("Post a comment...");
+            text.placeholder =  reply ? lf("Reply... (or a YouTube link)") : lf("Post a comment... (or a YouTube link)");
             var postDiv:HTMLElement = div("commentPost", div(null, text), postBtn);
 
             var post = () => {
