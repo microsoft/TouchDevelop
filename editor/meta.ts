@@ -78,8 +78,8 @@ module TDev.Meta {
         if (!terms) return Promise.as([]);
 
         var indexName = "art1";
-        var apiKey = "E43690E2B2A39FEB68117546BF778DB8"; // touchdevelop web app query key in portal
-        var serviceUrl = "https://tdsearch.search.windows.net";
+        var apiKey = Cloud.config.searchApiKey;
+        var serviceUrl = Cloud.config.searchUrl;
         var query = terms.split(' ').map(term => /sound|picture/i.test(term) ? undefined : term + "*").filter(s => !!s).join("+");
         var filter = type ? "type eq '" + type + "'" : /sound/i.test(terms) ? "type eq 'sound'" : /picture/i.test(terms) ? "type eq 'picture'" : undefined;
         var scoringProfile = "editorpics";

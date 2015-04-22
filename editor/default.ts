@@ -1,6 +1,25 @@
 ///<reference path='refs.ts'/>
 module TDev
 {
+    function fetchConfigAsync()
+    {
+        if (Cloud.lite && !Cloud.config.liteVersion) {
+            var storeCfg = r => Object.keys(r).forEach(k => Cloud.config[k] = r[k]);
+            var p = Cloud.getPublicApiAsync("clientconfig")
+                .then(r => {
+                    localStorage['clientconfig'] = JSON.stringify(r)
+                    storeCfg(r)
+                })
+
+            if (localStorage['clientconfig']) {
+                storeCfg(JSON.parse(localStorage['clientconfig']))
+                p.done()
+                return Promise.as()
+            } else return p;
+        }
+        else return Promise.as()
+    }
+
     function initEditorAsync()
     {
         SizeMgr.earlyInit();
@@ -21,6 +40,7 @@ module TDev
         return Promise.as()
         .then(() => LocalProxy.updateShellAsync())
         .then(() => LocalProxy.loadCachesAsync())
+        .then(() => fetchConfigAsync())
         .then(() => Browser.TheApiCacheMgr.initAsync())
         .then(() => {
             initScreens();
@@ -459,7 +479,7 @@ module TDev
 
         if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            (<any>window).rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://mbitmain.azurewebsites.net"
+            Cloud.config.rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://mbitmain.azurewebsites.net"
             TDev.Ticker.disable()
         }
 
@@ -467,12 +487,17 @@ module TDev
             Cloud.lite = true;
             if ((<any>window).tdlite == "url") {
                 mx = /^(https?:\/\/[^\/]+)/.exec(document.URL);
-                (<any>window).rootUrl = mx[1]
+                Cloud.config.rootUrl = mx[1]
             } else {
-                (<any>window).rootUrl = (<any>window).tdlite;
+                Cloud.config.rootUrl = (<any>window).tdlite;
             }
             TDev.Ticker.disable()
+            var cfg = (<any>window).tdConfig
+            if (cfg) Object.keys(cfg).forEach(k => Cloud.config[k] = cfg[k])
         }
+
+        if (Cloud.lite) (<any>window).rootUrl = Cloud.config.rootUrl;
+
 
         if (/httplog=1/.test(document.URL)) {
             HttpLog.enabled = true;
