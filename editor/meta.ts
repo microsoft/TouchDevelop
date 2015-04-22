@@ -156,10 +156,10 @@ module TDev.Meta {
     export function chooseListAsync(options: ChooseListOptions = {}): Promise {
         var r = new PromiseInv();
 
-        Browser.TheHost.getLocationList("me/publists?count=100",(itms: Browser.BrowserPage[], cont: string) => {
+        Browser.TheHost.getLocationList("me/channels?count=100",(itms: Browser.BrowserPage[], cont: string) => {
             var m = new ModalDialog();
             var selected = false;
-            var converter = (s: Browser.PubListInfo) => {
+            var converter = (s: Browser.ChannelInfo) => {
                 return s.mkSmallBoxNoClick().withClick(() => {
                     selected = true;
                     m.dismiss();
@@ -170,8 +170,8 @@ module TDev.Meta {
             var boxes = []
             for (var i = 0; i < itms.length; ++i) {
                 var p = itms[i];
-                if (p instanceof Browser.PubListInfo) {
-                    var s = <Browser.PubListInfo>p;
+                if (p instanceof Browser.ChannelInfo) {
+                    var s = <Browser.ChannelInfo>p;
                     var b = converter(s);
                     if (!!b) boxes.push(b);
                 }

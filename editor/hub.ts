@@ -713,7 +713,7 @@ module TDev.Browser {
         }
 
         private createList() {
-            if (Cloud.anonMode(lf("creating lists"))) return;
+            if (Cloud.anonMode(lf("creating channels"))) return;
 
             var name = "ADJ scripts".replace(/ADJ/g,() => TopicInfo.getAwesomeAdj());
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
@@ -724,24 +724,24 @@ module TDev.Browser {
             var m = new ModalDialog();
             m.add([
                 progress,
-                div("wall-dialog-header", lf("create a new list")),
-                div("wall-dialog-body", lf("Organize your scripts with lists!")),
+                div("wall-dialog-header", lf("create a new channel")),
+                div("wall-dialog-body", lf("Organize your scripts with channels!")),
                 div("wall-dialog-line-textbox", nameBox),
                div("wall-dialog-buttons",
                     createBtn = HTML.mkButton(lf("create"),() => {
                         createBtn.removeSelf();
                         progress.start();
-                        Cloud.postPrivateApiAsync("publists", { name: nameBox.value })
-                            .done((l: JsonPubList) => {
+                        Cloud.postPrivateApiAsync("channels", { name: nameBox.value })
+                            .done((l: JsonChannel) => {
                                 progress.stop();
                                 m.dismiss();
-                                var info = this.browser().getPubListInfo(l);
+                                var info = this.browser().getChannelInfo(l);
                                 info.invalidateCaches();
                                 this.browser().loadDetails(info);
                             }, e => {
                                 progress.stop();
                                 m.dismiss();
-                                World.handlePostingError(e, lf("create list"));
+                                World.handlePostingError(e, lf("create channel"));
                             });
                     }))
             ]);
@@ -1210,7 +1210,7 @@ module TDev.Browser {
                     } else if (s == "art") this.browser().showList("art", item);
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
-                    else if (s == "publists") this.browser().showList("publists", item);
+                    else if (s == "channels") this.browser().showList("channels", item);
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -1316,19 +1316,19 @@ module TDev.Browser {
                 } else {
                     elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                 }
-            } else if (s == "publists") {
+            } else if (s == "channels") {
                 noFnBreak = true;
                 while (elements.length < 5) {
-                    var oneSlot = this.mkFnBtn(lf("Your list will appear here"),() => {
+                    var oneSlot = this.mkFnBtn(lf("Your channel will appear here"),() => {
                     }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
                     oneSlot.className += " scriptSlot";
                     elements.push(oneSlot)
                 }
 
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
-                    () => { this.hide(); this.browser().showList("publists", null) });
+                    () => { this.hide(); this.browser().showList("channels", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-                addFnBtn(lf("Create list"), Ticks.hubCreateList,
+                addFnBtn(lf("Create channel"), Ticks.hubCreateList,
                     () => { this.createList(); });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:script,white")));                
             } else {
@@ -2157,7 +2157,7 @@ module TDev.Browser {
             if (Cloud.lite) {
                 delete sects["tags"];
                 if (!this.isBeginner()) {
-                    sects["publists"] = lf("lists")
+                    sects["channels"] = lf("channels")
                 }
             }
 
@@ -2285,9 +2285,9 @@ module TDev.Browser {
                     else
                         this.addPageTiles(s, c, []);
                 }
-                else if (s == "publists") {
+                else if (s == "channels") {
                     if (Cloud.getUserId())
-                        this.browser().getLocationList(Cloud.getUserId() + "/publists?count=6",(items, cont) => this.addPageTiles(s, c, items));
+                        this.browser().getLocationList(Cloud.getUserId() + "/channels?count=6",(items, cont) => this.addPageTiles(s, c, items));
                     else
                         this.addPageTiles(s, c, []);
                 }

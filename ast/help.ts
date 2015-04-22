@@ -236,7 +236,7 @@ module TDev {
         publicationuserid:string;
     }
 
-    export interface JsonPubList extends JsonPublication
+    export interface JsonChannel extends JsonPublication
     {
         name: string;
         description:string;
