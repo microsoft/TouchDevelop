@@ -3943,14 +3943,8 @@
             }
             
             // parsing youtube links
-            c.text.replace(/https?:\/\/(youtu\.be\/([^\s]+))|(www\.youtube\.com\/watch\?v=([^\s]+))/gi,(m, m2, id1, m3, id2) => {
-                var ytid = id1 || id2;
-                var d = div('md-video-link');
-                d.dataset['youtubeid'] = ytid;
-                setInnerHTML(d, SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid)));
-                d.withClick(() => {
-                    d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=https://www.touchdevelop.com' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
-                });
+            MdComments.parseYouTubeIds(c.text).forEach(ytid => {
+                var d = HTML.mkYouTubePlayer(ytid);
                 nestedPubs.appendChild(d);
             });
 
@@ -5353,6 +5347,23 @@
                         divs.push(div('', pull, diff, list));
                     }
 
+                    if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
+                        var youtubeInput: HTMLInputElement;
+                        var meta = div('',
+                            lf("YouTube video:"),
+                            youtubeInput = HTML.mkTextInputWithOk("url", "YouTube video link",() => {
+                                var id = MdComments.parseYouTubeIds(youtubeInput.value)[0] || null;
+                                youtubeInput.value = id ? "https://youtu.be/" + id : "";
+                                HTML.showProgressNotification("saving youtube link");
+                                Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", { youtubeid: id }).done(() => {
+                                    TheApiCacheMgr.invalidate(sc.jsonScript.id);
+                                }, e => World.handlePostingError(e, "saving metadata"));
+                            }));
+                        if (sc.jsonScript.meta && sc.jsonScript.meta.youtubeid)
+                            youtubeInput.value = "https://youtu.be/" + sc.jsonScript.meta.youtubeid;
+                        divs.push(meta);                        
+                    }
+
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
                     } else if (app.getPlatform()) {
                         var caps = lf("This script uses the following capabilities: ") +
@@ -6193,6 +6204,7 @@
             // var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
 
             var descDiv = div("sdDesc");
+            var metaDiv = div(null);
             var wontWork = div(null);
             var runBtns = div(null);
             var authorDiv = div(null);
@@ -6203,6 +6215,7 @@
                 authorDiv,
                 runBtns,
                 descDiv,
+                metaDiv,
                 docsButtonDiv,
                 commentsDiv,
                 wontWork,
@@ -6250,6 +6263,11 @@
                     wontWork.setChildren([span("symbol", "⚠"),
                         lf("This script is using the following capabilities that might be missing on your current device: {0}",
                             AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
+                }
+
+                if (this.jsonScript.meta && this.jsonScript.meta.youtubeid) {
+                    var yt = HTML.mkYouTubePlayer(this.jsonScript.meta.youtubeid);
+                    metaDiv.appendChild(yt);
                 }
 
                 if (this.getPublicationIdOrBaseId()) {
