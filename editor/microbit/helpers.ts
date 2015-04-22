@@ -11,10 +11,14 @@ module TDev {
 
       var kStringType = "shared_ptr<string>";
 
+      export function mangleName(name: string) {
+        return name.replace(/\W/g, "_");
+      }
+
       // Compute a unique name from a user-provided name and a
       // TouchDevelop-generated unique id.
       export function mangle(name: string, id: string) {
-          return name + "_" + id;
+          return mangleName(name) + "_" + mangleName(id);
       }
 
       export function mangleDef(d: J.JLocalDef) {
