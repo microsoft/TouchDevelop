@@ -1218,8 +1218,9 @@
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
+            else if (e.kind == "list") return this.getSpecificInfoById(e.id, PubListInfo);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
-            else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo)
+            else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo);
             else return null;
         }
 
@@ -1394,7 +1395,10 @@
                     tick(Ticks.browseListUsers);
                     header = lf("users");
                     break;
-
+                case "lists":
+                    tick(Ticks.browseListLists);
+                    header = lf("lists");
+                    break;
                 default:
                     if (/^bugs\//.test(path)) {
                         tick(Ticks.browseListBugs);
@@ -1710,6 +1714,17 @@
             var si = <GroupInfo>this.getLocation(c.id);
             if (!si) {
                 si = new GroupInfo(this);
+                TheApiCacheMgr.store(c.id, c);
+                si.loadFromWeb(c.id);
+                this.saveLocation(si);
+            }
+            return si;
+        }
+
+        public getPubListInfo(c: JsonPubList) {
+            var si = <PubListInfo>this.getLocation(c.id);
+            if (!si) {
+                si = new PubListInfo(this);
                 TheApiCacheMgr.store(c.id, c);
                 si.loadFromWeb(c.id);
                 this.saveLocation(si);
@@ -5329,8 +5344,13 @@
                     if (sc.jsonScript && sc.jsonScript.time) {
                         var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
                         var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
-
-                        divs.push(div('', pull, diff));
+                        var list = Cloud.lite ? HTML.mkButtonTick(lf("add to list"), Ticks.browseAddScriptToList,() => {
+                            Meta.chooseListAsync().done((info: PubListInfo) => {
+                                var si = (<ScriptInfo>this.parent);
+                                if (info) info.addScriptAsync(si).done();
+                            });
+                        }) : null;
+                        divs.push(div('', pull, diff, list));
                     }
 
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
@@ -5913,11 +5933,12 @@
                 //nums.style.background = this.app.htmlColor();
 
                 var smallIcon = div("hubTileSmallIcon");
-                var bigIcon = div("hubTileScreenShot");
+                var bigIcon = null;
 
                 var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
                 if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
+                    bigIcon = div("hubTileScreenShot");
                     bigIcon.style.backgroundImage = HTML.cssImage(ss);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
                     bigIcon.style.backgroundPosition = 'center';
@@ -7296,13 +7317,16 @@
             this.progressHeader = document.createElement("tr");
             this.progressHeader.className = "header";
             this.progressTable.appendChild(this.progressHeader);
-            this.progressHeader.appendChild(document.createElement("td"));
+            var cph = document.createElement("td");
+            cph.appendChild(HTML.mkButton(lf("pop out"), () => this.showDialog()));
+            this.progressHeader.appendChild(cph);
             var cp = document.createElement("td"); cp.appendChild(div('', span('', lf("tutorial completed"))));
             this.progressHeader.appendChild(cp); // completed
             var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
             this.progressHeader.appendChild(st);
             this.tutorials = {};
             this.userRows = {};
+
             return div('tbProgress', this.progressTable);
         }
 
@@ -7783,10 +7807,6 @@
 
                 ad.setChildren([]);
                 if (this.isMine()) {
-                    ad.appendChild(HTML.mkButton(lf("progress"),() => {
-                        var tab = new GroupUserProgressTab(this);
-                        tab.showDialog();
-                    }));
                     if (!Cloud.isRestricted())
                         ad.appendChild(HTML.mkButton(lf("change picture"), () => {
                             tick(Ticks.groupChangePicture);
@@ -9216,6 +9236,208 @@
         }
     }
 
+    export class PubListInfo
+        extends BrowserPage {
+        private json: JsonPubList;
+
+        constructor(par: Host) {
+            super(par)
+        }
+        public persistentId() { return "list:" + this.publicId; }
+        public getTitle() { return this.json ? this.json.name : this.publicId; }
+        public getId() { return "overview"; }
+        public getName() { return lf("overview"); }
+
+        public loadFromWeb(id: string) {
+            Util.assert(!!id);
+            this.publicId = id;
+        }
+        
+        public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
+
+        public mkBoxCore(big: boolean) : HTMLElement {
+            var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var res = div("sdHeaderOuter",
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                        )));
+
+            if (big)
+                res.className += " sdBigHeader";
+
+
+            return this.withUpdate(res,(u: JsonPubList) => {
+                this.json = u;
+                if (u.pictureid && !Browser.lowMemory) {
+                    icon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(u.pictureid));
+                    icon.style.backgroundRepeat = 'no-repeat';
+                    icon.style.backgroundPosition = 'center';
+                    icon.style.backgroundSize = 'contain';
+                    icon.setChildren([]);
+                }
+                nameBlock.setChildren([this.json.name])
+                author.setChildren([this.json.username]);
+                addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(this.json.time)]);
+            });
+        }
+
+        public mkTile(sz: number) : HTMLElement {
+            var d = div("hubTile hubTileSize" + sz);
+            d.style.background = "#1731B8";
+            return this.withUpdate(d, (u: JsonPubList) => {                
+                this.json = u;
+
+                var cont = [];
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                addNum(this.json.positivereviews, "♥");
+                if (sz > 1) {
+                    addNum(this.json.comments, "✉");
+                }
+
+                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
+                //nums.style.background = this.app.htmlColor();
+
+                var smallIcon = div("hubTileSmallIcon");
+                var bigIcon = null;
+
+                if (this.json.pictureid && !Browser.lowMemory) {
+                    bigIcon = div("hubTileScreenShot");
+                    bigIcon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(this.json.pictureid));
+                    bigIcon.style.backgroundRepeat = 'no-repeat';
+                    bigIcon.style.backgroundPosition = 'center';
+                    bigIcon.style.backgroundSize = 'cover';
+                    smallIcon.setChildren([HTML.mkImg("svg:script")]);
+                    smallIcon.style.background = "#1731B8";
+                }
+
+                d.setChildren([div("hubTileIcon", HTML.mkImg("svg:script,white")),
+                    bigIcon,
+                    smallIcon,
+                    div("hubTileTitleBar",
+                        div("hubTileTitle", spanDirAuto(this.json.name)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(this.json.username), nums)))])
+            });
+        }
+
+        public mkTabsCore(): BrowserTab[]{
+            return [this];
+        }
+
+        public invalidateCaches() {
+            TheApiCacheMgr.invalidate(this.publicId + "/scripts");
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/lists");
+            TheApiCacheMgr.invalidate("/lists");
+        }
+
+        private listTab: PubListTab;
+        public initTab() {
+            this.listTab = new PubListTab(this);
+
+            var author = div(null);
+            var btn = div(null);
+            var descr = div(null);
+            var scripts = div(null);
+
+            this.tabContent.setChildren([
+                author,
+                descr,
+                btn,
+                scripts
+            ]);
+
+            this.withUpdate(this.tabContent,(u: JsonPubList) => {
+                this.json = u;
+                author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar()]);
+                descr.setChildren([Host.expandableTextBox(this.json.description)]);
+
+                if (this.isMine()) {
+                    btn.appendChild(HTML.mkButton(lf("add script"),() => {
+                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, header: "add a script to your list", searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
+                            if (info) this.addScriptAsync(info).done(() => {
+                                this.browser().loadDetails(this);
+                            });
+                        });
+                    }));
+                    btn.appendChild(HTML.mkButton(lf("delete list"),() => {
+                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete list"),() => {
+                            HTML.showProgressNotification(lf("deleting list..."));
+                            Cloud.deletePrivateApiAsync(this.publicId)
+                                .done(() => {
+                                this.invalidateCaches();
+                                Util.setHash("list:lists");
+                            }, e => World.handlePostingError(e, lf("delete list")));
+                        });
+                    }));
+                    if (!Cloud.isRestricted())
+                        btn.appendChild(HTML.mkButton(lf("change picture"),() => {
+                            Meta.chooseArtPictureAsync({ title: lf("change the list picture"), initialQuery: "list" })
+                                .then((a: JsonArt) => {
+                                if (a) {
+                                    HTML.showProgressNotification(lf("updating picture..."));
+                                    return Cloud.postPrivateApiAsync(this.publicId, { pictureid: a.id })
+                                }
+                                return Promise.as(undefined);
+                                }).done(() => this.browser().loadDetails(this, "overview"));
+                        }));
+                }
+
+                this.listTab.initElements();
+                this.listTab.initTab();
+                scripts.setChildren([this.listTab.tabContent]);
+                this.listTab.tabContent;
+            });
+        }
+
+        public addScriptAsync(si: ScriptInfo) : Promise {
+            return Cloud.postPrivateApiAsync(si.publicId + "/lists/" + this.publicId, {})
+                .then(() => {
+                    this.invalidateCaches();
+                }, e => World.handlePostingError(e, lf("add script to list")));
+        }
+    }
+
+    export class PubListTab
+        extends ListTab {
+        constructor(par: BrowserPage) {
+            super(par, "/scripts");
+            this.isEmpty = true;
+        }
+
+        public needsJsonScript() { return true; }
+        public inlineIsTile() { return false; }
+        public getId() { return "scripts"; }
+        public getName() { return lf("scripts"); }
+        public bgIcon() { return "svg:script"; }
+        public noneText() { return lf("no scripts for this list"); }
+
+        public tabBox(c: JsonScript): HTMLElement {
+            var el = this.browser().getScriptInfo(c).mkSmallBox();
+            var list = <PubListInfo>this.parent;
+            if (list.isMine()) {
+                el = div('', el, div('', HTML.mkButtonOnce(lf("remove"),() => {
+                    HTML.showProgressNotification(lf("removing script..."));
+                    Cloud.deletePrivateApiAsync(c.id + "/lists/" + this.parent.publicId)
+                    .done(() => {
+                        list.invalidateCaches();
+                        el.removeSelf(); 
+                    }, e => World.handlePostingError(e, lf("remove script")));
+                })));
+            }
+            return el;
+        }
+    }
+
     export class PubListListTab
         extends ListTab {
         constructor(par: BrowserPage) {
@@ -9228,8 +9450,9 @@
         public noneText() { return lf("no lists yet!"); }
 
         public tabBox(cc: JsonIdObject): HTMLElement {
-            var c = <JsonScript>cc;
-            return this.browser().getScriptInfo(c).mkSmallBox();
+            var c = <JsonPubList>cc;
+
+            return this.browser().getPubListInfo(c).mkSmallBox();
         }
     }
 }

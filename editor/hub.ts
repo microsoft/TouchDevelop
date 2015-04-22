@@ -297,7 +297,7 @@ module TDev.Browser {
 
     export class Hub
         extends Screen {
-        constructor () {
+        constructor() {
             super()
             this.topContainer = div(null, this.logo, this.meBox, this.notificationBox, this.dingDingBox);
             this.topBox = div(null, this.topContainer);
@@ -310,7 +310,7 @@ module TDev.Browser {
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
         private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,black"));
-            // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
+        // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
         private dingDingBox = div("dingDingBox");
@@ -324,7 +324,7 @@ module TDev.Browser {
         private historyMode = false;
         public vertical = true;
 
-        private afterSections:()=>void = null;
+        private afterSections: () => void = null;
 
         public screenId() { return "hub"; }
 
@@ -338,7 +338,7 @@ module TDev.Browser {
                 Hub.showAbout();
             });
             if (!Browser.mobileWebkit)
-                this.mainContent.addEventListener("scroll", () => this.paralax())
+                this.mainContent.addEventListener("scroll",() => this.paralax())
             ArtUtil.setupDragAndDrop(document.body);
         }
 
@@ -392,13 +392,13 @@ module TDev.Browser {
 
         public syncDone() {
             this.updateSections();
-            World.continuouslySyncAsync(false, () =>
+            World.continuouslySyncAsync(false,() =>
                 this.showSectionsCoreAsync(true));
         }
 
         private browser(): Host { return TheHost; }
 
-        static legacyTemplateIds:StringMap<string> = {
+        static legacyTemplateIds: StringMap<string> = {
             turtle: "firststepswithturtle",
             bouncingmonster: "monsterslicertutorial",
             soundboard: "soundboardtutorial",
@@ -426,8 +426,7 @@ module TDev.Browser {
             small: "insanelyshorttutorial",
         }
 
-        private newScriptHash(id:string, tutorialMode:string)
-        {
+        private newScriptHash(id: string, tutorialMode: string) {
             Util.log("newScriptHash: " + id + " tut:" + tutorialMode)
 
             if (Hub.legacyTemplateIds.hasOwnProperty(id))
@@ -540,22 +539,22 @@ module TDev.Browser {
 
             this.showSections();
 
-            switch(h[1]) {
+            switch (h[1]) {
                 case "joingroup":
                     var code = h[2];
                     HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)
                     Cloud.authenticateAsync(lf("joining groups"), false, true)
                         .done((auth) => {
-                            if (auth) Browser.TheHost.joinGroup(code);
-                        });
+                        if (auth) Browser.TheHost.joinGroup(code);
+                    });
                     break;
                 case "creategroup":
                     Util.log('creategroup received');
                     HistoryMgr.instance.setHash(this.screenId() + ":creategroup", null);
                     Cloud.authenticateAsync(lf("creating groups"), false, true)
                         .done((auth) => {
-                            if (auth) this.createGroup();
-                        });
+                        if (auth) this.createGroup();
+                    });
                     break;
                 case "androidgcm":
                     var regid = h[2];
@@ -569,21 +568,21 @@ module TDev.Browser {
                     } else {
                         Cloud.authenticateAsync(lf("receive Android notifications"), false, true)
                             .done((auth) => {
-                                if (auth) {
-                                    Cloud.postNotificationChannelAsync({
-                                        subscriptionuri : 'androidgcm:' + regid,
-                                        versionminor : versionMinor,
-                                        versionmajor : versionMajor
-                                    }).done(() => {
-                                        Util.log('androidgcm: registered');
-                                        Browser.Hub.askToEnableNotifications();
-                                    }, e => {
+                            if (auth) {
+                                Cloud.postNotificationChannelAsync({
+                                    subscriptionuri: 'androidgcm:' + regid,
+                                    versionminor: versionMinor,
+                                    versionmajor: versionMajor
+                                }).done(() => {
+                                    Util.log('androidgcm: registered');
+                                    Browser.Hub.askToEnableNotifications();
+                                }, e => {
                                         World.handlePostingError(e, "android notifications");
                                     });
-                                } else {
-                                    Util.log('androidgcm: cancelled, offline or not authenticated');
-                                }
-                            });
+                            } else {
+                                Util.log('androidgcm: cancelled, offline or not authenticated');
+                            }
+                        });
                     }
                     break;
                 case "pub":
@@ -592,25 +591,25 @@ module TDev.Browser {
                         HistoryMgr.instance.setHash(this.screenId() + ":pub:" + h[2], null)
                         TheApiCacheMgr.getAsync(id, true)
                             .done((d) => {
-                                var details = this.browser().getAnyInfoByEtag(d);
-                                if (details)
-                                    this.browser().loadDetails(details);
-                            });
+                            var details = this.browser().getAnyInfoByEtag(d);
+                            if (details)
+                                this.browser().loadDetails(details);
+                        });
                     }
                     break;
                 case "derive":
                     if (/^\w+$/.test(h[2])) {
                         HistoryMgr.instance.setHash(this.screenId() + ":derive:" + h[2], null)
                         if (!Cloud.isAccessTokenExpired())
-                            ProgressOverlay.show("creating your script", () => {
+                            ProgressOverlay.show("creating your script",() => {
                                 Promise.join([
                                     TheApiCacheMgr.getAsync(h[2]),
                                     ScriptCache.getScriptAsync(h[2])
                                 ]).done((arr) => {
-                                    var scr:JsonScript = arr[0]
-                                    var txt:string = arr[1]
+                                    var scr: JsonScript = arr[0]
+                                    var txt: string = arr[1]
                                     if (!scr || !txt) return;
-                                    var t:ScriptTemplate = <any>{
+                                    var t: ScriptTemplate = <any>{
                                         title: scr.name,
                                         id: "derive",
                                         scriptid: scr.id,
@@ -619,7 +618,7 @@ module TDev.Browser {
                                         name: scr.name,
                                         source: txt,
                                         section: "",
-                                        editorMode:0,
+                                        editorMode: 0,
                                         baseId: scr.id,
                                         baseUserId: scr.userid,
                                     }
@@ -632,14 +631,14 @@ module TDev.Browser {
             }
         }
 
-        private tileClick(t: HTMLElement, f: () =>void ) {
+        private tileClick(t: HTMLElement, f: () => void) {
             t.withClick(() => {
                 var p = Util.offsetIn(t, this.theRoot);
                 t.style.left = p.x + "px";
                 t.style.top = p.y + "px";
                 t.removeSelf();
                 this.theRoot.appendChild(t);
-                Util.coreAnim("fadeSlide", 200, this.mainContent, () => {
+                Util.coreAnim("fadeSlide", 200, this.mainContent,() => {
                     t.removeSelf();
                     f();
                 })
@@ -655,7 +654,7 @@ module TDev.Browser {
             var y = 0;
             c.setChildren(elements);
             var beforeFirstFnBtn = elements.filter((e) => !(<any>e).fnBtn).peek();
-            if (elements.some((e) =>(<any>e).tutorialBtn))
+            if (elements.some((e) => (<any>e).tutorialBtn))
                 beforeFirstFnBtn = elements.filter((e) => !(<any>e).tutorialBtn).peek();
             if (noFnBreak) beforeFirstFnBtn = null;
 
@@ -672,7 +671,7 @@ module TDev.Browser {
                 rowWidth = Math.max(rowWidth, w);
                 y += h;
                 maxY = Math.max(y, maxY);
-                if (t == beforeFirstFnBtn || y > maxHeight || (elements[i+1] && (<any>elements[i+1]).breakBefore)) {
+                if (t == beforeFirstFnBtn || y > maxHeight || (elements[i + 1] && (<any>elements[i + 1]).breakBefore)) {
                     y = 0;
                     x += rowWidth + margin;
                     rowWidth = 0;
@@ -681,12 +680,12 @@ module TDev.Browser {
             c.style.height = maxY + 0.2 + "em";
         }
 
-        private mkFnBtn(lbl: string, f: () =>void , t = Ticks.noEvent, modal = false, size = 1, ovrLbl = null) {
+        private mkFnBtn(lbl: string, f: () => void, t = Ticks.noEvent, modal = false, size = 1, ovrLbl = null) {
             var elt = div("hubTile hubTileBtn hubTileSize" + size,
                 dirAuto(div("hubTileBtnLabel " + (
                     size <= 1 && Util.wordLength(lbl) > 10 ? " hubTileBtnLabelSmall" :
-                    Util.wordLength(lbl) >= 7 || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium"
-                    : ""), ovrLbl, lbl)));
+                        Util.wordLength(lbl) >= 7 || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium"
+                            : ""), ovrLbl, lbl)));
             (<any>elt).fnBtn = 1;
             var f0 = () => { tick(t); f() };
             if (t)
@@ -699,19 +698,56 @@ module TDev.Browser {
         }
 
         public tutorialScriptText =
-           "meta version 'v2.2';\n" +
-           "meta name 'SCRIPTNAME';\n" +
-           "action main { }";
+        "meta version 'v2.2';\n" +
+        "meta name 'SCRIPTNAME';\n" +
+        "action main { }";
 
-        private templates : ScriptTemplate[];
+        private templates: ScriptTemplate[];
 
-        private joinGroup(code : string = null) {
+        private joinGroup(code: string = null) {
             this.browser().joinGroup(code);
         }
 
         private createGroup() {
             this.browser().createNewGroup();
         }
+
+        private createList() {
+            if (Cloud.anonMode(lf("creating lists"))) return;
+
+            var name = "ADJ scripts".replace(/ADJ/g,() => TopicInfo.getAwesomeAdj());
+            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
+            var progress = HTML.mkProgressBar();
+            var createBtn: HTMLElement = null;
+            nameBox.value = name;
+
+            var m = new ModalDialog();
+            m.add([
+                progress,
+                div("wall-dialog-header", lf("create a new list")),
+                div("wall-dialog-body", lf("Organize your scripts with lists!")),
+                div("wall-dialog-line-textbox", nameBox),
+               div("wall-dialog-buttons",
+                    createBtn = HTML.mkButton(lf("create"),() => {
+                        createBtn.removeSelf();
+                        progress.start();
+                        Cloud.postPrivateApiAsync("lists", { name: nameBox.value })
+                            .done((l: JsonPubList) => {
+                                progress.stop();
+                                m.dismiss();
+                                var info = this.browser().getPubListInfo(l);
+                                info.invalidateCaches();
+                                this.browser().loadDetails(info);
+                            }, e => {
+                                progress.stop();
+                                m.dismiss();
+                                World.handlePostingError(e, lf("create list"));
+                            });
+                    }))
+            ]);
+            m.show();
+        }
+    
 
         static loginToCreate(name:string, hash:string)
         {
@@ -1170,11 +1206,11 @@ module TDev.Browser {
                     this.hide();
                     if (s == "recent") this.browser().showList("installed-scripts", item);
                     else if (s == "myart") {
-                        if (Cloud.getUserId())
-                            this.browser().showList("myart", item);
+                        if (Cloud.getUserId()) this.browser().showList("myart", item);
                     } else if (s == "art") this.browser().showList("art", item);
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
+                    else if (s == "lists") this.browser().showList("lists", item);
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -1259,7 +1295,6 @@ module TDev.Browser {
                 noFnBreak = true;
                 while(elements.length < 5) {
                     var oneSlot = this.mkFnBtn(lf("Your art will appear here"), () => {
-                        this.showTutorialTip()
                     }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
                     oneSlot.className += " scriptSlot";
                     elements.push(oneSlot)
@@ -1270,17 +1305,32 @@ module TDev.Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                    addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null) });
-                    elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
+                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                    if (!this.isBeginner()) {
-                        elements.push(this.smallBtn(lf("Users"), () => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                        elements.push(this.smallBtn(lf("Give feedback Contact us"), () => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
-                        elements.push(this.smallBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                        elements.push(this.smallBtn(lf("Create Group"), () => { this.createGroup() }, Ticks.hubCreateGroup));
-                    } else {
-                        elements.push(this.mkFnBtn(lf("Join Group"), () => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    }
+                if (!this.isBeginner()) {
+                    elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                    elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                    elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                    elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
+                } else {
+                    elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                }
+            } else if (s == "lists") {
+                noFnBreak = true;
+                while (elements.length < 5) {
+                    var oneSlot = this.mkFnBtn(lf("Your list will appear here"),() => {
+                    }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
+                    oneSlot.className += " scriptSlot";
+                    elements.push(oneSlot)
+                }
+
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
+                    () => { this.hide(); this.browser().showList("lists", null) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
+                addFnBtn(lf("Create list"), Ticks.hubCreateList,
+                    () => { this.createList(); });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:script,white")));                
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
@@ -2104,6 +2154,10 @@ module TDev.Browser {
                 if (!theme.top) delete sects["top"];
                 if (!theme.social) delete sects["social"];
             }
+            if (Cloud.lite) {
+                delete sects["tags"];
+                sects["lists"] = lf("lists")
+            }
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
@@ -2226,6 +2280,12 @@ module TDev.Browser {
                 else if (s == "social") {
                     if (Cloud.getUserId())
                         this.browser().getLocationList(Cloud.getUserId() + "/groups?count=6", (items, cont) => this.addPageTiles(s, c, items));
+                    else
+                        this.addPageTiles(s, c, []);
+                }
+                else if (s == "lists") {
+                    if (Cloud.getUserId())
+                        this.browser().getLocationList(Cloud.getUserId() + "/lists?count=6",(items, cont) => this.addPageTiles(s, c, items));
                     else
                         this.addPageTiles(s, c, []);
                 }
