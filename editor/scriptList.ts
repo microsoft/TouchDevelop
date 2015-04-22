@@ -8403,12 +8403,13 @@
                     btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
                 else
                     btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#EAC117"))
+                var ctnSpan = span('', ''); btn.appendChild(ctnSpan);
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
                     TheApiCacheMgr.getAnd(id, (s:JsonScript) => {
                         var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
-                        btn.appendChild(span('', n + ""));
+                        ctnSpan.innerText = n + "";
                     })
             }
             ScriptInfo.setupLike(id, setLikeBtn);
@@ -9267,13 +9268,17 @@
             var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
             var pubId = div("sdAddInfoOuter", addInfoInner);
 
+            var abuse = this.reportAbuse(big);
+
             var res = div("sdHeaderOuter",
                 div("sdHeader", icon,
-                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), abuse, numbers
                         )));
 
-            if (big)
-                res.className += " sdBigHeader";
+            if (big) {
+                res.className += " sdBigHeader sdDocsHeader";
+                res.appendChild(this.likeBtn(false));
+            }
 
 
             return this.withUpdate(res,(u: JsonPubList) => {
@@ -9289,6 +9294,28 @@
                 author.setChildren([this.json.username]);
                 addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(this.json.time)]);
             });
+        }
+
+        private likeBtn(showCount = false) : HTMLElement {
+            var lbtn = div(null);
+            var id = this.publicId;
+            var setLikeBtn = (s: number, h: string, f: () => void) => {
+                var btn: HTMLElement;
+                if (s < 0)
+                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
+                else
+                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#EAC117"))
+                var ctnSpan = span('', ''); btn.appendChild(ctnSpan);
+                if (Math.abs(s) < 2) btn.setFlag("working", true);
+                lbtn.setChildren([btn.withClick(f)]);
+                if (showCount)
+                    TheApiCacheMgr.getAnd(id,(s: JsonPubList) => {
+                        var n = s.positivereviews;
+                        ctnSpan.innerText = n + "";
+                    })
+            }
+            ScriptInfo.setupLike(id, setLikeBtn);
+            return lbtn;
         }
 
         public mkTile(sz: number) : HTMLElement {
