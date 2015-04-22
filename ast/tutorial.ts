@@ -194,6 +194,7 @@ module TDev.AST
         {
             var visibleRecordFields:StringMap<boolean> = {}
             var hashActions:StringMap<boolean> = {}
+            var seenAct:StringMap<boolean> = {}
             var nameIdx = 0
             var preciseStrings:StringMap<boolean> = {}
             var problems = ""
@@ -469,11 +470,12 @@ module TDev.AST
 
                 var resSteps:Step[] = []
                 orderedSteps.forEach(s => {
+                    seenAct[s._actionName] = true
                     var m = new SyntacticMethodFinder()
                     m.dispatch(s.template)
                     Object.keys(m.calledActions).forEach(name => {
-                        if (!hashActions.hasOwnProperty(name)) {
-                            hashActions[name] = true
+                        if (!seenAct.hasOwnProperty(name)) {
+                            seenAct[name] = true
                             var act = app.allActions().filter(a => a.getName() == name)[0]
                             if (act) {
                                 resSteps.pushRange(splitAction(act))
