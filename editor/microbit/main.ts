@@ -30,10 +30,14 @@ module TDev {
         };
       }
 
-      lift(a);
-      var e = new Emitter(libRef, libs);
-      e.visit(emptyEnv, a);
-      return e;
+      try {
+        lift(a);
+        var e = new Emitter(libRef, libs);
+        e.visit(emptyEnv, a);
+        return e;
+      } catch (e) {
+        console.error("Compilation error", e);
+      }
     }
 
     // Compile an entire program, including its libraries.

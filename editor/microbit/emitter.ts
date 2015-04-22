@@ -94,7 +94,7 @@ module TDev {
         case "microbit_button_pressed":
           if (isStringLiteral(args[0]) == "left")
             return [mkNumberLiteral(1)];
-          else if (isStringLiteral(args[1]) == "right")
+          else if (isStringLiteral(args[0]) == "right")
             return [mkNumberLiteral(2)];
           throw new Error(call+": unknown button");
       }
