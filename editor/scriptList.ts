@@ -7317,13 +7317,16 @@
             this.progressHeader = document.createElement("tr");
             this.progressHeader.className = "header";
             this.progressTable.appendChild(this.progressHeader);
-            this.progressHeader.appendChild(document.createElement("td"));
+            var cph = document.createElement("td");
+            cph.appendChild(HTML.mkButton(lf("pop out"), () => this.showDialog()));
+            this.progressHeader.appendChild(cph);
             var cp = document.createElement("td"); cp.appendChild(div('', span('', lf("tutorial completed"))));
             this.progressHeader.appendChild(cp); // completed
             var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
             this.progressHeader.appendChild(st);
             this.tutorials = {};
             this.userRows = {};
+
             return div('tbProgress', this.progressTable);
         }
 
@@ -7804,10 +7807,6 @@
 
                 ad.setChildren([]);
                 if (this.isMine()) {
-                    ad.appendChild(HTML.mkButton(lf("progress"),() => {
-                        var tab = new GroupUserProgressTab(this);
-                        tab.showDialog();
-                    }));
                     if (!Cloud.isRestricted())
                         ad.appendChild(HTML.mkButton(lf("change picture"), () => {
                             tick(Ticks.groupChangePicture);
