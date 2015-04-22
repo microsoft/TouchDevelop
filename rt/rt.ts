@@ -323,7 +323,7 @@ module TDev
         private state: RtState = RtState.Stopped;
         private stateMsg: string = undefined;
         // when an event is executing, no other event can start
-        private eventExecuting = false;
+        public eventExecuting = false;
         // used to prevent recursive invocations of mainLoop
         private mainLoopRunning = false;
 
