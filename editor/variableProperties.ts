@@ -447,10 +447,10 @@ module TDev
         public render()
         {
             var d = div("artEditor",
-                  div("varLabel", lf("url")),
-                  this.url,
                   div("varLabel", lf("value")),
                   this.value,
+                  div("varLabel", lf("url")),
+                  this.url,
                   div("varLabel", lf("key url")),
                   this.keyUrl);
             return d;
