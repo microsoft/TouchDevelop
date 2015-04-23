@@ -1050,7 +1050,7 @@ module TDev.Browser {
                         }
                     });
             };
-            if (Cloud.lite)
+            if (Cloud.isRestricted())
                 this.chooseEditorAsync().done((editor) => {
                     if (editor === undefined) {
                         // user canceled

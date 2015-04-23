@@ -2063,7 +2063,7 @@ module TDev
             else
                 children = [ Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
 
-            if (Cloud.lite)
+            if (Cloud.isRestricted())
                 children.push(Editor.mkTopMenuItem("svg:bolt,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", () => this.compile()));
 
             this.playBtnDiv.setChildren(children);
