@@ -1218,7 +1218,7 @@
             else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
-            else if (e.kind == "publist") return this.getSpecificInfoById(e.id, PubListInfo);
+            else if (e.kind == "channel") return this.getSpecificInfoById(e.id, ChannelInfo);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
             else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo);
             else return null;
@@ -1395,9 +1395,9 @@
                     tick(Ticks.browseListUsers);
                     header = lf("users");
                     break;
-                case "publists":
+                case "channels":
                     tick(Ticks.browseListLists);
-                    header = lf("lists");
+                    header = lf("channels");
                     break;
                 default:
                     if (/^bugs\//.test(path)) {
@@ -1721,10 +1721,10 @@
             return si;
         }
 
-        public getPubListInfo(c: JsonPubList) {
-            var si = <PubListInfo>this.getLocation(c.id);
+        public getChannelInfo(c: JsonChannel) {
+            var si = <ChannelInfo>this.getLocation(c.id);
             if (!si) {
-                si = new PubListInfo(this);
+                si = new ChannelInfo(this);
                 TheApiCacheMgr.store(c.id, c);
                 si.loadFromWeb(c.id);
                 this.saveLocation(si);
@@ -3407,7 +3407,7 @@
                 lf("This tab contains additional information about this script"),
                 ScreenShotTab,
                 ScriptHeartsTab,
-                Cloud.lite ? PubListListTab : null,
+                Cloud.lite ? ChannelListTab : null,
                 TagsTab,               
                 ArtTab,
                 ConsumersTab,
@@ -5338,8 +5338,8 @@
                     if (sc.jsonScript && sc.jsonScript.time) {
                         var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
                         var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
-                        var list = Cloud.lite ? HTML.mkButtonTick(lf("add to list"), Ticks.browseAddScriptToList,() => {
-                            Meta.chooseListAsync().done((info: PubListInfo) => {
+                        var list = Cloud.lite ? HTML.mkButtonTick(lf("add to channel"), Ticks.browseAddScriptToList,() => {
+                            Meta.chooseListAsync().done((info: ChannelInfo) => {
                                 var si = (<ScriptInfo>this.parent);
                                 if (info) info.addScriptAsync(si).done();
                             });
@@ -7226,7 +7226,7 @@
         constructor(par: UserInfo) {
             super(par,
                 "More information about art, score, groups, subscribers, subscriptions and given hearts.",
-                Cloud.lite ? PubListListTab : null,
+                Cloud.lite ? ChannelListTab : null,
                 ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab);
         }
 
@@ -9258,9 +9258,9 @@
         }
     }
 
-    export class PubListInfo
+    export class ChannelInfo
         extends BrowserPage {
-        private json: JsonPubList;
+        private json: JsonChannel;
 
         constructor(par: Host) {
             super(par)
@@ -9302,7 +9302,7 @@
             }
 
 
-            return this.withUpdate(res,(u: JsonPubList) => {
+            return this.withUpdate(res,(u: JsonChannel) => {
                 this.json = u;
                 if (u.pictureid && !Browser.lowMemory) {
                     icon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(u.pictureid));
@@ -9330,7 +9330,7 @@
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 lbtn.setChildren([btn.withClick(f)]);
                 if (showCount)
-                    TheApiCacheMgr.getAnd(id,(s: JsonPubList) => {
+                    TheApiCacheMgr.getAnd(id,(s: JsonChannel) => {
                         var n = s.positivereviews;
                         ctnSpan.innerText = n + "";
                     })
@@ -9342,7 +9342,7 @@
         public mkTile(sz: number) : HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
-            return this.withUpdate(d, (u: JsonPubList) => {                
+            return this.withUpdate(d, (u: JsonChannel) => {                
                 this.json = u;
 
                 var cont = [];
@@ -9384,13 +9384,13 @@
 
         public invalidateCaches() {
             TheApiCacheMgr.invalidate(this.publicId + "/scripts");
-            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/publists");
-            TheApiCacheMgr.invalidate("/publists");
+            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/channels");
+            TheApiCacheMgr.invalidate("/channels");
         }
 
-        private listTab: PubListTab;
+        private listTab: ChannelTab;
         public initTab() {
-            this.listTab = new PubListTab(this);
+            this.listTab = new ChannelTab(this);
 
             var author = div(null);
             var btn = div(null);
@@ -9404,7 +9404,7 @@
                 scripts
             ]);
 
-            this.withUpdate(this.tabContent,(u: JsonPubList) => {
+            this.withUpdate(this.tabContent,(u: JsonChannel) => {
                 this.json = u;
                 author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar(this)]);
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
@@ -9417,19 +9417,19 @@
                             });
                         });
                     }));
-                    btn.appendChild(HTML.mkButton(lf("delete list"),() => {
-                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete list"),() => {
-                            HTML.showProgressNotification(lf("deleting list..."));
+                    btn.appendChild(HTML.mkButton(lf("delete channel"),() => {
+                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"),() => {
+                            HTML.showProgressNotification(lf("deleting channel..."));
                             Cloud.deletePrivateApiAsync(this.publicId)
                                 .done(() => {
                                 this.invalidateCaches();
                                 Util.setHash("list:lists");
-                            }, e => World.handlePostingError(e, lf("delete list")));
+                            }, e => World.handlePostingError(e, lf("delete channel")));
                         });
                     }));
                     if (!Cloud.isRestricted())
                         btn.appendChild(HTML.mkButton(lf("change picture"),() => {
-                            Meta.chooseArtPictureAsync({ title: lf("change the list picture"), initialQuery: "list" })
+                            Meta.chooseArtPictureAsync({ title: lf("change the channel picture"), initialQuery: "channel" })
                                 .then((a: JsonArt) => {
                                 if (a) {
                                     HTML.showProgressNotification(lf("updating picture..."));
@@ -9448,14 +9448,14 @@
         }
 
         public addScriptAsync(si: ScriptInfo) : Promise {
-            return Cloud.postPrivateApiAsync(si.publicId + "/publists/" + this.publicId, {})
+            return Cloud.postPrivateApiAsync(si.publicId + "/channels/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();
-                }, e => World.handlePostingError(e, lf("add script to list")));
+                }, e => World.handlePostingError(e, lf("add script to channel")));
         }
     }
 
-    export class PubListTab
+    export class ChannelTab
         extends ListTab {
         constructor(par: BrowserPage) {
             super(par, "/scripts");
@@ -9467,15 +9467,15 @@
         public getId() { return "scripts"; }
         public getName() { return lf("scripts"); }
         public bgIcon() { return "svg:script"; }
-        public noneText() { return lf("no scripts for this list"); }
+        public noneText() { return lf("no scripts for this channel"); }
 
         public tabBox(c: JsonScript): HTMLElement {
             var el = this.browser().getScriptInfo(c).mkSmallBox();
-            var list = <PubListInfo>this.parent;
+            var list = <ChannelInfo>this.parent;
             if (list.isMine()) {
                 el = div('', el, div('', HTML.mkButtonOnce(lf("remove"),() => {
                     HTML.showProgressNotification(lf("removing script..."));
-                    Cloud.deletePrivateApiAsync(c.id + "/publists/" + this.parent.publicId)
+                    Cloud.deletePrivateApiAsync(c.id + "/channels/" + this.parent.publicId)
                     .done(() => {
                         list.invalidateCaches();
                         el.removeSelf(); 
@@ -9486,21 +9486,21 @@
         }
     }
 
-    export class PubListListTab
+    export class ChannelListTab
         extends ListTab {
         constructor(par: BrowserPage) {
-            super(par, "/publists")
+            super(par, "/channels")
         }
-        public getId() { return "publists"; }
-        public getName() { return lf("lists"); }
+        public getId() { return "channels"; }
+        public getName() { return lf("channels"); }
 
         public bgIcon() { return "svg:script"; }
-        public noneText() { return lf("no lists yet!"); }
+        public noneText() { return lf("no channels yet!"); }
 
         public tabBox(cc: JsonIdObject): HTMLElement {
-            var c = <JsonPubList>cc;
+            var c = <JsonChannel>cc;
 
-            return this.browser().getPubListInfo(c).mkSmallBox();
+            return this.browser().getChannelInfo(c).mkSmallBox();
         }
     }
 }

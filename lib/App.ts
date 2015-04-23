@@ -1079,5 +1079,11 @@ module TDev.RT {
         export function host_subscribe(message: string, handler: TextAction, r: ResumeCtx) {
             return hostSubscribeAsync(r.rt, message, handler).done(resp => r.resumeVal(resp));
         }
+
+        //? Allow execution of other events, before the current event finishes.
+        //@ dbgOnly
+        export function allow_other_events(s:IStackFrame) {
+            s.rt.eventExecuting = false;
+        }
     }
 }
