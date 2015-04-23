@@ -190,6 +190,8 @@ module TDev
                         m.add(d);
                         var editor = ace.edit(d);
                         if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
+                        else if (/\.json$/i.test(name)) editor.getSession().setMode("ace/mode/json");
+                        else if (/\.xml$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
                         else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
                         editor.setValue(value);
