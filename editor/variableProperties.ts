@@ -448,7 +448,7 @@ module TDev
         }
 
         public editFullScreenAsync() : Promise {
-            return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
+            return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync(baseUrl + "ace/ace.js") : Promise.as())
                 .then(() => {
                     var name = this.varName();
                     return new Promise((onSuccess, onProgress, onError) => {
