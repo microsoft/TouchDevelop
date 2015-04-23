@@ -2929,9 +2929,10 @@
 
             var url = "http://tdev.ly/" + id;
             var text = this.twitterMessage();
-            var r = div("sdAuthorLabel", HTML.mkImg("svg:Package,#000,clip=100"), lf("share")).withClick(() => {
-                    TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "");
-                });
+            var btns = ["email", "twitter", "facebook"].map(network =>
+                div("sdAuthorLabel", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+            );
+            var r = div('', btns);
             return r;
         }
     }
