@@ -2929,9 +2929,19 @@
 
             var url = "http://tdev.ly/" + id;
             var text = this.twitterMessage();
+
             var btns = ["email", "twitter", "facebook"].map(network =>
                 div("sdAuthorLabel", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-            );
+                );
+            if (Cloud.lite && this.parent instanceof ScriptInfo) {
+                btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
+                    Meta.chooseListAsync({ header: lf("add to list") }).done((info: ChannelInfo) => {
+                        var si = (<ScriptInfo>this.parent);
+                        if (info) info.addScriptAsync(si).done();
+                    });
+                }));
+            }
+
             var r = div('', btns);
             return r;
         }
@@ -5339,13 +5349,7 @@
                     if (sc.jsonScript && sc.jsonScript.time) {
                         var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
                         var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
-                        var list = Cloud.lite ? HTML.mkButtonTick(lf("add to channel"), Ticks.browseAddScriptToList,() => {
-                            Meta.chooseListAsync().done((info: ChannelInfo) => {
-                                var si = (<ScriptInfo>this.parent);
-                                if (info) info.addScriptAsync(si).done();
-                            });
-                        }) : null;
-                        divs.push(div('', pull, diff, list));
+                        divs.push(div('', pull, diff));
                     }
 
                     if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
