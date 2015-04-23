@@ -202,7 +202,7 @@ module TDev
                                   //div("formHint", lf("You can read the colon symbol (':') as 'of type' everywhere in TouchDevelop.")),
                                   ActionProperties.copyCutRefs("the current variable", this.theVariable),
                                   !this.artEditor ? null : (renderedEditor = this.artEditor.render()),
-                                  div("varLabel", lf("comments")),
+                                  div("varLabel", lf("description")),
                                   this.description,
                                   ]);
             this.editor.displayLeft([this.formRoot]);
