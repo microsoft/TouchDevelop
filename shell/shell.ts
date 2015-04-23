@@ -1417,7 +1417,13 @@ class Worker {
             debug.log(d.replace(/\n$/, ""))
         })
 
+        var numPing = 0
         var ping = () => {
+            if (++numPing > 120) {
+                error.log("cannot start worker, #pings " + numPing)
+                return
+            }
+
             var u = this.getUrl()
             u.path = "/-tdevmgmt-/" + config.deploymentKey + "/ready"
             var creq = http.request(u, cres => {
@@ -1433,7 +1439,8 @@ class Worker {
                 }
             })
             creq.on("error", err => {
-                debug.log("ping failed, " + err.message)
+                if (err.code == 'ECONNREFUSED') {}
+                else debug.log("ping failed, " + err.message)
                 setTimeout(ping, 1000)
             })
             creq.end()
