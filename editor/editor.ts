@@ -194,6 +194,7 @@ module TDev
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
                         editor.setValue(value);
                         editor.clearSelection();
+                        editor.focus();
                         m.onDismiss = () => {
                             onSuccess(editor.getValue());
                         };

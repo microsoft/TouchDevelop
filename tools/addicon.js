@@ -6,7 +6,7 @@ Go to http://fortawesome.github.io/Font-Awesome/icons/
 Find the icon you want
 From the root github folder run:
   node tools/addicon.js iconname
-Use "svg:fa-iconanme,black" in the code.
+Use "svg:iconanme,black" in the code.
 
 */
 
