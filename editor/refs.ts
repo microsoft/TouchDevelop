@@ -5,6 +5,7 @@
 ///<reference path='../build/storage.d.ts'/>
 ///<reference path='../build/libwab.d.ts'/>
 ///<reference path='../build/libcordova.d.ts'/>
+///<reference path='../typings/ace/ace.d.ts'/>
 ///<reference path='videoUtil.ts'/>
 ///<reference path='tipManager.ts'/>
 ///<reference path='sideTab.ts'/>

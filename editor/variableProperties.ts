@@ -446,13 +446,34 @@ module TDev
 
         public render()
         {
+            var labelDiv: HTMLElement;
             var d = div("artEditor",
-                  div("varLabel", lf("value")),
-                  this.value,
-                  div("varLabel", lf("url")),
-                  this.url,
-                  div("varLabel", lf("key url")),
-                  this.keyUrl);
+                div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => {
+                    (Browser.isDesktop && !(<any>window).AceAjax ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
+                    .done(() => {
+                        var m = new ModalDialog();
+                        if (!!(<any>window).AceAjax && false) {
+                            // TODO
+                        } else {
+                            this.value.style.height = "100%";
+                            this.value.style.width = "80%";
+                            m.add(this.value);
+                            m.onDismiss = () => {
+                                this.value.style.height = '';
+                                this.value.style.width = '';
+                                d.insertBefore(this.value, labelDiv);
+                            }
+                        }
+                        m.fullScreen();
+                        m.stretchWide();
+                        m.show();
+                    });
+                })),
+                this.value,
+                labelDiv = div("varLabel", lf("url")),
+                this.url,
+                div("varLabel", lf("key url")),
+                this.keyUrl);
             return d;
         }
     }

@@ -2,6 +2,35 @@
 
 
 module TDev.HTML {
+    export function jsrequireAsync(url: string): Promise {
+        return new Promise((onSuccess, onProgress, onError) => {
+            // look for previous script tag
+            if (Util.children(document.head).some(el => /script/i.test(el.tagName) && el.getAttribute("src") == url)) {
+                onSuccess(undefined);
+                return;
+            }
+
+            Util.log('require ' + url);
+            // add a new script entry and wait till loaded
+            var script = <HTMLScriptElement> document.createElement("script");
+            script.type = "text/javascript";
+            script.charset = "utf-8";
+            script.onload = () => {
+                if (!script.readyState || script.readyState === 'complete') {
+                    Util.log('require success ' + url);
+                    onSuccess(undefined);
+                }
+            };
+            script.onreadystatechange = script.onload;
+            script.onerror = (err) => {
+                Util.log('require error: {0}', err);
+                onSuccess(err)
+            };
+            script.src = url;
+            document.head.appendChild(script);
+        });
+    }
+
     export function mkYouTubePlayer(ytid: string) {
         var d = div('md-video-link');
         d.dataset['youtubeid'] = ytid;

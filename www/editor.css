@@ -1166,9 +1166,9 @@ textarea.commentEdit {
 }
 
 textarea.variableDesc {
-  width: 30em;
-  max-width: 90%;
+  width: calc(100% - 1em);
   height: 10em;
+  white-space:nowrap;
 }
 
 textarea.shell {
