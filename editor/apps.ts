@@ -917,6 +917,10 @@ module TDev.AppExport
                                     var variables = []
 
                                     // add some secrets for use by the website
+                                    variables.push({
+                                        Name: "WEBSITE_NODE_DEFAULT_VERSION",
+                                        Value: "0.12.0"
+                                    });
                                     var secrets = ["TOKEN_SECRET"]
                                     secrets.forEach(s =>
                                         variables.push({
