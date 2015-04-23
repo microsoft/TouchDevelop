@@ -1678,6 +1678,11 @@ module TDev {
             this.getDefaultValue = () => AST.Parser.parseExprHolder(s).tokens;
         }
 
+        public md_lang(s:string)
+        {
+            this.languageHint = s
+        }
+
         public setDeflStrings(v:string[])
         {
             this._stringValues = v;
@@ -1706,6 +1711,7 @@ module TDev {
 
         public _kind:Kind;
         public parentProperty:IProperty;
+        public languageHint:string;
         private _stringValues: string[];
         private _stringValueArtIds: StringMap<string>;
         public _flags:ParameterFlags = 0;

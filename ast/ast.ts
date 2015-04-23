@@ -3044,6 +3044,7 @@ module TDev.AST {
         extends Token
     {
         public loc:StackOp;
+        public languageHint:string;
 
         constructor() {
             super()
