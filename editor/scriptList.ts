@@ -6258,7 +6258,7 @@
                 // if (this.cloudHeader)
                 runBtns.setChildren([this.mkButtons()]);
 
-                var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username).userBar();
+                var author = this.browser().getUserInfoById(this.jsonScript.userid, this.jsonScript.username).userBar(this);
                 authorDiv.setChildren(author)
 
                 if (!this.willWork()) {
@@ -6950,7 +6950,7 @@
             this.userName = name;
         }
 
-        public userBar(): HTMLElement {
+        public userBar(info : BrowserPage): HTMLElement {
             var authorDiv = div('sdScriptAuthor');
             this.withUpdate(authorDiv,(u:JsonUser) => {
                 this.userName = u.name;
@@ -6961,7 +6961,7 @@
                     div("inlineBlock", authorHead, div("sdAuthorLabel", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
                     ,
-                    div("floatright", this.facebookLike())
+                    div("floatright", info.facebookLike())
                     ]);
             });
             return authorDiv;
@@ -8618,7 +8618,7 @@
 
             allTopDiv.setChildren([
                 super.mkBigBox(),
-                this.browser().getUserInfoById(this.topic.json.userid || "jeiv", '').userBar()
+                this.browser().getUserInfoById(this.topic.json.userid || "jeiv", '').userBar(this)
             ])
 
             this.tabContent.setChildren([
@@ -9406,7 +9406,7 @@
 
             this.withUpdate(this.tabContent,(u: JsonPubList) => {
                 this.json = u;
-                author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar()]);
+                author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar(this)]);
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
 
                 if (this.isMine()) {
