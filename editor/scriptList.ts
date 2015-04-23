@@ -2935,7 +2935,7 @@
                 );
             if (Cloud.lite && this.parent instanceof ScriptInfo) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
-                    Meta.chooseListAsync({ header: lf("add to list") }).done((info: ChannelInfo) => {
+                    Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
                         if (info) info.addScriptAsync(si).done();
                     });
