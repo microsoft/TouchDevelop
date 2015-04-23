@@ -274,27 +274,44 @@ module TDev
                     if (decl == mainAction || decl instanceof AST.Action) {
                         var a = <AST.Action>decl;
                         if (a.isTest()) {
-                            var runbtn = HTML.mkRoundButton("svg:experiment,black", lf("test"), Ticks.sideTestOne, () => { TheEditor.runAction(decl, null, { debugging : true }) });
+                            var runbtn = HTML.mkRoundButton("svg:experiment,black", lf("test"), Ticks.sideTestOne,() => { TheEditor.runAction(decl, null, { debugging: true }) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (a.isRunnable() && TheEditor.widgetEnabled("sideRunButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:play,black", lf("run"), Ticks.sideRun, () => { TheEditor.runAction(decl) });
+                            var runbtn = HTML.mkRoundButton("svg:play,black", lf("run"), Ticks.sideRun,() => { TheEditor.runAction(decl) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         }
                         var participants = div("stmtParticipants", div("stmtParticipantsOverfloxBox"));
                         participants.classList.add("actionParticipants");
                         d.appendChild(participants);
-                    }
-                    if (decl instanceof AST.LibraryRef) {
+                    } else if (decl instanceof AST.LibraryRef) {
                         var lib = <AST.LibraryRef>decl;
                         if (lib.needsUpdate && this.editor.widgetEnabled("updateButton")) {
                             var runbtn = HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdateOne,
-                                    () => { TheEditor.updateLibraries([lib]) });
+                                () => { TheEditor.updateLibraries([lib]) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (this.editor.widgetEnabled("editLibraryButton")) {
                             var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
-                                    () => {
-                                        LibraryRefProperties.editLibrary(lib, () => {})
+                                () => {
+                                    LibraryRefProperties.editLibrary(lib,() => { })
+                                });
+                            d = ScriptNav.addSideButton(d, runbtn);
+                        }
+                    } else if (decl instanceof AST.GlobalDef) {
+                        var glob = <AST.GlobalDef>decl;
+                        if (glob.isResource && glob.getKind() == api.core.String) {
+                            var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
+                                () => {
+                                    var editor = new StringEditor();
+                                    editor.set(glob.url);
+                                    editor.editFullScreenAsync().done(() => {
+                                        var newUrl = editor.get();
+                                        if (newUrl != glob.url) {
+                                            Script.resetStableName(glob);
+                                            glob.url = newUrl;
+                                            glob.notifyChange();
+                                        }
                                     });
+                                });
                             d = ScriptNav.addSideButton(d, runbtn);
                         }
                     }

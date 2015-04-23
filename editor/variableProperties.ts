@@ -444,13 +444,10 @@ module TDev
             return this.url.value;
         }
 
-        public render()
-        {
-            var labelDiv: HTMLElement;
-            var d = div("artEditor",
-                div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => {
-                    (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
-                    .done(() => {
+        public editFullScreenAsync() : Promise {
+            return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
+                .then(() => {
+                    return new Promise((onSuccess, onProgress, onError) => {
                         var m = new ModalDialog();
                         if (!!(<any>window).ace) {
                             var d = div('');
@@ -463,22 +460,31 @@ module TDev
                             editor.clearSelection();
                             m.onDismiss = () => {
                                 this.value.value = editor.getValue();
+                                onSuccess(true);
                             };
                         } else {
-                            this.value.style.height = "100%";
-                            this.value.style.width = "80%";
-                            m.add(this.value);
+                            var v = HTML.mkTextArea("variableDesc");
+                            v.style.height = "100%";
+                            v.style.width = "80%";
+                            v.value = this.value.value;
+                            m.add(v);
                             m.onDismiss = () => {
-                                this.value.style.height = '';
-                                this.value.style.width = '';
-                                d.insertBefore(this.value, labelDiv);
+                                this.value.value = v.value;
+                                onSuccess(true);
                             }
                         }
                         m.fullScreen();
                         m.stretchWide();
                         m.show();
                     });
-                })),
+            });
+        }
+
+        public render()
+        {
+            var labelDiv: HTMLElement;
+            var d = div("artEditor",
+                div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => this.editFullScreenAsync().done())),
                 this.value,
                 labelDiv = div("varLabel", lf("url")),
                 this.url,
