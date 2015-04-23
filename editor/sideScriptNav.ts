@@ -299,11 +299,12 @@ module TDev
                     } else if (decl instanceof AST.GlobalDef) {
                         var glob = <AST.GlobalDef>decl;
                         if (glob.isResource && glob.getKind() == api.core.String) {
-                            var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
+                            var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditString,
                                 () => {
-                                    // TODO: load variable properties and call editFullScreenAsync
+                                    TheEditor.renderDecl(glob);
+                                    TheEditor.variableProperties.editFullScreen()
                                 });
-                          //  d = ScriptNav.addSideButton(d, runbtn);
+                            d = ScriptNav.addSideButton(d, runbtn);
                         }
                     }
                 }

@@ -164,6 +164,13 @@ module TDev
 
         public renderCore(a:AST.Decl) { return this.load(<AST.GlobalDef>a); }
 
+        public editFullScreen()
+        {
+            if (this.artEditor instanceof StringEditor) {
+                (<StringEditor>this.artEditor).editFullScreenAsync().done()
+            }
+        }
+
         private load(a:AST.GlobalDef) :void
         {
             this.theVariable = null;

@@ -268,6 +268,7 @@ module TDev {
         sideAllTests,
         sideTestOne,
         sideEditLibrary,
+        sideEditString,
         sideUpdate,
         sideUpdateOne,
         sideActionAddInput,

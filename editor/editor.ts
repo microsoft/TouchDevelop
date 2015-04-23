@@ -944,7 +944,7 @@ module TDev
         private currentStmtEditor: StmtEditor;
 
         private scriptProperties = new ScriptProperties();
-        private variableProperties = new VariableProperties();
+        public variableProperties = new VariableProperties();
         private librefProperties = new LibraryRefProperties();
         private recordProperties = new RecordDefProperties();
         private recordEditor = new RecordEditor(this.recordProperties);
