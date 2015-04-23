@@ -301,16 +301,7 @@ module TDev
                         if (glob.isResource && glob.getKind() == api.core.String) {
                             var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
                                 () => {
-                                    var editor = new StringEditor();
-                                    editor.set(glob.url);
-                                    editor.editFullScreenAsync().done(() => {
-                                        var newUrl = editor.get();
-                                        if (newUrl != glob.url) {
-                                            Script.resetStableName(glob);
-                                            glob.url = newUrl;
-                                            glob.notifyChange();
-                                        }
-                                    });
+                                    // TODO: load variable properties and call editFullScreenAsync
                                 });
                             d = ScriptNav.addSideButton(d, runbtn);
                         }

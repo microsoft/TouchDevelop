@@ -171,8 +171,10 @@ module TDev
             this.theVariable = a;
             if (a.isResource) {
                 this.artEditor = ArtEditor.lookup(a.getKind());
-                if (this.artEditor)
+                if (this.artEditor) {
                     this.artEditor.newNameHint = (s) => this.newNameHint(s);
+                    this.artEditor.varName = () => this.variableName.value;
+                }
             } else
                 this.artEditor = null;
 
@@ -248,7 +250,8 @@ module TDev
         public set(url:string) { return Util.abstract() }
         public get() : string { return Util.abstract() }
         public render() : HTMLElement { return Util.abstract() }
-        public init(k:Kind) {}
+        public init(k: Kind) { }
+        public varName: () => string;
         public newNameHint:(s:string)=>void;
 
         static editors:any;
@@ -447,6 +450,7 @@ module TDev
         public editFullScreenAsync() : Promise {
             return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
                 .then(() => {
+                    var name = this.varName();
                     return new Promise((onSuccess, onProgress, onError) => {
                         var m = new ModalDialog();
                         if (!!(<any>window).ace) {
@@ -455,12 +459,14 @@ module TDev
                             d.style.width = '80%';
                             m.add(d);
                             var editor = ace.edit(d);
-                            //editor.getSession().setMode("ace/mode/c_cpp");
+                            if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
+                            else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
+                            else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
                             editor.setValue(this.value.value);
                             editor.clearSelection();
                             m.onDismiss = () => {
                                 this.value.value = editor.getValue();
-                                onSuccess(true);
+                                onSuccess(undefined);
                             };
                         } else {
                             var v = HTML.mkTextArea("variableDesc");
@@ -470,7 +476,7 @@ module TDev
                             m.add(v);
                             m.onDismiss = () => {
                                 this.value.value = v.value;
-                                onSuccess(true);
+                                onSuccess(undefined);
                             }
                         }
                         m.fullScreen();
