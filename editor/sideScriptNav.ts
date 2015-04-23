@@ -303,7 +303,7 @@ module TDev
                                 () => {
                                     // TODO: load variable properties and call editFullScreenAsync
                                 });
-                            d = ScriptNav.addSideButton(d, runbtn);
+                          //  d = ScriptNav.addSideButton(d, runbtn);
                         }
                     }
                 }
