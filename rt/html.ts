@@ -826,13 +826,42 @@ module TDev.HTML {
         return r;
     }
 
-    export function mkAutoExpandingTextArea(showDismiss = false)
+    export interface AutoExpandingTextAreaOptions {
+        showDismiss?: boolean;
+        editFullScreenAsync?: (text: string) => Promise; // string
+    }
+
+    export interface AutoExpandingTextArea {
+        div: HTMLElement;
+        textarea: HTMLTextAreaElement;
+        update: () => void;
+        onUpdate: () => void;
+        dismiss: HTMLElement;
+        onDismiss: () => void;
+        fullScreen: HTMLElement;
+    }
+
+    export function mkAutoExpandingTextArea(options: AutoExpandingTextAreaOptions = {}): AutoExpandingTextArea
     {
         var ta = HTML.mkTextArea();
         var pre = document.createElement("pre");
-        var dismiss = showDismiss ? div('close-round-button', HTML.mkImg("svg:check,black")).withClick(() => {
-          if(r.onDismiss) r.onDismiss();
-        }) : null
+        var dismiss: HTMLElement;
+        var fullScreen: HTMLElement;
+        var btns: HTMLElement;
+        if (options.showDismiss || options.editFullScreenAsync) {
+            btns = div('close-round-buttons');
+            if (options.showDismiss)
+                btns.appendChild(dismiss = div('',HTML.mkImg("svg:check,black")).withClick(() => {
+                    if (r.onDismiss) r.onDismiss();
+                }));
+            if (options.editFullScreenAsync)
+                btns.appendChild(fullScreen = div('',HTML.mkImg('svg:expand,black')).withClick(() => {
+                    options.editFullScreenAsync(ta.value).done(value => {
+                        ta.value = value;
+                        if (r.onDismiss) r.onDismiss();
+                    })
+                }));
+        }
         var content = span(null, null)
         pre.setChildren([content, mkBr()])
         var update = () => {
@@ -841,14 +870,15 @@ module TDev.HTML {
         }
         Util.onInputChange(ta, update)
         var r = {
-          div: div("expandingTextAreaContainer", pre, ta, dismiss),
+          div: div("expandingTextAreaContainer", pre, ta, btns),
           textarea: ta,
           update: update,
           onUpdate: () => {},
           dismiss: dismiss,
-          onDismiss: () => {},
+          onDismiss: () => { },
+          fullScreen: fullScreen,
         }
-        return r
+        return r;
     }
 
     export function fixWp8Links(...elts:HTMLElement[])

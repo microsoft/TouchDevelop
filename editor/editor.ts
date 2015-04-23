@@ -1179,6 +1179,7 @@ module TDev
             scriptPropertiesInstrumentation: 1,
             scriptPropertiesData: 1,
             wallLogsButton: 1,
+            stringEditFullScreen: 1,
             // language
             async: 1,
             testAction: 1,

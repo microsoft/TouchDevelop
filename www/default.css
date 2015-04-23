@@ -1229,15 +1229,19 @@ input[data-invalid^="yes"]
   font-size: 1.3em;
 }
 
-.close-round-button {
+.close-round-buttons {
   position: absolute;
   top: 0.2em;
   right: 0.2em;
+}
+
+.close-round-buttons div {
   width: 1.5em;
   height: 1.5em;
   margin-left: 0.5em;
   background: white;
   border-radius: 50%;
+  float:right;
 }
 
 /*
