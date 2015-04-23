@@ -9466,7 +9466,7 @@
         public inlineIsTile() { return false; }
         public getId() { return "scripts"; }
         public getName() { return lf("scripts"); }
-        public bgIcon() { return "svg:script"; }
+        public bgIcon() { return "svg:list"; }
         public noneText() { return lf("no scripts for this channel"); }
 
         public tabBox(c: JsonScript): HTMLElement {
