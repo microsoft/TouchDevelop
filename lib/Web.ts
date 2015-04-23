@@ -512,6 +512,8 @@ module TDev.RT {
         export function url_encode(text:string) : string { return encodeURIComponent(text); }
 
         //? Parses the string as a json object
+        //@ [value].lang("json")
+        //@ [value].defl("{}")
         export function json(value: string): JsonObject
         {
             return JsonObject.mk(value, function (msg) {

@@ -1238,7 +1238,8 @@ module TDev
         private inlineEditString(l:AST.Literal)
         {
             var opts : HTML.AutoExpandingTextAreaOptions = { showDismiss: true };
-            if (Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen")) opts.editFullScreenAsync = (t) => EditorHost.editFullScreenAsync('', t);
+            if (Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen")) 
+                opts.editFullScreenAsync = (t) => EditorHost.editFullScreenAsync(l.languageHint ? 'inline.' + l.languageHint : '', t);
             var res = HTML.mkAutoExpandingTextArea(opts)
             res.div.className += " calcStringEdit";
             res.textarea.value = l.data;

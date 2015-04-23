@@ -821,6 +821,7 @@ module TDev.RT {
 
         //? When exported, run `script` instead of the body of the action
         //@ [calling_convention].defl("local")
+        //@ [script].lang("js")
         export function javascript(calling_convention:string, script:string) : void
         {
         }
@@ -828,6 +829,7 @@ module TDev.RT {
         //? When exported, run `script` instead of the body of the action
         //@ async
         //@ [calling_convention].defl("local")
+        //@ [script].lang("js")
         export function javascript_async(calling_convention:string, script:string, r:ResumeCtx) : void
         {
             r.resume()

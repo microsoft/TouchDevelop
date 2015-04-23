@@ -1905,6 +1905,7 @@ module TDev.AST
                         this.typeCheckExpr(args[i]);
                 } else {
                     this.expectExpr(args[i], inP[i].getKind(), prop.getName(), i == 0);
+                    args[i].languageHint = inP[i].languageHint
                 }
             }
 
