@@ -447,43 +447,9 @@ module TDev
             return this.url.value;
         }
 
-        public editFullScreenAsync() : Promise {
-            return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync(baseUrl + "ace/ace.js") : Promise.as())
-                .then(() => {
-                    var name = this.varName();
-                    return new Promise((onSuccess, onProgress, onError) => {
-                        var m = new ModalDialog();
-                        if (!!(<any>window).ace) {
-                            var d = div('');
-                            d.style.height = '100%';
-                            d.style.width = '80%';
-                            m.add(d);
-                            var editor = ace.edit(d);
-                            if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
-                            else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
-                            else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
-                            editor.setValue(this.value.value);
-                            editor.clearSelection();
-                            m.onDismiss = () => {
-                                this.value.value = editor.getValue();
-                                onSuccess(undefined);
-                            };
-                        } else {
-                            var v = HTML.mkTextArea("variableDesc");
-                            v.style.height = "100%";
-                            v.style.width = "80%";
-                            v.value = this.value.value;
-                            m.add(v);
-                            m.onDismiss = () => {
-                                this.value.value = v.value;
-                                onSuccess(undefined);
-                            }
-                        }
-                        m.fullScreen();
-                        m.stretchWide();
-                        m.show();
-                    });
-            });
+        public editFullScreenAsync(): Promise {
+            return EditorHost.editFullScreenAsync(this.varName(), this.value.value)
+                .then(value => this.value.value = value);
         }
 
         public render()

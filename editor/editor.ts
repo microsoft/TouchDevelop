@@ -178,6 +178,42 @@ module TDev
             }).done()
         }
 
+        static editFullScreenAsync(name : string, value : string): Promise { // of string
+            return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync(baseUrl + "ace/ace.js") : Promise.as())
+                .then(() => {
+                return new Promise((onSuccess, onProgress, onError) => {
+                    var m = new ModalDialog();
+                    if (!!(<any>window).ace) {
+                        var d = div('');
+                        d.style.height = '100%';
+                        d.style.width = '80%';
+                        m.add(d);
+                        var editor = ace.edit(d);
+                        if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
+                        else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
+                        else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
+                        editor.setValue(value);
+                        editor.clearSelection();
+                        m.onDismiss = () => {
+                            onSuccess(editor.getValue());
+                        };
+                    } else {
+                        var v = HTML.mkTextArea("variableDesc");
+                        v.style.height = "100%";
+                        v.style.width = "80%";
+                        v.value = value;
+                        m.add(v);
+                        m.onDismiss = () => {
+                            onSuccess(v.value);
+                        }
+                    }
+                    m.fullScreen();
+                    m.stretchWide();
+                    m.show();
+                });
+            });
+        }
+
         public additionalButtons(): HTMLElement[]{
             this.pauseBtnDiv = div("inlineBlock")
             this.updatePause()
