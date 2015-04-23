@@ -97,13 +97,11 @@ module TDev.RT {
             var encodedText = encodeURIComponent(text);
             var encodedName = encodeURIComponent(link.name());
             var encodedAddress = encodeURIComponent(link.address());
-            function shareEmail() { window.open('mailto:?subject=' + encodedName + '&body=' + encodedAddress); }
-            function shareTweet() { window.open('https://twitter.com/intent/tweet?text=' + encodedText); }
-            function shareFacebookLike() { window.open('http://www.facebook.com/plugins/like.php?send=false&layout=standard&width=200&show_faces=false&font&colorscheme=light&action=like&height=35&href=' + encodedAddress); }
-            function shareFacebook() {
-                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedAddress,
-                            'facebook-share-dialog',
-                            'width=626,height=436'); }
+            var features = "menubar=no,status=no,titlebar=no,location=no,scrollbars=no,toolbar=no,width=500,height=550";
+            function shareEmail() { window.open('mailto:?subject=' + encodedName + '&body=' + encodedAddress, 'share', features); }
+            function shareTweet() { window.open('https://twitter.com/intent/tweet?text=' + encodedText, 'share', features); }
+            function shareFacebookLike() { window.open('http://www.facebook.com/plugins/like.php?send=false&layout=standard&width=200&show_faces=false&font&colorscheme=light&action=like&height=35&href=' + encodedAddress, 'share', features); }
+            function shareFacebook() { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedAddress, 'share', features); }
 
             if (options.tickCallback) options.tickCallback(network)
 
