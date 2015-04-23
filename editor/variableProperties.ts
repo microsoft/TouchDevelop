@@ -449,11 +449,21 @@ module TDev
             var labelDiv: HTMLElement;
             var d = div("artEditor",
                 div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => {
-                    (Browser.isDesktop && !(<any>window).AceAjax ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
+                    (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync("ace/ace.js") : Promise.as())
                     .done(() => {
                         var m = new ModalDialog();
-                        if (!!(<any>window).AceAjax && false) {
-                            // TODO
+                        if (!!(<any>window).ace) {
+                            var d = div('');
+                            d.style.height = '100%';
+                            d.style.width = '80%';
+                            m.add(d);
+                            var editor = ace.edit(d);
+                            //editor.getSession().setMode("ace/mode/c_cpp");
+                            editor.setValue(this.value.value);
+                            editor.clearSelection();
+                            m.onDismiss = () => {
+                                this.value.value = editor.getValue();
+                            };
                         } else {
                             this.value.style.height = "100%";
                             this.value.style.width = "80%";
