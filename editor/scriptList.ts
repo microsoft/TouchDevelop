@@ -3419,7 +3419,7 @@
                 ScreenShotTab,
                 ScriptHeartsTab,
                 Cloud.lite ? ChannelListTab : null,
-                TagsTab,               
+                TagsTab,
                 ArtTab,
                 ConsumersTab,
                 SuccessorsTab,
@@ -3952,7 +3952,7 @@
                         },
                         e => {});
             }
-            
+
             // parsing youtube links
             MdComments.parseYouTubeIds(c.text).forEach(ytid => {
                 var d = HTML.mkYouTubePlayer(ytid);
@@ -4538,7 +4538,7 @@
             case "abusereport":
                 return div(null, lab(lf("abuse report")),
                                  lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
-                
+
             // missing: tag, crash buckets
             default:
                 debugger;
@@ -5366,7 +5366,7 @@
                             }));
                         if (sc.jsonScript.meta && sc.jsonScript.meta.youtubeid)
                             youtubeInput.value = "https://youtu.be/" + sc.jsonScript.meta.youtubeid;
-                        divs.push(meta);                        
+                        divs.push(meta);
                     }
 
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
@@ -6344,7 +6344,7 @@
             if (Cloud.lite && isDocs) {
                 var pubAt = (pref:string) => {
                     var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
-                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () => 
+                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () =>
                         Cloud.postPrivateApiAsync("pointers", {
                             path: path,
                             scriptid: id,
@@ -8154,7 +8154,7 @@
 
         public mkSmallBox():HTMLElement
         {
-            return this.mkBoxCore(false).withClick(() => 
+            return this.mkBoxCore(false).withClick(() =>
                 TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, this.publicId)));
         }
 
@@ -8224,7 +8224,7 @@
                             div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
                             div("", inp),
                             err,
-                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
+                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
                                     lf("No abuse reports so far.")),
                         ])
                     }
@@ -9254,7 +9254,7 @@
                     ));
 
                 if (u.commit)
-                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank", 
+                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank",
                     lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
 
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
@@ -9298,7 +9298,7 @@
             Util.assert(!!id);
             this.publicId = id;
         }
-        
+
         public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
 
         public mkBoxCore(big: boolean) : HTMLElement {
@@ -9366,7 +9366,7 @@
         public mkTile(sz: number) : HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
-            return this.withUpdate(d, (u: JsonChannel) => {                
+            return this.withUpdate(d, (u: JsonChannel) => {
                 this.json = u;
 
                 var cont = [];
@@ -9502,7 +9502,7 @@
                     Cloud.deletePrivateApiAsync(c.id + "/channels/" + this.parent.publicId)
                     .done(() => {
                         list.invalidateCaches();
-                        el.removeSelf(); 
+                        el.removeSelf();
                     }, e => World.handlePostingError(e, lf("remove script")));
                 })));
             }
