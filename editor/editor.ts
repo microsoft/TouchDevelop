@@ -2092,6 +2092,8 @@ module TDev
                 }, json => {
                     ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
                 });
+            }, (error: any) => {
+                ModalDialog.info("Compilation error", error.message);
             });
         }
 

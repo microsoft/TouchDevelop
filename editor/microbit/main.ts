@@ -37,6 +37,7 @@ module TDev {
         return e;
       } catch (e) {
         console.error("Compilation error", e);
+        throw e;
       }
     }
 
