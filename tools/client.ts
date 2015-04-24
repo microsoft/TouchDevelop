@@ -27,7 +27,7 @@ var scriptsWithErrors = ["isrt", "bvxv", "cgcbb", "bkiza", "urde",
 ];
 
 var additionalTopics = [
-    "quyt"  // Coding Jetpack Jumper!
+    "yiqnc"  // Coding Jetpack Jumper!
     , "tjkjc" // Customize Jetpack Jumper!
 ]
 
@@ -1700,8 +1700,11 @@ export function updatehelp(args:string[])
     var usedIds = {}
     var visitedIds = {}
     var offlineScripts = {}
+    var todo = {};
 
-    function oneDone() {
+
+    function oneDone(id: string) {
+        delete todo[id];
         --numScripts;
         if (numScripts == 0) {
             var s = "";
@@ -1765,6 +1768,7 @@ export function updatehelp(args:string[])
 
     function getScript(id, f) {
         cachedScripts[id] = "";
+        todo[id+'/text'] = 1;
         numScripts++;
         tdevGet(id + "/text?original=true", (text) => {
             if (!text) {
@@ -1780,7 +1784,7 @@ export function updatehelp(args:string[])
                 })
             }
             f(text);
-            oneDone();
+            oneDone(id+'/text');
         })
     }
 
@@ -1834,8 +1838,12 @@ export function updatehelp(args:string[])
                 }
 
                 console.log("%s             (%s, %d to go, %d bytes%s)", desc.name, desc.id, numScripts, JSON.stringify(text).length, isOffline ? " OFFLINE" : "");
+                if (numScripts <= 5) {
+                    console.log("remaining: %s", JSON.stringify(todo));
+                }
                 m = /\/\/\s*\{template:(\w+)\}/i.exec(text);
                 if (m) {
+                    todo[id + "/webast"] = 1;
                     numScripts++;
                     tdevGet(id + "/webast", dat => {
                         var ast = JSON.parse(dat)
@@ -1847,16 +1855,18 @@ export function updatehelp(args:string[])
                         if (img) desc.screenshot = img.url
                         else if (scr.screenshotids && scr.screenshotids[0])
                             desc.screenshot = 'https://az31353.vo.msecnd.net/pub/' + scr.screenshotids[0];
-                        oneDone()
+                        oneDone(id+"/webast")
                     })
 
                     if (m[1] == "empty" || m[1] == "emptyapp") {
                     } else {
+                        var mid = m[1];
+                        todo[mid + '/empty'] = 1;
                         numScripts++;
-                        getScript(m[1], text => {
+                        getScript(mid, text => {
                             if (!text)
                                 throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');
-                            oneDone()
+                            oneDone(mid + '/empty')
                         })
                     }
                 }
@@ -1864,33 +1874,38 @@ export function updatehelp(args:string[])
                 m = scr.rootid && scr.rootid != scr.id && /#blog/.exec(text);
                 if (m) {
                     console.log('fetching original time blog entry of /' + scr.id + ' from /' + scr.rootid);
+                    todo[scr.rootid + '/blog'] = 1;
                     numScripts++;
                     tdevGet(scr.rootid, dat => {
                         desc.time = <number>JSON.parse(dat)["time"];
-                        oneDone()
+                        oneDone(scr.rootid + '/blog')
                     });
                 }
             }
         }));
     }
 
-    function getFrom(cont:string, path : string) {
+    function getFrom(cont: string, path: string) {
+        todo[path + cont + '/from'] = 1;
         numScripts++;
         tdevGet(path + cont, (text) => {
             var resp = JSON.parse(text);
             resp.items.forEach(processScript)
             if (resp.continuation) getFrom("&continuation=" + resp.continuation, path)
-            oneDone();
+            oneDone(path + cont + '/from');
         })
     }
 
     additionalTopics.forEach(id => {
+        todo[id + '/add'] = 1;
         numScripts++
         tdevGet(id, text => {
             var scr = JSON.parse(text)
+            delete todo[id + '/add'];
+            todo[scr.updateid + '/addupdate'] = 1;
             tdevGet(scr.updateid, text => {
                 processScript(JSON.parse(text))
-                oneDone()
+                oneDone(scr.updateid + '/addupdate')
             })
         })
     })
@@ -1899,6 +1914,7 @@ export function updatehelp(args:string[])
     getFrom("", "scripts?q=" + encodeURIComponent(blogQuery) + "&applyupdates=true&count=100")
 
     templates.forEach((t) => {
+        todo[t.scriptid + '/template'] = 1;
         numScripts++;
         function processJscript(scr) {
             var ids = [scr.id].concat(scr.librarydependencyids);
@@ -1908,14 +1924,16 @@ export function updatehelp(args:string[])
                 if (t.section == sectTemplates)
                     offlineScripts[id] = 1
             }))
-            oneDone();
+            oneDone(t.scriptid + '/template');
         }
         tdevGet(t.scriptid, (text) => {
             var jscript = JSON.parse(text)
             if (!jscript.updateid || jscript.updateid == jscript.id)
                 processJscript(jscript)
             else {
+                delete todo[t.scriptid + '/template'];
                 t.scriptid = jscript.updateid;
+                todo[jscript.updateid + '/template'] = 1;
                 tdevGet(jscript.updateid, t => processJscript(JSON.parse(t)));
             }
         })
