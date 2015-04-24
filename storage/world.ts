@@ -810,7 +810,7 @@ module TDev {
                 // This is mandatory: since [setInstalledAsync] uses the
                 // [scriptText] to save data, there's no way we can switch to a
                 // different name at this stage.
-                Util.assert(meta.name == stub.scriptName);
+                Util.assert(meta.name.trim() == stub.scriptName.trim());
                 // For compatibility with old cloud entries, we now switch to
                 // the semantics "falsy [editor] field for [Cloud.Header] means
                 // TouchDevelop editor".
