@@ -6336,6 +6336,23 @@
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
 
+            if (Cloud.lite && /#docs/i.test(this.getDescription())) {
+                var pubAt = (pref:string) => {
+                    var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
+                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () => 
+                        Cloud.postPrivateApiAsync("pointers", {
+                            path: path,
+                            scriptid: id,
+                        }))
+                }
+
+                m.addBody([
+                    lf("Doc script: "),
+                      HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview")),
+                      Cloud.hasPermission("no-pointer-prefix") ? pubAt("") : pubAt(Cloud.getUserId() + "/")
+                    ])
+            }
+
             if (!this.isLibrary() && !this.isCloud()) {
                 var appStudioDiv = div("wall-dialog-buttons text-left")
                 appStudioDiv.style.height = "2.8em";
