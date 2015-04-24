@@ -3953,11 +3953,11 @@
                         e => {});
             }
             
-            // parsing youtube links
-            MdComments.parseYouTubeIds(c.text).forEach(ytid => {
-                var d = HTML.mkYouTubePlayer(ytid);
-                nestedPubs.appendChild(d);
-            });
+            // parsing social network links
+            socialNetworks.filter(sn => !!sn.idToHTMLAsync)
+                .forEach(sn => sn.parseIds(c.text)
+                    .forEach(ytid => sn.idToHTMLAsync(ytid)
+                        .done(d => { if (d) nestedPubs.appendChild(d); })));
 
             var translateBtn: HTMLElement = null;
             var translateCmt = () => {
@@ -5353,20 +5353,21 @@
                     }
 
                     if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
-                        var youtubeInput: HTMLInputElement;
-                        var meta = div('sdSocialEmbed',
-                            HTML.mkImg("svg:youtube,black,clip=100"),
-                            youtubeInput = HTML.mkTextInputWithOk("url", "YouTube video link",() => {
-                                var id = MdComments.parseYouTubeIds(youtubeInput.value)[0] || null;
-                                youtubeInput.value = id ? "https://youtu.be/" + id : "";
-                                HTML.showProgressNotification("saving youtube link");
-                                Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", { youtubeid: id }).done(() => {
-                                    TheApiCacheMgr.invalidate(sc.jsonScript.id);
-                                }, e => World.handlePostingError(e, "saving metadata"));
-                            }));
-                        if (sc.jsonScript.meta && sc.jsonScript.meta.youtubeid)
-                            youtubeInput.value = "https://youtu.be/" + sc.jsonScript.meta.youtubeid;
-                        divs.push(meta);                        
+                        socialNetworks.forEach(sn => {
+                            var metaInput: HTMLInputElement;
+                            var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
+                                metaInput = HTML.mkTextInputWithOk("url", sn.description ,() => {
+                                    var id = sn.parseIds(metaInput.value)[0] || null;
+                                    metaInput.value = id ? sn.idToUrl(id) : "";
+                                    HTML.showProgressNotification(lf("saving..."));
+                                    var payload = {}; payload[sn.id] = id;
+                                    Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
+                                        TheApiCacheMgr.invalidate(sc.jsonScript.id);
+                                    }, e => World.handlePostingError(e, "saving metadata"));
+                                }));
+                            if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
+                            divs.push(meta);
+                        });
                     }
 
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
@@ -6273,9 +6274,9 @@
                             AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
                 }
 
-                if (this.jsonScript.meta && this.jsonScript.meta.youtubeid) {
-                    var yt = HTML.mkYouTubePlayer(this.jsonScript.meta.youtubeid);
-                    metaDiv.appendChild(yt);
+                if (this.jsonScript.meta) {
+                    socialNetworks.filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
+                        .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
                 }
 
                 if (this.getPublicationIdOrBaseId()) {

@@ -263,8 +263,8 @@ module TDev{
         return a.href;
     }
 
-    export function httpGetJsonAsync(filename:string) : Promise {
-        return httpGetTextAsync(filename).then((s) => JSON.parse(s));
+    export function httpGetJsonAsync(filename:string, contentTypeOrHeaders? : any) : Promise {
+        return httpGetTextAsync(filename, contentTypeOrHeaders).then((s) => JSON.parse(s));
     }
 
     export function forEachResponseHeader(client: XMLHttpRequest, action: (name: string, value: string) => void ) {
@@ -298,9 +298,9 @@ module TDev{
         return e;
     }
 
-    export function httpGetTextAsync(filename:string) : Promise
+    export function httpGetTextAsync(filename:string, contentTypeOrHeaders?: any) : Promise
     {
-        return httpRequestAsync(toAbsoluteUrl(filename), "get", undefined)
+        return httpRequestAsync(toAbsoluteUrl(filename), "get", undefined, contentTypeOrHeaders)
     }
 
     // the cloud is giving 400 if the content type is set correctly for many APIs

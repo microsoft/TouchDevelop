@@ -31,6 +31,25 @@ module TDev.HTML {
         });
     }
 
+    export interface OEmbed {
+        title: string;
+        author_name: string;
+        author_url: string;
+        thumbnail_url: string;
+        provider_name: string;
+        provider_url: string;
+    }
+
+    export function mkOEmbed(url: string, oe: OEmbed): HTMLElement {
+        var d = div('md-video-link',
+            div('', HTML.mkImg(oe.thumbnail_url)).withClick(() => window.open(url, 'oembed') ),
+            oe.title,
+            HTML.mkA('', oe.author_url, 'oembed', oe.author_name),
+            HTML.mkA('', oe.provider_url, 'oembed', oe.provider_url)
+            );
+        return d;
+    }
+
     export function mkYouTubePlayer(ytid: string) {
         var d = div('md-video-link');
         d.dataset['youtubeid'] = ytid;
