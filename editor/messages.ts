@@ -81,7 +81,8 @@ module TDev {
         // All this says is that the editor state for an external editor may
         // have as many fields as desired; however, the two fields below get a
         // special treatment and serve to display tutorial progress in "the
-        // hub".
+        // hub". What the hub displays (legacy code, apparently) is
+        // "[tutorialStep + 1] of [tutorialNumSteps + 1]".
         export interface EditorState {
             tutorialStep?: number;
             tutorialNumSteps?: number;

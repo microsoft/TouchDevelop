@@ -5981,7 +5981,10 @@
                 if (!text) return;
                 var prog = <AST.AppEditorState>JSON.parse(text);
                 var num = prog.tutorialNumSteps - (prog.tutorialStep || 0);
-                if (prog.tutorialId && num > 0) {
+                // Preserve the TouchDevelop behavior (needs [tutorialId] to be
+                // considered a valid tutorial); external editors don't have
+                // that requirement.
+                if ((prog.tutorialId || header.editor) && num > 0) {
                     var starSpan = span("bold",((prog.tutorialStep || 0) + 1) + "★");
                     var ofSteps = prog.tutorialNumSteps ? (small ? "/" : lf(" of ")) + (prog.tutorialNumSteps + 1) : "";
                     d.appendChild(div("tutProgress",
