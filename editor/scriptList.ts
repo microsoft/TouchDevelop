@@ -2921,14 +2921,14 @@
 
         public twitterMessage()
         {
-            return "Cool #touchdevelop script";
+            return lf("Cool script!") + " " + Cloud.config.hashtag;
         }
 
         public facebookLike(): HTMLElement {
             var id = this.getPublicationId();
             if (!id) return null;
 
-            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id;
+            var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
 
             var btns = ["email", "twitter", "facebook"].map(network =>
@@ -5667,7 +5667,7 @@
 
         public twitterMessage()
         {
-            return (this.app ? this.app.getName() + " - " : "") +  "cool #touchdevelop script!";
+            return (this.app ? this.app.getName() + " - " : "") + lf("Cool script!") + " " + Cloud.config.hashtag;
         }
 
         public loadLocalHeader(v:Cloud.Header)
@@ -6322,9 +6322,9 @@
             var title = this.getTitle();
             var ht = "";
             this.getDescription().replace(/(#\w+)/g, (m, h) => { ht += " " + m; return "" })
-            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id
+            var url = Cloud.config.shareUrl + "/" + id
             var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
-            lnk.set_title(title + " #touchdevelop" + ht)
+            lnk.set_title(title + " " + Cloud.config.hashtag + ht)
 
             options.header = lf("share this script")
             options.noDismiss = true
@@ -6684,7 +6684,7 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + this.publicId;
+                txtAddress.value = Cloud.config.shareUrl + "/" + this.publicId;
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
@@ -7869,7 +7869,7 @@
                                     // readonly does not pop keyboard on mobile
                                     input.value = r.code;
                                     input.onchange = () => { input.value = r.code };
-                                    var iurl = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + r.code;
+                                    var iurl = Cloud.config.shareUrl + "/" + r.code;
                                     var codeDiv = div('',
                                         div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
                                         div('sdExpandableText',

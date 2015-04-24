@@ -12,6 +12,7 @@ module TDev.Cloud {
         liteVersion: string;
         shareUrl: string;
         cdnUrl: string;
+        hashtag: string;
 
         tdVersion?: string;
         releaseid?: string;
@@ -26,6 +27,7 @@ module TDev.Cloud {
         workspaceUrl: null,
         rootUrl: "https://www.touchdevelop.com",
         shareUrl: "http://tdev.ly",
+        hashtag:"#TouchDevelop",
         liteVersion: null,
     }
     
