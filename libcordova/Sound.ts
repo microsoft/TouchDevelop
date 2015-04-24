@@ -38,16 +38,18 @@ module TDev.RT.Cordova {
         Util.log('wab: boosting PLAY_SOUND');
         Sound.prototype.initAsync = function () {
             var sound: Sound = <Sound>this;
+            if ((<any>sound)._audio) return Promise.as(sound);
             return sound.createUrlAsync()
                 .then(url => {
                     (<any>sound)._audio = new MediaShim(url);
+                    return sound;
                 });
         }
 
         Sound.prototype.resetAsync = function () {
             var sound: Sound = <Sound>this;
             var media : Media = (<any>sound)._audio;
-            if (media) media.seekTo(0);
+            if (media && media.seekTo) media.seekTo(0);
             return Promise.as();
         }
     }

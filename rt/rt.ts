@@ -2977,7 +2977,9 @@ module TDev
                                             )._value;
                                         break;
                                     case "Sound":
-                                        v = TDev.RT.Sound.mk("https://az31353.vo.msecnd.net/pub/pxiraczt");
+                                        var missingUrl = "https://az31353.vo.msecnd.net/pub/pxiraczt";
+                                        if (!Browser.audioWav) missingUrl = HTML.patchWavToMp4Url(missingUrl);
+                                        v = TDev.RT.Sound.mk(missingUrl);
                                         break;
                                     default:
                                         break;

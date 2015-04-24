@@ -78,7 +78,7 @@ module TDev.RT {
             if (/^\.\/art\//.test(url)) {
                 url = Sound.patchLocalArtUrl(url);
             }
-            if (!Browser.audioWav && ArtCache.isArtResource(url)) {
+            if (!Browser.audioWav) {
                 url = HTML.patchWavToMp4Url(url);
                 Util.log('fixed art sound: ' + url);
             }

@@ -70,7 +70,7 @@ module TDev {
         export var deviceOrientation = false;
         export var deviceHeading = false;
         export var audioDataUrls = true;
-        export var audioWav = true;
+        export var audioWav = false;
         export var compilerInlining = false;
         export var compilerOkElimination = true; // always on
         export var compilerBlockChaining = false;
