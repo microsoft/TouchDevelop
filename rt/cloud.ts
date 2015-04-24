@@ -11,6 +11,7 @@ module TDev.Cloud {
         rootUrl: string;
         liteVersion: string;
 
+        shareUrl?: string;
         tdVersion?: string;
         releaseid?: string;
         relid?: string;
@@ -22,6 +23,7 @@ module TDev.Cloud {
         searchUrl: "https://tdsearch.search.windows.net",
         workspaceUrl: null,
         rootUrl: "https://www.touchdevelop.com",
+        shareUrl: "http://tdev.ly",
         liteVersion: null,
     }
     

@@ -2927,7 +2927,7 @@
             var id = this.getPublicationId();
             if (!id) return null;
 
-            var url = "http://tdev.ly/" + id;
+            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id;
             var text = this.twitterMessage();
 
             var btns = ["email", "twitter", "facebook"].map(network =>
@@ -6317,7 +6317,7 @@
             var title = this.getTitle();
             var ht = "";
             this.getDescription().replace(/(#\w+)/g, (m, h) => { ht += " " + m; return "" })
-            var url = "http://tdev.ly/" + id
+            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id
             var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
             lnk.set_title(title + " #touchdevelop" + ht)
 
@@ -6661,7 +6661,7 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = "http://tdev.ly/" + this.publicId;
+                txtAddress.value = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + this.publicId;
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
@@ -7846,11 +7846,12 @@
                                     // readonly does not pop keyboard on mobile
                                     input.value = r.code;
                                     input.onchange = () => { input.value = r.code };
+                                    var iurl = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + r.code;
                                     var codeDiv = div('',
                                         div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
                                         div('sdExpandableText',
                                             lf("To join, users can enter the invitation code in the search or navigate to "),
-                                            HTML.mkA('', 'http://tdev.ly/' + r.code, '_blank', 'http://tdev.ly/' + r.code)),
+                                            HTML.mkA('', iurl, '_blank', iurl)),
                                         input
                                     );
                                     hd.appendChild(codeDiv);
