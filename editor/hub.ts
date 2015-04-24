@@ -933,13 +933,12 @@ module TDev.Browser {
         private findImgForTutorial(app: AST.App) {
             // XXX it seems that this function is actually unused as [app] is
             // always null?!!
-            if (!app)
-                return null;
+            if (!app) return null;
 
             var findImg = t => app.resources().filter(r =>
                     r.getKind() == api.core.Picture &&
                     t.test(r.getName()) &&
-                    /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
+                    Cloud.isArtUrl(r.url))[0];
 
             var img = findImg(/screenshot/) || findImg(/background/);
 

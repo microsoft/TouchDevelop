@@ -107,7 +107,7 @@ module TDev.RT {
         private imgLoadAsync(url : string, cors : boolean, dataUrl : string = null): Promise
         {
             var rt = Runtime.theRuntime;
-            var auth = (!dataUrl && cors && !/^https:\/\/az31353.vo.msecnd.net\/pub\//.test(url)) ? Cloud.authenticateAsync(lf("image proxying")) : Promise.as(true);
+            var auth = (!dataUrl && cors && !Cloud.isArtUrl(url)) ? Cloud.authenticateAsync(lf("image proxying")) : Promise.as(true);
             return auth.then((authenticated) => { // ask wab to expand urls
                 Util.log('picture load: 0');
                 if (dataUrl) {
@@ -252,8 +252,8 @@ module TDev.RT {
             if (/^data:image\/(jpeg|png|svg\+xml);base64,/i.test(url))
                 return this.imgLoadAsync(url, false, url);
 
-            // Art hosted on TouchDevelop?
-            if (this._isResource || ArtCache.isArtResource(url))
+            // caching?
+            if (this._isResource || Cloud.isArtUrl(url))
                 return ArtCache.getArtAsync(url, "image/*")
                        .then(dataUrl => this.imgLoadAsync(url, cors, dataUrl));
             // default load

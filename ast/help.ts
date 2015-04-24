@@ -724,7 +724,7 @@ module TDev {
                 }
             } else if (macro == "pici") {
                 var artId = MdComments.findArtId(arg);
-                var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId)));
+                var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", Cloud.artUrl(artId));
                 return r;
             } else if (macro == "decl") {
                 var decl = Script ? Script.things.filter((t) => t.getName() == arg)[0] : null;

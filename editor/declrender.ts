@@ -217,7 +217,7 @@ module TDev
         function iconFromDecl(decl: AST.Decl, tp: string) {
             var img;
             var iconArtId = decl.getIconArtId ? decl.getIconArtId() : undefined;
-            if (iconArtId) img = Cloud.artImg(iconArtId, true);
+            if (iconArtId) img = ArtUtil.artImg(iconArtId, true);
             else {
                 var iconPath = declIcon[tp](decl);
                 img = !iconPath ? <any> text("") : HTML.mkImg(iconPath);

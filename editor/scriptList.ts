@@ -763,7 +763,7 @@
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
                                 Browser.isWP8app ? null :
-                                div("introThumb introLarge", Cloud.artImg("kkqqysxz", false)),
+                                div("introThumb introLarge", ArtUtil.artImg("kkqqysxz", false)),
                                 div("wall-dialog-body",
                                     Util.fmt("Run the beta version of TouchDevelop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
@@ -5759,7 +5759,7 @@
         }
 
         public iconImg(thumb : boolean): HTMLElement {
-            return this.app.iconArtId ? Cloud.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
+            return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
         }
 
         public mkBoxExt(big:boolean, isTopic:boolean)

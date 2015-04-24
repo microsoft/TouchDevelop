@@ -31,10 +31,12 @@ module TDev.Cloud {
         liteVersion: null,
     }
 
-    export function artImg(id: string, thumb = false): HTMLElement {
-        var d = div('iconThumb');
-        d.style.backgroundImage = Cloud.artCssImg(id, true);
-        return d;
+    export function isArtUrl(url : string) : boolean {
+        if (!url) return false;
+        var pubUrl = config.cdnUrl + "/pub/";
+        return url.substr(0, pubUrl.length) == pubUrl
+            || /\.\/art\//i.test(url) // exported apps
+            || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url); // legacy
     }
 
     export function artCssImg(id: string, thumb = false): string {

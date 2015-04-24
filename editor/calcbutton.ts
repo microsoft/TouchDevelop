@@ -64,7 +64,7 @@ module TDev
 
         public setBackgroundImage(url: string) {
             if (!Browser.lowMemory) {
-                this._theButton.style.backgroundImage = HTML.cssImage(url.replace("https://az31353.vo.msecnd.net/pub/", "https://az31353.vo.msecnd.net/thumb/"));
+                this._theButton.style.backgroundImage = HTML.cssImage(url.replace(Cloud.config.cdnUrl + "/pub/", Cloud.config.cdnUrl + "/thumb/"));
                 this._theButton.style.backgroundSize = 'cover';
             }
         }

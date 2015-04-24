@@ -617,6 +617,12 @@ module TDev
     }
 
     export module ArtUtil {
+        export function artImg(id: string, thumb = false): HTMLElement {
+            var d = div('iconThumb');
+            d.style.backgroundImage = Cloud.artCssImg(id, true);
+            return d;
+        }
+
         export function setupDragAndDrop(r: HTMLElement) {
             if (!Browser.dragAndDrop) return;
 

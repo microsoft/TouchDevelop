@@ -120,7 +120,7 @@ module TDev {
     function initWebRunnerApis() {
         // api keys needed to make maps work
         TDev.RT.ApiManager.bingMapsKey = 'AsnQk63tYReqttLHcIL1RUsc_0h0BwCOib6j0Zvk8QjWs4FQjM9JRM9wEKescphX';
-        TDev.RT.ArtCache.isArtResource = (url: string) => false; // disable art caching
+        TDev.RT.ArtCache.enabled = false; // disable art caching
         TDev.RT.ApiManager.getKeyAsync = function (url: string): Promise { return Promise.as(undefined); }
         TDev.RT.AdManager.initialize = (el) => el.style.display = 'none'; // do not show adds
         //TDev.RT.Web.create_request = function (url: string): TDev.RT.WebRequest { return TDev.RT.WebRequest.mk(url, undefined);};
@@ -165,7 +165,7 @@ module TDev {
     function initCompiledApp() {
         TDev.RuntimeSettings.askSourceAccess = false;
         TDev.Cloud.authenticateAsync = (reason:string) => Promise.as(true);
-        TDev.RT.ArtCache.isArtResource = (url: string) => false; // disable art caching
+        TDev.RT.ArtCache.enabled = false; // disable art caching
         TDev.RT.ApiManager.getKeyAsync = (url: string): Promise => Promise.as(TDev.RT.ApiManager.keys[url] || undefined);
         TDev.RT.BingServices.searchAsync = function (
             kind: string,
