@@ -190,14 +190,6 @@ module TDev {
     box.scrollTop = box.scrollHeight;
   }
 
-  function loadEditorState(s: string): EditorState {
-    return JSON.parse(s || "{ \"lastSave\": null }");
-  }
-
-  function saveEditorState(s: EditorState): string {
-    return JSON.stringify(s);
-  }
-
   function loadBlockly(s: string) {
     var text = s || "<xml></xml>";
     var xml = Blockly.Xml.textToDom(text);
@@ -236,7 +228,7 @@ module TDev {
 
   // Called once at startup
   function setupEditor(message: External.Message_Init) {
-    var state = loadEditorState(message.script.editorState);
+    var state = <MyEditorState> message.script.editorState;
 
     Blockly.inject($("#editor"), {
       toolbox: $("#blockly-toolbox"),
@@ -283,6 +275,10 @@ module TDev {
       "(dated from: "+state.lastSave+")");
   }
 
+  interface MyEditorState extends External.EditorState {
+      lastSave: Date
+  }
+
   function doSave(force = false) {
     if (!dirty && !force)
       return;
@@ -293,9 +289,12 @@ module TDev {
       type: External.MessageType.Save,
       script: {
         scriptText: text,
-        editorState: saveEditorState({
+        editorState: <MyEditorState> {
+          // XXX test values
+          tutorialStep: 1,
+          tutorialNumSteps: 10,
           lastSave: new Date()
-        }),
+        },
         baseSnapshot: currentVersion,
         metadata: {
           name: getName(),

@@ -71,20 +71,12 @@ module TDev {
 
     // ---------- UI functions
 
-    interface EditorState {
-        lastSave: Date;
-    }
-
-    function loadEditorState(s: string): EditorState {
-        return JSON.parse(s || "{ \"lastSave\": null }");
-    }
-
-    function saveEditorState(s: EditorState): string {
-        return JSON.stringify(s);
+    interface MyEditorState {
+        lastSave: Date
     }
 
     function setupEditor(message: External.Message_Init) {
-        var state = loadEditorState(message.script.editorState);
+        var state = <MyEditorState> message.script.editorState;
 
         editor = ace.edit("editor");
         editor.setTheme("ace/theme/twilight");
@@ -103,9 +95,9 @@ module TDev {
                 type: External.MessageType.Save,
                 script: {
                     scriptText: editor.getValue(),
-                    editorState: saveEditorState({
+                    editorState: {
                         lastSave: new Date()
-                    }),
+                    },
                     baseSnapshot: currentVersion,
                     metadata: {
                         name: scriptName,

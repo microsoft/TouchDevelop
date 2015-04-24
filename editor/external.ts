@@ -127,7 +127,7 @@ module TDev {
             var message = <Message_Save> event.data;
             World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
               var scriptText = message.script.scriptText;
-              var editorState = message.script.editorState;
+              var editorState = JSON.stringify(message.script.editorState);
               header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
 
               var metadata = message.script.metadata;
@@ -288,7 +288,7 @@ module TDev {
     export interface ScriptData {
       guid: string;
       scriptText: string;
-      editorState: string;
+      editorState: EditorState;
       scriptVersionInCloud: string;
       baseSnapshot: string;
       metadata: Metadata;

@@ -3143,7 +3143,7 @@ module TDev
                         scriptText: scriptText,
                         guid: header.guid,
                         scriptVersionInCloud: scriptVersionInCloud,
-                        editorState: editorState,
+                        editorState: JSON.parse(editorState || "{}"),
                         baseSnapshot: header.scriptVersion.baseSnapshot,
                         metadata: header.meta,
                     });

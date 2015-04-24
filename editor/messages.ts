@@ -70,12 +70,21 @@ module TDev {
 
         // A saved script has some text (this is what ends up published when the
         // user hits "publish"), an associated editor state (doesn't get
-        // published), and is saved on top of a cloud-assigned [baseVersion].
+        // published), and is saved on top of a cloud-assigned [baseSnapshot].
         export interface SavedScript {
             scriptText: string;
-            editorState: string;
+            editorState: EditorState;
             baseSnapshot: string;
             metadata: Metadata; // Must be set to the correct value every time.
+        }
+
+        // All this says is that the editor state for an external editor may
+        // have as many fields as desired; however, the two fields below get a
+        // special treatment and serve to display tutorial progress in "the
+        // hub".
+        export interface EditorState {
+            tutorialStep?: number;
+            tutorialNumSteps?: number;
         }
 
         export interface Metadata {
