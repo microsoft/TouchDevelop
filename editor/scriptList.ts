@@ -2931,7 +2931,7 @@
             var text = this.twitterMessage();
 
             var btns = ["email", "twitter", "facebook"].map(network =>
-                div("sdAuthorLabel", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                 );
             if (Cloud.lite && this.parent instanceof ScriptInfo) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
