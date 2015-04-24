@@ -1480,13 +1480,17 @@ module TDev.AST {
         }
         public forSearch()
         {
-            var decoded = this.url || ""
-            if (this.isResource && this.getKind() == api.core.String && this.url) {
-                var tmp = RT.String_.valueFromArtUrl(this.url)
-                if (tmp) decoded = tmp
-            }
-            return decoded
+            return this.stringResourceValue() || this.url || ""
         }
+
+        public stringResourceValue()
+        {
+            if (this.isResource && this.getKind() == api.core.String && this.url) {
+                return RT.String_.valueFromArtUrl(this.url)
+            }
+            return null
+        }
+
         public thingSetKindName() { return this.isResource ? "art" : "data"; }
 
         public getCategory() { return PropertyCategory.Data; }

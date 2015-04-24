@@ -66,9 +66,20 @@ class ApiRequest
                         Math.round(Date.now() - this.startCompute)/1000
             ))
         }
-        this.response.writeHead(200, { "Content-Type": "application/json" });
-        this.response.end(res, "utf-8")
+
+        this.text(res, "application/json")
     }
+
+    text(s:string, contentType = "text/plain")
+    {
+        this.response.writeHead(200, { 
+            'Content-Type': contentType,
+            'X-TouchDevelop-RelID': ccfg.relid || "none",
+        })
+        this.response.end(s, "utf-8")
+    }
+
+    html(s:string) { this.text(s, "text/html") }
 
     deployErr(exn:any)
     {
@@ -736,8 +747,7 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         ar.spaces = 2;
     var hr = ar.response
     var html = (content:string, css = true) => {
-        hr.writeHead(200, { "Content-Type": "text/html" });
-        hr.end(htmlFrame(TDev.Script.getName(), content, css), "utf-8")
+        ar.html(htmlFrame(TDev.Script.getName(), content, css))
     }
     ar.addInfo = m[1];
 
@@ -764,6 +774,16 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         ar.ok(TDev.AST.Json.dump(TDev.Script))
         break;
 
+    case "string-art":
+        var rmap = []
+        TDev.Script.resources().forEach(r => {
+            var v = r.stringResourceValue()
+            if (v != null)
+                rmap.push({ name: r.getName(), value: v })
+        })
+        ar.ok(rmap)
+        break;
+
     case "pretty":
         html(prettyScript(tcRes, !!opts.libErrors))
         break;
@@ -774,10 +794,10 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "raw-docs":
-        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => {
-            hr.writeHead(200, { "Content-Type": "text/plain" });
-            hr.end(top, "utf-8")
-        })
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script)).done(top => ar.ok({
+            body: top,
+            template: "docs", // TODO get from script text
+        }))
         break;
 
     case "docs-info":
@@ -787,8 +807,7 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
     case "newsletter":
         TDev.HelpTopic.fromScript(TDev.Script).printedAsync(true).done(text => {
             if (opts.bare) {
-                hr.writeHead(200, { "Content-Type": "text/plain" });
-                hr.end(text, "utf-8")
+                ar.text(text)
             } else {
                 html(text, false)
             }
@@ -822,8 +841,7 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "text":
-        hr.writeHead(200, { "Content-Type": "text/plain" });
-        hr.end(TDev.Script.serialize(), "utf-8");
+        ar.text(TDev.Script.serialize())
         break;
 
     case "compile":
@@ -969,14 +987,14 @@ var apiHandlers = {
 
     "oauth": (ar:ApiRequest) => {
         var hr = ar.response
-        hr.writeHead(200, { "Content-Type": "text/html" });
-        hr.end(TDev.RT.Node.storeOAuthHTML, "utf-8")
+        ar.html(TDev.RT.Node.storeOAuthHTML)
     },
 
     "stats": statsResp,
 
     "docs": (ar:ApiRequest) => {
         var r = <TDev.DocsRequest>ar.data;
+        if (!r || !r.topic) r = { topic: ar.args }
         var ht = TDev.HelpTopic.findById(r.topic);
         ar.addInfo = r.topic;
         if (!ht) {
@@ -1031,6 +1049,7 @@ var apiHandlers = {
 
     "language": (ar:ApiRequest) => {
         var r = <TDev.LanguageRequest>ar.data;
+        if (!r || !r.path) r.path = ar.args
         var m = /^([^?]*)(\?(.*))?/.exec(r.path)
         var opts:any = m[3] ? querystring.parse(m[3]) : {}
         if (opts.format)
@@ -1048,8 +1067,7 @@ var apiHandlers = {
             break;
 
         case "webast":
-            hr.writeHead(200, { "Content-Type": "text/plain" });
-            hr.end(TDev.AST.Json.docs, "utf-8")
+            ar.text(TDev.AST.Json.docs)
             break;
 
         case "apis":
@@ -1061,8 +1079,7 @@ var apiHandlers = {
             break;
 
         case "shell.js":
-            hr.writeHead(200, { "Content-Type": "application/javascript" });
-            hr.end((<any>TDev).pkgShell['server.js'], "utf-8")
+            ar.text((<any>TDev).pkgShell['server.js'], "application/javascript")
             break;
 
         case "touchdevelop.tgz":
@@ -1076,21 +1093,19 @@ var apiHandlers = {
             break;
 
         case "touchdevelop-rpi.sh":
-            hr.writeHead(200, { "Content-Type": "text/plain" });
-            hr.end(
+            ar.text(
                 "mkdir TouchDevelop\n" +
                 "cd TouchDevelop\n" +
                 "wget http://node-arm.herokuapp.com/node_latest_armhf.deb\n" +
                 "sudo dpkg -i node_latest_armhf.deb\n" +
                 "sudo npm install -g http://aka.ms/touchdevelop.tgz\n" +
                 "wget -O $HOME/TouchDevelop/TouchDevelop.png https://www.touchdevelop.com/images/touchdevelop72x72.png\n" +
-                "wget -O $HOME/Desktop/TouchDevelop.desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n", "utf-8");
+                "wget -O $HOME/Desktop/TouchDevelop.desktop https://www.touchdevelop.com/api/language/touchdevelop.desktop\n");
             break;
 
         // linux desktop shortcut, mainly for raspberry pi
         case "touchdevelop.desktop":
-            hr.writeHead(200, { "Content-Type": "text/plain" });
-            hr.end(
+            ar.text(
                 "[Desktop Entry]\n" +
                 "Encoding=UTF-8\n" +
                 "Version=1.0\n" +
@@ -1102,7 +1117,7 @@ var apiHandlers = {
                 "Icon=/home/pi/TouchDevelop/TouchDevelop.png\n" +
                 "Type=Application\n" +
                 "Categories=Programming;Games\n" +
-                "Comment=Learn to code using TouchDevelop!", "utf-8");
+                "Comment=Learn to code using TouchDevelop!");
             break;
 
         default:
@@ -1116,11 +1131,14 @@ var apiHandlers = {
     },
 
     "q": (ar:ApiRequest) => {
-        var w = ar.args.split(/\//)
-        ar.data = { path: w[1], id: w[0] }
-
-        TDev.AST.reset();
-        TDev.AST.loadScriptAsync(getScriptAsync, w[0]).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
+        var m = /^([a-z]+)\/(.*)/.exec(ar.args)
+        if (m) {
+            ar.data = { path: m[2], id: m[1] }
+            TDev.AST.reset();
+            TDev.AST.loadScriptAsync(getScriptAsync, m[1]).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
+        } else {
+            ar.notFound()
+        }
     },
 
     "query2": (ar:ApiRequest) => {
