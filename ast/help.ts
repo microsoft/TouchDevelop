@@ -382,13 +382,35 @@ module TDev {
             },
             idToUrl: id => 'https://instagram.com/p/' + id + '/',
             /* CORS issue
-            idToHTMLAsync: id => Util.httpGetJsonAsync('https://api.instagram.com/oembed?url=https://instagram.com/p/' + id + '/')
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://api.instagram.com/oembed?omit_script=true&url=https://instagram.com/p/' + id + '/')
                 .then(oembed => HTML.mkOEmbed('https://instagram.com/p/' + id + '/', oembed),
                 e => {
                     Util.log('oembed error:' + e);
                     return null;
                 })
                 */
+        },
+        {
+            id: "vine",
+            name: "Vine",
+            description: lf("Vine animation (https://vine.co/v/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/vine\.co\/v\/([a-z0-9]+)\/?/gi,(m, id) => {
+                        links.push(id);
+                    });
+                return links;
+            },
+            idToUrl: id => 'https://vine.co/v/' + id,
+            /* CORS issue
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://vine.co/oembed.json?omit_script=true&url=https://vine.co/v/' + id)
+                .then(oembed => HTML.mkOEmbed('https://vine.co/v/' + id, oembed),
+                e => {
+                    Util.log('oembed error:' + e);
+                    return null;
+                })
+            */
         },
     ];
 
