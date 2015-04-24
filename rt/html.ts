@@ -274,6 +274,24 @@ module TDev.HTML {
         return r;
     }
 
+    export function mkAsyncButton(content:string, f:()=>Promise, cls = ""):HTMLElement
+    {
+        var btn = mkButtonElt("wall-button " + cls, text(content));
+        var running = false
+        Util.clickHandler(btn, () => {
+            if (running) return
+            running = true
+            btn.style.opacity = "0.5"
+            btn.setFlag("disabled", true)
+            f().done(() => {
+                running = false
+                btn.style.opacity = null
+                btn.setFlag("disabled", false)
+            })
+        });
+        return btn;
+    }
+
     export function mkButton(content:string, f:()=>void, cls = ""):HTMLElement
     {
         var btn = mkButtonElt("wall-button " + cls, text(content));
