@@ -153,7 +153,7 @@ module TDev {
 
       public visitStringLiteral(env: EmitterEnv, s: string) {
         return '"'+s.replace(/"\\/, c => {
-          if (c == '"') return '\"';
+          if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
         }) + '"';
       }
@@ -223,7 +223,7 @@ module TDev {
             // Call to a built-in C++ function
             return s;
           else
-            // Actually call to a library function
+            // Actual call to a library function
             return mangleLibraryName(n, name);
         }
 
