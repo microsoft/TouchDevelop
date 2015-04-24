@@ -179,11 +179,9 @@ module TDev.HTML {
     export function patchWavToMp4Url(url: string): string {
         if (url) {
             var m = url.match(/^http(s?):\/\/(cdn\.touchdevelop\.com|az31353\.vo\.msecnd\.net)\/pub\/(\w+)/i);
-            if (m) {
-                url = 'http' + m[1] + '://' + m[2] + '/aac/' + m[3] + '.m4a';
-            }
+            if (m) return 'https://' + m[2] + '/aac/' + m[3] + '.m4a';
+            if (/^\.\/art\//i.test(url)) return url + '.m4a';
         }
-
         return url;
     }
 

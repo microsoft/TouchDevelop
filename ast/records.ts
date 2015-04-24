@@ -291,6 +291,8 @@ module TDev.AST {
             this.setupForEdit()
         }
 
+        public forSearch() { return this.getName() + " " + this.dataKind.toString(); }
+
         // The calculator will call this method before editing us, so that our
         // exprholder is not left in a stale state from a previous
         // (unsuccessful) edit.

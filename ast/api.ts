@@ -1426,7 +1426,7 @@ module TDev {
         public md_onlyOn(...s: string[]) { this.availableOnlyOn = s.map(ss => api.getKind(ss)) }
         public md_import(manager: string, name: string, version: string) {
             if (!this._imports) this._imports = [];
-            this._imports.push({ manager: manager, name: name, version: version });
+            this._imports.push({ manager: manager, name: name, version: version || "*" });
         }
         public md_oldName(s:string) {
             var pref = this.parentKind.getName() + "->"

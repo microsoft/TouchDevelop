@@ -84,7 +84,7 @@ module TDev
                         else if (bangOp)
                             specialCommand = tt;
                         else
-                            terms.push(tt);
+                            terms.push(tt.toLowerCase());
                     }
                     refOp = false;
                     bangOp = false;
