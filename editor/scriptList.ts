@@ -85,8 +85,9 @@
             this.updateScroll()
             elt("root").appendChild(this.theRoot);
 
-            Util.onInputChange(this.searchBox,
-                    Util.catchErrors("slSearch-searchKey", () => this.searchKey()));
+            var up = KeyboardAutoUpdate.mkInput(this.searchBox, () => this.searchKey())
+            up.attach()
+
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
             this.searchBox.placeholder = lf("Search here...");
 
