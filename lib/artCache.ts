@@ -24,7 +24,8 @@ module TDev.RT {
 
         export var isArtResource = (url: string) : boolean => {
             return /^https:\/\/az31353\.vo\.msecnd\.net\/pub\//i.test(url)
-                || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url);
+                || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url)
+                || /\.\/art\//i.test(url);
         }
 
         export function responseToDataUrl(response: TDev.RT.WebResponse): string {
