@@ -39,7 +39,7 @@ var generated = [
 // A list of targets we compile with the --noImplicitAny flag.
 var noImplicitAny = {
   "build/browser.d.ts": null,
-  "build/blockly.js": null
+  "build/blockly-main.js": null
 };
 
 // On Windows, merely changing a file in the directory does *not* change that
@@ -99,11 +99,13 @@ function mkSimpleTask(production, dependencies, target) {
       tscCall.push("--noImplicitAny");
     var match = target.match(/(\w+)\/refs.ts/);
     if (match) {
-      tscCall.push("--out build/"+match[1]+".js");
+      tscCall.push("--out "+production);
     } else {
       tscCall.push("--outDir build/");
     }
     tscCall.push(target);
+    // We always generate definition files
+    file(production.replace(".js", ".d.ts"), [ production ]);
     return file(production, expand(dependencies), { async: true, parallelLimit: branchingFactor }, function () {
       var task = this;
       console.log("[B] "+production);
@@ -151,42 +153,42 @@ file('build/pkgshell.js', [ 'build/package.js' ], { async: true }, function () {
 // instance, anytime something changes in [editor/], [build/editor.d.ts] gets
 // rebuilt. This amounts to assuming that for all [foo/bar.ts], [bar.ts] is a
 // dependency of [build/foo.js].
-mkSimpleTask('build/browser.d.ts', [
+mkSimpleTask('build/browser.js', [
     'browser/browser.ts'
 ], "browser/browser.ts");
-mkSimpleTask('build/rt.d.ts', [
+mkSimpleTask('build/rt.js', [
     'build/browser.d.ts',
     'rt',
     'lib'
 ], "rt/refs.ts");
-mkSimpleTask('build/storage.d.ts', [
+mkSimpleTask('build/storage.js', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
     'build/browser.d.ts',
     'storage'
 ], "storage/refs.ts");
-mkSimpleTask('build/ast.d.ts', [
+mkSimpleTask('build/ast.js', [
     'build/rt.d.ts',
     'ast'
 ], "ast/refs.ts");
-mkSimpleTask('build/libwab.d.ts', [
+mkSimpleTask('build/libwab.js', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
     'build/browser.d.ts',
     'libwab'
 ], "libwab/refs.ts");
-mkSimpleTask('build/libnode.d.ts', [
+mkSimpleTask('build/libnode.js', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
     'libnode'
 ], "libnode/refs.ts");
-mkSimpleTask('build/libcordova.d.ts', [
+mkSimpleTask('build/libcordova.js', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
     'build/browser.d.ts',
     'libcordova'
 ], "libcordova/refs.ts");
-mkSimpleTask('build/editor.d.ts', [
+mkSimpleTask('build/editor.js', [
     'rt/typings.d.ts',
     'build/browser.d.ts',
     'build/rt.d.ts',
@@ -197,10 +199,10 @@ mkSimpleTask('build/editor.d.ts', [
     'intellitrain',
     'editor'
 ], "editor/refs.ts");
-mkSimpleTask('build/officemix.d.ts', [
+mkSimpleTask('build/officemix.js', [
     'officemix'
 ], "officemix/officemix.ts");
-mkSimpleTask('build/jsonapi.d.ts', [], "noderunner/jsonapi.ts");
+mkSimpleTask('build/jsonapi.js', [], "noderunner/jsonapi.ts");
 mkSimpleTask('build/client.js', [
     'rt/typings.d.ts',
     'build/jsonapi.d.ts',
@@ -216,7 +218,7 @@ mkSimpleTask('build/nrunner.js', [
     'noderunner'
 ], "noderunner/nrunner.ts");
 // XXX same here
-mkSimpleTask('build/runner.d.ts', [
+mkSimpleTask('build/runner.js', [
     'build/browser.d.ts',
     'rt/typings.d.ts',
     'build/rt.d.ts',
@@ -226,11 +228,11 @@ mkSimpleTask('build/runner.d.ts', [
     'build/libcordova.d.ts',
     'runner'
 ], "runner/refs.ts");
-mkSimpleTask('build/ace.js', [
+mkSimpleTask('build/ace-main.js', [
     "www/ace/ace-main.ts",
     "editor/messages.ts"
 ], "www/ace/refs.ts");
-mkSimpleTask('build/blockly.js', [
+mkSimpleTask('build/blockly-main.js', [
     "www/blockly/blockly-main.ts",
     "www/blockly/compiler.ts",
     "editor/messages.ts"
@@ -345,8 +347,8 @@ function mapCat(files, dest) {
 
 Object.keys(concatMap).forEach(function (f) {
     var isJs = function (s) { return s.substr(s.length - 3, 3) == ".js"; };
-    var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".d.ts"; });
-    var toConcat = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; })
+    var buildDeps = concatMap[f].map(function (x) { if (isJs(x)) return x; else return x + ".js"; });
+    var toConcat = buildDeps;
     file(f, buildDeps, { parallelLimit: branchingFactor }, function () {
       if (f == "build/main.js" && process.env.TD_SOURCE_MAPS)
         mapCat(toConcat, f);
@@ -372,8 +374,8 @@ task('default', [
   'css-prefixes',
   'build/client.js',
   'build/officemix.d.ts',
-  'build/ace.js',
-  'build/blockly.js',
+  'build/ace-main.js',
+  'build/blockly-main.js',
   'log'
 ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,

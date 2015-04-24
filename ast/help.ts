@@ -412,6 +412,28 @@ module TDev {
                 })
             */
         },
+        {
+            id: "twitter",
+            name: "Twitter",
+            description: lf("Twitter picture or tweet (https://twitter.com/.../status/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https:\/\/twitter\.com\/[^\/]+\/status\/[0-9]+\/?/gi,(m) => {
+                        links.push(m);
+                    });
+                return links;
+            },
+            idToUrl: id => id,
+            /* CORS issue
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://vine.co/oembed.json?omit_script=true&url=https://vine.co/v/' + id)
+                .then(oembed => HTML.mkOEmbed('https://vine.co/v/' + id, oembed),
+                e => {
+                    Util.log('oembed error:' + e);
+                    return null;
+                })
+            */
+        },
     ];
 
     export class MdComments

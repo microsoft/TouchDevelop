@@ -24,7 +24,7 @@ module TDev.Browser {
         scriptTemplates?: string[];
     }
 
-    export var hubThemes: StringMap<HubTheme> = {        
+    export var hubThemes: StringMap<HubTheme> = {
         'minecraft': {
             description: 'Learn to code with Minecraft',
             logoArtId: 'eopyzwpm',
@@ -747,7 +747,7 @@ module TDev.Browser {
             ]);
             m.show();
         }
-    
+
 
         static loginToCreate(name:string, hash:string)
         {
@@ -1330,7 +1330,7 @@ module TDev.Browser {
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create channel"), Ticks.hubCreateList,
                     () => { this.createList(); });
-                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));                
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short

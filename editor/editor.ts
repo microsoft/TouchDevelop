@@ -2092,6 +2092,8 @@ module TDev
                 }, json => {
                     ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
                 });
+            }, (error: any) => {
+                ModalDialog.info("Compilation error", error.message);
             });
         }
 
@@ -3141,7 +3143,7 @@ module TDev
                         scriptText: scriptText,
                         guid: header.guid,
                         scriptVersionInCloud: scriptVersionInCloud,
-                        editorState: editorState,
+                        editorState: JSON.parse(editorState || "{}"),
                         baseSnapshot: header.scriptVersion.baseSnapshot,
                         metadata: header.meta,
                     });

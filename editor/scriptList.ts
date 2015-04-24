@@ -85,8 +85,9 @@
             this.updateScroll()
             elt("root").appendChild(this.theRoot);
 
-            Util.onInputChange(this.searchBox,
-                    Util.catchErrors("slSearch-searchKey", () => this.searchKey()));
+            var up = KeyboardAutoUpdate.mkInput(this.searchBox, () => this.searchKey())
+            up.attach()
+
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
             this.searchBox.placeholder = lf("Search here...");
 
@@ -5362,11 +5363,11 @@
                                     HTML.showProgressNotification(lf("saving..."));
                                     var payload = {}; payload[sn.id] = id;
                                     Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
-                                        TheApiCacheMgr.invalidate(sc.jsonScript.id);
-                                    }, e => World.handlePostingError(e, "saving metadata"));
-                                }));
+                                    TheApiCacheMgr.invalidate(sc.jsonScript.id);
+                                }, e => World.handlePostingError(e, "saving metadata"));
+                            }));
                             if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
-                            divs.push(meta);
+                        divs.push(meta);                        
                         });
                     }
 
@@ -5982,7 +5983,10 @@
                 if (!text) return;
                 var prog = <AST.AppEditorState>JSON.parse(text);
                 var num = prog.tutorialNumSteps - (prog.tutorialStep || 0);
-                if (prog.tutorialId && num > 0) {
+                // Preserve the TouchDevelop behavior (needs [tutorialId] to be
+                // considered a valid tutorial); external editors don't have
+                // that requirement.
+                if ((prog.tutorialId || header.editor) && num > 0) {
                     var starSpan = span("bold",((prog.tutorialStep || 0) + 1) + "★");
                     var ofSteps = prog.tutorialNumSteps ? (small ? "/" : lf(" of ")) + (prog.tutorialNumSteps + 1) : "";
                     d.appendChild(div("tutProgress",
