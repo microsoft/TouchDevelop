@@ -6340,7 +6340,8 @@
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
 
-            if (Cloud.lite && /#docs/i.test(this.getDescription())) {
+            var isDocs = /#docs/i.test(this.getDescription());
+            if (Cloud.lite && isDocs) {
                 var pubAt = (pref:string) => {
                     var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
                     return HTML.mkAsyncButton(lf("publish at /{0}", path), () => 
@@ -6357,7 +6358,7 @@
                     ])
             }
 
-            if (!this.isLibrary() && !this.isCloud()) {
+            if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud() && !isDocs) {
                 var appStudioDiv = div("wall-dialog-buttons text-left")
                 appStudioDiv.style.height = "2.8em";
                 m.add(appStudioDiv)
