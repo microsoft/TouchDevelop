@@ -171,10 +171,11 @@ module TDev.AppExport
                         progressBar.stop();
                         if (res && res.redirect) {
                             msg.setChildren([]);
+                            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + res.id;
                             Browser.setInnerHTML(msg, "Your Web App is ready: " +
-                                "<a target='_blank' href='http://tdev.ly/" + res.id + "'>http://tdev.ly/" + res.id + "</a>" +
+                                "<a target='_blank' href='" + url + "'>" + url + "</a>" +
                                 "<div class='smallText' style='margin-top:0.8em'>To delete the Web App later, go back to this dialog for the same installed published script.</div>");
-                            addShare("http://tdev.ly/" + res.id, name)
+                            addShare(url, name)
                         } else {
                             msg.setChildren([div('wall-dialog-header', "Sorry, the app could not be created. "), res ? res.message : ""]);
                         }
@@ -216,7 +217,7 @@ module TDev.AppExport
 
                 m.add(div("wall-dialog-header", storeLogo("html5")));
                 if (data.existingRedirect) {
-                    var url = "http://tdev.ly/" + data.existingId
+                    var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + data.existingId
                     buttonsDiv.setChildren([
                         HTML.mkButton(lf("cancel"), () => {
                             m.dismiss();
