@@ -361,8 +361,6 @@ module TDev {
                     }
                 } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari
 
-            audioWav = isGecko;
-
             if (isWP8app) {
                 audioDataUrls = true; // through wab
                 screenshots = true; // through wab

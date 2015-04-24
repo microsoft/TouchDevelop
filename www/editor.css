@@ -2799,6 +2799,17 @@ a.md-bigbutton:hover {
     margin-right:0.3em;
 }
 
+.sdSocialEmbed .svg
+{
+    width:1.4em;
+    height:1.4em;
+    vertical-align:middle;
+}
+
+.sdSocialEmbed input {
+    width: calc(100% - 4em);
+}
+
 div.iconThumb {
     width:auto;
     height:100%;

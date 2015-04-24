@@ -5354,8 +5354,8 @@
 
                     if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
                         var youtubeInput: HTMLInputElement;
-                        var meta = div('',
-                            lf("YouTube video:"),
+                        var meta = div('sdSocialEmbed',
+                            HTML.mkImg("svg:youtube,black,clip=100"),
                             youtubeInput = HTML.mkTextInputWithOk("url", "YouTube video link",() => {
                                 var id = MdComments.parseYouTubeIds(youtubeInput.value)[0] || null;
                                 youtubeInput.value = id ? "https://youtu.be/" + id : "";
