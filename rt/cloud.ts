@@ -10,8 +10,9 @@ module TDev.Cloud {
         searchApiKey: string;
         rootUrl: string;
         liteVersion: string;
+        shareUrl: string;
+        cdnUrl: string;
 
-        shareUrl?: string;
         tdVersion?: string;
         releaseid?: string;
         relid?: string;
@@ -21,6 +22,7 @@ module TDev.Cloud {
     export var config: ClientConfig = {
         searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
         searchUrl: "https://tdsearch.search.windows.net",
+        cdnUrl: "https://az31353.vo.msecnd.net",
         workspaceUrl: null,
         rootUrl: "https://www.touchdevelop.com",
         shareUrl: "http://tdev.ly",
