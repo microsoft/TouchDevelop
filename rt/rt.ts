@@ -2977,7 +2977,7 @@ module TDev
                                             )._value;
                                         break;
                                     case "Sound":
-                                        var missingUrl = "https://az31353.vo.msecnd.net/pub/pxiraczt";
+                                        var missingUrl = Cloud.artUrl('pxiraczt');
                                         if (!Browser.audioWav) missingUrl = HTML.patchWavToMp4Url(missingUrl);
                                         v = TDev.RT.Sound.mk(missingUrl);
                                         break;

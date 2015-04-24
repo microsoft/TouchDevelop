@@ -943,7 +943,7 @@ module TDev.HTML {
         // Must be idempotent
         if (!url) return url;
         // only do it for az31353.vo.msecnd.net ?
-        if (localCdn &&
+        if (localCdn && !/http:\/\/localhost/i.test(url) &&
             /^(https:\/\/az31353.vo.msecnd.net|http:\/\/cdn.touchdevelop.com|https?:\/\/lexmediaservice3.blob.core.windows.net|https:\/\/tdtutorialtranslator.blob.core.windows.net)/i.test(url)) {
             url = localCdn + encodeURIComponent(url)
         }

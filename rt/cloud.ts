@@ -30,6 +30,20 @@ module TDev.Cloud {
         hashtag:"#TouchDevelop",
         liteVersion: null,
     }
+
+    export function artImg(id: string, thumb = false): HTMLElement {
+        var d = div('iconThumb');
+        d.style.backgroundImage = Cloud.artCssImg(id, true);
+        return d;
+    }
+
+    export function artCssImg(id: string, thumb = false): string {
+        return HTML.cssImage(Cloud.artUrl(id, thumb));
+    }
+
+    export function artUrl(id: string, thumb = false): string {
+        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.cdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
+    }
     
     export function hasPermission(perm:string)
     {

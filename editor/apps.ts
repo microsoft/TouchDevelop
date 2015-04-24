@@ -1420,7 +1420,7 @@ module TDev.AppExport
         AST.TypeChecker.tcApp(app)
         var compiled = AST.Compiler.getCompiledScript(app, {
             packaging: true,
-            artResolver: function (u) { return ArtUtil.artUrl(u, false); },
+            artResolver: function (u) { return Cloud.artUrl(u); },
             javascript: true,
             scriptId: options.scriptId,
             authorId: options.userId,

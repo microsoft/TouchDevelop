@@ -790,7 +790,7 @@ module TDev
         {
             this.setIconColor(TDev.Util.colors,
                          (s) => s,
-                         (s) => this.theScript.iconArtId ? ArtUtil.artImg(this.theScript.iconArtId, true) : HTML.mkImg(this.theScript.iconPath()),
+                         (s) => this.theScript.iconArtId ? Cloud.artImg(this.theScript.iconArtId, true) : HTML.mkImg(this.theScript.iconPath()),
                          (s:string) => {
                             this.theScript.color = "#ff" + s.replace("#", "");
                          });

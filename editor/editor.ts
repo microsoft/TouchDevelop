@@ -1734,7 +1734,7 @@ module TDev
                         this.runActionCore(a, args, !!opts.debugging);
                     });
                     saveAndRun()
-                }, ArtUtil.artUrl(Script.splashArtId));
+                }, Cloud.artUrl(Script.splashArtId));
             };
 
             var run1 = () => {

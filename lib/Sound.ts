@@ -66,7 +66,7 @@ module TDev.RT {
 
         static fromArtId(id:string)  : Promise
         {
-            return Sound.fromArtUrl('https://az31353.vo.msecnd.net/pub/' + id);
+            return Sound.fromArtUrl(Cloud.artUrl(id));
         }
 
         static fromArtUrl(url:string)  : Promise

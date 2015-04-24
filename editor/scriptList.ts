@@ -763,7 +763,7 @@
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
                                 Browser.isWP8app ? null :
-                                div("introThumb introLarge", ArtUtil.artImg("kkqqysxz", false)),
+                                div("introThumb introLarge", Cloud.artImg("kkqqysxz", false)),
                                 div("wall-dialog-body",
                                     Util.fmt("Run the beta version of TouchDevelop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
@@ -5759,7 +5759,7 @@
         }
 
         public iconImg(thumb : boolean): HTMLElement {
-            return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
+            return this.app.iconArtId ? Cloud.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
         }
 
         public mkBoxExt(big:boolean, isTopic:boolean)
@@ -5953,7 +5953,7 @@
                 var smallIcon = div("hubTileSmallIcon");
                 var bigIcon = null;
 
-                var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
+                var ss = this.jsonScript.screenshotthumburl || Cloud.artUrl(this.app.iconArtId);
                 if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
                     bigIcon = div("hubTileScreenShot");
@@ -7718,7 +7718,7 @@
                 this.userid = u.userid;
 
                 if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
@@ -7748,7 +7748,7 @@
             return this.withUpdate(d, (u: JsonGroup) => {
                 this.name = u.name;
                 if (u.pictureid && !Browser.lowMemory) {
-                    d.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    d.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     d.style.backgroundRepeat = 'no-repeat';
                     d.style.backgroundPosition = 'center';
                     d.style.backgroundSize = 'cover';
@@ -9334,7 +9334,7 @@
             return this.withUpdate(res,(u: JsonChannel) => {
                 this.json = u;
                 if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(u.pictureid));
+                    icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
@@ -9389,7 +9389,7 @@
 
                 if (this.json.pictureid && !Browser.lowMemory) {
                     bigIcon = div("hubTileScreenShot");
-                    bigIcon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(this.json.pictureid));
+                    bigIcon.style.backgroundImage = Cloud.artCssImg(this.json.pictureid);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
                     bigIcon.style.backgroundPosition = 'center';
                     bigIcon.style.backgroundSize = 'cover';

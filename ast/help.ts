@@ -704,7 +704,7 @@ module TDev {
                     var caption = m[6];
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
-                        url = Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId);
+                        url = Cloud.artUrl(artId);
                     }
                     var urlsafe = HTML.proxyResource(url);
                     if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url);
@@ -1247,7 +1247,7 @@ module TDev {
                                 break;
                             case "avatar":
                                 var artId = MdComments.findArtId(parts[1]);
-                                boxHd = Util.fmt("<img class='md-box-avatar-img' src='{0}' /><div class='md-box-avatar-body' dir='auto'>", HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId)));
+                                boxHd = Util.fmt("<img class='md-box-avatar-img' src='{0}' /><div class='md-box-avatar-body' dir='auto'>", Cloud.artUrl(artId));
                                 boxFt = '</div>';
                                 boxCss = '';
                                 boxClass = 'avatar';
