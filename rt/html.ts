@@ -55,7 +55,7 @@ module TDev.HTML {
         d.dataset['youtubeid'] = ytid;
         Browser.setInnerHTML(d, SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid)));
         d.withClick(() => {
-            d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=https://www.touchdevelop.com' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
+            d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=" + Cloud.config.rootUrl + "' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
         });
         return d;
     }
@@ -826,7 +826,7 @@ module TDev.HTML {
     {
         var msg = div("errorNotification",
             lf("Access Denied: Your web browser and the web site prevent cross-origin resource sharing (CORS)."),
-            mkA("", "https://www.touchdevelop.com/docs/CORS", "_blank", "Learn more..."), mkBr(), span("smallText", "URL: " + url));
+            mkA("", Cloud.config.rootUrl + "/docs/CORS", "_blank", "Learn more..."), mkBr(), span("smallText", "URL: " + url));
         showNotification(msg);
     }
 

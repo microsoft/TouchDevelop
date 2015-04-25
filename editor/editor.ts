@@ -5278,11 +5278,11 @@ module TDev
             m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
                                           "TouchDevelop was brought to you by Microsoft Research."));
             m.add(div("wall-dialog-buttons",
-                link("legal", "/legal"),
-                link("privacy and cookies", "/privacy")));
+                link(lf("legal"), "/legal"),
+                link(lf("privacy and cookies"), "/privacy")));
 
             m.add(div("wall-dialog-buttons",
-                link("visit www.touchdevelop.com", "/")));
+                link(lf("visit {0}", Cloud.config.rootUrl), "/")));
 
             m.show();
         }

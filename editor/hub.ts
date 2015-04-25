@@ -1900,7 +1900,7 @@ module TDev.Browser {
             if (Browser.isWP8app)
                 Editor.showFeedbackBox();
             else
-                Util.navigateInWindow("https://www.touchdevelop.com/");
+                Util.navigateInWindow(Cloud.config.rootUrl);
         }
 
         static winStoreHelp() {

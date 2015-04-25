@@ -801,9 +801,9 @@ module TDev
             this.scriptName.value = this.theScript.getName();
             this.description.value = this.theScript.comment;
             this.updatePlatformDiv();
-            this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published" ? null
-                : [lf("published id: "),
-                   HTML.mkA("idlink", "https://www.touchdevelop.com/" + ScriptEditorWorldInfo.baseId, "_blank", "/" + ScriptEditorWorldInfo.baseId)]);
+            this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published"
+                ? null
+                : lf("published id: {0}", ScriptEditorWorldInfo.baseId));
 
             var color = new DeclEntry(lf("color: {0}", this.theScript.htmlColor()));
             color.icon = "";

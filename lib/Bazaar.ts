@@ -75,7 +75,7 @@ module TDev.RT {
                     kind: "leaderboardScore__Send",
                     data: { score: score, scriptId: scriptId }
                 });
-                Web.post_message_to_parent("https://www.touchdevelop.com", msg, null);
+                Web.post_message_to_parent(Cloud.config.rootUrl, msg, null);
                 Web.post_message_to_parent("http://localhost:15669", msg, null);
             }
         }

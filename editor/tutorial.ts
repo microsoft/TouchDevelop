@@ -1025,7 +1025,7 @@ module TDev
             if (advertise && Script.editorState && Script.editorState.tutorialId) {
                 Util.log("tutorial complete: " + Script.editorState.tutorialId);
                 var msg = RT.JsonObject.wrap({ kind: "tutorialComplete__Send", tutorialId: Script.editorState.tutorialId });
-                RT.Web.post_message_to_parent("https://www.touchdevelop.com", msg, null);
+                RT.Web.post_message_to_parent(Cloud.config.rootUrl, msg, null);
                 RT.Web.post_message_to_parent("http://localhost:15669", msg, null);
             }
 

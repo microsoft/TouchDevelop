@@ -493,7 +493,7 @@ module TDev {
                 var ytid = v.getAttribute("data-youtubeid");
                 if (ytid)
                     v.withClick(() => {
-                        v.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=https://www.touchdevelop.com' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
+                        v.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=" + Cloud.config.rootUrl + "' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
                     });
                 else if (v.hasAttribute("data-video")) {
                     var lang = Util.getTranslationLanguage();
@@ -1857,7 +1857,7 @@ module TDev {
                           "</div>";
 
                 if (mdcmt.useExternalLinks)
-                    ch = ch.replace(/#topic(:|%3a)/g, "https://www.touchdevelop.com/docs/");
+                    ch = ch.replace(/#topic(:|%3a)/g, Cloud.config.rootUrl + "/docs/");
             }
 
             if (this.app) {
