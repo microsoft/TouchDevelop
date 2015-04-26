@@ -155,7 +155,8 @@ module TDev {
     }
 
     export interface JsonScriptMeta {
-        youtubeid?: string;
+        youtube?: string;
+        instagram?: string;
     }
 
     export interface JsonScript extends JsonPublication
@@ -341,6 +342,100 @@ module TDev {
         hasabusereports:boolean;
     }
 
+    export interface SocialNetwork {
+        id: string;
+        name: string;
+        description: string;
+        parseIds: (text: string) => string[];
+        idToUrl: (id: string) => string;
+        idToHTMLAsync?: (id: string) => Promise; // HTMLElement;
+    }
+
+    export var socialNetworks: SocialNetwork[] = [
+        {
+            id: "youtube",
+            name: "YouTube",
+            description: lf("YouTube video (https://youtu.be/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/(youtu\.be\/([^\s]+))|(www\.youtube\.com\/watch\?v=([^\s]+))/gi,(m, m2, id1, m3, id2) => {
+                        var ytid = id1 || id2;
+                        links.push(ytid);
+                    });
+                return links;
+            },
+            idToUrl: id => 'https://youtu.be/' + id,
+            idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
+        },
+        {
+            id: "instagram",
+            name: "Instagram",
+            description: lf("Instagram photo (https://instagram.com/p/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/instagram\.com\/p\/([a-z0-9]+)\/?/gi,(m, id) => {
+                        links.push(id);
+                    });
+                return links;
+            },
+            idToUrl: id => 'https://instagram.com/p/' + id + '/',
+            /* CORS issue
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://api.instagram.com/oembed?omit_script=true&url=https://instagram.com/p/' + id + '/')
+                .then(oembed => HTML.mkOEmbed('https://instagram.com/p/' + id + '/', oembed),
+                e => {
+                    Util.log('oembed error:' + e);
+                    return null;
+                })
+                */
+        },
+        {
+            id: "vine",
+            name: "Vine",
+            description: lf("Vine animation (https://vine.co/v/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/vine\.co\/v\/([a-z0-9]+)\/?/gi,(m, id) => {
+                        links.push(id);
+                    });
+                return links;
+            },
+            idToUrl: id => 'https://vine.co/v/' + id,
+            /* CORS issue
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://vine.co/oembed.json?omit_script=true&url=https://vine.co/v/' + id)
+                .then(oembed => HTML.mkOEmbed('https://vine.co/v/' + id, oembed),
+                e => {
+                    Util.log('oembed error:' + e);
+                    return null;
+                })
+            */
+        },
+        {
+            id: "twitter",
+            name: "Twitter",
+            description: lf("Twitter picture or tweet (https://twitter.com/.../status/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https:\/\/twitter\.com\/[^\/]+\/status\/[0-9]+\/?/gi,(m) => {
+                        links.push(m);
+                    });
+                return links;
+            },
+            idToUrl: id => id,
+            /* CORS issue
+            idToHTMLAsync: id => Util.httpGetJsonAsync('https://vine.co/oembed.json?omit_script=true&url=https://vine.co/v/' + id)
+                .then(oembed => HTML.mkOEmbed('https://vine.co/v/' + id, oembed),
+                e => {
+                    Util.log('oembed error:' + e);
+                    return null;
+                })
+            */
+        },
+    ];
+
     export class MdComments
     {
         public userid:string;
@@ -376,16 +471,6 @@ module TDev {
         static error(msg:string)
         {
             return "<span class='md-error'>" + Util.htmlEscape(msg) + " </span>";
-        }
-
-        static parseYouTubeIds(text: string) : string[] {
-            var links = [];
-            if (text)
-                text.replace(/https?:\/\/(youtu\.be\/([^\s]+))|(www\.youtube\.com\/watch\?v=([^\s]+))/gi,(m, m2, id1, m3, id2) => {
-                    var ytid = id1 || id2;
-                    links.push(ytid);
-                });
-            return links;
         }
 
         static proxyVideos(v: JsonVideo) {
@@ -619,7 +704,7 @@ module TDev {
                     var caption = m[6];
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
-                        url = Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId);
+                        url = Cloud.artUrl(artId);
                     }
                     var urlsafe = HTML.proxyResource(url);
                     if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url);
@@ -639,7 +724,7 @@ module TDev {
                 }
             } else if (macro == "pici") {
                 var artId = MdComments.findArtId(arg);
-                var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId)));
+                var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", Cloud.artUrl(artId));
                 return r;
             } else if (macro == "decl") {
                 var decl = Script ? Script.things.filter((t) => t.getName() == arg)[0] : null;
@@ -1162,7 +1247,7 @@ module TDev {
                                 break;
                             case "avatar":
                                 var artId = MdComments.findArtId(parts[1]);
-                                boxHd = Util.fmt("<img class='md-box-avatar-img' src='{0}' /><div class='md-box-avatar-body' dir='auto'>", HTML.proxyResource(Util.fmt("https://az31353.vo.msecnd.net/pub/{0:uri}", artId)));
+                                boxHd = Util.fmt("<img class='md-box-avatar-img' src='{0}' /><div class='md-box-avatar-body' dir='auto'>", Cloud.artUrl(artId));
                                 boxFt = '</div>';
                                 boxCss = '';
                                 boxClass = 'avatar';

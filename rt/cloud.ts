@@ -10,8 +10,10 @@ module TDev.Cloud {
         searchApiKey: string;
         rootUrl: string;
         liteVersion: string;
+        shareUrl: string;
+        cdnUrl: string;
+        hashtag: string;
 
-        shareUrl?: string;
         tdVersion?: string;
         releaseid?: string;
         relid?: string;
@@ -21,10 +23,28 @@ module TDev.Cloud {
     export var config: ClientConfig = {
         searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
         searchUrl: "https://tdsearch.search.windows.net",
+        cdnUrl: "https://az31353.vo.msecnd.net",
         workspaceUrl: null,
         rootUrl: "https://www.touchdevelop.com",
         shareUrl: "http://tdev.ly",
+        hashtag:"#TouchDevelop",
         liteVersion: null,
+    }
+
+    export function isArtUrl(url : string) : boolean {
+        if (!url) return false;
+        var pubUrl = config.cdnUrl + "/pub/";
+        return url.substr(0, pubUrl.length) == pubUrl
+            || /\.\/art\//i.test(url) // exported apps
+            || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url); // legacy
+    }
+
+    export function artCssImg(id: string, thumb = false): string {
+        return HTML.cssImage(Cloud.artUrl(id, thumb));
+    }
+
+    export function artUrl(id: string, thumb = false): string {
+        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.cdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
     }
     
     export function hasPermission(perm:string)

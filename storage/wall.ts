@@ -250,17 +250,6 @@ module TDev {
                     link("legal", "/legal"),
                     link("privacy and cookies", "/privacy")));
 
-                //var s = shareLink();
-                //if (s) {
-                //    RT.ShareManager.addShareButtons(m, TDev.RT.Web.link_url("Cool #touchdevelop web app", s), {
-                //            header: "share this web app"
-                //    });
-                //} else {
-                //    m.add(div("wall-dialog-header", lf("publish to share!")));
-                //    m.addHTML("To share your script with others you first need to publish it. " +
-                //             "In editor, tap on the 'publish' button, next to your script name and icon. ");
-                //}
-
                 m.show();
             }
 

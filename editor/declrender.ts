@@ -150,7 +150,7 @@ module TDev
         function appCloudColor(app:AST.App, icon:string)
         {
             if (!app) return icon
-            if (!icon) icon = ArtUtil.artUrl(app.iconArtId) || app.iconPath()
+            if (!icon) icon = Cloud.artUrl(app.iconArtId, true) || app.iconPath()
             if (app.isCloud) // TODO: wrong color
                 icon = icon.replace(/,white/, ",cyan")
             return icon

@@ -180,8 +180,7 @@ module TDev
             // display picture art in button
             if (this.prop instanceof TDev.AST.GlobalDef) {
                 var gd = <TDev.AST.GlobalDef>this.prop;
-                var artPref = "https://az31353.vo.msecnd.net/pub/";
-                if (gd.isResource && gd.getKind().getName() == "Picture" && gd.url && gd.url.slice(0, artPref.length) == artPref) {
+                if (gd.isResource && gd.getKind().getName() == "Picture" && Cloud.isArtUrl(gd.url)) {
                     c.setBackgroundImage(gd.url);
                     inner.style.backgroundColor = 'rgba(238,238,255,0.5)';
                 }

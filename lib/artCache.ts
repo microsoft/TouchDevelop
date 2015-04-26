@@ -2,6 +2,7 @@
 
 module TDev.RT {
     export module ArtCache {
+        export var enabled = true;
         export var runningTests = false;
         function log(s: string) { Util.log("ArtCache: " + s); }
         var getArtCacheTableAsync = () => Storage.getTableAsync("ArtCache");
@@ -20,12 +21,6 @@ module TDev.RT {
         {
             itemsToDownload = 0;
             itemsDownloaded = 0;
-        }
-
-        export var isArtResource = (url: string) : boolean => {
-            return /^https:\/\/az31353\.vo\.msecnd\.net\/pub\//i.test(url)
-                || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url)
-                || /\.\/art\//i.test(url);
         }
 
         export function responseToDataUrl(response: TDev.RT.WebResponse): string {
@@ -77,7 +72,7 @@ module TDev.RT {
         export function getArtAsync(url: string, accept:string = "*") : Promise // of string
         {
             // disabled art cache
-            if (!getMaxItems()) return null;
+            if (!enabled || !getMaxItems()) return Promise.as(null);
 
             // make sure we have a url and not a data uri
             if (!url || !/^https?:\/\//.test(url)) {

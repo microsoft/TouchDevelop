@@ -2921,14 +2921,14 @@
 
         public twitterMessage()
         {
-            return "Cool #touchdevelop script";
+            return lf("Cool script!") + " " + Cloud.config.hashtag;
         }
 
         public facebookLike(): HTMLElement {
             var id = this.getPublicationId();
             if (!id) return null;
 
-            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id;
+            var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
 
             var btns = ["email", "twitter", "facebook"].map(network =>
@@ -3420,7 +3420,7 @@
                 ScreenShotTab,
                 ScriptHeartsTab,
                 Cloud.lite ? ChannelListTab : null,
-                TagsTab,
+                TagsTab,               
                 ArtTab,
                 ConsumersTab,
                 SuccessorsTab,
@@ -3953,12 +3953,12 @@
                         },
                         e => {});
             }
-
-            // parsing youtube links
-            MdComments.parseYouTubeIds(c.text).forEach(ytid => {
-                var d = HTML.mkYouTubePlayer(ytid);
-                nestedPubs.appendChild(d);
-            });
+            
+            // parsing social network links
+            socialNetworks.filter(sn => !!sn.idToHTMLAsync)
+                .forEach(sn => sn.parseIds(c.text)
+                    .forEach(ytid => sn.idToHTMLAsync(ytid)
+                        .done(d => { if (d) nestedPubs.appendChild(d); })));
 
             var translateBtn: HTMLElement = null;
             var translateCmt = () => {
@@ -4539,7 +4539,7 @@
             case "abusereport":
                 return div(null, lab(lf("abuse report")),
                                  lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
-
+                
             // missing: tag, crash buckets
             default:
                 debugger;
@@ -5354,20 +5354,21 @@
                     }
 
                     if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
-                        var youtubeInput: HTMLInputElement;
-                        var meta = div('',
-                            lf("YouTube video:"),
-                            youtubeInput = HTML.mkTextInputWithOk("url", "YouTube video link",() => {
-                                var id = MdComments.parseYouTubeIds(youtubeInput.value)[0] || null;
-                                youtubeInput.value = id ? "https://youtu.be/" + id : "";
-                                HTML.showProgressNotification("saving youtube link");
-                                Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", { youtubeid: id }).done(() => {
+                        socialNetworks.forEach(sn => {
+                            var metaInput: HTMLInputElement;
+                            var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
+                                metaInput = HTML.mkTextInputWithOk("url", sn.description ,() => {
+                                    var id = sn.parseIds(metaInput.value)[0] || null;
+                                    metaInput.value = id ? sn.idToUrl(id) : "";
+                                    HTML.showProgressNotification(lf("saving..."));
+                                    var payload = {}; payload[sn.id] = id;
+                                    Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
                                     TheApiCacheMgr.invalidate(sc.jsonScript.id);
                                 }, e => World.handlePostingError(e, "saving metadata"));
                             }));
-                        if (sc.jsonScript.meta && sc.jsonScript.meta.youtubeid)
-                            youtubeInput.value = "https://youtu.be/" + sc.jsonScript.meta.youtubeid;
-                        divs.push(meta);
+                            if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
+                        divs.push(meta);                        
+                        });
                     }
 
                     if (app.getPlatformRaw() & PlatformCapability.Current) {
@@ -5666,7 +5667,7 @@
 
         public twitterMessage()
         {
-            return (this.app ? this.app.getName() + " - " : "") +  "cool #touchdevelop script!";
+            return (this.app ? this.app.getName() + " - " : "") + lf("Cool script!") + " " + Cloud.config.hashtag;
         }
 
         public loadLocalHeader(v:Cloud.Header)
@@ -5952,7 +5953,7 @@
                 var smallIcon = div("hubTileSmallIcon");
                 var bigIcon = null;
 
-                var ss = this.jsonScript.screenshotthumburl || ArtUtil.artUrl(this.app.iconArtId);
+                var ss = this.jsonScript.screenshotthumburl || Cloud.artUrl(this.app.iconArtId);
                 if (ss && !Browser.lowMemory) {
                     ss = ss.replace(/\/thumb\//, "/pub/");
                     bigIcon = div("hubTileScreenShot");
@@ -6277,9 +6278,9 @@
                             AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
                 }
 
-                if (this.jsonScript.meta && this.jsonScript.meta.youtubeid) {
-                    var yt = HTML.mkYouTubePlayer(this.jsonScript.meta.youtubeid);
-                    metaDiv.appendChild(yt);
+                if (this.jsonScript.meta) {
+                    socialNetworks.filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
+                        .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
                 }
 
                 if (this.getPublicationIdOrBaseId()) {
@@ -6321,9 +6322,9 @@
             var title = this.getTitle();
             var ht = "";
             this.getDescription().replace(/(#\w+)/g, (m, h) => { ht += " " + m; return "" })
-            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + id
+            var url = Cloud.config.shareUrl + "/" + id
             var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
-            lnk.set_title(title + " #touchdevelop" + ht)
+            lnk.set_title(title + " " + Cloud.config.hashtag + ht)
 
             options.header = lf("share this script")
             options.noDismiss = true
@@ -6348,7 +6349,7 @@
             if (Cloud.lite && isDocs) {
                 var pubAt = (pref:string) => {
                     var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
-                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () =>
+                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () => 
                         Cloud.postPrivateApiAsync("pointers", {
                             path: path,
                             scriptid: id,
@@ -6683,7 +6684,7 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + this.publicId;
+                txtAddress.value = Cloud.config.shareUrl + "/" + this.publicId;
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
@@ -7717,7 +7718,7 @@
                 this.userid = u.userid;
 
                 if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
@@ -7747,7 +7748,7 @@
             return this.withUpdate(d, (u: JsonGroup) => {
                 this.name = u.name;
                 if (u.pictureid && !Browser.lowMemory) {
-                    d.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/' + u.pictureid);
+                    d.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     d.style.backgroundRepeat = 'no-repeat';
                     d.style.backgroundPosition = 'center';
                     d.style.backgroundSize = 'cover';
@@ -7868,7 +7869,7 @@
                                     // readonly does not pop keyboard on mobile
                                     input.value = r.code;
                                     input.onchange = () => { input.value = r.code };
-                                    var iurl = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + r.code;
+                                    var iurl = Cloud.config.shareUrl + "/" + r.code;
                                     var codeDiv = div('',
                                         div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
                                         div('sdExpandableText',
@@ -8158,7 +8159,7 @@
 
         public mkSmallBox():HTMLElement
         {
-            return this.mkBoxCore(false).withClick(() =>
+            return this.mkBoxCore(false).withClick(() => 
                 TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, this.publicId)));
         }
 
@@ -8228,7 +8229,7 @@
                             div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
                             div("", inp),
                             err,
-                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
+                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
                                     lf("No abuse reports so far.")),
                         ])
                     }
@@ -9258,7 +9259,7 @@
                     ));
 
                 if (u.commit)
-                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank",
+                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank", 
                     lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
 
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
@@ -9302,7 +9303,7 @@
             Util.assert(!!id);
             this.publicId = id;
         }
-
+        
         public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
 
         public mkBoxCore(big: boolean) : HTMLElement {
@@ -9333,7 +9334,7 @@
             return this.withUpdate(res,(u: JsonChannel) => {
                 this.json = u;
                 if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(u.pictureid));
+                    icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
                     icon.style.backgroundSize = 'contain';
@@ -9370,7 +9371,7 @@
         public mkTile(sz: number) : HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
-            return this.withUpdate(d, (u: JsonChannel) => {
+            return this.withUpdate(d, (u: JsonChannel) => {                
                 this.json = u;
 
                 var cont = [];
@@ -9388,7 +9389,7 @@
 
                 if (this.json.pictureid && !Browser.lowMemory) {
                     bigIcon = div("hubTileScreenShot");
-                    bigIcon.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(this.json.pictureid));
+                    bigIcon.style.backgroundImage = Cloud.artCssImg(this.json.pictureid);
                     bigIcon.style.backgroundRepeat = 'no-repeat';
                     bigIcon.style.backgroundPosition = 'center';
                     bigIcon.style.backgroundSize = 'cover';
@@ -9506,7 +9507,7 @@
                     Cloud.deletePrivateApiAsync(c.id + "/channels/" + this.parent.publicId)
                     .done(() => {
                         list.invalidateCaches();
-                        el.removeSelf();
+                        el.removeSelf(); 
                     }, e => World.handlePostingError(e, lf("remove script")));
                 })));
             }

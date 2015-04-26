@@ -769,7 +769,11 @@ module TDev.RT {
             var rt = r.rt;
             var score = Bazaar.cachedScore(rt);
             var scriptId = rt.currentScriptId;
+
             rt.stopAsync().done(() => {
+                // if script is not published yet, don't restart - it interferes with tutorial engine
+                if (!scriptId) return;
+
                 var m = new ModalDialog();
                 m.canDismiss = !scriptId;
                 m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
@@ -781,16 +785,13 @@ module TDev.RT {
                         m.dismiss();
                         rt.rerunAsync().done();
                     }, 'wall-dialog-button-huge'),
-                    !scriptId ? HTML.mkButton(lf("dismiss"),() => {
-                        m.dismiss();
-                    }) : null,
-                    scriptId && Browser.notifyBackToHost ? HTML.mkButton(lf("back"),() => {
+                    Browser.notifyBackToHost ? HTML.mkButton(lf("back"),() => {
                         tick(Ticks.runtimeBack);
                         m.dismiss();
                         Util.externalNotify("exit");
                     }) : null
                     ));
-                if (score > 0 && scriptId) {
+                if (score > 0) {
                     Bazaar.loadLeaderboardItemsAsync(scriptId)
                         .done((els: HTMLElement[]) => {
                         if (els && els.length > 0) {

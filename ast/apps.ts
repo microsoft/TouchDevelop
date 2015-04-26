@@ -152,7 +152,7 @@ module TDev.AST.Apps {
         setProp('var webAppGuid = "{0:jq}"', app.localGuid)
         setProp('var runtimeFlags = "{0:jq}"', options.runtimeFlags || "")
 
-        var theBase = "https://az31353.vo.msecnd.net/app/" + options.relId + "/c/";
+        var theBase = Cloud.config.cdnUrl + "/app/" + options.relId + "/c/";
 
 
         AST.TypeChecker.tcApp(app)
@@ -226,7 +226,7 @@ module TDev.AST.Apps {
             if (app.getIconArtId()) {
                 instructions.files.push({
                     path: '',
-                    url: HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + app.getIconArtId()),
+                    url: Cloud.artUrl(app.getIconArtId()),
                     kind: "picture",
                     sourceName:"icon",
                     isUnused: false,
@@ -235,7 +235,7 @@ module TDev.AST.Apps {
             if (app.splashArtId) {
                 instructions.files.push({
                     path: '',
-                    url: HTML.proxyResource("https://az31353.vo.msecnd.net/pub/" + app.splashArtId),
+                    url: Cloud.artUrl(app.splashArtId),
                     kind: "picture",
                     sourceName:"splash",
                     isUnused: false,

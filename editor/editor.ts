@@ -1734,7 +1734,7 @@ module TDev
                         this.runActionCore(a, args, !!opts.debugging);
                     });
                     saveAndRun()
-                }, ArtUtil.artUrl(Script.splashArtId));
+                }, Cloud.artUrl(Script.splashArtId));
             };
 
             var run1 = () => {
@@ -3890,9 +3890,7 @@ module TDev
                         st.disableUpdate = true;
                         st.updateProfile(this.intelliProfile)
 
-                        // always split screen in block/legacy or if user did not explicitely denied it.
-                        if ((AST.blockMode || this.widgetEnabled("splitScreen"))
-                            && !this.intelliProfile.hasKey("flag:nosplit"))
+                        if (!this.intelliProfile.hasFlag("nosplit"))
                             this.setSplitScreen(true, true);
 
                         if (firstTime) {

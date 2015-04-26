@@ -103,7 +103,7 @@ module TDev.Browser {
 
             [elt("hubRoot"), elt("slRoot")].filter(e => !!e).forEach(e => {
                 if (id) {
-                    e.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(id));
+                    e.style.backgroundImage = Cloud.artCssImg(id);
                     e.style.backgroundRepeat = 'repeat'
                 }
                 else e.style.backgroundImage = "";
@@ -174,7 +174,7 @@ module TDev.Browser {
                 { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
             return modes.map((mode, index) => {
                 var pic = div('pic');
-                pic.style.background = HTML.cssImage("https://az31353.vo.msecnd.net/pub/" + mode.id);
+                pic.style.background = Cloud.artCssImg(mode.id, true);
                 pic.style.backgroundSize = "cover";
 
                 return div('editor-mode', pic, HTML.mkButton(EditorSettings.editorModeText(mode.n),() => {
@@ -933,13 +933,12 @@ module TDev.Browser {
         private findImgForTutorial(app: AST.App) {
             // XXX it seems that this function is actually unused as [app] is
             // always null?!!
-            if (!app)
-                return null;
+            if (!app) return null;
 
             var findImg = t => app.resources().filter(r =>
                     r.getKind() == api.core.Picture &&
                     t.test(r.getName()) &&
-                    /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(r.url))[0];
+                    Cloud.isArtUrl(r.url))[0];
 
             var img = findImg(/screenshot/) || findImg(/background/);
 
@@ -1151,7 +1150,7 @@ module TDev.Browser {
 
             if (!Browser.lowMemory) {
                 elt.style.backgroundSize = 'contain';
-                elt.style.backgroundImage = HTML.cssImage('https://az31353.vo.msecnd.net/pub/zxddkvgm');
+                elt.style.backgroundImage = Cloud.artCssImg('zxddkvgm');
                 elt.style.backgroundRepeat = 'no-repeat';
             }
             elt.className += " tutorialBtn";
@@ -1962,7 +1961,7 @@ module TDev.Browser {
                         TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1",(res: JsonList) => {
                             var sc = res.items[0];
                             if (sc) {
-                                btn.style.backgroundImage = HTML.cssImage(ArtUtil.artUrl(sc.id, false));
+                                btn.style.backgroundImage = Cloud.artCssImg(sc.id, true);
                                 btn.style.backgroundSize = "cover";
                                 btn.style.backgroundPosition = 'center';
                             }

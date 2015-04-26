@@ -171,7 +171,7 @@ module TDev.AppExport
                         progressBar.stop();
                         if (res && res.redirect) {
                             msg.setChildren([]);
-                            var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + res.id;
+                            var url = Cloud.config.shareUrl + "/" + res.id;
                             Browser.setInnerHTML(msg, "Your Web App is ready: " +
                                 "<a target='_blank' href='" + url + "'>" + url + "</a>" +
                                 "<div class='smallText' style='margin-top:0.8em'>To delete the Web App later, go back to this dialog for the same installed published script.</div>");
@@ -217,7 +217,7 @@ module TDev.AppExport
 
                 m.add(div("wall-dialog-header", storeLogo("html5")));
                 if (data.existingRedirect) {
-                    var url = (Cloud.config.shareUrl || Cloud.config.rootUrl) + "/" + data.existingId
+                    var url = Cloud.config.shareUrl + "/" + data.existingId
                     buttonsDiv.setChildren([
                         HTML.mkButton(lf("cancel"), () => {
                             m.dismiss();
@@ -1420,7 +1420,7 @@ module TDev.AppExport
         AST.TypeChecker.tcApp(app)
         var compiled = AST.Compiler.getCompiledScript(app, {
             packaging: true,
-            artResolver: function (u) { return ArtUtil.artUrl(u, false); },
+            artResolver: function (u) { return Cloud.artUrl(u); },
             javascript: true,
             scriptId: options.scriptId,
             authorId: options.userId,

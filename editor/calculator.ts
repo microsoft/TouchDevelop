@@ -3659,7 +3659,7 @@ module TDev
                 e.colorOverride = "rgb(0, 204, 153)";
                 var spic = picStringValues[s];
                 if (spic) {
-                    e.imageOverride = ArtUtil.artUrl(spic, true);
+                    e.imageOverride = Cloud.artUrl(spic, true);
                     e.descOverride = e.nameOverride;
                 }
                 e.cbOverride = () => {
