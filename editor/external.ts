@@ -68,10 +68,10 @@ module TDev {
     }
 
     // This function modifies its argument by adding an extra [J.JLibrary]
-    // to its [decls] field that references the Embedded library.
-    function addEmbeddedLibrary(app: J.JApp) {
+    // to its [decls] field that references the device's library.
+    function addDeviceLibrary(app: J.JApp) {
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
-        'meta import embedded {'+
+        'meta import device {'+
         '  pub "hrgbjn"'+
         '}'
       );
@@ -82,7 +82,7 @@ module TDev {
     // Takes a [JApp] and runs its through various hoops to make sure
     // everything is type-checked and resolved properly.
     function roundtrip(a: J.JApp): Promise { // of J.JApp
-      addEmbeddedLibrary(a);
+      addDeviceLibrary(a);
       var text = J.serialize(a);
       return AST.loadScriptAsync((id: string) => {
         if (id == "")
@@ -267,7 +267,7 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             var ast = message2.ast;
-            addEmbeddedLibrary(ast);
+            addDeviceLibrary(ast);
             console.log("Attempting to serialize", ast);
             var text = J.serialize(ast);
             console.log("Attempting to edit script text", text);

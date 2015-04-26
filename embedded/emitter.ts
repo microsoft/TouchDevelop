@@ -91,7 +91,7 @@ module TDev {
     // the right number constant.
     function translateArgsIfNeeded(call: string, args: J.JExpr[]) {
       switch (call) {
-        case "embedded_button_pressed":
+        case "device_button_pressed":
           if (isStringLiteral(args[0]) == "left")
             return [mkNumberLiteral(1)];
           else if (isStringLiteral(args[0]) == "right")

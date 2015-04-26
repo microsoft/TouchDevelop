@@ -98,10 +98,10 @@ module Helpers {
     return mkCall(name, mkTypeRef(librarySymbol), [librarySingleton]);
   }
 
-  // Call function [name] from the standard embedded library with arguments
+  // Call function [name] from the standard device library with arguments
   // [args].
   export function stdCall(name: string, args: J.JExpr[]): J.JCall {
-    return mkCall(name, mkTypeRef("embedded"), [<J.JExpr> mkLibrary("embedded")].concat(args));
+    return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
   }
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
@@ -419,9 +419,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "embedded_button_pressed":
+    case "device_button_pressed":
       return compileButtonPressed(e, b);
-    case "embedded_logic_onoff_states":
+    case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
@@ -613,11 +613,11 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         e = r.env;
         break;
 
-      case 'embedded_comment':
+      case 'device_comment':
         stmts.push(compileComment(e, b));
         break;
 
-      case 'embedded_forever':
+      case 'device_forever':
         stmts.push(compileForever(e, b));
         break;
 
@@ -629,19 +629,19 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsWhileUntil(e, b));
         break;
 
-      case 'embedded_set_led':
+      case 'device_set_led':
         stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
         break;
 
-      case 'embedded_wait':
+      case 'device_wait':
         stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
         break;
 
-      case 'embedded_scroll':
+      case 'device_scroll':
         stmts.push(compileStdBlock(e, b, "scroll", ["ARG"]));
         break;
 
-      case 'embedded_event':
+      case 'device_event':
         stmts.push(compileEvent(e, b));
         break;
 
