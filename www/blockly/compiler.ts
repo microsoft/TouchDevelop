@@ -5,11 +5,6 @@
 //                A compiler from Blocky to TouchDevelop                     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO:
-// - loops: repeat n times, repeat, forever, simplified for loop
-// - logic: on/off
-// - basic, led, images, input: adapt API
-
 import J = TDev.AST.Json;
 import B = Blockly;
 

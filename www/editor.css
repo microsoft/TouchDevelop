@@ -19,7 +19,7 @@ div.calcButtonHelp {
 .hubSectionHeader
 {
     font-family: "Segoe UI Light", "Segoe UI", "Segoe WP Light", "Segoe WP",
-	         "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Sans-Serif;
+             "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Sans-Serif;
     font-weight: 200;
 }
 
@@ -178,13 +178,13 @@ button.navItem[data-current^="yes"]
 
 .navImg
 {
-	width: 3.15em;
-	height: 3.15em;
-  	/* border: 1px solid transparent; why? */
-	position: absolute;
+    width: 3.15em;
+    height: 3.15em;
+    /* border: 1px solid transparent; why? */
+    position: absolute;
         padding: 0;
-	top: 0;
-	left: 0;
+    top: 0;
+    left: 0;
 }
 
 .navDiamond .svg,
@@ -200,13 +200,13 @@ button.navItem[data-current^="yes"]
 
 .navContent
 {
-	position: absolute;
-	left: 4em;
-	top: 0;
-	/*margin-top: -5px;
-	margin-left: 62px;*/
-	white-space: nowrap;
-	overflow: hidden;
+    position: absolute;
+    left: 4em;
+    top: 0;
+    /*margin-top: -5px;
+    margin-left: 62px;*/
+    white-space: nowrap;
+    overflow: hidden;
 }
 .recordTypeDescription .navContent
 {
@@ -215,8 +215,8 @@ button.navItem[data-current^="yes"]
 
 .smallDecl
 {
-	font-size: 0.8em;
-	color: #666;
+    font-size: 0.8em;
+    color: #666;
     display: inline;
 }
 
@@ -228,8 +228,8 @@ button.navItem[data-current^="yes"]
 
 .navDescription
 {
-	font-size: 0.8em;
-	color: #666;
+    font-size: 0.8em;
+    color: #666;
 }
 
 .recordTypeDescription .navDescription
@@ -241,7 +241,7 @@ button.navItem[data-current^="yes"]
 
 .navItem[data-current^="yes"] .navDescription
 {
-	color: #ccc;
+    color: #ccc;
 }
 
 .navItem[data-current^="yes"] .navImg
@@ -995,16 +995,16 @@ textarea.commentEdit {
 
 .stmtEditorSide
 {
-	position: absolute;
-	left: 0;
-	top: 0;
-	height: 100%;
-	width: 38%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 38%;
 }
 
 .landscape .stmtEditorSide
 {
-	background: white;
+    background: white;
 }
 
 
@@ -3456,7 +3456,7 @@ div.sdTabTileLabel {
 
 .sdCmt .sdCmtNested
 {
-	padding-left: 4em;
+    padding-left: 4em;
 }
 
 .phone .sdCmt {
@@ -3838,15 +3838,15 @@ right:4.5em;
 .hubTileSize2 img,
 .hubTileSize1 img
 {
-	width: 4em;
-	height: 4em;
+    width: 4em;
+    height: 4em;
 }
 
 .hubTileSize3 .svg,
 .hubTileSize3 img
 {
-	width: 11em;
-	height: 11em;
+    width: 11em;
+    height: 11em;
 }
 
 .hubDocTile {
@@ -4496,6 +4496,11 @@ span.videoCaption
 #btn-editorTutorialNext { right: 0.1em; top:0em; }
 #btn-editorTutorialPrevious { left: 0.1em; top:0em; }
 
+/* Try to roughly center the bolt icon in the compile button */
+#btn-codeCompile svg {
+    margin-left: .3em;
+}
+
 .tutorialStars {
   text-align:center;
 }
@@ -4747,17 +4752,17 @@ height: 2.2em;
 }
 
 .md-video-wrapper {
-	position: relative;
-	padding-bottom: 56.25%; /* 16:9 */
-	padding-top: 25px;
-	height: 0;
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    padding-top: 25px;
+    height: 0;
 }
 .md-video-wrapper iframe {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .md-box {
