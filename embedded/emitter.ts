@@ -294,7 +294,7 @@ module TDev {
         var userFunctions = decls.map((d: J.JDecl) => {
           if (d.nodeType == "action") {
             return this.visit(e, d);
-          } else if (!(d.nodeType == "library" && d.name == "embedded")) {
+          } else if (!(d.nodeType == "library")) {
             throw new Error("Untranslated declaration" + d);
           }
           return null;
