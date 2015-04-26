@@ -9,8 +9,8 @@
     <!-- <script type="application/javascript" src="blockly/blockly_uncompressed.js"></script> -->
     <!-- <script type="application/javascript" src="blockly/blocks_compressed.js"></script> -->
     <!-- <script type="application/javascript" src="blockly/msg/js/en.js"></script> -->
-    <!-- Microbit-specific blocks -->
-    <script type="application/javascript" src="blocks-microbit.js"></script>
+    <!-- Embedded-specific blocks -->
+    <script type="application/javascript" src="blocks-custom.js"></script>
     <!-- Compiled version of blockly-main.ts -->
     <script type="application/javascript" src="../blockly-main.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
@@ -53,35 +53,35 @@
         <block type="text"></block>
         <block type="math_number"></block>
         <block type="math_number1"></block>
-        <block type="microbit_scroll">
+        <block type="embedded_scroll">
           <value name="ARG">
             <block type="text">
               <field name="TEXT"></field>
             </block>
           </value>
         </block>
-        <block type="microbit_event">
+        <block type="embedded_event">
           <value name="ID">
             <block type="text">
               <field name="TEXT">start</field>
             </block>
           </value>
         </block>
-        <block type="microbit_wait">
+        <block type="embedded_wait">
           <value name="VAL">
             <block type="math_number">
               <field name="NUM">100</field>
             </block>
           </value>
         </block>
-        <!-- <block type="microbit_pause"> -->
+        <!-- <block type="embedded_pause"> -->
         <!--   <value name="pause"> -->
         <!--     <block type="math_number"> -->
         <!--       <field name="NUM">100</field> -->
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <!-- <block type="microbit_print_message"> -->
+        <!-- <block type="embedded_print_message"> -->
         <!--   <value name="message"> -->
         <!--     <block type="text"> -->
         <!--       <field name="TEXT">BBC Bug</field> -->
@@ -95,19 +95,19 @@
         <!-- </block> -->
       </category>
       <category name="LED">
-        <block type="microbit_clear_display"></block>
-        <block type="microbit_set_led">
+        <block type="embedded_clear_display"></block>
+        <block type="embedded_set_led">
           <value name="id">
             <block type="math_number">
               <field name="NUM">0</field>
             </block>
           </value>
           <value name="brightness">
-            <block type="microbit_logic_onoff_states"></block>
+            <block type="embedded_logic_onoff_states"></block>
           </value>
         </block>
 
-        <!-- <block type="microbit_plot"> -->
+        <!-- <block type="embedded_plot"> -->
         <!--   <value name="x"> -->
         <!--     <block type="math_number"> -->
         <!--       <field name="NUM">0</field> -->
@@ -119,7 +119,7 @@
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <!-- <block type="microbit_unplot"> -->
+        <!-- <block type="embedded_unplot"> -->
         <!--   <value name="x"> -->
         <!--     <block type="math_number"> -->
         <!--       <field name="NUM">0</field> -->
@@ -131,7 +131,7 @@
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <!-- <block type="microbit_point"> -->
+        <!-- <block type="embedded_point"> -->
         <!--   <value name="x"> -->
         <!--     <block type="math_number"> -->
         <!--       <field name="NUM">0</field> -->
@@ -143,29 +143,29 @@
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <!-- <block type="microbit_eye_on"></block> -->
-        <!-- <block type="microbit_eye_off"></block> -->
-        <!-- <block type="microbit_set_eye"></block> -->
-        <!-- <block type="microbit_toggle_eye"></block> -->
-        <!-- <block type="microbit_get_eye"></block> -->
+        <!-- <block type="embedded_eye_on"></block> -->
+        <!-- <block type="embedded_eye_off"></block> -->
+        <!-- <block type="embedded_set_eye"></block> -->
+        <!-- <block type="embedded_toggle_eye"></block> -->
+        <!-- <block type="embedded_get_eye"></block> -->
       </category>
       <category name="Images">
-        <block type="microbit_make_StringImage">
+        <block type="embedded_make_StringImage">
           <value name="NAME">
             <block type="text">
               <field name="TEXT">BBC Bug</field>
             </block>
           </value>
         </block>
-        <block type="microbit_scroll_string_image">
+        <block type="embedded_scroll_string_image">
           <value name="speed">
             <block type="math_number">
               <field name="NUM">100</field>
             </block>
           </value>
         </block>
-        <!-- <block type="microbit_show_image"></block> -->
-        <block type="microbit_show_image_offset">
+        <!-- <block type="embedded_show_image"></block> -->
+        <block type="embedded_show_image_offset">
           <value name="x">
             <block type="math_number">
               <field name="NUM">0</field>
@@ -177,14 +177,14 @@
             </block>
           </value>
         </block>
-        <!-- <block type="microbit_scroll_image"></block> -->
-        <block type="microbit_build_image"></block>
-        <block type="microbit_build_big_image"></block>
-        <!-- <block type="microbit_set_image_point"></block>
-            <block type="microbit_get_image_point"></block> -->
+        <!-- <block type="embedded_scroll_image"></block> -->
+        <block type="embedded_build_image"></block>
+        <block type="embedded_build_big_image"></block>
+        <!-- <block type="embedded_set_image_point"></block>
+            <block type="embedded_get_image_point"></block> -->
       </category>
       <category name="Input">
-        <block type="microbit_button_pressed"></block>
+        <block type="embedded_button_pressed"></block>
       </category>
       <category name="If">
         <block type="controls_if"></block>
@@ -221,14 +221,14 @@
             </block>
           </value>
         </block>
-        <block type="microbit_forever"></block>
+        <block type="embedded_forever"></block>
       </category>
       <category name="Logic">
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
         <block type="logic_boolean"></block>
-        <block type="microbit_logic_onoff_states"></block>
+        <block type="embedded_logic_onoff_states"></block>
       </category>
       <category name="Maths">
         <block type="math_arithmetic"></block>
@@ -238,7 +238,7 @@
         <block type="variables_get"></block>
       </category>
       <category name="Comment">
-        <block type="microbit_comment">
+        <block type="embedded_comment">
           <value name="comment">
             <block type="text">
               <field name="TEXT"></field>

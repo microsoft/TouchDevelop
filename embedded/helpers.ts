@@ -1,8 +1,8 @@
-///<reference path='../refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
-  export module Microbit {
+  export module Embedded {
 
     import J = AST.Json
 

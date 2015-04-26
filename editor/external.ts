@@ -68,10 +68,10 @@ module TDev {
     }
 
     // This function modifies its argument by adding an extra [J.JLibrary]
-    // to its [decls] field that references the Microbit library.
-    function addMicrobitLibrary(app: J.JApp) {
+    // to its [decls] field that references the Embedded library.
+    function addEmbeddedLibrary(app: J.JApp) {
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
-        'meta import microbit {'+
+        'meta import embedded {'+
         '  pub "hrgbjn"'+
         '}'
       );
@@ -82,7 +82,7 @@ module TDev {
     // Takes a [JApp] and runs its through various hoops to make sure
     // everything is type-checked and resolved properly.
     function roundtrip(a: J.JApp): Promise { // of J.JApp
-      addMicrobitLibrary(a);
+      addEmbeddedLibrary(a);
       var text = J.serialize(a);
       return AST.loadScriptAsync((id: string) => {
         if (id == "")
@@ -227,7 +227,7 @@ module TDev {
               case Language.TouchDevelop:
                 // the guid is here only for testing; the real generation should be deterministic for best results
                 cpp = roundtrip(message1.text).then((a: J.JApp) => {
-                  return Microbit.compile(a);
+                  return Embedded.compile(a);
                 });
                 break;
             }
@@ -267,7 +267,7 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             var ast = message2.ast;
-            addMicrobitLibrary(ast);
+            addEmbeddedLibrary(ast);
             console.log("Attempting to serialize", ast);
             var text = J.serialize(ast);
             console.log("Attempting to edit script text", text);

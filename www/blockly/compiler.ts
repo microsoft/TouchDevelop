@@ -98,10 +98,10 @@ module Helpers {
     return mkCall(name, mkTypeRef(librarySymbol), [librarySingleton]);
   }
 
-  // Call function [name] from the standard microbit library with arguments
+  // Call function [name] from the standard embedded library with arguments
   // [args].
   export function stdCall(name: string, args: J.JExpr[]): J.JCall {
-    return mkCall(name, mkTypeRef("microbit"), [<J.JExpr> mkLibrary("microbit")].concat(args));
+    return mkCall(name, mkTypeRef("embedded"), [<J.JExpr> mkLibrary("embedded")].concat(args));
   }
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
@@ -419,9 +419,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "microbit_button_pressed":
+    case "embedded_button_pressed":
       return compileButtonPressed(e, b);
-    case "microbit_logic_onoff_states":
+    case "embedded_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
@@ -613,11 +613,11 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         e = r.env;
         break;
 
-      case 'microbit_comment':
+      case 'embedded_comment':
         stmts.push(compileComment(e, b));
         break;
 
-      case 'microbit_forever':
+      case 'embedded_forever':
         stmts.push(compileForever(e, b));
         break;
 
@@ -629,19 +629,19 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsWhileUntil(e, b));
         break;
 
-      case 'microbit_set_led':
+      case 'embedded_set_led':
         stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
         break;
 
-      case 'microbit_wait':
+      case 'embedded_wait':
         stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
         break;
 
-      case 'microbit_scroll':
+      case 'embedded_scroll':
         stmts.push(compileStdBlock(e, b, "scroll", ["ARG"]));
         break;
 
-      case 'microbit_event':
+      case 'embedded_event':
         stmts.push(compileEvent(e, b));
         break;
 

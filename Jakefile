@@ -167,6 +167,10 @@ mkSimpleTask('build/storage.js', [
     'build/browser.d.ts',
     'storage'
 ], "storage/refs.ts");
+mkSimpleTask('build/embedded.js', [
+    'build/ast.d.ts',
+    'embedded'
+], "embedded/refs.ts");
 mkSimpleTask('build/ast.js', [
     'build/rt.d.ts',
     'ast'
@@ -196,6 +200,7 @@ mkSimpleTask('build/editor.js', [
     'build/storage.d.ts',
     'build/libwab.d.ts',
     'build/libcordova.d.ts',
+    'build/embedded.d.ts',
     'intellitrain',
     'editor'
 ], "editor/refs.ts");
@@ -393,9 +398,9 @@ task('clean', [], function () {
 desc('display info about installed tools')
 task('info', [], { async: true }, function () {
   var task = this;
-  
+
   if (process.env.TRAVIS) {
-	  assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
+      assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
   }
 
   jake.exec([ 'tsc --version' ],
@@ -418,16 +423,16 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
   var task = this;
   var upload = function (buildVersion) {
     console.log("[I] uploading v" + buildVersion)
-	var procs = [];
-	if (process.env.TD_UPLOAD_LITE_KEY) {
-		console.log("[I] uploading to lite")
-		procs.push('node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion + ' latest');
-	}
-	var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
-	procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
-	jake.exec(procs,
-	  { printStdout: true, printStderr: true },
-	  function() { task.complete(); });
+    var procs = [];
+    if (process.env.TD_UPLOAD_LITE_KEY) {
+        console.log("[I] uploading to lite")
+        procs.push('node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion + ' latest');
+    }
+    var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
+    procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
+    jake.exec(procs,
+      { printStdout: true, printStderr: true },
+      function() { task.complete(); });
   };
   if (!process.env.TRAVIS) {
     upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);

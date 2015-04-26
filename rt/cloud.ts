@@ -566,7 +566,7 @@ module TDev.Cloud {
 
         HTML.showProgressNotification(lf("starting compilation"));
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
-            config: "microbit",
+            config: "embedded",
             source: cppSource
         })
         .then(resp => {

@@ -1,8 +1,8 @@
-///<reference path='../refs.ts'/>
+///<reference path='refs.ts'/>
 
 module TDev {
 
-  export module Microbit {
+  export module Embedded {
 
     import J = AST.Json
     import H = Helpers
@@ -91,7 +91,7 @@ module TDev {
     // the right number constant.
     function translateArgsIfNeeded(call: string, args: J.JExpr[]) {
       switch (call) {
-        case "microbit_button_pressed":
+        case "embedded_button_pressed":
           if (isStringLiteral(args[0]) == "left")
             return [mkNumberLiteral(1)];
           else if (isStringLiteral(args[0]) == "right")
@@ -294,7 +294,7 @@ module TDev {
         var userFunctions = decls.map((d: J.JDecl) => {
           if (d.nodeType == "action") {
             return this.visit(e, d);
-          } else if (!(d.nodeType == "library" && d.name == "microbit")) {
+          } else if (!(d.nodeType == "library" && d.name == "embedded")) {
             throw new Error("Untranslated declaration" + d);
           }
           return null;

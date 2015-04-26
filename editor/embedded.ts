@@ -1,10 +1,14 @@
-///<reference path='../refs.ts'/>
+///<reference path='refs.ts'/>
+
+// The main driver for C++ compilation: for each program, loads the libraries it
+// depends on, compiles said libraries, compiles the main program, and stitches
+// the various part together.
 
 module TDev {
   import J = AST.Json
 
 
-  export module Microbit {
+  export module Embedded {
 
     interface ResolvedLibrary {
       isShim: boolean;
