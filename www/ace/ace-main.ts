@@ -9,11 +9,9 @@ module TDev {
 
     // ---------- Communication protocol
 
-    var allowedOrigins = {
-        "http://localhost:4242": null,
-        "https://www.touchdevelop.com": null,
-        "https://mbitmain.azurewebsites.net": null
-    };
+    function isAllowedOrigin(origin: string) {
+        return origin.indexOf((<any>document.location).origin) == 0;
+    }
 
     // Both of these are written once when we receive the first (trusted)
     // message.
@@ -28,7 +26,7 @@ module TDev {
     var currentVersion: string;
 
     window.addEventListener("message", (event) => {
-        if (!(event.origin in allowedOrigins))
+        if (!isAllowedOrigin(event.origin))
             return;
 
         if (!outer || !origin) {

@@ -6,11 +6,9 @@ module TDev {
 
   // ---------- Communication protocol
 
-  var allowedOrigins: { [index: string]: any } = {
-    "http://localhost:4242": null,
-    "https://www.touchdevelop.com": null,
-    "https://mbitmain.azurewebsites.net": null
-  };
+  function isAllowedOrigin(origin: string) {
+      return origin.indexOf((<any>document.location).origin) == 0;
+  }
 
   var $ = (s: string) => document.querySelector(s);
 
@@ -24,7 +22,7 @@ module TDev {
   var inMerge: boolean = false;
 
   window.addEventListener("message", (event) => {
-    if (!(event.origin in allowedOrigins)) {
+    if (!isAllowedOrigin(event.origin)) {
       console.error("[inner message] not from the right origin!", event.origin);
       return;
     }
