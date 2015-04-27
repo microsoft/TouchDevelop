@@ -775,7 +775,6 @@ module TDev.RT {
                 if (!scriptId) return;
 
                 var m = new ModalDialog();
-                m.canDismiss = !scriptId;
                 m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
                 if (score > 0)
                     m.add(div('wall-dialog-large wall-dialog-text-center', lf("your best score: {0}", score)));
