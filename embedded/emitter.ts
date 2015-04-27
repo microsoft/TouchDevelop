@@ -48,21 +48,15 @@ module TDev {
       );
     }
 
-    // [ JExprStmt { expr: JExprHolder { tree: JStringLiteral { value: VALUE }}}, ... ] -> VALUE
+    // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
     function isShimBody(body: J.JStmt[]): string {
-      var nonComments = body.filter((x: J.JStmt) => x.nodeType != "comment");
-      // If only we had that wonderful thing called pattern-matching...
-      var value =
-        nonComments.length &&
-        nonComments[0].nodeType == "exprStmt" &&
-        (<J.JExprStmt> nonComments[0]).expr.nodeType == "exprHolder" &&
-        (<J.JExprHolder> (<J.JExprStmt> nonComments[0]).expr).tree.nodeType == "stringLiteral" &&
-        (<J.JStringLiteral> (<J.JExprHolder> (<J.JExprStmt> nonComments[0]).expr).tree).value;
-      var matches = value && value.match(/^shim:(.*)/);
-      if (matches)
-        return matches[1];
-      else
-        return null;
+      var ret = null;
+      body.foreach((s: J.JStmt) => {
+        var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]+)}$/);
+        if (matches)
+          ret = matches[1];
+      });
+      return ret;
     }
 
     // JStringLiteral { value: VALUE } -> VALUE
