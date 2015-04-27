@@ -3890,8 +3890,7 @@ module TDev
                         st.disableUpdate = true;
                         st.updateProfile(this.intelliProfile)
 
-                        if (!this.intelliProfile.hasFlag("nosplit"))
-                            this.setSplitScreen(true, true);
+                        this.setSplitScreen(!this.intelliProfile.hasFlag("nosplit"), false);
 
                         if (firstTime) {
                             if (st.hourOfCode && !/#hourOfCode/i.test(Script.comment)) {
