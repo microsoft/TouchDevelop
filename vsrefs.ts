@@ -13,4 +13,6 @@
 ///<reference path='shell/shell.ts'/>
 ///<reference path='tools/client.ts'/>
 ///<reference path='tools/genMeta.ts'/>
-
+///<reference path='embedded/refs.ts' />
+///<reference path='www/ace/refs.ts' />
+///<reference path='www/blockly/refs.ts' />
