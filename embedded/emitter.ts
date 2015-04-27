@@ -295,7 +295,7 @@ module TDev {
         var userFunctions = decls.map((d: J.JDecl) => {
           if (d.nodeType == "action") {
             return this.visit(e, d);
-          } else if (d.nodeType == "art" && d.name == "cpp:prelude") {
+          } else if (d.nodeType == "art" && d.name == "prelude.cpp") {
             this.prelude += (<J.JArt> d).value;
           } else if (!(d.nodeType == "library")) {
             throw new Error("Untranslated declaration" + d);
