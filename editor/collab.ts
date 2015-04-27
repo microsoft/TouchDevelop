@@ -65,7 +65,7 @@ module TDev {
                 if (Cloud.isOffline()) return Promise.wrapError("Cloud is offline");
                 var url = Revisions.revisionservice_http() + "/" + sessionid + "/collaboration"
                     + "?user=" + userid + "&access_token=" + encodeURIComponent(token);
-                return Util.httpRequestAsync(url, "PUT", JSON.stringify(ci)).then(
+                return Util.httpRequestAsync(url, "POST", JSON.stringify(ci)).then(
                 (s) => Editor.updateEditorStateAsync(scriptGuid, (st) => {
                                     st.collabSessionId = sessionid;
                                     st.groupId = this.publicId;
