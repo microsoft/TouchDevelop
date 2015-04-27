@@ -84,7 +84,7 @@ module TDev
                         else if (bangOp)
                             specialCommand = tt;
                         else
-                            terms.push(tt.toLowerCase());
+                            terms.push(tt);
                     }
                     refOp = false;
                     bangOp = false;
@@ -105,6 +105,9 @@ module TDev
                     break;
                 }
             });
+
+            var origTerms = terms
+            terms = terms.map(t => t.toLowerCase())
 
             var fullName = terms.join("");
             var entries:CodeLocation[] = [];
@@ -230,7 +233,7 @@ module TDev
             specialCommand = specialCommand.toLowerCase()
 
             if (!specialCommand && refs.length == 0) {
-                var stkM = /^StK([a-zA-Z0-9]+)$/.exec(terms[0])
+                var stkM = /^StK([a-zA-Z0-9]+)$/.exec(origTerms[0])
                 if (stkM && stkM[1].length % 8 == 0) {
                     var frames = AST.decompressStack(stkM[1])
                     if (frames.length > 0) {
