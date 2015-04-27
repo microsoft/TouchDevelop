@@ -53,101 +53,72 @@
         <block type="text"></block>
         <block type="math_number"></block>
         <block type="math_number1"></block>
-        <block type="device_scroll">
-          <value name="ARG">
+        <block type="device_show_letter">
+          <value name="letter">
             <block type="text">
               <field name="TEXT"></field>
             </block>
           </value>
         </block>
-        <block type="device_event">
-          <value name="ID">
-            <block type="text">
-              <field name="TEXT">start</field>
-            </block>
-          </value>
-        </block>
-        <block type="device_wait">
-          <value name="VAL">
+        <block type="device_pause">
+          <value name="pause">
             <block type="math_number">
               <field name="NUM">100</field>
             </block>
           </value>
         </block>
-        <!-- <block type="device_pause"> -->
-        <!--   <value name="pause"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">100</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
-        <!-- <block type="device_print_message"> -->
-        <!--   <value name="message"> -->
-        <!--     <block type="text"> -->
-        <!--       <field name="TEXT">Hello world</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="pausetime"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">100</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
+        <block type="device_print_message">
+          <value name="message">
+            <block type="text">
+              <field name="TEXT">Hello world</field>
+            </block>
+          </value>
+          <value name="pausetime">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
       </category>
       <category name="LED">
         <block type="device_clear_display"></block>
-        <block type="device_set_led">
-          <value name="id">
+
+        <block type="device_plot">
+          <value name="x">
             <block type="math_number">
               <field name="NUM">0</field>
             </block>
           </value>
-          <value name="brightness">
-            <block type="device_logic_onoff_states"></block>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
           </value>
         </block>
-
-        <!-- <block type="device_plot"> -->
-        <!--   <value name="x"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="y"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
-        <!-- <block type="device_unplot"> -->
-        <!--   <value name="x"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="y"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
-        <!-- <block type="device_point"> -->
-        <!--   <value name="x"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="y"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
-        <!-- <block type="device_eye_on"></block> -->
-        <!-- <block type="device_eye_off"></block> -->
-        <!-- <block type="device_set_eye"></block> -->
-        <!-- <block type="device_toggle_eye"></block> -->
-        <!-- <block type="device_get_eye"></block> -->
+        <block type="device_unplot">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
+        <block type="device_point">
+          <value name="x">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+          <value name="y">
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+          </value>
+        </block>
       </category>
       <category name="Images">
         <block type="device_make_StringImage">
@@ -184,7 +155,9 @@
             <block type="device_get_image_point"></block> -->
       </category>
       <category name="Input">
-        <block type="device_button_pressed"></block>
+        <block type="device_get_button"></block>
+        <block type="device_button_type"></block>
+        <block type="device_button_event"></block>
       </category>
       <category name="If">
         <block type="controls_if"></block>
@@ -203,7 +176,7 @@
             </block>
           </value>
         </block>
-        <block type="controls_whileUntil"></block>
+        <block type="device_while"></block>
         <block type="controls_for">
           <value name="FROM">
             <block type="math_number">

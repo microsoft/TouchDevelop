@@ -4,77 +4,6 @@ goog.provide('Blockly.Blocks.device');
 
 goog.require('Blockly.Blocks');
 
-Blockly.Blocks['device_wait'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(120);
-    this.appendValueInput("VAL")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("wait");
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-
-// https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xxv26z
-Blockly.Blocks['device_event'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(120);
-    this.appendDummyInput()
-        .appendField("on");
-    this.appendValueInput("ID")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("event");
-    this.appendStatementInput("HANDLER")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("do");
-    this.setInputsInline(true);
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_set_led'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(120);
-    this.appendValueInput("id")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("set led #");
-    this.appendValueInput("brightness")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("to");
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_button_pressed'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(210);
-    this.appendValueInput("id")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("button");
-    this.appendDummyInput()
-        .appendField("is pressed");
-    this.setInputsInline(true);
-    this.setOutput(true);
-    this.setTooltip('');
-  }
-};
-
-// -----------------------------------------------------------------------------
-
 // Blockly.Blocks['device_scroll_string'] = {
 //   init: function() {
 //     this.setHelpUrl('http://www.example.com/');
@@ -93,74 +22,6 @@ Blockly.Blocks['device_button_pressed'] = {
 //   }
 // };
 
-// https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#83qc3o
-Blockly.Blocks['device_set_eye'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("set eye");
-    this.appendValueInput("id")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.appendValueInput("state")
-        .setCheck(["OnOffState","Boolean"])
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("state");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-    this.setInputsInline(true);
-    }
-};
-
-//https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#jgkr8y
-Blockly.Blocks['device_eye_on'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("eye on");
-    this.appendValueInput("id")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-Blockly.Blocks['device_eye_off'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("eye off");
-    this.appendValueInput("id")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_toggle_eye'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("toggle eye");
-    this.appendValueInput("id")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
 Blockly.Blocks['device_print_message'] = {
@@ -185,18 +46,64 @@ Blockly.Blocks['device_print_message'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
-Blockly.Blocks['device_scroll'] = {
+Blockly.Blocks['device_show_letter'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("scroll");
-    this.appendValueInput("ARG")
+        .appendField("show letter");
+    this.appendValueInput("letter")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['device_button_event'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(120);
+    this.appendDummyInput()
+        .appendField("when");
+    this.appendValueInput("NAME")
+        .setCheck("button_type")
+        .setAlign(Blockly.ALIGN_RIGHT);
+    this.appendDummyInput()
+        .appendField("button is pressed");
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
+    this.setInputsInline(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['device_get_button'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(160);
+    this.appendDummyInput()
+        .appendField("button");
+    this.appendValueInput("NAME")
+        .setCheck("button_type");
+    this.appendDummyInput()
+        .appendField("is pressed");
+    this.setInputsInline(true);
+    this.setOutput(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['device_button_type'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(210);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["left", "left"], ["right", "right"]]), "name");
+    this.setOutput(true, "button_type");
     this.setTooltip('');
   }
 };
@@ -475,24 +382,10 @@ Blockly.Blocks['device_forever'] = {
     this.setColour(120);
     this.appendDummyInput()
         .appendField("forever");
-    this.appendStatementInput("DO")
+    this.appendStatementInput("NAME")
         .setCheck("null");
     this.setInputsInline(true);
     this.setPreviousStatement(true, "null");
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_get_eye'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("get eye");
-    this.appendValueInput("NAME")
-        .setCheck("String");
-    this.setInputsInline(true);
-    this.setOutput(true, "OnOffState");
     this.setTooltip('');
   }
 };
@@ -504,18 +397,6 @@ Blockly.Blocks['device_logic_onoff_states'] = {
          ['off', 'OFF']];
     this.setColour(210);
     this.setOutput(true, 'OnOffState');
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown(BOOLEANS), 'STATE');
-  }
-};
-
-Blockly.Blocks['device_logic_button_states'] = {
-  init: function() {
-    var BOOLEANS =
-        [['pressed', 'PRESSED'],
-         ['not_pressed','NOT_PRESSED']];
-    this.setColour(210);
-    this.setOutput(true, 'ButtonState');
     this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown(BOOLEANS), 'STATE');
   }
@@ -547,3 +428,21 @@ Blockly.Blocks['math_number1'] = {
     this.setTooltip(Blockly.Msg.MATH_NUMBER_TOOLTIP);
   }
 };
+
+Blockly.Blocks['device_while'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(120);
+    this.appendValueInput("COND")
+        .setCheck("Boolean")
+        .appendField("while");
+    this.appendStatementInput("NAME")
+        .appendField("do");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+// Overriding the default value.
+Blockly.Msg.CONTROLS_FOR_INPUT_WITH = "for";
