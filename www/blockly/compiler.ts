@@ -5,11 +5,6 @@
 //                A compiler from Blocky to TouchDevelop                     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO:
-// - loops: repeat n times, repeat, forever, simplified for loop
-// - logic: on/off
-// - basic, led, images, input: adapt API
-
 import J = TDev.AST.Json;
 import B = Blockly;
 
@@ -98,10 +93,10 @@ module Helpers {
     return mkCall(name, mkTypeRef(librarySymbol), [librarySingleton]);
   }
 
-  // Call function [name] from the standard microbit library with arguments
+  // Call function [name] from the standard device library with arguments
   // [args].
   export function stdCall(name: string, args: J.JExpr[]): J.JCall {
-    return mkCall(name, mkTypeRef("microbit"), [<J.JExpr> mkLibrary("microbit")].concat(args));
+    return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
   }
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
@@ -419,9 +414,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "microbit_button_pressed":
+    case "device_button_pressed":
       return compileButtonPressed(e, b);
-    case "microbit_logic_onoff_states":
+    case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
@@ -575,18 +570,21 @@ function compileComment(e: Environment, b: B.Block): J.JStmt {
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
 
-function compileEvent(e: Environment, b: B.Block): J.JStmt {
-  var bId = b.getInputTargetBlock("ID");
-  var bBody = b.getInputTargetBlock("HANDLER");
-  var id = compileExpression(e, bId);
-  var body = compileStatements(e, bBody);
+function generateEvent(e: Environment, id: J.JExpr, body: J.JStmt[]): J.JStmt {
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
     [ H.mkInlineAction(body, true, def) ],
     H.mkExprHolder(
       [ def ],
       H.stdCall("on", [id])));
+}
 
+function compileEvent(e: Environment, b: B.Block): J.JStmt {
+  var bId = b.getInputTargetBlock("ID");
+  var bBody = b.getInputTargetBlock("HANDLER");
+  var id = compileExpression(e, bId);
+  var body = compileStatements(e, bBody);
+  return generateEvent(e, id, body);
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -609,15 +607,15 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
       case 'variables_set':
         var r = compileSetOrDef(e, b);
         stmts.push(r.stmt);
-        // This function also return a possibly-extended environment.
+        // This function also returns a possibly-extended environment.
         e = r.env;
         break;
 
-      case 'microbit_comment':
+      case 'device_comment':
         stmts.push(compileComment(e, b));
         break;
 
-      case 'microbit_forever':
+      case 'device_forever':
         stmts.push(compileForever(e, b));
         break;
 
@@ -629,22 +627,21 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsWhileUntil(e, b));
         break;
 
-      case 'microbit_set_led':
+      case 'device_set_led':
         stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
         break;
 
-      case 'microbit_wait':
+      case 'device_wait':
         stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
         break;
 
-      case 'microbit_scroll':
+      case 'device_scroll':
         stmts.push(compileStdBlock(e, b, "scroll", ["ARG"]));
         break;
 
-      case 'microbit_event':
+      case 'device_event':
         stmts.push(compileEvent(e, b));
         break;
-
 
       default:
         throw new Error(b.type + " is not a statement block or is not supported");
@@ -678,13 +675,18 @@ interface CompileOptions {
   description: string;
 }
 
+function compileWithEventIfNeeded(e: Environment, b: B.Block): J.JStmt {
+  if (b.type != "device_event") {
+    var id = H.mkStringLiteral("start");
+    var body = compileStatements(e, b);
+    return generateEvent(e, id, body);
+  }
+}
+
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var stmts: J.JStmt[] = [];
   b.getTopBlocks(true).forEach((b: B.Block) => {
-    // TODO: wrap in "on event start" if outer block is not of type event.
-    // Each "on ..." event handler is compiled in its own empty environment.
-    // This is akin to a function definition.
-    stmts = stmts.concat(compileStatements(empty, b));
+    stmts.push(compileWithEventIfNeeded(empty, b));
   });
 
   var def: J.JLocalDef = H.mkDef("errno", H.mkTypeRef("Number"));

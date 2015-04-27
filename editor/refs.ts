@@ -5,6 +5,7 @@
 ///<reference path='../build/storage.d.ts'/>
 ///<reference path='../build/libwab.d.ts'/>
 ///<reference path='../build/libcordova.d.ts'/>
+///<reference path='../build/embedded.d.ts'/>
 ///<reference path='../typings/ace/ace.d.ts'/>
 ///<reference path='videoUtil.ts'/>
 ///<reference path='tipManager.ts'/>
@@ -48,13 +49,9 @@
 ///<reference path='plugins.ts'/>
 ///<reference path='external.ts'/>
 ///<reference path='messages.ts'/>
+///<reference path='embedded.ts'/>
 ///<reference path='../intellitrain/train.ts'/>
 ///<reference path='../intellitrain/astutil.ts'/>
 ///<reference path='../intellitrain/features.ts'/>
 ///<reference path='../intellitrain/output.ts'/>
 ///<reference path='../intellitrain/tokenize.ts'/>
-///<reference path='microbit/helpers.ts'/>
-///<reference path='microbit/main.ts'/>
-///<reference path='microbit/visitor.ts'/>
-///<reference path='microbit/emitter.ts'/>
-///<reference path='microbit/lambda_lifter.ts'/>

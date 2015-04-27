@@ -1,10 +1,10 @@
 'use strict';
 
-goog.provide('Blockly.Blocks.microbit');
+goog.provide('Blockly.Blocks.device');
 
 goog.require('Blockly.Blocks');
 
-Blockly.Blocks['microbit_wait'] = {
+Blockly.Blocks['device_wait'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
@@ -20,7 +20,7 @@ Blockly.Blocks['microbit_wait'] = {
 };
 
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xxv26z
-Blockly.Blocks['microbit_event'] = {
+Blockly.Blocks['device_event'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
@@ -38,7 +38,7 @@ Blockly.Blocks['microbit_event'] = {
   }
 };
 
-Blockly.Blocks['microbit_set_led'] = {
+Blockly.Blocks['device_set_led'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
@@ -57,7 +57,7 @@ Blockly.Blocks['microbit_set_led'] = {
   }
 };
 
-Blockly.Blocks['microbit_button_pressed'] = {
+Blockly.Blocks['device_button_pressed'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(210);
@@ -75,7 +75,7 @@ Blockly.Blocks['microbit_button_pressed'] = {
 
 // -----------------------------------------------------------------------------
 
-// Blockly.Blocks['microbit_scroll_string'] = {
+// Blockly.Blocks['device_scroll_string'] = {
 //   init: function() {
 //     this.setHelpUrl('http://www.example.com/');
 //     this.setColour(0);
@@ -94,7 +94,7 @@ Blockly.Blocks['microbit_button_pressed'] = {
 // };
 
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#83qc3o
-Blockly.Blocks['microbit_set_eye'] = {
+Blockly.Blocks['device_set_eye'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -115,7 +115,7 @@ Blockly.Blocks['microbit_set_eye'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#jgkr8y
-Blockly.Blocks['microbit_eye_on'] = {
+Blockly.Blocks['device_eye_on'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -130,7 +130,7 @@ Blockly.Blocks['microbit_eye_on'] = {
     this.setTooltip('');
   }
 };
-Blockly.Blocks['microbit_eye_off'] = {
+Blockly.Blocks['device_eye_off'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -146,7 +146,7 @@ Blockly.Blocks['microbit_eye_off'] = {
   }
 };
 
-Blockly.Blocks['microbit_toggle_eye'] = {
+Blockly.Blocks['device_toggle_eye'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -163,7 +163,7 @@ Blockly.Blocks['microbit_toggle_eye'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
-Blockly.Blocks['microbit_print_message'] = {
+Blockly.Blocks['device_print_message'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -185,7 +185,7 @@ Blockly.Blocks['microbit_print_message'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
-Blockly.Blocks['microbit_scroll'] = {
+Blockly.Blocks['device_scroll'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -202,7 +202,7 @@ Blockly.Blocks['microbit_scroll'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#nwf7c5
-Blockly.Blocks['microbit_clear_display'] = {
+Blockly.Blocks['device_clear_display'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -216,7 +216,7 @@ Blockly.Blocks['microbit_clear_display'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#rhpgfx
-Blockly.Blocks['microbit_plot'] = {
+Blockly.Blocks['device_plot'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -234,7 +234,7 @@ Blockly.Blocks['microbit_plot'] = {
     this.setTooltip('');
   }
 };
-Blockly.Blocks['microbit_unplot'] = {
+Blockly.Blocks['device_unplot'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -254,7 +254,7 @@ Blockly.Blocks['microbit_unplot'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#jw5b4i
-Blockly.Blocks['microbit_point'] = {
+Blockly.Blocks['device_point'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -272,7 +272,7 @@ Blockly.Blocks['microbit_point'] = {
   }
 };
 
-Blockly.Blocks['microbit_build_image'] = {
+Blockly.Blocks['device_build_image'] = {
     init: function()
     {
         this.setColour(160);
@@ -287,7 +287,7 @@ Blockly.Blocks['microbit_build_image'] = {
     }
 };
 
-Blockly.Blocks['microbit_build_big_image'] = {
+Blockly.Blocks['device_build_big_image'] = {
     init: function()
     {
         this.setColour(160);
@@ -314,7 +314,7 @@ Blockly.Blocks['microbit_build_big_image'] = {
     }
 };
 
-// Blockly.Blocks['microbit_show_image'] = {
+// Blockly.Blocks['device_show_image'] = {
 //     init: function()
 //     {
 //         this.setColour(160);
@@ -326,7 +326,7 @@ Blockly.Blocks['microbit_build_big_image'] = {
 //     }
 // };
 
-Blockly.Blocks['microbit_show_image_offset'] = {
+Blockly.Blocks['device_show_image_offset'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -347,7 +347,7 @@ Blockly.Blocks['microbit_show_image_offset'] = {
   }
 };
 
-Blockly.Blocks['microbit_scroll_image'] = {
+Blockly.Blocks['device_scroll_image'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -368,7 +368,7 @@ Blockly.Blocks['microbit_scroll_image'] = {
   }
 };
 
-Blockly.Blocks['microbit_get_image_point'] = {
+Blockly.Blocks['device_get_image_point'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -391,7 +391,7 @@ Blockly.Blocks['microbit_get_image_point'] = {
   }
 };
 
-Blockly.Blocks['microbit_set_image_point'] = {
+Blockly.Blocks['device_set_image_point'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -420,7 +420,7 @@ Blockly.Blocks['microbit_set_image_point'] = {
 };
 
 
-Blockly.Blocks['microbit_make_StringImage'] = {
+Blockly.Blocks['device_make_StringImage'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -435,7 +435,7 @@ Blockly.Blocks['microbit_make_StringImage'] = {
   }
 };
 
-Blockly.Blocks['microbit_scroll_string_image'] = {
+Blockly.Blocks['device_scroll_string_image'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -455,7 +455,7 @@ Blockly.Blocks['microbit_scroll_string_image'] = {
   }
 };
 
-Blockly.Blocks['microbit_pause'] = {
+Blockly.Blocks['device_pause'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -469,7 +469,7 @@ Blockly.Blocks['microbit_pause'] = {
   }
 };
 
-Blockly.Blocks['microbit_forever'] = {
+Blockly.Blocks['device_forever'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
@@ -483,7 +483,7 @@ Blockly.Blocks['microbit_forever'] = {
   }
 };
 
-Blockly.Blocks['microbit_get_eye'] = {
+Blockly.Blocks['device_get_eye'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
@@ -497,7 +497,7 @@ Blockly.Blocks['microbit_get_eye'] = {
   }
 };
 
-Blockly.Blocks['microbit_logic_onoff_states'] = {
+Blockly.Blocks['device_logic_onoff_states'] = {
   init: function() {
     var BOOLEANS =
         [['on', 'ON'],
@@ -509,7 +509,7 @@ Blockly.Blocks['microbit_logic_onoff_states'] = {
   }
 };
 
-Blockly.Blocks['microbit_logic_button_states'] = {
+Blockly.Blocks['device_logic_button_states'] = {
   init: function() {
     var BOOLEANS =
         [['pressed', 'PRESSED'],
@@ -521,7 +521,7 @@ Blockly.Blocks['microbit_logic_button_states'] = {
   }
 };
 
-Blockly.Blocks['microbit_comment'] = {
+Blockly.Blocks['device_comment'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
