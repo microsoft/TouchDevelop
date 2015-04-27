@@ -51,10 +51,6 @@ module TDev {
 
     import J = AST.Json;
 
-    export function wrapCpp(cpp: string) {
-      return ("// version = 1\n#include \"prelude.h\"\n" + cpp);
-    }
-
     export function makeOutMbedErrorMsg(json: any) {
       var errorMsg = "unknown error";
       // This JSON format is *very* unstructured...
@@ -233,7 +229,7 @@ module TDev {
             }
             cpp.then((cpp: string) => {
               console.log(cpp);
-              Cloud.postUserInstalledCompileAsync(this.guid, wrapCpp(cpp)).then(json => {
+              Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
                 // Success.
                 console.log(json);
                 if (json.success) {

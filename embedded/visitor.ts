@@ -59,6 +59,8 @@ module TDev {
               return this.visitApp(env, (<J.JApp> n).decls);
             case "library":
               return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
+            case "art":
+              return this.visitArt(env, (<J.JArt> n).url);
           }
           throw new Error("Unsupported node: "+n.nodeType);
       }
@@ -111,6 +113,7 @@ module TDev {
         body: J.JStmt[]): U                                               { throw new Error("Not implemented"); }
       public visitApp(env: T, decls: J.JDecl[]): U                        { throw new Error("Not implemented"); }
       public visitLibrary(env: T, name: string): U                        { throw new Error("Not implemented"); }
+      public visitArt(env: T, url: string): U                             { throw new Error("Not implemented"); }
     }
   }
 

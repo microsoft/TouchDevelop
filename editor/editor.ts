@@ -2080,7 +2080,6 @@ module TDev
 
         private compile() {
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
-                cpp = External.wrapCpp(cpp);
                 console.log(cpp);
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);

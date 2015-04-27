@@ -74,6 +74,10 @@ module TDev {
       public visitApp(e, decls: J.JDecl[]) {
         return this.visitMany(e, decls);
       }
+
+      public visitArt(e, url) {
+        return [];
+      }
     }
 
     // This function modifies in-place the AST it visits to lift all closures

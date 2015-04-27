@@ -720,6 +720,7 @@ module TDev.AST.Json
                 isReadonly: n.readonly,
                 isTransient: n.isTransient,
                 isCloudEnabled: n.cloudEnabled,
+                value: n.stringResourceValue(),
             }
 
             if (n.isResource) {

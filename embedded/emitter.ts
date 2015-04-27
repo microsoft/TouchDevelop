@@ -109,6 +109,7 @@ module TDev {
       // Output "parameters", written to at the end.
       public prototypes = "";
       public code = "";
+      public prelude = "";
 
       // All the libraries needed to compile this [JApp].
       constructor(
@@ -294,6 +295,8 @@ module TDev {
         var userFunctions = decls.map((d: J.JDecl) => {
           if (d.nodeType == "action") {
             return this.visit(e, d);
+          } else if (d.nodeType == "art" && d.name == "cpp:prelude") {
+            this.prelude += (<J.JArt> d).value;
           } else if (!(d.nodeType == "library")) {
             throw new Error("Untranslated declaration" + d);
           }
@@ -305,7 +308,7 @@ module TDev {
         this.prototypes = forwardDeclarations.join("\n");
         this.code = userFunctions.join("\n");
 
-        return forwardDeclarations.concat(userFunctions).join("\n");
+        return this.prelude + "\n" + forwardDeclarations.concat(userFunctions).join("\n");
       }
     }
   }

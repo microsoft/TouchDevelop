@@ -289,6 +289,7 @@ var concatMap = {
         "build/libwab",
         "build/libcordova",
         "build/pkgshell.js",
+        "build/embedded",
         "build/editor" ,
     ],
 };

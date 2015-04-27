@@ -17,7 +17,7 @@ module TDev {
 
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
-    function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string } {
+    function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string } {
       var i = libs.indexOf(a);
       var libRef: J.JCall = null;
       if (i >= 0) {
@@ -59,16 +59,14 @@ module TDev {
         });
       });
       return Promise.join(textPromises).then((libs: J.JApp[]) => {
-        var prototypes = [];
-        var code = [];
-        libs.concat([a]).forEach((a: J.JApp) => {
-          var r = compile1(libs, a);
-          if (r.prototypes)
-            prototypes.push(r.prototypes);
-          if (r.code)
-            code.push(r.code);
-        });
-        return Promise.as(prototypes.join("\n") + "\n\n" + code.join("\n"));
+        var compiled = libs.concat([a]).map((a: J.JApp) => compile1(libs, a));
+        return Promise.as(
+                  compiled.map(x => x.prelude)
+          .concat(compiled.map(x => x.prototypes))
+          .concat(compiled.map(x => x.code))
+          .filter(x => x != "")
+          .join("\n")
+        );
       });
     }
   }

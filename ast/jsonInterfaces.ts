@@ -296,7 +296,11 @@ module TDev.AST.Json
         isCloudEnabled:boolean;
     }
 
-    export interface JArt extends JGlobalDef { url: string; }
+    export interface JArt extends JGlobalDef {
+        url: string;
+        // If it's a string art, contains its value.
+        value: string;
+    }
     export interface JData extends JGlobalDef { }
 
     export interface JLibrary extends JDecl
