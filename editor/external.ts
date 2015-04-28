@@ -68,7 +68,7 @@ module TDev {
     function addDeviceLibrary(app: J.JApp) {
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
         'meta import device {'+
-        '  pub "hrgbjn"'+
+        '  pub "bqfhkx"'+
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
