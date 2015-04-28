@@ -810,14 +810,14 @@ module TDev.AppExport
         }
 
 
-        boxes.push(mkNavBtn("DownloadPage,#aaa", "white", lf("import .PublishSettings"),
+        boxes.push(mkNavBtn("fa-download,#aaa", "white", lf("import .PublishSettings"),
                                 lf("find 'Download the publish profile' in Azure portal"))
                     .withClick(() => {
                                     m.dismiss()
                                     r.success(manualPublishProfileImportAsync())
                                 }))
 
-        boxes.push(mkNavBtn("DownloadPage,#aaa", "white", lf("add custom website"),
+        boxes.push(mkNavBtn("fa-download,#aaa", "white", lf("add custom website"),
             lf("run your own node server and deploy from here"))
             .withClick(() => {
                 m.dismiss()
