@@ -80,8 +80,8 @@ module TDev.Meta {
         var indexName = "art1";
         var apiKey = Cloud.config.searchApiKey;
         var serviceUrl = Cloud.config.searchUrl;
-        var query = terms.split(' ').map(term => /sound|picture/i.test(term) ? undefined : term + "*").filter(s => !!s).join("+");
-        var filter = type ? "type eq '" + type + "'" : /sound/i.test(terms) ? "type eq 'sound'" : /picture/i.test(terms) ? "type eq 'picture'" : undefined;
+        var query = terms.split(' ').map(term => /sound|picture|document/i.test(term) ? undefined : term + "*").filter(s => !!s).join("+");
+        var filter = type ? "type eq '" + type + "'" : /sound/i.test(terms) ? "type eq 'sound'" : /picture/i.test(terms) ? "type eq 'picture'" : /document/i.test(terms) ? "type eq 'document'" : undefined;
         var scoringProfile = "editorpics";
 
         var queryUrl = serviceUrl + "/indexes/" + indexName + "/docs?api-version=2014-07-31-Preview&$select=id,type&search=" + encodeURIComponent(query) + "&$top=" + top;
