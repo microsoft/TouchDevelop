@@ -15,7 +15,7 @@ module TDev
                 storeCfg(JSON.parse(localStorage['clientconfig']))
                 p.done()
                 return Promise.as()
-            } else return p;
+            } else return p.then(() => {}, e => { Util.log("cannot download client config: " + e.message) });
         }
         else return Promise.as()
     }
