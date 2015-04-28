@@ -63,6 +63,10 @@ body {
     white-space: pre-wrap;
 }
 
+.status:first-letter {
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
+}
+
 .status:not(:first-letter) {
     font-weight: bold;
 }
@@ -104,4 +108,10 @@ body {
 
 .blocklyMainBackground {
   fill: white !important;
+}
+
+/* Block styles */
+.blocklyError > .blocklyPath {
+    stroke: #d9301a !important;
+    stroke-width: 3px;
 }

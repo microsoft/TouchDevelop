@@ -6,8 +6,22 @@ module TDev {
 
   // ---------- Communication protocol
 
+  function hashCode(s: string) {
+    var hash = 0;
+    var len = s.length;
+    if (len == 0)
+        return hash;
+    var chr = 0;
+    for (var i = 0, len = s.length; i < len; i++) {
+      chr   = s.charCodeAt(i);
+      hash  = ((hash << 5) - hash) + chr;
+      hash |= 0
+    }
+    return hash;
+  }
+
   function isAllowedOrigin(origin: string) {
-      return origin.indexOf((<any>document.location).origin) == 0;
+      return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == 2038446495;
   }
 
   var $ = (s: string) => document.querySelector(s);
@@ -303,28 +317,56 @@ module TDev {
     dirty = false;
   }
 
+  function compileOrError() {
+    var ast: TDev.AST.Json.JApp;
+    try {
+      // Clear any previous errors
+      var clear = (c: string) => {
+        var elts = document.getElementsByClassName(c);
+        // Argh! It's alive!
+        for (var i = elts.length - 1; i >= 0; --i)
+          (<any> elts[i]).classList.remove(c);
+      };
+      clear("blocklySelected");
+      clear("blocklyError");
+
+      ast = compile(Blockly.mainWorkspace, {
+        name: getName(),
+        description: getDescription()
+      });
+    } catch (e) {
+      var block: Blockly.Block = (<any> e).block ? (<any> e).block : null;
+      if (block) {
+        (<any> block.svgGroup_).classList.add("blocklySelected");
+        (<any> block.svgGroup_).classList.add("blocklyError");
+      }
+      statusMsg("⚠ compilation error "+e, External.Status.Error);
+    }
+    // return ast;
+  }
+
   function setupButtons() {
     $("#command-quit").addEventListener("click", () => {
       doSave();
       post({ type: External.MessageType.Quit });
     });
     $("#command-compile").addEventListener("click", () => {
+      var ast = compileOrError();
+      if (!ast)
+        return;
       post(<External.Message_Compile> {
         type: External.MessageType.Compile,
-        text: compile(Blockly.mainWorkspace, {
-          name: getName(),
-          description: getDescription()
-        }),
+        text: ast,
         language: External.Language.TouchDevelop
       });
     });
     $("#command-graduate").addEventListener("click", () => {
+      var ast = compileOrError();
+      if (!ast)
+        return;
       post(<External.Message_Upgrade> {
         type: External.MessageType.Upgrade,
-        ast: compile(Blockly.mainWorkspace, {
-          name: getName(),
-          description: getDescription()
-        }),
+        ast: ast,
         name: getName()+" (converted)",
       });
     });

@@ -14,6 +14,8 @@ declare module Blockly {
         getInputTargetBlock(field: string): Block;
         // Returns null if no next block or is disconnected.
         getNextBlock(): Block;
+
+        svgGroup_: SVGElement;
     }
 
     // if type == controls_if

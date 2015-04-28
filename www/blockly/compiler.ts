@@ -8,11 +8,6 @@
 import J = TDev.AST.Json;
 import B = Blockly;
 
-function assert(x: boolean) {
-  if (!x)
-    throw new Error("Assertion failure");
-}
-
 // A series of utility functions for constructing various J* AST nodes.
 module Helpers {
   // Digits are operators...
@@ -307,12 +302,45 @@ module Helpers {
 
 import H = Helpers;
 
+// A few wrappers for basic Block operations that throw errors when compilation
+// is not possible. (The outer code catches these and highlights the relevant
+// block.)
+
+// Internal error (in our code). Compilation shouldn't proceed.
+function assert(x: boolean) {
+  if (!x)
+    throw new Error("Assertion failure");
+}
+
+// User error. Should report to the user.
+function assertBlock(x: boolean, b: B.Block, m: string) {
+  // https://github.com/Microsoft/TypeScript/issues/1168
+  if (!x) {
+    var e = new Error(m);
+    (<any> e).block = b;
+    throw e;
+  }
+}
+
+function safeGetInputTargetBlock(b: B.Block, f: string) {
+  var r = b.getInputTargetBlock(f);
+  assertBlock(r != null, b, "There's a hole in this block!");
+  return r;
+}
+
+function safeGetFieldValue(b: B.Block, f: string) {
+  var r = b.getFieldValue(f);
+  assertBlock(r != null, b, "There's a hole in this block!");
+  return r;
+}
+
 // Infers the expected type of an expression by looking at the untranslated
 // block and figuring out, from the look of it, what type of expression it
 // holds.
 function inferType(e: Environment, b: B.Block): J.JTypeRef {
   switch (b.type) {
     case "math_number":
+    case "math_number1":
     case "math_arithmetic":
       return H.mkTypeRef("Number");
     case "logic_operation":
@@ -323,7 +351,7 @@ function inferType(e: Environment, b: B.Block): J.JTypeRef {
     case "text":
       return H.mkTypeRef("String");
     case "variables_get":
-      return lookup(e, b.getFieldValue("VAR")).type;
+      return lookup(e, safeGetFieldValue(b, "VAR")).type;
   }
   return H.mkTypeRef("Unknown");
 }
@@ -336,7 +364,7 @@ function inferType(e: Environment, b: B.Block): J.JTypeRef {
 ///////////////////////////////////////////////////////////////////////////////
 
 function compileNumber(e: Environment, b: B.Block): J.JExpr {
-  return H.mkNumberLiteral(parseInt(b.getFieldValue("NUM")));
+  return H.mkNumberLiteral(parseInt(safeGetFieldValue(b, "NUM")));
 }
 
 var opToTok: { [index: string]: string } = {
@@ -357,50 +385,51 @@ var opToTok: { [index: string]: string } = {
 
 
 function compileArithmetic(e: Environment, b: B.Block): J.JExpr {
-  var bOp = b.getFieldValue("OP");
-  var left = b.getInputTargetBlock("A");
-  var right = b.getInputTargetBlock("B");
+  var bOp = safeGetFieldValue(b, "OP");
+  var left = safeGetInputTargetBlock(b, "A");
+  var right = safeGetInputTargetBlock(b, "B");
   return H.mkSimpleCall(opToTok[bOp], [compileExpression(e, left), compileExpression(e, right)]);
 }
 
 function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
-  var name = b.getFieldValue("VAR");
-  assert(lookup(e, name) != null);
+  var name = safeGetFieldValue(b, "VAR");
+  assertBlock(lookup(e, name) != null, b, "Unknown variable: "+name);
   return H.mkLocalRef(name);
 }
 
 function compileText(e: Environment, b: B.Block): J.JExpr {
-  return H.mkStringLiteral(b.getFieldValue("TEXT"));
+  return H.mkStringLiteral(safeGetFieldValue(b, "TEXT"));
 }
 
 function compileBoolean(e: Environment, b: B.Block): J.JExpr {
-  return H.mkBooleanLiteral(b.getFieldValue("BOOL") == "TRUE");
+  return H.mkBooleanLiteral(safeGetFieldValue(b, "BOOL") == "TRUE");
 }
 
 function compileNot(e: Environment, b: B.Block): J.JExpr {
-  var expr = compileExpression(e, b.getInputTargetBlock("BOOL"));
+  var expr = compileExpression(e, safeGetInputTargetBlock(b, "BOOL"));
   return H.mkSimpleCall("not", [expr]);
 }
 
 function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
-  var f = b.getFieldValue("NAME");
+  var f = safeGetFieldValue(b, "NAME");
   var args = b.arguments_.map((x: any, i: number) => {
-    return compileExpression(e, b.getInputTargetBlock("ARG"+i));
+    return compileExpression(e, safeGetInputTargetBlock(b, "ARG"+i));
   });
   return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
-function compileButtonPressed(e: Environment, b: B.Block): J.JExpr {
-  return compileStdCall(e, b, "button pressed", ["id"]);
+function compileButtonType(e: Environment, b: B.Block): J.JExpr {
+  return H.mkStringLiteral(safeGetFieldValue(b, "name"));
 }
 
 function compileOnOff(e: Environment, b: B.Block): J.JExpr {
-  return H.mkNumberLiteral(b.getFieldValue("STATE") == "ON" ? 1 : 0);
+  return H.mkBooleanLiteral(safeGetFieldValue(b, "STATE") == "ON" ? true : false);
 }
 
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
   switch (b.type) {
     case "math_number":
+    case "math_number1":
       return compileNumber(e, b);
     case "math_arithmetic":
     case "logic_operation":
@@ -414,16 +443,20 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "device_button_pressed":
-      return compileButtonPressed(e, b);
+    case "device_button_type":
+      return compileButtonType(e, b);
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
+    default:
+      if (b.type in stdCallTable)
+        return compileStdCall(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args);
+      else {
+        console.log("Unable to compile expression: "+b.type);
+        return H.mkNumberLiteral(0);
+      }
   }
-  throw new Error((b.type + " is not an expression block or is not supported"));
-  // unreachable
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -466,24 +499,24 @@ var empty: Environment = {
 function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
   for (var i = 0; i <= b.elseifCount_; ++i) {
-    var cond = compileExpression(e, b.getInputTargetBlock("IF"+i));
-    var thenBranch = compileStatements(e, b.getInputTargetBlock("DO"+i));
+    var cond = compileExpression(e, safeGetInputTargetBlock(b, "IF"+i));
+    var thenBranch = compileStatements(e, safeGetInputTargetBlock(b, "DO"+i));
     stmts.push(H.mkSimpleIf(H.mkExprHolder([], cond), thenBranch));
     if (i > 0)
       stmts[stmts.length - 1].isElseIf = true;
   }
   if (b.elseCount_) {
-    stmts[stmts.length - 1].elseBody = compileStatements(e, b.getInputTargetBlock("ELSE"));
+    stmts[stmts.length - 1].elseBody = compileStatements(e, safeGetInputTargetBlock(b, "ELSE"));
   }
   return stmts;
 }
 
 function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
-  var bVar = b.getFieldValue("VAR");
-  var bFrom = b.getInputTargetBlock("FROM");
-  var bTo = b.getInputTargetBlock("TO");
-  var bBy = b.getInputTargetBlock("BY");
-  var bDo = b.getInputTargetBlock("DO");
+  var bVar = safeGetFieldValue(b, "VAR");
+  var bFrom = safeGetInputTargetBlock(b, "FROM");
+  var bTo = safeGetInputTargetBlock(b, "TO");
+  var bBy = safeGetInputTargetBlock(b, "BY");
+  var bDo = safeGetInputTargetBlock(b, "DO");
 
   var e1 = extend(e, { name: bVar, type: H.mkTypeRef("Number") });
 
@@ -508,33 +541,31 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
-  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"));
-  var body = compileStatements(e, b.getInputTargetBlock("DO"));
+  var bound = compileExpression(e, safeGetInputTargetBlock(b, "TIMES"));
+  var body = compileStatements(e, safeGetInputTargetBlock(b, "DO"));
   return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
 }
 
-function compileControlsWhileUntil(e: Environment, b: B.Block): J.JStmt {
-  var until = b.getFieldValue('MODE') == 'UNTIL';
-  var cond = compileExpression(e, b.getInputTargetBlock("BOOL"));
-  var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  var finalCond = until ? H.mkSimpleCall("not", [cond]) : cond;
-  return H.mkWhile(H.mkExprHolder([], finalCond), body);
+function compileWhile(e: Environment, b: B.Block): J.JStmt {
+  var cond = compileExpression(e, safeGetInputTargetBlock(b, "COND"));
+  var body = compileStatements(e, safeGetInputTargetBlock(b, "DO"));
+  return H.mkWhile(H.mkExprHolder([], cond), body);
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
   return H.mkWhile(
     H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("DO")));
+    compileStatements(e, safeGetInputTargetBlock(b, "DO")));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
-  var text = compileExpression(e, b.getInputTargetBlock("TEXT"));
+  var text = compileExpression(e, safeGetInputTargetBlock(b, "TEXT"));
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
 }
 
 function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Environment } {
-  var bVar = b.getFieldValue("VAR");
-  var bExpr = b.getInputTargetBlock("VALUE");
+  var bVar = safeGetFieldValue(b, "VAR");
+  var bExpr = safeGetInputTargetBlock(b, "VALUE");
   var expr = compileExpression(e, bExpr);
   var binding = lookup(e, bVar);
   if (binding) {
@@ -556,7 +587,7 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
 }
 
 function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[]) {
-  var args = inputs.map(x => compileExpression(e, b.getInputTargetBlock(x)));
+  var args = inputs.map(x => compileExpression(e, safeGetInputTargetBlock(b, x)));
   return H.stdCall(f, args);
 }
 
@@ -565,26 +596,39 @@ function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[]
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
-  var arg = compileExpression(e, b.getInputTargetBlock("comment"));
-  assert(arg.nodeType == "stringLiteral");
+  var arg = compileExpression(e, safeGetInputTargetBlock(b, "comment"));
+  assertBlock(arg.nodeType == "stringLiteral", b, "Non-string comment");
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
 
-function generateEvent(e: Environment, id: J.JExpr, body: J.JStmt[]): J.JStmt {
+function generateEvent(e: Environment, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
     [ H.mkInlineAction(body, true, def) ],
     H.mkExprHolder(
       [ def ],
-      H.stdCall("on", [id])));
+      H.stdCall(f, args)));
 }
 
-function compileEvent(e: Environment, b: B.Block): J.JStmt {
-  var bId = b.getInputTargetBlock("ID");
-  var bBody = b.getInputTargetBlock("HANDLER");
-  var id = compileExpression(e, bId);
+function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
+  var bName = safeGetInputTargetBlock(b, "NAME");
+  var bBody = safeGetInputTargetBlock(b, "HANDLER");
+  var name = compileExpression(e, bName);
   var body = compileStatements(e, bBody);
-  return generateEvent(e, id, body);
+  return generateEvent(e, "when button is pressed", [name], body);
+}
+
+var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
+  device_show_letter:             { f: "show letter",           args: ["letter"] },
+  device_pause:                   { f: "pause",                 args: ["pausetime"] },
+  device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
+  device_plot:                    { f: "plot",                  args: ["x", "y"] },
+  device_unplot:                  { f: "unplot",                args: ["x", "y"] },
+  device_point:                   { f: "point",                 args: ["x", "y"] },
+  device_make_StringImage:        { f: "make string image",     args: ["NAME"] },
+  device_scroll_string_image:     { f: "scroll string image",   args: ["string", "speed"] },
+  device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
+  device_get_button:              { f: "button is pressed",     args: ["NAME"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -623,28 +667,19 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsRepeat(e, b));
         break;
 
-      case 'controls_whileUntil':
-        stmts.push(compileControlsWhileUntil(e, b));
+      case 'device_while':
+        stmts.push(compileWhile(e, b));
         break;
 
-      case 'device_set_led':
-        stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
-        break;
-
-      case 'device_wait':
-        stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
-        break;
-
-      case 'device_scroll':
-        stmts.push(compileStdBlock(e, b, "scroll", ["ARG"]));
-        break;
-
-      case 'device_event':
-        stmts.push(compileEvent(e, b));
+      case 'device_button_event':
+        stmts.push(compileButtonEvent(e, b));
         break;
 
       default:
-        throw new Error(b.type + " is not a statement block or is not supported");
+        if (b.type in stdCallTable)
+          stmts.push(compileStdBlock(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args));
+        else
+          console.log("Not generating code for (not a statement / not supported): "+b.type);
     }
     b = b.getNextBlock();
   }
@@ -653,7 +688,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
 function compileFunction(e: Environment, b: B.DefOrCallBlock): J.JAction {
   // currently broken
-  var fName = b.getFieldValue("NAME");
+  var fName = safeGetFieldValue(b, "NAME");
   var inParams: J.JLocalDef[] = [];
   var outParams: J.JLocalDef[] = [];
   e = b.arguments_.reduce((e: Environment, name: string) => {
@@ -662,7 +697,7 @@ function compileFunction(e: Environment, b: B.DefOrCallBlock): J.JAction {
     return extend(e, { name: name, type: t });
   }, e);
 
-  var body = compileStatements(e, b.getInputTargetBlock("STACK"));
+  var body = compileStatements(e, safeGetInputTargetBlock(b, "STACK"));
   return H.mkAction(fName, body, inParams, outParams);
 }
 
@@ -677,9 +712,9 @@ interface CompileOptions {
 
 function compileWithEventIfNeeded(e: Environment, b: B.Block): J.JStmt {
   if (b.type != "device_event") {
-    var id = H.mkStringLiteral("start");
+    var id = H.mkStringLiteral("starts");
     var body = compileStatements(e, b);
-    return generateEvent(e, id, body);
+    return generateEvent(e, "when device", [id], body);
   }
 }
 
