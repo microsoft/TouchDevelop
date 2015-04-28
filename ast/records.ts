@@ -503,13 +503,21 @@ module TDev.AST {
 
         private extActions:IProperty[] = [];
 
+        private cachedExtensions:IProperty[];
+        private cachedVersion:any;
+
         public addExtensionAction(a:IProperty)
         {
+            this.cachedVersion = null
             this.extActions.push(a)
         }
 
         public listExtensions():IProperty[]
         {
+            if (this.cachedVersion === Script.notifyVersionMarker) {
+                return this.cachedExtensions;
+            }
+
             var res:IProperty[] = []
             Script.things.forEach(t => {
                 if (t instanceof Action) {
@@ -521,11 +529,14 @@ module TDev.AST {
             })
 
             if (res.length > 0) {
-                if (this.extActions.length > 0) return this.extActions.concat(res)
-                else return res
+                if (this.extActions.length > 0) this.cachedExtensions = this.extActions.concat(res)
+                else this.cachedExtensions = res
             } else {
-                return this.extActions;
+                this.cachedExtensions = this.extActions;
             }
+
+            this.cachedVersion = Script.notifyVersionMarker
+            return this.cachedExtensions
         }
 
         public getExtension(name:string)

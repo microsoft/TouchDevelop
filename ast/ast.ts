@@ -2254,6 +2254,7 @@ module TDev.AST {
         public syntheticIds:StringMap<boolean> = {};
         public diffRemovedThings: Decl[];
         public imports = new AppImports();
+        public notifyVersionMarker:any = new Object();
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;
@@ -2312,6 +2313,12 @@ module TDev.AST {
         }
 
         private meta:any = {};
+
+        public notifyChange()
+        {
+            this.notifyVersionMarker = new Object();
+            super.notifyChange()
+        }
 
         public getGlobalErrorDecl(ignoreLibs:boolean) { return this.things.filter((t) => t.hasErrors() && !(t instanceof Action) && (!ignoreLibs || !(t instanceof LibraryRef)))[0]; }
 

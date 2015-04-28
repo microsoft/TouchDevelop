@@ -349,12 +349,10 @@ module TDev.AST
                 expr.hasFix = true
                 if (this.errorLevel == 0)
                     this.errorCount++;
-                try {
-                    this.errorLevel++;
-                    this.dispatch(parsed);
-                } finally {
-                    this.errorLevel--;
-                }
+
+                this.errorLevel++;
+                this.dispatch(parsed);
+                this.errorLevel--;
             }
 
             this.saveFixes = 0
@@ -363,13 +361,15 @@ module TDev.AST
 
             var seenAssign = false;
             var prevTok = null
+            var tokErr:Token = null
+
             expr.tokens.forEach((t) => {
                 if (t instanceof PropertyRef) {
                     var p = <PropertyRef>t;
                     if (!p.prop)
                         p.prop = p.getOrMakeProp();
-                    if (AST.mkFakeCall(p).referencedRecordField() &&
-                        prevTok && prevTok.getThing() instanceof LocalDef && prevTok.getThing().getName() == modelSymbol)
+                    if (prevTok && prevTok.getThing() instanceof LocalDef && prevTok.getThing().getName() == modelSymbol &&
+                        AST.mkFakeCall(p).referencedRecordField())
                         p.skipArrow = true;
                     else if (p.skipArrow)
                         p.skipArrow = false;
@@ -386,13 +386,18 @@ module TDev.AST
                     }
                 }
                 prevTok = t
+
+                if (!tokErr && t.getError() != null)
+                    tokErr = t
             })
 
-            if (!this.allLocals.slice(prevLocals).some(l => l.isRegular))
-                seenAssign = false;
-            expr.looksLikeVarDef = (whoExpects == "void" && seenAssign);
+            if (whoExpects == "void") {
+                if (seenAssign && (this.allLocals.length == prevLocals || 
+                                   !this.allLocals.slice(prevLocals).some(l => l.isRegular)))
+                    seenAssign = false;
+                expr.looksLikeVarDef = seenAssign;
+            }
 
-            var tokErr:Token = expr.tokens.filter((n:Token) => n.getError() != null)[0];
             var errNode:AstNode = parseErr || tokErr || expr.parsed;
 
             this.markHolderError(expr, errNode.getError());
@@ -406,9 +411,6 @@ module TDev.AST
             } else {
                 expr.locals = null;
             }
-
-            if (expr.tokens.some((t) => t.getThing() instanceof LocalDef && t.getText() == "\u0007locals_marker"))
-                expr.locals = this.snapshotLocals();
 
             if (!Util.check(expr.getKind() != null, "expr type unset")) {
                 expr._kind = api.core.Unknown

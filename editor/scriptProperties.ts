@@ -251,6 +251,7 @@ module TDev
                     HTML.mkButton(lf("to JSON"), () => this.dumpToJson()),
                     HTML.mkButton(lf("rebuild session cache"), () => TheEditor.currentRt.sessions.resetCurrentSession()),
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
+                    HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech())
                     ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),

@@ -1973,6 +1973,47 @@ module TDev{
     export var logSz = 200;
     var logIdx = -1;
 
+    export function timeSeries(f:()=>void, len = 10)
+    {
+        var times = []
+
+        var avg = (v:number[]) => { 
+            var sum = 0
+            v.forEach(x => sum += x)
+            return Math.round(sum / v.length * 100) / 100;
+        }
+
+        var report = (m="") => {
+            times.sort((a,b) => a-b)
+            var t = times.slice(0, Math.round(0.7 * times.length))
+            
+            var sum = 0
+            t.forEach(v => sum += v)
+            var sum2 = 0
+            times.forEach(v => sum2 += v)
+            Util.log("iter {0}; {2}ms (with drop {1}; otherwise {3}ms) [{5}] {4}",
+                        times.length, times.length - t.length,
+                        avg(t), avg(times), m,
+                        times.map(v => Math.round(v)).join(", "))
+        }
+
+        var tot = 0
+
+        for (var i = 0; i < len; ++i) {
+            var st = Util.perfNow()
+            f()
+            var tm = Util.perfNow() - st
+            tot += tm
+            times.push(tm)
+            if (tot > 1000) {
+                report()
+                tot = 0
+            }
+        }
+
+        report("done")
+    }
+
     export function time(msg:string, f:()=>void, dontDoIt = false)
     {
         if (dontDoIt)

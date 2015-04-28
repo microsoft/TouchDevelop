@@ -5419,6 +5419,11 @@ module TDev
                 return s
         }
 
+        static testScriptTc():void
+        {
+            Util.timeSeries(() => AST.TypeChecker.tcApp(Script), 10)
+        }
+
         static testScriptParse(id:string):void
         {
             AST.loadScriptAsync(World.getAnyScriptAsync, id).done((resp:AST.LoadScriptResult) => {
