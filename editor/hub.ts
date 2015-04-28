@@ -62,10 +62,10 @@ module TDev.Browser {
         export function init() {
             if (window && window.location) {
                 if (Browser.isRaspberryPiDebian)
-                    EditorSettings.setHubTheme('rpi', false);
+                    EditorSettings.setHubTheme('rpi');
                 else {
                     var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
-                    EditorSettings.setHubTheme(m ? m[2] : "", false);
+                    EditorSettings.setHubTheme(m ? m[2] : "");
                 }
             }
         }
@@ -128,6 +128,7 @@ module TDev.Browser {
                     localStorage.setItem("editorMode", EditorMode[mode]);
                 if (upload)
                     uploadEditorMode();
+                TheEditor.refreshMode();
             }
         }
 
@@ -204,7 +205,7 @@ module TDev.Browser {
             });
         }
 
-        export function setHubTheme(theme: string, upload: boolean) {
+        export function setHubTheme(theme: string) {
             if (!!theme && !Browser.hubThemes[theme]) return;
 
             var previous = localStorage.getItem("hubTheme");
@@ -214,8 +215,6 @@ module TDev.Browser {
                     localStorage.removeItem("hubTheme");
                 else
                     localStorage.setItem("hubTheme", theme);
-                if (upload)
-                    uploadHubTheme();
                 updateWallpaper();
             }
         }
@@ -223,14 +222,6 @@ module TDev.Browser {
         export function hubTheme(): HubTheme {
             var key = localStorage.getItem("hubTheme");
             return key ? Browser.hubThemes[key] : undefined;
-        }
-
-        function uploadHubTheme() {
-            var m = localStorage.getItem("hubTheme");
-            if (Cloud.getUserId() && Cloud.isOnline()) {
-                Cloud.postUserSettingsAsync({ hubtheme: m || "" })
-                    .done(() => { HTML.showProgressNotification(lf("hub theme saved"), true); },(e) => { });
-            }
         }
     }
 

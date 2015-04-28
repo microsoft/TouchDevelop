@@ -152,8 +152,6 @@
                     var mode = EditorSettings.parseEditorMode(settings.editorMode);
                     if (mode != EditorMode.unknown)
                         EditorSettings.setEditorMode(mode, false);
-                    if (settings.hubtheme)
-                        EditorSettings.setHubTheme(settings.hubtheme, false);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     Cloud.litePermissions = settings.permissions;
                 }, e => { });
@@ -3544,10 +3542,12 @@
                         var si = this.browser().getScriptInfo(resp)
                         var hd = si.mkSmallBox();
                         hd.className += " sdBaseHeader"
-                        var btn = div("sdBaseCorner",
-                            div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
-                            div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
-                        hd.appendChild(btn)
+                        if (TheEditor.widgetEnabled("commentHistory")) {
+                            var btn = div("sdBaseCorner",
+                                div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
+                                div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
+                            hd.appendChild(btn)
+                        } else hd.setFlag("slim", true);
                         cont.appendChild(div(null, hd, d))
 
                         if (resp.rootid != resp.id) getFor(resp.id)

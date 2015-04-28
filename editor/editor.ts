@@ -1187,6 +1187,8 @@ module TDev
             async: 1,
             testAction: 1,
             lambda: 1,
+            // hub
+            commentHistory: 1,
         }
 
         public toggleWidgetVisibility(name: string, el: HTMLElement) {
