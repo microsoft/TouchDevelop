@@ -51,7 +51,7 @@ module TDev {
     // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
     function isShimBody(body: J.JStmt[]): string {
       var ret = null;
-      body.foreach((s: J.JStmt) => {
+      body.forEach((s: J.JStmt) => {
         var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]+)}$/);
         if (matches)
           ret = matches[1];
