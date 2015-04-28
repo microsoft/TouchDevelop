@@ -73,7 +73,10 @@ module TDev.AST.Json
         declId?: JNodeRef; // filled when the property is user-defined
     }
 
-    export interface JStringLiteral extends JExpr { value:string; }
+    export interface JStringLiteral extends JExpr {
+        value:string;
+        enumValue?:number;
+    }
     export interface JBooleanLiteral extends JExpr { value:boolean; }
 
     // A number literal is only used when adopting the "tree" view for

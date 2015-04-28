@@ -515,7 +515,8 @@ module TDev.AST.Json
             return {
                 nodeType: (typeof n.data) + "Literal",
                 value: n.data,
-                stringForm: n.stringForm
+                stringForm: n.stringForm,
+                enumValue: n.enumVal,
             }
         }
 

@@ -1940,8 +1940,21 @@ module TDev.AST {
             if (!this.propertyDeflStrings) {
                 this.propertyDeflStrings = {}
                 var descr = this.getDescription();
-                descr.replace(/\{hints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals : string) => {
-                    this.propertyDeflStrings[arg] = vals.split(',');
+                descr.replace(/\{(hints|enum):([^:{}]*):([^{}]*)/g,(mtch, tp, arg, vals : string) => {
+                    var lst = vals.split(',');
+                    if (tp == "enum") {
+                        var enumMap:StringMap<number> = {}
+                        lst = lst.map(a => {
+                            var m = /(.*)=(\d+)$/.exec(a)
+                            if (m) {
+                                enumMap[m[1]] = parseInt(m[2])
+                                return m[1]
+                            }
+                            else return a
+                        });
+                        (<any>lst).enumMap = enumMap
+                    }
+                    this.propertyDeflStrings[arg] = lst
                     return ""
                 })
                 descr.replace(/\{pichints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
@@ -3049,6 +3062,7 @@ module TDev.AST {
     {
         public loc:StackOp;
         public languageHint:string;
+        public enumVal:number;
 
         constructor() {
             super()
