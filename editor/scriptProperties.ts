@@ -26,6 +26,7 @@ module TDev
         public getTick() { return Ticks.viewScriptInit; }
         private platformsDiv: HTMLElement;
 
+        private iconsSection: HTMLElement;
         private managementSection: HTMLElement;
         private exportSection: HTMLElement;
         private dataSection: HTMLElement;
@@ -191,9 +192,11 @@ module TDev
                 div("formLine", lf("name: "), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on
                 this.pubId = div("inline-block"),
-                this.colorContainer,
-                this.iconArtIdContainer,
-                this.splashArtIdContainer,
+                this.iconsSection = div('',
+                    this.colorContainer,
+                    this.iconArtIdContainer,
+                    this.splashArtIdContainer
+                ),
                 this.managementSection = div("formLine",
                     HTML.mkButton(lf("delete script"), () => this.deleteScript()),
                     HTML.mkButton(lf("clone script"), () => TheEditor.cloneScriptAsync().done()),
@@ -804,7 +807,7 @@ module TDev
             this.updatePlatformDiv();
             this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published"
                 ? null
-                : lf("published id: {0}", ScriptEditorWorldInfo.baseId));
+                : lf("published id: /{0}", ScriptEditorWorldInfo.baseId));
 
             var color = new DeclEntry(lf("color: {0}", this.theScript.htmlColor()));
             color.icon = "";
@@ -846,6 +849,7 @@ module TDev
                 this.mdRoot.setChildren([]);
             }
 
+            TheEditor.toggleWidgetVisibility("scriptPropertiesIcons", this.iconsSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesManagement", this.managementSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesExport", this.exportSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesData", this.dataSection);

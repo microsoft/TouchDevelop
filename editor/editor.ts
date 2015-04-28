@@ -1138,6 +1138,7 @@ module TDev
             uploadArtInSearchButton: 1,
             calcApiHelp: 1,
             sideRunButton: 1,
+            scriptPropertiesIcons: 1,
             scriptPropertiesManagement: 1,
             scriptPropertiesSettings: 1,
             scriptPropertiesExport: 1,
