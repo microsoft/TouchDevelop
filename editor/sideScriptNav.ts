@@ -522,6 +522,7 @@ module TDev
                         { decl: this.editor.freshPictureResource(), displayName: 'picture resource', tick: Ticks.sideAddResource, description: lf("A picture from the web") },
                         { decl: this.editor.freshSoundResource(), displayName: 'sound resource', tick: Ticks.sideAddResource, description: lf("A sound from the web") },
                         { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: true, displayName: 'string resource', tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web") },
+                        { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: 'document resource', tick: Ticks.sideAddResource, description: lf("A document from the web") },
                         { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: 'color resource', tick: Ticks.sideAddResource, description: lf("A color constant") },
                         { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden: true, displayName: 'number resource', tick: Ticks.sideAddResource, description: lf("A number constant") }
                     ],

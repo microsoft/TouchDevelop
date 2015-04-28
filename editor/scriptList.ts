@@ -4970,7 +4970,7 @@
                     picDiv.style.backgroundPosition = 'center';
                     picDiv.style.backgroundSize = picMode;
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay, () => {
+                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -4983,6 +4983,8 @@
                         else audio.play();
                     });
                     img = playBtn;
+                } else if (a.bloburl) {
+                    // todo
                 }
 
                 d.setChildren([img,
@@ -5026,8 +5028,8 @@
                 if (a.thumburl) {
                     img = HTML.mkImg(a.thumburl);
                     img.className += " checker";
-                } else {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay, () => {
+                } else if (a.wavurl) {
+                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5040,6 +5042,8 @@
                         else audio.play();
                     });
                     img = div('checker', playBtn);
+                } else if (a.bloburl) {
+                    // TODO: preview
                 }
                 icon.setChildren([img]);
 
@@ -5096,6 +5100,8 @@
                     });
                 } else if (a.wavurl) {
                     id.setChildren([HTML.mkAudio(a.wavurl, a.aacurl, null, true)]);
+                } else if (a.bloburl) {
+                    id.setChildren([HTML.mkImg("svg:document,black")]);
                 }
 
                 var uid = this.browser().getCreatorInfo(a);

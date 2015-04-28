@@ -4721,6 +4721,10 @@ module TDev
             this.queueNavRefresh();
         }
 
+        public freshDocumentResource(name: string = "doc", url?: string) {
+            return this.freshArtResource("Document", name, url);
+        }
+
         public freshSoundResource(name: string = "snd", url? : string) {
             return this.freshArtResource("Sound", name, url);
         }

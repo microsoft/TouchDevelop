@@ -114,3 +114,4 @@
 ///<reference path='Editor.ts' />
 ///<reference path='Create.ts'/>
 ///<reference path='WebSocket.ts'/>
+///<reference path='Document.ts'/>

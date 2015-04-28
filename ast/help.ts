@@ -88,6 +88,9 @@ module TDev {
         // if sound
         wavurl: string;
         aacurl: string;
+        // cloud.lite
+        bloburl?: string;
+        arttype?: string;
     }
 
     export interface JsonUser extends JsonIdObject

@@ -280,7 +280,8 @@ module TDev
                     Sound: SoundEditor,
                     Color: ColorEditor,
                     Number : NumberEditor,
-                    String : StringEditor
+                    String: StringEditor,
+                    Document: DocumentEditor,
                 };
             Object.keys(ArtEditor.editors).forEach((kn:string) => {
                 var k = api.getKind(kn);
@@ -369,7 +370,6 @@ module TDev
         {
             var durl = div('', [this.searchOnlineButton,this.uploadButton]);
             var r = div("artEditor",
-                  div("varLabel", lf("i want to find pictures")),
                   durl,
                   div("varLabel", lf("url")),
                   div('', this.url),
@@ -378,6 +378,70 @@ module TDev
                   );
             (<any>r).blinkSection = durl
             return r
+        }
+    }
+
+    export class DocumentEditor
+        extends ArtEditor {
+        private url: HTMLInputElement;
+        private uploadButton: HTMLElement;
+        private searchOnlineButton: HTMLElement;
+        constructor() {
+            super()
+            this.url = HTML.mkTextInput("text", "The document url");
+            this.url.readOnly = true;
+            this.uploadButton = HTML.mkButton(lf("upload"),() => {
+                this.uploadHandler();
+            });
+            this.searchOnlineButton = HTML.mkButton(lf("search documents"),() => {
+                this.searchOnlineHandler();
+            });
+        }
+
+        public set(v: string) { this.url.value = v; }
+        public get() { return this.url.value; }
+
+        private uploadHandler() {
+            ArtUtil.uploadDocumentDialogAsync().done((a: TDev.JsonArt) => {
+                if (!!a) {
+                    this.set(a.bloburl);
+                    this.newNameHint(a.name);
+                }
+            });
+        }
+
+        private searchOnlineHandler() {
+            var m = new ModalDialog();
+            var converter = (s: Browser.ArtInfo) => {
+                return s.mkSmallBoxNoClick().withClick(() => {
+                    m.dismiss();
+                    s.getJsonAsync().done(() => {
+                        if (s.art.bloburl) {
+                            this.set(s.art.bloburl);
+                            this.newNameHint(s.name)
+                        }
+                    });
+                });
+            };
+
+            var queryAsync = (terms: string) => Meta.searchArtAsync(terms, "document")
+                .then((itms: Browser.ArtInfo[]) => itms.map(itm => converter(itm)).filter(itm => itm != null));
+            m.choose([], {
+                queryAsync: queryAsync,
+                searchHint: lf("Type to search..."),
+                initialEmptyQuery: true
+            });
+        }
+
+        public render() {
+            var durl = div('', [this.searchOnlineButton, this.uploadButton]);
+            var r = div("artEditor",
+                durl,
+                div("varLabel", lf("url")),
+                div('', this.url)
+                );
+            (<any>r).blinkSection = durl
+            return r;
         }
     }
 
@@ -663,7 +727,7 @@ module TDev
                         } else if (Cloud.lite && !!HTML.documentMimeTypes[file.type]) {
                             ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                                 if (art && Script) {
-                                    var n = TheEditor.freshSoundResource(art.name, art.wavurl);
+                                    var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
                                     TheEditor.addNode(n);
                                 }
                             });
@@ -690,7 +754,7 @@ module TDev
                 var name = HTML.mkTextInput("text", lf("document name"));
                 name.value = initialName || "";
                 var description = HTML.mkTextInput("text", lf("description"));
-                var file = input || HTML.mkAudioInput(false, 1);
+                var file = input || HTML.mkDocumentInput(1);
                 var errorDiv = div('validation-error');
                 var progressDiv = div('');
                 var progressBar = HTML.mkProgressBar();

@@ -393,7 +393,7 @@ module TDev.HTML {
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
     };
 
-    export function mkDocumentInput(accept: string, maxMb: number): IInputElement {
+    export function mkDocumentInput(maxMb: number): IInputElement {
         var input = HTML.mkTextInput("file", lf("choose a file"));
         input.accept = Object.keys(documentMimeTypes).join(";");
         return <IInputElement>{
