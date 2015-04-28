@@ -4260,12 +4260,6 @@ module TDev
 
             m.add([
                 div("wall-dialog-header", lf("TouchDevelop settings")),
-                div("wall-dialog-body", Cloud.getUserId() ? lf("You have signed in with {0}.", Cloud.getIdentityProvider()) :
-                    lf("You are not signed in.")),
-                div("wall-dialog-body",
-                    Editor.mkHelpLink("user accounts"),
-                    HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
-                    ),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("access and use your location"),
                     (v) => RuntimeSettings.setLocation(v), RuntimeSettings.location())),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("play sounds and music"),
