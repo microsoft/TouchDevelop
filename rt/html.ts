@@ -1238,7 +1238,7 @@ module TDev.HTML {
     export function sanitizeHTML(html:string) : string
     {
         if (!isBeta) return html
-
+        if (!html) return html;
         try {
             var reminder = html.replace(/<([^<>]+)>/g, (allm, t) => {
                 validateTag(t, html)
