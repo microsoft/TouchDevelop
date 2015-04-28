@@ -6062,7 +6062,7 @@
                 editB.className = "sdBigButton sdBigButtonFull";
             }
             var runB = mkBtn(Ticks.browseRun, "svg:play,white", lf("run"), null, () => { this.run() });
-            if (this.jsonScript && this.jsonScript.islibrary) {
+            if (Cloud.isRestricted() || (this.jsonScript && this.jsonScript.islibrary)) {
                 runB = null;
                 pinB = null;
             }
