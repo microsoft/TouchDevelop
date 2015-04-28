@@ -189,10 +189,10 @@ module TDev.RT.Wab {
                 .done();
         }
 
-        export function mkAudioInput(allowEmpty: boolean, maxMb: number): HTML.IMediaInputElement {
+        export function mkAudioInput(allowEmpty: boolean, maxMb: number): HTML.IInputElement {
             var dataUri: string = null;
             var statusDiv = div('', div('validation-error', 'no sound selected'));
-            return <HTML.IMediaInputElement>{
+            return <HTML.IInputElement>{
                 element: div("",
                     HTML.mkButton(lf("record sound"), () => {
                         sendRequestAsync({ action: Action.RECORD_MICROPHONE })
@@ -234,11 +234,11 @@ module TDev.RT.Wab {
             };
         }
 
-        export var mkImageInput = (allowEmpty: boolean, maxMb: number): HTML.IMediaInputElement =>
+        export var mkImageInput = (allowEmpty: boolean, maxMb: number): HTML.IInputElement =>
         {
             var dataUri: string = null;
             var statusDiv = div('', div('validation-error', lf("no picture selected")));
-            return <HTML.IMediaInputElement>{
+            return <HTML.IInputElement>{
                 element: div("",
                     HTML.mkButton(lf("choose picture"), () => {
                         sendRequestAsync({ action: Action.PICK_IMAGE })

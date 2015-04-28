@@ -364,17 +364,59 @@ module TDev.HTML {
         return <HTMLButtonElement>btn;
     }
 
-    export interface IMediaInputElement {
+    export interface IInputElement {
         element: HTMLElement;
         validate(): string; // returns error message
         readAsync(): Promise; // of string
     }
 
-    export var mkAudioInput = (allowEmpty: boolean, maxMb: number): IMediaInputElement =>
+    export function fileReadAsDataURLAsync(f: File) : Promise {
+        if (!f)
+            return Promise.as(null);
+        else {
+            return new Promise((onSuccess, onError, onProgress) => {
+                var reader = new FileReader();
+                reader.onerror = (ev) => onSuccess(null);
+                reader.onload = (ev) => onSuccess(reader.result);
+                reader.readAsDataURL(f);
+            });
+        }
+    }
+
+    export var documentMimeTypes: StringMap<string> = {
+        "text/css": "css",
+        "application/javascript": "js",
+        "text/plain": "txt",
+        "application/pdf": "pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
+    };
+
+    export function mkDocumentInput(accept: string, maxMb: number): IInputElement {
+        var input = HTML.mkTextInput("file", lf("choose a file"));
+        input.accept = Object.keys(documentMimeTypes).join(";");
+        return <IInputElement>{
+            element: input,
+            validate: function (): string {
+                var f = input.files[0];
+                if (!f)
+                    return 'Oops, you need to select a file...';
+                if (maxMb > 0 && f.size > maxMb * 1000000)
+                    return 'Sorry, the file is too big. The sound must be less than ' + maxMb + 'Mb...';
+                if (input.accept.indexOf(f.type) < 0)
+                    return 'Sorry, this document format is not supported...';
+                return null;
+            },
+            readAsync: () => fileReadAsDataURLAsync(input.files[0])
+        };
+    }
+
+    export var mkAudioInput = (allowEmpty: boolean, maxMb: number): IInputElement =>
     {
         var input = HTML.mkTextInput("file", lf("choose a file"));
         input.accept = "audio/wav";
-        return <IMediaInputElement>{
+        return <IInputElement>{
             element: input,
             validate: function (): string {
                 var files = input.files;
@@ -387,19 +429,7 @@ module TDev.HTML {
                     return 'Sorry, you can only upload WAV sounds...';
                 return null;
             },
-            readAsync: function (): Promise { // of String
-                var f = input.files[0];
-                if (!f)
-                    return Promise.as(null);
-                else {
-                    return new Promise((onSuccess, onError, onProgress) => {
-                        var reader = new FileReader();
-                        reader.onerror = (ev) => onSuccess(null);
-                        reader.onload = (ev) => onSuccess(reader.result);
-                        reader.readAsDataURL(f);
-                    });
-                }
-            }
+            readAsync: () => fileReadAsDataURLAsync(input.files[0])
         };
     }
 
@@ -417,42 +447,36 @@ module TDev.HTML {
         return file;
     }
 
-    export function mkFileInput(file : File, maxMb: number): IMediaInputElement
+    export function mkFileInput(file : File, maxMb: number): IInputElement
     {
         var input;
-        if (/^image\/(png|jpeg)$/.test(file.type)) {
+        if (/^image\//.test(file.type)) {
             input = document.createElement("img");
             input.style.maxWidth = '21em';
             input.style.maxHeight = '11em';
             input.src = file;
-        } else {
+            fileReadAsDataURLAsync(file).done(url => input.src = url);
+        } else if (/^audio\//.test(file.type)) {
             input = document.createElement("audio");
             (<any>input).crossorigin = "anonymous";
             input.src = file;
+            fileReadAsDataURLAsync(file).done(url => input.src = url);
+        } else {
+            input = div('wall-textbox', lf("{0} {1}Kb", file.name, Math.ceil(file.size / 1000)));
         }
         input.style.margins = '0.5em';
-        var prev = new FileReader();
-        prev.onload = (e) => input.src = prev.result;
-        prev.readAsDataURL(file);
-        return <IMediaInputElement>{
+        return <IInputElement>{
             element : input,
             validate : () => null,
-            readAsync : (): Promise => { // of String
-                return new Promise((onSuccess, onError, onProgress) => {
-                    var reader = new FileReader();
-                    reader.onerror = (ev) => onSuccess(null);
-                    reader.onload = (ev) => onSuccess(reader.result);
-                    reader.readAsDataURL(file);
-                });
-            }
+            readAsync: (): Promise => fileReadAsDataURLAsync(file)
         };
     }
 
-    export var mkImageInput = (allowEmpty : boolean, maxMb: number): IMediaInputElement =>
+    export var mkImageInput = (allowEmpty : boolean, maxMb: number): IInputElement =>
     {
         var input = HTML.mkTextInput("file", lf("choose a picture"));
         input.accept = "image/jpeg,image/png";
-        return <IMediaInputElement>{ element : input,
+        return <IInputElement>{ element : input,
             validate : function (): string {
                 var files = input.files;
                 if (files.length == 0)

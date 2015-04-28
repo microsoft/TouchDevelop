@@ -660,6 +660,13 @@ module TDev
                                     TheEditor.addNode(n);
                                 }
                             });
+                        } else if (Cloud.lite && !!HTML.documentMimeTypes[file.type]) {
+                            ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                                if (art && Script) {
+                                    var n = TheEditor.freshSoundResource(art.name, art.wavurl);
+                                    TheEditor.addNode(n);
+                                }
+                            });
                         } else {
                             ModalDialog.info('unsupported file type', 'sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)');
                         }
@@ -672,7 +679,87 @@ module TDev
             }, false);
         }
 
-        export function uploadSoundDialogAsync(input? : TDev.HTML.IMediaInputElement, initialName? : string): Promise {
+        export function uploadDocumentDialogAsync(input?: TDev.HTML.IInputElement, initialName?: string): Promise {
+            if (!Cloud.lite || Cloud.anonMode(lf("uploading documents"))) {
+                return Promise.as();
+            }
+            return new Promise((onSuccess, onError, onProgress) => {
+                var m = new ModalDialog();
+                var art: JsonArt = null;
+                m.onDismiss = () => onSuccess(art);
+                var name = HTML.mkTextInput("text", lf("document name"));
+                name.value = initialName || "";
+                var description = HTML.mkTextInput("text", lf("description"));
+                var file = input || HTML.mkAudioInput(false, 1);
+                var errorDiv = div('validation-error');
+                var progressDiv = div('');
+                var progressBar = HTML.mkProgressBar();
+                m.add(div("wall-dialog-header", lf("upload document")));
+                m.add(div("wall-dialog-body",
+                    [
+                        div('', div('', lf("1. choose a document (.txt, .pptx, .pdf, .css, .js, less than 1MB)")), file.element),
+                        div('', div('', lf("2. give it a name (minimum 4 characters)")), name),
+                        div('', div('', lf("3. describe it")), description),
+                        div('', progressBar),
+                        errorDiv,
+                        progressDiv
+                    ]));
+                var publishBtn = null;
+                m.add(div("wall-dialog-body", lf("Everyone will be able to read your document on the Internet forever. ")));
+                m.add(Cloud.mkLegalDiv());
+                m.add(div("wall-dialog-buttons", publishBtn = HTML.mkButton(lf("4. publish"),() => {
+                    errorDiv.setChildren([]);
+                    if (name.value.length < 4) {
+                        errorDiv.setChildren([lf("Oops, the name is too short...")]);
+                        return;
+                    }
+                    var ef = file.validate();
+                    if (ef) {
+                        errorDiv.setChildren([ef]);
+                        return; // no file selected
+                    }
+                    progressBar.start();
+                    progressDiv.setChildren([lf("publishing...")]);
+                    file.readAsync()
+                        .then(data => {
+                        if (!data) return Promise.as(undefined);
+                        else {
+                            Util.log('upload document: uploading');
+                            return uploadArtAsync(name.value, description.value, data);
+                        }
+                    }).done((resp) => {
+                        progressBar.stop();
+                        progressDiv.setChildren([]);
+                        art = resp;
+                        if (!art) {
+                            Util.log('upload document: could not read document');
+                            errorDiv.setChildren([lf("Could not read document.")]);
+                        } else {
+                            Util.log('upload document: success');
+                            m.dismiss();
+                            ModalDialog.info(lf("document published!"), lf("You can find your document under 'my art' in the hub."));
+                        }
+                    }, e => {
+                            Util.log('upload documeent: error ' + e.status);
+                            progressBar.stop();
+                            progressDiv.setChildren([]);
+                            if (e.status == 502)
+                                errorDiv.setChildren([lf("Could not publish document. ") + Cloud.onlineInfo()]);
+                            else if (e.status == 503)
+                                errorDiv.setChildren([lf("Could not publish documeent. Did you publish a lot recently? Please try again later.")]);
+                            else if (e.status == 403)
+                                errorDiv.setChildren([lf("Access denied; Please return to the main hub and then try again.")]);
+                            else if (e.status == 400)
+                                errorDiv.setChildren([lf("Could not publish document: ") + e.errorMessage]);
+                            else
+                                throw e;
+                        });
+                })));
+                m.show();
+            });
+        }
+
+        export function uploadSoundDialogAsync(input? : TDev.HTML.IInputElement, initialName? : string): Promise {
             if (Cloud.anonMode(lf("uploading sounds"))) {
                 return Promise.as();
             }
@@ -769,7 +856,7 @@ module TDev
             }
         }
 
-        export function uploadPictureDialogAsync(removeWhite = false, input? : TDev.HTML.IMediaInputElement, initialName? : string): Promise {
+        export function uploadPictureDialogAsync(removeWhite = false, input? : TDev.HTML.IInputElement, initialName? : string): Promise {
             if (Cloud.anonMode(lf("uploading pictures")))
                 return Promise.as();
             return new Promise((onSuccess, onError, onProgress) => {
