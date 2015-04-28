@@ -4984,7 +4984,7 @@
                     });
                     img = playBtn;
                 } else if (a.bloburl) {
-                    // todo
+                    img = HTML.mkImg("svg:document,black");
                 }
 
                 d.setChildren([img,
@@ -5043,7 +5043,7 @@
                     });
                     img = div('checker', playBtn);
                 } else if (a.bloburl) {
-                    // TODO: preview
+                    img = HTML.mkImg("svg:document,black");
                 }
                 icon.setChildren([img]);
 
@@ -5101,7 +5101,7 @@
                 } else if (a.wavurl) {
                     id.setChildren([HTML.mkAudio(a.wavurl, a.aacurl, null, true)]);
                 } else if (a.bloburl) {
-                    id.setChildren([HTML.mkImg("svg:document,black")]);
+                    //
                 }
 
                 var uid = this.browser().getCreatorInfo(a);
