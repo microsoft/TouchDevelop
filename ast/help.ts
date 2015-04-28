@@ -717,9 +717,7 @@ module TDev {
                     return r;
                 } else {
                     m = /^(:(\d+)x(\d+))?(:.*)?/.exec(arg);
-                    if (m) {
-                        
-                    } else
+                    if (!m)
                         return MdComments.error(lf("invalid picture id"));
                 }
             } else if (macro == "pici") {
@@ -784,7 +782,7 @@ module TDev {
                     this.appLink("#pub:" + MdComments.shrink(args[0])),
                     args[1])
             } else if (macro == "hide" || macro == "priority" || macro == "template" || macro == "highlight" ||
-                macro == 'box' || macro == "code" || macro == "widgets" || macro == "templatename" || 
+                macro == 'box' || macro == "code" || macro == "widgets" || macro == "templatename" ||
                 macro == "hints" || macro == "pichints" || macro == "enum" ||
                 macro == "parenttopic" || macro == "docflags" || macro == "stprecise" || macro == "flags" || macro == "action" ||
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||
@@ -855,6 +853,8 @@ module TDev {
                 var ms = arg.split(',');
                 if (ms.length != 2) return MdComments.error(lf("bigbutton: must have <text>,<url> arguments"));
                 return Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
+            } else if (macro == "shim") {
+                return "<b>compiles to C++ function: </b><span class='font-family: monospace'>"+arg+"</span>";
             } else {
                 return null;
             }
