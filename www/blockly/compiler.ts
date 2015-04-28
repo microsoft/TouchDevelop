@@ -313,6 +313,7 @@ import H = Helpers;
 function inferType(e: Environment, b: B.Block): J.JTypeRef {
   switch (b.type) {
     case "math_number":
+    case "math_number1":
     case "math_arithmetic":
       return H.mkTypeRef("Number");
     case "logic_operation":
@@ -390,17 +391,18 @@ function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
   return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
-function compileButtonPressed(e: Environment, b: B.Block): J.JExpr {
-  return compileStdCall(e, b, "button pressed", ["id"]);
+function compileButtonType(e: Environment, b: B.Block): J.JExpr {
+  return H.mkStringLiteral(b.getFieldValue("name"));
 }
 
 function compileOnOff(e: Environment, b: B.Block): J.JExpr {
-  return H.mkNumberLiteral(b.getFieldValue("STATE") == "ON" ? 1 : 0);
+  return H.mkBooleanLiteral(b.getFieldValue("STATE") == "ON" ? true : false);
 }
 
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
   switch (b.type) {
     case "math_number":
+    case "math_number1":
       return compileNumber(e, b);
     case "math_arithmetic":
     case "logic_operation":
@@ -414,16 +416,20 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
-    case "device_button_pressed":
-      return compileButtonPressed(e, b);
+    case "device_button_type":
+      return compileButtonType(e, b);
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
       return compileCall(e, <B.DefOrCallBlock> b);
+    default:
+      if (b.type in stdCallTable)
+        return compileStdCall(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args);
+      else {
+        console.log("Unable to compile expression: "+b.type);
+        return H.mkNumberLiteral(0);
+      }
   }
-  throw new Error((b.type + " is not an expression block or is not supported"));
-  // unreachable
-  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -513,12 +519,10 @@ function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
   return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
 }
 
-function compileControlsWhileUntil(e: Environment, b: B.Block): J.JStmt {
-  var until = b.getFieldValue('MODE') == 'UNTIL';
-  var cond = compileExpression(e, b.getInputTargetBlock("BOOL"));
+function compileWhile(e: Environment, b: B.Block): J.JStmt {
+  var cond = compileExpression(e, b.getInputTargetBlock("COND"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  var finalCond = until ? H.mkSimpleCall("not", [cond]) : cond;
-  return H.mkWhile(H.mkExprHolder([], finalCond), body);
+  return H.mkWhile(H.mkExprHolder([], cond), body);
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
@@ -570,21 +574,34 @@ function compileComment(e: Environment, b: B.Block): J.JStmt {
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
 
-function generateEvent(e: Environment, id: J.JExpr, body: J.JStmt[]): J.JStmt {
+function generateEvent(e: Environment, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
     [ H.mkInlineAction(body, true, def) ],
     H.mkExprHolder(
       [ def ],
-      H.stdCall("on", [id])));
+      H.stdCall(f, args)));
 }
 
-function compileEvent(e: Environment, b: B.Block): J.JStmt {
-  var bId = b.getInputTargetBlock("ID");
+function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
+  var bName = b.getInputTargetBlock("NAME");
   var bBody = b.getInputTargetBlock("HANDLER");
-  var id = compileExpression(e, bId);
+  var name = compileExpression(e, bName);
   var body = compileStatements(e, bBody);
-  return generateEvent(e, id, body);
+  return generateEvent(e, "when button is pressed", [name], body);
+}
+
+var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
+  device_show_letter:             { f: "show letter",           args: ["letter"] },
+  device_pause:                   { f: "pause",                 args: ["pausetime"] },
+  device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
+  device_plot:                    { f: "plot",                  args: ["x", "y"] },
+  device_unplot:                  { f: "unplot",                args: ["x", "y"] },
+  device_point:                   { f: "point",                 args: ["x", "y"] },
+  device_make_StringImage:        { f: "make string images",    args: ["NAME"] },
+  device_scroll_string_image:     { f: "scroll string image",   args: ["string", "speed"] },
+  device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
+  device_get_button:              { f: "button is pressed",     args: ["NAME"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -623,28 +640,19 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         stmts.push(compileControlsRepeat(e, b));
         break;
 
-      case 'controls_whileUntil':
-        stmts.push(compileControlsWhileUntil(e, b));
+      case 'device_while':
+        stmts.push(compileWhile(e, b));
         break;
 
-      case 'device_set_led':
-        stmts.push(compileStdBlock(e, b, "set led", ["id", "brightness"]));
-        break;
-
-      case 'device_wait':
-        stmts.push(compileStdBlock(e, b, "busy wait ms", ["VAL"]));
-        break;
-
-      case 'device_scroll':
-        stmts.push(compileStdBlock(e, b, "scroll", ["ARG"]));
-        break;
-
-      case 'device_event':
-        stmts.push(compileEvent(e, b));
+      case 'device_button_event':
+        stmts.push(compileButtonEvent(e, b));
         break;
 
       default:
-        throw new Error(b.type + " is not a statement block or is not supported");
+        if (b.type in stdCallTable)
+          stmts.push(compileStdBlock(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args));
+        else
+          console.log("Not generating code for (not a statement / not supported): "+b.type);
     }
     b = b.getNextBlock();
   }
@@ -677,9 +685,9 @@ interface CompileOptions {
 
 function compileWithEventIfNeeded(e: Environment, b: B.Block): J.JStmt {
   if (b.type != "device_event") {
-    var id = H.mkStringLiteral("start");
+    var id = H.mkStringLiteral("starts");
     var body = compileStatements(e, b);
-    return generateEvent(e, id, body);
+    return generateEvent(e, "when device", [id], body);
   }
 }
 

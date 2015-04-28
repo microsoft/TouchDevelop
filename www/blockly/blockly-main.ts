@@ -323,12 +323,18 @@ module TDev {
       post({ type: External.MessageType.Quit });
     });
     $("#command-compile").addEventListener("click", () => {
-      post(<External.Message_Compile> {
-        type: External.MessageType.Compile,
-        text: compile(Blockly.mainWorkspace, {
+      var ast: TDev.AST.Json.JApp;
+      try {
+        ast = compile(Blockly.mainWorkspace, {
           name: getName(),
           description: getDescription()
-        }),
+        });
+      } catch (e) {
+        statusMsg("⚠  compilation error "+e, External.Status.Error);
+      }
+      post(<External.Message_Compile> {
+        type: External.MessageType.Compile,
+        text: ast,
         language: External.Language.TouchDevelop
       });
     });

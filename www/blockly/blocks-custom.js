@@ -436,7 +436,7 @@ Blockly.Blocks['device_while'] = {
     this.appendValueInput("COND")
         .setCheck("Boolean")
         .appendField("while");
-    this.appendStatementInput("NAME")
+    this.appendStatementInput("DO")
         .appendField("do");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
