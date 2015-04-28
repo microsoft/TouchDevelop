@@ -3576,8 +3576,8 @@ function tdupload(args:string[])
             "build/touchdevelop.tgz",
             "officemix/officemix.html",
             "build/officemix.js",
-            "build/ace.js",
-            "build/blockly.js",
+            "build/ace-main.js",
+            "build/blockly-main.js",
         ])
 
     var liteId = ""
