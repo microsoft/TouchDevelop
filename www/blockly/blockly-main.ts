@@ -317,21 +317,43 @@ module TDev {
     dirty = false;
   }
 
+  function compileOrError() {
+    var ast: TDev.AST.Json.JApp;
+    try {
+      // Clear any previous errors
+      var clear = (c: string) => {
+        var elts = document.getElementsByClassName(c);
+        // Argh! It's alive!
+        for (var i = elts.length - 1; i >= 0; --i)
+          (<any> elts[i]).classList.remove(c);
+      };
+      clear("blocklySelected");
+      clear("blocklyError");
+
+      ast = compile(Blockly.mainWorkspace, {
+        name: getName(),
+        description: getDescription()
+      });
+    } catch (e) {
+      var block: Blockly.Block = (<any> e).block ? (<any> e).block : null;
+      if (block) {
+        (<any> block.svgGroup_).classList.add("blocklySelected");
+        (<any> block.svgGroup_).classList.add("blocklyError");
+      }
+      statusMsg("⚠ compilation error "+e, External.Status.Error);
+    }
+    // return ast;
+  }
+
   function setupButtons() {
     $("#command-quit").addEventListener("click", () => {
       doSave();
       post({ type: External.MessageType.Quit });
     });
     $("#command-compile").addEventListener("click", () => {
-      var ast: TDev.AST.Json.JApp;
-      try {
-        ast = compile(Blockly.mainWorkspace, {
-          name: getName(),
-          description: getDescription()
-        });
-      } catch (e) {
-        statusMsg("⚠  compilation error "+e, External.Status.Error);
-      }
+      var ast = compileOrError();
+      if (!ast)
+        return;
       post(<External.Message_Compile> {
         type: External.MessageType.Compile,
         text: ast,
@@ -339,12 +361,12 @@ module TDev {
       });
     });
     $("#command-graduate").addEventListener("click", () => {
+      var ast = compileOrError();
+      if (!ast)
+        return;
       post(<External.Message_Upgrade> {
         type: External.MessageType.Upgrade,
-        ast: compile(Blockly.mainWorkspace, {
-          name: getName(),
-          description: getDescription()
-        }),
+        ast: ast,
         name: getName()+" (converted)",
       });
     });
