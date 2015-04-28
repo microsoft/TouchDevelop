@@ -9,6 +9,11 @@ module TDev.RT {
             super()
         }
 
+        static fromArtUrl(url: string): Promise {
+            var value = String_.valueFromArtUrl(url);
+            return Promise.as(JsonObject.mk(value));
+        }
+
         static mk(s: string, log?: (msg: string) => void ): JsonObject {
             return JsonParser.parse(s, log);
         }

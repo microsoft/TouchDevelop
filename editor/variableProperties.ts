@@ -282,6 +282,7 @@ module TDev
                     Number : NumberEditor,
                     String: StringEditor,
                     Document: DocumentEditor,
+                    "Json Object": JsonObjectEditor,
                 };
             Object.keys(ArtEditor.editors).forEach((kn:string) => {
                 var k = api.getKind(kn);
@@ -533,6 +534,36 @@ module TDev
                 this.url,
                 div("varLabel", lf("key url")),
                 this.keyUrl);
+            return d;
+        }
+    }
+
+    export class JsonObjectEditor
+        extends ArtEditor {
+        private value: HTMLTextAreaElement;
+        constructor() {
+            super()
+            this.value = HTML.mkTextArea("variableDesc");
+        }
+
+        public set(v: string) {
+            var value = TDev.RT.String_.valueFromArtUrl(v);
+            this.value.value = value;
+        }
+        public get() {
+            return TDev.RT.String_.valueToArtUrl(this.value.value);
+        }
+
+        public editFullScreenAsync(): Promise {
+            return EditorHost.editFullScreenAsync(this.varName(), this.value.value, "json")
+                .then(value => this.value.value = value);
+        }
+
+        public render() {
+            var labelDiv: HTMLElement;
+            var d = div("artEditor",
+                div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => this.editFullScreenAsync().done())),
+                this.value);
             return d;
         }
     }

@@ -178,7 +178,7 @@ module TDev
             }).done()
         }
 
-        static editFullScreenAsync(name : string, value : string): Promise { // of string
+        static editFullScreenAsync(name : string, value : string, mode? : string): Promise { // of string
             return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync(baseUrl + "ace/ace.js") : Promise.as())
                 .then(() => {
                 return new Promise((onSuccess, onProgress, onError) => {
@@ -189,7 +189,8 @@ module TDev
                         d.style.width = '80%';
                         m.add(d);
                         var editor = ace.edit(d);
-                        if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
+                        if (mode) editor.getSession().setMode("ace/mode/" + mode);
+                        else if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
                         else if (/\.json$/i.test(name)) editor.getSession().setMode("ace/mode/json");
                         else if (/\.xml$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
                         else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
