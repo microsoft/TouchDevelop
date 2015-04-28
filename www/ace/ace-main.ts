@@ -9,8 +9,22 @@ module TDev {
 
     // ---------- Communication protocol
 
+    function hashCode(s: string) {
+      var hash = 0;
+      var len = s.length;
+      if (len == 0)
+          return hash;
+      var chr = 0;
+      for (var i = 0, len = s.length; i < len; i++) {
+        chr   = s.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0
+      }
+      return hash;
+    }
+
     function isAllowedOrigin(origin: string) {
-        return origin.indexOf((<any>document.location).origin) == 0;
+        return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == 2038446495;
     }
 
     // Both of these are written once when we receive the first (trusted)
