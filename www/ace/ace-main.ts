@@ -24,7 +24,7 @@ module TDev {
     }
 
     function isAllowedOrigin(origin: string) {
-        return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == 2038446495;
+        return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == -1042622320;
     }
 
     // Both of these are written once when we receive the first (trusted)
