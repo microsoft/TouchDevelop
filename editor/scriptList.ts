@@ -6303,6 +6303,8 @@
 
         private addShare(m:ModalDialog, options:RT.ShareManager.ShareOptions)
         {
+            if (Cloud.isRestricted()) return;
+
             var id = this.publicId;
             var title = this.getTitle();
             var ht = "";
