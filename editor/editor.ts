@@ -1138,7 +1138,6 @@ module TDev
             uploadArtInSearchButton: 1,
             calcApiHelp: 1,
             sideRunButton: 1,
-            scriptPropertiesSettings: 1,
             tutorialGoToPreviousStep : 1,
             // sections
             dataSection: 1,
@@ -1185,6 +1184,7 @@ module TDev
             scriptPropertiesPlatform: 1,
             scriptPropertiesInstrumentation: 1,
             scriptPropertiesData: 1,
+            scriptPropertiesSettings: 1,
             wallLogsButton: 1,
             stringEditFullScreen: 1,
             // language
