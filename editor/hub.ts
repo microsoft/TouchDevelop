@@ -1102,7 +1102,7 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates" && !this.isBeginner())
+                    if (k != "templates" && !this.isBeginnerOrCoder())
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
@@ -1237,7 +1237,7 @@ module TDev.Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     if (elements.length < slots + 1) {
                         var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
                         el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
@@ -1270,7 +1270,7 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     var upd = this.browser().headersWithUpdates();
                     if (upd.length > 0) {
                         var updBtn =
@@ -1297,7 +1297,7 @@ module TDev.Browser {
                 addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
                     elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
                     elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
@@ -2112,19 +2112,19 @@ module TDev.Browser {
             m.choose(boxes);
         }
 
-        private isBeginner() {
-            return EditorSettings.editorMode() <= EditorMode.block;
+        private isBeginnerOrCoder() {
+            return EditorSettings.editorMode() <= EditorMode.classic;
         }
 
         private updateSections()
         {
             var sects = {
                 "recent": lf("my scripts"),
-                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
+                "misc": this.isBeginnerOrCoder() ? lf("tutorials") : lf("learn"),
                 "showcase": lf("showcase"),
                 "social": lf("social"),
             };
-            if (!this.isBeginner()) {
+            if (!this.isBeginnerOrCoder()) {
                 var extra = {
                     "top": lf("top & new"),
                     "tags": lf("categories"),
@@ -2145,7 +2145,7 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     sects["channels"] = lf("channels")
                 }
             }
@@ -2258,7 +2258,7 @@ module TDev.Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    this.isBeginner() ? this.showSimplifiedLearn(c) : this.showLearn(c);
+                    this.isBeginnerOrCoder() ? this.showSimplifiedLearn(c) : this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
