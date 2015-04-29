@@ -7117,7 +7117,6 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             new ScriptsTab(this),
              EditorSettings.editorMode() >= EditorMode.pro ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
@@ -7133,7 +7132,7 @@
         }
 
         private askedToLogin:boolean;
-
+        private scriptsTab: ScriptsTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -7180,6 +7179,13 @@
                         }))
             }
 
+            if (!this.scriptsTab) {
+                this.scriptsTab = new ScriptsTab(this);
+                this.scriptsTab.initElements();
+                this.scriptsTab.initTab();
+            }
+            ch.push(this.scriptsTab.tabContent);
+
             this.tabContent.setChildren(ch);
 
             if (!Cloud.isRestricted()) {
@@ -7220,19 +7226,7 @@
             return "svg:lock";
         }
 
-        public inlineIsTile() { return true; }
-
-        public initElements() {
-            super.initElements();
-            this.inlineContent.setChildren(BrowserMultiTab.generateReplacementTileContents(this));
-            this.setVisibility(true);
-        }
-
-        public initInline() {
-            super.initInline();
-            this.inlineContent.setChildren(BrowserMultiTab.generateReplacementTileContents(this));
-            this.setVisibility(true);
-        }
+        public inlineIsTile() { return false; }
 
         public getName() { return lf("private"); }
         public getId() { return "private"; }
