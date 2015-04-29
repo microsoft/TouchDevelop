@@ -6313,7 +6313,8 @@
 
             options.header = lf("share this script")
             options.noDismiss = true
-            options.moreButtons = [{
+            if (EditorSettings.widgetEnabled("shareScriptToGroup")) {
+                options.moreButtons = [{
                     text: lf("group"),
                     handler: () => {
                         tick(Ticks.publishShareGroup);
@@ -6326,6 +6327,7 @@
                         });
                     }
                 }]
+            }
 
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
@@ -6687,11 +6689,6 @@
 
             if (!isPull)
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
-
-            m.addOk("close", () => {
-                m.dismiss();
-                Browser.Hub.askToEnableNotifications(finish);
-            });
         }
 
         private uninstall()
@@ -7157,7 +7154,7 @@
                 });
                 nameInput.value = this.userName;
                 ch.unshift(nameInput);
-                ch.unshift(div('input-label', 'nickname:'));
+                ch.unshift(div('input-label', 'nickname'));
             }
             ch.unshift(hd);
 

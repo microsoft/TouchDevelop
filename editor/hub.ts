@@ -222,6 +222,7 @@ module TDev.Browser {
         // widgets not support in restricted mode
         var unrestrictedWidgets: StringMap<number> = {
             splitScreen: 1,
+            shareScriptToGroup: 1,
         }
         var blockWidgets: StringMap<number> = {
             // edit
@@ -231,6 +232,7 @@ module TDev.Browser {
             promoteRefactoring: 1,
             fixItButton: 1,
             splitScreen: 1,
+            shareScriptToGroup: 1,
         }
         var legacyWidgets: StringMap<number> = {
             // edit
@@ -310,16 +312,18 @@ module TDev.Browser {
         }
 
         export function widgetEnabled(name: string): boolean {
-            if (Cloud.isRestricted() && unrestrictedWidgets[name]) return false;
-
             if (TDev.isBeta)
                 Util.assert(!!blockWidgets[name] || !!legacyWidgets[name] || !!proWidgets[name], "uncategorized widget " + name);
+
+            if (Cloud.isRestricted() && unrestrictedWidgets[name]) return false;
 
             var mode = editorMode();
             if (mode <= EditorMode.block && !blockWidgets[name])
                 return false
 
-            if (mode <= EditorMode.block && !blockWidgets[name] && !legacyWidgets[name])
+            if (mode <= EditorMode.classic &&
+                !blockWidgets[name] &&
+                !legacyWidgets[name])
                 return false;
 
             return true
