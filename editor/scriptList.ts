@@ -17,7 +17,7 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            this.theRoot.appendChild(Editor.mkBetaNote());
+            this.theRoot.appendChild(EditorSettings.mkBetaNote());
         }
         private theList = div("slList");
         private header = div("sdListLabel");
@@ -2928,11 +2928,14 @@
 
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
-
-            var btns = ["email", "twitter", "facebook"].map(network =>
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-                );
-            if (Cloud.lite && this.parent instanceof ScriptInfo) {
+            
+            var btns: HTMLElement[] = [];
+            if (!Cloud.isRestricted()) {
+                btns.pushRange(["email", "twitter", "facebook"].map(network =>
+                    div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+                    ));
+            }
+            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgetEnabled("scriptAddToChannel")) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
@@ -3542,7 +3545,7 @@
                         var si = this.browser().getScriptInfo(resp)
                         var hd = si.mkSmallBox();
                         hd.className += " sdBaseHeader"
-                        if (TheEditor.widgetEnabled("commentHistory")) {
+                        if (EditorSettings.widgetEnabled("commentHistory")) {
                             var btn = div("sdBaseCorner",
                                 div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
                                 div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
@@ -4984,7 +4987,7 @@
                     });
                     img = playBtn;
                 } else if (a.bloburl) {
-                    // todo
+                    img = HTML.mkImg("svg:document,black");
                 }
 
                 d.setChildren([img,
@@ -5043,7 +5046,7 @@
                     });
                     img = div('checker', playBtn);
                 } else if (a.bloburl) {
-                    // TODO: preview
+                    img = HTML.mkImg("svg:document,black");
                 }
                 icon.setChildren([img]);
 
@@ -5101,7 +5104,7 @@
                 } else if (a.wavurl) {
                     id.setChildren([HTML.mkAudio(a.wavurl, a.aacurl, null, true)]);
                 } else if (a.bloburl) {
-                    id.setChildren([HTML.mkImg("svg:document,black")]);
+                    //
                 }
 
                 var uid = this.browser().getCreatorInfo(a);
@@ -5354,8 +5357,8 @@
 
 
                     if (sc.jsonScript && sc.jsonScript.time) {
-                        var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
-                        var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
+                        var pull = EditorSettings.widgetEnabled("scriptPullChanges") ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
+                        var diff = EditorSettings.widgetEnabled("scriptDiffToBase") ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         divs.push(div('', pull, diff));
                     }
 
@@ -5387,24 +5390,6 @@
                     if (sc.jsonScript) {
                         var uid = this.browser().getCreatorInfo(sc.jsonScript);
                         divs.push(div("inlineBlock", ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())));
-                    }
-
-                    var likesDiv = div("inlineBlock");
-                    divs.push(likesDiv);
-                    if (sc.publicId) {
-                        // display a lis of buble headers
-                        TheApiCacheMgr.getAnd(sc.publicId + "/reviews?count=12",(list: JsonList) => {
-                            if (list.items.length > 0)
-                                likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} heart{0:s}", sc.jsonScript.cumulativepositivereviews), div('inlineBlock',
-                                    list.items.slice(0, 12).map((review: JsonReview) => {
-                                        var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
-                                        var el = info.thumbnail(false,() => { this.parent.browser().loadDetails(info) });
-                                        el.classList.add('teamHead');
-                                        return el;
-                                    })
-                                    )
-                            ));
-                        });
                     }
 
                     if (sc.jsonScript && sc.jsonScript.updateid && sc.jsonScript.id != sc.jsonScript.updateid)
@@ -5453,34 +5438,36 @@
                         }
                     });
 
-                    var stats = ""
-                    var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
-                    stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
+                    if (EditorSettings.editorMode() >= EditorMode.pro) {
+                        var stats = ""
+                        var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
+                        stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
 
-                    var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
-                    descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
-                    var stmts = 0
-                    descs.forEach((d) => { stmts += d.stmtCount })
-                    if (sc.jsonScript && sc.jsonScript.time) {
-                        var d = new Date(sc.jsonScript.time * 1000)
-                        stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
-                            d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                        var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
+                        descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
+                        var stmts = 0
+                        descs.forEach((d) => { stmts += d.stmtCount })
+                        if (sc.jsonScript && sc.jsonScript.time) {
+                            var d = new Date(sc.jsonScript.time * 1000)
+                            stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
+                                d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                        }
+                        stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                        descs.slice(0, 20).forEach((d, i) => {
+                            if (i > 0)
+                                stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
+                            else
+                                stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
+                        })
+                        if (descs.length > 20)
+                            stats += ", ...";
+                        divs.push(Host.expandableTextBox(stats));
+
+                        TheEditor.refreshMode();
+                        var render = new EditorRenderer();
+                        var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                        divs.push(code);
                     }
-                    stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
-                    descs.slice(0, 20).forEach((d, i) => {
-                        if (i > 0)
-                            stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
-                        else
-                            stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
-                    })
-                    if (descs.length > 20)
-                        stats += ", ...";
-                    divs.push(Host.expandableTextBox(stats));
-
-                    TheEditor.refreshMode();
-                    var render = new EditorRenderer();
-                    var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
-                    divs.push(code);
 
                     this.tabContent.setChildren(divs);
                 });
@@ -6014,14 +6001,16 @@
         {
             var r:BrowserTab[];
             if (!this.publicId)
-                r = [this, new ScriptDetailsTab(this), new HistoryTab(this)];
+                r = [this,
+                    new ScriptDetailsTab(this),
+                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null];
             else
                 r =
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    new HistoryTab(this),
-                    new InsightsTab(this),
+                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null,
+                    EditorSettings.widgetEnabled("scriptInsightsTab") ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;
@@ -6062,7 +6051,7 @@
                 editB.className = "sdBigButton sdBigButtonFull";
             }
             var runB = mkBtn(Ticks.browseRun, "svg:play,white", lf("run"), null, () => { this.run() });
-            if (this.jsonScript && this.jsonScript.islibrary) {
+            if (Cloud.isRestricted() || (this.jsonScript && this.jsonScript.islibrary)) {
                 runB = null;
                 pinB = null;
             }
@@ -6092,7 +6081,9 @@
             var btns: HTMLElement = div("sdRunBtns");
 
             if (this.cloudHeader) {
-                uninstall = ScriptInfo.mkSimpleBtnConfirm(lf("uninstall"), () => this.uninstall())
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
+                uninstall.classList.add("sdUninstall");
+
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -6108,22 +6099,10 @@
                             })
                         });
                     }
-
-                    if (Cloud.isRestricted()) return
-
-                    // group mode?
-                    if(!st.collabSessionId) {
-                        btns.appendChild(HTML.mkButton(lf("edit with group"), () => {
-                            Meta.chooseGroupAsync({ header: lf("choose a group") })
-                                .done((group : GroupInfo) => {
-                                    if (group) group.addScriptAsync(this).done(() => this.edit());
-                                });
-                        }));
-                    }
                 })
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -6334,19 +6313,21 @@
 
             options.header = lf("share this script")
             options.noDismiss = true
-            options.moreButtons = [{
-                    text:lf("group"),
+            if (EditorSettings.widgetEnabled("shareScriptToGroup")) {
+                options.moreButtons = [{
+                    text: lf("group"),
                     handler: () => {
                         tick(Ticks.publishShareGroup);
-                        Meta.chooseGroupAsync({ header : lf("choose group"), includeSearch : false })
-                            .done((g : GroupInfo) => {
-                                if (g) {
-                                    CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
-                                    this.browser().loadDetails(g);
-                                }
-                            });
+                        Meta.chooseGroupAsync({ header: lf("choose group"), includeSearch: false })
+                            .done((g: GroupInfo) => {
+                            if (g) {
+                                CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
+                                this.browser().loadDetails(g);
+                            }
+                        });
                     }
                 }]
+            }
 
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
@@ -6410,7 +6391,6 @@
         {
             var m = new ModalDialog()
             this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) })
-            m.addOk("cancel")
             m.show()
         }
 
@@ -6614,13 +6594,13 @@
                     var publishBtn;
                     m.add(div("wall-dialog-buttons",
                         publishBtn = HTML.mkButton(lf("publish"), () => pub(false, uploadScreenshot ? screenshotDataUri : undefined)),
-                        TheEditor.widgetEnabled('publishAsHidden') ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
+                        EditorSettings.widgetEnabled('publishAsHidden') ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())));
-                    if (TheEditor.widgetEnabled('publishDescription')) {
+                    if (EditorSettings.widgetEnabled('publishDescription')) {
                         // if different author, allow to create pull request
                         m.add(div('wall-dialog-buttons', changeDescription));
                     }
-                    if (TheEditor.widgetEnabled('sendPullRequest') &&
+                    if (EditorSettings.widgetEnabled('sendPullRequest') &&
                         this.cloudHeader.userId && this.cloudHeader.userId != Cloud.getUserId()) {
                         m.add(div('wall-dialog-body',
                             Editor.mkHelpLink('pullrequests', lf("learn about pull requests")),
@@ -6709,15 +6689,11 @@
 
             if (!isPull)
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
-
-            m.addOk("close", () => {
-                m.dismiss();
-                Browser.Hub.askToEnableNotifications(finish);
-            });
         }
 
         private uninstall()
         {
+            tick(Ticks.browseUninstall);
             Editor.updateEditorStateAsync(this.getGuid(),(st) => {
 
                 var isownedgroupscript = st
@@ -6731,10 +6707,14 @@
 
                 TipManager.setTip(null);
 
-                Promise.join([
-                    // this.browser().deletePaneAnimAsync(),
-                    World.uninstallAsync(this.getGuid())
-                ]).done(() => {
+                var id = this.getGuid();
+                World.uninstallAsync(id)
+                    .done(() => {
+
+                    HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()),() => {
+                        // TODO: undo the uninstall.
+                    });
+
                     this.cloudHeader = null;
                     if (this.publicId)
                         TheEditor.historyMgr.reload(HistoryMgr.windowHash());
@@ -7072,14 +7052,6 @@
                 var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.score, "svg:Award,black,clip=110");
                 addNum(u.receivedpositivereviews, "♥");
-                //addNum(u.subscribers, "♟");
-                //addNum(u.features, "⚒");
-                if (big && !SizeMgr.phoneMode) {
-                    addNum(u.subscribers, "svg:Person,black,clip=80");
-                    //addNum(u.features, "svg:Award,black,clip=110");
-                    addNum(u.features, "svg:Pencil,black,clip=110");
-                    addNum(u.activedays, "☀");
-                }
                 numbers.setChildren(cont);
             });
         }
@@ -7139,10 +7111,7 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             Cloud.isRestricted() ? null : new UserScoreTab(this),
-             Cloud.isRestricted() ? null : new ScreenShotTab(this),
-             new ScriptsTab(this),
-             new UserSocialTab(this),
+             EditorSettings.editorMode() >= EditorMode.pro ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
@@ -7157,7 +7126,7 @@
         }
 
         private askedToLogin:boolean;
-
+        private scriptsTab: ScriptsTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -7166,17 +7135,31 @@
 
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
-            var accountButtons = <HTMLElement>undefined;
-            if (this.isMe())
-                ch.unshift(accountButtons = div("sdBottomButtons sdAccountBtns",
-                    HTML.mkButton(lf("account settings"), () => { Hub.accountSettings() }),
-                    HTML.mkButton(lf("skill level"),() => { EditorSettings.showChooseEditorModeAsync().done() }),
-                    HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() })
-                ));
+            var accountButtons = div('');
+            ch.unshift(accountButtons);
+            if (this.isMe() && Cloud.getUserId()) {
+                accountButtons.setChildren([
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"),() => { Hub.chooseWallpaper() })
+                ]);
+
+                var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
+                    HTML.showProgressNotification("saving...");
+                    Cloud.postUserSettingsAsync({ nickname: nameInput.value })
+                        .done(resp => {
+                        if (resp.message) HTML.showProgressNotification(resp.message);
+                        else HTML.showProgressNotification(lf("nicknamed saved..."));
+                        TheApiCacheMgr.invalidate("me");
+                    }, e => World.handlePostingError(e, lf("saving nickname")));
+                });
+                nameInput.value = this.userName;
+                ch.unshift(nameInput);
+                ch.unshift(div('input-label', 'nickname'));
+            }
             ch.unshift(hd);
 
             if (Cloud.hasPermission("admin")) {
-                ch.unshift(div(null,
+                accountButtons.appendChild(
                     HTML.mkButton(lf("permissions"),
                         () => {
                             var path = this.publicId + "/permissions"
@@ -7187,24 +7170,23 @@
                                         return Cloud.postPrivateApiAsync(path, { permissions: t })
                                     })
                             })
-                        })))
+                        }))
             }
+
+            if (!this.scriptsTab) {
+                this.scriptsTab = new ScriptsTab(this);
+                this.scriptsTab.initElements();
+                this.scriptsTab.initTab();
+            }
+            ch.push(this.scriptsTab.tabContent);
 
             this.tabContent.setChildren(ch);
 
-            this.withUpdate(hd, (u: JsonUser) => {
-                hd.setChildren([Host.expandableTextBox(u.about)]);
-                if (this.isMe()) {
-                    if (u.score) {
-                        var scoreDiv = Browser.ScriptInfo.mkNum(u.score, "svg:Award,white,clip=110");
-                        var scoreBtn = HTML.mkButtonElt("wall-button", scoreDiv);
-                        Util.clickHandler(scoreBtn, () => {
-                            Util.setHash("#list:installed-scripts:user:" + this.publicId + ":score")
-                        });
-                    }
-                    accountButtons.appendChildren([scoreBtn, HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())]);
-                }
-            });
+            if (!Cloud.isRestricted()) {
+                this.withUpdate(hd,(u: JsonUser) => {
+                    hd.setChildren([Host.expandableTextBox(u.about)]);
+                });
+            }
         }
 
         public match(terms:string[], fullName:string)
@@ -7238,19 +7220,7 @@
             return "svg:lock";
         }
 
-        public inlineIsTile() { return true; }
-
-        public initElements() {
-            super.initElements();
-            this.inlineContent.setChildren(BrowserMultiTab.generateReplacementTileContents(this));
-            this.setVisibility(true);
-        }
-
-        public initInline() {
-            super.initInline();
-            this.inlineContent.setChildren(BrowserMultiTab.generateReplacementTileContents(this));
-            this.setVisibility(true);
-        }
+        public inlineIsTile() { return false; }
 
         public getName() { return lf("private"); }
         public getId() { return "private"; }
@@ -7261,7 +7231,7 @@
             super(par,
                 "More information about art, score, groups, subscribers, subscriptions and given hearts.",
                 Cloud.lite ? ChannelListTab : null,
-                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab);
+                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
         }
 
         public bgIcon() {
@@ -7282,52 +7252,8 @@
             this.setVisibility(true);
         }
 
-        public getName() { return lf("more"); }
-        public getId() { return "more"; }
-    }
-
-    export class UserScoreTab
-        extends BrowserTab
-    {
-        constructor(par: BrowserPage) {
-            super(par);
-        }
-        public getName() { return lf("score"); }
-        public getId() { return "score"; }
-        public bgIcon() { return "svg:Group"; }
-        public hideOnEmpty() { return true; }
-        public inlineIsTile() { return false; }
-
-        public initTab() {
-            if (Cloud.anonMode(lf("accessing user score"))) return;
-
-            var loadingDiv = div('bigLoadingMore', lf("loading..."));
-            var ch = div('');
-            this.tabContent.setChildren([loadingDiv, ch]);
-            Cloud.getPrivateApiAsync(this.parent.publicId + "/score").done((u: JsonUserScore) => {
-            TheApiCacheMgr.getAsync(this.parent.publicId, true).done((ui: JsonUser) => {
-
-                loadingDiv.removeSelf();
-
-                var features = u.languageFeatures.features;
-                features.sort((a,b) => b.count - a.count);
-                var reviews = u.receivedPositiveReviews.scripts;
-                //reviews.sort((a,b) => b.count - a.count);
-
-                ch.appendChild(div('sdScoreTitleTop', 'user score: ' + ui.score + ' points'));
-
-                ch.appendChild(div('sdScoreTitle', 'subscriptions: ' + ui.subscribers + " gives " + u.receivedSubscriptions.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', 'active days: ' + ui.activedays + " gives " + u.activeDays.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', 'language features: ' + features.length + " gives " + u.languageFeatures.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', '♥ from other people: ' + ui.receivedpositivereviews + " gives " + u.receivedPositiveReviews.points + ' points'));
-                ch.appendChildren(
-                    reviews.map((review : JsonScript) => this.browser().getScriptInfo(review).mkSmallBox())
-                    );
-                ch.appendChild(div('',
-                    features.map((feature : JsonFeature) => HTML.mkA('sdFeature', '#topic:' + feature.name, '', feature.title))
-                    ));
-            })});
-        }
+        public getName() { return lf("insights"); }
+        public getId() { return "insights"; }
     }
 
     export class GroupsTab

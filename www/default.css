@@ -902,18 +902,31 @@ div.wall-box-tile>div.wall-box
   display: inline-block;
 }
 
-.errorNotification
+.errorNotification, .infoNotification
 {
   position: absolute;
   width: auto;
   left: 0;
   right: 0;
   bottom: 0px;
-  background-color: #E72A59;
   font-size: 1em;
   color: white;
   padding: 0.5em 3em;
   text-align: center;
+}
+
+.errorNotification {
+  background-color: #E72A59;
+}
+
+.infoNotification {
+  background-color: #aaa;
+}
+.infoNotification .sdThumb {
+  vertical-align: middle;
+}
+.infoNotification button {
+    border-color:white; color:white;
 }
 
 .warningNotification

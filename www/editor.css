@@ -1167,8 +1167,15 @@ textarea.commentEdit {
 
 textarea.variableDesc {
   width: calc(100% - 1em);
-  height: 10em;
+  height: 6em;
   white-space:nowrap;
+}
+
+textarea.description {
+  width: calc(100% - 1.4em);
+  height: 6em;
+  resize: none;
+  margin: 0.5em 0.4em;
 }
 
 textarea.shell {
@@ -3318,6 +3325,10 @@ div.sdTabTileLabel {
   font-size: 2em;
 }
 
+.sdUninstall {
+  background-color:#999;
+}
+
 .phone .sdBigButtonFull .sdBigButtonDesc
 {
     left:3em;
@@ -3697,10 +3708,6 @@ right:4.5em;
   position: absolute;
   left: 0.5em;
   top: 0.3em;
-}
-
-.errorNotification .sdThumb {
-  vertical-align: middle;
 }
 
 .phone .sdThumb {
@@ -5120,19 +5127,6 @@ div.validation-error {
   padding: 0.2em;
   line-height: 100%;
 }
-
-@keyframes dingZoom {
-  0% { transform: scale(1); opacity: 1; }
-  20% { transform: scale(1.2); }
-  80% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(0.25); }
-  100% { transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes dingZoom { 0% { -webkit-transform: scale(1); opacity: 1; } 20% { -webkit-transform: scale(1.2); } 80% { -webkit-transform: scale(1); opacity: 1; } 90% { -webkit-transform: scale(0.25); } 100% { -webkit-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } }  @-moz-keyframes dingZoom { 0% { -moz-transform: scale(1); opacity: 1; } 20% { -moz-transform: scale(1.2); } 80% { -moz-transform: scale(1); opacity: 1; } 90% { -moz-transform: scale(0.25); } 100% { -moz-transform: scale(0.15) translate(-1.5em,-0.5em); opacity: 0; } }
-
-@keyframes dingShow {
-  0% { transform: scale(0.25) translate(0,-4em); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes dingShow { 0% { -webkit-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -webkit-transform: scale(1); opacity: 1; } }  @-moz-keyframes dingShow { 0% { -moz-transform: scale(0.25) translate(0,-4em); opacity: 0; } 100% { -moz-transform: scale(1); opacity: 1; } }
 
 .diffSame {
   width: 7em;

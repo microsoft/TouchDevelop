@@ -15,17 +15,16 @@ module TDev
         private iconArtIdContainer = div("scriptPropContainer");
         private splashArtIdContainer = div("scriptPropContainer");
         private isLibrary:HTMLElement;
-        private showAd:HTMLElement;
         private allowExport: HTMLElement;
         private isCloud: HTMLElement;
-        private pubId:HTMLElement;
         private formRoot = div("varProps");
         private mdRoot = div(null);
-        private description = HTML.mkTextArea();
+        private description = HTML.mkTextArea("description");
         private revertButton:HTMLElement;
         public getTick() { return Ticks.viewScriptInit; }
         private platformsDiv: HTMLElement;
 
+        private iconsSection: HTMLElement;
         private managementSection: HTMLElement;
         private exportSection: HTMLElement;
         private dataSection: HTMLElement;
@@ -179,23 +178,20 @@ module TDev
 
             this.isLibrary = HTML.mkCheckBox(lf("this script is a library"), (v) => this.theScript.isLibrary = v);
             this.isLibrary.appendChild(Editor.mkHelpLink("libraries"));
-            this.showAd = HTML.mkCheckBox(lf("show advertisement"), (v) => this.theScript.showAd = v);
-            this.showAd.appendChild(Editor.mkHelpLink("ads"));
-            // not supported anymore
-            this.showAd.style.display = 'none';
             this.allowExport = HTML.mkCheckBox(lf("allow other users to export to app"), (v) => this.exportChanged(v));
             this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
             this.formRoot.setChildren([div("varLabel", lf("script properties")),
-                div("formLine", lf("name: "), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
+                div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on
-                this.pubId = div("inline-block"),
-                this.colorContainer,
-                this.iconArtIdContainer,
-                this.splashArtIdContainer,
+                div("formLine", lf("description"), this.description),
+                this.iconsSection = div('',
+                    this.colorContainer,
+                    this.iconArtIdContainer,
+                    this.splashArtIdContainer
+                ),
                 this.managementSection = div("formLine",
-                    HTML.mkButton(lf("delete script"), () => this.deleteScript()),
                     HTML.mkButton(lf("clone script"), () => TheEditor.cloneScriptAsync().done()),
                     this.revertButton = HTML.mkButton(lf("revert to published version"), () => {
                         ModalDialog.ask(lf("Do you really want to revert this script to the latest published version?"), lf("revert"), () => { this.revert(); });
@@ -233,13 +229,10 @@ module TDev
                     div("varLabel", lf("i want it to run on")),
                     this.platformsDiv = div(null)
                     ),
-                div("varLabel", lf("description")),
-                this.description,
                 this.settingsSection = div("formLine",
                     this.isLibrary,
-                    this.isCloud,
-                    this.showAd,
-                    this.allowExport),
+                    this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null,
+                    this.editor.widgetEnabled("scriptPropertiesPropertyAllowExport") ? this.allowExport : null),
                 dbg ? div("formLine",
                     div("varLabel", lf("under the hood (dbg)")),
                     HTML.mkButton(lf("test merge"), () => this.mergeWithScript(true)),
@@ -257,7 +250,7 @@ module TDev
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
-            this.description.className = "variableDesc";
+            this.description.className = "description";
         }
 
         static diffToBase()
@@ -802,9 +795,6 @@ module TDev
             this.scriptName.value = this.theScript.getName();
             this.description.value = this.theScript.comment;
             this.updatePlatformDiv();
-            this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published"
-                ? null
-                : lf("published id: {0}", ScriptEditorWorldInfo.baseId));
 
             var color = new DeclEntry(lf("color: {0}", this.theScript.htmlColor()));
             color.icon = "";
@@ -827,7 +817,6 @@ module TDev
             this.splashArtIdContainer.setChildren([splashArtId.mkBox().withClick(() => this.setSplashArtId())]);
 
             HTML.setCheckboxValue(this.isLibrary, this.theScript.isLibrary);
-            HTML.setCheckboxValue(this.showAd, this.theScript.showAd);
             HTML.setCheckboxValue(this.allowExport, this.theScript.allowExport);
             HTML.setCheckboxValue(this.isCloud, this.theScript.isCloud);
 
@@ -846,6 +835,7 @@ module TDev
                 this.mdRoot.setChildren([]);
             }
 
+            TheEditor.toggleWidgetVisibility("scriptPropertiesIcons", this.iconsSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesManagement", this.managementSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesExport", this.exportSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesData", this.dataSection);

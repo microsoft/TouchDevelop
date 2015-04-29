@@ -59,6 +59,65 @@ module TDev.Browser {
         export var PRO_MODE = "pro";
         export var CLASSIC_MODE = "classic";
 
+        export function showFeedbackBox() {
+            var link = (text: string, lnk: string) =>
+                HTML.mkButton(text,
+                    () => { window.open(Cloud.getServiceUrl() + lnk) });
+
+            if (ModalDialog.current && !ModalDialog.current.canDismiss) {
+                window.open(Cloud.getServiceUrl());
+                return;
+            }
+
+            var relId = "(local)";
+            var mtch = /-(\d+)\//.exec(Ticker.mainJsName)
+            if (mtch) relId = mtch[1];
+
+            var m = new ModalDialog();
+            m.fullWhite();
+            m.add(div("wall-dialog-header", Runtime.appName));
+            m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
+            var btns: HTMLElement;
+            m.add(btns = div("wall-dialog-buttons",
+                HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
+                link(lf("privacy and cookies"), "/privacy"),
+                link(lf("legal"), "/legal")
+                ));
+
+            if (EditorSettings.widgetEnabled("githubLinks")) {
+                btns.appendChild(HTML.mkButton(lf("changes"),() => {
+                    HTML.showProgressNotification(lf("downloading change log..."))
+                    Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
+                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
+                        .done();
+                }));
+                btns.appendChild(
+                    link(lf("GitHub"), "https://github.com/Microsoft/TouchDevelop")
+                    );
+            }
+
+            m.show();
+        }
+
+        export function mkBetaNote(): HTMLElement {
+            var beta = div("beta-note");
+            var betaFriendlyId = (<any>window).betaFriendlyId;
+            var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
+            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>Microsoft</span></div>" +
+                "<div class='beta-legal'>" + (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
+                "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
+                ;
+
+            // there is a menu option for that in the wp8 app
+            if (Browser.isWP8app) copyrights = "";
+
+            Browser.setInnerHTML(beta, betaNote + copyrights);
+
+            beta.withClick(EditorSettings.showFeedbackBox);
+
+            return beta;
+        }
+
         export function init() {
             if (window && window.location) {
                 if (Browser.isRaspberryPiDebian)
@@ -157,6 +216,117 @@ module TDev.Browser {
                 Cloud.postUserSettingsAsync({ editorMode: EditorMode[m] })
                     .done(() => { HTML.showProgressNotification(lf("skill level saved"), true); },(e) => { });
             }
+        }
+
+
+        // widgets not support in restricted mode
+        var unrestrictedWidgets: StringMap<number> = {
+            splitScreen: 1,
+            shareScriptToGroup: 1,
+        }
+        var blockWidgets: StringMap<number> = {
+            // edit
+            addNewButton: 1,
+            undoButton: 1,
+            // refactoring
+            promoteRefactoring: 1,
+            fixItButton: 1,
+            splitScreen: 1,
+            shareScriptToGroup: 1,
+        }
+        var legacyWidgets: StringMap<number> = {
+            // edit
+            copyPaste: 1,
+            // features
+            actionSettings: 1,
+            publishAsHidden: 1,
+            // refactoring
+            simplify: 1,
+            // ui
+            splitButton: 1,
+            uploadArtInSearchButton: 1,
+            calcApiHelp: 1,
+            sideRunButton: 1,
+            tutorialGoToPreviousStep : 1,
+            // sections
+            dataSection: 1,
+            eventsSection: 1,
+            artSection:1,
+            librariesSection: 1,
+            scriptPropertiesSettings: 1,
+            // statements
+            comment: 1,
+            // hub
+            scriptAddToChannel: 1,
+        }
+        var proWidgets: StringMap<number> = {
+            //navigation
+            codeSearch:1,
+            findReferences: 1,
+            gotoNavigation: 1,
+            goToDef: 1,
+            // refactorings
+            moveToLibrary: 1,
+            stripBlock: 1,
+            // debugging
+            toggleBreakpoint: 1,
+            debugButton: 1,
+            // ui
+            publishDescription: 1,
+            sendPullRequest: 1,
+            // sections
+            testsSection: 1,
+            actionTypesSection:1,
+            pagesSection: 1,
+            recordsSection:1,
+            // script lifecycle
+            updateButton: 1,
+            editLibraryButton: 1,
+            errorsButton: 1,
+            logsButton: 1,
+            deployButton:1,
+            // ui
+            pluginsButton: 1,
+            runTestsButton:1,
+            scriptPropertiesManagement: 1,
+            scriptPropertiesIcons: 1,
+            scriptPropertiesExport: 1,
+            scriptPropertiesPlatform: 1,
+            scriptPropertiesInstrumentation: 1,
+            scriptPropertiesData: 1,
+            wallLogsButton: 1,
+            scriptPropertiesPropertyCloud: 1,
+            scriptPropertiesPropertyAllowExport: 1,
+            stringEditFullScreen: 1,
+            // language
+            async: 1,
+            testAction: 1,
+            lambda: 1,
+            // hub
+            commentHistory: 1,
+            scriptPullChanges: 1, 
+            scriptDiffToBase: 1,
+            scriptHistoryTab: 1,
+            scriptInsightsTab: 1,
+            githubLinks: 1,
+        }
+
+        export function widgetEnabled(name: string): boolean {
+            if (TDev.isBeta)
+                Util.assert(!!blockWidgets[name] || !!legacyWidgets[name] || !!proWidgets[name], "uncategorized widget " + name);
+
+            if (Cloud.isRestricted() && unrestrictedWidgets[name]) return false;
+
+            var mode = editorMode();
+            if (mode <= EditorMode.block && !blockWidgets[name])
+                return false
+
+            if (mode <= EditorMode.classic &&
+                !blockWidgets[name] &&
+                !legacyWidgets[name])
+                return false;
+
+            return true
         }
 
         export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
@@ -259,7 +429,6 @@ module TDev.Browser {
 
         export var keyboardSounds = /sounds/.test(window.location.href);
         export function intellibuttonClick() { if (keyboardSounds) playSound('aonptkth'); }
-        export function scoreUp() { playSound('sjmgbwrv'); }
         export function tutorialStepNew() { playSound('ncoqavnw', 1); }
         export function tutorialStepFinished() { playSound('sjmgbwrv', 1); }
         export function tutorialStart() { playSound('sjmgbwrv', 1); }
@@ -322,7 +491,7 @@ module TDev.Browser {
         public init() {
             this.theRoot.style.display = "none";
             this.theRoot.id = "hubRoot";
-            this.theRoot.appendChild(Editor.mkBetaNote());
+            this.theRoot.appendChild(EditorSettings.mkBetaNote());
             elt("root").appendChild(this.theRoot);
             this.logo.withClick(() => {
                 tick(Ticks.hubAbout);
@@ -1103,7 +1272,7 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates" && !this.isBeginner())
+                    if (k != "templates" && !this.isBeginnerOrCoder())
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
@@ -1238,7 +1407,7 @@ module TDev.Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     if (elements.length < slots + 1) {
                         var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
                         el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
@@ -1271,7 +1440,7 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     var upd = this.browser().headersWithUpdates();
                     if (upd.length > 0) {
                         var updBtn =
@@ -1298,9 +1467,9 @@ module TDev.Browser {
                 addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                    elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { Editor.showFeedbackBox() }, Ticks.hubFeedback));
+                    elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { EditorSettings.showFeedbackBox() }, Ticks.hubFeedback));
                     elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                     elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
                 } else {
@@ -1889,7 +2058,7 @@ module TDev.Browser {
 
         static showAbout() {
             if (Browser.isWP8app)
-                Editor.showFeedbackBox();
+                EditorSettings.showFeedbackBox();
             else
                 Util.navigateInWindow(Cloud.config.rootUrl);
         }
@@ -2113,19 +2282,19 @@ module TDev.Browser {
             m.choose(boxes);
         }
 
-        private isBeginner() {
-            return EditorSettings.editorMode() <= EditorMode.block;
+        private isBeginnerOrCoder() {
+            return EditorSettings.editorMode() <= EditorMode.classic;
         }
 
         private updateSections()
         {
             var sects = {
                 "recent": lf("my scripts"),
-                "misc": this.isBeginner() ? lf("tutorials") : lf("learn"),
+                "misc": this.isBeginnerOrCoder() ? lf("tutorials") : lf("learn"),
                 "showcase": lf("showcase"),
                 "social": lf("social"),
             };
-            if (!this.isBeginner()) {
+            if (!this.isBeginnerOrCoder()) {
                 var extra = {
                     "top": lf("top & new"),
                     "tags": lf("categories"),
@@ -2146,9 +2315,13 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
-                if (!this.isBeginner()) {
+                if (!this.isBeginnerOrCoder()) {
                     sects["channels"] = lf("channels")
                 }
+            }
+            if (Cloud.isRestricted()) {
+                delete sects["showcase"];
+                delete sects["social"];
             }
 
             if (SizeMgr.portraitMode) {
@@ -2259,7 +2432,7 @@ module TDev.Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    this.isBeginner() ? this.showSimplifiedLearn(c) : this.showLearn(c);
+                    this.isBeginnerOrCoder() ? this.showSimplifiedLearn(c) : this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
@@ -2318,62 +2491,6 @@ module TDev.Browser {
                 }))
                 this.notificationBox.setChildren([]);
             }
-
-            World.getCurrentUserInfoAsync().done(u => {
-                if (this.visible)
-                    this.startDingDing(u);
-            })
-        }
-
-        private currentDingDing = null;
-        private startDingDing(u:JsonUser)
-        {
-            var prevScore = parseInt(window.localStorage["prevUserScore"] || "-1")
-            if (prevScore < 0 || prevScore >= u.score) {
-                window.localStorage["prevUserScore"] = u.score;
-                return;
-            }
-
-            var scoreDiv = Browser.ScriptInfo.mkNum(1, "svg:Award,#444,clip=110")
-            this.currentDingDing = scoreDiv;
-            this.dingDingBox.setChildren([scoreDiv])
-
-            var diff = u.score - prevScore
-            var animTime = 400
-            var sleepTime = 100
-
-            var sym = scoreDiv.firstChild.nextSibling
-
-            var currScore = 0
-
-            var setNum = (v:number) => {
-                scoreDiv.setChildren([" " + v + " ", sym])
-                currScore = v;
-                window.localStorage["prevUserScore"] = v + "";
-            };
-
-            var advance = () => {
-                if (this.currentDingDing != scoreDiv)
-                    return;
-
-                if (currScore == u.score) {
-                    Util.coreAnim("dingZoom", 3500, scoreDiv, () => {
-                        scoreDiv.removeSelf();
-                    })
-                    return;
-                }
-                var s = currScore + Math.max(1, Math.round((u.score - currScore) / 4))
-                setNum(s)
-                Util.coreAnim("dingDing", animTime, scoreDiv, () => {
-                    Util.setTimeout(sleepTime, advance);
-                })
-            };
-
-            setNum(prevScore);
-            EditorSoundManager.scoreUp();
-            Util.coreAnim("dingShow", 1000, scoreDiv, () => {
-                Util.setTimeout(600, advance)
-            })
         }
     }
 }

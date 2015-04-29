@@ -598,7 +598,7 @@ module TDev
                     });
                     els.push(el);
                 });
-                if (TheEditor.widgetEnabled('uploadArtInSearchButton')) {
+                if (this.editor.widgetEnabled('uploadArtInSearchButton')) {
                     if (uploadPicBtn) this.removeBtn(uploadPicBtn);
                     uploadPicBtn = HTML.mkButton(lf("upload picture"), () => {
                         this.removeBtn(uploadPicBtn);
