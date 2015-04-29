@@ -6094,18 +6094,6 @@
                             })
                         });
                     }
-
-                    if (Cloud.isRestricted()) return
-
-                    // group mode?
-                    if(!st.collabSessionId) {
-                        btns.appendChild(HTML.mkButton(lf("edit with group"), () => {
-                            Meta.chooseGroupAsync({ header: lf("choose a group") })
-                                .done((group : GroupInfo) => {
-                                    if (group) group.addScriptAsync(this).done(() => this.edit());
-                                });
-                        }));
-                    }
                 })
             }
 
