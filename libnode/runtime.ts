@@ -425,6 +425,11 @@ module TDev.RT.Node {
             var d = domain.create()
             d.tdStackFrame = frame
             d.on("error", err => {
+                if (err && err.tdMeta && err.tdMeta.unrefed && err.code == 'ECONNRESET') {
+                    Util.log("ignoring ECONNRESET on " + err.tdMeta.socketHost)
+                    return
+                }
+
                 this.handleException(err, frame)
             })
 
@@ -759,11 +764,23 @@ module TDev.RT.Node {
 
         var origDestroy = net.Socket.prototype._destroy
         net.Socket.prototype._destroy = function (exn) {
-            if (typeof exn == "object" && this.tdHost) {
+            if (typeof exn == "object" && (this.tdHost || this.tdUnrefed)) {
                 if (!exn.tdMeta) exn.tdMeta = {}
                 exn.tdMeta.socketHost = this.tdHost
+                exn.tdMeta.unrefed = this.tdUnrefed
             }
             return origDestroy.apply(this, arguments)
+        }
+
+        var origRef = net.Socket.prototype.ref
+        net.Socket.prototype.ref = function () {
+            this.tdUnrefed = false
+            return origRef.apply(this, arguments)
+        }
+        var origUnref = net.Socket.prototype.unref
+        net.Socket.prototype.unref = function () {
+            this.tdUnrefed = true
+            return origUnref.apply(this, arguments)
         }
 
         //var buf = Buffer.prototype
