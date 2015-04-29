@@ -76,7 +76,7 @@ module TDev.Browser {
             var m = new ModalDialog();
             m.fullWhite();
             m.add(div("wall-dialog-header", Runtime.appName));
-            m.add(div("wall-dialog-body", lf("Running against cloud services v" + relId + ".")));
+            m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
                 HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
