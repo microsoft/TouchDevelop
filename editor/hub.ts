@@ -2149,6 +2149,10 @@ module TDev.Browser {
                     sects["channels"] = lf("channels")
                 }
             }
+            if (Cloud.isRestricted()) {
+                delete sects["showcase"];
+                delete sects["social"];
+            }
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
