@@ -7142,16 +7142,32 @@
 
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
-            var accountButtons = <HTMLElement>undefined;
-            if (this.isMe())
-                ch.unshift(accountButtons = div("sdBottomButtons sdAccountBtns",
-                    HTML.mkButton(lf("account settings"), () => { Hub.accountSettings() }),
-                    HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() })
-                ));
+            var accountButtons = div('');
+            ch.unshift(accountButtons);
+            if (this.isMe() && Cloud.getUserId()) {
+                accountButtons.setChildren([
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"),() => { Hub.chooseWallpaper() }),
+                    HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog())
+                ]);
+
+                var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
+                    HTML.showProgressNotification("saving...");
+                    Cloud.postUserSettingsAsync({ nickname: nameInput.value })
+                        .done(resp => {
+                        if (resp.message) HTML.showProgressNotification(resp.message);
+                        else HTML.showProgressNotification(lf("nicknamed saved..."));
+                        TheApiCacheMgr.invalidate("me");
+                    }, e => World.handlePostingError(e, lf("saving nickname")));
+                });
+                nameInput.value = this.userName;
+                ch.unshift(nameInput);
+                ch.unshift(div('input-label', 'nickname:'));
+            }
             ch.unshift(hd);
 
             if (Cloud.hasPermission("admin")) {
-                ch.unshift(div(null,
+                accountButtons.appendChild(
                     HTML.mkButton(lf("permissions"),
                         () => {
                             var path = this.publicId + "/permissions"
@@ -7162,17 +7178,16 @@
                                         return Cloud.postPrivateApiAsync(path, { permissions: t })
                                     })
                             })
-                        })))
+                        }))
             }
 
             this.tabContent.setChildren(ch);
 
-            this.withUpdate(hd, (u: JsonUser) => {
-                hd.setChildren([Host.expandableTextBox(u.about)]);
-                if (this.isMe()) {
-                    accountButtons.appendChildren([HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())]);
-                }
-            });
+            if (!Cloud.isRestricted()) {
+                this.withUpdate(hd,(u: JsonUser) => {
+                    hd.setChildren([Host.expandableTextBox(u.about)]);
+                });
+            }
         }
 
         public match(terms:string[], fullName:string)
