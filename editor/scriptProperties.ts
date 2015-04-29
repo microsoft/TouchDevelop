@@ -17,7 +17,6 @@ module TDev
         private isLibrary:HTMLElement;
         private allowExport: HTMLElement;
         private isCloud: HTMLElement;
-        private pubId:HTMLElement;
         private formRoot = div("varProps");
         private mdRoot = div(null);
         private description = HTML.mkTextArea("description");
@@ -186,7 +185,6 @@ module TDev
             this.formRoot.setChildren([div("varLabel", lf("script properties")),
                 div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on
-                this.pubId = div("inline-block"),
                 div("formLine", lf("description"), this.description),
                 this.iconsSection = div('',
                     this.colorContainer,
@@ -797,9 +795,6 @@ module TDev
             this.scriptName.value = this.theScript.getName();
             this.description.value = this.theScript.comment;
             this.updatePlatformDiv();
-            this.pubId.setChildren(ScriptEditorWorldInfo.status !== "published"
-                ? null
-                : lf("published id: /{0}", ScriptEditorWorldInfo.baseId));
 
             var color = new DeclEntry(lf("color: {0}", this.theScript.htmlColor()));
             color.icon = "";
