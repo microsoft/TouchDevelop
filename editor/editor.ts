@@ -1116,6 +1116,10 @@ module TDev
             super();
         }
 
+        // widgets not support in restricted mode
+        static unrestrictedWidgets: StringMap<number> = {
+            splitScreen: 1,
+        }
         static blockWidgets: StringMap<number> = {
             // edit
             addNewButton: 1,
@@ -1206,7 +1210,9 @@ module TDev
                 el.style.display = 'none';
         }
 
-        public widgetEnabled(name : string) : boolean {
+        public widgetEnabled(name: string): boolean {
+            if (Cloud.isRestricted() && Editor.unrestrictedWidgets[name]) return false;
+
             if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
                 return this.intelliProfile.hasKey(name)
 
@@ -4395,6 +4401,8 @@ module TDev
 
         public setSplitScreen(split:boolean, save = false)
         {
+            if (Cloud.isRestricted()) split = true; // always split in cloud restricted mode
+
             if (save && Script)
                 Script.editorState.splitScreen = split
 
