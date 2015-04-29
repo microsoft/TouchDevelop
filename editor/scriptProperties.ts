@@ -21,7 +21,7 @@ module TDev
         private pubId:HTMLElement;
         private formRoot = div("varProps");
         private mdRoot = div(null);
-        private description = HTML.mkTextArea();
+        private description = HTML.mkTextArea("description");
         private revertButton:HTMLElement;
         public getTick() { return Ticks.viewScriptInit; }
         private platformsDiv: HTMLElement;
@@ -189,9 +189,10 @@ module TDev
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
             this.formRoot.setChildren([div("varLabel", lf("script properties")),
-                div("formLine", lf("name: "), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
+                div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on
                 this.pubId = div("inline-block"),
+                div("formLine", lf("description"), this.description),
                 this.iconsSection = div('',
                     this.colorContainer,
                     this.iconArtIdContainer,
@@ -235,8 +236,6 @@ module TDev
                     div("varLabel", lf("i want it to run on")),
                     this.platformsDiv = div(null)
                     ),
-                div("varLabel", lf("description")),
-                this.description,
                 this.settingsSection = div("formLine",
                     this.isLibrary,
                     this.isCloud,
@@ -259,7 +258,7 @@ module TDev
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
-            this.description.className = "variableDesc";
+            this.description.className = "description";
         }
 
         static diffToBase()

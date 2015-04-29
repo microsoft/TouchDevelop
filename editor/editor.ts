@@ -1138,10 +1138,8 @@ module TDev
             uploadArtInSearchButton: 1,
             calcApiHelp: 1,
             sideRunButton: 1,
-            scriptPropertiesIcons: 1,
             scriptPropertiesManagement: 1,
             scriptPropertiesSettings: 1,
-            scriptPropertiesExport: 1,
             tutorialGoToPreviousStep : 1,
             // sections
             dataSection: 1,
@@ -1182,6 +1180,8 @@ module TDev
             // ui
             pluginsButton: 1,
             runTestsButton:1,
+            scriptPropertiesIcons: 1,
+            scriptPropertiesExport: 1,
             scriptPropertiesPlatform: 1,
             scriptPropertiesInstrumentation: 1,
             scriptPropertiesData: 1,

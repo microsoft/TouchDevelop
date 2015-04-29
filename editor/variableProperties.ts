@@ -24,7 +24,7 @@ module TDev
         private kindContainer:HTMLElement;
         private formRoot = div("varProps");
         private varRender = div("");
-        private description = HTML.mkTextArea();
+        private description = HTML.mkTextArea("description");
         private artEditor:ArtEditor = null;
         private persistentCheckbox:HTMLElement;
         private renderer = new TDev.EditorRenderer();

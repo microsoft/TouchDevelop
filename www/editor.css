@@ -1167,8 +1167,15 @@ textarea.commentEdit {
 
 textarea.variableDesc {
   width: calc(100% - 1em);
-  height: 10em;
+  height: 6em;
   white-space:nowrap;
+}
+
+textarea.description {
+  width: calc(100% - 1.4em);
+  height: 6em;
+  resize: none;
+  margin: 0.5em 0.4em;
 }
 
 textarea.shell {
