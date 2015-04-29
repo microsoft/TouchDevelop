@@ -46,7 +46,9 @@ module TDev.RT {
             justButtons?: boolean;
         }
 
-        export var shareButtons = (m:ModalDialog, link: Link, options:ShareOptions) => {
+        export var shareButtons = (m: ModalDialog, link: Link, options: ShareOptions) => {
+            if (Cloud.isRestricted()) return [];
+
             return [
                 HTML.mkButton('email', () => {
                     shareOnNetwork(link, "email", options);

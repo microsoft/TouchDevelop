@@ -6303,8 +6303,6 @@
 
         private addShare(m:ModalDialog, options:RT.ShareManager.ShareOptions)
         {
-            if (Cloud.isRestricted()) return;
-
             var id = this.publicId;
             var title = this.getTitle();
             var ht = "";
@@ -6316,16 +6314,16 @@
             options.header = lf("share this script")
             options.noDismiss = true
             options.moreButtons = [{
-                    text:lf("group"),
+                    text: lf("group"),
                     handler: () => {
                         tick(Ticks.publishShareGroup);
-                        Meta.chooseGroupAsync({ header : lf("choose group"), includeSearch : false })
-                            .done((g : GroupInfo) => {
-                                if (g) {
-                                    CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
-                                    this.browser().loadDetails(g);
-                                }
-                            });
+                        Meta.chooseGroupAsync({ header: lf("choose group"), includeSearch: false })
+                            .done((g: GroupInfo) => {
+                            if (g) {
+                                CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
+                                this.browser().loadDetails(g);
+                            }
+                        });
                     }
                 }]
 
@@ -6391,7 +6389,6 @@
         {
             var m = new ModalDialog()
             this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) })
-            m.addOk("cancel")
             m.show()
         }
 

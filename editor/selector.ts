@@ -715,7 +715,7 @@ module TDev
                     this.selectedStmt instanceof AST.OptionalParameter ||
                     this.selectionBlock instanceof AST.FieldBlock)
                 && !(this.selectedStmt instanceof AST.FieldComment)
-                && !TheEditor.isDebuggerMode()
+                && !this.editor.isDebuggerMode()
                 && this.editor.widgetEnabled("copyPaste");
         }
 
