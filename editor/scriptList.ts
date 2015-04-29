@@ -7131,9 +7131,8 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             Cloud.isRestricted() ? null : new ScreenShotTab(this),
              new ScriptsTab(this),
-             new UserSocialTab(this),
+             EditorSettings.editorMode() >= EditorMode.pro ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
@@ -7244,7 +7243,7 @@
             super(par,
                 "More information about art, score, groups, subscribers, subscriptions and given hearts.",
                 Cloud.lite ? ChannelListTab : null,
-                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab);
+                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
         }
 
         public bgIcon() {
@@ -7265,8 +7264,8 @@
             this.setVisibility(true);
         }
 
-        public getName() { return lf("more"); }
-        public getId() { return "more"; }
+        public getName() { return lf("insights"); }
+        public getId() { return "insights"; }
     }
 
     export class GroupsTab
