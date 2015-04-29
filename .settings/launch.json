@@ -5,7 +5,7 @@
 	"configurations": [
 		{
 			// Name of configuration; appears in the launch configuration drop down menu.
-			"name": "Shell.js",
+			"name": "local",
 			// Type of configuration. Possible values: "node", "mono".
 			"type": "node",
 			// Workspace relative or absolute path to the program.
@@ -22,7 +22,7 @@
 			"env": { }
 		}, 
 		{
-			"name": "Attach",
+			"name": "attach local",
 			"type": "node",
 			// TCP/IP address. Default is "localhost".
 			"address": "localhost",
