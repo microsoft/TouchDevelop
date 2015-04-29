@@ -55,41 +55,6 @@ module TDev {
         public agreeTermsOfUseAsync(): Promise {
             return RunnerSettings.agreeTermsAsync();
         }
-
-        public tweakMsg()
-        {
-            var webAppId = (<any>window).webAppId || "";
-            var txt = webAppId && Math.random() < 0.2 ? "tweak this web app on touchdevelop.com" : "find more on touchdevelop.com";
-            var d = div("copyright-text", txt);
-            if (SizeMgr.phoneMode)
-                d.innerHTML = "<span class='beta-underline'>more</span>";
-
-            return d.withClick(() => {
-                var link = (text:string, lnk:string) =>
-                    HTML.mkButton(text,
-                                    () => { window.open(Cloud.getServiceUrl() + lnk) });
-
-                var m = new ModalDialog();
-
-                m.add(div("wall-dialog-header", lf("Create apps at TouchDevelop.com")));
-                m.addHTML("With TouchDevelop you can create and publish apps. "+
-                          "You can also explore, use and edit apps published by others.");
-                m.addHTML("TouchDevelop was brought to you by Microsoft Research and runs on " +
-                          "Windows, Windows Phone, Mac, Linux, iPhone, iPad, Android, etc. (and soon your toaster :-)");
-
-                if (webAppId) {
-                    m.add(div("wall-dialog-buttons",
-                        link("tweak this web app", "/" + webAppId),
-                        link("explore TouchDevelop", "/app")));
-                } else {
-                    m.add(div("wall-dialog-buttons",
-                        link("run TouchDevelop now!", "/app")));
-                }
-
-                m.show();
-
-            })
-        }
     }
 
     function initEditor() {

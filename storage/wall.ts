@@ -190,17 +190,12 @@ module TDev {
                 !!this.fullScreenContainer.firstChild;
         }
 
-        public tweakMsg(): HTMLElement {
-            return div(null);
-        }
-
         public copyrightElement(): HTMLElement {
             // no copyright notice in compiled apps
             if (Browser.isCompiledApp && !Browser.webRunner)
                 return div(null);
 
             var copyrights = div("copyright-text copyright-info");
-            //var msg = this.tweakMsg();
             var logo = div("copyright-text copyright-logo", SVG.getHorizLogo())
             //copyrights.style.right = "0";
             //logo.style.left = "0";
@@ -237,9 +232,9 @@ module TDev {
                 m.fullWhite();
                 m.add(div("wall-dialog-header", Util.htmlUnescape(appName)));
 
-                m.addHTML("This web app was created" + author + " using TouchDevelop.");
-                m.addHTML("The TouchDevelop platform - Copyright © 2014 Microsoft Corporation. All rights reserved.");
-                m.addHTML("<b>DISCLAIMER:</b> This web app is not endorsed by Microsoft.");
+                m.addHTML(lf("This web app was created {0} using TouchDevelop.", author));
+                m.addHTML(lf("The TouchDevelop platform - Copyright © 2015 Microsoft Corporation. All rights reserved."));
+                m.addHTML(lf("<b>DISCLAIMER:</b> This web app is not endorsed by Microsoft."));
 
                 if (!Browser.inEditor)
                     m.add(div("wall-dialog-buttons",
@@ -247,8 +242,9 @@ module TDev {
                         link("try touchdevelop", "")));
 
                 m.add(div("wall-dialog-buttons",
-                    link("legal", "/legal"),
-                    link("privacy and cookies", "/privacy")));
+                    link(lf("privacy and cookies"), "/privacy"),
+                    link(lf("legal"), "/legal")
+                    ));
 
                 m.show();
             }

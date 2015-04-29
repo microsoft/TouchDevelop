@@ -185,22 +185,22 @@ module TDev
                     ])
                 }));
 
-            if (!isParent && TheEditor.widgetEnabled("updateButton") &&
+            if (!isParent && this.editor.widgetEnabled("updateButton") &&
                 (TheEditor.scriptUpdateId || TheEditor.librariesNeedUpdate()))
                 addBtn(HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdate, () => {
                     this.editor.updateScript();
                 }));
-            if (onlyParent && TheEditor.widgetEnabled("logsButton"))
+            if (onlyParent && this.editor.widgetEnabled("logsButton"))
                 addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs,() => {
                     this.editor.showAppLog(app);
                 }));
-            if (!isParent && TheEditor.widgetEnabled("errorsButton"))
+            if (!isParent && this.editor.widgetEnabled("errorsButton"))
                 addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors,() => {
                     this.editor.typeCheckNow();
                     this.editor.searchFor(":m");
                 }));
 
-            if (onlyParent && TheEditor.widgetEnabled("deployButton")) {
+            if (onlyParent && this.editor.widgetEnabled("deployButton")) {
                 addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("export"), Ticks.sideDeployWebSite,() => {
                     TDev.RT.App.clearLogs();
                     var wa = Azure.getWebsiteAuthForApp(app)

@@ -17,7 +17,7 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            this.theRoot.appendChild(Editor.mkBetaNote());
+            this.theRoot.appendChild(EditorSettings.mkBetaNote());
         }
         private theList = div("slList");
         private header = div("sdListLabel");
@@ -2935,7 +2935,7 @@
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
-            if (Cloud.lite && this.parent instanceof ScriptInfo && TheEditor.widgetEnabled("scriptAddToChannel")) {
+            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgetEnabled("scriptAddToChannel")) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
@@ -3545,7 +3545,7 @@
                         var si = this.browser().getScriptInfo(resp)
                         var hd = si.mkSmallBox();
                         hd.className += " sdBaseHeader"
-                        if (TheEditor.widgetEnabled("commentHistory")) {
+                        if (EditorSettings.widgetEnabled("commentHistory")) {
                             var btn = div("sdBaseCorner",
                                 div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
                                 div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
@@ -5357,8 +5357,8 @@
 
 
                     if (sc.jsonScript && sc.jsonScript.time) {
-                        var pull = TheEditor.widgetEnabled("scriptPullChanges") ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
-                        var diff = TheEditor.widgetEnabled("scriptDiffToBase") ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
+                        var pull = EditorSettings.widgetEnabled("scriptPullChanges") ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
+                        var diff = EditorSettings.widgetEnabled("scriptDiffToBase") ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         divs.push(div('', pull, diff));
                     }
 
@@ -6003,14 +6003,14 @@
             if (!this.publicId)
                 r = [this,
                     new ScriptDetailsTab(this),
-                    TheEditor.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null];
+                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null];
             else
                 r =
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    TheEditor.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null,
-                    TheEditor.widgetEnabled("scriptInsightsTab") ? new InsightsTab(this) : null,
+                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null,
+                    EditorSettings.widgetEnabled("scriptInsightsTab") ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;
@@ -6595,13 +6595,13 @@
                     var publishBtn;
                     m.add(div("wall-dialog-buttons",
                         publishBtn = HTML.mkButton(lf("publish"), () => pub(false, uploadScreenshot ? screenshotDataUri : undefined)),
-                        TheEditor.widgetEnabled('publishAsHidden') ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
+                        EditorSettings.widgetEnabled('publishAsHidden') ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())));
-                    if (TheEditor.widgetEnabled('publishDescription')) {
+                    if (EditorSettings.widgetEnabled('publishDescription')) {
                         // if different author, allow to create pull request
                         m.add(div('wall-dialog-buttons', changeDescription));
                     }
-                    if (TheEditor.widgetEnabled('sendPullRequest') &&
+                    if (EditorSettings.widgetEnabled('sendPullRequest') &&
                         this.cloudHeader.userId && this.cloudHeader.userId != Cloud.getUserId()) {
                         m.add(div('wall-dialog-body',
                             Editor.mkHelpLink('pullrequests', lf("learn about pull requests")),

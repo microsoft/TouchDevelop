@@ -158,14 +158,6 @@ module TDev
             return Promise.as();
         }
 
-        public tweakMsg()
-        {
-            var d = div("copyright-text", lf("give feedback about touchdevelop!")).withClick(Editor.showFeedbackBox)
-            if (SizeMgr.phoneMode)
-                Browser.setInnerHTML(d, "<span class='beta-underline'>" + lf("feedback") + "</span>");
-            return d;
-        }
-
         public showAppView(logs? : LogMessage[]) {
             TDev.RT.App.showAppLogAsync(logs, undefined, els => {
                 els.filter(el => el.dataset['crash']).forEach(el => {
@@ -223,7 +215,7 @@ module TDev
             this.updatePause()
 
             var btns = [this.pauseBtnDiv];
-            if (ScriptEditorWorldInfo.status != "published" && TheEditor.widgetEnabled("wallLogsButton"))
+            if (ScriptEditorWorldInfo.status != "published" && TDev.Browser.EditorSettings.widgetEnabled("wallLogsButton"))
                 btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
             return btns;
         }
@@ -1116,96 +1108,6 @@ module TDev
             super();
         }
 
-        // widgets not support in restricted mode
-        static unrestrictedWidgets: StringMap<number> = {
-            splitScreen: 1,
-        }
-        static blockWidgets: StringMap<number> = {
-            // edit
-            addNewButton: 1,
-            undoButton: 1,
-            // refactoring
-            promoteRefactoring: 1,
-            fixItButton: 1,
-            splitScreen: 1,
-        }
-        static legacyWidgets: StringMap<number> = {
-            // edit
-            copyPaste: 1,
-            // features
-            actionSettings: 1,
-            publishAsHidden: 1,
-            // refactoring
-            simplify: 1,
-            // ui
-            splitButton: 1,
-            uploadArtInSearchButton: 1,
-            calcApiHelp: 1,
-            sideRunButton: 1,
-            tutorialGoToPreviousStep : 1,
-            // sections
-            dataSection: 1,
-            eventsSection: 1,
-            artSection:1,
-            librariesSection: 1,
-            scriptPropertiesSettings: 1,
-            // statements
-            comment: 1,
-            // hub
-            scriptAddToChannel: 1,
-        }
-        static proWidgets: StringMap<number> = {
-            //navigation
-            codeSearch:1,
-            findReferences: 1,
-            gotoNavigation: 1,
-            goToDef: 1,
-            // refactorings
-            moveToLibrary: 1,
-            stripBlock: 1,
-            // debugging
-            toggleBreakpoint: 1,
-            debugButton: 1,
-            // ui
-            publishDescription: 1,
-            sendPullRequest: 1,
-            // sections
-            testsSection: 1,
-            actionTypesSection:1,
-            pagesSection: 1,
-            recordsSection:1,
-            // script lifecycle
-            updateButton: 1,
-            editLibraryButton: 1,
-            errorsButton: 1,
-            logsButton: 1,
-            deployButton:1,
-            // ui
-            pluginsButton: 1,
-            runTestsButton:1,
-            scriptPropertiesManagement: 1,
-            scriptPropertiesIcons: 1,
-            scriptPropertiesExport: 1,
-            scriptPropertiesPlatform: 1,
-            scriptPropertiesInstrumentation: 1,
-            scriptPropertiesData: 1,
-            wallLogsButton: 1,
-            scriptPropertiesPropertyCloud: 1,
-            scriptPropertiesPropertyAllowExport: 1,
-            stringEditFullScreen: 1,
-            // language
-            async: 1,
-            testAction: 1,
-            lambda: 1,
-            // hub
-            commentHistory: 1,
-            scriptPullChanges: 1, 
-            scriptDiffToBase: 1,
-            scriptHistoryTab: 1,
-            scriptInsightsTab: 1,
-            githubLinks: 1,
-        }
-
         public toggleWidgetVisibility(name: string, el: HTMLElement) {
             if (this.widgetEnabled(name))
                 el.style.display = 'block';
@@ -1214,21 +1116,10 @@ module TDev
         }
 
         public widgetEnabled(name: string): boolean {
-            if (Cloud.isRestricted() && Editor.unrestrictedWidgets[name]) return false;
-
+            if (!TDev.Browser.EditorSettings.widgetEnabled(name)) return false;
             if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
                 return this.intelliProfile.hasKey(name)
-
-            if (TDev.isBeta)
-                Util.assert(!!Editor.blockWidgets[name] || !!Editor.legacyWidgets[name] || !!Editor.proWidgets[name], "uncategorized widget " + name);
-
-            if (AST.blockMode && !Editor.blockWidgets[name])
-                return false
-
-            if (AST.legacyMode && !Editor.blockWidgets[name] && !Editor.legacyWidgets[name])
-                return false;
-
-            return true
+            return true;
         }
 
         public editedStmt(selectorOk = false):AST.Stmt
@@ -4510,7 +4401,7 @@ module TDev
                 this.dismissSidePane();
             });
 
-            elt("scriptEditor").appendChild(this.betaNote = Editor.mkBetaNote());
+            elt("scriptEditor").appendChild(this.betaNote = TDev.Browser.EditorSettings.mkBetaNote());
             elt("scriptEditor").withClick(() => {}) // disable text selection
 
             this.setupTopButtons();
@@ -5260,67 +5151,6 @@ module TDev
                 this.videoContainer.style.display = "block";
             }
             this.applyVideoConstraints();
-        }
-
-        static showFeedbackBox()
-        {
-            var link = (text:string, lnk:string) =>
-                HTML.mkButton(text,
-                                () => { window.open(Cloud.getServiceUrl() + lnk) });
-
-            if (ModalDialog.current && !ModalDialog.current.canDismiss) {
-                window.open(Cloud.getServiceUrl());
-                return;
-            }
-
-            var relId = "(local)";
-            var mtch = /-(\d+)\//.exec(Ticker.mainJsName)
-            if (mtch) relId = mtch[1];
-
-            var m = new ModalDialog();
-            m.fullWhite();
-            m.add(div("wall-dialog-header", Runtime.appName));
-
-            m.add(div("wall-dialog-body", "Running against cloud services v" + relId + "."));
-            m.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
-                link(lf("privacy and cookies"), "/privacy"),
-                link(lf("legal"), "/legal")
-                ));
-
-            if (TheEditor.widgetEnabled("githubLinks")) {
-                m.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("changes"),() => {
-                        HTML.showProgressNotification(lf("downloading change log..."))
-                        Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
-                            .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
-                            .done();
-                    }),
-                    link(lf("GitHub"), "https://github.com/Microsoft/TouchDevelop")
-                    ));
-            }
-
-            m.show();
-        }
-
-        static mkBetaNote() : HTMLElement
-        {
-            var beta = div("beta-note");
-            var betaFriendlyId = (<any>window).betaFriendlyId;
-            var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
-            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>Microsoft</span></div>" +
-                "<div class='beta-legal'>" + (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
-                "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
-                             ;
-
-            // there is a menu option for that in the wp8 app
-            if (Browser.isWP8app) copyrights = "";
-
-            Browser.setInnerHTML(beta, betaNote + copyrights);
-
-            beta.withClick(Editor.showFeedbackBox);
-
-            return beta;
         }
 
         public displayHelp()
