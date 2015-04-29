@@ -1150,6 +1150,8 @@ module TDev
             librariesSection: 1,
             // statements
             comment: 1,
+            // hub
+            scriptAddToChannel: 1,
         }
         static proWidgets: StringMap<number> = {
             //navigation

@@ -2928,11 +2928,14 @@
 
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
-
-            var btns = ["email", "twitter", "facebook"].map(network =>
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-                );
-            if (Cloud.lite && this.parent instanceof ScriptInfo) {
+            
+            var btns: HTMLElement[] = [];
+            if (!Cloud.isRestricted()) {
+                btns.pushRange(["email", "twitter", "facebook"].map(network =>
+                    div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+                    ));
+            }
+            if (Cloud.lite && this.parent instanceof ScriptInfo && TheEditor.widgetEnabled("scriptAddToChannel")) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
