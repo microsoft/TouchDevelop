@@ -924,6 +924,31 @@ module TDev {
                 })
             );
         }
+
+        export function getScriptRestoreAsync(guid:string)
+        {
+            var d = null
+
+            return Promise.join({
+                indexTable: getIndexTablePromise(),
+                scriptsTable: getScriptsTablePromise(),
+            }).then(function (data/*: SyncData*/) {
+                d = data
+                return Promise.join([
+                    data.indexTable.getValueAsync(guid),
+                    data.scriptsTable.getItemsAsync([
+                            guid + "-scriptVersionInCloud",
+                            guid + "-editorState",
+                            guid + "-script"
+                    ])])
+            }).then(resp => {
+                var hd = {}
+                hd[guid] = resp[0]
+                var entries = resp[1]
+                return () => Promise.join([d.indexTable.setItemsAsync(hd), d.scriptsTable.setItemsAsync(entries)])
+            })
+        }
+
         export function setInstalledScriptAsync(
             header: Cloud.Header,
             script: string,

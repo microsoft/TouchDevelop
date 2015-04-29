@@ -5707,7 +5707,7 @@ module TDev
                 h = h.substr(0, i);
             }
 
-            h = LocalProxy.updateDeploymentKey()
+            h = LocalProxy.updateDeploymentKey(h)
 
             Runtime.stopPendingScriptsAsync().done(() => {
                 h = decodeURIComponent(h.replace("#", ""));
