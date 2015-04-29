@@ -1148,6 +1148,7 @@ module TDev
             eventsSection: 1,
             artSection:1,
             librariesSection: 1,
+            scriptPropertiesSettings: 1,
             // statements
             comment: 1,
             // hub
@@ -1188,8 +1189,9 @@ module TDev
             scriptPropertiesPlatform: 1,
             scriptPropertiesInstrumentation: 1,
             scriptPropertiesData: 1,
-            scriptPropertiesSettings: 1,
             wallLogsButton: 1,
+            scriptPropertiesPropertyCloud: 1,
+            scriptPropertiesPropertyAllowExport: 1,
             stringEditFullScreen: 1,
             // language
             async: 1,

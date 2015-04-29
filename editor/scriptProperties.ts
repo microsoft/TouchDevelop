@@ -15,7 +15,6 @@ module TDev
         private iconArtIdContainer = div("scriptPropContainer");
         private splashArtIdContainer = div("scriptPropContainer");
         private isLibrary:HTMLElement;
-        private showAd:HTMLElement;
         private allowExport: HTMLElement;
         private isCloud: HTMLElement;
         private pubId:HTMLElement;
@@ -180,10 +179,6 @@ module TDev
 
             this.isLibrary = HTML.mkCheckBox(lf("this script is a library"), (v) => this.theScript.isLibrary = v);
             this.isLibrary.appendChild(Editor.mkHelpLink("libraries"));
-            this.showAd = HTML.mkCheckBox(lf("show advertisement"), (v) => this.theScript.showAd = v);
-            this.showAd.appendChild(Editor.mkHelpLink("ads"));
-            // not supported anymore
-            this.showAd.style.display = 'none';
             this.allowExport = HTML.mkCheckBox(lf("allow other users to export to app"), (v) => this.exportChanged(v));
             this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
@@ -238,9 +233,8 @@ module TDev
                     ),
                 this.settingsSection = div("formLine",
                     this.isLibrary,
-                    this.isCloud,
-                    this.showAd,
-                    this.allowExport),
+                    TheEditor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null,
+                    TheEditor.widgetEnabled("scriptPropertiesPropertyAllowExport") ? this.allowExport : null),
                 dbg ? div("formLine",
                     div("varLabel", lf("under the hood (dbg)")),
                     HTML.mkButton(lf("test merge"), () => this.mergeWithScript(true)),
@@ -828,7 +822,6 @@ module TDev
             this.splashArtIdContainer.setChildren([splashArtId.mkBox().withClick(() => this.setSplashArtId())]);
 
             HTML.setCheckboxValue(this.isLibrary, this.theScript.isLibrary);
-            HTML.setCheckboxValue(this.showAd, this.theScript.showAd);
             HTML.setCheckboxValue(this.allowExport, this.theScript.allowExport);
             HTML.setCheckboxValue(this.isCloud, this.theScript.isCloud);
 
