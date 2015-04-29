@@ -5389,24 +5389,6 @@
                         divs.push(div("inlineBlock", ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())));
                     }
 
-                    var likesDiv = div("inlineBlock");
-                    divs.push(likesDiv);
-                    if (sc.publicId) {
-                        // display a lis of buble headers
-                        TheApiCacheMgr.getAnd(sc.publicId + "/reviews?count=12",(list: JsonList) => {
-                            if (list.items.length > 0)
-                                likesDiv.setChildren(ScriptInfo.labeledBox(lf("{0} heart{0:s}", sc.jsonScript.cumulativepositivereviews), div('inlineBlock',
-                                    list.items.slice(0, 12).map((review: JsonReview) => {
-                                        var info = Browser.TheHost.getUserInfoById(review.userid, review.username);
-                                        var el = info.thumbnail(false,() => { this.parent.browser().loadDetails(info) });
-                                        el.classList.add('teamHead');
-                                        return el;
-                                    })
-                                    )
-                            ));
-                        });
-                    }
-
                     if (sc.jsonScript && sc.jsonScript.updateid && sc.jsonScript.id != sc.jsonScript.updateid)
                         divs.push(ScriptInfo.labeledBox(lf("update"), this.browser().getScriptInfoById(sc.jsonScript.updateid).mkSmallBox()));
 
@@ -5453,34 +5435,36 @@
                         }
                     });
 
-                    var stats = ""
-                    var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
-                    stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
+                    if (EditorSettings.editorMode() >= EditorMode.pro) {
+                        var stats = ""
+                        var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
+                        stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
 
-                    var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
-                    descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
-                    var stmts = 0
-                    descs.forEach((d) => { stmts += d.stmtCount })
-                    if (sc.jsonScript && sc.jsonScript.time) {
-                        var d = new Date(sc.jsonScript.time * 1000)
-                        stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
-                            d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                        var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
+                        descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
+                        var stmts = 0
+                        descs.forEach((d) => { stmts += d.stmtCount })
+                        if (sc.jsonScript && sc.jsonScript.time) {
+                            var d = new Date(sc.jsonScript.time * 1000)
+                            stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
+                                d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                        }
+                        stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                        descs.slice(0, 20).forEach((d, i) => {
+                            if (i > 0)
+                                stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
+                            else
+                                stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
+                        })
+                        if (descs.length > 20)
+                            stats += ", ...";
+                        divs.push(Host.expandableTextBox(stats));
+
+                        TheEditor.refreshMode();
+                        var render = new EditorRenderer();
+                        var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                        divs.push(code);
                     }
-                    stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
-                    descs.slice(0, 20).forEach((d, i) => {
-                        if (i > 0)
-                            stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
-                        else
-                            stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
-                    })
-                    if (descs.length > 20)
-                        stats += ", ...";
-                    divs.push(Host.expandableTextBox(stats));
-
-                    TheEditor.refreshMode();
-                    var render = new EditorRenderer();
-                    var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
-                    divs.push(code);
 
                     this.tabContent.setChildren(divs);
                 });
@@ -6021,7 +6005,7 @@
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
                     new HistoryTab(this),
-                    new InsightsTab(this),
+                    EditorSettings.editorMode() < EditorMode.pro ? null : new InsightsTab(this),
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;
