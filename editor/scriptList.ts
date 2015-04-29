@@ -6078,7 +6078,9 @@
             var btns: HTMLElement = div("sdRunBtns");
 
             if (this.cloudHeader) {
-                uninstall = ScriptInfo.mkSimpleBtnConfirm(lf("uninstall"), () => this.uninstall())
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
+                uninstall.classList.add("sdUninstall");
+
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -6097,7 +6099,7 @@
                 })
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, div(""), uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -6692,6 +6694,7 @@
 
         private uninstall()
         {
+            tick(Ticks.browseUninstall);
             Editor.updateEditorStateAsync(this.getGuid(),(st) => {
 
                 var isownedgroupscript = st
@@ -6705,10 +6708,14 @@
 
                 TipManager.setTip(null);
 
-                Promise.join([
-                    // this.browser().deletePaneAnimAsync(),
-                    World.uninstallAsync(this.getGuid())
-                ]).done(() => {
+                var id = this.getGuid();
+                World.uninstallAsync(id)
+                    .done(() => {
+
+                    HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()),() => {
+                        // TODO: undo the uninstall.
+                    });
+
                     this.cloudHeader = null;
                     if (this.publicId)
                         TheEditor.historyMgr.reload(HistoryMgr.windowHash());

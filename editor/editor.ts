@@ -3290,7 +3290,7 @@ module TDev
                         return;
 
                     var howLongAgo = Util.timeSince(participant.lastEdit.getTime()/1000);
-                    var notification = div("errorNotification");
+                    var notification = div("infoNotification");
                     notification.appendChild(el.cloneNode(true));
                     notification.appendChild(text(j.name));
                     if (participant.lastEdit) {

@@ -421,6 +421,7 @@ module TDev {
         browseHeart,
         browseUnHeart,
         browsePublish,
+        browseUninstall,
         browsePush,
         browseDiffBase,
         browseAddScriptToList,

@@ -736,6 +736,19 @@ module TDev.HTML {
         a.begin();
     }
 
+    export function showUndoNotification(msgText: string, undo: () => void) {
+        var previous = elt("infoNotification"); if (previous) previous.removeSelf();
+        var msg = divId("infoNotification", "infoNotification", msgText, HTML.mkButtonOnce(lf("undo"),() => {
+            msg.removeSelf();
+            undo();
+        }));
+        elt("root").appendChild(msg);
+        var a = Animation.fadeOut(msg);
+        a.delay = 4000;
+        a.duration = 1000;
+        a.begin();        
+    }
+
     export function showErrorNotification(msgText:string)
     {
         if (Browser.isHeadless) {

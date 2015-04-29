@@ -3318,6 +3318,10 @@ div.sdTabTileLabel {
   font-size: 2em;
 }
 
+.sdUninstall {
+  background-color:#999;
+}
+
 .phone .sdBigButtonFull .sdBigButtonDesc
 {
     left:3em;
@@ -3697,10 +3701,6 @@ right:4.5em;
   position: absolute;
   left: 0.5em;
   top: 0.3em;
-}
-
-.errorNotification .sdThumb {
-  vertical-align: middle;
 }
 
 .phone .sdThumb {
