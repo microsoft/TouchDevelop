@@ -1,0 +1,18 @@
+{
+    "version": "0.1.0",
+    "command": "jake",
+    "showOutput": "always",
+    "isShellCommand": true,
+    "tasks": [
+        {
+            "taskName": "build",
+            "args": [],
+            "isTestCommand": false
+        },
+        {
+            "taskName": "docs",
+            "args": ["update-docs"],
+            "isTestCommand": false
+        }
+    ]
+}
