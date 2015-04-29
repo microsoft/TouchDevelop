@@ -1203,6 +1203,7 @@ module TDev
             scriptDiffToBase: 1,
             scriptHistoryTab: 1,
             scriptInsightsTab: 1,
+            githubLinks: 1,
         }
 
         public toggleWidgetVisibility(name: string, el: HTMLElement) {
@@ -5279,26 +5280,25 @@ module TDev
             var m = new ModalDialog();
             m.fullWhite();
             m.add(div("wall-dialog-header", Runtime.appName));
-            m.add(div("wall-dialog-body", lf("For feedback and support please use our forum, or just email us!")));
+
+            m.add(div("wall-dialog-body", "Running against cloud services v" + relId + "."));
             m.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("changes"),() => {
-                    HTML.showProgressNotification(lf("downloading change log..."))
-                    Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
-                        .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
-                        .done();
-                }),
-                HTML.mkButton(lf("forum"),() => { Browser.Hub.showForum(); }),
-                HTML.mkButton(lf("GitHub"),() => { RT.Web.browseAsync("https://github.com/Microsoft/TouchDevelop").done(); })
+                HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
+                link(lf("privacy and cookies"), "/privacy"),
+                link(lf("legal"), "/legal")
                 ));
 
-            m.add(div("wall-dialog-body", "Running against cloud services v" + relId + ". " +
-                                          "TouchDevelop was brought to you by Microsoft Research."));
-            m.add(div("wall-dialog-buttons",
-                link(lf("legal"), "/legal"),
-                link(lf("privacy and cookies"), "/privacy")));
-
-            m.add(div("wall-dialog-buttons",
-                link(lf("visit {0}", Cloud.config.rootUrl), "/")));
+            if (TheEditor.widgetEnabled("githubLinks")) {
+                m.add(div("wall-dialog-buttons",
+                    HTML.mkButton(lf("changes"),() => {
+                        HTML.showProgressNotification(lf("downloading change log..."))
+                        Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
+                            .then(t => RT.Web.browseAsync("http://github.com/Microsoft/TouchDevelop/commits/" + t.commit))
+                            .done();
+                    }),
+                    link(lf("GitHub"), "https://github.com/Microsoft/TouchDevelop")
+                    ));
+            }
 
             m.show();
         }
@@ -5309,7 +5309,8 @@ module TDev
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
             var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>Microsoft</span></div>" +
-                             "<div class='beta-legal'><span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
+                "<div class='beta-legal'>" + (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
+                "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
                              ;
 
             // there is a menu option for that in the wp8 app
