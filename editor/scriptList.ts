@@ -5354,8 +5354,8 @@
 
 
                     if (sc.jsonScript && sc.jsonScript.time) {
-                        var pull = HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript())
-                        var diff = HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase())
+                        var pull = TheEditor.widgetEnabled("scriptPullChanges") ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
+                        var diff = TheEditor.widgetEnabled("scriptDiffToBase") ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         divs.push(div('', pull, diff));
                     }
 
@@ -5998,14 +5998,16 @@
         {
             var r:BrowserTab[];
             if (!this.publicId)
-                r = [this, new ScriptDetailsTab(this), new HistoryTab(this)];
+                r = [this,
+                    new ScriptDetailsTab(this),
+                    TheEditor.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null];
             else
                 r =
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    new HistoryTab(this),
-                    EditorSettings.editorMode() < EditorMode.pro ? null : new InsightsTab(this),
+                    TheEditor.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null,
+                    TheEditor.widgetEnabled("scriptInsightsTab") ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;

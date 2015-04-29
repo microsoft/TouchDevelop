@@ -1191,6 +1191,10 @@ module TDev
             lambda: 1,
             // hub
             commentHistory: 1,
+            scriptPullChanges: 1, 
+            scriptDiffToBase: 1,
+            scriptHistoryTab: 1,
+            scriptInsightsTab: 1,
         }
 
         public toggleWidgetVisibility(name: string, el: HTMLElement) {
