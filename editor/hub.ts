@@ -259,7 +259,6 @@ module TDev.Browser {
 
         export var keyboardSounds = /sounds/.test(window.location.href);
         export function intellibuttonClick() { if (keyboardSounds) playSound('aonptkth'); }
-        export function scoreUp() { playSound('sjmgbwrv'); }
         export function tutorialStepNew() { playSound('ncoqavnw', 1); }
         export function tutorialStepFinished() { playSound('sjmgbwrv', 1); }
         export function tutorialStart() { playSound('sjmgbwrv', 1); }
@@ -2318,62 +2317,6 @@ module TDev.Browser {
                 }))
                 this.notificationBox.setChildren([]);
             }
-
-            World.getCurrentUserInfoAsync().done(u => {
-                if (this.visible)
-                    this.startDingDing(u);
-            })
-        }
-
-        private currentDingDing = null;
-        private startDingDing(u:JsonUser)
-        {
-            var prevScore = parseInt(window.localStorage["prevUserScore"] || "-1")
-            if (prevScore < 0 || prevScore >= u.score) {
-                window.localStorage["prevUserScore"] = u.score;
-                return;
-            }
-
-            var scoreDiv = Browser.ScriptInfo.mkNum(1, "svg:Award,#444,clip=110")
-            this.currentDingDing = scoreDiv;
-            this.dingDingBox.setChildren([scoreDiv])
-
-            var diff = u.score - prevScore
-            var animTime = 400
-            var sleepTime = 100
-
-            var sym = scoreDiv.firstChild.nextSibling
-
-            var currScore = 0
-
-            var setNum = (v:number) => {
-                scoreDiv.setChildren([" " + v + " ", sym])
-                currScore = v;
-                window.localStorage["prevUserScore"] = v + "";
-            };
-
-            var advance = () => {
-                if (this.currentDingDing != scoreDiv)
-                    return;
-
-                if (currScore == u.score) {
-                    Util.coreAnim("dingZoom", 3500, scoreDiv, () => {
-                        scoreDiv.removeSelf();
-                    })
-                    return;
-                }
-                var s = currScore + Math.max(1, Math.round((u.score - currScore) / 4))
-                setNum(s)
-                Util.coreAnim("dingDing", animTime, scoreDiv, () => {
-                    Util.setTimeout(sleepTime, advance);
-                })
-            };
-
-            setNum(prevScore);
-            EditorSoundManager.scoreUp();
-            Util.coreAnim("dingShow", 1000, scoreDiv, () => {
-                Util.setTimeout(600, advance)
-            })
         }
     }
 }

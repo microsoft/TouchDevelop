@@ -7072,14 +7072,6 @@
                 var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.score, "svg:Award,black,clip=110");
                 addNum(u.receivedpositivereviews, "♥");
-                //addNum(u.subscribers, "♟");
-                //addNum(u.features, "⚒");
-                if (big && !SizeMgr.phoneMode) {
-                    addNum(u.subscribers, "svg:Person,black,clip=80");
-                    //addNum(u.features, "svg:Award,black,clip=110");
-                    addNum(u.features, "svg:Pencil,black,clip=110");
-                    addNum(u.activedays, "☀");
-                }
                 numbers.setChildren(cont);
             });
         }
@@ -7139,7 +7131,6 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             Cloud.isRestricted() ? null : new UserScoreTab(this),
              Cloud.isRestricted() ? null : new ScreenShotTab(this),
              new ScriptsTab(this),
              new UserSocialTab(this),
@@ -7194,14 +7185,7 @@
             this.withUpdate(hd, (u: JsonUser) => {
                 hd.setChildren([Host.expandableTextBox(u.about)]);
                 if (this.isMe()) {
-                    if (u.score) {
-                        var scoreDiv = Browser.ScriptInfo.mkNum(u.score, "svg:Award,white,clip=110");
-                        var scoreBtn = HTML.mkButtonElt("wall-button", scoreDiv);
-                        Util.clickHandler(scoreBtn, () => {
-                            Util.setHash("#list:installed-scripts:user:" + this.publicId + ":score")
-                        });
-                    }
-                    accountButtons.appendChildren([scoreBtn, HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())]);
+                    accountButtons.appendChildren([HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())]);
                 }
             });
         }
@@ -7283,50 +7267,6 @@
 
         public getName() { return lf("more"); }
         public getId() { return "more"; }
-    }
-
-    export class UserScoreTab
-        extends BrowserTab
-    {
-        constructor(par: BrowserPage) {
-            super(par);
-        }
-        public getName() { return lf("score"); }
-        public getId() { return "score"; }
-        public bgIcon() { return "svg:Group"; }
-        public hideOnEmpty() { return true; }
-        public inlineIsTile() { return false; }
-
-        public initTab() {
-            if (Cloud.anonMode(lf("accessing user score"))) return;
-
-            var loadingDiv = div('bigLoadingMore', lf("loading..."));
-            var ch = div('');
-            this.tabContent.setChildren([loadingDiv, ch]);
-            Cloud.getPrivateApiAsync(this.parent.publicId + "/score").done((u: JsonUserScore) => {
-            TheApiCacheMgr.getAsync(this.parent.publicId, true).done((ui: JsonUser) => {
-
-                loadingDiv.removeSelf();
-
-                var features = u.languageFeatures.features;
-                features.sort((a,b) => b.count - a.count);
-                var reviews = u.receivedPositiveReviews.scripts;
-                //reviews.sort((a,b) => b.count - a.count);
-
-                ch.appendChild(div('sdScoreTitleTop', 'user score: ' + ui.score + ' points'));
-
-                ch.appendChild(div('sdScoreTitle', 'subscriptions: ' + ui.subscribers + " gives " + u.receivedSubscriptions.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', 'active days: ' + ui.activedays + " gives " + u.activeDays.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', 'language features: ' + features.length + " gives " + u.languageFeatures.points + ' points'));
-                ch.appendChild(div('sdScoreTitle', '♥ from other people: ' + ui.receivedpositivereviews + " gives " + u.receivedPositiveReviews.points + ' points'));
-                ch.appendChildren(
-                    reviews.map((review : JsonScript) => this.browser().getScriptInfo(review).mkSmallBox())
-                    );
-                ch.appendChild(div('',
-                    features.map((feature : JsonFeature) => HTML.mkA('sdFeature', '#topic:' + feature.name, '', feature.title))
-                    ));
-            })});
-        }
     }
 
     export class GroupsTab
