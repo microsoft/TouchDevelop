@@ -4,6 +4,10 @@ module TDev.Browser {
 
     export var TheHub: Hub;
 
+    export interface HubSection {
+        title: string; // localized            
+    }
+    
     export interface HubTheme {
         description: string;
         logoArtId: string;
@@ -23,7 +27,7 @@ module TDev.Browser {
         editorMode?: string;
         scriptTemplates?: string[];
     }
-
+        
     export var hubThemes: StringMap<HubTheme> = {
         'minecraft': {
             description: 'Learn to code with Minecraft',
@@ -2300,23 +2304,23 @@ module TDev.Browser {
 
         private isBeginnerOrCoder() {
             return EditorSettings.editorMode() <= EditorMode.classic;
-        }
+        }       
 
         private updateSections()
         {
-            var sects = {
-                "recent": lf("my scripts"),
-                "misc": this.isBeginnerOrCoder() ? lf("tutorials") : lf("learn"),
-                "showcase": lf("showcase"),
-                "social": lf("social"),
+            var sects : StringMap<HubSection> = {
+                "recent": { title: lf("my scripts") },
+                "misc": { title: this.isBeginnerOrCoder() ? lf("tutorials") : lf("learn") },
+                "showcase": { title: lf("showcase") },
+                "social": { title: lf("social") },
             };
             if (!this.isBeginnerOrCoder()) {
                 var extra = {
-                    "top": lf("top & new"),
-                    "tags": lf("categories"),
+                    "top": { title: lf("top & new") },
+                    "tags": { title: lf("categories") },
                     //"new": lf("new"),
                     //"art": lf("art"),
-                    "myart": lf("my art"),
+                    "myart": { title: lf("my art") },
                 };
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
@@ -2332,7 +2336,7 @@ module TDev.Browser {
             if (Cloud.lite) {
                 delete sects["tags"];
                 if (!this.isBeginnerOrCoder()) {
-                    sects["channels"] = lf("channels")
+                    sects["channels"] = { title: lf("channels") };
                 }
             }
             if (Cloud.isRestricted()) {
@@ -2422,12 +2426,12 @@ module TDev.Browser {
             this.mainContent.style.height = SizeMgr.windowHeight + "px";
             var lastHeight = 0;
 
-            Object.keys(sects).forEach((s) => {
+            Object.keys(sects).forEach((s : string) => {
                 var c = div("hubSectionBody");
 
-                var hd = sects[s];
+                var hd : HubSection = sects[s];
 
-                var sd = div("hubSection hubSection-" + s, div("hubSectionHeader", spanDirAuto(hd)), c);
+                var sd = div("hubSection hubSection-" + s, div("hubSectionHeader", spanDirAuto(hd.title)), c);
                 divs.push(sd)
                 this.mainContent.appendChild(sd);
 
