@@ -303,8 +303,8 @@ module TDev {
         scriptText: text,
         editorState: <MyEditorState> {
           // XXX test values
-          tutorialStep: 1,
-          tutorialNumSteps: 10,
+          // tutorialStep: 1,
+          // tutorialNumSteps: 10,
           lastSave: new Date()
         },
         baseSnapshot: currentVersion,
