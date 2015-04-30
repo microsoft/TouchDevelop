@@ -160,7 +160,7 @@ module TDev
 
         public showAppView(logs? : LogMessage[]) {
             TDev.RT.App.showAppLogAsync(logs, undefined, els => {
-                els.filter(el => el.dataset['crash']).forEach(el => {
+                els.filter(el => !!el.dataset['crash']).forEach(el => {
                     el.withClick(() => {
                         var crash = JSON.parse(el.dataset['crash']);
                         ModalDialog.dismissCurrent();
@@ -187,6 +187,7 @@ module TDev
                         else if (/\.xml$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
                         else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
+                        else if (/\.h(pp)?|\.c(pp)?|\.cxx/i.test(name)) editor.getSession().setMode("ace/mode/c_cpp");
                         editor.setValue(value);
                         editor.clearSelection();
                         editor.focus();
