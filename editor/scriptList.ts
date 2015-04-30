@@ -6708,21 +6708,30 @@
                 TipManager.setTip(null);
 
                 var id = this.getGuid();
-                World.uninstallAsync(id)
-                    .done(() => {
+                var restoreAsync = null
+
+                World.getScriptRestoreAsync(id)
+                .then(r => restoreAsync = r)
+                .then(() => World.uninstallAsync(id))
+                .then(() => {
+                    var hash = HistoryMgr.windowHash()
 
                     HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()),() => {
-                        // TODO: undo the uninstall.
+                        restoreAsync()
+                        .then(() => this.browser().updateInstalledHeaderCacheAsync())
+                        .then(() => TheEditor.historyMgr.reload(hash))
+                        .done()
                     });
 
                     this.cloudHeader = null;
                     if (this.publicId)
-                        TheEditor.historyMgr.reload(HistoryMgr.windowHash());
+                        TheEditor.historyMgr.reload(hash);
                     else {
                         this.browser().skipOneSync = true;
                         Util.setHash("list:installed-scripts");
                     }
-                });
+                })
+                .done()
 
             }).done();
         }
