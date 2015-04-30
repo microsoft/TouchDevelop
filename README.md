@@ -132,7 +132,7 @@ jake clean
 
 You can use your favorite editor to edit the TypeScript file. Here are a couple tips:
 
-* Visual Studio 2013+: open the ``vs.sln``, then open the ``vsrefs.ts`` file to open the repo as a virtual folder.
+* [Visual Studio Code](https://code.visualstudio.com/), cross platform editor for TypeScript. Simply open the folder in Code.
 * Atom: there are a number of packages that will give you TypeScript coloring
 
 ## Documentation
