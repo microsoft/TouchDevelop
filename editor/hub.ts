@@ -95,6 +95,21 @@ module TDev.Browser {
                     link(lf("GitHub"), "https://github.com/Microsoft/TouchDevelop")
                     );
             }
+            
+            if (Cloud.lite && ["upload", "admin", "bug"].some(perm => Cloud.hasPermission(perm))) {
+                m.add(div("wall-dialog-header", lf("admin")));
+                m.add([div("wall-dialog-body", [
+                    (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
+                    (Cloud.hasPermission("bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("generate codes"), () => {
+                        TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
+                            .done(function(r) {
+                            TDev.RT.ShareManager.shareTextAsync("This is your teacher code: " + r.items[0], '').done();
+                        });
+                    }) : null)
+                ])])
+            }
 
             m.show();
         }
