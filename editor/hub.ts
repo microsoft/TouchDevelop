@@ -1211,18 +1211,16 @@ module TDev.Browser {
             };
             if (Cloud.isRestricted())
                 this.chooseEditorAsync().done((editor) => {
-                    if (editor === undefined) {
-                        // user canceled
-                    } else if (editor != "touchdevelop") {
-                        var stub: World.ScriptStub = {
-                            editorName: editor,
-                            scriptName: lf("{0} {1} script", TopicInfo.getAwesomeAdj(), editor),
-                            scriptText: "",
-                        };
-                        this.browser().openNewScriptAsync(stub);
-                    } else {
-                        gotoTemplate();
-                    }
+                    if (!editor) return;
+                    var src = "";
+                    if (editor == "touchdevelop")
+                        src = this.templates.filter(t => t.id == "blank")[0].source;
+                    var stub: World.ScriptStub = {
+                        editorName: editor,
+                        scriptName: lf("{0} script", TopicInfo.getAwesomeAdj()),
+                        scriptText: src,
+                    };
+                    this.browser().openNewScriptAsync(stub);
                 })
             else
                 gotoTemplate();
@@ -1234,13 +1232,13 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
 
                 var elts = [];
-                getExternalEditors().concat([{
+                [{
                     name: "TouchDevelop",
-                    description: "The touch editor you love and know!",
+                    description: lf("A beginner friendly editor"),
                     id: "touchdevelop",
                     origin: "",
                     path: "",
-                }]).forEach(k => {
+                }].concat(getExternalEditors()).forEach(k => {
                     var icon = div("sdIcon");
                     icon.style.backgroundColor = ScriptIcons.stableColorFromName(k.name);
                     icon.setChildren([HTML.mkImg("svg:edit,white")]);
@@ -1257,7 +1255,7 @@ module TDev.Browser {
                     });
                     elts.push(res)
                 })
-                m.choose(elts, { searchHint: lf("search editors"), header: lf("pick an editor for your script...") });
+                m.choose(elts, { header: lf("pick an editor...") });
             });
         }
 
