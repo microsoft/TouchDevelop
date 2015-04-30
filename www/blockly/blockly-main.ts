@@ -342,7 +342,7 @@ module TDev {
       }
       statusMsg("⚠ compilation error "+e, External.Status.Error);
     }
-    // return ast;
+    return ast;
   }
 
   function setupButtons() {
