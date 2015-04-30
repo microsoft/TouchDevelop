@@ -1399,9 +1399,11 @@ module TDev.Browser {
                     elements.push(fill);
                 }
 
-                var forumEl = this.mkFnBtn(lf("Forums"), () => { this.hide(); Hub.showForum() }, Ticks.hubForum, false, tileSize(elements.length));
-                forumEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:im,white")));
-                elements.push(forumEl);
+                if (!Cloud.isRestricted()) {
+                    var forumEl = this.mkFnBtn(lf("Forums"),() => { this.hide(); Hub.showForum() }, Ticks.hubForum, false, tileSize(elements.length));
+                    forumEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:im,white")));
+                    elements.push(forumEl);
+                }
 
                 var toExternalBtn = (btn: HTMLElement) => {
                     btn.className += " externalBtn";
@@ -1474,6 +1476,7 @@ module TDev.Browser {
                     elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
                 } else {
                     elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                    elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
                 }
             } else if (s == "channels") {
                 noFnBreak = true;
@@ -2321,7 +2324,6 @@ module TDev.Browser {
             }
             if (Cloud.isRestricted()) {
                 delete sects["showcase"];
-                delete sects["social"];
             }
 
             if (SizeMgr.portraitMode) {
