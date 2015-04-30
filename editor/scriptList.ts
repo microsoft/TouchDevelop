@@ -7149,7 +7149,8 @@
             if (this.isMe() && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
-                    Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"),() => { Hub.chooseWallpaper() })
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
+                    HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
                 ]);
 
                 var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
