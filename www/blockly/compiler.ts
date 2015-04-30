@@ -620,7 +620,7 @@ function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
 
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_show_letter:             { f: "show letter",           args: ["letter"] },
-  device_pause:                   { f: "pause",                 args: ["pausetime"] },
+  device_pause:                   { f: "pause",                 args: ["pause"] },
   device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
   device_plot:                    { f: "plot",                  args: ["x", "y"] },
   device_unplot:                  { f: "unplot",                args: ["x", "y"] },
