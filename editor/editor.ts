@@ -184,10 +184,10 @@ module TDev
                         if (mode) editor.getSession().setMode("ace/mode/" + mode);
                         else if (/\.js$/i.test(name)) editor.getSession().setMode("ace/mode/javascript");
                         else if (/\.json$/i.test(name)) editor.getSession().setMode("ace/mode/json");
-                        else if (/\.xml$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
+                        else if (/\.(xml|svg)$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
                         else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
-                        else if (/\.h(pp)?|\.c(pp)?|\.cxx/i.test(name)) editor.getSession().setMode("ace/mode/c_cpp");
+                        else if (/\.(h(pp)?|c(pp)?|cxx)/i.test(name)) editor.getSession().setMode("ace/mode/c_cpp");
                         editor.setValue(value);
                         editor.clearSelection();
                         editor.focus();
