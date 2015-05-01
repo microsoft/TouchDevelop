@@ -406,7 +406,8 @@ module TDev.RT.Node {
                 return
             }
 
-            this.dispatchServerRequest(sr)
+            sr.recvContentAsync()
+                .done(() => this.dispatchServerRequest(sr))
         }
 
         public augmentException(e:any)
