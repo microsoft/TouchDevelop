@@ -179,6 +179,18 @@ Blockly.Blocks['device_point'] = {
   }
 };
 
+Blockly.Blocks['device_heading'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("heading");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('');
+    }
+};
+
 Blockly.Blocks['device_build_image'] = {
     init: function()
     {

@@ -625,6 +625,7 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_plot:                    { f: "plot",                  args: ["x", "y"] },
   device_unplot:                  { f: "unplot",                args: ["x", "y"] },
   device_point:                   { f: "point",                 args: ["x", "y"] },
+  device_heading:                 { f: "heading",               args: [] },
   device_make_StringImage:        { f: "make string image",     args: ["NAME"] },
   device_scroll_string_image:     { f: "scroll string image",   args: ["string", "speed"] },
   device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },

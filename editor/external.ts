@@ -34,7 +34,7 @@ module TDev {
         id: "blockly",
         origin: origin,
         path: path+"blockly/editor.html"
-      } ];
+      }];
     }
     return externalEditorsCache;
   }
@@ -47,7 +47,8 @@ module TDev {
   }
 
   export module External {
-    export var TheChannel: Channel = null;
+      export var TheChannel: Channel = null;
+      var deviceScriptId : string;
 
     import J = AST.Json;
 
@@ -63,12 +64,21 @@ module TDev {
       return errorMsg;
     }
 
+    export function initAsync(): Promise {        
+        return deviceScriptId ? Promise.as(deviceScriptId)
+            : TDev.Browser.TheApiCacheMgr.getAsync('jktwxx', true)
+              .then((script: JsonScript) => {
+                if (script) deviceScriptId = script.updateid;
+                else deviceScriptId = 'jktwxx';
+              });
+    }
+
     // This function modifies its argument by adding an extra [J.JLibrary]
     // to its [decls] field that references the device's library.
-    function addDeviceLibrary(app: J.JApp) {
+    function addDeviceLibrary(app: J.JApp) {      
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
         'meta import device {'+
-        '  pub "jktwxx"'+
+        '  pub "' + deviceScriptId + '"'+
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
@@ -93,6 +103,11 @@ module TDev {
         // The function writes its result in a global
         return Promise.as(J.dump(s));
       });
+    }
+
+    export function mkChannelAsync(editor: ExternalEditor, iframe: HTMLIFrameElement, guid: string) {
+        return initAsync()
+            .then(() => new Channel(editor, iframe, guid));
     }
 
     export class Channel {
@@ -316,13 +331,16 @@ module TDev {
       var iframe = document.createElement("iframe");
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
       iframe.addEventListener("load", function () {
-        TheChannel = new Channel(editor, iframe, data.guid);
-        var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-        TheChannel.post(<Message_Init>{
-          type: MessageType.Init,
-          script: data,
-          merge: ("theirs" in extra) ? extra : null
-        });
+          mkChannelAsync(editor, iframe, data.guid)
+              .done(channel => {
+              TheChannel = channel;
+              var extra = JSON.parse(data.scriptVersionInCloud || "{}");
+              TheChannel.post(<Message_Init>{
+                  type: MessageType.Init,
+                  script: data,
+                  merge: ("theirs" in extra) ? extra : null
+              });
+          });
       });
       iframe.setAttribute("src", editor.origin + editor.path);
       iframeDiv.appendChild(iframe);
