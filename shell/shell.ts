@@ -650,9 +650,11 @@ function deploy(d:any, cb:(err:any,resp:any) => void, isScript = true)
                 runPython = true
                 runPip = fe.updated
             }
+            if (hadExn || err) tdstate.downloadedFiles = {}
             if (hadExn) saveState();
             else if (err) {
                 hadExn = true
+                saveState()
                 cb(err, null)
             } else {
                 oneUp()
@@ -1376,6 +1378,7 @@ class Worker {
     public port: number;
     public child: child_process.ChildProcess
     public isready: boolean;
+    public iscurrent:boolean;
 
     public shutdown()
     {
@@ -1426,6 +1429,7 @@ class Worker {
 
             var u = this.getUrl()
             u.path = "/-tdevmgmt-/" + config.deploymentKey + "/ready"
+            debug.log("worker ping, " + this.description())
             var creq = http.request(u, cres => {
                 if (cres.statusCode == 200) {
                     if (!this.isready) {
@@ -1439,6 +1443,11 @@ class Worker {
                 }
             })
             creq.on("error", err => {
+                if (this.isready || this.child == null) {
+                    debug.log("error, but no need to ping anymore, " + this.description())
+                    return
+                }
+
                 if (err.code == 'ECONNREFUSED') {}
                 else debug.log("ping failed, " + err.message)
                 setTimeout(ping, 1000)
@@ -1461,7 +1470,10 @@ class Worker {
 }
 
 var workers:Worker[] = []
+var allWorkers:Worker[] = []
 var totalWorkers = 0;
+var whenWorkers = []
+
 
 function startWorker(cb0, cb)
 {
@@ -1512,13 +1524,24 @@ function loadScriptCoreAsync()
     var numW = numWorkers
     var oneUp = () => {
         if (--numW == 0) {
-            workers.forEach(w => w.shutdown())
-            workers = newWorkers
+            allWorkers.forEach(w => w.iscurrent = false)
+            newWorkers.forEach(w => w.iscurrent = true)
+            workers = newWorkers.slice(0)
+
+            allWorkers.forEach(w => w.iscurrent || w.shutdown())
+            allWorkers = newWorkers.slice(0)
+
+            var l = whenWorkers
+            whenWorkers = []
+            l.forEach(f => f())
         }
     }
 
     for (var i = 0; i < numWorkers; ++i)
-        startWorker(w => newWorkers.push(w), oneUp)
+        startWorker(w => {
+            newWorkers.push(w)
+            allWorkers.push(w)
+        }, oneUp)
 
     return {
         then: f => f(),
@@ -2036,7 +2059,6 @@ function forwardWebSocket(req, sock, body)
     })
 }
 
-
 function handleReq(req, resp)
 {
     setupHeaders(req)
@@ -2046,7 +2068,7 @@ function handleReq(req, resp)
     else if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
         specHandleReq(req, resp)
     else if (workers.length == 0)
-        specHandleReq(req, resp) // 404
+        whenWorkers.push(() => handleReq(req, resp))
     else {
         var w = pickWorker()
         var u = w.getUrl()
@@ -2273,7 +2295,6 @@ function main()
     var agent = (<any>http).globalAgent;
     agent.keepAlive = true;
     if (agent.options) agent.options.keepAlive = true;
-    agent.keepAliveMsecs = 20000;
     agent.maxSockets = Infinity; 
     // don't limit maxSockets - they might be long-living
 

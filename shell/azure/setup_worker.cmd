@@ -14,10 +14,22 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo %DATE% %TIME% Permissions granted
 
-:install_node
+if "%ZIP_URL%"=="" goto download_node
+
+echo %DATE% %TIME% Downloading zip...
+powershell -nologo -noprofile -c "Invoke-WebRequest %ZIP_URL% -OutFile %THIS%\pkg.zip"
+echo %DATE% %TIME% Unzipping...
+powershell -nologo -noprofile -c "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('pkg.zip', '.'); }"
+echo %DATE% %TIME% Done unzipping.
+
+:download_node
+
+if exist %THIS%\node.msi goto install_node
 
 echo %DATE% %TIME% Downloading node.js...
-powershell -c "Invoke-WebRequest %NODE_URL% -OutFile %THIS%\node.msi"
+powershell -nologo -noprofile -c "Invoke-WebRequest %NODE_URL% -OutFile %THIS%\node.msi"
+
+:install_node
 
 echo %DATE% %TIME% Installing node.js...
 msiexec /i %THIS%\node.msi /q
