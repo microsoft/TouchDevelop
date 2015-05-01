@@ -108,6 +108,77 @@ Blockly.Blocks['device_button_type'] = {
   }
 };
 
+Blockly.Blocks['device_pin_type'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(210);
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown([["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]), "name");
+        this.setOutput(true, "pin_type");
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_get_digital_pin'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("digital read pin");
+        this.appendValueInput("name")
+            .setCheck("pin_type");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_set_digital_pin'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("digital write");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.appendValueInput("name")
+            .setCheck("pin_type")
+            .appendField("to pin");
+        this.setInputsInline(true);
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_get_analog_pin'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("analog read pin");
+        this.appendValueInput("name")
+            .setCheck("pin_type");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_set_analog_pin'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("analog write");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.appendValueInput("name")
+            .setCheck("pin_type")
+            .appendField("to pin");
+        this.setInputsInline(true);
+        this.setTooltip('');
+    }
+};
+
 Blockly.Blocks['device_get_acceleration'] = {
     init: function () {
         this.setHelpUrl('http://www.example.com/');

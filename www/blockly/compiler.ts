@@ -418,12 +418,8 @@ function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
   return H.mkCall(f, H.mkTypeRef("code"), args);
 }
 
-function compileButtonType(e: Environment, b: B.Block): J.JExpr {
+function compileEnumType(e: Environment, b: B.Block): J.JExpr {
   return H.mkStringLiteral(safeGetFieldValue(b, "name"));
-}
-
-function compileAccelerationType(e: Environment, b: B.Block): J.JExpr {
-    return H.mkStringLiteral(safeGetFieldValue(b, "name"));
 }
 
 function compileOnOff(e: Environment, b: B.Block): J.JExpr {
@@ -448,9 +444,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
     case "text":
       return compileText(e, b);
     case "device_button_type":
-      return compileButtonType(e, b);
     case "device_acceleration_type":
-        return compileAccelerationType(e, b);
+    case "device_pin_type":
+          return compileEnumType(e, b);
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
@@ -637,6 +633,10 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
   device_get_button:              { f: "button is pressed",     args: ["NAME"] },
   device_get_acceleration:        { f: "acceleration",          args: ["dimension"] },
+  device_get_digital_pin:         { f: "digital read pin",      args: ["name"] },
+  device_set_digital_pin:         { f: "digital write pin",     args: ["name", "value"] },
+  device_get_analog_pin:          { f: "analog read pin",       args: ["name"] },
+  device_set_analog_pin:          { f: "analog write pin",      args: ["name", "value"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
