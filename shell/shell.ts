@@ -650,9 +650,11 @@ function deploy(d:any, cb:(err:any,resp:any) => void, isScript = true)
                 runPython = true
                 runPip = fe.updated
             }
+            if (hadExn || err) tdstate.downloadedFiles = {}
             if (hadExn) saveState();
             else if (err) {
                 hadExn = true
+                saveState()
                 cb(err, null)
             } else {
                 oneUp()
@@ -2273,7 +2275,6 @@ function main()
     var agent = (<any>http).globalAgent;
     agent.keepAlive = true;
     if (agent.options) agent.options.keepAlive = true;
-    agent.keepAliveMsecs = 20000;
     agent.maxSockets = Infinity; 
     // don't limit maxSockets - they might be long-living
 
