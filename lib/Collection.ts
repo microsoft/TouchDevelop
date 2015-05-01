@@ -79,7 +79,7 @@ module TDev.RT {
         }
 
         //? Removes the first occurence of an object. Returns true if removed.
-        //@ writesMutable
+        //@ writesMutable ignoreReturnValue
         public remove(item:T) : boolean
         {
             var i = this.index_of(item, 0);

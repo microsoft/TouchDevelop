@@ -221,6 +221,7 @@ module TDev.RT {
                  r.resume();
                  return;
              }
+             App.allow_other_events(r.stackframe);
              var step = () => {
                  r.rt.yield_now();
                  // call evolved if not called in another loop
