@@ -69,7 +69,8 @@ module TDev.RT {
             var r = new PromiseInv()
             var contentType = this.header("content-type") || "application/octet-stream"
             contentType = contentType.replace(/;.*/, "")
-            this._isText = /^text\//.test(contentType) || contentType == "application/json"
+            var isJson = /application\/json/i.test(contentType)
+            this._isText = /^text\//.test(contentType) || isJson
             var req = this._req
 
             if (this._isText) {
@@ -78,7 +79,7 @@ module TDev.RT {
                 req.on("data", buf => acc += buf)
                 req.on("end", () => {
                     this._content = acc
-                    if (contentType == "application/json") {
+                    if (isJson) {
                         var obj = JsonObject.mk(this._content, Time.log)
                         this._jsonBody = obj.value()
                     }
