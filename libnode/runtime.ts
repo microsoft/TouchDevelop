@@ -933,11 +933,17 @@ module TDev.RT.Node {
                     } else if (/^\/app\//.test(req.url)) {
                         serveStaticFile(req, resp)
                     } else {
-                        rt.requestHandler(req, resp)
+                        if (rt.requestHandler)
+                            rt.requestHandler(req, resp)
+                        else
+                            error(resp, 404, "Generic routing not setup")
                     }
                 } 
             } else {
-                rt.requestHandler(req, resp)
+                if (rt.requestHandler)
+                    rt.requestHandler(req, resp)
+                else
+                    error(resp, 404, "Neither generic nor regular routing setup")
             }
         }
     }
