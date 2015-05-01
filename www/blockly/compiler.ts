@@ -732,12 +732,7 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
     stmts.push(compileWithEventIfNeeded(empty, b));
   });
 
-  var def: J.JLocalDef = H.mkDef("errno", H.mkTypeRef("Number"));
-  var assign = H.mkSimpleCall(":=", [H.mkLocalRef("errno"), H.mkNumberLiteral(0)]);
-  var expr = H.mkExprHolder([def], assign);
-  stmts.push(H.mkExprStmt(expr));
-
-  var action = H.mkAction("main", stmts, [], [def]);
+  var action = H.mkAction("main", stmts, [], []);
 
   return H.mkApp(options.name, options.description, [ action ]);
 }
