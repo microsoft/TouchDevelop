@@ -94,6 +94,14 @@ module TDev {
         return createElement("span", cl, kw);
     }
 
+    export function show(v:any)
+    {
+        if (v instanceof Promise)
+            v.done(show)
+        else
+            console.log(v)
+    }
+
     export function createElement(tag: string, cl: string = null, kw: any = null)
     {
         var elt:HTMLElement = document.createElement(tag);
