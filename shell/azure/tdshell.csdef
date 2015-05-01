@@ -12,6 +12,7 @@
       <Setting name="AZURE_STORAGE_ACCESS_KEY" />
       <Setting name="TD_DEPLOYMENT_KEY" />
       <Setting name="TD_BLOB_DEPLOY_CHANNEL" />
+      <Setting name="ZIP_URL" />
     </ConfigurationSettings>
     <Imports/>
     <Startup>
@@ -22,6 +23,9 @@
         </Variable>
         <Variable name="AZURE_STORAGE_ACCESS_KEY">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCESS_KEY']/@value" />
+        </Variable>
+        <Variable name="ZIP_URL">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='ZIP_URL']/@value" />
         </Variable>
         </Environment>
       </Task>
