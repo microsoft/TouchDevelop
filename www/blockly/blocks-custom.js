@@ -108,6 +108,31 @@ Blockly.Blocks['device_button_type'] = {
   }
 };
 
+Blockly.Blocks['device_get_acceleration'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("acceleration");
+        this.appendValueInput("dimension")
+            .setCheck("acceleration_type");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_acceleration_type'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(210);
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown([["x", "x"], ["y", "y"], ["z", "z"]]), "name");
+        this.setOutput(true, "acceleration_type");
+        this.setTooltip('');
+    }
+};
+
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#nwf7c5
 Blockly.Blocks['device_clear_display'] = {
   init: function() {

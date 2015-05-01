@@ -422,6 +422,10 @@ function compileButtonType(e: Environment, b: B.Block): J.JExpr {
   return H.mkStringLiteral(safeGetFieldValue(b, "name"));
 }
 
+function compileAccelerationType(e: Environment, b: B.Block): J.JExpr {
+    return H.mkStringLiteral(safeGetFieldValue(b, "name"));
+}
+
 function compileOnOff(e: Environment, b: B.Block): J.JExpr {
   return H.mkBooleanLiteral(safeGetFieldValue(b, "STATE") == "ON" ? true : false);
 }
@@ -445,6 +449,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileText(e, b);
     case "device_button_type":
       return compileButtonType(e, b);
+    case "device_acceleration_type":
+        return compileAccelerationType(e, b);
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
@@ -630,6 +636,7 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_scroll_string_image:     { f: "scroll string image",   args: ["string", "speed"] },
   device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
   device_get_button:              { f: "button is pressed",     args: ["NAME"] },
+  device_get_acceleration:        { f: "acceleration",          args: ["dimension"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
