@@ -1674,15 +1674,15 @@ export function updatelang(args:string[])
         fs.writeFileSync("generated/langs.js", res)
     }
 
-    tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/Svc/language list", resp => {
-        var ll = JSON.parse(resp)["language list"]
+    tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/languages", resp => {
+        var ll = JSON.parse(resp)
         excluded.forEach(l => delete ll[l])
         langs = Object.keys(ll)
 
         langs.forEach(l => {
             numStarted++
-            tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/Svc/export?lang=" + l, resp => {
-                allTrans[l] = JSON.parse(resp).translations[l]
+            tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/export/" + l, resp => {
+                allTrans[l] = JSON.parse(resp)[l]
                 if (--numStarted == 0)
                     finish()
             })
