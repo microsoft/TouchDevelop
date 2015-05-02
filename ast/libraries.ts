@@ -617,6 +617,10 @@ module TDev.AST {
                 if (a._extensionAction)
                     a._extensionAction.updateSubstitution()
             })
+            this._publicKinds.forEach(k => {
+                if (k.getRecord() instanceof LibraryRecordDef)
+                    (<LibraryRecordDef>k.getRecord()).updateSubstitution()
+            })
         }
 
         public importBindings()
