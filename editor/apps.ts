@@ -1633,7 +1633,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
             return runNpm
-                ? cli(lf("installing jimp..."), "npm install jimp")
+                ? cli(lf("installing jimp..."), "npm install jimp@0.2.2")
                   .then(() => cli(lf("installing pngjs..."), "npm install pngjs"))
                 : Promise.as();
         }).then(() => mkDir(dir, "777"))

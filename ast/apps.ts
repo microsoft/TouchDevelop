@@ -225,18 +225,20 @@ module TDev.AST.Apps {
             })
             if (app.getIconArtId()) {
                 instructions.files.push({
-                    path: '',
+                    path: options.filePrefix + 'art/icon',
                     url: Cloud.artUrl(app.getIconArtId()),
-                    kind: "picture",
+                    kind: "art",
+                    type: "picture",
                     sourceName:"icon",
                     isUnused: false,
                 })
             }
             if (app.splashArtId) {
                 instructions.files.push({
-                    path: '',
+                    path: options.filePrefix + 'art/splash',
                     url: Cloud.artUrl(app.splashArtId),
-                    kind: "picture",
+                    kind: "art",
+                    type: "picture",
                     sourceName:"splash",
                     isUnused: false,
                 })
@@ -354,7 +356,7 @@ module TDev.AST.Apps {
                 { src: "res/windows8/storelogo.png", width: 50 }
             ],
             splash: [
-                { src: "res/screen/windows8/splashscreen.png", width: 620, height: 300 }
+                { src: "res/screen/windows8/splashscreen.png", width: 620, height: 300 },
             ]
         },
         "ios": {
