@@ -410,7 +410,7 @@ task('info', [], { async: true }, function () {
 });
 
 desc('run local test suite')
-task('test', [ 'info', 'build/client.js', 'default', 'nw-build' ], { async: true }, function () {
+task('test', [ 'info', 'build/client.js', 'default' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
   jake.exec([ 'node build/client.js buildtest' ],
