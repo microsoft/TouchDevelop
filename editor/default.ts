@@ -552,10 +552,10 @@ module TDev
         statusMsg("global init 2");
         if (Browser.inCordova) {
             // TODO: move all TD code inside of this handler, including browser.js
-            document.addEventListener("deviceready", () => {
+            TDev.RT.Cordova.setup(() => {
                 statusMsg("global init deviceready");
                 initAsync().done();
-            }, false)
+            });
         } else if ((<any>window).browserSupported) {
             statusMsg("global init 4");
             initJs();
