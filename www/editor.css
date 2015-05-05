@@ -4725,21 +4725,24 @@ table.bitmatrix > tr > td.index {
 }
 
 table.bitmatrix > tr > td.bit {
-    background-color:lightgray;
-    border: 0.1em solid black;
     width:2em;
     height:2em;
 }
 
-table.bitmatrix > tr > td.bit:nth-child(5n+1) {
-    margin-left:0.5em;
-}
-table.bitmatrix > tr > td.bit:hover {
-    border-color:yellow;
+table.bitmatrix > tr > td.bit > div {
+    background-color:#ddd;
+    border: 0.1em solid black;
+    width:1em;
+    height:1em;
+    margin:0.5em;
 }
 
-table.bitmatrix > tr > td.bit[data-on=yes] {
-    background-color:black;
+table.bitmatrix > tr > td.bit:hover > div {
+    border-color:white;
+}
+
+table.bitmatrix > tr > td.bit[data-on=yes] > div {
+    background-color:red;
 }
 
 .marginTop {
