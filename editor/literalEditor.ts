@@ -44,13 +44,33 @@ module TDev
 
     export class BitMatrixLiteralEditor extends LiteralEditor {
         private root: HTMLElement;
+        private table: HTMLTableElement;
         private rows: number;
-        private columns: number;
+        private frames: number;
         private bitCells: HTMLElement[];
 
         constructor(public calculator: Calculator, public literal: AST.Literal) {
             super(calculator, literal);
 
+            this.table = document.createElement('table');
+            this.table.className = 'bitmatrix';
+            this.table.withClick(() => { });
+            var plusBtn = HTML.mkRoundButton("svg:add,black", "add frame", Ticks.noEvent,() => {
+                var v = this.serialize(this.frames + 1);
+                this.updateTable(v);
+            });
+            var minusBtn = HTML.mkRoundButton("svg:minus,black", "remove frame", Ticks.noEvent,() => {
+                if (this.frames > 1) {
+                    var v = this.serialize(this.frames - 1);
+                    this.updateTable(v);
+                }
+            });
+            this.root = div('bitmatrix', this.table, div('btns', plusBtn, minusBtn));
+            
+            this.updateTable(literal.data);
+        }
+
+        private updateTable(data: string) {
             function tr(parent: HTMLElement, cl: string) {
                 var d = document.createElement('tr');
                 d.className = cl;
@@ -64,26 +84,24 @@ module TDev
                 return d;
             }
 
-            var table = document.createElement('table');
-            table.className = 'bitmatrix';
-            this.root = div('bitmatrix', table);
-            this.bitCells = [];
-            var bits = (literal.data || "").trim().split(/[\s\r\n]+/).map(s => parseInt(s));   
+            var bits = (data || "").trim().split(/[\s\r\n]+/).map(s => parseInt(s));
             this.rows = bits.shift() || 5;
-            this.columns = bits.shift() || 5;
-            
-            // add coordinates row
-            var hrow = tr(table, 'bitheader');
+            this.frames = bits.shift() || 1;
+
+            this.bitCells = [];
+            this.table.innerHTML = ""; // clear table and rebuild
+            var hrow = tr(this.table, 'bitheader');
             td(hrow, '');
-            for (var j = 0; j < this.columns; ++j) td(hrow, '').innerText = j.toString();
+            for (var j = 0; j < this.frames * this.rows; ++j) td(hrow, 'index').innerText = j.toString();
 
             // bit matrix
             Util.range(0, this.rows).forEach(i => {
-                var row = tr(table, 'bitrow');
-                td(row, '').innerText = i.toString();
-                Util.range(0, this.columns).forEach(j => {
+                var row = tr(this.table, 'bitrow');
+                td(row, 'index').innerText = i.toString();
+                Util.range(0, this.frames * this.rows).forEach(j => {
                     var cell = td(row, 'bit');
-                    var k = i * this.columns + j;
+                    cell.title = "(" + i + ", " + j + ")";
+                    var k = i * this.frames * this.rows + j;
                     this.bitCells[k] = cell;
                     cell.setFlag('on', !!bits[k]);
                     cell.withClick(() => {
@@ -97,13 +115,21 @@ module TDev
             return this.root;
         }
 
+        private serialize(f: number): string {
+            var r = this.rows + " " + f;
+            for (var i = 0; i < this.rows; ++i) {
+                r += "\n";
+                for (var j = 0; j < f * this.rows; ++j) {
+                    var k = i * this.rows * this.frames + j;
+                    var s = j < this.rows * this.frames ? this.bitCells[k].getFlag("on") ? "1" : "0" : "0";
+                    r += s + " ";
+                }
+            }
+            return r;
+        }
+
         public value(): string {
-            return this.rows + " " + this.columns + "\n"
-                + this.bitCells.map((cell, index) => {
-                    var s = cell.getFlag("on") ? "1" : "0";
-                    if (index > 0 && index % this.columns == 0) s = '\n' + s;
-                    return s;
-                }).join(' ');
+            return this.serialize(this.frames);
         }
     }
 }
