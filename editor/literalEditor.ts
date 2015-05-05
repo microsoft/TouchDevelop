@@ -45,6 +45,8 @@ module TDev
     export class BitMatrixLiteralEditor extends LiteralEditor {
         private root: HTMLElement;
         private table: HTMLTableElement;
+        private plusBtn: HTMLElement;
+        private minusBtn: HTMLElement;
         private rows: number;
         private frames: number;
         private bitCells: HTMLElement[];
@@ -55,17 +57,17 @@ module TDev
             this.table = document.createElement('table');
             this.table.className = 'bitmatrix';
             this.table.withClick(() => { });
-            var plusBtn = HTML.mkRoundButton("svg:add,black", "add frame", Ticks.noEvent,() => {
+            this.plusBtn = HTML.mkRoundButton("svg:add,black", "add frame", Ticks.noEvent,() => {
                 var v = this.serialize(this.frames + 1);
                 this.updateTable(v);
             });
-            var minusBtn = HTML.mkRoundButton("svg:minus,black", "remove frame", Ticks.noEvent,() => {
+            this.minusBtn = HTML.mkRoundButton("svg:minus,black", "remove frame", Ticks.noEvent,() => {
                 if (this.frames > 1) {
                     var v = this.serialize(this.frames - 1);
                     this.updateTable(v);
                 }
             });
-            this.root = div('bitmatrix', this.table, div('btns', plusBtn, minusBtn));
+            this.root = div('bitmatrix', this.table, div('btns', this.plusBtn, this.minusBtn));
             
             this.updateTable(literal.data);
         }
@@ -93,6 +95,9 @@ module TDev
                 this.rows = data.split('\n').length;
                 this.frames = Math.floor(bits.length / (this.rows * this.rows));
             }
+
+            this.plusBtn.style.display = this.frames < 5 ? 'block' : 'none';
+            this.minusBtn.style.display = this.frames > 1 ? 'block' : 'none';
 
             this.bitCells = [];
             this.table.innerHTML = ""; // clear table and rebuild
