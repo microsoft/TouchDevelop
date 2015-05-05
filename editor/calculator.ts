@@ -1239,6 +1239,7 @@ module TDev
         {
             var editor = TheEditor;
             var literalEditor = new TextLiteralEditor(this, l);
+            //var literalEditor = new BitMatrixLiteralEditor(this, l);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;

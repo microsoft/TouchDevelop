@@ -4693,6 +4693,33 @@ span.videoCaption
   100% { }
 }   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } }
 
+table.bitmatrix {
+    display:inline-block;
+}
+
+table.bitmatrix > tr.bitheader {
+
+}
+
+table.bitmatrix > tr.bitrow {
+
+}
+
+table.bitmatrix > tr > td.bit {
+    background-color:lightgray;
+    border: 0.1em solid black;
+    width:2em;
+    height:2em;
+}
+
+table.bitmatrix > tr > td.bit:hover {
+    border-color:yellow;
+}
+
+table.bitmatrix > tr > td.bit[data-on=yes] {
+    background-color:black;
+}
+
 .marginTop {
     margin-top:2em;
 }
