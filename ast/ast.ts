@@ -1600,6 +1600,13 @@ module TDev.AST {
         }
     }
 
+    export interface ParameterAnnotations {
+        hints?:string[];
+        enumMap?:StringMap<number>;
+        pichints?:StringMap<string>;
+        langugage?:string;
+    }
+
     export class Action
         extends PropertyDecl
         implements IProperty
@@ -1934,42 +1941,54 @@ module TDev.AST {
             this.modelParameter = new ActionParameter(l);
         }
 
-        private propertyDeflStrings: StringMap<string[]>;
-        private _propertyDelfStringArtIds: StringMap<StringMap<string>>;
+        private initParameterAnnotations()
+        {
+            if (this.parameterAnnotations) return;
+
+            this.parameterAnnotations = {};
+            var descr = this.getDescription();
+            descr.replace(/\{(hints|enum):([^:{}]*):([^{}]*)/g,(mtch, tp, arg, vals : string) => {
+                var annot = this.getParameterAnnotation(arg);
+                annot.hints = vals.split(',');
+                if (tp == "enum") {
+                    annot.enumMap = {}
+                    annot.hints = annot.hints.map(a => {
+                        var m = /(.*)=(\d+)$/.exec(a)
+                        if (m) {
+                            annot.enumMap[m[1]] = parseInt(m[2])
+                            return m[1]
+                        }
+                        else return a
+                    });
+                    (<any>annot.hints).enumMap = annot.enumMap
+                }
+                return ""
+            })
+            descr.replace(/\{pichints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
+                this.getParameterAnnotation(arg).pichints = Util.splitKeyValues(vals);
+                return ""
+            })
+            descr.replace(/\{language:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
+                this.getParameterAnnotation(arg).langugage = vals
+                return ""
+            })
+        }
+
+        private getParameterAnnotation(name:string): ParameterAnnotations
+        {
+            this.initParameterAnnotations()
+            if (!this.parameterAnnotations.hasOwnProperty(name))
+                this.parameterAnnotations[name] = {}
+            return this.parameterAnnotations[name]
+        }
+
+        private parameterAnnotations:StringMap<ParameterAnnotations>;
         public mkPP(name:string, k:Kind) {
-            if (!this.propertyDeflStrings) {
-                this.propertyDeflStrings = {}
-                var descr = this.getDescription();
-                descr.replace(/\{(hints|enum):([^:{}]*):([^{}]*)/g,(mtch, tp, arg, vals : string) => {
-                    var lst = vals.split(',');
-                    if (tp == "enum") {
-                        var enumMap:StringMap<number> = {}
-                        lst = lst.map(a => {
-                            var m = /(.*)=(\d+)$/.exec(a)
-                            if (m) {
-                                enumMap[m[1]] = parseInt(m[2])
-                                return m[1]
-                            }
-                            else return a
-                        });
-                        (<any>lst).enumMap = enumMap
-                    }
-                    this.propertyDeflStrings[arg] = lst
-                    return ""
-                })
-                descr.replace(/\{pichints:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
-                    if (!this._propertyDelfStringArtIds) this._propertyDelfStringArtIds = {};
-                    this._propertyDelfStringArtIds[arg] = Util.splitKeyValues(vals);
-                    return ""
-                })
-            }
             var r = super.mkPP(name, k)
-            var v = this.propertyDeflStrings[name]
-            if (v) r.setDeflStrings(v)
-            if (this._propertyDelfStringArtIds) {
-                var vids = this._propertyDelfStringArtIds[name];
-                if (vids) r.setDeflStringArtIds(vids);
-            }
+            var annot = this.getParameterAnnotation(name)
+            if (annot.hints) r.setDeflStrings(annot.hints)
+            if (annot.pichints) r.setDeflStringArtIds(annot.pichints);
+            if (annot.langugage) r.languageHint = annot.langugage
             return r
         }
     }
