@@ -84,9 +84,15 @@ module TDev
                 return d;
             }
 
-            var bits = (data || "").trim().split(/[\s\r\n]+/).map(s => parseInt(s));
-            this.rows = bits.shift() || 5;
-            this.frames = bits.shift() || 1;
+            data = (data || "").trim();
+            var bits = data.split(/[\s\r\n]+/).map(s => parseInt(s));
+            if (bits.length <= 1) {
+                this.rows = 5;
+                this.frames = 1;
+            } else {
+                this.rows = data.split('\n').length;
+                this.frames = Math.floor(bits.length / (this.rows * this.rows));
+            }
 
             this.bitCells = [];
             this.table.innerHTML = ""; // clear table and rebuild
@@ -107,6 +113,7 @@ module TDev
                     cell.withClick(() => {
                         cell.setFlag('on', !cell.getFlag('on'));
                     });
+                    cell.appendChild(div(''));
                 });
             });
         }
@@ -116,13 +123,14 @@ module TDev
         }
 
         private serialize(f: number): string {
-            var r = this.rows + " " + f;
+            var r = "";
             for (var i = 0; i < this.rows; ++i) {
-                r += "\n";
+                if (i > 0) r += "\n";
                 for (var j = 0; j < f * this.rows; ++j) {
+                    if (j > 0) r += " ";
                     var k = i * this.rows * this.frames + j;
                     var s = j < this.rows * this.frames ? this.bitCells[k].getFlag("on") ? "1" : "0" : "0";
-                    r += s + " ";
+                    r += s;
                 }
             }
             return r;
