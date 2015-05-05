@@ -3131,7 +3131,7 @@ module TDev{
     export function loadUserLanguageSetting() {
         var ln = getUserLanguageSetting();
         if (ln) {
-            setTranslationLangauge(ln); return true;
+            setTranslationLanguage(ln); return true;
         }
         else return false;
     }
@@ -3149,7 +3149,7 @@ module TDev{
           }
     }
 
-    export function setTranslationLangauge(ln:string)
+    export function setTranslationLanguage(ln:string)
     {
         ln = ln.slice(0, 2)
         if (ln == "zh") ln = "zh-CHS"
@@ -3167,7 +3167,7 @@ module TDev{
         translations = tr
     }
 
-    export function _setLangaugeArray(keys:string[], trans:string[])
+    export function _setLanguageArray(keys:string[], trans:string[])
     {
         translations = {}
         trans.forEach((t, i) => {

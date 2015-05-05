@@ -1668,7 +1668,7 @@ export function updatelang(args:string[])
             console.log("%s: %d translations", l, numTr)
             for(var i = 0; i < arr.length; ++i)
                 if (!arr[i]) arr[i] = 0
-            res += "if (lang == \"" + l + "\") TDev.Util._setLangaugeArray(keys, " + arrToStr(arr) + ");\n\n"
+            res += "if (lang == \"" + l + "\") TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + ");\n\n"
         })
         res += "}\n\n"
         fs.writeFileSync("generated/langs.js", res)
@@ -3687,9 +3687,9 @@ var cmds = {
     "docs": { f: docs, a: "id", h: "print script as docs to results.html" },
     "topic": { f: topic, a: "id", h: "print docs topic to results.html" },
     "updatehelp": { f: updatehelp, a: "", h: "update script cache for help topics" },
-    "updatelang": { f: updatelang, a: "", h: "update langauge cache" },
+    "updatelang": { f: updatelang, a: "", h: "update language cache" },
     "query": { f: query, a: "id path", h: "simulate /api/id/path" },
-    "language": { f: language, a: "path", h: "simulate /api/langauge/path" },
+    "language": { f: language, a: "path", h: "simulate /api/language/path" },
     "embedwp8": { f: embedwp8, a: 'releaseId', h: "download and embed release in wp8 app" },
     "azure": { f: azure, a: 'id', h: "simulate azure parse call" },
     "art": { f: art, a: 'url', h: "download art URI" },

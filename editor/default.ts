@@ -242,11 +242,11 @@ module TDev
 
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
         if (m) {
-            Util.setTranslationLangauge(m[1])
+            Util.setTranslationLanguage(m[1])
         } else if (!Util.loadUserLanguageSetting()) {
             var lang = window.navigator.language || window.navigator.userLanguage
             if (lang)
-                Util.setTranslationLangauge(lang)
+                Util.setTranslationLanguage(lang)
         }
 
         if (Math.random() < 0.05 || /translationTracking/.test(url))
@@ -368,7 +368,7 @@ module TDev
                             return initEditorAsync()
                         }
                     }
-                    HTML.showErrorNotification("cannot load langauge " + Util.getTranslationLanguage())
+                    HTML.showErrorNotification("cannot load language " + Util.getTranslationLanguage())
                     return initEditorAsync()
                 })
 
