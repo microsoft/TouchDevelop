@@ -5,7 +5,7 @@ module TDev
     export class LiteralEditor {       
         public constructor(public calculator : Calculator, public literal: AST.Literal) { }
 
-        public element(): HTMLElement { return Util.abstract(); }
+        public editor(): HTMLElement { return Util.abstract(); }
         public value(): string { return Util.abstract();}
     }
 
@@ -36,14 +36,14 @@ module TDev
             };
         }
 
-        public element(): HTMLElement { return this.res.div; }
+        public editor(): HTMLElement { return this.res.div; }
         public value(): string {
             return this.res.textarea.value;
         }
     }
 
     export class BitMatrixLiteralEditor extends LiteralEditor {
-        public editor: HTMLElement;
+        private root: HTMLElement;
         private rows: number;
         private columns: number;
         private bitCells: HTMLElement[];
@@ -64,19 +64,22 @@ module TDev
                 return d;
             }
 
-            this.editor = document.createElement('table'); this.editor.className = 'bitmatrix';
+            var table = document.createElement('table');
+            table.className = 'bitmatrix';
+            this.root = div('bitmatrix', table);
             this.bitCells = [];
-            this.rows = 5;
-            this.columns = 5;
+            var bits = (literal.data || "").trim().split(/[\s\r\n]+/).map(s => parseInt(s));   
+            this.rows = bits.shift() || 5;
+            this.columns = bits.shift() || 5;
+            
             // add coordinates row
-            var hrow = tr(this.editor, 'bitheader');
+            var hrow = tr(table, 'bitheader');
             td(hrow, '');
             for (var j = 0; j < this.columns; ++j) td(hrow, '').innerText = j.toString();
 
             // bit matrix
-            var bits = (literal.data || "").trim().split(/[\s\r\n]+/).map(s => parseInt(s));   
             Util.range(0, this.rows).forEach(i => {
-                var row = tr(this.editor, 'bitrow');
+                var row = tr(table, 'bitrow');
                 td(row, '').innerText = i.toString();
                 Util.range(0, this.columns).forEach(j => {
                     var cell = td(row, 'bit');
@@ -90,16 +93,17 @@ module TDev
             });
         }
 
-        public element(): HTMLElement {
-            return this.editor;
+        public editor(): HTMLElement {
+            return this.root;
         }
 
         public value(): string {
-            return this.bitCells.map((cell, index) => {
-                var s = cell.getFlag("on") ? "1" : "0";
-                if (index > 0 && index % this.columns == 0) s += '\n';
-                return s;
-            }).join(' ');
+            return this.rows + " " + this.columns + "\n"
+                + this.bitCells.map((cell, index) => {
+                    var s = cell.getFlag("on") ? "1" : "0";
+                    if (index > 0 && index % this.columns == 0) s = '\n' + s;
+                    return s;
+                }).join(' ');
         }
     }
 }

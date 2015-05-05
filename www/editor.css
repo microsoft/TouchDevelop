@@ -4693,7 +4693,7 @@ span.videoCaption
   100% { }
 }   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } }
 
-table.bitmatrix {
+div.bitmatrix, table.bitmatrix {
     display:inline-block;
 }
 

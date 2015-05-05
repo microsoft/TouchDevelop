@@ -1238,8 +1238,10 @@ module TDev
         private inlineEditString(l:AST.Literal)
         {
             var editor = TheEditor;
-            var literalEditor = new TextLiteralEditor(this, l);
-            //var literalEditor = new BitMatrixLiteralEditor(this, l);
+            var literalEditor: LiteralEditor;
+            if (/^bitmatrix$/.test(l.languageHint))
+                literalEditor = new BitMatrixLiteralEditor(this, l);
+            else literalEditor = new TextLiteralEditor(this, l);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
@@ -1253,7 +1255,7 @@ module TDev
                     editor.dismissSidePane();
             };
 
-            return literalEditor.element();
+            return literalEditor.editor();
         }
 
         private inlineEditDecl(l:AST.Decl)
