@@ -373,7 +373,7 @@ module TDev
             if (this.cursorPosition > this.expr.tokens.length) this.cursorPosition = this.expr.tokens.length;
         }
 
-        private checkNextDisplay()
+        public checkNextDisplay()
         {
             var r = this.onNextDisplay;
             this.onNextDisplay = null;
@@ -1237,38 +1237,22 @@ module TDev
 
         private inlineEditString(l:AST.Literal)
         {
-            var opts : HTML.AutoExpandingTextAreaOptions = { showDismiss: true };
-            if (Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen")) 
-                opts.editFullScreenAsync = (t) => EditorHost.editFullScreenAsync(l.languageHint ? 'inline.' + l.languageHint : '', t);
-            var res = HTML.mkAutoExpandingTextArea(opts)
-            res.div.className += " calcStringEdit";
-            res.textarea.value = l.data;
-            res.div.id = "stringEdit";
+            var editor = TheEditor;
+            var literalEditor = new TextLiteralEditor(this, l);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
                 if (this.expr == null) return;
-                l.data = res.textarea.value;
-                if (TheEditor.autoHide())
+                l.data = literalEditor.value();
+                if (editor.autoHide())
                     this.switchToNormalKeypad();
                 this.display();
-                TheEditor.selector.positionButtonRows();
+                editor.selector.positionButtonRows();
                 if (this.stmt instanceof AST.RecordNameHolder)
-                    TheEditor.dismissSidePane();
+                    editor.dismissSidePane();
             };
-            res.dismiss.id = "inlineEditCloseBtn";
-            res.onDismiss = () => this.checkNextDisplay();
 
-            (<any>res.div).focusEditor = () => {
-                res.update();
-                Util.setKeyboardFocusTextArea(res.textarea);
-              };
-
-            res.onUpdate = () => {
-                TheEditor.selector.positionButtonRows();
-              };
-
-            return res.div;
+            return literalEditor.element();
         }
 
         private inlineEditDecl(l:AST.Decl)
@@ -2115,7 +2099,7 @@ module TDev
                     e.nameOverride = lf("rename");
                 else
                     e.nameOverride = lf("edit");
-                e.descOverride = lf("change string literal contents");
+                e.descOverride = lf("change contents");
                 e.cbOverride = () => { this.inlineEdit(l) };
             } else if (typeof l.data == "boolean") {
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcSwapBoolean);

@@ -50,6 +50,7 @@
 ///<reference path='external.ts'/>
 ///<reference path='messages.ts'/>
 ///<reference path='embedded.ts'/>
+///<reference path='literalEditor.ts'/>
 ///<reference path='../intellitrain/train.ts'/>
 ///<reference path='../intellitrain/astutil.ts'/>
 ///<reference path='../intellitrain/features.ts'/>
