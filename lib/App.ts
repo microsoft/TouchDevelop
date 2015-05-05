@@ -687,6 +687,11 @@ module TDev.RT {
         }
 
         export function logException(err: any, meta? : any): void {
+            if (err.tdSkipReporting) {
+                logEvent(DEBUG, "skipped-crash", err.message || err + "", null)
+                return
+            }
+
             if (err.tdIsSecondary) {
                 logEvent(DEBUG, "secondary-crash", err.message || err + "", null)
                 return
@@ -730,16 +735,18 @@ module TDev.RT {
         }
 
         export function logTick(category: string, id: string, meta:any) {
-            App.logEvent(App.INFO, category, id, meta);
             runTransports("logTick", t => t.logTick && t.logTick(category, id, meta))
+            if (!meta || !meta.skipLog)
+                App.logEvent(App.INFO, category, id, meta);
         }
 
         export function logMeasure(category:string, id: string, value: number, meta: any) {
             var lmeta = Util.jsonClone(meta) || {};
             lmeta.measureId = id
             lmeta.measureValue = value
-            App.logEvent(App.INFO, category, id + ": " + value, lmeta);
             runTransports("logMeasure", t => t.logMeasure && t.logMeasure(category, id, value, meta))
+            if (!meta || !meta.skipLog)
+                App.logEvent(App.INFO, category, id + ": " + value, lmeta);
         }
 
         export function logs() : LogMessage[]
