@@ -747,7 +747,8 @@ function compileWithEventIfNeeded(e: Environment, b: B.Block): J.JStmt {
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var stmts: J.JStmt[] = [];
   b.getTopBlocks(true).forEach((b: B.Block) => {
-    stmts.push(compileWithEventIfNeeded(empty, b));
+      if (b.type != "device_event") compileStatements(empty, b).forEach(st => stmts.push(st));
+    //stmts.push(compileWithEventIfNeeded(empty, b));
   });
 
   var action = H.mkAction("main", stmts, [], []);
