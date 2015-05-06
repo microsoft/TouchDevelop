@@ -639,6 +639,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
 }
 
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
+  device_clear_display:             { f: "clear display",           args: [] },
   device_show_letter:             { f: "show letter",           args: ["letter"] },
   device_pause:                   { f: "pause",                 args: ["pause"] },
   device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
@@ -655,6 +656,8 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_set_digital_pin:         { f: "digital write pin",     args: ["name", "value"] },
   device_get_analog_pin:          { f: "analog read pin",       args: ["name"] },
   device_set_analog_pin:          { f: "analog write pin",      args: ["name", "value"] },
+  device_get_brightness:          { f: "brightness",            args: [] },
+  device_set_brightness:          { f: "set brightness",      args: ["value"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {

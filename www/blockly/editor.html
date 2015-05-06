@@ -119,6 +119,16 @@
             </block>
           </value>
         </block>
+
+        <block type="device_get_brightness"></block>
+        <block type="device_set_brightness">
+            <value name="value">
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
+            </value>
+        </block>
+
       </category>
       <category name="Images">
         <block type="device_make_StringImage">

@@ -145,6 +145,8 @@ Blockly.Blocks['device_set_digital_pin'] = {
             .setCheck("pin_type")
             .appendField("to pin");
         this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
         this.setTooltip('');
     }
 };
@@ -175,6 +177,34 @@ Blockly.Blocks['device_set_analog_pin'] = {
             .setCheck("pin_type")
             .appendField("to pin");
         this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_get_brightness'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("brightness");
+        this.setOutput(true, "Number");
+        this.setTooltip('');
+    }
+};
+
+Blockly.Blocks['device_set_brightness'] = {
+    init: function () {
+        this.setHelpUrl('http://www.example.com/');
+        this.setColour(160);
+        this.appendDummyInput()
+            .appendField("set brightness (%)");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
         this.setTooltip('');
     }
 };
