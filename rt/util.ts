@@ -3107,7 +3107,7 @@ module TDev{
         return msg
     }
 
-    export var _languageData: (l:string) => void;
+    export var _languageData: (l:string) => boolean;
 
     var translationLang: string = null;
 
@@ -3151,15 +3151,25 @@ module TDev{
 
     export function setTranslationLanguage(ln:string)
     {
-        ln = ln.slice(0, 2)
-        if (ln == "zh") ln = "zh-CHS"
+        // normalize language
+        var m = /^([a-z]{2,})(-([a-z]{2,}))$/i.exec(ln);
+        if (m) {
+            ln = m[1].toLowerCase();
+            if (m[2]) ln += '-' + m[3].toUpperCase();
+        }
 
-        sForPlural = ln == "en" || ln == "es" || ln == "pt" || ln == "de" || ln == "fr";
+        var ln2 = ln.slice(0, 2)
+        //normalize ln
+        if (ln2 == "zh") ln = "zh-CHS"
 
-        translationLang = ln
+        sForPlural = ln2 == "en" || ln2 == "es" || ln2 == "pt" || ln2 == "de" || ln2 == "fr";
+
         translations = {}
-        if (_languageData)
-            _languageData(ln)
+        translationLang = ln2
+        if (_languageData) {
+            if (_languageData(ln)) translationLang = ln;
+            else _languageData(ln2);
+        }
     }
 
     export function setTranslationTable(tr:any)

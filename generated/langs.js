@@ -740,7 +740,10 @@ var keys = [
 "{0} year{0:s} ago"
 ];
 
-if (lang == "zh-CHS") TDev.Util._setLangaugeArray(keys, [
+if (lang == "en-GB") { TDev.Util._setLanguageArray(keys, [
+]); return true; }
+
+if (lang == "zh-CHS") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "“原子”动作",
 "“{0}”认为此处应为 {1}",
@@ -1317,9 +1320,9 @@ if (lang == "zh-CHS") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} 秒以前",
 "{0} 年以前"
-]);
+]); return true; }
 
-if (lang == "es") TDev.Util._setLangaugeArray(keys, [
+if (lang == "es") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "acción 'atomic'",
 "'{0}' espera {1} aquí",
@@ -1903,9 +1906,9 @@ if (lang == "es") TDev.Util._setLangaugeArray(keys, [
 0,
 "hace {0} segundo{0:s}",
 "hace  {0:s}años {0}"
-]);
+]); return true; }
 
-if (lang == "ar") TDev.Util._setLangaugeArray(keys, [
+if (lang == "ar") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "إجراء \"ذري\"",
 "'{0}' يتوقع {1} هنا",
@@ -2501,9 +2504,9 @@ if (lang == "ar") TDev.Util._setLangaugeArray(keys, [
 0,
 "منذ {0} ثانية{0:s}",
 "منذ {0} عام{0:s}"
-]);
+]); return true; }
 
-if (lang == "pt") TDev.Util._setLangaugeArray(keys, [
+if (lang == "pt") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "ação \"atômica\"",
 "'{0}' espera {1} aqui",
@@ -3097,9 +3100,9 @@ if (lang == "pt") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} segundo{0:s} atrás",
 "{0} ano{0:s} atrás"
-]);
+]); return true; }
 
-if (lang == "ru") TDev.Util._setLangaugeArray(keys, [
+if (lang == "ru") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "\"атомарное\" действие",
 "\"{0}\" ожидает {1} здесь",
@@ -3735,9 +3738,9 @@ if (lang == "ru") TDev.Util._setLangaugeArray(keys, [
 0,
 "Секунд назад: {0}",
 "Лет назад: {0}"
-]);
+]); return true; }
 
-if (lang == "de") TDev.Util._setLangaugeArray(keys, [
+if (lang == "de") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "'Atomische' Aktion",
 "'{0}' erwartet {1} hier",
@@ -4310,9 +4313,9 @@ if (lang == "de") TDev.Util._setLangaugeArray(keys, [
 0,
 "Vor {0} Sekunde{0:s}",
 "Vor {0} Jahr{0:s}"
-]);
+]); return true; }
 
-if (lang == "fr") TDev.Util._setLangaugeArray(keys, [
+if (lang == "fr") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "action 'atomic'",
 "'{0}' attend {1} ici",
@@ -5019,9 +5022,9 @@ if (lang == "fr") TDev.Util._setLangaugeArray(keys, [
 "{0} script publié{0:s}",
 "il y a {0} seconde{0:s}",
 "il y a {0} années{0:s}"
-]);
+]); return true; }
 
-if (lang == "pl") TDev.Util._setLangaugeArray(keys, [
+if (lang == "pl") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "akcja „atomowa”",
 "'{0}' oczekuje {1} tutaj",
@@ -5629,9 +5632,9 @@ if (lang == "pl") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} s{0:s} temu",
 "Lat temu {0} {0:s}"
-]);
+]); return true; }
 
-if (lang == "nl") TDev.Util._setLangaugeArray(keys, [
+if (lang == "nl") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "'atomaire' actie",
 "'{0}' verwacht {1} hier",
@@ -6249,9 +6252,9 @@ if (lang == "nl") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} seconden{0:s} geleden",
 "{0} jaar {0:s} geleden"
-]);
+]); return true; }
 
-if (lang == "tr") TDev.Util._setLangaugeArray(keys, [
+if (lang == "tr") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "'atomik' eylem",
 "'{0}' burada {1} bekleniyor",
@@ -6825,9 +6828,9 @@ if (lang == "tr") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} saniye{0:s} önce",
 "{0} yıl{0:s} önce"
-]);
+]); return true; }
 
-if (lang == "ko") TDev.Util._setLangaugeArray(keys, [
+if (lang == "ko") { TDev.Util._setLanguageArray(keys, [
 " ⓘ",
 "'원자성' 작업",
 "'{0}'에 {1} 필요",
@@ -7392,9 +7395,9 @@ if (lang == "ko") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0}초{0:s} 전",
 "{0}년{0:s} 전"
-]);
+]); return true; }
 
-if (lang == "ja") TDev.Util._setLangaugeArray(keys, [
+if (lang == "ja") { TDev.Util._setLanguageArray(keys, [
 " ",
 "'アトミック' アクション",
 "'{0}' はここで {1} を予期しています",
@@ -7959,9 +7962,9 @@ if (lang == "ja") TDev.Util._setLangaugeArray(keys, [
 0,
 "{0} 秒{0:s} 前",
 "{0} 年{0:s} 前"
-]);
+]); return true; }
 
-if (lang == "he") TDev.Util._setLangaugeArray(keys, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+if (lang == "he") { TDev.Util._setLanguageArray(keys, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "חיפוש...",
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "עזרה...",
@@ -7973,10 +7976,12 @@ if (lang == "he") TDev.Util._setLangaugeArray(keys, [0,0,0,0,0,0,0,0,0,0,0,0,0,0
 "הקישו על \"stor in var\" על מנת לשמור כמשתנה או בחרו מאפיין",
 0,0,0,0,
 "הקש שם"
-]);
+]); return true; }
 
-if (lang == "cy") TDev.Util._setLangaugeArray(keys, [
-]);
+if (lang == "cy") { TDev.Util._setLanguageArray(keys, [
+]); return true; }
 
+
+    return false;
 }
 

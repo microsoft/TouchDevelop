@@ -1668,9 +1668,9 @@ export function updatelang(args:string[])
             console.log("%s: %d translations", l, numTr)
             for(var i = 0; i < arr.length; ++i)
                 if (!arr[i]) arr[i] = 0
-            res += "if (lang == \"" + l + "\") TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + ");\n\n"
+            res += "if (lang == \"" + l + "\") { TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + "); return true; }\n\n"
         })
-        res += "}\n\n"
+        res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
     }
 
