@@ -127,7 +127,7 @@ module TDev.RT {
         {
             var v = meta ? meta.value() : null
 
-            if (!AppLogger.findContext(s)) return v
+            if (!AppLogger.findContext(s)) return v || {}
 
             if (v) v = Util.jsonClone(v)
             else v = {}

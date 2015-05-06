@@ -426,11 +426,6 @@ module TDev.RT.Node {
             var d = domain.create()
             d.tdStackFrame = frame
             d.on("error", err => {
-                if (err && err.tdMeta && err.tdMeta.unrefed && err.code == 'ECONNRESET') {
-                    Util.log("ignoring ECONNRESET on " + err.tdMeta.socketHost)
-                    return
-                }
-
                 this.handleException(err, frame)
             })
 
@@ -769,6 +764,12 @@ module TDev.RT.Node {
                 if (!exn.tdMeta) exn.tdMeta = {}
                 exn.tdMeta.socketHost = this.tdHost
                 exn.tdMeta.unrefed = this.tdUnrefed
+
+                if (this.tdUnrefed && exn.code == 'ECONNRESET') {
+                    Util.log("ignoring ECONNRESET on " + this.tdHost)
+                    exn.rtProtectHandled = true;
+                    exn.tdSkipReporting = true;
+                }
             }
             return origDestroy.apply(this, arguments)
         }
