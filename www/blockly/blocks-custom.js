@@ -372,6 +372,10 @@ Blockly.Blocks['device_scroll_image'] = {
       .setCheck("sprite")
         .setAlign(Blockly.ALIGN_RIGHT);
 //        .appendField("image");
+    this.appendValueInput("x")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("x");
     this.appendValueInput("delay")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
@@ -444,7 +448,7 @@ Blockly.Blocks['device_make_StringImage'] = {
     this.appendValueInput("NAME")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
-    this.setOutput(true, "StringImage");
+    this.setOutput(true, "sprite");
     this.setTooltip('');
     this.setInputsInline(true);
   }

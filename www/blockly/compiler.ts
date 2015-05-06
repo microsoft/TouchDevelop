@@ -647,7 +647,7 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_point:                   { f: "point",                 args: ["x", "y"] },
   device_heading:                 { f: "heading",               args: [] },
   device_make_StringImage:        { f: "make string image",     args: ["NAME"] },
-  device_scroll_string_image:     { f: "scroll string image",   args: ["string", "speed"] },
+  device_scroll_image:            { f: "scroll image",          args: ["sprite", "x", "delay"] },
   device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
   device_get_button:              { f: "button is pressed",     args: ["NAME"] },
   device_get_acceleration:        { f: "acceleration",          args: ["dimension"] },
