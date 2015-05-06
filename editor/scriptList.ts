@@ -3568,6 +3568,9 @@
         private mkCommentPostWidget(reply:boolean, id:string, initialText : string = null):HTMLElement
         {
             Util.assert(!!id, "missing comment id");
+
+            if (Cloud.isRestricted() && !Cloud.hasPermission("postComment")) return div('');
+
             var text =  HTML.mkTextArea();
             var postBtn = div(null);
             text.rows = 1;
