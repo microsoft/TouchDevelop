@@ -482,6 +482,8 @@ module TDev {
                 _askToEnableEmailNotifications = !data.installedHeaders.emailNotifications;
                 _profileIndex = data.installedHeaders.profileIndex || 0;
                 _profileCount = data.installedHeaders.profileCount || 0;
+                if (data.installedHeaders.blobcontainer)
+                    Cloud.config.workspaceUrl = data.installedHeaders.blobcontainer
                 Random.addCloudEntropy(data.installedHeaders.random)
                 if (!Cloud.lite && data.installedHeaders.time) {
                     var now = new Date().getTime();
