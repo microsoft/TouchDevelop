@@ -735,8 +735,11 @@ module TDev
                     e.preventDefault();
                     if (Cloud.anonMode(lf("upload pictures and sounds"))) return;
                     if (file.size > 1000000) {
-                        ModalDialog.info('file too big', 'sorry, the picture is too big (max 1Mb)');
+                        ModalDialog.info(lf('file too big'), lf('sorry, the file is too big (max 1Mb)'));
                     } else {
+                        HTML.fileReadAsDataURLAsync(file).done(s => {
+                            s.toString();
+                        });
                         var name = file.name;
                         var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
                         if (m) name = m[1];
