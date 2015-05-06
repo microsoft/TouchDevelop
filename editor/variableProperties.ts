@@ -733,9 +733,9 @@ module TDev
                 if (file) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
-                    if (Cloud.anonMode(lf("upload pictures and sounds"))) return;
+                    if (Cloud.anonMode(lf("uploading art"))) return;
                     if (file.size > 1000000) {
-                        ModalDialog.info(lf('file too big'), lf('sorry, the file is too big (max 1Mb)'));
+                        ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max 1Mb)"));
                     } else {
                         HTML.fileReadAsDataURLAsync(file).done(s => {
                             s.toString();
