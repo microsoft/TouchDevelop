@@ -50,6 +50,7 @@ module TDev
         private rows: number;
         private frames: number;
         private bitCells: HTMLElement[];
+        private dialog: ModalDialog;
 
         constructor(public calculator: Calculator, public literal: AST.Literal) {
             super(calculator, literal);
@@ -121,10 +122,20 @@ module TDev
                     cell.appendChild(div(''));
                 });
             });
+
+            if (!this.dialog && this.frames > 1) {
+                this.dialog = new ModalDialog();
+                this.dialog.add(this.root);
+                this.dialog.fullWhite();
+                this.dialog.stretchWide();
+                this.dialog.setScroll();
+                this.dialog.onDismiss = () => this.calculator.checkNextDisplay();
+                this.dialog.show();
+            }
         }
 
         public editor(): HTMLElement {
-            return this.root;
+            return this.dialog ? div('') : this.root;
         }
 
         private serialize(f: number): string {
