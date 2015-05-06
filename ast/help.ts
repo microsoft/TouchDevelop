@@ -672,11 +672,14 @@ module TDev {
 
         static findArtId(id : string) : string {
             var artVar = Script ? Script.resources().filter((r) => MdComments.shrink(r.getName()) == MdComments.shrink(id))[0] : null;
-            var artPref = "https://az31353.vo.msecnd.net/pub/"
-            if (artVar && artVar.url && artVar.url.slice(0, artPref.length) == artPref) {
-                var newId = artVar.url.slice(artPref.length)
-                if (/^\w+$/.test(newId)) id = newId;
-            }
+
+            ["https://az31353.vo.msecnd.net/pub/", 
+             Cloud.config.cdnUrl + "/pub/"].forEach(artPref => {
+                if (artVar && artVar.url && artVar.url.slice(0, artPref.length) == artPref) {
+                    var newId = artVar.url.slice(artPref.length)
+                    if (/^\w+$/.test(newId)) id = newId;
+                }
+            })
             return id;
         }
 
