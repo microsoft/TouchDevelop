@@ -4720,8 +4720,8 @@ table.bitmatrix > tr.bitrow {
 
 }
 
-table.bitmatrix > tr > td.index {
-    color:gray;
+#scriptEditor[data-blockmode="yes"] table.bitmatrix > tr > td.index {
+    color:white;
 }
 
 table.bitmatrix > tr > td.bit {

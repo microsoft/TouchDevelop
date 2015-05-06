@@ -123,7 +123,7 @@ module TDev
                 });
             });
 
-            if (!this.dialog && this.frames > 1) {
+            if (!this.dialog && (this.frames > 1 ||  SizeMgr.splitScreen || SizeMgr.phoneMode)) {
                 this.dialog = new ModalDialog();
                 this.dialog.add(this.root);
                 this.dialog.fullWhite();
