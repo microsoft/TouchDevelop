@@ -4724,17 +4724,22 @@ table.bitmatrix > tr.bitrow {
     color:white;
 }
 
+table.bitmatrix > tr > td.sep {
+    width:2em;
+}
+
 table.bitmatrix > tr > td.bit {
     width:2em;
     height:2em;
 }
 
 table.bitmatrix > tr > td.bit > div {
+    border-radius:4px;
     background-color:#ddd;
     border: 0.1em solid black;
     width:1em;
-    height:1em;
-    margin:0.5em;
+    height:1.6em;
+    margin:0.2em 0.5em 0.2em 0.5em;
 }
 
 table.bitmatrix > tr > td.bit:hover > div {

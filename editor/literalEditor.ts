@@ -86,6 +86,11 @@ module TDev
                 parent.appendChild(d);
                 return d;
             }
+            function col(parent: HTMLElement) {
+                var d = document.createElement('col');
+                parent.appendChild(d);
+                return d;
+            }
 
             data = (data || "").trim();
             var bits = data.split(/[\s\r\n]+/).map(s => parseInt(s));
@@ -104,13 +109,17 @@ module TDev
             this.table.innerHTML = ""; // clear table and rebuild
             var hrow = tr(this.table, 'bitheader');
             td(hrow, '');
-            for (var j = 0; j < this.frames * this.rows; ++j) td(hrow, 'index').innerText = j.toString();
+            for (var j = 0; j < this.frames * this.rows; ++j) {
+                if (j > 0 && j % this.rows == 0) td(hrow, 'sep');
+                td(hrow, 'index').innerText = j.toString();
+            }
 
             // bit matrix
             Util.range(0, this.rows).forEach(i => {
                 var row = tr(this.table, 'bitrow');
                 td(row, 'index').innerText = i.toString();
                 Util.range(0, this.frames * this.rows).forEach(j => {
+                    if (j > 0 && j % this.rows == 0) td(row, 'sep');
                     var cell = td(row, 'bit');
                     cell.title = "(" + i + ", " + j + ")";
                     var k = i * this.frames * this.rows + j;
