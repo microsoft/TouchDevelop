@@ -450,7 +450,11 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
-      return compileCall(e, <B.DefOrCallBlock> b);
+        return compileCall(e, <B.DefOrCallBlock> b);
+    case 'device_build_image':
+        return compileBuildImage(e, b, false);
+    case 'device_build_big_image':
+        return compileBuildImage(e, b, true);
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args);
@@ -618,6 +622,20 @@ function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
   var name = compileExpression(e, bName);
   var body = compileStatements(e, bBody);
   return generateEvent(e, "when button is pressed", [name], body);
+}
+
+function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
+    var state = "";
+    var rows = 5;
+    var columns = big ? 10 : 5;
+    for (var i = 0; i < rows; ++i) {
+        if (i > 0) state += '\n';
+        for (var j = 0; j < columns; ++j) {
+            if (j > 0) state += ' ';
+            state += /TRUE/.test(safeGetFieldValue(b, "LED" + j + i)) ? "1" : "0";            
+        }
+    }
+    return H.stdCall("make image", [H.mkStringLiteral(state)]);
 }
 
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
