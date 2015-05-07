@@ -1640,5 +1640,11 @@ module TDev.RT {
             var now = Time.now();
             return now.year() + "-" + now.month() + "-" + now.day() + "-" + now.hour() + "-" + now.minute() + "-" + now.second() + "-" + now.millisecond();
         }
+
+        //? Shows an art picture in the docs.
+        //@ docsOnly
+        public docs_render(height:number, caption:string)
+        {
+        }
     }
 }

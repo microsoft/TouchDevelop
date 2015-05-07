@@ -233,17 +233,18 @@ module TDev.AST
                         var isAutoStep = ""
                         s.tutorialWarning = null
 
-                        if (s instanceof AST.Comment) {
-                            var c = <AST.Comment>s;
-                            if (/^\s*\{box:([^{}]*)\}\s*$/i.test(c.text))
+                        var ctext = s.docText()
+
+                        if (ctext != null) {
+                            if (/^\s*\{box:([^{}]*)\}\s*$/i.test(ctext))
                                 boxNesting++;
-                            if (/^\s*\{\/box\}\s*$/i.test(c.text))
+                            if (/^\s*\{\/box\}\s*$/i.test(ctext))
                                 boxNesting--;
 
-                            if (currStepIdx < 0 && /^\s*\{adddecl\}\s*$/i.test(c.text))
+                            if (currStepIdx < 0 && /^\s*\{adddecl\}\s*$/i.test(ctext))
                                 currStep.addDecl = []
 
-                            var m = /^\s*\{stprecise:(.*)\}\s*$/i.exec(c.text)
+                            var m = /^\s*\{stprecise:(.*)\}\s*$/i.exec(ctext)
                             if (m) {
                                 var vs = m[1]
                                 if (/^["']/.test(vs)) {
@@ -253,16 +254,16 @@ module TDev.AST
                                 preciseStrings[vs] = true
                             }
 
-                            m = /^\s*\{stnoprofile}\s*$/i.exec(c.text)
+                            m = /^\s*\{stnoprofile}\s*$/i.exec(ctext)
                             if (m) {
                                 combined._skipIntelliProfile = true;
                             }
 
-                            m = /^\s*\{stauto(:(.*))?}\s*$/i.exec(c.text)
+                            m = /^\s*\{stauto(:(.*))?}\s*$/i.exec(ctext)
                             if (m)
                                 isAutoStep = m[2] || "yes"
 
-                            m = /^\s*\{stcmd:([^:]*)(:(.*))?\}\s*$/i.exec(c.text)
+                            m = /^\s*\{stcmd:([^:]*)(:(.*))?\}\s*$/i.exec(ctext)
                             if (m) {
                                 currStep.command = m[1]
                                 currStep.commandArg = m[3] || ""
@@ -282,12 +283,12 @@ module TDev.AST
                                 }
                             }
 
-                            m = /^\s*\{sthints:([^:]*)\}\s*$/i.exec(c.text)
+                            m = /^\s*\{sthints:([^:]*)\}\s*$/i.exec(ctext)
                             if (m) {
                                 currStep.hintLevel = m[1]
                             }
 
-                            m = /^\s*\{stvalidator:([^:]*)(:(.*))?\}\s*$/i.exec(c.text)
+                            m = /^\s*\{stvalidator:([^:]*)(:(.*))?\}\s*$/i.exec(ctext)
                             if (m) {
                                 currStep.validator = m[1]
                                 currStep.validatorArg = m[3] || ""
@@ -404,7 +405,7 @@ module TDev.AST
                     prune(i, act.body)
                     var newDocs = []
                     s.docs.forEach(d => {
-                        if (d instanceof Comment && (<Comment>d).text == "{stcode}") {
+                        if (d.docText() == "{stcode}") {
                             newDocs.pushRange(stepStmts)
                         } else newDocs.push(d)
                     })

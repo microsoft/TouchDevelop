@@ -277,6 +277,8 @@ module TDev.AST {
                     if (n.tokens[i].matches(d)) return true;
             return false
         }
+
+        public docText():string { return null }
     }
 
     export class Comment
@@ -295,6 +297,7 @@ module TDev.AST {
             tw.comment(this.text);
         }
         public forSearch() { return this.text.toLowerCase(); }
+        public docText() { return this.text }
     }
 
     export class FieldComment
@@ -889,6 +892,30 @@ module TDev.AST {
         }
 
         public forSearch() { return (this.isVarDef() ? "var " : "") + this.expr.forSearch(); }
+
+        public docText():string
+        {
+            var prop = this.expr.parsed ? this.expr.parsed.getCalledProperty() : null
+            if (!prop || prop.getName() != "docs render") return null
+            var c = <Call>this.expr.parsed
+            var arg0 = <GlobalDef>c.args[0].getCalledProperty()
+            if (arg0 instanceof GlobalDef) {
+                var url = arg0.url
+            }
+            if (!url) return null
+            if (arg0.getKind() == api.core.Picture) {
+                var h = c.args[1].getNumberLiteral() || 12
+                var cap = c.args[2].getStringLiteral() || ""
+                return "{pic:" + arg0.getName() + ":" + h + "x" + h + (cap ? ":" + cap : "") + "}"
+            }
+
+            if (arg0.getKind().getName() == "Document") {
+                var cap = c.args[1].getStringLiteral() || arg0.getName()
+                return "[" + cap + "] (" + url + ")"
+            }
+
+            return null
+        }
     }
 
     export class InlineActionBase
@@ -1665,10 +1692,9 @@ module TDev.AST {
 
             if (this.body)
                 for (var i = 0; i < this.body.stmts.length; ++i) {
-                    var s = this.body.stmts[i]
-                    if (s instanceof Comment) {
-                        var t = (<Comment>s).text
-                        if (/{action:ignoreReturn}/i.test(t)) {
+                    var s = this.body.stmts[i].docText()
+                    if (s != null) {
+                        if (/{action:ignoreReturn}/i.test(s)) {
                             flags |= PropertyFlags.IgnoreReturnValue
                         }
                     } else {
@@ -3059,6 +3085,12 @@ module TDev.AST {
         public getStringLiteral():string
         {
             if (typeof this.getLiteral() == "string")
+                return this.getLiteral()
+            return null
+        }
+        public getNumberLiteral():number
+        {
+            if (typeof this.getLiteral() == "number")
                 return this.getLiteral()
             return null
         }

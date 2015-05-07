@@ -697,8 +697,8 @@ module TDev {
                 if (m) {
                     var url = m[2];
                     var artId = m[3];
-                    var width = parseFloat(m[4] || "12");
-                    var height = parseFloat(m[5] || "12");
+                    var width = parseFloat(m[5] || "12");
+                    var height = parseFloat(m[6] || "12");
                     if (width > 30) {
                         height = 30 / width * height;
                         width = 30;
@@ -707,7 +707,7 @@ module TDev {
                         width = 20 / height * width;
                         height = 20;
                     }
-                    var caption = m[6];
+                    var caption = m[7];
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
                         url = Cloud.artUrl(artId);
@@ -1175,7 +1175,7 @@ module TDev {
         {
             function isEmptyComment(s:AST.Stmt)
             {
-                return s instanceof AST.Comment && !(<AST.Comment>s).text;
+                return s.docText() == ""
             }
 
             this.init();
@@ -1184,40 +1184,34 @@ module TDev {
             var currBox = null;
 
             for (var i = 0; i < stmts.length; ) {
-                if (stmts[i] instanceof AST.Comment) {
-                    var cmt = <AST.Comment>stmts[i]
-                } else {
-                    cmt = null;
-                }
+                var cmt = stmts[i].docText()
 
-                if (cmt) {
-                    var m = /^\s*\{hide(:[^{}]*)?\}\s*$/.exec(cmt.text);
+                if (cmt != null) {
+                    var m = /^\s*\{hide(:[^{}]*)?\}\s*$/.exec(cmt);
                     if (m) {
                         if (m[1]) output += this.formatText(m[1]);
                         var j = i + 1;
                         while (j < stmts.length) {
-                            if (stmts[j] instanceof AST.Comment &&
-                                /^\s*\{\/hide\}\s*$/.test((<AST.Comment>stmts[j]).text)) {
+                            if (/^\s*\{\/hide\}\s*$/.test(stmts[j].docText())) {
                                 j++;
                                 break;
                             }
                             j++;
                         }
                         i = j;
-                    } else if (i == 0 && cmt.text == '{var:apihelp}') {
+                    } else if (i == 0 && cmt == '{var:apihelp}') {
                         i++;
-                    } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt.text)) != null) {
+                    } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt)) != null) {
                         var j = i + 1;
                         var seenStmt = false;
                         while (j < stmts.length) {
-                            if ((stmts[j] instanceof AST.Comment) &&
-                                /^\s*(\{\/code}|````)\s*$/.test((<AST.Comment>stmts[j]).text))
+                            if (/^\s*(\{\/code}|````)\s*$/.test(stmts[j].docText()))
                                 break;
                             j++;
                         }
                         output += this.mkSnippet(stmts.slice(i + 1, j));
                         i = j + 1;
-                    } else if ((m = /^\s*\{box:([^{}]*)\}\s*$/.exec(cmt.text)) != null) {
+                    } else if ((m = /^\s*\{box:([^{}]*)\}\s*$/.exec(cmt)) != null) {
                         if (currBox) output += "</div>";
                         var parts = m[1].split(':');
                         var boxClass = parts[0];
@@ -1268,7 +1262,7 @@ module TDev {
                         currBox = boxClass;
                         output += Util.fmt("<div class='{0} md-box-{1}' {2}>{3}", boxCss, boxClass, boxDir, boxHd)
                         i++;
-                    } else if (/^\s*\{\/box(:[^{}]*)?\}\s*$/.test(cmt.text)) {
+                    } else if (/^\s*\{\/box(:[^{}]*)?\}\s*$/.test(cmt)) {
                         if (currBox) {
                             output += boxFt + "</div>";
                             currBox = null;
@@ -1277,13 +1271,13 @@ module TDev {
                         }
                         i++;
                     } else {
-                        output += this.formatText(cmt.text);
+                        output += this.formatText(cmt);
                         i++;
                     }
                 } else {
                     var j = i;
                     while (j < stmts.length) {
-                        if (stmts[j] instanceof AST.Comment) break;
+                        if (stmts[j].docText() != null) break;
                         j++;
                     }
                     output += this.mkSnippet(stmts.slice(i, j));

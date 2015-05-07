@@ -517,6 +517,14 @@ module TDev
 
         public visitExprStmt(n:AST.ExprStmt)
         {
+            if (!this.showDiff && this.formatComments) {
+                var doc = n.docText()
+                if (doc != null) {
+                    var inner = this.tline(Renderer.tdiv("md-comment", 
+                        this.mdComments.formatText(doc)))
+                    return this.stmt(n, inner + this.possibleError(n));
+                }
+            }
             return this.stmt(n, this.renderExprStmt(n))
         }
 

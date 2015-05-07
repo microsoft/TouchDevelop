@@ -16,5 +16,11 @@ module TDev.RT {
             doc._url = url;
             return Promise.as(doc);
         }
+
+        //? Shows a document link in the docs.
+        //@ docsOnly
+        public docs_render(caption:string)
+        {
+        }
     }
 }

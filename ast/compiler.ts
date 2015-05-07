@@ -1056,10 +1056,10 @@ module TDev.AST
             if (this.options.usedProperties.hasOwnProperty("appconsumerenderedcomments")) {
                 var par = (<CodeBlock>c.parent).stmts
                 var idx = par.indexOf(c)
-                if (par[idx - 1] instanceof Comment)
+                if (par[idx - 1] && par[idx - 1].docText() != null)
                     return []; // not first
                 var end = idx
-                while (par[end] instanceof Comment)
+                while (par[end] && par[end].docText() != null)
                     end++
                 var d = Step.renderDocs(par.slice(idx, end))
                 return [new JsExprStmt(JsCall.direct("s.rt.saveComment", [new JsLiteral(this.stringLiteral(d))]))]
