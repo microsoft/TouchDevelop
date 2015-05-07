@@ -1224,22 +1224,28 @@ module TDev.Browser {
                                 scriptName: template.name,
                                 scriptText: template.source
                             };
-                            this.browser().openNewScriptAsync(stub);
+                            this.browser().openNewScriptAsync(stub).done();
                         }
                     });
             };
             if (Cloud.isRestricted())
                 this.chooseEditorAsync().done((editor) => {
                     if (!editor) return;
-                    var src = "";
+                    var p = Promise.as("");
                     if (editor == "touchdevelop")
-                        src = this.templates.filter(t => t.id == "blank")[0].source;
-                    var stub: World.ScriptStub = {
-                        editorName: editor,
-                        scriptName: lf("{0} script", TopicInfo.getAwesomeAdj()),
-                        scriptText: src,
-                    };
-                    this.browser().openNewScriptAsync(stub);
+                        p = TheApiCacheMgr.getAsync("ljbrmh", true)
+                            .then((script: JsonScript) => script ? script.updateid : "ljbrmh")
+                            .then(scriptid => TheApiCacheMgr.getAsync(scriptid + "/text", true))
+                            .then(text => text || this.templates.filter(t => t.id == "blank")[0].source);
+                    p.then(src => {
+                        var stub: World.ScriptStub = {
+                            editorName: editor,
+                            scriptName: lf("{0} script", TopicInfo.getAwesomeAdj()),
+                            scriptText: src,
+                        };
+                        return this.browser().openNewScriptAsync(stub);
+                    });
+                    p.done();
                 })
             else
                 gotoTemplate();
