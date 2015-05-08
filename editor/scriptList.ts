@@ -7814,12 +7814,9 @@
                                     // readonly does not pop keyboard on mobile
                                     input.value = r.code;
                                     input.onchange = () => { input.value = r.code };
-                                    var iurl = Cloud.config.shareUrl + "/" + r.code;
                                     var codeDiv = div('',
                                         div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
-                                        div('sdExpandableText',
-                                            lf("To join, users can enter the invitation code in the search or navigate to "),
-                                            HTML.mkA('', iurl, '_blank', iurl)),
+                                        div('sdExpandableText',lf("To join, users can enter the invitation code in the search")),
                                         input
                                     );
                                     hd.appendChild(codeDiv);
