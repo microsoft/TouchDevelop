@@ -491,7 +491,7 @@ Blockly.Blocks['device_scroll_string_image'] = {
     this.appendDummyInput()
         .appendField("scroll string image");
     this.appendValueInput("string")
-        .setCheck("StringImage")
+        .setCheck("sprite")
         .setAlign(Blockly.ALIGN_RIGHT);
 //        .appendField("String");
     this.appendValueInput("speed")
