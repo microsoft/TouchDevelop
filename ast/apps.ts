@@ -325,7 +325,8 @@ module TDev.AST.Apps {
         if (options.compileServer)
             lst.push(addFileAsync("noderuntime.js", "script/"));
 
-        if (options.downloadLocalFilesFrom) {
+        // this code path break cordova
+        if (false && options.downloadLocalFilesFrom) {
             lst.push(addFileAsync("error.html"))
             lst.push(addFileAsync("browsers.html"))
         } else {
