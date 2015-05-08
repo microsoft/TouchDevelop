@@ -39,6 +39,7 @@ module TDev.Browser {
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
+            editorMode: 'block',
         },
         'rpi': {
             description: 'Learn to code with Raspberry Pi',
@@ -47,6 +48,7 @@ module TDev.Browser {
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
             lowMemory: true,
+            editorMode: 'block',
         },
         'arduino': {
             description: 'Program Arduino boards',

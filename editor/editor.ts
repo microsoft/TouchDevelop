@@ -3072,8 +3072,14 @@ module TDev
 
                 return final();
             }).then(() => {
-                if (!shouldRun && !Browser.EditorSettings.editorMode())
+                if (!shouldRun && !Browser.EditorSettings.editorMode()) {
+                    var theme = Browser.EditorSettings.hubTheme();
+                    if (theme && theme.editorMode) {
+                        Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
+                        return Promise.as();
+                    }
                     return Browser.EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
+                }
                 else return Promise.as();
             }).then(() => {
                 if (!Script) return;
