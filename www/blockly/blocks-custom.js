@@ -574,15 +574,34 @@ Blockly.Blocks['device_comment'] = {
   }
 };
 
-Blockly.Blocks['math_number1'] = {
+Blockly.Blocks['math_op2'] = {
   init: function() {
-    this.setHelpUrl(Blockly.Msg.MATH_NUMBER_HELPURL);
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(230);
+    this.appendValueInput("x")
+        .setCheck("Number")
+        .appendField(new Blockly.FieldDropdown([["min", "min"], ["max", "max"]]), "op")
+        .appendField("of");
+    this.appendValueInput("y")
+        .setCheck("Number")
+        .appendField("and");
+    this.setInputsInline(true);
+    this.setOutput(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['math_op3'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
     this.setColour(230);
     this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput('1',
-        Blockly.FieldTextInput.numberValidator), 'NUM');
-    this.setOutput(true, 'Number');
-    this.setTooltip(Blockly.Msg.MATH_NUMBER_TOOLTIP);
+        .appendField("absolute of");
+    this.appendValueInput("x")
+        .setCheck("Number")
+    this.setInputsInline(true);
+    this.setOutput(true);
+    this.setTooltip('');
   }
 };
 
