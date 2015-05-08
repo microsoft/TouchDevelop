@@ -51,8 +51,12 @@
     <xml id="blockly-toolbox" style="display: none">
       <category name="Basic">
         <block type="text"></block>
-        <block type="math_number"></block>
-        <block type="math_number1"></block>
+        <block type="math_number">
+          <field name="NUM">0</field>
+        </block>
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
         <block type="device_show_letter">
           <value name="letter">
             <block type="text">
@@ -178,11 +182,9 @@
       </category>
       <category name="Input">
         <block type="device_get_button"></block>
-        <block type="device_button_type"></block>
         <block type="device_button_event"></block>
         <block type="device_heading"></block>
         <block type="device_get_acceleration"></block>
-        <block type="device_acceleration_type"></block>
       </category>
       <category name="If">
         <block type="controls_if"></block>
@@ -222,6 +224,9 @@
         <block type="device_forever"></block>
       </category>
       <category name="Logic">
+        <block type="math_number">
+          <field name="NUM">0</field>
+        </block>
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
@@ -230,13 +235,15 @@
       </category>
       <category name="Maths">
         <block type="math_arithmetic"></block>
+        <block type="math_number">
+          <field name="NUM">0</field>
+        </block>
       </category>
       <category name="Pins">
           <block type="device_get_digital_pin"></block>
           <block type="device_set_digital_pin"></block>
           <block type="device_get_analog_pin"></block>
           <block type="device_set_analog_pin"></block>
-          <block type="device_pin_type"></block>
       </category>
       <category name="Variables">
         <block type="variables_set"></block>
