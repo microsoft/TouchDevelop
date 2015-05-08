@@ -368,8 +368,12 @@ function inferType(e: Environment, b: B.Block): J.JTypeRef {
 // each property ref, the right value for its [parent] property.
 ///////////////////////////////////////////////////////////////////////////////
 
+function extractNumber(b: B.Block) {
+  return parseInt(safeGetFieldValue(b, "NUM"));
+}
+
 function compileNumber(e: Environment, b: B.Block): J.JExpr {
-  return H.mkNumberLiteral(parseInt(safeGetFieldValue(b, "NUM")));
+  return H.mkNumberLiteral(extractNumber(b));
 }
 
 var opToTok: { [index: string]: string } = {
@@ -522,6 +526,11 @@ function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   return stmts;
 }
 
+function isClassicForLoop(bBy: B.Block, bFrom: B.Block) {
+  return bBy.type.match(/^math_number/) && extractNumber(bBy) == 1 &&
+    bFrom.type.match(/^math_number/) && extractNumber(bFrom) == 0;
+}
+
 function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bVar = safeGetFieldValue(b, "VAR");
   var bFrom = safeGetInputTargetBlock(b, "FROM");
@@ -531,24 +540,26 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 
   var e1 = extend(e, { name: bVar, type: H.mkTypeRef("Number") });
 
-  // TODO: use an actual for-loop when bFrom = 0 and bBy = 1
-  return [
-    // var VAR: Number = FROM
-    H.mkDefAndAssign(bVar, H.mkTypeRef("Number"), compileExpression(e, bFrom)),
-    // while
-    H.mkWhile(
-      // VAR <= TO
-      H.mkExprHolder([],
-        H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e1, bTo)])),
-      // DO
-      compileStatements(e1, bDo).concat([
-        H.mkExprStmt(
-          H.mkExprHolder([],
-            // VAR :=
-            H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
-              // VAR + BY
-              H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e1, bBy)])])))]))
-  ];
+  if (isClassicForLoop(bBy, bFrom))
+    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo)), compileStatements(e1, bDo))];
+  else
+    return [
+      // var VAR: Number = FROM
+      H.mkDefAndAssign(bVar, H.mkTypeRef("Number"), compileExpression(e, bFrom)),
+      // while
+      H.mkWhile(
+        // VAR <= TO
+        H.mkExprHolder([],
+          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e1, bTo)])),
+        // DO
+        compileStatements(e1, bDo).concat([
+          H.mkExprStmt(
+            H.mkExprHolder([],
+              // VAR :=
+              H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
+                // VAR + BY
+                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e1, bBy)])])))]))
+    ];
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
