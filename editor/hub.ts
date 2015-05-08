@@ -26,6 +26,9 @@ module TDev.Browser {
 
         editorMode?: string;
         scriptTemplates?: string[];
+
+        noAnimations?: boolean;
+        lowMemory?: boolean;
     }
         
     export var hubThemes: StringMap<HubTheme> = {
@@ -35,12 +38,15 @@ module TDev.Browser {
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+            noAnimations: true,
         },
         'rpi': {
             description: 'Learn to code with Raspberry Pi',
             logoArtId: 'eopyzwpm',
             tutorialsTopic: 'minecraftpitutorials',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+            noAnimations: true,
+            lowMemory: true,
         },
         'arduino': {
             description: 'Program Arduino boards',
@@ -404,7 +410,19 @@ module TDev.Browser {
                     localStorage.removeItem("hubTheme");
                 else
                     localStorage.setItem("hubTheme", theme);
+                updateThemeSettings();
                 updateWallpaper();
+            }
+        }
+
+        function updateThemeSettings() {
+            var theme = hubTheme();
+            if (theme) {
+                Browser.noAnimations = !!theme.noAnimations;
+                Browser.lowMemory = !!theme.lowMemory;
+            } else {
+                Browser.noAnimations = false;
+                Browser.lowMemory = false;
             }
         }
 
