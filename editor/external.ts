@@ -341,7 +341,7 @@ module TDev {
       var iframe = document.createElement("iframe");
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
       iframe.addEventListener("load", function () {
-        mkChannelAsync(editor, iframe, data.guid).done(channel => {
+        mkChannelAsync(editor, iframe, data.guid).done((channel: Channel) => {
           TheChannel = channel;
           var extra = JSON.parse(data.scriptVersionInCloud || "{}");
           TheChannel.post(<Message_Init> {
