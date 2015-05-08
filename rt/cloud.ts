@@ -415,7 +415,7 @@ module TDev.Cloud {
         // adopt the view that [editor == undefined] means "default
         // TouchDevelop" editor, while anything else means "external editor".
         editor?: string;
-
+        pendingMerge?: string;
     }
     export interface AskSomething {
         title: string;

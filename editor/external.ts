@@ -140,6 +140,10 @@ module TDev {
               var scriptText = message.script.scriptText;
               var editorState = JSON.stringify(message.script.editorState);
               header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
+              // This may be over-optimistic (the external editor may serve on
+              // top of a version that's already outdated), but the sync code
+              // will re-flag the pending merge later on.
+              header.pendingMerge = null;
 
               var metadata = message.script.metadata;
               Object.keys(metadata).forEach(k => {
@@ -152,7 +156,8 @@ module TDev {
               // appears both on the header and in the metadata.
               header.name = metadata.name;
 
-              // Writes into local storage.
+              // Writes into local storage. Also clears the scriptVersionInCloud
+              // field (fifth argument).
               World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
                 console.log("[external] script saved properly");
                 this.post(<Message_SaveAck>{

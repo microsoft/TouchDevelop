@@ -178,7 +178,9 @@ module TDev {
                                                 // Don't update the header: merely record the fact that we've seen a new version go by from the cloud,
                                                 // and record in the extra field the contents of that version (so that we don't have to hit the cloud
                                                 // again to get it later on).
+                                                var newVersion = header.scriptVersion.baseSnapshot;
                                                 header = hd; // FIXME properly pass a value instead of updating in-place, so that we don't have to bind ret before
+                                                header.pendingMerge = newVersion;
                                                 return ret;
                                             } else {
                                                 // Our new header is the one that we took in from the cloud, except that some modifications were
@@ -258,9 +260,13 @@ module TDev {
             // below, a newer version gets written and it's innocuous, but we err on the safe side.)
             var conservativeVersion = JSON.stringify(header.scriptVersion);
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is dirty, attempting to save version " + conservativeVersion);
+            if (header.pendingMerge) {
+                log(header.guid + "/" + header.scriptId + ": " + header.name + " is pending merge resolution, skipping");
+                return Promise.as();
+            }
             return Promise.join({
-                    script: scriptsTable.getValueAsync(header.guid + "-script"),
-                    editorState: scriptsTable.getValueAsync(header.guid + "-editorState")
+                script: scriptsTable.getValueAsync(header.guid + "-script"),
+                editorState: scriptsTable.getValueAsync(header.guid + "-editorState")
             }).then(function (data) {
                 var body = <Cloud.Body>JSON.parse(JSON.stringify(header));
                 if (!Cloud.lite && body.status == "published")
@@ -524,6 +530,7 @@ module TDev {
                         var existingHeader = <Cloud.Header>JSON.parse(existingItem);
                         if (Cloud.lite) {
                             isNewer = header.scriptVersion.baseSnapshot != existingHeader.scriptVersion.baseSnapshot
+                                && header.scriptVersion.baseSnapshot != existingHeader.pendingMerge;
                             if (existingHeader.status == "deleted")
                                 isNewer = false
                         } else
@@ -575,6 +582,10 @@ module TDev {
                     data.recentUses = recentUsesInstalledAsync(recentUses);
                 return Promise.join(data);
             }).then(function (data/*: SyncData*/) {
+                // It's unclear how [data] is used from then on, because it is
+                // just discarded two steps below. Perhaps we assign the
+                // properties to prevent some promises from being
+                // garbage-collected until we move on to the next step?
                 time("diff");
                 data.downloaded = Promise.thenEach(newerHeaders, (h: Cloud.Header) => {
                     if (syncVersion != mySyncVersion) return canceled;

@@ -632,14 +632,14 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
         if (i > 0) state += '\n';
         for (var j = 0; j < columns; ++j) {
             if (j > 0) state += ' ';
-            state += /TRUE/.test(safeGetFieldValue(b, "LED" + j + i)) ? "1" : "0";            
+            state += /TRUE/.test(safeGetFieldValue(b, "LED" + j + i)) ? "1" : "0";
         }
     }
     return H.stdCall("make image", [H.mkStringLiteral(state)]);
 }
 
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
-  device_clear_display:             { f: "clear display",           args: [] },
+  device_clear_display:           { f: "clear display",         args: [] },
   device_show_letter:             { f: "show letter",           args: ["letter"] },
   device_pause:                   { f: "pause",                 args: ["pause"] },
   device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
@@ -657,7 +657,7 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_get_analog_pin:          { f: "analog read pin",       args: ["name"] },
   device_set_analog_pin:          { f: "analog write pin",      args: ["name", "value"] },
   device_get_brightness:          { f: "brightness",            args: [] },
-  device_set_brightness:          { f: "set brightness",      args: ["value"] },
+  device_set_brightness:          { f: "set brightness",        args: ["value"] },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
