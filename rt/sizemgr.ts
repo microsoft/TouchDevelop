@@ -134,7 +134,7 @@ module TDev {
             previousWidth = w;
 
             // in desktop, we lower the threshold so that TD goes into portrait mode when it is docked on a side of the scrreen
-            var portraitThreshold = Browser.isDesktop ? 0.98 : 1.2;
+            var portraitThreshold = Browser.isDesktop ? 0.9 : 1.2;
             portraitMode = w * portraitThreshold < h;
 
             if (Browser.isCellphone)
@@ -156,8 +156,8 @@ module TDev {
             windowWidth = w;
 
             if (splitScreen) {
-                editorWindowWidth = windowWidth / 2;
-                wallWindowWidth = windowWidth / 2;
+                editorWindowWidth = windowWidth / 1.618;
+                wallWindowWidth = windowWidth - editorWindowWidth;
             } else {
                 editorWindowWidth = windowWidth;
                 wallWindowWidth = windowWidth;
