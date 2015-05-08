@@ -2922,14 +2922,15 @@
             return lf("Cool script!") + " " + Cloud.config.hashtag;
         }
 
-        public facebookLike(): HTMLElement {
+        public shareButtons(): HTMLElement[] {
+            var btns: HTMLElement[] = [];
+
             var id = this.getPublicationId();
-            if (!id) return null;
+            if (!id) return btns;
 
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
-            
-            var btns: HTMLElement[] = [];
+
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["email", "twitter", "facebook"].map(network =>
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
@@ -2943,9 +2944,7 @@
                     });
                 }));
             }
-
-            var r = div('', btns);
-            return r;
+            return btns;
         }
     }
 
@@ -6987,7 +6986,7 @@
                     div("inlineBlock", authorHead, div("sdAuthorLabel", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
                     ,
-                    div("floatright", info.facebookLike())
+                    div("floatright", info.shareButtons() )
                     ]);
             });
             return authorDiv;
@@ -8383,6 +8382,12 @@
         private getIconUrl() { return "svg:" + this.topic.json.icon + ",white"; }
         private getIcon() { return HTML.mkImg(this.getIconUrl()); }
 
+        public shareButtons() {
+            return super.shareButtons().concat(
+                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { this.topic.print() })
+            );
+        }
+
         private likeBtn(showCount = false)
         {
             var likeBtn = div(null);
@@ -8451,7 +8456,6 @@
             var allTopDiv = div(null)
             var noChromeDiv = div("sdInfoLink")
             var btn2 = null
-            var btnShare = null
 
             if (!this.topic.fromJson) {
                 Ticker.rawTick("browseTopic_" + this.topic.id);
@@ -8506,12 +8510,9 @@
                 });
 
                 btn2 = HTML.mkButton(lf("view as script"), viewAsScript)
-                btnShare = HTML.mkButton(lf("share"), shareAsScript);
                 noChromeDiv.setChildren([
-                    HTML.mkLinkButton(lf("share"), shareAsScript),
                     HTML.mkLinkButton(lf("view as script"), viewAsScript)])
             }
-            var btn3 = HTML.mkButton(lf("print"), () => this.topic.print())
             //var docsList = div("sdRelatedContainer", div("sdLoadingMore", lf("loading...")));
             var rnd = this.topic.render(TopicInfo.attachCopyHandlers);
 
@@ -8576,7 +8577,7 @@
             }
 
             allBottomDiv.setChildren([
-                div("sdBottomButtons", btnShare, btn, btn3, btn2,
+                div("sdBottomButtons", btn, btn2,
                   Editor.mkHelpLink("how to edit the docs", lf("about editing docs"))
                   ),
                 //div(null, div("sdHeading inlineBlock", lf("related docs"))
