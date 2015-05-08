@@ -302,6 +302,11 @@ module Helpers {
 
 import H = Helpers;
 
+// Mutate [a1] in place and append to it the elements from [a2].
+function append <T> (a1: T[], a2: T[]) {
+  a1.push.apply(a1, a2);
+}
+
 // A few wrappers for basic Block operations that throw errors when compilation
 // is not possible. (The outer code catches these and highlights the relevant
 // block.)
@@ -662,7 +667,6 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   var stmts: J.JStmt[] = [];
-  var append = <T> (a: T[], es: T[]) => a.push.apply(a, es);
   while (b) {
     switch (b.type) {
       case 'controls_if':
@@ -739,22 +743,24 @@ interface CompileOptions {
   description: string;
 }
 
-function compileWithEventIfNeeded(e: Environment, b: B.Block): J.JStmt {
-  if (b.type != "device_event") {
-    var id = H.mkStringLiteral("starts");
-    var body = compileStatements(e, b);
-    return generateEvent(e, "when device", [id], body);
-  }
+function isHandlerRegistration(b: B.Block) {
+  return b.type == "device_button_event";
 }
 
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
-  var stmts: J.JStmt[] = [];
+  // [stmtsHandlers] contains calls to register event handlers. They must be
+  // executed before the code that goes in the main function, as that latter
+  // code may block, and prevent the event handler from being registered.
+  var stmtsHandlers: J.JStmt[] = [];
+  var stmtsMain: J.JStmt[] = [];
   b.getTopBlocks(true).forEach((b: B.Block) => {
-      if (b.type != "device_event") compileStatements(empty, b).forEach(st => stmts.push(st));
-    //stmts.push(compileWithEventIfNeeded(empty, b));
+    if (isHandlerRegistration(b))
+      append(stmtsHandlers, compileStatements(empty, b));
+    else
+      append(stmtsMain, compileStatements(empty, b));
   });
 
-  var action = H.mkAction("main", stmts, [], []);
+  var action = H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []);
 
   return H.mkApp(options.name, options.description, [ action ]);
 }
