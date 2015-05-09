@@ -751,10 +751,14 @@ module TDev.HTML {
             undo();
         }));
         elt("root").appendChild(msg);
-        var a = Animation.fadeOut(msg);
-        a.delay = 4000;
-        a.duration = 1000;
-        a.begin();        
+        var fi = Animation.fadeIn(msg);
+        fi.completed = () => {
+            var a = Animation.fadeOut(msg);
+            a.delay = 4000;
+            a.duration = 1000;
+            a.begin();
+        }
+        fi.begin();
     }
 
     export function showErrorNotification(msgText:string)
