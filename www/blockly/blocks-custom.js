@@ -5,14 +5,42 @@ goog.provide('Blockly.Blocks.device');
 goog.require('Blockly.Blocks');
 
 var buttonsDropdown =[
-  ["left", "left"],
-  ["right", "right"],
+  ["A", "A"],
+  ["B", "B"],
 ];
 
-var pinsDropdown = [
+var analogPinsDropdown = [
+  ["C0", "C0"],
+  ["C1", "C1"],
+  ["C2", "C2"]
+];
+
+var digitalPinsDropdown = [
+  ["C0", "C0"],
+  ["C1", "C1"],
+  ["C2", "C2"],
   ["P0", "P0"],
   ["P1", "P1"],
-  ["P2", "P2"]
+  ["P2", "P2"],
+  ["P3", "P3"],
+  ["P4", "P4"],
+  ["P5", "P5"],
+  ["P6", "P6"],
+  ["P7", "P7"],
+  ["P8", "P8"],
+  ["P9", "P9"],
+  ["P10", "P10"],
+  ["P11", "P11"],
+  ["P12", "P12"],
+  ["P13", "P13"],
+  ["P14", "P14"],
+  ["P15", "P15"],
+  ["P16", "P16"],
+  ["P17", "P17"],
+  ["P18", "P18"],
+  ["P19", "P19"],
+  ["P20", "P20"],
+  ["P21", "P21"],
 ];
 
 // Blockly.Blocks['device_scroll_string'] = {
@@ -98,10 +126,7 @@ Blockly.Blocks['device_get_button'] = {
     this.appendDummyInput()
         .appendField("button");
     this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-            ["left", "left"],
-            ["right", "right"],
-        ]), "NAME");
+        .appendField(new Blockly.FieldDropdown(buttonsDropdown), "NAME");
     this.appendDummyInput()
         .appendField("is pressed");
     this.setInputsInline(true);
@@ -110,6 +135,7 @@ Blockly.Blocks['device_get_button'] = {
   }
 };
 
+/* still needed?
 Blockly.Blocks['device_button_type'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
@@ -131,6 +157,7 @@ Blockly.Blocks['device_pin_type'] = {
         this.setTooltip('');
     }
 };
+*/
 
 Blockly.Blocks['device_get_digital_pin'] = {
     init: function () {
@@ -138,7 +165,7 @@ Blockly.Blocks['device_get_digital_pin'] = {
         this.setColour(160);
         this.appendDummyInput()
             .appendField("digital read pin")
-            .appendField(new Blockly.FieldDropdown(pinsDropdown), "name");
+            .appendField(new Blockly.FieldDropdown(digitalPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setTooltip('');
@@ -155,7 +182,7 @@ Blockly.Blocks['device_set_digital_pin'] = {
             .setCheck("Number");
         this.appendDummyInput()
             .appendField("to pin")
-            .appendField(new Blockly.FieldDropdown(pinsDropdown), "name");
+            .appendField(new Blockly.FieldDropdown(digitalPinsDropdown), "name");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
@@ -169,7 +196,7 @@ Blockly.Blocks['device_get_analog_pin'] = {
         this.setColour(160);
         this.appendDummyInput()
             .appendField("analog read pin")
-            .appendField(new Blockly.FieldDropdown(pinsDropdown), "name");
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setTooltip('');
@@ -186,7 +213,7 @@ Blockly.Blocks['device_set_analog_pin'] = {
             .setCheck("Number");
         this.appendDummyInput()
             .appendField("to pin")
-            .appendField(new Blockly.FieldDropdown(pinsDropdown), "name");
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);

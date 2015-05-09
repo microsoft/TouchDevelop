@@ -452,10 +452,12 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
       return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
+    /* still needed?
     case "device_button_type":
     case "device_acceleration_type":
     case "device_pin_type":
           return compileEnumType(e, b);
+    */
     case "device_logic_onoff_states":
       return compileOnOff(e, b);
     case "procedures_callreturn":
@@ -655,7 +657,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
 }
 
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
-  device_clear_display:           { f: "clear display",         args: [] },
+  device_clear_display:           { f: "clear screen",         args: [] },
   device_show_letter:             { f: "show letter",           args: ["letter"] },
   device_pause:                   { f: "pause",                 args: ["pause"] },
   device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
