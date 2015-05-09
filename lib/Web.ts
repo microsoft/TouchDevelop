@@ -863,7 +863,7 @@ module TDev.RT {
                 + (/\?/.test(oauth_url) ? '&' : '?')
                 + 'redirect_uri=' + encodeURIComponent(actualRedirectURI)
                 + "&" + stateArg;
-            if (!/response_type=token/i.test(url))
+            if (!/response_type=(token|code)/i.test(url))
                 url += "&response_type=token";
 
             App.log('oauth auth url: ' + url);
