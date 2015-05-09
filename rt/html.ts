@@ -35,6 +35,7 @@ module TDev.HTML {
         title: string;
         author_name: string;
         author_url: string;
+        html: string;
         thumbnail_url: string;
         provider_name: string;
         provider_url: string;
@@ -50,14 +51,21 @@ module TDev.HTML {
         return d;
     }
 
-    export function mkYouTubePlayer(ytid: string) {
+    export function mkLazyVideoPlayer(preview: string, iframeSrc:string): HTMLElement {
         var d = div('md-video-link');
-        d.dataset['youtubeid'] = ytid;
-        Browser.setInnerHTML(d, SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid)));
+        Browser.setInnerHTML(d, SVG.getVideoPlay(preview));
+        d.dataset["playersrc"] = iframeSrc;
         d.withClick(() => {
-            d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=" + Cloud.config.rootUrl + "' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
+            d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' allowfullscreen=''></iframe></div>",iframeSrc);
         });
-        return d;
+        return d;        
+    }
+
+    export function mkYouTubePlayer(ytid: string) {
+        return mkLazyVideoPlayer(
+            Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid),
+            Util.fmt("//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin={1:uri}", ytid, Cloud.config.rootUrl)
+            );
     }
 
     export function mkAudio(url: string, aacUrl: string = null, mp3Url: string = null, controls = false): HTMLAudioElement {

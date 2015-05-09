@@ -354,6 +354,7 @@ module TDev {
         idToHTMLAsync?: (id: string) => Promise; // HTMLElement;
     }
 
+    var oembedCache: StringMap<HTML.OEmbed> = {};
     export var socialNetworks: SocialNetwork[] = [
         {
             id: "youtube",
@@ -370,8 +371,30 @@ module TDev {
             },
             idToUrl: id => 'https://youtu.be/' + id,
             idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
-        },
-        {
+        }, {
+            id: "vimeo",
+            name: "Vimeo",
+            description: lf("vimeo video (https://vimeo.com/...)"),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/vimeo\.com\/([^\s]+)/gi,(m, id) => {
+                        links.push(id);
+                    });
+                return links;
+            },
+            idToUrl: id => "https://vimeo.com/" + id,
+            idToHTMLAsync: (id:string) : Promise => {
+                var url = 'https://vimeo.com/' + id;
+                var p = oembedCache[url] ? Promise.as(oembedCache[url])
+                    : Util.httpGetJsonAsync("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/" + id)
+                        .then(oembed => {
+                        oembedCache[url] = oembed;
+                        return oembed;
+                        });
+                return p.then((oe: HTML.OEmbed) => HTML.mkLazyVideoPlayer(oe.thumbnail_url, "https://player.vimeo.com/video/" + id));
+            },
+        }, {
             id: "instagram",
             name: "Instagram",
             description: lf("Instagram photo (https://instagram.com/p/...)"),
@@ -493,11 +516,7 @@ module TDev {
                 Util.toArray(e.getElementsByClassName('md-box-avatar-body')).forEach((v: HTMLElement) => dirAuto(v));
             }
             Util.toArray(e.getElementsByClassName('md-video-link')).forEach((v: HTMLElement) => {
-                var ytid = v.getAttribute("data-youtubeid");
-                if (ytid)
-                    v.withClick(() => {
-                        v.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin=" + Cloud.config.rootUrl + "' frameborder='0' allowfullscreen=''></iframe></div>", ytid);
-                    });
+                if (v.dataset["playersrc"]) v.withClick(() => v.innerHTML = v.dataset["playersrc"]);
                 else if (v.hasAttribute("data-video")) {
                     var lang = Util.getTranslationLanguage();
                     var jsvideo = <JsonVideo>JSON.parse(decodeURIComponent(v.getAttribute("data-video")));
@@ -806,8 +825,8 @@ module TDev {
                 if (!arg)
                     return MdComments.error("youtube: missing video id");
                 else {
-                    return Util.fmt("<div class='md-video-link' data-youtubeid='{0:uri}'>{1}</div>",
-                        arg,
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:uri}'>{1}</div>",
+                        Util.fmt("//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1", arg),
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', arg))
                         );
                 }
