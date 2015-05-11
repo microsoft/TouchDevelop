@@ -649,4 +649,4 @@ Blockly.Blocks['device_while'] = {
 
 // Overriding the default value.
 Blockly.Msg.CONTROLS_FOR_INPUT_WITH = "for";
-Blockly.pathToMedia = "./";
+Blockly.pathToMedia = "./media/";
