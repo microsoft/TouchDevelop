@@ -576,9 +576,9 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
-  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), "Number");
+  var args = [compileExpression(e, b.getInputTargetBlock("TIMES"), "Number")];
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
+  return mkCallWithCallback(e, "repeat", args, body);
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
@@ -588,9 +588,7 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
-  return H.mkWhile(
-    H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("DO")));
+  return mkCallWithCallback(e, "forever", [], compileStatements(e, b.getInputTargetBlock("DO")));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
@@ -642,7 +640,7 @@ function compileComment(e: Environment, b: B.Block): J.JStmt {
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
 
-function generateEvent(e: Environment, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
+function mkCallWithCallback(e: Environment, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
     [ H.mkInlineAction(body, true, def) ],
@@ -655,7 +653,7 @@ function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var name = H.mkStringLiteral(b.getFieldValue("NAME"));
   var body = compileStatements(e, bBody);
-  return generateEvent(e, "when button is pressed", [name], body);
+  return mkCallWithCallback(e, "when button is pressed", [name], body);
 }
 
 function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
