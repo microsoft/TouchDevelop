@@ -94,8 +94,12 @@ module Helpers {
 
   // Call function [name] from the standard device library with arguments
   // [args].
-  export function stdCall(name: string, args: J.JExpr[]): J.JCall {
-    return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
+  export function stdCall(name: string, args: J.JExpr[], isExtensionMethod?: boolean): J.JCall {
+    if (isExtensionMethod) {
+      return mkCall(name, mkTypeRef("call"), args);
+    } else {
+      return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
+    }
   }
 
   // Call a function from the Math library. Apparently, the Math library is a
@@ -479,7 +483,12 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
         return compileBuildImage(e, b, true);
     default:
       if (b.type in stdCallTable)
-        return compileStdCall(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args);
+        return compileStdCall(
+          e, b,
+          stdCallTable[b.type].f,
+          stdCallTable[b.type].args,
+          stdCallTable[b.type].isExtensionMethod
+        );
       else {
         console.error("Unable to compile expression: "+b.type);
         return defaultValueForType(t);
@@ -619,7 +628,7 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
   }
 }
 
-function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[]) {
+function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[], isExtensionMethod?: boolean) {
   var args = inputs.map(x => {
     var f = b.getFieldValue(x);
     if (f)
@@ -627,11 +636,11 @@ function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[])
     else
       return compileExpression(e, b.getInputTargetBlock(x))
   });
-  return H.stdCall(f, args);
+  return H.stdCall(f, args, isExtensionMethod);
 }
 
-function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[]) {
-  return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f, inputs)));
+function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[], isExtensionMethod?: boolean) {
+  return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f, inputs, isExtensionMethod)));
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
@@ -677,7 +686,8 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
 // [args] either a field value or, if not found, an input target block; field
 //  values are compiled to string, while input target blocks follow the
 //  expression compilation scheme
-var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
+// [isExtensionMethod] compile [f(x, y...)] into [x → f (y...)]
+var stdCallTable: { [blockName: string]: { f: string; args: string[]; isExtensionMethod?: boolean }} = {
   device_clear_display:           { f: "clear screen",          args: [] },
   device_show_letter:             { f: "show letter",           args: ["letter"] },
   device_pause:                   { f: "pause",                 args: ["pause"] },
@@ -687,8 +697,8 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_point:                   { f: "point",                 args: ["x", "y"] },
   device_heading:                 { f: "heading",               args: [] },
   device_make_StringImage:        { f: "make string image",     args: ["NAME"] },
-  device_scroll_image:            { f: "scroll image",          args: ["sprite", "x", "delay"] },
-  device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
+  device_scroll_image:            { f: "scroll image",          args: ["sprite", "x", "delay"],   isExtensionMethod: true },
+  device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"],       isExtensionMethod: true },
   device_get_button:              { f: "button is pressed",     args: ["NAME"] },
   device_get_acceleration:        { f: "acceleration",          args: ["NAME"] },
   device_get_digital_pin:         { f: "digital read pin",      args: ["name"] },
@@ -748,7 +758,12 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
         default:
           if (b.type in stdCallTable)
-            stmts.push(compileStdBlock(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args));
+            stmts.push(compileStdBlock(
+              e, b,
+              stdCallTable[b.type].f,
+              stdCallTable[b.type].args,
+              stdCallTable[b.type].isExtensionMethod)
+            );
           else
             console.log("Not generating code for (not a statement / not supported): "+b.type);
       }
