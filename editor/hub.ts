@@ -370,6 +370,9 @@ module TDev.Browser {
             var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
                 { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
                 { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
+            if (Cloud.isRestricted() && !Cloud.hasPermission("admin"))
+                modes.pop(); // expert mode not support for regular users
+
             return modes.map((mode, index) => {
                 var pic = div('pic');
                 pic.style.background = Cloud.artCssImg(mode.id, true);
@@ -391,11 +394,11 @@ module TDev.Browser {
                 var m = new ModalDialog();
                 m.onDismiss = () => onSuccess(undefined);
                 m.add(div('wall-dialog-header', lf("choose your coding skill level")));
-                m.add(div('wall-dialog-body', lf("TouchDevelop will adapt to the coding experience to your skill level. You can change your skill level again in the hub.")));
-                var current = EditorSettings.editorModeText(EditorSettings.editorMode());
-                if (current)
-                    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
-                m.add(div('wall-dialog-body', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
+                m.add(div('wall-dialog-body', lf("We will adapt the editor to your coding skill level. You can change your skill level later in the hub.")));
+                //var current = EditorSettings.editorModeText(EditorSettings.editorMode());
+                //if (current)
+                //    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
+                m.add(div('wall-dialog-body center', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
                 m.add(Editor.mkHelpLink("skill levels"));
                 m.fullWhite();
                 m.show();

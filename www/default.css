@@ -1836,6 +1836,9 @@ a.button, a.button:hover, a.button:visited {
 .floatright {
     float: right;
 }
+.center {
+    text-align:center;
+}
 
 .login-button {
   background: #eee;
