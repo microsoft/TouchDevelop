@@ -396,6 +396,11 @@ function compileMathOp2(e: Environment, b: B.Block): J.JExpr {
   return H.mathCall(op, [x, y]);
 }
 
+function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
+  var x = compileExpression(e, b.getInputTargetBlock("x"), "Number");
+  return H.mathCall("abs", [x]);
+}
+
 function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   assert(lookup(e, name) != null);
@@ -446,6 +451,8 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
       return compileNumber(e, b);
     case "math_op2":
       return compileMathOp2(e, b);
+    case "math_op3":
+      return compileMathOp3(e, b);
     case "math_arithmetic":
     case "logic_compare":
       return compileArithmetic(e, b, "Number");
