@@ -332,7 +332,7 @@ Blockly.Blocks['device_unplot'] = {
 Blockly.Blocks['device_point'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
+    this.setColour(210);
     this.appendDummyInput()
         .appendField("point");
     this.appendValueInput("x")
@@ -342,7 +342,7 @@ Blockly.Blocks['device_point'] = {
         .setCheck("Number")
         .appendField("y");
     this.setInputsInline(true);
-    this.setOutput(true, "OnOffState");
+    this.setOutput(true, "Boolean");
     this.setTooltip('');
   }
 };

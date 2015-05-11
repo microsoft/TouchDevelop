@@ -417,10 +417,6 @@ function defaultValueForType(t: string): J.JExpr {
   return null;
 }
 
-function compileOnOff(e: Environment, b: B.Block): J.JExpr {
-  return H.mkBooleanLiteral(b.getFieldValue("STATE") == "ON");
-}
-
 // [t] is the expected type; in case the block was actually not there (i.e.
 // [b == null]), we may be able to provide a default value.
 function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
@@ -439,8 +435,6 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
       return compileBoolean(e, b);
     case "logic_negate":
       return compileNot(e, b);
-    case "device_logic_onoff_states":
-      return compileOnOff(e, b);
     case "variables_get":
       return compileVariableGet(e, b);
     case "text":
