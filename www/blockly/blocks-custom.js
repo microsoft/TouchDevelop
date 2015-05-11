@@ -106,11 +106,11 @@ Blockly.Blocks['device_button_event'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
     this.appendDummyInput()
-        .appendField("when");
+        .appendField("when button");
     this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown(buttonsDropdown), "NAME");
     this.appendDummyInput()
-        .appendField("button is pressed");
+        .appendField("is pressed");
     this.appendStatementInput("HANDLER")
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("do");
