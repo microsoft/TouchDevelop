@@ -1253,8 +1253,8 @@ module TDev.Browser {
                     if (!editor) return;
                     var p = Promise.as("");
                     if (editor == "touchdevelop")
-                        p = TheApiCacheMgr.getAsync("ljbrmh", true)
-                            .then((script: JsonScript) => script ? script.updateid : "ljbrmh")
+                        p = TheApiCacheMgr.getAsync("dtoihh", true)
+                            .then((script: JsonScript) => script ? script.updateid : "dtoihh")
                             .then(scriptid => TheApiCacheMgr.getAsync(scriptid + "/text", true))
                             .then(text => text || this.templates.filter(t => t.id == "blank")[0].source);
                     p.then(src => {

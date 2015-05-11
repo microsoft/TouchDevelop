@@ -66,12 +66,12 @@ module TDev {
 
     export function initAsync(): Promise { // of nothing
       return deviceScriptId ? Promise.as()
-        : Browser.TheApiCacheMgr.getAsync('jktwxx', true)
+          : Browser.TheApiCacheMgr.getAsync('dhhzzl', true)
           .then((script: JsonScript) => {
             if (script)
               deviceScriptId = script.updateid;
             else
-              deviceScriptId = 'jktwxx';
+                deviceScriptId = 'dhhzzl';
           });
     }
 
