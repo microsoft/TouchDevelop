@@ -366,11 +366,12 @@ function compileNumber(e: Environment, b: B.Block): J.JExpr {
 }
 
 var opToTok: { [index: string]: string } = {
+  // POWER gets a special treatment because there's no operator for it in
+  // TouchDevelop
   "ADD": "+",
   "MINUS": "-",
   "MULTIPLY": "*",
   "DIVIDE": "/",
-  //"POWER": "",
   "EQ":  "=",
   "NEQ": "≠",
   "LT":  "<",
@@ -386,7 +387,11 @@ function compileArithmetic(e: Environment, b: B.Block, t: string): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
-  return H.mkSimpleCall(opToTok[bOp], [compileExpression(e, left, t), compileExpression(e, right, t)]);
+  var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
+  if (bOp == "POWER")
+    return H.mathCall("pow", args);
+  else
+    return H.mkSimpleCall(opToTok[bOp], args);
 }
 
 function compileMathOp2(e: Environment, b: B.Block): J.JExpr {
