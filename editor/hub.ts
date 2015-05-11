@@ -342,7 +342,7 @@ module TDev.Browser {
             if (TDev.isBeta)
                 Util.assert(!!blockWidgets[name] || !!legacyWidgets[name] || !!proWidgets[name], "uncategorized widget " + name);
 
-            if (Cloud.isRestricted() && unrestrictedWidgets[name]) return false;
+            if (Cloud.isUserRestricted() && unrestrictedWidgets[name]) return false;
 
             var mode = editorMode();
             if (mode <= EditorMode.block && !blockWidgets[name])

@@ -4290,7 +4290,7 @@ module TDev
 
         public setSplitScreen(split:boolean, save = false)
         {
-            if (Cloud.isRestricted()) split = true; // always split in cloud restricted mode
+            if (Cloud.isUserRestricted()) split = true; // always split in cloud restricted mode
 
             if (save && Script)
                 Script.editorState.splitScreen = split

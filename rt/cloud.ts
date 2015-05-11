@@ -58,6 +58,11 @@ module TDev.Cloud {
         return !!lite;
     }
 
+    export function isUserRestricted()
+    {
+        return !!lite && !Cloud.hasPermission("root-ptr");
+    }
+
     export function getServiceUrl() { return config.rootUrl; }
 
     export function mkLegalDiv() {
