@@ -417,6 +417,10 @@ function defaultValueForType(t: string): J.JExpr {
   return null;
 }
 
+function compileOnOff(e: Environment, b: B.Block): J.JExpr {
+  return H.mkBooleanLiteral(b.getFieldValue("STATE") == "ON");
+}
+
 // [t] is the expected type; in case the block was actually not there (i.e.
 // [b == null]), we may be able to provide a default value.
 function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
@@ -435,6 +439,8 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
       return compileBoolean(e, b);
     case "logic_negate":
       return compileNot(e, b);
+    case "device_logic_onoff_states":
+      return compileOnOff(e, b);
     case "variables_get":
       return compileVariableGet(e, b);
     case "text":
@@ -590,7 +596,13 @@ function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Envi
 }
 
 function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[]) {
-  var args = inputs.map(x => compileExpression(e, b.getInputTargetBlock(x)));
+  var args = inputs.map(x => {
+    var f = b.getFieldValue(x);
+    if (f)
+      return H.mkStringLiteral(f);
+    else
+      return compileExpression(e, b.getInputTargetBlock(x))
+  });
   return H.stdCall(f, args);
 }
 
@@ -636,6 +648,11 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
   return H.stdCall("make image", [H.mkStringLiteral(state)]);
 }
 
+// [key] id of a block
+// [f] function from the library it compiles to
+// [args] either a field value or, if not found, an input target block; field
+//  values are compiled to string, while input target blocks follow the
+//  expression compilation scheme
 var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_clear_display:           { f: "clear screen",          args: [] },
   device_show_letter:             { f: "show letter",           args: ["letter"] },
