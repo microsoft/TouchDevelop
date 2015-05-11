@@ -613,7 +613,7 @@ Blockly.Blocks['math_op2'] = {
         .setCheck("Number")
         .appendField("and");
     this.setInputsInline(true);
-    this.setOutput(true);
+    this.setOutput(true, "Number");
     this.setTooltip('');
   }
 };
@@ -627,7 +627,7 @@ Blockly.Blocks['math_op3'] = {
     this.appendValueInput("x")
         .setCheck("Number")
     this.setInputsInline(true);
-    this.setOutput(true);
+    this.setOutput(true, "Number");
     this.setTooltip('');
   }
 };
