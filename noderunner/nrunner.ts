@@ -804,16 +804,6 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         TDev.HelpTopic.fromScript(TDev.Script).docInfoAsync().done(resp => ar.ok(resp))
         break;
 
-    case "newsletter":
-        TDev.HelpTopic.fromScript(TDev.Script).printedAsync(true).done(text => {
-            if (opts.bare) {
-                ar.text(text)
-            } else {
-                html(text, false)
-            }
-        })
-        break;
-
     case "tutorial-info":
         ar.ok(TDev.AST.Step.tutorialInfo(TDev.Script))
         break;
