@@ -3073,7 +3073,7 @@ module TDev
                 return final();
             }).then(() => {
                 if (!shouldRun && !Browser.EditorSettings.editorMode()) {
-                    var theme = Browser.EditorSettings.hubTheme();
+                    var theme = Browser.EditorSettings.currentTheme;
                     if (theme && theme.editorMode) {
                         Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
                         return Promise.as();

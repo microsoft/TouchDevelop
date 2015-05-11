@@ -278,7 +278,7 @@
                 .filter((s) => !!s);
             var searchMode = terms.length > 0;
             var allHelpBtn = null;
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             if (theme && /scripts/.test(this.apiPath) && theme.scriptSearch) terms.push(theme.scriptSearch);
 
             if (!searchMode) {

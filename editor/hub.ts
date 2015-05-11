@@ -7,31 +7,8 @@ module TDev.Browser {
     export interface HubSection {
         title: string; // localized            
     }
-    
-    export interface HubTheme {
-        description: string;
-        logoArtId: string;
-
-        wallpaperArtId?: string;
-
-        tutorialsTopic?: string; // topics of tutorial pages
-
-        scriptSearch?: string; // seed when searching script
-
-        showcase?: boolean;
-        art?: boolean;
-        tags?: boolean;
-        top?: boolean;
-        social?: boolean;
-
-        editorMode?: string;
-        scriptTemplates?: string[];
-
-        noAnimations?: boolean;
-        lowMemory?: boolean;
-    }
-        
-    export var hubThemes: StringMap<HubTheme> = {
+            
+    export var themes: StringMap<Cloud.ClientTheme> = {
         'minecraft': {
             description: 'Learn to code with Minecraft',
             logoArtId: 'eopyzwpm',
@@ -147,11 +124,12 @@ module TDev.Browser {
 
         export function init() {
             if (window && window.location) {
-                if (Browser.isRaspberryPiDebian)
-                    EditorSettings.setHubTheme('rpi');
+                var cloudTheme = Cloud.config.theme;
+                if (cloudTheme) EditorSettings.setTheme(cloudTheme);
+                else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
                 else {
                     var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
-                    EditorSettings.setHubTheme(m ? m[2] : "");
+                    EditorSettings.setTheme(themes[m ? m[2] : ""]);
                 }
             }
         }
@@ -183,7 +161,7 @@ module TDev.Browser {
         function updateWallpaper() {
             var id = wallpaper();
             if (!id) {
-                var theme = hubTheme();
+                var theme = currentTheme
                 if (theme) id = theme.wallpaperArtId;
             }
 
@@ -230,7 +208,7 @@ module TDev.Browser {
         export function editorMode(): EditorMode {
             var mode = localStorage.getItem("editorMode");
             if (!mode) {
-                var theme = hubTheme();
+                var theme = currentTheme;
                 if (theme) mode = theme.editorMode;
             }
             return parseEditorMode(mode);
@@ -405,23 +383,17 @@ module TDev.Browser {
             });
         }
 
-        export function setHubTheme(theme: string) {
-            if (!!theme && !Browser.hubThemes[theme]) return;
-
-            var previous = localStorage.getItem("hubTheme");
-            if (previous !== theme) {
-                Util.log('theme: ' + theme);
-                if (!theme)
-                    localStorage.removeItem("hubTheme");
-                else
-                    localStorage.setItem("hubTheme", theme);
-                updateThemeSettings();
-                updateWallpaper();
-            }
+        export var currentTheme: Cloud.ClientTheme;
+        export function setTheme(theme: Cloud.ClientTheme) {
+            currentTheme = theme;
+            Util.log('theme: ' + theme);
+            currentTheme = theme;
+            updateThemeSettings();
+            updateWallpaper();
         }
 
         function updateThemeSettings() {
-            var theme = hubTheme();
+            var theme = currentTheme;
             if (theme) {
                 Browser.noAnimations = !!theme.noAnimations;
                 Browser.lowMemory = !!theme.lowMemory;
@@ -429,11 +401,6 @@ module TDev.Browser {
                 Browser.noAnimations = false;
                 Browser.lowMemory = false;
             }
-        }
-
-        export function hubTheme(): HubTheme {
-            var key = localStorage.getItem("hubTheme");
-            return key ? Browser.hubThemes[key] : undefined;
         }
     }
 
@@ -1023,7 +990,7 @@ module TDev.Browser {
         {
             var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
             var currentCap = PlatformCapabilityManager.current();
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             return this.templates
                 .filter(template => {
                     if (template.editorMode && template.editorMode > editorMode) return false;
@@ -1348,7 +1315,7 @@ module TDev.Browser {
         {
             var elt = this.mkFnBtn(lf("Tutorials"),() => {
                 var topic = "tutorials";
-                var theme = EditorSettings.hubTheme();
+                var theme = EditorSettings.currentTheme;
                 if (theme && theme.tutorialsTopic)
                     topic = theme.tutorialsTopic;
                 Util.setHash('#topic:' + topic);
@@ -2150,7 +2117,7 @@ module TDev.Browser {
 
         private showSimplifiedLearn(container:HTMLElement) {
             var buttons = [];
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
             this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
@@ -2354,7 +2321,7 @@ module TDev.Browser {
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
 
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             if (theme) {
                 if (!theme.showcase) delete sects["showcase"];
                 if (!theme.art) delete sects["myart"];
