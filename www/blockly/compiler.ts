@@ -75,12 +75,16 @@ module Helpers {
   }
 
   var librarySymbol = "♻";
-  var librarySingleton: J.JSingletonRef = {
-    nodeType: "singletonRef",
-    id: null,
-    name: librarySymbol,
-    type: mkTypeRef(librarySymbol)
-  };
+  var librarySingleton = mkSingletonRef(librarySymbol);
+
+  function mkSingletonRef(name: string): J.JSingletonRef {
+    return {
+      nodeType: "singletonRef",
+      id: null,
+      name: name.toLowerCase(),
+      type: mkTypeRef(name)
+    };
+  }
 
   // A library "♻ foobar" is actually a call to the method "foobar" of the
   // global singleton object "♻".
@@ -92,6 +96,13 @@ module Helpers {
   // [args].
   export function stdCall(name: string, args: J.JExpr[]): J.JCall {
     return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
+  }
+
+  // Call a function from the Math library. Apparently, the Math library is a
+  // different object than other libraries, so its AST representation is not the
+  // same. Go figure.
+  export function mathCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
   }
 
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
@@ -378,6 +389,13 @@ function compileArithmetic(e: Environment, b: B.Block, t: string): J.JExpr {
   return H.mkSimpleCall(opToTok[bOp], [compileExpression(e, left, t), compileExpression(e, right, t)]);
 }
 
+function compileMathOp2(e: Environment, b: B.Block): J.JExpr {
+  var op = b.getFieldValue("op");
+  var x = compileExpression(e, b.getInputTargetBlock("x"), "Number");
+  var y = compileExpression(e, b.getInputTargetBlock("y"), "Number");
+  return H.mathCall(op, [x, y]);
+}
+
 function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   assert(lookup(e, name) != null);
@@ -426,6 +444,8 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
   switch (b.type) {
     case "math_number":
       return compileNumber(e, b);
+    case "math_op2":
+      return compileMathOp2(e, b);
     case "math_arithmetic":
     case "logic_compare":
       return compileArithmetic(e, b, "Number");
@@ -450,7 +470,7 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
         return compileStdCall(e, b, stdCallTable[b.type].f, stdCallTable[b.type].args);
       else {
         console.error("Unable to compile expression: "+b.type);
-        return H.mkNumberLiteral(0);
+        return defaultValueForType(t);
       }
   }
 }
@@ -660,7 +680,7 @@ var stdCallTable: { [blockName: string]: { f: string; args: string[] }} = {
   device_scroll_image:            { f: "scroll image",          args: ["sprite", "x", "delay"] },
   device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"] },
   device_get_button:              { f: "button is pressed",     args: ["NAME"] },
-  device_get_acceleration:        { f: "acceleration",          args: ["dimension"] },
+  device_get_acceleration:        { f: "acceleration",          args: ["NAME"] },
   device_get_digital_pin:         { f: "digital read pin",      args: ["name"] },
   device_set_digital_pin:         { f: "digital write pin",     args: ["name", "value"] },
   device_get_analog_pin:          { f: "analog read pin",       args: ["name"] },
