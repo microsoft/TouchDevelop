@@ -2087,21 +2087,6 @@ module TDev {
             }
         }
 
-        public printNewsletter()
-        {
-            this.printedAsync(true).done(text => {
-                try {
-                    var w = window.open("about:blank", "tdTopic" + Util.guidGen());
-                    text = Util.fmt("<!DOCTYPE html><html><head><title>{0:q}</title></head><body>{1}</body></html>",
-                             this.json.name, text)
-                    w.document.write(text)
-                    w.document.close();
-                } catch(e) {
-                    ModalDialog.info(":( can't print from here", "Your browser might have blocked the print page or try to print from another device...");
-                }
-            })
-        }
-
         public print()
         {
             this.printedAsync().done(text => HelpTopic.printText(text, this.json.name))

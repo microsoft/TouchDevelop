@@ -178,10 +178,7 @@ module TDev
                         }),
                         HTML.mkButton(lf("for print/email"), () => {
                             topic.print()
-                        }),
-                        dbg ? HTML.mkButton(lf("for newsletter"), () => {
-                            topic.printNewsletter()
-                        }) : null
+                        })
                     ])
                 }));
 
