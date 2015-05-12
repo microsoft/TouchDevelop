@@ -540,11 +540,12 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   // Happens if we couldn't infer the type for a variable.
   if (t == null)
     throw new Error("No type for subexpression");
-  if (t != inferType(e, b))
-    throw new Error("Type mismatch");
 
   if (b == null)
     return defaultValueForType(t);
+
+  if (t != inferType(e, b))
+    throw new Error("Type mismatch");
 
   switch (b.type) {
     case "math_number":
