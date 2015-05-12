@@ -35,7 +35,7 @@ module TDev.Browser {
             scriptSearch: '#arduino',
             scriptTemplates: ['blankarduino', 'blankesplore'],
             editorMode: 'block',
-            intelliProfileId: 'efriyccg',
+            intelliProfileId: 'kbmkc',
         },
         'engduino': {
             description: 'Programming the Engduino',
@@ -45,7 +45,7 @@ module TDev.Browser {
             scriptSearch: '#engduino',
             scriptTemplates: ['blankengduino'],
             editorMode: 'block',
-            intelliProfileId: 'efriyccg',
+            intelliProfileId: 'kbmkc',
         },
     };
 
