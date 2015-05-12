@@ -1080,7 +1080,7 @@ module TDev
 
                     var tutLength = 8 - (moreTutorialsId ? 1 : 0);
                     var allTutorials = HelpTopic.getAllTutorials();
-                    var theme = Browser.EditorSettings.hubTheme();
+                    var theme = Browser.EditorSettings.currentTheme;
                     var score = (ht: HelpTopic) => {
                         var sc = 0;
                         if (this.hourOfCode && ht.isHourOfCode()) sc += 100;

@@ -4,6 +4,30 @@ module TDev.Cloud {
     export var lite = false;
     export var litePermissions:string = null;
 
+    export interface ClientTheme {
+        description: string;
+        logoArtId: string;
+
+        wallpaperArtId?: string;
+
+        tutorialsTopic?: string; // topics of tutorial pages
+        intelliProfileId?: string; // script containing supported apis
+
+        scriptSearch?: string; // seed when searching script
+
+        showcase?: boolean;
+        art?: boolean;
+        tags?: boolean;
+        top?: boolean;
+        social?: boolean;
+
+        editorMode?: string;
+        scriptTemplates?: string[];
+
+        noAnimations?: boolean;
+        lowMemory?: boolean;
+    }
+
     export interface ClientConfig {
         workspaceUrl: string;
         searchUrl: string;
@@ -18,6 +42,8 @@ module TDev.Cloud {
         releaseid?: string;
         relid?: string;
         releaseLabel?: string;
+
+        theme?: ClientTheme;
     }
 
     export var config: ClientConfig = {

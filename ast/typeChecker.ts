@@ -440,10 +440,8 @@ module TDev.AST
                         var k = expr.getKind()
                         var msg = ""
 
-                        if (k == api.core.String || k == api.core.Number)
-                            msg = lf("insert 'post to wall' if you want to display it");
-                        else if (k.hasContext(KindContext.Parameter))
-                            msg = lf("tap 'store in var' to save it in a variable or select a property on it");
+                        if (k.hasContext(KindContext.Parameter))
+                            msg = lf("tap 'store in var' to store it in a variable or select a property on it");
                         else
                             msg = lf("now you can select a property on it");
 

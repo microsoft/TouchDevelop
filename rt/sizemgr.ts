@@ -164,6 +164,7 @@ module TDev {
             }
 
             topFontSize = Math.floor(Math.min(h / 25, editorWindowWidth / (phoneMode ? 25 : portraitMode ? 36 : 55)));
+            if (Browser.isDesktop) topFontSize = Math.min(18, topFontSize);
             if (splitScreen)
                 wallWindowWidth -= 0.15*topFontSize // for the border
 

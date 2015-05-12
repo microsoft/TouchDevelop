@@ -2712,6 +2712,7 @@ module TDev
                 this.scriptVersions = ver;
                 Ticker.dbg("Editor.loadScriptTextAsync.done");
             })
+            .then(() => Browser.EditorSettings.loadThemeIntelliProfileAsync())
             .then(() => this.loadPluginsAsync())
             .then(() => this.loadParentScriptAsync())
         }
@@ -3043,7 +3044,7 @@ module TDev
                 var finalClassic = () => scr.then(scriptN => {
                     elt("scriptEditor").classList.remove("external");
                     if (script != scriptN) wasUpgraded = true
-                    ProgressOverlay.setProgress("parsing script text");
+                    ProgressOverlay.setProgress(lf("parsing script text"));
                     return this.loadScriptTextAsync(worldInfo, scriptN, editorState, true);
                 });
                 var finalExternal = () => scr.then(scriptText => {
@@ -3073,7 +3074,7 @@ module TDev
                 return final();
             }).then(() => {
                 if (!shouldRun && !Browser.EditorSettings.editorMode()) {
-                    var theme = Browser.EditorSettings.hubTheme();
+                    var theme = Browser.EditorSettings.currentTheme;
                     if (theme && theme.editorMode) {
                         Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
                         return Promise.as();
@@ -3780,6 +3781,7 @@ module TDev
         private loadIntelliProfile(ht: HelpTopic, firstTime: boolean = false)
         {
             var refresh = () => {
+                this.addIntelliProfile(Browser.EditorSettings.currentThemeIntelliProfile);
                 this.addIntelliProfile(Plugins.getPluginIntelliProfile());
                 this.setupTopButtons();
                 this.refreshScriptNav();

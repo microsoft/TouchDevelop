@@ -7,31 +7,8 @@ module TDev.Browser {
     export interface HubSection {
         title: string; // localized            
     }
-    
-    export interface HubTheme {
-        description: string;
-        logoArtId: string;
-
-        wallpaperArtId?: string;
-
-        tutorialsTopic?: string; // topics of tutorial pages
-
-        scriptSearch?: string; // seed when searching script
-
-        showcase?: boolean;
-        art?: boolean;
-        tags?: boolean;
-        top?: boolean;
-        social?: boolean;
-
-        editorMode?: string;
-        scriptTemplates?: string[];
-
-        noAnimations?: boolean;
-        lowMemory?: boolean;
-    }
-        
-    export var hubThemes: StringMap<HubTheme> = {
+            
+    export var themes: StringMap<Cloud.ClientTheme> = {
         'minecraft': {
             description: 'Learn to code with Minecraft',
             logoArtId: 'eopyzwpm',
@@ -56,6 +33,19 @@ module TDev.Browser {
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
             scriptSearch: '#arduino',
+            scriptTemplates: ['blankarduino', 'blankesplore'],
+            editorMode: 'block',
+            intelliProfileId: 'efriyccg',
+        },
+        'engduino': {
+            description: 'Programming the Engduino',
+            logoArtId: 'qmjzqlkc',
+            wallpaperArtId: 'qmjzqlkc',
+            tutorialsTopic: 'engduinotutorials',
+            scriptSearch: '#engduino',
+            scriptTemplates: ['blankengduino'],
+            editorMode: 'block',
+            intelliProfileId: 'efriyccg',
         },
     };
 
@@ -147,11 +137,12 @@ module TDev.Browser {
 
         export function init() {
             if (window && window.location) {
-                if (Browser.isRaspberryPiDebian)
-                    EditorSettings.setHubTheme('rpi');
+                var cloudTheme = Cloud.config.theme;
+                if (cloudTheme) EditorSettings.setTheme(cloudTheme);
+                else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
                 else {
-                    var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
-                    EditorSettings.setHubTheme(m ? m[2] : "");
+                    var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
+                    EditorSettings.setTheme(themes[m ? m[2] : ""]);
                 }
             }
         }
@@ -183,7 +174,7 @@ module TDev.Browser {
         function updateWallpaper() {
             var id = wallpaper();
             if (!id) {
-                var theme = hubTheme();
+                var theme = EditorSettings.currentTheme
                 if (theme) id = theme.wallpaperArtId;
             }
 
@@ -230,7 +221,7 @@ module TDev.Browser {
         export function editorMode(): EditorMode {
             var mode = localStorage.getItem("editorMode");
             if (!mode) {
-                var theme = hubTheme();
+                var theme = EditorSettings.currentTheme;
                 if (theme) mode = theme.editorMode;
             }
             return parseEditorMode(mode);
@@ -370,6 +361,9 @@ module TDev.Browser {
             var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
                 { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
                 { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
+            if (Cloud.isRestricted() && !Cloud.hasPermission("admin"))
+                modes.pop(); // expert mode not support for regular users
+
             return modes.map((mode, index) => {
                 var pic = div('pic');
                 pic.style.background = Cloud.artCssImg(mode.id, true);
@@ -391,34 +385,48 @@ module TDev.Browser {
                 var m = new ModalDialog();
                 m.onDismiss = () => onSuccess(undefined);
                 m.add(div('wall-dialog-header', lf("choose your coding skill level")));
-                m.add(div('wall-dialog-body', lf("TouchDevelop will adapt to the coding experience to your skill level. You can change your skill level again in the hub.")));
-                var current = EditorSettings.editorModeText(EditorSettings.editorMode());
-                if (current)
-                    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
-                m.add(div('wall-dialog-body', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
+                m.add(div('wall-dialog-body', lf("We will adapt the editor to your coding skill level. You can change your skill level later in the hub.")));
+                //var current = EditorSettings.editorModeText(EditorSettings.editorMode());
+                //if (current)
+                //    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
+                m.add(div('wall-dialog-body center', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
                 m.add(Editor.mkHelpLink("skill levels"));
                 m.fullWhite();
                 m.show();
             });
         }
 
-        export function setHubTheme(theme: string) {
-            if (!!theme && !Browser.hubThemes[theme]) return;
+        export var currentTheme: Cloud.ClientTheme;
+        // call themeIntelliProfileAsync() to populate
+        export var currentThemeIntelliProfile: AST.IntelliProfile;
+        export function setTheme(theme: Cloud.ClientTheme) {
+            Util.log('theme: ' + theme);
+            EditorSettings.currentTheme = theme;
+            currentThemeIntelliProfile = undefined;
+            updateThemeSettings();
+            updateWallpaper();
+        }
+        export function loadThemeIntelliProfileAsync(): Promise { // of IntelliProfile
+            // cache hit
+            if (currentThemeIntelliProfile) return Promise.as(currentThemeIntelliProfile);
+            // should we load anything?
+            if (!currentTheme || !currentTheme.intelliProfileId) return Promise.as(undefined);
+            // try loading profile data
+            return ScriptCache.getScriptAsync(currentTheme.intelliProfileId)
+                .then((text: string) => {
+                    Util.log('loading intelliprofile for theme');
+                    var app = AST.Parser.parseScript(text);
+                    AST.TypeChecker.tcApp(app);
+                    currentThemeIntelliProfile = new AST.IntelliProfile();
+                    currentThemeIntelliProfile.allowAllLibraries = true;
+                    currentThemeIntelliProfile.loadFrom(app.actions()[0], false);
 
-            var previous = localStorage.getItem("hubTheme");
-            if (previous !== theme) {
-                Util.log('theme: ' + theme);
-                if (!theme)
-                    localStorage.removeItem("hubTheme");
-                else
-                    localStorage.setItem("hubTheme", theme);
-                updateThemeSettings();
-                updateWallpaper();
-            }
+                    return currentThemeIntelliProfile;
+                }, e => { return Promise.as(undefined) })
         }
 
         function updateThemeSettings() {
-            var theme = hubTheme();
+            var theme = EditorSettings.currentTheme;
             if (theme) {
                 Browser.noAnimations = !!theme.noAnimations;
                 Browser.lowMemory = !!theme.lowMemory;
@@ -426,11 +434,6 @@ module TDev.Browser {
                 Browser.noAnimations = false;
                 Browser.lowMemory = false;
             }
-        }
-
-        export function hubTheme(): HubTheme {
-            var key = localStorage.getItem("hubTheme");
-            return key ? Browser.hubThemes[key] : undefined;
         }
     }
 
@@ -1020,7 +1023,7 @@ module TDev.Browser {
         {
             var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
             var currentCap = PlatformCapabilityManager.current();
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             return this.templates
                 .filter(template => {
                     if (template.editorMode && template.editorMode > editorMode) return false;
@@ -1345,7 +1348,7 @@ module TDev.Browser {
         {
             var elt = this.mkFnBtn(lf("Tutorials"),() => {
                 var topic = "tutorials";
-                var theme = EditorSettings.hubTheme();
+                var theme = EditorSettings.currentTheme;
                 if (theme && theme.tutorialsTopic)
                     topic = theme.tutorialsTopic;
                 Util.setHash('#topic:' + topic);
@@ -2147,7 +2150,7 @@ module TDev.Browser {
 
         private showSimplifiedLearn(container:HTMLElement) {
             var buttons = [];
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
             this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
@@ -2351,7 +2354,7 @@ module TDev.Browser {
                 Object.keys(extra).forEach(k => sects[k] = extra[k]);
             }
 
-            var theme = EditorSettings.hubTheme();
+            var theme = EditorSettings.currentTheme;
             if (theme) {
                 if (!theme.showcase) delete sects["showcase"];
                 if (!theme.art) delete sects["myart"];
