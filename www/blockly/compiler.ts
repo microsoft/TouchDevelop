@@ -641,9 +641,9 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
-  var args = [compileExpression(e, b.getInputTargetBlock("TIMES"), "Number")];
+  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), "Number");
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return mkCallWithCallback(e, "repeat", args, body);
+  return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
@@ -653,7 +653,9 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
-  return mkCallWithCallback(e, "forever", [], compileStatements(e, b.getInputTargetBlock("DO")));
+  return H.mkWhile(
+    H.mkExprHolder([], H.mkBooleanLiteral(true)),
+    compileStatements(e, b.getInputTargetBlock("DO")));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
