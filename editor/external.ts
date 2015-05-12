@@ -89,6 +89,7 @@ module TDev {
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
+      jLib.id = "__DEVICE__";
       app.decls.push(jLib);
     }
 

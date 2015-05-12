@@ -109,6 +109,10 @@ module Helpers {
     return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
   }
 
+  export function mkGlobalRef(name: string): J.JCall {
+    return mkCall(name, mkTypeRef("data"), [mkSingletonRef("data")]);
+  }
+
   // Assumes its parameter [p] is in the [knownPropertyRefs] table.
   export function mkSimpleCall(p: string, args: J.JExpr[]): J.JExpr {
     assert(knownPropertyRefs[p] != undefined);
@@ -120,8 +124,25 @@ module Helpers {
     return <any> t;
   }
 
+  export function mkLTypeRef(t: string): J.JTypeRef {
+    return <any> JSON.stringify(<J.JLibraryType> { o: t, l: <any> "__DEVICE__" });
+  }
+
   export function mkGTypeRef(t: string): J.JTypeRef {
     return <any> JSON.stringify(<J.JGenericTypeInstance> { g: t });
+  }
+
+  export function mkVarDecl(x: string, t: J.JTypeRef): J.JData {
+    return {
+      nodeType: "data",
+      id: null,
+      name: x,
+      type: t,
+      comment: "",
+      isReadonly: false,
+      isTransient: false,
+      isCloudEnabled: false,
+    };
   }
 
   // Generates a local definition for [x] at type [t]; this is not enough to
@@ -239,6 +260,12 @@ module Helpers {
     }
   }
 
+  export function mkAssign(x: string, e: J.JExpr): J.JStmt {
+    var assign = mkSimpleCall(":=", [mkLocalRef(x), e]);
+    var expr = mkExprHolder([], assign);
+    return mkExprStmt(expr);
+  }
+
   // Generate the AST for:
   //   [var x: t := e]
   export function mkDefAndAssign(x: string, t: J.JTypeRef, e: J.JExpr): J.JStmt {
@@ -290,7 +317,7 @@ module Helpers {
     };
   }
 
-  export function mkApp(name: string, description: string, actions: J.JAction[]): J.JApp {
+  export function mkApp(name: string, description: string, decls: J.JDecl[]): J.JApp {
     return {
       nodeType: "app",
       id: null,
@@ -309,7 +336,7 @@ module Helpers {
       showAd: false,
       hasIds: false,
       rootId: "TODO",
-      decls: actions,
+      decls: decls,
       deletedDecls: <any> [],
     };
   }
@@ -332,26 +359,48 @@ function assert(x: boolean) {
     throw new Error("Assertion failure");
 }
 
+enum BlocklyType { TNumber, TBoolean, TString, TImage };
+
 // Infers the expected type of an expression by looking at the untranslated
 // block and figuring out, from the look of it, what type of expression it
 // holds.
-function inferType(e: Environment, b: B.Block): J.JTypeRef {
+function inferType(e: Environment, b: B.Block): BlocklyType {
   switch (b.type) {
     case "math_number":
     case "math_number1":
     case "math_arithmetic":
-      return H.mkTypeRef("Number");
+      return BlocklyType.TNumber;
     case "logic_operation":
     case "logic_compare":
     case "logic_boolean":
     case "logic_negate":
-      return H.mkTypeRef("Boolean");
+      return BlocklyType.TBoolean;
     case "text":
-      return H.mkTypeRef("String");
+      return BlocklyType.TString;
+    case "device_build_image":
+    case "device_build_big_image":
+      return BlocklyType.TImage;
     case "variables_get":
-      return lookup(e, b.getFieldValue("VAR")).type;
+      var binding = lookup(e, b.getFieldValue("VAR"));
+      if (binding)
+        return binding.type;
+      else
+        return null;
   }
-  return H.mkTypeRef("Unknown");
+  return null;
+}
+
+function toTdType(t: BlocklyType) {
+  switch (t) {
+    case BlocklyType.TNumber:
+      return H.mkTypeRef("Number");
+    case BlocklyType.TBoolean:
+      return H.mkTypeRef("Boolean");
+    case BlocklyType.TString:
+      return H.mkTypeRef("String");
+    case BlocklyType.TImage:
+      return H.mkLTypeRef("image");
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -413,7 +462,7 @@ function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
 function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   assert(lookup(e, name) != null);
-  return H.mkLocalRef(name);
+  return H.mkGlobalRef(name);
 }
 
 function compileText(e: Environment, b: B.Block): J.JExpr {
@@ -508,13 +557,19 @@ interface Environment {
 
 interface Binding {
   name: string;
-  type: J.JTypeRef;
+  type: BlocklyType;
+  isForVariable?: boolean;
+  isAssigned?: boolean;
 }
 
-function extend(e: Environment, b: Binding): Environment {
-  assert(lookup(e, b.name) == null);
+function isCompiledAsLocal(b: Binding) {
+  return b.isForVariable && !b.isAssigned;
+}
+
+function extend(e: Environment, x: string, t: BlocklyType): Environment {
+  assert(lookup(e, x) == null);
   return {
-    bindings: [b].concat(e.bindings)
+    bindings: [{ name: x, type: t }].concat(e.bindings)
   };
 }
 
@@ -560,27 +615,28 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bBy = b.getInputTargetBlock("BY");
   var bDo = b.getInputTargetBlock("DO");
 
-  var e1 = extend(e, { name: bVar, type: H.mkTypeRef("Number") });
+  var binding = lookup(e, bVar);
+  assert(binding.isForVariable);
 
-  if (isClassicForLoop(bBy, bFrom))
-    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, "Number")), compileStatements(e1, bDo))];
+  if (isClassicForLoop(bBy, bFrom) && !binding.isAssigned)
+    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, "Number")), compileStatements(e, bDo))];
   else
     return [
-      // var VAR: Number = FROM
-      H.mkDefAndAssign(bVar, H.mkTypeRef("Number"), compileExpression(e, bFrom, "Number")),
+      // VAR = FROM
+      H.mkAssign(bVar, compileExpression(e, bFrom, "Number")),
       // while
       H.mkWhile(
         // VAR <= TO
         H.mkExprHolder([],
-          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e1, bTo, "Number")])),
+          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e, bTo, "Number")])),
         // DO
-        compileStatements(e1, bDo).concat([
+        compileStatements(e, bDo).concat([
           H.mkExprStmt(
             H.mkExprHolder([],
               // VAR :=
               H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
                 // VAR + BY
-                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e1, bBy, "Number")])])))]))
+                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e, bBy, "Number")])])))]))
     ];
 }
 
@@ -605,27 +661,17 @@ function compilePrint(e: Environment, b: B.Block): J.JStmt {
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
 }
 
-function compileSetOrDef(e: Environment, b: B.Block): { stmt: J.JStmt; env: Environment } {
+function compileSet(e: Environment, b: B.Block): J.JStmt {
   var bVar = b.getFieldValue("VAR");
   var bExpr = b.getInputTargetBlock("VALUE");
-  var expr = compileExpression(e, bExpr);
   var binding = lookup(e, bVar);
-  if (binding) {
-    // Assignment. It's ok if we assign an expression of the wrong type, as
-    // TouchDevelop will flag it as an error.
-    return {
-      env: e,
-      stmt: H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [H.mkLocalRef(bVar), expr])))
-    };
-  } else {
-    // Definition
-    var t = inferType(e, b);
-    var e1 = extend(e, { name: bVar, type: t });
-    return {
-      env: e1,
-      stmt: H.mkDefAndAssign(bVar, t, expr)
-    };
+  if (inferType(e, bExpr) != binding.type) {
+    // Will be caught higher up and result in no statement
+    throw new Error("Type mismatch");
   }
+  var expr = compileExpression(e, bExpr);
+  var ref = isCompiledAsLocal(binding) ? H.mkLocalRef(bVar) : H.mkGlobalRef(bVar);
+  return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, expr])));
 }
 
 function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[], isExtensionMethod?: boolean) {
@@ -730,10 +776,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;
 
         case 'variables_set':
-          var r = compileSetOrDef(e, b);
-          stmts.push(r.stmt);
-          // This function also returns a possibly-extended environment.
-          e = r.env;
+          stmts.push(compileSet(e, b));
           break;
 
         case 'device_comment':
@@ -775,21 +818,6 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   return stmts;
 }
 
-function compileFunction(e: Environment, b: B.DefOrCallBlock): J.JAction {
-  // currently broken
-  var fName = b.getFieldValue("NAME");
-  var inParams: J.JLocalDef[] = [];
-  var outParams: J.JLocalDef[] = [];
-  e = b.arguments_.reduce((e: Environment, name: string) => {
-    var t = H.mkTypeRef("Unknown");
-    inParams.push(H.mkDef(name, t));
-    return extend(e, { name: name, type: t });
-  }, e);
-
-  var body = compileStatements(e, b.getInputTargetBlock("STACK"));
-  return H.mkAction(fName, body, inParams, outParams);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // Top-level definitions for compiling an entire blockly workspace
@@ -803,7 +831,66 @@ function isHandlerRegistration(b: B.Block) {
   return b.type == "device_button_event";
 }
 
+function mkEnv(w: B.Workspace): Environment {
+  // The to-be-returned environment.
+  var e = empty;
+
+  // First pass: collect loop variables, and mark them as such.
+  w.getAllBlocks().forEach((b: B.Block) => {
+    if (b.type == "controls_for") {
+      var x = b.getFieldValue("VAR");
+      e = extend(e, x, BlocklyType.TNumber);
+      lookup(e, x).isForVariable = true;
+    }
+  });
+
+  // This is really a dumb way to do type-inference, but well, I don't expect
+  // users to write terribly complicated programs (famous last words?).
+  var notInferred = 0;
+  var oneRound = () => {
+    var notInferred = 0;
+    // Second pass: try to infer the type of each binding if we can. If a loop
+    // variable is assigned elsewhere, flag it, because it means we won't be
+    // able to compile it as a TouchDevelop for-loop.
+    w.getAllBlocks().forEach((b: B.Block) => {
+      if (b.type == "variables_set") {
+        // If this is something we won't know how to compile, don't bother. Error
+        // will be flagged later.
+        var t = inferType(e, b.getInputTargetBlock("VALUE"));
+        if (t == null) {
+          notInferred++;
+          return;
+        }
+
+        // Add a binding, if needed. The strategy is "first type we can infer
+        // wins". Again, errors will be flagged later when compiling an
+        // assignment.
+        var x = b.getFieldValue("VAR");
+        var binding = lookup(e, x);
+        if (!binding)
+          e = extend(e, x, t);
+        else if (binding && binding.isForVariable)
+          binding.isAssigned = true;
+      }
+    });
+    return notInferred;
+  };
+
+  // Fixpoint computation.
+  while (notInferred != (notInferred = oneRound()));
+
+  return e;
+}
+
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
+  var decls: J.JDecl[] = [];
+  var e = mkEnv(b);
+  e.bindings.forEach((b: Binding) => {
+    if (!isCompiledAsLocal(b)) {
+      decls.push(H.mkVarDecl(b.name, toTdType(b.type)));
+    }
+  });
+
   // [stmtsHandlers] contains calls to register event handlers. They must be
   // executed before the code that goes in the main function, as that latter
   // code may block, and prevent the event handler from being registered.
@@ -811,14 +898,14 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var stmtsMain: J.JStmt[] = [];
   b.getTopBlocks(true).forEach((b: B.Block) => {
     if (isHandlerRegistration(b))
-      append(stmtsHandlers, compileStatements(empty, b));
+      append(stmtsHandlers, compileStatements(e, b));
     else
-      append(stmtsMain, compileStatements(empty, b));
+      append(stmtsMain, compileStatements(e, b));
   });
 
-  var action = H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []);
+  decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
 
-  return H.mkApp(options.name, options.description, [ action ]);
+  return H.mkApp(options.name, options.description, decls);
 }
 
 function compile(b: B.Workspace, options: CompileOptions): J.JApp {
