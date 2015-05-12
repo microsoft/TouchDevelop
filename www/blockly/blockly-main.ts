@@ -24,7 +24,7 @@ module TDev {
       return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == -1042622320;
   }
 
-  var $ = (s: string) => document.querySelector(s);
+  var $ = (s: string) => <HTMLElement> document.querySelector(s);
 
   // Both of these are written once when we receive the first (trusted)
   // message.
@@ -317,32 +317,63 @@ module TDev {
     dirty = false;
   }
 
-  function compileOrError() {
+  function compileOrError(wantErrors: boolean) {
     var ast: TDev.AST.Json.JApp;
-    try {
-      // Clear any previous errors
-      var clear = (c: string) => {
-        var elts = document.getElementsByClassName(c);
-        // Argh! It's alive!
-        for (var i = elts.length - 1; i >= 0; --i)
-          (<any> elts[i]).classList.remove(c);
-      };
-      clear("blocklySelected");
-      clear("blocklyError");
 
-      ast = compile(Blockly.mainWorkspace, {
-        name: getName(),
-        description: getDescription()
-      });
-    } catch (e) {
-      var block: Blockly.Block = (<any> e).block ? (<any> e).block : null;
-      if (block) {
+    // Clear any previous errors
+    var clear = (c: string) => {
+      var elts = document.getElementsByClassName(c);
+      // Argh! It's alive!
+      for (var i = elts.length - 1; i >= 0; --i)
+        (<any> elts[i]).classList.remove(c);
+    };
+    clear("blocklySelected");
+    clear("blocklyError");
+    $("#errors").classList.add("hidden");
+
+    ast = compile(Blockly.mainWorkspace, {
+      name: getName(),
+      description: getDescription()
+    });
+
+    var errors = Errors.get();
+    if (errors.length && wantErrors) {
+      $("#errors").classList.remove("hidden");
+      var text = "";
+      errors.forEach((e: Errors.CompilationError) => {
+        var block = e.block;
         (<any> block.svgGroup_).classList.add("blocklySelected");
         (<any> block.svgGroup_).classList.add("blocklyError");
-      }
-      statusMsg("⚠ compilation error "+e, External.Status.Error);
+        text += e.msg + "\n";
+      });
+      $("#errorsText").textContent = text;
+      statusMsg("⚠ compilation errors", External.Status.Error);
+      return null;
     }
+
     return ast;
+  }
+
+  function doGraduate(wantErrors: boolean) {
+    var ast = compileOrError(wantErrors);
+    if (!ast)
+      return;
+    post(<External.Message_Upgrade> {
+      type: External.MessageType.Upgrade,
+      ast: ast,
+      name: getName()+" (converted)",
+    });
+  }
+
+  function doCompile(wantErrors: boolean) {
+    var ast = compileOrError(wantErrors);
+    if (!ast)
+      return;
+    post(<External.Message_Compile> {
+      type: External.MessageType.Compile,
+      text: ast,
+      language: External.Language.TouchDevelop
+    });
   }
 
   function setupButtons() {
@@ -350,25 +381,21 @@ module TDev {
       doSave();
       post({ type: External.MessageType.Quit });
     });
+    $("#command-force-compile").addEventListener("click", () => {
+      doCompile(false);
+    });
     $("#command-compile").addEventListener("click", () => {
-      var ast = compileOrError();
-      if (!ast)
-        return;
-      post(<External.Message_Compile> {
-        type: External.MessageType.Compile,
-        text: ast,
-        language: External.Language.TouchDevelop
-      });
+      $("#command-force-graduate").classList.add("hidden");
+      $("#command-force-compile").classList.remove("hidden");
+      doCompile(true);
+    });
+    $("#command-force-graduate").addEventListener("click", () => {
+      doGraduate(false);
     });
     $("#command-graduate").addEventListener("click", () => {
-      var ast = compileOrError();
-      if (!ast)
-        return;
-      post(<External.Message_Upgrade> {
-        type: External.MessageType.Upgrade,
-        ast: ast,
-        name: getName()+" (converted)",
-      });
+      $("#command-force-graduate").classList.remove("hidden");
+      $("#command-force-compile").classList.add("hidden");
+      doGraduate(true);
     });
     $("#command-run").addEventListener("click", () => {
     });

@@ -344,6 +344,10 @@ module Helpers {
 
 import H = Helpers;
 
+///////////////////////////////////////////////////////////////////////////////
+// Miscellaneous utility functions
+///////////////////////////////////////////////////////////////////////////////
+
 // Mutate [a1] in place and append to it the elements from [a2].
 function append <T> (a1: T[], a2: T[]) {
   a1.push.apply(a1, a2);
@@ -359,27 +363,62 @@ function assert(x: boolean) {
     throw new Error("Assertion failure");
 }
 
-enum BlocklyType { TNumber, TBoolean, TString, TImage };
+module Errors {
+
+  export interface CompilationError {
+    msg: string;
+    block: B.Block;
+  }
+
+  var errors: CompilationError[] = [];
+
+  export function report(m: string, b: B.Block) {
+    errors.push({ msg: m, block: b });
+  }
+
+  export function clear() {
+    errors = [];
+  }
+
+  export function get() {
+    return errors;
+  }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Types
+//
+// We slap a very simple type system on top of Blockly. This is needed to ensure
+// we generate valid TouchDevelop code (otherwise compilation from TD to C++
+// would not work).
+///////////////////////////////////////////////////////////////////////////////
+
+enum Type { Number = 1, Boolean, String, Image, Unit };
 
 // Infers the expected type of an expression by looking at the untranslated
 // block and figuring out, from the look of it, what type of expression it
 // holds.
-function inferType(e: Environment, b: B.Block): BlocklyType {
+function inferType(e: Environment, b: B.Block): Type {
+  if (b.type in stdCallTable)
+    return stdCallTable[b.type].f.type;
+
   switch (b.type) {
     case "math_number":
-    case "math_number1":
+    case "math_op2":
+    case "math_op3":
     case "math_arithmetic":
-      return BlocklyType.TNumber;
+      return Type.Number;
     case "logic_operation":
     case "logic_compare":
     case "logic_boolean":
     case "logic_negate":
-      return BlocklyType.TBoolean;
+      return Type.Boolean;
     case "text":
-      return BlocklyType.TString;
+      return Type.String;
     case "device_build_image":
     case "device_build_big_image":
-      return BlocklyType.TImage;
+      return Type.Image;
     case "variables_get":
       var binding = lookup(e, b.getFieldValue("VAR"));
       if (binding)
@@ -390,16 +429,18 @@ function inferType(e: Environment, b: B.Block): BlocklyType {
   return null;
 }
 
-function toTdType(t: BlocklyType) {
+function toTdType(t: Type) {
   switch (t) {
-    case BlocklyType.TNumber:
+    case Type.Number:
       return H.mkTypeRef("Number");
-    case BlocklyType.TBoolean:
+    case Type.Boolean:
       return H.mkTypeRef("Boolean");
-    case BlocklyType.TString:
+    case Type.String:
       return H.mkTypeRef("String");
-    case BlocklyType.TImage:
+    case Type.Image:
       return H.mkLTypeRef("image");
+    case Type.Unit:
+      throw new Error("Cannot convert unit");
   }
 }
 
@@ -436,7 +477,7 @@ var opToTok: { [index: string]: string } = {
 };
 
 
-function compileArithmetic(e: Environment, b: B.Block, t: string): J.JExpr {
+function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
@@ -449,20 +490,23 @@ function compileArithmetic(e: Environment, b: B.Block, t: string): J.JExpr {
 
 function compileMathOp2(e: Environment, b: B.Block): J.JExpr {
   var op = b.getFieldValue("op");
-  var x = compileExpression(e, b.getInputTargetBlock("x"), "Number");
-  var y = compileExpression(e, b.getInputTargetBlock("y"), "Number");
+  var x = compileExpression(e, b.getInputTargetBlock("x"), Type.Number);
+  var y = compileExpression(e, b.getInputTargetBlock("y"), Type.Number);
   return H.mathCall(op, [x, y]);
 }
 
 function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
-  var x = compileExpression(e, b.getInputTargetBlock("x"), "Number");
+  var x = compileExpression(e, b.getInputTargetBlock("x"), Type.Number);
   return H.mathCall("abs", [x]);
 }
 
-function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
+function compileVariableGet(e: Environment, b: B.Block, t?: Type): J.JExpr {
   var name = b.getFieldValue("VAR");
-  assert(lookup(e, name) != null);
-  return H.mkGlobalRef(name);
+  var binding = lookup(e, name);
+  assert(binding != null);
+  if (t != null && t != binding.type)
+    throw new Error("Type mismatch");
+  return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
 }
 
 function compileText(e: Environment, b: B.Block): J.JExpr {
@@ -474,33 +518,31 @@ function compileBoolean(e: Environment, b: B.Block): J.JExpr {
 }
 
 function compileNot(e: Environment, b: B.Block): J.JExpr {
-  var expr = compileExpression(e, b.getInputTargetBlock("BOOL"), "Boolean");
+  var expr = compileExpression(e, b.getInputTargetBlock("BOOL"), Type.Boolean);
   return H.mkSimpleCall("not", [expr]);
 }
 
-function compileCall(e: Environment, b: B.DefOrCallBlock): J.JExpr {
-  var f = b.getFieldValue("NAME");
-  var args = b.arguments_.map((x: any, i: number) => {
-    return compileExpression(e, b.getInputTargetBlock("ARG"+i));
-  });
-  return H.mkCall(f, H.mkTypeRef("code"), args);
-}
-
-function defaultValueForType(t: string): J.JExpr {
+function defaultValueForType(t: Type): J.JExpr {
   switch (t) {
-    case "Boolean":
+    case Type.Boolean:
       return H.mkBooleanLiteral(false);
-    case "Number":
+    case Type.Number:
       return H.mkNumberLiteral(0);
-    case "String":
+    case Type.String:
       return H.mkStringLiteral("");
   }
-  return null;
+  throw new Error("No default value for type");
 }
 
 // [t] is the expected type; in case the block was actually not there (i.e.
 // [b == null]), we may be able to provide a default value.
-function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
+function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
+  // Happens if we couldn't infer the type for a variable.
+  if (t == null)
+    throw new Error("No type for subexpression");
+  if (t != inferType(e, b))
+    throw new Error("Type mismatch");
+
   if (b == null)
     return defaultValueForType(t);
 
@@ -513,31 +555,24 @@ function compileExpression(e: Environment, b: B.Block, t?: string): J.JExpr {
       return compileMathOp3(e, b);
     case "math_arithmetic":
     case "logic_compare":
-      return compileArithmetic(e, b, "Number");
+      return compileArithmetic(e, b, Type.Number);
     case "logic_operation":
-      return compileArithmetic(e, b, "Boolean");
+      return compileArithmetic(e, b, Type.Boolean);
     case "logic_boolean":
       return compileBoolean(e, b);
     case "logic_negate":
       return compileNot(e, b);
     case "variables_get":
-      return compileVariableGet(e, b);
+      return compileVariableGet(e, b, t);
     case "text":
       return compileText(e, b);
-    case "procedures_callreturn":
-        return compileCall(e, <B.DefOrCallBlock> b);
     case 'device_build_image':
         return compileBuildImage(e, b, false);
     case 'device_build_big_image':
         return compileBuildImage(e, b, true);
     default:
       if (b.type in stdCallTable)
-        return compileStdCall(
-          e, b,
-          stdCallTable[b.type].f,
-          stdCallTable[b.type].args,
-          stdCallTable[b.type].isExtensionMethod
-        );
+        return compileStdCall(e, b, stdCallTable[b.type]);
       else {
         console.error("Unable to compile expression: "+b.type);
         return defaultValueForType(t);
@@ -557,7 +592,7 @@ interface Environment {
 
 interface Binding {
   name: string;
-  type: BlocklyType;
+  type: Type;
   isForVariable?: boolean;
   isAssigned?: boolean;
 }
@@ -566,7 +601,7 @@ function isCompiledAsLocal(b: Binding) {
   return b.isForVariable && !b.isAssigned;
 }
 
-function extend(e: Environment, x: string, t: BlocklyType): Environment {
+function extend(e: Environment, x: string, t: Type): Environment {
   assert(lookup(e, x) == null);
   return {
     bindings: [{ name: x, type: t }].concat(e.bindings)
@@ -591,7 +626,7 @@ var empty: Environment = {
 function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
   for (var i = 0; i <= b.elseifCount_; ++i) {
-    var cond = compileExpression(e, b.getInputTargetBlock("IF"+i), "Boolean");
+    var cond = compileExpression(e, b.getInputTargetBlock("IF"+i), Type.Boolean);
     var thenBranch = compileStatements(e, b.getInputTargetBlock("DO"+i));
     stmts.push(H.mkSimpleIf(H.mkExprHolder([], cond), thenBranch));
     if (i > 0)
@@ -619,16 +654,16 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   assert(binding.isForVariable);
 
   if (isClassicForLoop(bBy, bFrom) && !binding.isAssigned)
-    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, "Number")), compileStatements(e, bDo))];
+    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, Type.Number)), compileStatements(e, bDo))];
   else
     return [
       // VAR = FROM
-      H.mkAssign(bVar, compileExpression(e, bFrom, "Number")),
+      H.mkAssign(bVar, compileExpression(e, bFrom, Type.Number)),
       // while
       H.mkWhile(
         // VAR <= TO
         H.mkExprHolder([],
-          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e, bTo, "Number")])),
+          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e, bTo, Type.Number)])),
         // DO
         compileStatements(e, bDo).concat([
           H.mkExprStmt(
@@ -636,18 +671,18 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
               // VAR :=
               H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
                 // VAR + BY
-                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e, bBy, "Number")])])))]))
+                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e, bBy, Type.Number)])])))]))
     ];
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
-  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), "Number");
+  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), Type.Number);
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
   return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
-  var cond = compileExpression(e, b.getInputTargetBlock("COND"), "Boolean");
+  var cond = compileExpression(e, b.getInputTargetBlock("COND"), Type.Boolean);
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
   return H.mkWhile(H.mkExprHolder([], cond), body);
 }
@@ -655,11 +690,11 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 function compileForever(e: Environment, b: B.Block): J.JStmt {
   return H.mkWhile(
     H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("DO")));
+    compileStatements(e, b.getInputTargetBlock("NAME")));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
-  var text = compileExpression(e, b.getInputTargetBlock("TEXT"), "String");
+  var text = compileExpression(e, b.getInputTargetBlock("TEXT"), Type.String);
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
 }
 
@@ -667,32 +702,29 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
   var bVar = b.getFieldValue("VAR");
   var bExpr = b.getInputTargetBlock("VALUE");
   var binding = lookup(e, bVar);
-  if (inferType(e, bExpr) != binding.type) {
-    // Will be caught higher up and result in no statement
-    throw new Error("Type mismatch");
-  }
-  var expr = compileExpression(e, bExpr);
+  var expr = compileExpression(e, bExpr, binding.type);
   var ref = isCompiledAsLocal(binding) ? H.mkLocalRef(bVar) : H.mkGlobalRef(bVar);
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, expr])));
 }
 
-function compileStdCall(e: Environment, b: B.Block, f: string, inputs: string[], isExtensionMethod?: boolean) {
-  var args = inputs.map(x => {
-    var f = b.getFieldValue(x);
-    if (f)
+function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
+  var args = func.args.map((x: Param) => {
+    var f = b.getFieldValue(x.name);
+    if (f) {
+      assert(x.type == Type.String);
       return H.mkStringLiteral(f);
-    else
-      return compileExpression(e, b.getInputTargetBlock(x))
+    } else
+      return compileExpression(e, b.getInputTargetBlock(x.name), x.type)
   });
-  return H.stdCall(f, args, isExtensionMethod);
+  return H.stdCall(func.f.name, args, func.isExtensionMethod);
 }
 
-function compileStdBlock(e: Environment, b: B.Block, f: string, inputs: string[], isExtensionMethod?: boolean) {
-  return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f, inputs, isExtensionMethod)));
+function compileStdBlock(e: Environment, b: B.Block, f: StdFunc) {
+  return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f)));
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
-  var arg = compileExpression(e, b.getInputTargetBlock("comment"), "String");
+  var arg = compileExpression(e, b.getInputTargetBlock("comment"), Type.String);
   assert(arg.nodeType == "stringLiteral");
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
@@ -729,32 +761,102 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
   return H.stdCall("make image", [H.mkStringLiteral(state)]);
 }
 
-// [key] id of a block
-// [f] function from the library it compiles to
-// [args] either a field value or, if not found, an input target block; field
-//  values are compiled to string, while input target blocks follow the
-//  expression compilation scheme
-// [isExtensionMethod] compile [f(x, y...)] into [x → f (y...)]
-var stdCallTable: { [blockName: string]: { f: string; args: string[]; isExtensionMethod?: boolean }} = {
-  device_clear_display:           { f: "clear screen",          args: [] },
-  device_show_letter:             { f: "show letter",           args: ["letter"] },
-  device_pause:                   { f: "pause",                 args: ["pause"] },
-  device_print_message:           { f: "print string",          args: ["message", "pausetime"] },
-  device_plot:                    { f: "plot",                  args: ["x", "y"] },
-  device_unplot:                  { f: "unplot",                args: ["x", "y"] },
-  device_point:                   { f: "point",                 args: ["x", "y"] },
-  device_heading:                 { f: "heading",               args: [] },
-  device_make_StringImage:        { f: "make string image",     args: ["NAME"] },
-  device_scroll_image:            { f: "scroll image",          args: ["sprite", "x", "delay"],   isExtensionMethod: true },
-  device_show_image_offset:       { f: "show image",            args: ["sprite", "x", "y"],       isExtensionMethod: true },
-  device_get_button:              { f: "button is pressed",     args: ["NAME"] },
-  device_get_acceleration:        { f: "acceleration",          args: ["NAME"] },
-  device_get_digital_pin:         { f: "digital read pin",      args: ["name"] },
-  device_set_digital_pin:         { f: "digital write pin",     args: ["name", "value"] },
-  device_get_analog_pin:          { f: "analog read pin",       args: ["name"] },
-  device_set_analog_pin:          { f: "analog write pin",      args: ["name", "value"] },
-  device_get_brightness:          { f: "brightness",            args: [] },
-  device_set_brightness:          { f: "set brightness",        args: ["value"] },
+interface Param {
+  type: Type;
+  name: string;
+}
+
+var p = (x: string, t: Type) => ({ type: t, name: x });
+
+// We first try to find each arg as a field of the block (must be a string); if
+// that fails, we lookup the param as an input block.
+//
+// [isExtensionMethod] compiles [f(x, y...)] into [x → f (y...)]
+interface StdFunc {
+  f: Param;
+  args: Param[];
+  isExtensionMethod?: boolean
+}
+
+var stdCallTable: { [blockType: string]: StdFunc } = {
+  device_clear_display: {
+    f: p("clear screen", Type.Unit),
+    args: []
+  },
+  device_show_letter: {
+    f: p("show letter", Type.Unit),
+    args: [ p("letter", Type.String) ]
+  },
+  device_pause: {
+    f: p("pause", Type.Unit),
+    args: [ p("pause", Type.Number) ]
+  },
+  device_print_message: {
+    f: p("print string", Type.Unit),
+    args: [ p("message", Type.String), p("pausetime", Type.Number) ]
+  },
+  device_plot: {
+    f: p("plot", Type.Unit),
+    args: [ p("x", Type.Number), p("y", Type.Number) ]
+  },
+  device_unplot: {
+    f: p("unplot", Type.Unit),
+    args: [ p("x", Type.Number), p("y", Type.Number) ]
+  },
+  device_point: {
+    f: p("point", Type.Boolean),
+    args: [ p("x", Type.Number), p("y", Type.Number) ]
+  },
+  device_heading: {
+    f: p("heading", Type.Number),
+    args: []
+  },
+  device_make_StringImage: {
+    f: p("make string image", Type.Image),
+    args: [ p("NAME", Type.String) ]
+  },
+  device_scroll_image: {
+    f: p("scroll image", Type.Unit),
+    args: [ p("sprite", Type.Image), p("x", Type.Number), p("delay", Type.Number) ],
+    isExtensionMethod: true
+  },
+  device_show_image_offset: {
+    f: p("show image", Type.Unit),
+    args: [ p("sprite", Type.Image), p("x", Type.Number), p("y", Type.Number) ],
+    isExtensionMethod: true
+  },
+  device_get_button: {
+    f: p("button is pressed", Type.Boolean),
+    args: [ p("NAME", Type.String) ]
+  },
+  device_get_acceleration: {
+    f: p("acceleration", Type.Number),
+    args: [ p("NAME", Type.String) ]
+  },
+  device_get_digital_pin: {
+    f: p("digital read pin", Type.Number),
+    args: [ p("name", Type.String) ]
+  },
+  device_set_digital_pin: {
+    f: p("digital write pin", Type.Unit),
+    args: [ p("name", Type.String), p("value", Type.Number) ]
+  },
+  device_get_analog_pin: {
+    f: p("analog read pin", Type.Number),
+    args: [ p("name", Type.String) ]
+  },
+  device_set_analog_pin: {
+    f: p("analog write pin", Type.Unit),
+    args: [ p("name", Type.String), p("value", Type.Number) ]
+  },
+  device_get_brightness: {
+    f: p("brightness", Type.Number),
+    args: []
+  },
+  device_set_brightness: {
+    f: p("set brightness", Type.Unit),
+    args: [ p("value", Type.Number) ]
+  },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -803,17 +905,12 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
         default:
           if (b.type in stdCallTable)
-            stmts.push(compileStdBlock(
-              e, b,
-              stdCallTable[b.type].f,
-              stdCallTable[b.type].args,
-              stdCallTable[b.type].isExtensionMethod)
-            );
+            stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
           else
             console.log("Not generating code for (not a statement / not supported): "+b.type);
       }
     } catch (e) {
-      console.error("Could not compile", b, "error", e);
+      Errors.report(e+"", b);
     }
     b = b.getNextBlock();
   }
@@ -841,7 +938,7 @@ function mkEnv(w: B.Workspace): Environment {
   w.getAllBlocks().forEach((b: B.Block) => {
     if (b.type == "controls_for") {
       var x = b.getFieldValue("VAR");
-      e = extend(e, x, BlocklyType.TNumber);
+      e = extend(e, x, Type.Number);
       lookup(e, x).isForVariable = true;
     }
   });
@@ -911,6 +1008,7 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
 }
 
 function compile(b: B.Workspace, options: CompileOptions): J.JApp {
+  Errors.clear();
   return compileWorkspace(b, options);
 }
 
