@@ -2712,6 +2712,7 @@ module TDev
                 this.scriptVersions = ver;
                 Ticker.dbg("Editor.loadScriptTextAsync.done");
             })
+            .then(() => Browser.EditorSettings.loadThemeIntelliProfileAsync())
             .then(() => this.loadPluginsAsync())
             .then(() => this.loadParentScriptAsync())
         }
@@ -3780,6 +3781,7 @@ module TDev
         private loadIntelliProfile(ht: HelpTopic, firstTime: boolean = false)
         {
             var refresh = () => {
+                this.addIntelliProfile(Browser.EditorSettings.currentThemeIntelliProfile);
                 this.addIntelliProfile(Plugins.getPluginIntelliProfile());
                 this.setupTopButtons();
                 this.refreshScriptNav();

@@ -35,6 +35,7 @@ module TDev.Browser {
             scriptSearch: '#arduino',
             scriptTemplates: ['blankarduino', 'blankesplore'],
             editorMode: 'block',
+            intelliProfileId: 'efriyccg',
         },
         'engduino': {
             description: 'Programming the Engduino',
@@ -44,6 +45,7 @@ module TDev.Browser {
             scriptSearch: '#engduino',
             scriptTemplates: ['blankengduino'],
             editorMode: 'block',
+            intelliProfileId: 'efriyccg',
         },
     };
 
@@ -395,11 +397,32 @@ module TDev.Browser {
         }
 
         export var currentTheme: Cloud.ClientTheme;
+        // call themeIntelliProfileAsync() to populate
+        export var currentThemeIntelliProfile: AST.IntelliProfile;
         export function setTheme(theme: Cloud.ClientTheme) {
             Util.log('theme: ' + theme);
             EditorSettings.currentTheme = theme;
+            currentThemeIntelliProfile = undefined;
             updateThemeSettings();
             updateWallpaper();
+        }
+        export function loadThemeIntelliProfileAsync(): Promise { // of IntelliProfile
+            // cache hit
+            if (currentThemeIntelliProfile) return Promise.as(currentThemeIntelliProfile);
+            // should we load anything?
+            if (!currentTheme || !currentTheme.intelliProfileId) return Promise.as(undefined);
+            // try loading profile data
+            return ScriptCache.getScriptAsync(currentTheme.intelliProfileId)
+                .then((text: string) => {
+                    Util.log('loading intelliprofile for theme');
+                    var app = AST.Parser.parseScript(text);
+                    AST.TypeChecker.tcApp(app);
+                    currentThemeIntelliProfile = new AST.IntelliProfile();
+                    currentThemeIntelliProfile.allowAllLibraries = true;
+                    currentThemeIntelliProfile.loadFrom(app.actions()[0], false);
+
+                    return currentThemeIntelliProfile;
+                }, e => { return Promise.as(undefined) })
         }
 
         function updateThemeSettings() {

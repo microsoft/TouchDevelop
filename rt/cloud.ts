@@ -11,6 +11,7 @@ module TDev.Cloud {
         wallpaperArtId?: string;
 
         tutorialsTopic?: string; // topics of tutorial pages
+        intelliProfileId?: string; // script containing supported apis
 
         scriptSearch?: string; // seed when searching script
 
