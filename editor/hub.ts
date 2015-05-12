@@ -33,6 +33,17 @@ module TDev.Browser {
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
             scriptSearch: '#arduino',
+            scriptTemplates: ['blankarduino', 'blankesplore'],
+            editorMode: 'block',
+        },
+        'engduino': {
+            description: 'Programming the Engduino',
+            logoArtId: 'qmjzqlkc',
+            wallpaperArtId: 'qmjzqlkc',
+            tutorialsTopic: 'engduinotutorials',
+            scriptSearch: '#engduino',
+            scriptTemplates: ['blankengduino'],
+            editorMode: 'block',
         },
     };
 
@@ -128,7 +139,7 @@ module TDev.Browser {
                 if (cloudTheme) EditorSettings.setTheme(cloudTheme);
                 else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
                 else {
-                    var m = /(\?|&)theme=([a-z]+)(&|$)/.exec(window.location.href);
+                    var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
                     EditorSettings.setTheme(themes[m ? m[2] : ""]);
                 }
             }
@@ -161,7 +172,7 @@ module TDev.Browser {
         function updateWallpaper() {
             var id = wallpaper();
             if (!id) {
-                var theme = currentTheme
+                var theme = EditorSettings.currentTheme
                 if (theme) id = theme.wallpaperArtId;
             }
 
@@ -208,7 +219,7 @@ module TDev.Browser {
         export function editorMode(): EditorMode {
             var mode = localStorage.getItem("editorMode");
             if (!mode) {
-                var theme = currentTheme;
+                var theme = EditorSettings.currentTheme;
                 if (theme) mode = theme.editorMode;
             }
             return parseEditorMode(mode);
@@ -385,15 +396,14 @@ module TDev.Browser {
 
         export var currentTheme: Cloud.ClientTheme;
         export function setTheme(theme: Cloud.ClientTheme) {
-            currentTheme = theme;
             Util.log('theme: ' + theme);
-            currentTheme = theme;
+            EditorSettings.currentTheme = theme;
             updateThemeSettings();
             updateWallpaper();
         }
 
         function updateThemeSettings() {
-            var theme = currentTheme;
+            var theme = EditorSettings.currentTheme;
             if (theme) {
                 Browser.noAnimations = !!theme.noAnimations;
                 Browser.lowMemory = !!theme.lowMemory;

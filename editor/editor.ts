@@ -3043,7 +3043,7 @@ module TDev
                 var finalClassic = () => scr.then(scriptN => {
                     elt("scriptEditor").classList.remove("external");
                     if (script != scriptN) wasUpgraded = true
-                    ProgressOverlay.setProgress("parsing script text");
+                    ProgressOverlay.setProgress(lf("parsing script text"));
                     return this.loadScriptTextAsync(worldInfo, scriptN, editorState, true);
                 });
                 var finalExternal = () => scr.then(scriptText => {
