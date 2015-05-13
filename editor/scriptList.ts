@@ -7329,7 +7329,7 @@
                 var row = this.userRows[c.id];
                 if (!row) {
                     row = this.userRows[c.id] = document.createElement("tr");
-                    row.dataset["userid"] = c.id;
+                    row.setAttribute("data-userid", c.id);
                 }
                 var cell = document.createElement("td");
                 cell.style.width = '14em';
@@ -7387,7 +7387,7 @@
                             return;
                         }
                         var cell = td(row, "");
-                        cell.dataset["scriptid"] = progress.progressid;
+                        cell.setAttribute("data-scriptid", progress.progressid);
                         cell.setFlag("completed", progress.completed>0);
                         steps += progress.index;
                         stepsTd.innerText = steps.toString();

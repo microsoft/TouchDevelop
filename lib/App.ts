@@ -431,7 +431,7 @@ module TDev.RT {
             var timestart = 0;
             els.forEach((elt, index) => {
                 var msg = elt.innerText; if (!msg) return;
-                var timestamp = parseFloat(elt.dataset["timestamp"])
+                var timestamp = parseFloat(elt.getAttribute("data-timestamp"))
                 if (index == 0) timestart = timestamp;
                 // parse out data
                 var f: number;

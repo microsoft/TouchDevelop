@@ -516,7 +516,7 @@ module TDev {
                 Util.toArray(e.getElementsByClassName('md-box-avatar-body')).forEach((v: HTMLElement) => dirAuto(v));
             }
             Util.toArray(e.getElementsByClassName('md-video-link')).forEach((v: HTMLElement) => {
-                if (v.dataset["playersrc"]) v.withClick(() => v.innerHTML = v.dataset["playersrc"]);
+                if (v.hasAttribute("data-playersrc")) v.withClick(() => v.innerHTML = v.getAttribute("data-playersrc"));
                 else if (v.hasAttribute("data-video")) {
                     var lang = Util.getTranslationLanguage();
                     var jsvideo = <JsonVideo>JSON.parse(decodeURIComponent(v.getAttribute("data-video")));

@@ -54,7 +54,7 @@ module TDev.HTML {
     export function mkLazyVideoPlayer(preview: string, iframeSrc:string): HTMLElement {
         var d = div('md-video-link');
         Browser.setInnerHTML(d, SVG.getVideoPlay(preview));
-        d.dataset["playersrc"] = iframeSrc;
+        d.setAttribute("data-playersrc", iframeSrc);
         d.withClick(() => {
             d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' allowfullscreen=''></iframe></div>",iframeSrc);
         });
