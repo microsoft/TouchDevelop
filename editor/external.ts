@@ -52,6 +52,7 @@ module TDev {
     // update chain, but in order to save on some API calls, this script id
     // should be refreshed at regular intervals.
     var deviceScriptId = "jtpmeh";
+    var deviceLibraryName = "device";
 
     import J = AST.Json;
 
@@ -73,6 +74,7 @@ module TDev {
             if (deviceScriptId != script.updateid) {
               // Found a new version, keep going
               deviceScriptId = script.updateid;
+              deviceLibraryName = script.name;
               return pullLatestLibraryVersion();
             } else {
               return Promise.as();
@@ -84,11 +86,15 @@ module TDev {
     // to its [decls] field that references the device's library.
     function addDeviceLibrary(app: J.JApp) {
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
-        'meta import device {'+
+        'meta import ' + AST.Lexer.quoteId(deviceLibraryName) + ' {' +
         '  pub "' + deviceScriptId + '"'+
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
+      // There's an implicit convention here. The external editor needs to
+      // generate references to the device library (to talk about the image
+      // type, for instance), but doesn't know yet which id will be assigned to
+      // it. So both the external editor and this module agree on a common id.
       jLib.id = "__DEVICE__";
       app.decls.push(jLib);
     }
