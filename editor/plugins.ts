@@ -373,7 +373,7 @@ module TDev.Plugins {
                 Script.editorState.buttonPlugins[si.getGuid()] = 1
 
                 btns.forEach(btn => {
-                    var ico = /{icon:([a-z]+)}/.exec(btn.getDescription());
+                    var ico = /{icon:([a-zA-Z0-9]+)}/.exec(btn.getDescription());
                     p.operations.push(<PluginOperation> {
                         opid: btn.getName(),
                         header: btn.getName(),
