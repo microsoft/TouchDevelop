@@ -2,6 +2,26 @@
 
 
 module TDev.HTML {
+    export function tr(parent: HTMLElement, cl: string) {
+        var d = document.createElement('tr');
+        d.className = cl;
+        parent.appendChild(d);
+        return d;
+    }
+
+    export function td(parent: HTMLElement, cl: string) {
+        var d = document.createElement('td');
+        d.className = cl;
+        parent.appendChild(d);
+        return d;
+    }
+
+    export function col(parent: HTMLElement) {
+        var d = document.createElement('col');
+        parent.appendChild(d);
+        return d;
+    }
+
     export function jsrequireAsync(url: string): Promise {
         return new Promise((onSuccess, onProgress, onError) => {
             // look for previous script tag

@@ -24,7 +24,10 @@ module TDev
             this.res.div.id = "stringEdit";
 
             this.res.dismiss.id = "inlineEditCloseBtn";
-            this.res.onDismiss = () => this.calculator.checkNextDisplay();
+            this.res.onDismiss = () => {
+                this.dismissed();
+                this.calculator.checkNextDisplay();
+            }
 
             (<any>this.res.div).focusEditor = () => {
                 this.res.update();
@@ -40,6 +43,7 @@ module TDev
         public value(): string {
             return this.res.textarea.value;
         }
+        public dismissed() { }
     }
 
     export class BitMatrixLiteralEditor extends LiteralEditor {
@@ -50,6 +54,9 @@ module TDev
         private rows: number;
         private frames: number;
         private bitCells: HTMLElement[];
+        private animTable: HTMLTableElement;
+        private animToken: number;
+        private animCells: HTMLElement[];
         private dialog: ModalDialog;
 
         constructor(public calculator: Calculator, public literal: AST.Literal) {
@@ -65,30 +72,28 @@ module TDev
                     this.updateTable(v);
                 }
             });
-            this.table = div('');
-            this.root = div('bitmatrix', div('btns', this.plusBtn, this.minusBtn), this.table);
+            this.table = div('bitmatrices');
+            this.animTable = <HTMLTableElement>document.createElement("table");
+            this.animTable.className = 'bitmatrix bitpreview';
+            this.animCells = [];
+            Util.range(0, 5).forEach(i => {
+                var row = HTML.tr(this.animTable, 'bitrow');
+                HTML.td(row, 'index');
+                for (var j = 0; j < 5; ++j) {
+                    this.animCells[i * 5 + j] = HTML.td(row, 'bit');
+                    this.animCells[i * 5 + j].appendChild(div(''));
+                }
+            });
+            this.root = div('bitmatrix', div('btns', this.animTable, this.plusBtn, this.minusBtn), this.table);
             
             this.updateTable(literal.data);
         }
 
+        public dismissed() {
+            if (this.animToken) clearInterval(this.animToken);
+        }
+
         private updateTable(data: string) {
-            function tr(parent: HTMLElement, cl: string) {
-                var d = document.createElement('tr');
-                d.className = cl;
-                parent.appendChild(d);
-                return d;
-            }
-            function td(parent: HTMLElement, cl: string) {
-                var d = document.createElement('td');
-                d.className = cl;
-                parent.appendChild(d);
-                return d;
-            }
-            function col(parent: HTMLElement) {
-                var d = document.createElement('col');
-                parent.appendChild(d);
-                return d;
-            }
 
             data = (data || "").trim();
             var bits = data.split(/[\s\r\n]+/).map(s => parseInt(s));
@@ -100,27 +105,28 @@ module TDev
                 this.frames = Math.floor(bits.length / (this.rows * this.rows));
             }
 
-            this.plusBtn.style.display = this.frames < 10 ? 'block' : 'none';
-            this.minusBtn.style.display = this.frames > 1 ? 'block' : 'none';
+            this.plusBtn.style.display = this.frames < 10 ? '' : 'none';
+            this.minusBtn.style.display = this.frames > 1 ? '' : 'none';
 
             this.bitCells = [];
+            if (this.animToken) clearInterval(this.animToken);
             this.table.setChildren(Util.range(0, this.frames).map(frame => {
                 var table = document.createElement('table');
                 table.className = 'bitmatrix';
                 table.withClick(() => { });
 
-                var hrow = tr(table, 'bitheader');
-                td(hrow, '');
+                var hrow = HTML.tr(table, 'bitheader');
+                HTML.td(hrow, '');
                 for (var j = frame * this.rows; j < (frame + 1) * this.rows; ++j) {
-                    td(hrow, 'index').innerText = j.toString();
+                    HTML.td(hrow, 'index').innerText = j.toString();
                 }
 
                 // bit matrix
                 Util.range(0, this.rows).forEach(i => {
-                    var row = tr(table, 'bitrow');
-                    td(row, 'index').innerText = i.toString();
+                    var row = HTML.tr(table, 'bitrow');
+                    HTML.td(row, 'index').innerText = i.toString();
                     Util.range(frame * this.rows, this.rows).forEach(j => {
-                        var cell = td(row, 'bit');
+                        var cell = HTML.td(row, 'bit');
                         cell.title = "(" + j + ", " + i + ")";
                         var k = i * this.frames * this.rows + j;
                         this.bitCells[k] = cell;
@@ -135,6 +141,8 @@ module TDev
                 return table;
             }));
 
+            this.animate();
+
             if (!this.dialog && (this.frames > 1 ||  SizeMgr.splitScreen || SizeMgr.phoneMode)) {
                 this.dialog = new ModalDialog();
                 this.dialog.add(this.root);
@@ -144,6 +152,17 @@ module TDev
                 this.dialog.onDismiss = () => this.calculator.checkNextDisplay();
                 this.dialog.show();
             }
+        }
+
+        private animate() {
+            var af = 0;
+            this.animToken = window.setInterval(() => {
+                for (var i = 0; i < 5; ++i) {
+                    for (var j = 0; j < 5; ++j)
+                        this.animCells[i * 5 + j].setFlag('on', this.bitCells[i * this.frames * this.rows + af * this.rows + j].getFlag('on'));
+                }
+                af = (af + 1) % this.frames;
+            }, 600);
         }
 
         public editor(): HTMLElement {
