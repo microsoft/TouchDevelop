@@ -398,6 +398,11 @@ module TDev {
       doGraduate(true);
     });
     $("#command-run").addEventListener("click", () => {
+      var ast = compileOrError(false);
+      post(<External.Message_Run> {
+        type: External.MessageType.Run,
+        ast: <any> ast,
+      });
     });
   }
 }

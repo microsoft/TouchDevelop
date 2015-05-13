@@ -19,7 +19,7 @@ module TDev {
             Save, SaveAck,
             Compile, CompileAck,
             Merge, Quit, // [Quit] has no attached data, so not defining a special interface
-            Upgrade
+            Upgrade, Run
         };
 
         export interface Message_Init extends Message {
@@ -65,6 +65,11 @@ module TDev {
         export interface Message_Upgrade extends Message {
             type: MessageType; // == MessageType.Message_Upgrade
             name: string;
+            ast: any // AST.Json.JApp
+        }
+
+        export interface Message_Run extends Message {
+            type: MessageType; // == MessageType.Message_Run
             ast: any // AST.Json.JApp
         }
 

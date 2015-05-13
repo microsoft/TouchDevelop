@@ -74,7 +74,7 @@ module TDev {
             if (deviceScriptId != script.updateid) {
               // Found a new version, keep going
               deviceScriptId = script.updateid;
-              deviceLibraryName = script.name;
+              // deviceLibraryName = script.name;
               return pullLatestLibraryVersion();
             } else {
               return Promise.as();
@@ -99,11 +99,7 @@ module TDev {
       app.decls.push(jLib);
     }
 
-    // Takes a [JApp] and runs its through various hoops to make sure
-    // everything is type-checked and resolved properly.
-    function roundtrip(a: J.JApp): Promise { // of J.JApp
-      addDeviceLibrary(a);
-      var text = J.serialize(a);
+    function parseScript(text: string): Promise { // of AST.App
       return AST.loadScriptAsync((id: string) => {
         if (id == "")
           return Promise.as(text);
@@ -115,7 +111,25 @@ module TDev {
         var s = Script;
         Script = null;
         // The function writes its result in a global
-        return Promise.as(J.dump(s));
+        return Promise.as(s);
+      });
+    }
+
+    // Takes a [JApp] and runs its through various hoops to make sure
+    // everything is type-checked and resolved properly.
+    function roundtrip(a: J.JApp): Promise { // of J.JApp
+      addDeviceLibrary(a);
+      var text = J.serialize(a);
+      return parseScript(text).then((a: AST.App) => { return Promise.as(J.dump(a)); });
+    }
+
+    function typeCheckAndRun(text: string) {
+      parseScript(text).then((a: AST.App) => {
+        AST.TypeChecker.tcApp(a);
+        var compiledScript = AST.Compiler.getCompiledScript(a, {});
+        var rt = TheEditor.currentRt;
+        var main = compiledScript.actionsByStableName.main;
+        rt.run(main, []);
       });
     }
 
@@ -299,7 +313,7 @@ module TDev {
 
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
-            var ast = message2.ast;
+            var ast: AST.Json.JApp = message2.ast;
             addDeviceLibrary(ast);
             console.log("Attempting to serialize", ast);
             var text = J.serialize(ast);
@@ -309,6 +323,14 @@ module TDev {
               scriptName: message2.name,
               scriptText: text
             });
+            break;
+
+          case MessageType.Run:
+            var message3 = <Message_Run> event.data;
+            var ast: AST.Json.JApp = message3.ast;
+            addDeviceLibrary(ast);
+            var text = J.serialize(ast);
+            typeCheckAndRun(text);
             break;
 
           default:
