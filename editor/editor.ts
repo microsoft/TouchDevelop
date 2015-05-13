@@ -356,7 +356,8 @@ module TDev
                 Util.setTimeout(2000, takePoll);
         }
 
-        private takeScreenshotMaybe() : boolean {
+        private takeScreenshotMaybe(): boolean {
+            if (Cloud.isRestricted()) return false;
             if (this.currentRt && !this.currentRt.isStopped()) {
                 if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
                     if (Browser.screenshots && Browser.isHosted)
