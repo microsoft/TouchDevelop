@@ -4703,7 +4703,8 @@ table.bitmatrix {
 }
 
 div.bitmatrix > div.btns {
-  display:inline-block;
+  position:absolute;
+  right:0em;
   vertical-align:top;
   margin-top:0.5em;
 }

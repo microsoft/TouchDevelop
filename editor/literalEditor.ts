@@ -44,7 +44,7 @@ module TDev
 
     export class BitMatrixLiteralEditor extends LiteralEditor {
         private root: HTMLElement;
-        private table: HTMLTableElement;
+        private table: HTMLElement;
         private plusBtn: HTMLElement;
         private minusBtn: HTMLElement;
         private rows: number;
@@ -55,9 +55,6 @@ module TDev
         constructor(public calculator: Calculator, public literal: AST.Literal) {
             super(calculator, literal);
 
-            this.table = document.createElement('table');
-            this.table.className = 'bitmatrix';
-            this.table.withClick(() => { });
             this.plusBtn = HTML.mkRoundButton("svg:add,black", "add frame", Ticks.noEvent,() => {
                 var v = this.serialize(this.frames + 1);
                 this.updateTable(v);
@@ -68,7 +65,8 @@ module TDev
                     this.updateTable(v);
                 }
             });
-            this.root = div('bitmatrix', this.table, div('btns', this.plusBtn, this.minusBtn));
+            this.table = div('');
+            this.root = div('bitmatrix', div('btns', this.plusBtn, this.minusBtn), this.table);
             
             this.updateTable(literal.data);
         }
@@ -102,35 +100,40 @@ module TDev
                 this.frames = Math.floor(bits.length / (this.rows * this.rows));
             }
 
-            this.plusBtn.style.display = this.frames < 5 ? 'block' : 'none';
+            this.plusBtn.style.display = this.frames < 10 ? 'block' : 'none';
             this.minusBtn.style.display = this.frames > 1 ? 'block' : 'none';
 
             this.bitCells = [];
-            this.table.innerHTML = ""; // clear table and rebuild
-            var hrow = tr(this.table, 'bitheader');
-            td(hrow, '');
-            for (var j = 0; j < this.frames * this.rows; ++j) {
-                if (j > 0 && j % this.rows == 0) td(hrow, 'sep');
-                td(hrow, 'index').innerText = j.toString();
-            }
+            this.table.setChildren(Util.range(0, this.frames).map(frame => {
+                var table = document.createElement('table');
+                table.className = 'bitmatrix';
+                table.withClick(() => { });
 
-            // bit matrix
-            Util.range(0, this.rows).forEach(i => {
-                var row = tr(this.table, 'bitrow');
-                td(row, 'index').innerText = i.toString();
-                Util.range(0, this.frames * this.rows).forEach(j => {
-                    if (j > 0 && j % this.rows == 0) td(row, 'sep');
-                    var cell = td(row, 'bit');
-                    cell.title = "(" + i + ", " + j + ")";
-                    var k = i * this.frames * this.rows + j;
-                    this.bitCells[k] = cell;
-                    cell.setFlag('on', !!bits[k]);
-                    cell.withClick(() => {
-                        cell.setFlag('on', !cell.getFlag('on'));
+                var hrow = tr(table, 'bitheader');
+                td(hrow, '');
+                for (var j = frame * this.rows; j < (frame + 1) * this.rows; ++j) {
+                    td(hrow, 'index').innerText = j.toString();
+                }
+
+                // bit matrix
+                Util.range(0, this.rows).forEach(i => {
+                    var row = tr(table, 'bitrow');
+                    td(row, 'index').innerText = i.toString();
+                    Util.range(frame * this.rows, this.rows).forEach(j => {
+                        var cell = td(row, 'bit');
+                        cell.title = "(" + j + ", " + i + ")";
+                        var k = i * this.frames * this.rows + j;
+                        this.bitCells[k] = cell;
+                        cell.setFlag('on', !!bits[k]);
+                        cell.withClick(() => {
+                            cell.setFlag('on', !cell.getFlag('on'));
+                        });
+                        cell.appendChild(div(''));
                     });
-                    cell.appendChild(div(''));
                 });
-            });
+
+                return table;
+            }));
 
             if (!this.dialog && (this.frames > 1 ||  SizeMgr.splitScreen || SizeMgr.phoneMode)) {
                 this.dialog = new ModalDialog();
