@@ -574,7 +574,7 @@ module TDev
         }
 
         private searchAzureSearchArtAsync(terms: string, itemCount: number, kind: string = undefined) {
-            if (!this.autoUpdate.resultsCurrent(terms)) {
+            if (Cloud.isRestricted() || !this.autoUpdate.resultsCurrent(terms)) {
                 return Promise.as();
             }
             if (!kind && this.artKind) kind = this.artKind.getName().toLowerCase();

@@ -240,6 +240,7 @@ module TDev.Browser {
         var unrestrictedWidgets: StringMap<number> = {
             splitScreen: 1,
             shareScriptToGroup: 1,
+            uploadArtInSearchButton: 1,
         }
         var blockWidgets: StringMap<number> = {
             // edit
