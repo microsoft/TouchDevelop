@@ -41,7 +41,6 @@ module TDev.Browser {
             description: 'Programming the Engduino',
             logoArtId: 'qmjzqlkc',
             wallpaperArtId: 'qmjzqlkc',
-            tutorialsTopic: 'engduinotutorials',
             scriptSearch: '#engduino',
             scriptTemplates: ['blankengduino'],
             editorMode: 'block',
@@ -2152,6 +2151,9 @@ module TDev.Browser {
             var buttons = [];
             var theme = EditorSettings.currentTheme;
             var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
+            if (!helpTopic) {
+                Util.log("help topic not found"); return;
+            }
             this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
                 if (buttons.length > 6)
