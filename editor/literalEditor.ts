@@ -162,7 +162,7 @@ module TDev
                         this.animCells[i * 5 + j].setFlag('on', this.bitCells[i * this.frames * this.rows + af * this.rows + j].getFlag('on'));
                 }
                 af = (af + 1) % this.frames;
-            }, 600);
+            }, 400);
         }
 
         public editor(): HTMLElement {

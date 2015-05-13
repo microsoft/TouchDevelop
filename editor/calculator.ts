@@ -1235,13 +1235,17 @@ module TDev
             return wrapper;
         }
 
+        private inlineLiteralEditor(l: AST.Literal) {
+            var literalEditor: LiteralEditor;
+            if (/^bitmatrix$/.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l);
+            else literalEditor = new TextLiteralEditor(this, l);
+            return literalEditor;
+        }
+
         private inlineEditString(l:AST.Literal)
         {
             var editor = TheEditor;
-            var literalEditor: LiteralEditor;
-            if (/^bitmatrix$/.test(l.languageHint))
-                literalEditor = new BitMatrixLiteralEditor(this, l);
-            else literalEditor = new TextLiteralEditor(this, l);
+            var literalEditor = this.inlineLiteralEditor(l);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
@@ -2100,8 +2104,10 @@ module TDev
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
                 if (l instanceof AST.FieldName || l instanceof AST.RecordName)
                     e.nameOverride = lf("rename");
-                else
-                    e.nameOverride = lf("edit");
+                else if (/^bitmatrix$/.test(l.languageHint)) {
+                    e.nameOverride = lf("edit image");
+                    e.imageOverride = Cloud.artUrl("jbrtborw");
+                } else e.nameOverride = lf("edit");
                 e.descOverride = lf("change contents");
                 e.cbOverride = () => { this.inlineEdit(l) };
             } else if (typeof l.data == "boolean") {
