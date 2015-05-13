@@ -46,7 +46,26 @@
             <div id="status">✔ loaded</div>
         </div>
       </div>
-      <div id="editor"></div>
+      <div class="hbox" style="flex: 1">
+          <div id="editor"></div>
+          <div id="errors" class="vbox hidden">
+              <div id="errorsHeader">
+                  Some blocks could not be compiled.
+              </div>
+              <div id="errorsButton">
+                  <a href="#" class="roundbutton" id="command-force-graduate">
+                    <div class="roundsymbol">🎓</div>
+                    <div class="roundlabel">force<br />graduation</div>
+                  </a>
+                  <a href="#" class="roundbutton" id="command-force-compile">
+                    <div class="roundsymbol">⚡</div>
+                    <div class="roundlabel">force<br />compile</div>
+                  </a>
+              </div>
+              <div id="errorsText">
+              </div>
+          </div>
+      </div>
     </div>
     <xml id="blockly-toolbox" style="display: none">
       <category name="Basic">

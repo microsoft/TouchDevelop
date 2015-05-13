@@ -48,7 +48,10 @@ module TDev {
 
   export module External {
     export var TheChannel: Channel = null;
-    var deviceScriptId : string;
+    // [initAsync] will find the latest version of this script by walking up the
+    // update chain, but in order to save on some API calls, this script id
+    // should be refreshed at regular intervals.
+    var deviceScriptId = "jtpmeh";
 
     import J = AST.Json;
 
@@ -64,14 +67,16 @@ module TDev {
       return errorMsg;
     }
 
-    export function initAsync(): Promise { // of nothing
-      return deviceScriptId ? Promise.as()
-          : Browser.TheApiCacheMgr.getAsync('dhhzzl', true)
+    export function pullLatestLibraryVersion(): Promise { // of nothing
+      return Browser.TheApiCacheMgr.getAsync(deviceScriptId, true)
           .then((script: JsonScript) => {
-            if (script)
+            if (deviceScriptId != script.updateid) {
+              // Found a new version, keep going
               deviceScriptId = script.updateid;
-            else
-                deviceScriptId = 'dhhzzl';
+              return pullLatestLibraryVersion();
+            } else {
+              return Promise.as();
+            }
           });
     }
 
@@ -84,6 +89,7 @@ module TDev {
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
+      jLib.id = "__DEVICE__";
       app.decls.push(jLib);
     }
 
@@ -112,7 +118,7 @@ module TDev {
       iframe: HTMLIFrameElement,
       guid: string): Promise // of Channel
     {
-      return initAsync().then(() => new Channel(editor, iframe, guid));
+      return pullLatestLibraryVersion().then(() => new Channel(editor, iframe, guid));
     }
 
     export class Channel {
