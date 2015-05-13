@@ -164,7 +164,11 @@ module TDev.RT {
 
         function mouseReading(ev: MouseEvent)
         {
-            var x = (ev.pageX - SizeMgr.windowWidth / 2) / SizeMgr.windowWidth;
+            var x = 0;
+            if (SizeMgr.splitScreen)
+                x = (ev.pageX - SizeMgr.editorWindowWidth - SizeMgr.wallWindowWidth / 2) / SizeMgr.wallWindowWidth;
+            else
+                x = (ev.pageX - SizeMgr.wallWindowWidth / 2) / SizeMgr.wallWindowWidth;
             var y = (ev.pageY - SizeMgr.windowHeight / 2) / SizeMgr.windowHeight;
             x *= 2;
             y *= 2;
