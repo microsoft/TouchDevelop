@@ -813,7 +813,7 @@ module TDev {
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||
                 macro == "stcode" || macro == "storder" || macro == "stdelete" || macro == "stcheckpoint" || macro == "sthashtags" ||
                 macro == "stnocheers" || macro == "steditormode" || macro == "stnexttutorials" || macro == "stmoretutorials" ||
-                macro == "translations" || macro == "stpixeltracking" || macro == "steventhubstracking"
+                macro == "translations" || macro == "stpixeltracking" || macro == "steventhubstracking" || macro == "icon"
                 ) {
                 if (this.designTime)
                     return "{" + macro + (arg ? ":" + Util.htmlEscape(arg) : "") + "}";

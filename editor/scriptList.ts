@@ -5364,7 +5364,7 @@
                         divs.push(div('', pull, diff));
                     }
 
-                    if (Cloud.lite && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
+                    if (Cloud.lite && !Cloud.isRestricted() && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
                         socialNetworks.forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
