@@ -286,6 +286,8 @@ module TDev.RT {
         {
             if (this.getRecord())
                 s.rt.postBoxedHtml(this.getRecord().getTable(<any[]>this.a, s), s.pc);
+            else if (this.typeInfo.prototype instanceof RTValue)
+                (<any[]>this.a).forEach((v: RTValue) => v.post_to_wall(s));
             else
                 s.rt.postBoxedHtml(this.getHtml(), s.pc);
         }
