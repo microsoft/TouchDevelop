@@ -34,7 +34,7 @@ module TDev.Browser {
         },
         'classic': {
             id: 'classic',
-            name: lf('coder'),
+            name: lf("coder"),
             descr: lf("Edit code as text, more options, for aspiring app writers!"),
             artId: 'ehymsljr',
             astMode: 2,
