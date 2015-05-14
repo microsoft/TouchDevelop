@@ -4819,6 +4819,12 @@ module TDev.AST {
                 this.dispatch(eh.parsed)
         }
 
+        public visitExpr(expr: Expr) {
+            if (expr.getKind() != api.core.Unknown)
+                this.incr(expr.getKind().getName());
+            super.visitExpr(expr);
+        }
+
         public visitCall(c:Call)
         {
             if (c.prop())
@@ -4923,6 +4929,11 @@ module TDev.AST {
         {
             if (!this.properties) return false;
             return this.hasKey("flag:" + flg)
+        }
+
+        public hasKind(k: Kind): boolean {
+            if (!this.properties) return true;
+            return this.hasTokenUsage(k) || this.hasKey(k.getName());
         }
 
         public hasDecl(p:Decl)

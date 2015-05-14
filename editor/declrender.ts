@@ -280,10 +280,13 @@ module TDev
         }
 
         export function mkKindList(ctx:KindContext, curr:Kind, selected:(k:Kind)=>void)
-        {
+        {         
+            var profile = TheEditor.intelliProfile;   
             var kinds = Script.getKinds().filter((k:Kind) =>
-                k.isData && k.hasContext(ctx) && Script.canUseCapability(k.generalCapabilities) &&
-                k.getParameterCount() <= 1);
+                k.isData && k.hasContext(ctx) && Script.canUseCapability(k.generalCapabilities) && k != api.core.Unknown &&
+                k.getParameterCount() <= 1 &&
+                (!profile || profile.hasKind(k))
+                );
             function cmp(a:Kind, b:Kind) {
                 var d = b.listPriority() - a.listPriority();
                 if (d) return d;

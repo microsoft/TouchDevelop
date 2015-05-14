@@ -81,7 +81,7 @@ module TDev
                         TheEditor.stepTutorial.notifyKindList(kindList)
                 }
 
-                doKind("select type of this " + model.kindBoxHeader(), model.getContexts(), k => model.setKind(k))
+                doKind(lf("select type of this {0}", model.kindBoxHeader()), model.getContexts(), k => model.setKind(k))
             }
 
             var d = div("kindContainer");

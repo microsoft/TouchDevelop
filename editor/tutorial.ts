@@ -729,8 +729,10 @@ module TDev
 
         public updateProfile(ip:AST.IntelliProfile)
         {
-            if (this.steps.some(s => !!s.data.addDecl || s.data.addsAction))
+            if (this.steps.some(s => !!s.data.addDecl || s.data.addsAction)) {
                 ip.incr("addNewButton")
+                ip.incr("dataSection");
+            }
         }
 
         public renderDocs(code:AST.Stmt[]):string

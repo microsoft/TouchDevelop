@@ -27,6 +27,9 @@ module TDev.Browser {
                 shareScriptToGroup: true,
                 // statements
                 boxed: true,
+                // sections
+                dataSection: true,
+                artSection: true,
             }
         },
         'classic': {
