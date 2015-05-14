@@ -13,8 +13,9 @@ module TDev.Cloud {
         // refactoring
         promoteRefactoring?: boolean;
         fixItButton?: boolean;
-        splitScreen?: boolean;
         shareScriptToGroup?: boolean;
+        splitScreen?: boolean; // split screen button
+        splitScreenOnLoad?: boolean;
         simplify?: boolean;
         moveToLibrary?: boolean;
         stripBlock?: boolean;

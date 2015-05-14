@@ -23,7 +23,8 @@ module TDev.Browser {
                 // refactoring
                 promoteRefactoring: true,
                 fixItButton: true,
-                splitScreen: true,
+                splitScreen: false,
+                splitScreenOnLoad: true,
                 shareScriptToGroup: true,
                 // statements
                 boxed: true,
@@ -46,6 +47,7 @@ module TDev.Browser {
                 promoteRefactoring: true,
                 fixItButton: true,
                 splitScreen: true,
+                splitScreenOnLoad: true,
                 shareScriptToGroup: true,
                 // misc
                 groupAllowExportApp: true,
@@ -254,6 +256,7 @@ module TDev.Browser {
                     copyPaste: true,
                     comment: true,
                     dataSection: true,
+                    splitScreenOnLoad: true
                 }
             },
         }
