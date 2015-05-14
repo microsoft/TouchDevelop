@@ -110,7 +110,7 @@ module TDev
             this.table.setChildren(Util.range(0, this.frames).map(frame => {
                 var table = document.createElement('table');
                 table.className = 'bitmatrix';
-                table.style.width = '16em';
+                table.style.width = SizeMgr.phoneMode ? '16em' : SizeMgr.portraitMode ? '13em' : '15em';
                 table.withClick(() => { });
 
                 var hrow = HTML.tr(table, 'bitheader');
@@ -141,7 +141,7 @@ module TDev
 
             this.animate();
 
-            if (!this.dialog && (this.frames > 1 ||  SizeMgr.splitScreen || SizeMgr.phoneMode)) {
+            if (!this.dialog) {
                 this.dialog = new ModalDialog();
                 this.dialog.add(this.root);
                 this.dialog.fullWhite();
