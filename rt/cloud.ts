@@ -106,6 +106,7 @@ module TDev.Cloud {
         scriptPropertiesPropertyCloud?: boolean;
         scriptPropertiesPropertyAllowExport?: boolean;
         stringEditFullScreen?: boolean;
+        persistanceRadio?: boolean;
     }
 
     export interface EditorMode {

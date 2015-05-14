@@ -207,7 +207,7 @@ module TDev
                                   // div("varLabel", lf("of type")),
                                   this.kindContainer,
                                   this.varRender,
-                                  saveBox,
+                                  TheEditor.widgetEnabled("persistanceRadio") ? saveBox : undefined,
                                   //div("formHint", lf("You can read the colon symbol (':') as 'of type' everywhere in TouchDevelop.")),
                                   ActionProperties.copyCutRefs("the current variable", this.theVariable),
                                   !this.artEditor ? null : (renderedEditor = this.artEditor.render()),

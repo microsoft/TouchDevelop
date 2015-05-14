@@ -315,7 +315,7 @@ module TDev
 
                 if (sect.things.length == 0) return;
                 // some sections are optional in tutorials
-                if (sect.tutorialHidden && sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
+                if (sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
 
                 items.push(div("navHeader", sect.label));
 
@@ -549,7 +549,6 @@ module TDev
                     }],
                     addOne: addLibrary,
                     newName: lf("lib"),
-                    tutorialHidden: true
                 },
             ]
 
@@ -565,6 +564,7 @@ module TDev
 
                 sections.forEach((sect) => {
                     if (!sect.createOne) return
+                    if (sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
                     sect.createOne().forEach((ds, i) => {
                         // d.setName(sect.newName
                         var d = ds.decl;
@@ -641,7 +641,6 @@ module TDev
         createOne: () => DeclButton[];
         addOne?: (d: AST.Decl) => void;
         newName?: string;
-        tutorialHidden?: boolean; // specifies whether it should be hidden by default in tutorials
         initiallyHidden?: boolean; // don't show immediately in dialog
     }
 }

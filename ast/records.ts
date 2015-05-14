@@ -1222,10 +1222,10 @@ module TDev.AST {
         static recordPersistenceToString(v:RecordPersistence, service:boolean):string
         {
             switch (v) {
-            case RecordPersistence.Temporary: return "temporary";
-            case RecordPersistence.Local: return service ? "server-local" : "local";
-            case RecordPersistence.Cloud: return service ? "fully replicated" :"replicated";
-            case RecordPersistence.Partial: return "partially replicated";
+            case RecordPersistence.Temporary: return lf("temporary");
+            case RecordPersistence.Local: return service ? lf("server-local") : lf("local");
+            case RecordPersistence.Cloud: return service ? lf("fully replicated") : lf("replicated");
+            case RecordPersistence.Partial: return lf("partially replicated");
             default: Util.die();
             }
         }

@@ -77,6 +77,7 @@ module TDev.Browser {
                 hubChannels: true,
                 hubScriptUpdates: true,
                 hubUsers: true,
+                persistanceRadio: true,
             }
         },
         'pro': {
@@ -185,6 +186,7 @@ module TDev.Browser {
                 hubTags: true,
                 hubMyArt: true,
                 hubLearn: true,
+                persistanceRadio: true,
             }
         }
     }
@@ -248,6 +250,7 @@ module TDev.Browser {
                     fixItButton: true,
                     copyPaste: true,
                     comment: true,
+                    dataSection: true,
                 }
             },
         }
