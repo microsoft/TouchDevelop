@@ -4699,7 +4699,6 @@ div.bitmatrix, table.bitmatrix {
 
 table.bitmatrix {
   table-layout:fixed;
-  overflow-x:auto;
 }
 
 table.bitpreview {
