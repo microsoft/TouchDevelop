@@ -416,8 +416,11 @@ module TDev
                     }
                 }
 
-                Script.getKinds().forEach((k) => {
-                    k.listProperties().forEach(addProp);
+                var profile = this.editor.intelliProfile;
+                Script.getKinds().filter(k => (!profile || profile.hasKind(k))).forEach((k) => {
+                    k.listProperties()
+                        .filter(prop => !profile || profile.hasProperty(prop))
+                        .forEach(addProp);
                 });
                 Script.libraries().forEach((l) => {
                     l.getKind().listProperties().forEach(addProp);

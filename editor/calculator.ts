@@ -2414,7 +2414,8 @@ module TDev
                 });
             } else {
                 var maxScore = 1;
-                var singl: AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons().filter(sg => sg.isBrowsable()));
+                var profile = TheEditor.intelliProfile;
+                var singl: AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons().filter(sg => sg.isBrowsable() && (!profile || profile.hasDecl(sg)) ));
                 var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
                 var libSingl:IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
@@ -2442,8 +2443,7 @@ module TDev
                 var maxLibs = (AST.blockMode || AST.legacyMode) ? 1e6 : 5;
                 if (libs.length > maxLibs)
                     libs = libs.slice(0, maxLibs)
-                else
-                    libSingl.score *= 1e-10;
+                else if (libSingl) libSingl.score *= 1e-10;
                 this.currentIntelliItems.pushRange(libs)
 
                 var locals = this.getLocals()
