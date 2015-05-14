@@ -593,9 +593,9 @@ module TDev
             }
 
             if (!debugMode && TheEditor.widgetEnabled("addNewButton")) {
-                var e = new DeclEntry(lf("add new action, event, ..."));
+                var e = new DeclEntry(lf("add new action, ..."));
                 e.makeIntoAddButton();
-                e.description = lf("or event, variable, library reference, record")
+                e.description = lf("or variable, library, ...")
                 var ee = e.mkBox();
                 HTML.setTickCallback(ee, Ticks.sideAddAnything, addNew);
                 items.push(ee);

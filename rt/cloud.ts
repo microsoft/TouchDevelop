@@ -27,6 +27,7 @@ module TDev.Cloud {
 
         // misc
         groupAllowExportApp?: boolean;
+        changeSkillLevel?: boolean;
 
         // features
         actionSettings?: boolean;
@@ -116,9 +117,11 @@ module TDev.Cloud {
     }
 
     export interface ClientTheme {
+        name: string;
         description: string;
-        logoArtId: string;
+        logoArtId?: string;
 
+        locale?: string;
         wallpaperArtId?: string;
 
         tutorialsTopic?: string; // topics of tutorial pages

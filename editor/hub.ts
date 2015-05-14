@@ -19,6 +19,7 @@ module TDev.Browser {
                 // edit
                 addNewButton: true,
                 undoButton: true,
+                changeSkillLevel: true,
                 // refactoring
                 promoteRefactoring: true,
                 fixItButton: true,
@@ -43,7 +44,7 @@ module TDev.Browser {
                 shareScriptToGroup: true,
                 // misc
                 groupAllowExportApp: true,
-
+                changeSkillLevel: true,
                 // edit
                 copyPaste: true,
                 // features
@@ -91,6 +92,7 @@ module TDev.Browser {
                 shareScriptToGroup: true,
                 // misc
                 groupAllowExportApp: true,
+                changeSkillLevel: true,
 
                 // edit
                 copyPaste: true,
@@ -183,7 +185,8 @@ module TDev.Browser {
             
     export var themes: StringMap<Cloud.ClientTheme> = {
         'minecraft': {
-            description: 'Learn to code with Minecraft',
+            name: "Minecraft",
+            description: lf("Learn to code with Minecraft"),
             logoArtId: 'eopyzwpm',
             tutorialsTopic: 'minecraftpitutorials',
             scriptSearch: '#minecraft',
@@ -192,7 +195,8 @@ module TDev.Browser {
             editorMode: editorModes['block'],
         },
         'rpi': {
-            description: 'Learn to code with Raspberry Pi',
+            name: "Raspberry Pi",
+            description: lf("Learn to code with Raspberry Pi"),
             logoArtId: 'eopyzwpm',
             tutorialsTopic: 'minecraftpitutorials',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
@@ -201,7 +205,8 @@ module TDev.Browser {
             editorMode: editorModes['block'],
         },
         'arduino': {
-            description: 'Program Arduino boards',
+            name: "Arduino",
+            description: lf("Program Arduino boards"),
             logoArtId: 'kzajxznr',
             wallpaperArtId: 'kzajxznr',
             tutorialsTopic: 'arduinotutorials',
@@ -211,13 +216,33 @@ module TDev.Browser {
             editorMode: editorModes['classic'],
         },
         'engduino': {
-            description: 'Programming the Engduino',
+            name: "Engduino",
+            description: lf("Programming the Engduino"),
             logoArtId: 'qmjzqlkc',
             wallpaperArtId: 'qmjzqlkc',
             scriptSearch: '#engduino',
             scriptTemplates: ['blankengduino'],
             intelliProfileId: 'kbmkc',
             editorMode: editorModes['classic'],
+        },
+        'restricted': {
+            name: "Restricted",
+            description: lf("Opinionated restricted mode"),
+            scriptTemplates: ['blank'],
+            intelliProfileId: 'lyusma',
+            editorMode: {
+                id: 'restricted',
+                name: lf("restricted"),
+                descr: lf("Restricted mode!"),
+                astMode: 2,
+                widgets: {
+                    addNewButton: true,
+                    undoButton: true,
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    copyPaste:true,
+                }
+            },
         }
     };
 
@@ -304,6 +329,7 @@ module TDev.Browser {
             if (window && window.location) {
                 var cloudTheme = Cloud.config.theme;
                 if (cloudTheme) EditorSettings.setTheme(cloudTheme);
+                else if (Cloud.isRestricted()) EditorSettings.setTheme(themes['restricted']);
                 else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
                 else {
                     var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
@@ -370,6 +396,8 @@ module TDev.Browser {
         }
 
         export function setEditorMode(mode: Cloud.EditorMode, upload: boolean) {
+            if (Cloud.isRestricted()) return;
+
             var previous = localStorage.getItem("editorMode");
             if (previous != mode) {
                 localStorage.setItem("editorMode", mode.id);
@@ -385,6 +413,7 @@ module TDev.Browser {
                 currentEditorMode = currentTheme && currentTheme.editorMode
                     ? currentTheme.editorMode
                     : editorModes[localStorage.getItem("editorMode") || ""] || editorModes['block']
+                TheEditor.refreshMode();
             }
             return currentEditorMode;
         }
@@ -403,11 +432,12 @@ module TDev.Browser {
         }
 
         export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
-            var current = editorMode();
+            if (!widgets().changeSkillLevel) return undefined;
+
             return div(cls, HTML.mkLinkButton(lf("Change skill level!"),() => {
                 tick(tk);
                 EditorSettings.showChooseEditorModeAsync().done(() => {
-                    if (current != editorMode()) editor.refreshMode();
+                    editor.refreshMode();
                 });
             }));
         }
@@ -445,8 +475,9 @@ module TDev.Browser {
         export var currentThemeIntelliProfile: AST.IntelliProfile;
         export function setTheme(theme: Cloud.ClientTheme) {
             Util.log('theme: ' + theme);
-            EditorSettings.currentTheme = theme;
+            currentTheme = theme;
             currentThemeIntelliProfile = undefined;
+            currentEditorMode = undefined;
             updateThemeSettings();
             updateWallpaper();
         }

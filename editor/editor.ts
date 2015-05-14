@@ -1118,10 +1118,9 @@ module TDev
         }
 
         public widgetEnabled(name: string): boolean {
-            if (!TDev.Browser.EditorSettings.widgets[name]) return false;
             if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
                 return this.intelliProfile.hasKey(name)
-            return true;
+            return !!TDev.Browser.EditorSettings.widgets()[name];
         }
 
         public editedStmt(selectorOk = false):AST.Stmt
@@ -4323,7 +4322,7 @@ module TDev
                 AST.proMode = false
                 AST.blockMode = true
                 AST.legacyMode = false
-            } else if (prevMode == Browser.EditorSettings.AST_LEGACY) {
+            } else if (prevMode == Browser.EditorSettings.AST_PRO) {
                 AST.proMode = true
                 AST.blockMode = false
                 AST.legacyMode = false
