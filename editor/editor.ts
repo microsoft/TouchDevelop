@@ -3113,7 +3113,7 @@ module TDev
                 if (!shouldRun) {
                     this.setMode()
                     var st = Script.editorState
-                    if (st.splitScreen || this.widgetEnabled("splitScreenOnLoad"))
+                    if (st.splitScreen || this.widgetEnabled("splitScreenOnLoad") || Browser.EditorSettings.widgets().splitScreenOnLoad)
                         this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
