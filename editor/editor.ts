@@ -3074,14 +3074,7 @@ module TDev
 
                 return final();
             }).then(() => {
-                if (!shouldRun && !Browser.EditorSettings.editorMode()) {
-                    var theme = Browser.EditorSettings.currentTheme;
-                    if (theme && theme.editorMode) {
-                        Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
-                        return Promise.as();
-                    }
-                    return Browser.EditorSettings.showChooseEditorModeAsync().then(() => this.setMode(true))
-                }
+                if (!shouldRun) return Browser.EditorSettings.initEditorModeAsync().then(() => this.setMode(true))
                 else return Promise.as();
             }).then(() => {
                 if (!Script) return;
@@ -4326,7 +4319,7 @@ module TDev
 
         private setMode(refresh = false)
         {
-            var prevMode = Browser.EditorSettings.editorMode();
+            var prevMode = Browser.EditorSettings.astMode();
 
             if (prevMode == Browser.EditorMode.block) {
                 AST.proMode = false

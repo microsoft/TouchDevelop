@@ -45,7 +45,7 @@ module TDev.Browser {
             scriptTemplates: ['blankengduino'],
             editorMode: 'block',
             intelliProfileId: 'kbmkc',
-        },
+        }
     };
 
     export enum EditorMode {
@@ -146,6 +146,17 @@ module TDev.Browser {
             }
         }
 
+        export function initEditorModeAsync() : Promise {
+            if (!!editorMode()) return Promise.as();
+
+            var theme = Browser.EditorSettings.currentTheme;
+            if (theme && theme.editorMode) {
+                Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
+                return Promise.as();
+            }
+            return Browser.EditorSettings.showChooseEditorModeAsync();
+        }
+
         export function parseEditorMode(mode: string): EditorMode {
             if (!mode) return EditorMode.unknown;
             mode = mode.trim().toLowerCase();
@@ -195,8 +206,14 @@ module TDev.Browser {
             }
         }
 
+        export function loadEditorMode(id: string) {
+            var mode = Browser.EditorSettings.parseEditorMode(id);
+            if (mode && !editorMode())
+                Browser.EditorSettings.setEditorMode(mode, false);
+        }
+
         export function setEditorMode(mode: EditorMode, upload: boolean) {
-            var previous = EditorSettings.editorMode();
+            var previous = editorMode();
             if (previous != mode) {
                 if (mode == EditorMode.unknown)
                     localStorage.removeItem("editorMode");
@@ -208,6 +225,10 @@ module TDev.Browser {
             }
         }
 
+        export function editorModeName(): string {
+            return editorModeText(editorMode());
+        }
+
         export function editorModeText(mode: EditorMode): string {
             switch (mode) {
                 case EditorMode.block: return lf("beginner");
@@ -217,20 +238,26 @@ module TDev.Browser {
             }
         }
 
-        export function editorMode(): EditorMode {
+        export function astMode(): EditorMode {
+            return editorMode();
+        }
+
+        function editorMode(): EditorMode {
             var mode = localStorage.getItem("editorMode");
             if (!mode) {
                 var theme = EditorSettings.currentTheme;
                 if (theme) mode = theme.editorMode;
             }
-            return parseEditorMode(mode);
+            var m = parseEditorMode(mode);
+            if (!m) m = EditorMode.block;
+            return m;
         }
 
         function uploadEditorMode() {
-            var m = editorMode();
-            if (Cloud.getUserId() && Cloud.isOnline() && m != EditorMode.unknown) {
-                Util.log('updating skill level to ' + EditorMode[m]);
-                Cloud.postUserSettingsAsync({ editorMode: EditorMode[m] })
+            var m = localStorage.getItem("editorMode");
+            if (Cloud.getUserId() && Cloud.isOnline() && m) {
+                Util.log('updating skill level to ' + m);
+                Cloud.postUserSettingsAsync({ editorMode:m })
                     .done(() => { HTML.showProgressNotification(lf("skill level saved"), true); },(e) => { });
             }
         }
@@ -251,6 +278,8 @@ module TDev.Browser {
             fixItButton: 1,
             splitScreen: 1,
             shareScriptToGroup: 1,
+            // misc
+            groupAllowExportApp : 1,
         }
         var legacyWidgets: StringMap<number> = {
             // edit
@@ -276,10 +305,15 @@ module TDev.Browser {
             comment: 1,
             // hub
             scriptAddToChannel: 1,
+            notifyAppReloaded: 1,
+            showTemporaryNotice: 1,
+            hubChannels: 1,
+            hubScriptUpdates: 1,
+            hubUsers: 1,
         }
         var proWidgets: StringMap<number> = {
             //navigation
-            codeSearch:1,
+            codeSearch: 1,
             findReferences: 1,
             gotoNavigation: 1,
             goToDef: 1,
@@ -292,20 +326,22 @@ module TDev.Browser {
             // ui
             publishDescription: 1,
             sendPullRequest: 1,
+            scriptStats: 1,
+            userSocialTab: 1,
             // sections
             testsSection: 1,
-            actionTypesSection:1,
+            actionTypesSection: 1,
             pagesSection: 1,
-            recordsSection:1,
+            recordsSection: 1,
             // script lifecycle
             updateButton: 1,
             editLibraryButton: 1,
             errorsButton: 1,
             logsButton: 1,
-            deployButton:1,
+            deployButton: 1,
             // ui
             pluginsButton: 1,
-            runTestsButton:1,
+            runTestsButton: 1,
             scriptPropertiesManagement: 1,
             scriptPropertiesIcons: 1,
             scriptPropertiesExport: 1,
@@ -322,11 +358,16 @@ module TDev.Browser {
             lambda: 1,
             // hub
             commentHistory: 1,
-            scriptPullChanges: 1, 
+            scriptPullChanges: 1,
             scriptDiffToBase: 1,
             scriptHistoryTab: 1,
             scriptInsightsTab: 1,
             githubLinks: 1,
+            hubSocialTiles: 1,
+            hubTopAndNew: 1,
+            hubTags: 1,
+            hubMyArt: 1,
+            hubLearn: 1,
         }
 
         export function widgetEnabled(name: string): boolean {
@@ -378,7 +419,7 @@ module TDev.Browser {
         }
 
         export function showChooseEditorModeAsync(preferredMode = EditorMode.unknown): Promise {
-            if (preferredMode != EditorMode.unknown && EditorSettings.editorMode() <= preferredMode) return Promise.as();
+            if (preferredMode != EditorMode.unknown && editorMode() <= preferredMode) return Promise.as();
 
             TipManager.setTip(null)
             return new Promise((onSuccess, onError, onProgress) => {
@@ -697,9 +738,7 @@ module TDev.Browser {
                 if (h[2] == 'jumpingbird') h[2] = 'jumpingbirdtutorial';
                 Util.log('follow: {0}', h[2]);
                 // if specified, force the current editor mode
-                var editorMode = Browser.EditorSettings.parseEditorMode(h[3]);
-                if (editorMode && !Browser.EditorSettings.editorMode())
-                    Browser.EditorSettings.setEditorMode(editorMode, false);
+                EditorSettings.loadEditorMode(h[3]);
                 this.browser().clearAsync(true)
                     .done(() => {
                     // try finding built-in topic first
@@ -1021,12 +1060,11 @@ module TDev.Browser {
 
         private getAvailableTemplates():ScriptTemplate[]
         {
-            var editorMode = EditorSettings.editorMode() || EditorSettings.BLOCK_MODE;
+            // filter by editor mode
             var currentCap = PlatformCapabilityManager.current();
             var theme = EditorSettings.currentTheme;
             return this.templates
                 .filter(template => {
-                    if (template.editorMode && template.editorMode > editorMode) return false;
                     if (theme && theme.scriptTemplates && theme.scriptTemplates.indexOf(template.id) < 0) return false;
                     if (!template.caps) return true;
                     else {
@@ -1318,7 +1356,7 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
                 var elts = []
                 sections.forEach(k => {
-                    if (k != "templates" && !this.isBeginnerOrCoder())
+                    if (k != "templates")
                         elts.push(div("modalSearchHeader section", lf_static(k, true)))
                     bySection[k].forEach((template: ScriptTemplate) => {
                         var icon = div("sdIcon");
@@ -1455,7 +1493,7 @@ module TDev.Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (!this.isBeginnerOrCoder()) {
+                if (EditorSettings.widgetEnabled("hubSocialTiles")) {
                     if (elements.length < slots + 1) {
                         var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
                         el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
@@ -1488,7 +1526,7 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-                if (!this.isBeginnerOrCoder()) {
+                if (EditorSettings.widgetEnabled("hubScriptUpdates")) {
                     var upd = this.browser().headersWithUpdates();
                     if (upd.length > 0) {
                         var updBtn =
@@ -1515,15 +1553,10 @@ module TDev.Browser {
                 addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                if (!this.isBeginnerOrCoder()) {
+                if (EditorSettings.widgetEnabled("hubUsers"))
                     elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
-                    elements.push(this.smallBtn(lf("Give feedback Contact us"),() => { EditorSettings.showFeedbackBox() }, Ticks.hubFeedback));
-                    elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
-                } else {
-                    elements.push(this.mkFnBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
-                    elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
-                }
+                elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
+                elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
             } else if (s == "channels") {
                 noFnBreak = true;
                 while (elements.length < 5) {
@@ -1628,7 +1661,7 @@ module TDev.Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if (!Storage.temporary || this.showingTemporarySignin || EditorSettings.editorMode() <= EditorMode.block) return;
+            if ((!Storage.temporary || this.showingTemporarySignin) && EditorSettings.widgetEnabled("showTemporaryNotice")) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
@@ -1659,7 +1692,7 @@ module TDev.Browser {
                     d.canDismiss = false;
                 d.show();
             } else {
-                if (EditorSettings.editorMode() > EditorMode.block)
+                if (EditorSettings.widgetEnabled("showTemporaryNotice"))
                     Storage.showTemporaryWarning();
             }
         }
@@ -2194,8 +2227,7 @@ module TDev.Browser {
         }
 
         private createSkillButton(): HTMLElement {
-            var editorMode = EditorSettings.editorMode();
-            var skillTitle = editorMode ? lf("Skill level: {0}     ", EditorSettings.editorModeText(editorMode)) : lf("Choose skill");
+            var skillTitle = lf("Skill level: {0}     ", EditorSettings.editorModeName());
             var skill = this.mkFnBtn(skillTitle,() => {
                 EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
             }, Ticks.hubChooseSkill, true);
@@ -2334,28 +2366,20 @@ module TDev.Browser {
             m.choose(boxes);
         }
 
-        private isBeginnerOrCoder() {
-            return EditorSettings.editorMode() <= EditorMode.classic;
-        }       
-
         private updateSections()
         {
             var sects : StringMap<HubSection> = {
                 "recent": { title: lf("my scripts") },
-                "misc": { title: this.isBeginnerOrCoder() ? lf("tutorials") : lf("learn") },
+                "misc": { title: EditorSettings.widgetEnabled("hubLearn") ? lf("learn") : lf("tutorials") },
                 "showcase": { title: lf("showcase") },
                 "social": { title: lf("social") },
             };
-            if (!this.isBeginnerOrCoder()) {
-                var extra = {
-                    "top": { title: lf("top & new") },
-                    "tags": { title: lf("categories") },
-                    //"new": lf("new"),
-                    //"art": lf("art"),
-                    "myart": { title: lf("my art") },
-                };
-                Object.keys(extra).forEach(k => sects[k] = extra[k]);
-            }
+            if (EditorSettings.widgetEnabled("hubTopAndNew"))
+                sects["top"] = { title: lf("top & new") };
+            if (EditorSettings.widgetEnabled("hubTags"))
+                sects["tags"] = { title: lf("categories") };
+            if (EditorSettings.widgetEnabled("hubMyArt"))
+                sects["myart"] = { title: lf("my art") };
 
             var theme = EditorSettings.currentTheme;
             if (theme) {
@@ -2367,7 +2391,7 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
-                if (!this.isBeginnerOrCoder()) {
+                if (EditorSettings.widgetEnabled("hubChannels")) {
                     sects["channels"] = { title: lf("channels") };
                 }
             }
@@ -2483,7 +2507,7 @@ module TDev.Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    this.isBeginnerOrCoder() ? this.showSimplifiedLearn(c) : this.showLearn(c);
+                    EditorSettings.widgetEnabled("hubLearn") ? this.showLearn(c) : this.showSimplifiedLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {

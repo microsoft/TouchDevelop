@@ -1012,12 +1012,6 @@
             descr.placeholder = lf("enter a description");
             descr.value = "";
 
-            var school = HTML.mkTextInput("text", lf("enter the school name"));
-            school.value = "";
-
-            var grade = HTML.mkTextInput("text", lf("enter class grade"));
-            grade.value = "";
-
             var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
             HTML.setCheckboxValue(allowExport, false);
 
@@ -1031,9 +1025,7 @@
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("group name (minimum 4 characters)")), name),
                     div('', div('', lf("group description")), descr),
-                    div('', div('', lf("school name")), school),
-                    div('', div('', lf("class grade")), grade),
-                    (!Cloud.isRestricted() && EditorSettings.editorMode() == EditorMode.pro) ? div('', allowExport) : undefined
+                    EditorSettings.widgetEnabled("groupAllowExportApp") ? div('', allowExport) : undefined
                     ),
                 div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
@@ -1042,8 +1034,6 @@
                         var request = <Cloud.PostApiGroupsBody>{
                             name: name.value,
                             description: descr.value,
-                            school: school.value,
-                            grade: grade.value,
                             allowexport: HTML.getCheckboxValue(allowExport),
                             allowappstatistics: false,
                             userplatform: Browser.platformCaps,
@@ -5440,7 +5430,7 @@
                         }
                     });
 
-                    if (EditorSettings.editorMode() >= EditorMode.pro) {
+                    if (EditorSettings.widgetEnabled("scriptStats")) {
                         var stats = ""
                         var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
                         stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
@@ -7122,7 +7112,7 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             EditorSettings.editorMode() >= EditorMode.pro ? new UserSocialTab(this) : null,
+             EditorSettings.widgetEnabled("userSocialTab") ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
