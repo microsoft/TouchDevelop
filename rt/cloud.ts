@@ -53,6 +53,8 @@ module TDev.Cloud {
 
         // language
         comment?: boolean;
+        foreach?: boolean;
+        boxed?: boolean;
         async?: boolean;
         testAction?: boolean;
         lambda?: boolean;

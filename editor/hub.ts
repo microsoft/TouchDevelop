@@ -25,6 +25,8 @@ module TDev.Browser {
                 fixItButton: true,
                 splitScreen: true,
                 shareScriptToGroup: true,
+                // statements
+                boxed: true,
             }
         },
         'classic': {
@@ -66,6 +68,8 @@ module TDev.Browser {
                 scriptPropertiesSettings: true,
                 // statements
                 comment: true,
+                foreach: true,
+                boxed: true,
                 // hub
                 scriptAddToChannel: true,
                 notifyAppReloaded: true,
@@ -115,6 +119,8 @@ module TDev.Browser {
                 scriptPropertiesSettings: true,
                 // statements
                 comment: true,
+                foreach: true,
+                boxed: true,
                 // hub
                 scriptAddToChannel: true,
                 notifyAppReloaded: true,
@@ -240,7 +246,8 @@ module TDev.Browser {
                     undoButton: true,
                     promoteRefactoring: true,
                     fixItButton: true,
-                    copyPaste:true,
+                    copyPaste: true,
+                    comment: true,
                 }
             },
         }

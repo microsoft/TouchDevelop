@@ -48,19 +48,29 @@ module TDev
         public nonActionSelected() { return this.selectionActive && !(this.selectedStmt instanceof AST.ActionHeader); }
         public phoneNarrow() { return true }
 
-        static insertionButtons() {
+        static insertionButtons(): { name: string; desc: string; tick: Ticks; node: string; widget?: string; }[] {
             return [
-                { name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
-                        node: "if \\u0001need_Boolean\\u003Acondition then { }" },
-                { name: "for",  desc: lf("repeat code"), tick: Ticks.codeFor,
-                        node: "for 0 <= i < \\u0001need_Number do { }" },
-                { name: "while", desc: lf("simple loop"), tick: Ticks.codeWhile,
-                        node: "while \\u0001need_Boolean\\u003Aloop_condition do { }" },
-                { name: "for each", desc: lf("repeat on collection"),  tick: Ticks.codeForEach,
-                        node: "foreach e in \\u0001need_Collection\\u005bString\\u005d\\u003Acollection do { }" },
-                { name: "boxed", desc: lf("UI widget"), tick: Ticks.codeBoxed,
-                        node: "do box { }" },
-                ];
+                <{ name: string; desc: string; tick: Ticks; node: string; widget?: string; }>{
+                    name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
+                    node: "if \\u0001need_Boolean\\u003Acondition then { }"
+                },
+                {
+                    name: "for", desc: lf("repeat code"), tick: Ticks.codeFor,
+                    node: "for 0 <= i < \\u0001need_Number do { }"
+                },
+                {
+                    name: "while", desc: lf("simple loop"), tick: Ticks.codeWhile,
+                    node: "while \\u0001need_Boolean\\u003Aloop_condition do { }"
+                },
+                {
+                    name: "for each", desc: lf("repeat on collection"), tick: Ticks.codeForEach,
+                    node: "foreach e in \\u0001need_Collection\\u005bString\\u005d\\u003Acollection do { }", widget: "foreach"
+                },
+                {
+                    name: "boxed", desc: lf("UI widget"), tick: Ticks.codeBoxed,
+                    node: "do box { }", widget: "boxed"
+                },
+            ].filter(btn => !btn.widget || TheEditor.widgetEnabled(btn.widget));
         }
 
         public init(e:Editor)
@@ -223,7 +233,7 @@ module TDev
                   div("selHeader", lf("extract selection into action")),
                      this.extractedName = HTML.mkTextInput("text", lf("action name")),
                      mkBtn("extract", "Ctrl-E", Ticks.codeExtractAction, () => { this.extract() }));
-
+                
                 btns.push(div("selHeader", lf("surround with")));
                 this.extractedName.value = Script.freshName(extractedName);
 
