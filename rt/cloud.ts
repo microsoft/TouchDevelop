@@ -4,6 +4,117 @@ module TDev.Cloud {
     export var lite = false;
     export var litePermissions:string = null;
 
+    export interface EditorWidgets {
+        // edit
+        addNewButton?: boolean;
+        undoButton?: boolean;
+        copyPaste?: boolean;
+
+        // refactoring
+        promoteRefactoring?: boolean;
+        fixItButton?: boolean;
+        splitScreen?: boolean;
+        shareScriptToGroup?: boolean;
+        simplify?: boolean;
+        moveToLibrary?: boolean;
+        stripBlock?: boolean;
+
+        //navigation
+        codeSearch?: boolean;
+        findReferences?: boolean;
+        gotoNavigation?: boolean;
+        goToDef?: boolean;
+
+        // misc
+        groupAllowExportApp?: boolean;
+
+        // features
+        actionSettings?: boolean;
+        publishAsHidden?: boolean;
+
+        // ui
+        splitButton?: boolean;
+        uploadArtInSearchButton?: boolean;
+        calcApiHelp?: boolean;
+        sideRunButton?: boolean;
+        tutorialGoToPreviousStep?: boolean;
+
+        // sections
+        dataSection?: boolean;
+        eventsSection?: boolean;
+        artSection?: boolean;
+        librariesSection?: boolean;
+        scriptPropertiesSettings?: boolean;
+        testsSection?: boolean;
+        actionTypesSection?: boolean;
+        pagesSection?: boolean;
+        recordsSection?: boolean;
+
+        // language
+        comment?: boolean;
+        async?: boolean;
+        testAction?: boolean;
+        lambda?: boolean;
+
+        // debugging
+        toggleBreakpoint?: boolean;
+        debugButton?: boolean;
+        
+        // hub
+        scriptAddToChannel?: boolean;
+        notifyAppReloaded?: boolean;
+        showTemporaryNotice?: boolean;
+        hubChannels?: boolean;
+        hubScriptUpdates?: boolean;
+        hubUsers?: boolean;
+        publishDescription?: boolean;
+        sendPullRequest?: boolean;
+        scriptStats?: boolean;
+        userSocialTab?: boolean;
+        commentHistory?: boolean;
+        scriptPullChanges?: boolean;
+        scriptDiffToBase?: boolean;
+        scriptHistoryTab?: boolean;
+        scriptInsightsTab?: boolean;
+        githubLinks?: boolean;
+        hubSocialTiles?: boolean;
+        hubTopAndNew?: boolean;
+        hubTags?: boolean;
+        hubMyArt?: boolean;
+        hubLearn?: boolean;
+
+        // script lifecycle
+        updateButton?: boolean;
+        editLibraryButton?: boolean;
+        errorsButton?: boolean;
+        logsButton?: boolean;
+        deployButton?: boolean;
+
+        // ui
+        pluginsButton?: boolean;
+        runTestsButton?: boolean;
+        scriptPropertiesManagement?: boolean;
+        scriptPropertiesIcons?: boolean;
+        scriptPropertiesExport?: boolean;
+        scriptPropertiesPlatform?: boolean;
+        scriptPropertiesInstrumentation?: boolean;
+        scriptPropertiesData?: boolean;
+        wallLogsButton?: boolean;
+        scriptPropertiesPropertyCloud?: boolean;
+        scriptPropertiesPropertyAllowExport?: boolean;
+        stringEditFullScreen?: boolean;
+    }
+
+    export interface EditorMode {
+        id?: string;
+        name: string;
+        descr: string;
+        artId?: string;
+        // 1 : block, 2: legacy, 3: pro
+        astMode?: number;
+        widgets: EditorWidgets;                
+    }
+
     export interface ClientTheme {
         description: string;
         logoArtId: string;
@@ -21,7 +132,7 @@ module TDev.Cloud {
         top?: boolean;
         social?: boolean;
 
-        editorMode?: string;
+        editorMode?: EditorMode;
         scriptTemplates?: string[];
 
         noAnimations?: boolean;

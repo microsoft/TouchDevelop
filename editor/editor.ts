@@ -216,7 +216,7 @@ module TDev
             this.updatePause()
 
             var btns = [this.pauseBtnDiv];
-            if (ScriptEditorWorldInfo.status != "published" && TDev.Browser.EditorSettings.widgetEnabled("wallLogsButton"))
+            if (ScriptEditorWorldInfo.status != "published" && TDev.Browser.EditorSettings.widgets().wallLogsButton)
                 btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
             return btns;
         }
@@ -1118,7 +1118,7 @@ module TDev
         }
 
         public widgetEnabled(name: string): boolean {
-            if (!TDev.Browser.EditorSettings.widgetEnabled(name)) return false;
+            if (!TDev.Browser.EditorSettings.widgets[name]) return false;
             if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
                 return this.intelliProfile.hasKey(name)
             return true;
@@ -3820,8 +3820,7 @@ module TDev
                             }
 
                             var editorMode = ht.templateEditorMode();
-                            if (editorMode)
-                                Browser.EditorSettings.showChooseEditorModeAsync(Browser.EditorSettings.parseEditorMode(editorMode)).done();
+                            if (editorMode) Browser.EditorSettings.showChooseEditorModeAsync(editorMode).done();
                         }
 
                         // we've got kicked out of the editor in the meantime?
@@ -4319,13 +4318,12 @@ module TDev
 
         private setMode(refresh = false)
         {
-            var prevMode = Browser.EditorSettings.astMode();
-
-            if (prevMode == Browser.EditorMode.block) {
+            var prevMode = Browser.EditorSettings.editorMode().astMode;
+            if (prevMode == Browser.EditorSettings.AST_BLOCK) {
                 AST.proMode = false
                 AST.blockMode = true
                 AST.legacyMode = false
-            } else if (prevMode == Browser.EditorMode.pro) {
+            } else if (prevMode == Browser.EditorSettings.AST_LEGACY) {
                 AST.proMode = true
                 AST.blockMode = false
                 AST.legacyMode = false

@@ -50,7 +50,7 @@ module TDev
             if (window.localStorage["lastExceptionMessage"]) {
                 var msg = window.localStorage["lastExceptionMessage"];
                 window.localStorage["lastExceptionMessage"] = "";
-                if (TDev.Browser.EditorSettings.widgetEnabled("notifyAppReloaded"))
+                if (TDev.Browser.EditorSettings.widgets().notifyAppReloaded)
                     upd = div("app-updated", lf("Something went wrong and we reloaded the app"));
             }
 

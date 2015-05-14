@@ -149,9 +149,7 @@
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
                     Util.setUserLanguageSetting(settings.culture, true);
-                    var mode = EditorSettings.parseEditorMode(settings.editorMode);
-                    if (mode != EditorMode.unknown)
-                        EditorSettings.setEditorMode(mode, false);
+                    EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     Cloud.litePermissions = settings.permissions;
                 }, e => { });
@@ -1025,7 +1023,7 @@
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("group name (minimum 4 characters)")), name),
                     div('', div('', lf("group description")), descr),
-                    EditorSettings.widgetEnabled("groupAllowExportApp") ? div('', allowExport) : undefined
+                    EditorSettings.widgets().groupAllowExportApp ? div('', allowExport) : undefined
                     ),
                 div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
@@ -2926,7 +2924,7 @@
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
-            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgetEnabled("scriptAddToChannel")) {
+            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
@@ -3534,7 +3532,7 @@
                         var si = this.browser().getScriptInfo(resp)
                         var hd = si.mkSmallBox();
                         hd.className += " sdBaseHeader"
-                        if (EditorSettings.widgetEnabled("commentHistory")) {
+                        if (EditorSettings.widgets().commentHistory) {
                             var btn = div("sdBaseCorner",
                                 div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
                                 div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
@@ -5349,8 +5347,8 @@
 
 
                     if (sc.jsonScript && sc.jsonScript.time) {
-                        var pull = EditorSettings.widgetEnabled("scriptPullChanges") ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
-                        var diff = EditorSettings.widgetEnabled("scriptDiffToBase") ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
+                        var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
+                        var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         divs.push(div('', pull, diff));
                     }
 
@@ -5430,7 +5428,7 @@
                         }
                     });
 
-                    if (EditorSettings.widgetEnabled("scriptStats")) {
+                    if (EditorSettings.widgets().scriptStats) {
                         var stats = ""
                         var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
                         stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
@@ -5995,14 +5993,14 @@
             if (!this.publicId)
                 r = [this,
                     new ScriptDetailsTab(this),
-                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null];
+                    EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null];
             else
                 r =
                 [
                     this,
                     this.editor() ? null : new ScriptDetailsTab(this),
-                    EditorSettings.widgetEnabled("scriptHistoryTab") ? new HistoryTab(this) : null,
-                    EditorSettings.widgetEnabled("scriptInsightsTab") ? new InsightsTab(this) : null,
+                    EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
+                    EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
             return r;
@@ -6305,7 +6303,7 @@
 
             options.header = lf("share this script")
             options.noDismiss = true
-            if (EditorSettings.widgetEnabled("shareScriptToGroup")) {
+            if (EditorSettings.widgets().shareScriptToGroup) {
                 options.moreButtons = [{
                     text: lf("group"),
                     handler: () => {
@@ -6586,13 +6584,13 @@
                     var publishBtn;
                     m.add(div("wall-dialog-buttons",
                         publishBtn = HTML.mkButton(lf("publish"), () => pub(false, uploadScreenshot ? screenshotDataUri : undefined)),
-                        EditorSettings.widgetEnabled('publishAsHidden') ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
+                        EditorSettings.widgets().publishAsHidden ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())));
-                    if (EditorSettings.widgetEnabled('publishDescription')) {
+                    if (EditorSettings.widgets().publishDescription) {
                         // if different author, allow to create pull request
                         m.add(div('wall-dialog-buttons', changeDescription));
                     }
-                    if (EditorSettings.widgetEnabled('sendPullRequest') &&
+                    if (EditorSettings.widgets().sendPullRequest &&
                         this.cloudHeader.userId && this.cloudHeader.userId != Cloud.getUserId()) {
                         m.add(div('wall-dialog-body',
                             Editor.mkHelpLink('pullrequests', lf("learn about pull requests")),
@@ -7112,7 +7110,7 @@
         public mkTabsCore():BrowserTab[]
         {
             var tabs:BrowserTab[] = [this,
-             EditorSettings.widgetEnabled("userSocialTab") ? new UserSocialTab(this) : null,
+             EditorSettings.widgets().userSocialTab ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));

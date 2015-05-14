@@ -7,6 +7,179 @@ module TDev.Browser {
     export interface HubSection {
         title: string; // localized            
     }
+
+    export var editorModes: StringMap<Cloud.EditorMode> = {
+        'block': {
+            id: 'block',
+            name: lf("beginner"),
+            descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
+            astMode: 1,
+            artId: 'brfljsds',
+            widgets: {
+                // edit
+                addNewButton: true,
+                undoButton: true,
+                // refactoring
+                promoteRefactoring: true,
+                fixItButton: true,
+                splitScreen: true,
+                shareScriptToGroup: true,
+            }
+        },
+        'classic': {
+            id: 'classic',
+            name: lf('coder'),
+            descr: lf("Edit code as text, more options, for aspiring app writers!"),
+            artId: 'ehymsljr',
+            astMode: 2,
+            widgets: {
+                // edit
+                addNewButton: true,
+                undoButton: true,
+                // refactoring
+                promoteRefactoring: true,
+                fixItButton: true,
+                splitScreen: true,
+                shareScriptToGroup: true,
+                // misc
+                groupAllowExportApp: true,
+
+                // edit
+                copyPaste: true,
+                // features
+                actionSettings: true,
+                publishAsHidden: true,
+                // refactoring
+                simplify: true,
+                // ui
+                splitButton: true,
+                uploadArtInSearchButton: true,
+                calcApiHelp: true,
+                sideRunButton: true,
+                tutorialGoToPreviousStep: true,
+                // section
+                dataSection: true,
+                eventsSection: true,
+                artSection: true,
+                librariesSection: true,
+                scriptPropertiesSettings: true,
+                // statements
+                comment: true,
+                // hub
+                scriptAddToChannel: true,
+                notifyAppReloaded: true,
+                showTemporaryNotice: true,
+                hubChannels: true,
+                hubScriptUpdates: true,
+                hubUsers: true,
+            }
+        },
+        'pro': {
+            id: 'pro',
+            name: lf("expert"),
+            artId: 'indivfwz',
+            descr: lf("'Javascripty' curly braces, all the tools, for experienced devs!"),
+            astMode: 3,
+            widgets: {
+                // edit
+                addNewButton: true,
+                undoButton: true,
+                // refactoring
+                promoteRefactoring: true,
+                fixItButton: true,
+                splitScreen: true,
+                shareScriptToGroup: true,
+                // misc
+                groupAllowExportApp: true,
+
+                // edit
+                copyPaste: true,
+                // features
+                actionSettings: true,
+                publishAsHidden: true,
+                // refactoring
+                simplify: true,
+                // ui
+                splitButton: true,
+                uploadArtInSearchButton: true,
+                calcApiHelp: true,
+                sideRunButton: true,
+                tutorialGoToPreviousStep: true,
+                // section
+                dataSection: true,
+                eventsSection: true,
+                artSection: true,
+                librariesSection: true,
+                scriptPropertiesSettings: true,
+                // statements
+                comment: true,
+                // hub
+                scriptAddToChannel: true,
+                notifyAppReloaded: true,
+                showTemporaryNotice: true,
+                hubChannels: true,
+                hubScriptUpdates: true,
+                hubUsers: true,
+
+                //navigation
+                codeSearch: true,
+                findReferences: true,
+                gotoNavigation: true,
+                goToDef: true,
+                // refactorings
+                moveToLibrary: true,
+                stripBlock: true,
+                // debugging
+                toggleBreakpoint: true,
+                debugButton: true,
+                // ui
+                publishDescription: true,
+                sendPullRequest: true,
+                scriptStats: true,
+                userSocialTab: true,
+                // sections
+                testsSection: true,
+                actionTypesSection: true,
+                pagesSection: true,
+                recordsSection: true,
+                // script lifecycle
+                updateButton: true,
+                editLibraryButton: true,
+                errorsButton: true,
+                logsButton: true,
+                deployButton: true,
+                // ui
+                pluginsButton: true,
+                runTestsButton: true,
+                scriptPropertiesManagement: true,
+                scriptPropertiesIcons: true,
+                scriptPropertiesExport: true,
+                scriptPropertiesPlatform: true,
+                scriptPropertiesInstrumentation: true,
+                scriptPropertiesData: true,
+                wallLogsButton: true,
+                scriptPropertiesPropertyCloud: true,
+                scriptPropertiesPropertyAllowExport: true,
+                stringEditFullScreen: true,
+                // language
+                async: true,
+                testAction: true,
+                lambda: true,
+                // hub
+                commentHistory: true,
+                scriptPullChanges: true,
+                scriptDiffToBase: true,
+                scriptHistoryTab: true,
+                scriptInsightsTab: true,
+                githubLinks: true,
+                hubSocialTiles: true,
+                hubTopAndNew: true,
+                hubTags: true,
+                hubMyArt: true,
+                hubLearn: true,
+            }
+        }
+    }
             
     export var themes: StringMap<Cloud.ClientTheme> = {
         'minecraft': {
@@ -16,7 +189,7 @@ module TDev.Browser {
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
-            editorMode: 'block',
+            editorMode: editorModes['block'],
         },
         'rpi': {
             description: 'Learn to code with Raspberry Pi',
@@ -25,7 +198,7 @@ module TDev.Browser {
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
             lowMemory: true,
-            editorMode: 'block',
+            editorMode: editorModes['block'],
         },
         'arduino': {
             description: 'Program Arduino boards',
@@ -34,8 +207,8 @@ module TDev.Browser {
             tutorialsTopic: 'arduinotutorials',
             scriptSearch: '#arduino',
             scriptTemplates: ['blankarduino', 'blankesplore'],
-            editorMode: 'block',
             intelliProfileId: 'kbmkc',
+            editorMode: editorModes['classic'],
         },
         'engduino': {
             description: 'Programming the Engduino',
@@ -43,22 +216,15 @@ module TDev.Browser {
             wallpaperArtId: 'qmjzqlkc',
             scriptSearch: '#engduino',
             scriptTemplates: ['blankengduino'],
-            editorMode: 'block',
             intelliProfileId: 'kbmkc',
+            editorMode: editorModes['classic'],
         }
     };
 
-    export enum EditorMode {
-        unknown,
-        block,
-        classic,
-        pro
-    }
-
     export module EditorSettings {
-        export var BLOCK_MODE = "block";
-        export var PRO_MODE = "pro";
-        export var CLASSIC_MODE = "classic";
+        export var AST_BLOCK = 1;
+        export var AST_LEGACY = 2;
+        export var AST_PRO = 3;        
 
         export function showFeedbackBox() {
             var link = (text: string, lnk: string) =>
@@ -85,7 +251,7 @@ module TDev.Browser {
                 link(lf("legal"), "/legal")
                 ));
 
-            if (EditorSettings.widgetEnabled("githubLinks")) {
+            if (EditorSettings.widgets().githubLinks) {
                 btns.appendChild(HTML.mkButton(lf("changes"),() => {
                     HTML.showProgressNotification(lf("downloading change log..."))
                     Util.httpGetJsonAsync((<any>window).mainJsName.replace(/main.js$/, "buildinfo.json"))
@@ -151,19 +317,10 @@ module TDev.Browser {
 
             var theme = Browser.EditorSettings.currentTheme;
             if (theme && theme.editorMode) {
-                Browser.EditorSettings.setEditorMode(Browser.EditorSettings.parseEditorMode(theme.editorMode), true);
+                Browser.EditorSettings.setEditorMode(theme.editorMode, false);
                 return Promise.as();
             }
             return Browser.EditorSettings.showChooseEditorModeAsync();
-        }
-
-        export function parseEditorMode(mode: string): EditorMode {
-            if (!mode) return EditorMode.unknown;
-            mode = mode.trim().toLowerCase();
-            if (mode === BLOCK_MODE) return EditorMode.block;
-            else if (mode === CLASSIC_MODE) return EditorMode.classic;
-            else if (mode === PRO_MODE) return EditorMode.pro;
-            else return EditorMode.unknown;
         }
 
         export function wallpaper(): string {
@@ -207,50 +364,33 @@ module TDev.Browser {
         }
 
         export function loadEditorMode(id: string) {
-            var mode = Browser.EditorSettings.parseEditorMode(id);
-            if (mode && !editorMode())
+            var mode =  editorModes[id] || editorModes['block'];
+            if (mode)
                 Browser.EditorSettings.setEditorMode(mode, false);
         }
 
-        export function setEditorMode(mode: EditorMode, upload: boolean) {
-            var previous = editorMode();
+        export function setEditorMode(mode: Cloud.EditorMode, upload: boolean) {
+            var previous = localStorage.getItem("editorMode");
             if (previous != mode) {
-                if (mode == EditorMode.unknown)
-                    localStorage.removeItem("editorMode");
-                else
-                    localStorage.setItem("editorMode", EditorMode[mode]);
-                if (upload)
-                    uploadEditorMode();
+                localStorage.setItem("editorMode", mode.id);
+                currentEditorMode = mode;
+                if (upload) uploadEditorMode();
                 TheEditor.refreshMode();
             }
         }
 
-        export function editorModeName(): string {
-            return editorModeText(editorMode());
-        }
-
-        export function editorModeText(mode: EditorMode): string {
-            switch (mode) {
-                case EditorMode.block: return lf("beginner");
-                case EditorMode.classic: return lf("coder");
-                case EditorMode.pro: return lf("expert");
-                default: return "";
+        var currentEditorMode: Cloud.EditorMode;
+        export function editorMode(): Cloud.EditorMode {
+            if (!currentEditorMode) {
+                currentEditorMode = currentTheme && currentTheme.editorMode
+                    ? currentTheme.editorMode
+                    : editorModes[localStorage.getItem("editorMode") || ""] || editorModes['block']
             }
+            return currentEditorMode;
         }
 
-        export function astMode(): EditorMode {
-            return editorMode();
-        }
-
-        function editorMode(): EditorMode {
-            var mode = localStorage.getItem("editorMode");
-            if (!mode) {
-                var theme = EditorSettings.currentTheme;
-                if (theme) mode = theme.editorMode;
-            }
-            var m = parseEditorMode(mode);
-            if (!m) m = EditorMode.block;
-            return m;
+        export function widgets(): Cloud.EditorWidgets {
+            return editorMode().widgets;
         }
 
         function uploadEditorMode() {
@@ -262,135 +402,9 @@ module TDev.Browser {
             }
         }
 
-
-        // widgets not support in restricted mode
-        var unrestrictedWidgets: StringMap<number> = {
-            splitScreen: 1,
-            shareScriptToGroup: 1,
-            uploadArtInSearchButton: 1,
-        }
-        var blockWidgets: StringMap<number> = {
-            // edit
-            addNewButton: 1,
-            undoButton: 1,
-            // refactoring
-            promoteRefactoring: 1,
-            fixItButton: 1,
-            splitScreen: 1,
-            shareScriptToGroup: 1,
-            // misc
-            groupAllowExportApp : 1,
-        }
-        var legacyWidgets: StringMap<number> = {
-            // edit
-            copyPaste: 1,
-            // features
-            actionSettings: 1,
-            publishAsHidden: 1,
-            // refactoring
-            simplify: 1,
-            // ui
-            splitButton: 1,
-            uploadArtInSearchButton: 1,
-            calcApiHelp: 1,
-            sideRunButton: 1,
-            tutorialGoToPreviousStep : 1,
-            // sections
-            dataSection: 1,
-            eventsSection: 1,
-            artSection:1,
-            librariesSection: 1,
-            scriptPropertiesSettings: 1,
-            // statements
-            comment: 1,
-            // hub
-            scriptAddToChannel: 1,
-            notifyAppReloaded: 1,
-            showTemporaryNotice: 1,
-            hubChannels: 1,
-            hubScriptUpdates: 1,
-            hubUsers: 1,
-        }
-        var proWidgets: StringMap<number> = {
-            //navigation
-            codeSearch: 1,
-            findReferences: 1,
-            gotoNavigation: 1,
-            goToDef: 1,
-            // refactorings
-            moveToLibrary: 1,
-            stripBlock: 1,
-            // debugging
-            toggleBreakpoint: 1,
-            debugButton: 1,
-            // ui
-            publishDescription: 1,
-            sendPullRequest: 1,
-            scriptStats: 1,
-            userSocialTab: 1,
-            // sections
-            testsSection: 1,
-            actionTypesSection: 1,
-            pagesSection: 1,
-            recordsSection: 1,
-            // script lifecycle
-            updateButton: 1,
-            editLibraryButton: 1,
-            errorsButton: 1,
-            logsButton: 1,
-            deployButton: 1,
-            // ui
-            pluginsButton: 1,
-            runTestsButton: 1,
-            scriptPropertiesManagement: 1,
-            scriptPropertiesIcons: 1,
-            scriptPropertiesExport: 1,
-            scriptPropertiesPlatform: 1,
-            scriptPropertiesInstrumentation: 1,
-            scriptPropertiesData: 1,
-            wallLogsButton: 1,
-            scriptPropertiesPropertyCloud: 1,
-            scriptPropertiesPropertyAllowExport: 1,
-            stringEditFullScreen: 1,
-            // language
-            async: 1,
-            testAction: 1,
-            lambda: 1,
-            // hub
-            commentHistory: 1,
-            scriptPullChanges: 1,
-            scriptDiffToBase: 1,
-            scriptHistoryTab: 1,
-            scriptInsightsTab: 1,
-            githubLinks: 1,
-            hubSocialTiles: 1,
-            hubTopAndNew: 1,
-            hubTags: 1,
-            hubMyArt: 1,
-            hubLearn: 1,
-        }
-
-        export function widgetEnabled(name: string): boolean {
-            if (TDev.isBeta)
-                Util.assert(!!blockWidgets[name] || !!legacyWidgets[name] || !!proWidgets[name], "uncategorized widget " + name);
-
-            if (Cloud.isUserRestricted() && unrestrictedWidgets[name]) return false;
-
-            var mode = editorMode();
-            if (mode <= EditorMode.block && !blockWidgets[name])
-                return false
-
-            if (mode <= EditorMode.classic &&
-                !blockWidgets[name] &&
-                !legacyWidgets[name])
-                return false;
-
-            return true
-        }
-
         export function changeSkillLevelDiv(editor: Editor, tk: Ticks, cls = ""): HTMLElement {
             var current = editorMode();
-            return div(cls, current < EditorMode.pro ? lf("Ready for more options?") : lf("Too many options?"), HTML.mkLinkButton(lf("Change skill level!"),() => {
+            return div(cls, HTML.mkLinkButton(lf("Change skill level!"),() => {
                 tick(tk);
                 EditorSettings.showChooseEditorModeAsync().done(() => {
                     if (current != editorMode()) editor.refreshMode();
@@ -399,37 +413,26 @@ module TDev.Browser {
         }
 
         export function createChooseSkillLevelElements(click?: () => void): HTMLElement[] {
-            var modes = [{ n: EditorMode.block, id: "brfljsds", descr: lf("Drag and drop blocks, simplified interface, great for beginners!"), tick: Ticks.editorSkillBlock },
-                { n: EditorMode.classic, id: "ehymsljr", descr: lf("Edit code as text, more options, for aspiring app writers!"), tick: Ticks.editorSkillClassic },
-                { n: EditorMode.pro, id: "indivfwz", descr: lf("'Javascripty' curly braces, all the tools, for experienced coders!"), tick: Ticks.editorSkillCurly }]
-            if (Cloud.isRestricted() && !Cloud.hasPermission("admin"))
-                modes.pop(); // expert mode not support for regular users
-
-            return modes.map((mode, index) => {
+            return Util.values(editorModes).map((mode, index) => {
                 var pic = div('pic');
-                pic.style.background = Cloud.artCssImg(mode.id, true);
+                pic.style.background = Cloud.artCssImg(mode.artId, true);
                 pic.style.backgroundSize = "cover";
 
-                return div('editor-mode', pic, HTML.mkButton(EditorSettings.editorModeText(mode.n),() => {
-                    tick(mode.tick);
-                    EditorSettings.setEditorMode(mode.n, true);
+                return div('editor-mode', pic, HTML.mkButton(mode.name,() => {
+                    Ticker.rawTick('editorMode' + mode);
+                    EditorSettings.setEditorMode(mode, true);
                     if (click) click();
                 }, 'title'), div('descr', mode.descr));
             });
         }
 
-        export function showChooseEditorModeAsync(preferredMode = EditorMode.unknown): Promise {
-            if (preferredMode != EditorMode.unknown && editorMode() <= preferredMode) return Promise.as();
-
+        export function showChooseEditorModeAsync(preferredMode : string = undefined): Promise {
             TipManager.setTip(null)
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 m.onDismiss = () => onSuccess(undefined);
                 m.add(div('wall-dialog-header', lf("choose your coding skill level")));
                 m.add(div('wall-dialog-body', lf("We will adapt the editor to your coding skill level. You can change your skill level later in the hub.")));
-                //var current = EditorSettings.editorModeText(EditorSettings.editorMode());
-                //if (current)
-                //    m.add(div('wall-dialog-header', lf("current skill level: {0}", current)));
                 m.add(div('wall-dialog-body center', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
                 m.add(Editor.mkHelpLink("skill levels"));
                 m.fullWhite();
@@ -1493,7 +1496,7 @@ module TDev.Browser {
                     btn.className += " externalBtn";
                     return btn;
                 }
-                if (EditorSettings.widgetEnabled("hubSocialTiles")) {
+                if (EditorSettings.widgets().hubSocialTiles) {
                     if (elements.length < slots + 1) {
                         var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
                         el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
@@ -1526,7 +1529,7 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
-                if (EditorSettings.widgetEnabled("hubScriptUpdates")) {
+                if (EditorSettings.widgets().hubScriptUpdates) {
                     var upd = this.browser().headersWithUpdates();
                     if (upd.length > 0) {
                         var updBtn =
@@ -1553,7 +1556,7 @@ module TDev.Browser {
                 addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
-                if (EditorSettings.widgetEnabled("hubUsers"))
+                if (EditorSettings.widgets().hubUsers)
                     elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
                 elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                 elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
@@ -1661,7 +1664,7 @@ module TDev.Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if ((!Storage.temporary || this.showingTemporarySignin) && EditorSettings.widgetEnabled("showTemporaryNotice")) return;
+            if ((!Storage.temporary || this.showingTemporarySignin) && EditorSettings.widgets().showTemporaryNotice) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
@@ -1692,7 +1695,7 @@ module TDev.Browser {
                     d.canDismiss = false;
                 d.show();
             } else {
-                if (EditorSettings.widgetEnabled("showTemporaryNotice"))
+                if (EditorSettings.widgets().showTemporaryNotice)
                     Storage.showTemporaryWarning();
             }
         }
@@ -2227,7 +2230,7 @@ module TDev.Browser {
         }
 
         private createSkillButton(): HTMLElement {
-            var skillTitle = lf("Skill level: {0}     ", EditorSettings.editorModeName());
+            var skillTitle = lf("Skill level: {0}     ", EditorSettings.editorMode().name);
             var skill = this.mkFnBtn(skillTitle,() => {
                 EditorSettings.showChooseEditorModeAsync().done(() => this.updateSections(), e => this.updateSections());
             }, Ticks.hubChooseSkill, true);
@@ -2370,15 +2373,15 @@ module TDev.Browser {
         {
             var sects : StringMap<HubSection> = {
                 "recent": { title: lf("my scripts") },
-                "misc": { title: EditorSettings.widgetEnabled("hubLearn") ? lf("learn") : lf("tutorials") },
+                "misc": { title: EditorSettings.widgets().hubLearn ? lf("learn") : lf("tutorials") },
                 "showcase": { title: lf("showcase") },
                 "social": { title: lf("social") },
             };
-            if (EditorSettings.widgetEnabled("hubTopAndNew"))
+            if (EditorSettings.widgets().hubTopAndNew)
                 sects["top"] = { title: lf("top & new") };
-            if (EditorSettings.widgetEnabled("hubTags"))
+            if (EditorSettings.widgets().hubTags)
                 sects["tags"] = { title: lf("categories") };
-            if (EditorSettings.widgetEnabled("hubMyArt"))
+            if (EditorSettings.widgets().hubMyArt)
                 sects["myart"] = { title: lf("my art") };
 
             var theme = EditorSettings.currentTheme;
@@ -2391,7 +2394,7 @@ module TDev.Browser {
             }
             if (Cloud.lite) {
                 delete sects["tags"];
-                if (EditorSettings.widgetEnabled("hubChannels")) {
+                if (EditorSettings.widgets().hubChannels) {
                     sects["channels"] = { title: lf("channels") };
                 }
             }
@@ -2507,7 +2510,7 @@ module TDev.Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "misc")
-                    EditorSettings.widgetEnabled("hubLearn") ? this.showLearn(c) : this.showSimplifiedLearn(c);
+                    EditorSettings.widgets().hubLearn ? this.showLearn(c) : this.showSimplifiedLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
