@@ -343,14 +343,17 @@ module TDev.Browser {
 
         export function init() {
             if (window && window.location) {
-                var cloudTheme = Cloud.config.theme;
-                if (cloudTheme) EditorSettings.setTheme(cloudTheme);
-                else if (Cloud.isRestricted()) EditorSettings.setTheme(themes['restricted']);
-                else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
-                else {
-                    var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
+                var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
+                if (m) {
                     EditorSettings.setTheme(themes[m ? m[2] : ""]);
+                } else if (Cloud.config.theme)
+                    EditorSettings.setTheme(Cloud.config.theme);
+                else if (Cloud.isRestricted()) {
+                    var theme = Cloud.hasPermission('admin') ? 'pro' : 'restricted';
+                    EditorSettings.setTheme(themes[theme]);
                 }
+                else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
+                else EditorSettings.setTheme(undefined);
             }
         }
 
