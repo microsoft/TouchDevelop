@@ -115,7 +115,7 @@ module TDev
 
                 var hrow = HTML.tr(table, 'bitheader');
                 HTML.td(hrow, '');
-                for (var j = frame * this.rows; j < (frame + 1) * this.rows; ++j) {
+                for (var j = 0; j < this.rows; ++j) {
                     HTML.td(hrow, 'index').innerText = j.toString();
                 }
 
