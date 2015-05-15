@@ -31,7 +31,11 @@ module TDev.RT {
         public _location : Location_ = undefined;
         private _angle : number = 0;
         public _elasticity : number = 1;
-        public _scale : number = 1;
+        public _scale: number = 1;
+        public _shadowBlur: number;
+        public _shadowColor: Color;
+        public _shadowOffsetX: number;
+        public _shadowOffsetY: number;
         constructor() {
             super()
         }
@@ -102,11 +106,19 @@ module TDev.RT {
 
         //? Gets the fraction of speed loss between 0 and 1
         //@ readsMutable
-        public friction() : number
-        {
-           if (! this._parent) return NaN;
-           if (isNaN(this._friction)) return this._parent._worldFriction;
-           return this._friction;
+        public friction(): number {
+            if (!this._parent) return NaN;
+            if (isNaN(this._friction)) return this._parent._worldFriction;
+            return this._friction;
+        }
+
+        //? Sets the shadow information
+        //@ writesMutable [blur].defl(20) [x_offset].defl(5) [y_offset].defl(5) [color].deflExpr('colors->gray')
+        public set_shadow(blur: number, color: Color, x_offset : number, y_offset: number) {
+            this._shadowBlur = blur;
+            this._shadowColor = color;
+            this._shadowOffsetX = x_offset;
+            this._shadowOffsetY = y_offset;
         }
 
         //? Sets the friction to a fraction of speed loss between 0 and 1
@@ -469,6 +481,14 @@ module TDev.RT {
             var ag = this._angle / 180 * Math.PI;
             if (this._frame && this._frame.rotated) ag -= 90;
             ctx.rotate(ag);
+
+            if (this._shadowBlur > 0 && this._shadowColor) {
+                ctx.shadowBlur = this._shadowBlur;
+                ctx.shadowColor = this._shadowColor.toHtml();
+                ctx.shadowOffsetX = this._shadowOffsetX;
+                ctx.shadowOffsetY = this._shadowOffsetY;
+            }
+
             switch (this.spriteType) {
             case SpriteType.Rectangle:
                 ctx.translate(-scaledWidth/2, -scaledHeight/2);
