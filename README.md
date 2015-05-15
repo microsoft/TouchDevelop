@@ -90,7 +90,7 @@ npm install
 
 ## Building
 
-There's different way to build and run TouchDevelop:
+There's different ways to build and run TouchDevelop:
 
 * just build:
 
