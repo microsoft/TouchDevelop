@@ -256,7 +256,8 @@ module TDev.Browser {
                     copyPaste: true,
                     comment: true,
                     dataSection: true,
-                    splitScreenOnLoad: true
+                    splitScreenOnLoad: true,
+                    updateButton: true,
                 }
             },
         }
@@ -345,7 +346,7 @@ module TDev.Browser {
             if (window && window.location) {
                 var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
                 if (m) {
-                    EditorSettings.setTheme(themes[m ? m[2] : ""]);
+                    EditorSettings.setTheme(themes[m[2]]);
                 } else if (Cloud.config.theme)
                     EditorSettings.setTheme(Cloud.config.theme);
                 else if (Cloud.isRestricted()) {
