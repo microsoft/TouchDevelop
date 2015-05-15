@@ -1090,7 +1090,6 @@ module TDev.RT {
         }
 
         //? Allow execution of other events, before the current event finishes.
-        //@ dbgOnly
         export function allow_other_events(s:IStackFrame) {
             s.rt.eventExecuting = false;
         }
