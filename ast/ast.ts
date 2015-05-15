@@ -4820,8 +4820,9 @@ module TDev.AST {
         }
 
         public visitExpr(expr: Expr) {
-            if (expr.getKind() != api.core.Unknown)
-                this.incr(expr.getKind().getName());
+            var k = expr.getKind()
+            if (k && k != api.core.Unknown)
+                this.incr(k.getName());
             super.visitExpr(expr);
         }
 

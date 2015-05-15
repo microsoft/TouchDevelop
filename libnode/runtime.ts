@@ -362,6 +362,14 @@ module TDev.RT.Node {
             this.restartAfterException()
         }
 
+        private setCors(resp)
+        {
+            resp.setHeader('Access-Control-Allow-Origin', "*");
+            resp.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST');
+            resp.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            resp.setHeader('Access-Control-Expose-Headers', 'ErrorMessage');
+        }
+
         public handleRpc(req, resp)
         {
             req.tdResponse = resp
@@ -372,6 +380,14 @@ module TDev.RT.Node {
             if (sr._api_path == "-internal-/ping") {
                 error(resp, 200, { v: req.tdQueryString['v'] || "",
                                    now: Date.now() })
+                return
+            }
+
+            this.setCors(resp)
+
+            if (req.method == "OPTIONS") {
+                resp.writeHead(200)
+                resp.end()
                 return
             }
 
