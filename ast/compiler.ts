@@ -1471,8 +1471,8 @@ module TDev.AST
         {
             var prop = c.prop();
 
-            if (prop && prop.parentKind === api.core.CloudData)
-                this.options.hasCloudData = true;
+            //if (prop && prop.parentKind === api.core.CloudData)
+            //    this.options.hasCloudData = true;
 
             if (prop == api.core.AssignmentProp) return this.doAssignment(c);
 
@@ -2840,8 +2840,11 @@ module TDev.AST
             if (this.options.cloud && this.options.isTopLevel) {
                 this.imports.pipPackages = AppImports.combinePipPackages(a);
 
-                if (!a.isCloud)
+                if (!a.isCloud) {
                     this.wr("cs.autoRouting = true;\n")
+                    if (this.options.hasCloudData)
+                        this.options.hostCloudData = true;
+                }
 
                 this.wr("cs.setupRestRoutes = function(rt) {\n")
                 var host = /^https?:\/\/(.+?)\/?$/i.exec(this.options.azureSite)[1];
