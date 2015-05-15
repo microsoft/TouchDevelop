@@ -106,11 +106,11 @@ Blockly.Blocks['device_button_event'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
     this.appendDummyInput()
-        .appendField("when button");
+        .appendField("on button");
     this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown(buttonsDropdown), "NAME");
     this.appendDummyInput()
-        .appendField("is pressed");
+        .appendField("pressed");
     this.appendStatementInput("HANDLER")
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("do");
@@ -565,11 +565,11 @@ Blockly.Blocks['device_forever'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
     this.appendDummyInput()
-        .appendField("forever");
-    this.appendStatementInput("NAME")
-        .setCheck("null");
+        .appendField("on every beat");
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
     this.setInputsInline(true);
-    this.setPreviousStatement(true, "null");
     this.setTooltip('');
   }
 };

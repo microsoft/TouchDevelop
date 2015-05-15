@@ -689,9 +689,9 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
-  return H.mkWhile(
-    H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("NAME")));
+  var bBody = b.getInputTargetBlock("HANDLER");
+  var body = compileStatements(e, bBody);
+  return mkCallWithCallback(e, "on every beat", [], body);
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
@@ -743,7 +743,7 @@ function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var name = H.mkStringLiteral(b.getFieldValue("NAME"));
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "when button is pressed", [name], body);
+  return mkCallWithCallback(e, "on button pressed", [name], body);
 }
 
 function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
@@ -928,7 +928,8 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-  return b.type == "device_button_event";
+    return b.type == "device_button_event"
+        || b.type == "device_forever";
 }
 
 function mkEnv(w: B.Workspace): Environment {
