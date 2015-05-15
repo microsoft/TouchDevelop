@@ -260,6 +260,12 @@ module TDev.Browser {
                     updateButton: true,
                 }
             },
+        },
+        'restrictededitor': {
+            name: "Restricted Editor",
+            description: lf("Opinionated restricted mode"),
+            scriptTemplates: ['blank'],
+            editorMode: editorModes['pro']
         }
     };
 
@@ -350,7 +356,7 @@ module TDev.Browser {
                 } else if (Cloud.config.theme)
                     EditorSettings.setTheme(Cloud.config.theme);
                 else if (Cloud.isRestricted()) {
-                    var theme = Cloud.hasPermission('admin') ? 'pro' : 'restricted';
+                    var theme = Cloud.hasPermission('admin') ? 'restrictededitor' : 'restricted';
                     EditorSettings.setTheme(themes[theme]);
                 }
                 else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
