@@ -366,7 +366,7 @@ module TDev.RT.Node {
         {
             resp.setHeader('Access-Control-Allow-Origin', "*");
             resp.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST');
-            resp.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            resp.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             resp.setHeader('Access-Control-Expose-Headers', 'ErrorMessage');
         }
 
