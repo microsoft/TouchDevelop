@@ -729,7 +729,7 @@ module TDev {
                     }
 
                     // load cloud session
-                    if (this.rt.compiled.hasCloudData) {
+                    if (this.rt.compiled.hasCloudData || (this.rt.compiled.hasLocalData && this.isNodeServer())) {
                         if (!this.current_nodeserver && !this.current_userid)
                             loadcurrent = Promise.wrapError("cannot run this script without first signing in");
                         else if (!this.current_scriptguid || !this.current_scriptname || !this.current_scriptauthor || !this.current_script)
