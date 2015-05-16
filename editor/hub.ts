@@ -71,6 +71,7 @@ module TDev.Browser {
                 artSection: true,
                 librariesSection: true,
                 scriptPropertiesSettings: true,
+                databaseSection: true,
                 // statements
                 comment: true,
                 foreach: true,
@@ -123,6 +124,7 @@ module TDev.Browser {
                 artSection: true,
                 librariesSection: true,
                 scriptPropertiesSettings: true,
+                databaseSection: true,
                 // statements
                 comment: true,
                 foreach: true,
