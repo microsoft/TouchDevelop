@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? A web socket message
-    //@ stem("msg") ctx(general) dbgOnly
+    //@ stem("msg") ctx(general)
     export class WebSocketMessage
         extends RTValue {
         private stringData:string;
@@ -74,7 +74,7 @@ module TDev.RT {
     }
 
     //? A web socket
-    //@ stem("ws") ctx(general) dbgOnly
+    //@ stem("ws") ctx(general)
     export class WebSocket_
         extends RTDisposableValue {
 

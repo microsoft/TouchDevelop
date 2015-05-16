@@ -555,7 +555,7 @@ module TDev.RT {
         }
 
         //? Creates a web socket
-        //@ dbgOnly async returns(WebSocket_)
+        //@ async returns(WebSocket_)
         export function open_web_socket(url: string, r:ResumeCtx)
         {
             var ws = new WebSocket(url)
