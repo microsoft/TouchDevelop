@@ -1346,7 +1346,6 @@ function getMime(filename:string)
     }
 }
 
-var app;
 var needsStop = false
 var scriptLoadPromise : any;
 var rootDir = ""
@@ -2301,6 +2300,7 @@ function main()
     inAzure = !!process.env.PORT;
     var port = process.env.PORT || 4242;
 
+
     rootDir = process.cwd()
 
     var args = process.argv.slice(2)
@@ -2354,6 +2354,11 @@ function main()
     if (process.env['TD_WORKERS']) {
         numWorkers = parseFloat(process.env['TD_WORKERS']) || 1
     }
+
+    var sslport = process.env.HTTPS_PORT || 443;
+    var pfx = process.env['TD_HTTPS_PFX']
+    delete process.env['TD_HTTPS_PFX'] // we don't really want the workers to see this
+    if (!pfx) sslport = 0
 
     while (args.length > 0) {
         switch (args[0]) {
@@ -2473,10 +2478,13 @@ function main()
     process.on('uncaughtException', handleError)
 
     var startUp = () => {
-        if (internet)
+        if (internet) {
             app.listen(port);
-        else
+            if (sslport) sslapp.listen(sslport)
+        } else {
             app.listen(port, "127.0.0.1")
+            if (sslport) sslapp.listen(sslport, "127.0.0.1")
+        }
 
         if (controllerUrl) {
             connectToContoller(controllerUrl);
@@ -2508,8 +2516,7 @@ function main()
 
     blobChannel = process.env['TD_BLOB_DEPLOY_CHANNEL']
 
-    app = http.createServer(handleReq);
-    app.on("upgrade", (req, sock, body) =>
+    var webSocketHandler = (req, sock, body) =>
         loadModule("faye-websocket", wsModule => {
             global.WebSocket = wsModule.Client
             if (!wsModule.isWebSocket(req)) {
@@ -2531,7 +2538,18 @@ function main()
             } else {
                 sock.end()
             }
-        }))
+        })
+
+    var app = http.createServer(handleReq);
+    app.on("upgrade", webSocketHandler)
+
+    if (sslport) {
+        var sslapp = https.createServer({
+          pfx: new Buffer(pfx, "base64")
+        })
+        sslapp.on("request", handleReq)
+        sslapp.on("upgrade", webSocketHandler)
+    }
 
     if (scriptId) {
         shouldStart = false;

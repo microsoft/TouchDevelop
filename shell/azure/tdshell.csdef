@@ -13,6 +13,7 @@
       <Setting name="TD_DEPLOYMENT_KEY" />
       <Setting name="TD_BLOB_DEPLOY_CHANNEL" />
       <Setting name="ZIP_URL" />
+      <Setting name="TD_HTTPS_PFX" />
     </ConfigurationSettings>
     <Imports/>
     <Startup>
@@ -56,6 +57,9 @@
         </Variable>
         <Variable name="TD_BLOB_DEPLOY_CHANNEL">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='TD_BLOB_DEPLOY_CHANNEL']/@value" />
+        </Variable>
+        <Variable name="TD_HTTPS_PFX">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='TD_HTTPS_PFX']/@value" />
         </Variable>
       </Environment>
       <EntryPoint>
