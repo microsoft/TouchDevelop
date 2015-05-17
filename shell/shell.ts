@@ -2337,6 +2337,10 @@ function main()
         console.error("Azure Web Apps compatibility:")
         console.error("IISNODE_VERSION         -- same as TD_TRUST_XFF")
         console.error("PORT                    -- same as --port $PORT --internet and disable console logging")
+        console.error("")
+        console.error("HTTPS support:")
+        console.error("TD_HTTPS_PFX            -- if set to base64-encoded .pfx file, enables TLS/SSL/HTTPS")
+        console.error("HTTPS_PORT              -- defaults to 443; only used when TD_HTTPS_PFX is set")
 
         process.exit(1)
     }
