@@ -3241,7 +3241,7 @@ module TDev
                 if (op2) this.tokenEdit(op2);
             }
 
-            if (this.awaitAllowed()) {
+            if (TheEditor.widgetEnabled("makeAsyncRefactoring")) {
                 var addAwait = this.expr.tokens.some((tt) => {
                     var t = <AST.PropertyRef>tt;
                     if (!(t instanceof AST.PropertyRef)) return false;
@@ -3410,11 +3410,6 @@ module TDev
             m.choose(boxes, { header: lf("Optional parameter:") })
 
             return res
-        }
-
-        public awaitAllowed()
-        {
-            return true;
         }
 
         private selectionLength() { return this.selectionEnd - this.selectionStart; }

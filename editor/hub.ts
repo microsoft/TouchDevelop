@@ -103,6 +103,7 @@ module TDev.Browser {
                 splitScreen: true,
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
+                makeAsyncRefactoring: true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,

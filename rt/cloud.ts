@@ -13,6 +13,7 @@ module TDev.Cloud {
         // refactoring
         promoteRefactoring?: boolean;
         searchArtRefactoring?: boolean;
+        makeAsyncRefactoring?: boolean;
         fixItButton?: boolean;
         shareScriptToGroup?: boolean;
         splitScreen?: boolean; // split screen button
