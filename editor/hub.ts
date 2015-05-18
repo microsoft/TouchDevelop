@@ -1731,7 +1731,6 @@ module TDev.Browser {
                 this.temporaryRequestedSignin = true;
                 this.showingTemporarySignin = true;
                 var d = new ModalDialog();
-                d.addHTML(lf("<h3>Welcome to TouchDevelop!</h3>"));
                 d.add(div('wall-dialog-header', lf("Sign in to avoid losing your scripts!")));
                 d.add(div('wall-dialog-body', lf("Your browser does not allow TouchDevelop to store web site data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage.")));
                 d.add(div('wall-dialog-body', lf("When you sign in, TouchDevelop will save your scripts in the cloud.")));
