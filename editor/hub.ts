@@ -266,6 +266,7 @@ module TDev.Browser {
                     dataSection: true,
                     splitScreenOnLoad: true,
                     updateButton: true,
+                    forceMainAsAction: true,
                 }
             },
         },

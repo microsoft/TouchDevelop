@@ -32,6 +32,7 @@ module TDev.Cloud {
         // misc
         groupAllowExportApp?: boolean;
         changeSkillLevel?: boolean;
+        mainAlwaysAction?: boolean;
 
         // features
         actionSettings?: boolean;
