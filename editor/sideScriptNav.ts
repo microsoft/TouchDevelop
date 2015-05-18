@@ -441,7 +441,7 @@ module TDev
                     label: lf("code"),
                     things: unsorted,
                     createOne: () => [{
-                        decl: (AST.blockMode || AST.legacyMode || TheEditor.stepTutorial) ? this.editor.freshAsyncAction() : this.editor.freshAction(),
+                        decl: this.editor.freshAsyncAction(),
                         displayName: 'action',
                         description: lf("Code that performs a specific task"),
                         tick: Ticks.sideAddAction
