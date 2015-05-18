@@ -1295,15 +1295,9 @@ module TDev
                     this.fullDisplay()
                 }
 
-                if (v0 != v1 && l instanceof AST.LocalDef) {
+                if (v0 != v1 && l instanceof AST.LocalDef)
                     v1 = v0;
-                    var m = ModalDialog.ask(lf("Renaming '{0}' to '{1}' will merge it with an existing variable. Is it OK?", l.getName(), v0), lf("merge variables"), finish)
-                    m.onDismiss = () => {
-                        if (!renamed) this.fullDisplay()
-                    }
-                } else {
-                    finish()
-                }
+                finish()
             };
 
             return inp;
