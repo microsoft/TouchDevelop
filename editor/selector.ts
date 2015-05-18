@@ -847,7 +847,7 @@ module TDev
 
                 this.bottomButtonRow.setChildren([
                     wrenchDiv,
-                    this.canCopyPaste() ?
+                    this.canCopyPaste() && TheEditor.widgetEnabled("selectStatements") ?
                         mkBtnDown("svg:select,black", lf("select"), " Shift-Up, Down", Ticks.btnSelect, () => {
                             this.startSelection();
                         }) : null

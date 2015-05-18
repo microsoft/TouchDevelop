@@ -9,6 +9,7 @@ module TDev.Cloud {
         addNewButton?: boolean;
         undoButton?: boolean;
         copyPaste?: boolean;
+        selectStatements?: boolean;
 
         // refactoring
         promoteRefactoring?: boolean;
