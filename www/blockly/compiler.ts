@@ -946,7 +946,9 @@ function mkEnv(w: B.Workspace): Environment {
   w.getAllBlocks().forEach((b: B.Block) => {
     if (b.type == "controls_for") {
       var x = b.getFieldValue("VAR");
-      e = extend(e, x, Type.Number);
+      // It's ok for two loops to share the same variable.
+      if (lookup(e, x) == null)
+        e = extend(e, x, Type.Number);
       lookup(e, x).isForVariable = true;
     }
   });

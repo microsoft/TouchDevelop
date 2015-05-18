@@ -331,10 +331,14 @@ module TDev {
     clear("blocklyError");
     $("#errors").classList.add("hidden");
 
-    ast = compile(Blockly.mainWorkspace, {
-      name: getName(),
-      description: getDescription()
-    });
+    try {
+      ast = compile(Blockly.mainWorkspace, {
+        name: getName(),
+        description: getDescription()
+      });
+    } catch (e) {
+      statusMsg("⚠ compilation error: "+e, External.Status.Error);
+    }
 
     var errors = Errors.get();
     if (errors.length && wantErrors) {
