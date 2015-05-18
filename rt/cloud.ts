@@ -34,6 +34,7 @@ module TDev.Cloud {
         changeSkillLevel?: boolean;
         mainAlwaysAction?: boolean;
         singleReturnValue?: boolean;
+        integerNumbers?: boolean;
 
         // features
         actionSettings?: boolean;

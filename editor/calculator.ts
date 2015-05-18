@@ -1617,7 +1617,9 @@ module TDev
 
             var numAdd = this.keyBlock(ph ? 3 : 4, 1);
             numAdd[0].setText("0", "", this.insertFn);
-            numAdd[1].setText(".", lf("decimal dot"), this.insertFn);
+            if (TheEditor.widgetEnabled("integerNumbers"))
+                numAdd[1].clear()
+            else numAdd[1].setText(".", lf("decimal dot"), this.insertFn);
             numAdd[2].setText("-", lf("negation"), this.insertFn);
 
             if (!ph) {

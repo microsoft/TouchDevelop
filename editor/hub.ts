@@ -269,6 +269,7 @@ module TDev.Browser {
                     forceMainAsAction: true,
                     singleReturnValue: true,
                     librariesSection: true,
+                    integerNumbers: true,
                 }
             },
         },
