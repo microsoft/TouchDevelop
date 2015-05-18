@@ -691,7 +691,7 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 function compileForever(e: Environment, b: B.Block): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "on every beat", [], body);
+  return mkCallWithCallback(e, "forever", [], body);
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
@@ -935,7 +935,7 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-  return b.type == "device_button_event" || b.type == "device_forever";
+  return b.type == "device_button_event";
 }
 
 function mkEnv(w: B.Workspace): Environment {

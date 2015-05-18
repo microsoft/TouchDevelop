@@ -565,11 +565,11 @@ Blockly.Blocks['device_forever'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(120);
     this.appendDummyInput()
-        .appendField("on every beat");
+        .appendField("forever");
     this.appendStatementInput("HANDLER")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("do");
+        .setCheck("null");
     this.setInputsInline(true);
+    this.setPreviousStatement(true, "null");
     this.setTooltip('');
   }
 };
