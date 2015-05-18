@@ -4240,7 +4240,9 @@ module TDev
 
                       divId("externalEditorContainer", "vbox",
                         divId("externalEditorChrome", "hbox"),
-                        divId("externalEditorFrame", "vbox flex1")),
+                        divId("externalEditorPanes", "hbox flex1",
+                            divId("externalEditorFrame", "vbox"),
+                            divId("externalEditorSide", "vbox flex1"))),
 
                       divId("wallOverlay", null));
             r.style.display = "none";

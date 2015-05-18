@@ -126,6 +126,15 @@ module TDev {
     class ExternalHost extends EditorHost {
       public updateButtonsVisibility() {
       }
+
+      public showWall() {
+        super.showWall();
+        document.getElementById("wallOverlay").style.display = "none";
+        var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
+        w.style.height = "100%";
+        w.style.display = "";
+        document.getElementById("externalEditorSide").appendChild(w);
+      }
     }
 
     function typeCheckAndRun(text: string) {
@@ -138,9 +147,13 @@ module TDev {
           rt = TheEditor.currentRt = new Runtime();
           rt.initFrom(compiledScript);
           rt.setHost(new ExternalHost());
+          rt.initPageStack();
         }
+        (<EditorHost> rt.host).showWall();
         var main = compiledScript.actionsByStableName.main;
-        rt.run(main, []);
+        rt.stopAsync().done(() => {
+          rt.run(main, []);
+        });
       });
     }
 
@@ -380,7 +393,8 @@ module TDev {
         baseSnapshot: null,
       };
 
-      // Clear leftover iframes.
+      // Clear leftover iframes and simulators.
+      document.getElementById("externalEditorSide").setChildren([]);
       var iframeDiv = document.getElementById("externalEditorFrame");
       iframeDiv.setChildren([]);
 
