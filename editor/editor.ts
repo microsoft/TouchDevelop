@@ -5189,12 +5189,8 @@ module TDev
                     return;
                 }
 
-                ModalDialog.ask(lf("Some libraries need update: {0}",
-                                         libs.map((l) => l.getName()).join(", ")), lf("update libraries"),
-                () => {
-                    tick(Ticks.editorUpdateLibrary);
-                    this.updateLibraries(libs);
-                })
+                tick(Ticks.editorUpdateLibrary);
+                this.updateLibraries(libs);
             }
         }
 
