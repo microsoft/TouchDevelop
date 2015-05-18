@@ -1786,6 +1786,17 @@ span.errorSq .kw
     padding: 0;
 }
 
+#externalEditorFrame {
+    flex: 3;
+    -webkit-flex: 3;
+}
+
+#externalEditorSide .boardCanvas {
+    width: calc(100% - 1em) !important;
+    height: auto !important;
+    margin: 3em auto !important;
+}
+
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
   display: none;
 }
