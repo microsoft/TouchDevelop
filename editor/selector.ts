@@ -830,12 +830,18 @@ module TDev
                 this.breakpointBtn = null
                 if (stmt.isExecutableStmt() && TheEditor.debugSupported())
                     this.breakpointBtn = mkBtn("svg:breakpoint,red,clip=-150", lf("breakpoint"), "Ctrl+B", Ticks.btnBreakpoint, this.toggleBreakpointHandler());
+                var noAdd = TheEditor.widgetEnabled("singleReturnValue")
+                    && stmt.parent instanceof AST.ParameterBlock
+                    && stmt.parent == (<AST.ActionHeader>(<AST.ParameterBlock>stmt.parent).parent).outParameters
+                    && stmt.parentAction().hasOutParameters();
 
                 this.topLeftButtonRow.setChildren([
-                    mkBtn("svg:add,black", lf("add"), "Ctrl-Enter", Ticks.btnAddUp, this.addCallback(-1, null, Ticks.codeAddAbove)),
+                    noAdd ? null : mkBtn("svg:add,black", lf("add"), "Ctrl-Enter", Ticks.btnAddUp, this.addCallback(-1, null, Ticks.codeAddAbove)),
                     this.breakpointBtn
                 ]);
-                this.bottomLeftButtonRow.setChildren([moveLeft, mkBtnDown("svg:add,black", lf("add"), "-Enter", Ticks.btnAddDown, this.addCallback(1, null, Ticks.codeAddBelow))]);
+                this.bottomLeftButtonRow.setChildren([moveLeft,
+                    noAdd? null : mkBtnDown("svg:add,black", lf("add"), "-Enter", Ticks.btnAddDown, this.addCallback(1, null, Ticks.codeAddBelow))
+                ]);
 
                 var t = HelpTopic.findById(this.selectedStmt.helpTopic())
                 HelpTopic.contextTopics = t ? [t] : [];

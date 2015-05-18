@@ -267,6 +267,7 @@ module TDev.Browser {
                     splitScreenOnLoad: true,
                     updateButton: true,
                     forceMainAsAction: true,
+                    singleReturnValue: true,
                 }
             },
         },

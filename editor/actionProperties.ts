@@ -141,6 +141,7 @@ module TDev
             var act = this.theAction.action;
             var showSettings = TheEditor.widgetEnabled("actionSettings");
             var asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
+            var singleReturnValue = TheEditor.widgetEnabled("singleReturnValue");
             if (asAction) this.actionName.readOnly = true;
             var propDivs =
                  [div("prop-spacer"),
@@ -152,7 +153,7 @@ module TDev
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
                   !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
-                  ev || act.isPage() || asAction ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
+                  ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
                   ActionProperties.copyCutRefs(lf("the current action"), this.theAction.action),
 
                   showSettings && icl ? this.offlineAction : null,
