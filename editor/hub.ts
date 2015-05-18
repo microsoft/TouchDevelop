@@ -268,6 +268,7 @@ module TDev.Browser {
                     updateButton: true,
                     forceMainAsAction: true,
                     singleReturnValue: true,
+                    librariesSection: true,
                 }
             },
         },

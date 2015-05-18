@@ -218,7 +218,7 @@ module TDev
                                     div("formHint", lf("binds to script:")),
                                     this.boundTo),
                                   ActionProperties.copyCutRefs("the current library reference", this.theLibrary),
-                                  HTML.mkButton(lf("edit library"), () => this.editLib()),
+                                  TheEditor.widgetEnabled("editLibraryButton") ? HTML.mkButton(lf("edit library"), () => this.editLib()) : null,
                                   this.pluginsBtn = HTML.mkButton(lf("reinstall plugins"), () => this.reinstallPlugins()),
                                   this.docs,
                                   this.resolves
