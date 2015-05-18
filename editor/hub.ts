@@ -70,6 +70,7 @@ module TDev.Browser {
                 // section
                 dataSection: true,
                 eventsSection: true,
+                pagesSection: true,
                 artSection: true,
                 librariesSection: true,
                 scriptPropertiesSettings: true,
