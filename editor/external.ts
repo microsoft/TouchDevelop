@@ -51,7 +51,7 @@ module TDev {
     // [initAsync] will find the latest version of this script by walking up the
     // update chain, but in order to save on some API calls, this script id
     // should be refreshed at regular intervals.
-    var deviceScriptId = "jtpmeh";
+    var deviceScriptId = "pjlnya";
     var deviceLibraryName = "device";
 
     import J = AST.Json;

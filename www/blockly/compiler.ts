@@ -769,10 +769,17 @@ interface Param {
 
 var p = (x: string, t: Type) => ({ type: t, name: x });
 
-// We first try to find each arg as a field of the block (must be a string); if
-// that fails, we lookup the param as an input block.
-//
-// [isExtensionMethod] compiles [f(x, y...)] into [x → f (y...)]
+// A typed description of each function from the "device library". This would
+// probably be more readable with a DSL, but let's use that for now. Each entry
+// in [stdCallTable] is as follows:
+// - the key is the name of the Blockly.Block that we compile into a device call;
+// - [f] is a pair of the TouchDevelop function name and its Blockly return type;
+// - [args] is a list of pairs of name and a Blockly type; the name is taken to
+//   be either the name of a Blockly field value or, if not found, the name of a
+//   Blockly input block; if a field value is found, then the type must be
+//   [String]
+// - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
+//   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
 interface StdFunc {
   f: Param;
   args: Param[];

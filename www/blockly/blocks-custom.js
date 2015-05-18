@@ -352,7 +352,7 @@ Blockly.Blocks['device_heading'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("heading");
+            .appendField("compass heading");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setTooltip('');
