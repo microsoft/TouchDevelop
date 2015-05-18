@@ -61,6 +61,7 @@ module TDev.Cloud {
         async?: boolean;
         testAction?: boolean;
         lambda?: boolean;
+        stringConcatProperty?: boolean;
 
         // debugging
         toggleBreakpoint?: boolean;

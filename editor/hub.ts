@@ -28,7 +28,7 @@ module TDev.Browser {
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
                 // statements
-                boxed: true,
+                stringConcatProperty: true,
                 // sections
                 dataSection: true,
                 artSection: true,
@@ -78,6 +78,7 @@ module TDev.Browser {
                 comment: true,
                 foreach: true,
                 boxed: true,
+                stringConcatProperty: true,
                 // hub
                 scriptAddToChannel: true,
                 notifyAppReloaded: true,
@@ -107,7 +108,6 @@ module TDev.Browser {
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,
-
                 // edit
                 copyPaste: true,
                 // features
@@ -132,6 +132,7 @@ module TDev.Browser {
                 comment: true,
                 foreach: true,
                 boxed: true,
+                stringConcatProperty: true,
                 // hub
                 scriptAddToChannel: true,
                 notifyAppReloaded: true,

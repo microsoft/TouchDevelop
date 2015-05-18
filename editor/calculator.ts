@@ -2382,7 +2382,7 @@ module TDev
                 }
 
                 var isNothing = (k.primaryKind == api.core.Nothing || !k.primaryKind.isData) && k.secondaryKinds.length == 0;
-                if (!isNothing && s.indexOf(api.core.StringConcatProp) < 0) {
+                if (!isNothing && s.indexOf(api.core.StringConcatProp) < 0 && TheEditor.widgetEnabled("stringConcatProperty")) {
                     s.push(api.core.StringConcatProp); // always available
                     downgradeConcat = true;
                 }
