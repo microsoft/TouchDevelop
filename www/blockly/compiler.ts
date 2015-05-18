@@ -809,7 +809,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: [ p("x", Type.Number), p("y", Type.Number) ]
   },
   device_heading: {
-    f: p("heading", Type.Number),
+    f: p("compass heading", Type.Number),
     args: []
   },
   device_make_StringImage: {
@@ -928,8 +928,7 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-    return b.type == "device_button_event"
-        || b.type == "device_forever";
+  return b.type == "device_button_event" || b.type == "device_forever";
 }
 
 function mkEnv(w: B.Workspace): Environment {
