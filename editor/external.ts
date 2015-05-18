@@ -123,11 +123,22 @@ module TDev {
       return parseScript(text).then((a: AST.App) => { return Promise.as(J.dump(a)); });
     }
 
+    class ExternalHost extends EditorHost {
+      public updateButtonsVisibility() {
+      }
+    }
+
     function typeCheckAndRun(text: string) {
       parseScript(text).then((a: AST.App) => {
+        J.setStableId(a);
         AST.TypeChecker.tcApp(a);
         var compiledScript = AST.Compiler.getCompiledScript(a, {});
         var rt = TheEditor.currentRt;
+        if (!rt) {
+          rt = TheEditor.currentRt = new Runtime();
+          rt.initFrom(compiledScript);
+          rt.setHost(new ExternalHost());
+        }
         var main = compiledScript.actionsByStableName.main;
         rt.run(main, []);
       });
@@ -334,7 +345,9 @@ module TDev {
             break;
 
           default:
-            console.error("[external] unexpected message type", message.type);
+            // Apparently the runtime loop of the simulator is implemented using
+            // messages on any origins... see [rt/util.ts]. So just don't do
+            // anything if we receive an unrecognized message.
             break;
         }
       }
