@@ -79,7 +79,6 @@ module TDev.Browser {
                 // hub
                 scriptAddToChannel: true,
                 notifyAppReloaded: true,
-                showTemporaryNotice: true,
                 hubChannels: true,
                 hubScriptUpdates: true,
                 hubUsers: true,
@@ -1723,7 +1722,7 @@ module TDev.Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if ((!Storage.temporary || this.showingTemporarySignin) && EditorSettings.widgets().showTemporaryNotice) return;
+            if ((!Storage.temporary || this.showingTemporarySignin) || !EditorSettings.widgets().showTemporaryNotice) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
