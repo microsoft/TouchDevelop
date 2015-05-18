@@ -26,6 +26,7 @@ module TDev.Browser {
                 splitScreen: false,
                 splitScreenOnLoad: true,
                 shareScriptToGroup: true,
+                searchArtRefactoring: true,
                 // statements
                 boxed: true,
                 // sections
@@ -49,6 +50,7 @@ module TDev.Browser {
                 splitScreen: true,
                 splitScreenOnLoad: true,
                 shareScriptToGroup: true,
+                searchArtRefactoring: true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,
@@ -100,6 +102,7 @@ module TDev.Browser {
                 fixItButton: true,
                 splitScreen: true,
                 shareScriptToGroup: true,
+                searchArtRefactoring: true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,

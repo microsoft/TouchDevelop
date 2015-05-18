@@ -3220,7 +3220,8 @@ module TDev
                         }
 
                         if (decl instanceof AST.GlobalDef && (<AST.GlobalDef>decl).isResource &&
-                                (decl.getKind() == api.core.Picture || decl.getKind() == api.core.Sound)) {
+                                (decl.getKind() == api.core.Picture || decl.getKind() == api.core.Sound) &&
+                                TheEditor.widgetEnabled("searchArtRefactoring")) {
                             e = this.mkIntelliItem(1.01e20, Ticks.calcEditArt);
                             e.nameOverride = decl.getKind() == api.core.Sound ? lf("replace sound") : lf("replace picture")
                             e.descOverride = lf("search art");
