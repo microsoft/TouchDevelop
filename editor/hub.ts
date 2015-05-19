@@ -147,7 +147,6 @@ module TDev.Browser {
                 codeSearch: true,
                 findReferences: true,
                 gotoNavigation: true,
-                goToDef: true,
                 // refactorings
                 moveToLibrary: true,
                 stripBlock: true,

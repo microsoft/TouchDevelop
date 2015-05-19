@@ -27,7 +27,6 @@ module TDev.Cloud {
         codeSearch?: boolean;
         findReferences?: boolean;
         gotoNavigation?: boolean;
-        goToDef?: boolean;
 
         // misc
         groupAllowExportApp?: boolean;
