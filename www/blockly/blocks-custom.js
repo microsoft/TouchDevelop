@@ -85,6 +85,23 @@ Blockly.Blocks['device_print_message'] = {
 };
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
+Blockly.Blocks['device_show_number'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(160);
+    this.appendDummyInput()
+        .appendField("show number");
+    this.appendValueInput("number")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+//https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
 Blockly.Blocks['device_show_letter'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');

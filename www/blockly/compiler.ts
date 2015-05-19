@@ -791,6 +791,10 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: p("clear screen", Type.Unit),
     args: []
   },
+  device_show_number: {
+    f: p("show number", Type.Unit),
+    args: [ p("number", Type.Number) ]
+  },
   device_show_letter: {
     f: p("show letter", Type.Unit),
     args: [ p("letter", Type.String) ]
