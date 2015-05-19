@@ -1717,12 +1717,13 @@ span.errorSq .kw
 }
 
 #root.portrait[data-pane-hidden^="no"] .code-button-row {
-  right: 20em;
+  /* just hide it */
+  display:none;
 }
 
 #root.phone[data-pane-hidden^="no"] .code-button-row {
   /* just hide it */
-  right: 50em;
+  display:none;
 }
 
 #root.portrait[data-pane-hidden^="no"] #leftBtnRow .topMenu-button {
