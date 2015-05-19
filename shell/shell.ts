@@ -687,7 +687,8 @@ function createProcess(d:RunCliOptions)
 {
     var isWin = /^win/.test(os.platform())
     debug.log("running: " + (d.cwd || "") + ">" + d.command + (d.args ? (" " + d.args.join(" ")) : ""))
-    var env = clone(d.env || process.env);
+    var env = clone(process.env);
+    if (d.env) Object.keys(d.env).forEach(k => env[k] = d.env[k]);
     if (pythonEnv) Object.keys(pythonEnv).forEach(k => env[k] = pythonEnv[k]);
     var proc = child_process.spawn(d.args ? d.command : isWin ? "cmd" : "sh", d.args || [isWin ? "/c" : "-c", d.command], {
         cwd: d.cwd || undefined,
