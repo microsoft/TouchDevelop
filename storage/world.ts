@@ -273,7 +273,8 @@ module TDev {
                     body.script = "";
                 else if ((Cloud.lite && body.status == "published") || body.status == "unpublished" || body.status == "tobepublished") {
                     body.script = sanitizeScriptTextForCloud(data.script);
-                    body.status = "unpublished";
+                    if (body.status == "tobepublished")
+                        body.status = "unpublished";
                 }
                 else
                     body.script = undefined;
