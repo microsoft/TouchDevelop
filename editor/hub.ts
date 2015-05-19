@@ -48,7 +48,6 @@ module TDev.Browser {
                 promoteRefactoring: true,
                 fixItButton: true,
                 splitScreen: true,
-                splitScreenOnLoad: true,
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
                 // misc
@@ -74,6 +73,7 @@ module TDev.Browser {
                 artSection: true,
                 librariesSection: true,
                 scriptPropertiesSettings: true,
+                scriptPropertiesManagement: true,
                 databaseSection: true,
                 // statements
                 comment: true,
