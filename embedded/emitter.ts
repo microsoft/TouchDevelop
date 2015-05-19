@@ -75,9 +75,10 @@ module TDev {
       }
 
       public visitStringLiteral(env: EmitterEnv, s: string) {
-        return '"'+s.replace(/"\\/, c => {
+        return '"'+s.replace(/["\\\n]/g, c => {
           if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
+          if (c == "\n") return '\\n';
         }) + '"';
       }
 
@@ -164,7 +165,7 @@ module TDev {
           var argsCode = args.map(a => {
             var k = H.isEnumLiteral(a);
             if (k)
-              return H.mkNumberLiteral(k);
+              return k+"";
             else
               return this.visit(env, a)
           });
