@@ -525,7 +525,8 @@ module TDev.Browser {
             // should we load anything?
             if (!currentTheme || !currentTheme.intelliProfileId) return Promise.as(undefined);
             // try loading profile data
-            return ScriptCache.getScriptAsync(currentTheme.intelliProfileId)
+            return TheApiCacheMgr.getAsync(currentTheme.intelliProfileId, true)
+                .then((script : JsonScript) => ScriptCache.getScriptAsync(script.updateid))
                 .then((text: string) => {
                     Util.log('loading intelliprofile for theme');
                     var app = AST.Parser.parseScript(text);

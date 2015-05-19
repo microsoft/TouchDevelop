@@ -1028,7 +1028,7 @@ module TDev
                     this.insertOp("and");
                     break;
                 case "|":
-                    if (prevOp == "or")
+                    if (prevOp == "or" && TheEditor.widgetEnabled("stringConcatProperty"))
                         this.replaceOp("\u2225", prev);
                     else
                         this.insertOp("or");
