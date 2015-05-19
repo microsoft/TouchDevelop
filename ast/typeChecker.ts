@@ -1914,13 +1914,18 @@ module TDev.AST
                             if (str.indexOf(lit) >= 0) {
                                 args[i].enumVal = emap.hasOwnProperty(lit) ? emap[lit] : undefined
                             } else {
-                                this.markError(args[i], lf("TD199: we didn't expect {0} here; try something like {1}", 
+                                this.markError(args[i], lf("TD199: we didn't expect {0} here; try something like {1}",
                                     JSON.stringify(lit),
                                     str.map(s => JSON.stringify(s)).join(", ").slice(0, 100)))
                             }
                         } else {
-                            this.markError(args[i], lf("TD198: we need an enum string here, something like {0}", 
+                            this.markError(args[i], lf("TD198: we need an enum string here, something like {0}",
                                 str.map(s => JSON.stringify(s)).join(", ").slice(0, 100)))
+                        }
+                    } else if (/^bitmatrix$/.test(args[i].languageHint)) {
+                        var lit = args[i].getLiteral();
+                        if (!(typeof lit == "string")) {
+                            this.markError(args[i], lf("TD179: we need a string here"));
                         }
                     }
                 }
