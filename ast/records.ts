@@ -514,6 +514,9 @@ module TDev.AST {
 
         public listExtensions():IProperty[]
         {
+            if (!Script)
+                return [];
+
             if (this.cachedVersion === Script.notifyVersionMarker) {
                 return this.cachedExtensions;
             }
