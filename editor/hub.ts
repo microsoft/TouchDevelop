@@ -1599,6 +1599,9 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
+                if (Cloud.isRestricted())
+                    addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null); }, true);
+
                 if (EditorSettings.widgets().hubScriptUpdates) {
                     var upd = this.browser().headersWithUpdates();
                     if (upd.length > 0) {

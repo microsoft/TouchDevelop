@@ -21,6 +21,7 @@
         }
         private theList = div("slList");
         private header = div("sdListLabel");
+        private botDiv = div(null);
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search");
         private autoUpdate:KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
@@ -600,6 +601,7 @@
                 if (this.hasMore)
                     this.listDivs.push(div('sdLoadingMore', lf("there is more, keep typing!")));
             } else {
+                this.listDivs.push(this.botDiv)
                 if (this.moreDiv)
                     this.listDivs.push(this.moreDiv)
             }
@@ -1318,6 +1320,7 @@
             var header = path.replace(/-scripts/, "").replace(/\/scripts/, "");
             this.shownSomething = false;
             this.apiPath = path;
+            this.botDiv = div(null);
             switch (header) {
                 case "installed":
                     tick(Ticks.browseListMyScripts);
@@ -1366,6 +1369,10 @@
                     header = lf("my groups");
                     if (Cloud.getUserId()) path = Cloud.getUserId() + "/groups";
                     else path = null;
+                    this.botDiv = div(null, 
+                        HTML.mkButtonTick(lf("create group"), Ticks.hubCreateGroup, 
+                            () => { this.createNewGroup() })
+                    )
                     break;
                 case "releases":
                     tick(Ticks.browseListReleases)
