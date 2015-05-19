@@ -126,6 +126,11 @@ module TDev.AST.Json
     export interface JCall extends JPropertyRef, JExpr
     {
         args:JExpr[];
+        // The field below allows to tell the difference between f->x (a
+        // reference to a field from a record, for which [isExtensionMethod] is
+        // false) and f->x() (a call to function x which takes f as a parameter,
+        // but that is represented as an "extension method")
+        isExtensionMethod: boolean;
     }
 
     // Expressions can be represented in two different manners.
