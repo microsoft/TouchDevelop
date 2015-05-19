@@ -4038,6 +4038,24 @@ module TDev
             });
         }
 
+        static loginAs(id:string)
+        {
+            Cloud.postPrivateApiAsync(id + "/token", {})
+                .then(tok => {
+                    World.cancelSync();
+                    Cloud.setAccessToken(undefined);
+                    var ver = localStorage["experimentalVersion"]
+                    return TheEditor.resetWorldAsync().then(() => {
+                        window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
+                        Cloud.setUserId(id)
+                        Cloud.setAccessToken(tok.token)
+                        localStorage["experimentalVersion"] = ver
+                        window.location.reload()
+                    });
+                })
+                .done()
+        }
+
         public logoutDialog() {
             var userId = Cloud.getUserId();
             // when users don't have an picture, the dialog has a broken image which looks really bad

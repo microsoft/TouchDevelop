@@ -475,11 +475,14 @@ module TDev
             return true;
         }
 
-        var mx = /lite=([0-9a-z]+)/.exec(document.URL)
+        var mx = /lite=([0-9a-z\.]+)/.exec(document.URL)
 
         if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            Cloud.config.rootUrl = mx[1].length > 2 ? "http://" + mx[1] + ".cloudapp.net" : "https://mbitmain.azurewebsites.net"
+            if (/\./.test(mx[1]))
+                Cloud.config.rootUrl = "https://" + mx[1]
+            else
+                Cloud.config.rootUrl = "http://" + mx[1] + ".cloudapp.net"
             TDev.Ticker.disable()
         }
 
