@@ -71,6 +71,7 @@ module Helpers {
         name: name,
         parent: parent,
         args: args,
+        isExtensionMethod: false,
     };
   }
 
