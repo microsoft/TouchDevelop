@@ -52,7 +52,7 @@ module TDev {
     // update chain, but in order to save on some API calls, this script id
     // should be refreshed at regular intervals.
     var deviceScriptId = "xulltg";
-    var deviceLibraryName = "device";
+    var deviceLibraryName = "micro:bit";
 
     import J = AST.Json;
 

@@ -75,6 +75,7 @@ module Helpers {
   }
 
   var librarySymbol = "♻";
+  var libraryName = "micro:bit";
   var librarySingleton = mkSingletonRef(librarySymbol);
 
   function mkSingletonRef(name: string): J.JSingletonRef {
@@ -98,7 +99,7 @@ module Helpers {
     if (isExtensionMethod) {
       return mkCall(name, mkTypeRef("call"), args);
     } else {
-      return mkCall(name, mkTypeRef("device"), [<J.JExpr> mkLibrary("device")].concat(args));
+      return mkCall(name, mkTypeRef(libraryName), [<J.JExpr> mkLibrary(libraryName)].concat(args));
     }
   }
 
