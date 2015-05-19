@@ -270,6 +270,7 @@ module TDev.Browser {
                     singleReturnValue: true,
                     librariesSection: true,
                     integerNumbers: true,
+                    codeSearch: true,
                 }
             },
         },
