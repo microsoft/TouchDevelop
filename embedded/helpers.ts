@@ -58,10 +58,14 @@ module TDev {
           case "Boolean":
             return "bool";
           default:
-            throw new Error("Unsupported type: " + t1);
+            try {
+              var t2 = JSON.parse(t1);
+              if (t2.o == "image")
+                return "MicroBitImage*";
+            } catch (e) {
+            }
         }
-        // unreachable
-        return null;
+        throw new Error("Unsupported type: " + t1);
       }
 
       export function mkParam(p: J.JLocalDef) {
@@ -106,6 +110,13 @@ module TDev {
         return (
           e.nodeType == "stringLiteral" &&
           (<J.JStringLiteral> e).enumValue
+        );
+      }
+
+      export function isSingletonRef(e: J.JExpr): string {
+        return (
+          e.nodeType == "singletonRef" &&
+          (<J.JSingletonRef> e).name
         );
       }
 

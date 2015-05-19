@@ -399,6 +399,10 @@ enum Type { Number = 1, Boolean, String, Image, Unit };
 // Infers the expected type of an expression by looking at the untranslated
 // block and figuring out, from the look of it, what type of expression it
 // holds.
+//
+// XXX this is redundant since this information should be on blocks already --
+// make sure all blocks have the right "setCheck" calls and discard this
+// function.
 function inferType(e: Environment, b: B.Block): Type {
   if (b.type in stdCallTable)
     return stdCallTable[b.type].f.type;
@@ -786,6 +790,8 @@ interface StdFunc {
   isExtensionMethod?: boolean
 }
 
+// XXX this is also redundant since, again, we should be able to recover that
+// information by looking at the input block / field value to infer that
 var stdCallTable: { [blockType: string]: StdFunc } = {
   device_clear_display: {
     f: p("clear screen", Type.Unit),
@@ -942,6 +948,11 @@ function isHandlerRegistration(b: B.Block) {
   return b.type == "device_button_event";
 }
 
+// This function only considers assignments, not dereferences, to infer the type
+// of variables. This is ok: what we want is essentially convince ourselves that
+// we always *write* values of the correct type in the variable, as *reads* are
+// checked later on when type-checking expressions, where the expected type is
+// propagated down.
 function mkEnv(w: B.Workspace): Environment {
   // The to-be-returned environment.
   var e = empty;

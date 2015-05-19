@@ -175,8 +175,14 @@ module TDev {
           return mkCall(resolvedName);
         else if (name == ":=")
           return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
+        else if (H.isSingletonRef(receiver))
+          return this.visit(env, receiver) + "::" + mkCall(name);
         else
-          throw new Error("Unknown call: "+name);
+          return this.visit(env, receiver) + "->" + mkCall(name);
+      }
+
+      public visitSingletonRef(e, n: string) {
+        return n;
       }
 
       private mangleActionName(n: string) {
