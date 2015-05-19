@@ -21,7 +21,8 @@ module TDev {
   }
 
   function isAllowedOrigin(origin: string) {
-      return origin.indexOf((<any>document.location).origin) == 0 || hashCode(origin) == -1042622320;
+      var allowed = [ -1042622320, -1360431310, 512055968, 2112581382, -1523767934, -1713123527 ];
+      return origin.indexOf((<any>document.location).origin) == 0 || allowed.indexOf(hashCode(origin)) >= 0;
   }
 
   var $ = (s: string) => <HTMLElement> document.querySelector(s);
