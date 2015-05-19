@@ -24,78 +24,6 @@ module TDev {
     }
 
 
-    // --- Pattern-matching.
-    // Because there's no pattern-matching in TypeScript, these slightly
-    // cumbersome functions match on the node types, and either return [null] or
-    // the thing we were looking for. The pattern is written as a comment to the
-    // function.
-
-    // JCall { args: [ JSingletonRef { name = ♻ } ], name = NAME } -> NAME
-    function isLibrary(e: J.JExpr): string {
-      return (
-        e.nodeType == "call" &&
-        (<J.JCall> e).args[0].nodeType == "singletonRef" &&
-        (<J.JSingletonRef> (<J.JCall> e).args[0]).name == H.librarySymbol &&
-        (<J.JCall> e).name || null
-      );
-    }
-
-    // JSingletonRef { name = "code" } -> true
-    function isScopedCall(e: J.JExpr): boolean {
-      return (
-        e.nodeType == "singletonRef" &&
-        (<J.JSingletonRef> e).name == "code" || null
-      );
-    }
-
-    // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
-    function isShimBody(body: J.JStmt[]): string {
-      var ret = null;
-      body.forEach((s: J.JStmt) => {
-        var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]+)}$/);
-        if (matches)
-          ret = matches[1];
-      });
-      return ret;
-    }
-
-    // JStringLiteral { value: VALUE } -> VALUE
-    function isStringLiteral(x: J.JNode) {
-      return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || null;
-    }
-
-
-    // --- Helper functions.
-    // For constructing / modifying AST nodes.
-
-    function mkNumberLiteral (x: number): J.JNumberLiteral {
-      return {
-        nodeType: "numberLiteral",
-        id: null,
-        value: x
-      };
-    }
-
-    function mangleLibraryName(l, n) {
-      return H.mangleName(l)+"_"+H.mangleName(n);
-    }
-
-    // Rewrites arguments for some selected C++ functions. For instance, as we
-    // don't have enums, the constant string "left" needs to be translated into
-    // the right number constant.
-    function translateArgsIfNeeded(call: string, args: J.JExpr[]) {
-      switch (call) {
-        case "device_button_pressed":
-          if (isStringLiteral(args[0]) == "left")
-            return [mkNumberLiteral(1)];
-          else if (isStringLiteral(args[0]) == "right")
-            return [mkNumberLiteral(2)];
-          throw new Error(call+": unknown button");
-      }
-      return args;
-    }
-
-
     // --- The code emitter.
 
     export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
@@ -198,7 +126,7 @@ module TDev {
 
       private resolveCall(receiver: J.JExpr, name: string) {
         // Is this a call in the current scope?
-        var scoped = isScopedCall(receiver);
+        var scoped = H.isScopedCall(receiver);
         if (scoped)
           if (this.libRef)
             // If compiling a library, no scope actually means the library's scope.
@@ -208,18 +136,18 @@ module TDev {
             return H.mangleName(name);
 
         // Is this a call to a library?
-        var n = isLibrary(receiver);
+        var n = H.isLibrary(receiver);
         if (n) {
           // I expect all libraries and all library calls to be properly resolved.
           var lib = this.libs.filter(l => l.name == n)[0];
           var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
-          var s = isShimBody((<J.JAction> action).body);
+          var s = H.isShimBody((<J.JAction> action).body);
           if (s)
             // Call to a built-in C++ function
             return s;
           else
             // Actual call to a library function
-            return mangleLibraryName(n, name);
+            return H.mangleLibraryName(n, name);
         }
 
         // Something else (e.g. operator)
@@ -231,10 +159,15 @@ module TDev {
         args = args.splice(1);
 
         var resolvedName = this.resolveCall(receiver, name);
-        args = translateArgsIfNeeded(resolvedName, args);
 
         var mkCall = (f: string) => {
-          var argsCode = args.map(a => this.visit(env, a));
+          var argsCode = args.map(a => {
+            var k = H.isEnumLiteral(a);
+            if (k)
+              return H.mkNumberLiteral(k);
+            else
+              return this.visit(env, a)
+          });
           return f + "(" + argsCode.join(", ") + ")";
         };
 
@@ -248,7 +181,7 @@ module TDev {
 
       private mangleActionName(n: string) {
         if (this.libRef)
-          return mangleLibraryName(this.libRef.name, n);
+          return H.mangleLibraryName(this.libRef.name, n);
         else
           return H.mangleName(n);
       }
@@ -262,7 +195,7 @@ module TDev {
       {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
-        if (isShimBody(body))
+        if (H.isShimBody(body))
           return null;
 
         var env2 = indent(env);
@@ -275,11 +208,13 @@ module TDev {
         return head + " {\n" + bodyText + "\n}";
       }
 
+      // This function runs over all declarations. After execution, the three
+      // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
-          if (f.nodeType == "action" && !isShimBody((<J.JAction> f).body))
+          if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
             return H.mkSignature(this.mangleActionName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else
             return null;
@@ -287,12 +222,15 @@ module TDev {
 
         // Compile all the top-level functions.
         var userFunctions = decls.map((d: J.JDecl) => {
-          if (d.nodeType == "action") {
+          if (d.nodeType == "action" && H.willCompile(<J.JAction> d)) {
             return this.visit(e, d);
           } else if (d.nodeType == "art" && d.name == "prelude.cpp") {
             this.prelude += (<J.JArt> d).value;
-          } else if (!(d.nodeType == "library")) {
-            throw new Error("Untranslated declaration" + d);
+          } else {
+            // The typical library has other stuff mixed in (pictures, other
+            // resources) that are used, say, when running the simulator. Just
+            // silently ignore these.
+            return null;
           }
           return null;
         }).filter(x => x != null);
@@ -302,6 +240,8 @@ module TDev {
         this.prototypes = forwardDeclarations.join("\n");
         this.code = userFunctions.join("\n");
 
+        // [embedded.ts] now reads the three member fields separately and
+        // ignores this return value.
         return this.prelude + "\n" + forwardDeclarations.concat(userFunctions).join("\n");
       }
     }

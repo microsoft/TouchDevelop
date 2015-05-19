@@ -182,7 +182,6 @@ module TDev {
       }
 
       public receive(event) {
-        console.log("[outer message]", event);
         if (event.origin != this.editor.origin) {
           console.error("[outer message] not from the right origin!", event.origin, this.editor.origin);
           return;

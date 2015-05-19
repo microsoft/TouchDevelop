@@ -25,6 +25,9 @@ module TDev {
               return this.visitCall(env, n10.name, n10.args);
             case "singletonRef":
               return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
+            case "globalDef":
+              var n13 = <J.JGlobalDef> n;
+              return this.visitGlobalDef(env, n13.name, n13.type);
             case "localDef":
               var n1 = <J.JLocalDef> n;
               return this.visitLocalDef(env, n1.name, n1.id, n1.type);
@@ -54,13 +57,20 @@ module TDev {
               return this.visitInlineAction(env, n6.reference, n6.inParameters, n6.outParameters, n6.body);
             case "action":
               var n7 = <J.JAction> n;
-              return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body);
+              return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body, n7.isPrivate);
             case "app":
               return this.visitApp(env, (<J.JApp> n).decls);
             case "library":
               return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
             case "art":
-              return this.visitArt(env, (<J.JArt> n).url);
+              var n12 = <J.JArt> n;
+              return this.visitArt(env, n12.name, n12.type, n12.url);
+            case "data":
+              var n14 = <J.JData> n;
+              return this.visitData(env, n14.name, n14.type);
+            case "record":
+              var n15 = <J.JRecord> n;
+              return this.visitRecord(env, n15.name, n15.keys, n15.fields, n15.isExported);
           }
           throw new Error("Unsupported node: "+n.nodeType);
       }
@@ -110,10 +120,32 @@ module TDev {
         name: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[]): U                                               { throw new Error("Not implemented"); }
+        body: J.JStmt[],
+        isPrivate: boolean): U                                            { return this.visitDecl(env, name); }
       public visitApp(env: T, decls: J.JDecl[]): U                        { throw new Error("Not implemented"); }
-      public visitLibrary(env: T, name: string): U                        { throw new Error("Not implemented"); }
-      public visitArt(env: T, url: string): U                             { throw new Error("Not implemented"); }
+      public visitLibrary(env: T, name: string): U                        { return this.visitDecl(env, name); }
+      public visitArt(
+        env: T,
+        name: string,
+        type: J.JTypeRef,
+        url: string): U                                                   { return this.visitGlobalDef(env, name, type); }
+      public visitData(
+        env: T,
+        name: string,
+        type: J.JTypeRef): U                                              { return this.visitGlobalDef(env, name, type); }
+      public visitGlobalDef(
+        env: T,
+        name: string,
+        type: J.JTypeRef): U                                              { return this.visitDecl(env, name); }
+      public visitRecord(
+        env: T,
+        name: string,
+        keys: J.JRecordKey[],
+        fields: J.JRecordField[],
+        isExported: boolean): U                                           { return this.visitDecl(env, name); }
+      public visitDecl(
+        env: T,
+        name: string): U                                                  { throw new Error("Not implemented"); }
     }
   }
 

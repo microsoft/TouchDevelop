@@ -62,9 +62,13 @@ module TDev {
         name: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[])
+        body: J.JStmt[],
+        isPrivate: boolean)
       {
-        return this.visitMany(env, body);
+        if (isPrivate || H.isShimBody(body))
+          return [];
+        else
+          return this.visitMany(env, body);
       }
 
       public visitLibrary(env, name) {
@@ -75,7 +79,11 @@ module TDev {
         return this.visitMany(e, decls);
       }
 
-      public visitArt(e, url) {
+      public visitGlobalDef(e, n, t) {
+        return [];
+      }
+
+      public visitRecord(e, n, k, f) {
         return [];
       }
     }
