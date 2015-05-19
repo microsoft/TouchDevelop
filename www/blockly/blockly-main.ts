@@ -6,23 +6,14 @@ module TDev {
 
   // ---------- Communication protocol
 
-  function hashCode(s: string) {
-    var hash = 0;
-    var len = s.length;
-    if (len == 0)
-        return hash;
-    var chr = 0;
-    for (var i = 0, len = s.length; i < len; i++) {
-      chr   = s.charCodeAt(i);
-      hash  = ((hash << 5) - hash) + chr;
-      hash |= 0
-    }
-    return hash;
-  }
+  var allowedOrigins = [
+    /^http:\/\/localhost/,
+    /^https?:\/\/.*\.microbit\.co\.uk/,
+    /^https?:\/\/microbit\.co\.uk/,
+  ];
 
   function isAllowedOrigin(origin: string) {
-      var allowed = [ -1042622320, -1360431310, 512055968, 2112581382, -1523767934, -1713123527 ];
-      return origin.indexOf((<any>document.location).origin) == 0 || allowed.indexOf(hashCode(origin)) >= 0;
+    return allowedOrigins.filter(x => !!origin.match(x)).length > 0;
   }
 
   var $ = (s: string) => <HTMLElement> document.querySelector(s);
