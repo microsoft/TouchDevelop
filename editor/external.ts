@@ -141,7 +141,13 @@ module TDev {
       parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
         AST.TypeChecker.tcApp(a);
+        // The compiler expects this global to be set. However, this is
+        // dangerous, since the sync code might want to write the *translated*
+        // script text to storage for us. Fortunately, the compiler is
+        // synchronous, so it shouldn't happen.
+        Script = a;
         var compiledScript = AST.Compiler.getCompiledScript(a, {});
+        Script = null;
         var rt = TheEditor.currentRt;
         if (!rt) {
           rt = TheEditor.currentRt = new Runtime();
