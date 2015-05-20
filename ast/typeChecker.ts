@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD206:
+// Next available error: TD208:
 
 module TDev.AST
 {
@@ -669,14 +669,18 @@ module TDev.AST
         {
             node._kind = this.core.Nothing;
             this.expectExpr(node.args[0], null, "show")
-            var tp = node.args[0].getKind()
-            if (tp == api.core.Unknown) return
-            var show = tp.getProperty("post to wall")
             node.topPostCall = null;
-            if (!show)
-                this.markError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
-            else
-                node.topPostCall = mkFakeCall(PropertyRef.mkProp(show), [node.args[0]])
+            if (node.args[0].isPlaceholder()) {
+                this.markError(node, lf("TD207: we need something to show"))
+            } else {
+                var tp = node.args[0].getKind()
+                if (tp == api.core.Unknown) return
+                var show = tp.getProperty("post to wall")
+                if (!show)
+                    this.markError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
+                else
+                    node.topPostCall = mkFakeCall(PropertyRef.mkProp(show), [node.args[0]])
+            }
         }
         
         public visitReturn(node:Call)
@@ -695,6 +699,9 @@ module TDev.AST
                     exp = node.topRetLocal.getKind()
                     this.recordLocalWrite(node.topRetLocal)
                 }
+            } else {
+                if (this.outLocals.length == 1)
+                    this.markError(node, lf("TD206: we need a value to return here"))
             }
             this.expectExpr(node.args[0], exp, "return")
             node.topAffectedStmt = this.currentAnyAction;
