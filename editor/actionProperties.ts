@@ -36,8 +36,8 @@ module TDev
                 e.updateTutorial();
             });
 
-            this.testAction.appendChild(Editor.mkHelpLinkBtn("testing", lf("more info")));
-            this.syncBox.appendChild(Editor.mkHelpLinkBtn("async actions", lf("more info")));
+            this.testAction.appendChild(Editor.mkHelpLink("testing"));
+            this.syncBox.appendChild(Editor.mkHelpLink("async actions"));
         }
 
         public editedStmt():AST.Stmt { return this.theAction; }
@@ -151,11 +151,11 @@ module TDev
                   !showSettings || ev ? null : div("formHint",
                     Script.isLibrary ? lf("Private actions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
-                  !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
                   ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
                   ActionProperties.copyCutRefs(lf("the current action"), this.theAction.action),
 
+                  !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   showSettings && icl ? this.offlineAction : null,
                   showSettings && icl ? this.queryAction : null,
                   Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillActionProperties, "formHint marginBottom"),

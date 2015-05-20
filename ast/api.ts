@@ -559,6 +559,7 @@ module TDev {
         public kill() { Util.abstract() }
         public getParameterCount() { return 0 }
         public getParameter(idx:number):Kind { return undefined }
+        public getHtmlName(): any[] { return [this.getName()]; }
 
         constructor(name:string, public _help:string) {
             super(name)

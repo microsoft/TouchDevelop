@@ -16,12 +16,19 @@ declare module Blockly {
         getNextBlock(): Block;
 
         svgGroup_: SVGElement;
+        parentBlock_: Block;
+        inputList: Input[];
     }
 
     // if type == controls_if
     class IfBlock extends Block {
         elseifCount_: number;
         elseCount_: number;
+    }
+
+    class Input {
+        name: string;
+        sourceBlock_: Block;
     }
 
     // if type is one of "procedures_def{,no}return", or "procedures_call{,no}return"

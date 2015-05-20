@@ -62,8 +62,10 @@ module TDev
         {
             if (!!this.decl && this.decl instanceof AST.SingletonDef)
                 return this.decl.getKind().shortName();
-            if (this.prop && this.prop instanceof AST.LibraryRef)
+            else if (this.prop && this.prop instanceof AST.LibraryRef)
                 return AST.libSymbol;
+            else if (this.prop && this.prop instanceof AST.GlobalDef)
+                return (<AST.GlobalDef>this.prop).isResource ? AST.artSymbol : AST.dataSymbol;
             return null;
         }
 

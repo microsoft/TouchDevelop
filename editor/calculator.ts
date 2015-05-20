@@ -2419,7 +2419,8 @@ module TDev
                 var profile = TheEditor.intelliProfile;
                 var singl: AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons().filter(sg => sg.isBrowsable() && (!profile || profile.hasDecl(sg)) ));
                 var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
-                var libSingl:IntelliItem = null;
+                var libSingl: IntelliItem = null;
+                var dataSingl: IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
                     var sc = s.usage.count() + 1e-20;
                     sc *= s.usageMult();
@@ -2429,6 +2430,8 @@ module TDev
                     e.decl = s;
                     if (s.getName() == AST.libSymbol)
                         libSingl = e;
+                    else if (s.getName() == "data")
+                        dataSingl = e;
                 });
 
                 var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
@@ -2443,8 +2446,7 @@ module TDev
                 libs.sort((a, b) => b.score - a.score)
                 // always show all libraries in block/legacy mode
                 var maxLibs = (AST.blockMode || AST.legacyMode) ? 1e6 : 5;
-                if (libs.length > maxLibs)
-                    libs = libs.slice(0, maxLibs)
+                if (libs.length > maxLibs) libs = libs.slice(0, maxLibs)
                 else if (libSingl) libSingl.score *= 1e-10;
                 this.currentIntelliItems.pushRange(libs)
 
@@ -2459,6 +2461,22 @@ module TDev
                         e.decl = s;
                     }
                 });
+
+                // if enough space, expand data variables
+                var vars = Script.variables().filter(r => r.isBrowsable());
+                var maxDatas = Math.min(vars.length, (AST.blockMode || AST.legacyMode) ? 5 : 3);
+                var datas = vars.map(r => {
+                    var sc = r.getUsage().count() + 40;
+                    var e = this.mkIntelliItem(sc, Ticks.calcIntelliResource)
+                    this.currentIntelliItems.pop()
+                    e.isAttachedTo = r.parentKind;
+                    e.prop = r;
+                    return e;                    
+                });
+                datas.sort((a, b) => b.score - a.score);
+                if (datas.length > maxDatas) datas = datas.slice(0, maxDatas)
+                else if (dataSingl) dataSingl.score *= 1e-10;
+                this.currentIntelliItems.pushRange(datas);
             }
         }
 
@@ -3589,8 +3607,10 @@ module TDev
             sig.unshift(find.property.getName())
 
             var resK = find.property.getResult().getKind();
-            if (resK != api.core.Nothing)
-                sig.push(" returns " + resK.toString())
+            if (resK != api.core.Nothing) {
+                sig.push(" returns ");
+                sig.pushRange(resK.getHtmlName())
+            }
 
             if (sig.length > 0)
                 sig.push(" -- ")
