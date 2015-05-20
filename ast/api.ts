@@ -214,7 +214,9 @@ module TDev {
             var invl = Kind.md_make(0, "Unknown", "an unknown value");
             function specProp(name:string, prio:number) {
                 var mkp = (n:string) => PropertyParameter.md_make(n, invl);
-                var p = Property.md_make(1, invl, name, "", prio == 98 || prio == 2.5 ? [mkp("arg")] : [mkp("left"), mkp("right")], invl)
+                var p = Property.md_make(1, invl, name, "", 
+                    prio == 0.5 ? [] :
+                    prio == 98 || prio == 2.5 ? [mkp("arg")] : [mkp("left"), mkp("right")], invl)
                 p._infixPriority = prio;
             }
             specProp(":=", 1);

@@ -127,6 +127,13 @@ module TDev.AST.ExprParser
             var tokens = parse0(tokens0);
             var currentTok = 0;
 
+            if (tokens.length == 1 &&
+                tokens[0].prio() == 0.5) {
+                var z = mkZero(tokens[0])
+                z.expr = mkPlaceholderThingRef()
+                tokens.push(z)
+            }
+
             function expect(op:string)
             {
                 var loc:StackOp = null;
@@ -330,7 +337,7 @@ module TDev.AST.ExprParser
                     }
                 }
 
-                reduceOps(stack, 1);
+                reduceOps(stack, 0);
 
                 var t = stack.peek();
                 if (!t || !t.expr)

@@ -656,6 +656,7 @@ module TDev.AST
 
         public visitBreak(node:Call)
         {
+            node._kind = this.core.Nothing;
             node.topAffectedStmt = this.currLoop
             if (!this.currLoop)
                 this.markError(node, lf("TD200: 'break' can be only used inside a loop"))
@@ -666,6 +667,7 @@ module TDev.AST
         
         public visitShow(node:Call)
         {
+            node._kind = this.core.Nothing;
             this.expectExpr(node.args[0], null, "show")
             var tp = node.args[0].getKind()
             if (tp == api.core.Unknown) return
@@ -679,14 +681,15 @@ module TDev.AST
         
         public visitReturn(node:Call)
         {
+            node._kind = this.core.Nothing;
             node.topRetLocal = null;
             var exp = null
 
             if (!node.args[0].isPlaceholder()) {
                 if (this.outLocals.length == 0)
-                    this.markError(node.args[0], lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
+                    this.markError(node.args[0], lf("TD202: the function doesn't have output parameters; return with a value is not allowed"))
                 else if (this.outLocals.length > 1)
-                    this.markError(node.args[0], lf("TD203: the function has more than one output parameter; return with value is not allowed"))
+                    this.markError(node.args[0], lf("TD203: the function has more than one output parameter; return with a value is not allowed"))
                 else {
                     node.topRetLocal = this.outLocals[0]
                     exp = node.topRetLocal.getKind()
