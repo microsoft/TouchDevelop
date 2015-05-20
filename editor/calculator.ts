@@ -3601,8 +3601,10 @@ module TDev
             sig.unshift(find.property.getName())
 
             var resK = find.property.getResult().getKind();
-            if (resK != api.core.Nothing)
-                sig.push(" returns " + resK.toString())
+            if (resK != api.core.Nothing) {
+                sig.push(" returns ");
+                sig.pushRange(resK.getHtmlName())
+            }
 
             if (sig.length > 0)
                 sig.push(" -- ")
