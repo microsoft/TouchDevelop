@@ -1478,6 +1478,10 @@ module TDev.AST {
         */
     }
 
+    export var artSymbol = "\u273f";
+    export var dataSymbol = "\u25f3";
+    export var codeSymbol = "\u25b7";
+
     export class GlobalDef
         extends PropertyDecl
         implements IProperty
