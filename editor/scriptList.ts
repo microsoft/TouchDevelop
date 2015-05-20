@@ -2931,7 +2931,7 @@
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
-            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
+            if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);

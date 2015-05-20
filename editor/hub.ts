@@ -35,6 +35,10 @@ module TDev.Browser {
                 // ui
                 wallScreenshot: true,
                 startTutorialButton: true,
+                // hub
+                hubTutorials : true,
+                hubShowcase : true,
+                hubSocial : true,
             }
         },
         'classic': {
@@ -87,11 +91,14 @@ module TDev.Browser {
                 boxed: true,
                 stringConcatProperty: true,
                 // hub
-                scriptAddToChannel: true,
-                notifyAppReloaded: true,
-                hubChannels: true,
+                hubTutorials: true,
+                hubLearn: true,
+                hubShowcase: true,
+                hubSocial: true,
+                hubTopAndNew : true,
                 hubScriptUpdates: true,
                 hubUsers: true,
+                notifyAppReloaded: true,
                 startTutorialButton: true,
             }
         },
@@ -143,13 +150,6 @@ module TDev.Browser {
                 foreach: true,
                 boxed: true,
                 stringConcatProperty: true,
-                // hub
-                scriptAddToChannel: true,
-                notifyAppReloaded: true,
-                showTemporaryNotice: true,
-                hubChannels: true,
-                hubScriptUpdates: true,
-                hubUsers: true,
                 //navigation
                 codeSearch: true,
                 findReferences: true,
@@ -189,6 +189,7 @@ module TDev.Browser {
                 scriptPropertiesPropertyCloud: true,
                 scriptPropertiesPropertyAllowExport: true,
                 stringEditFullScreen: true,
+                persistanceRadio: true,
                 // language
                 async: true,
                 testAction: true,
@@ -199,13 +200,17 @@ module TDev.Browser {
                 scriptDiffToBase: true,
                 scriptHistoryTab: true,
                 scriptInsightsTab: true,
+                notifyAppReloaded: true,
+                showTemporaryNotice: true,
                 githubLinks: true,
-                hubSocialTiles: true,
+                hubLearn: true,
+                hubShowcase: true,
+                hubSocial: true,
                 hubTopAndNew: true,
+                hubScriptUpdates: true,
+                hubUsers: true,
                 hubTags: true,
                 hubMyArt: true,
-                hubLearn: true,
-                persistanceRadio: true,
             }
         }
     }
@@ -278,6 +283,9 @@ module TDev.Browser {
                     integerNumbers: true,
                     codeSearch: true,
                     scriptPropertiesSettings: true,
+                    // hub
+                    hubChannels : true,
+                    scriptAddToChannel : true,
                 }
             },
         },
@@ -2461,36 +2469,26 @@ module TDev.Browser {
 
         private updateSections()
         {
+            var widgets = EditorSettings.widgets();
             var sects : StringMap<HubSection> = {
                 "recent": { title: lf("my scripts") },
-                "misc": { title: EditorSettings.widgets().hubLearn ? lf("learn") : lf("tutorials") },
-                "showcase": { title: lf("showcase") },
-                "social": { title: lf("social") },
             };
-            if (EditorSettings.widgets().hubTopAndNew)
+            if (widgets.hubTutorials)
+                sects["tutorials"] = { title: lf("tutorials") };
+            if (widgets.hubLearn)
+                sects["learn"] = { title: lf("learn") };
+            if (widgets.hubChannels)
+                sects["channels"] = { title: lf("channels") };
+            if (widgets.hubShowcase)
+                sects["showcase"] = { title: lf("showcase") };
+            if (widgets.hubSocial)
+                sects["social"] = { title: lf("social") };
+            if (widgets.hubTopAndNew)
                 sects["top"] = { title: lf("top & new") };
-            if (EditorSettings.widgets().hubTags)
+            if (widgets.hubTags)
                 sects["tags"] = { title: lf("categories") };
-            if (EditorSettings.widgets().hubMyArt)
+            if (widgets.hubMyArt)
                 sects["myart"] = { title: lf("my art") };
-
-            var theme = EditorSettings.currentTheme;
-            if (theme) {
-                if (!theme.showcase) delete sects["showcase"];
-                if (!theme.art) delete sects["myart"];
-                if (!theme.tags) delete sects["tags"];
-                if (!theme.top) delete sects["top"];
-                if (!theme.social) delete sects["social"];
-            }
-            if (Cloud.lite) {
-                delete sects["tags"];
-                if (EditorSettings.widgets().hubChannels) {
-                    sects["channels"] = { title: lf("channels") };
-                }
-            }
-            if (Cloud.isRestricted()) {
-                delete sects["showcase"];
-            }
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
@@ -2599,8 +2597,10 @@ module TDev.Browser {
                 } else
                     posLeft += sectWidth(s) + 4;
 
-                if (s == "misc")
-                    EditorSettings.widgets().hubLearn ? this.showLearn(c) : this.showSimplifiedLearn(c);
+                if (s == "tutorials")
+                    this.showSimplifiedLearn(c);
+                else if (s == "learn")
+                    this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {
