@@ -51,8 +51,8 @@ module TDev {
     // [initAsync] will find the latest version of this script by walking up the
     // update chain, but in order to save on some API calls, this script id
     // should be refreshed at regular intervals.
-    var deviceScriptId = "xulltg";
-    var deviceLibraryName = "micro:bit";
+    export var deviceScriptId = "xulltg";
+    export var deviceLibraryName = "micro:bit";
 
     import J = AST.Json;
 
@@ -149,13 +149,14 @@ module TDev {
         var compiledScript = AST.Compiler.getCompiledScript(a, {});
         Script = null;
         var rt = TheEditor.currentRt;
-        if (!rt) {
+        if (!rt)
           rt = TheEditor.currentRt = new Runtime();
-          rt.initFrom(compiledScript);
+        rt.initFrom(compiledScript);
+        if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
-          rt.initPageStack();
-        }
+        rt.initPageStack();
         (<EditorHost> rt.host).showWall();
+
         var main = compiledScript.actionsByStableName.main;
         rt.stopAsync().done(() => {
           rt.run(main, []);

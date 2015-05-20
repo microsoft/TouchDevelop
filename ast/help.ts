@@ -926,9 +926,9 @@ module TDev {
                     s = s.replace(/->/g, "\u2192");
                     s = s.replace(/(^|\s)(\w+)\u2192/, (m, pr, w) => {
                         switch (w) {
-                            case "code": return pr + "\u25b7";
-                            case "data": return pr + "\u25f3";
-                            case "art": return pr + "\u273f";
+                            case "code": return pr + AST.codeSymbol;
+                            case "data": return pr + AST.dataSymbol;
+                            case "art": return pr + AST.artSymbol;
                             case "libs": return pr + AST.libSymbol;
                             case "records": return pr + AST.recordSymbol;
                             default: return m;

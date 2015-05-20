@@ -82,6 +82,7 @@ module TDev {
         calcIntelliPropertyPrimary,
         calcIntelliSingleton,
         calcIntelliLibrary,
+        calcIntelliResource,
         calcKeyboardSearch,
         calcMoveCursorLeft,
         calcMoveCursorRight,

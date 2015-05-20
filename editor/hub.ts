@@ -32,6 +32,13 @@ module TDev.Browser {
                 // sections
                 dataSection: true,
                 artSection: true,
+                // ui
+                wallScreenshot: true,
+                startTutorialButton: true,
+                // hub
+                hubTutorials : true,
+                hubShowcase : true,
+                hubSocial : true,
             }
         },
         'classic': {
@@ -66,6 +73,8 @@ module TDev.Browser {
                 calcApiHelp: true,
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
+                helpLinks: true,
+                wallScreenshot: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -75,18 +84,22 @@ module TDev.Browser {
                 scriptPropertiesSettings: true,
                 scriptPropertiesManagement: true,
                 databaseSection: true,
+                persistanceRadio: true,
                 // statements
                 comment: true,
                 foreach: true,
                 boxed: true,
                 stringConcatProperty: true,
                 // hub
-                scriptAddToChannel: true,
-                notifyAppReloaded: true,
-                hubChannels: true,
+                hubTutorials: true,
+                hubLearn: true,
+                hubShowcase: true,
+                hubSocial: true,
+                hubTopAndNew : true,
                 hubScriptUpdates: true,
                 hubUsers: true,
-                persistanceRadio: true,
+                notifyAppReloaded: true,
+                startTutorialButton: true,
             }
         },
         'pro': {
@@ -123,6 +136,8 @@ module TDev.Browser {
                 calcApiHelp: true,
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
+                helpLinks: true,
+                wallScreenshot: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -135,14 +150,6 @@ module TDev.Browser {
                 foreach: true,
                 boxed: true,
                 stringConcatProperty: true,
-                // hub
-                scriptAddToChannel: true,
-                notifyAppReloaded: true,
-                showTemporaryNotice: true,
-                hubChannels: true,
-                hubScriptUpdates: true,
-                hubUsers: true,
-
                 //navigation
                 codeSearch: true,
                 findReferences: true,
@@ -182,6 +189,7 @@ module TDev.Browser {
                 scriptPropertiesPropertyCloud: true,
                 scriptPropertiesPropertyAllowExport: true,
                 stringEditFullScreen: true,
+                persistanceRadio: true,
                 // language
                 async: true,
                 testAction: true,
@@ -192,13 +200,17 @@ module TDev.Browser {
                 scriptDiffToBase: true,
                 scriptHistoryTab: true,
                 scriptInsightsTab: true,
+                notifyAppReloaded: true,
+                showTemporaryNotice: true,
                 githubLinks: true,
-                hubSocialTiles: true,
+                hubLearn: true,
+                hubShowcase: true,
+                hubSocial: true,
                 hubTopAndNew: true,
+                hubScriptUpdates: true,
+                hubUsers: true,
                 hubTags: true,
                 hubMyArt: true,
-                hubLearn: true,
-                persistanceRadio: true,
             }
         }
     }
@@ -267,9 +279,13 @@ module TDev.Browser {
                     updateButton: true,
                     forceMainAsAction: true,
                     singleReturnValue: true,
-                    librariesSection: true,
                     integerNumbers: true,
                     codeSearch: true,
+                    // librariesSection: true,
+                    // scriptPropertiesSettings: true,
+                    // hub
+                    hubChannels : true,
+                    scriptAddToChannel : true,
                 }
             },
         },
@@ -615,7 +631,7 @@ module TDev.Browser {
         extends Screen {
         constructor() {
             super()
-            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox, this.dingDingBox);
+            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
             this.topBox = div(null, this.topContainer);
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
             this.templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
@@ -629,7 +645,6 @@ module TDev.Browser {
         // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
-        private dingDingBox = div("dingDingBox");
         private topBox: HTMLElement;
         private topContainer: HTMLElement;
         private theRoot: HTMLElement;
@@ -1367,10 +1382,17 @@ module TDev.Browser {
                     if (!editor) return;
                     var p = Promise.as("");
                     if (editor == "touchdevelop")
-                        p = TheApiCacheMgr.getAsync("dtoihh", true)
-                            .then((script: JsonScript) => script ? script.updateid : "dtoihh")
-                            .then(scriptid => TheApiCacheMgr.getAsync(scriptid + "/text", true))
-                            .then(text => text || this.templates.filter(t => t.id == "blank")[0].source);
+                        p = External.pullLatestLibraryVersion()
+                            .then(() => {
+                            var text = '// A #microbit script\n' +
+                                'action main() {\n' +
+                                '    skip;\n' +                                
+                                '}\n' +
+                                'meta import ' + AST.Lexer.quoteId(External.deviceLibraryName) + ' {\n' +
+                                '  pub "' + External.deviceScriptId + '"\n' +
+                                '}\n';
+                                return text;
+                            });
                     p.then(src => {
                         var stub: World.ScriptStub = {
                             editorName: editor,
@@ -1509,9 +1531,12 @@ module TDev.Browser {
 
             var scriptSlots = 0
             if (s == "recent" && items.length < 5) {
-                tutorialOffset++;
-                elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
-                scriptSlots = 4 - items.length
+                scriptSlots = 5 - items.length
+                if (EditorSettings.widgets().startTutorialButton) {
+                    tutorialOffset++;
+                    elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
+                    scriptSlots--;
+                }
             }
 
 
@@ -1532,14 +1557,14 @@ module TDev.Browser {
                 elements.push(t);
             });
 
-            if (scriptSlots && items.length == 0) {
+            if (scriptSlots && items.length == 0 && EditorSettings.widgets().startTutorialButton) {
                 Util.setTimeout(1000, () => this.showTutorialTip())
             }
 
             while (scriptSlots-- > 0) {
-                var oneSlot = this.mkFnBtn(lf("Your script will appear here"), () => {
+                var oneSlot = this.mkFnBtn(lf("Your script will appear here"),() => {
                     this.showTutorialTip()
-                }, Ticks.hubFirstTutorial, true, scriptSlots == 3 ? 2 : 1);
+                }, Ticks.hubFirstTutorial, true, tileSize(elements.length - tutorialOffset));
                 oneSlot.className += " scriptSlot";
                 elements.push(oneSlot)
             }
@@ -2443,36 +2468,26 @@ module TDev.Browser {
 
         private updateSections()
         {
+            var widgets = EditorSettings.widgets();
             var sects : StringMap<HubSection> = {
                 "recent": { title: lf("my scripts") },
-                "misc": { title: EditorSettings.widgets().hubLearn ? lf("learn") : lf("tutorials") },
-                "showcase": { title: lf("showcase") },
-                "social": { title: lf("social") },
             };
-            if (EditorSettings.widgets().hubTopAndNew)
+            if (widgets.hubTutorials)
+                sects["tutorials"] = { title: lf("tutorials") };
+            if (widgets.hubLearn)
+                sects["learn"] = { title: lf("learn") };
+            if (widgets.hubChannels)
+                sects["channels"] = { title: lf("channels") };
+            if (widgets.hubShowcase)
+                sects["showcase"] = { title: lf("showcase") };
+            if (widgets.hubSocial)
+                sects["social"] = { title: lf("social") };
+            if (widgets.hubTopAndNew)
                 sects["top"] = { title: lf("top & new") };
-            if (EditorSettings.widgets().hubTags)
+            if (widgets.hubTags)
                 sects["tags"] = { title: lf("categories") };
-            if (EditorSettings.widgets().hubMyArt)
+            if (widgets.hubMyArt)
                 sects["myart"] = { title: lf("my art") };
-
-            var theme = EditorSettings.currentTheme;
-            if (theme) {
-                if (!theme.showcase) delete sects["showcase"];
-                if (!theme.art) delete sects["myart"];
-                if (!theme.tags) delete sects["tags"];
-                if (!theme.top) delete sects["top"];
-                if (!theme.social) delete sects["social"];
-            }
-            if (Cloud.lite) {
-                delete sects["tags"];
-                if (EditorSettings.widgets().hubChannels) {
-                    sects["channels"] = { title: lf("channels") };
-                }
-            }
-            if (Cloud.isRestricted()) {
-                delete sects["showcase"];
-            }
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
@@ -2581,8 +2596,10 @@ module TDev.Browser {
                 } else
                     posLeft += sectWidth(s) + 4;
 
-                if (s == "misc")
-                    EditorSettings.widgets().hubLearn ? this.showLearn(c) : this.showSimplifiedLearn(c);
+                if (s == "tutorials")
+                    this.showSimplifiedLearn(c);
+                else if (s == "learn")
+                    this.showLearn(c);
                 else if (s == "tags")
                     this.showTags(c);
                 else if (s == "myart") {

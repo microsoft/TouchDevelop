@@ -337,10 +337,10 @@ module TDev.AppExport
     {
         var m = new ModalDialog();
         m.add(div('wall-dialog-header', lf("azure management certificate")));
-        m.addHTML(lf("<p>If you do not have an Azure subscription, <a href='http://www.youtube.com/watch?v=YE4u55oNjmw' target='_blank'>here is a 2 minute video</a> with instructions.</p>"));
+        m.addHTML(lf("<p>If you do not have an Azure subscription, go to <a href='https://account.windowsazure.com/Subscriptions' target='_blank'>Azure subscriptions</a> to get one.</p>"));
         m.addHTML("<ol>" +
             "<li>" + lf("<a href='http://go.microsoft.com/fwlink/?LinkId=254432' target='_blank'>generate the certificate</a>.") + "</li>" +
-            "<li>" + lf("paste the content of the certificate into the textbox  and press import") + "</li>" +
+            "<li>" + lf("paste the content of the certificate into the textbox and press import") + "</li>" +
             "</ol>");
         var save = true
         m.add(div("wall-dialog-body", HTML.mkCheckBox(lf("save certificate in the browser"), (v) => {
