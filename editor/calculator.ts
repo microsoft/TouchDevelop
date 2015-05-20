@@ -53,6 +53,7 @@ module TDev
         private lastOpenBracePos = -1;
         private specialKeypadOn = 0;
         private boxMode = false;
+        private noExpr = false;
         private inlineEditAt = -1;
         private inlineEditToken:AST.Token;
         private onNextDisplay:()=>void = null;
@@ -476,6 +477,8 @@ module TDev
                 introE = span("", span("kw", "where "))
             } else if (this.stmt instanceof AST.Return) {
                 introE = span("", span("kw", "return "))
+            } else if (this.stmt instanceof AST.Break) {
+                introE = span("", span("kw", "break "))
             } else if (this.stmt instanceof AST.Show) {
                 introE = span("", span("kw", "show "))
             } else if (this.stmt instanceof AST.ExprStmt) {
@@ -775,6 +778,7 @@ module TDev
             this.undoMgr.clearCalc();
             this.stmt = s;
             this.boxMode = s instanceof AST.Box;
+            this.noExpr = this.boxMode || s instanceof AST.Break;
 
             Ticker.dbg("Calc.edit0");
             elt("leftPaneContent").setFlag("in-calculator", true)
@@ -1682,7 +1686,7 @@ module TDev
             if (!pm) this.setupNumKeypad();
             this.specialKeypadOn = 0;
 
-            if (this.boxMode) {
+            if (this.noExpr) {
                 this.buttons.forEach((b) => b.clear())
                 return;
             }
@@ -3535,7 +3539,7 @@ module TDev
             this.elseIfButton();
             this.addFieldButtons();
 
-            if (!this.boxMode) {
+            if (!this.noExpr) {
                 var placeholderDef:AST.PlaceholderDef = null;
                 var prevTok = this.expr.tokens[this.cursorPosition - 1]
                 var nameHint:string = null
