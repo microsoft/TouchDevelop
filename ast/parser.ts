@@ -31,6 +31,8 @@ module TDev { export module AST {
                 "foreach": Parser.stmtCtor(Foreach),
                 "while": Parser.stmtCtor(While),
                 "if": Parser.stmtCtor(If),
+                "break": Parser.stmtCtor(Break),
+                "return": Parser.stmtCtor(Return),
                 "else": this.parseElseIf,
                 "do": this.parseDo,
                 "where": this.parseWhere,

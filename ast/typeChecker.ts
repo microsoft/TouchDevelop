@@ -215,6 +215,7 @@ module TDev.AST
         private pageDisplay:Block;
         private saveFixes = 0;
         private outLocals:LocalDef[] = [];
+        private reportedUnassigned = false;
 
         private allLocals :LocalDef[] = [];
         private recentErrors: string[] = [];
@@ -679,6 +680,8 @@ module TDev.AST
         {
             this.updateStmtUsage(node);
             node.retLocal = null;
+            var exp = null
+
             if (!node.expr.isPlaceholder()) {
                 if (this.outLocals.length == 0)
                     this.setNodeError(node, lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
@@ -686,10 +689,11 @@ module TDev.AST
                     this.setNodeError(node, lf("TD203: the function has more than one output parameter; return with value is not allowed"))
                 else {
                     node.retLocal = this.outLocals[0]
-                    this.expect(node.expr, node.retLocal.getKind(), "return")
+                    exp = node.retLocal.getKind()
                     this.recordLocalWrite(node.retLocal)
                 }
             }
+            this.expect(node.expr, exp, "return")
             node.action = this.currentAnyAction;
             this.checkAssignment(node)
         }
@@ -820,6 +824,7 @@ module TDev.AST
                 // TODO in - read-only?
                 var prevErr = this.errorCount;
                 this.outLocals = node.getOutParameters().map((p) => p.local)
+                this.reportedUnassigned = false;
 
                 this.typeResolver.visitAction(node);
 
@@ -842,8 +847,10 @@ module TDev.AST
                     if (outp1) {
                         this.setNodeError(node, lf("TD171: currently action types support at most one output parameter; sorry"))
                     }
-                } else
-                    this.checkAssignment(node);
+                } else {
+                    if (!this.reportedUnassigned)
+                        this.checkAssignment(node);
+                }
                 node._hasErrors = this.errorCount > prevErr;
                 node.allLocals = this.allLocals;
             });
@@ -1105,6 +1112,7 @@ module TDev.AST
         {
             var unassigned = this.outLocals.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
+                this.reportedUnassigned = true;
                 node.addHint(
                     lf("parameter{0:s} {1} may be unassigned before the action finishes",
                              unassigned.length, 
@@ -1120,6 +1128,7 @@ module TDev.AST
                 var prevSect = this.actionSection;
                 var prevAtomic = this.inAtomic;
                 var prevOut = this.outLocals;
+                var prevRep = this.reportedUnassigned;
                 var prevAct = this.currentAnyAction;
 
                 this.writtenLocals = [];
@@ -1137,6 +1146,7 @@ module TDev.AST
                     this.actionSection = prevSect;
                     this.outLocals = prevOut;
                     this.currentAnyAction = prevAct;
+                    this.reportedUnassigned = prevRep;
                 }
             })
         }
@@ -1149,8 +1159,10 @@ module TDev.AST
                 inl.inParameters.forEach((d) => this.declareLocal(d));
                 inl.outParameters.forEach((d) => this.declareLocal(d));
                 this.outLocals = inl.outParameters.slice(0);
+                this.reportedUnassigned = false;
                 this.typeCheck(inl.body);
-                this.checkAssignment(inl);
+                if (!this.reportedUnassigned)
+                    this.checkAssignment(inl);
             })
         }
 

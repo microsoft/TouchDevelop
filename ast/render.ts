@@ -619,7 +619,8 @@ module TDev
 
         public visitReturn(n:AST.Return)
         {
-            return this.stmt(n, this.tline(this.kw("return") + this.expr(n.expr)) 
+            return this.stmt(n, this.tline(this.kw("return") + 
+                                (n.expr.isPlaceholder() ? "" : this.expr(n.expr))) 
                                 + this.possibleError(n))
         }
 

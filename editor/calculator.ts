@@ -474,6 +474,10 @@ module TDev
                 outroE = st(" ) {", " do")
             } else if (this.stmt instanceof AST.Where) {
                 introE = span("", span("kw", "where "))
+            } else if (this.stmt instanceof AST.Return) {
+                introE = span("", span("kw", "return "))
+            } else if (this.stmt instanceof AST.Show) {
+                introE = span("", span("kw", "show "))
             } else if (this.stmt instanceof AST.ExprStmt) {
                 if ((<AST.ExprStmt>this.stmt).isVarDef())
                     introE = span("kw",  "var ")
