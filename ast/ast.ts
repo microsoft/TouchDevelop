@@ -755,6 +755,10 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitBreak(this); }
         public isExecutableStmt() { return true; }
 
+        private emptyExpr = Parser.emptyExpr();
+        public calcNode() { return this.emptyExpr; }
+        public children() { return []; }
+
         public writeTo(tw:TokenWriter)
         {
             this.writeIdOpt(tw);

@@ -934,7 +934,7 @@ module TDev.AST
             if (ex != this.unit)
                 r.push(new JsExprStmt(ex));
             this.resetAnalysisInfo();
-            return s
+            return r
         }
 
         private compileInlineAction(inl:InlineAction)
@@ -2175,6 +2175,7 @@ module TDev.AST
                 this.profilingScopes.push(new JsTmpDef("profilingLastCallTimeStamp", new JsLiteral("0")));
 
             var jsNodes: JsStmt[] = this.dispatch(a.body);
+            jsNodes.push(a._compilerBreakLabel);
 
             if (this.needsProfiling())
                 jsNodes.unshift(this.profilingScopes.pop());
@@ -2190,7 +2191,6 @@ module TDev.AST
 
             jsNodes.unshift(lab0);
             lab0.refs.push(lab0);
-            jsNodes.push(a._compilerBreakLabel);
             var prevMax = this.maxArgsToCheck + 1;
             this.insertFinalLabels(jsNodes);
             jsNodes.forEach((n) => n.forEachExpr((e:JsExpr) => {
