@@ -1370,10 +1370,17 @@ module TDev.Browser {
                     if (!editor) return;
                     var p = Promise.as("");
                     if (editor == "touchdevelop")
-                        p = TheApiCacheMgr.getAsync("dtoihh", true)
-                            .then((script: JsonScript) => script ? script.updateid : "dtoihh")
-                            .then(scriptid => TheApiCacheMgr.getAsync(scriptid + "/text", true))
-                            .then(text => text || this.templates.filter(t => t.id == "blank")[0].source);
+                        p = External.pullLatestLibraryVersion()
+                            .then(() => {
+                            var text = '// A #microbit script\n' +
+                                'action main() {\n' +
+                                '    skip;\n' +                                
+                                '}\n' +
+                                'meta import ' + AST.Lexer.quoteId(External.deviceLibraryName) + ' {\n' +
+                                '  pub "' + External.deviceScriptId + '"\n' +
+                                '}\n';
+                                return text;
+                            });
                     p.then(src => {
                         var stub: World.ScriptStub = {
                             editorName: editor,
