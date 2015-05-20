@@ -123,19 +123,22 @@ body {
 }
 
 .roundsymbol {
-  width: 2rem;
-  height: 2rem;
+  width: 4rem;
+  height: 4rem;
   border: 2px solid black;
   border-radius: 50%;
   margin: .2rem;
   margin-bottom: 0;
   text-align: center;
-  font-size: 1.4rem;
+  font-size: 2.6rem;
+  line-height: 3.8rem;
+  padding: .1em;
   font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
 }
 
 .roundlabel {
-  font-size: 60%;
+  padding-top: .6rem;
+  font-size: 80%;
   text-align: center;
 }
 

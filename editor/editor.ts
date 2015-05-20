@@ -2080,7 +2080,6 @@ module TDev
 
         private setupExternalButtons() {
             elt("externalEditorChrome").setChildren([
-                div("tdLite", [ "♥ TouchDevelop" ])
             ])
         }
 
