@@ -645,14 +645,6 @@ module TDev.AST {
                     result = new While();
                     (<While>result).body = <CodeBlock>getNewChild(0); // TODO - check cast?
                     (<While>result).condition = mergeExprHolder(x => (<While>x).condition);
-                } else if(test(Return)) {
-                    result = new Return();
-                    (<Return>result).expr = mergeExprHolder(x => (<Return>x).expr);
-                } else if(test(Show)) {
-                    result = new Show();
-                    (<Show>result).expr = mergeExprHolder(x => (<Show>x).expr);
-                } else if(test(Break)) {
-                    result = new Break();
                 } else if(test(OptionalParameter)) {
                     result = new OptionalParameter();
                     (<OptionalParameter>result)._opt_name = getChange(x => (<OptionalParameter>x).getName());

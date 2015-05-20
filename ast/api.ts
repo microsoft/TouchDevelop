@@ -36,6 +36,9 @@ module TDev {
         public EqualsProp:IProperty;
         public AsyncProp:IProperty;
         public FunProp:IProperty;
+        public ShowProp:IProperty;
+        public ReturnProp:IProperty;
+        public BreakProp:IProperty;
         public StringConcatProp:IProperty;
         public PlaceholderThing:AST.SingletonDef;
         public AndProp:Property;
@@ -88,6 +91,9 @@ module TDev {
             this.EqualsProp = this.Number.getProperty("=");
             this.AsyncProp = this.Unknown.getProperty("async");
             this.FunProp = this.Unknown.getProperty("fun");
+            this.ShowProp = this.Unknown.getProperty("show");
+            this.BreakProp = this.Unknown.getProperty("break");
+            this.ReturnProp = this.Unknown.getProperty("return");
             this.AndProp = <Property>this.Boolean.getProperty("and");
             this.OrProp = <Property>this.Boolean.getProperty("or");
             this.NotProp = <Property>this.Boolean.getProperty("not");
@@ -215,9 +221,9 @@ module TDev {
             specProp(",", 2);
             specProp("async", 98);
             specProp("fun", 2.5);
-            specProp("return", 1);
-            specProp("show", 1);
-            specProp("break", 1);
+            specProp("return", 0.5);
+            specProp("show", 0.5);
+            specProp("break", 0.5);
             invl.isData = true;
 
             this.core = new CoreApi(this);

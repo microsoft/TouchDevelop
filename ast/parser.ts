@@ -31,8 +31,6 @@ module TDev { export module AST {
                 "foreach": Parser.stmtCtor(Foreach),
                 "while": Parser.stmtCtor(While),
                 "if": Parser.stmtCtor(If),
-                "break": Parser.stmtCtor(Break),
-                "return": Parser.stmtCtor(Return),
                 "else": this.parseElseIf,
                 "do": this.parseDo,
                 "where": this.parseWhere,
@@ -980,10 +978,8 @@ module TDev { export module AST {
             var node;
             if (id == "box")
                 node = Box;
-            else if (id == "show")
-                node = Show;
             else {
-                this.error("expecting 'box' or 'show' here");
+                this.error("expecting 'box' here");
                 return;
             }
 

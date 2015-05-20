@@ -475,12 +475,6 @@ module TDev
                 outroE = st(" ) {", " do")
             } else if (this.stmt instanceof AST.Where) {
                 introE = span("", span("kw", "where "))
-            } else if (this.stmt instanceof AST.Return) {
-                introE = span("", span("kw", "return "))
-            } else if (this.stmt instanceof AST.Break) {
-                introE = span("", span("kw", "break "))
-            } else if (this.stmt instanceof AST.Show) {
-                introE = span("", span("kw", "show "))
             } else if (this.stmt instanceof AST.ExprStmt) {
                 if ((<AST.ExprStmt>this.stmt).isVarDef())
                     introE = span("kw",  "var ")
@@ -778,7 +772,7 @@ module TDev
             this.undoMgr.clearCalc();
             this.stmt = s;
             this.boxMode = s instanceof AST.Box;
-            this.noExpr = this.boxMode || s instanceof AST.Break;
+            this.noExpr = this.boxMode
 
             Ticker.dbg("Calc.edit0");
             elt("leftPaneContent").setFlag("in-calculator", true)

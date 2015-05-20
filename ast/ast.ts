@@ -3158,7 +3158,6 @@ module TDev.AST {
         public getLiftedSetter() : IProperty { return null; }
         public calledProp() : IProperty { return null; }
         public assignmentInfo() : AssignmentInfo { return null; }
-        public getTopExpr():TopExpr { return null }
         public isRefValue() { return false }
         public allowRefUse() { return false }
         public isEscapeDef() { return false }
@@ -3372,6 +3371,11 @@ module TDev.AST {
         public optionalConstructor:InlineActions;
         public compiledTypeArgs:any;
 
+        // this is for break, return, and show
+        public topRetLocal:LocalDef;
+        public topAffectedStmt:Stmt;
+        public topPostCall:Expr;
+
         constructor() {
             super()
         }
@@ -3486,7 +3490,22 @@ module TDev.AST {
             }
         }
 
-        public accept(v:NodeVisitor) { return v.visitCall(this); }
+        public accept(v:NodeVisitor) {
+            var p = this.prop()
+            if (!p || p.parentKind != api.core.Unknown) // fast path
+                return v.visitCall(this)
+
+            if (p == api.core.AssignmentProp)
+                return v.visitAssignment(this)
+            else if (p == api.core.ReturnProp)
+                return v.visitReturn(this)
+            else if (p == api.core.BreakProp)
+                return v.visitBreak(this)
+            else if (p == api.core.ShowProp)
+                return v.visitShow(this)
+
+            return v.visitCall(this);
+        }
 
         public calledAction():AST.Action
         {
@@ -3513,50 +3532,6 @@ module TDev.AST {
         {
             return !this.runAsAsync && this.prop() && !!(this.prop().getFlags() & PropertyFlags.Async);
         }
-    }
-
-    export class TopExpr
-        extends Expr
-    {
-        public expr:Expr;
-        public getTopExpr():TopExpr { return this }
-        public children() { return [this.expr] }
-    }
-
-    export class Show
-        extends TopExpr
-    {
-        public postCall:Expr;
-
-        constructor() {
-            super()
-        }
-        public nodeType() { return "show"; }
-        public accept(v:NodeVisitor) { return v.visitShow(this); }
-    }
-
-    export class Break
-        extends TopExpr
-    {
-        constructor() {
-            super()
-        }
-        public loop:Stmt;
-        public nodeType() { return "break"; }
-        public accept(v:NodeVisitor) { return v.visitBreak(this); }
-    }
-
-    export class Return
-        extends TopExpr
-    {
-        public retLocal:LocalDef;
-        public action:Stmt;
-
-        constructor() {
-            super()
-        }
-        public nodeType() { return "return"; }
-        public accept(v:NodeVisitor) { return v.visitReturn(this); }
     }
 
 
@@ -3755,9 +3730,10 @@ module TDev.AST {
         public visitLiteral(n:Literal) { return this.visitExpr(n); }
         public visitThingRef(n:ThingRef) { return this.visitExpr(n); }
         public visitCall(n:Call) { return this.visitExpr(n); }
-        public visitShow(n:Show) { return this.visitExpr(n); }
-        public visitBreak(n:Break) { return this.visitExpr(n); }
-        public visitReturn(n:Return) { return this.visitExpr(n); }
+        public visitShow(n:Call) { return this.visitCall(n); }
+        public visitBreak(n:Call) { return this.visitCall(n); }
+        public visitReturn(n:Call) { return this.visitCall(n); }
+        public visitAssignment(n:Call) { return this.visitCall(n); }
 
         public visitExprHolder(n:ExprHolder) { return this.visitAstNode(n); }
 

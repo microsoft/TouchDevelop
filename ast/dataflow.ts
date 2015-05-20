@@ -2254,11 +2254,11 @@ module TDev.AST {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }
-        visitBreak(n: Break) {
+        visitBreak(n: Call) {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }
-        visitReturn(n: Return) {
+        visitReturn(n: Call) {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }

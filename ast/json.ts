@@ -613,20 +613,24 @@ module TDev.AST.Json
             }
         }
 
-        public visitShow(n:Show) {
+        public visitShow(n:Call) {
             return {
-                expr: n.expr,
+                nodeType: "show",
+                expr: n.args[0],
             }
         }
 
-        public visitReturn(n:Return) {
+        public visitReturn(n:Call) {
             return {
-                expr: n.expr,
+                nodeType: "return",
+                expr: n.args[0],
             }
         }
 
-        public visitBreak(n:Break) {
-            return { }
+        public visitBreak(n:Call) {
+            return {
+                nodeType: "break",
+            }
         }
 
         public visitBox(n:Box) {
@@ -1218,6 +1222,14 @@ module TDev.AST.Json
                     case "singletonRef":
                         r.push(e);
                         break;
+                    case "show":
+                    case "break":
+                    case "return":
+                        pushOp(e.nodeType)
+                        var ee = (<JReturn>e).expr
+                        if (ee)
+                            rec(ee, prio)
+                        break
                     default:
                         Util.oops("invalid nodeType when flattning: " + e.nodeType)
                 }
@@ -1445,25 +1457,6 @@ module TDev.AST.Json
                 selfEh(n, n.condition);
                 tw.keyword("do");
                 block(n.body);
-            },
-
-            "break": (n:JBreak) => {
-                stmt(n)
-                tw.keyword("break").op0(";").nl();
-            },
-
-            "return": (n:JReturn) => {
-                stmt(n)
-                tw.keyword("return");
-                selfEh(n, n.expr);
-                tw.op0(";").nl();
-            },
-
-            "show": (n:JShow) => {
-                stmt(n)
-                tw.keyword("do").id("show");
-                selfEh(n, n.expr);
-                tw.op0(";").nl();
             },
 
             "if": (n:JIf) => {

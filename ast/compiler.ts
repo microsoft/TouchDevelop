@@ -900,26 +900,26 @@ module TDev.AST
             return res;
         }
 
-        public visitBreak(b:Break)
+        public visitBreak(b:Call)
         {
-            if (b.loop)
-                this.aux.push(JsGoto.simple(b.loop._compilerBreakLabel))
+            if (b.topAffectedStmt)
+                this.aux.push(JsGoto.simple(b.topAffectedStmt._compilerBreakLabel))
             return this.unit
         }
 
-        public visitReturn(r:Return)
+        public visitReturn(r:Call)
         {
-            if (r.retLocal) {
-                var val = this.doExpr(r.expr);
-                this.aux.push(this.localVarRef(r.retLocal).gets(val))
+            if (r.topRetLocal) {
+                var val = this.doExpr(r.args[0]);
+                this.aux.push(this.localVarRef(r.topRetLocal).gets(val))
             }
-            this.aux.push(JsGoto.simple(r.action._compilerBreakLabel))
+            this.aux.push(JsGoto.simple(r.topAffectedStmt._compilerBreakLabel))
             return this.unit
         }
 
-        public visitShow(s:Show)
+        public visitShow(s:Call)
         {
-            var ex = this.doExpr(s.postCall)
+            var ex = this.doExpr(s.topPostCall)
             if (ex != this.unit)
                 this.aux.push(new JsExprStmt(ex));
             return this.unit

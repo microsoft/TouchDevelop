@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD205:
+// Next available error: TD206:
 
 module TDev.AST
 {
@@ -654,45 +654,48 @@ module TDev.AST
             });
         }
 
-        public visitBreak(node:Break)
+        public visitBreak(node:Call)
         {
-            node.loop = this.currLoop
-            if (!node.loop) 
+            node.topAffectedStmt = this.currLoop
+            if (!this.currLoop)
                 this.markError(node, lf("TD200: 'break' can be only used inside a loop"))
+            if (!node.args[0].isPlaceholder())
+                this.markError(node, lf("TD205: 'break' cannot take arguments"))
+            this.expectExpr(node.args[0], null, "break")
         }
         
-        public visitShow(node:Show)
+        public visitShow(node:Call)
         {
-            this.expectExpr(node.expr, null, "show")
-            var tp = node.expr.getKind()
+            this.expectExpr(node.args[0], null, "show")
+            var tp = node.args[0].getKind()
             if (tp == api.core.Unknown) return
             var show = tp.getProperty("post to wall")
-            node.postCall = null;
+            node.topPostCall = null;
             if (!show)
                 this.markError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
             else
-                node.postCall = mkFakeCall(PropertyRef.mkProp(show), [node.expr.parsed])
+                node.topPostCall = mkFakeCall(PropertyRef.mkProp(show), [node.args[0]])
         }
         
-        public visitReturn(node:Return)
+        public visitReturn(node:Call)
         {
-            node.retLocal = null;
+            node.topRetLocal = null;
             var exp = null
 
-            if (!node.expr.isPlaceholder()) {
+            if (!node.args[0].isPlaceholder()) {
                 if (this.outLocals.length == 0)
-                    this.markError(node.expr, lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
+                    this.markError(node.args[0], lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
                 else if (this.outLocals.length > 1)
-                    this.markError(node.expr, lf("TD203: the function has more than one output parameter; return with value is not allowed"))
+                    this.markError(node.args[0], lf("TD203: the function has more than one output parameter; return with value is not allowed"))
                 else {
-                    node.retLocal = this.outLocals[0]
-                    exp = node.retLocal.getKind()
-                    this.recordLocalWrite(node.retLocal)
+                    node.topRetLocal = this.outLocals[0]
+                    exp = node.topRetLocal.getKind()
+                    this.recordLocalWrite(node.topRetLocal)
                 }
             }
-            this.expectExpr(node.expr, exp, "return")
-            node.action = this.currentAnyAction;
-            this.checkAssignment(node)
+            this.expectExpr(node.args[0], exp, "return")
+            node.topAffectedStmt = this.currentAnyAction;
+            this.checkAssignment(this.lastStmt)
         }
         
         public visitActionParameter(node:ActionParameter)
