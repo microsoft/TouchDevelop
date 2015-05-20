@@ -37,7 +37,20 @@ module TDev {
             case "exprHolder":
               return this.visitExprHolder(env, (<J.JExprHolder> n).tree);
             case "exprStmt":
-              return this.visitExprStmt(env, (<J.JExprStmt> n).expr);
+              var ex = <J.JExprStmt> n
+              var tr = ex.expr.tree
+              switch (tr.nodeType) {
+                case "show":
+                  var nshow = <J.JShow> tr;
+                  return this.visitShow(env, nshow.expr);
+                case "break":
+                  return this.visitBreak(env);
+                case "return":
+                  var nret = <J.JReturn> tr;
+                  return this.visitReturn(env, nret.expr);
+                default:
+                  return this.visitExprStmt(env, ex.expr);
+              }
             case "inlineActions":
               var n8 = <J.JInlineActions> n;
               return this.visitInlineActions(env, n8.expr, n8.actions);
@@ -93,6 +106,9 @@ module TDev {
       public visitLocalRef(env: T, name: string, id: string): U           { throw new Error("Not implemented"); }
       public visitExprHolder(env: T, expr: J.JExpr): U                    { throw new Error("Not implemented"); }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw new Error("Not implemented"); }
+      public visitReturn(env: T, expr: J.JExpr): U                        { throw new Error("Not implemented"); }
+      public visitShow(env: T, expr: J.JExpr): U                          { throw new Error("Not implemented"); }
+      public visitBreak(env: T): U                                        { throw new Error("Not implemented"); }
       public visitInlineActions(
         env: T,
         expr: J.JExpr,
