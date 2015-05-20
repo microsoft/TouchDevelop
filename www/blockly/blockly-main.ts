@@ -236,7 +236,7 @@ module TDev {
 
     Blockly.inject($("#editor"), {
       toolbox: $("#blockly-toolbox"),
-      scrollbars: false
+      scrollbars: true
     });
     loadBlockly(message.script.scriptText);
     // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual

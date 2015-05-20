@@ -662,10 +662,11 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 
   if (isClassicForLoop(bBy, bFrom) && !binding.incompatibleWithFor)
     // In the perfect case, we can do a local binding that declares a local
-    // variable. There is also a leftover global variable by the same name that
-    // we don't use. XXX optimize and flag that one for removal?
+    // variable. The code that generates global variable declarations is in sync
+    // and won't generate a global binding.
     return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, Type.Number)), compileStatements(e, bDo))];
   else
+    // In any other case, fallback to a while loop.
     return [
       // VAR = FROM
       H.mkAssign(H.mkGlobalRef(bVar), compileExpression(e, bFrom, Type.Number)),
