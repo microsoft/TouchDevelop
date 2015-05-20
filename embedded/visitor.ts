@@ -45,6 +45,8 @@ module TDev {
                   return this.visitShow(env, nshow.expr);
                 case "break":
                   return this.visitBreak(env);
+                case "continue":
+                  return this.visitContinue(env);
                 case "return":
                   var nret = <J.JReturn> tr;
                   return this.visitReturn(env, nret.expr);
@@ -109,6 +111,7 @@ module TDev {
       public visitReturn(env: T, expr: J.JExpr): U                        { throw new Error("Not implemented"); }
       public visitShow(env: T, expr: J.JExpr): U                          { throw new Error("Not implemented"); }
       public visitBreak(env: T): U                                        { throw new Error("Not implemented"); }
+      public visitContinue(env: T): U                                     { throw new Error("Not implemented"); }
       public visitInlineActions(
         env: T,
         expr: J.JExpr,

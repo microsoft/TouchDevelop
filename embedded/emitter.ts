@@ -55,6 +55,10 @@ module TDev {
         return env.indent + "break;";
       }
 
+      public visitContinue(env: EmitterEnv) {
+        return env.indent + "continue;";
+      }
+
       public visitShow(env: EmitterEnv, expr: J.JExpr) {
         // TODO hook this up to "post to wall" handling if any
         return env.indent + "serial.print(" + this.visit(env, expr) + ");";

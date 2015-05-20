@@ -136,6 +136,7 @@ module TDev {
         codeAddAbove,
         codeAddBelow,
         codeShow,
+        codeContinue,
         codeReturn,
         codeBreak,
         codeBoxed,

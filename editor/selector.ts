@@ -699,6 +699,7 @@ module TDev
             if (this.editor.widgetEnabled("comment"))
                 add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
             addOpStmt("break", lf("stop loop"))
+            addOpStmt("continue", lf("skip iteration"))
             addOpStmt("return", lf("stop function"))
 
             return res;

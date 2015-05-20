@@ -885,6 +885,7 @@ module TDev.AST
             this.updateAnalysisInfo(w.calcNode());
             this.markLocation(w);
             var begLabel = this.allocateLabel();
+            w._compilerContinueLabel = begLabel;
             w._compilerBreakLabel = this.allocateLabel()
             this.aux.push(begLabel);
             var cond = this.topExpr(w.condition, w);
@@ -904,6 +905,13 @@ module TDev.AST
         {
             if (b.topAffectedStmt)
                 this.aux.push(JsGoto.simple(b.topAffectedStmt._compilerBreakLabel))
+            return this.unit
+        }
+
+        public visitContinue(b:Call)
+        {
+            if (b.topAffectedStmt)
+                this.aux.push(JsGoto.simple(b.topAffectedStmt._compilerContinueLabel))
             return this.unit
         }
 
@@ -1013,6 +1021,7 @@ module TDev.AST
 
             var idxTmp = this.newTmpVarOK("idx", this.term("0"));
             var begLabel = this.allocateLabel();
+            f._compilerContinueLabel = begLabel;
             this.aux.push(begLabel);
             var lenExpr:JsExpr;
             if (isArray)
@@ -1069,12 +1078,14 @@ module TDev.AST
             var idx = this.localVarRef(f.boundLocal);
             this.aux.push(idx.gets(this.term("0")));
             var begLabel = this.allocateLabel();
+            f._compilerContinueLabel = this.allocateLabel();
             f._compilerBreakLabel = this.allocateLabel()
             var res = this.flushAux();
             res.push(begLabel);
             var ifNode = this.allocateIf();
             ifNode.condition = new JsInfix(idx, "<", bndTmp);
             ifNode.thenBody = this.dispatch(f.body);
+            ifNode.thenBody.push(f._compilerContinueLabel);
             ifNode.thenBody.push(new JsExprStmt(new JsInfix(idx, "++", null)));
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];

@@ -1167,6 +1167,7 @@ module TDev
                 else if (o == "async") tick(Ticks.calcAsync);
                 else if (o == "return") tick(Ticks.codeReturn);
                 else if (o == "break") tick(Ticks.codeBreak);
+                else if (o == "continue") tick(Ticks.codeContinue);
                 else if (o == "show") tick(Ticks.codeShow);
                 else if (o == "true" || o == "false") tick(Ticks.calcTrueFalse);
             }

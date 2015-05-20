@@ -39,6 +39,7 @@ module TDev {
         public ShowProp:IProperty;
         public ReturnProp:IProperty;
         public BreakProp:IProperty;
+        public ContinueProp:IProperty;
         public StringConcatProp:IProperty;
         public PlaceholderThing:AST.SingletonDef;
         public AndProp:Property;
@@ -93,6 +94,7 @@ module TDev {
             this.FunProp = this.Unknown.getProperty("fun");
             this.ShowProp = this.Unknown.getProperty("show");
             this.BreakProp = this.Unknown.getProperty("break");
+            this.ContinueProp = this.Unknown.getProperty("continue");
             this.ReturnProp = this.Unknown.getProperty("return");
             this.AndProp = <Property>this.Boolean.getProperty("and");
             this.OrProp = <Property>this.Boolean.getProperty("or");
@@ -227,6 +229,7 @@ module TDev {
             specProp("return", api.opStmtPriority);
             specProp("show", api.opStmtPriority);
             specProp("break", api.opStmtPriority);
+            specProp("continue", api.opStmtPriority);
             invl.isData = true;
 
             this.core = new CoreApi(this);

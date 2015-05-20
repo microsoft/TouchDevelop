@@ -633,6 +633,12 @@ module TDev.AST.Json
             }
         }
 
+        public visitContinue(n:Call) {
+            return {
+                nodeType: "continue",
+            }
+        }
+
         public visitBox(n:Box) {
             return { body: n.body }
         }
@@ -1225,6 +1231,7 @@ module TDev.AST.Json
                     case "show":
                     case "break":
                     case "return":
+                    case "continue":
                         pushOp(e.nodeType)
                         var ee = (<JReturn>e).expr
                         if (ee)

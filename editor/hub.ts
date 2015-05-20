@@ -137,6 +137,7 @@ module TDev.Browser {
                 show: true,
                 "return": true,
                 "break": true,
+                "continue": true,
                 stringConcatProperty: true,
                 // hub
                 scriptAddToChannel: true,

@@ -191,6 +191,7 @@ module TDev.AST.Json
         body:JStmt[];
     }
 
+    export interface JContinue extends JExpr {}
     export interface JBreak extends JExpr {}
     export interface JReturn extends JExpr { expr: JExprHolder; }
     export interface JShow extends JExpr { expr: JExprHolder; }

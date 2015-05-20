@@ -2254,6 +2254,10 @@ module TDev.AST {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }
+        visitContinue(n: Call) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
         visitBreak(n: Call) {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);

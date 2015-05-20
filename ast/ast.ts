@@ -132,6 +132,7 @@ module TDev.AST {
         public tutorialWarning: string;
         public _hint:string;
         public _compilerBreakLabel:any;
+        public _compilerContinueLabel:any;
 
         constructor() {
             super()
@@ -3501,6 +3502,8 @@ module TDev.AST {
                 return v.visitReturn(this)
             else if (p == api.core.BreakProp)
                 return v.visitBreak(this)
+            else if (p == api.core.ContinueProp)
+                return v.visitContinue(this)
             else if (p == api.core.ShowProp)
                 return v.visitShow(this)
 
@@ -3732,6 +3735,7 @@ module TDev.AST {
         public visitCall(n:Call) { return this.visitExpr(n); }
         public visitShow(n:Call) { return this.visitCall(n); }
         public visitBreak(n:Call) { return this.visitCall(n); }
+        public visitContinue(n:Call) { return this.visitCall(n); }
         public visitReturn(n:Call) { return this.visitCall(n); }
         public visitAssignment(n:Call) { return this.visitCall(n); }
 

@@ -654,16 +654,19 @@ module TDev.AST
             });
         }
 
-        public visitBreak(node:Call)
+        public visitBreakContinue(node:Call, tp:string)
         {
             node._kind = this.core.Nothing;
             node.topAffectedStmt = this.currLoop
             if (!this.currLoop)
-                this.markError(node, lf("TD200: 'break' can be only used inside a loop"))
+                this.markError(node, lf("TD200: '{0}' can be only used inside a loop", tp))
             if (!node.args[0].isPlaceholder())
-                this.markError(node, lf("TD205: 'break' cannot take arguments"))
-            this.expectExpr(node.args[0], null, "break")
+                this.markError(node, lf("TD205: '{0}' cannot take arguments", tp))
+            this.expectExpr(node.args[0], null, tp)
         }
+        
+        public visitBreak(node:Call) { this.visitBreakContinue(node, "break") }
+        public visitContinue(node:Call) { this.visitBreakContinue(node, "continue") }
         
         public visitShow(node:Call)
         {
@@ -1140,7 +1143,9 @@ module TDev.AST
                 var prevOut = this.outLocals;
                 var prevRep = this.reportedUnassigned;
                 var prevAct = this.currentAnyAction;
+                var prevLoop = this.currLoop;
 
+                this.currLoop = null;
                 this.writtenLocals = [];
 
                 this.actionSection = ActionSection.Lambda;
@@ -1157,6 +1162,7 @@ module TDev.AST
                     this.outLocals = prevOut;
                     this.currentAnyAction = prevAct;
                     this.reportedUnassigned = prevRep;
+                    this.currLoop = prevLoop;
                 }
             })
         }
