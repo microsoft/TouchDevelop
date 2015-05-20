@@ -128,7 +128,7 @@ module TDev.AST.ExprParser
             var currentTok = 0;
 
             if (tokens.length == 1 &&
-                tokens[0].prio() == 0.5) {
+                tokens[0].prio() == api.opStmtPriority) {
                 var z = mkZero(tokens[0])
                 z.expr = mkPlaceholderThingRef()
                 tokens.push(z)
@@ -244,7 +244,7 @@ module TDev.AST.ExprParser
                         }
 
                         if (op.op === "not" || op.op == "async" || op.op == "await" 
-                            || /^fun:/.test(op.op) || op.prio() == 0.5) {
+                            || /^fun:/.test(op.op) || op.prio() == api.opStmtPriority) {
                             if (prevExpr === null) {
                                 prev = mkZero(op);
                                 stack.push(prev);

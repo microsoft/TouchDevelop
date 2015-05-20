@@ -112,6 +112,7 @@ module TDev {
         public eventMgr:AST.EventMgr;
         public restoreFlags = false; // for genStub
         public addHelpTopics:any = () => {}
+        public opStmtPriority = 0.5;
 
         public rt_start = "";
         public rt_stop = "";
@@ -215,7 +216,7 @@ module TDev {
             function specProp(name:string, prio:number) {
                 var mkp = (n:string) => PropertyParameter.md_make(n, invl);
                 var p = Property.md_make(1, invl, name, "", 
-                    prio == 0.5 ? [] :
+                    prio == api.opStmtPriority ? [] :
                     prio == 98 || prio == 2.5 ? [mkp("arg")] : [mkp("left"), mkp("right")], invl)
                 p._infixPriority = prio;
             }
@@ -223,9 +224,9 @@ module TDev {
             specProp(",", 2);
             specProp("async", 98);
             specProp("fun", 2.5);
-            specProp("return", 0.5);
-            specProp("show", 0.5);
-            specProp("break", 0.5);
+            specProp("return", api.opStmtPriority);
+            specProp("show", api.opStmtPriority);
+            specProp("break", api.opStmtPriority);
             invl.isData = true;
 
             this.core = new CoreApi(this);

@@ -15,6 +15,7 @@ module TDev
         public addToken2:AST.Token; // used when inserting library token
         public delToken:AST.Token;
         public addAfter:AST.Token;
+        public isOpStmt:boolean;
         public localName:string;
         public editString:string;
         public showTokens:AST.Token[];
@@ -591,6 +592,14 @@ module TDev
                     } else if (currAction instanceof AST.GlobalDef) {
                         op.stmt = (<AST.GlobalDef>currAction)
                     }
+                }
+            }
+
+            if (op && op.addToken && op.addToken.getOperator()) {
+                var opprop = api.core.Unknown.getProperty(op.addToken.getOperator())
+                if (opprop && opprop.getInfixPriority() == api.opStmtPriority) {
+                    TheEditor.intelliProfile.incr(opprop.getName())
+                    op.isOpStmt = true;
                 }
             }
 

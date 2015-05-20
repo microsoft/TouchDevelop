@@ -3866,7 +3866,7 @@ module TDev
 
         private setupTopButtons()
         {
-            if (this.stmt.isPlaceholder()) {
+            if (this.cursorPosition == 0 /*this.stmt.isPlaceholder()*/) {
                 this.setupTopPaging();
             } else {
                 this.calcTopButtons.setChildren([this.apiHelpDiv]);
@@ -4248,10 +4248,11 @@ module TDev
                 return tmpl == act.getName()
             }
 
-            if (ins.stmtToInsert) {
+            if (ins.stmtToInsert || ins.isOpStmt) {
                 if (apiSearchVisible()) return
+                if (ins.isOpStmt && !inPosition()) return;
 
-                var ntype = ins.stmtToInsert.nodeType()
+                var ntype = ins.isOpStmt ? ins.addToken.getOperator() : ins.stmtToInsert.nodeType()
                 if (ntype == "elseIf") ntype = "if"
                 if (ntype == "foreach" || ntype == "for") {
                     var loc = ins.stmtToInsert.loopVariable()
