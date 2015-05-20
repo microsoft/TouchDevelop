@@ -5749,7 +5749,10 @@
         }
 
         public iconImg(thumb : boolean): HTMLElement {
-            return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
+            if (this.cloudHeader && this.cloudHeader.editor == "blockly")
+                return HTML.mkImg("blockly/icon.png");
+            else
+                return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
         }
 
         public mkBoxExt(big:boolean, isTopic:boolean)
@@ -5926,7 +5929,9 @@
             this.getJsonScriptPromise().whenUpdated((j,opts) => {
                 if (opts.isSame || !this.jsonScript) return;
 
-                d.style.background = this.app.htmlColor();
+                d.style.background = this.cloudHeader && this.cloudHeader.editor == "blockly"
+                    ? "white"
+                    : this.app.htmlColor();
 
                 var cont = [];
                 var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
