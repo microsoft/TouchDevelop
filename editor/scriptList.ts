@@ -5554,6 +5554,12 @@
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
+        public shareButtons() {
+            return super.shareButtons().concat(
+                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
+                );
+        }
+
         static compareScripts(a: ScriptInfo, b: ScriptInfo) : number {
             var c = b.lastScore - a.lastScore;
             if (c == 0)
