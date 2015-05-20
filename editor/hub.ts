@@ -631,7 +631,7 @@ module TDev.Browser {
         extends Screen {
         constructor() {
             super()
-            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox, this.dingDingBox);
+            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
             this.topBox = div(null, this.topContainer);
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
             this.templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
@@ -645,7 +645,6 @@ module TDev.Browser {
         // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
-        private dingDingBox = div("dingDingBox");
         private topBox: HTMLElement;
         private topContainer: HTMLElement;
         private theRoot: HTMLElement;

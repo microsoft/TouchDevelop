@@ -5201,27 +5201,6 @@ div.validation-error {
     width:100%;
 }
 
-@keyframes dingDing {
-  0% { transform: translate(0em,0em); }
-  20% { transform: translate(0em,-0.1em); }
-  100% { transform: translate(0em,0em); }
-}   /*CSSpref*/ @-webkit-keyframes dingDing { 0% { -webkit-transform: translate(0em,0em); } 20% { -webkit-transform: translate(0em,-0.1em); } 100% { -webkit-transform: translate(0em,0em); } }  @-moz-keyframes dingDing { 0% { -moz-transform: translate(0em,0em); } 20% { -moz-transform: translate(0em,-0.1em); } 100% { -moz-transform: translate(0em,0em); } }
-
-.dingDingBox {
-  position: absolute;
-  left: 2em;
-  top: 0em;
-  z-index: 100;
-}
-
-.dingDingBox .sdNumber {
-  font-size: 6em;
-  background: rgba(255,255,255,0.95);
-  color: #444;
-  padding: 0.2em;
-  line-height: 100%;
-}
-
 .diffSame {
   width: 7em;
   font-size: 0.8em;
