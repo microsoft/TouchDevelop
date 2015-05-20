@@ -74,21 +74,6 @@ module TDev
                     node: "do box { }",
                     widget: "boxed"
                 },
-                {
-                    name: "show", desc: lf("show value on the screen"), tick: Ticks.codeShow,
-                    node: "`show` \\u0001need_String\\u003Awhat_to_show ;",
-                    widget: "show"
-                },
-                {
-                    name: "break", desc: lf("stop a loop"), tick: Ticks.codeBreak,
-                    node: "`break` ;",
-                    widget: "break"
-                },
-                {
-                    name: "return", desc: lf("stop a function"), tick: Ticks.codeReturn,
-                    node: "`return` ;",
-                    widget: "return"
-                },
             ].filter(btn => !btn.widget || TheEditor.widgetEnabled(btn.widget));
         }
 
@@ -693,14 +678,23 @@ module TDev
                 res.push(it);
             }
 
+            var addOpStmt = (op, help) => {
+                if (this.editor.widgetEnabled(op)) {
+                    add({ name: op, desc: help, node: "", usageKey: op })
+                    res.peek().cbOverride = () => TheEditor.calculator.insertOp(op, true);
+                }
+            }
             add({ name: "var", desc: lf("new variable"), node: "", usageKey: "var" });
             res.peek().cbOverride = () => {
                 tick(Ticks.codeNewVar)
                 TheEditor.calculator.newVar()
             };
+            addOpStmt("show", lf("display value"))
             Selector.insertionButtons().forEach(add);
             if (this.editor.widgetEnabled("comment"))
                 add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
+            addOpStmt("break", lf("stop loop"))
+            addOpStmt("return", lf("stop function"))
 
             return res;
         }
