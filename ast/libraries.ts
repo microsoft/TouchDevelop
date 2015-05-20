@@ -213,7 +213,7 @@ module TDev.AST {
             return Property.withParent(this)(a[0]);
         }
 
-        public getHtmlName() { return [span('symbol', AST.libSymbol), this.lib.getName()] };
+        public getHtmlName() { return [span('symbol', AST.libSymbol), this.lib.getName()]; }
         public getName() { return this.lib.getName() }
         public toString() { return this.lib.toString() }
 
