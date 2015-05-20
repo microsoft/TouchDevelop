@@ -93,6 +93,7 @@ module TDev.Cloud {
         hubTags?: boolean;
         hubMyArt?: boolean;
         hubLearn?: boolean;
+        startTutorialButton?: boolean;
 
         // script lifecycle
         updateButton?: boolean;

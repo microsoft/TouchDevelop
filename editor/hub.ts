@@ -34,6 +34,7 @@ module TDev.Browser {
                 artSection: true,
                 // ui
                 wallScreenshot: true,
+                startTutorialButton: true,
             }
         },
         'classic': {
@@ -79,6 +80,7 @@ module TDev.Browser {
                 scriptPropertiesSettings: true,
                 scriptPropertiesManagement: true,
                 databaseSection: true,
+                persistanceRadio: true,
                 // statements
                 comment: true,
                 foreach: true,
@@ -90,7 +92,7 @@ module TDev.Browser {
                 hubChannels: true,
                 hubScriptUpdates: true,
                 hubUsers: true,
-                persistanceRadio: true,
+                startTutorialButton: true,
             }
         },
         'pro': {
@@ -1522,9 +1524,12 @@ module TDev.Browser {
 
             var scriptSlots = 0
             if (s == "recent" && items.length < 5) {
-                tutorialOffset++;
-                elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
-                scriptSlots = 4 - items.length
+                scriptSlots = 5 - items.length
+                if (EditorSettings.widgets().startTutorialButton) {
+                    tutorialOffset++;
+                    elements.push(this.startTutorialButton(Ticks.hubFirstTutorial))
+                    scriptSlots--;
+                }
             }
 
 
@@ -1545,14 +1550,14 @@ module TDev.Browser {
                 elements.push(t);
             });
 
-            if (scriptSlots && items.length == 0) {
+            if (scriptSlots && items.length == 0 && EditorSettings.widgets().startTutorialButton) {
                 Util.setTimeout(1000, () => this.showTutorialTip())
             }
 
             while (scriptSlots-- > 0) {
-                var oneSlot = this.mkFnBtn(lf("Your script will appear here"), () => {
+                var oneSlot = this.mkFnBtn(lf("Your script will appear here"),() => {
                     this.showTutorialTip()
-                }, Ticks.hubFirstTutorial, true, scriptSlots == 3 ? 2 : 1);
+                }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
                 oneSlot.className += " scriptSlot";
                 elements.push(oneSlot)
             }
