@@ -262,8 +262,8 @@ module Helpers {
     }
   }
 
-  export function mkAssign(x: string, e: J.JExpr): J.JStmt {
-    var assign = mkSimpleCall(":=", [mkLocalRef(x), e]);
+  export function mkAssign(x: J.JExpr, e: J.JExpr): J.JStmt {
+    var assign = mkSimpleCall(":=", [x, e]);
     var expr = mkExprHolder([], assign);
     return mkExprStmt(expr);
   }
@@ -601,11 +601,11 @@ interface Binding {
   name: string;
   type: Type;
   isForVariable?: boolean;
-  isAssigned?: boolean;
+  incompatibleWithFor?: boolean;
 }
 
 function isCompiledAsLocal(b: Binding) {
-  return b.isForVariable && !b.isAssigned;
+  return b.isForVariable && !b.incompatibleWithFor;
 }
 
 function extend(e: Environment, x: string, t: Type): Environment {
@@ -660,25 +660,28 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var binding = lookup(e, bVar);
   assert(binding.isForVariable);
 
-  if (isClassicForLoop(bBy, bFrom) && !binding.isAssigned)
+  if (isClassicForLoop(bBy, bFrom) && !binding.incompatibleWithFor)
+    // In the perfect case, we can do a local binding that declares a local
+    // variable. There is also a leftover global variable by the same name that
+    // we don't use. XXX optimize and flag that one for removal?
     return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, Type.Number)), compileStatements(e, bDo))];
   else
     return [
       // VAR = FROM
-      H.mkAssign(bVar, compileExpression(e, bFrom, Type.Number)),
+      H.mkAssign(H.mkGlobalRef(bVar), compileExpression(e, bFrom, Type.Number)),
       // while
       H.mkWhile(
         // VAR <= TO
         H.mkExprHolder([],
-          H.mkSimpleCall("≤", [H.mkLocalRef(bVar), compileExpression(e, bTo, Type.Number)])),
+          H.mkSimpleCall("≤", [H.mkGlobalRef(bVar), compileExpression(e, bTo, Type.Number)])),
         // DO
         compileStatements(e, bDo).concat([
           H.mkExprStmt(
             H.mkExprHolder([],
               // VAR :=
-              H.mkSimpleCall(":=", [H.mkLocalRef(bVar),
+              H.mkSimpleCall(":=", [H.mkGlobalRef(bVar),
                 // VAR + BY
-                H.mkSimpleCall("+", [H.mkLocalRef(bVar), compileExpression(e, bBy, Type.Number)])])))]))
+                H.mkSimpleCall("+", [H.mkGlobalRef(bVar), compileExpression(e, bBy, Type.Number)])])))]))
     ];
 }
 
@@ -950,6 +953,21 @@ function isHandlerRegistration(b: B.Block) {
   return b.type == "device_button_event";
 }
 
+// Find the parent (as in "scope" parent) of a Block. The [parentNode_] property
+// will return the visual parent, that is, the one connected to the top of the
+// block.
+function findParent(b: B.Block) {
+  var candidate = b.parentBlock_;
+  if (!candidate)
+    return null;
+  var isActualInput = false;
+  candidate.inputList.forEach((i: B.Input) => {
+    if (i.name && candidate.getInputTargetBlock(i.name) == b)
+      isActualInput = true;
+  });
+  return isActualInput && candidate || null;
+}
+
 // This function only considers assignments, not dereferences, to infer the type
 // of variables. This is ok: what we want is essentially convince ourselves that
 // we always *write* values of the correct type in the variable, as *reads* are
@@ -969,6 +987,17 @@ function mkEnv(w: B.Workspace): Environment {
       lookup(e, x).isForVariable = true;
     }
   });
+
+  // Auxiliary check: check that all references to a for-bound variable are in
+  // scope
+  var variableIsScoped = (b: B.Block, name: string): boolean => {
+    if (!b)
+      return false;
+    else if (b.type == "controls_for" && b.getFieldValue("VAR") == name)
+      return true;
+    else
+      return variableIsScoped(findParent(b), name);
+  };
 
   // This is really a dumb way to do type-inference, but well, I don't expect
   // users to write terribly complicated programs (famous last words?).
@@ -996,7 +1025,14 @@ function mkEnv(w: B.Workspace): Environment {
         if (!binding)
           e = extend(e, x, t);
         else if (binding && binding.isForVariable)
-          binding.isAssigned = true;
+          binding.incompatibleWithFor = true;
+      } else if (b.type == "variables_get") {
+        var x = b.getFieldValue("VAR");
+        var binding = lookup(e, x);
+        // Because of the order of the traversal in [getAllBlocks()]
+        assert(binding != null);
+        if (binding.isForVariable && !variableIsScoped(b, x))
+          binding.incompatibleWithFor = true;
       }
     });
     return notInferred;
