@@ -279,10 +279,10 @@ module TDev.Browser {
                     updateButton: true,
                     forceMainAsAction: true,
                     singleReturnValue: true,
-                    librariesSection: true,
                     integerNumbers: true,
                     codeSearch: true,
-                    scriptPropertiesSettings: true,
+                    // librariesSection: true,
+                    // scriptPropertiesSettings: true,
                     // hub
                     hubChannels : true,
                     scriptAddToChannel : true,
