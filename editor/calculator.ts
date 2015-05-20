@@ -3861,7 +3861,7 @@ module TDev
 
         private setupTopButtons()
         {
-            if (this.stmt.isPlaceholder()) {
+            if (this.cursorPosition == 0 /*this.stmt.isPlaceholder()*/) {
                 this.setupTopPaging();
             } else {
                 this.calcTopButtons.setChildren([this.apiHelpDiv]);
