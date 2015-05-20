@@ -355,7 +355,12 @@ module TDev
             var ch = at.parentBlock().stmts.slice(0);
             var idx = ch.indexOf(at);
             var len = 1;
-            if (!at.isPlaceholder()) { idx++; len = 0; }
+            if (at.isPlaceholder()) {
+            } else if (n.calcNode() && at.nodeType() == "exprStmt") {
+                n.calcNode().tokens = at.calcNode().tokens
+            } else {
+                idx++; len = 0;
+            }
             ch.splice(idx, len, n);
             at.parentBlock().setChildren(ch);
         }
