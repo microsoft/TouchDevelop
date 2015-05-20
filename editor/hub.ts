@@ -32,6 +32,8 @@ module TDev.Browser {
                 // sections
                 dataSection: true,
                 artSection: true,
+                // ui
+                wallScreenshot: true,
             }
         },
         'classic': {
@@ -67,6 +69,7 @@ module TDev.Browser {
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
                 helpLinks: true,
+                wallScreenshot: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -125,6 +128,7 @@ module TDev.Browser {
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
                 helpLinks: true,
+                wallScreenshot: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -144,7 +148,6 @@ module TDev.Browser {
                 hubChannels: true,
                 hubScriptUpdates: true,
                 hubUsers: true,
-
                 //navigation
                 codeSearch: true,
                 findReferences: true,
