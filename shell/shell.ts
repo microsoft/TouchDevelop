@@ -51,6 +51,7 @@ interface TdState {
     downloadedFiles:StringMap<string>;
     numDeploys:number;
     deployedId:string;
+    dmeta:any;
 }
 
 var tdstate:TdState;
@@ -636,6 +637,8 @@ function deploy(d:any, cb:(err:any,resp:any) => void, isScript = true)
     if (isScript) {
         tdstate.numDeploys = (tdstate.numDeploys || 0) + 1
         tdstate.deployedId = ""
+        tdstate.dmeta = d.dmeta || {}
+        tdstate.dmeta.activationtime = Math.round(Date.now()/1000)
         saveState()
     }
 
@@ -982,6 +985,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             argv: process.argv,
             numRequests: currentReqNo,
             numDeploys: tdstate.numDeploys,
+            dmeta: tdstate.dmeta,
         })
     },
 
@@ -1484,6 +1488,7 @@ function startWorker(cb0, cb)
     var env = JSON.parse(JSON.stringify(process.env))
     Object.keys(additionalEnv).forEach(k => env[k] = additionalEnv[k])
     env['TD_WORKER_ID'] = ++totalWorkers;
+    env['TD_DEPLOYMENT_META'] = JSON.stringify(tdstate.dmeta || {})
 
     var fin = () => {
         debug.log("forking child script, " + w.description())
@@ -2248,9 +2253,14 @@ function checkUpdate()
             getBlobJson("000cfg-" + blobChannel, (err, cfg) => {
                 if (!err) applyConfig(cfg)
 
+                if (d.did == lastAzureDeployment) return // race?
+
                 getBlobJson(d.blob, (err, data) => {
                     lastAzureDeployment = d.did
                     if (data) {
+                        if (!data.dmeta) data.dmeta = {}
+                        data.dmeta.blobid = d.blob
+                        data.dmeta.deploytime = d.time
                         deploy(data, (err, resp) => {
                             var f = blobDeployCallback
                             blobDeployCallback = null
@@ -2478,7 +2488,7 @@ function main()
     if (fs.existsSync(tdStateJson))
         tdstate = JSON.parse(fs.readFileSync(tdStateJson, "utf8"))
     else
-        tdstate = { downloadedFiles: {}, numDeploys: 0, deployedId: "" }
+        tdstate = { downloadedFiles: {}, numDeploys: 0, deployedId: "", dmeta: {} }
 
     process.on('uncaughtException', handleError)
 
