@@ -17,7 +17,7 @@ var scriptsWithErrors = ["isrt", "bvxv", "cgcbb", "bkiza", "urde",
   // concat on record field without ->get
   // "ejhva", "muvr", "vhiz",
   // more errors
-  "asct", "rzmfa", "cqbba", "xcjj", "awska", "btkz", "khtv", "hcts", "vvju",
+  "asct", "rzmfa", "xcjj", "awska", "btkz", "khtv", "hcts", "vvju", /* "cqbba" unasigned return value not failing anymore */
   "uetu", "xyzx", "wqcxa", "laogsfab", "crlf", "uoji","xuom",
   "oixe", "ifsqb",
   // async errors
