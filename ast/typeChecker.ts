@@ -1049,13 +1049,14 @@ module TDev.AST
                 this.updateStmtUsage(expr, "var");
         }
 
-        private checkAssignment(node:AstNode, vars:LocalDef[])
+        private checkAssignment(node:Stmt, vars:LocalDef[])
         {
             var unassigned = vars.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
-                this.setNodeError(node,
-                    lf("TD127: output parameter{0:s} {1} need to be assigned to before the action finishes",
-                             unassigned.length, unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
+                node.addHint(
+                    lf("parameter{0:s} {1} may be unassigned before the action finishes",
+                             unassigned.length, 
+                             unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
             }
         }
 

@@ -479,12 +479,11 @@ module TDev
             }
 
             if (res == "" && node instanceof AST.Stmt) {
-                var calcNode = (<AST.Stmt>node).calcNode();
-                if (calcNode && calcNode.hint) {
-                    calcNode.hint.split("\n").forEach(h => {
+                var hint = (<AST.Stmt>node).getHint()
+                if (hint)
+                    hint.split("\n").forEach(h => {
                         res += this.message("hintMessage", Util.htmlEscape("\u270e " + h))
                     })
-                }
             }
 
             if (node.annotations)

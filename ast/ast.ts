@@ -130,6 +130,7 @@ module TDev.AST {
         private stableName: string;
         private stableVersions : string[];
         public tutorialWarning: string;
+        public _hint:string;
 
         constructor() {
             super()
@@ -146,6 +147,25 @@ module TDev.AST {
                 return this.errorOf(c);
             else
                 return this._error;
+        }
+        public getHint()
+        {
+            var r:string = null
+            if (this.calcNode())
+                r = this.calcNode().hint
+            if (!r) return this._hint
+            if (this._hint) return r + "\n" + this._hint
+            return null
+        }
+        public addHint(msg:string)
+        {
+            if (!this._hint) this._hint = msg
+            else this._hint += "\n" + msg
+        }
+        public clearError()
+        {
+            this._error = null
+            this._hint = null
         }
 
         public debuggerRenderContext: {
