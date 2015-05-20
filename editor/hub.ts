@@ -272,6 +272,7 @@ module TDev.Browser {
                     librariesSection: true,
                     integerNumbers: true,
                     codeSearch: true,
+                    scriptPropertiesSettings: true,
                 }
             },
         },
