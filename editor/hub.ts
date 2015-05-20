@@ -1565,7 +1565,7 @@ module TDev.Browser {
             while (scriptSlots-- > 0) {
                 var oneSlot = this.mkFnBtn(lf("Your script will appear here"),() => {
                     this.showTutorialTip()
-                }, Ticks.hubFirstTutorial, true, tileSize(elements.length));
+                }, Ticks.hubFirstTutorial, true, tileSize(elements.length - tutorialOffset));
                 oneSlot.className += " scriptSlot";
                 elements.push(oneSlot)
             }
