@@ -93,6 +93,10 @@ module TDev.Cloud {
         hubTags?: boolean;
         hubMyArt?: boolean;
         hubLearn?: boolean;
+        hubTutorials?: boolean;
+        hubShowcase?: boolean;
+        hubSocial?: boolean;
+        startTutorialButton?: boolean;
 
         // script lifecycle
         updateButton?: boolean;
@@ -115,6 +119,7 @@ module TDev.Cloud {
         scriptPropertiesPropertyAllowExport?: boolean;
         stringEditFullScreen?: boolean;
         persistanceRadio?: boolean;
+        wallScreenshot?: boolean;
     }
 
     export interface EditorMode {
@@ -139,12 +144,6 @@ module TDev.Cloud {
         intelliProfileId?: string; // script containing supported apis
 
         scriptSearch?: string; // seed when searching script
-
-        showcase?: boolean;
-        art?: boolean;
-        tags?: boolean;
-        top?: boolean;
-        social?: boolean;
 
         editorMode?: EditorMode;
         scriptTemplates?: string[];

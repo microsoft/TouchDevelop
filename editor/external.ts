@@ -51,8 +51,8 @@ module TDev {
     // [initAsync] will find the latest version of this script by walking up the
     // update chain, but in order to save on some API calls, this script id
     // should be refreshed at regular intervals.
-    var deviceScriptId = "xulltg";
-    var deviceLibraryName = "micro:bit";
+    export var deviceScriptId = "xulltg";
+    export var deviceLibraryName = "micro:bit";
 
     import J = AST.Json;
 

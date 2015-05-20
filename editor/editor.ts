@@ -223,7 +223,7 @@ module TDev
 
         public additionalFullScreenButtons(): HTMLElement[] {
             var btns = [];
-            if (ScriptEditorWorldInfo.status == "published")
+            if (ScriptEditorWorldInfo.status == "published" && TheEditor.widgetEnabled("wallScreenshot"))
                 btns.push(HTML.mkRoundButton("svg:camera,black", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
             return btns;
         }
