@@ -45,6 +45,7 @@ module TDev.Cloud {
         calcApiHelp?: boolean;
         sideRunButton?: boolean;
         tutorialGoToPreviousStep?: boolean;
+        helpLinks?: boolean;
 
         // sections
         dataSection?: boolean;

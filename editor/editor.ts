@@ -1839,20 +1839,14 @@ module TDev
             Util.setHash("#topic:" + t)
         }
 
-        static mkHelpLinkBtn(topic: string, lbl = lf("read more..."))
-        {
-            var btn = HTML.mkLinkButton(lbl, () => Editor.goToTopic(topic))
-            btn.setAttribute("aria-label", lf("learn more about {0}", topic));
-            var r = div("float-help-link", btn);
-            return r;
-        }
+        static mkHelpLink(topic: string, lbl = lf("read more...")) {
 
-        static mkHelpLink(topic:string, lbl = lf("read more..."))
-        {
             var r = div("float-help-link");
-            Browser.setInnerHTML(r, "<a href=\"#topic:" + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
-            r.firstElementChild.setAttribute("aria-label", lf("learn more about {0}", topic));
-            HTML.fixWp8Links(r);
+            if (TheEditor.widgetEnabled("helpLinks")) {
+                Browser.setInnerHTML(r, "<a href=\"#topic:" + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
+                r.firstElementChild.setAttribute("aria-label", lf("learn more about {0}", topic));
+                HTML.fixWp8Links(r);
+            }
             return r;
         }
 

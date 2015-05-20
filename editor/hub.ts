@@ -66,6 +66,7 @@ module TDev.Browser {
                 calcApiHelp: true,
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
+                helpLinks: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -123,6 +124,7 @@ module TDev.Browser {
                 calcApiHelp: true,
                 sideRunButton: true,
                 tutorialGoToPreviousStep: true,
+                helpLinks: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
