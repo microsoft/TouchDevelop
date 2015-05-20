@@ -149,13 +149,14 @@ module TDev {
         var compiledScript = AST.Compiler.getCompiledScript(a, {});
         Script = null;
         var rt = TheEditor.currentRt;
-        if (!rt) {
+        if (!rt)
           rt = TheEditor.currentRt = new Runtime();
-          rt.initFrom(compiledScript);
+        rt.initFrom(compiledScript);
+        if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
-          rt.initPageStack();
-        }
+        rt.initPageStack();
         (<EditorHost> rt.host).showWall();
+
         var main = compiledScript.actionsByStableName.main;
         rt.stopAsync().done(() => {
           rt.run(main, []);
