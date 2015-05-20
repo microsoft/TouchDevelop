@@ -613,6 +613,22 @@ module TDev.AST.Json
             }
         }
 
+        public visitShow(n:Show) {
+            return {
+                expr: n.expr,
+            }
+        }
+
+        public visitReturn(n:Return) {
+            return {
+                expr: n.expr,
+            }
+        }
+
+        public visitBreak(n:Break) {
+            return { }
+        }
+
         public visitBox(n:Box) {
             return { body: n.body }
         }
@@ -1429,6 +1445,25 @@ module TDev.AST.Json
                 selfEh(n, n.condition);
                 tw.keyword("do");
                 block(n.body);
+            },
+
+            "break": (n:JBreak) => {
+                stmt(n)
+                tw.keyword("break").op0(";").nl();
+            },
+
+            "return": (n:JReturn) => {
+                stmt(n)
+                tw.keyword("return");
+                selfEh(n, n.expr);
+                tw.op0(";").nl();
+            },
+
+            "show": (n:JShow) => {
+                stmt(n)
+                tw.keyword("do").id("show");
+                selfEh(n, n.expr);
+                tw.op0(";").nl();
             },
 
             "if": (n:JIf) => {

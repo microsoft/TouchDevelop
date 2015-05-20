@@ -978,8 +978,10 @@ module TDev { export module AST {
             var node;
             if (id == "box")
                 node = Box;
+            else if (id == "show")
+                node = Show;
             else {
-                this.error("expecting 'box' here");
+                this.error("expecting 'box' or 'show' here");
                 return;
             }
 

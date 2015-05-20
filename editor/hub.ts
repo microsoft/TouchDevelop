@@ -134,6 +134,9 @@ module TDev.Browser {
                 comment: true,
                 foreach: true,
                 boxed: true,
+                show: true,
+                "return": true,
+                "break": true,
                 stringConcatProperty: true,
                 // hub
                 scriptAddToChannel: true,

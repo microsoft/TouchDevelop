@@ -73,6 +73,18 @@ module TDev.AST {
         public visitForeach(stmt: Foreach) { return this.visitLoop(stmt); }
         public visitWhile(stmt: While) { return this.visitLoop(stmt); }
 
+        public visitBreak(stmt: Break) {
+            return this.nextInBlock(stmt); // TODO wrong
+        }
+
+        public visitReturn(stmt: Return) {
+            return this.nextInBlock(stmt); // TODO wrong
+        }
+
+        public visitShow(stmt: Show) {
+            return this.nextInBlock(stmt);
+        }
+
         public visitExprStmt(stmt: ExprStmt) {
             return this.nextInBlock(stmt);
         }
@@ -985,6 +997,15 @@ module TDev.AST {
             this.visitExprHolderHolder(n);
         }
         visitExprStmt(n: ExprStmt) {
+            this.visitExprHolderHolder(n);
+        }
+        visitBreak(n: Break) {
+            this.visitExprHolderHolder(n);
+        }
+        visitReturn(n: Return) {
+            this.visitExprHolderHolder(n);
+        }
+        visitShow(n: Show) {
             this.visitExprHolderHolder(n);
         }
 
@@ -2250,6 +2271,14 @@ module TDev.AST {
             this.visitChildren(n);
         }
         visitOptionalParameter(n: OptionalParameter) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
+        visitBreak(n: Break) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
+        visitReturn(n: Return) {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }

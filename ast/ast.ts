@@ -131,6 +131,7 @@ module TDev.AST {
         private stableVersions : string[];
         public tutorialWarning: string;
         public _hint:string;
+        public _compilerBreakLabel:any;
 
         constructor() {
             super()
@@ -676,6 +677,97 @@ module TDev.AST {
         }
 
         public forSearch() { return "for do " + this.upperBound.forSearch(); }
+    }
+
+    export class Return
+        extends Stmt
+    {
+        public expr:ExprHolder;
+        public retLocal:LocalDef;
+        public action:Stmt;
+
+        constructor() {
+            super()
+        }
+        public nodeType() { return "return"; }
+        public calcNode() { return this.expr; }
+        public accept(v:NodeVisitor) { return v.visitReturn(this); }
+        public isExecutableStmt() { return true; }
+        public allowSimplify() { return true }
+
+        public writeTo(tw:TokenWriter)
+        {
+            this.writeIdOpt(tw);
+            tw.keyword("return").node(this.expr);
+            tw.op0(";").nl();
+        }
+
+        private parseFrom(p:Parser)
+        {
+            this.setStableName(p.consumeLabel());
+            this.expr = p.parseExpr();
+            p.skipOp(";")
+        }
+
+        public forSearch() { return "return " + this.expr.forSearch(); }
+    }
+
+    export class Show
+        extends Stmt
+    {
+        public expr:ExprHolder;
+        public postCall:Expr;
+
+        constructor() {
+            super()
+        }
+        public nodeType() { return "show"; }
+        public calcNode() { return this.expr; }
+        public accept(v:NodeVisitor) { return v.visitShow(this); }
+        public isExecutableStmt() { return true; }
+        public allowSimplify() { return true }
+
+        public writeTo(tw:TokenWriter)
+        {
+            this.writeIdOpt(tw);
+            tw.keyword("do").id("show").node(this.expr);
+            tw.op0(";").nl();
+        }
+
+        private parseFrom(p:Parser)
+        {
+            this.setStableName(p.consumeLabel());
+            this.expr = p.parseExpr();
+            p.skipOp(";")
+        }
+
+        public forSearch() { return "show " + this.expr.forSearch(); }
+    }
+
+    export class Break
+        extends Stmt
+    {
+        constructor() {
+            super()
+        }
+        public loop:Stmt;
+        public nodeType() { return "break"; }
+        public accept(v:NodeVisitor) { return v.visitBreak(this); }
+        public isExecutableStmt() { return true; }
+
+        public writeTo(tw:TokenWriter)
+        {
+            this.writeIdOpt(tw);
+            tw.keyword("break").op0(";").nl();
+        }
+
+        private parseFrom(p:Parser)
+        {
+            this.setStableName(p.consumeLabel());
+            p.skipOp(";")
+        }
+
+        public forSearch() { return "break"; }
     }
 
     export class Foreach
@@ -3725,6 +3817,9 @@ module TDev.AST {
         public visitForeach(n:Foreach) { return this.visitStmt(n); }
         public visitWhile(n:While) { return this.visitStmt(n); }
         public visitBox(n:Box) { return this.visitStmt(n); }
+        public visitShow(n:Show) { return this.visitStmt(n); }
+        public visitBreak(n:Break) { return this.visitStmt(n); }
+        public visitReturn(n:Return) { return this.visitStmt(n); }
         public visitAnyIf(n:If) { return this.visitStmt(n); }
         public visitIf(n:If) { return this.visitAnyIf(n); }
         public visitElseIf(n:If) { return this.visitAnyIf(n); }
@@ -5138,6 +5233,9 @@ module TDev.AST {
         public visitInlineActions(n:InlineActions)  { this.visitChStmt(n); }
         public visitActionHeader(n:ActionHeader)    { this.visitChStmt(n); }
         public visitExprStmt(n:ExprStmt)            { this.visitChStmt(n); }
+        public visitBreak(n:Break)                  { this.visitChStmt(n); }
+        public visitReturn(n:Return)                { this.visitChStmt(n); }
+        public visitShow(n:Show)                    { this.visitChStmt(n); }
 
         public visitActionParameter(n:ActionParameter) { this.withBoundLocal(n, n.local) }
 

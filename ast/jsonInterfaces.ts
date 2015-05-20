@@ -191,6 +191,10 @@ module TDev.AST.Json
         body:JStmt[];
     }
 
+    export interface JBreak extends JStmt {}
+    export interface JReturn extends JStmt { expr: JExprHolder; }
+    export interface JShow extends JStmt { expr: JExprHolder; }
+
     // Sequences of if / else if / else statements are not represented the usual
     // way. That is, instead of having a structured AST:
     //

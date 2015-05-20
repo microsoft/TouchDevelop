@@ -885,6 +885,7 @@ module TDev.AST
             this.updateAnalysisInfo(w.calcNode());
             this.markLocation(w);
             var begLabel = this.allocateLabel();
+            w._compilerBreakLabel = this.allocateLabel()
             this.aux.push(begLabel);
             var cond = this.topExpr(w.condition, w);
             this.resetAnalysisInfo();
@@ -895,7 +896,45 @@ module TDev.AST
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(w._compilerBreakLabel)
             return res;
+        }
+
+        public visitBreak(b:Break)
+        {
+            this.markLocation(b);
+            var res = this.flushAux();
+            if (b.loop)
+                res.push(JsGoto.simple(b.loop._compilerBreakLabel))
+            this.resetAnalysisInfo();
+            return res
+        }
+
+        public visitReturn(r:Return)
+        {
+            this.markLocation(r);
+            if (r.retLocal) {
+                this.updateAnalysisInfo(r.expr);
+                var val = this.topExpr(r.expr, r);
+                this.resetAnalysisInfo();
+            }
+            var res = this.flushAux();
+            if (r.retLocal)
+                res.push(this.localVarRef(r.retLocal).gets(val))
+            res.push(JsGoto.simple(r.action._compilerBreakLabel))
+            return res
+        }
+
+        public visitShow(s:Show)
+        {
+            this.markLocation(s);
+            this.updateAnalysisInfo(s.expr);
+            var ex = this.doExpr(s.postCall)
+            var r = this.flushAux();
+            if (ex != this.unit)
+                r.push(new JsExprStmt(ex));
+            this.resetAnalysisInfo();
+            return s
         }
 
         private compileInlineAction(inl:InlineAction)
@@ -982,6 +1021,7 @@ module TDev.AST
                 collTmp = this.newTmpVar("coll", this.topExpr(f.collection, f));
             }
             this.resetAnalysisInfo();
+            f._compilerBreakLabel = this.allocateLabel()
 
             var idxTmp = this.newTmpVarOK("idx", this.term("0"));
             var begLabel = this.allocateLabel();
@@ -1028,6 +1068,7 @@ module TDev.AST
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(f._compilerBreakLabel);
             return res;
         }
 
@@ -1040,6 +1081,7 @@ module TDev.AST
             var idx = this.localVarRef(f.boundLocal);
             this.aux.push(idx.gets(this.term("0")));
             var begLabel = this.allocateLabel();
+            f._compilerBreakLabel = this.allocateLabel()
             var res = this.flushAux();
             res.push(begLabel);
             var ifNode = this.allocateIf();
@@ -1049,6 +1091,7 @@ module TDev.AST
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(f._compilerBreakLabel);
             return res;
         }
 
@@ -2005,6 +2048,7 @@ module TDev.AST
             this.wr("function " + this.actionName + "(s ");
             a.getInParameters().forEach((l) => { this.wr(", " + this.localVarName(l.local)); });
             this.wr(") {\n");
+            a._compilerBreakLabel = this.allocateLabel();
 
             if (this.throwSyntaxError(a)) {
                 this.wr("\n }\n");
@@ -2025,6 +2069,7 @@ module TDev.AST
             });
 
             var jsNodes: JsStmt[] = this.dispatch(a.body);
+            jsNodes.push(a._compilerBreakLabel)
             var prevMax = this.maxArgsToCheck + 1;
             this.insertFinalLabels(jsNodes);
             jsNodes.forEach((n) => n.forEachExpr((e:JsExpr) => {
@@ -2086,6 +2131,7 @@ module TDev.AST
             a.getInParameters().forEach((l) => { this.wr(", " + this.localVarName(l.local)); });
             var lab0 = this.allocateLabel();
             this.wr(") {\n")
+            a._compilerBreakLabel = this.allocateLabel();
 
             if (!this.throwSyntaxError(a)) {
                 this.wr(
@@ -2144,6 +2190,7 @@ module TDev.AST
 
             jsNodes.unshift(lab0);
             lab0.refs.push(lab0);
+            jsNodes.push(a._compilerBreakLabel);
             var prevMax = this.maxArgsToCheck + 1;
             this.insertFinalLabels(jsNodes);
             jsNodes.forEach((n) => n.forEachExpr((e:JsExpr) => {

@@ -135,6 +135,9 @@ module TDev {
 
         codeAddAbove,
         codeAddBelow,
+        codeShow,
+        codeReturn,
+        codeBreak,
         codeBoxed,
         codeCopy,
         codeCopySelection,

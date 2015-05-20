@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD200:
+// Next available error: TD205:
 
 module TDev.AST
 {
@@ -200,18 +200,21 @@ module TDev.AST
 
         public topApp:App;
         private currentAction:Action;
+        private currentAnyAction:Stmt;
         private seenAwait = false;
         private numFixes = 0;
         private nothingLocals:LocalDef[] = [];
         private localScopes: LocalDef[][] = [[]];
         private readOnlyLocals:LocalDef[] = [];
         private writtenLocals:LocalDef[] = [];
+        private currLoop:Stmt;
 
         private inAtomic = false;
         private actionSection = ActionSection.Normal;
         private pageInit:Block;
         private pageDisplay:Block;
         private saveFixes = 0;
+        private outLocals:LocalDef[] = [];
 
         private allLocals :LocalDef[] = [];
         private recentErrors: string[] = [];
@@ -295,6 +298,7 @@ module TDev.AST
                 case "while": return lf("TD129: 'while' condition wants {1:a}", whoExpects, tp);
                 case "for": return lf("TD130: bound of 'for' wants {1:a}", whoExpects, tp);
                 case "optional": return lf("TD186: this optional parameter wants {1:a}", whoExpects, tp);
+                case "return": return lf("TD204: 'return' value wants {1:a}", whoExpects, tp);
                 default: Util.die()
             }
         }
@@ -562,10 +566,12 @@ module TDev.AST
         private conditionalScope(f: () => any)
         {
             var prevWritten = this.writtenLocals.slice(0);
+            var prevLoop = this.currLoop
             try {
                 return this.scope(f);
             } finally {
                 this.writtenLocals = prevWritten;
+                this.currLoop = prevLoop
             }
         }
 
@@ -642,10 +648,52 @@ module TDev.AST
             this.updateStmtUsage(node);
             this.expect(node.condition, this.core.Boolean, 'while');
             this.conditionalScope(() => {
+                this.currLoop = node;
                 this.typeCheck(node.body);
             });
         }
 
+        public visitBreak(node:Break)
+        {
+            this.updateStmtUsage(node);
+            node.loop = this.currLoop
+            if (!node.loop) 
+                this.setNodeError(node, lf("TD200: 'break' can be only used inside a loop"))
+        }
+        
+        public visitShow(node:Show)
+        {
+            this.updateStmtUsage(node);
+            this.expect(node.expr, null, "show")
+            var tp = node.expr.getKind()
+            if (tp == api.core.Unknown) return
+            var show = tp.getProperty("post to wall")
+            node.postCall = null;
+            if (!show)
+                this.setNodeError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
+            else
+                node.postCall = mkFakeCall(PropertyRef.mkProp(show), [node.expr.parsed])
+        }
+        
+        public visitReturn(node:Return)
+        {
+            this.updateStmtUsage(node);
+            node.retLocal = null;
+            if (!node.expr.isPlaceholder()) {
+                if (this.outLocals.length == 0)
+                    this.setNodeError(node, lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
+                else if (this.outLocals.length > 1)
+                    this.setNodeError(node, lf("TD203: the function has more than one output parameter; return with value is not allowed"))
+                else {
+                    node.retLocal = this.outLocals[0]
+                    this.expect(node.expr, node.retLocal.getKind(), "return")
+                    this.recordLocalWrite(node.retLocal)
+                }
+            }
+            node.action = this.currentAnyAction;
+            this.checkAssignment(node)
+        }
+        
         public visitActionParameter(node:ActionParameter)
         {
         }
@@ -711,6 +759,7 @@ module TDev.AST
             node.boundLocal._kind = this.core.Number;
             this.readOnlyLocals.push(node.boundLocal);
             this.conditionalScope(() => {
+                this.currLoop = node;
                 this.declareLocal(node.boundLocal);
                 this.typeCheck(node.body);
             });
@@ -738,6 +787,7 @@ module TDev.AST
                 node.boundLocal._kind = ek;
             this.readOnlyLocals.push(node.boundLocal);
             this.conditionalScope(() => {
+                this.currLoop = node;
                 this.declareLocal(node.boundLocal);
                 this.typeCheck(node.conditions);
                 this.typeCheck(node.body);
@@ -761,6 +811,7 @@ module TDev.AST
             this.readOnlyLocals = [];
             this.allLocals = [];
             this.currentAction = node;
+            this.currentAnyAction = node;
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
@@ -768,6 +819,7 @@ module TDev.AST
             this.scope(() => {
                 // TODO in - read-only?
                 var prevErr = this.errorCount;
+                this.outLocals = node.getOutParameters().map((p) => p.local)
 
                 this.typeResolver.visitAction(node);
 
@@ -791,7 +843,7 @@ module TDev.AST
                         this.setNodeError(node, lf("TD171: currently action types support at most one output parameter; sorry"))
                     }
                 } else
-                    this.checkAssignment(node, node.getOutParameters().map((p) => p.local));
+                    this.checkAssignment(node);
                 node._hasErrors = this.errorCount > prevErr;
                 node.allLocals = this.allLocals;
             });
@@ -1049,9 +1101,9 @@ module TDev.AST
                 this.updateStmtUsage(expr, "var");
         }
 
-        private checkAssignment(node:Stmt, vars:LocalDef[])
+        private checkAssignment(node:Stmt)
         {
-            var unassigned = vars.filter((v) => this.writtenLocals.indexOf(v) < 0);
+            var unassigned = this.outLocals.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
                 node.addHint(
                     lf("parameter{0:s} {1} may be unassigned before the action finishes",
@@ -1067,6 +1119,8 @@ module TDev.AST
                 var prevWritten = this.writtenLocals;
                 var prevSect = this.actionSection;
                 var prevAtomic = this.inAtomic;
+                var prevOut = this.outLocals;
+                var prevAct = this.currentAnyAction;
 
                 this.writtenLocals = [];
 
@@ -1081,6 +1135,8 @@ module TDev.AST
                     this.readOnlyLocals = prevReadOnly;
                     this.inAtomic = prevAtomic;
                     this.actionSection = prevSect;
+                    this.outLocals = prevOut;
+                    this.currentAnyAction = prevAct;
                 }
             })
         }
@@ -1089,10 +1145,12 @@ module TDev.AST
         private typeCheckInlineAction(inl:InlineAction)
         {
             this.actionScope(inl.name.getKind(), () => {
+                this.currentAnyAction = inl;
                 inl.inParameters.forEach((d) => this.declareLocal(d));
                 inl.outParameters.forEach((d) => this.declareLocal(d));
+                this.outLocals = inl.outParameters.slice(0);
                 this.typeCheck(inl.body);
-                this.checkAssignment(inl, inl.outParameters);
+                this.checkAssignment(inl);
             })
         }
 
@@ -1399,6 +1457,12 @@ module TDev.AST
             t._kind = ak || this.core.Unknown
         }
 
+        private recordLocalWrite(loc:LocalDef)
+        {
+            if (this.writtenLocals.indexOf(loc) < 0)
+                this.writtenLocals.push(loc);
+        }
+
         private handleAssignment(t:Call, args:Expr[])
         {
             t._kind = this.core.Nothing;
@@ -1466,8 +1530,7 @@ module TDev.AST
                             else
                                 this.markError(trg, lf("TD108: you cannot assign to the local variable '{0}'", name));
                         } else {
-                            if (this.writtenLocals.indexOf(loc) < 0)
-                                this.writtenLocals.push(loc);
+                            this.recordLocalWrite(loc)
                         }
                     }
                     this.typeCheckExpr(trg);
@@ -1586,11 +1649,7 @@ module TDev.AST
             case "javascript":
             case "javascript async":
                 if (!checkArgumentCount(3)) return;
-                this.currentAction.getOutParameters().forEach(p => {
-                    var loc = p.local
-                    if (this.writtenLocals.indexOf(loc) < 0)
-                        this.writtenLocals.push(loc);
-                })
+                this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
                 this.lintJavaScript(t.args[2].getStringLiteral(), /async/.test(t.prop().getName()))
                 break;
             case "import":

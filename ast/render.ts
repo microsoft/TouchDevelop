@@ -612,6 +612,23 @@ module TDev
               this.endKeyword("while"));
         }
 
+        public visitBreak(n:AST.Break)
+        {
+            return this.stmt(n, this.tline(this.kw("break")) + this.possibleError(n))
+        }
+
+        public visitReturn(n:AST.Return)
+        {
+            return this.stmt(n, this.tline(this.kw("return") + this.expr(n.expr)) 
+                                + this.possibleError(n))
+        }
+
+        public visitShow(n:AST.Show)
+        {
+            return this.stmt(n, this.tline(this.kw("show") + this.expr(n.expr)) 
+                                + this.possibleError(n))
+        }
+
         public visitBox(n:AST.Box)
         {
             return this.stmt(n,
