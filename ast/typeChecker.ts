@@ -656,44 +656,41 @@ module TDev.AST
 
         public visitBreak(node:Break)
         {
-            this.updateStmtUsage(node);
             node.loop = this.currLoop
             if (!node.loop) 
-                this.setNodeError(node, lf("TD200: 'break' can be only used inside a loop"))
+                this.markError(node, lf("TD200: 'break' can be only used inside a loop"))
         }
         
         public visitShow(node:Show)
         {
-            this.updateStmtUsage(node);
-            this.expect(node.expr, null, "show")
+            this.expectExpr(node.expr, null, "show")
             var tp = node.expr.getKind()
             if (tp == api.core.Unknown) return
             var show = tp.getProperty("post to wall")
             node.postCall = null;
             if (!show)
-                this.setNodeError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
+                this.markError(node, lf("TD201: we don't know how to display {0}", tp.toString()))
             else
                 node.postCall = mkFakeCall(PropertyRef.mkProp(show), [node.expr.parsed])
         }
         
         public visitReturn(node:Return)
         {
-            this.updateStmtUsage(node);
             node.retLocal = null;
             var exp = null
 
             if (!node.expr.isPlaceholder()) {
                 if (this.outLocals.length == 0)
-                    this.setNodeError(node, lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
+                    this.markError(node.expr, lf("TD202: the function doesn't have output parameters; return with value is not allowed"))
                 else if (this.outLocals.length > 1)
-                    this.setNodeError(node, lf("TD203: the function has more than one output parameter; return with value is not allowed"))
+                    this.markError(node.expr, lf("TD203: the function has more than one output parameter; return with value is not allowed"))
                 else {
                     node.retLocal = this.outLocals[0]
                     exp = node.retLocal.getKind()
                     this.recordLocalWrite(node.retLocal)
                 }
             }
-            this.expect(node.expr, exp, "return")
+            this.expectExpr(node.expr, exp, "return")
             node.action = this.currentAnyAction;
             this.checkAssignment(node)
         }

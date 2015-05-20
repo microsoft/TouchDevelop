@@ -127,6 +127,21 @@ module TDev.AST.ExprParser
             var tokens = parse0(tokens0);
             var currentTok = 0;
 
+            var topExpr:TopExpr = null;
+            if (tokens[0].prio() == 0.5) {
+                switch (tokens[0].op) {
+                    case "show": topExpr = new Show(); break;
+                    case "return": topExpr = new Return(); break;
+                    case "break": topExpr = new Break(); break;
+                    default: Util.die()
+                }
+                tokens.shift()
+                if (tokens.length == 0) {
+                    topExpr.expr = mkPlaceholderThingRef();
+                    return topExpr
+                }
+            }
+
             function expect(op:string)
             {
                 var loc:StackOp = null;
@@ -338,6 +353,10 @@ module TDev.AST.ExprParser
                     return t.expr;
             }
 
-            return parseParenFree(true);
+            var res = parseParenFree(true);
+            if (topExpr) {
+                topExpr.expr = res
+                return topExpr
+            } else return res
         }
 }

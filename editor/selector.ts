@@ -76,17 +76,17 @@ module TDev
                 },
                 {
                     name: "show", desc: lf("show value on the screen"), tick: Ticks.codeShow,
-                    node: "do show \\u0001need_String\\u003Awhat_to_show ;",
+                    node: "`show` \\u0001need_String\\u003Awhat_to_show ;",
                     widget: "show"
                 },
                 {
                     name: "break", desc: lf("stop a loop"), tick: Ticks.codeBreak,
-                    node: "break;",
+                    node: "`break` ;",
                     widget: "break"
                 },
                 {
                     name: "return", desc: lf("stop a function"), tick: Ticks.codeReturn,
-                    node: "return ... ;",
+                    node: "`return` ;",
                     widget: "return"
                 },
             ].filter(btn => !btn.widget || TheEditor.widgetEnabled(btn.widget));

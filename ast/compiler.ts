@@ -902,39 +902,27 @@ module TDev.AST
 
         public visitBreak(b:Break)
         {
-            this.markLocation(b);
-            var res = this.flushAux();
             if (b.loop)
-                res.push(JsGoto.simple(b.loop._compilerBreakLabel))
-            this.resetAnalysisInfo();
-            return res
+                this.aux.push(JsGoto.simple(b.loop._compilerBreakLabel))
+            return this.unit
         }
 
         public visitReturn(r:Return)
         {
-            this.markLocation(r);
             if (r.retLocal) {
-                this.updateAnalysisInfo(r.expr);
-                var val = this.topExpr(r.expr, r);
-                this.resetAnalysisInfo();
+                var val = this.doExpr(r.expr);
+                this.aux.push(this.localVarRef(r.retLocal).gets(val))
             }
-            var res = this.flushAux();
-            if (r.retLocal)
-                res.push(this.localVarRef(r.retLocal).gets(val))
-            res.push(JsGoto.simple(r.action._compilerBreakLabel))
-            return res
+            this.aux.push(JsGoto.simple(r.action._compilerBreakLabel))
+            return this.unit
         }
 
         public visitShow(s:Show)
         {
-            this.markLocation(s);
-            this.updateAnalysisInfo(s.expr);
             var ex = this.doExpr(s.postCall)
-            var r = this.flushAux();
             if (ex != this.unit)
-                r.push(new JsExprStmt(ex));
-            this.resetAnalysisInfo();
-            return r
+                this.aux.push(new JsExprStmt(ex));
+            return this.unit
         }
 
         private compileInlineAction(inl:InlineAction)

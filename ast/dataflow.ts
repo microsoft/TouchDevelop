@@ -73,18 +73,7 @@ module TDev.AST {
         public visitForeach(stmt: Foreach) { return this.visitLoop(stmt); }
         public visitWhile(stmt: While) { return this.visitLoop(stmt); }
 
-        public visitBreak(stmt: Break) {
-            return this.nextInBlock(stmt); // TODO wrong
-        }
-
-        public visitReturn(stmt: Return) {
-            return this.nextInBlock(stmt); // TODO wrong
-        }
-
-        public visitShow(stmt: Show) {
-            return this.nextInBlock(stmt);
-        }
-
+        // TODO this is wrong for Return and Break
         public visitExprStmt(stmt: ExprStmt) {
             return this.nextInBlock(stmt);
         }
@@ -997,15 +986,6 @@ module TDev.AST {
             this.visitExprHolderHolder(n);
         }
         visitExprStmt(n: ExprStmt) {
-            this.visitExprHolderHolder(n);
-        }
-        visitBreak(n: Break) {
-            this.visitExprHolderHolder(n);
-        }
-        visitReturn(n: Return) {
-            this.visitExprHolderHolder(n);
-        }
-        visitShow(n: Show) {
             this.visitExprHolderHolder(n);
         }
 

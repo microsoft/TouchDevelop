@@ -215,6 +215,9 @@ module TDev {
             specProp(",", 2);
             specProp("async", 98);
             specProp("fun", 2.5);
+            specProp("return", 1);
+            specProp("show", 1);
+            specProp("break", 1);
             invl.isData = true;
 
             this.core = new CoreApi(this);
