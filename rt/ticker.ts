@@ -425,6 +425,7 @@ module TDev {
         browseUninstall,
         browsePush,
         browseDiffBase,
+        browseConvertToTutorial,
         browseAddScriptToList,
         browseUpdate,
         browseSendPullRequest,

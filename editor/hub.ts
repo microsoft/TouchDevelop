@@ -38,7 +38,9 @@ module TDev.Browser {
                 // hub
                 hubTutorials : true,
                 hubShowcase : true,
-                hubSocial : true,
+                hubSocial: true,
+
+                scriptSocialLinks: Cloud.lite,
             }
         },
         'classic': {
@@ -100,6 +102,9 @@ module TDev.Browser {
                 hubUsers: true,
                 notifyAppReloaded: true,
                 startTutorialButton: true,
+
+                scriptSocialLinks: Cloud.lite,
+                scriptAddToChannel: Cloud.lite,
             }
         },
         'pro': {
@@ -165,6 +170,7 @@ module TDev.Browser {
                 sendPullRequest: true,
                 scriptStats: true,
                 userSocialTab: true,
+                //scriptConvertToTutorial: true,
                 // sections
                 testsSection: true,
                 actionTypesSection: true,
@@ -211,6 +217,9 @@ module TDev.Browser {
                 hubUsers: true,
                 hubTags: true,
                 hubMyArt: true,
+
+                scriptSocialLinks: Cloud.lite,
+                scriptAddToChannel: Cloud.lite,
             }
         }
     }
@@ -281,6 +290,7 @@ module TDev.Browser {
                     singleReturnValue: true,
                     integerNumbers: true,
                     codeSearch: true,
+                    scriptConvertToTutorial: true,
                     // librariesSection: true,
                     // scriptPropertiesSettings: true,
                     // hub

@@ -5364,14 +5364,8 @@
                     var app = AST.Parser.parseScript(scriptText);
                     AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
 
-
-                    if (sc.jsonScript && sc.jsonScript.time) {
-                        var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
-                        var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        divs.push(div('', pull, diff));
-                    }
-
-                    if (Cloud.lite && !Cloud.isRestricted() && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
+                    
+                    if (EditorSettings.widgets().scriptSocialLinks && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
                         socialNetworks.forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
@@ -5446,6 +5440,13 @@
                             divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
                         }
                     });
+
+                    if (sc.jsonScript && sc.jsonScript.time) {
+                        var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
+                        var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        divs.push(div('', pull, diff, convertToTutorial));
+                    }
 
                     if (EditorSettings.widgets().scriptStats) {
                         var stats = ""
@@ -6854,6 +6855,11 @@
                 TheApiCacheMgr.getAsync(this.publicId + "/base", true).done(scr => this.diffToId(scr ? scr.id : null))
             else
                 this.diffToId(null);
+        }
+
+        public convertToTutorial()
+        {
+            
         }
 
         public mergeScript()
