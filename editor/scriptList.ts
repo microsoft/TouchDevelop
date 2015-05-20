@@ -2931,7 +2931,7 @@
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
-            if (Cloud.lite && this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
+            if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
                     Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
@@ -3502,6 +3502,7 @@
         public finalListElt(): HTMLElement {
             if (!this.isForum() && this.parent instanceof ScriptInfo) {
 
+                var versionDepth = 0;
                 var js = this.script().jsonScript
                 if (js.id && js.rootid == js.id)
                     return div(null)
@@ -3509,11 +3510,12 @@
                 var getFor = (id: string) => {
                     Util.assert(!!id, "missing comment id");
                     TheApiCacheMgr.getAsync(id + "/base").done(resp => {
+                        versionDepth++;
                         if (!resp) return
                         var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
                         var loadMore = (cont: string) => {
                             var dd = div(null, HTML.mkButton(lf("load more"),() => {
-                                dd.setChildren("loading...")
+                                dd.setChildren(lf("loading..."))
                                 TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
                                     dd.setChildren(lst.items.map(j => this.tabBox(j)))
                                     if (lst.continuation)
@@ -3547,7 +3549,17 @@
                         } else hd.setFlag("slim", true);
                         cont.appendChild(div(null, hd, d))
 
-                        if (resp.rootid != resp.id) getFor(resp.id)
+                        if (resp.rootid != resp.id) {
+                            if (versionDepth < 5) getFor(resp.id)
+                            else {
+                                var loadMoreVersion = HTML.mkButton(lf("load more"),() => {
+                                    loadMoreVersion.removeSelf();
+                                    versionDepth = 0;
+                                    getFor(resp.id);
+                                });
+                                cont.appendChild(loadMoreVersion);
+                            }
+                        }
                     })
                 }
 
@@ -5541,6 +5553,12 @@
             return this.app ? this.app.getDescription() : "";
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
+
+        public shareButtons() {
+            return super.shareButtons().concat(
+                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
+                );
+        }
 
         static compareScripts(a: ScriptInfo, b: ScriptInfo) : number {
             var c = b.lastScore - a.lastScore;
