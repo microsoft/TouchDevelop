@@ -291,8 +291,8 @@ module TDev.Browser {
                     integerNumbers: true,
                     codeSearch: true,
                     scriptConvertToTutorial: true,
-                    // librariesSection: true,
-                    // scriptPropertiesSettings: true,
+                    librariesSection: true,
+                    scriptPropertiesSettings: true,
                     // hub
                     hubChannels : true,
                     scriptAddToChannel : true,
