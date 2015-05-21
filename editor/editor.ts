@@ -3018,19 +3018,18 @@ module TDev
                 };
                 if (worldInfo.status === "published") {
                     if (!worldInfo.baseUserId)
-                        throw new Error("Could not determine the user id of the script owner; status = " + worldInfo.status);
+                        throw new Error(lf("Could not determine the user id of the script owner; status = {0}", worldInfo.status));
                     if (!worldInfo.baseId)
-                        throw new Error("Could not determine the script id; status = " + worldInfo.status);
+                        throw new Error(lf("Could not determine the script id; status = {0}", worldInfo.status));
                 }
                 this.host.currentGuid = header.guid;
 
                 var scr = Promise.as(script)
 
                 if (!shouldRun && Cloud.isOnline() && !/^meta hasIds/m.test(script) && !header.editor) {
-                    ProgressOverlay.setProgress("upgrading script text for future merges");
+                    ProgressOverlay.setProgress(lf("upgrading script..."));
                     scr = this.addIdsAsync(header, worldInfo.baseId, script)
                 }
-
 
                 // Two outcomes, depending on whether we're proceeding with the
                 // classic editor, or an external one.
@@ -3139,7 +3138,7 @@ module TDev
                     if (!Script)
                         return;
                     if (runPlugin) return;
-                    if (shouldRun) {
+                    if (shouldRun || TheEditor.widgetEnabled("editorRunOnLoad")) {
                         this.runAction(Script.mainAction(), null)
                 }
             }, (e) => {

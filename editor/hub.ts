@@ -304,6 +304,7 @@ module TDev.Browser {
                     // hub
                     hubChannels : true,
                     scriptAddToChannel: true,
+                    editorRunOnLoad: true,
 
                     whileConditionDefault: "true",
                     forConditionDefault: "5",

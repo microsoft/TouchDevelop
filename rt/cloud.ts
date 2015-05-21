@@ -124,6 +124,8 @@ module TDev.Cloud {
         persistanceRadio?: boolean;
         wallScreenshot?: boolean;
 
+        editorRunOnLoad?: boolean;
+
         // statement defaults
         ifConditionDefault?: string;
         forConditionDefault?: string;
