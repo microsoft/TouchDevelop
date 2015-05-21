@@ -6696,7 +6696,7 @@
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
-                m.add(div('wall-dialog-body', lf("Everyone can run your script at:"), txtAddress));
+                m.add(div('wall-dialog-body', lf("Share it with this url:"), txtAddress));
             }
 
             var finish = () => {
