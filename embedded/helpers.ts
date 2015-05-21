@@ -11,8 +11,21 @@ module TDev {
 
       var kStringType = "shared_ptr<string>";
 
+      var replacementTable = {
+        "<": "lt",
+        "≤": "leq",
+        "≠": "neq",
+        "=": "eq",
+        ">": "gt",
+        "≥": "geq",
+        "+": "plus",
+        "-": "minus",
+        "/": "div",
+        "*": "times",
+      };
+
       export function mangleName(name: string) {
-        return name.replace(/\W/g, "_");
+        return name.replace(/\W/g, x => (replacementTable[x] || "_"));
       }
 
       // Compute a unique name from a user-provided name and a

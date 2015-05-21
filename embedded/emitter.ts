@@ -143,6 +143,9 @@ module TDev {
       }
 
       private resolveCall(receiver: J.JExpr, name: string) {
+        if (!receiver)
+          return null;
+
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
@@ -168,18 +171,18 @@ module TDev {
             return H.mangleLibraryName(n, name);
         }
 
-        // Something else (e.g. operator)
         return null;
       }
 
-      public visitCall(env: EmitterEnv, name: string, args: J.JExpr[]) {
-        var receiver = args[0];
-        args = args.splice(1);
-
-        var resolvedName = this.resolveCall(receiver, name);
-
-        var mkCall = (f: string) => {
-          var argsCode = args.map(a => {
+      public visitCall(env: EmitterEnv,
+        name: string,
+        args: J.JExpr[],
+        parent: J.JTypeRef,
+        isExtensionMethod: boolean)
+      {
+        var mkCall = (f: string, skipReceiver: boolean) => {
+          var actualArgs = skipReceiver ? args.slice(1) : args;
+          var argsCode = actualArgs.map(a => {
             var k = H.isEnumLiteral(a);
             if (k)
               return k+"";
@@ -189,14 +192,44 @@ module TDev {
           return f + "(" + argsCode.join(", ") + ")";
         };
 
+        // The [JCall] node has several, different, often unrelated purposes.
+        // This function identifies (tentatively) the different cases and
+        // compiles each one of them into something that makes sense.
+
+        // 1) A call to a function, either in the current scope, or belonging to
+        // a TouchDevelop library. Resolves to a C++ function call.
+        var resolvedName = this.resolveCall(args[0], name);
         if (resolvedName)
-          return mkCall(resolvedName);
+          return mkCall(resolvedName, true);
+
+        // 2) A call to the assignment operator on the receiver. C++ assignment.
         else if (name == ":=")
-          return this.visit(env, receiver) + " = " + this.visit(env, args[0]);
-        else if (H.isSingletonRef(receiver))
-          return this.visit(env, receiver) + "::" + mkCall(name);
+          return this.visit(env, args[0]) + " = " + this.visit(env, args[1]);
+
+        // 3) Reference to a variable in the global scope
+        else if (args.length && H.isSingletonRef(args[0]) == "data")
+          return H.mangleName(name);
+
+        // 4) Reference to a built-in library method, e.g. Math→ max
+        else if (args.length && H.isSingletonRef(args[0]))
+          return H.isSingletonRef(args[0]) + "::" + mkCall(H.mangleName(name), true);
+
+        // 5) Extension method, where p(x) is represented as x→ p.
+        // XXX the prefix is missing in case we're calling an extension method
+        // on a library-defined type
+        else if (isExtensionMethod)
+          return mkCall(H.mangleName(name), false);
+
+        // 6) Field access for an object. Rationale: it's either a library type
+        // (meaning it has fields) or a user-defined type (meaning it also has
+        // fields). Let's see if that works.
+        else if ((<any> parent[0] == "{") && args.length == 1)
+          return this.visit(env, args[0]) + "->" + H.mangleName(name);
+
+        // 7) Instance method (e.g. Number's > operator, for which the receiver
+        // is the number itself)
         else
-          return this.visit(env, receiver) + "->" + mkCall(name);
+          return (<any> parent)+"::"+mkCall(H.mangleName(name), false);
       }
 
       public visitSingletonRef(e, n: string) {
