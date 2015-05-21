@@ -127,6 +127,13 @@ module TDev.AST.ExprParser
             var tokens = parse0(tokens0);
             var currentTok = 0;
 
+            if (tokens.length == 1 &&
+                tokens[0].prio() == api.opStmtPriority) {
+                var z = mkZero(tokens[0])
+                z.expr = mkPlaceholderThingRef()
+                tokens.push(z)
+            }
+
             function expect(op:string)
             {
                 var loc:StackOp = null;
@@ -236,7 +243,8 @@ module TDev.AST.ExprParser
                             stack.push(prev);
                         }
 
-                        if (op.op === "not" || op.op == "async" || op.op == "await" || /^fun:/.test(op.op)) {
+                        if (op.op === "not" || op.op == "async" || op.op == "await" 
+                            || /^fun:/.test(op.op) || op.prio() == api.opStmtPriority) {
                             if (prevExpr === null) {
                                 prev = mkZero(op);
                                 stack.push(prev);
@@ -329,7 +337,7 @@ module TDev.AST.ExprParser
                     }
                 }
 
-                reduceOps(stack, 1);
+                reduceOps(stack, 0);
 
                 var t = stack.peek();
                 if (!t || !t.expr)

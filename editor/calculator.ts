@@ -53,6 +53,7 @@ module TDev
         private lastOpenBracePos = -1;
         private specialKeypadOn = 0;
         private boxMode = false;
+        private noExpr = false;
         private inlineEditAt = -1;
         private inlineEditToken:AST.Token;
         private onNextDisplay:()=>void = null;
@@ -771,6 +772,7 @@ module TDev
             this.undoMgr.clearCalc();
             this.stmt = s;
             this.boxMode = s instanceof AST.Box;
+            this.noExpr = this.boxMode
 
             Ticker.dbg("Calc.edit0");
             elt("leftPaneContent").setFlag("in-calculator", true)
@@ -1163,6 +1165,10 @@ module TDev
                 else if (/^[(),-]$/.test(o)) tick(Ticks.calcDedicatedOp);
                 else if (o == "not") tick(Ticks.calcNot);
                 else if (o == "async") tick(Ticks.calcAsync);
+                else if (o == "return") tick(Ticks.codeReturn);
+                else if (o == "break") tick(Ticks.codeBreak);
+                else if (o == "continue") tick(Ticks.codeContinue);
+                else if (o == "show") tick(Ticks.codeShow);
                 else if (o == "true" || o == "false") tick(Ticks.calcTrueFalse);
             }
 
@@ -1678,7 +1684,7 @@ module TDev
             if (!pm) this.setupNumKeypad();
             this.specialKeypadOn = 0;
 
-            if (this.boxMode) {
+            if (this.noExpr) {
                 this.buttons.forEach((b) => b.clear())
                 return;
             }
@@ -1761,7 +1767,7 @@ module TDev
             if (TheEditor.intelliProfile && TheEditor.intelliProfile.hasFlag("nodefaults"))
                 return [AST.mkPlaceholder(p)]
 
-            return AST.Fixer.findDefault(p, this.getLocals())
+            return AST.Fixer.findDefault(p, this.getLocals().filter(l => !l.isOut))
         }
 
         private removePlaceholder()
@@ -2449,7 +2455,8 @@ module TDev
                 locals.sort((a:AST.LocalDef, b:AST.LocalDef) => b.lastUsedAt - a.lastUsedAt);
                 var score = maxScore * 4;
                 locals.forEach((s:AST.LocalDef) => {
-                    if (s.isBrowsable()) {
+                    // outAssign is set by tutorial engine for legacy tutorials
+                    if (s.isBrowsable() && (!s.isHiddenOut || TheEditor.widgetEnabled("outAssign"))) {
                         var e = this.mkIntelliItem(score, Ticks.calcIntelliLocal);
                         score *= 0.7;
                         e.decl = s;
@@ -2688,7 +2695,7 @@ module TDev
 
             if (!onlyGlobal)
                 this.getLocals().forEach((l) => {
-                    if (isRecordKind(l.getKind()))
+                    if (!l.isOut && isRecordKind(l.getKind()))
                         res.push(l);
                 });
 
@@ -2887,7 +2894,7 @@ module TDev
                 var locs = this.getLocals()
                 locs.sort(Util.nameCompare);
                 locs.forEach((l) => {
-                    if (l.isBrowsable()) {
+                    if (l.isBrowsable() && !l.isOut) {
                         boxes.push(DeclRender.mkBox(l).withClick(() => {
                             repl.dst = [AST.mkLocalRef(l)];
                             finish();
@@ -3549,7 +3556,7 @@ module TDev
             this.elseIfButton();
             this.addFieldButtons();
 
-            if (!this.boxMode) {
+            if (!this.noExpr) {
                 var placeholderDef:AST.PlaceholderDef = null;
                 var prevTok = this.expr.tokens[this.cursorPosition - 1]
                 var nameHint:string = null
@@ -4263,10 +4270,11 @@ module TDev
                 return tmpl == act.getName()
             }
 
-            if (ins.stmtToInsert) {
+            if (ins.stmtToInsert || ins.isOpStmt) {
                 if (apiSearchVisible()) return
+                if (ins.isOpStmt && !inPosition()) return;
 
-                var ntype = ins.stmtToInsert.nodeType()
+                var ntype = ins.isOpStmt ? ins.addToken.getOperator() : ins.stmtToInsert.nodeType()
                 if (ntype == "elseIf") ntype = "if"
                 if (ntype == "foreach" || ntype == "for") {
                     var loc = ins.stmtToInsert.loopVariable()

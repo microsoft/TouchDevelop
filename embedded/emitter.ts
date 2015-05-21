@@ -51,6 +51,23 @@ module TDev {
         return "// "+c.replace("\n", "\n"+env.indent+"// ");
       }
 
+      public visitBreak(env: EmitterEnv) {
+        return env.indent + "break;";
+      }
+
+      public visitContinue(env: EmitterEnv) {
+        return env.indent + "continue;";
+      }
+
+      public visitShow(env: EmitterEnv, expr: J.JExpr) {
+        // TODO hook this up to "post to wall" handling if any
+        return env.indent + "serial.print(" + this.visit(env, expr) + ");";
+      }
+
+      public visitReturn(env: EmitterEnv, expr: J.JExpr) {
+        return env.indent + H.mkReturn(this.visit(env, expr));
+      }
+
       public visitExprStmt(env: EmitterEnv, expr: J.JExpr) {
         return env.indent + this.visit(env, expr)+";";
       }

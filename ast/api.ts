@@ -36,6 +36,10 @@ module TDev {
         public EqualsProp:IProperty;
         public AsyncProp:IProperty;
         public FunProp:IProperty;
+        public ShowProp:IProperty;
+        public ReturnProp:IProperty;
+        public BreakProp:IProperty;
+        public ContinueProp:IProperty;
         public StringConcatProp:IProperty;
         public PlaceholderThing:AST.SingletonDef;
         public AndProp:Property;
@@ -88,6 +92,10 @@ module TDev {
             this.EqualsProp = this.Number.getProperty("=");
             this.AsyncProp = this.Unknown.getProperty("async");
             this.FunProp = this.Unknown.getProperty("fun");
+            this.ShowProp = this.Unknown.getProperty("show");
+            this.BreakProp = this.Unknown.getProperty("break");
+            this.ContinueProp = this.Unknown.getProperty("continue");
+            this.ReturnProp = this.Unknown.getProperty("return");
             this.AndProp = <Property>this.Boolean.getProperty("and");
             this.OrProp = <Property>this.Boolean.getProperty("or");
             this.NotProp = <Property>this.Boolean.getProperty("not");
@@ -106,6 +114,7 @@ module TDev {
         public eventMgr:AST.EventMgr;
         public restoreFlags = false; // for genStub
         public addHelpTopics:any = () => {}
+        public opStmtPriority = 0.5;
 
         public rt_start = "";
         public rt_stop = "";
@@ -208,13 +217,19 @@ module TDev {
             var invl = Kind.md_make(0, "Unknown", "an unknown value");
             function specProp(name:string, prio:number) {
                 var mkp = (n:string) => PropertyParameter.md_make(n, invl);
-                var p = Property.md_make(1, invl, name, "", prio == 98 || prio == 2.5 ? [mkp("arg")] : [mkp("left"), mkp("right")], invl)
+                var p = Property.md_make(1, invl, name, "", 
+                    prio == api.opStmtPriority ? [] :
+                    prio == 98 || prio == 2.5 ? [mkp("arg")] : [mkp("left"), mkp("right")], invl)
                 p._infixPriority = prio;
             }
             specProp(":=", 1);
             specProp(",", 2);
             specProp("async", 98);
             specProp("fun", 2.5);
+            specProp("return", api.opStmtPriority);
+            specProp("show", api.opStmtPriority);
+            specProp("break", api.opStmtPriority);
+            specProp("continue", api.opStmtPriority);
             invl.isData = true;
 
             this.core = new CoreApi(this);

@@ -885,6 +885,8 @@ module TDev.AST
             this.updateAnalysisInfo(w.calcNode());
             this.markLocation(w);
             var begLabel = this.allocateLabel();
+            w._compilerContinueLabel = begLabel;
+            w._compilerBreakLabel = this.allocateLabel()
             this.aux.push(begLabel);
             var cond = this.topExpr(w.condition, w);
             this.resetAnalysisInfo();
@@ -895,7 +897,40 @@ module TDev.AST
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(w._compilerBreakLabel)
             return res;
+        }
+
+        public visitBreak(b:Call)
+        {
+            if (b.topAffectedStmt)
+                this.aux.push(JsGoto.simple(b.topAffectedStmt._compilerBreakLabel))
+            return this.unit
+        }
+
+        public visitContinue(b:Call)
+        {
+            if (b.topAffectedStmt)
+                this.aux.push(JsGoto.simple(b.topAffectedStmt._compilerContinueLabel))
+            return this.unit
+        }
+
+        public visitReturn(r:Call)
+        {
+            if (r.topRetLocal) {
+                var val = this.doExpr(r.args[0]);
+                this.aux.push(this.localVarRef(r.topRetLocal).gets(val))
+            }
+            this.aux.push(JsGoto.simple(r.topAffectedStmt._compilerBreakLabel))
+            return this.unit
+        }
+
+        public visitShow(s:Call)
+        {
+            var ex = this.doExpr(s.topPostCall)
+            if (ex != this.unit)
+                this.aux.push(new JsExprStmt(ex));
+            return this.unit
         }
 
         private compileInlineAction(inl:InlineAction)
@@ -982,9 +1017,11 @@ module TDev.AST
                 collTmp = this.newTmpVar("coll", this.topExpr(f.collection, f));
             }
             this.resetAnalysisInfo();
+            f._compilerBreakLabel = this.allocateLabel()
 
             var idxTmp = this.newTmpVarOK("idx", this.term("0"));
             var begLabel = this.allocateLabel();
+            f._compilerContinueLabel = begLabel;
             this.aux.push(begLabel);
             var lenExpr:JsExpr;
             if (isArray)
@@ -1028,6 +1065,7 @@ module TDev.AST
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(f._compilerBreakLabel);
             return res;
         }
 
@@ -1040,15 +1078,19 @@ module TDev.AST
             var idx = this.localVarRef(f.boundLocal);
             this.aux.push(idx.gets(this.term("0")));
             var begLabel = this.allocateLabel();
+            f._compilerContinueLabel = this.allocateLabel();
+            f._compilerBreakLabel = this.allocateLabel()
             var res = this.flushAux();
             res.push(begLabel);
             var ifNode = this.allocateIf();
             ifNode.condition = new JsInfix(idx, "<", bndTmp);
             ifNode.thenBody = this.dispatch(f.body);
+            ifNode.thenBody.push(f._compilerContinueLabel);
             ifNode.thenBody.push(new JsExprStmt(new JsInfix(idx, "++", null)));
             ifNode.thenBody.push(JsGoto.simple(begLabel));
             ifNode.elseBody = [];
             res.push(ifNode);
+            res.push(f._compilerBreakLabel);
             return res;
         }
 
@@ -2005,6 +2047,7 @@ module TDev.AST
             this.wr("function " + this.actionName + "(s ");
             a.getInParameters().forEach((l) => { this.wr(", " + this.localVarName(l.local)); });
             this.wr(") {\n");
+            a._compilerBreakLabel = this.allocateLabel();
 
             if (this.throwSyntaxError(a)) {
                 this.wr("\n }\n");
@@ -2025,6 +2068,7 @@ module TDev.AST
             });
 
             var jsNodes: JsStmt[] = this.dispatch(a.body);
+            jsNodes.push(a._compilerBreakLabel)
             var prevMax = this.maxArgsToCheck + 1;
             this.insertFinalLabels(jsNodes);
             jsNodes.forEach((n) => n.forEachExpr((e:JsExpr) => {
@@ -2086,6 +2130,7 @@ module TDev.AST
             a.getInParameters().forEach((l) => { this.wr(", " + this.localVarName(l.local)); });
             var lab0 = this.allocateLabel();
             this.wr(") {\n")
+            a._compilerBreakLabel = this.allocateLabel();
 
             if (!this.throwSyntaxError(a)) {
                 this.wr(
@@ -2129,6 +2174,7 @@ module TDev.AST
                 this.profilingScopes.push(new JsTmpDef("profilingLastCallTimeStamp", new JsLiteral("0")));
 
             var jsNodes: JsStmt[] = this.dispatch(a.body);
+            jsNodes.push(a._compilerBreakLabel);
 
             if (this.needsProfiling())
                 jsNodes.unshift(this.profilingScopes.pop());

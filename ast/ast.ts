@@ -131,6 +131,8 @@ module TDev.AST {
         private stableVersions : string[];
         public tutorialWarning: string;
         public _hint:string;
+        public _compilerBreakLabel:any;
+        public _compilerContinueLabel:any;
 
         constructor() {
             super()
@@ -637,21 +639,24 @@ module TDev.AST {
         public allowAddOf(n:Stmt) { return n instanceof InlineAction }
     }
 
-    export class For
+    export class Loop
         extends Stmt
+    {
+        public body:CodeBlock;
+        public primaryBody() { return this.body; }
+        public isExecutableStmt() { return true; }
+        public loopVariable():LocalDef { return null }
+    }
+
+    export class For
+        extends Loop
     {
         public boundLocal:LocalDef;
         public upperBound:ExprHolder;
-        public body:CodeBlock;
-        constructor() {
-            super()
-        }
         public nodeType() { return "for"; }
         public calcNode() { return this.upperBound; }
         public children() { return [<AstNode> this.upperBound, this.body]; }
-        public primaryBody() { return this.body; }
         public accept(v:NodeVisitor) { return v.visitFor(this); }
-        public isExecutableStmt() { return true; }
         public allowSimplify() { return true }
         public loopVariable():LocalDef { return this.boundLocal }
 
@@ -679,22 +684,16 @@ module TDev.AST {
     }
 
     export class Foreach
-        extends Stmt
+        extends Loop
     {
         public boundLocal:LocalDef;
         public collection:ExprHolder;
         // the block contains Where stmts only (at the moment; in future there might be OrderBy etc)
         public conditions:ConditionBlock;
-        public body:CodeBlock;
-        constructor() {
-            super()
-        }
         public nodeType() { return "foreach"; }
         public calcNode() { return this.collection; }
-        public primaryBody() { return this.body; }
         public accept(v:NodeVisitor) { return v.visitForeach(this); }
         public children() { return [<AstNode> this.collection, this.conditions, this.body]; }
-        public isExecutableStmt() { return true; }
         public allowSimplify() { return true }
         public loopVariable():LocalDef { return this.boundLocal }
 
@@ -735,19 +734,13 @@ module TDev.AST {
     }
 
     export class While
-        extends Stmt
+        extends Loop
     {
         public condition:ExprHolder;
-        public body:CodeBlock;
-        constructor() {
-            super()
-        }
         public nodeType() { return "while"; }
         public calcNode() { return this.condition; }
-        public primaryBody() { return this.body; }
         public accept(v:NodeVisitor) { return v.visitWhile(this); }
         public children() { return [<AstNode> this.condition, this.body]; }
-        public isExecutableStmt() { return true; }
 
         public writeTo(tw:TokenWriter)
         {
@@ -2075,6 +2068,9 @@ module TDev.AST {
         public lastUsedAt = 0;
         public lambdaNameStatus:number;
         public isRegular:boolean;
+        public isHiddenOut:boolean;
+        public isOut:boolean;
+        public _lastWriteLocation:Stmt;
 
         public writeWithType(app:App, tw:TokenWriter)
         {
@@ -3374,6 +3370,11 @@ module TDev.AST {
         public optionalConstructor:InlineActions;
         public compiledTypeArgs:any;
 
+        // this is for break, return, and show
+        public topRetLocal:LocalDef;
+        public topAffectedStmt:Stmt;
+        public topPostCall:Expr;
+
         constructor() {
             super()
         }
@@ -3488,7 +3489,24 @@ module TDev.AST {
             }
         }
 
-        public accept(v:NodeVisitor) { return v.visitCall(this); }
+        public accept(v:NodeVisitor) {
+            var p = this.prop()
+            if (!p || p.parentKind != api.core.Unknown) // fast path
+                return v.visitCall(this)
+
+            if (p == api.core.AssignmentProp)
+                return v.visitAssignment(this)
+            else if (p == api.core.ReturnProp)
+                return v.visitReturn(this)
+            else if (p == api.core.BreakProp)
+                return v.visitBreak(this)
+            else if (p == api.core.ContinueProp)
+                return v.visitContinue(this)
+            else if (p == api.core.ShowProp)
+                return v.visitShow(this)
+
+            return v.visitCall(this);
+        }
 
         public calledAction():AST.Action
         {
@@ -3516,6 +3534,7 @@ module TDev.AST {
             return !this.runAsAsync && this.prop() && !!(this.prop().getFlags() & PropertyFlags.Async);
         }
     }
+
 
     // -------------------------------------------------------------------------------------------------------
     // Constructors
@@ -3712,6 +3731,11 @@ module TDev.AST {
         public visitLiteral(n:Literal) { return this.visitExpr(n); }
         public visitThingRef(n:ThingRef) { return this.visitExpr(n); }
         public visitCall(n:Call) { return this.visitExpr(n); }
+        public visitShow(n:Call) { return this.visitCall(n); }
+        public visitBreak(n:Call) { return this.visitCall(n); }
+        public visitContinue(n:Call) { return this.visitCall(n); }
+        public visitReturn(n:Call) { return this.visitCall(n); }
+        public visitAssignment(n:Call) { return this.visitCall(n); }
 
         public visitExprHolder(n:ExprHolder) { return this.visitAstNode(n); }
 
@@ -3924,6 +3948,8 @@ module TDev.AST {
         private writtenLocals0:LocalDef[];
         readLocals:LocalDef[];
         writtenLocals:LocalDef[];
+        lastStmt:Stmt;
+        saveWrites = false;
 
         // globals read or written, including both global variables and records
         readGlobals: Decl[];
@@ -3933,10 +3959,13 @@ module TDev.AST {
 
         getGlobals: boolean = false;
 
-        add(l:Decl, lst:LocalDef[])
+        add(s:Stmt, l:Decl, lst:LocalDef[])
         {
-            if (l instanceof LocalDef && lst.indexOf(<LocalDef>l) < 0)
+            if (l instanceof LocalDef && lst.indexOf(<LocalDef>l) < 0) {
+                if (this.saveWrites && s)
+                    (<LocalDef>l)._lastWriteLocation = s
                 lst.push(<LocalDef>l);
+            }
         }
 
         private getLocal(e:Token):LocalDef
@@ -3983,6 +4012,13 @@ module TDev.AST {
             return null;
         }
 
+        visitStmt(s:Stmt)
+        {
+            this.lastStmt = s
+            this.visitChildren(s)
+            return null;
+        }
+
         visitAction(n: Action) {
             if (this.visitedActions && this.visitedActions.indexOf(n) < 0) {
                 this.visitedActions.push(n);
@@ -3992,7 +4028,7 @@ module TDev.AST {
 
         visitThingRef(n:ThingRef)
         {
-            this.add(n.def, this.readLocals0);
+            this.add(null, n.def, this.readLocals0);
             return null;
         }
 
@@ -4003,7 +4039,7 @@ module TDev.AST {
             if (prop == api.core.AssignmentProp) {
                 n.args[0].flatten(api.core.TupleProp).forEach((e) => {
                     var l = this.getLocal(e);
-                    if (l) this.add(l, this.writtenLocals0);
+                    if (l) this.add(null, l, this.writtenLocals0);
                     else if (this.getGlobals) {
                         var g = this.getGlobal(e);
                         if (g) this.addGlobal(g, this.writtenGlobals);
@@ -4048,12 +4084,14 @@ module TDev.AST {
 
         visitInlineAction(n:InlineAction)
         {
-            n.inParameters.forEach(i => this.add(i, this.writtenLocals))
+            n.inParameters.forEach(i => this.add(n, i, this.writtenLocals))
             super.visitInlineAction(n)
         }
 
         visitExprHolder(n:ExprHolder)
         {
+            var stmt = this.lastStmt
+
             this.readLocals0 = [];
             this.writtenLocals0 = [];
 
@@ -4064,24 +4102,24 @@ module TDev.AST {
             n.tokens.forEach((t) => {
                 var l = this.getLocal(t);
                 if (l && this.readLocals0.indexOf(l) < 0 && this.writtenLocals0.indexOf(l) < 0)
-                    this.add(l, this.readLocals0);
+                    this.add(null, l, this.readLocals0);
             });
 
-            this.readLocals0.forEach((l) => this.add(l, this.readLocals));
-            this.writtenLocals0.forEach((l) => this.add(l, this.writtenLocals));
+            this.readLocals0.forEach((l) => this.add(null, l, this.readLocals));
+            this.writtenLocals0.forEach((l) => this.add(stmt, l, this.writtenLocals));
             return null;
         }
 
         visitFor(n:For)
         {
-            this.add(n.boundLocal, this.writtenLocals);
+            this.add(n, n.boundLocal, this.writtenLocals);
             super.visitFor(n);
             return null;
         }
 
         visitForeach(n:Foreach)
         {
-            this.add(n.boundLocal, this.writtenLocals);
+            this.add(n, n.boundLocal, this.writtenLocals);
             super.visitForeach(n);
             return null;
         }
@@ -4104,6 +4142,7 @@ module TDev.AST {
     {
         extractedAction:Action;
         numAwait = 0;
+        failed:Stmt[] = [];
 
         constructor(public extracted:CodeBlock, public action:Action, public callPlaceholder:ExprStmt, public name:string)
         {
@@ -4119,19 +4158,48 @@ module TDev.AST {
 
         run()
         {
+            AST.visitStmtsCtx({ inLoop: false, inHandler: false }, this.extracted, (ctx, s) => {
+                if (s.calcNode() && s.calcNode().parsed) {
+                    var prop = s.calcNode().parsed.calledProp()
+                    if (!ctx.inLoop && (prop == api.core.BreakProp || prop == api.core.ContinueProp))
+                        this.failed.push(s)
+                    if (!ctx.inHandler && (prop == api.core.ReturnProp))
+                        this.failed.push(s)
+                }
+                ctx = Util.jsonClone(ctx)
+                if (s instanceof Loop)
+                    ctx.inLoop = true
+                if (s instanceof InlineAction) {
+                    ctx.inHandler = true
+                    ctx.inLoop = true
+                }
+                return ctx
+            })
+
+            if (this.failed.length > 0) return
+
+            this.saveWrites = true
             this.traverse(this.extracted);
             var hasAwait = this.numAwait > 0;
             var readSub = this.readLocals;
             var writtenSub = this.writtenLocals;
+            this.saveWrites = false
             this.traverse(this.action.body);
 
-            this.action.getInParameters().forEach((p) => this.add(p.local, this.writtenLocals));
+            this.action.getInParameters().forEach((p) => this.add(null, p.local, this.writtenLocals));
             if (this.action.modelParameter)
-                this.add(this.action.modelParameter.local, this.writtenLocals)
-            this.action.getOutParameters().forEach((p) => this.add(p.local, this.readLocals));
+                this.add(null, this.action.modelParameter.local, this.writtenLocals)
+            this.action.getOutParameters().forEach((p) => this.add(null, p.local, this.readLocals));
 
             var outgoing = writtenSub.filter((l) => this.readLocals.indexOf(l) >= 0);
             var incoming = readSub.filter((l) => this.writtenLocals.indexOf(l) >= 0);
+
+            var useReturn = outgoing.length == 1
+
+            if (outgoing.length > 1) {
+                this.failed = outgoing.map(l => l._lastWriteLocation)
+                return
+            }
 
             var refLocal = (l:LocalDef) => mkThing(l.getName());
             var copyNames:any = {}
@@ -4142,11 +4210,14 @@ module TDev.AST {
             extractedAction.isAtomic = !hasAwait;
             extractedAction.header.inParameters.pushRange(incoming.map((l) => new ActionParameter(l)));
             outgoing.forEach((l) => {
-                if (incoming.indexOf(l) >= 0) {
+                if (useReturn || incoming.indexOf(l) >= 0) {
                     var copy = mkLocal(this.action.nameLocal(l.getName(), copyNames), l.getKind());
                     copyNames[copy.getName()] = true;
                     var stmt = Parser.emptyExprStmt();
-                    stmt.expr.tokens = [refLocal(copy), mkOp(":="), refLocal(l)];
+                    if (useReturn)
+                        stmt.expr.tokens = [AST.mkOp("return"), refLocal(l)];
+                    else
+                        stmt.expr.tokens = [refLocal(copy), mkOp(":="), refLocal(l)];
                     extractedStmts.push(stmt);
                     l = copy;
                 }
@@ -4554,24 +4625,35 @@ module TDev.AST {
         }
     }
 
-    class StmtVisitor
+    class StmtVisitor<T>
         extends NodeVisitor
     {
-        constructor(public f:(s:Stmt)=>void)
+        t:T;
+
+        constructor(public f:(ctx:T, s:Stmt)=>T)
         {
             super()
         }
 
         visitStmt(s:Stmt)
         {
-            this.f(s)
+            var prev = this.t
+            this.t = this.f(prev, s)
             this.visitChildren(s)
+            this.t = prev
         }
     }
 
     export function visitStmts(s:Stmt, f:(s:Stmt)=>void)
     {
+        var v = new StmtVisitor<number>((ctx, s) => { f(s); return ctx; })
+        v.dispatch(s)
+    }
+
+    export function visitStmtsCtx<T>(ctx:T, s:Stmt, f:(ctx:T, s:Stmt)=>T)
+    {
         var v = new StmtVisitor(f)
+        v.t = ctx
         v.dispatch(s)
     }
 

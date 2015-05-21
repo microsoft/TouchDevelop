@@ -613,6 +613,32 @@ module TDev.AST.Json
             }
         }
 
+        public visitShow(n:Call) {
+            return {
+                nodeType: "show",
+                expr: n.args[0],
+            }
+        }
+
+        public visitReturn(n:Call) {
+            return {
+                nodeType: "return",
+                expr: n.args[0],
+            }
+        }
+
+        public visitBreak(n:Call) {
+            return {
+                nodeType: "break",
+            }
+        }
+
+        public visitContinue(n:Call) {
+            return {
+                nodeType: "continue",
+            }
+        }
+
         public visitBox(n:Box) {
             return { body: n.body }
         }
@@ -1202,6 +1228,15 @@ module TDev.AST.Json
                     case "singletonRef":
                         r.push(e);
                         break;
+                    case "show":
+                    case "break":
+                    case "return":
+                    case "continue":
+                        pushOp(e.nodeType)
+                        var ee = (<JReturn>e).expr
+                        if (ee)
+                            rec(ee, prio)
+                        break
                     default:
                         Util.oops("invalid nodeType when flattning: " + e.nodeType)
                 }

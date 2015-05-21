@@ -298,6 +298,20 @@ module TDev
                                          callPlaceholder,
                                          Script.freshName(this.extractedName.value));
             extr.run();
+
+            if (extr.failed.length > 0) {
+                var ss = this.selectionBlock.stmts
+                var ch = ss.slice(0, this.selectionBegin).concat(extracted.stmts).concat(ss.slice(this.selectionBegin + 1, ss.length))
+                this.selectionBlock.setChildren(ch);
+                this.unselect()
+                extr.failed.forEach(s => {
+                    var elt = s && s.renderedAs
+                    if (elt)
+                        Util.coreAnim("shakeTip", 500, elt)
+                })
+                return
+            }
+
             TheEditor.initIds(extr.extractedAction)
             Script.addDecl(extr.extractedAction);
             TheEditor.queueNavRefresh();
@@ -307,7 +321,10 @@ module TDev
             if (elt) Util.coreAnim("blinkLocation", 1000, elt);
         }
 
-        public copyOutSelection() { return this.selectionBlock ? this.selectionBlock.stmts.slice(this.selectionBegin, this.selectionEnd + 1) : []; }
+        public copyOutSelection()
+        {
+            return this.selectionBlock ? this.selectionBlock.stmts.slice(this.selectionBegin, this.selectionEnd + 1) : [];
+        }
 
         private replaceSelectionWithPlaceholder()
         {
@@ -684,14 +701,24 @@ module TDev
                 res.push(it);
             }
 
+            var addOpStmt = (op, help) => {
+                if (this.editor.widgetEnabled(op)) {
+                    add({ name: op, desc: help, node: "", usageKey: op })
+                    res.peek().cbOverride = () => TheEditor.calculator.insertOp(op, true);
+                }
+            }
             add({ name: "var", desc: lf("new variable"), node: "", usageKey: "var" });
             res.peek().cbOverride = () => {
                 tick(Ticks.codeNewVar)
                 TheEditor.calculator.newVar()
             };
+            addOpStmt("show", lf("display value"))
             Selector.insertionButtons().forEach(add);
             if (this.editor.widgetEnabled("comment"))
                 add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
+            addOpStmt("break", lf("stop loop"))
+            addOpStmt("continue", lf("skip iteration"))
+            addOpStmt("return", lf("stop function"))
 
             return res;
         }

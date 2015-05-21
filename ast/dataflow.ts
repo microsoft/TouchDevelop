@@ -73,6 +73,7 @@ module TDev.AST {
         public visitForeach(stmt: Foreach) { return this.visitLoop(stmt); }
         public visitWhile(stmt: While) { return this.visitLoop(stmt); }
 
+        // TODO this is wrong for Return and Break
         public visitExprStmt(stmt: ExprStmt) {
             return this.nextInBlock(stmt);
         }
@@ -2250,6 +2251,18 @@ module TDev.AST {
             this.visitChildren(n);
         }
         visitOptionalParameter(n: OptionalParameter) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
+        visitContinue(n: Call) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
+        visitBreak(n: Call) {
+            this.nowVisiting.canInline = false;
+            this.visitChildren(n);
+        }
+        visitReturn(n: Call) {
             this.nowVisiting.canInline = false;
             this.visitChildren(n);
         }
