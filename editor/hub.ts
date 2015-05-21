@@ -29,6 +29,8 @@ module TDev.Browser {
                 searchArtRefactoring: true,
                 // statements
                 stringConcatProperty: true,
+                show: true,
+                "return": true,
                 // sections
                 dataSection: true,
                 artSection: true,
@@ -90,6 +92,10 @@ module TDev.Browser {
                 foreach: true,
                 boxed: true,
                 stringConcatProperty: true,
+                show: true,
+                "return": true,
+                "break": true,
+                "continue": true,
                 // hub
                 hubTutorials: true,
                 hubLearn: true,

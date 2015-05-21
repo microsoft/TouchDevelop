@@ -822,6 +822,16 @@ module TDev.AST
             this.updateStmtUsage(node);
         }
 
+        private setOutLocals(locs:LocalDef[])
+        {
+            this.outLocals = locs
+            var isHiddenOut = locs.length == 1
+            locs.forEach(l => {
+                l.isHiddenOut = isHiddenOut;
+                l.isOut = true;
+            })
+        }
+
         public visitAction(node:Action)
         {
             this.writtenLocals = [];
@@ -836,7 +846,7 @@ module TDev.AST
             this.scope(() => {
                 // TODO in - read-only?
                 var prevErr = this.errorCount;
-                this.outLocals = node.getOutParameters().map((p) => p.local)
+                this.setOutLocals(node.getOutParameters().map((p) => p.local))
                 this.reportedUnassigned = false;
 
                 this.typeResolver.visitAction(node);
@@ -1174,7 +1184,7 @@ module TDev.AST
                 this.currentAnyAction = inl;
                 inl.inParameters.forEach((d) => this.declareLocal(d));
                 inl.outParameters.forEach((d) => this.declareLocal(d));
-                this.outLocals = inl.outParameters.slice(0);
+                this.setOutLocals(inl.outParameters.slice(0))
                 this.reportedUnassigned = false;
                 this.typeCheck(inl.body);
                 if (!this.reportedUnassigned)

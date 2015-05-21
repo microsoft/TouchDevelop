@@ -2077,6 +2077,8 @@ module TDev.AST {
         public lastUsedAt = 0;
         public lambdaNameStatus:number;
         public isRegular:boolean;
+        public isHiddenOut:boolean;
+        public isOut:boolean;
 
         public writeWithType(app:App, tw:TokenWriter)
         {

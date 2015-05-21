@@ -1118,9 +1118,12 @@ module TDev
         }
 
         public widgetEnabled(name: string): boolean {
-            if (this.intelliProfile && this.intelliProfile.hasKey("tutorialWidgets"))
-                return this.intelliProfile.hasKey(name)
-            return !!TDev.Browser.EditorSettings.widgets()[name];
+            var override = false
+            if (this.intelliProfile) {
+                override = this.intelliProfile.hasKey(name)
+                if (this.intelliProfile.hasKey("tutorialWidgets")) return override
+            }
+            return override || !!TDev.Browser.EditorSettings.widgets()[name];
         }
 
         public editedStmt(selectorOk = false):AST.Stmt

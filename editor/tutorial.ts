@@ -603,6 +603,9 @@ module TDev
                 }
             }
 
+            if (op && op.addToken && op.addToken.getLocalDef() && op.addToken.getLocalDef().isHiddenOut)
+                TheEditor.intelliProfile.incr("outAssign")
+
 
             return op
         }

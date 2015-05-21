@@ -1767,7 +1767,7 @@ module TDev
             if (TheEditor.intelliProfile && TheEditor.intelliProfile.hasFlag("nodefaults"))
                 return [AST.mkPlaceholder(p)]
 
-            return AST.Fixer.findDefault(p, this.getLocals())
+            return AST.Fixer.findDefault(p, this.getLocals().filter(l => !l.isOut))
         }
 
         private removePlaceholder()
@@ -2455,7 +2455,8 @@ module TDev
                 locals.sort((a:AST.LocalDef, b:AST.LocalDef) => b.lastUsedAt - a.lastUsedAt);
                 var score = maxScore * 4;
                 locals.forEach((s:AST.LocalDef) => {
-                    if (s.isBrowsable()) {
+                    // outAssign is set by tutorial engine for legacy tutorials
+                    if (s.isBrowsable() && (!s.isHiddenOut || TheEditor.widgetEnabled("outAssign"))) {
                         var e = this.mkIntelliItem(score, Ticks.calcIntelliLocal);
                         score *= 0.7;
                         e.decl = s;
@@ -2694,7 +2695,7 @@ module TDev
 
             if (!onlyGlobal)
                 this.getLocals().forEach((l) => {
-                    if (isRecordKind(l.getKind()))
+                    if (!l.isOut && isRecordKind(l.getKind()))
                         res.push(l);
                 });
 
@@ -2893,7 +2894,7 @@ module TDev
                 var locs = this.getLocals()
                 locs.sort(Util.nameCompare);
                 locs.forEach((l) => {
-                    if (l.isBrowsable()) {
+                    if (l.isBrowsable() && !l.isOut) {
                         boxes.push(DeclRender.mkBox(l).withClick(() => {
                             repl.dst = [AST.mkLocalRef(l)];
                             finish();
