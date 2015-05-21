@@ -4194,6 +4194,8 @@ module TDev.AST {
             var outgoing = writtenSub.filter((l) => this.readLocals.indexOf(l) >= 0);
             var incoming = readSub.filter((l) => this.writtenLocals.indexOf(l) >= 0);
 
+            var useReturn = outgoing.length == 1
+
             if (outgoing.length > 1) {
                 this.failed = outgoing.map(l => l._lastWriteLocation)
                 return
@@ -4208,11 +4210,14 @@ module TDev.AST {
             extractedAction.isAtomic = !hasAwait;
             extractedAction.header.inParameters.pushRange(incoming.map((l) => new ActionParameter(l)));
             outgoing.forEach((l) => {
-                if (incoming.indexOf(l) >= 0) {
+                if (useReturn || incoming.indexOf(l) >= 0) {
                     var copy = mkLocal(this.action.nameLocal(l.getName(), copyNames), l.getKind());
                     copyNames[copy.getName()] = true;
                     var stmt = Parser.emptyExprStmt();
-                    stmt.expr.tokens = [refLocal(copy), mkOp(":="), refLocal(l)];
+                    if (useReturn)
+                        stmt.expr.tokens = [AST.mkOp("return"), refLocal(l)];
+                    else
+                        stmt.expr.tokens = [refLocal(copy), mkOp(":="), refLocal(l)];
                     extractedStmts.push(stmt);
                     l = copy;
                 }
