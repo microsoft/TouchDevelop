@@ -553,7 +553,10 @@ module TDev.AST.Json
             var r = this.visitPropertyRef(n.propRef)
             r.nodeType = "call";
             r.args = this.toJsons(n.args);
-            r.isExtensionMethod = n.propRef.prop instanceof AST.ExtensionProperty;
+            if (n.calledExtensionAction() != null)
+                r.callType = "extension";
+            if (n.referencedRecordField() != null)
+                r.callType = "field";
             return r;
         }
 

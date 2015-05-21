@@ -31,7 +31,6 @@ module TDev {
           }],
           name: libs[i].name,
           parent: null,
-          isExtensionMethod: false,
         };
       }
 

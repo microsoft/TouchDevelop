@@ -178,7 +178,7 @@ module TDev {
         name: string,
         args: J.JExpr[],
         parent: J.JTypeRef,
-        isExtensionMethod: boolean)
+        callType: string)
       {
         var mkCall = (f: string, skipReceiver: boolean) => {
           var actualArgs = skipReceiver ? args.slice(1) : args;
@@ -206,25 +206,27 @@ module TDev {
         else if (name == ":=")
           return this.visit(env, args[0]) + " = " + this.visit(env, args[1]);
 
-        // 3) Reference to a variable in the global scope
+        // 3) Reference to a variable in the global scope. Not mangling the name
+        // with the [id], since i) we don't have that id right and ii) globals
+        // are unique (I think?).
+        // XXX if [this.libRef] is present, we should prefix with the name of
+        // the library to avoid name clashes
         else if (args.length && H.isSingletonRef(args[0]) == "data")
           return H.mangleName(name);
 
-        // 4) Reference to a built-in library method, e.g. Math→ max
-        else if (args.length && H.isSingletonRef(args[0]))
-          return H.isSingletonRef(args[0]) + "::" + mkCall(H.mangleName(name), true);
-
-        // 5) Extension method, where p(x) is represented as x→ p.
+        // 4) Extension method, where p(x) is represented as x→ p.
         // XXX the prefix is missing in case we're calling an extension method
         // on a library-defined type
-        else if (isExtensionMethod)
+        else if (callType == "extension")
           return mkCall(H.mangleName(name), false);
 
-        // 6) Field access for an object. Rationale: it's either a library type
-        // (meaning it has fields) or a user-defined type (meaning it also has
-        // fields). Let's see if that works.
-        else if ((<any> parent[0] == "{") && args.length == 1)
+        // 5) Field access for an object.
+        else if (callType == "field")
           return this.visit(env, args[0]) + "->" + H.mangleName(name);
+
+        // 6) Reference to a built-in library method, e.g. Math→ max
+        else if (args.length && H.isSingletonRef(args[0]))
+          return H.isSingletonRef(args[0]) + "::" + mkCall(H.mangleName(name), true);
 
         // 7) Instance method (e.g. Number's > operator, for which the receiver
         // is the number itself)
@@ -241,6 +243,12 @@ module TDev {
           return H.mangleLibraryName(this.libRef.name, n);
         else
           return H.mangleName(n);
+      }
+
+      public visitGlobalDef(e: EmitterEnv, name: string, type: J.JTypeRef) {
+        // XXX if [this.libRef] is present, we should prefix with the library
+        // name
+        return e.indent + H.mkType(type) + " " + H.mangleName(name) + ";";
       }
 
       public visitAction(
@@ -273,6 +281,8 @@ module TDev {
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
             return H.mkSignature(this.mangleActionName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+          else if (f.nodeType == "data")
+            return this.visit(e, f);
           else
             return null;
         }).filter(x => x != null);

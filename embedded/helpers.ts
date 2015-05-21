@@ -10,6 +10,7 @@ module TDev {
       export var librarySymbol = "♻";
 
       var kStringType = "shared_ptr<string>";
+      var kImageType = "MicrobitImage*";
 
       var replacementTable = {
         "<": "lt",
@@ -74,11 +75,11 @@ module TDev {
             try {
               var t2 = JSON.parse(t1);
               if (t2.o == "image")
-                return "MicroBitImage*";
+                return kImageType;
             } catch (e) {
             }
         }
-        throw new Error("Unsupported type: " + t1);
+        return mangleName(t1);
       }
 
       export function mkParam(p: J.JLocalDef) {
