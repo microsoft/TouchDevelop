@@ -211,10 +211,8 @@ module TDev {
         // 3) Reference to a variable in the global scope. Not mangling the name
         // with the [id], since i) we don't have that id right and ii) globals
         // are unique (I think?).
-        // XXX if [this.libRef] is present, we should prefix with the name of
-        // the library to avoid name clashes
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.mangleName(name);
+          return this.mangleScopedName(name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
@@ -223,7 +221,7 @@ module TDev {
           var t = JSON.parse(<any> parent);
           var prefixedName = t.l
             ? this.resolveCall(H.mkLibraryRef(this.libraryMap[t.l]), name)
-            : H.mangleName(name);
+            : this.mangleScopedName(name);
           return mkCall(prefixedName, false);
         }
 
@@ -245,7 +243,7 @@ module TDev {
         return n;
       }
 
-      private mangleActionName(n: string) {
+      private mangleScopedName(n: string) {
         if (this.libRef)
           return H.mangleLibraryName(this.libRef.name, n);
         else
@@ -253,9 +251,7 @@ module TDev {
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, type: J.JTypeRef) {
-        // XXX if [this.libRef] is present, we should prefix with the library
-        // name
-        return e.indent + H.mkType(type) + " " + H.mangleName(name) + ";";
+        return e.indent + H.mkType(type) + " " + this.mangleScopedName(name) + ";";
       }
 
       public visitAction(
@@ -276,7 +272,7 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(this.mangleActionName(name), inParams, outParams);
+        var head = H.mkSignature(this.mangleScopedName(name), inParams, outParams);
         return head + " {\n" + bodyText + "\n}";
       }
 
@@ -295,7 +291,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return H.mkSignature(this.mangleActionName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return H.mkSignature(this.mangleScopedName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else if (f.nodeType == "data")
             return this.visit(e, f);
           else
