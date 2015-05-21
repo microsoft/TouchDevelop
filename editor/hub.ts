@@ -41,6 +41,10 @@ module TDev.Browser {
                 hubSocial: true,
                 translateComments: true,
 
+                whileConditionDefault: "true",
+                forConditionDefault: "5",
+                ifConditionDefault: "true",
+
                 scriptSocialLinks: Cloud.lite,
             }
         },
@@ -299,7 +303,10 @@ module TDev.Browser {
                     scriptPropertiesSettings: true,
                     // hub
                     hubChannels : true,
-                    scriptAddToChannel : true,
+                    scriptAddToChannel: true,
+
+                    whileConditionDefault: "true",
+                    forConditionDefault: "5",
                 }
             },
         },

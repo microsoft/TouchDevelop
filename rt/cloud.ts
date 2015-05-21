@@ -123,6 +123,11 @@ module TDev.Cloud {
         stringEditFullScreen?: boolean;
         persistanceRadio?: boolean;
         wallScreenshot?: boolean;
+
+        // statement defaults
+        ifConditionDefault?: string;
+        forConditionDefault?: string;
+        whileConditionDefault?: string;
     }
 
     export interface EditorMode {
