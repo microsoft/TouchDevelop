@@ -1795,7 +1795,7 @@ span.errorSq .kw
 #externalEditorSide .boardCanvas {
     width: calc(100% - 1em) !important;
     height: auto !important;
-    margin: 3em auto !important;
+    margin: .8em auto !important;
 }
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {

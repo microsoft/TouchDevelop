@@ -54,19 +54,22 @@ body, input {
 }
 
 /* Script info box */
+#script-box {
+  margin-right: 1rem;
+}
+
 #script-name {
   font-size: 3rem;
 }
 
-#script-icons > * {
+#script-icons > *:not(:first-child) {
   display: inline-block;
   cursor: pointer;
+  padding-left: .5rem;
 }
 
 #script-icons {
-  text-align: right;
   font-size: 1.5rem;
-  margin-right: 1rem;
 }
 
 /* Popups */
