@@ -64,6 +64,7 @@ module TDev.Browser {
                 changeSkillLevel: true,
                 // edit
                 copyPaste: true,
+                selectStatements: true,
                 // features
                 actionSettings: true,
                 publishAsHidden: true,
