@@ -162,6 +162,8 @@ module TDev.Cloud {
         liteVersion: string;
         shareUrl: string;
         cdnUrl: string;
+        translateCdnUrl: string;
+        translateApiUrl: string;
         hashtag: string;
 
         tdVersion?: string;
@@ -176,6 +178,8 @@ module TDev.Cloud {
         searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
         searchUrl: "https://tdsearch.search.windows.net",
         cdnUrl: "https://az31353.vo.msecnd.net",
+        translateCdnUrl: "https://tdtutorialtranslator.blob.core.windows.net",
+        translateApiUrl: "https://tdtutorialtranslator.azurewebsites.net/api",
         workspaceUrl: null,
         rootUrl: "https://www.touchdevelop.com",
         shareUrl: "http://tdev.ly",

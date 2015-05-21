@@ -1752,19 +1752,21 @@ module TDev {
 
         private translateToScriptAsync(to: string, tutorialId: string): Promise { // translated topic
             // unpublished tutorial
-            if (!tutorialId)
+            if (!tutorialId ||
+                // cloud config not set
+                !Cloud.config.translateCdnUrl || !Cloud.config.translateApiUrl)
                 return Promise.as(this.translatedTopic = <HelpTopicInfoJson>{ body: undefined });
 
             return ProgressOverlay.lockAndShowAsync(lf("translating topic...") + (dbg ? tutorialId : ""))
                 .then(() => {
-                    var blobUrl = HTML.proxyResource("https://tdtutorialtranslator.blob.core.windows.net/docs/" + to + "/" + tutorialId);
+                    var blobUrl = HTML.proxyResource(Cloud.config.translateCdnUrl + "/docs/" + to + "/" + tutorialId);
                     return Util.httpGetJsonAsync(blobUrl).then((blob) => {
                         this.translatedTopic = blob;
                         return this.translatedTopic;
                     }, e => {
                             // requestion translation
                             Util.log('requesting topic translation');
-                            var url = 'https://tdtutorialtranslator.azurewebsites.net/api/translate_doc?scriptId=' + tutorialId + '&to=' + to;
+                            var url = Cloud.config.translateApiUrl + '/translate_doc?scriptId=' + tutorialId + '&to=' + to;
                             return Util.httpGetJsonAsync(url).then((js) => {
                                 this.translatedTopic = js.info;
                                 return this.translatedTopic;

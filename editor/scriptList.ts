@@ -3903,12 +3903,13 @@
         }
 
         static translateCommentAsync(cid: string): Promise { // text
+            if (!Cloud.config.translateCdnUrl || !Cloud.config.translateApiUrl) return Promise.as(undefined);
             var to = Util.getTranslationLanguage();
-            var blobUrl = "https://tdtutorialtranslator.blob.core.windows.net/comments/" + to + "/" + cid;
+            var blobUrl = Cloud.config.translateCdnUrl + "/comments/" + to + "/" + cid;
             return Util.httpGetTextAsync(blobUrl)
                 .then((blob) => blob, e => {
                     // requestion translation
-                    var url = 'https://tdtutorialtranslator.azurewebsites.net/api/translate_comment?commentId=' + cid + '&to=' + to;
+                    var url = Cloud.config.translateApiUrl + '/translate_comment?commentId=' + cid + '&to=' + to;
                     return Util.httpGetJsonAsync(url).then((js) => js.translated, e => undefined);
                 });
         }

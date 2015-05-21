@@ -1118,21 +1118,21 @@ module TDev
 
         private translateAsync(to : string) : Promise { // of TranslatedTutorialInfo
             if (this.translatedTutorial) return Promise.as(this.translatedTutorial);
-            if (!to || /^en/i.test(to) || Cloud.isOffline()) return Promise.as(undefined);
+            if (!to || /^en(-us)?$/i.test(to) || Cloud.isOffline() || !Cloud.config.translateCdnUrl || !Cloud.config.translateApiUrl) return Promise.as(undefined);
 
             tick(Ticks.tutorialTranslateScript, to);
             var tutorialId = this.topic.json.id;
             return ProgressOverlay.lockAndShowAsync(lf("translating tutorial..."))
                 .then(() => {
                 Util.log('loading tutorial translation from blob');
-                var blobUrl = HTML.proxyResource("https://tdtutorialtranslator.blob.core.windows.net/translations/" + to + "/" + tutorialId);
+                var blobUrl = HTML.proxyResource(Cloud.config.translateCdnUrl + "/translations/" + to + "/" + tutorialId);
                 return Util.httpGetJsonAsync(blobUrl).then((blob) => {
                     this.translatedTutorial = blob;
                     return this.translatedTutorial;
                 }, e => {
                         // requestion translation
                         Util.log('requesting tutorial translation');
-                        var url = 'https://tdtutorialtranslator.azurewebsites.net/api/translate_tutorial?scriptId=' + tutorialId + '&to=' + to;
+                        var url = HTML.proxyResource(Cloud.config.translateApiUrl + '/translate_tutorial?scriptId=' + tutorialId + '&to=' + to);
                         return Util.httpGetJsonAsync(url).then((js) => {
                             this.translatedTutorial = js.info;
                             return this.translatedTutorial;
