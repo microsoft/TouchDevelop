@@ -33,37 +33,33 @@
             <div class="roundlabel">run</div>
           </a>
           <a href="#" class="roundbutton" id="command-graduate">
-            <div class="roundsymbol">🎓</div>
+            <div class="roundsymbol"><i class="fa fa-graduation-cap"></i></div>
             <div class="roundlabel">graduate</div>
           </a>
         </div>
-        <div id="merge-commands" class="hbox">
+        <div id="merge-commands" class="hbox flex1">
         </div>
-        <div class="vbox" id="metadata">
-            <div><input id="script-name" placeholder="script name" /></div>
-            <div><input id="script-description" placeholder="script description" /></div>
-        </div>
-        <div id="log">
-            <div id="status">✔ loaded</div>
+        <div class="vbox">
+          <div id="script-name" class="flex1">
+          </div>
+          <div id="script-description">
+          </div>
+          <div id="script-icons">
+            <i id="link-edit" class="fa fa-pencil-square"></i>
+            <div class="cloud-status">
+              <i class="fa fa-cloud-upload"></i>
+            </div>
+            <i id="link-log" class="fa fa-info-circle"></i>
+          </div>
         </div>
       </div>
-      <div class="hbox" style="flex: 1">
-          <div id="editor"></div>
-          <div id="errors" class="vbox hidden">
+      <div class="hbox flex1">
+          <div id="editor" class="flex3"></div>
+          <div id="errors" class="vbox hidden flex1">
               <div id="errorsHeader">
                   Some blocks could not be compiled.
               </div>
-              <div id="errorsButton">
-                  <a href="#" class="roundbutton" id="command-force-graduate">
-                    <div class="roundsymbol">🎓</div>
-                    <div class="roundlabel">force<br />graduation</div>
-                  </a>
-                  <a href="#" class="roundbutton" id="command-force-compile">
-                    <div class="roundsymbol">⚡</div>
-                    <div class="roundlabel">force<br />compile</div>
-                  </a>
-              </div>
-              <div id="errorsText">
+              <div id="errorsText" class="flex1">
               </div>
           </div>
       </div>
@@ -287,5 +283,27 @@
         </block>
       </category>
     </xml>
+    <div class="popup hidden" id="popup-log">
+      <div class="popup-inner">
+        <div id="log">
+          <div id="status">✔ loaded</div>
+        </div>
+        <div id="errorsGraduate" class="hidden">
+          I could not understand some blocks. Fix errors or
+          <a class="command" href="#" id="command-force-graduate">graduate anyway</a>.
+        </div>
+        <div id="errorsCompile" class="hidden">
+          I could not understand some blocks. Fix errors or
+          <a class="command" href="#" id="command-force-compile">compile anyway</a>.
+        </div>
+      </div>
+    </div>
+    <div class="popup hidden" id="popup-edit">
+      <div class="popup-inner">
+        <div><b>Your script name:</b> <input id="input-script-name" /></div>
+        <div><b>Your script description:</b> <input id="input-script-description" /></div>
+      </div>
+    </div>
   </body>
 </html>
+<!-- vim: set ts=2 sw=2 sts=2: -->

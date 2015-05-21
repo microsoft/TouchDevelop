@@ -1,10 +1,4 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-  overflow: hidden;
-}
-
+/* Re-usable, generic rules */
 .hidden {
   display: none !important;
 }
@@ -21,6 +15,29 @@ body {
   display: -webkit-flex;
 }
 
+.flex1 {
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+.flex3 {
+  flex: 3;
+  -webkit-flex: 3;
+}
+
+/* Whole page layout */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body, input {
+  font-family: "Segoe UI Light", "Segoe UI", "Segoe WP Light", "Segoe WP",
+    "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", sans-serif;
+  font-size: 1rem;
+}
+
 #main {
   margin: 0;
   position: absolute;
@@ -34,37 +51,56 @@ body {
 #editor {
   position: relative;
   margin: 0;
-  flex: 3;
 }
 
-#errors {
-  flex: 1;
-  background-color: white;
-  padding-left: .5em;
+/* Script info box */
+#script-name {
+  font-size: 3rem;
 }
 
-#errorsHeader {
-  font-size: 150%;
-  border-bottom: 1px solid black;
-  margin-bottom: .5em;
-}
-
-#errorsText {
-  flex: 1;
-  white-space: pre-wrap;
-}
-
-#errorsButton {
-  text-align: center;
-  margin-bottom: 1em;
-}
-
-#errorsButton a {
+#script-icons > * {
   display: inline-block;
+  cursor: pointer;
 }
 
+#script-icons {
+  text-align: right;
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+/* Popups */
+.popup {
+  width: 500px;
+  border: 5px solid #666;
+  position: relative;
+  background-color: white;
+}
+
+.popup::after {
+  content: "";
+  display: block;
+  width: 0;
+
+  position: absolute;
+  top: -20px;
+  right: 10px;
+
+  border-style: solid;
+  border-width: 0 20px 20px;
+  border-color: #666 transparent;
+}
+
+.popup-inner {
+  padding: 1rem;
+}
+
+#popup-edit input {
+  border: 0;
+}
+
+/* Toolbox and commands */
 #merge-commands {
-  flex: 1;
   margin-left: 3em;
 }
 
@@ -73,13 +109,6 @@ body {
   margin-right: 1em;
 }
 
-#metadata {
-  padding-right: 2em;
-}
-
-#metadata > div:first-child {
-  padding-bottom: 1ex;
-}
 
 #toolbox {
   padding: .5em;
@@ -88,8 +117,7 @@ body {
 #log {
   overflow: auto;
   width: 500px;
-  height: 50px;
-  font-size: 60%;
+  max-height: 500px;
 }
 
 .status {
@@ -142,11 +170,22 @@ body {
   text-align: center;
 }
 
+/* Misc */
+a.command, a.command:visited {
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a.command:hover {
+  text-decoration: underline;
+}
+
+/* Block styles */
 .blocklyMainBackground {
   fill: white !important;
 }
 
-/* Block styles */
 .blocklyError > .blocklyPath {
   stroke: #d9301a !important;
   stroke-width: 3px;

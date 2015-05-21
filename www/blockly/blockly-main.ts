@@ -157,7 +157,7 @@ module TDev {
       inMerge = false;
       currentVersion = merge.theirs.baseSnapshot;
       clearMerge();
-      doSave();
+      doSave(true);
     });
     clearMerge();
     inMerge = true;
@@ -213,22 +213,66 @@ module TDev {
   }
 
   function setDescription(x: string) {
-    (<HTMLInputElement> $("#script-description")).value = (x || "");
+    $("#script-description").textContent = x;
+    (<HTMLInputElement> $("#input-script-description")).value = (x || "");
   }
 
   function setName(x: string) {
-    (<HTMLInputElement> $("#script-name")).value = x;
+    $("#script-name").textContent = x;
+    (<HTMLInputElement> $("#input-script-name")).value = x;
   }
 
   function getDescription() {
-    return (<HTMLInputElement> $("#script-description")).value;
+    return (<HTMLInputElement> $("#input-script-description")).value;
   }
 
   function getName() {
-    return (<HTMLInputElement> $("#script-name")).value;
+    return (<HTMLInputElement> $("#input-script-name")).value;
   }
 
   var dirty = false;
+
+  /* Some popup routines... */
+  function clearPopups() {
+    var popups = document.querySelectorAll(".popup");
+    Array.prototype.forEach.call(popups, (popup: HTMLElement) => {
+      popup.classList.add("hidden");
+    });
+  }
+  function setupPopups() {
+    /* Hide all popups when user clicks elsewhere. */
+    document.addEventListener("click", () => {
+      clearPopups();
+    }, false);
+    /* Catch clicks on popups themselves to disable above handler. */
+    var popups = document.querySelectorAll(".popup");
+    Array.prototype.forEach.call(popups, (popup: HTMLElement) => {
+      popup.addEventListener("click", (e: Event) => {
+        e.stopPropagation();
+      });
+    }, false);
+  }
+
+  function setupPopup(link: HTMLElement, popup: HTMLElement) {
+    link.addEventListener("click", (e: Event) => {
+      if (popup.classList.contains("hidden"))
+        showPopup(link, popup);
+      else
+        popup.classList.add("hidden");
+      e.stopPropagation();
+    }, false);
+  }
+
+  function showPopup(link: HTMLElement, popup: HTMLElement) {
+    clearPopups();
+    popup.classList.remove("hidden");
+    var x = link.offsetLeft;
+    var w = link.clientWidth;
+    var y = link.offsetTop;
+    var h = link.clientHeight;
+    popup.style.left = Math.round(x - 500 + w/2 + 5 + 15)+"px";
+    popup.style.top = Math.round(y + h + 10 + 5)+"px";
+  }
 
   // Called once at startup
   function setupEditor(message: External.Message_Init) {
@@ -249,11 +293,13 @@ module TDev {
         dirty = true;
       });
     }, 1);
-    $("#script-name").addEventListener("input", () => {
+    $("#input-script-name").addEventListener("input", () => {
+      $("#script-name").textContent = (<HTMLInputElement> $("#input-script-name")).value;
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
-    $("#script-description").addEventListener("input", () => {
+    $("#input-script-description").addEventListener("input", () => {
+      $("#script-description").textContent = (<HTMLInputElement> $("#input-script-description")).value;
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
@@ -274,6 +320,10 @@ module TDev {
     window.setInterval(() => {
       doSave();
     }, 5000);
+
+    setupPopup($("#link-edit"), $("#popup-edit"));
+    setupPopup($("#link-log"), $("#popup-log"));
+    setupPopups();
 
     console.log("[loaded] cloud version " + message.script.baseSnapshot +
       "(dated from: "+state.lastSave+")");
@@ -309,7 +359,7 @@ module TDev {
     dirty = false;
   }
 
-  function compileOrError(wantErrors: boolean) {
+  function compileOrError(msgSel?: string) {
     var ast: TDev.AST.Json.JApp;
 
     // Clear any previous errors
@@ -321,7 +371,9 @@ module TDev {
     };
     clear("blocklySelected");
     clear("blocklyError");
-    $("#errors").classList.add("hidden");
+    clearPopups();
+    $("#errorsGraduate").classList.add("hidden");
+    $("#errorsCompile").classList.add("hidden");
 
     try {
       ast = compile(Blockly.mainWorkspace, {
@@ -333,8 +385,7 @@ module TDev {
     }
 
     var errors = Errors.get();
-    if (errors.length && wantErrors) {
-      $("#errors").classList.remove("hidden");
+    if (errors.length && msgSel) {
       var text = "";
       errors.forEach((e: Errors.CompilationError) => {
         var block = e.block;
@@ -342,16 +393,17 @@ module TDev {
         (<any> block.svgGroup_).classList.add("blocklyError");
         text += e.msg + "\n";
       });
-      $("#errorsText").textContent = text;
-      statusMsg("⚠ compilation errors", External.Status.Error);
+      statusMsg(text, External.Status.Error);
+      $(msgSel).classList.remove("hidden");
+      showPopup($("#link-log"), $("#popup-log"));
       return null;
     }
 
     return ast;
   }
 
-  function doGraduate(wantErrors: boolean) {
-    var ast = compileOrError(wantErrors);
+  function doGraduate(msgSel?: string) {
+    var ast = compileOrError(msgSel);
     if (!ast)
       return;
     post(<External.Message_Upgrade> {
@@ -361,8 +413,8 @@ module TDev {
     });
   }
 
-  function doCompile(wantErrors: boolean) {
-    var ast = compileOrError(wantErrors);
+  function doCompile(msgSel?: string) {
+    var ast = compileOrError(msgSel);
     if (!ast)
       return;
     post(<External.Message_Compile> {
@@ -378,23 +430,21 @@ module TDev {
       post({ type: External.MessageType.Quit });
     });
     $("#command-force-compile").addEventListener("click", () => {
-      doCompile(false);
+      doCompile();
     });
-    $("#command-compile").addEventListener("click", () => {
-      $("#command-force-graduate").classList.add("hidden");
-      $("#command-force-compile").classList.remove("hidden");
-      doCompile(true);
+    $("#command-compile").addEventListener("click", (e: Event) => {
+      doCompile("#errorsCompile");
+      e.stopPropagation();
     });
     $("#command-force-graduate").addEventListener("click", () => {
-      doGraduate(false);
+      doGraduate();
     });
-    $("#command-graduate").addEventListener("click", () => {
-      $("#command-force-graduate").classList.remove("hidden");
-      $("#command-force-compile").classList.add("hidden");
-      doGraduate(true);
+    $("#command-graduate").addEventListener("click", (e: Event) => {
+      doGraduate("#errorsGraduate");
+      e.stopPropagation();
     });
     $("#command-run").addEventListener("click", () => {
-      var ast = compileOrError(false);
+      var ast = compileOrError();
       post(<External.Message_Run> {
         type: External.MessageType.Run,
         ast: <any> ast,
