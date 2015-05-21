@@ -699,9 +699,9 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
-  var bBody = b.getInputTargetBlock("HANDLER");
-  var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "forever", [], body);
+  return H.mkWhile(
+    H.mkExprHolder([], H.mkBooleanLiteral(true)),
+    compileStatements(e, b.getInputTargetBlock("HANDLER")));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
