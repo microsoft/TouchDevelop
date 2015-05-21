@@ -2420,7 +2420,7 @@ module TDev
                     sc *= s.usageMult();
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
                     if (sc > maxScore) maxScore = sc;
-                    if (skill < s.getKind().minSkill) e.score -= 1e10;
+                    if (skill < s.getKind().minSkill) e.score *= 1e-10;
                     e.decl = s;
                     if (s.getName() == AST.libSymbol)
                         libSingl = e;

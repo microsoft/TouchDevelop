@@ -171,7 +171,7 @@ module TDev.Browser {
                 sendPullRequest: true,
                 scriptStats: true,
                 userSocialTab: true,
-                //scriptConvertToTutorial: true,
+                scriptConvertToTutorial: true,
                 // sections
                 testsSection: true,
                 actionTypesSection: true,

@@ -4863,6 +4863,28 @@ module TDev.AST {
                 this.incr(t.def.usageKey())
         }
 
+        public visitGlobalDef(t: GlobalDef)
+        {
+            this.incr("addNewButton");
+            this.incr("dataSection");
+            super.visitGlobalDef(t);
+        }
+
+        public visitRecordDef(t: RecordDef)
+        {
+            this.incr("addNewButton");
+            this.incr("persistanceRadio");
+            switch (t.recordType) {
+                case RecordType.Decorator:
+                case RecordType.Object:
+                    this.incr("recordsSection"); break;
+                case RecordType.Index:
+                case RecordType.Table:
+                    this.incr("databaseSection"); break;
+            }
+            super.visitRecordDef(t);
+        }
+
         public visitComment(c:Comment)
         {
             var dummy = c.text.replace(/#allow:(\w+)/, (match:string, feature:string) => {
