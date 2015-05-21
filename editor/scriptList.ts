@@ -5441,10 +5441,10 @@
                         }
                     });
 
-                    if (sc.jsonScript && sc.jsonScript.time) {
+                    if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
                         var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !/#docs/i.test(sc.jsonScript.description) ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         divs.push(div('', pull, diff, convertToTutorial));
                     }
 
@@ -6862,14 +6862,70 @@
                 this.diffToId(null);
         }
 
-        public convertToTutorial()
-        {
-            
+        public convertToTutorial() {
+            if (!this.jsonScript) return;
+
+            this.browser().updateInstalledHeaderCacheAsync()
+                .then(() => World.getAnyScriptAsync(this.getGuid()))
+                .then(scriptText => {
+                var clone = AST.Parser.parseScript(scriptText);
+                clone.comment += " #docs #tutorials #stepByStep";
+                clone.setName(this.browser().newScriptName(lf("{0} tutorial", clone.getName())));
+
+                // TODO proper DFS conversion
+                var converter = new TutorialConverter();
+                converter.visitChildren(clone);
+
+                // add main
+                var main = AST.Parser.parseDecl("action main {\n"
+                    + "// {template:empty}\n"
+                    + "// {widgets:}\n"
+                    + "// TODO: describe your tutorial here.\n"
+                    + "}");
+                clone.addDecl(main);
+
+                var text = clone.serialize();
+                Util.log(text);
+                var scriptStub = {
+                    editorName: "touchdevelop",
+                    scriptText: text,
+                    scriptName: clone.getName(),
+                }
+                return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
+            }).done((header: Cloud.Header) => {
+                this.browser().createInstalled(header).edit();
+            });
         }
 
         public mergeScript()
         {
             ScriptProperties.mergeScript(this.jsonScript)
+        }
+    }
+
+    class TutorialConverter extends AST.NodeVisitor
+    {
+        private actionCount = 0;
+        public visitAction(n: AST.Action) {
+            n.setName("#" + (this.actionCount++) + " " + n.getName());
+            this.visitBlock(n.body);
+        }
+        public visitBlock(n: AST.Block) {
+            var stmts = n.stmts.splice(0);
+            n.stmts.clear();
+            stmts.forEach(stmt => {
+                var step = /^(exprStmt|if|for|while|boxed|foreach)$/.test(stmt.nodeType());
+                if (step) {
+                    var c = new AST.Comment(); c.text = lf("TODO: describe the current step") + "\n{stcode}";
+                    n.stmts.push(c);
+                }
+                n.stmts.push(stmt);
+                this.visitChildren(stmt);
+                if (step) {
+                    var c = new AST.Comment(); c.text = "{stcmd:run}";
+                    n.stmts.push(c);
+                }
+            });
         }
     }
 
