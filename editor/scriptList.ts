@@ -3985,7 +3985,7 @@
                         textDiv.appendChild(trDiv);
                 });
             }
-            translateBtn = div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000"), lf("translate")).withClick(translateCmt);
+            translateBtn = EditorSettings.widgets().translateComments ? div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000"), lf("translate")).withClick(translateCmt) : null;
 
             var delBtn:HTMLElement = null;
             var deleteCmt = () => {

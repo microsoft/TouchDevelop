@@ -99,6 +99,7 @@ module TDev.Cloud {
         hubShowcase?: boolean;
         hubSocial?: boolean;
         startTutorialButton?: boolean;
+        translateComments?: boolean;
 
         // script lifecycle
         updateButton?: boolean;

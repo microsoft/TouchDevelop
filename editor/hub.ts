@@ -39,6 +39,7 @@ module TDev.Browser {
                 hubTutorials : true,
                 hubShowcase : true,
                 hubSocial: true,
+                translateComments: true,
 
                 scriptSocialLinks: Cloud.lite,
             }
@@ -103,6 +104,7 @@ module TDev.Browser {
                 hubUsers: true,
                 notifyAppReloaded: true,
                 startTutorialButton: true,
+                translateComments: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
@@ -218,6 +220,7 @@ module TDev.Browser {
                 hubUsers: true,
                 hubTags: true,
                 hubMyArt: true,
+                translateComments: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
