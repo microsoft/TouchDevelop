@@ -24,13 +24,13 @@
             <div class="roundsymbol"><i class="fa fa-arrow-left"></i></div>
             <div class="roundlabel">quit</div>
           </a>
-          <a href="#" class="roundbutton" id="command-compile">
-            <div class="roundsymbol"><i class="fa fa-bolt"></i></div>
-            <div class="roundlabel">compile</div>
-          </a>
           <a href="#" class="roundbutton" id="command-run">
             <div class="roundsymbol"><i class="fa fa-play"></i></div>
             <div class="roundlabel">run</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-compile">
+            <div class="roundsymbol"><i class="fa fa-bolt"></i></div>
+            <div class="roundlabel">compile</div>
           </a>
           <a href="#" class="roundbutton" id="command-graduate">
             <div class="roundsymbol"><i class="fa fa-graduation-cap"></i></div>
@@ -39,17 +39,21 @@
         </div>
         <div id="merge-commands" class="hbox flex1">
         </div>
-        <div class="vbox">
+        <div class="vbox" id="script-box">
           <div id="script-name" class="flex1">
           </div>
           <div id="script-description">
           </div>
-          <div id="script-icons">
-            <i id="link-edit" class="fa fa-pencil-square"></i>
-            <div class="cloud-status">
+          <div id="script-icons" class="hbox">
+            <div id="cloud-status" class="flex1">
               <i class="fa fa-cloud-upload"></i>
             </div>
-            <i id="link-log" class="fa fa-info-circle"></i>
+            <div>
+              <i id="link-edit" class="fa fa-pencil-square"></i>
+            </div>
+            <div>
+              <i id="link-log" class="fa fa-info-circle"></i>
+            </div>
           </div>
         </div>
       </div>

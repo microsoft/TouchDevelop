@@ -81,10 +81,16 @@ module TDev {
     }
   }
 
+  function statusIcon(icon: string) {
+    var i = $("#cloud-status i");
+    i.setAttribute("class", "fa fa-"+icon);
+  }
+
   function saveAck(message: External.Message_SaveAck) {
     switch (message.status) {
       case External.Status.Error:
         statusMsg(prefix(message.where)+" error: "+message.error, message.status);
+        statusIcon("exclamation-triangle");
         break;
       case External.Status.Ok:
         if (message.where == External.SaveLocation.Cloud) {
@@ -93,7 +99,12 @@ module TDev {
             "from "+currentVersion+" to "+message.newBaseSnapshot+")",
             message.status);
           currentVersion = message.newBaseSnapshot;
+          if (message.cloudIsInSync)
+            statusIcon("cloud-upload");
+          else
+            statusIcon("exclamation-triangle");
         } else {
+          statusIcon("floppy-o");
           statusMsg(prefix(message.where)+" successfully saved", message.status);
         }
         break;
@@ -290,6 +301,7 @@ module TDev {
     window.setTimeout(() => {
       Blockly.addChangeListener(() => {
         statusMsg("✎ local changes", External.Status.Ok);
+        statusIcon("pencil");
         dirty = true;
       });
     }, 1);
