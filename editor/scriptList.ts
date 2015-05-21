@@ -5445,7 +5445,7 @@
                     if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
                         var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !/#docs/i.test(sc.jsonScript.description) ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         divs.push(div('', pull, diff, convertToTutorial));
                     }
 
@@ -5768,7 +5768,7 @@
             return this.mkBoxExt(big, false);
         }
 
-        public iconImg(thumb : boolean): HTMLElement {
+        public iconImg(thumb: boolean): HTMLElement {
             if (this.cloudHeader && this.cloudHeader.editor == "blockly")
                 return HTML.mkImg("blockly/icon.png");
             else
@@ -6873,15 +6873,20 @@
                 clone.comment += " #docs #tutorials #stepByStep";
                 clone.setName(this.browser().newScriptName(lf("{0} tutorial", clone.getName())));
 
-                // TODO proper DFS conversion
+                // rename main to #0 main
+                var m = clone.actions().filter(a => a.getName() == "main")[0];
+                if (m) m.setName("#0 main");
+                
+                // insert steps
                 var converter = new TutorialConverter();
                 converter.visitChildren(clone);
 
                 // add main
                 var main = AST.Parser.parseDecl("action main {\n"
-                    + "// {template:empty}\n"
+                    + "// {template:" + (m.isPage() ? "emptyapp" : "empty") + "}\n"
+                    + "// {templatename:ADJ script}\n"
                     + "// {widgets:}\n"
-                    + "// TODO: describe your tutorial here.\n"
+                    + "// " + lf("TODO: describe your tutorial here.") + "\n"
                     + "}");
                 clone.addDecl(main);
 
@@ -6906,9 +6911,7 @@
 
     class TutorialConverter extends AST.NodeVisitor
     {
-        private actionCount = 0;
         public visitAction(n: AST.Action) {
-            n.setName("#" + (this.actionCount++) + " " + n.getName());
             this.visitBlock(n.body);
         }
         public visitBlock(n: AST.Block) {
@@ -6917,7 +6920,9 @@
             stmts.forEach(stmt => {
                 var step = /^(exprStmt|if|for|while|boxed|foreach)$/.test(stmt.nodeType());
                 if (step) {
-                    var c = new AST.Comment(); c.text = lf("TODO: describe the current step") + "\n{stcode}";
+                    var c = new AST.Comment();
+                    c.text = lf("TODO: describe the current step")
+                        + "\n{stcode}";
                     n.stmts.push(c);
                 }
                 n.stmts.push(stmt);
