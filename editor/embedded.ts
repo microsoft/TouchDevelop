@@ -7,13 +7,9 @@
 module TDev {
   import J = AST.Json
 
-
   export module Embedded {
 
-    interface ResolvedLibrary {
-      isShim: boolean;
-      ast: J.JApp;
-    }
+    import H = Helpers
 
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
@@ -21,17 +17,7 @@ module TDev {
       var i = libs.indexOf(a);
       var libRef: J.JCall = null;
       if (i >= 0) {
-        libRef = {
-          nodeType: "call",
-          id: null,
-          args: [<J.JSingletonRef> {
-            nodeType: "singletonRef",
-            id: null,
-            name: "♻",
-          }],
-          name: libs[i].name,
-          parent: null,
-        };
+        libRef = H.mkLibraryRef(libs[i].name);
       }
 
       try {

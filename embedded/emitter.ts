@@ -33,6 +33,8 @@ module TDev {
       public code = "";
       public prelude = "";
 
+      private libraryMap: { [id: string]: string } = {};
+
       // All the libraries needed to compile this [JApp].
       constructor(
         private libRef: J.JCall,
@@ -214,11 +216,16 @@ module TDev {
         else if (args.length && H.isSingletonRef(args[0]) == "data")
           return H.mangleName(name);
 
-        // 4) Extension method, where p(x) is represented as x→ p.
-        // XXX the prefix is missing in case we're calling an extension method
-        // on a library-defined type
-        else if (callType == "extension")
-          return mkCall(H.mangleName(name), false);
+        // 4) Extension method, where p(x) is represented as x→ p. In case we're
+        // actually referencing a function from a library, go through
+        // [resolveCall] again, so that we find the shim if any.
+        else if (callType == "extension") {
+          var t = JSON.parse(<any> parent);
+          var prefixedName = t.l
+            ? this.resolveCall(H.mkLibraryRef(this.libraryMap[t.l]), name)
+            : H.mangleName(name);
+          return mkCall(prefixedName, false);
+        }
 
         // 5) Field access for an object.
         else if (callType == "field")
@@ -276,6 +283,14 @@ module TDev {
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
+        // Some parts of the emitter need to lookup library names by their id
+        decls.forEach((x: J.JDecl) => {
+          if (x.nodeType == "library") {
+            var l: J.JLibrary = <J.JLibrary> x;
+            this.libraryMap[l.id] = l.name;
+          }
+        });
+
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {

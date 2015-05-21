@@ -47,14 +47,6 @@ module TDev {
       // --- Helper functions.
       // For constructing / modifying AST nodes.
 
-      export function mkNumberLiteral (x: number): J.JNumberLiteral {
-        return {
-          nodeType: "numberLiteral",
-          id: null,
-          value: x
-        };
-      }
-
       export function mangleLibraryName(l, n) {
         return mangleName(l)+"_"+mangleName(n);
       }
@@ -160,6 +152,21 @@ module TDev {
 
       export function willCompile (f: J.JAction) {
         return !isShimBody(f.body) && !f.isPrivate;
+      }
+
+      /* Some functions for constructing fake "WebAST" nodes when we need them. */
+      export function mkLibraryRef(x: string) {
+        return {
+          nodeType: "call",
+          id: null,
+          args: [<J.JSingletonRef> {
+            nodeType: "singletonRef",
+            id: null,
+            name: "♻",
+          }],
+          name: x,
+          parent: null,
+        }
       }
     }
   }
