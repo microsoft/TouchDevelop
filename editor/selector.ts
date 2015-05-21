@@ -297,6 +297,20 @@ module TDev
                                          callPlaceholder,
                                          Script.freshName(this.extractedName.value));
             extr.run();
+
+            if (extr.failed.length > 0) {
+                var ss = this.selectionBlock.stmts
+                var ch = ss.slice(0, this.selectionBegin).concat(extracted.stmts).concat(ss.slice(this.selectionBegin + 1, ss.length))
+                this.selectionBlock.setChildren(ch);
+                this.unselect()
+                extr.failed.forEach(s => {
+                    var elt = s && s.renderedAs
+                    if (elt)
+                        Util.coreAnim("shakeTip", 500, elt)
+                })
+                return
+            }
+
             TheEditor.initIds(extr.extractedAction)
             Script.addDecl(extr.extractedAction);
             TheEditor.queueNavRefresh();
@@ -306,7 +320,10 @@ module TDev
             if (elt) Util.coreAnim("blinkLocation", 1000, elt);
         }
 
-        public copyOutSelection() { return this.selectionBlock ? this.selectionBlock.stmts.slice(this.selectionBegin, this.selectionEnd + 1) : []; }
+        public copyOutSelection()
+        {
+            return this.selectionBlock ? this.selectionBlock.stmts.slice(this.selectionBegin, this.selectionEnd + 1) : [];
+        }
 
         private replaceSelectionWithPlaceholder()
         {
