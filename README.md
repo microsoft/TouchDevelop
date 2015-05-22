@@ -92,7 +92,7 @@ npm install
 * install [Chocolatey](https://chocolatey.org/)
 * install nodejs, Visual Studio Code
 ````
-choco nodejs.install visualstudiocode python2 pip
+choco nodejs.install visualstudiocode
 ````
 * for Arduino dev
 ````
