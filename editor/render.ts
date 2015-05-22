@@ -220,7 +220,7 @@ module TDev
 
                 })
                 n.getPublicActions().forEach((a) => {
-                    var inner = this.kw(AST.legacyMode ? "action " : "function ") + Util.htmlEscape(a.getName());
+                    var inner = this.kw("function ") + Util.htmlEscape(a.getName());
                     if (a.hasInParameters())
                         inner += "(" + a.getInParameters().map(renderParam).join(", ") + ")";
                     if (a.hasOutParameters()) {

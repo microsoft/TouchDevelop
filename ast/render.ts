@@ -567,7 +567,7 @@ module TDev
             var ss = this.diffLine(a, a.diffAltStmt, renderHead) +
                      this.possibleError(a) +
                      this.renderBlock(a.body) +
-                     (!AST.legacyMode ? this.endKeyword("function") : "")
+                     this.endKeyword("")
             return this.stmt(a, ss);
         }
 
@@ -751,7 +751,7 @@ module TDev
         {
             if (a.isEvent()) return "event";
             else if (a.isPage()) return "page";
-            return !AST.legacyMode ? "function" : "action";
+            return "function";
         }
 
         private renderActionHeader(n:AST.ActionHeader)
@@ -920,7 +920,7 @@ module TDev
         {
             if (this.showDiff && !n.isExplicit) return ""
             return this.stmt(n, this.tline((n.isExplicit ? this.kw("explicit") : "") +
-                            this.kw("action") + this.id(n.formalName) + this.kw("bound to") +
+                            this.kw("function") + this.id(n.formalName) + this.kw("bound to") +
                             this.libName(n.actualLib) + this.id("\u200A\u2192\u00A0" + (n.getActualName()))) +
                     this.possibleError(n))
         }
