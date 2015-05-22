@@ -161,7 +161,7 @@ module TDev
             }
 
             var it = new DeclEntry("set to default");
-            it.description = Util.fmt("set to action named '{0}' in default library if available", ab.formalName);
+            it.description = lf("set to function named '{0}' in default library if available", ab.formalName);
             actions.push(it.mkBox().withClick(() => {
                 ab.isExplicit = false;
                 done();

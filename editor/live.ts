@@ -59,7 +59,7 @@ module TDev
             if (!act) return;
 
             if (act.hasErrors()) {
-                //this.errDiv.setChildren(["current action has errors"]);
+                //this.errDiv.setChildren(["current function has errors"]);
                 //this.searchApi.removeLiveView();
                 return;
             } else if (Script.getGlobalErrorDecl(false)) {

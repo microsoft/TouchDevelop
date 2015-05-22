@@ -438,7 +438,7 @@ module TDev.Plugins {
             .then(() => {
                 var f = Script.actions().filter(a => !a.isPrivate && a.getName() == actionName)[0]
                 if (!f) {
-                    ModalDialog.info(lf("errors in plugin"), lf("no public '{0}' action", actionName))
+                    ModalDialog.info(lf("errors in plugin"), lf("no public '{0}' function", actionName))
                     TheEditor.reload();
                 } else if (!f.isButtonPlugin() && !f.isPlugin()) {
                     ModalDialog.info(lf("errors in plugin"), lf("'{0}' has unsupported signature", actionName))

@@ -382,7 +382,7 @@ module TDev
             var tp = TheEditor.clipMgr.pasteType();
             if (tp == "tokens" || tp == "block" || tp == "decls") {
                 var it = new DeclEntry("paste");
-                it.description = tp == "block" ? "copied lines as a new action" : "copied declaration(s)";
+                it.description = tp == "block" ? "copied lines as a new function" : "copied declaration(s)";
                 it.makeIntoAddButton();
                 var ee = it.mkBox();
                 ee.withClick(() => { tick(Ticks.sidePaste); TheEditor.pasteNode() });
@@ -446,7 +446,7 @@ module TDev
                         description: lf("Code that performs a specific task"),
                         tick: Ticks.sideAddAction
                     }],
-                    newName: lf("action")
+                    newName: lf("function")
                 }, <ThingSection>{
                     label: lf("pages"),
                     widget: "pagesSection",
@@ -526,7 +526,7 @@ module TDev
                     ],
                     newName: lf("art resource")
                 }, <ThingSection>{
-                    label: lf("action types"),
+                    label: lf("function types"),
                     widget: "actionTypesSection",
                     initiallyHidden: !AST.proMode,
                     things: things.filter((t) => t instanceof AST.Action && (<AST.Action>t).isActionTypeDef()),
@@ -534,7 +534,7 @@ module TDev
                         decl: this.editor.freshActionTypeDef(),
                         tick: Ticks.sideAddActionTypeDef,
                         displayName: 'callback',
-                        description: lf("A signature definition of an action")
+                        description: lf("A signature definition of an function")
                     }],
                 }, <ThingSection>{
                     label: lf("libraries"),
@@ -593,7 +593,7 @@ module TDev
             }
 
             if (!debugMode && TheEditor.widgetEnabled("addNewButton")) {
-                var e = new DeclEntry(lf("add new action, ..."));
+                var e = new DeclEntry(lf("add new function, ..."));
                 e.makeIntoAddButton();
                 e.description = lf("or variables, ...")
                 var ee = e.mkBox();

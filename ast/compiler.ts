@@ -2021,7 +2021,7 @@ module TDev.AST
             }
 
             if (a.hasErrors()) {
-                userErr(lf("action '{0}' (in '{1}') has errors and will not run", a.getName(), this.currentApp.getName()),
+                userErr(lf("function '{0}' (in '{1}') has errors and will not run", a.getName(), this.currentApp.getName()),
                         a.getStableName());
                 return true;
             } else if (this.globalError) {

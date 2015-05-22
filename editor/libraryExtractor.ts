@@ -38,7 +38,7 @@ module TDev
                 HTML.showErrorNotification(lf("can't add a script to a library"));
                 return;
             } else if (d instanceof AST.Action && (<AST.Action>d).isEvent()) {
-                HTML.showErrorNotification(lf("can't add an event action to a library (use event handlers instead)"));
+                HTML.showErrorNotification(lf("can't add an event function to a library (use event handlers instead)"));
                 return;
             } else if (d instanceof AST.LibraryRef) {
                 HTML.showErrorNotification(lf("can't move a library reference directly"));

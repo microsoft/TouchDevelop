@@ -11,13 +11,13 @@ module TDev
             super()
         }
 
-        private actionName = HTML.mkTextInputWithOk("text", lf("action name"),() => {
+        private actionName = HTML.mkTextInputWithOk("text", lf("function name"),() => {
             this.updateActionName();
             this.theAction.notifyChange();
             TheEditor.refreshDecl();
         });
-        private privateAction = HTML.mkTickCheckBox(Ticks.actionPropPrivate, lf("private action"));
-        private testAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("test action"));
+        private privateAction = HTML.mkTickCheckBox(Ticks.actionPropPrivate, lf("private function"));
+        private testAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("test function"));
         private queryAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("read only"));
         private offlineAction = HTML.mkTickCheckBox(Ticks.actionPropTest, lf("offline available"));
         private syncBox:HTMLElement;
@@ -30,7 +30,7 @@ module TDev
             super.init(e);
             this.actionName.id = "renameBox";
 
-            this.syncBox = HTML.mkTickCheckBox(Ticks.actionPropAtomic, lf("'atomic' action"), (v) => {
+            this.syncBox = HTML.mkTickCheckBox(Ticks.actionPropAtomic, lf("'atomic' function"), (v) => {
                 this.theAction.action.isAtomic = v;
                 this.theAction.notifyChange();
                 e.updateTutorial();
@@ -153,7 +153,7 @@ module TDev
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
                   ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
                   ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
-                  ActionProperties.copyCutRefs(lf("the current action"), this.theAction.action),
+                  ActionProperties.copyCutRefs(lf("the current function"), this.theAction.action),
 
                   !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
                   showSettings && icl ? this.offlineAction : null,

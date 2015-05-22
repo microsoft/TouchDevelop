@@ -176,7 +176,7 @@ module TDev
                     if (this.data.template instanceof AST.Action) {
                         var act = <AST.Action>this.data.template
                         op.addButton = act.isPage() ? Ticks.sideAddPage : Ticks.sideAddAction;
-                        op.label = lf("we need a new {0}", act.isPage() ? lf("page") : lf("action"));
+                        op.label = lf("we need a new {0}", act.isPage() ? lf("page") : lf("function"));
                     } else if (this.data.template instanceof AST.RecordDef) {
                         var rec = <AST.RecordDef>this.data.template
                         if (rec.recordType == AST.RecordType.Table) {
@@ -537,7 +537,7 @@ module TDev
                     op = new TutorialInstruction()
                     op.calcButton = Ticks.actionPropAtomic
                     op.stmt = (<AST.Action>currAction).header
-                    op.label = lf("make the action ") + ((<AST.Action>this.data.template).isAtomic ? lf("atomic") : lf("non-atomic"))
+                    op.label = lf("make the function ") + ((<AST.Action>this.data.template).isAtomic ? lf("atomic") : lf("non-atomic"))
                 } else {
                     findFirst((<AST.Action>this.data.template).header)
                 }

@@ -997,7 +997,7 @@ module TDev
                 return "<a href='#topic:" + MdComments.shrink(k.getName()) + "'>" + this.kind(k) + "</a>";
             }
 
-            var hd = this.kw("action ");
+            var hd = this.kw("function ");
             if (withKind) {
                 if (prop.parentKind.singleton)
                     hd += topicLink(prop.parentKind.singleton.getName())

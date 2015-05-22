@@ -2806,7 +2806,7 @@ module TDev
 
             if (!isPlaceholder && !toks.some((t) => t.getThing() instanceof AST.LocalDef))
                 mk(lf("replace all in script"), lf("global replace"), Ticks.calcReplaceInScript, () => this.replaceToks(toks, ReplacementScope.Script))
-            mk(lf("replace all in action"), lf("in this action"), Ticks.calcReplaceInAction, () => this.replaceToks(toks, ReplacementScope.Action))
+            mk(lf("replace all in function"), lf("in this function"), Ticks.calcReplaceInAction, () => this.replaceToks(toks, ReplacementScope.Action))
             // TODO replace all in selection
 
             if (AST.proMode || toks.every(t => /^[0-9]$/.test(t.getOperator()) || !!t.getLiteral())) {
@@ -2981,7 +2981,7 @@ module TDev
 
             if (/^TD158:/.test(this.expr.getError())) {
                 var e = this.mkIntelliItem(1e20, Ticks.calcFixItAtomic);
-                e.nameOverride = lf("make action non-atomic")
+                e.nameOverride = lf("make function non-atomic")
                 e.descOverride = lf("fix it");
                 e.cbOverride = () => {
                     TheEditor.undoMgr.clearCalc();

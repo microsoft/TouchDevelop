@@ -278,7 +278,7 @@ module TDev
             acts = acts.filter(a => !a.isAtomic && a.getName() != "main")
             if (acts.length == 0) {
                 ModalDialog.info(lf("it's as atomic as it gets"),
-                                 lf("All actions that could be marked atomic already are."))
+                                 lf("All functions that could be marked atomic already are."))
                 return
             }
 

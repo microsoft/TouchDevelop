@@ -95,7 +95,7 @@ module TDev
         private mkAction() {
             if (this.theRecord.recordType != AST.RecordType.Object) return null;
 
-            var b = HTML.mkButtonTick(lf("add action"), Ticks.recordAddAction,() => {
+            var b = HTML.mkButtonTick(lf("add function"), Ticks.recordAddAction,() => {
                 this.commit();
                 // create fresh action
                 var decl = this.editor.freshAsyncAction();
