@@ -2645,9 +2645,15 @@ module TDev.AST {
 
         public mainAction()
         {
-            var c0 = this.allActions().filter((a:Action) => a.isRunnable())
+            var c0 = this.allActions().filter((a: Action) => a.isRunnable())
+            
+            if (this.isTutorial()) {
+                var main0 = c0.filter((a: Action) => a.getName() == "#0 main")[0];
+                if (main0) return main0;
+            }
+            
             var c1 = c0.filter((a) => !a.isPage())
-            var c2 = c0.filter((a:Action) => a.getName() == "main");
+            var c2 = c0.filter((a: Action) => a.getName() == "main");
             if (c2.length == 0) c2 = c1;
             if (c2.length == 0) c2 = c0;
             /*
