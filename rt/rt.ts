@@ -296,6 +296,7 @@ module TDev
         public authValidator: RT.StringConverter<string>;
         public authAccessToken:string;
         public authUserId:string;
+        public _libinitDone:boolean;
 
         public runtimeKind() {
             return this.devMode ? "editor" : "website"
@@ -1900,6 +1901,7 @@ module TDev
 
         public killTempState() {
             this.renderedComments = ""
+            this._libinitDone = false;
             this.sessions.unlink();   // sessions can have backlinks
             this.compiled.resetData(this.datas); // all globals need to be cleared
         }
@@ -2238,6 +2240,24 @@ module TDev
             var r = this.getRestRequest().getRestArgument(name, tp, s);
             //console.log("get rest : " + name + " -> " + r)
             return r
+        }
+
+        public runLibInits(ids:string[], cb:any)
+        {
+            if (this._libinitDone) return
+            var frame = this.current
+            this._libinitDone = true
+
+            var loop = (i) => {
+                if (i >= ids.length)
+                    return cb(frame)
+                var libcall = this.compiled.libs[ids[i]]["_libinit"](frame)
+                return this.enter(libcall.invoke(libcall, () => {
+                    return loop(i + 1)
+                }))
+            }
+
+            return loop(0)
         }
     }
 

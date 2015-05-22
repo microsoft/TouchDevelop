@@ -1731,6 +1731,10 @@ module TDev.AST {
 
         public isInLibrary() { return false }
         public markUsed() { }
+        public isLibInit()
+        {
+            return !this.isPrivate && this.getName() == "_libinit" && this.getOutParameters().length == 0 && this.getInParameters().length == 0;
+        }
 
         public modelParameter:ActionParameter;
 

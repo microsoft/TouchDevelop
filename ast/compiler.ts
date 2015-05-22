@@ -2307,6 +2307,8 @@ module TDev.AST
             var lab = <JsLabel> nodes[idx];
             this.wr("function " + lab.id + "(s) {\n");
 
+            if (idx == 0) this.libInits(lab.id)
+
             if (this.options.optimizeLoops) {
                 var head = <JsIf>nodes[idx + 1]
                 if (head instanceof JsIf && head.elseBody.length == 0) {
@@ -2652,7 +2654,7 @@ module TDev.AST
         {
             var prep = new PreCompiler(options)
             prep.run(a)
-            
+
             var cs = new CompiledScript();
             cs.getCompiledCode = () => Compiler.getCompiledCode(cs, options);
             a.clearRecompiler();
@@ -2832,9 +2834,24 @@ module TDev.AST
             this.wr("}());\n");
         }
 
+        private libInits = (nm:string) => {};
+
         public visitApp(a:App)
         {
             this.stmtIds = StmtIdCollector.collect(a);
+
+            if (this.options.isTopLevel) {
+                var libInits = []
+                a.libraries().forEach(l => {
+                    if (l.getLibInit())
+                        libInits.push(l.getStableName())
+                })
+                if (libInits.length > 0) {
+                    this.libInits = nm => {
+                        this.wr("  if (!s.rt._libinitDone) return s.rt.runLibInits(" + JSON.stringify(libInits) + ", " + nm + ");\n")
+                    }
+                }
+            }
 
             this.initGlobals = "";
             this.initGlobals2 = "";
@@ -3169,6 +3186,8 @@ module TDev.AST
                 if (l.isTutorial() || l.isCloud()) {
                     l.getPublicActions().forEach(a => this.runOnDecl(a))
                 }
+                var li = l.getLibInit()
+                if (li) this.runOnDecl(li)
             })
         }
     }

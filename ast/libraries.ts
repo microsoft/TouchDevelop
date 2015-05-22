@@ -573,6 +573,11 @@ module TDev.AST {
 
         public getIconArtId() : string { return this.resolved ? this.resolved.iconArtId : ""; }
 
+        public getLibInit()
+        {
+            return this.getPublicActions().filter(a => a.isLibInit())[0]
+        }
+
         public getPublicActionsAndActionTypes():Action[]
         {
             var acts:Action[] =
