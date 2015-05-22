@@ -35,8 +35,8 @@ module TDev {
             if (!trace) return ""
 
             trace = trace.filter(f => !!f.pc)
-            if (trace.length > 10)
-                trace = trace.slice(-10)
+            if (trace.length > 15)
+                trace = trace.slice(-15)
             var r = ""
             trace.forEach((f, i) => {
                 r += combineIds(f.pc, f.d ? f.d.libName : "")
