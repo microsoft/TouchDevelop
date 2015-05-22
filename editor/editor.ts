@@ -3142,7 +3142,7 @@ module TDev
                     if (!Script)
                         return;
                     if (runPlugin) return;
-                    if (shouldRun || TheEditor.widgetEnabled("editorRunOnLoad")) {
+                    if (shouldRun || (TheEditor.widgetEnabled("editorRunOnLoad") && !SizeMgr.phone)) {
                         this.runAction(Script.mainAction(), null)
                 }
             }, (e) => {
