@@ -5535,15 +5535,15 @@
         constructor(par:Host) {
             super(par)
         }
-        public isLibrary() { return this.app && this.app.isLibrary; }
-        public isCloud() { return this.app && this.app.isCloud; }
-        public persistentId() { return "script:" + (this.cloudHeader ? this.getGuid() : this.publicId); }
-        public getTitle() { return this.app ? this.app.getName() : super.getTitle(); }
+        public isLibrary() :boolean { return this.app && this.app.isLibrary; }
+        public isCloud() : boolean { return this.app && this.app.isCloud; }
+        public persistentId() : string { return "script:" + (this.cloudHeader ? this.getGuid() : this.publicId); }
+        public getTitle(): string { return this.app ? this.app.getName() : super.getTitle(); }
 
-        public additionalHash() { return this.cloudHeader && this.cloudHeader.scriptId ? ":id=" + this.cloudHeader.scriptId : "" }
+        public additionalHash() : string { return this.cloudHeader && this.cloudHeader.scriptId ? ":id=" + this.cloudHeader.scriptId : "" }
 
-        public getGuid() { return this.cloudHeader ? this.cloudHeader.guid : ""; }
-        public getAnyId() { return this.getGuid() || this.publicId; }
+        public getGuid() : string { return this.cloudHeader ? this.cloudHeader.guid : ""; }
+        public getAnyId() : string { return this.getGuid() || this.publicId; }
         public getPublicationIdOrBaseId() {
             if (this.publicId) return this.publicId;
             if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
@@ -5551,7 +5551,7 @@
             return undefined;
         }
         public getCloudHeader() { return this.cloudHeader; }
-        public getDescription() {
+        public getDescription() :string {
             return this.app ? this.app.getDescription() : "";
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
@@ -6354,7 +6354,7 @@
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
 
-            var isDocs = /#docs/i.test(this.getDescription());
+            var isDocs = /#docs/i.test(this.getDescription()) || this.isLibrary();
             if (Cloud.lite && isDocs) {
                 var pubAt = (pref:string) => {
                     var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
