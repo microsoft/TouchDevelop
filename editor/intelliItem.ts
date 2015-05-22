@@ -256,8 +256,8 @@ module TDev
         static thereIsMore()
         {
             var dotdotdot = new IntelliItem();
-            dotdotdot.nameOverride = "... there's more ...";
-            dotdotdot.descOverride = "just keep typing the search terms!";
+            dotdotdot.nameOverride = lf("... there's more ...");
+            dotdotdot.descOverride = lf("just keep typing the search terms!");
             return dotdotdot.mkBox();
         }
 

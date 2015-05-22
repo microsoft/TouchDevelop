@@ -469,7 +469,7 @@ module TDev
                     var tr = new IntelliItem();
                     tr.tick = Ticks.calcIntelliLiteral;
                     tr.nameOverride = name;
-                    tr.descOverride = "Insert '" + name + "' " + tp;
+                    tr.descOverride = lf("Insert '{0}' {1}", name, tp);
                     tr.cbOverride = () => { this.calc.insertOp(name); };
                     tr.score = 10;
                     propIts.push(tr);
