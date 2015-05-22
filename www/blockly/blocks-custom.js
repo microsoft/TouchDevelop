@@ -68,7 +68,7 @@ Blockly.Blocks['device_print_message'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("print");
+        .appendField("show");
     this.appendValueInput("message")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT)
@@ -94,6 +94,10 @@ Blockly.Blocks['device_show_number'] = {
     this.appendValueInput("number")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT);
+    this.appendValueInput("pausetime")
+        .setCheck("Number")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("pause (ms)");        
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
@@ -181,7 +185,7 @@ Blockly.Blocks['device_get_digital_pin'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("digital read pin")
+            .appendField("digital read pin (0,1)")
             .appendField(new Blockly.FieldDropdown(digitalPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
@@ -194,7 +198,7 @@ Blockly.Blocks['device_set_digital_pin'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(160);
         this.appendDummyInput()
-            .appendField("digital write");
+            .appendField("digital write (0,1)");
         this.appendValueInput("value")
             .setCheck("Number");
         this.appendDummyInput()
@@ -243,7 +247,7 @@ Blockly.Blocks['device_get_brightness'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("brightness");
+            .appendField("brightness (%)");
         this.setOutput(true, "Number");
         this.setTooltip('');
     }
@@ -269,7 +273,7 @@ Blockly.Blocks['device_get_acceleration'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("acceleration");
+            .appendField("acceleration (mg)");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown([
                 ["x", "x"],
@@ -299,7 +303,7 @@ Blockly.Blocks['device_clear_display'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("clear display");
+        .appendField("clear screen");
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
@@ -369,7 +373,7 @@ Blockly.Blocks['device_heading'] = {
         this.setHelpUrl('http://www.example.com/');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("compass heading");
+            .appendField("compass heading (°)");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setTooltip('');
@@ -380,7 +384,7 @@ Blockly.Blocks['device_build_image'] = {
     init: function()
     {
         this.setColour(20);
-        this.appendDummyInput().appendField("make image");
+        this.appendDummyInput().appendField("create image");
         this.appendDummyInput().appendField("    0     1     2     3     4");
         this.appendDummyInput().appendField("0").appendField(new Blockly.FieldCheckbox("FALSE"), "LED00").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED10").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED20").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED30").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED40");
         this.appendDummyInput().appendField("1").appendField(new Blockly.FieldCheckbox("FALSE"), "LED01").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED11").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED21").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED31").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED41");
@@ -395,7 +399,7 @@ Blockly.Blocks['device_build_big_image'] = {
     init: function()
     {
         this.setColour(20);
-        this.appendDummyInput().appendField("make big image");
+        this.appendDummyInput().appendField("create big image");
         this.appendDummyInput().appendField("    0     1     2     3     4     5     6     7     8     9");
 
         this.appendDummyInput().appendField("0").appendField(new Blockly.FieldCheckbox("FALSE"), "LED00").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED10").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED20").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED30").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED40")
@@ -468,7 +472,7 @@ Blockly.Blocks['device_scroll_image'] = {
     this.appendValueInput("delay")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("delay (ms)");
+        .appendField("pause (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('');
@@ -533,7 +537,7 @@ Blockly.Blocks['device_make_StringImage'] = {
     this.setHelpUrl('http://www.example.com/');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("make string image");
+        .appendField("create image from");
     this.appendValueInput("NAME")
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);

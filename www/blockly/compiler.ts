@@ -804,7 +804,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_show_number: {
     f: p("show number", Type.Unit),
-    args: [ p("number", Type.Number) ]
+    args: [ p("number", Type.Number), p("pausetime", Type.Number) ]
   },
   device_show_letter: {
     f: p("show letter", Type.Unit),
@@ -815,7 +815,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: [ p("pause", Type.Number) ]
   },
   device_print_message: {
-    f: p("print string", Type.Unit),
+    f: p("show string", Type.Unit),
     args: [ p("message", Type.String), p("pausetime", Type.Number) ]
   },
   device_plot: {
