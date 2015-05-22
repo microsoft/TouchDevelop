@@ -936,7 +936,8 @@ module TDev.AST
         private compileInlineAction(inl:InlineAction)
         {
             var a = new Action();
-            a.compilerParentAction = this.currentAction;
+            a._compilerParentAction = this.currentAction;
+            a._compilerInlineAction = inl;
             a.body = inl.body;
             a.isLambda = true;
             a.setStableName(this.actionName + "$" + this.stepIdx);
@@ -2131,12 +2132,14 @@ module TDev.AST
             var lab0 = this.allocateLabel();
             this.wr(") {\n")
             a._compilerBreakLabel = this.allocateLabel();
+            if (a._compilerInlineAction)
+                a._compilerInlineAction._compilerBreakLabel = a._compilerBreakLabel;
 
             if (!this.throwSyntaxError(a)) {
                 this.wr(
                    "  var s = TDev.Runtime.mkStackFrame(previous, returnAddr);\n" +
                    "  s.entryAddr = " + lab0.id + ";\n" +
-                   "  s.name = " + str((a.compilerParentAction || a).getName()) + ";\n");
+                   "  s.name = " + str((a._compilerParentAction || a).getName()) + ";\n");
                 if (a.getOutParameters().length > 1)
                     this.wr("  s.results = [];\n");
                 a.allLocals.forEach((l) => {

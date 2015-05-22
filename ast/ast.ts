@@ -1678,7 +1678,8 @@ module TDev.AST {
         public _errorsOK:boolean;
         public _isPage:boolean;
         public _isActionTypeDef:boolean;
-        public compilerParentAction:Action; // this is only set for synthetic actions created in compiler for lambda expressions
+        public _compilerInlineAction:InlineAction;
+        public _compilerParentAction:Action; // this is only set for synthetic actions created in compiler for lambda expressions
         public _skipIntelliProfile:boolean;
         public allLocals:LocalDef[];
         public accept(v:NodeVisitor) { return v.visitAction(this); }
