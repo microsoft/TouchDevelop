@@ -2143,7 +2143,7 @@ module TDev
 
                 if (t.def.getKind().hasContext(KindContext.GlobalVar) && TheEditor.widgetEnabled('promoteRefactoring')) {
                     var e = this.mkIntelliItem(0.9 * promoteMult, Ticks.calcPromoteIntoGlobal);
-                    e.nameOverride = lf("promote to ◳data");
+                    e.nameOverride = lf("promote to data");
                     e.descOverride = lf("to global var");
                     e.cbOverride = () => { this.promoteLocal(t, null) };
 
