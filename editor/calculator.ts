@@ -2339,6 +2339,7 @@ module TDev
                 return;
             }
 
+            var profile = TheEditor.intelliProfile;
             var placeholderKind = placeholderDef ? placeholderDef.getKind() : null
 
             if (placeholderKind && placeholderKind.getRoot() == api.core.Ref) {
@@ -2368,9 +2369,8 @@ module TDev
                     this.addGoTo(k.definition);
 
                 var kk = this.intelliReplacementSingletonKind();
-                if (kk) {
+                if (kk)
                     s.pushRange(kk.listProperties().filter((p:IProperty) => p.getResult().getKind() == k.primaryKind))
-                }
 
                 k.secondaryKinds.forEach((kk:Kind) => {
                     s.pushRange(kk.listProperties().filter((p:IProperty) => p.getInfixPriority() > 0));
@@ -2394,6 +2394,10 @@ module TDev
                     s.push(api.core.StringConcatProp); // always available
                     downgradeConcat = true;
                 }
+                
+                if (profile)
+                    s = s.filter(p => profile.hasProperty(p));
+                
                 s = Calculator.sortDecls(s);
 
                 s.forEach((p:IProperty) => {
@@ -2416,7 +2420,6 @@ module TDev
                 });
             } else {
                 var maxScore = 1;
-                var profile = TheEditor.intelliProfile;
                 var singl: AST.SingletonDef[] = Calculator.sortDecls(api.getSingletons().filter(sg => sg.isBrowsable() && (!profile || profile.hasDecl(sg)) ));
                 var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
                 var libSingl: IntelliItem = null;
