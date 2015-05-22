@@ -89,14 +89,11 @@ npm install
 ````
 
 ### Quick windows setup
+These steps install the tools for Windows (+ extras to handle the Arduino compilation scenarios)
 * install [Chocolatey](https://chocolatey.org/)
 * install nodejs, Visual Studio Code
 ````
-choco nodejs.install visualstudiocode
-````
-* for Arduino dev
-````
-choco arduino python2 pip
+choco install -y nodejs git visualstudiocode arduino python2 pip
 ````
 
 ## Building
