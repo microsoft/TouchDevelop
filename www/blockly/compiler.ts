@@ -443,7 +443,7 @@ function toTdType(t: Type) {
     case Type.String:
       return H.mkTypeRef("String");
     case Type.Image:
-      return H.mkLTypeRef("image");
+      return H.mkLTypeRef("Image");
     case Type.Unit:
       throw new Error("Cannot convert unit");
   }
