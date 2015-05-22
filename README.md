@@ -88,6 +88,17 @@ tsd reinstall
 npm install
 ````
 
+### Quick windows setup
+* install [Chocolatey](https://chocolatey.org/)
+* install nodejs, Visual Studio Code
+````
+choco nodejs.install visualstudiocode python2 pip
+````
+* for Arduino dev
+````
+choco arduino python2 pip
+````
+
 ## Building
 
 There's different ways to build and run TouchDevelop:
