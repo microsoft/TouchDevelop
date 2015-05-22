@@ -337,7 +337,7 @@ module TDev.AST.ExprParser
                     }
                 }
 
-                reduceOps(stack, 0);
+                reduceOps(stack, 0.1);
 
                 var t = stack.peek();
                 if (!t || !t.expr)
