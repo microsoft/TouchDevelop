@@ -318,6 +318,8 @@ module TDev.Browser {
 
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
+                    "return": true,
+                    "break": true,
                 }
             },
         },
