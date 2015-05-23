@@ -114,6 +114,10 @@ module TDev.AST {
             this.addExtensionAction();
             this._flags = super.getFlags()
         }
+        
+        public isBrowsable() :boolean {
+            return !(this._flags & PropertyFlags.NonBrowsable) && !this.isLibInit();
+        }
 
         public toString()
         {

@@ -2395,27 +2395,23 @@ module TDev
                     downgradeConcat = true;
                 }
                 
-                if (profile)
-                    s = s.filter(p => profile.hasProperty(p));
-                
+                s = s.filter(p => p.isBrowsable() && (!profile || profile.hasProperty(p)));                
                 s = Calculator.sortDecls(s);
 
-                s.forEach((p:IProperty) => {
-                    if (p.isBrowsable()) {
-                        if (p.getInfixPriority() > 0 && p.getParameters().length == 1) {
-                            // unary prefix operator; skip
-                        } else {
-                            var v = p.getUsage().count() + 1e-20;
-                            if (p == api.core.StringConcatProp && downgradeConcat)
-                                v /= 5;
-                            if (p.forwardsToStmt() instanceof AST.RecordField)
-                                v += 1e10;
-                            var e = this.mkIntelliItem(v, Ticks.calcIntelliPropertyPrimary);
-                            if (p.getInfixPriority())
-                                e.nameOverride = Renderer.opName(p.getName())
-                            e.prop = p;
-                            e.noButton = !p.showIntelliButton()
-                        }
+                s.forEach((p: IProperty) => {
+                    if (p.getInfixPriority() > 0 && p.getParameters().length == 1) {
+                        // unary prefix operator; skip
+                    } else {
+                        var v = p.getUsage().count() + 1e-20;
+                        if (p == api.core.StringConcatProp && downgradeConcat)
+                            v /= 5;
+                        if (p.forwardsToStmt() instanceof AST.RecordField)
+                            v += 1e10;
+                        var e = this.mkIntelliItem(v, Ticks.calcIntelliPropertyPrimary);
+                        if (p.getInfixPriority())
+                            e.nameOverride = Renderer.opName(p.getName())
+                        e.prop = p;
+                        e.noButton = !p.showIntelliButton()
                     }
                 });
             } else {
