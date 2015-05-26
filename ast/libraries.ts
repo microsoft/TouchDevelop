@@ -413,7 +413,7 @@ module TDev.AST {
                 var act = al.getPublicActions().filter((a) => a.getName() == binding.actualName)[0];
                 binding.actual = act;
                 if (!act)
-                    binding.setError(Util.fmt("TD138: cannot find action '{1}' in {0}", al, binding.actualName));
+                    binding.setError(lf("TD138: cannot find function '{1}' in {0}", al, binding.actualName));
             })
         }
 
@@ -455,9 +455,9 @@ module TDev.AST {
                     if (!al.isTypechecked)
                         binding.setError("TD174: cause of circular library reference")
                 } else if (al.isReal()) {
-                    binding.setError(Util.fmt("TD138: cannot find action '{1}' in {0}", al, binding.actualName));
+                    binding.setError(lf("TD138: cannot find function '{1}' in {0}", al, binding.actualName));
                 } else {
-                    this.setError(Util.fmt("TD139: no library reference named {0}", al));
+                    this.setError(lf("TD139: no library reference named {0}", al));
                 }
                 return binding;
             });
@@ -521,19 +521,19 @@ module TDev.AST {
             var compareParameters = (formal:ActionParameter[], actual:ActionParameter[], tp:string) =>
             {
                 if (formal.length != actual.length)
-                    err = Util.fmt("TD136: '{0}' has {1} {2}-paramters, but '{3}' requires {4}", act, actual.length, tp, form.getName(), formal.length);
+                    err = lf("TD136: '{0}' has {1} {2}-paramters, but '{3}' requires {4}", act, actual.length, tp, form.getName(), formal.length);
                 else
                     for (var i = 0; i < formal.length; ++i) {
                         var fk = formal[i].getKind();
                         var ak = actual[i].getKind();
                         if (!ctx.unify(fk, ak))
-                            err = Util.fmt("TD137: '{0}' has {1} as {3}-paramter #{2}, but '{4}' requires {5}",
+                            err = lf("TD137: '{0}' has {1} as {3}-paramter #{2}, but '{4}' requires {5}",
                                            act, ak, i, tp, form.getName(), ctx.resolve(fk));
                     }
             }
 
             if (form.isAtomic && !act.isAtomic)
-                return Util.fmt("TD162: an atomic action is required for '{0}'", form.getName());
+                return lf("TD162: an atomic function is required for '{0}'", form.getName());
 
             compareParameters(form.getInParameters(), act.getInParameters(), "in");
             compareParameters(form.getOutParameters(), act.getOutParameters(), "out");
@@ -682,7 +682,7 @@ module TDev.AST {
                 this._publicKinds.forEach((k) => { k.kill(); });
                 this.kindMapping = {};
                 this._publicKinds = [];
-                // first collect all the action types
+                // first collect all the function types
                 var tasks = this.resolved.actionTypeDefs()
                     .filter((a) => !a.isPrivate)
                     .map(a => {

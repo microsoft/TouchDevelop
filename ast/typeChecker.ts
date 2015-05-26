@@ -868,7 +868,7 @@ module TDev.AST
                 if (node.isActionTypeDef()) {
                     var outp1 = node.getOutParameters()[1]
                     if (outp1) {
-                        this.setNodeError(node, lf("TD171: currently action types support at most one output parameter; sorry"))
+                        this.setNodeError(node, lf("TD171: function types support at most one output parameter; sorry"))
                     }
                 } else {
                     if (!this.reportedUnassigned)
@@ -932,7 +932,7 @@ module TDev.AST
                     node.setError(lf("TD177: cloud libraries cannot define pages"));
 
                 if (this.topApp.isCloud && !node.isPrivate && node.isAtomic)
-                    node.setError(lf("TD178: cloud libraries cannot define atomic actions"));
+                    node.setError(lf("TD178: cloud libraries cannot define atomic functions"));
             }
 
             if (!!node.getError()) node._hasErrors = true;
@@ -1137,7 +1137,7 @@ module TDev.AST
             if (unassigned.length > 0) {
                 this.reportedUnassigned = true;
                 node.addHint(
-                    lf("parameter{0:s} {1} may be unassigned before the action finishes",
+                    lf("return parameter{0:s} {1} may be unassigned before the function finishes",
                              unassigned.length, 
                              unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
             }
@@ -1433,7 +1433,7 @@ module TDev.AST
                 isAsyncable = false;
 
             if (!isAsyncable) {
-                this.markError(t, lf("TD157: 'async' keyword needs a non-atomic API or action to call"))
+                this.markError(t, lf("TD157: 'async' keyword needs a non-atomic API or function to call"))
                 return;
             }
 
@@ -1443,7 +1443,7 @@ module TDev.AST
             if (calledProp && calledProp.forwardsTo() instanceof Action) {
                 var act = <Action>calledProp.forwardsTo()
                 if (act.getOutParameters().length > 1)
-                    this.markError(t, lf("TD170: cannot use 'async' on actions with more than one output parameter"))
+                    this.markError(t, lf("TD170: cannot use 'async' on functions with more than one output parameter"))
             }
 
             t._kind = this.core.Task.createInstance([arg.getKind()])
@@ -1458,11 +1458,11 @@ module TDev.AST
                 ak = <ActionKind>this.typeHint
                 var outp = ak.getOutParameters()
                 if (outp.length != 1)
-                    this.markError(t, lf("TD194: lambda expressions need to return exactly one value; action type '{0}' returns {1}", ak.getName(), outp.length))
+                    this.markError(t, lf("TD194: lambda expressions need to return exactly one value; function type '{0}' returns {1}", ak.getName(), outp.length))
                 else
                     resKind = outp[0].getKind()
             } else {
-                this.markError(t, lf("TD195: lambda expressions can only be used as arguments of action type"))
+                this.markError(t, lf("TD195: lambda expressions can only be used as arguments of function type"))
             }
 
             this.actionScope(this.typeHint, () => {
@@ -1525,7 +1525,7 @@ module TDev.AST
                 sources = act.getOutParameters().map((a:AST.ActionParameter) => a.local);
                 var missing = sources.length - lhs.length;
                 if (missing > 0) {
-                    this.markError(t, lf("TD105: action '{0}' returns {1} more value{1:s}", act, missing));
+                    this.markError(t, lf("TD105: function '{0}' returns {1} more value{1:s}", act, missing));
                     info.missingArguments = missing;
                 }
             }
@@ -1564,7 +1564,7 @@ module TDev.AST
                         var loc = <LocalDef>thing;
                         if (this.readOnlyLocals.indexOf(loc) >= 0) {
                             if (this.actionSection == ActionSection.Lambda)
-                                this.markError(trg, lf("TD107: inline actions cannot assign to locals from outside like '{0}'", name));
+                                this.markError(trg, lf("TD107: inline functions cannot assign to locals from outside like '{0}'", name));
                             else
                                 this.markError(trg, lf("TD108: you cannot assign to the local variable '{0}'", name));
                         } else {
@@ -1882,7 +1882,7 @@ module TDev.AST
                             this.markError(t, lf("TD172: '{0}' cannot be used in page display section (which is treated as 'atomic')", prop.getName()));
                         }
                     } else {
-                        this.markError(t, lf("TD158: '{0}' cannot be used in actions marked with 'atomic'", prop.getName()));
+                        this.markError(t, lf("TD158: '{0}' cannot be used in functions marked with 'atomic'", prop.getName()));
                     }
                 }
                 this.seenAwait = true;
@@ -1919,7 +1919,7 @@ module TDev.AST
                             implIdx = i
                     })
                     if (implIdx < 0) {
-                        this.setNodeError(topInline, lf("TD182: '{0}' doesn't take an implicit inline action", prop))
+                        this.setNodeError(topInline, lf("TD182: '{0}' doesn't take an implicit inline function", prop))
                     } else {
                         var tok = AST.mkThing(impl.getName(), true)
                         // this.dispatch(tok)

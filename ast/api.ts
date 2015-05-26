@@ -206,7 +206,7 @@ module TDev {
 
         public initFrom()
         {
-            new ThingSetKind("code", lf("Lists actions defined in the current script"), () => !TDev.Script ? [] : TDev.Script.actions(), "\u25b7");
+            new ThingSetKind("code", lf("Lists functions defined in the current script"), () => !TDev.Script ? [] : TDev.Script.actions(), "\u25b7");
             new ThingSetKind("data", lf("Lists global variables defined in the current script"), () => !TDev.Script ? [] : TDev.Script.variables(), "\u25f3");
             new ThingSetKind("art", lf("Lists pictures, sounds, etc. defined in the current script"), () => !TDev.Script ? [] : TDev.Script.resources(), "\u273f");
             new ThingSetKind(AST.libSymbol, lf("Lists libraries referenced by the current script"), () => !TDev.Script ? [] : TDev.Script.libraries(), AST.libSymbol);

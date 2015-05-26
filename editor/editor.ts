@@ -3199,7 +3199,7 @@ module TDev
                         if (!this.currentAction() || this.currentAction().getStableName() != participant.actionName) {
                             notification.appendChild(text(" "));
                             var a = document.createElement("a");
-                            a.textContent = lf("on another action");
+                            a.textContent = lf("on another function");
                             a.href = "#";
                             a.addEventListener("click", (event) => {
                                 Script.orderedThings().forEach(thing => {

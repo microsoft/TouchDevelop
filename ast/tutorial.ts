@@ -279,7 +279,7 @@ module TDev.AST
                                         })
                                     })
                                     if (!found)
-                                        problem(s, lf("art resource '{0}' not found in current action", currStep.commandArg))
+                                        problem(s, lf("art resource '{0}' not found in current function", currStep.commandArg))
                                 }
                             }
 
@@ -296,7 +296,7 @@ module TDev.AST
                                 if (validAct) {
                                     validAct._skipIntelliProfile = true;
                                 } else {
-                                    problem(s, "public validator action " + currStep.validator + " not found")
+                                    problem(s, "public validator function " + currStep.validator + " not found")
                                 }
                                 isCommand = true
                             }

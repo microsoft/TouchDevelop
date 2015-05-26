@@ -135,7 +135,7 @@ module TDev.RT {
                     headers["content-type"] = "application/json; charset=utf-8"
             } else {
                 if (this._restResult)
-                    Util.userError(lf("set_content_... cannot be called on the response object when action has result(s)"))
+                    Util.userError(lf("set_content_... cannot be called on the response object when function has result(s)"))
             }
 
 

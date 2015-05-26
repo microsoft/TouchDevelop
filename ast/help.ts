@@ -1645,7 +1645,7 @@ module TDev {
             if (mdcmt.renderer)
                 r += mdcmt.renderer.renderPropertySig(p, false, withKind);
             else
-                r += Renderer.tdiv("signature", "action " + p.getName()) // we shouldn't really get here
+                r += Renderer.tdiv("signature", "function " + p.getName()) // we shouldn't really get here
             r += "<div class='nopara'>" + mdcmt.formatTextNoLinks(p.getDescription()) + "</div>";
             r += "</div></a>";
             return r;
@@ -1924,7 +1924,7 @@ module TDev {
                 kindTopics.filter(st => !st.apiKind.isData && !st.apiKind.isObsolete).forEach((st) => HelpTopic.renderKindDecl(r,st, mdcmt));
                 r.push('<h3>' + lf("types") + '</h3>');
                 kindTopics.filter(st => st.apiKind.isData && !st.apiKind.isAction && !st.apiKind.isObsolete).forEach((st) => HelpTopic.renderKindDecl(r, st, mdcmt));
-                r.push('<h3>' + lf("action types") + '</h3>');
+                r.push('<h3>' + lf("function types") + '</h3>');
                 kindTopics.filter(st => st.apiKind.isData && st.apiKind.isAction && !st.apiKind.isObsolete).forEach((st) => HelpTopic.renderKindDecl(r, st, mdcmt));
 
                 ch += "<div class='md-tutorial'>" + r.join('') + "</div>";

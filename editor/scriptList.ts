@@ -5463,7 +5463,7 @@
                             stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
                                 d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
                         }
-                        stats += lf("{0} action{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                        stats += lf("{0} function{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
                         descs.slice(0, 20).forEach((d, i) => {
                             if (i > 0)
                                 stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
@@ -6393,7 +6393,7 @@
                                 ModalDialog.ask(
                                     lf("Your script is currently using features unsupported in App Studio.")
                                     + " " + lf("If you set your platform settings to 'App Studio', we will give you hints about which particular ones are problematic.")
-                                    + " " + lf("Look for a blue pencil next to action name."),
+                                    + " " + lf("Look for a blue pencil next to function name."),
                                     lf("set platform to App Studio"),
                                     () => {
                                         Script.setPlatform(PlatformCapability.AppStudio)

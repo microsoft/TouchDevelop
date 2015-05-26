@@ -235,8 +235,8 @@ module TDev
 
             if (this.selectionBlock instanceof AST.CodeBlock) {
                 btns.push(
-                  div("selHeader", lf("extract selection into action")),
-                     this.extractedName = HTML.mkTextInput("text", lf("action name")),
+                  div("selHeader", lf("extract selection into function")),
+                     this.extractedName = HTML.mkTextInput("text", lf("function name")),
                      mkBtn("extract", "Ctrl-E", Ticks.codeExtractAction, () => { this.extract() }));
                 
                 btns.push(div("selHeader", lf("surround with")));

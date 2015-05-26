@@ -1309,7 +1309,7 @@ module TDev
             var next = ret;
 
             if (this.rendermode && !isQuery) {
-                this.forceNonRender("Can not call a cloud action that is not \"read-only\" in display code");
+                this.forceNonRender("Can not call a cloud function that is not \"read-only\" in display code");
             }
 
             // setup recording if outer cloud service call
@@ -1324,18 +1324,18 @@ module TDev
                 // 1) start recording operation
                 prev.rt.startCloudCall(service, actionName, paramNames, returnNames, req, isQuery);
 
-                // executed after outer cloud service action
+                // executed after outer cloud service function
                 next = (s: IStackFrame) => {
 
                     // 3) stop recording operation
                     s.rt.endCloudCall(service, actionName, paramNames, returnNames, req, isQuery);
 
-                    // 4) continue after action call
+                    // 4) continue after function call
                     return ret;
                 };
             }
 
-            // 2) execute action locally
+            // 2) execute function locally
             return action.invoke.apply(action, [action, next].concat(args));
         }
 
@@ -1359,7 +1359,7 @@ module TDev
 
             var run = (s: IStackFrame) => {
                 if (this.rendermode) {
-                    this.forceNonRender("Can not call a remote cloud action in display code (only \"offline available\" \"read-only\" are allowed)");
+                    this.forceNonRender("Can not call a remote cloud function in display code (only \"offline available\" \"read-only\" are allowed)");
                 }
 
                 // Start await
@@ -1842,7 +1842,7 @@ module TDev
                                     if (this.validatorAction) {
                                         var act = this.current.libs["tutorialLib"][this.validatorAction]
                                         if (!act) {
-                                            Util.userError(lf("problem with tutorial: validator action '{0}' not found", this.validatorAction))
+                                            Util.userError(lf("problem with tutorial: validator function '{0}' not found", this.validatorAction))
                                         }
                                         var libcall = act(this.current)
                                         this.tutorialObject = libcall.libs.topScriptId
@@ -2076,7 +2076,7 @@ module TDev
         {
             var r = this.runUserAction(f, args)
             if (r === undefined)
-                Util.userError("user action passed to library returned invalid")
+                Util.userError("user function passed to library returned invalid")
             return r
         }
 
@@ -3073,7 +3073,7 @@ module TDev
 
         public mkLambdaProxy(libs:any, libRefName:string)
         {
-            return (s:IStackFrame) => new LibProxy(libs, s, libRefName, "inline action", null);
+            return (s:IStackFrame) => new LibProxy(libs, s, libRefName, "inline function", null);
         }
 
         public mkLibProxyFactory(libs:any, libRefName:string, actionName:string) : (s:IStackFrame) => IStackFrame
