@@ -379,6 +379,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
                     (Cloud.hasPermission("bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
+                    (Cloud.hasPermission("docs") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("generate codes"), () => {
                         TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
                             .done(function(r) {
@@ -2692,6 +2693,60 @@ module TDev.Browser {
                 }))
                 this.notificationBox.setChildren([]);
             }
+        }
+
+        private docTopics:any[];
+
+        public importDocs()
+        {
+            var md = new ModalDialog();
+
+            /* CORS issues
+            var getTopicsAsync = () => 
+                (this.docTopics ? 
+                    Promise.as(this.docTopics) : 
+                    Util.httpGetJsonAsync("https://www.touchdevelop.com/api/doctopics")
+                        .then(resp => this.docTopics = resp))
+            */
+
+            var getTopicsAsync = () => Promise.as(TDev.HelpTopic.getAll().map(t => t.json))
+
+            var btns = div("wall-dialog-buttons",
+                HTML.mkButton(lf("import"), () => {
+                    var m = /^http.*\/docs\/([a-zA-Z0-9]+)$/.exec(inp.value)
+                    if (!m)
+                        Util.coreAnim("shakeTip", 500, inp)
+                    else {
+                        var tt = HelpTopic.findById(m[1])
+                        if (!tt) {
+                            Util.coreAnim("shakeTip", 500, inp)
+                        } else {
+                            md.dismiss()
+                            return Util.httpGetTextAsync(Cloud.getPrivateApiUrl("tdtext/" + tt.json.id))
+                                .then(text => {
+                                    text = text.replace(/{parenttopic:([^{}]+)}/i, 
+                                        (r, pt) => "{parentTopic:td/" + pt + "} {topic:td/" + m[1] + "}")
+                                    var stub: World.ScriptStub = {
+                                        editorName: "touchdevelop",
+                                        scriptName: tt.json.name,
+                                        scriptText: text,
+                                    };
+                                    return this.browser().openNewScriptAsync(stub)
+                                })
+                                .done()
+                        }
+                    }
+                }),
+                HTML.mkButton(lf("cancel"), () => md.dismiss()))
+
+            var inp = HTML.mkTextInput("text", "")
+            inp.placeholder = "https://www.touchdevelop.com/docs/..."
+
+            md.add(div("wall-dialog-header", lf("import docs")))
+            md.add(div(null, inp))
+            md.add(btns)
+
+            md.show()
         }
     }
 }
