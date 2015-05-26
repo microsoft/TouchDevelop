@@ -13,7 +13,7 @@ module TDev {
 
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
-    function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string } {
+    function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string; libName: string } {
       var i = libs.indexOf(a);
       var libRef: J.JCall = null;
       if (i >= 0) {
@@ -22,8 +22,9 @@ module TDev {
 
       try {
         lift(a);
-        var e = new Emitter(libRef, libs);
-        e.visit(emptyEnv, a);
+        var libName = i >= 0 ? H.mangleName(libs[i].name) : null;
+        var e = new Emitter(libRef, libName, libs);
+        e.visit(i >= 0 ? indent(emptyEnv) : emptyEnv, a);
         return e;
       } catch (e) {
         console.error("Compilation error", e);
@@ -46,10 +47,18 @@ module TDev {
       });
       return Promise.join(textPromises).then((libs: J.JApp[]) => {
         var compiled = libs.concat([a]).map((a: J.JApp) => compile1(libs, a));
+        var wrapNamespaceIf = (x: { libName: string }, s: string) => {
+          if (x.libName != null)
+            return "namespace "+x.libName+" {\n"+
+              s+
+            "\n}";
+          else
+            return s;
+        };
         return Promise.as(
                   compiled.map(x => x.prelude)
-          .concat(compiled.map(x => x.prototypes))
-          .concat(compiled.map(x => x.code))
+          .concat(compiled.map(x => wrapNamespaceIf(x, x.prototypes)))
+          .concat(compiled.map(x => wrapNamespaceIf(x, x.code)))
           .filter(x => x != "")
           .join("\n")
         );

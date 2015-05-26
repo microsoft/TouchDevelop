@@ -9,9 +9,6 @@ module TDev {
     export module Helpers {
       export var librarySymbol = "♻";
 
-      var kStringType = "shared_ptr<string>";
-      var kImageType = "MicrobitImage*";
-
       var replacementTable = {
         "<": "lt",
         "≤": "leq",
@@ -48,43 +45,51 @@ module TDev {
       // For constructing / modifying AST nodes.
 
       export function mangleLibraryName(l, n) {
-        return mangleName(l)+"_"+mangleName(n);
+        if (l)
+          return mangleName(l)+"::"+mangleName(n);
+        else
+          return mangleName(n);
       }
 
-      // To stay as close as possible to the usual TouchDevelop semantics, we
-      // pass scalar values by copy, and strings and arrays by reference (using
-      // [shared_ptr]s).
-      export function mkType(t: J.JTypeRef) {
-        var t1: string = <any> t;
-        switch (t1) {
-          case "Number":
-            return "int";
-          case "String":
-            return kStringType;
-          case "Boolean":
-            return "bool";
-          default:
-            try {
-              var t2 = JSON.parse(t1);
-              if (t2.o == "image")
-                return kImageType;
-            } catch (e) {
-            }
+      export interface LibMap { [id: string]: string }
+
+      // Resolve a type reference to either "t" (no scope for this type) or
+      // "l::t" (reference to a library-defined type). If the former case, lib
+      // is the empty string; in the latter case, lib is "l".
+      export function resolveTypeRef(libMap: LibMap, typeRef: J.JTypeRef): { lib: string; type: string } {
+        var s = <any> typeRef;
+        if (s.length && s[0] == "{") {
+          var t = JSON.parse(<any> typeRef);
+          if (!t.o)
+            throw new Error("Unsupported type reference");
+          return {
+            lib: t.l ? libMap[t.l] : "",
+            type: t.o
+          };
+        } else {
+          return {
+            lib: "",
+            type: s
+          };
         }
-        return mangleName(t1);
       }
 
-      export function mkParam(p: J.JLocalDef) {
-        return mkType(p.type)+" "+mangleDef(p);
+      export function mkType(libMap: LibMap, type: J.JTypeRef) {
+        var t = resolveTypeRef(libMap, type);
+        return mangleLibraryName(t.lib, t.type);
       }
 
-      export function mkSignature(name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+      export function mkParam(libMap: LibMap, p: J.JLocalDef) {
+        return mkType(libMap, p.type)+" "+mangleDef(p);
+      }
+
+      export function mkSignature(libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
-        var retType = outParams.length ? mkType(outParams[0].type) : "void";
+        var retType = outParams.length ? mkType(libMap, outParams[0].type) : "void";
         return [
           retType, " ", name, "(",
-          inParams.map(mkParam).join(", "),
+          inParams.map(p => mkParam(libMap, p)).join(", "),
           ")",
         ].join("");
       }
