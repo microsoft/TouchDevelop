@@ -4907,9 +4907,10 @@ module TDev.AST {
         }
     }
 
-    class IntelliCollector extends NodeVisitor
+    export class IntelliCollector extends NodeVisitor
     {
         props:any = {};
+        topicPath:string;
 
         public visitAstNode(n:AstNode) {
             this.visitChildren(n);
@@ -4995,6 +4996,11 @@ module TDev.AST {
             var dummy2 = c.text.replace(/\{flags:([\w,]*)\}/, (match:string, features:string) => {
                 this.incr("tutorialFlags");
                 features.split(',').forEach(feature => this.incr("flag:" + feature));
+                return ""
+            })
+
+            var dummy2 = c.text.replace(/\{topic:([\w\/]*)\}/, (match:string, top:string) => {
+                this.topicPath = top;
                 return ""
             })
         }

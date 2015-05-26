@@ -75,8 +75,11 @@ module TDev {
         return env.indent + this.visit(env, expr)+";";
       }
 
-      public visitExprHolder(env: EmitterEnv, expr: J.JExprHolder) {
-        return this.visit(env, expr);
+      public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
+        var decls = locals.map(d => this.visit(env, d));
+        return decls.join("\n"+env.indent) +
+          (decls.length ? "\n" + env.indent : "") +
+          this.visit(env, expr);
       }
 
       public visitLocalRef(env: EmitterEnv, name: string, id: string) {
@@ -91,7 +94,7 @@ module TDev {
       }
 
       public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id);
+        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id)+";";
       }
 
       public visitStringLiteral(env: EmitterEnv, s: string) {

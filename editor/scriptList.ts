@@ -6356,20 +6356,38 @@
 
             var isDocs = /#docs/i.test(this.getDescription()) || this.isLibrary();
             if (Cloud.lite && isDocs) {
-                var pubAt = (pref:string) => {
-                    var path = pref + title.replace(/[^\w\-\/]/g, "").toLowerCase()
-                    return HTML.mkAsyncButton(lf("publish at /{0}", path), () => 
+                var pubDiv = div(null)
+
+                var pubAt = (path:string) => {
+                    return HTML.mkAsyncButton(lf("overwrite current", Cloud.getServiceUrl() + "/" + path), () => 
                         Cloud.postPrivateApiAsync("pointers", {
                             path: path,
                             scriptid: id,
                         }))
                 }
 
-                m.addBody([
-                    lf("Doc script: "),
-                      HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview")),
-                      Cloud.hasPermission("no-pointer-prefix") ? pubAt("") : pubAt(Cloud.getUserId() + "/")
-                    ])
+                this.getScriptTextAsync()
+                    .then((text:string) => {
+                        if (this.app.things.length == 0 && text)
+                            this.app = AST.Parser.parseScript(text)
+
+                        var coll = new AST.IntelliCollector()
+                        coll.dispatch(this.app)
+                        var path = coll.topicPath || title.replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
+                        if (!Cloud.hasPermission("no-pointer-prefix"))
+                            path = Cloud.getUserId() + "/" + path
+
+                        var url = Cloud.getServiceUrl() + "/" + path
+
+                        m.add(div("wall-dialog-header",  lf("documentation page")))
+                        m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])
+                        m.addBody([
+                              HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
+                              " ",
+                              pubAt(path)
+                        ])
+                    })
+                    .done()
             }
 
             if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud() && !isDocs) {

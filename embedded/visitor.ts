@@ -35,7 +35,8 @@ module TDev {
               var n11 = <J.JLocalRef> n;
               return this.visitLocalRef(env, n11.name, <any> n11.localId);
             case "exprHolder":
-              return this.visitExprHolder(env, (<J.JExprHolder> n).tree);
+              var n16 = <J.JExprHolder> n;
+              return this.visitExprHolder(env, n16.locals, n16.tree);
             case "exprStmt":
               var ex = <J.JExprStmt> n
               var tr = ex.expr.tree
@@ -111,7 +112,10 @@ module TDev {
         id: string,
         type: J.JTypeRef): U                                              { throw new Error("Not implemented"); }
       public visitLocalRef(env: T, name: string, id: string): U           { throw new Error("Not implemented"); }
-      public visitExprHolder(env: T, expr: J.JExpr): U                    { throw new Error("Not implemented"); }
+      public visitExprHolder(
+        env: T,
+        locals: J.JLocalDef[],
+        expr: J.JExpr): U                                                 { throw new Error("Not implemented"); }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw new Error("Not implemented"); }
       public visitReturn(env: T, expr: J.JExpr): U                        { throw new Error("Not implemented"); }
       public visitShow(env: T, expr: J.JExpr): U                          { throw new Error("Not implemented"); }
