@@ -17,7 +17,7 @@ module TDev {
       indent: "",
     };
 
-    function indent(e: EmitterEnv) {
+    export function indent(e: EmitterEnv) {
       return {
         indent: e.indent + "  ",
       };
@@ -33,11 +33,12 @@ module TDev {
       public code = "";
       public prelude = "";
 
-      private libraryMap: { [id: string]: string } = {};
+      private libraryMap: H.LibMap = {};
 
       // All the libraries needed to compile this [JApp].
       constructor(
         private libRef: J.JCall,
+        public libName: string,
         private libs: J.JApp[]
       ) {
         super();
@@ -50,7 +51,7 @@ module TDev {
       }
 
       public visitComment(env: EmitterEnv, c: string) {
-        return "// "+c.replace("\n", "\n"+env.indent+"// ");
+        return env.indent+"// "+c.replace("\n", "\n"+env.indent+"// ");
       }
 
       public visitBreak(env: EmitterEnv) {
@@ -74,8 +75,11 @@ module TDev {
         return env.indent + this.visit(env, expr)+";";
       }
 
-      public visitExprHolder(env: EmitterEnv, expr: J.JExprHolder) {
-        return this.visit(env, expr);
+      public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
+        var decls = locals.map(d => this.visit(env, d));
+        return decls.join("\n"+env.indent) +
+          (decls.length ? "\n" + env.indent : "") +
+          this.visit(env, expr);
       }
 
       public visitLocalRef(env: EmitterEnv, name: string, id: string) {
@@ -90,7 +94,7 @@ module TDev {
       }
 
       public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(type)+" "+H.mangle(name, id);
+        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id)+";";
       }
 
       public visitStringLiteral(env: EmitterEnv, s: string) {
@@ -151,12 +155,8 @@ module TDev {
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
-          if (this.libRef)
-            // If compiling a library, no scope actually means the library's scope.
-            return this.resolveCall(this.libRef, name);
-          else
-            // Call to a function from the current script.
-            return H.mangleName(name);
+          // We're always in the "right" scope thanks to C++ namespaces.
+          return H.mangleName(name);
 
         // Is this a call to a library?
         var n = H.isLibrary(receiver);
@@ -212,16 +212,16 @@ module TDev {
         // with the [id], since i) we don't have that id right and ii) globals
         // are unique (I think?).
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return this.mangleScopedName(name);
+          return H.mangleName(name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
         // [resolveCall] again, so that we find the shim if any.
         else if (callType == "extension") {
-          var t = JSON.parse(<any> parent);
-          var prefixedName = t.l
-            ? this.resolveCall(H.mkLibraryRef(this.libraryMap[t.l]), name)
-            : this.mangleScopedName(name);
+          var t = H.resolveTypeRef(this.libraryMap, parent);
+          var prefixedName = t.lib
+            ? this.resolveCall(H.mkLibraryRef(t.lib), name)
+            : H.mangleName(name);
           return mkCall(prefixedName, false);
         }
 
@@ -243,15 +243,8 @@ module TDev {
         return n;
       }
 
-      private mangleScopedName(n: string) {
-        if (this.libRef)
-          return H.mangleLibraryName(this.libRef.name, n);
-        else
-          return H.mangleName(n);
-      }
-
-      public visitGlobalDef(e: EmitterEnv, name: string, type: J.JTypeRef) {
-        return e.indent + H.mkType(type) + " " + this.mangleScopedName(name) + ";";
+      public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
+        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangleName(name) + ";";
       }
 
       public visitAction(
@@ -265,6 +258,9 @@ module TDev {
           throw new Error("Not supported (multiple return parameters)");
         if (H.isShimBody(body))
           return null;
+        // XXX hack surface that properly in the JSON AST
+        if (name == "_libinit")
+          return null;
 
         var env2 = indent(env);
         var bodyText = [
@@ -272,8 +268,8 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(this.mangleScopedName(name), inParams, outParams);
-        return head + " {\n" + bodyText + "\n}";
+        var head = H.mkSignature(this.libraryMap, H.mangleName(name), inParams, outParams);
+        return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
       // This function runs over all declarations. After execution, the three
@@ -291,7 +287,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return H.mkSignature(this.mangleScopedName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return e.indent + H.mkSignature(this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else if (f.nodeType == "data")
             return this.visit(e, f);
           else
@@ -320,7 +316,7 @@ module TDev {
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
-        return this.prelude + "\n" + forwardDeclarations.concat(userFunctions).join("\n");
+        return null;
       }
     }
   }
