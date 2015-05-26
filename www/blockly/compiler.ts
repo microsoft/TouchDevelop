@@ -768,7 +768,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
       state += /TRUE/.test(b.getFieldValue("LED" + j + i)) ? "1" : "0";
     }
   }
-  return H.stdCall("make image", [H.mkStringLiteral(state)]);
+  return H.stdCall("create image", [H.mkStringLiteral(state)]);
 }
 
 interface Param {
@@ -835,7 +835,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: []
   },
   device_make_StringImage: {
-    f: p("make string image", Type.Image),
+    f: p("create image from string", Type.Image),
     args: [ p("NAME", Type.String) ]
   },
   device_scroll_image: {
