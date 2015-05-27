@@ -1104,7 +1104,6 @@ module TDev.RT {
             });
         }
 
-        /*
         //? Draws a path with a given color.
         //@ writesMutable
         //@ [angle].defl(0) [color].deflExpr('colors->random')
@@ -1115,7 +1114,7 @@ module TDev.RT {
                 this.ctx.strokeStyle = color.toHtml();
                 this.ctx.lineWidth = thickness;
                 this.ctx.beginPath();
-                this.parsePathData(data);
+                Picture.parsePathData(this.ctx, data);
                 this.ctx.stroke();
             });
         }
@@ -1129,11 +1128,10 @@ module TDev.RT {
                 this.ctx.strokeStyle = color.toHtml();
                 this.ctx.fillStyle = color.toHtml();
                 this.ctx.beginPath();
-                this.parsePathData(data);
+                Picture.parsePathData(this.ctx, data);
                 this.ctx.fill();
             });
         }
-        */
 
         static parseSvg(xml : string, width : number, height : number) : HTMLCanvasElement {
             try {
