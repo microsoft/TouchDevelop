@@ -241,7 +241,10 @@ module TDev {
       }
 
       public visitSingletonRef(e, n: string) {
-        return n;
+        if (n == "$skip")
+          return "";
+        else
+          return n;
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
