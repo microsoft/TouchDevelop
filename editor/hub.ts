@@ -346,9 +346,12 @@ module TDev.Browser {
                     codeSearch: true,
                     scriptConvertToDocs: true,
                     librariesSection: true,
-                    scriptPropertiesSettings: true,
+                    scriptPropertiesSettings: true,                    
+                    scriptDiffToBase: true,
                     
-                    scriptDiffToBase: true,                    
+                    socialNetworks: true,
+                    socialNetworkvimeo:true,
+                    
                     // hub
                     hubChannels : true,
                     scriptAddToChannel: true,

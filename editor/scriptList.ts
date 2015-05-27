@@ -8996,7 +8996,7 @@
                     })
                 })()
             }
-            MdComments.attachVideoHandlers(EditorSettings.widgets(), e, false);
+            MdComments.attachVideoHandlers(e, false);
             if (TheEditor.canReplyTutorial()) {
                 var elts = e.getElementsByClassName("stepid")
                 for (var i = 0; i < elts.length; ++i) {

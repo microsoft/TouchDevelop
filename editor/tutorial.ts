@@ -107,8 +107,7 @@ module TDev
             var docs = this.parent.renderDocs(this.data.docs)
             var e = div(null)
             Browser.setInnerHTML(e, docs);
-            if (!hint)
-                MdComments.attachVideoHandlers(e, true);
+            if (!hint) MdComments.attachVideoHandlers(e, true);
             var t = e.innerText || "";
             if (t.length > 4096) t = t.substr(0, 4096);
             this.text = t;

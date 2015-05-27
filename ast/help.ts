@@ -514,11 +514,12 @@ module TDev {
             })
         }
 
-        static attachVideoHandlers(widgets : Cloud.EditorWidgets, e: HTMLElement, autoPlay: boolean): void {
+        static attachVideoHandlers(e: HTMLElement, autoPlay: boolean): void {
             if (!Browser.directionAuto) {
                 Util.toArray(e.getElementsByClassName('md-tutorial')).forEach((v: HTMLElement) => dirAuto(v));
                 Util.toArray(e.getElementsByClassName('md-box-avatar-body')).forEach((v: HTMLElement) => dirAuto(v));
             }
+            /*
             var sns = socialNetworks(widgets).filter(sn => !!sn.idToHTMLAsync);
             Util.toArray(e.getElementsByTagName('a')).forEach((v: HTMLAnchorElement) => {
                 sns.forEach(sn => sn.parseIds(v.href).forEach(id => {
@@ -526,6 +527,7 @@ module TDev {
                     sn.idToHTMLAsync(id).done(pl => v.parentElement.insertBefore(pl, v));
                 }));
             });
+            */
             Util.toArray(e.getElementsByClassName('md-video-link')).forEach((v: HTMLElement) => {
                 if (v.hasAttribute("data-playersrc")) v.withClick(() => v.innerHTML = v.getAttribute("data-playersrc"));
                 else if (v.hasAttribute("data-video")) {
