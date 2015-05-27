@@ -76,7 +76,8 @@ module TDev {
       }
 
       public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
-        var decls = locals.map(d => this.visit(env, d));
+        var decls = locals.map(d =>
+          this.visit(env, d) + " = " + H.defaultValueForType(d.type) + ";");
         return decls.join("\n"+env.indent) +
           (decls.length ? "\n" + env.indent : "") +
           this.visit(env, expr);
@@ -94,15 +95,16 @@ module TDev {
       }
 
       public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id)+";";
+        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id);
       }
 
+      // Allows the target to redefine their own string type.
       public visitStringLiteral(env: EmitterEnv, s: string) {
-        return '"'+s.replace(/["\\\n]/g, c => {
+        return 'touch_develop::mk_string("'+s.replace(/["\\\n]/g, c => {
           if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
           if (c == "\n") return '\\n';
-        }) + '"';
+        }) + '")';
       }
 
       public visitNumberLiteral(env: EmitterEnv, n: number) {
@@ -155,8 +157,17 @@ module TDev {
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
-          // We're always in the "right" scope thanks to C++ namespaces.
-          return H.mangleName(name);
+          if (this.libRef)
+            // If compiling a library, no scope actually means the library's
+            // scope. This step is required to possibly find a shim. This means
+            // that we may generate "lib::f()" where we could've just written
+            // "f()", but since the prototypes have been written out already,
+            // that's fine.
+            return this.resolveCall(this.libRef, name);
+          else
+            // Call to a function from the current script.
+            return H.mangleName(name);
+
 
         // Is this a call to a library?
         var n = H.isLibrary(receiver);
@@ -248,7 +259,8 @@ module TDev {
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
-        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangleName(name) + ";";
+        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangleName(name) +
+          " = " + H.defaultValueForType(t) + ";"
       }
 
       public visitAction(
