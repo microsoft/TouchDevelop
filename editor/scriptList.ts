@@ -5447,7 +5447,7 @@
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
-                        divs.push(div('', pull, diff, convertToTutorial, convertToDocs));
+                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
                     }
 
                     if (EditorSettings.widgets().scriptStats) {
