@@ -92,6 +92,7 @@ module TDev
         public showDiff = false;
         public hideErrors = false;
         public formatComments = true;
+        public skipComments = false;
         public numDiffs = 0;
 
         public interpretedComment(n:AST.Comment)
@@ -640,10 +641,12 @@ module TDev
                 inner = this.diffLine(n, n.diffAltStmt, tokenize)
             } else {
                 if (this.interpretedComment(n)) return "";
-                if (this.formatComments)
-                    inner = this.tline(Renderer.tdiv("md-comment", this.mdComments.formatText(n.text, n)))
-                else
-                    inner = this.tline("<span class='comment'> " + Util.formatText(n.text) + "</span>")
+                if (!this.skipComments) {
+                    if (this.formatComments)
+                        inner = this.tline(Renderer.tdiv("md-comment", this.mdComments.formatText(n.text, n)))
+                    else
+                        inner = this.tline("<span class='comment'> " + Util.formatText(n.text) + "</span>")
+                }
             }
             return this.stmt(n, inner + this.possibleError(n));
         }

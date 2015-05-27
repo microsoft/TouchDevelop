@@ -756,12 +756,12 @@ module TDev {
                 var artId = MdComments.findArtId(arg);
                 var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", Cloud.artUrl(artId));
                 return r;
-            } else if (macro == "decl") {
-                var decl = Script ? Script.things.filter((t) => t.getName() == arg)[0] : null;
+            } else if (macro == "decl" || macro == "decl*") {
+                var decl = !Script ? null : !arg ? Script : Script.things.filter((t) => t.getName() == arg)[0];
                 if (this.currComment && this.currComment.mdDecl)
                     decl = this.currComment.mdDecl;
-                if (!decl) return MdComments.error("no such decl " + arg);
-                return this.mkDeclSnippet(decl);
+                if (!decl) return MdComments.error(lf("no such decl {0}", arg));
+                return this.mkDeclSnippet(decl, macro == "decl*");
             } else if (macro == "imports") {
                 if (!Script) return MdComments.error(lf("import can only be used from a script context"));
                 var r = "";
@@ -971,7 +971,7 @@ module TDev {
 
             while (inp) {
                 if (allowRepl &&
-                    applySpan(/^\{(\w+)(:([^{}]*))?\}/, (m) => {
+                    applySpan(/^\{([\w\*]+)(:([^{}]*))?\}/, (m) => {
                         if (!this.allowImages) return "";
                         var res = this.defaultRepl(m[1].toLowerCase(), m[3])
                         if (res == null) return MdComments.error("unknown macro '" + m[1] + "'")
@@ -1139,21 +1139,24 @@ module TDev {
 
         private depthLimit = 0;
 
-        public mkDeclSnippet(decl:AST.Decl, formatComments = false, cls = 'md-snippet', addDepth = 0)
+        public mkDeclSnippet(decl:AST.Decl, skipComments = false, formatComments = false, cls = 'md-snippet', addDepth = 0)
         {
             if (this.depthLimit < 0 || !this.renderer) return "<div class='md-message'>[" + Util.htmlEscape(decl.getName()) + " goes here]</div>";
 
             var r = "<div class=notranslate translate=no dir=ltr><div class='" + cls + "'>";
             var prev = this.renderer.formatComments;
+            var prevSc = this.renderer.skipComments;
             var prevMd = this.renderer.mdComments
             try {
                 this.depthLimit += addDepth - 1;
                 this.renderer.mdComments = this;
                 this.renderer.formatComments = formatComments;
+                this.renderer.skipComments = skipComments;
                 r += this.renderer.renderDecl(decl);
             } finally {
                 this.depthLimit -= addDepth - 1;
                 this.renderer.formatComments = prev;
+                this.renderer.skipComments = prevSc;
                 this.renderer.mdComments = prevMd;
             }
             if (this.showCopy && !formatComments)
@@ -1908,7 +1911,7 @@ module TDev {
                 if (tutorialSteps.length > 0) {
                     tutorialSteps.forEach((s) => {
                         if (s.printOut) {
-                            ch += mdcmt.mkDeclSnippet(s.printOut, true, "tutorial-step", 1);
+                            ch += mdcmt.mkDeclSnippet(s.printOut, false, true, "tutorial-step", 1);
                         }
                     })
 

@@ -6971,6 +6971,15 @@
                 var converter = new TutorialConverter();
                 converter.visitChildren(clone);
 
+                // insert final full code step                 
+                var main = clone.mainAction();
+                if (main) {
+                    var c = new AST.Comment();
+                    c.text = lf("### full source code");
+                    c.text += "\n{decl*:}";
+                    main.body.stmts.push(c)
+                }
+               
                 var text = clone.serialize();
                 Util.log(text);
                 var scriptStub = {
