@@ -5771,7 +5771,9 @@
 
         public iconImg(thumb: boolean): HTMLElement {
             if (this.cloudHeader && this.cloudHeader.editor == "blockly")
-                return HTML.mkImg("blockly/icon.png");
+                return HTML.mkImg(
+                    Ticker.mainJsName.replace(/main.js$/, "") +
+                    "blockly/icon.png");
             else
                 return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
         }
