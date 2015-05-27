@@ -348,6 +348,7 @@ module TDev.Browser {
                     librariesSection: true,
                     scriptPropertiesSettings: true,
                     
+                    scriptDiffToBase: true,                    
                     // hub
                     hubChannels : true,
                     scriptAddToChannel: true,
