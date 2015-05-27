@@ -143,7 +143,7 @@ module TDev {
           this.visitMany(indent(env), thenBranch) + "\n",
           env.indent, "}",
           elseBranch ? " else {\n" : "",
-          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n": "",
+          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
           elseBranch ? env.indent + "}" : ""
         ].join("");
       }
@@ -231,12 +231,13 @@ module TDev {
 
         // 6) Reference to a built-in library method, e.g. Math→ max
         else if (args.length && H.isSingletonRef(args[0]))
-          return H.isSingletonRef(args[0]) + "::" + mkCall(H.mangleName(name), true);
+          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name), true);
 
         // 7) Instance method (e.g. Number's > operator, for which the receiver
-        // is the number itself)
+        // is the number itself). Lowercase so that "number" is the namespace
+        // that contains the functions that operate on typedef "Number".
         else
-          return (<any> parent)+"::"+mkCall(H.mangleName(name), false);
+          return (<any> parent).toLowerCase()+"::"+mkCall(H.mangleName(name), false);
       }
 
       public visitSingletonRef(e, n: string) {
