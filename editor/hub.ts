@@ -373,7 +373,7 @@ module TDev.Browser {
                     );
             }
             
-            if (Cloud.lite && ["upload", "admin", "bug"].some(perm => Cloud.hasPermission(perm))) {
+            if (Cloud.lite && ["upload", "admin", "bug", "docs"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
                 m.add([div("wall-dialog-body", [
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),

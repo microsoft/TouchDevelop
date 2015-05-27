@@ -6324,6 +6324,47 @@
             });
         }
 
+        private docPath:string;
+        private docPathCurrent:boolean;
+        private setupDocPathAsync(isPublish = false)
+        {
+            this.docPath = ""
+            this.docPathCurrent = false
+
+            if (!Cloud.lite) return Promise.as()
+
+            var isDocs = /#docs/i.test(this.getDescription()) || this.isLibrary();
+            if (!isDocs) return Promise.as()
+
+            return this.getScriptTextAsync()
+                    .then((text:string) => {
+                        if (this.app.things.length == 0 && text)
+                            this.app = AST.Parser.parseScript(text)
+
+                        var coll = new AST.IntelliCollector()
+                        coll.dispatch(this.app)
+                        var path = coll.topicPath || this.getTitle().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
+                        if (!Cloud.hasPermission("root-ptr"))
+                            path = "users/" + Cloud.getUserId() + "/" + path
+
+                        this.docPath = path
+
+                        if (isPublish && !Cloud.hasPermission("root-ptr")) {
+                            return Cloud.postPrivateApiAsync("pointers", {
+                                    path: this.docPath,
+                                    scriptid: this.publicId,
+                            })
+                        } else {
+                            return Promise.as()
+                        }
+                    })
+                    .then(() => Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")).then(v => v, e => null))
+                    .then(resp => {
+                        if (resp)
+                            this.docPathCurrent = resp.scriptid == this.publicId
+                    })
+        }
+
         private addShare(m:ModalDialog, options:RT.ShareManager.ShareOptions)
         {
             var id = this.publicId;
@@ -6331,6 +6372,8 @@
             var ht = "";
             this.getDescription().replace(/(#\w+)/g, (m, h) => { ht += " " + m; return "" })
             var url = Cloud.config.shareUrl + "/" + id
+            if (this.docPath && this.docPathCurrent)
+                url = Cloud.config.shareUrl + "/" + this.docPath
             var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
             lnk.set_title(title + " " + Cloud.config.hashtag + ht)
 
@@ -6355,43 +6398,31 @@
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
 
-            var isDocs = /#docs/i.test(this.getDescription()) || this.isLibrary();
-            if (Cloud.lite && isDocs) {
-                var pubDiv = div(null)
+            (() => {
+                if (!this.docPath) return
 
-                var pubAt = (path:string) => {
-                    return HTML.mkAsyncButton(lf("overwrite current", Cloud.getServiceUrl() + "/" + path), () => 
-                        Cloud.postPrivateApiAsync("pointers", {
-                            path: path,
-                            scriptid: id,
-                        }))
-                }
+                if (this.docPathCurrent && !Cloud.hasPermission("root-ptr"))
+                    return
 
-                this.getScriptTextAsync()
-                    .then((text:string) => {
-                        if (this.app.things.length == 0 && text)
-                            this.app = AST.Parser.parseScript(text)
+                var url = Cloud.getServiceUrl() + "/" + this.docPath
 
-                        var coll = new AST.IntelliCollector()
-                        coll.dispatch(this.app)
-                        var path = coll.topicPath || title.replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
-                        if (!Cloud.hasPermission("no-pointer-prefix"))
-                            path = Cloud.getUserId() + "/" + path
+                m.add(div("wall-dialog-header",  lf("documentation page")))
+                m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])
+                if (this.docPathCurrent)
+                    m.addBody([lf("This script is current.")])
+                else
+                    m.addBody([
+                          HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
+                          " ",
+                          HTML.mkAsyncButton(lf("overwrite current"), () => 
+                                Cloud.postPrivateApiAsync("pointers", {
+                                    path: this.docPath,
+                                    scriptid: id,
+                                }))
+                    ])
+            })()
 
-                        var url = Cloud.getServiceUrl() + "/" + path
-
-                        m.add(div("wall-dialog-header",  lf("documentation page")))
-                        m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])
-                        m.addBody([
-                              HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
-                              " ",
-                              pubAt(path)
-                        ])
-                    })
-                    .done()
-            }
-
-            if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud() && !isDocs) {
+            if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud()) {
                 var appStudioDiv = div("wall-dialog-buttons text-left")
                 appStudioDiv.style.height = "2.8em";
                 m.add(appStudioDiv)
@@ -6431,8 +6462,9 @@
         public share()
         {
             var m = new ModalDialog()
-            this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) })
             m.show()
+            this.setupDocPathAsync()
+            .done(() => this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) }))
         }
 
         public publishAsync(fromHub: boolean, noDialog = false, screenshotDataUri : string = null) : Promise
@@ -6580,7 +6612,9 @@
                                                 return Cloud.postPrivateApiAsync(mid + "/comments", req);
                                             })).done(() => {}, (e) => {});
                                         }
-                                        this.publishFinished(m, fromHub, sendPullRequest);
+
+                                        return this.setupDocPathAsync(true)
+                                            .then(() => this.publishFinished(m, fromHub, sendPullRequest))
                                     }).done()
                                 }
                             } else {
@@ -6711,7 +6745,7 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = Cloud.config.shareUrl + "/" + this.publicId;
+                txtAddress.value = Cloud.config.shareUrl + "/" + (this.docPathCurrent ? this.docPath : this.publicId);
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
