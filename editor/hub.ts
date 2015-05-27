@@ -324,6 +324,7 @@ module TDev.Browser {
             name: "Restricted Teacher",
             description: lf("Opinionated restricted mode"),
             scriptTemplates: ['blank'],
+            intelliProfileId: 'lyusma',
             editorMode: {
                 id: 'restrictedteacher',
                 name: lf("teacher"),
