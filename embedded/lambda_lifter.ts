@@ -94,7 +94,7 @@ module TDev {
     // variables, i.e. that closure-conversion has been performed already.
     export function lift(a: J.JApp) {
       var lambdas = (new Lifter()).visit({}, a).map((a: J.JInlineAction): J.JAction => {
-        var name = H.mangleDef(a.reference);
+        var name = a.reference.name;
         return {
           nodeType: "action",
           id: a.id,

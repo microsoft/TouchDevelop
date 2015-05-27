@@ -9,17 +9,21 @@ module TDev {
 
     // --- Environments
 
-    export interface EmitterEnv {
+    export interface EmitterEnv extends H.Env {
       indent: string;
     }
 
     export var emptyEnv: EmitterEnv = {
       indent: "",
+      ident_of_id: {},
+      id_of_ident: {},
     };
 
     export function indent(e: EmitterEnv) {
       return {
         indent: e.indent + "  ",
+        ident_of_id: e.ident_of_id,
+        id_of_ident: e.id_of_ident,
       };
     }
 
@@ -91,11 +95,11 @@ module TDev {
         //   which C and C++ accept both "f" and "&f" (we hence use the former)
         // - arrays, strings, user-defined objects, which are in fact of type
         //   "shared_ptr<T>", no "&" operator here.
-        return H.mangle(name, id);
+        return H.mangle(env, name, id);
       }
 
       public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(this.libraryMap, type)+" "+H.mangle(name, id);
+        return H.mkType(this.libraryMap, type)+" "+H.mangle(env, name, id);
       }
 
       // Allows the target to redefine their own string type.
@@ -123,8 +127,8 @@ module TDev {
 
       public visitFor(env: EmitterEnv, index: J.JLocalDef, bound: J.JExprHolder, body: J.JStmt[]) {
         var indexCode = this.visit(env, index) + " = 1";
-        var testCode = H.mangleDef(index) + " <= " + this.visit(env, bound);
-        var incrCode = "++"+H.mangleDef(index);
+        var testCode = H.mangleDef(env, index) + " <= " + this.visit(env, bound);
+        var incrCode = "++"+H.mangleDef(env, index);
         var bodyCode = this.visitMany(indent(env), body);
         return (
           env.indent + "for ("+indexCode+"; "+testCode+"; "+incrCode+") {\n" +
@@ -219,11 +223,9 @@ module TDev {
         else if (name == ":=")
           return this.visit(env, args[0]) + " = " + this.visit(env, args[1]);
 
-        // 3) Reference to a variable in the global scope. Not mangling the name
-        // with the [id], since i) we don't have that id right and ii) globals
-        // are unique (I think?).
+        // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.mangleName(name);
+          return H.mangle(env, name, name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
@@ -259,7 +261,7 @@ module TDev {
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
-        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangleName(name) +
+        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangle(e, name, name) +
           " = " + H.defaultValueForType(t) + ";"
       }
 
@@ -282,9 +284,9 @@ module TDev {
         var bodyText = [
           outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
           this.visitMany(env2, body),
-          outParams.length ? env2.indent + H.mkReturn(H.mangleDef(outParams[0])) : "",
+          outParams.length ? env2.indent + H.mkReturn(H.mangleDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(this.libraryMap, H.mangleName(name), inParams, outParams);
+        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams);
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
@@ -303,7 +305,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return e.indent + H.mkSignature(this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else if (f.nodeType == "data")
             return this.visit(e, f);
           else

@@ -26,18 +26,33 @@ module TDev {
         return name.replace(/\W/g, x => (replacementTable[x] || "_"));
       }
 
+      export interface Env {
+        ident_of_id: { [id: string]: string };
+        id_of_ident: { [ident: string]: boolean };
+      }
+
       // Compute a unique name from a user-provided name and a
       // TouchDevelop-generated unique id.
-      export function mangle(name: string, id: string) {
-          return mangleName(name) + "_" + mangleName(id);
+      export function mangle(env: Env, name: string, id: string) {
+        if (id in env.ident_of_id)
+          return env.ident_of_id[id];
+        else {
+          var i = 0;
+          var suffix = <any> "";
+          while (mangleName(name+suffix) in env.id_of_ident)
+            suffix = i++;
+          env.id_of_ident[mangleName(name+suffix)] = true;
+          env.ident_of_id[id] = mangleName(name + suffix);
+          return mangleName(name + suffix);
+        }
       }
 
-      export function mangleDef(d: J.JLocalDef) {
-          return mangle(d.name, d.id);
+      export function mangleDef(env: Env, d: J.JLocalDef) {
+        return mangle(env, d.name, d.id);
       }
 
-      export function mangleRef(d: J.JLocalRef) {
-          return mangle(d.name, <any> d.localId);
+      export function mangleRef(env: Env, d: J.JLocalRef) {
+        return mangle(env, d.name, <any> d.localId);
       }
 
 
@@ -89,11 +104,11 @@ module TDev {
         return mangleLibraryName(t.lib, t.type);
       }
 
-      export function mkParam(libMap: LibMap, p: J.JLocalDef) {
-        return mkType(libMap, p.type)+" "+mangleDef(p);
+      export function mkParam(env: Env, libMap: LibMap, p: J.JLocalDef) {
+        return mkType(libMap, p.type)+" "+mangleDef(env, p);
       }
 
-      export function mkSignature(libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+      export function mkSignature(env: Env, libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
         var retType = outParams.length ? mkType(libMap, outParams[0].type) : "void";
@@ -101,7 +116,7 @@ module TDev {
           name = "app_main";
         return [
           retType, " ", name, "(",
-          inParams.map(p => mkParam(libMap, p)).join(", "),
+          inParams.map(p => mkParam(env, libMap, p)).join(", "),
           ")",
         ].join("");
       }
