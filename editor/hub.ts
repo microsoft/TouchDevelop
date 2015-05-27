@@ -356,6 +356,9 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     "return": true,
                     "break": true,
+                    
+                    publishAsHidden: true,
+                 //   scriptSocialLinks: true,
                 }
             },
         },
