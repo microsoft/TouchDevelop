@@ -74,6 +74,16 @@ module TDev {
         }
       }
 
+      export function defaultValueForType(t1: J.JTypeRef) {
+        var t = <any> t1;
+        if (t == "Number")
+          return "0";
+        else if (t == "Boolean")
+          return "false";
+        else
+          return "NULL";
+      }
+
       export function mkType(libMap: LibMap, type: J.JTypeRef) {
         var t = resolveTypeRef(libMap, type);
         return mangleLibraryName(t.lib, t.type);
@@ -87,6 +97,8 @@ module TDev {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
         var retType = outParams.length ? mkType(libMap, outParams[0].type) : "void";
+        if (name == "main")
+          name = "app_main";
         return [
           retType, " ", name, "(",
           inParams.map(p => mkParam(libMap, p)).join(", "),
