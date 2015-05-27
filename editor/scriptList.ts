@@ -5445,8 +5445,9 @@
                     if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
                         var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("diff to base script"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
-                        divs.push(div('', pull, diff, convertToTutorial));
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
+                        divs.push(div('', pull, diff, convertToTutorial, convertToDocs));
                     }
 
                     if (EditorSettings.widgets().scriptStats) {
@@ -6931,6 +6932,7 @@
                 
                 // insert steps
                 var converter = new TutorialConverter();
+                converter.tutorial = true;
                 converter.visitChildren(clone);
 
                 // add main
@@ -6954,6 +6956,33 @@
                 this.browser().createInstalled(header).edit();
             });
         }
+        
+        public convertToLesson() {
+            if (!this.jsonScript) return;
+
+            this.browser().updateInstalledHeaderCacheAsync()
+                .then(() => World.getAnyScriptAsync(this.getGuid()))
+                .then(scriptText => {
+                var clone = AST.Parser.parseScript(scriptText);
+                clone.comment += " #docs";
+                clone.setName(this.browser().newScriptName(lf("{0} lesson", clone.getName())));
+
+                // insert steps
+                var converter = new TutorialConverter();
+                converter.visitChildren(clone);
+
+                var text = clone.serialize();
+                Util.log(text);
+                var scriptStub = {
+                    editorName: "touchdevelop",
+                    scriptText: text,
+                    scriptName: clone.getName(),
+                }
+                return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
+            }).done((header: Cloud.Header) => {
+                this.browser().createInstalled(header).edit();
+            });
+        }
 
         public mergeScript()
         {
@@ -6963,6 +6992,7 @@
 
     class TutorialConverter extends AST.NodeVisitor
     {
+        public tutorial = false;
         public visitAction(n: AST.Action) {
             this.visitBlock(n.body);
         }
@@ -6973,13 +7003,13 @@
                 var step = /^(exprStmt|if|for|while|boxed|foreach)$/.test(stmt.nodeType());
                 if (step) {
                     var c = new AST.Comment();
-                    c.text = lf("TODO: describe the current step")
-                        + "\n{stcode}";
+                    c.text = lf("TODO: describe the current step");
+                    if (this.tutorial) c.text += "\n{stcode}";
                     n.stmts.push(c);
                 }
                 n.stmts.push(stmt);
                 this.visitChildren(stmt);
-                if (step) {
+                if (step && this.tutorial) {
                     var c = new AST.Comment(); c.text = "{stcmd:run}";
                     n.stmts.push(c);
                 }

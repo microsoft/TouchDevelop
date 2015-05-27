@@ -430,6 +430,7 @@ module TDev {
         browsePush,
         browseDiffBase,
         browseConvertToTutorial,
+        browseConvertToLesson,
         browseAddScriptToList,
         browseUpdate,
         browseSendPullRequest,

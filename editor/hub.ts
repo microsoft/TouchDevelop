@@ -187,7 +187,7 @@ module TDev.Browser {
                 sendPullRequest: true,
                 scriptStats: true,
                 userSocialTab: true,
-                scriptConvertToTutorial: true,
+                scriptConvertToDocs: true,
                 // sections
                 testsSection: true,
                 actionTypesSection: true,
@@ -308,7 +308,7 @@ module TDev.Browser {
                     singleReturnValue: true,
                     integerNumbers: true,
                     codeSearch: true,
-                    scriptConvertToTutorial: true,
+                    scriptConvertToDocs: true,
                     librariesSection: true,
                     scriptPropertiesSettings: true,
                     // hub

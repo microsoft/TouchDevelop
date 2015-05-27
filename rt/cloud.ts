@@ -74,7 +74,7 @@ module TDev.Cloud {
         // hub
         scriptAddToChannel?: boolean;
         scriptSocialLinks?: boolean;
-        scriptConvertToTutorial?: boolean;
+        scriptConvertToDocs?: boolean;
         notifyAppReloaded?: boolean;
         showTemporaryNotice?: boolean;
         hubChannels?: boolean;
