@@ -308,9 +308,45 @@ module TDev.Browser {
                     singleReturnValue: true,
                     integerNumbers: true,
                     codeSearch: true,
+                    librariesSection: true,
+                    scriptPropertiesSettings: true,
+                    // hub
+                    editorRunOnLoad: true,
+
+                    whileConditionDefault: "true",
+                    forConditionDefault: "5",
+                    "return": true,
+                    "break": true,
+                }
+            },
+        },
+        'restrictedteacher': {
+            name: "Restricted Teacher",
+            description: lf("Opinionated restricted mode"),
+            scriptTemplates: ['blank'],
+            editorMode: {
+                id: 'restrictedteacher',
+                name: lf("teacher"),
+                descr: lf("Restricted teacher mode!"),
+                astMode: 2,
+                widgets: {
+                    addNewButton: true,
+                    undoButton: true,
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    copyPaste: true,
+                    comment: true,
+                    dataSection: true,
+                    splitScreenOnLoad: true,
+                    updateButton: true,
+                    forceMainAsAction: true,
+                    singleReturnValue: true,
+                    integerNumbers: true,
+                    codeSearch: true,
                     scriptConvertToDocs: true,
                     librariesSection: true,
                     scriptPropertiesSettings: true,
+                    
                     // hub
                     hubChannels : true,
                     scriptAddToChannel: true,
@@ -419,7 +455,7 @@ module TDev.Browser {
                 } else if (Cloud.config.theme)
                     EditorSettings.setTheme(Cloud.config.theme);
                 else if (Cloud.isRestricted()) {
-                    var theme = Cloud.hasPermission('admin') ? 'restrictededitor' : 'restricted';
+                    var theme = Cloud.hasPermission('admin') ? 'restrictededitor' : Cloud.hasPermission('teacher') ? 'restrictedteacher' : 'restricted';
                     EditorSettings.setTheme(themes[theme]);
                 }
                 else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);

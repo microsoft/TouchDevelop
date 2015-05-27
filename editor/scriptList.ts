@@ -149,10 +149,10 @@
             });
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
+                    Cloud.litePermissions = settings.permissions;
                     Util.setUserLanguageSetting(settings.culture, true);
                     EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
-                    Cloud.litePermissions = settings.permissions;
                 }, e => { });
         }
 
