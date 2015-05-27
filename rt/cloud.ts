@@ -71,9 +71,15 @@ module TDev.Cloud {
         toggleBreakpoint?: boolean;
         debugButton?: boolean;
         
+        socialNetworks?: boolean;
+        socialNetworkyoutube?: boolean;
+        socialNetworkvimeo?: boolean;
+        socialNetworkvine?: boolean;
+        socialNetworkinstagram?: boolean;
+        socialNetworktwitter?: boolean;
+        
         // hub
         scriptAddToChannel?: boolean;
-        scriptSocialLinks?: boolean;
         scriptConvertToDocs?: boolean;
         notifyAppReloaded?: boolean;
         showTemporaryNotice?: boolean;

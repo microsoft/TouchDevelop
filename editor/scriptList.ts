@@ -3968,7 +3968,7 @@
             }
             
             // parsing social network links
-            socialNetworks.filter(sn => !!sn.idToHTMLAsync)
+            socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync)
                 .forEach(sn => sn.parseIds(c.text)
                     .forEach(ytid => sn.idToHTMLAsync(ytid)
                         .done(d => { if (d) nestedPubs.appendChild(d); })));
@@ -5366,8 +5366,8 @@
                     AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
 
                     
-                    if (EditorSettings.widgets().scriptSocialLinks && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
-                        socialNetworks.forEach(sn => {
+                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
+                        socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
                                 metaInput = HTML.mkTextInputWithOk("url", sn.description ,() => {
@@ -6287,7 +6287,7 @@
                 }
 
                 if (this.jsonScript.meta) {
-                    socialNetworks.filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
+                    socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
                         .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
                 }
 
@@ -8996,7 +8996,7 @@
                     })
                 })()
             }
-            MdComments.attachVideoHandlers(e, false);
+            MdComments.attachVideoHandlers(EditorSettings.widgets(), e, false);
             if (TheEditor.canReplyTutorial()) {
                 var elts = e.getElementsByClassName("stepid")
                 for (var i = 0; i < elts.length; ++i) {

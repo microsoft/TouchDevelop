@@ -355,7 +355,7 @@ module TDev {
     }
 
     var oembedCache: StringMap<HTML.OEmbed> = {};
-    export var socialNetworks: SocialNetwork[] = [
+    var _socialNetworks: SocialNetwork[] = [
         {
             id: "youtube",
             name: "YouTube",
@@ -461,6 +461,10 @@ module TDev {
             */
         },
     ];
+    
+    export function socialNetworks(widgets : Cloud.EditorWidgets) : SocialNetwork[] {
+        return _socialNetworks.filter(sn => !!widgets["socialNetwork" + sn.id]);
+    }
 
     export class MdComments
     {
@@ -510,12 +514,12 @@ module TDev {
             })
         }
 
-        static attachVideoHandlers(e: HTMLElement, autoPlay: boolean): void {
+        static attachVideoHandlers(widgets : Cloud.EditorWidgets, e: HTMLElement, autoPlay: boolean): void {
             if (!Browser.directionAuto) {
                 Util.toArray(e.getElementsByClassName('md-tutorial')).forEach((v: HTMLElement) => dirAuto(v));
                 Util.toArray(e.getElementsByClassName('md-box-avatar-body')).forEach((v: HTMLElement) => dirAuto(v));
             }
-            var sns = socialNetworks.filter(sn => !!sn.idToHTMLAsync);
+            var sns = socialNetworks(widgets).filter(sn => !!sn.idToHTMLAsync);
             Util.toArray(e.getElementsByTagName('a')).forEach((v: HTMLAnchorElement) => {
                 sns.forEach(sn => sn.parseIds(v.href).forEach(id => {
                     v.style.display = 'none';
