@@ -268,6 +268,7 @@ module TDev {
       public visitAction(
         env: EmitterEnv,
         name: string,
+        id: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
         body: J.JStmt[])
@@ -286,7 +287,7 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams);
+        var head = H.mkSignature(env, this.libraryMap, H.mangle(env, name, id), inParams, outParams);
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
@@ -305,7 +306,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return e.indent + H.mkSignature(e, this.libraryMap, H.mangle(e, f.name, f.id), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else if (f.nodeType == "data")
             return this.visit(e, f);
           else

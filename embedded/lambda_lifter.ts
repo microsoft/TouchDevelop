@@ -18,8 +18,10 @@ module TDev {
       // That's where we do the in-place modification.
       public visit(env, e: J.JNode) {
         var as = super.visit(env, e);
-        if (e.nodeType == "inlineActions")
+        if (e.nodeType == "inlineActions") {
           e.nodeType = "exprStmt";
+          (<J.JInlineActions> e).expr.locals = [];
+        }
         return as;
       }
 
@@ -60,6 +62,7 @@ module TDev {
       public visitAction(
         env,
         name: string,
+        id: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
         body: J.JStmt[],
@@ -101,7 +104,7 @@ module TDev {
           name: name,
           inParameters: a.inParameters,
           outParameters: a.outParameters,
-          isPrivate: true,
+          isPrivate: false,
           isOffline: false,
           isQuery: false,
           isTest: false,

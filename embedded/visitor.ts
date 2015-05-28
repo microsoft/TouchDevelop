@@ -73,7 +73,7 @@ module TDev {
               return this.visitInlineAction(env, n6.reference, n6.inParameters, n6.outParameters, n6.body);
             case "action":
               var n7 = <J.JAction> n;
-              return this.visitAction(env, n7.name, n7.inParameters, n7.outParameters, n7.body, n7.isPrivate);
+              return this.visitAction(env, n7.name, n7.id, n7.inParameters, n7.outParameters, n7.body, n7.isPrivate);
             case "app":
               return this.visitApp(env, (<J.JApp> n).decls);
             case "library":
@@ -146,6 +146,7 @@ module TDev {
       public visitAction(
         env: T,
         name: string,
+        id: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
         body: J.JStmt[],
