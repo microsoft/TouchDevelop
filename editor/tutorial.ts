@@ -984,10 +984,9 @@ module TDev
                 this.disableUpdate = true;
 
                 m.add(div('wall-dialog-header', lf("you did it!")));
-                m.addHTML(lf("Congratulations, you created a mobile app!") + "<br/>" +
-                    lf("Publish it, so that everyone can run it."))
+                m.addHTML(lf("Publish your script, so that everyone can run it."))
                 m.add(div('wall-dialog-buttons',
-                    HTML.mkButton(lf("publish to TouchDevelop"), () => {
+                    HTML.mkButton(lf("publish"), () => {
                         this.disableUpdate = false;
                         ScriptNav.publishScript(dbg ? false : true, uploadScreenshot ? screenshotDataUri : undefined)
                     this.update()
