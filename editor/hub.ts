@@ -426,6 +426,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
                     (Cloud.hasPermission("bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("docs") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("generate codes"), () => {
                         TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
                             .done(function(r) {
@@ -437,6 +438,27 @@ module TDev.Browser {
 
             m.show();
         }
+
+        export function editApiConfig()
+        {
+            ModalDialog.editText(lf("API name"), "config/settings", name => {
+                var r = Cloud.getPrivateApiAsync(name)
+                r.then(resp => EditorHost.editFullScreenAsync("resp.json", JSON.stringify(resp, null, 2)))
+                .then(val => {
+                    var r = RT.JsonObject.mk(val, (err) => {
+                        ModalDialog.info(lf("parse error"), err)
+                    })
+                    if (r && r.value()) {
+                        ModalDialog.ask(JSON.stringify(r.value(), null, 2), "update", () => {
+                            Cloud.postPrivateApiAsync(name, r.value()).done()
+                        })
+                    }
+                })
+                .done()
+                return r
+            })
+        }
+
 
         export function mkBetaNote(): HTMLElement {
             var beta = div("beta-note");
