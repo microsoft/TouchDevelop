@@ -1430,9 +1430,12 @@ module TDev
         }
 
         private stopOverlayHandler = () => {};
-
+        private runOverlay: HTMLElement;
+            
         private showRunOverlay(step: Step)
         {
+            if (this.runOverlay && this.runOverlay.parentElement) return;
+            
             var tip =
                div('tip tip-tl', div('tipInner',
                     div('tipTitle', lf("tap there")),
@@ -1441,27 +1444,27 @@ module TDev
             tip.style.bottom = "calc(50% - 3em)";
             tip.style.right = "calc(50% - 3em)";
 
-            var overlay =
+            this.runOverlay =
                 div("modalOverlay" /* , tip */)
-
-            overlay.withClick(() => {
+            
+            this.runOverlay.withClick(() => {
+                if (this.runOverlay) {
+                    this.runOverlay.removeSelf()
+                    this.runOverlay = null;
+                }                                
                 Runtime.theRuntime.stopAsync().done()
-                if (overlay) {
-                    overlay.removeSelf()
-                    overlay = null;
-                }
             });
-            overlay.style.backgroundColor = "rgba(255, 255, 79, 0.1)";
-            overlay.style.cursor = "pointer";
-            elt("editorContainer").appendChild(overlay)
+            this.runOverlay.style.backgroundColor = "rgba(255, 255, 79, 0.1)";
+            this.runOverlay.style.cursor = "pointer";
+            elt("editorContainer").appendChild(this.runOverlay)
             this.stopOverlayHandler = () => {
-                if (overlay) {
-                    overlay.removeSelf()
-                    overlay = null
-                }
+                if (this.runOverlay) {
+                    this.runOverlay.removeSelf()
+                    this.runOverlay = null;
+                }                                
             }
             Util.setTimeout(3000, () => {
-              if (overlay) overlay.appendChild(tip)
+              if (this.runOverlay) this.runOverlay.appendChild(tip)
             })
         }
 
@@ -1806,7 +1809,7 @@ module TDev
             if (expS > 0) this.expectingSearch--;
 
             if (SizeMgr.splitScreen && !TheEditor.currentRt.isStopped()) {
-                TipManager.setTip(null)
+                this.showRunOverlay(this.steps[this.currentStep]);
                 return
             }
 
