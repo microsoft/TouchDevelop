@@ -685,6 +685,7 @@ module TDev.Browser {
         baseId?: string;
         baseUserId?: string;
         requiresLogin?: boolean;
+        editor?: string;
     }
 
     interface ITutorial {
@@ -1029,35 +1030,39 @@ module TDev.Browser {
                         });
                     }
                     break;
+                case "create":
                 case "derive":
                     if (/^\w+$/.test(h[2])) {
-                        HistoryMgr.instance.setHash(this.screenId() + ":derive:" + h[2], null)
-                        if (!Cloud.isAccessTokenExpired())
-                            ProgressOverlay.show("creating your script",() => {
-                                Promise.join([
-                                    TheApiCacheMgr.getAsync(h[2]),
-                                    ScriptCache.getScriptAsync(h[2])
-                                ]).done((arr) => {
-                                    var scr: JsonScript = arr[0]
-                                    var txt: string = arr[1]
-                                    if (!scr || !txt) return;
-                                    var t: ScriptTemplate = <any>{
-                                        title: scr.name,
-                                        id: "derive",
-                                        scriptid: scr.id,
-                                        icon: "",
-                                        description: "",
-                                        name: scr.name,
-                                        source: txt,
-                                        section: "",
-                                        editorMode: 0,
-                                        baseId: scr.id,
-                                        baseUserId: scr.userid,
-                                    }
-                                    ProgressOverlay.hide();
-                                    this.createScriptFromTemplate(t);
-                                })
-                            })
+                        ProgressOverlay.show(lf("loading template"), () => {
+                            var scriptid = h[2];
+                            TheApiCacheMgr.getAsync(scriptid, true)
+                                .then((scr: JsonScript) => {
+                                if (scr && scr.updateid != scr.id) scriptid = scr.updateid;
+                                return Promise.join([
+                                    TheApiCacheMgr.getAsync(scriptid),
+                                    ScriptCache.getScriptAsync(scriptid)]);
+                            }).done(arr => {
+                                var scr: JsonScript = arr[0]
+                                var txt: string = arr[1]
+                                if (!scr || !txt) return;
+                                var t: ScriptTemplate = {
+                                    title: scr.name,
+                                    id: "derive",
+                                    scriptid: scr.id,
+                                    icon: "",
+                                    description: "",
+                                    name: scr.name,
+                                    source: txt,
+                                    section: "",
+                                    editorMode: 0,
+                                    editor: scr.editor || "touchdevelop",
+                                    baseId: h[1] == "device" ? scr.id : "",
+                                    baseUserId: scr.userid,
+                                }
+                                ProgressOverlay.hide();
+                                this.createScriptFromTemplate(t);
+                            });
+                        });
                     }
                     break;
             }
@@ -1201,9 +1206,13 @@ module TDev.Browser {
 
         public createScriptFromTemplate(template: ScriptTemplate) {
             this.renameScriptFromTemplateAsync(template)
-                .then(temp => {
-                    if (temp)
-                        return this.browser().openNewScriptAsync(temp.source, temp.name);
+                .then((temp : ScriptTemplate) => {
+                if (temp)
+                    return this.browser().openNewScriptAsync(<World.ScriptStub>{
+                        editorName: temp.editor || "touchdevelop",
+                        scriptText: temp.source,
+                        scriptName: temp.name
+                    }, temp);
                     else
                         return Promise.as();
                 })
@@ -1571,7 +1580,7 @@ module TDev.Browser {
                             m.onDismiss = undefined;
                             m.dismiss();
                             this.renameScriptFromTemplateAsync(template)
-                                .done(temp => onSuccess(temp), e => onSuccess(undefined));
+                                .done((temp : ScriptTemplate) => onSuccess(temp), e => onSuccess(undefined));
                         });
                         elts.push(res)
                     })
