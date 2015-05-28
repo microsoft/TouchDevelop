@@ -362,11 +362,10 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     
-                    publishDescription: true,
-                    sendPullRequest: true,
+                    //publishDescription: true,
+                    //sendPullRequest: true,
                     scriptPullChanges: true,
                     publishAsHidden: true,
-                 //   scriptSocialLinks: true,
                 }
             },
         },
