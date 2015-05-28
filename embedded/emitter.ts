@@ -348,6 +348,7 @@ module TDev {
                   throw new Error("Malformed string literal");
               }
             }
+            h++;
             lit += "}";
             var r = "bitmap"+n;
             return "  int "+r+"_w = "+w+";\n" +
