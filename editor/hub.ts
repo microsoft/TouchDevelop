@@ -353,8 +353,8 @@ module TDev.Browser {
                     socialNetworkvimeo:true,
                     
                     // hub
-                    hubChannels : true,
-                    scriptAddToChannel: true,
+                    // hubChannels : true,
+                    // scriptAddToChannel: true,
                     editorRunOnLoad: true,
 
                     whileConditionDefault: "true",
