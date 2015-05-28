@@ -100,7 +100,7 @@ module TDev {
         var name = a.reference.name;
         return {
           nodeType: "action",
-          id: a.id,
+          id: a.reference.id,
           name: name,
           inParameters: a.inParameters,
           outParameters: a.outParameters,
