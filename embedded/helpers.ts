@@ -75,11 +75,11 @@ module TDev {
         var s = <any> typeRef;
         if (s.length && s[0] == "{") {
           var t = JSON.parse(<any> typeRef);
-          if (!t.o)
+          if (!(t.o || t.g))
             throw new Error("Unsupported type reference");
           return {
             lib: t.l ? libMap[t.l] : "",
-            type: t.o
+            type: t.o || t.g
           };
         } else {
           return {
