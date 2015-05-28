@@ -3838,10 +3838,12 @@ module TDev
                         if (firstTime)
                             TDev.Browser.EditorSoundManager.startTutorial();
                         refresh();
-                        this.stepTutorial.startAsync().done(() => {
-                            refresh();
-                            this.updateTutorial();
-                        });
+                        this.stepTutorial.startAsync()
+                            .then(() => this.currentRt.stopAsync())
+                            .done(() => {
+                                refresh();
+                                this.updateTutorial();
+                            });
                     }
                 // })
                 })
