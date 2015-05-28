@@ -39,6 +39,8 @@ module TDev {
 
       private libraryMap: H.LibMap = {};
 
+      private imageLiterals = [];
+
       // All the libraries needed to compile this [JApp].
       constructor(
         private libRef: J.JCall,
@@ -191,6 +193,23 @@ module TDev {
         return null;
       }
 
+      // Some conversions cannot be expressed using the simple "enums" feature
+      // (which maps a string literal to a constant). This function transforms
+      // the arguments for some known specific C++ functions.
+      private specialTreatment(f: string, actualArgs: J.JExpr[]) {
+        if (f == "micro_bit::createImage") {
+          var x = H.isStringLiteral(actualArgs[0]);
+          if (!x)
+            throw new Error("create image takes a string literal only");
+          var r = "literals::bitmap"+this.imageLiterals.length;
+          var code = f+"("+r+"_w, "+r+"_h, "+r+")";
+          this.imageLiterals.push(x);
+          return code;
+        } else {
+          return null;
+        }
+      }
+
       public visitCall(env: EmitterEnv,
         name: string,
         args: J.JExpr[],
@@ -199,14 +218,20 @@ module TDev {
       {
         var mkCall = (f: string, skipReceiver: boolean) => {
           var actualArgs = skipReceiver ? args.slice(1) : args;
-          var argsCode = actualArgs.map(a => {
-            var k = H.isEnumLiteral(a);
-            if (k)
-              return k+"";
-            else
-              return this.visit(env, a)
-          });
-          return f + "(" + argsCode.join(", ") + ")";
+          var s = this.specialTreatment(f, actualArgs);
+          if (s)
+            return s;
+          else {
+            var argsCode =
+              actualArgs.map(a => {
+                var k = H.isEnumLiteral(a);
+                if (k)
+                  return k+"";
+                else
+                  return this.visit(env, a)
+              });
+            return f + "(" + argsCode.join(", ") + ")";
+          }
         };
 
         // The [JCall] node has several, different, often unrelated purposes.
@@ -291,6 +316,47 @@ module TDev {
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
+      private compileImageLiterals() {
+        if (!this.imageLiterals.length)
+          return "";
+
+        return "namespace literals {\n" +
+          this.imageLiterals.map((s: string, n: number) => {
+            var x = 0;
+            var w = 0;
+            var h = 0;
+            var lit = "{ ";
+            for (var i = 0; i < s.length; ++i) {
+              switch (s[i]) {
+                case "0":
+                case "1":
+                  lit += s[i]+", ";
+                  x++;
+                  break;
+                case " ":
+                  break;
+                case "\n":
+                  if (w == 0)
+                    w = x;
+                  else if (x != w)
+                    // Sanity check
+                    throw new Error("Malformed string literal");
+                  x = 0;
+                  h++;
+                  break;
+                default:
+                  throw new Error("Malformed string literal");
+              }
+            }
+            lit += "}";
+            var r = "bitmap"+n;
+            return "  int "+r+"_w = "+w+";\n" +
+              "  int "+r+"_h = "+h+";\n"+
+              "  uint8_t "+r+"[] = "+lit+";\n";
+          }) +
+        "}\n\n";
+      }
+
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
@@ -329,8 +395,9 @@ module TDev {
         }).filter(x => x != null);
 
         // By convention, because we're forced to return a string, write the
-        // output parameters in the member variables.
-        this.prototypes = forwardDeclarations.join("\n");
+        // output parameters in the member variables. Image literals are scoped
+        // within our namespace.
+        this.prototypes = this.compileImageLiterals() + forwardDeclarations.join("\n");
         this.code = userFunctions.join("\n");
 
         // [embedded.ts] now reads the three member fields separately and
