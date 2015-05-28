@@ -1644,5 +1644,12 @@ module TDev.RT {
         public docs_render(height:number, caption:string)
         {
         }
+
+        //? Get the web address of an art resource; invalid if not available.
+        public readonly_url():string
+        {
+            return this.getReadonlyUrlSync()
+        }
+
     }
 }

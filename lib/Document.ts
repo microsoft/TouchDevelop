@@ -22,5 +22,11 @@ module TDev.RT {
         public docs_render(caption:string)
         {
         }
+
+        //? Gets the web address for the document.
+        public url():string
+        {
+            return this._url
+        }
     }
 }
