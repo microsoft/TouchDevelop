@@ -141,7 +141,7 @@ module Helpers {
       type: t,
       comment: "",
       isReadonly: false,
-      isTransient: false,
+      isTransient: true,
       isCloudEnabled: false,
     };
   }

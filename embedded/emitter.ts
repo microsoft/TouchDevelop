@@ -82,8 +82,10 @@ module TDev {
       }
 
       public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
-        var decls = locals.map(d =>
-          this.visit(env, d) + " = " + H.defaultValueForType(d.type) + ";");
+        var decls = locals.map(d => {
+          var x = H.defaultValueForType(d.type);
+          return this.visit(env, d) + (x ? " = " + x : "") + ";";
+        });
         return decls.join("\n"+env.indent) +
           (decls.length ? "\n" + env.indent : "") +
           this.visit(env, expr);
@@ -286,8 +288,9 @@ module TDev {
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
+        var x = H.defaultValueForType(t);
         return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangle(e, name, name) +
-          " = " + H.defaultValueForType(t) + ";"
+          (x ? " = " + x : "") + ";"
       }
 
       public visitAction(
