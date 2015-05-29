@@ -1464,6 +1464,7 @@
                         loadItem = false; // just once
                         var nitem = item;
                         if (!!item) nitem = items.filter((p) => p.equals(item))[0] || item;
+                        else nitem = items[0];
                         if (!nitem)
                             this.clearRightPane();
                         else {

@@ -310,9 +310,7 @@ module TDev.Browser {
                     codeSearch: true,
                     librariesSection: true,
                     scriptPropertiesSettings: true,
-                    // hub
                     editorRunOnLoad: true,
-
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
                     "return": true,
@@ -344,27 +342,19 @@ module TDev.Browser {
                     singleReturnValue: true,
                     integerNumbers: true,
                     codeSearch: true,
-                    scriptConvertToDocs: true,
                     librariesSection: true,
                     scriptPropertiesSettings: true,                    
-                    scriptDiffToBase: true,
-                    
-                    socialNetworks: true,
-                    socialNetworkvimeo:true,
-                    
-                    // hub
-                    // hubChannels : true,
-                    // scriptAddToChannel: true,
                     editorRunOnLoad: true,
-
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
                     "return": true,
                     "break": true,
                     
-                    //publishDescription: true,
-                    //sendPullRequest: true,
-                    scriptPullChanges: true,
+                    // teacher specific
+                    scriptDiffToBase: true,                    
+                    scriptConvertToDocs: true,
+                    socialNetworks: true,
+                    socialNetworkvimeo:true,
                     publishAsHidden: true,
                 }
             },
@@ -373,8 +363,46 @@ module TDev.Browser {
             name: "Restricted Editor",
             description: lf("Opinionated restricted mode"),
             scriptTemplates: ['blank', 'blankdocs'],
-            intelliProfileId: 'lyusma',
-            editorMode: editorModes['pro']
+            editorMode: {
+                id: 'restricteditor',
+                name: lf("editor"),
+                descr: lf("Restricted editor mode!"),
+                astMode: 2,
+                widgets: {
+                    addNewButton: true,
+                    undoButton: true,
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    copyPaste: true,
+                    comment: true,
+                    dataSection: true,
+                    splitScreenOnLoad: true,
+                    updateButton: true,
+                    forceMainAsAction: true,
+                    singleReturnValue: true,
+                    integerNumbers: true,
+                    codeSearch: true,
+                    librariesSection: true,
+                    scriptPropertiesSettings: true,
+                    editorRunOnLoad: true,
+                    whileConditionDefault: "true",
+                    forConditionDefault: "5",
+                    "return": true,
+                    "break": true,
+                    
+                    // teacher specific
+                    scriptDiffToBase: true,
+                    scriptConvertToDocs: true,
+                    socialNetworks: true,
+                    socialNetworkvimeo: true,
+                    publishAsHidden: true,
+
+                    // editor specific                  
+                    publishDescription: true,
+                    sendPullRequest: true,
+                    scriptPullChanges: true,
+                }
+            }
         }
     };
 
@@ -386,7 +414,7 @@ module TDev.Browser {
         export function showFeedbackBox() {
             var link = (text: string, lnk: string) =>
                 HTML.mkButton(text,
-                    () => { window.open(Cloud.getServiceUrl() + lnk) });
+                    () => { window.location.href = lnk });
 
             if (ModalDialog.current && !ModalDialog.current.canDismiss) {
                 window.open(Cloud.getServiceUrl());
