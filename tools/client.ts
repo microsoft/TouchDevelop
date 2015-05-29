@@ -3510,6 +3510,37 @@ function uploadwf(args:string[])
     })
 }
 
+function copyscript(args:string[])
+{
+    var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
+    if (!mm) {
+        console.log("invalid or missing $TD_UPLOAD_KEY")
+        return
+    }
+
+    if (args.length < 1 || !/^http/.test(args[0])) {
+        console.log("usage: copyscript https://account.blob.core.windows.net/scripttext/scriptid [baseidoverride]")
+        return
+    }
+
+    
+    var liteUrl = mm[1]
+    var key = mm[2]
+
+    tdevGet(args[0], resp => {
+        var scr = JSON.parse(resp)
+        console.log(scr)
+
+        scr.forceid = scr.id
+        if (args[1])
+            scr.baseid = args[1]
+
+        tdevGet(liteUrl + "api/scripts" + key, resp => {
+            console.log(resp)
+        }, 1, scr)
+    })
+}
+
 function tdupload(args:string[])
 {
     if (process.env.TD_SOURCE_MAPS && !process.env.TRAVIS)
@@ -3726,6 +3757,7 @@ var cmds = {
     "uploadwf": { f:uploadwf, a:'PATH FILE [LABEL]', h:'upload a webfile'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
     "setlabel": { f:setlabel, a:'KEY RELID LABEL', h:'set release label'},
+    "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
 }
 
 export interface ScriptTemplate {
