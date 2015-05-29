@@ -1072,7 +1072,10 @@ module TDev.Browser {
                             }).done(arr => {
                                 var scr: JsonScript = arr[0]
                                 var txt: string = arr[1]
-                                if (!scr || !txt) return;
+                                if (!scr || !txt) {
+                                    ProgressOverlay.hide();
+                                    return;
+                                }
                                 var t: ScriptTemplate = {
                                     title: scr.name,
                                     id: "derive",
