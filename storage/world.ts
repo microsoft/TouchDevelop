@@ -743,11 +743,11 @@ module TDev {
                 }
                 else if (e.status == 403) {
                     Cloud.accessTokenExpired();
-                    ModalDialog.info("access denied", "Your access token might have expired. Please return to the main hub and then try again.");
+                    ModalDialog.info(lf("access denied"), lf("Your access token might have expired. Please return to the main hub and then try again."));
                     return;
                 }
-                else if (e.status == 419) {
-                    ModalDialog.info("access denied", "Your account is not authorized to perform this action.");
+                else if (e.status == 419 || e.status == 402) {
+                    ModalDialog.info(lf("access denied"), lf("Your account is not authorized to perform this action."));
                     return;
                 }
                 else if (e.status == 400)

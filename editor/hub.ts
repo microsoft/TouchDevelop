@@ -419,15 +419,15 @@ module TDev.Browser {
                     );
             }
             
-            if (Cloud.lite && ["upload", "admin", "bug", "docs"].some(perm => Cloud.hasPermission(perm))) {
+            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-codes"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
                 m.add([div("wall-dialog-body", [
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
-                    (Cloud.hasPermission("bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
-                    (Cloud.hasPermission("docs") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
+                    (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
+                    (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
-                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("generate codes"), () => {
+                    (Cloud.hasPermission("gen-codes") ? HTML.mkButton(lf("generate codes"), () => {
                         TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
                             .done(function(r) {
                             TDev.RT.ShareManager.shareTextAsync("This is your teacher code: " + r.items[0], '').done();
@@ -481,13 +481,15 @@ module TDev.Browser {
 
         export function init() {
             if (window && window.location) {
+                Cloud.setPermissions();
                 var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
                 if (m) {
                     EditorSettings.setTheme(themes[m[2]]);
                 } else if (Cloud.config.theme)
                     EditorSettings.setTheme(Cloud.config.theme);
                 else if (Cloud.isRestricted()) {
-                    var theme = Cloud.hasPermission('admin') ? 'restrictededitor' : Cloud.hasPermission('teacher') ? 'restrictedteacher' : 'restricted';
+                    var theme = Cloud.hasPermission('full-editor') ? 'restrictededitor' : 
+                                Cloud.hasPermission('post-art') ? 'restrictedteacher' : 'restricted';
                     EditorSettings.setTheme(themes[theme]);
                 }
                 else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);

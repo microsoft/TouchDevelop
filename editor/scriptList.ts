@@ -149,7 +149,7 @@
             });
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
-                    Cloud.litePermissions = settings.permissions;
+                    Cloud.setPermissions(settings.permissions);
                     Util.setUserLanguageSetting(settings.culture, true);
                     EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
@@ -7349,7 +7349,7 @@
             }
             ch.unshift(hd);
 
-            if (Cloud.hasPermission("admin")) {
+            if (Cloud.hasPermission("user-mgmt")) {
                 accountButtons.appendChild(
                     HTML.mkButton(lf("permissions"),
                         () => {
@@ -7359,6 +7359,7 @@
                                 ModalDialog.editText(lf("permissions"), resp.permissions,
                                     t => {
                                         return Cloud.postPrivateApiAsync(path, { permissions: t })
+                                            .then(r => {}, e => World.handlePostingError(e, lf("set permissions")))
                                     })
                             })
                         }))
