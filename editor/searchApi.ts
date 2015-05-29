@@ -477,7 +477,7 @@ module TDev
                 insertLit("true");
                 insertLit("false");
                 insertLit("not", "operator");
-                if (asyncEnabled) {
+                if (asyncEnabled && TheEditor.widgetEnabled("async")) {
                     insertLit("async", "operator");
                 }
                 propIts.pushRange(TheEditor.selector.getStmtIntelliItems());
