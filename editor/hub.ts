@@ -448,7 +448,7 @@ module TDev.Browser {
                     );
             }
             
-            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-codes"].some(perm => Cloud.hasPermission(perm))) {
+            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
                 m.add([div("wall-dialog-body", [
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
@@ -456,7 +456,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
-                    (Cloud.hasPermission("gen-codes") ? HTML.mkButton(lf("generate codes"), () => {
+                    (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
                         var perm = HTML.mkTextInput("text", "")
                         var count = HTML.mkTextInput("text", "")
