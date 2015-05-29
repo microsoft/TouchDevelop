@@ -714,6 +714,7 @@ module TDev.Browser {
         baseUserId?: string;
         requiresLogin?: boolean;
         editor?: string;
+        updateLibraries?: boolean;
     }
 
     interface ITutorial {
@@ -1089,6 +1090,7 @@ module TDev.Browser {
                                     editor: scr.editor || "touchdevelop",
                                     baseId: h[1] == "device" ? scr.id : "",
                                     baseUserId: scr.userid,
+                                    updateLibraries: true
                                 }
                                 ProgressOverlay.hide();
                                 this.createScriptFromTemplate(t);

@@ -3961,7 +3961,8 @@ module TDev
 
         public newScriptAndLoadAsync(stub: World.ScriptStub, t?:Browser.ScriptTemplate) : Promise {
             return this.newScriptAsync(stub, t)
-                .then((header) => this.loadScriptAsync(header, false, true));
+                .then((header) => this.loadScriptAsync(header, false, true))
+                .then(() => !t || t.updateLibraries ? this.updateAllLibrariesAsync() : Promise.as());
         }
 
         public newScriptAsync(stub: World.ScriptStub, t?: Browser.ScriptTemplate): Promise {
@@ -5211,6 +5212,13 @@ module TDev
                 tick(Ticks.editorUpdateLibrary);
                 this.updateLibraries(libs);
             }
+        }
+        
+        public updateAllLibrariesAsync(): Promise {
+            var libs = Script.libraries().filter((l) => l.needsUpdate)
+            if (libs.length == 0) return Promise.as();
+            return Promise.sequentialMap(libs, (l) =>
+                LibraryRefProperties.bindLibraryAsync(l, Browser.TheHost.getScriptInfoById(l.updateId)));
         }
 
         public updateLibraries(libs:AST.LibraryRef[])
