@@ -71,6 +71,7 @@ module TDev {
     export function pullLatestLibraryVersion(): Promise { // of nothing
       return Browser.TheApiCacheMgr.getAsync(deviceScriptId, true)
           .then((script: JsonScript) => {
+            if (!script) return Promise.as();
             if (deviceScriptId != script.updateid) {
               // Found a new version, keep going
               deviceScriptId = script.updateid;
