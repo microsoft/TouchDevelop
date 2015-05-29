@@ -1511,7 +1511,7 @@ module TDev.Browser {
             return tileOuter
         }
 
-        private chooseEditor() {
+        public createScript() {
             var gotoTemplate = () => {
                 this.chooseScriptFromTemplateAsync()
                     .done(template => {
@@ -1771,7 +1771,7 @@ module TDev.Browser {
                 addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-                addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.chooseEditor(); }, true);
+                addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.createScript(); }, true);
                 if (Cloud.isRestricted())
                     addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null); }, true);
 
