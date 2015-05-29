@@ -428,10 +428,35 @@ module TDev.Browser {
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("gen-codes") ? HTML.mkButton(lf("generate codes"), () => {
-                        TDev.Cloud.postPrivateApiAsync("generatecodes", { count: 1, credit: 2 })
-                            .done(function(r) {
-                            TDev.RT.ShareManager.shareTextAsync("This is your teacher code: " + r.items[0], '').done();
-                        });
+                        var m = new ModalDialog()
+                        var perm = HTML.mkTextInput("text", "")
+                        var count = HTML.mkTextInput("text", "")
+                        var credit = HTML.mkTextInput("text", "")
+                        perm.value = "educator"
+                        count.value = "1"
+                        credit.value = "100"
+                        m.add(div("wall-dialog-body",
+                            lf("Permissions (preview, educator, moderator, staff): "), perm,
+                            lf("Number of codes: "), count,
+                            lf("Credit for each code: "), credit,
+                            HTML.mkAsyncButton(lf("generate"), () => {
+                                var data = {
+                                    count: parseInt(count.value),
+                                    credit: parseInt(credit.value),
+                                    permissions: perm
+                                }
+                                if (!data.count) HTML.wrong(count)
+                                else if (!data.credit) HTML.wrong(credit)
+                                else if (!data.permissions) HTML.wrong(perm)
+                                else 
+                                    return TDev.Cloud.postPrivateApiAsync("generatecodes", data)
+                                        .then(r => {
+                                            ModalDialog.showText(r.items.join("\n"), lf("your codes"))
+                                        }, e => World.handlePostingError(e, lf("generate codes")))
+
+                                return Promise.as()
+                            })))
+                        m.show()
                     }) : null)
                 ])])
             }
@@ -2794,11 +2819,11 @@ module TDev.Browser {
                 HTML.mkButton(lf("import"), () => {
                     var m = /^http.*\/docs\/([a-zA-Z0-9]+)$/.exec(inp.value)
                     if (!m)
-                        Util.coreAnim("shakeTip", 500, inp)
+                        HTML.wrong(inp)
                     else {
                         var tt = HelpTopic.findById(m[1])
                         if (!tt) {
-                            Util.coreAnim("shakeTip", 500, inp)
+                            HTML.wrong(inp)
                         } else {
                             md.dismiss()
                             return Util.httpGetTextAsync(Cloud.getPrivateApiUrl("tdtext/" + tt.json.id))

@@ -247,6 +247,11 @@ module TDev.HTML {
         return ta;
     }
 
+    export function wrong(e:HTMLElement)
+    {
+        Util.coreAnim("shakeTip", 500, e)
+    }
+
     export function setupDragAndDrop(r: HTMLElement, onFiles : (files : FileList) => void) {
         if (!Browser.dragAndDrop) return;
 
