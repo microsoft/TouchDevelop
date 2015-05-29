@@ -829,7 +829,7 @@ module TDev.Browser {
         }
 
         private show() {
-            if (!this.visible) {
+            if (!this.visible && !Cloud.isRestricted()) {
                 this.theRoot.style.display = "block";
                 this.visible = true;
                 currentScreen = this;
@@ -1094,6 +1094,9 @@ module TDev.Browser {
                     }
                     break;
             }
+            
+            if (Cloud.isRestricted())
+                this.browser().loadHash(["list", "installed-scripts"]);
         }
 
         private tileClick(t: HTMLElement, f: () => void) {

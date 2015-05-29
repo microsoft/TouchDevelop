@@ -122,11 +122,18 @@
         }
 
         private setBackButton()
-        {
-            this.backContainer.setChildren([
-                    ScriptInfo.mkBtn("svg:back,black", this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething ? "dismiss" :
-                                this.backToEditor ? lf("script") : lf("the hub"), () => this.showHub())
-            ])
+        {           
+            var icon = "svg:back,black";
+            var btn: HTMLElement;
+            if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething)
+                btn = ScriptInfo.mkBtn(icon, lf("dismiss"), () => this.showHub());
+            else if (this.backToEditor)
+                btn = ScriptInfo.mkBtn(icon, lf("script"), () => this.showHub());
+            else if (!Cloud.isRestricted()) // hub not available
+                btn = ScriptInfo.mkBtn(icon, lf("the hub"), () => this.showHub());
+            else 
+                btn = ScriptInfo.mkBtn(icon, lf("back"), () => window.location.href = "/");
+            this.backContainer.setChildren([btn]);
         }
 
         public initMeAsync(): Promise {
@@ -182,7 +189,10 @@
             this.hide();
             if (ed) {
                 TheEditor.restore();
-            } else TheHub.showSections();
+            } else {
+                Util.check(!Cloud.isRestricted(), "trying to naviate to hub");
+                TheHub.showSections();
+            }
         }
 
         public startSearch(s:string)
