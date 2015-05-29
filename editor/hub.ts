@@ -386,7 +386,7 @@ module TDev.Browser {
         export function showFeedbackBox() {
             var link = (text: string, lnk: string) =>
                 HTML.mkButton(text,
-                    () => { window.open(Cloud.getServiceUrl() + lnk) });
+                    () => { window.location.href = lnk });
 
             if (ModalDialog.current && !ModalDialog.current.canDismiss) {
                 window.open(Cloud.getServiceUrl());
