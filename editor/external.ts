@@ -360,7 +360,7 @@ module TDev {
               editorName: "touchdevelop",
               scriptName: message2.name,
               scriptText: text
-            });
+            }).done();
             break;
 
           case MessageType.Run:
