@@ -69,18 +69,25 @@ module TDev {
     }
 
     export function pullLatestLibraryVersion(): Promise { // of nothing
-      return Browser.TheApiCacheMgr.getAsync(deviceScriptId, true)
-          .then((script: JsonScript) => {
-            if (!script) return Promise.as();
-            if (deviceScriptId != script.updateid) {
-              // Found a new version, keep going
-              deviceScriptId = script.updateid;
-              // deviceLibraryName = script.name;
-              return pullLatestLibraryVersion();
-            } else {
-              return Promise.as();
-            }
-          });
+      var r = new PromiseInv()
+
+      var set = (script: JsonScript) => {
+          if (!script || !r.isPending()) return
+          deviceScriptId = script.updateid;
+          r.success(null)
+      }
+
+      Browser.TheApiCacheMgr.getAsync(deviceScriptId, false)
+        .then(set)
+        .done()
+
+      // in case the one above fails, we also try the stale one from the cache
+      Browser.TheApiCacheMgr.getAsync(deviceScriptId, true)
+          .then(() => Promise.delay(2000))
+          .then(set)
+          .done()
+
+      return r
     }
 
     // This function modifies its argument by adding an extra [J.JLibrary]
