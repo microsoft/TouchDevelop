@@ -444,7 +444,7 @@ module TDev.Browser {
                                 var data = {
                                     count: parseInt(count.value),
                                     credit: parseInt(credit.value),
-                                    permissions: perm
+                                    permissions: perm.value.replace(/[,\s]+/g, ",")
                                 }
                                 if (!data.count) HTML.wrong(count)
                                 else if (!data.credit) HTML.wrong(credit)
