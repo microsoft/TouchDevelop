@@ -5784,13 +5784,50 @@
             return this.mkBoxExt(big, false);
         }
 
+        public getScriptType():string
+        {
+            if (/#docs/.test(this.getDescription()))
+                return "docs"
+
+            var editor = ""
+            if (this.cloudHeader)
+                editor = this.cloudHeader.editor
+            else if (this.jsonScript)
+                editor = this.jsonScript.editor
+
+            if (!editor) editor = "touchdevelop"
+            return editor
+        }
+
+        static editorIcons = {
+            "blockly": "fa-puzzle-piece,#5b80a5",
+            "touchdevelop": "touchdevelop,#308919",
+            "docs": "fa-file-text-o,#E00069",
+            "html": "fa-file-text-o,#E00069",
+            "ace": "braces,#007fff",
+            "*": "emptycircle,#85BB65",
+        }
+
         public iconImg(thumb: boolean): HTMLElement {
-            if (this.cloudHeader && this.cloudHeader.editor == "blockly")
-                return HTML.mkImg(
-                    Ticker.mainJsName.replace(/main.js$/, "") +
-                    "blockly/icon.png");
-            else
-                return this.app.iconArtId ? ArtUtil.artImg(this.app.iconArtId, thumb) : HTML.mkImg(this.app.iconPath());
+            if (this.app.iconArtId)
+                return ArtUtil.artImg(this.app.iconArtId, thumb)
+
+            var ic = ScriptInfo.editorIcons[this.getScriptType()]
+            if (!ic) ic = ScriptInfo.editorIcons["*"]
+            ic = ic.replace(/,.*/, "")
+
+            return HTML.mkImg("svg:" + ic + ",white")
+        }
+
+        public iconBgColor():string
+        {
+            if (Cloud.isRestricted()) {
+                var ic = ScriptInfo.editorIcons[this.getScriptType()]
+                if (!ic) ic = ScriptInfo.editorIcons["*"]
+                ic = ic.replace(/.*,/, "")
+                return ic
+            }
+            return this.app.htmlColor()
         }
 
         public mkBoxExt(big:boolean, isTopic:boolean)
@@ -5819,7 +5856,7 @@
                 var deleted = (<any>this.jsonScript) === false
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
-                icon.style.backgroundColor = deleted ? "#999999" : this.app.htmlColor();
+                icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
 
                 var time = 0;
