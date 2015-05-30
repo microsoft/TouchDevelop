@@ -2,6 +2,7 @@
 module TDev.Cloud {
 
     export var lite = false;
+    export var litePermissions:StringMap<boolean> = {};
 
     export interface EditorWidgets {
         // edit
@@ -216,7 +217,6 @@ module TDev.Cloud {
         return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.cdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
     }
     
-    var litePermissions:StringMap<boolean> = {};
     export function setPermissions(perms:string = null)
     {
         if (perms !== null)

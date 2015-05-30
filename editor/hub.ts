@@ -490,6 +490,19 @@ module TDev.Browser {
                 ])])
             }
 
+            var users = Object.keys(Cloud.litePermissions).filter(k => /^signin-/.test(k)).map(k => k.replace(/signin-/, ""))
+
+            if (users.length > 0) {
+                m.add(div("wall-dialog-header", lf("sign in as:")));
+                var usersDiv = div("wall-dialog-body")
+                m.add(usersDiv)
+                users.map(u => TheApiCacheMgr.getAsync(u, true).done(r => {
+                    if (r) {
+                        usersDiv.appendChild(HTML.mkButton(r.name, () => Editor.loginAs(r.id)))
+                    }
+                }))
+            }
+
             m.show();
         }
 
