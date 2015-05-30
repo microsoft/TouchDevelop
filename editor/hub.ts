@@ -1138,10 +1138,13 @@ module TDev.Browser {
                         });
                     }
                     break;
+
+                default:
+                    if (Cloud.isRestricted())
+                        this.browser().loadHash(["list", "installed-scripts"]);
+                    break;
             }
             
-            if (Cloud.isRestricted())
-                this.browser().loadHash(["list", "installed-scripts"]);
         }
 
         private tileClick(t: HTMLElement, f: () => void) {
