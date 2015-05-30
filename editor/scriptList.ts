@@ -18,6 +18,12 @@
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             document.body.appendChild(EditorSettings.mkBetaNote());
+            
+            var signinLink = elt("signinLink");
+            if (signinLink)
+                signinLink.withClick(() => {
+                    Login.show();      
+                })
         }
         private theList = div("slList");
         private header = div("sdListLabel");
