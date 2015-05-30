@@ -96,7 +96,7 @@ module TDev {
         else if (t == "Boolean")
           return "false";
         else
-          return "NULL";
+          return null;
       }
 
       export function mkType(libMap: LibMap, type: J.JTypeRef) {

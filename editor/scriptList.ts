@@ -220,6 +220,9 @@
                     this.searchBox.blur();
                 this.initialSearch = "";
                 this.progressBar.reset();
+                
+                var siteHeader = elt("siteHeader");
+                if (siteHeader) siteHeader.style.display = 'block';            
             }
         }
 

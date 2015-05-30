@@ -97,7 +97,7 @@ Blockly.Blocks['device_show_number'] = {
     this.appendValueInput("pausetime")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("pause (ms)");        
+        .appendField("pause (ms)");
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
