@@ -184,6 +184,7 @@ module TDev.Cloud {
         releaseid?: string;
         relid?: string;
         releaseLabel?: string;
+        anonToken?: string;
 
         theme?: ClientTheme;
     }
@@ -531,7 +532,13 @@ module TDev.Cloud {
     export function showModalOnlineInfo(title : string) {
         ModalDialog.info(title, onlineInfo());
     }
-    var appendAccessToken = (url: string) => (url + (/\?/.test(url) ? "&" : "?") + "access_token=" + getAccessToken() + "&world_id=" + encodeURIComponent(Cloud.getWorldId()) + "&release_id=" + encodeURIComponent(Cloud.currentReleaseId) + "&user_platform=" + encodeURIComponent(Browser.platformCaps.join(",")));
+    var appendAccessToken = (url: string) => {
+        return (url + (/\?/.test(url) ? "&" : "?") + "access_token=" + getAccessToken()
+          + "&world_id=" + encodeURIComponent(Cloud.getWorldId()) 
+          + "&release_id=" + encodeURIComponent(Cloud.currentReleaseId) 
+          + "&user_platform=" + encodeURIComponent(Browser.platformCaps.join(","))
+          + "&anon_token=" + encodeURIComponent(Cloud.config.anonToken || ""));
+    }
     export function getPublicApiUrl(path: string) : string {
         //getServiceUrl() + "/api/" + path;
         return appendAccessToken(getServiceUrl() + "/api/" + path);
