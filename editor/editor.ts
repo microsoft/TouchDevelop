@@ -4413,7 +4413,6 @@ module TDev
                 this.dismissSidePane();
             });
 
-            elt("scriptEditor").appendChild(this.betaNote = TDev.Browser.EditorSettings.mkBetaNote());
             elt("scriptEditor").withClick(() => {}) // disable text selection
 
             this.setupTopButtons();

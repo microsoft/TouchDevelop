@@ -17,7 +17,7 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            this.theRoot.appendChild(EditorSettings.mkBetaNote());
+            document.body.appendChild(EditorSettings.mkBetaNote());
         }
         private theList = div("slList");
         private header = div("sdListLabel");

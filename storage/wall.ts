@@ -194,6 +194,7 @@ module TDev {
             // no copyright notice in compiled apps
             if (Browser.isCompiledApp && !Browser.webRunner)
                 return div(null);
+            if (Browser.inEditor) return div(null);
 
             var copyrights = div("copyright-text copyright-info");
             var logo = div("copyright-text copyright-logo", SVG.getHorizLogo())

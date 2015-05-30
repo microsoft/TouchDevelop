@@ -531,7 +531,7 @@ module TDev.Browser {
             var beta = div("beta-note");
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
-            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>Microsoft</span></div>" +
+            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>" + ((<any>window).copyrightCompany || "Microsoft") + "</span></div>" +
                 "<div class='beta-legal'>" + (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
                 "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
                 ;
@@ -836,7 +836,6 @@ module TDev.Browser {
         public init() {
             this.theRoot.style.display = "none";
             this.theRoot.id = "hubRoot";
-            this.theRoot.appendChild(EditorSettings.mkBetaNote());
             elt("root").appendChild(this.theRoot);
             this.logo.withClick(() => {
                 tick(Ticks.hubAbout);
