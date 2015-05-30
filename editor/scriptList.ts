@@ -24,6 +24,9 @@
                 signinLink.withClick(() => {
                     Login.show();      
                 })
+            var siteHeader = elt("siteHeader")
+            if (siteHeader)
+                HTML.fixWp8Links(siteHeader)
         }
         private theList = div("slList");
         private header = div("sdListLabel");
