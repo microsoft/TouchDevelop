@@ -4526,11 +4526,6 @@ span.videoCaption
 #btn-editorTutorialNext { right: 0.1em; top:0em; }
 #btn-editorTutorialPrevious { left: 0.1em; top:0em; }
 
-/* Try to roughly center the bolt icon in the compile button */
-#btn-codeCompile svg {
-    margin-left: .3em;
-}
-
 .tutorialStars {
   text-align:center;
 }
