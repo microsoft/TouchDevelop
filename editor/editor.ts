@@ -4299,9 +4299,6 @@ module TDev
                 elt("root").setFlag("is-editor", true);
                 this.resetVideoConstraints();
                 
-                var siteHeader = elt("siteHeader");
-                if (siteHeader) siteHeader.style.display = 'none';            
-                
                 SizeMgr.applySizes(true);
             }
         }
@@ -5827,7 +5824,7 @@ module TDev
             this.root.style.display = "none";
             this.root.removeSelf();
             var siteHeader = elt("siteHeader");
-            if(siteHeader) siteHeader.style.display = 'block';
+            if (siteHeader) siteHeader.classList.remove("hidden");
             Browser.loadingDone = true;
         }
 
