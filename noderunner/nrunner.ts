@@ -1084,6 +1084,7 @@ var apiHandlers = {
 
         case "touchdevelop-rpi.sh":
             ar.text(
+                "cd /home/pi\n" +
                 "mkdir TouchDevelop\n" +
                 "cd TouchDevelop\n" +
                 "wget http://node-arm.herokuapp.com/node_latest_armhf.deb\n" +
@@ -1107,7 +1108,7 @@ var apiHandlers = {
                 "Icon=/home/pi/TouchDevelop/TouchDevelop.png\n" +
                 "Type=Application\n" +
                 "Categories=Programming;Games\n" +
-                "Comment=Learn to code using TouchDevelop!");
+                "Comment=Code your Pi using TouchDevelop!");
             break;
 
         default:
