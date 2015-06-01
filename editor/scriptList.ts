@@ -144,20 +144,22 @@
                 btn = ScriptInfo.mkBtn(icon, lf("back"), () => window.location.href = "/");
             this.backContainer.setChildren([btn]);
         }
-
-        public initMeAsync(): Promise {
-            var id = Cloud.getUserId();
-            if (!id) return Promise.as();
-
+        
+        private initBadgeTag() {
             // update polling URI; relevant on Win8 when app is pinned
             var badgeTag = document.getElementsByName("msapplication-badge")[0];
-            if (badgeTag) (<any>badgeTag).content = "frequency=30;polling-uri=" + Cloud.getServiceUrl() + "/api/" + id + "/badge";
+            if (badgeTag) (<any>badgeTag).content = "frequency=30;polling-uri=" + Cloud.getServiceUrl() + "/api/" + Cloud.getUserId() + "/badge";
             if (Browser.isTrident && !Browser.isCellphone)
                 try {
                     (<any>(window.external)).msSiteModeRefreshBadge(); // don't test for it, just invoke --- testing would lie
                 } catch (e) {
-                }
+                }            
+        }
 
+        public initMeAsync(): Promise {
+            var id = Cloud.getUserId();
+            if (!id) return Promise.as();
+            this.initBadgeTag();            
             TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
                 (<any>window).userName = u.name;
                 (<any>window).userScore = u.score;
@@ -186,6 +188,47 @@
 
             return false;
         }
+        
+        public showLegalNotice()
+        {
+            if (!Runtime.legalNotice ||
+                localStorage["legalNotice"] == Runtime.legalNotice)
+                return;
+            
+            var d = new ModalDialog();
+            var noticeHTML = Cloud.config.legalNoticeHeader ||
+                (lf("<h3>welcome to TouchDevelop</h3>") +
+                lf("<p>TouchDevelop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
+                lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
+            d.addHTML(noticeHTML);
+
+            var msgHolder = div(null);
+            d.add(msgHolder);
+
+            var notice = Runtime.legalNotice || Cloud.config.legalNotice;
+            if (notice)
+                d.addHTML(notice);
+
+            d.add(div("wall-dialog-buttons",
+                HTML.mkButton(lf("sign in"), () => {
+                    tick(Ticks.legalNoticeSignIn);
+                    if(Login.show()) {
+                        localStorage["legalNotice"] = notice;
+                        d.canDismiss = true;
+                        d.dismiss();
+                    }
+                }, "gray-button"),
+                HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
+                    tick(Ticks.legalNoticeAgree);
+                    localStorage["legalNotice"] = notice;
+                    d.canDismiss = true;
+                    d.dismiss();
+                }, "gray-button")
+            ));
+            d.fullWhite()
+            d.canDismiss = false;
+            d.show();
+        }        
 
         public showHub()
         {
@@ -1514,6 +1557,8 @@
             } else {
                 this.syncView(true);
             }
+            
+            this.showLegalNotice();
         }
 
         public deletePaneAnimAsync()

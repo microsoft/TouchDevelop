@@ -824,7 +824,6 @@ module TDev.Browser {
         private theRoot: HTMLElement;
         private visible = false;
         private notificationsCount = -1;
-        private showingIntro = false;
 
         private historyMode = false;
         public vertical = true;
@@ -890,8 +889,7 @@ module TDev.Browser {
         }
 
         public applySizes() {
-            if (!this.showingIntro)
-                this.updateSections();
+            this.updateSections();
         }
 
         public syncDone() {
@@ -1939,7 +1937,6 @@ module TDev.Browser {
 
         private showSectionsCoreAsync(skipSync = false)
         {
-            this.showingIntro = false;
             return this.browser().clearAsync(skipSync).then(() => {
                 this.updateSections();
                 if (this.afterSections) {
@@ -1953,7 +1950,9 @@ module TDev.Browser {
         private temporaryRequestedSignin = false;
         private showingTemporarySignin = false;
         private showTemporaryNotice() {
-            if ((!Storage.temporary || this.showingTemporarySignin) || !EditorSettings.widgets().showTemporaryNotice) return;
+            if ((!Storage.temporary || this.showingTemporarySignin) ||
+                !EditorSettings.widgets().showTemporaryNotice ||
+                ModalDialog.currentIsVisible()) return;
 
             // if only and not signed in, request to sign in
             if (!this.temporaryRequestedSignin
@@ -1986,44 +1985,6 @@ module TDev.Browser {
                 if (EditorSettings.widgets().showTemporaryNotice)
                     Storage.showTemporaryWarning();
             }
-        }
-
-        private showLegalNotice()
-        {
-            this.showingIntro = true;
-            var d = new ModalDialog();
-            var noticeHTML = Cloud.config.legalNoticeHeader ||
-                (lf("<h3>welcome to TouchDevelop</h3>") +
-                lf("<p>TouchDevelop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
-                lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
-            d.addHTML(noticeHTML);
-
-            var msgHolder = div(null);
-            d.add(msgHolder);
-
-            var notice = Runtime.legalNotice || Cloud.config.legalNotice;
-            if (notice)
-                d.addHTML(notice);
-
-            d.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("sign in"), () => {
-                    tick(Ticks.legalNoticeSignIn);
-                    if(Login.show()) {
-                        localStorage["legalNotice"] = notice;
-                        d.canDismiss = true;
-                        d.dismiss();
-                    }
-                }, "gray-button"),
-                HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
-                    tick(Ticks.legalNoticeAgree);
-                    localStorage["legalNotice"] = notice;
-                    d.canDismiss = true;
-                    d.dismiss();
-                }, "gray-button")
-            ));
-            d.fullWhite()
-            d.canDismiss = false;
-            d.show();
         }
 
         static userPictureChooser(fbButton:boolean, onUpd:()=>void)
@@ -2369,13 +2330,11 @@ module TDev.Browser {
             Meta.chooseArtPictureAsync({ title: lf("choose a wallpaper"), initialQuery: "background", buttons: buttons })
                 .done((a: JsonArt) => { if (a) EditorSettings.setWallpaper(a.id, true); });
         }
-
+        
         public showSections(skipSync = false)
         {
             this.show();
-            if (Runtime.legalNotice && localStorage["legalNotice"] != Runtime.legalNotice) //|| (localStorage["legalNotice"] == undefined)
-                this.showLegalNotice();
-            else this.showTemporaryNotice();
+            this.showTemporaryNotice();
             this.showSectionsCoreAsync(skipSync).done();
         }
 
