@@ -356,6 +356,7 @@ module TDev.Browser {
                     socialNetworks: true,
                     socialNetworkvimeo:true,
                     publishAsHidden: true,
+                    publishToComputingAtSchools: true,
                 }
             },
         },
@@ -396,6 +397,7 @@ module TDev.Browser {
                     socialNetworks: true,
                     socialNetworkvimeo: true,
                     publishAsHidden: true,
+                    publishToComputingAtSchools: true,
 
                     // editor specific                  
                     publishDescription: true,
