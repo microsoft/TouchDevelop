@@ -1024,7 +1024,11 @@ module TDev {
                         var href = m[2];
                         var acls = '';
                         var additions = ""
-                        if (!name) name = href.replace(/^\//, "");
+                        if (!name) {
+                            name = href.replace(/^\//, "");
+                            if (this.pointerHelp)
+                                name = name.replace(/^[\w\/]+\//, "")
+                        }
                         if (this.pointerHelp && /^\/[\w\/]+$/.test(href))
                             href = href
                         else if (/^\/\w+(->\w+)?(#\w+)?$/.test(href))
