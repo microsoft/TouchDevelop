@@ -1992,23 +1992,11 @@ module TDev.Browser {
         {
             this.showingIntro = true;
             var d = new ModalDialog();
-            d.addHTML(
-                '<h3>welcome to TouchDevelop</h3>' +
-                '<p>TouchDevelop lets you <b>create apps easily</b>, directly on ' +
-                (Browser.isCellphone ? 'your phone' :
-                 Browser.isTablet ? 'your tablet' :
-                 'pretty much any device including your computer') +
-                '. You can share your apps with others, so they can <b>run and edit</b> them on ' +
-                'Windows Phone, iPad, iPhone, Android, PC, or Mac. ' +
-                '</p>')
-
-            /*
-            d.addHTML('<p class="agree">' +
-                'TouchDevelop client apps use cloud services to synchronize your scripts across all your devices. ' +
-                'You will need to login to make use of that.' +
-                '</p>')
-            */
-
+            var noticeHTML = Cloud.config.legalNoticeHeader ||
+                (lf("<h3>welcome to TouchDevelop</h3>") +
+                lf("<p>TouchDevelop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
+                lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
+            d.addHTML(noticeHTML);
 
             var msgHolder = div(null);
             d.add(msgHolder);

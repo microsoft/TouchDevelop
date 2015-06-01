@@ -187,6 +187,7 @@ module TDev.Cloud {
         anonToken?: string;
 
         theme?: ClientTheme;
+        legalNoticeHeader?: string; // HTML
         legalNotice?: string;
     }
 
