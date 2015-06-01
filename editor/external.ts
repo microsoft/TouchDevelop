@@ -145,7 +145,7 @@ module TDev {
       }
     }
 
-    function typeCheckAndRun(text: string) {
+    function typeCheckAndRun(text: string, mainName = "main") {
       parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
         AST.TypeChecker.tcApp(a);
@@ -165,7 +165,7 @@ module TDev {
         rt.initPageStack();
         (<EditorHost> rt.host).showWall();
 
-        var main = compiledScript.actionsByStableName.main;
+        var main = compiledScript.actionsByName[mainName];
         rt.stopAsync().done(() => {
           rt.run(main, []);
         });
@@ -431,6 +431,11 @@ module TDev {
 
       // Change the hash and the window title.
       TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
+
+      // Start the simulator
+      Browser.TheApiCacheMgr.getAsync(deviceScriptId+"/text", false).then((s: string) => {
+        typeCheckAndRun(s, "_libinit");
+      });
     }
   }
 }
