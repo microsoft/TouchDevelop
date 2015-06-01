@@ -187,6 +187,7 @@ module TDev.Cloud {
         anonToken?: string;
 
         theme?: ClientTheme;
+        legalNotice?: string;
     }
 
     export var config: ClientConfig = {

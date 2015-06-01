@@ -2938,7 +2938,7 @@
 
         public twitterMessage()
         {
-            return lf("Cool script!") + " " + Cloud.config.hashtag;
+            return " " + Cloud.config.hashtag;
         }
 
         public shareButtons(): HTMLElement[] {
@@ -2950,8 +2950,10 @@
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
 
+            btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
+           
             if (!Cloud.isRestricted()) {
-                btns.pushRange(["email", "twitter", "facebook"].map(network =>
+                btns.pushRange(["twitter", "facebook"].map(network =>
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }

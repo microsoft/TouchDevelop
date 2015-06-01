@@ -2013,7 +2013,7 @@ module TDev.Browser {
             var msgHolder = div(null);
             d.add(msgHolder);
 
-            var notice = Runtime.legalNotice;
+            var notice = Runtime.legalNotice || Cloud.config.legalNotice;
             if (notice)
                 d.addHTML(notice);
 
