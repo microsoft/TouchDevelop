@@ -143,6 +143,14 @@ module TDev {
         w.style.display = "";
         document.getElementById("externalEditorSide").appendChild(w);
       }
+
+      public fullWallWidth() {
+        return (<HTMLElement> document.querySelector(".wallFullScreenContainer")).offsetWidth;
+      }
+
+      public fullWallHeight() {
+        return (<HTMLElement> document.querySelector(".wallFullScreenContainer")).offsetHeight;
+      }
     }
 
     function typeCheckAndRun(text: string, mainName = "main") {
