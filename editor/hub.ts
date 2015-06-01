@@ -358,6 +358,7 @@ module TDev.Browser {
                     socialNetworkvimeo:true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
+                    actionSettings: true,
                 }
             },
         },
@@ -393,7 +394,7 @@ module TDev.Browser {
                     "break": true,
                     splitScreenOnLoad: false,
                     splitScreen: true,
-                    
+
                     // teacher specific
                     scriptDiffToBase: true,
                     scriptConvertToDocs: true,
@@ -401,6 +402,7 @@ module TDev.Browser {
                     socialNetworkvimeo: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
+                    actionSettings: true,
 
                     // editor specific                  
                     publishDescription: true,
