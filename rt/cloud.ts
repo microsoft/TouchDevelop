@@ -88,6 +88,7 @@ module TDev.Cloud {
         hubUsers?: boolean;
         publishDescription?: boolean;
         sendPullRequest?: boolean;
+        publishToComputingAtSchools?: boolean;
         scriptStats?: boolean;
         userSocialTab?: boolean;
         commentHistory?: boolean;

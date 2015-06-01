@@ -442,7 +442,7 @@ module TDev
                     things: unsorted,
                     createOne: () => [{
                         decl: this.editor.freshAsyncAction(),
-                        displayName: 'action',
+                        displayName: 'function',
                         description: lf("Code that performs a specific task"),
                         tick: Ticks.sideAddAction
                     }],
@@ -595,7 +595,7 @@ module TDev
             if (!debugMode && TheEditor.widgetEnabled("addNewButton")) {
                 var e = new DeclEntry(lf("add new function, ..."));
                 e.makeIntoAddButton();
-                e.description = lf("or variables, ...")
+                e.description = lf("or variables, libraries,...")
                 var ee = e.mkBox();
                 HTML.setTickCallback(ee, Ticks.sideAddAnything, addNew);
                 items.push(ee);

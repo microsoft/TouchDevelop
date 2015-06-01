@@ -6531,6 +6531,24 @@
                                 }))
                     ])
             })()
+            
+            if (this.app.isDocsTopic && EditorSettings.widgets().publishToComputingAtSchools) {
+                m.add(div("wall-dialog-buttons text-left",
+                    HTML.mkButton(lf("publish at computingatschool.org.uk"), () => {
+                        var descr = this.app.getDescription();
+                        var d = descr + '\n\n' +
+                            '* ' + url + '\n' +
+                            '**Level:** (Beginner / Intermediate/ Advanced)\n\n' +
+                            '**Duration:** (duration, if applicable)\n\n' +
+                            '**Teaches:** (set of concepts learned)\n';
+                        var casUrl = 'http://community.computingatschool.org.uk/resources/new?'
+                            + 'title=' + encodeURIComponent(title)
+                            + 'shortDescription=' + encodeURIComponent(descr)
+                            + 'description=' + encodeURIComponent(d)
+                            + 'cat=microbit';
+                        window.location.href = casUrl;                
+                    })));                
+            }
 
             if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud()) {
                 var appStudioDiv = div("wall-dialog-buttons text-left")
