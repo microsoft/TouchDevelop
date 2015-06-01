@@ -473,6 +473,7 @@ module TDev {
         public showCopy = true;
         public useSVG = true;
         public useExternalLinks = false;
+        public pointerHelp = Cloud.lite;
         public allowLinks = true;
         public allowImages = true;
         public allowVideos = true;
@@ -792,7 +793,7 @@ module TDev {
                 else return "<h3>" + lf("imports") + "</h3><ul>" + r + "</ul>";
             } else if (macro == "stlaunch") {
                 if (!this.scriptid) return "";
-                return "<h2>" + lf("follow tutorial online") + "</h2><div class='md-box-print print-big'>" + lf("Follow this tutorial online at <b>http://tdev.ly/{0:q}</b>", this.scriptid) + ".</div>";
+                return "<h2>" + lf("follow tutorial online") + "</h2><div class='md-box-print print-big'>" + lf("Follow this tutorial online at <b>{1}/{0:q}</b>", this.scriptid, Cloud.config.shareUrl) + ".</div>";
             } else if (macro == "stcmd") {
                 var mrun = /^run(:(.*))?/.exec(arg)
                 if (mrun)
@@ -1024,11 +1025,13 @@ module TDev {
                         var acls = '';
                         var additions = ""
                         if (!name) name = href.replace(/^\//, "");
-                        if (/^\/\w+(->\w+)?(#\w+)?$/.test(href))
+                        if (this.pointerHelp && /^\/[\w\/]+$/.test(href))
+                            href = href
+                        else if (/^\/\w+(->\w+)?(#\w+)?$/.test(href))
                             href = this.topicLink(href.slice(1));
                         else if (/^\/script:\w+$/.test(href)) {
                             acls = 'md-link';
-                            href = (this.useExternalLinks ? "http://tdev.ly/" + href.slice(8) : "#" + href.slice(1));
+                            href = (this.useExternalLinks ? Cloud.config.shareUrl + "/" + href.slice(8) : "#" + href.slice(1));
                         }
                         else if (/^#[\w\-]+:[\w,\-:]*$/.test(href))
                             href = (this.useExternalLinks ? tdev + "/app/#" : "#") + href.slice(1);
