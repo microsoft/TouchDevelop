@@ -196,7 +196,7 @@
                 return;
             
             var d = new ModalDialog();
-            var noticeHTML = Cloud.config.legalNoticeHeader ||
+            var noticeHTML = Runtime.legalNoticeHeader ||
                 (lf("<h3>welcome to TouchDevelop</h3>") +
                 lf("<p>TouchDevelop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
                 lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
@@ -205,7 +205,7 @@
             var msgHolder = div(null);
             d.add(msgHolder);
 
-            var notice = Runtime.legalNotice || Cloud.config.legalNotice;
+            var notice = Runtime.legalNotice;
             if (notice)
                 d.addHTML(notice);
 
