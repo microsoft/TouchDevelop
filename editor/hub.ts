@@ -347,6 +347,7 @@ module TDev.Browser {
                     editorRunOnLoad: true,
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
+                    artSection: true,
                     "return": true,
                     "break": true,
                     
@@ -387,6 +388,7 @@ module TDev.Browser {
                     editorRunOnLoad: true,
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
+                    artSection: true,
                     "return": true,
                     "break": true,
                     splitScreenOnLoad: false,
