@@ -1792,6 +1792,11 @@ span.errorSq .kw
     -webkit-flex: 3;
 }
 
+#externalEditorSide .boardCanvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
 #externalEditorSide .wallFullScreenContainer {
     margin: 0 1em;
     display: -webkit-flex;
