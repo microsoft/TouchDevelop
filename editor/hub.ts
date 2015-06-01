@@ -376,7 +376,6 @@ module TDev.Browser {
                     copyPaste: true,
                     comment: true,
                     dataSection: true,
-                    splitScreenOnLoad: true,
                     updateButton: true,
                     forceMainAsAction: true,
                     singleReturnValue: true,
@@ -389,6 +388,8 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     "return": true,
                     "break": true,
+                    splitScreenOnLoad: false,
+                    splitScreen: true,
                     
                     // teacher specific
                     scriptDiffToBase: true,
