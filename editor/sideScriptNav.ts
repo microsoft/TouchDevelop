@@ -442,7 +442,7 @@ module TDev
                     things: unsorted,
                     createOne: () => [{
                         decl: this.editor.freshAsyncAction(),
-                        displayName: 'action',
+                        displayName: 'function',
                         description: lf("Code that performs a specific task"),
                         tick: Ticks.sideAddAction
                     }],
