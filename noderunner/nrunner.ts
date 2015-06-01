@@ -2000,6 +2000,8 @@ export function globalInit()
         }
     }
 
+    TDev.Cloud.lite = !!liteStorage;
+
     TDev.AST.Lexer.init();
     TDev.HelpTopic.getScriptAsync = getScriptAsync;
     TDev.api.initFrom();
