@@ -31,7 +31,7 @@
         private theList = div("slList");
         private header = div("sdListLabel");
         private botDiv = div(null);
-        private searchBox = HTML.mkTextInput("text", lf("Search..."), "search");
+        private searchBox = HTML.mkTextInput("search", lf("Search..."), "search");
         private autoUpdate:KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
         private backContainer = div("slBackContainer");
