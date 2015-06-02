@@ -853,6 +853,7 @@ module TDev {
                 return this.apiList(arg);
             } else if (macro == "youtube") {
                 if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
                     return MdComments.error("youtube: missing video id");
                 else {
@@ -863,6 +864,7 @@ module TDev {
                 }
             } else if (macro == "channel9") {
                 if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
                     return MdComments.error("channel9: missing MP4 url");
                 var video = arg.replace(/^http:\/\/video/, 'https://sec');
@@ -873,6 +875,7 @@ module TDev {
                     SVG.getVideoPlay(poster))
             } else if (macro == "video") {
                 if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
                     return MdComments.error("video: missing video preview and url");
                 var res = MdComments.findArtStringResource(Script, arg);
@@ -931,12 +934,16 @@ module TDev {
                 SVG.getVideoPlay(poster))
         }
 
-        private blockLink(href:string)
+        private blockExternal()
         {
             if (this.blockExternalLinks === undefined)
                 this.blockExternalLinks = !!(Cloud.isRestricted() && !Cloud.hasPermission("external-links"));
+            return this.blockExternalLinks
+        }
 
-            if (!this.blockExternalLinks) return null
+        private blockLink(href:string)
+        {
+            if (!this.blockExternal()) return null
 
             // TODO check if the link is external?
 
