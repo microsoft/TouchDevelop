@@ -426,10 +426,10 @@ module TDev.RT {
 
         //? Add an action that fires for every display frame
         //@ ignoreReturnValue
-        public on_every_frame(perform: Action, s: IStackFrame): EventBinding {
+        public on_every_frame(body: Action, s: IStackFrame): EventBinding {
             if (this._parent)
                 this._parent.enableEveryFrameOnSprite(s);
-            return this.onEveryFrame.addHandler(perform)
+            return this.onEveryFrame.addHandler(body)
         }
 
         public changed(): void

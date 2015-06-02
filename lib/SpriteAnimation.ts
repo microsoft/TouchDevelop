@@ -270,17 +270,17 @@ module TDev.RT {
 
         //? Raised when the animation started playing
         //@ ignoreReturnValue writesMutable
-        public on_start(handler : Action) : EventBinding{
+        public on_start(body : Action) : EventBinding{
             if (!this._onStart) this._onStart = new Event_();
-            return this._onStart.addHandler(handler);
+            return this._onStart.addHandler(body);
         }
 
         //? Raised when the animation stopped playing
         //@ ignoreReturnValue writesMutable
-        public on_stop(handler : Action) : EventBinding{
+        public on_stop(body : Action) : EventBinding{
             this.ensureActive();
             if (!this._onStop) this._onStop = new Event_();
-            return this._onStop.addHandler(handler);
+            return this._onStop.addHandler(body);
         }
 
         //? Waits for a number of seconds

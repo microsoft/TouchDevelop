@@ -27,8 +27,8 @@ module TDev.RT {
         //? sets the action to perform when the timer fires
         //@ writesMutable
         //@ ignoreReturnValue
-        public on_trigger(perform: Action): EventBinding {
-            var b = this.handlerEvent.addHandler(perform);
+        public on_trigger(body: Action): EventBinding {
+            var b = this.handlerEvent.addHandler(body);
             this.arm();
             return b;
         }
