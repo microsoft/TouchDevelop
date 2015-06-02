@@ -947,6 +947,18 @@ module TDev.RT {
 
         export function hostExecAsync(message: string): Promise {
             return new Promise((onSuccess, onError, onProgress) => {
+                if (message == "td_access_token") {
+                    if (!Cloud.hasPermission("post-raw"))
+                        onSuccess(undefined)
+                    Runtime.theRuntime.host.askSourceAccessAsync(lf("your private access token"),
+                        lf("your TouchDevelop access token. The script will be able to upload web content as you."), false, true)
+                        .done((allow :boolean) => {
+                            if (!allow) onSuccess(undefined)
+                            else onSuccess(Cloud.getServiceUrl() + "/?access_token=" + Cloud.getAccessToken())
+                        })
+                    return;
+                }
+            
                 // minecraft support
                 var mcefQuery = (<any>window).mcefQuery;
                 if (mcefQuery) {
