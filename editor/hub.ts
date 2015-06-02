@@ -317,6 +317,7 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     "return": true,
                     "break": true,
+                    hideMyScriptHeader: true,
                 }
             },
         },
@@ -351,6 +352,8 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     "return": true,
                     "break": true,
+                    hideMyScriptHeader: true,
+                    
                     // for docs
                     artSection: true,
                     selectStatements: true,
@@ -409,6 +412,7 @@ module TDev.Browser {
                     databaseSection: true,
                     scriptPropertiesManagement: true,
                     editLibraryButton: true,
+                    hideMyScriptHeader: true,
                     //MORE
                     
                     // teacher specific

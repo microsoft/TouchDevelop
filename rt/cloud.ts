@@ -109,6 +109,7 @@ module TDev.Cloud {
         startTutorialButton?: boolean;
         translateComments?: boolean;
         searchHelp?: boolean;
+        hideMyScriptHeader?: boolean;
 
         // script lifecycle
         updateButton?: boolean;

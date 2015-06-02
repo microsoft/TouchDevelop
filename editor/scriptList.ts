@@ -67,6 +67,7 @@
         private moreDiv:HTMLElement;
         private listDivs:HTMLElement[] = [];
         private apiPath = "???";
+        private topTitleHidden = false;
         private topTitle = "???";
         private lastSearchValue = "";
         private shownSomething = false;
@@ -544,7 +545,7 @@
                 else
                     this.header.setChildren([spanDirAuto(lf("search"))]);
             } else {
-                this.header.setChildren([spanDirAuto(this.topTitle)]);
+                this.header.setChildren([this.topTitleHidden ? null : spanDirAuto(this.topTitle)]);
             }
 
             this.listDivs = [this.header];
@@ -1400,10 +1401,13 @@
             this.shownSomething = false;
             this.apiPath = path;
             this.botDiv = div(null);
+            var hideHeader = false;
             switch (header) {
                 case "installed":
                     tick(Ticks.browseListMyScripts);
                     header = lf("my scripts");
+                    if (EditorSettings.widgets().hideMyScriptsHeader)
+                        hideHeader = true;
                     break;
                 case "topics":
                     tick(Ticks.browseListDocs);
@@ -1493,6 +1497,7 @@
             this.theList.setChildren([]);
             this.listDivs = [];
             this.show();
+            this.topTitleHidden = hideHeader;
             this.topTitle = header;
 
             this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
