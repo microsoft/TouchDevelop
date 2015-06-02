@@ -18,15 +18,10 @@
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             document.body.appendChild(EditorSettings.mkBetaNote());
-            
-            var signinLink = elt("signinLink");
-            if (signinLink)
-                signinLink.withClick(() => {
-                    Login.show();      
-                })
             var siteHeader = elt("siteHeader")
             if (siteHeader)
                 HTML.fixWp8Links(siteHeader)
+            this.initSignin();
         }
         private theList = div("slList");
         private header = div("sdListLabel");
@@ -107,8 +102,24 @@
 
             this.setBackButton();
             this.initMeAsync().done(() => { }, () => { });
-
+            
             if (dbg) bugsEnabled = true;
+        }
+        
+        private initSignin() {
+            var signinLink = elt("signinLink");
+            if (signinLink) {
+                if (Cloud.getUserId()) {
+                    signinLink.innerText = lf("Settings");
+                    signinLink.withClick(() => {
+                        var user = this.getUserInfoById("me", "");
+                        this.loadDetails(user);
+                    })
+                } else {
+                    signinLink.innerText = lf("Sign In");
+                    signinLink.withClick(() => Login.show());                    
+                }
+            }            
         }
 
         private updateScroll()
@@ -158,12 +169,15 @@
 
         public initMeAsync(): Promise {
             var id = Cloud.getUserId();
-            if (!id) return Promise.as();
+            if (!id) {
+                this.initSignin();
+                return Promise.as();
+            }
             this.initBadgeTag();            
             TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
                 (<any>window).userName = u.name;
                 (<any>window).userScore = u.score;
-                (<any>window).userId = id;
+                (<any>window).userId = id;                
             });
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
@@ -171,6 +185,7 @@
                     Util.setUserLanguageSetting(settings.culture, true);
                     EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
+                    this.initSignin();
                 }, e => { });
         }
 
