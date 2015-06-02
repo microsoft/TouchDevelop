@@ -362,8 +362,7 @@ module TDev {
   function compileOrError(msgSel?: string) {
     var ast: TDev.AST.Json.JApp;
 
-    $(".blocklySelected").remove();
-    $(".blocklyError").remove();
+    $(".blocklySelected, .blocklyError").attr("class", "");
     clearPopups();
     $("#errorsGraduate").addClass("hidden");
     $("#errorsCompile").addClass("hidden");
@@ -383,8 +382,7 @@ module TDev {
       var text = "";
       errors.forEach((e: Errors.CompilationError) => {
         var block = e.block;
-        (<any> block.svgGroup_).classList.add("blocklySelected");
-        (<any> block.svgGroup_).classList.add("blocklyError");
+        $(block.svgGroup_).attr("class", "blocklySelected blocklyError");
         text += e.msg + "\n";
       });
       statusMsg(text, External.Status.Error);
