@@ -1538,8 +1538,9 @@ height: 100%;
   position: absolute;
   bottom: 0;
   right: 1.5em;
-  font-size: 0.6em;
-  
+  font-size: 0.8em;
+  z-index:100;
+
   padding: 0.5em;
   line-height: 1.1em;
   background: rgba(255, 255, 255, 0.75);
