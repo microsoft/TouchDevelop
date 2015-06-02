@@ -457,7 +457,8 @@ module TDev
         static offerNotifications() { return !!Runtime.refreshNotifications || !!localStorage["gcm"]; }
         static legalNotice: string = "";
         static legalNoticeHeader: string;
-        static appName = "TouchDevelop Web App";
+        static companyCopyright = "Microsoft";
+        static appName = "TouchDevelop";
 
         public getActionResults() {
             var r = this.returnedFrom;

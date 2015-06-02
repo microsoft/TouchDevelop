@@ -551,10 +551,10 @@ module TDev.Browser {
             var beta = div("beta-note");
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
-            var copyrights = "<div class='beta-legal'>© 2015 <span class='beta-black'>" + ((<any>window).copyrightCompany || "Microsoft") + "</span></div>" +
-                "<div class='beta-legal'>" + (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
-                "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>"
-                ;
+            var copyrights = "<div class='beta-legal'>" + 
+                "<span class='beta-black'>© 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
+                (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
+                "<span class='beta-underline'>privacy</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>";
 
             // there is a menu option for that in the wp8 app
             if (Browser.isWP8app) copyrights = "";
