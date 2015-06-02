@@ -29,8 +29,8 @@ module TDev.RT {
 
         //? Set the handler invoked when the pushpin is tapped
         //@ ignoreReturnValue
-        public on_tap(tapped: Action) : EventBinding {
-            return this.onTap.addHandler(tapped);
+        public on_tap(body: Action) : EventBinding {
+            return this.onTap.addHandler(body);
         }
 
         //? Gets the pushpin geo location

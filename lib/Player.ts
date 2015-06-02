@@ -52,12 +52,12 @@ module TDev.RT {
 
         //? Attaches a handler when the active song changes
         //@ ignoreReturnValue
-        export function on_active_song_changed(changed : Action) : EventBinding {
+        export function on_active_song_changed(body : Action) : EventBinding {
             if (_rt && !_onActiveSongChanged) {
                 _onActiveSongChanged = new Event_();
                 Player.addActiveSongChangedEvent(_rt);
             }
-            return _onActiveSongChanged.addHandler(changed);
+            return _onActiveSongChanged.addHandler(body);
         }
 
         function raiseActiveSongChanged() {
@@ -71,12 +71,12 @@ module TDev.RT {
 
         //? Attaches a handler when the player state changes
         //@ ignoreReturnValue
-        export function on_player_state_changed(changed : Action) : EventBinding {
+        export function on_player_state_changed(body : Action) : EventBinding {
             if (_rt && !_onPlayerStateChanged) {
                 _onPlayerStateChanged = new Event_();
                 Player.addPlayerStateChangedEvent(_rt);
             }
-            return _onPlayerStateChanged.addHandler(changed);
+            return _onPlayerStateChanged.addHandler(body);
         }
 
         function raisePlayerStateChanged() {

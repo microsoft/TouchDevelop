@@ -420,14 +420,14 @@ module TDev { export module RT {
 
         //? add an action that fires for every display frame.
         //@ ignoreReturnValue
-        public add_on_every_frame(perform: Action, s: IStackFrame): EventBinding {
-            return this.on_every_frame(perform, s);
+        public add_on_every_frame(body: Action, s: IStackFrame): EventBinding {
+            return this.on_every_frame(body, s);
         }
 
         //? add an action that fires for every display frame.
         //@ ignoreReturnValue
-        public on_every_frame(perform: Action, s: IStackFrame): EventBinding {
-            return this.frame_timer(s).on_trigger(perform);
+        public on_every_frame(body: Action, s: IStackFrame): EventBinding {
+            return this.frame_timer(s).on_trigger(body);
         }
 
         //? Stops and clears all the `every frame` timers

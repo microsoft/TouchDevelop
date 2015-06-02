@@ -22,28 +22,28 @@ module TDev.RT {
         //? Attaches a handler to run on every time frame, roughly every 20ms.
         //@ writesMutable
         //@ ignoreReturnValue
-        export function on_every_frame(perform : Action, s : IStackFrame) : EventBinding {
+        export function on_every_frame(body : Action, s : IStackFrame) : EventBinding {
             if (!everyFrameTimer) everyFrameTimer = new Timer(s.rt, 0.02,false);
-            return everyFrameTimer.on_trigger(perform);
+            return everyFrameTimer.on_trigger(body);
         }
 
         //? Starts a timer to run ``perform`` after ``seconds`` seconds.
         //@ writesMutable
         //@ ignoreReturnValue [seconds].defl(1)
-        export function run_after(seconds : number, perform : Action, s : IStackFrame) : Timer {
+        export function run_after(seconds : number, body : Action, s : IStackFrame) : Timer {
             seconds = Math.max(0.02, seconds);
             var timer = new Timer(s.rt, seconds, true);
-            timer.on_trigger(perform);
+            timer.on_trigger(body);
             return timer;
         }
 
         //? Starts a timer to run ``perform`` every ``seconds`` seconds.
         //@ writesMutable
         //@ [seconds].defl(1) ignoreReturnValue
-        export function run_every(seconds : number, perform : Action, s : IStackFrame) : Timer {
+        export function run_every(seconds : number, body : Action, s : IStackFrame) : Timer {
             seconds = Math.max(0.02, seconds);
             var timer = new Timer(s.rt, seconds, false);
-            timer.on_trigger(perform);
+            timer.on_trigger(body);
             return timer;
         }
 

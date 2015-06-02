@@ -59,13 +59,13 @@ module TDev.RT {
 
         //? Attaches a handler to the `shake` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_shake(handler : Action) : EventBinding
+        export function on_shake(body : Action) : EventBinding
         {
             if(!_onShake) {
                 _onShake = new RT.Event_();
                 if(_rt) DeviceMotion.start(_rt);
             }
-            return _onShake.addHandler(handler);
+            return _onShake.addHandler(body);
         }
         export function raiseShakeEvent()
         {
@@ -78,57 +78,57 @@ module TDev.RT {
 
         //? Attaches a handler to the `phone face up` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_phone_face_up(handler : Action) : EventBinding
+        export function on_phone_face_up(body : Action) : EventBinding
         {
             if (!_onPhoneFaceUp) {
                 _onPhoneFaceUp = new RT.Event_();
                 if(_rt) DeviceOrientation.start(_rt); // make sure we are tracking the position
             }
-            return _onPhoneFaceUp.addHandler(handler);
+            return _onPhoneFaceUp.addHandler(body);
         }
         export function raisePhoneFaceUp() { raisePhoneEvent("phone face up", _onPhoneFaceUp); }
         //? Attaches a handler to the `phone face down` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_phone_face_down(handler : Action) : EventBinding
+        export function on_phone_face_down(body : Action) : EventBinding
         {
             if (!_onPhoneFaceDown) {
                 _onPhoneFaceDown = new RT.Event_();
                 if(_rt) DeviceOrientation.start(_rt); // make sure we are tracking the position
             }
-            return _onPhoneFaceDown.addHandler(handler);
+            return _onPhoneFaceDown.addHandler(body);
         }
         export function raisePhoneFaceDown() { raisePhoneEvent("phone face down", _onPhoneFaceDown); }
         //? Attaches a handler to the `phone portrait` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_phone_portrait(handler : Action) : EventBinding
+        export function on_phone_portrait(body : Action) : EventBinding
         {
             if (!_onPhonePortrait) {
                 _onPhonePortrait = new RT.Event_();
                 if(_rt) DeviceOrientation.start(_rt); // make sure we are tracking the position
             }
-            return _onPhonePortrait.addHandler(handler);
+            return _onPhonePortrait.addHandler(body);
         }
         export function raisePhonePortrait() { raisePhoneEvent("phone portrait", _onPhonePortrait); }
         //? Attaches a handler to the `phone landscape left` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_phone_landscape_left(handler : Action) : EventBinding
+        export function on_phone_landscape_left(body : Action) : EventBinding
         {
             if (!_onPhoneLandscapeLeft) {
                 _onPhoneLandscapeLeft = new RT.Event_();
                 if(_rt) DeviceOrientation.start(_rt); // make sure we are tracking the position
             }
-            return _onPhoneLandscapeLeft.addHandler(handler);
+            return _onPhoneLandscapeLeft.addHandler(body);
         }
         export function raisePhoneLandscapeLeft() { raisePhoneEvent("phone landscape left", _onPhoneLandscapeLeft); }
         //? Attaches a handler to the `phone landscape right` event.
         //@ ignoreReturnValue cap(accelerometer)
-        export function on_phone_landscape_right(handler : Action) : EventBinding
+        export function on_phone_landscape_right(body : Action) : EventBinding
         {
             if (!_onPhoneLandscapeRight) {
                 _onPhoneLandscapeRight = new RT.Event_();
                 if(_rt) DeviceOrientation.start(_rt); // make sure we are tracking the position
             }
-            return _onPhoneLandscapeRight.addHandler(handler);
+            return _onPhoneLandscapeRight.addHandler(body);
         }
         export function raisePhoneLandscapeRight() { raisePhoneEvent("phone landscape right", _onPhoneLandscapeRight); }
 
@@ -371,8 +371,8 @@ module TDev.RT {
         //? Attaches an event that triggers while the key is pressed. This event repeats while the key is down.
         //@ [key].deflStrings('space', 'a', 'w', 's', 'd', 'enter', 'left', 'right', 'up', 'down')
         //@ ignoreReturnValue
-        export function on_key_pressed(key: string, handler : Action, s : IStackFrame): EventBinding {
-            return s.rt.host.keyboard.registerDown(key, handler);
+        export function on_key_pressed(key: string, body : Action, s : IStackFrame): EventBinding {
+            return s.rt.host.keyboard.registerDown(key, body);
         }
 
         var gamepadsSupported = false;
@@ -589,16 +589,16 @@ module TDev.RT {
             return this.keyState(key, true).timeStamp > 0;
         }
 
-        public registerDown(key: string, handler: Action): EventBinding {
+        public registerDown(key: string, body: Action): EventBinding {
             var state = this.keyState(key, true);
             if (!state.down) state.down = new Event_();
-            return state.down.addHandler(handler);
+            return state.down.addHandler(body);
         }
 
-        public registerUp(key: string, handler: Action): EventBinding {
+        public registerUp(key: string, body: Action): EventBinding {
             var state = this.keyState(key, true);
             if (!state.up) state.up = new Event_();
-            return state.up.addHandler(handler);
+            return state.up.addHandler(body);
         }
     }
 }

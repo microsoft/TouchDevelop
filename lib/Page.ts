@@ -22,8 +22,8 @@ module TDev { export module RT {
 
         //? Sets a handler that runs when the page is popped.
         //@ ignoreReturnValue
-        public on_navigated_from(handler: Action): EventBinding {
-            return this.page.onNavigatedFrom.addHandler(handler);
+        public on_navigated_from(body: Action): EventBinding {
+            return this.page.onNavigatedFrom.addHandler(body);
         }
 
         //? Gets a value indicating if the page is equal to the other

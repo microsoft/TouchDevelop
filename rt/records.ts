@@ -739,10 +739,10 @@ module TDev {
             }
 
 
-            public on_changed(perform: Action, s: IStackFrame): EventBinding {
+            public on_changed(body: Action, s: IStackFrame): EventBinding {
                 if (!this.onChangeEvent)
                     this.onChangeEvent = new RT.Event_();
-                var b = this.onChangeEvent.addHandler(perform);
+                var b = this.onChangeEvent.addHandler(body);
                 s.rt.queueLocalEvent(this.onChangeEvent, undefined, true, true);
                 return b;
             }

@@ -93,7 +93,7 @@ module TDev.RT {
 
         //? Sets an event to run when the event source is opened
         //@ ignoreReturnValue writesMutable
-        public on_open(opened: Action): EventBinding {
+        public on_open(body: Action): EventBinding {
             if (!this.onOpen) {
                 this.onOpen = new Event_();
                 if (this.source)
@@ -102,12 +102,12 @@ module TDev.RT {
                             this.rt.queueLocalEvent(this.onOpen);
                     }, false);
             }
-            return this.onOpen.addHandler(opened);
+            return this.onOpen.addHandler(body);
         }
 
         //? Sets an event to run when an error occurs
         //@ ignoreReturnValue writesMutable
-        public on_error(handler: Action): EventBinding {
+        public on_error(body: Action): EventBinding {
             if (!this.onError) {
                 this.onError = new Event_();
                 if (this.source)
@@ -116,7 +116,7 @@ module TDev.RT {
                             this.rt.queueLocalEvent(this.onError);
                     }, false);
             }
-            return this.onError.addHandler(handler);
+            return this.onError.addHandler(body);
         }
 
         //? Closes the EventSource. No further event will be raised.

@@ -454,9 +454,9 @@ module TDev { export module RT {
 
         //? Set what happens when this element is clicked.
         //@ betaOnly
-        export function add_on_click(handler: Action, s: IStackFrame): void {
+        export function add_on_click(body: Action, s: IStackFrame): void {
             var box = s.rt.getCurrentHtmlBox();
-            box.attributes.tappedEvent.addHandler(handler);
+            box.attributes.tappedEvent.addHandler(body);
         }
 
     }

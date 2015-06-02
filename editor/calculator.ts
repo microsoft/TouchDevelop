@@ -1759,7 +1759,9 @@ module TDev
                 }
             })
 
-            return this.expr.locals.concat(res)
+            var locs = this.expr.locals.concat(res)
+            locs = locs.filter(loc => !/^_body_$/i.test(loc.getName()));
+            return locs;
         }
 
         private findDefault(p:PropertyParameter)
