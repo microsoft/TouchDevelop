@@ -205,10 +205,8 @@ module TDev {
       }
 
       public receive(event) {
-        if (event.origin != this.editor.origin) {
-          console.error("[outer message] not from the right origin!", event.origin, this.editor.origin);
+        if (event.origin != this.editor.origin)
           return;
-        }
 
         switch ((<Message> event.data).type) {
           case MessageType.Save: {

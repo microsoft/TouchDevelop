@@ -644,7 +644,10 @@ function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   return stmts;
 }
 
-function isClassicForLoop(bBy: B.Block, bFrom: B.Block) {
+function isClassicForLoop(b: B.Block) {
+  assert(b.type == "controls_for");
+  var bBy = b.getInputTargetBlock("BY");
+  var bFrom = b.getInputTargetBlock("FROM");
   return bBy.type.match(/^math_number/) && extractNumber(bBy) == 1 &&
     bFrom.type.match(/^math_number/) && extractNumber(bFrom) == 0;
 }
@@ -659,12 +662,12 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var binding = lookup(e, bVar);
   assert(binding.isForVariable);
 
-  if (isClassicForLoop(bBy, bFrom) && !binding.incompatibleWithFor)
+  if (isClassicForLoop(b) && !binding.incompatibleWithFor)
     // In the perfect case, we can do a local binding that declares a local
     // variable. The code that generates global variable declarations is in sync
     // and won't generate a global binding.
     return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, Type.Number)), compileStatements(e, bDo))];
-  else
+  else {
     // In any other case, fallback to a while loop.
     return [
       // VAR = FROM
@@ -683,12 +686,17 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
                 // VAR + BY
                 H.mkSimpleCall("+", [H.mkGlobalRef(bVar), compileExpression(e, bBy, Type.Number)])])))]))
     ];
+  }
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
   var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), Type.Number);
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
+  var valid = (x: string) => !lookup(e, x) || !isCompiledAsLocal(lookup(e, x));
+  var name = "i";
+  for (var i = 0; !valid(name); i++)
+    name = "i"+i;
+  return H.mkFor(name, H.mkExprHolder([], bound), body);
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
@@ -985,6 +993,8 @@ function mkEnv(w: B.Workspace): Environment {
       if (lookup(e, x) == null)
         e = extend(e, x, Type.Number);
       lookup(e, x).isForVariable = true;
+      if (!isClassicForLoop(b))
+        lookup(e, x).incompatibleWithFor = true;
     }
   });
 

@@ -779,7 +779,7 @@ module TDev.Cloud {
 
         HTML.showProgressNotification(lf("starting compilation"));
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
-            config: "embedded",
+            config: "proto",
             source: cppSource
         })
         .then(resp => {
