@@ -184,7 +184,7 @@ module TDev {
           var lib = this.libs.filter(l => l.name == n)[0];
           var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
           var s = H.isShimBody((<J.JAction> action).body);
-          if (s)
+          if (s != null)
             // Call to a built-in C++ function
             return s;
           else
@@ -301,13 +301,10 @@ module TDev {
         outParams: J.JLocalDef[],
         body: J.JStmt[])
       {
+        // This function is always called with H.willCompile == true, meaning
+        // it's not a shim.
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
-        if (H.isShimBody(body))
-          return null;
-        // XXX hack surface that properly in the JSON AST
-        if (name == "_libinit")
-          return null;
 
         var env2 = indent(env);
         var bodyText = [

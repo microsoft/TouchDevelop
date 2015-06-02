@@ -68,7 +68,7 @@ module TDev {
         body: J.JStmt[],
         isPrivate: boolean)
       {
-        if (isPrivate || H.isShimBody(body))
+        if (isPrivate || H.isShimBody(body) != null)
           return [];
         else
           return this.visitMany(env, body);

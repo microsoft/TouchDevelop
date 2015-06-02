@@ -167,10 +167,12 @@ module TDev {
       }
 
       // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
+      // ! This function might return "" (means ignore, don't compile). So test
+      // the return value of this function with != null.
       export function isShimBody(body: J.JStmt[]): string {
         var ret = null;
         body.forEach((s: J.JStmt) => {
-          var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]+)}$/);
+          var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]*)}$/);
           if (matches)
             ret = matches[1];
         });
@@ -183,7 +185,7 @@ module TDev {
       }
 
       export function willCompile (f: J.JAction) {
-        return !isShimBody(f.body) && !f.isPrivate;
+        return isShimBody(f.body) == null && !f.isPrivate;
       }
 
       /* Some functions for constructing fake "WebAST" nodes when we need them. */

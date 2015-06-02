@@ -115,6 +115,7 @@ module TDev {
     switch (message.status) {
       case External.Status.Error:
         statusMsg("compilation error: "+message.error, message.status);
+        showPopup($("#link-log"), $("#popup-log"));
         break;
       case External.Status.Ok:
         statusMsg("compilation successful", message.status);
@@ -394,6 +395,7 @@ module TDev {
       });
     } catch (e) {
       statusMsg("⚠ compilation error: "+e, External.Status.Error);
+      showPopup($("#link-log"), $("#popup-log"));
     }
 
     var errors = Errors.get();
