@@ -208,12 +208,14 @@ module TDev.RT {
 
         export var addReadingEvent = () =>
         {
-            if (isMotionSupported())
+            if (Browser.assumeMouse) {
+                Util.log("emulating accelerometer with mouse");
+                window.addEventListener('mousemove', mouseReading, false);
+            }
+            else if (isMotionSupported())
                 window.addEventListener('devicemotion', reading, false);
             else if (DeviceOrientation.isOrientationSupported())
                 window.addEventListener('deviceorientation', orientationReading, false);
-            else if (Browser.assumeMouse)
-                window.addEventListener('mousemove', mouseReading, false);
         }
 
         export var removeReadingEvent = () =>

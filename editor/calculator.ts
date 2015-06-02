@@ -1036,7 +1036,7 @@ module TDev
                         this.insertOp("or");
                     break;
                 case ".":
-                    if (/[0-9]/.test(prevOp) || !this.inPropertyPosition)
+                    if ((/[0-9]/.test(prevOp) && !TheEditor.widgetEnabled("integerNumbers")) || !this.inPropertyPosition)
                         this.insertOp(".");
                     else
                         this.searchApi.show();

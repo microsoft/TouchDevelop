@@ -361,6 +361,7 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
+                    actionSettings: true,
                 }
             },
         },
@@ -403,7 +404,6 @@ module TDev.Browser {
                     recordsSection: true,
                     persistanceRadio: true,
                     databaseSection: true,
-                    actionSettings:true,
                     //MORE
                     
                     // teacher specific
@@ -414,6 +414,7 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
+                    actionSettings: true,
 
                     // editor specific                  
                     publishDescription: true,

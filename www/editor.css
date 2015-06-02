@@ -1793,10 +1793,18 @@ span.errorSq .kw
 }
 
 #externalEditorSide .boardCanvas {
-    width: calc(100% - 1em) !important;
+    width: 100% !important;
     height: auto !important;
-    margin: .8em auto !important;
 }
+
+#externalEditorSide .wallFullScreenContainer {
+    margin: 0 1em;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex: 1;
+    flex: 1;
+}
+
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
   display: none;
