@@ -1406,7 +1406,7 @@
                 case "installed":
                     tick(Ticks.browseListMyScripts);
                     header = lf("my scripts");
-                    if (EditorSettings.widgets().hideMyScriptsHeader)
+                    if (EditorSettings.widgets().hideMyScriptHeader)
                         hideHeader = true;
                     break;
                 case "topics":
