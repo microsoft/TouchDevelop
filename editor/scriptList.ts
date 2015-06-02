@@ -6549,7 +6549,7 @@
             
             if (this.app.isDocsTopic && EditorSettings.widgets().publishToComputingAtSchools) {
                 m.add(div("wall-dialog-buttons text-left",
-                    HTML.mkButton(lf("publish at computingatschool.org.uk"), () => {
+                    HTML.mkButton(lf("publish at ComputingAtSchool.org.uk"), () => {
                         var descr = this.app.getDescription();
                         var d = descr + '\n\n' +
                             '* ' + url + '\n' +
