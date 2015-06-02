@@ -347,15 +347,18 @@ module TDev.Browser {
                     editorRunOnLoad: true,
                     whileConditionDefault: "true",
                     forConditionDefault: "5",
-                    artSection: true,
                     "return": true,
                     "break": true,
+                    // for docs
+                    artSection: true,
+                    selectStatements: true,
                     
                     // teacher specific
                     scriptDiffToBase: true,                    
                     scriptConvertToDocs: true,
                     socialNetworks: true,
                     socialNetworkvimeo:true,
+                    socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
                 }
@@ -393,12 +396,22 @@ module TDev.Browser {
                     "break": true,
                     splitScreenOnLoad: false,
                     splitScreen: true,
+                    findReferences: true,
+                    gotoNavigation: true,
+                    selectStatements: true,
+                    stringEditFullScreen: true,
+                    recordsSection: true,
+                    persistanceRadio: true,
+                    databaseSection: true,
+                    actionSettings:true,
+                    //MORE
                     
                     // teacher specific
                     scriptDiffToBase: true,
                     scriptConvertToDocs: true,
                     socialNetworks: true,
                     socialNetworkvimeo: true,
+                    socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
 
@@ -1841,7 +1854,7 @@ module TDev.Browser {
                 }
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreArt, () => { this.hide(); this.browser().showList("myart", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-                addFnBtn(lf("Upload Picture"), Ticks.hubUploadPicture, () => { ArtUtil.uploadPictureDialogAsync().done() }, true);
+                addFnBtn(lf("Upload Picture"), Ticks.hubUploadPicture, () => { ArtUtil.uploadPictureDialogAsync({ finalDialog: true }).done() }, true);
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {

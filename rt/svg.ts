@@ -109,6 +109,7 @@ export module SVG {
         heart: "fa-heart-o",
         award: "fa-trophy",
         person: "fa-user",
+        art: "fa-paint-brush",
     };
 
     var fontAwesomeIconsByDaveGandy:any = {

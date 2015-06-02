@@ -77,6 +77,7 @@ module TDev.Cloud {
         socialNetworkvine?: boolean;
         socialNetworkinstagram?: boolean;
         socialNetworktwitter?: boolean;
+        socialNetworkart?: boolean;
         
         // hub
         scriptAddToChannel?: boolean;
