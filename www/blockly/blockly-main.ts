@@ -1,5 +1,6 @@
 ///<reference path='../../editor/messages.ts'/>
 ///<reference path='blockly.d.ts'/>
+///<reference path='../../typings/jquery/jquery.d.ts'/>
 ///<reference path='compiler.ts'/>
 
 module TDev {
@@ -15,8 +16,6 @@ module TDev {
   function isAllowedOrigin(origin: string) {
     return allowedOrigins.filter(x => !!origin.match(x)).length > 0;
   }
-
-  var $ = (s: string) => <HTMLElement> document.querySelector(s);
 
   // Both of these are written once when we receive the first (trusted)
   // message.
@@ -83,7 +82,7 @@ module TDev {
 
   function statusIcon(icon: string) {
     var i = $("#cloud-status i");
-    i.setAttribute("class", "fa fa-"+icon);
+    i.attr("class", "fa fa-"+icon);
   }
 
   function saveAck(message: External.Message_SaveAck) {
@@ -128,24 +127,11 @@ module TDev {
       ", theirs = "+merge.theirs.baseSnapshot +
       ", mine = "+currentVersion);
     var mkButton = function (symbol: string, label: string, f: () => void) {
-      var b = document.createElement("a");
-      b.classList.add("roundbutton");
-      b.setAttribute("href", "#");
-      var s = document.createElement("div");
-      s.classList.add("roundsymbol");
-      s.textContent = symbol;
-      b.appendChild(s);
-      var l = document.createElement("div");
-      l.classList.add("roundlabel");
-      l.textContent = label;
-      b.appendChild(l);
-      b.addEventListener("click", f);
-      return b;
+      return $("<div>").text(symbol+" "+label).click(f);
     };
     var box = $("#merge-commands");
     var clearMerge = () => {
-      while (box.firstChild)
-        box.removeChild(box.firstChild);
+      box.empty();
     };
     var mineText = saveBlockly();
     var mineName = getName();
@@ -173,9 +159,10 @@ module TDev {
     });
     clearMerge();
     inMerge = true;
+    box.append($("<div>").addClass("label").text("Merge conflict"));
     [ mineButton, theirsButton, baseButton, mergeButton ].forEach(button => {
-      box.appendChild(button);
-      box.appendChild(document.createTextNode(" "));
+      box.append(button);
+      box.append($(" "));
     });
   }
 
@@ -194,16 +181,14 @@ module TDev {
   }
 
   function statusMsg(s: string, st: External.Status) {
-    var box = <HTMLElement> $("#log");
-    var elt = document.createElement("div");
-    elt.classList.add("status");
+    var box = $("#log");
+    var elt = $("<div>").addClass("status").text(s);
     if (st == External.Status.Error)
-      elt.classList.add("error");
+      elt.addClass("error");
     else
-      elt.classList.remove("error");
-    elt.textContent = s;
-    box.appendChild(elt);
-    box.scrollTop = box.scrollHeight;
+      elt.removeClass("error");
+    box.append(elt);
+    box.scrollTop(box.prop("scrollHeight"));
   }
 
   function loadBlockly(s: string) {
@@ -225,73 +210,65 @@ module TDev {
   }
 
   function setDescription(x: string) {
-    $("#script-description").textContent = x;
-    (<HTMLInputElement> $("#input-script-description")).value = (x || "");
+    $("#script-description").text(x);
+    $("#input-script-description").val(x || "");
   }
 
   function setName(x: string) {
-    $("#script-name").textContent = x;
-    (<HTMLInputElement> $("#input-script-name")).value = x;
+    $("#script-name").text(x);
+    $("#input-script-name").val(x);
   }
 
   function getDescription() {
-    return (<HTMLInputElement> $("#input-script-description")).value;
+    return $("#input-script-description").val();
   }
 
   function getName() {
-    return (<HTMLInputElement> $("#input-script-name")).value;
+    return $("#input-script-name").val();
   }
 
   var dirty = false;
 
   /* Some popup routines... */
   function clearPopups() {
-    var popups = document.querySelectorAll(".popup");
-    Array.prototype.forEach.call(popups, (popup: HTMLElement) => {
-      popup.classList.add("hidden");
-    });
+    $(".popup").addClass("hidden");
   }
   function setupPopups() {
     /* Hide all popups when user clicks elsewhere. */
-    document.addEventListener("click", () => {
-      clearPopups();
-    }, false);
+    $(document).click(clearPopups);
     /* Catch clicks on popups themselves to disable above handler. */
-    var popups = document.querySelectorAll(".popup");
-    Array.prototype.forEach.call(popups, (popup: HTMLElement) => {
-      popup.addEventListener("click", (e: Event) => {
-        e.stopPropagation();
-      });
-    }, false);
+    $(".popup").click((e: Event) => {
+      e.stopPropagation();
+    });
   }
 
-  function setupPopup(link: HTMLElement, popup: HTMLElement) {
-    link.addEventListener("click", (e: Event) => {
-      if (popup.classList.contains("hidden"))
+  function setupPopup(link: JQuery, popup: JQuery) {
+    link.click((e: Event) => {
+      if (popup.hasClass("hidden"))
         showPopup(link, popup);
       else
-        popup.classList.add("hidden");
+        popup.addClass("hidden");
       e.stopPropagation();
-    }, false);
+    });
   }
 
-  function showPopup(link: HTMLElement, popup: HTMLElement) {
+  function showPopup(link: JQuery, popup: JQuery) {
     clearPopups();
-    popup.classList.remove("hidden");
-    var x = link.offsetLeft;
-    var w = link.clientWidth;
-    var y = link.offsetTop;
-    var h = link.clientHeight;
-    popup.style.left = Math.round(x - 500 + w/2 + 5 + 15)+"px";
-    popup.style.top = Math.round(y + h + 10 + 5)+"px";
+    popup.removeClass("hidden");
+    var x = link[0].offsetLeft;
+    var w = link[0].clientWidth;
+    var y = link[0].offsetTop;
+    var h = link[0].clientHeight;
+    popup.css("left", Math.round(x - 500 + w/2 + 5 + 15)+"px");
+    popup.css("top", Math.round(y + h + 10 + 5)+"px");
   }
 
   // Called once at startup
   function setupEditor(message: External.Message_Init) {
     var state = <MyEditorState> message.script.editorState;
 
-    Blockly.inject($("#editor"), {
-      toolbox: $("#blockly-toolbox"),
+    Blockly.inject($("#editor")[0], {
+      toolbox: $("#blockly-toolbox")[0],
       scrollbars: true
     });
     loadBlockly(message.script.scriptText);
@@ -306,13 +283,13 @@ module TDev {
         dirty = true;
       });
     }, 1);
-    $("#input-script-name").addEventListener("input", () => {
-      $("#script-name").textContent = (<HTMLInputElement> $("#input-script-name")).value;
+    $("#input-script-name").on("input", () => {
+      $("#script-name").text($("#input-script-name").val());
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
-    $("#input-script-description").addEventListener("input", () => {
-      $("#script-description").textContent = (<HTMLInputElement> $("#input-script-description")).value;
+    $("#input-script-description").on("input", () => {
+      $("#script-description").text($("#input-script-description").val());
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
@@ -322,7 +299,7 @@ module TDev {
 
     // That's triggered when the user closes or reloads the whole page, but
     // doesn't help if the user hits the "back" button in our UI.
-    window.addEventListener("beforeunload", function (e) {
+    window.addEventListener("beforeunload", e => {
       if (dirty) {
         var confirmationMessage = "Some of your changes have not been saved. Quit anyway?";
         (e || window.event).returnValue = confirmationMessage;
@@ -375,18 +352,11 @@ module TDev {
   function compileOrError(msgSel?: string) {
     var ast: TDev.AST.Json.JApp;
 
-    // Clear any previous errors
-    var clear = (c: string) => {
-      var elts = document.getElementsByClassName(c);
-      // Argh! It's alive!
-      for (var i = elts.length - 1; i >= 0; --i)
-        (<any> elts[i]).classList.remove(c);
-    };
-    clear("blocklySelected");
-    clear("blocklyError");
+    $(".blocklySelected").remove();
+    $(".blocklyError").remove();
     clearPopups();
-    $("#errorsGraduate").classList.add("hidden");
-    $("#errorsCompile").classList.add("hidden");
+    $("#errorsGraduate").addClass("hidden");
+    $("#errorsCompile").addClass("hidden");
 
     try {
       ast = compile(Blockly.mainWorkspace, {
@@ -408,7 +378,7 @@ module TDev {
         text += e.msg + "\n";
       });
       statusMsg(text, External.Status.Error);
-      $(msgSel).classList.remove("hidden");
+      $(msgSel).removeClass("hidden");
       showPopup($("#link-log"), $("#popup-log"));
       return null;
     }
@@ -439,25 +409,25 @@ module TDev {
   }
 
   function setupButtons() {
-    $("#command-quit").addEventListener("click", () => {
+    $("#command-quit").click(() => {
       doSave();
       post({ type: External.MessageType.Quit });
     });
-    $("#command-force-compile").addEventListener("click", () => {
+    $("#command-force-compile").click(() => {
       doCompile();
     });
-    $("#command-compile").addEventListener("click", (e: Event) => {
+    $("#command-compile").click((e: Event) => {
       doCompile("#errorsCompile");
       e.stopPropagation();
     });
-    $("#command-force-graduate").addEventListener("click", () => {
+    $("#command-force-graduate").click(() => {
       doGraduate();
     });
-    $("#command-graduate").addEventListener("click", (e: Event) => {
+    $("#command-graduate").click((e: Event) => {
       doGraduate("#errorsGraduate");
       e.stopPropagation();
     });
-    $("#command-run").addEventListener("click", () => {
+    $("#command-run").click(() => {
       var ast = compileOrError();
       post(<External.Message_Run> {
         type: External.MessageType.Run,

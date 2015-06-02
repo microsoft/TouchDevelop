@@ -107,7 +107,16 @@ body, input {
   margin-left: 3em;
 }
 
-#commands a, #merge-commands a {
+#merge-commands > * {
+  cursor: pointer;
+}
+
+#merge-commands > .label {
+  color: #a40000;
+  font-weight: bold;
+}
+
+#commands a {
   padding-right: .5em;
   margin-right: 1em;
 }
