@@ -122,7 +122,17 @@ module TDev {
     }
   }
 
+  var mergeDisabled = true;
+
   function promptMerge(merge: External.PendingMerge) {
+    if (mergeDisabled) {
+      inMerge = false;
+      currentVersion = merge.theirs.baseSnapshot;
+      statusMsg("✎ ignoring merge, forcing changes", External.Status.Ok);
+      doSave(true);
+      return;
+    }
+
     console.log("[merge] merge request, base = "+merge.base.baseSnapshot +
       ", theirs = "+merge.theirs.baseSnapshot +
       ", mine = "+currentVersion);
