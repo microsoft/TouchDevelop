@@ -404,6 +404,7 @@ module TDev.Browser {
                     recordsSection: true,
                     persistanceRadio: true,
                     databaseSection: true,
+                    scriptPropertiesManagement: true,
                     //MORE
                     
                     // teacher specific
