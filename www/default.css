@@ -913,6 +913,7 @@ div.wall-box-tile>div.wall-box
   color: white;
   padding: 0.5em 3em;
   text-align: center;
+  z-index:3;
 }
 
 .errorNotification {
@@ -926,7 +927,8 @@ div.wall-box-tile>div.wall-box
   vertical-align: middle;
 }
 .infoNotification button {
-    border-color:white; color:white;
+    border-color:white;
+    color:white;
 }
 
 .warningNotification
@@ -1539,7 +1541,7 @@ height: 100%;
   bottom: 0;
   right: 1.5em;
   font-size: 0.8em;
-  z-index:100;
+  z-index:1;
 
   padding: 0.5em;
   line-height: 1.1em;
