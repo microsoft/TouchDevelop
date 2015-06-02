@@ -744,8 +744,13 @@ module TDev
                         var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
                         if (m) name = m[1];
                         if (/^image\/(png|jpeg)$/i.test(file.type)) {
-                            ArtUtil.uploadPictureDialogAsync(/^image\/png$/i.test(file.type), HTML.mkFileInput(file, 1), name)
-                                .done((art: JsonArt) => {
+                            ArtUtil.uploadPictureDialogAsync({
+                                removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type), 
+                                input: HTML.mkFileInput(file, 1), 
+                                initialName: name,
+                                finalDialog: !Script
+                            })
+                            .done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
                                     TheEditor.addNode(n);
@@ -817,6 +822,7 @@ module TDev
                         return; // no file selected
                     }
                     progressBar.start();
+                    publishBtn.style.display = "none"
                     progressDiv.setChildren([lf("publishing...")]);
                     file.readAsync()
                         .then(data => {
@@ -826,6 +832,7 @@ module TDev
                             return uploadArtAsync(name.value, description.value, data);
                         }
                     }).done((resp) => {
+                        publishBtn.style.display = null
                         progressBar.stop();
                         progressDiv.setChildren([]);
                         art = resp;
@@ -839,6 +846,7 @@ module TDev
                         }
                     }, e => {
                             Util.log('upload documeent: error ' + e.status);
+                            publishBtn.style.display = null
                             progressBar.stop();
                             progressDiv.setChildren([]);
                             if (e.status == 502)
@@ -954,18 +962,26 @@ module TDev
             }
         }
 
-        export function uploadPictureDialogAsync(removeWhite = false, input? : TDev.HTML.IInputElement, initialName? : string): Promise {
+        export interface UploadPictureOptions {
+            removeWhite?: boolean;
+            input?: TDev.HTML.IInputElement;
+            initialName?: string;
+            finalDialog?: boolean;
+        }
+
+        export function uploadPictureDialogAsync(options:UploadPictureOptions = {}): Promise {
             if (Cloud.anonMode(lf("uploading pictures")))
                 return Promise.as();
+            var removeWhite = !!options.removeWhite
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 var art: JsonArt = null;
                 m.onDismiss = () => onSuccess(art);
                 var name = HTML.mkTextInput("text", lf("picture name"));
                 name.required = true;
-                name.value = initialName || "";
+                name.value = options.initialName || "";
                 var description = HTML.mkTextInput("text", lf("description"));
-                var file = input || HTML.mkImageInput(false, 1);
+                var file = options.input || HTML.mkImageInput(false, 1);
                 var removeWhiteCheck = HTML.mkCheckBox(lf("remove white background (best for game sprites)"), (b) => removeWhite = b, removeWhite);
                 var errorDiv = div('validation-error');
                 var progressDiv = div('');
@@ -999,6 +1015,7 @@ module TDev
                     }
                     progressBar.start();
                     progressDiv.setChildren([lf("publishing...")]);
+                    publishBtn.style.display = "none"
                     file.readAsync()
                         .then(data => {
                             if (!data) return Promise.as(undefined);
@@ -1024,7 +1041,16 @@ module TDev
                                 errorDiv.setChildren(lf("We failed to read the file. Please try again with another picture."));
                             } else {
                                 m.dismiss();
-                                HTML.showProgressNotification(lf("picture published!"));
+                                if (!options.finalDialog)
+                                    HTML.showProgressNotification(lf("picture published!"));
+                                else {
+                                    var sm = ModalDialog.info(lf("resource published!"), 
+                                        lf("Here's a URL."), null);
+                                    var inp = HTML.mkTextInput("text", "")
+                                    inp.value = art.pictureurl || art.aacurl || art.bloburl
+                                    sm.add(div(null, inp))
+                                    sm.addOk()
+                                }
                             }
                         }, e => {
                             if (e.status == 502)
