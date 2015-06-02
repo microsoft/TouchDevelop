@@ -1539,7 +1539,7 @@ height: 100%;
   bottom: 0;
   right: 1.5em;
   font-size: 0.6em;
-
+  
   padding: 0.5em;
   line-height: 1.1em;
   background: rgba(255, 255, 255, 0.75);
@@ -1579,7 +1579,12 @@ height: 100%;
   right: 0;
 }
 
+#root[data-is-editor^="yes"] .beta-note {
+  display:none;
+}
+
 #root[data-modal-visible^="yes"] .beta-note {
+  display:block;
   background: rgba(255, 255, 255, 0.0001);
 }
 

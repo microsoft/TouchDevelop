@@ -552,14 +552,12 @@ module TDev.Browser {
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
             var copyrights = "<div class='beta-legal'>" + 
+                betaNote +
                 "<span class='beta-black'>© 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
                 (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
                 "<span class='beta-underline'>privacy</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>";
 
-            // there is a menu option for that in the wp8 app
-            if (Browser.isWP8app) copyrights = "";
-
-            Browser.setInnerHTML(beta, betaNote + copyrights);
+            Browser.setInnerHTML(beta, copyrights);
 
             beta.withClick(EditorSettings.showFeedbackBox);
 

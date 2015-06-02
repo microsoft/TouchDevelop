@@ -17,7 +17,7 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            document.body.appendChild(EditorSettings.mkBetaNote());
+            elt("root").appendChild(EditorSettings.mkBetaNote());
             var siteHeader = elt("siteHeader")
             if (siteHeader)
                 HTML.fixWp8Links(siteHeader)
