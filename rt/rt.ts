@@ -1106,8 +1106,6 @@ module TDev
                 }
                 p = this.host.notifyStopAsync();
                 p = p.then(() => this.sessions.stopAsync());
-                if (!isPause)
-                    VisibilityManager.attachToVisibilityChange(null);
             }
             return p;
         }
@@ -1690,7 +1688,6 @@ module TDev
             this.eventQ.clearPause()
             if (this.state != RtState.Stopped || !this.resumeAllowed) return;
 
-            VisibilityManager.attachToVisibilityChange(this);
             this.refreshPageStackForNewScript();
             this.eventQ.clear();
             if (!this.liveMode())
@@ -1705,8 +1702,6 @@ module TDev
                 bot.entryAddr = Runtime.pumpEvents;
                 bot.returnAddr = Runtime.pumpEvents;
                 var frame = this.enter(bot);
-                if (!once)
-                    VisibilityManager.attachToVisibilityChange(this);
                 this.mainLoop(frame, "resume execution");
             } catch (e) {
                 this.handleException(e, this.current)
@@ -1834,7 +1829,6 @@ module TDev
                         else
                             ProgressOverlay.hide();
                         Util.assert(this.isStopped())
-                        VisibilityManager.attachToVisibilityChange(this);
                         // missing must be setup after the loading dialog is gone
                         this.host.initApiKeysAsync()
                             .then(() => this.host.agreeTermsOfUseAsync())
@@ -3114,54 +3108,6 @@ module TDev
             f(this);
         }
     }
-
-    module VisibilityManager {
-        var hiddenProp = null;
-        var rt: Runtime = null;
-
-        function getHiddenProp(): string {
-            if (Browser.isNodeJS) return null;
-            var prefixes = ['webkit', 'moz', 'ms', 'o'];
-            // if 'hidden' is natively supported just return it
-            if ('hidden' in document) return 'hidden';
-            // otherwise loop over all the known prefixes until we find one
-            for (var i = 0; i < prefixes.length; i++) {
-                if ((prefixes[i] + 'Hidden') in document)
-                    return prefixes[i] + 'Hidden';
-            }
-            // otherwise it's not supported
-            return null;
-        }
-
-        export function attachToVisibilityChange(runtime: Runtime) {
-            if (runtime && runtime.testMode)
-                return;
-            rt = runtime;
-            if(!hiddenProp)
-                hiddenProp = getHiddenProp();
-            if (hiddenProp) {
-                Util.log('visibility manager: ' + (!!runtime ? "attach" : "detach"));
-                var evName = hiddenProp.replace(/[H|h]idden/, '') + 'visibilitychange';
-                if (rt) document.addEventListener(evName, visibilityChanged, false);
-                else document.removeEventListener(evName, visibilityChanged, false);
-            }
-        }
-
-        function visibilityChanged() {
-            var rt = Runtime.theRuntime;
-            if (rt && hiddenProp) {
-                var hidden = document[hiddenProp];
-                if (hidden) {
-                    Util.log('visibility manager: pausing');
-                    rt.pauseExecution()
-                }
-                else {
-                    Util.log('visibility manager: resuming');
-                    rt.resumeExecution();
-                }
-            }
-        }
-        }
 
     export module RT {
         export function unwrapJson(o: JsonObject): any {
