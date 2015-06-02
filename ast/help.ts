@@ -357,6 +357,21 @@ module TDev {
     var oembedCache: StringMap<HTML.OEmbed> = {};
     var _socialNetworks: SocialNetwork[] = [
         {
+            id: "art",
+            name: "TouchDevelop Art",
+            description: lf("Cover art ({0}/...)", Cloud.config.cdnUrl),
+            parseIds: text => {
+                var links = [];
+                if (text)
+                    text.replace(/https?:\/\/.*\/pub\/([a-z]+)/gi,(m, id) => {
+                        var ytid = id;
+                        links.push(id)
+                    });
+                return links;
+            },
+            idToUrl: id => Cloud.config.cdnUrl + "/pub/" + id,
+            // idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
+        }, {
             id: "youtube",
             name: "YouTube",
             description: lf("YouTube video (https://youtu.be/...)"),
