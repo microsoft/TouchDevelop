@@ -1404,10 +1404,6 @@
                 case "installed":
                     tick(Ticks.browseListMyScripts);
                     header = lf("my scripts");
-                    this.botDiv = div(null, 
-                        HTML.mkButtonTick(lf("create script"), Ticks.hubCreateScript, 
-                            () => { TheHub.createScript() })
-                    );                    
                     break;
                 case "topics":
                     tick(Ticks.browseListDocs);
