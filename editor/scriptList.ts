@@ -663,11 +663,13 @@
                         elts.push(searchDiv);
                     } else if (items.length == 0) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
-                        var t = HelpTopic.findById("howtosearch");
-                        if (t) {
-                            var s = TopicInfo.mk(t);
-                            var b = s.mkSmallBox();
-                            elts.push(b);
+                        if (EditorSettings.widgets().searchHelp) {
+                            var t = HelpTopic.findById("howtosearch");
+                            if (t) {
+                                var s = TopicInfo.mk(t);
+                                var b = s.mkSmallBox();
+                                elts.push(b);
+                            }
                         }
                     }
                     sd.setChildren(elts);

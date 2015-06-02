@@ -115,6 +115,7 @@ module TDev.Browser {
                 notifyAppReloaded: true,
                 startTutorialButton: true,
                 translateComments: true,
+                searchHelp: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
@@ -235,6 +236,7 @@ module TDev.Browser {
                 hubTags: true,
                 hubMyArt: true,
                 translateComments: true,
+                searchHelp: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,

@@ -108,6 +108,7 @@ module TDev.Cloud {
         hubSocial?: boolean;
         startTutorialButton?: boolean;
         translateComments?: boolean;
+        searchHelp?: boolean;
 
         // script lifecycle
         updateButton?: boolean;
