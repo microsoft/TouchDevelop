@@ -477,11 +477,13 @@ module TDev.Browser {
                     );
             }
             
-            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code"].some(perm => Cloud.hasPermission(perm))) {
+            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
                 m.add([div("wall-dialog-body", [
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
-                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
                     (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
