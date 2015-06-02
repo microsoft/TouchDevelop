@@ -795,7 +795,14 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "raw-docs":
-        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), !opts.allowexternal).done(top => ar.ok({
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), true).done(top => ar.ok({
+            body: top,
+            template: "docs", // TODO get from script text
+        }))
+        break;
+
+    case "raw-docs-official":
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), false).done(top => ar.ok({
             body: top,
             template: "docs", // TODO get from script text
         }))
