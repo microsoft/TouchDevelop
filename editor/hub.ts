@@ -362,6 +362,7 @@ module TDev.Browser {
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
                     actionSettings: true,
+                    scriptHistoryTab: true,
                 }
             },
         },
@@ -417,6 +418,7 @@ module TDev.Browser {
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
                     actionSettings: true,
+                    scriptHistoryTab: true,
 
                     // editor specific                  
                     publishDescription: true,
