@@ -692,7 +692,11 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
   var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), Type.Number);
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return H.mkFor("__unused_index", H.mkExprHolder([], bound), body);
+  var valid = (x: string) => !lookup(e, x) || !isCompiledAsLocal(lookup(e, x));
+  var name = "i";
+  for (var i = 0; !valid(name); i++)
+    name = "i"+i;
+  return H.mkFor(name, H.mkExprHolder([], bound), body);
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
