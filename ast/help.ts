@@ -488,6 +488,7 @@ module TDev {
         public showCopy = true;
         public useSVG = true;
         public useExternalLinks = false;
+        public blockExternalLinks:boolean = undefined;
         public pointerHelp = Cloud.lite;
         public allowLinks = true;
         public allowImages = true;
@@ -907,7 +908,7 @@ module TDev {
                 if (!arg) return MdComments.error("bigbutton: requires <text>,<url> arguments");
                 var ms = arg.split(',');
                 if (ms.length != 2) return MdComments.error(lf("bigbutton: must have <text>,<url> arguments"));
-                return Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
+                return this.blockLink(ms[1]) || Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
             } else if (macro == "shim") {
                 return "<b>compiles to C++ function: </b><span class='font-family: monospace'>"+arg+"</span>";
             } else {
@@ -928,6 +929,18 @@ module TDev {
             return Util.fmt("<div class='md-video-link' data-video='{0:uri}'>{1}</div>",
                 JSON.stringify(video),
                 SVG.getVideoPlay(poster))
+        }
+
+        private blockLink(href:string)
+        {
+            if (this.blockExternalLinks === undefined)
+                this.blockExternalLinks = !!(Cloud.isRestricted() && !Cloud.hasPermission("external-links"));
+
+            if (!this.blockExternalLinks) return null
+
+            // TODO check if the link is external?
+
+            return MdComments.error(lf("sorry, external link not allowed"))
         }
 
         private expandInline(s:string, allowStyle = false, allowRepl = true):string
@@ -1017,6 +1030,9 @@ module TDev {
                     applySpan(/^__(.+?)__/, replace("strong")) ||
                     applySpan(/^_([^\n_]+)_/, replace("em")) ||
                     (this.allowLinks && applySpan(/^(http|https|ftp):\/\/[^\s]*/gi, (m) => {
+                        var msg = this.blockLink(str)
+                        if (msg) return msg
+
                         var str = m[0];
                         var suff = ""
                         var mm = /(.*?)([,\.;:\)]+)$/.exec(str);
@@ -1044,7 +1060,7 @@ module TDev {
                             if (this.pointerHelp)
                                 name = name.replace(/^[\w\/]+\//, "")
                         }
-                        if (this.pointerHelp && /^\/[\w\/]+$/.test(href))
+                        if (this.pointerHelp && /^\/[\w\-\/]+(#\w+)?$/.test(href))
                             href = href
                         else if (/^\/\w+(->\w+)?(#\w+)?$/.test(href))
                             href = this.topicLink(href.slice(1));
@@ -1057,6 +1073,9 @@ module TDev {
                         else if (/^#[\w\-]+$/.test(href))
                             href = (this.useExternalLinks ? "#" : "#goto:") + href.slice(1);
                         else if (/^(http|https|ftp):\/\//.test(href) || /^mailto:/.test(href)) {
+                            var msg = this.blockLink(href)
+                            if (msg) return msg
+
                             href = href; // OK
                             acls = "md-link md-external-link";
                             additions = " rel=\"nofollow\" target=\"_blank\"";
