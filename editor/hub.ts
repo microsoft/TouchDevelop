@@ -405,6 +405,7 @@ module TDev.Browser {
                     persistanceRadio: true,
                     databaseSection: true,
                     scriptPropertiesManagement: true,
+                    editLibraryButton: true,
                     //MORE
                     
                     // teacher specific
