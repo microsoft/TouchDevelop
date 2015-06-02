@@ -13,11 +13,13 @@ module TDev {
       indent: string;
     }
 
-    export var emptyEnv: EmitterEnv = {
-      indent: "",
-      ident_of_id: {},
-      id_of_ident: {},
-    };
+    export function emptyEnv(): EmitterEnv {
+      return {
+        indent: "",
+        ident_of_id: {},
+        id_of_ident: {},
+      };
+    }
 
     export function indent(e: EmitterEnv) {
       return {
@@ -130,8 +132,8 @@ module TDev {
       }
 
       public visitFor(env: EmitterEnv, index: J.JLocalDef, bound: J.JExprHolder, body: J.JStmt[]) {
-        var indexCode = this.visit(env, index) + " = 1";
-        var testCode = H.mangleDef(env, index) + " <= " + this.visit(env, bound);
+        var indexCode = this.visit(env, index) + " = 0";
+        var testCode = H.mangleDef(env, index) + " < " + this.visit(env, bound);
         var incrCode = "++"+H.mangleDef(env, index);
         var bodyCode = this.visitMany(indent(env), body);
         return (

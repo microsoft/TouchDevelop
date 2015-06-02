@@ -24,7 +24,7 @@ module TDev {
         lift(a);
         var libName = i >= 0 ? H.mangleName(libs[i].name) : null;
         var e = new Emitter(libRef, libName, libs);
-        e.visit(i >= 0 ? indent(emptyEnv) : emptyEnv, a);
+        e.visit(i >= 0 ? indent(emptyEnv()) : emptyEnv(), a);
         return e;
       } catch (e) {
         console.error("Compilation error", e);
