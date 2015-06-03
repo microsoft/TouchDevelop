@@ -151,7 +151,7 @@ Blockly.Blocks['device_get_button'] = {
     this.appendDummyInput()
         .appendField("is pressed");
     this.setInputsInline(true);
-    this.setOutput(true);
+    this.setOutput(true, "Boolean");
     this.setTooltip('');
   }
 };
@@ -534,6 +534,19 @@ Blockly.Blocks['device_while'] = {
         .appendField("do");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['device_random'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(230);
+    this.appendDummyInput()
+        .appendField("random number up to")
+        .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "limit");
+    this.setInputsInline(true);
+    this.setOutput(true, "Number");
     this.setTooltip('');
   }
 };

@@ -1000,6 +1000,7 @@ module TDev.HTML {
                 var a = <HTMLAnchorElement>ch[i];
                 var href = a.getAttribute("href");
                 if (/^#/.test(href)) {
+                    a.onclick = () => false;
                     a.withClick(() => {
                         Util.setHash(href)
                         return false;
