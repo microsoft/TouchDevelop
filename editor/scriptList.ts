@@ -6469,21 +6469,29 @@
                         if (this.app.things.length == 0 && text)
                             this.app = AST.Parser.parseScript(text)
 
-                        var coll = new AST.IntelliCollector()
-                        coll.dispatch(this.app)
-                        var path = coll.topicPath || this.getTitle().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
-                        if (!Cloud.hasPermission("root-ptr"))
-                            path = "users/" + Cloud.getUserId() + "/" + path
-
-                        this.docPath = path
-
-                        if (isPublish && !Cloud.hasPermission("root-ptr")) {
-                            return Cloud.postPrivateApiAsync("pointers", {
-                                    path: this.docPath,
-                                    scriptid: this.publicId,
-                            })
-                        } else {
+                        if (Cloud.hasPermission("root-ptr")) {
+                            var coll = new AST.IntelliCollector()
+                            coll.dispatch(this.app)
+                            this.docPath = coll.topicPath || this.getTitle().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
                             return Promise.as()
+                        } else {
+                            // Not sure if we want it
+                            // if (Cloud.hasPermission("custom-ptr"))
+                            //    this.docPath = "users/" + Cloud.getUserId() + "/" + path
+
+                            return TheApiCacheMgr.getAsync(this.publicId, true)
+                                .then((js:JsonScript) => {
+                                    this.docPath = "usercontent/" + js.updateroot
+                                })
+                                .then(() => {
+                                    if (isPublish && !Cloud.hasPermission("root-ptr")) {
+                                        return Cloud.postPrivateApiAsync("pointers", {
+                                                path: this.docPath,
+                                                scriptid: this.publicId,
+                                        })
+                                    }
+                                    else return Promise.as()
+                                })
                         }
                     })
                     .then(() => Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")).then(v => v, e => null))
@@ -6501,7 +6509,7 @@
             this.getDescription().replace(/(#\w+)/g, (m, h) => { ht += " " + m; return "" })
             var url = Cloud.config.shareUrl + "/" + id
             if (this.docPath && this.docPathCurrent)
-                url = Cloud.config.shareUrl + "/" + this.docPath
+                url = Cloud.config.shareUrl + "/" + this.docPath.replace(/^usercontent\//, "u/")
             var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
             lnk.set_title(title + " " + Cloud.config.hashtag + ht)
 
@@ -6891,7 +6899,8 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = Cloud.config.shareUrl + "/" + (this.docPathCurrent ? this.docPath : this.publicId);
+                txtAddress.value = Cloud.config.shareUrl + "/" + 
+                    (this.docPathCurrent ? this.docPath.replace(/^usercontent\//, "u/") : this.publicId);
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 

@@ -192,6 +192,7 @@ module TDev {
         mergeids:string[];
         editor?: string; // convention where empty means touchdevelop, for backwards compatibility
         meta?: JsonScriptMeta; // only in lite, bag of metadata
+        updateroot: string; // lite-only
     }
 
     export interface JsonHistoryItem
