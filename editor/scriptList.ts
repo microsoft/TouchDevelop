@@ -19,8 +19,13 @@
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkBetaNote());
             var siteHeader = elt("siteHeader")
-            if (siteHeader)
+            if (siteHeader) {
                 HTML.fixWp8Links(siteHeader)
+                if (Cloud.getUserId()) {
+                    var siteNotifications = elt("siteNotifications");
+                    if (siteNotifications) this.addNotificationCounter(siteNotifications);
+                }
+            }
             this.initSignin();
         }
         private theList = div("slList");
