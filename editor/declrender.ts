@@ -227,9 +227,12 @@ module TDev
             return icon;
         }
 
-        var mdCmt = new MdComments();
+        var mdCmt:MdComments;
+
         export function mkBoxEx(decl:any, tp:string):HTMLElement
         {
+            if (!mdCmt) mdCmt = new MdComments();
+
             var icon = iconFromDecl(decl, tp);
             var innerElt = div("navItemInner");
             var elt= HTML.mkButtonElt("navItem", innerElt);
