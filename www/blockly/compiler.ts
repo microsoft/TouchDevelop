@@ -683,7 +683,13 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
     // In the perfect case, we can do a local binding that declares a local
     // variable. The code that generates global variable declarations is in sync
     // and won't generate a global binding.
-    return [H.mkFor(bVar, H.mkExprHolder([], compileExpression(e, bTo, Type.Number)), compileStatements(e, bDo))];
+    return [
+      // FOR 0 <= VAR
+      H.mkFor(bVar,
+        // < TO + 1 DO
+        H.mkExprHolder([], H.mkSimpleCall("+", [compileExpression(e, bTo, Type.Number), H.mkNumberLiteral(1)])),
+        compileStatements(e, bDo))
+    ];
   else {
     // In any other case, fallback to a while loop.
     return [
