@@ -449,6 +449,21 @@ function toTdType(t: Type) {
   }
 }
 
+function typeToString(t: Type) {
+  switch (t) {
+    case Type.Number:
+      return "Number";
+    case Type.Boolean:
+      return "Boolean";
+    case Type.String:
+      return "String";
+    case Type.Image:
+      return "Image";
+    case Type.Unit:
+      throw new Error("Should be forbidden by Blockly");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Expressions
 //
@@ -510,7 +525,8 @@ function compileVariableGet(e: Environment, b: B.Block, t?: Type): J.JExpr {
   var binding = lookup(e, name);
   assert(binding != null);
   if (t != null && t != binding.type)
-    throw new Error("Type mismatch");
+    throw new Error("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
+        ", but is used here as a "+typeToString(t));
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
 }
 
@@ -549,8 +565,9 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   if (b == null)
     return defaultValueForType(t);
 
-  if (t != inferType(e, b))
-    throw new Error("Type mismatch");
+  var actualType = inferType(e, b);
+  if (t != actualType)
+    throw new Error("We need "+typeToString(t)+" here, but we got "+typeToString(actualType));
 
   switch (b.type) {
     case "math_number":
