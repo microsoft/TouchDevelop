@@ -395,45 +395,42 @@ module Errors {
 // would not work).
 ///////////////////////////////////////////////////////////////////////////////
 
+// There are several layers of abstraction.
+// - String annotations on the blocks (see blocks-custom.js).
+// - Type (as in our "Blocks" language). It's an enum, so as to rule out more
+//   mistakes.
+// - TouchDevelop types.
+// The various functions below convert from one to another.
+
 // Starts at 1, otherwise [if (type) ...] doesn't work.
 enum Type { Number = 1, Boolean, String, Image, Unit };
 
 // Infers the expected type of an expression by looking at the untranslated
 // block and figuring out, from the look of it, what type of expression it
 // holds.
-//
-// XXX this is redundant since this information should be on blocks already --
-// make sure all blocks have the right "setCheck" calls and discard this
-// function.
 function inferType(e: Environment, b: B.Block): Type {
-  if (b.type in stdCallTable)
-    return stdCallTable[b.type].f.type;
+  if (!b.outputConnection)
+    return Type.Unit;
 
-  switch (b.type) {
-    case "math_number":
-    case "math_op2":
-    case "math_op3":
-    case "math_arithmetic":
-    case "device_random":
-      return Type.Number;
-    case "logic_operation":
-    case "logic_compare":
-    case "logic_boolean":
-    case "logic_negate":
-      return Type.Boolean;
-    case "text":
+  if (!b.outputConnection.check_ || !b.outputConnection.check_.length)
+    return null;
+
+  return toType(b.outputConnection.check_[0]);
+}
+
+function toType(t: string): Type {
+  switch (t) {
+    case "String":
       return Type.String;
-    case "device_build_image":
-    case "device_build_big_image":
+    case "Number":
+      return Type.Number;
+    case "sprite":
       return Type.Image;
-    case "variables_get":
-      var binding = lookup(e, b.getFieldValue("VAR"));
-      if (binding)
-        return binding.type;
-      else
-        return null;
+    case "Boolean":
+      return Type.Boolean;
+    default:
+      throw new Error("Unknown type");
   }
-  return null;
 }
 
 function toTdType(t: Type) {
@@ -451,6 +448,7 @@ function toTdType(t: Type) {
   }
 }
 
+// This is for debugging only.
 function typeToString(t: Type) {
   switch (t) {
     case Type.Number:
@@ -765,7 +763,7 @@ function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
     } else
       return compileExpression(e, b.getInputTargetBlock(x.name), x.type)
   });
-  return H.stdCall(func.f.name, args, func.isExtensionMethod);
+  return H.stdCall(func.f, args, func.isExtensionMethod);
 }
 
 function compileStdBlock(e: Environment, b: B.Block, f: StdFunc) {
@@ -829,7 +827,7 @@ var p = (x: string, t: Type) => ({ type: t, name: x });
 // - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
 //   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
 interface StdFunc {
-  f: Param;
+  f: string;
   args: Param[];
   isExtensionMethod?: boolean
 }
@@ -838,85 +836,85 @@ interface StdFunc {
 // information by looking at the input block / field value to infer that
 var stdCallTable: { [blockType: string]: StdFunc } = {
   device_clear_display: {
-    f: p("clear screen", Type.Unit),
+    f: "clear screen",
     args: []
   },
   device_show_number: {
-    f: p("show number", Type.Unit),
+    f: "show number",
     args: [ p("number", Type.Number), p("pausetime", Type.Number) ]
   },
   device_show_letter: {
-    f: p("show letter", Type.Unit),
+    f: "show letter",
     args: [ p("letter", Type.String) ]
   },
   device_pause: {
-    f: p("pause", Type.Unit),
+    f: "pause",
     args: [ p("pause", Type.Number) ]
   },
   device_print_message: {
-    f: p("show string", Type.Unit),
+    f: "show string",
     args: [ p("message", Type.String), p("pausetime", Type.Number) ]
   },
   device_plot: {
-    f: p("plot", Type.Unit),
+    f: "plot",
     args: [ p("x", Type.Number), p("y", Type.Number) ]
   },
   device_unplot: {
-    f: p("unplot", Type.Unit),
+    f: "unplot",
     args: [ p("x", Type.Number), p("y", Type.Number) ]
   },
   device_point: {
-    f: p("point", Type.Boolean),
+    f: "point",
     args: [ p("x", Type.Number), p("y", Type.Number) ]
   },
   device_heading: {
-    f: p("compass heading", Type.Number),
+    f: "compass heading",
     args: []
   },
   device_make_StringImage: {
-    f: p("create image from string", Type.Image),
+    f: "create image from string",
     args: [ p("NAME", Type.String) ]
   },
   device_scroll_image: {
-    f: p("scroll image", Type.Unit),
+    f: "scroll image",
     args: [ p("sprite", Type.Image), p("x", Type.Number), p("delay", Type.Number) ],
     isExtensionMethod: true
   },
   device_show_image_offset: {
-    f: p("show image", Type.Unit),
+    f: "show image",
     args: [ p("sprite", Type.Image), p("x", Type.Number), p("y", Type.Number) ],
     isExtensionMethod: true
   },
   device_get_button: {
-    f: p("button is pressed", Type.Boolean),
+    f: "button is pressed",
     args: [ p("NAME", Type.String) ]
   },
   device_get_acceleration: {
-    f: p("acceleration", Type.Number),
+    f: "acceleration",
     args: [ p("NAME", Type.String) ]
   },
   device_get_digital_pin: {
-    f: p("digital read pin", Type.Number),
+    f: "digital read pin",
     args: [ p("name", Type.String) ]
   },
   device_set_digital_pin: {
-    f: p("digital write pin", Type.Unit),
+    f: "digital write pin",
     args: [ p("name", Type.String), p("value", Type.Number) ]
   },
   device_get_analog_pin: {
-    f: p("analog read pin", Type.Number),
+    f: "analog read pin",
     args: [ p("name", Type.String) ]
   },
   device_set_analog_pin: {
-    f: p("analog write pin", Type.Unit),
+    f: "analog write pin",
     args: [ p("name", Type.String), p("value", Type.Number) ]
   },
   device_get_brightness: {
-    f: p("brightness", Type.Number),
+    f: "brightness",
     args: []
   },
   device_set_brightness: {
-    f: p("set brightness", Type.Unit),
+    f: "set brightness",
     args: [ p("value", Type.Number) ]
   },
 }

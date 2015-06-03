@@ -151,7 +151,7 @@ Blockly.Blocks['device_get_button'] = {
     this.appendDummyInput()
         .appendField("is pressed");
     this.setInputsInline(true);
-    this.setOutput(true);
+    this.setOutput(true, "Boolean");
     this.setTooltip('');
   }
 };

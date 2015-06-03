@@ -15,6 +15,8 @@ declare module Blockly {
         // Returns null if no next block or is disconnected.
         getNextBlock(): Block;
 
+        outputConnection: Connection;
+
         svgGroup_: SVGElement;
         parentBlock_: Block;
         inputList: Input[];
@@ -29,6 +31,10 @@ declare module Blockly {
     class Input {
         name: string;
         sourceBlock_: Block;
+    }
+
+    class Connection {
+        check_: string[];
     }
 
     // if type is one of "procedures_def{,no}return", or "procedures_call{,no}return"
