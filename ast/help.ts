@@ -547,7 +547,7 @@ module TDev {
             });
             */
             Util.toArray(e.getElementsByClassName('md-video-link')).forEach((v: HTMLElement) => {
-                if (v.hasAttribute("data-playersrc")) v.withClick(() => v.innerHTML = v.getAttribute("data-playersrc"));
+                if (v.hasAttribute("data-playerurl")) v.withClick(() => v.innerHTML = HTML.mkVideoIframe(v.getAttribute("data-playerurl")));
                 else if (v.hasAttribute("data-video")) {
                     var lang = Util.getTranslationLanguage();
                     var jsvideo = <JsonVideo>JSON.parse(decodeURIComponent(v.getAttribute("data-video")));
@@ -858,9 +858,20 @@ module TDev {
                 if (!arg)
                     return MdComments.error("youtube: missing video id");
                 else {
-                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:uri}'>{1}</div>",
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
                         Util.fmt("//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1", arg),
-                        SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', arg))
+                        SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
+                        );
+                }
+            } else if (Cloud.lite && macro == "vimeo") {
+                if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
+                if (!/^\d+$/.test(arg))
+                    return MdComments.error("vimeo: video id should be a number");
+                else {
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
+                        Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1", arg),
+                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), arg))
                         );
                 }
             } else if (macro == "channel9") {

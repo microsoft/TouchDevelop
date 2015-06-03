@@ -71,19 +71,23 @@ module TDev.HTML {
         return d;
     }
 
+    export function mkVideoIframe(iframeSrc:string) {
+        return Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' allowfullscreen=''></iframe></div>",iframeSrc);
+    }
+
     export function mkLazyVideoPlayer(preview: string, iframeSrc:string): HTMLElement {
         var d = div('md-video-link');
         Browser.setInnerHTML(d, SVG.getVideoPlay(preview));
-        d.setAttribute("data-playersrc", iframeSrc);
+        d.setAttribute("data-playerurl", iframeSrc);
         d.withClick(() => {
-            d.innerHTML = Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' allowfullscreen=''></iframe></div>",iframeSrc);
+            d.innerHTML = mkVideoIframe(iframeSrc);
         });
         return d;        
     }
 
     export function mkYouTubePlayer(ytid: string) {
         return mkLazyVideoPlayer(
-            Util.fmt('https://img.youtube.com/vi/{0:q}/mqdefault.jpg', ytid),
+            Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', ytid),
             Util.fmt("//www.youtube-nocookie.com/embed/{0:uri}?modestbranding=1&autoplay=1&autohide=1&origin={1:uri}", ytid, Cloud.config.rootUrl)
             );
     }
