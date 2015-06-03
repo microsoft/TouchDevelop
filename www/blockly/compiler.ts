@@ -755,13 +755,18 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
-  var args = func.args.map((x: Param) => {
-    var f = b.getFieldValue(x.name);
+  var args = func.args.map((p: string) => {
+    var f = b.getFieldValue(p);
     if (f) {
-      assert(x.type == Type.String);
       return H.mkStringLiteral(f);
-    } else
-      return compileExpression(e, b.getInputTargetBlock(x.name), x.type)
+    } else {
+      var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
+      // This will throw if someone modified blocks-custom.js and forgot to add
+      // [setCheck]s in the block definition. This is intentional and MUST be
+      // fixed, otherwise type-checking will fail elsewhere.
+      var t = toType(i.connection.check_[0]);
+      return compileExpression(e, b.getInputTargetBlock(p), t)
+    }
   });
   return H.stdCall(func.f, args, func.isExtensionMethod);
 }
@@ -808,27 +813,18 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
   return H.stdCall("create image", [H.mkStringLiteral(state)]);
 }
 
-interface Param {
-  type: Type;
-  name: string;
-}
-
-var p = (x: string, t: Type) => ({ type: t, name: x });
-
-// A typed description of each function from the "device library". This would
-// probably be more readable with a DSL, but let's use that for now. Each entry
-// in [stdCallTable] is as follows:
+// A description of each function from the "device library". Types are fetched
+// from the Blockly blocks definition.
 // - the key is the name of the Blockly.Block that we compile into a device call;
-// - [f] is a pair of the TouchDevelop function name and its Blockly return type;
-// - [args] is a list of pairs of name and a Blockly type; the name is taken to
-//   be either the name of a Blockly field value or, if not found, the name of a
-//   Blockly input block; if a field value is found, then the type must be
-//   [String]
+// - [f] is the TouchDevelop function name we compile to
+// - [args] is a list of names; the name is taken to be either the name of a
+//   Blockly field value or, if not found, the name of a Blockly input block; if a
+//   field value is found, then this generates a string expression
 // - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
 //   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
 interface StdFunc {
   f: string;
-  args: Param[];
+  args: string[];
   isExtensionMethod?: boolean
 }
 
@@ -841,31 +837,31 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_show_number: {
     f: "show number",
-    args: [ p("number", Type.Number), p("pausetime", Type.Number) ]
+    args: [ "number", "pausetime" ]
   },
   device_show_letter: {
     f: "show letter",
-    args: [ p("letter", Type.String) ]
+    args: [ "letter" ]
   },
   device_pause: {
     f: "pause",
-    args: [ p("pause", Type.Number) ]
+    args: [ "pause" ]
   },
   device_print_message: {
     f: "show string",
-    args: [ p("message", Type.String), p("pausetime", Type.Number) ]
+    args: [ "message", "pausetime" ]
   },
   device_plot: {
     f: "plot",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_unplot: {
     f: "unplot",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_point: {
     f: "point",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_heading: {
     f: "compass heading",
@@ -873,41 +869,41 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_make_StringImage: {
     f: "create image from string",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_scroll_image: {
     f: "scroll image",
-    args: [ p("sprite", Type.Image), p("x", Type.Number), p("delay", Type.Number) ],
+    args: [ "sprite", "x", "delay" ],
     isExtensionMethod: true
   },
   device_show_image_offset: {
     f: "show image",
-    args: [ p("sprite", Type.Image), p("x", Type.Number), p("y", Type.Number) ],
+    args: [ "sprite", "x", "y" ],
     isExtensionMethod: true
   },
   device_get_button: {
     f: "button is pressed",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_get_acceleration: {
     f: "acceleration",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_get_digital_pin: {
     f: "digital read pin",
-    args: [ p("name", Type.String) ]
+    args: [ "name" ]
   },
   device_set_digital_pin: {
     f: "digital write pin",
-    args: [ p("name", Type.String), p("value", Type.Number) ]
+    args: [ "name", "value" ]
   },
   device_get_analog_pin: {
     f: "analog read pin",
-    args: [ p("name", Type.String) ]
+    args: [ "name" ]
   },
   device_set_analog_pin: {
     f: "analog write pin",
-    args: [ p("name", Type.String), p("value", Type.Number) ]
+    args: [ "name", "value" ]
   },
   device_get_brightness: {
     f: "brightness",
@@ -915,7 +911,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_set_brightness: {
     f: "set brightness",
-    args: [ p("value", Type.Number) ]
+    args: [ "value" ]
   },
 }
 
