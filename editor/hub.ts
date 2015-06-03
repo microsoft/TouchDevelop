@@ -1144,12 +1144,12 @@ module TDev.Browser {
                                     return;
                                 }
                                 var t: ScriptTemplate = {
-                                    title: scr.name,
+                                    title: lf("Create a {0}", scr.name),
                                     id: "derive",
                                     scriptid: scr.id,
                                     icon: "",
                                     description: "",
-                                    name: scr.name,
+                                    name: lf("ADJ script"),
                                     source: txt,
                                     section: "",
                                     editorMode: 0,
@@ -1323,6 +1323,11 @@ module TDev.Browser {
                 })
                 .done();
         }
+        
+        static expandTemplaceName(name: string): string {
+            if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
+            return name;            
+        }
 
         private renameScriptFromTemplateAsync(template:ScriptTemplate)  : Promise // of ScriptTemplate
         {
@@ -1334,8 +1339,7 @@ module TDev.Browser {
             Ticker.rawTick('scriptTemplate_' + template.id);
 
             template = JSON.parse(JSON.stringify(template)); // clone template
-            var name = template.name;
-            if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
+            var name = Hub.expandTemplaceName(template.name);
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
 
             return this.browser()
