@@ -825,7 +825,11 @@ module TDev.Cloud {
         return Util.httpGetJsonAsync(getPrivateApiUrl("me/keys"));
     }
     export function getUserSettingsAsync(): Promise {
-            return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"));
+        return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"))
+            .then(sett => {
+                // this is for the non-webapp part of the website in case it needs it
+                if (Cloud.lite && sett) localStorage["cachedSettings"] = JSON.stringify(sett)
+            })
     }
     export function postUserSettingsAsync(body: UserSettings) : Promise // of void
     {
