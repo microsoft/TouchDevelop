@@ -1001,7 +1001,6 @@ module TDev.HTML {
                 var href = a.getAttribute("href");
                 if (/^#/.test(href)) {
                     a.withClick(() => {
-                        Util.log("navigate " + href);
                         Util.setHash(href)
                         return false;
                     })

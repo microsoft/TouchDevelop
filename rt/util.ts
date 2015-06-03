@@ -3024,6 +3024,7 @@ module TDev{
 
     export function setHash(s:string, replace = false)
     {
+        Util.log("navigate " + s);
         s = s.replace(/^#/, "")
         Util.setTimeout(1, () => onSetHash(s, replace))
         //window.location.hash = s;

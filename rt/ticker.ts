@@ -662,7 +662,7 @@ module TDev {
             if (Util.now() > thresholdTime) {
                 setDate()
                 saveCurrent(true)
-                RT.Perf.saveCurrent(true);
+                RT.Perf.saveCurrentAsync(true).done();
                 if (delay < maxDelay) {
                     delay *= 1.1;
                     window.localStorage["ticksDelay"] = delay + "";

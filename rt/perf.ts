@@ -65,7 +65,7 @@ module TDev.RT.Perf {
             sendPerfEvents();
     }
 
-    export function saveCurrent(sendToCloud = false): Promise {
+    export function saveCurrentAsync(sendToCloud = false): Promise {
         var prevEvents: PerfData[] = [];
         var archived = window.localStorage["archivedPerfData"];
 

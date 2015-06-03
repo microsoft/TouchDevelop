@@ -69,6 +69,7 @@ module TDev {
         // Called to tell the history manager where we are
         // Not expected to change the appearance of the UI
         public setHash(h: string, t: string) {
+            Util.log("sethash: " + h + " - " + t)
             Ticker.dbg("History.setHash|" + h);
             var repl = this.replaceNext;
             this.replaceNext = false;
@@ -94,9 +95,9 @@ module TDev {
             }
             if (t !== null) {
                 if (t)
-                    document.title = t + " - TouchDevelop";
+                    document.title = t + " - " + Runtime.appName;
                 else
-                    document.title = "TouchDevelop";
+                    document.title = Runtime.appName;
             }
         }
 

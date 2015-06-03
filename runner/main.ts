@@ -70,7 +70,7 @@ module TDev {
 
         function saveState() {
             Ticker.saveCurrent()
-            RT.Perf.saveCurrent();
+            RT.Perf.saveCurrentAsync().done();
         }
         (<any>window).tdevSaveState = saveState;
 

@@ -124,7 +124,7 @@ module TDev
             TheEditor.saveStateAsync({ forReal: true }).done();
             Browser.TheApiCacheMgr.save();
             Ticker.saveCurrent()
-            RT.Perf.saveCurrent();
+            RT.Perf.saveCurrentAsync().done();
         }
 
         (<any>window).tdevSaveState = saveState;
