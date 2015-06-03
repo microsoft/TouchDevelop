@@ -459,6 +459,7 @@ module TDev
         static legalNoticeHeader: string;
         static companyCopyright = "Microsoft";
         static appName = "TouchDevelop";
+        static notificationIcon = "https://www.touchdevelop.com/images/touchdevelop114x114.png";
 
         public getActionResults() {
             var r = this.returnedFrom;

@@ -218,10 +218,13 @@
             notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
 
             notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-            notificationBox.withClick(() => { TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); Util.setHash("#notifications") });
+            notificationBox.withClick(() => { 
+                TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); 
+                Util.setHash("#notifications")
+            });
             World.onNewNotificationChanged = (n: number) => {
                 if (n > 0 && this.notificationsCount != n) {
-                    HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });
+                    HTML.showWebNotification(Runtime.appName, { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: Runtime.notificationIcon  });
                 }
                 this.notificationsCount = n;
                 Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
