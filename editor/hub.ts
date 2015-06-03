@@ -852,7 +852,6 @@ module TDev.Browser {
         private topContainer: HTMLElement;
         private theRoot: HTMLElement;
         private visible = false;
-        private notificationsCount = -1;
 
         private historyMode = false;
         public vertical = true;
@@ -2803,21 +2802,7 @@ module TDev.Browser {
             if (Cloud.getUserId()) {
                 var uid = this.browser().getUserInfoById("me", "me");
                 this.meBox.setChildren([uid.mkSmallBox()]);
-                var notificationsBtn = HTML.mkImg('svg:bell,#444');
-                notificationsBtn.id = "notificationsBtn";
-                var notificationsCounterDiv = div('notificationCounter', this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
-                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
-
-                this.notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-                this.notificationBox.withClick(() => { TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); Util.setHash("#notifications") });
-                World.onNewNotificationChanged = (n: number) => {
-                    if (n > 0 && this.notificationsCount != n) {
-                        HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });
-                    }
-                    this.notificationsCount = n;
-                    Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
-                    notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
-                };
+                this.browser().addNotificationCounter(this.notificationBox);
             } else {
                 var loginBtn = HTML.mkButtonElt("wall-button login-button", SVG.getLoginButton())
                 this.meBox.setChildren(loginBtn.withClick(() => {

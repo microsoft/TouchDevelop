@@ -205,6 +205,25 @@
             return false;
         }
         
+        private notificationsCount = -1;        
+        public addNotificationCounter(notificationBox : HTMLElement) {
+            var notificationsBtn = HTML.mkImg('svg:bell,#444');
+            notificationsBtn.id = "notificationsBtn";
+            var notificationsCounterDiv = div('notificationCounter', this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
+            notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
+
+            notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
+            notificationBox.withClick(() => { TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); Util.setHash("#notifications") });
+            World.onNewNotificationChanged = (n: number) => {
+                if (n > 0 && this.notificationsCount != n) {
+                    HTML.showWebNotification("TouchDevelop", { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: "https://www.touchdevelop.com/images/touchdevelop114x114.png" });
+                }
+                this.notificationsCount = n;
+                Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
+                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
+            };
+        }
+        
         public showLegalNotice()
         {
             if (!Runtime.legalNotice ||
@@ -915,7 +934,7 @@
                                         .done(undefined, () => { }); // ignore network errors
                             };
                             m.show();
-                        }, noOtherAsk).done(message => { Browser.TheHost.notifySyncDone() });
+                      }, noOtherAsk).done(message => { Browser.TheHost.notifySyncDone() });
                 }
                 else {
                     // user never registered; just skip
