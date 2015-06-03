@@ -829,6 +829,7 @@ module TDev.Cloud {
             .then(sett => {
                 // this is for the non-webapp part of the website in case it needs it
                 if (Cloud.lite && sett) localStorage["cachedSettings"] = JSON.stringify(sett)
+                return sett
             })
     }
     export function postUserSettingsAsync(body: UserSettings) : Promise // of void
