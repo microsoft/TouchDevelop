@@ -395,14 +395,23 @@ module Errors {
 // would not work).
 ///////////////////////////////////////////////////////////////////////////////
 
-// There are several layers of abstraction.
-// - String annotations on the blocks (see blocks-custom.js).
-// - Type (as in our "Blocks" language). It's an enum, so as to rule out more
+// There are several layers of abstraction for the type system.
+// - Block are annotated with a string return type, and a string type for their
+//   input blocks (see blocks-custom.js). We use that as the reference semantics
+//   for the blocks.
+// - In this "type system", we use the enum Type. Using an enum rules out more
 //   mistakes.
-// - TouchDevelop types.
-// The various functions below convert from one to another.
+// - When emitting code, we target the "TouchDevelop types".
+//
+// Type inference / checking is done as follows. First, we try to assign a type
+// to all variables. We do this by examining all variable assignments and
+// figuring out the type from the right-hand side. There's a fixpoint computation
+// (see [mkEnv]). Then, we propagate down the expected type when doing code
+// generation; when generating code for a variable dereference, if the expected
+// type doesn't match the inferred type, it's an error. If the type was
+// undetermined as of yet, the type of the variable becomes the expected type.
 
-// Starts at 1, otherwise [if (type) ...] doesn't work.
+// Starts at 1, otherwise you can't write "if (type) ...".
 enum Type { Number = 1, Boolean, String, Image, Unit };
 
 // Infers the expected type of an expression by looking at the untranslated
@@ -418,6 +427,7 @@ function inferType(e: Environment, b: B.Block): Type {
   return toType(b.outputConnection.check_[0]);
 }
 
+// From a Blockly string annotation to a [Type].
 function toType(t: string): Type {
   switch (t) {
     case "String":
@@ -433,6 +443,7 @@ function toType(t: string): Type {
   }
 }
 
+// From a [Type] to a TouchDevelop type.
 function toTdType(t: Type) {
   switch (t) {
     case Type.Number:
@@ -443,7 +454,7 @@ function toTdType(t: Type) {
       return H.mkTypeRef("String");
     case Type.Image:
       return H.mkLTypeRef("Image");
-    case Type.Unit:
+    default:
       throw new Error("Cannot convert unit");
   }
 }
@@ -520,11 +531,13 @@ function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
   return H.mathCall("abs", [x]);
 }
 
-function compileVariableGet(e: Environment, b: B.Block, t?: Type): J.JExpr {
+function compileVariableGet(e: Environment, b: B.Block, t: Type): J.JExpr {
   var name = b.getFieldValue("VAR");
   var binding = lookup(e, name);
   assert(binding != null);
-  if (t != null && t != binding.type)
+  if (binding.type == null)
+    binding.type = t;
+  if (t != binding.type)
     throw new Error("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
         ", but is used here as a "+typeToString(t));
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
@@ -570,7 +583,10 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
     return defaultValueForType(t);
 
   var actualType = inferType(e, b);
-  if (t != actualType)
+  // A variable is the only case where a null type is actually ok, it means that
+  // we haven't determined the type of the variable. It will be determined to be
+  // [t], now.
+  if (t != actualType && b.type != "variables_get")
     throw new Error("We need "+typeToString(t)+" here, but we got "+typeToString(actualType));
 
   switch (b.type) {
@@ -760,6 +776,8 @@ function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
     if (f) {
       return H.mkStringLiteral(f);
     } else {
+      // Lookup the block's input, then its type check. This allows us to
+      // propagate the expected type downwards.
       var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
       // This will throw if someone modified blocks-custom.js and forgot to add
       // [setCheck]s in the block definition. This is intentional and MUST be
@@ -1001,16 +1019,17 @@ function findParent(b: B.Block) {
   return isActualInput && candidate || null;
 }
 
-// This function only considers assignments, not dereferences, to infer the type
-// of variables. This is ok: what we want is essentially convince ourselves that
-// we always *write* values of the correct type in the variable, as *reads* are
-// checked later on when type-checking expressions, where the expected type is
-// propagated down.
+// This function does two things:
+// - it examines loop variable dereferences and assignments, to figure out
+//   whether uses of a for-loop index are compatible with the TouchDevelop
+//   for-loop model;
+// - it performs type inference for variables (see comments on our "type system"
+//   above).
 function mkEnv(w: B.Workspace): Environment {
   // The to-be-returned environment.
   var e = empty;
 
-  // First pass: collect loop variables, and mark them as such.
+  // First pass: collect loop variables.
   w.getAllBlocks().forEach((b: B.Block) => {
     if (b.type == "controls_for") {
       var x = b.getFieldValue("VAR");
@@ -1018,13 +1037,15 @@ function mkEnv(w: B.Workspace): Environment {
       if (lookup(e, x) == null)
         e = extend(e, x, Type.Number);
       lookup(e, x).isForVariable = true;
+      // Unless the loop starts at 0 and and increments by one, we can't compile
+      // as a TouchDevelop for loop.
       if (!isClassicForLoop(b))
         lookup(e, x).incompatibleWithFor = true;
     }
   });
 
-  // Auxiliary check: check that all references to a for-bound variable are in
-  // scope
+  // Auxiliary check: check that all references to a for-bound variable within
+  // the scope of the loop.
   var variableIsScoped = (b: B.Block, name: string): boolean => {
     if (!b)
       return false;
@@ -1059,14 +1080,23 @@ function mkEnv(w: B.Workspace): Environment {
         var binding = lookup(e, x);
         if (!binding)
           e = extend(e, x, t);
+        else if (binding.type == null)
+          // Maybe we saw the "variables_get" block first.
+          binding.type = t;
         else if (binding && binding.isForVariable)
+          // Second reason why we can't compile as a TouchDevelop for-loop: loop
+          // index is assigned to
           binding.incompatibleWithFor = true;
       } else if (b.type == "variables_get") {
         var x = b.getFieldValue("VAR");
         var binding = lookup(e, x);
-        // Because of the order of the traversal in [getAllBlocks()]
-        assert(binding != null);
+        if (lookup(e, x) == null) {
+          e = extend(e, x, null);
+          binding = lookup(e, x);
+        }
         if (binding.isForVariable && !variableIsScoped(b, x))
+          // Third reason why we can't compile to a TouchDevelop for-loop: loop
+          // index is read outside the loop.
           binding.incompatibleWithFor = true;
       }
     });
@@ -1082,11 +1112,6 @@ function mkEnv(w: B.Workspace): Environment {
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var decls: J.JDecl[] = [];
   var e = mkEnv(b);
-  e.bindings.forEach((b: Binding) => {
-    if (!isCompiledAsLocal(b)) {
-      decls.push(H.mkVarDecl(b.name, toTdType(b.type)));
-    }
-  });
 
   // [stmtsHandlers] contains calls to register event handlers. They must be
   // executed before the code that goes in the main function, as that latter
@@ -1101,6 +1126,20 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   });
 
   decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
+
+  // Code generation is intertwined with type inference, so it may be the case
+  // that while generating code, we figured out the type of some variables, so
+  // generate variable declarations at the last minute. If there's still some
+  // variables whose type is unknown, that's an error, sorry. (Happens in rare
+  // cases where there's a lone "variables_get" block.)
+  var undetermined = e.bindings.filter((b: Binding) => b.type == null);
+  if (undetermined.length > 0)
+    throw new Error("I could not determine the type of "+undetermined[0].name);
+  e.bindings.forEach((b: Binding) => {
+    if (!isCompiledAsLocal(b)) {
+      decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
+    }
+  });
 
   return H.mkApp(options.name, options.description, decls);
 }
