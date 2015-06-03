@@ -6904,6 +6904,9 @@
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
 
+                if (this.docPathCurrent)
+                    m.add(div('wall-dialog-body', HTML.mkA("", txtAddress.value, "_blank", lf("view page now"))))
+
                 m.add(div('wall-dialog-body', lf("Share it with this url:"), txtAddress));
             }
 
