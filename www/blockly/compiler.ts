@@ -395,6 +395,7 @@ module Errors {
 // would not work).
 ///////////////////////////////////////////////////////////////////////////////
 
+// Starts at 1, otherwise [if (type) ...] doesn't work.
 enum Type { Number = 1, Boolean, String, Image, Unit };
 
 // Infers the expected type of an expression by looking at the untranslated
@@ -413,6 +414,7 @@ function inferType(e: Environment, b: B.Block): Type {
     case "math_op2":
     case "math_op3":
     case "math_arithmetic":
+    case "device_random":
       return Type.Number;
     case "logic_operation":
     case "logic_compare":
@@ -543,6 +545,10 @@ function compileNot(e: Environment, b: B.Block): J.JExpr {
   return H.mkSimpleCall("not", [expr]);
 }
 
+function compileRandom(e: Environment, b: B.Block): J.JExpr {
+  return H.mathCall("random", [H.mkNumberLiteral(parseInt(b.getFieldValue("limit")))]);
+}
+
 function defaultValueForType(t: Type): J.JExpr {
   switch (t) {
     case Type.Boolean:
@@ -576,6 +582,8 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileMathOp2(e, b);
     case "math_op3":
       return compileMathOp3(e, b);
+    case "device_random":
+      return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
       return compileArithmetic(e, b, Type.Number);

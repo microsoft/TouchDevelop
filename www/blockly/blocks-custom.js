@@ -538,6 +538,19 @@ Blockly.Blocks['device_while'] = {
   }
 };
 
+Blockly.Blocks['device_random'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(230);
+    this.appendDummyInput()
+        .appendField("random number up to")
+        .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "limit");
+    this.setInputsInline(true);
+    this.setOutput(true, "Number");
+    this.setTooltip('');
+  }
+};
+
 // Overriding the default value.
 Blockly.Msg.CONTROLS_FOR_INPUT_WITH = "for";
 Blockly.pathToMedia = "./media/";
