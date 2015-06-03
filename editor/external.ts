@@ -420,7 +420,8 @@ module TDev {
 
       // Load the editor; send the initial message.
       var iframe = document.createElement("iframe");
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      // allow-popups is for the Blockly help menu item
+      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", function () {
         mkChannelAsync(editor, iframe, data.guid).done((channel: Channel) => {
           TheChannel = channel;
