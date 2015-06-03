@@ -156,30 +156,6 @@ Blockly.Blocks['device_get_button'] = {
   }
 };
 
-/* still needed?
-Blockly.Blocks['device_button_type'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(210);
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([["left", "left"], ["right", "right"]]), "name");
-    this.setOutput(true, "button_type");
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_pin_type'] = {
-    init: function () {
-        this.setHelpUrl('http://www.example.com/');
-        this.setColour(210);
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(pinsDropdown), "name");
-        this.setOutput(true, "pin_type");
-        this.setTooltip('');
-    }
-};
-*/
-
 Blockly.Blocks['device_get_digital_pin'] = {
     init: function () {
         this.setHelpUrl('http://www.example.com/');
@@ -282,17 +258,6 @@ Blockly.Blocks['device_get_acceleration'] = {
             ]), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('');
-    }
-};
-
-Blockly.Blocks['device_acceleration_type'] = {
-    init: function () {
-        this.setHelpUrl('http://www.example.com/');
-        this.setColour(210);
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["x", "x"], ["y", "y"], ["z", "z"]]), "name");
-        this.setOutput(true, "acceleration_type");
         this.setTooltip('');
     }
 };
@@ -422,18 +387,6 @@ Blockly.Blocks['device_build_big_image'] = {
     }
 };
 
-// Blockly.Blocks['device_show_image'] = {
-//     init: function()
-//     {
-//         this.setColour(160);
-//         this.appendDummyInput().appendField("show image");
-//         this.appendValueInput("SPRITE").appendField("image");
-//         this.setInputsInline(!0);
-//         this.setPreviousStatement(!0);
-//         this.setNextStatement(!0);
-//     }
-// };
-
 Blockly.Blocks['device_show_image_offset'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
@@ -480,57 +433,6 @@ Blockly.Blocks['device_scroll_image'] = {
   }
 };
 
-Blockly.Blocks['device_get_image_point'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("get_image_point");
-    this.appendValueInput("id")
-        .setCheck("sprite")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("image");
-    this.appendValueInput("x")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("x");
-    this.appendValueInput("y")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("y");
-    this.setOutput(true, "OnOffState");
-    this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_set_image_point'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("set_image_point");
-    this.appendValueInput("id")
-        .setCheck("sprite")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("image");
-    this.appendValueInput("x")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("x");
-    this.appendValueInput("y")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("y");
-    this.appendValueInput("value")
-        .setCheck("OnOffState")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("On/Off");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('');
-  }
-};
-
 
 Blockly.Blocks['device_make_StringImage'] = {
   init: function() {
@@ -542,26 +444,6 @@ Blockly.Blocks['device_make_StringImage'] = {
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
     this.setOutput(true, "sprite");
-    this.setTooltip('');
-    this.setInputsInline(true);
-  }
-};
-
-Blockly.Blocks['device_scroll_string_image'] = {
-  init: function() {
-    this.setHelpUrl('http://www.example.com/');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("scroll string image");
-    this.appendValueInput("string")
-        .setCheck("sprite")
-        .setAlign(Blockly.ALIGN_RIGHT);
-//        .appendField("String");
-    this.appendValueInput("speed")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("delay (ms)");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
     this.setTooltip('');
     this.setInputsInline(true);
   }
@@ -592,18 +474,6 @@ Blockly.Blocks['device_forever'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true, "null");
     this.setTooltip('');
-  }
-};
-
-Blockly.Blocks['device_logic_onoff_states'] = {
-  init: function() {
-    var BOOLEANS =
-        [['on', 'ON'],
-         ['off', 'OFF']];
-    this.setColour(210);
-    this.setOutput(true, 'OnOffState');
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown(BOOLEANS), 'STATE');
   }
 };
 
