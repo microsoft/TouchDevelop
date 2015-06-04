@@ -2568,16 +2568,11 @@ a.md-bigbutton:hover {
   pointer-events: auto;
   left: auto;
   font-size: 1.3em;
-  width: 18em;
-  top: 3.9em;
-  background: white;
-  border-left: 0.1em dotted #ccc;
-  display: none;
-}
-
-.phone .slList {
   width: 100%;
   border-left: none;
+  top: 3.9em;
+  background: white;
+  display: none;
 }
 
 .portrait .slListHeader {
