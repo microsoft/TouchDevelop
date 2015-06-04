@@ -263,6 +263,22 @@ module TDev {
             this.whenSafe(() => {
                 if (!h) h = "#"
                 if (!/^#/.test(h)) h = "#" + h
+                if (replace) { // try to pop history until h is found
+                    for (var i = this.urlStack.length - 1; i >= 0; --i) {
+                        if (this.urlStack[i].url == h) {
+                            if (i == 0) { // nothing to do.
+                                Util.log("replaced hash already present, skipping " + h)
+                                return;
+                            }
+                            else {
+                                Util.log("found hash to replace in stack, popping " + h)
+                                this.popBack(this.urlStack.length - 1 - i);
+                                return;
+                            }
+                        }
+                    }
+                    
+                }    
                 this.dispatch(h)
             })
         }

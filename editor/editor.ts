@@ -3906,7 +3906,7 @@ module TDev
 
         public goToHub(hash) {
             this.hide(true);
-            Util.setHash(hash);
+            Util.setHash(hash, true);
         }
 
         public goToHubAsync(tab = "overview"): Promise
