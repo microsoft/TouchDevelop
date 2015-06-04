@@ -1829,7 +1829,7 @@ module TDev
             this.currentRt.resumeExecution(true);
         }
 
-        static mkTopMenuItem(icon:string, name:string, tick:Ticks, key:string, f:()=>void)
+        static mkTopMenuItem(icon:string, name:string, tick:Ticks, key:string, f:(e: Event)=>void)
         {
             var btn = HTML.mkRoundButton(icon, name, tick, f);
             TheEditor.keyMgr.btnShortcut(btn, key);
@@ -1987,9 +1987,12 @@ module TDev
         }
         */
 
-        private compile() {
+        private compile(debug: boolean) {
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
-                console.log(cpp);
+                if (debug) {
+                    ModalDialog.showText(cpp);
+                    return;
+                }
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);
                     if (!json.success) {
@@ -2017,7 +2020,7 @@ module TDev
                 children = [ Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
 
             if (Cloud.isRestricted())
-                children.push(Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", () => this.compile()));
+                children.push(Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile((<MouseEvent> e).ctrlKey)));
 
             this.playBtnDiv.setChildren(children);
 

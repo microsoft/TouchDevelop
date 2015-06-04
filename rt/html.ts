@@ -380,18 +380,18 @@ module TDev.HTML {
         return btn;
     }
 
-    export function setTickCallback(btn:HTMLElement, tick:Ticks, f:()=>void)
+    export function setTickCallback(btn:HTMLElement, tick:Ticks, f:(e: Event)=>void)
     {
         if (tick == Ticks.noEvent) {
             return btn.withClick(f)
         } else {
             btn.id = "btn-" + Ticker.tickName(tick);
-            return btn.withClick(() => { Ticker.tick(tick); f() })
+            return btn.withClick((e: Event) => { Ticker.tick(tick); f(e) })
         }
         return btn
     }
 
-    export function mkRoundButton(icon:string, name:string, tick:Ticks, f:()=>void) :HTMLButtonElement
+    export function mkRoundButton(icon:string, name:string, tick:Ticks, f:(e: Event)=>void) :HTMLButtonElement
     {
         var btn = HTML.mkButtonElt("topMenu-button " + (name.length > 11 ? "topMenu-button-long-desc" : ""), [
             div("topMenu-button-frame", HTML.mkImg(icon)),
