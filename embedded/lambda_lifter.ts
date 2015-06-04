@@ -30,8 +30,16 @@ module TDev {
         return [];
       }
 
-      public visitExprStmt(env, expr) {
-          return [];
+      public visitExprStmt(env, expr: J.JExpr) {
+        return [];
+      }
+
+      public visitContinue(env) {
+        return [];
+      }
+
+      public visitBreak(env) {
+        return [];
       }
 
       public visitInlineActions(env, e: J.JExpr, actions: J.JInlineAction[]) {

@@ -278,8 +278,10 @@ module TDev {
         // 7) Instance method (e.g. Number's > operator, for which the receiver
         // is the number itself). Lowercase so that "number" is the namespace
         // that contains the functions that operate on typedef "Number".
-        else
-          return (<any> parent).toLowerCase()+"::"+mkCall(H.mangleName(name), false);
+        else {
+          var t = H.resolveTypeRef(this.libraryMap, parent);
+          return t.type.toLowerCase()+"::"+mkCall(H.mangleName(name), false);
+        }
       }
 
       public visitSingletonRef(e, n: string) {

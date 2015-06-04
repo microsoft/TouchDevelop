@@ -50,8 +50,8 @@ module TDev {
         var wrapNamespaceIf = (x: { libName: string }, s: string) => {
           if (x.libName != null)
             return "namespace "+x.libName+" {\n"+
-              "// Disclaimer: some of these declarations/definitions may be useless.\n"+
-              "// TODO: prune unused variable declarations and function definitions.\n"+
+              "  // Disclaimer: some of these declarations/definitions may be useless.\n"+
+              "  // TODO: prune unused variable declarations and function definitions.\n"+
               s+
             "\n}";
           else

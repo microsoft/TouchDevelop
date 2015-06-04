@@ -117,8 +117,8 @@ module TDev {
         locals: J.JLocalDef[],
         expr: J.JExpr): U                                                 { throw new Error("Not implemented"); }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw new Error("Not implemented"); }
-      public visitReturn(env: T, expr: J.JExpr): U                        { throw new Error("Not implemented"); }
-      public visitShow(env: T, expr: J.JExpr): U                          { throw new Error("Not implemented"); }
+      public visitReturn(env: T, expr: J.JExpr): U                        { return this.visitExprStmt(env, expr); }
+      public visitShow(env: T, expr: J.JExpr): U                          { return this.visitExprStmt(env, expr); }
       public visitBreak(env: T): U                                        { throw new Error("Not implemented"); }
       public visitContinue(env: T): U                                     { throw new Error("Not implemented"); }
       public visitInlineActions(
