@@ -30,6 +30,7 @@ declare module Blockly {
 
     class Input {
         name: string;
+        connection: Connection;
         sourceBlock_: Block;
     }
 

@@ -455,7 +455,8 @@ Blockly.Blocks['device_pause'] = {
     this.setColour(160);
     this.appendDummyInput()
         .appendField("pause (ms)");
-    this.appendValueInput("pause");
+    this.appendValueInput("pause")
+        .setCheck("Number");
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);

@@ -395,14 +395,23 @@ module Errors {
 // would not work).
 ///////////////////////////////////////////////////////////////////////////////
 
-// There are several layers of abstraction.
-// - String annotations on the blocks (see blocks-custom.js).
-// - Type (as in our "Blocks" language). It's an enum, so as to rule out more
+// There are several layers of abstraction for the type system.
+// - Block are annotated with a string return type, and a string type for their
+//   input blocks (see blocks-custom.js). We use that as the reference semantics
+//   for the blocks.
+// - In this "type system", we use the enum Type. Using an enum rules out more
 //   mistakes.
-// - TouchDevelop types.
-// The various functions below convert from one to another.
+// - When emitting code, we target the "TouchDevelop types".
+//
+// Type inference / checking is done as follows. First, we try to assign a type
+// to all variables. We do this by examining all variable assignments and
+// figuring out the type from the right-hand side. There's a fixpoint computation
+// (see [mkEnv]). Then, we propagate down the expected type when doing code
+// generation; when generating code for a variable dereference, if the expected
+// type doesn't match the inferred type, it's an error. If the type was
+// undetermined as of yet, the type of the variable becomes the expected type.
 
-// Starts at 1, otherwise [if (type) ...] doesn't work.
+// Starts at 1, otherwise you can't write "if (type) ...".
 enum Type { Number = 1, Boolean, String, Image, Unit };
 
 // Infers the expected type of an expression by looking at the untranslated
@@ -418,6 +427,7 @@ function inferType(e: Environment, b: B.Block): Type {
   return toType(b.outputConnection.check_[0]);
 }
 
+// From a Blockly string annotation to a [Type].
 function toType(t: string): Type {
   switch (t) {
     case "String":
@@ -433,6 +443,7 @@ function toType(t: string): Type {
   }
 }
 
+// From a [Type] to a TouchDevelop type.
 function toTdType(t: Type) {
   switch (t) {
     case Type.Number:
@@ -443,7 +454,7 @@ function toTdType(t: Type) {
       return H.mkTypeRef("String");
     case Type.Image:
       return H.mkLTypeRef("Image");
-    case Type.Unit:
+    default:
       throw new Error("Cannot convert unit");
   }
 }
@@ -520,11 +531,13 @@ function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
   return H.mathCall("abs", [x]);
 }
 
-function compileVariableGet(e: Environment, b: B.Block, t?: Type): J.JExpr {
+function compileVariableGet(e: Environment, b: B.Block, t: Type): J.JExpr {
   var name = b.getFieldValue("VAR");
   var binding = lookup(e, name);
   assert(binding != null);
-  if (t != null && t != binding.type)
+  if (binding.type == null)
+    binding.type = t;
+  if (t != binding.type)
     throw new Error("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
         ", but is used here as a "+typeToString(t));
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
@@ -570,7 +583,10 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
     return defaultValueForType(t);
 
   var actualType = inferType(e, b);
-  if (t != actualType)
+  // A variable is the only case where a null type is actually ok, it means that
+  // we haven't determined the type of the variable. It will be determined to be
+  // [t], now.
+  if (t != actualType && b.type != "variables_get")
     throw new Error("We need "+typeToString(t)+" here, but we got "+typeToString(actualType));
 
   switch (b.type) {
@@ -755,13 +771,20 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
-  var args = func.args.map((x: Param) => {
-    var f = b.getFieldValue(x.name);
+  var args = func.args.map((p: string) => {
+    var f = b.getFieldValue(p);
     if (f) {
-      assert(x.type == Type.String);
       return H.mkStringLiteral(f);
-    } else
-      return compileExpression(e, b.getInputTargetBlock(x.name), x.type)
+    } else {
+      // Lookup the block's input, then its type check. This allows us to
+      // propagate the expected type downwards.
+      var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
+      // This will throw if someone modified blocks-custom.js and forgot to add
+      // [setCheck]s in the block definition. This is intentional and MUST be
+      // fixed, otherwise type-checking will fail elsewhere.
+      var t = toType(i.connection.check_[0]);
+      return compileExpression(e, b.getInputTargetBlock(p), t)
+    }
   });
   return H.stdCall(func.f, args, func.isExtensionMethod);
 }
@@ -808,27 +831,18 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
   return H.stdCall("create image", [H.mkStringLiteral(state)]);
 }
 
-interface Param {
-  type: Type;
-  name: string;
-}
-
-var p = (x: string, t: Type) => ({ type: t, name: x });
-
-// A typed description of each function from the "device library". This would
-// probably be more readable with a DSL, but let's use that for now. Each entry
-// in [stdCallTable] is as follows:
+// A description of each function from the "device library". Types are fetched
+// from the Blockly blocks definition.
 // - the key is the name of the Blockly.Block that we compile into a device call;
-// - [f] is a pair of the TouchDevelop function name and its Blockly return type;
-// - [args] is a list of pairs of name and a Blockly type; the name is taken to
-//   be either the name of a Blockly field value or, if not found, the name of a
-//   Blockly input block; if a field value is found, then the type must be
-//   [String]
+// - [f] is the TouchDevelop function name we compile to
+// - [args] is a list of names; the name is taken to be either the name of a
+//   Blockly field value or, if not found, the name of a Blockly input block; if a
+//   field value is found, then this generates a string expression
 // - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
 //   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
 interface StdFunc {
   f: string;
-  args: Param[];
+  args: string[];
   isExtensionMethod?: boolean
 }
 
@@ -841,31 +855,31 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_show_number: {
     f: "show number",
-    args: [ p("number", Type.Number), p("pausetime", Type.Number) ]
+    args: [ "number", "pausetime" ]
   },
   device_show_letter: {
     f: "show letter",
-    args: [ p("letter", Type.String) ]
+    args: [ "letter" ]
   },
   device_pause: {
     f: "pause",
-    args: [ p("pause", Type.Number) ]
+    args: [ "pause" ]
   },
   device_print_message: {
     f: "show string",
-    args: [ p("message", Type.String), p("pausetime", Type.Number) ]
+    args: [ "message", "pausetime" ]
   },
   device_plot: {
     f: "plot",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_unplot: {
     f: "unplot",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_point: {
     f: "point",
-    args: [ p("x", Type.Number), p("y", Type.Number) ]
+    args: [ "x", "y" ]
   },
   device_heading: {
     f: "compass heading",
@@ -873,41 +887,41 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_make_StringImage: {
     f: "create image from string",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_scroll_image: {
     f: "scroll image",
-    args: [ p("sprite", Type.Image), p("x", Type.Number), p("delay", Type.Number) ],
+    args: [ "sprite", "x", "delay" ],
     isExtensionMethod: true
   },
   device_show_image_offset: {
     f: "show image",
-    args: [ p("sprite", Type.Image), p("x", Type.Number), p("y", Type.Number) ],
+    args: [ "sprite", "x", "y" ],
     isExtensionMethod: true
   },
   device_get_button: {
     f: "button is pressed",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_get_acceleration: {
     f: "acceleration",
-    args: [ p("NAME", Type.String) ]
+    args: [ "NAME" ]
   },
   device_get_digital_pin: {
     f: "digital read pin",
-    args: [ p("name", Type.String) ]
+    args: [ "name" ]
   },
   device_set_digital_pin: {
     f: "digital write pin",
-    args: [ p("name", Type.String), p("value", Type.Number) ]
+    args: [ "name", "value" ]
   },
   device_get_analog_pin: {
     f: "analog read pin",
-    args: [ p("name", Type.String) ]
+    args: [ "name" ]
   },
   device_set_analog_pin: {
     f: "analog write pin",
-    args: [ p("name", Type.String), p("value", Type.Number) ]
+    args: [ "name", "value" ]
   },
   device_get_brightness: {
     f: "brightness",
@@ -915,7 +929,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_set_brightness: {
     f: "set brightness",
-    args: [ p("value", Type.Number) ]
+    args: [ "value" ]
   },
 }
 
@@ -1005,16 +1019,17 @@ function findParent(b: B.Block) {
   return isActualInput && candidate || null;
 }
 
-// This function only considers assignments, not dereferences, to infer the type
-// of variables. This is ok: what we want is essentially convince ourselves that
-// we always *write* values of the correct type in the variable, as *reads* are
-// checked later on when type-checking expressions, where the expected type is
-// propagated down.
+// This function does two things:
+// - it examines loop variable dereferences and assignments, to figure out
+//   whether uses of a for-loop index are compatible with the TouchDevelop
+//   for-loop model;
+// - it performs type inference for variables (see comments on our "type system"
+//   above).
 function mkEnv(w: B.Workspace): Environment {
   // The to-be-returned environment.
   var e = empty;
 
-  // First pass: collect loop variables, and mark them as such.
+  // First pass: collect loop variables.
   w.getAllBlocks().forEach((b: B.Block) => {
     if (b.type == "controls_for") {
       var x = b.getFieldValue("VAR");
@@ -1022,13 +1037,15 @@ function mkEnv(w: B.Workspace): Environment {
       if (lookup(e, x) == null)
         e = extend(e, x, Type.Number);
       lookup(e, x).isForVariable = true;
+      // Unless the loop starts at 0 and and increments by one, we can't compile
+      // as a TouchDevelop for loop.
       if (!isClassicForLoop(b))
         lookup(e, x).incompatibleWithFor = true;
     }
   });
 
-  // Auxiliary check: check that all references to a for-bound variable are in
-  // scope
+  // Auxiliary check: check that all references to a for-bound variable within
+  // the scope of the loop.
   var variableIsScoped = (b: B.Block, name: string): boolean => {
     if (!b)
       return false;
@@ -1063,14 +1080,23 @@ function mkEnv(w: B.Workspace): Environment {
         var binding = lookup(e, x);
         if (!binding)
           e = extend(e, x, t);
+        else if (binding.type == null)
+          // Maybe we saw the "variables_get" block first.
+          binding.type = t;
         else if (binding && binding.isForVariable)
+          // Second reason why we can't compile as a TouchDevelop for-loop: loop
+          // index is assigned to
           binding.incompatibleWithFor = true;
       } else if (b.type == "variables_get") {
         var x = b.getFieldValue("VAR");
         var binding = lookup(e, x);
-        // Because of the order of the traversal in [getAllBlocks()]
-        assert(binding != null);
+        if (lookup(e, x) == null) {
+          e = extend(e, x, null);
+          binding = lookup(e, x);
+        }
         if (binding.isForVariable && !variableIsScoped(b, x))
+          // Third reason why we can't compile to a TouchDevelop for-loop: loop
+          // index is read outside the loop.
           binding.incompatibleWithFor = true;
       }
     });
@@ -1086,11 +1112,6 @@ function mkEnv(w: B.Workspace): Environment {
 function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var decls: J.JDecl[] = [];
   var e = mkEnv(b);
-  e.bindings.forEach((b: Binding) => {
-    if (!isCompiledAsLocal(b)) {
-      decls.push(H.mkVarDecl(b.name, toTdType(b.type)));
-    }
-  });
 
   // [stmtsHandlers] contains calls to register event handlers. They must be
   // executed before the code that goes in the main function, as that latter
@@ -1105,6 +1126,20 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   });
 
   decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
+
+  // Code generation is intertwined with type inference, so it may be the case
+  // that while generating code, we figured out the type of some variables, so
+  // generate variable declarations at the last minute. If there's still some
+  // variables whose type is unknown, that's an error, sorry. (Happens in rare
+  // cases where there's a lone "variables_get" block.)
+  var undetermined = e.bindings.filter((b: Binding) => b.type == null);
+  if (undetermined.length > 0)
+    throw new Error("I could not determine the type of "+undetermined[0].name);
+  e.bindings.forEach((b: Binding) => {
+    if (!isCompiledAsLocal(b)) {
+      decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
+    }
+  });
 
   return H.mkApp(options.name, options.description, decls);
 }

@@ -479,8 +479,22 @@ module TDev.Browser {
             
             if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
-                m.add([div("wall-dialog-body", [
-                    (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
+                var versionInfo = HTML.mkTextArea() 
+                versionInfo.rows = 4;
+                versionInfo.style.fontSize = "0.8em";
+                versionInfo.style.width = "100%";
+                versionInfo.value = lf("Loading version info...")
+                
+                Cloud.getPrivateApiAsync("stats/dmeta")
+                    .done(resp => {
+                        var tm = (n:number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
+                        versionInfo.value = 
+                                lf("Web App version: {0} {1} /{2}", Cloud.config.releaseLabel, Cloud.config.tdVersion, Cloud.config.relid) + "\n" +
+                                lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
+                                lf("Service activation: {0}", tm(resp.activationtime));
+                    })
+                m.add([div("wall-dialog-body", versionInfo), div("wall-dialog-body", [
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("release /{0}", Cloud.config.relid), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
