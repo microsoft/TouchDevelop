@@ -584,16 +584,16 @@ module TDev
                 })
                 ScriptNav.addAnythingVisible = true;
                 m.choose(boxes, {
-                    header: lf("create a new ..."),
+                    header: lf("add a new ..."),
                     mkSeeMore: DeclEntry.mkSeeMore,
                     afterRefresh: () => TheEditor.updateTutorial(),
-                    includeSearch: true,
+                    includeSearch: false,
                 });
                 TheEditor.updateTutorial()
             }
 
             if (!debugMode && TheEditor.widgetEnabled("addNewButton")) {
-                var e = new DeclEntry(lf("add new function, ..."));
+                var e = new DeclEntry(lf("add new function"));
                 e.makeIntoAddButton();
                 e.description = lf("or variables, libraries,...")
                 var ee = e.mkBox();
