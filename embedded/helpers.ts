@@ -89,12 +89,14 @@ module TDev {
         }
       }
 
-      export function defaultValueForType(t1: J.JTypeRef) {
-        var t = <any> t1;
-        if (t == "Number")
+      export function defaultValueForType(libMap: LibMap, t1: J.JTypeRef) {
+        var t = resolveTypeRef(libMap, t1);
+        if (!t.lib && t.type == "Number")
           return "0";
-        else if (t == "Boolean")
+        else if (!t.lib && t.type == "Boolean")
           return "false";
+        else if (!t.lib && t.type == "Action")
+          return "NULL";
         else
           return null;
       }
