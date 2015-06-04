@@ -21,6 +21,8 @@
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 HTML.fixWp8Links(siteHeader)
+                var siteLogo = elt("siteLogo");
+                if (siteLogo) siteLogo.withClick(() => window.location.pathname = "/");
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
