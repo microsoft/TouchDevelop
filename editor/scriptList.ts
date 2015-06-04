@@ -3517,6 +3517,9 @@
                             }))
                         }
                         return r
+                    }, e => {
+                        HTML.showProgressNotification(lf("error reading history; are you connected to internet?"));
+                        return [div('', lf("Oops, couldn't get the history. Please check your internet and try again."))];
                     })
             }
 
