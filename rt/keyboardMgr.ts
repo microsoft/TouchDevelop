@@ -266,8 +266,8 @@ module TDev {
                 if (replace) { // try to pop history until h is found
                     for (var i = this.urlStack.length - 1; i >= 0; --i) {
                         if (this.urlStack[i].url == h) {
-                            if (i == 0) { // nothing to do.
-                                Util.log("replaced hash already present, skipping " + h)
+                            if (i == this.urlStack.length - 1) { // nothing to do.
+                                Util.log("replaced hash already current, skipping " + h)
                                 return;
                             }
                             else {
