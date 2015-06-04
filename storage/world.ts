@@ -267,6 +267,7 @@ module TDev {
                 var hd = getHeader(body)
                 return setInstalledAsync(indexTable, scriptsTable, hd, body.script || null, body.editorState || null, null, cloudScriptVersion)
                     .then(() => newHeaderCallbackAsync(hd, "published"))
+                    .then(() => []) // non-null result
             })
             .then((r) => r, (e) => {
                 if (e.status == 400) {
