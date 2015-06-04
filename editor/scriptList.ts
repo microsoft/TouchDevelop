@@ -5549,9 +5549,7 @@
                         var stmts = 0
                         descs.forEach((d) => { stmts += d.stmtCount })
                         if (sc.jsonScript && sc.jsonScript.time) {
-                            var d = new Date(sc.jsonScript.time * 1000)
-                            stats += Util.fmt("Published on {0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}. ",
-                                d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+                            stats += lf("Published on {0}. ", Util.isoTime(sc.jsonScript.time))
                         }
                         stats += lf("{0} function{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
                         descs.slice(0, 20).forEach((d, i) => {

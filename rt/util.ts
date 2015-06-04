@@ -230,6 +230,13 @@ module TDev{
         return max
     }
 
+    export function isoTime(time:number)
+    {
+        var d = new Date(time * 1000)
+        return Util.fmt("{0}-{1:f02.0}-{2:f02.0} {3:f02.0}:{4:f02.0}:{5:f02.0}",
+            d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+    }
+
     export function timeSince(time:number)
     {
         var now = Util.now();

@@ -479,7 +479,22 @@ module TDev.Browser {
             
             if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("admin")));
-                m.add([div("wall-dialog-body", [
+                var versionInfo = div("wall-dialog-body")
+                Cloud.getPrivateApiAsync("stats/dmeta")
+                    .done(resp => {
+                        var tm = (n:number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
+                        versionInfo.setChildren([
+                            div(null,
+                                lf("Web App version: {0} {1} ", Cloud.config.releaseLabel, Cloud.config.tdVersion),
+                                Cloud.config.relid ? 
+                                HTML.mkLinkButton("/" + Cloud.config.relid, () => {
+                                    Util.setHash("#list:releases:release:" + Cloud.config.relid)
+                                }) : null),
+                            div(null, lf("Service deployment: {0}", tm(resp.deploytime))),
+                            div(null, lf("Service activation: {0}", tm(resp.activationtime))),
+                        ])
+                    })
+                m.add([versionInfo, div("wall-dialog-body", [
                     (Cloud.hasPermission("upload") ? HTML.mkButton(lf("show releases"), () => { Util.setHash("#list:releases") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
