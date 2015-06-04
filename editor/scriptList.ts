@@ -190,6 +190,7 @@
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
                     Cloud.setPermissions(settings.permissions);
+                    EditorSettings.setThemeFromSettings();
                     Util.setUserLanguageSetting(settings.culture, true);
                     EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
@@ -5492,7 +5493,8 @@
                     }
 
                     
-                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
+                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && 
+                        (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt"))) {
                         socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),

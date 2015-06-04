@@ -589,21 +589,24 @@ module TDev.Browser {
             return beta;
         }
 
+        export function setThemeFromSettings()
+        {
+            var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
+            if (m)
+                EditorSettings.setTheme(themes[m[2]]);
+            else if (Cloud.isRestricted()) {
+                var theme = Cloud.hasPermission('full-editor') ? 'restrictededitor' : 
+                            Cloud.hasPermission('post-art') ? 'restrictedteacher' : 'restricted';
+                EditorSettings.setTheme(themes[theme]);
+            }
+            else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
+            else EditorSettings.setTheme(undefined);
+        }
+
         export function init() {
             if (window && window.location) {
                 Cloud.setPermissions();
-                var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
-                if (m) {
-                    EditorSettings.setTheme(themes[m[2]]);
-                } else if (Cloud.config.theme)
-                    EditorSettings.setTheme(Cloud.config.theme);
-                else if (Cloud.isRestricted()) {
-                    var theme = Cloud.hasPermission('full-editor') ? 'restrictededitor' : 
-                                Cloud.hasPermission('post-art') ? 'restrictedteacher' : 'restricted';
-                    EditorSettings.setTheme(themes[theme]);
-                }
-                else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
-                else EditorSettings.setTheme(undefined);
+                setThemeFromSettings();
             }
         }
 
