@@ -172,10 +172,13 @@ module TDev.RT {
             var y = (ev.pageY - SizeMgr.windowHeight / 2) / SizeMgr.windowHeight;
             x *= 2;
             y *= 2;
-            var z = Math.sqrt(Math.max(0, 1 - x * x - y * y));
+            x = Math_.clamp(-1.2, 1.2, x);
+            y = Math_.clamp(-1.2, 1.2, y);
+            var z = -Math.sqrt(Math.max(0, 1 - x * x - y * y));
 
-            if (_runtime)
+            if (_runtime) {
                 _runtime.host.setTransform3d(Util.fmt("perspective(30em) rotateX({0}deg) rotateY({1}deg)", -y, x), "50% 50% 50%", "30em")
+            }
 
             setRaw(Vector3.mk(
                 x,
