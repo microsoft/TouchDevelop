@@ -296,7 +296,7 @@ module TDev {
                 }
                 this.observeChange();
                 // TODO XXX - we disable autosave for the collaborative editing demo
-                if (!TDev.Collab.enableUndo) TheEditor.scheduleSaveToCloudAsync().done();
+                if (!TDev.Collab.enableUndo) TheEditor.scheduleSaveToCloudAsync(true).done();
             } finally {
                 this.blockPush--;
             }

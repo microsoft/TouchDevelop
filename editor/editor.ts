@@ -1282,6 +1282,7 @@ module TDev
 
         public syncDone() {
             Ticker.dbg("syncDone");
+            if (Cloud.lite) return
             ProgressOverlay.lock.done(() => {
                 this.getDepsVersionsAsync().done((ver) => {
                     if (!Script) return;
@@ -2445,7 +2446,7 @@ module TDev
         private scheduled: boolean;
         private numSchedules = 0;
 
-        public scheduleSaveToCloudAsync(): TDev.Promise { // of Cloud.PostUserInstalledResponse (possibly null)
+        public scheduleSaveToCloudAsync(syncOnFail = false): TDev.Promise { // of Cloud.PostUserInstalledResponse (possibly null)
             this.numSchedules++;
             if (World.syncIsActive() || this.scheduled) return Promise.as();
             this.scheduled = true;
@@ -2478,10 +2479,6 @@ module TDev
                         if (!response)
                             return Promise.as();
 
-                        if (Cloud.lite && !response.numErrors && ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid == guid) {
-                            ScriptEditorWorldInfo.baseSnapshot = response.headers[0].scriptVersion.baseSnapshot
-                        }
-
                         this.lastSaveTime = Math.min(Util.now() - start, 30000);
                         if (response) this.saveToCloudDelay = response.delay * 1000;
                         this.scheduled = false;
@@ -2492,6 +2489,12 @@ module TDev
                             //Ticker.dbg("save-clr2");
                         }
                         localStorage.removeItem("editorScriptToSaveDirty");
+
+                        if (syncOnFail && Cloud.lite && response.numErrors && !World.syncIsActive()) {
+                            Util.log("save failed; triggering sync")
+                            World.syncAsync().done()
+                        }
+
                         // The [External] module wants to examine the actual
                         // response to take the appropriate course of action.
                         return Promise.as(response);
@@ -4421,6 +4424,42 @@ module TDev
             } else {
                 api.core.currentPlatform = PlatformCapabilityManager.current();
                 api.core.currentPlatformImpl = ImplementationStatus.Web;
+            }
+
+            if (Cloud.lite) {
+                var incoming = false;
+                World.incomingHeaderAsync = (guid) => {
+                    if (!Script || Script.localGuid != guid)
+                        return Promise.as()
+                    if (!incoming) {
+                        incoming = true
+                        ProgressOverlay.show(lf("getting new version of the script"))
+                    }
+                    Util.log("incoming cloud header, saving script");
+                    return this.saveStateAsync()
+                };
+
+                World.newHeaderCallbackAsync = (hd, state) => {
+                    if (state == "uploaded" && ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid == hd.guid) {
+                        ScriptEditorWorldInfo.baseSnapshot = hd.scriptVersion.baseSnapshot
+                    }
+
+                    if (!Script || Script.localGuid != hd.guid)
+                        return Promise.as()
+
+                    Util.log("new cloud header, state=" + state);
+
+                    if (state == "downloaded") {
+                        if (incoming) ProgressOverlay.hide()
+                        this.reload()
+                    } else if (state == "uploaded") {
+                        // snapshot already set above
+                    } else if (state == "published") {
+                        this.reload()
+                    }
+
+                    return Promise.as()
+                };
             }
         }
 
