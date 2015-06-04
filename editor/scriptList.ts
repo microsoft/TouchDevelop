@@ -5483,8 +5483,13 @@
                     if (!scriptText) return;
 
                     var divs = []
-                    var app = AST.Parser.parseScript(scriptText);
-                    AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
+
+                    if (sc.editor()) {
+                        var app = AST.Parser.parseScript('action main() { }')
+                    } else {
+                        var app = AST.Parser.parseScript(scriptText);
+                        AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
+                    }
 
                     
                     if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.userid == Cloud.getUserId()) {
@@ -5525,6 +5530,7 @@
                     var ch = sc.getCloudHeader();
                     if (sc.publicId) {
                         TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
+                            if (!d) return
                             var j = <JsonScript>d;
                             if (opts.isDefinitive)
                                 TheApiCacheMgr.store(j.id, j);
@@ -6189,7 +6195,7 @@
                 r =
                 [
                     this,
-                    this.editor() ? null : new ScriptDetailsTab(this),
+                    new ScriptDetailsTab(this),
                     EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
                     EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
