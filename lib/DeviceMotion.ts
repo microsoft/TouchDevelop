@@ -177,7 +177,7 @@ module TDev.RT {
             var z = -Math.sqrt(Math.max(0, 1 - x * x - y * y));
 
             if (_runtime) {
-                _runtime.host.setTransform3d(Util.fmt("perspective(30em) rotateX({0}deg) rotateY({1}deg)", -y, x), "50% 50% 50%", "30em")
+                _runtime.host.setTransform3d(Util.fmt("perspective(30em) rotateX({0}deg) rotateY({1}deg)", -y * Runtime.accelerometerTiltBooster, x * Runtime.accelerometerTiltBooster), "50% 50% 50%", "30em")
             }
 
             setRaw(Vector3.mk(

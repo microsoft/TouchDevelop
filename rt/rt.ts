@@ -460,6 +460,7 @@ module TDev
         static companyCopyright = "Microsoft";
         static appName = "TouchDevelop";
         static notificationIcon = "https://www.touchdevelop.com/images/touchdevelop114x114.png";
+        static accelerometerTiltBooster = 1;
 
         public getActionResults() {
             var r = this.returnedFrom;
