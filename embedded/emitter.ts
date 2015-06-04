@@ -293,7 +293,7 @@ module TDev {
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
         var x = H.defaultValueForType(this.libraryMap, t);
-        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.manglePrefixedName(e, "globals", name) +
+        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.mangleUnique(e, name, name) +
           (x ? " = " + x : "") + ";"
       }
 
