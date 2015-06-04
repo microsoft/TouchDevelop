@@ -896,7 +896,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_show_image_offset: {
     f: "show image",
-    args: [ "sprite", "x", "y" ],
+    args: [ "sprite", "x" ],
     isExtensionMethod: true
   },
   device_get_button: {

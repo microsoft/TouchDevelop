@@ -394,13 +394,9 @@ Blockly.Blocks['device_show_image_offset'] = {
     this.appendDummyInput()
         .appendField("show image");
     this.appendValueInput("sprite").setCheck('sprite');
-//        .appendField("image");
     this.appendValueInput("x")
         .setCheck("Number")
         .appendField("x");
-    this.appendValueInput("y")
-        .setCheck("Number")
-        .appendField("y");
     this.setTooltip('');
     this.setPreviousStatement(!0);
     this.setNextStatement(!0);
