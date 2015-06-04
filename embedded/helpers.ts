@@ -22,8 +22,19 @@ module TDev {
         "*": "times",
       };
 
+      // Convert a name into a valid C++ identifier. Use this function if you
+      // know that the name is unique already (e.g. globals).
       export function mangleName(name: string) {
         return name.replace(/\W/g, x => (replacementTable[x] || "_"));
+      }
+
+      // Convert a prefixed name into a valid C++ identifier. Same as above,
+      // only call this directly if you know that [n] is unique.
+      export function manglePrefixedName(e: Env, l: string, n: string) {
+        if (l)
+          return mangleName(l)+"::"+mangleUnique(e, n, n);
+        else
+          return mangleUnique(e, n, n);
       }
 
       export interface Env {
@@ -32,8 +43,11 @@ module TDev {
       }
 
       // Compute a unique name from a user-provided name and a
-      // TouchDevelop-generated unique id.
-      export function mangle(env: Env, name: string, id: string) {
+      // TouchDevelop-generated unique id. If a name is supposed to be globally
+      // unique already, it's fine to call this function with the id being the
+      // name. It will handle collisions (e.g. between "foo:bar" and "foo@bar")
+      // which map onto the same mangled name.
+      export function mangleUnique(env: Env, name: string, id: string) {
         if (id in env.ident_of_id)
           return env.ident_of_id[id];
         else {
@@ -48,23 +62,16 @@ module TDev {
       }
 
       export function mangleDef(env: Env, d: J.JLocalDef) {
-        return mangle(env, d.name, d.id);
+        return mangleUnique(env, d.name, d.id);
       }
 
       export function mangleRef(env: Env, d: J.JLocalRef) {
-        return mangle(env, d.name, <any> d.localId);
+        return mangleUnique(env, d.name, <any> d.localId);
       }
 
 
       // --- Helper functions.
       // For constructing / modifying AST nodes.
-
-      export function mangleLibraryName(l, n) {
-        if (l)
-          return mangleName(l)+"::"+mangleName(n);
-        else
-          return mangleName(n);
-      }
 
       export interface LibMap { [id: string]: string }
 
@@ -101,19 +108,19 @@ module TDev {
           return null;
       }
 
-      export function mkType(libMap: LibMap, type: J.JTypeRef) {
+      export function mkType(env: Env, libMap: LibMap, type: J.JTypeRef) {
         var t = resolveTypeRef(libMap, type);
-        return mangleLibraryName(t.lib, t.type);
+        return manglePrefixedName(env, t.lib, t.type);
       }
 
       export function mkParam(env: Env, libMap: LibMap, p: J.JLocalDef) {
-        return mkType(libMap, p.type)+" "+mangleDef(env, p);
+        return mkType(env, libMap, p.type)+" "+mangleDef(env, p);
       }
 
       export function mkSignature(env: Env, libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
-        var retType = outParams.length ? mkType(libMap, outParams[0].type) : "void";
+        var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         if (name == "main")
           name = "app_main";
         return [

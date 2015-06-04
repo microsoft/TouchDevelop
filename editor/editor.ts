@@ -1990,12 +1990,13 @@ module TDev
         private compile() {
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
                 console.log(cpp);
-                ModalDialog.showText(cpp); // XXX remove once debugging is done
-                return; // XXX remove once debugging is done
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);
                     if (!json.success) {
-                        ModalDialog.showText(External.makeOutMbedErrorMsg(json), lf("Compilation error"));
+                        ModalDialog.showText(
+                            "This is ARM's error message:\n"+External.makeOutMbedErrorMsg(json)+
+                            "\n\nFor reference, here's the C++ we sent them:\n"+cpp,
+                            lf("Compilation error"));
                     } else {
                         document.location.href = json.hexurl;
                     }

@@ -101,11 +101,11 @@ module TDev {
         //   which C and C++ accept both "f" and "&f" (we hence use the former)
         // - arrays, strings, user-defined objects, which are in fact of type
         //   "shared_ptr<T>", no "&" operator here.
-        return H.mangle(env, name, id);
+        return H.mangleUnique(env, name, id);
       }
 
       public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(this.libraryMap, type)+" "+H.mangle(env, name, id);
+        return H.mkType(env, this.libraryMap, type)+" "+H.mangleUnique(env, name, id);
       }
 
       // Allows the target to redefine their own string type.
@@ -160,7 +160,7 @@ module TDev {
         ].join("");
       }
 
-      private resolveCall(receiver: J.JExpr, name: string) {
+      private resolveCall(env: EmitterEnv, receiver: J.JExpr, name: string) {
         if (!receiver)
           return null;
 
@@ -173,7 +173,7 @@ module TDev {
             // that we may generate "lib::f()" where we could've just written
             // "f()", but since the prototypes have been written out already,
             // that's fine.
-            return this.resolveCall(this.libRef, name);
+            return this.resolveCall(env, this.libRef, name);
           else
             // Call to a function from the current script.
             return H.mangleName(name);
@@ -191,7 +191,7 @@ module TDev {
             return s;
           else
             // Actual call to a library function
-            return H.mangleLibraryName(n, name);
+            return H.manglePrefixedName(env, n, name);
         }
 
         return null;
@@ -244,7 +244,7 @@ module TDev {
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
-        var resolvedName = this.resolveCall(args[0], name);
+        var resolvedName = this.resolveCall(env, args[0], name);
         if (resolvedName)
           return mkCall(resolvedName, true);
 
@@ -254,7 +254,7 @@ module TDev {
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.mangle(env, name, name);
+          return H.manglePrefixedName(env, "globals", name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
@@ -262,7 +262,7 @@ module TDev {
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var prefixedName = t.lib
-            ? this.resolveCall(H.mkLibraryRef(t.lib), name)
+            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
             : H.mangleName(name);
           return mkCall(prefixedName, false);
         }
@@ -293,7 +293,7 @@ module TDev {
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
         var x = H.defaultValueForType(this.libraryMap, t);
-        return e.indent + H.mkType(this.libraryMap, t) + " " + H.mangle(e, name, name) +
+        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.manglePrefixedName(e, "globals", name) +
           (x ? " = " + x : "") + ";"
       }
 
@@ -316,7 +316,7 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(env, this.libraryMap, H.mangle(env, name, id), inParams, outParams);
+        var head = H.mkSignature(env, this.libraryMap, H.mangleUnique(env, name, id), inParams, outParams);
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
@@ -373,13 +373,26 @@ module TDev {
           }
         });
 
+        // Globals are in their own namespace (otherwise they would collide with
+        // "math", "number", etc.).
+        var globals = decls.map((f: J.JDecl) => {
+          var e1 = indent(e)
+          if (f.nodeType == "data")
+            return this.visit(e1, f);
+          else
+            return null;
+        }).filter(x => x != null);
+        var globalsCode = globals.length
+          ?  e.indent + "namespace globals {\n" +
+            globals.join("\n") + "\n" +
+          e.indent + "}\n"
+          : "";
+
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return e.indent + H.mkSignature(e, this.libraryMap, H.mangle(e, f.name, f.id), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
-          else if (f.nodeType == "data")
-            return this.visit(e, f);
+            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleUnique(e, f.name, f.id), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           else
             return null;
         }).filter(x => x != null);
@@ -402,7 +415,7 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = this.compileImageLiterals() + forwardDeclarations.join("\n");
+        this.prototypes = this.compileImageLiterals() + globalsCode + forwardDeclarations.join("\n");
         this.code = userFunctions.join("\n");
 
         // [embedded.ts] now reads the three member fields separately and
