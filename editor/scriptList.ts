@@ -29,6 +29,10 @@
                 }
                 var siteMore = elt("siteMore");
                 if (siteMore) {
+                    siteMore.setChildren([
+                        HTML.mkImg("svg:bars,white"),
+                        siteMore.innerText
+                    ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
                         var siteMenu = elt("siteMenu");
