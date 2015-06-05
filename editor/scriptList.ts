@@ -35,8 +35,12 @@
                         if (siteMenu) {
                             Util.toArray(siteMenu.getElementsByTagName("A")).forEach((a : HTMLAnchorElement) => {
                                 m.add(div('siteMenuBtn', a.innerText).withClick(() => {
-                                    if (/^#/.test(a.href)) Util.setHash(a.href)
-                                    else window.location.href = a.href;
+                                    var href = a.getAttribute("href");
+                                    if (/^#list:/.test(href)) {
+                                        m.dismiss();
+                                        this.showList(href.substr("#list:".length), null)                                        
+                                    }
+                                    else window.location.href = href;
                                 }))
                             })
                         }
