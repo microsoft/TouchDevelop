@@ -4306,7 +4306,7 @@ module TDev
                 this.placeSearchContainer()
                 elt("root").setFlag("is-editor", true);
                 this.resetVideoConstraints();
-                
+
                 SizeMgr.applySizes(true);
             }
         }
@@ -5257,7 +5257,7 @@ module TDev
                 this.updateLibraries(libs);
             }
         }
-        
+
         public updateAllLibrariesAsync(): Promise {
             var libs = Script.libraries().filter((l) => l.needsUpdate)
             if (libs.length == 0) return Promise.as();
@@ -5797,7 +5797,7 @@ module TDev
                         break;
                     case "pub":
                         hs = ["hub", "pub", hs[1] ];
-                        break;                    
+                        break;
                     case "follow":
                         hs = ["hub", "follow", hs[1], hs[2]];
                         break;
