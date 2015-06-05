@@ -185,7 +185,9 @@ input.logSearchInput {
 .modalFullYellow a,
 .modalFullYellow a:visited,
 .modalFullWhite a,
-.modalFullWhite a:visited {
+.modalFullWhite a:visited,
+.modalFullBlack a,
+.modalFullBlack a:visited {
   color: #008b00;
 }
 .modalDialogChooseItem {
@@ -294,6 +296,10 @@ font-size:1.2em;
   background: white;
 }
 
+.modalFullBlack .modalDialogInner {
+  background: black;
+}
+
 .modalFullYellow .modalDialogInner {
   background: #ccc;
 }
@@ -301,6 +307,9 @@ font-size:1.2em;
 .modalFullYellow .modalDialog,
 .modalFullWhite .modalDialog {
   color: black;
+}
+.modalFullBlack .modalDialog {
+  color:white;
 }
 
 .floatingFrown {
@@ -524,25 +533,30 @@ textarea
   color: black;
   border-color: black;
 }
+.modalFullBlack .modalDialog .wall-button
+{
+  color: white;
+  border-color: white;
+}
 
 .big-button {
   font-size:1.3em;
 }
 
-.modalFullWhite .wall-dialog-buttons {
+.modalFullWhite .wall-dialog-buttons, .modalFullBlack .wall-dialog-buttons {
   margin-top: 1.5em;
 }
 
-.modalFullWhite h3 {
+.modalFullWhite h3, .modalFullBlack h3 {
   font-size: 2em;
   font-weight: 400;
 }
 
-.modalFullWhite p {
+.modalFullWhite p, .modalFullBlack p {
   font-size: 1.2em;
 }
 
-.modalFullWhite p.agree {
+.modalFullWhite p.agree, .modalFullBlack p.agree {
   color: #777;
   font-size:0.8em;
 }

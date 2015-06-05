@@ -22,10 +22,29 @@
             if (siteHeader) {
                 HTML.fixWp8Links(siteHeader)
                 var siteLogo = elt("siteLogo");
-                if (siteLogo) siteLogo.withClick(() => window.location.pathname = "/");
+                if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
+                }
+                var siteMore = elt("siteMore");
+                if (siteMore) {
+                    siteMore.withClick(() => {
+                        var m = new ModalDialog();
+                        var siteMenu = elt("siteMenu");
+                        if (siteMenu) {
+                            Util.toArray(siteMenu.getElementsByTagName("A")).forEach((a : HTMLAnchorElement) => {
+                                m.add(div('siteMenuBtn', a.innerText).withClick(() => {
+                                    m.dismiss();
+                                    if (/^#/.test(a.href))
+                                        Util.setHash(a.href)
+                                    else window.location.href = a.href;
+                                }))
+                            })
+                        }
+                        m.fullBlack();
+                        m.show();
+                    })
                 }
             }
             this.initSignin();

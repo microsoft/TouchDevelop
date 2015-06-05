@@ -2426,7 +2426,8 @@ div.decl > div.stmt {
 }
 
 .modalFullWhite .progressDot,
-.modalFullYellow .progressDot
+.modalFullYellow .progressDot,
+.modalFullBlack .progressDot
 {
   background: #008b00;
 }

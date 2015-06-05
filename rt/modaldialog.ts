@@ -393,6 +393,11 @@ module TDev
             this.outerDialog.setChildren(this.dialog);
         }
 
+        public fullBlack()
+        {
+            this.outerDialog.className += " modalFullBlack";
+        }
+       
         public fullWhite()
         {
             this.outerDialog.className += " modalFullWhite";
