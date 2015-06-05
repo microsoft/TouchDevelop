@@ -35,9 +35,7 @@
                         if (siteMenu) {
                             Util.toArray(siteMenu.getElementsByTagName("A")).forEach((a : HTMLAnchorElement) => {
                                 m.add(div('siteMenuBtn', a.innerText).withClick(() => {
-                                    m.dismiss();
-                                    if (/^#/.test(a.href))
-                                        Util.setHash(a.href)
+                                    if (/^#/.test(a.href)) Util.setHash(a.href)
                                     else window.location.href = a.href;
                                 }))
                             })

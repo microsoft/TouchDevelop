@@ -1646,7 +1646,7 @@ module TDev.AST {
 
     export interface ParameterAnnotations {
         hints?:string[];
-        enumMap?:StringMap<number>;
+        enumMap?:StringMap<string>;
         pichints?:StringMap<string>;
         langugage?:string;
     }
@@ -2001,9 +2001,9 @@ module TDev.AST {
                 if (tp == "enum") {
                     annot.enumMap = {}
                     annot.hints = annot.hints.map(a => {
-                        var m = /(.*)=(\d+)$/.exec(a)
+                        var m = /(.*)=([a-z_\d]+)$/i.exec(a)
                         if (m) {
-                            annot.enumMap[m[1]] = parseInt(m[2])
+                            annot.enumMap[m[1]] = m[2]
                             return m[1]
                         }
                         else return a
