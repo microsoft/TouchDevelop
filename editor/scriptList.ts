@@ -27,6 +27,17 @@
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
                 }
+                var siteUser = elt("siteUser");
+                if (siteUser) {
+                    if (Cloud.getUserId()) {
+                        siteUser.setChildren([HTML.mkImg("svg:fa-user,black")])
+                        siteUser.withClick(() => {
+                            this.loadDetails(this.getUserInfoById("me", "me"));
+                        });
+                    } else {
+                        siteUser.style.display = 'none';
+                    }
+                }
                 var siteMore = elt("siteMore");
                 if (siteMore) {
                     siteMore.setChildren([
@@ -38,14 +49,15 @@
                         var siteMenu = elt("siteMenu");
                         if (siteMenu) {
                             Util.toArray(siteMenu.getElementsByTagName("A")).forEach((a : HTMLAnchorElement) => {
-                                m.add(div('siteMenuBtn', a.innerText).withClick(() => {
-                                    var href = a.getAttribute("href");
-                                    if (/^#list:/.test(href)) {
-                                        m.dismiss();
-                                        this.showList(href.substr("#list:".length), null)                                        
-                                    }
-                                    else window.location.href = href;
-                                }))
+                                var href = a.getAttribute("href");
+                                if (href)
+                                    m.add(div('siteMenuBtn', a.innerText).withClick(() => {
+                                        if (/^#list:/.test(href)) {
+                                            m.dismiss();
+                                            this.showList(href.substr("#list:".length), null)                                        
+                                        }
+                                        else window.location.href = href;
+                                    }))
                             })
                         }
                         m.fullBlack();
