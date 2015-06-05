@@ -121,7 +121,7 @@ module TDev {
         export function mergeJSON(base:any, local:any, server:any)
         {
             Object.keys(server).forEach(k => {
-                if (typeof server[k] === "object" && local.hasOwnProperty(k) && typeof local[k] == "object")
+                if (server[k] && typeof server[k] === "object" && local[k] && typeof local[k] == "object")
                     local[k] = mergeJSON(base[k] || {}, local[k], server[k])
                 else if (!local.hasOwnProperty(k) || base[k] === local[k])
                     local[k] = server[k]
