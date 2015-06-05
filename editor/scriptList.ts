@@ -6551,6 +6551,7 @@
                                         return Cloud.postPrivateApiAsync("pointers", {
                                                 path: this.docPath,
                                                 scriptid: this.publicId,
+                                                description: this.getTitle(),
                                         })
                                     }
                                     else return Promise.as()
@@ -6617,6 +6618,7 @@
                                 Cloud.postPrivateApiAsync("pointers", {
                                     path: this.docPath,
                                     scriptid: id,
+                                    description: this.getTitle(),
                                 }))
                     ])
             })()
