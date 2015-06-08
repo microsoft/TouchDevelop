@@ -925,7 +925,9 @@ module TDev {
                 if (ms.length != 2) return MdComments.error(lf("bigbutton: must have <text>,<url> arguments"));
                 return this.blockLink(ms[1]) || Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
             } else if (macro == "shim") {
-                return "<b>compiles to C++ function: </b><span class='font-family: monospace'>"+arg+"</span>";
+                if (this.designTime) return "{" + macro + ":" + Util.htmlEscape(arg) + "}";
+                if (!arg) return null;
+                else return "<b>" + lf("<b>compiles to C++ function:</b> <span class='font-family: monospace'>{0}</span>", arg);
             } else {
                 return null;
             }
