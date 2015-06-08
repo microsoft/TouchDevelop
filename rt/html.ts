@@ -862,6 +862,15 @@ module TDev.HTML {
         return elt;
     }
 
+    export function li(cls: string, ...elts: any[]): HTMLElement
+    {
+        var r = document.createElement("li")
+        if (cls)
+            r.className = cls;
+        r.setChildren(elts)
+        return r;
+    }
+    
     export function span(cls:string, ...elts:any[]):HTMLElement
     {
         var r = document.createElement("span")

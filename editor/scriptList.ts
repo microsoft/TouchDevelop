@@ -20,7 +20,12 @@
             elt("root").appendChild(EditorSettings.mkBetaNote());
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
-                HTML.fixWp8Links(siteHeader)
+                var menuItems : StringMap<() => void> = {};
+                menuItems[lf("Create Code")] = () => TheHub.createScript();
+                menuItems[lf("My Scripts")] = () => this.showList("list:installed-scripts");
+                if (!Cloud.getUserId())
+                    menuItems[lf("Sign In")] = () => Login.show();
+                
                 var siteLogo = elt("siteLogo");
                 if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
@@ -38,6 +43,9 @@
                         siteUser.style.display = 'none';
                     }
                 }
+                var siteMenu = elt("siteMenu");
+                if (siteMenu)
+                    siteMenu.setChildren(Object.keys(menuItems).map(key => HTML.li('nav-list__item', key).withClick(menuItems[key])));
                 var siteMore = elt("siteMore");
                 if (siteMore) {
                     siteMore.setChildren([
@@ -46,20 +54,12 @@
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
-                        var siteMenu = elt("siteMenu");
-                        if (siteMenu) {
-                            Util.toArray(siteMenu.getElementsByTagName("A")).forEach((a : HTMLAnchorElement) => {
-                                var href = a.getAttribute("href");
-                                if (href)
-                                    m.add(div('siteMenuBtn', a.innerText).withClick(() => {
-                                        if (/^#list:/.test(href)) {
-                                            m.dismiss();
-                                            this.showList(href.substr("#list:".length), null)                                        
-                                        }
-                                        else window.location.href = href;
-                                    }))
-                            })
-                        }
+                        Object.keys(menuItems).forEach(key => {
+                            m.add(div('siteMenuBtn', key).withClick(() => {
+                                m.dismiss();
+                                menuItems[key]();
+                            }));
+                        });
                         m.fullBlack();
                         m.show();
                     })
@@ -254,12 +254,20 @@
         public addNotificationCounter(notificationBox : HTMLElement) {
             var notificationsBtn = HTML.mkImg('svg:bell,#444');
             notificationsBtn.id = "notificationsBtn";
-            var notificationsCounterDiv = div('notificationCounter', this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
-            notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
-
+            var notificationsCounterDiv = div('notificationCounter');
+            
+            var updateCount = () => {
+                Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
+                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");                
+            }
+            
+            updateCount();
+            
             notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
             notificationBox.withClick(() => { 
-                TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications"); 
+                this.notificationsCount = 0;
+                updateCount();
+                TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications");
                 Util.setHash("#notifications")
             });
             World.onNewNotificationChanged = (n: number) => {
@@ -267,8 +275,7 @@
                     HTML.showWebNotification(Runtime.appName, { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: Runtime.notificationIcon  });
                 }
                 this.notificationsCount = n;
-                Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
-                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
+                updateCount();
             };
         }
         
