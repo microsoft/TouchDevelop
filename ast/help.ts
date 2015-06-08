@@ -935,7 +935,7 @@ module TDev {
                 return this.blockLink(ms[1]) || Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
             } else if (macro == "shim") {
                 if (this.designTime) return "{" + macro + ":" + Util.htmlEscape(arg) + "}";
-                if (!arg) return null;
+                if (!arg) return "";
                 else return "<b>" + lf("<b>compiles to C++ function:</b> <span class='font-family: monospace'>{0}</span>", arg);
             } else {
                 return null;
