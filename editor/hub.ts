@@ -514,6 +514,7 @@ module TDev.Browser {
                         var perm = HTML.mkTextInput("text", "")
                         var count = HTML.mkTextInput("text", "")
                         var credit = HTML.mkTextInput("text", "")
+                        var groups = HTML.mkTextInput("text", "")
                         perm.value = "educator"
                         count.value = "1"
                         credit.value = "100"
@@ -521,11 +522,13 @@ module TDev.Browser {
                             lf("Permissions (preview, educator, moderator, staff): "), perm,
                             lf("Number of codes: "), count,
                             lf("Credit for each code: "), credit,
+                            lf("Groups to join: "), groups,
                             HTML.mkAsyncButton(lf("generate"), () => {
                                 var data = {
                                     count: parseInt(count.value),
                                     credit: parseInt(credit.value),
-                                    permissions: perm.value.replace(/[,\s]+/g, ",")
+                                    permissions: perm.value.replace(/[,\s]+/g, ","),
+                                    groups: groups.value.replace(/[,\s]+/g, ","),
                                 }
                                 if (!data.count) HTML.wrong(count)
                                 else if (!data.credit) HTML.wrong(credit)
