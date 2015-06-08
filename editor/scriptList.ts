@@ -22,6 +22,8 @@
             if (siteHeader) {
                 var menuItems : StringMap<() => void> = {};
                 menuItems[lf("Create Code")] = () => TheHub.createScript();
+                menuItems[lf("Tutorials")] = () => Util.navigateInWindow("/tutorials");
+                menuItems[lf("Projects")] = () => Util.navigateInWindow("/projects");
                 menuItems[lf("My Scripts")] = () => this.showList("installed-scripts");
                 if (!Cloud.getUserId())
                     menuItems[lf("Sign In")] = () => Login.show();
