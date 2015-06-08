@@ -394,7 +394,7 @@ Blockly.Blocks['device_show_image_offset'] = {
     this.appendDummyInput()
         .appendField("show image");
     this.appendValueInput("sprite").setCheck('sprite');
-    this.appendValueInput("x")
+    this.appendValueInput("offset")
         .setCheck("Number")
         .appendField("x");
     this.setTooltip('');
@@ -414,7 +414,7 @@ Blockly.Blocks['device_scroll_image'] = {
       .setCheck("sprite")
         .setAlign(Blockly.ALIGN_RIGHT);
 //        .appendField("image");
-    this.appendValueInput("x")
+    this.appendValueInput("frame offset")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("x");
