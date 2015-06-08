@@ -571,12 +571,13 @@ module TDev
                     eh.tokens.forEach(t => {
                         var call = t.getCall()
                         if (call && call.referencedData() && call.referencedData().getName() == this.data.commandArg) {
-                                op = new TutorialInstruction();
-                                op.stmt = stmt
-                                op.addAfter = t
-                                op.addToken = t
-                                op.calcIntelli = Ticks.calcEditArt
-                                op.label = lf("customize the art!")
+                            TheEditor.intelliProfile.incr("searchArtRefactoring");
+                            op = new TutorialInstruction();
+                            op.stmt = stmt
+                            op.addAfter = t
+                            op.addToken = t
+                            op.calcIntelli = Ticks.calcEditArt
+                            op.label = lf("customize the art!")
                         }
                     })
                 })
