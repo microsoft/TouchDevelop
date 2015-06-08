@@ -25,6 +25,7 @@
                 menuItems[lf("My Scripts")] = () => this.showList("list:installed-scripts");
                 if (!Cloud.getUserId())
                     menuItems[lf("Sign In")] = () => Login.show();
+                else menuItems[lf("Settings")] = () => this.loadDetails(this.getUserInfoById("me", "me"));
                 
                 var siteLogo = elt("siteLogo");
                 if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
