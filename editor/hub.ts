@@ -503,6 +503,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("page map"), () => { Browser.TheHub.showPointers() }) : null),
                     (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
@@ -2891,5 +2892,37 @@ module TDev.Browser {
 
             md.show()
         }
+
+        public showPointers()
+        {
+            var allPointers:JsonPointer[] = []
+            var fetchAsync = (cont:string) =>
+                Cloud.getPrivateApiAsync("pointers?count=50" + cont)
+                    .then(res => {
+                        allPointers.pushRange(res.items)
+                        if (res.continuation)
+                            return fetchAsync("&continuation=" + res.continuation)
+                    })
+
+            var m = ModalDialog.info(lf("page map"), lf("loading..."), "")
+            m.fullWhite()
+            m.setScroll()
+
+            fetchAsync("")
+                .then(() => {
+                    allPointers = allPointers.filter(p => !/^ptr-usercontent-/.test(p.id))
+                    allPointers.sort((a, b) => Util.stringCompare(a.id, b.id))
+                    var html = ""
+                    allPointers.forEach(p => {
+                        html += Util.fmt("<a href='{0:q}' target='_blank'>{0:q}</a> {1:q} {2:q}<br/>\n", "/" + p.path, 
+                            p.redirect ? "-> " + p.redirect : "", p.description)
+                    })
+                    m.empty()
+                    m.addHTML(html).style.fontSize = "0.8em"
+                    m.addOk()
+                })
+                .done()
+        }
+
     }
 }
