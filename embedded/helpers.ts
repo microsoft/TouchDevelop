@@ -268,8 +268,12 @@ module TDev {
       }
 
       // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
-      // ! This function might return "" (means ignore, don't compile). So test
-      // the return value of this function with != null.
+      // Beware:
+      // - null means "function has to be compiled in C++ land";
+      // - "" means "function does not have to be compiled in C++ land, author
+      //   promises that no one will call this function
+      // - anything else means "function does not have to be compiled in C++
+      //   land, calls to this function to be replaced with the shim"
       export function isShimBody(body: J.JStmt[]): string {
         var ret = null;
         body.forEach((s: J.JStmt) => {
@@ -286,7 +290,7 @@ module TDev {
       }
 
       export function willCompile (f: J.JAction) {
-        return isShimBody(f.body) == null && !f.isPrivate;
+        return isShimBody(f.body) == null;
       }
 
       /* Some functions for constructing fake "WebAST" nodes when we need them. */

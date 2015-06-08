@@ -186,12 +186,18 @@ module TDev {
           var lib = this.libs.filter(l => l.name == n)[0];
           var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
           var s = H.isShimBody((<J.JAction> action).body);
-          if (s != null)
+          if (s != null) {
             // Call to a built-in C++ function
+            if (!s.length)
+              throw new Error("Library author: some (compiled) function is trying to call "+name+" "+
+                "which is marked as {shim:}, i.e. for simulator purposes only.\n\n"+
+                "Hint: break on exceptions in the debugger and walk up the call stack to "+
+                "figure out which action it is.");
             return s;
-          else
+          } else {
             // Actual call to a library function
             return H.manglePrefixedName(env, n, name);
+          }
         }
 
         return null;

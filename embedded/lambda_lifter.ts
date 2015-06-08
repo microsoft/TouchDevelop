@@ -76,10 +76,11 @@ module TDev {
         body: J.JStmt[],
         isPrivate: boolean)
       {
-        if (isPrivate || H.isShimBody(body) != null)
-          return [];
-        else
+        if (H.isShimBody(body) == null)
+          // No shim <==> function we compile
           return this.visitMany(env, body);
+        else
+          return [];
       }
 
       public visitLibrary(env, name) {
