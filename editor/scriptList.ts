@@ -9013,8 +9013,7 @@
                         HTML.mkButton(lf("follow tutorial in editor"), () => {
                             tick(Ticks.browseFollowTopic)
                             this.follow()
-                        }),
-                        HTML.mkButton(lf("share"), shareAsScript)
+                        })
                     ])
                     d.style.fontSize = "1.2em";
                     followDiv.setChildren([d]);
