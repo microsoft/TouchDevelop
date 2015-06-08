@@ -1064,7 +1064,7 @@ module TDev
         }
 
         public isHeadless() {
-            return this.host.isHeadless()
+            return this.host && this.host.isHeadless()
         }
 
         public restartAfterException() {
