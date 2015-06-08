@@ -1472,6 +1472,8 @@
                     }
                 } else if (h[2] == "notifications") {
                     pg = new NotificationsPage(this);
+                } else if (h[2] == "abusereports") {
+                    pg = new AbuseReportsPage(this);
                 } else if (h[2] == "topic" || h[2] == "help") {
                     var t = HelpTopic.findById(h[3]);
                     if (!t && HelpTopic.contextTopics)
@@ -4607,6 +4609,23 @@
         }
     }
 
+    export class AllAbuseReportsTab
+        extends AbuseReportsTab
+    {
+        constructor(par:BrowserPage) {
+            super(par)
+        }
+        public getUrl() { return "abusereports" }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            var c = <JsonAbuseReport>cc;
+            return div(null, 
+                ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
+                ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
+        }
+    }
+
     export class ScriptHeartsTab
         extends ListTab
     {
@@ -4815,6 +4834,40 @@
                     } catch (e) {}
             }, ex => { }).done();
             Util.setTimeout(1, () => this.browser().loadTab(this._notifications))
+        }
+
+        public mkTabsCore():BrowserTab[] { return [this]; }
+    }
+
+    export class AbuseReportsPage
+        extends BrowserPage
+    {
+        private _reports:AllAbuseReportsTab;
+
+        constructor(par:Host)
+        {
+            super(par)
+            this.publicId = "all";
+            this._reports = new AllAbuseReportsTab(this);
+        }
+
+        public persistentId() { return "abusereports:" + this.publicId; }
+        public getTitle() { return lf("abuse reports"); }
+
+        public getId() { return "abusereports"; }
+        public getName() { return lf("abuse reports"); }
+
+        public mkBoxCore(big:boolean):HTMLElement
+        {
+            return null;
+        }
+
+        public initTab()
+        {
+            this._reports.initElements();
+            this._reports.tabLoaded = true;
+            this._reports.initTab();
+            Util.setTimeout(1, () => this.browser().loadTab(this._reports))
         }
 
         public mkTabsCore():BrowserTab[] { return [this]; }
