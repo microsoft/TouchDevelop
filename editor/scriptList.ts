@@ -1471,7 +1471,8 @@
         }
 
         public showList(path:string, item:BrowserPage = null, tab = "", noCache = false, includeETags = false)
-        {
+        {            
+            this.setSearch("");
             var header = path.replace(/-scripts/, "").replace(/\/scripts/, "");
             this.shownSomething = false;
             this.apiPath = path;

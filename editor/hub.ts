@@ -434,6 +434,8 @@ module TDev.Browser {
                     publishDescription: true,
                     sendPullRequest: true,
                     scriptPullChanges: true,
+                    scriptAddToChannel: true,
+                    hubChannels: true,
                 }
             }
         }
