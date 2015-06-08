@@ -2,7 +2,8 @@
 
 module TDev {
   export interface ExternalEditor {
-    // Both these two fields are for our UI
+    // 3 ields are for our UI
+    company: string;
     name: string;
     description: string;
     // Unique
@@ -22,18 +23,20 @@ module TDev {
       var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
       var origin = match[1];
       var path = match[2];
-      externalEditorsCache = [ {
+      externalEditorsCache = [ /* {
         name: "C++ Editor",
         description: "Directly write C++ code using Ace (OUTDATED)",
         id: "ace",
         origin: origin,
-        path: path+"ace/editor.html"
-      }, {
-        name: "Blockly editor",
-        description: "Great block-based environment!",
+        path: path + "ace/editor.html"
+        icon: ""
+      }, */ {
+        company: "Microsot Research",
+        name: "Blocks",
+        description: "Drag and drop",
         id: "blockly",
         origin: origin,
-        path: path+"blockly/editor.html"
+        path: path + "blockly/editor.html"        
       }];
     }
     return externalEditorsCache;
