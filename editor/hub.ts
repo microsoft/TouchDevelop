@@ -436,6 +436,8 @@ module TDev.Browser {
                     scriptPullChanges: true,
                     scriptAddToChannel: true,
                     hubChannels: true,
+                    testAction: true,
+                    testsSection: true,
                 }
             }
         }
