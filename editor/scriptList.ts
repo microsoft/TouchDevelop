@@ -21,8 +21,11 @@
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems : StringMap<() => void> = {};
-                menuItems[lf("Create Code")] = () => TheHub.createScript();
-                menuItems[lf("My Scripts")] = () => this.showList("list:installed-scripts");
+                menuItems[lf("Create Code")] = () => Util.navigateInWindow("/create-code");
+                menuItems[lf("Tutorials")] = () => Util.navigateInWindow("/tutorials");
+                menuItems[lf("Projects")] = () => Util.navigateInWindow("/projects");
+                menuItems[lf("Getting Started")] = () => Util.navigateInWindow("/getting-started");
+                menuItems[lf("My Scripts")] = () => this.showList("installed-scripts");
                 if (!Cloud.getUserId())
                     menuItems[lf("Sign In")] = () => Login.show();
                 else menuItems[lf("Settings")] = () => this.loadDetails(this.getUserInfoById("me", "me"));
@@ -9013,8 +9016,7 @@
                         HTML.mkButton(lf("follow tutorial in editor"), () => {
                             tick(Ticks.browseFollowTopic)
                             this.follow()
-                        }),
-                        HTML.mkButton(lf("share"), shareAsScript)
+                        })
                     ])
                     d.style.fontSize = "1.2em";
                     followDiv.setChildren([d]);

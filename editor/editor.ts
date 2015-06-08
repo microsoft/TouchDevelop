@@ -3130,12 +3130,13 @@ module TDev
                 this.setLibraryUpdateIds();
 
             }).then(() => {
-                    ProgressOverlay.setProgress("loading group script");
-                    return Collab.loadPromise;
-                }).then((firsttime: boolean) => {
+                if (!Collab.loadPromise) return Promise.as();
+                ProgressOverlay.setProgress("loading group script");
+                return Collab.loadPromise.then((firsttime: boolean) => {
                     if (firsttime)
-                       ProgressOverlay.setProgress("joining group script (first-time connection)");
+                        ProgressOverlay.setProgress("joining group script (first-time connection)");
                     return Collab.readyPromise;
+                });
             }).then(() => {
                 Util.log("loadScriptAsync: saving state again");
                 return this.saveStateAsync({ wasUpgraded: wasUpgraded });

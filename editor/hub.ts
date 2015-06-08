@@ -1624,22 +1624,27 @@ module TDev.Browser {
                 var m = new ModalDialog();
                 m.onDismiss = () => onSuccess(undefined);
 
-                var elts = [];
-                [{
+                var editors = [{
+                    company: "Microsoft Research",
                     name: "TouchDevelop",
                     description: lf("A beginner friendly editor"),
                     id: "touchdevelop",
                     origin: "",
                     path: "",
-                }].concat(getExternalEditors()).forEach(k => {
+                }].concat(getExternalEditors());
+                
+                var elts = [];
+                editors.forEach(k => {
                     var icon = div("sdIcon");
-                    icon.style.backgroundColor = ScriptIcons.stableColorFromName(k.name);
-                    icon.setChildren([HTML.mkImg("svg:edit,white")]);
+                    var ic = ScriptInfo.editorIcons[k.id].split(',');
+                    icon.style.backgroundColor = ic[1]
+                    icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
 
                     var nameBlock = div("sdName", k.name);
                     var hd = div("sdNameBlock", nameBlock);
+                    var author = div("sdAuthorInner", k.company);                    
                     var addInfo = div("sdAddInfoInner", k.description);
-                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo))));
+                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
 
                     res.withClick(() => {
                         m.onDismiss = undefined;
