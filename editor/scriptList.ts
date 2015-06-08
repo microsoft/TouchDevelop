@@ -3787,7 +3787,7 @@
         {
             Util.assert(!!id, "missing comment id");
 
-            if (Cloud.isRestricted() && !Cloud.hasPermission("postComment")) return div('');
+            if (Cloud.isRestricted() && !Cloud.hasPermission("post-comment")) return div('');
 
             var text =  HTML.mkTextArea();
             var postBtn = div(null);
