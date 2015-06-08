@@ -515,29 +515,38 @@ module TDev.Browser {
                         var count = HTML.mkTextInput("text", "")
                         var credit = HTML.mkTextInput("text", "")
                         var groups = HTML.mkTextInput("text", "")
+                        var numuses = HTML.mkTextInput("text", "")
                         perm.value = "educator"
                         count.value = "1"
                         credit.value = "100"
+                        numuses.value = "1"
                         m.add(div("wall-dialog-body",
                             lf("Permissions (preview, educator, moderator, staff): "), perm,
                             lf("Number of codes: "), count,
                             lf("Credit for each code: "), credit,
+                            lf("Number of uses for each code: "), numuses,
                             lf("Groups to join: "), groups,
                             HTML.mkAsyncButton(lf("generate"), () => {
                                 var data = {
                                     count: parseInt(count.value),
-                                    credit: parseInt(credit.value),
+                                    credit: parseInt(credit.value) * parseInt(numuses.value),
+                                    singlecredit: parseInt(credit.value),
                                     permissions: perm.value.replace(/[,\s]+/g, ","),
                                     groups: groups.value.replace(/[,\s]+/g, ","),
                                 }
                                 if (!data.count) HTML.wrong(count)
-                                else if (!data.credit) HTML.wrong(credit)
+                                else if (!data.singlecredit) HTML.wrong(credit)
+                                else if (!data.credit) HTML.wrong(numuses)
                                 else if (!data.permissions) HTML.wrong(perm)
                                 else 
-                                    return TDev.Cloud.postPrivateApiAsync("generatecodes", data)
-                                        .then(r => {
-                                            ModalDialog.showText(r.items.join("\n"), lf("your codes"))
-                                        }, e => World.handlePostingError(e, lf("generate codes")))
+                                    ModalDialog.ask(
+                                        lf("Creating this code will let up to {0} users into the system.", data.count * data.credit),
+                                        lf("create codes"),
+                                        () =>
+                                            TDev.Cloud.postPrivateApiAsync("generatecodes", data)
+                                                .then(r => {
+                                                    ModalDialog.showText(r.items.join("\n"), lf("your codes"))
+                                                }, e => World.handlePostingError(e, lf("generate codes"))))
 
                                 return Promise.as()
                             })))
