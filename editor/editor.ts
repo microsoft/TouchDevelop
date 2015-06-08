@@ -4368,22 +4368,12 @@ module TDev
             }
 
             if (refresh) {
-                var setup = () => {
-                    setFlags()
-                    this.setupTopButtons();
-                    this.refreshScriptNav();
-                    this.setupSearchContainer();
-                    this.refreshDecl()
-                }
-
-                if (prevMode == 2 && this.codeInner.firstChild) {
-                    (<HTMLElement>this.codeInner.firstChild).className += " blocksToCode"
-                    Util.setTimeout(600, () => Util.coreAnim("shakeCode", 400, this.codeInner))
-                    Util.setTimeout(750, setup)
-                }
-                else
-                    setup()
-            } else setFlags()
+                setFlags()
+                this.setupTopButtons();
+                this.refreshScriptNav();
+                this.setupSearchContainer();
+                this.refreshDecl();
+            }  else setFlags()
         }
 
         public init()

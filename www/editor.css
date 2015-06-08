@@ -5729,36 +5729,6 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
   100% { color: #41900d; }
 }   /*CSSpref*/ @-webkit-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-moz-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }
 
-#scriptEditor[data-blockMode="yes"] .blocksToCode .stmt .line {
-  animation: bgToWhite 1.5s;                      /*CSSpref*/  -webkit-animation: bgToWhite 1.5s;  -moz-animation: bgToWhite 1.5s;
-}
-
-#scriptEditor[data-blockMode="yes"] .blocksToCode .stmt .block {
-  animation: borderToWhite 1.5s;                      /*CSSpref*/  -webkit-animation: borderToWhite 1.5s;  -moz-animation: borderToWhite 1.5s;
-}
-
-#scriptEditor[data-blockMode="yes"] .blocksToCode .md-comment,
-#scriptEditor[data-blockMode="yes"] .blocksToCode .stringLiteral,
-#scriptEditor[data-blockMode="yes"] .blocksToCode .stmt,
-#scriptEditor[data-blockMode="yes"] .blocksToCode .greyed
-{
-  animation: colorToBlack 1.5s;                      /*CSSpref*/  -webkit-animation: colorToBlack 1.5s;  -moz-animation: colorToBlack 1.5s;
-}
-
-#scriptEditor[data-blockMode="yes"] .blocksToCode .kw {
-  animation: colorToBlue 1.5s;                      /*CSSpref*/  -webkit-animation: colorToBlue 1.5s;  -moz-animation: colorToBlue 1.5s;
-}
-@keyframes shakeCode {
-  0% { transform: none; }
-  20% { transform: translate(-1.5em, 0) scale(0.95, 0.95); }
-  45% { transform: translate(1.5em, 0) scale(1, 1); }
-  70% { transform: translate(-0.8em, 0) scale(0.95, 0.95); }
-  to { transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes shakeCode { 0% { -webkit-transform: none; } 20% { -webkit-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -webkit-transform: translate(1.5em, 0) scale(1, 1); } 70% { -webkit-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -webkit-transform: none; } }  @-moz-keyframes shakeCode { 0% { -moz-transform: none; } 20% { -moz-transform: translate(-1.5em, 0) scale(0.95, 0.95); } 45% { -moz-transform: translate(1.5em, 0) scale(1, 1); } 70% { -moz-transform: translate(-0.8em, 0) scale(0.95, 0.95); } to { -moz-transform: none; } }
-
-
-
-
 @keyframes wrenchCode {
   0% { transform-origin: 20% 50% 0; transform: none; }
   70% { transform-origin: 20% 50% 0; transform: rotate(-5deg); }
