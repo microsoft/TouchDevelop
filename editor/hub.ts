@@ -1279,43 +1279,6 @@ module TDev.Browser {
             this.browser().createNewGroup();
         }
 
-        private createList() {
-            if (Cloud.anonMode(lf("creating channels"))) return;
-
-            var name = "ADJ scripts".replace(/ADJ/g,() => TopicInfo.getAwesomeAdj());
-            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
-            var progress = HTML.mkProgressBar();
-            var createBtn: HTMLElement = null;
-            nameBox.value = name;
-
-            var m = new ModalDialog();
-            m.add([
-                progress,
-                div("wall-dialog-header", lf("create a new channel")),
-                div("wall-dialog-body", lf("Organize your scripts with channels!")),
-                div("wall-dialog-line-textbox", nameBox),
-               div("wall-dialog-buttons",
-                    createBtn = HTML.mkButton(lf("create"),() => {
-                        createBtn.removeSelf();
-                        progress.start();
-                        Cloud.postPrivateApiAsync("channels", { name: nameBox.value })
-                            .done((l: JsonChannel) => {
-                                progress.stop();
-                                m.dismiss();
-                                var info = this.browser().getChannelInfo(l);
-                                info.invalidateCaches();
-                                this.browser().loadDetails(info);
-                            }, e => {
-                                progress.stop();
-                                m.dismiss();
-                                World.handlePostingError(e, lf("create channel"));
-                            });
-                    }))
-            ]);
-            m.show();
-        }
-
-
         static loginToCreate(name:string, hash:string)
         {
             var m = new ModalDialog();
@@ -1917,7 +1880,7 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("channels", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create channel"), Ticks.hubCreateList,
-                    () => { this.createList(); });
+                    () => { this.browser().createChannel(); });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));
             } else {
                 //if (items.length > 5)

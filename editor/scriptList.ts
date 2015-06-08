@@ -251,6 +251,42 @@
             return false;
         }
         
+        public createChannel() {
+            if (Cloud.anonMode(lf("creating channels"))) return;
+
+            var name = "ADJ scripts".replace(/ADJ/g,() => TopicInfo.getAwesomeAdj());
+            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
+            var progress = HTML.mkProgressBar();
+            var createBtn: HTMLElement = null;
+            nameBox.value = name;
+
+            var m = new ModalDialog();
+            m.add([
+                progress,
+                div("wall-dialog-header", lf("create a new channel")),
+                div("wall-dialog-body", lf("Organize your scripts with channels!")),
+                div("wall-dialog-line-textbox", nameBox),
+               div("wall-dialog-buttons",
+                    createBtn = HTML.mkButton(lf("create"),() => {
+                        createBtn.removeSelf();
+                        progress.start();
+                        Cloud.postPrivateApiAsync("channels", { name: nameBox.value })
+                            .done((l: JsonChannel) => {
+                                progress.stop();
+                                m.dismiss();
+                                var info = this.getChannelInfo(l);
+                                info.invalidateCaches();
+                                this.loadDetails(info);
+                            }, e => {
+                                progress.stop();
+                                m.dismiss();
+                                World.handlePostingError(e, lf("create channel"));
+                            });
+                    }))
+            ]);
+            m.show();
+        }
+        
         private notificationsCount = -1;        
         public addNotificationCounter(notificationBox : HTMLElement) {
             var notificationsBtn = HTML.mkImg('svg:bell,#444');
@@ -3098,7 +3134,12 @@
             }
             if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
                 btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
-                    Meta.chooseListAsync({ header: lf("add to channel") }).done((info: ChannelInfo) => {
+                    Meta.chooseListAsync({
+                        header: lf("add to channel"),
+                        custombuttons: [
+                            HTML.mkButton(lf("create channel"), () => this.browser().createChannel())
+                        ]
+                        }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
                         if (info) info.addScriptAsync(si).done();
                     });
