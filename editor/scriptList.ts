@@ -22,7 +22,7 @@
             if (siteHeader) {
                 var menuItems : StringMap<() => void> = {};
                 menuItems[lf("Create Code")] = () => TheHub.createScript();
-                menuItems[lf("My Scripts")] = () => this.showList("list:installed-scripts");
+                menuItems[lf("My Scripts")] = () => this.showList("installed-scripts");
                 if (!Cloud.getUserId())
                     menuItems[lf("Sign In")] = () => Login.show();
                 else menuItems[lf("Settings")] = () => this.loadDetails(this.getUserInfoById("me", "me"));
