@@ -774,6 +774,7 @@ module TDev.Cloud {
             Util.httpGetJsonAsync(pollUrl).done(
                 json => {
                     HTML.showProgressNotification(lf("compilation finished"));
+                    json.url = pollUrl;
                     r.success(json)
                 },
                 err => Util.setTimeout(1000, poll))
