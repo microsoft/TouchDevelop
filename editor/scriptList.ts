@@ -22,18 +22,36 @@
             this.populateSiteHeader();
         }
         
+        private showTutorialTip() {
+            if (!this.visible) return;
+            var el = SizeMgr.portraitMode ? elt("siteMenuMoretutorials") : elt("siteMenuBtntutorials");
+            if (!el) return;
+
+            if (ModalDialog.currentIsVisible()) {
+                Util.setTimeout(1000, () => this.showTutorialTip())
+                return;
+            }
+            TipManager.setTip(null)
+            TipManager.setTip({
+                title: lf("tap here"),
+                description: lf("Follow tutorials to get started."),
+                el: el
+            })
+        }
+        
         private populateSiteHeader() {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
-                var menuItems : StringMap<() => void> = {};
-                menuItems[lf("Create Code")] = () => Util.navigateInWindow("/create-code");
-                menuItems[lf("Tutorials")] = () => Util.navigateInWindow("/tutorials");
-                menuItems[lf("Projects")] = () => Util.navigateInWindow("/projects");
-                menuItems[lf("Getting Started")] = () => Util.navigateInWindow("/getting-started");
-                menuItems[lf("My Scripts")] = () => this.showList("installed-scripts");
+                var menuItems = [
+                    { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => Util.navigateInWindow("/create-code") },
+                    { id: "tutorials", name: lf("Tutorials"), tick: Ticks.siteMenuTutorials, handler: () => Util.navigateInWindow("/tutorials") },
+                    { id: "projects", name: lf("Projects"), tick: Ticks.siteMenuProjects, handler: () => Util.navigateInWindow("/projects") },
+                    { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuCreateCode, handler: () => this.showList("installed-scripts") }
+                ];
                 if (!Cloud.getUserId())
-                    menuItems[lf("Sign In")] = () => Login.show();
-                else menuItems[lf("Settings")] = () => this.loadDetails(this.getUserInfoById("me", "me"));
+                    menuItems.push({ id: "signin", name: lf("Sign In"), tick: Ticks.noEvent, handler: () => Login.show() });
+                else menuItems.push({ id: "settings", name: lf("Settings"), tick: Ticks.noEvent, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
                 
                 var siteLogo = elt("siteLogo");
                 if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
@@ -54,7 +72,14 @@
                 }
                 var siteMenu = elt("siteMenu");
                 if (siteMenu)
-                    siteMenu.setChildren(Object.keys(menuItems).map(key => HTML.li('nav-list__item', key).withClick(menuItems[key])));
+                    siteMenu.setChildren(menuItems.map(mi => {
+                        var li = HTML.li('nav-list__item', mi.name).withClick(() => {
+                            tick(mi.tick);
+                            mi.handler();
+                        });
+                        li.id = "siteMenuBtn" + mi.id;
+                        return li;
+                    }));
                 var siteMore = elt("siteMore");
                 if (siteMore) {
                     siteMore.setChildren([
@@ -63,10 +88,11 @@
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
-                        Object.keys(menuItems).forEach(key => {
-                            m.add(div('siteMenuBtn', key).withClick(() => {
+                        menuItems.forEach(mi => {
+                            m.add(divId('siteMenuMore' + mi.id, 'siteMenuBtn', mi.name).withClick(() => {
                                 m.dismiss();
-                                menuItems[key]();
+                                tick(mi.tick);
+                                mi.handler();
                             }));
                         });
                         m.fullBlack();
@@ -1676,6 +1702,8 @@
                                 this.moreDiv.setChildren([])
                             this.syncView(false)
                         })]);
+                    } else if (!this.hasMore && this.topLocations.length == 0) {
+                        Util.setTimeout(1000, () => this.showTutorialTip())
                     }
                 }, noCache, includeETags);
             }

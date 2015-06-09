@@ -171,6 +171,12 @@ module TDev {
         actionPropPrivate,
         actionPropTest,
         actionPropAtomic,
+        
+        siteMenuCreateCode,
+        siteMenuTutorials,
+        siteMenuProjects,
+        siteMenuGettingStarted,
+        siteMenuMyScripts,
 
         btnPaste,
         btnCopy,
