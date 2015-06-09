@@ -370,7 +370,7 @@ module TDev {
             return "  int "+r+"_w = "+w+";\n" +
               "  int "+r+"_h = "+h+";\n"+
               "  uint8_t "+r+"[] = "+lit+";\n";
-          }) +
+          }).join("\n") +
         "}\n\n";
       }
 
