@@ -395,7 +395,9 @@
                 this.initialSearch = "";
                 this.progressBar.reset();
                 
-                World.
+                World.continuouslySyncAsync(false, () => {
+                    return Promise.as();
+                }).done();
             }
         }
 

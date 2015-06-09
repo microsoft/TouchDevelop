@@ -966,8 +966,8 @@ module TDev.Browser {
 
         public syncDone() {
             this.updateSections();
-            World.continuouslySyncAsync(false,() =>
-                this.showSectionsCoreAsync(true));
+            World.continuouslySyncAsync(false, () =>
+                this.showSectionsCoreAsync(true)).done();
         }
 
         private browser(): Host { return TheHost; }
