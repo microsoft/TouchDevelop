@@ -110,7 +110,10 @@ module TDev {
         return {
           nodeType: "action",
           id: a.reference.id,
-          name: name,
+          // The name needs to be unique, since it's going to be generated as a
+          // global (whose names are kept "as is"). So cram in the unique-id in
+          // there.
+          name: name+a.reference.id,
           inParameters: a.inParameters,
           outParameters: a.outParameters,
           isPrivate: false,
