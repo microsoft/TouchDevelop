@@ -18,6 +18,11 @@
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkBetaNote());
+            
+            this.populateSiteHeader();
+        }
+        
+        private populateSiteHeader() {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems : StringMap<() => void> = {};
@@ -69,7 +74,6 @@
                     })
                 }
             }
-            this.initSignin();
         }
         private theList = div("slList");
         private header = div("sdListLabel");
@@ -156,19 +160,7 @@
         }
         
         private initSignin() {
-            var signinLink = elt("signinLink");
-            if (signinLink) {
-                if (Cloud.getUserId()) {
-                    signinLink.innerText = lf("Settings");
-                    signinLink.withClick(() => {
-                        var user = this.getUserInfoById("me", "");
-                        this.loadDetails(user);
-                    })
-                } else {
-                    signinLink.innerText = lf("Sign In");
-                    signinLink.withClick(() => Login.show());                    
-                }
-            }            
+            this.populateSiteHeader();
         }
 
         private updateScroll()
@@ -954,8 +946,6 @@
                             if (!Editor.isAlwaysBeta()) Editor.setAlwaysBeta(false);
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
-                                Browser.isWP8app ? null :
-                                div("introThumb introLarge", ArtUtil.artImg("kkqqysxz", false)),
                                 div("wall-dialog-body",
                                     Util.fmt("Run the beta version of TouchDevelop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
@@ -2132,6 +2122,7 @@
         public notifySyncDone()
         {
             this.updateInstalledHeaderCacheAsync().done(() => {
+                this.syncDone();
                 if (currentScreen)
                     currentScreen.syncDone();
             });

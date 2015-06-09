@@ -86,6 +86,7 @@ module TDev.Browser {
                 tutorialGoToPreviousStep: true,
                 helpLinks: true,
                 wallScreenshot: true,
+                scriptConvertToDocs: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
