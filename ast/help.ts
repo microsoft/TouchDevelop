@@ -822,8 +822,9 @@ module TDev {
                 return "<h2>" + lf("follow tutorial online") + "</h2><div class='md-box-print print-big'>" + lf("Follow this tutorial online at <b>{1}/{0:q}</b>", this.scriptid, Cloud.config.shareUrl) + ".</div>";
             } else if (macro == "stcmd") {
                 var mrun = /^run(:(.*))?/.exec(arg)
-                if (mrun)
-                    return Util.fmt("<b>Run your program: {0:q}</b>", mrun[2] || "");
+                if (mrun) return Util.fmt("<b>Run your program: {0:q}</b>", mrun[2] || "");
+                var mcomp = /^compile(:(.*))?/.exec(arg)
+                if (mcomp) return Util.fmt("<b>Compile your program: {0:q}</b>", mcomp[2] || "");
                 return Util.fmt("<b>tutorial command: {0:q}</b>", arg)
             } else if (macro == "adddecl") {
                 return this.designTime ? Util.fmt("<b>Add the declaration:</b>") : ""

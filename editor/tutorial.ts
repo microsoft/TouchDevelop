@@ -1534,6 +1534,15 @@ module TDev
                 }
                 return;
             }
+            
+            if (cmd == "compile") {
+                if (this.waitingFor == "compile") {
+                    this.stepCompleted()
+                    Util.setTimeout(1000, () => this.update())
+                } else {
+                    this.update();
+                }
+            }
 
             if (cmd == "stepCompleted") {
                 // force tip display and wait for user to stop whenever he wants
@@ -1757,6 +1766,15 @@ module TDev
                             description: lf("publish your script")
                         })
                         return;
+                    case "compile":
+                        TheEditor.intelliProfile.incr("codeCompile");
+                        this.waitingFor = "compile"
+                        TipManager.setTip({
+                            tick: Ticks.codeCompile,
+                            title: lf("tap there to compile your app"),
+                            description: this.currentCommandArg() || ""
+                        })
+                        return;                        
                     case "plugin":
                         var pluginId = Util.htmlEscape(this.currentCommandArg().replace(/\s/, '').toLowerCase());
                         this.waitingFor = "plugin:" + pluginId;

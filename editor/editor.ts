@@ -1995,6 +1995,7 @@ module TDev
                 }
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);
+                    if (this.stepTutorial) this.stepTutorial.notify("compile");
                     if (!json.success) {
                         ModalDialog.showText(
                             "For debugging, here's the URL to the JSON file:\n"+json.url +
@@ -2008,6 +2009,7 @@ module TDev
                     ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
                 });
             }, (error: any) => {
+                if (this.stepTutorial) this.stepTutorial.notify("compile");
                 ModalDialog.info("Compilation error", error.message);
             });
         }
