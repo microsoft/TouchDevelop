@@ -38,6 +38,7 @@ module TDev.Browser {
                 // ui
                 wallScreenshot: true,
                 startTutorialButton: true,
+                nextTutorialsList: true,
                 // hub
                 hubTutorials : true,
                 hubShowcase : true,
@@ -87,6 +88,7 @@ module TDev.Browser {
                 helpLinks: true,
                 wallScreenshot: true,
                 scriptConvertToDocs: true,
+                nextTutorialsList: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
@@ -192,6 +194,7 @@ module TDev.Browser {
                 scriptStats: true,
                 userSocialTab: true,
                 scriptConvertToDocs: true,
+                nextTutorialsList: true,
                 // sections
                 testsSection: true,
                 actionTypesSection: true,
