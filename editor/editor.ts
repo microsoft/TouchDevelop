@@ -1992,7 +1992,7 @@ module TDev
               return;
 
             if (AST.TypeChecker.tcApp(Script) > 0) {
-                ModalDialog.info(lf("Your script has errors!"), lf("Try to fix your errosr and try again."));
+                ModalDialog.info(lf("Your script has errors!"), lf("Try to fix your errors and try again."));
                 return;
             }
 
