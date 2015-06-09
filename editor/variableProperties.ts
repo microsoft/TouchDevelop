@@ -717,10 +717,68 @@ module TDev
             d.style.backgroundImage = Cloud.artCssImg(id, true);
             return d;
         }
-
+        
+        function uploadFile(file: File) {
+            if (!file) return;
+                if (Cloud.anonMode(lf("uploading art"))) return;
+                if (file.size > 1000000) {
+                    ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max 1Mb)"));
+                } else {
+                    var name = file.name;
+                    var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
+                    if (m) name = m[1];
+                    if (/^image\/(png|jpeg)$/i.test(file.type)) {
+                        ArtUtil.uploadPictureDialogAsync({
+                            removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
+                            input: HTML.mkFileInput(file, 1),
+                            initialName: name,
+                            finalDialog: !Script
+                        })
+                            .done((art: JsonArt) => {
+                                if (art && Script) {
+                                    var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
+                                    TheEditor.addNode(n);
+                                }
+                            });
+                    } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
+                        ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                            if (art && Script) {
+                                var n = TheEditor.freshSoundResource(art.name, art.wavurl);
+                                TheEditor.addNode(n);
+                            }
+                        });
+                    } else if (Cloud.lite && !!HTML.documentMimeTypes[file.type]) {
+                        ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                            if (art && Script) {
+                                var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
+                                TheEditor.addNode(n);
+                            }
+                        });
+                    } else {
+                        ModalDialog.info(lf('unsupported file type'), lf('sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)'));
+                    }
+                }
+            }
+        
         export function setupDragAndDrop(r: HTMLElement) {
+
             if (!Browser.dragAndDrop) return;
 
+            r.addEventListener('paste', function(e: any /*: ClipboardEvent*/) {
+                Util.log('clipboard paste');
+                if (e.clipboardData) {
+                    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+                        e.stopPropagation(); // Stops some browsers from redirecting.
+                        e.preventDefault();
+                        uploadFile(e.clipboardData.files[0])
+                    }
+                    if (e.clipboardData.items && e.clipboardData.items.length > 0) {
+                        e.stopPropagation(); // Stops some browsers from redirecting.
+                        e.preventDefault();
+                        uploadFile(e.clipboardData.items[0].getAsFile())                        
+                    }
+                }
+            })            
             r.addEventListener('dragover', function(e) {
                 if (e.dataTransfer.types[0] == 'Files') {
                     if (e.preventDefault) e.preventDefault(); // Necessary. Allows us to drop.
@@ -733,47 +791,7 @@ module TDev
                 if (file) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
-                    if (Cloud.anonMode(lf("uploading art"))) return;
-                    if (file.size > 1000000) {
-                        ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max 1Mb)"));
-                    } else {
-                        HTML.fileReadAsDataURLAsync(file).done(s => {
-                            s.toString();
-                        });
-                        var name = file.name;
-                        var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
-                        if (m) name = m[1];
-                        if (/^image\/(png|jpeg)$/i.test(file.type)) {
-                            ArtUtil.uploadPictureDialogAsync({
-                                removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type), 
-                                input: HTML.mkFileInput(file, 1), 
-                                initialName: name,
-                                finalDialog: !Script
-                            })
-                            .done((art: JsonArt) => {
-                                if (art && Script) {
-                                    var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
-                                    TheEditor.addNode(n);
-                                }
-                            });
-                        } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
-                            ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                                if (art && Script) {
-                                    var n = TheEditor.freshSoundResource(art.name, art.wavurl);
-                                    TheEditor.addNode(n);
-                                }
-                            });
-                        } else if (Cloud.lite && !!HTML.documentMimeTypes[file.type]) {
-                            ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                                if (art && Script) {
-                                    var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
-                                    TheEditor.addNode(n);
-                                }
-                            });
-                        } else {
-                            ModalDialog.info('unsupported file type', 'sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)');
-                        }
-                    }
+                    uploadFile(file);
                 }
                 return false;
             }, false);
@@ -989,7 +1007,7 @@ module TDev
                 m.add(div("wall-dialog-header", lf("upload picture")));
                 m.add(div("wall-dialog-body",
                     [
-                     div("", div("", lf("choose a picture (less than 1MB, smaller than 2048x2048)")), file.element),
+                     div("", div("", options.input ? null : lf("choose a picture (less than 1MB, smaller than 2048x2048)")), file.element),
                      div("", div("", lf("picture name (minimum 4 characters)")), name),
                      div("", div("", lf("description (helps search)")), description),
                      div('', div('', removeWhiteCheck)),

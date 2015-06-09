@@ -255,10 +255,10 @@ module TDev.HTML {
     {
         Util.coreAnim("shakeTip", 500, e)
     }
-
+    
     export function setupDragAndDrop(r: HTMLElement, onFiles : (files : FileList) => void) {
         if (!Browser.dragAndDrop) return;
-
+       
         r.addEventListener('dragover', function (e) {
             if (e.dataTransfer.types[0] == 'Files') {
                 if (e.preventDefault) e.preventDefault(); // Necessary. Allows us to drop.
@@ -489,8 +489,8 @@ module TDev.HTML {
         var input;
         if (/^image\//.test(file.type)) {
             input = document.createElement("img");
-            input.style.maxWidth = '21em';
-            input.style.maxHeight = '11em';
+            input.style.maxWidth = '15em';
+            input.style.maxHeight = '7em';
             input.src = file;
             fileReadAsDataURLAsync(file).done(url => input.src = url);
         } else if (/^audio\//.test(file.type)) {
