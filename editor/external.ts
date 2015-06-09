@@ -36,7 +36,7 @@ module TDev {
         description: "Drag and drop",
         id: "blockly",
         origin: origin,
-        path: path + "blockly/editor.html"        
+        path: path + "blockly/editor.html"
       }];
     }
     return externalEditorsCache;
@@ -131,7 +131,12 @@ module TDev {
     function roundtrip(a: J.JApp): Promise { // of J.JApp
       addDeviceLibrary(a);
       var text = J.serialize(a);
-      return parseScript(text).then((a: AST.App) => { return Promise.as(J.dump(a)); });
+      return parseScript(text).then((a: AST.App) => {
+        if (AST.TypeChecker.tcApp(a) > 0) {
+          throw new Error("We received a script with errors and cannot compile it. " +
+              "Try converting then fixing the errors manually.");
+        }
+        return Promise.as(J.dump(a)); });
     }
 
     class ExternalHost extends EditorHost {
@@ -159,7 +164,13 @@ module TDev {
     function typeCheckAndRun(text: string, mainName = "main") {
       parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
-        AST.TypeChecker.tcApp(a);
+        // The call to [tcApp] also has the desired side-effect of resolving
+        // names.
+        if (AST.TypeChecker.tcApp(a) > 0) {
+          ModalDialog.info(lf("Type-checking error"),
+              lf("We received a script with errors and cannot run it. " +
+                  "Try converting then fixing the errors manually."));
+        }
         // The compiler expects this global to be set. However, this is
         // dangerous, since the sync code might want to write the *translated*
         // script text to storage for us. Fortunately, the compiler is
@@ -312,6 +323,9 @@ module TDev {
             break;
 
           case MessageType.Compile:
+            if (Cloud.anonMode(lf("Native compilation")))
+              return;
+
             var message1 = <Message_Compile> event.data;
             var cpp;
             switch (message1.language) {
@@ -319,7 +333,6 @@ module TDev {
                 cpp = Promise.as(message1.text);
                 break;
               case Language.TouchDevelop:
-                // the guid is here only for testing; the real generation should be deterministic for best results
                 cpp = roundtrip(message1.text).then((a: J.JApp) => {
                   return Embedded.compile(a);
                 });

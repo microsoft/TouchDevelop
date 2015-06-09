@@ -111,35 +111,47 @@ module TDev {
         "*": "times",
       };
 
-      // Convert a name into a valid C++ identifier. Use this function if you
-      // know that the name is unique already (e.g. globals).
-      export function mangleName(name: string) {
-        var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
-        if (candidate in cppKeywords)
-          candidate += "_";
-        return candidate;
-      }
-
-      // Convert a prefixed name into a valid C++ identifier. Same as above,
-      // only call this directly if you know that [n] is unique.
-      export function manglePrefixedName(e: Env, l: string, n: string) {
-        if (l)
-          return mangleName(l)+"::"+mangleUnique(e, n, n);
-        else
-          return mangleUnique(e, n, n);
-      }
-
+      // Our name environments. We have two behaviors for names:
+      // - global names must be left intact (i.e. function "f" is emitted as
+      //   function "f"), mostly because libraries are mutually recursive, and
+      //   doing a pre-computation of names would most likely be difficult
+      //   (also, it's more readable);
+      // - local names may be renamed to avoid conflicts with: another local
+      //   name, or a global.
       export interface Env {
+        // Maps a TouchDevelop id, or a global "left intact" name to the name of
+        // a corresponding, valid C++ identifier.
         ident_of_id: { [id: string]: string };
+        // Contains [true] if this C++ identifier has been used already.
         id_of_ident: { [ident: string]: boolean };
       }
 
-      // Compute a unique name from a user-provided name and a
-      // TouchDevelop-generated unique id. If a name is supposed to be globally
-      // unique already, it's fine to call this function with the id being the
-      // name. It will handle collisions (e.g. between "foo:bar" and "foo@bar")
-      // which map onto the same mangled name.
+      // Mark a name as being exported as a GLOBAL, and assert that there's no
+      // earlier name collision. If [id] is provided, name will also be
+      // registered for local-style, id-based lookup (this is useful for local
+      // actions which are lifted as globals but are still refered to with their
+      // local id).
+      export function reserveName(e: Env, name: string, id?: string) {
+        var mangledName = mangleName(name);
+        // This should not happen because all the names are reserved in a first
+        // pass (we run through function prototypes and global declarations
+        // first).
+        if (mangledName in e.id_of_ident)
+          throw new Error("Internal error: unexpected name collision");
+        // This name is no longer available.
+        e.id_of_ident[mangledName] = true;
+        e.ident_of_id[name] = mangledName;
+        if (id)
+          e.ident_of_id[id] = mangledName;
+      }
+
+      // Compute a unique name for a LOCAL, based on a user-provided name and a
+      // TouchDevelop-generated unique id. This function does its best to keep
+      // the original name, but uses the id to make sure there's no collisions
+      // in the generated code.
       export function mangleUnique(env: Env, name: string, id: string) {
+        if (id.match(/^init/))
+          debugger;
         if (id in env.ident_of_id)
           return env.ident_of_id[id];
         else {
@@ -151,6 +163,26 @@ module TDev {
           env.ident_of_id[id] = mangleName(name + suffix);
           return mangleName(name + suffix);
         }
+      }
+
+      // There's an extra step, which is that we need to convert a name into a
+      // valid C++ identifier. You may call this function only when referring to
+      // a global whose name is meant to be left intact.
+      export function mangleName(name: string) {
+        var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
+        if (candidate in cppKeywords)
+          candidate += "_";
+        return candidate;
+      }
+
+      // Convert a prefixed name into a valid C++ identifier. Same as above,
+      // only call this directly if you know that [n] is unique (i.e. is a
+      // global, whose name is unique).
+      export function manglePrefixedName(e: Env, l: string, n: string) {
+        if (l)
+          return mangleName(l)+"::"+mangleName(n);
+        else
+          return mangleName(n);
       }
 
       export function mangleDef(env: Env, d: J.JLocalDef) {

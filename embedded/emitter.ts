@@ -298,8 +298,12 @@ module TDev {
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
+        H.reserveName(e, name);
+
         var x = H.defaultValueForType(this.libraryMap, t);
-        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.mangleUnique(e, name, name) +
+        // A reference to a global is already unique (i.e. un-ambiguous).
+        // [mkType] calls [mangleName] (NOT [mangleUnique], and so should we).
+        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.mangleName(name) +
           (x ? " = " + x : "") + ";"
       }
 
@@ -322,7 +326,9 @@ module TDev {
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.mangleDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        var head = H.mkSignature(env, this.libraryMap, H.mangleUnique(env, name, id), inParams, outParams);
+        // The name of a function is unique per library, so don't go through
+        // [mangleUnique].
+        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams);
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
@@ -397,10 +403,12 @@ module TDev {
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
-          if (f.nodeType == "action" && H.willCompile(<J.JAction> f))
-            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleUnique(e, f.name, f.id), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
-          else
+          if (f.nodeType == "action" && H.willCompile(<J.JAction> f)) {
+            H.reserveName(e, f.name, f.id);
+            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+          } else {
             return null;
+          }
         }).filter(x => x != null);
 
         // Compile all the top-level functions.
