@@ -755,7 +755,7 @@ module TDev
                             }
                         });
                     } else {
-                        ModalDialog.info(lf('unsupported file type'), lf('sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)'));
+                        ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
                     }
                 }
             }
