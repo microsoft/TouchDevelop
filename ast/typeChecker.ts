@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD208:
+// Next available error: TD209:
 
 module TDev.AST
 {
@@ -206,6 +206,7 @@ module TDev.AST
         private nothingLocals:LocalDef[] = [];
         private localScopes: LocalDef[][] = [[]];
         private readOnlyLocals:LocalDef[] = [];
+        private invisibleLocals:LocalDef[] = [];
         private writtenLocals:LocalDef[] = [];
         private currLoop:Stmt;
 
@@ -1154,6 +1155,7 @@ module TDev.AST
                 var prevRep = this.reportedUnassigned;
                 var prevAct = this.currentAnyAction;
                 var prevLoop = this.currLoop;
+                var prevInvisibleLocals = this.invisibleLocals;
 
                 this.currLoop = null;
                 this.writtenLocals = [];
@@ -1161,6 +1163,8 @@ module TDev.AST
                 this.actionSection = ActionSection.Lambda;
                 this.inAtomic = k instanceof ActionKind && (<ActionKind>k).isAtomic();
                 this.readOnlyLocals = this.snapshotLocals();
+                if (Cloud.isRestricted())
+                    this.invisibleLocals = this.snapshotLocals();
 
                 try {
                     f()
@@ -1173,6 +1177,7 @@ module TDev.AST
                     this.currentAnyAction = prevAct;
                     this.reportedUnassigned = prevRep;
                     this.currLoop = prevLoop;
+                    this.invisibleLocals = prevInvisibleLocals;
                 }
             })
         }
@@ -1337,6 +1342,10 @@ module TDev.AST
                         l._kind = this.typeHint;
                     }
                 }
+            }
+
+            if (this.invisibleLocals.indexOf(l) >= 0) {
+                this.markError(t, lf("TD209: inline functions cannot access locals from outside, like '{0}'", l.getName()))
             }
 
 
