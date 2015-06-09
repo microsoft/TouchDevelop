@@ -36,7 +36,7 @@ module TDev {
         description: "Drag and drop",
         id: "blockly",
         origin: origin,
-        path: path + "blockly/editor.html"        
+        path: path + "blockly/editor.html"
       }];
     }
     return externalEditorsCache;
