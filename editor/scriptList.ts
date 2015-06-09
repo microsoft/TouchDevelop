@@ -396,6 +396,7 @@
                 this.progressBar.reset();
                 
                 World.continuouslySyncAsync(false, () => {
+                    this.searchKey();
                     return Promise.as();
                 }).done();
             }
