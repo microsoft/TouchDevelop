@@ -1988,12 +1988,16 @@ module TDev
         */
 
         private compile(debug: boolean) {
+            if (Cloud.anonMode(lf("Native compilation")))
+              return;
+
             if (AST.TypeChecker.tcApp(Script) > 0) {
                 ModalDialog.info(lf("Type-checking error"),
                     lf("Cannot compile a script that contains errors. " +
                         "Please fix each error then try again."));
                 return;
             }
+
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);

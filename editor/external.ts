@@ -323,6 +323,9 @@ module TDev {
             break;
 
           case MessageType.Compile:
+            if (Cloud.anonMode(lf("Native compilation")))
+              return;
+
             var message1 = <Message_Compile> event.data;
             var cpp;
             switch (message1.language) {
