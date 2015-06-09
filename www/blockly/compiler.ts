@@ -854,7 +854,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: []
   },
   device_show_number: {
-    f: "scroll number",
+    f: "show number",
     args: [ "number", "pausetime" ]
   },
   device_show_letter: {
@@ -866,7 +866,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: [ "pause" ]
   },
   device_print_message: {
-    f: "scroll string",
+    f: "show string",
     args: [ "message", "pausetime" ]
   },
   device_plot: {
