@@ -394,6 +394,8 @@
                     this.searchBox.blur();
                 this.initialSearch = "";
                 this.progressBar.reset();
+                
+                World.
             }
         }
 
@@ -405,6 +407,7 @@
                 this.visible = false;
                 TipManager.setTip(null)
             }
+            World.cancelContinuouslySync();
         }
 
         public restoreTopics()
@@ -1503,7 +1506,7 @@
         }
 
         public showList(path:string, item:BrowserPage = null, tab = "", noCache = false, includeETags = false)
-        {            
+        {      
             this.setSearch("");
             var header = path.replace(/-scripts/, "").replace(/\/scripts/, "");
             this.shownSomething = false;
