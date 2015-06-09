@@ -133,6 +133,7 @@ module TDev.Cloud {
         stringEditFullScreen?: boolean;
         persistanceRadio?: boolean;
         wallScreenshot?: boolean;
+        nextTutorialsList?: boolean;
 
         editorRunOnLoad?: boolean;
 

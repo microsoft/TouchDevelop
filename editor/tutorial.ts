@@ -1081,44 +1081,46 @@ module TDev
                     })                
                 ));
 
-            var nextTutorials = this.topic.nextTutorials();
-            if (!/none/i.test(nextTutorials[0])) {
-                m.add(div('wall-dialog-header', lf("next tutorials...")));
-                var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
-                m.add(loadingMoreTutorials);
-                Browser.TheHub.tutorialsByUpdateIdAsync()
-                    .done(progs => {
-                    loadingMoreTutorials.removeSelf();
-                    var moreTutorials = <HTMLUListElement>createElement('ul', 'tutorial-list');
+            if (Browser.EditorSettings.widgets().nextTutorialsList) {
+                var nextTutorials = this.topic.nextTutorials();
+                if (!/none/i.test(nextTutorials[0])) {
+                    m.add(div('wall-dialog-header', lf("next tutorials...")));
+                    var loadingMoreTutorials = div('wall-dialog-box', lf("loading..."));
+                    m.add(loadingMoreTutorials);
+                    Browser.TheHub.tutorialsByUpdateIdAsync()
+                        .done(progs => {
+                            loadingMoreTutorials.removeSelf();
+                            var moreTutorials = <HTMLUListElement>createElement('ul', 'tutorial-list');
 
-                    var tutLength = 8 - (moreTutorialsId ? 1 : 0);
-                    var allTutorials = HelpTopic.getAllTutorials();
-                    var theme = Browser.EditorSettings.currentTheme;
-                    var score = (ht: HelpTopic) => {
-                        var sc = 0;
-                        if (this.hourOfCode && ht.isHourOfCode()) sc += 100;
-                        if (/jetpack/i.test(ht.id)) sc += 25;
-                        if (/jump/i.test(ht.id)) sc += 20;
-                        if (progs[ht.updateKey()]) sc -= 50;
-                        if (theme && theme.scriptSearch) sc += ht.hashTags().indexOf(theme.scriptSearch) > -1 ? 200 : 0;
-                        return sc;
-                    };
-                    allTutorials.stableSort((a, b) => {
-                        var sca = score(a); var scb = score(b); return sca > scb ? 1 : sca < scb ? -1 : 0;
-                    });
-                    while (nextTutorials.length < tutLength && allTutorials.length > 0) {
-                        var tut = allTutorials.pop()
-                        nextTutorials.push(tut.id);
-                    }
-                    nextTutorials.forEach(tutid =>
-                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid,(h) => { m.dismiss() }))));
-                    var moreTutorialsId = this.topic.moreTutorials();
-                    if (moreTutorialsId)
-                        moreTutorials.appendChild(createElement('li', '', Browser.TheHub.topicTile(moreTutorialsId, lf("More"))));
-                    m.add(div('wall-dialog-body', moreTutorials));
-                    }, e => {
-                        loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
-                });
+                            var tutLength = 8 - (moreTutorialsId ? 1 : 0);
+                            var allTutorials = HelpTopic.getAllTutorials();
+                            var theme = Browser.EditorSettings.currentTheme;
+                            var score = (ht: HelpTopic) => {
+                                var sc = 0;
+                                if (this.hourOfCode && ht.isHourOfCode()) sc += 100;
+                                if (/jetpack/i.test(ht.id)) sc += 25;
+                                if (/jump/i.test(ht.id)) sc += 20;
+                                if (progs[ht.updateKey()]) sc -= 50;
+                                if (theme && theme.scriptSearch) sc += ht.hashTags().indexOf(theme.scriptSearch) > -1 ? 200 : 0;
+                                return sc;
+                            };
+                            allTutorials.stableSort((a, b) => {
+                                var sca = score(a); var scb = score(b); return sca > scb ? 1 : sca < scb ? -1 : 0;
+                            });
+                            while (nextTutorials.length < tutLength && allTutorials.length > 0) {
+                                var tut = allTutorials.pop()
+                                nextTutorials.push(tut.id);
+                            }
+                            nextTutorials.forEach(tutid =>
+                                moreTutorials.appendChild(createElement('li', '', Browser.TheHub.tutorialTile(tutid, (h) => { m.dismiss() }))));
+                            var moreTutorialsId = this.topic.moreTutorials();
+                            if (moreTutorialsId)
+                                moreTutorials.appendChild(createElement('li', '', Browser.TheHub.topicTile(moreTutorialsId, lf("More"))));
+                            m.add(div('wall-dialog-body', moreTutorials));
+                        }, e => {
+                            loadingMoreTutorials.setChildren([lf("Oops, we could not load your progress.")]);
+                        });
+                }
             }
 
             this.addHocFinishPixel(m);

@@ -167,9 +167,8 @@ module TDev {
         // The call to [tcApp] also has the desired side-effect of resolving
         // names.
         if (AST.TypeChecker.tcApp(a) > 0) {
-          ModalDialog.info(lf("Type-checking error"),
-              lf("We received a script with errors and cannot run it. " +
-                  "Try converting then fixing the errors manually."));
+            ModalDialog.info(lf("Type-checking error"),
+              lf("We received a script with errors and cannot run it. Try converting then fixing the errors manually."));
         }
         // The compiler expects this global to be set. However, this is
         // dangerous, since the sync code might want to write the *translated*
@@ -323,6 +322,9 @@ module TDev {
             break;
 
           case MessageType.Compile:
+            if (Cloud.anonMode(lf("Native compilation")))
+              return;
+
             var message1 = <Message_Compile> event.data;
             var cpp;
             switch (message1.language) {
@@ -364,7 +366,7 @@ module TDev {
                 });
               });
             }, (error: any) => {
-              ModalDialog.info("Compilation error", error.message);
+              ModalDialog.info(lf("Compilation error"), error.message);
             });
             break;
 
