@@ -435,6 +435,7 @@ module TDev {
         browseUpdate,
         browseSendPullRequest,
         browsePublicationNotes,
+        browseListPointers,
         browseListBugs,
         browseListReleases,
         browseShare,

@@ -1394,6 +1394,7 @@
             else if (e.kind == "channel") return this.getSpecificInfoById(e.id, ChannelInfo);
             else if (e.kind == "release") return this.getSpecificInfoById(e.id, ReleaseInfo)
             else if (e.kind == "abusereport") return this.getSpecificInfoById(e.id, AbuseReportInfo);
+            else if (e.kind == "pointer") return this.getSpecificInfoById(e.id, PointerInfo);
             else return null;
         }
 
@@ -1582,6 +1583,10 @@
                 case "channels":
                     tick(Ticks.browseListLists);
                     header = lf("channels");
+                    break;
+                case "pointers":
+                    tick(Ticks.browseListPointers);
+                    header = lf("pointers");
                     break;
                 default:
                     if (/^bugs\//.test(path)) {
@@ -9984,4 +9989,87 @@
             return this.browser().getChannelInfo(c).mkSmallBox();
         }
     }
+
+
+    export class PointerInfo
+        extends BrowserPage
+    {
+        private ptr:JsonPointer;
+        private script:JsonScript;
+        private text:string;
+
+        constructor(par: Host) {
+            super(par)
+        }
+        public persistentId() { return "pointer:" + this.publicId; }
+        public getTitle() { return this.script ? this.script.name : super.getTitle(); }
+
+        public getName() { return lf("page"); }
+        public getId() { return "page"; }
+
+        public loadFromWeb(id: string) {
+            Util.assert(!!id)
+            this.publicId = id;
+        }
+
+        public withUpdate(elt:HTMLElement, update:(data:any)=>void)
+        {
+            return super.withUpdate(elt, d => {
+                this.ptr = d
+                if (this.ptr.scriptid) {
+                    Promise.join([ScriptCache.getScriptAsync(this.ptr.scriptid),
+                                  TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
+                    .done(rr => {
+                        this.text = rr[0]
+                        this.script = rr[1]
+                        update(d)
+                    })
+                } else {
+                    this.script = null
+                    this.text = null
+                    update(d)
+                }
+            })
+        }
+
+        public mkBoxCore(big: boolean) {
+            var icon = div("sdIcon", HTML.mkImg("svg:fa-external-link,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var res = div("sdHeaderOuter",
+                            div("sdHeader", icon,
+                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                                    )));
+
+            if (big)
+                res.className += " sdBigHeader";
+
+
+            return this.withUpdate(res, (u:JsonPointer) => {
+                if (this.script) {
+                    var nm = this.script.name
+                    nm += " (" + this.ptr.path + ")"
+                    nameBlock.setChildren([ nm ])
+                    author.setChildren([this.script.username]);
+                    addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
+                }
+            });
+        }
+
+        public initTab() {
+            this.withUpdate(this.tabContent, (u:JsonPointer) => {
+                var ht = HelpTopic.fromJsonScript(this.script)
+                ht.render(e => this.tabContent.setChildren([e]))
+            });
+        }
+    }
+
 }
