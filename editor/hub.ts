@@ -376,6 +376,8 @@ module TDev.Browser {
                     publishToComputingAtSchools: true,
                     actionSettings: true,
                     scriptHistoryTab: true,
+                    scriptAddToChannel: true,
+                    hubChannels: true,
                 }
             },
         },
@@ -433,13 +435,13 @@ module TDev.Browser {
                     publishToComputingAtSchools: true,
                     actionSettings: true,
                     scriptHistoryTab: true,
+                    scriptAddToChannel: true,
+                    hubChannels: true,
 
                     // editor specific                  
                     publishDescription: true,
                     sendPullRequest: true,
                     scriptPullChanges: true,
-                    scriptAddToChannel: true,
-                    hubChannels: true,
                     testAction: true,
                     testsSection: true,
                 }

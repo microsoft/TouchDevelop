@@ -19,7 +19,7 @@
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkBetaNote());
             
-            this.populateSiteHeader();
+            this.populateSiteHeader(false);
         }
         
         private showTutorialTip() {
@@ -39,7 +39,7 @@
             })
         }
         
-        private populateSiteHeader(username = "") {
+        private populateSiteHeader(settings = false, username = "") {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems = [
@@ -47,11 +47,13 @@
                     { id: "tutorials", name: lf("Tutorials"), tick: Ticks.siteMenuTutorials, handler: () => Util.navigateInWindow("/tutorials") },
                     { id: "projects", name: lf("Projects"), tick: Ticks.siteMenuProjects, handler: () => Util.navigateInWindow("/projects") },
                     { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuCreateCode, handler: () => this.showList("installed-scripts") }
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
                 ];
+                if (settings && EditorSettings.widgets().hubChannels)
+                    menuItems.push({ id: "channels", name: lf("Channels"), tick: Ticks.siteMenuChannels, handler: () => this.showList("channels") });
                 if (!Cloud.getUserId())
-                    menuItems.push({ id: "signin", name: lf("Sign In"), tick: Ticks.noEvent, handler: () => Login.show() });
-                else menuItems.push({ id: "settings", name: username ? username : lf("Settings"), tick: Ticks.noEvent, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
+                    menuItems.push({ id: "signin", name: lf("Sign In"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
+                else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
                 
                 var siteLogo = elt("siteLogo");
                 if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
@@ -188,7 +190,7 @@
         }
         
         private initSignin(username:string = "") {
-            this.populateSiteHeader(username);
+            this.populateSiteHeader(true, username);
         }
 
         private updateScroll()

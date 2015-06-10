@@ -177,6 +177,9 @@ module TDev {
         siteMenuProjects,
         siteMenuGettingStarted,
         siteMenuMyScripts,
+        siteMenuSignIn,
+        siteMenuProfile,
+        siteMenuChannels,
 
         btnPaste,
         btnCopy,
