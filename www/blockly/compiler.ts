@@ -846,8 +846,6 @@ interface StdFunc {
   isExtensionMethod?: boolean
 }
 
-// XXX this is also redundant since, again, we should be able to recover that
-// information by looking at the input block / field value to infer that
 var stdCallTable: { [blockType: string]: StdFunc } = {
   device_clear_display: {
     f: "clear screen",

@@ -206,13 +206,16 @@ module TDev {
       // Some conversions cannot be expressed using the simple "enums" feature
       // (which maps a string literal to a constant). This function transforms
       // the arguments for some known specific C++ functions.
-      private specialTreatment(f: string, actualArgs: J.JExpr[]) {
-        if (f == "micro_bit::createImage") {
+      private specialTreatment(e: EmitterEnv, f: string, actualArgs: J.JExpr[]) {
+        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (!x)
             throw new Error("create image takes a string literal only");
           var r = "literals::bitmap"+this.imageLiterals.length;
-          var code = f+"("+r+"_w, "+r+"_h, "+r+")";
+          var otherArgs = actualArgs.splice(1).map((x: J.JExpr) => this.visit(e, x));
+          var code = f+"("+r+"_w, "+r+"_h, "+r+
+                (otherArgs.length ? ", "+otherArgs : "")+
+                ")";
           this.imageLiterals.push(x);
           return code;
         } else {
@@ -228,7 +231,7 @@ module TDev {
       {
         var mkCall = (f: string, skipReceiver: boolean) => {
           var actualArgs = skipReceiver ? args.slice(1) : args;
-          var s = this.specialTreatment(f, actualArgs);
+          var s = this.specialTreatment(env, f, actualArgs);
           if (s)
             return s;
           else {
@@ -429,8 +432,8 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = this.compileImageLiterals() + globalsCode + forwardDeclarations.join("\n");
-        this.code = userFunctions.join("\n");
+        this.prototypes = globalsCode + forwardDeclarations.join("\n");
+        this.code = this.compileImageLiterals() + userFunctions.join("\n");
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
