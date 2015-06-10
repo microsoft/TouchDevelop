@@ -767,7 +767,7 @@ module TDev.Cloud {
             url += "&mergeids=" + encodeURIComponent(mergeIds)
         return Util.httpPostJsonAsync(getPrivateApiUrl(url), Cloud.lite ? meta : "")
     }
-    export function postUserInstalledCompileAsync(guid:string, cppSource:string) : Promise
+    export function postUserInstalledCompileAsync(guid:string, cppSource:string, meta:any = {}) : Promise
     {
         var r = new PromiseInv()
         var pollUrl = ""
@@ -784,7 +784,8 @@ module TDev.Cloud {
         HTML.showProgressNotification(lf("starting compilation"));
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: "proto",
-            source: cppSource
+            source: cppSource,
+            meta: meta
         })
         .then(resp => {
             HTML.showProgressNotification(lf("program accepted, compiling"));

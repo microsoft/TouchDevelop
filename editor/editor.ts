@@ -2028,7 +2028,7 @@ module TDev
                     notifyCompiled();
                     return;
                 }
-                Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
+                Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp, { name: Script.getName() }).then(json => {
                     console.log(json);
                     if (notifyCompiled()) {
                         if (!json.success) {
