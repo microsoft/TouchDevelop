@@ -211,6 +211,7 @@ module TDev.AST
         private currLoop:Stmt;
 
         private inAtomic = false;
+        private inShim = false;
         private actionSection = ActionSection.Normal;
         private pageInit:Block;
         private pageDisplay:Block;
@@ -843,6 +844,7 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
+            this.inShim = /{shim:.*}/.test(node.getDescription())
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1344,8 +1346,8 @@ module TDev.AST
                 }
             }
 
-            if (this.invisibleLocals.indexOf(l) >= 0) {
-                // this.markError(t, lf("TD209: inline functions cannot access locals from outside, like '{0}'", l.getName()))
+            if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0) {
+                this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
             }
 
 
