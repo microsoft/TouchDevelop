@@ -215,6 +215,7 @@ module TDev {
                                         header.scriptVersion.instanceId = Cloud.getWorldId()
                                         header.scriptVersion.time = getCurrentTime();
                                         header.scriptVersion.version++;
+                                        header.status = "unpublished";
                                         return <ScriptBlob>{
                                             script:      mergeScripts(baseVer.script, currVer.script, theirs.script),
                                             editorState: mergeEditorStates(baseVer.editorState, currVer.editorState, theirs.editorState),
