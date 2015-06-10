@@ -57,7 +57,7 @@ Blockly.Blocks['device_print_message'] = {
         .appendField("pause (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Shows the specified string and scrolls it if necessary.');
     this.setInputsInline(true);
  }
 };
@@ -79,7 +79,7 @@ Blockly.Blocks['device_show_number'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Shows the specified number and scrolls it if necessary.');
   }
 };
 
@@ -96,7 +96,7 @@ Blockly.Blocks['device_show_letter'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Shows the specified letter, without scrolling.');
   }
 };
 
@@ -114,7 +114,7 @@ Blockly.Blocks['device_button_event'] = {
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("do");
     this.setInputsInline(true);
-    this.setTooltip('');
+    this.setTooltip('React to a button press.');
   }
 };
 
@@ -130,7 +130,7 @@ Blockly.Blocks['device_get_button'] = {
         .appendField("is pressed");
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
-    this.setTooltip('');
+    this.setTooltip('Test whether a button is pressed or not.');
   }
 };
 
@@ -143,7 +143,7 @@ Blockly.Blocks['device_get_digital_pin'] = {
             .appendField(new Blockly.FieldDropdown(digitalPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('');
+        this.setTooltip('Read the value of a pin (either 0 or 1).');
     }
 };
 
@@ -161,7 +161,7 @@ Blockly.Blocks['device_set_digital_pin'] = {
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('');
+        this.setTooltip('Set the value of a pin (either 0 or 1).');
     }
 };
 
@@ -174,7 +174,7 @@ Blockly.Blocks['device_get_analog_pin'] = {
             .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('');
+        this.setTooltip('Read an analog value on a pin (between 0x0000 and 0xFFFF).');
     }
 };
 
@@ -192,7 +192,7 @@ Blockly.Blocks['device_set_analog_pin'] = {
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('');
+        this.setTooltip('Set an analog value on a pin (between 0x0000 and 0xFFFF).');
     }
 };
 
@@ -203,7 +203,7 @@ Blockly.Blocks['device_get_brightness'] = {
         this.appendDummyInput()
             .appendField("brightness (%)");
         this.setOutput(true, "Number");
-        this.setTooltip('');
+        this.setTooltip('Get the current brightness of the screen (between 0 and 100).');
     }
 };
 
@@ -218,7 +218,7 @@ Blockly.Blocks['device_set_brightness'] = {
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('');
+        this.setTooltip('Set the current brightness of the screen (between 0 and 100).');
     }
 };
 
@@ -236,7 +236,7 @@ Blockly.Blocks['device_get_acceleration'] = {
             ]), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('');
+        this.setTooltip('Get the acceleration on an axis (between -2048 and 2047).');
     }
 };
 
@@ -250,7 +250,7 @@ Blockly.Blocks['device_clear_display'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Turns all LEDs off.');
   }
 };
 
@@ -270,7 +270,7 @@ Blockly.Blocks['device_plot'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Turns the LED at coordinates (x, y) on.');
   }
 };
 Blockly.Blocks['device_unplot'] = {
@@ -288,7 +288,7 @@ Blockly.Blocks['device_unplot'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Turns the LED at coordinates (x, y) off.');
   }
 };
 
@@ -307,7 +307,7 @@ Blockly.Blocks['device_point'] = {
         .appendField("y");
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
-    this.setTooltip('');
+    this.setTooltip('Returns 1 if the LED at coordinates (x, y) is on, 0 otherwise.');
   }
 };
 
@@ -319,7 +319,7 @@ Blockly.Blocks['device_heading'] = {
             .appendField("compass heading (°)");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('');
+        this.setTooltip('Returns an orientation (between 0 and 360°). 0 is North.');
     }
 };
 
@@ -335,6 +335,7 @@ Blockly.Blocks['device_build_image'] = {
         this.appendDummyInput().appendField("3").appendField(new Blockly.FieldCheckbox("FALSE"), "LED03").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED13").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED23").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED33").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED43");
         this.appendDummyInput().appendField("4").appendField(new Blockly.FieldCheckbox("FALSE"), "LED04").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED14").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED24").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED34").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED44");
         this.setOutput(true, 'sprite');
+        this.setTooltip('An image that fits on the LED array.');
     }
 };
 
@@ -362,6 +363,7 @@ Blockly.Blocks['device_build_big_image'] = {
 
 
         this.setOutput(true, 'sprite');
+        this.setTooltip("A larger image that will be scrolled across the LED display.");
     }
 };
 
@@ -375,7 +377,7 @@ Blockly.Blocks['device_show_image_offset'] = {
     this.appendValueInput("offset")
         .setCheck("Number")
         .appendField("offset");
-    this.setTooltip('');
+    this.setTooltip('For a given (possibly big) image, display only frame, starting at offset.');
     this.setPreviousStatement(!0);
     this.setNextStatement(!0);
     this.setInputsInline(true);
@@ -402,7 +404,7 @@ Blockly.Blocks['device_scroll_image'] = {
         .appendField("pause (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Display an image, scrolling it if it doesn\'t fit on the display.');
     this.setInputsInline(true);
   }
 };
@@ -418,7 +420,7 @@ Blockly.Blocks['device_make_StringImage'] = {
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT);
     this.setOutput(true, "sprite");
-    this.setTooltip('');
+    this.setTooltip('Turn a string of characters into the corresponding image.');
     this.setInputsInline(true);
   }
 };
@@ -434,7 +436,7 @@ Blockly.Blocks['device_pause'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Stop execution for the given delay, hence allowing other threads of execution to run.');
   }
 };
 
@@ -448,7 +450,7 @@ Blockly.Blocks['device_forever'] = {
         .setCheck("null");
     this.setInputsInline(true);
     this.setPreviousStatement(true, "null");
-    this.setTooltip('');
+    this.setTooltip('Power-efficient way of doing active polling.');
   }
 };
 
@@ -463,7 +465,7 @@ Blockly.Blocks['device_comment'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Comment a piece of code. Comment is preserved when converting.');
   }
 };
 
@@ -480,7 +482,7 @@ Blockly.Blocks['math_op2'] = {
         .appendField("and");
     this.setInputsInline(true);
     this.setOutput(true, "Number");
-    this.setTooltip('');
+    this.setTooltip('Math operators.');
   }
 };
 
@@ -494,7 +496,7 @@ Blockly.Blocks['math_op3'] = {
         .setCheck("Number")
     this.setInputsInline(true);
     this.setOutput(true, "Number");
-    this.setTooltip('');
+    this.setTooltip('Math operators.');
   }
 };
 
@@ -509,7 +511,7 @@ Blockly.Blocks['device_while'] = {
         .appendField("do");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('');
+    this.setTooltip('Run the same sequence of actions while the condition is met. Don\t forget to pause!');
   }
 };
 
@@ -522,7 +524,7 @@ Blockly.Blocks['device_random'] = {
         .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "limit");
     this.setInputsInline(true);
     this.setOutput(true, "Number");
-    this.setTooltip('');
+    this.setTooltip('Gives a random number.');
   }
 };
 
