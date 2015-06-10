@@ -3376,6 +3376,7 @@ module TDev.AST {
         public runAsAsync:boolean;
         public autoGet:boolean;
         public isSynthetic:boolean;
+        public isShim:boolean;
         public savedFix:Call;
         public funAction:InlineAction;
         public optionalConstructor:InlineActions;

@@ -1110,6 +1110,13 @@ module TDev.AST
             return [];
         }
 
+        static restrictedIntOps:StringMap<string> = {
+            "add": "Bits.add_int32",
+            "subtract": "Bits.subtract_int32",
+            "multiply": "Bits.multiply_int32",
+            "divide": "Bits.divide_int32",
+        }
+
         private callString(prop:IProperty, args:JsExpr[], ctxArg:JsExpr, astref: Call) : JsExpr
         {
             var pk = prop.parentKind;
@@ -1125,7 +1132,12 @@ module TDev.AST
                     Util.assertCode(args.length == 2);
                     if (astref && astref.isSynthetic)
                         astref = null
-                    res = this.newTmpVar("infix", JsCall.okAnd([args[0], args[1]], new JsInfix(args[0], specApply, args[1])), astref);
+                    var inner:JsExpr = new JsInfix(args[0], specApply, args[1])
+                    if (parName == "Number_" && Cloud.isRestricted() && astref && !astref.isShim) {
+                        var over = Compiler.restrictedIntOps[propName]
+                        if (over) inner = JsCall.direct("lib." + over, [args[0], args[1]])
+                    }
+                    res = this.newTmpVar("infix", JsCall.okAnd([args[0], args[1]], inner), astref);
                 } else if (propName == "is_invalid") {
                     //if (!(pk instanceof RecordEntryKind))
                     res = new JsInfix(args[0], "==", this.term("undefined"));

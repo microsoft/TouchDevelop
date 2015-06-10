@@ -55,5 +55,8 @@ module TDev.RT {
         //@ [encoding].deflStrings("base64", "hex", "binary", "utf8", "utf16le")
         export function string_to_buffer(s:string, encoding:string) : Buffer { return Buffer.fromString(s, encoding); }
 
+        // TODO: is this correct?
+        // Divide two signed 32 bit numbers
+        export function divide_int32(x:number, y:number):number { return Math.floor(x / y) | 0; }
     }
 }

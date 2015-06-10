@@ -1744,6 +1744,8 @@ module TDev.AST
             var args = t.args;
             var prop = t.prop();
 
+            if (this.inShim)
+                t.isShim = this.inShim;
             t._assignmentInfo = null;
 
             if (prop === this.core.AssignmentProp) {
