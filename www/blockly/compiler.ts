@@ -755,7 +755,7 @@ function compileForever(e: Environment, b: B.Block): J.JStmt {
     H.mkExprHolder([], H.mkBooleanLiteral(true)),
     compileStatements(e, b.getInputTargetBlock("HANDLER")).concat([
       H.mkExprStmt(H.mkExprHolder([],
-        H.stdCall("pause", [H.mkNumberLiteral(100)], false)
+        H.stdCall("pause", [H.mkNumberLiteral(0)], false)
       ))
     ]));
 }
