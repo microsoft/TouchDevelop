@@ -773,9 +773,12 @@ module TDev
                         uploadFile(e.clipboardData.files[0])
                     }
                     if (e.clipboardData.items && e.clipboardData.items.length > 0) {
-                        e.stopPropagation(); // Stops some browsers from redirecting.
-                        e.preventDefault();
-                        uploadFile(e.clipboardData.items[0].getAsFile())                        
+                        var f = e.clipboardData.items[0].getAsFile()
+                        if (f) {
+                            e.stopPropagation(); // Stops some browsers from redirecting.
+                            e.preventDefault();
+                            uploadFile(f)
+                        }
                     }
                 }
             })            
