@@ -567,7 +567,7 @@ module TDev {
                                 && header.scriptVersion.baseSnapshot != existingHeader.pendingMerge;
                             if (existingHeader.status == "deleted")
                                 isNewer = false
-                            if (!isNewer && existingHeader.status != header.status)
+                            if (!isNewer && header.status == "published" && existingHeader.status == "unpublished")
                                 isNewer = true;
                         } else
                             isNewer = Cloud.isVersionNewer(header.scriptVersion, existingHeader.scriptVersion);
