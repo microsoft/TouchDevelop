@@ -1987,7 +1987,9 @@ module TDev
         }
         */
 
+        private currentScriptCompiling: string;        
         private compile(btn : HTMLElement, debug: boolean) {
+            Util.log("compiling script");
             if (Cloud.anonMode(lf("Native compilation")))
               return;
 
@@ -1996,12 +1998,25 @@ module TDev
                 return;
             }
             
+            var src = Script.serialize();
+            if (this.currentScriptCompiling === src) {
+                // same script that's already compiling, nothing to do
+                Util.log("same compilation, skipping...");
+                return;
+            }
+            this.currentScriptCompiling = src;
+            
             btn.setFlag("working", true);
             
-            var notifyCompiled = () => {
+            var notifyCompiled = () : boolean => {
                 btn.setFlag("working", false);
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
+                var r = src === this.currentScriptCompiling;
+                this.currentScriptCompiling = undefined;
+                if (!r)
+                    Util.log("compilation outdated, skipping...");  
+                return r;              
             }
             
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
@@ -2012,23 +2027,24 @@ module TDev
                 }
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);
-                    notifyCompiled();
-                    if (!json.success) {
-                        ModalDialog.showText(
-                            "For debugging, here's the URL to the JSON file:\n"+json.url +
-                            "\n\nThis is ARM's error message:\n"+External.makeOutMbedErrorMsg(json)+
-                            "\n\nFor reference, here's the C++ we sent them:\n"+cpp,
-                            lf("Compilation error"));
-                    } else {
-                        document.location.href = json.hexurl;
-                    }
+                    if (notifyCompiled()) {
+                        if (!json.success) {
+                            ModalDialog.showText(
+                                "For debugging, here's the URL to the JSON file:\n" + json.url +
+                                "\n\nThis is ARM's error message:\n" + External.makeOutMbedErrorMsg(json) +
+                                "\n\nFor reference, here's the C++ we sent them:\n" + cpp,
+                                lf("Compilation error"));
+                        } else {
+                            document.location.href = json.hexurl;
+                        }
+                    }    
                 }, json => {
-                    notifyCompiled();
-                    ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
+                    if(notifyCompiled())
+                        ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
                 });
             }, (error: any) => {
-                notifyCompiled();
-                ModalDialog.info(lf("Compilation error"), error.message);
+                if(notifyCompiled())
+                    ModalDialog.info(lf("Compilation error"), error.message);
             });
         }
 
