@@ -753,7 +753,11 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 function compileForever(e: Environment, b: B.Block): J.JStmt {
   return H.mkWhile(
     H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("HANDLER")));
+    compileStatements(e, b.getInputTargetBlock("HANDLER")).concat([
+      H.mkExprStmt(H.mkExprHolder([],
+        H.stdCall("pause", [H.mkNumberLiteral(100)], false)
+      ))
+    ]));
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
