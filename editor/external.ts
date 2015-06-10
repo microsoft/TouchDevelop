@@ -45,7 +45,6 @@ module TDev {
   // Assumes that [id] is a valid external editor id.
   export function editorById(id: string): ExternalEditor {
     var r = getExternalEditors().filter(x => x.id == id);
-    Util.assert(r.length == 1);
     return r[0];
   }
 

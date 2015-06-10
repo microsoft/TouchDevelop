@@ -3096,6 +3096,13 @@ module TDev
                 var finalExternal = () => scr.then(scriptText => {
                     elt("scriptEditor").classList.add("external");
                     var editor = editorById(header.editor);
+                    if (!editor) {
+                        ProgressOverlay.hide()
+                        ModalDialog.infoAsync(lf("sorry, cannot edit this"), lf("Scripts of type '{0}' cannot be edited here.", header.editor))
+                            .then(() => this.goToHubAsync())
+                            .done()
+                        return new PromiseInv()
+                    }
                     External.loadAndSetup(editor, {
                         scriptText: scriptText,
                         guid: header.guid,

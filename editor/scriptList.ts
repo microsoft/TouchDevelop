@@ -6468,6 +6468,9 @@
                         });
                     }
                 })
+
+                if (this.cloudHeader.editor && !editorById(this.cloudHeader.editor))
+                    editB.style.opacity = "0.2"
             }
 
             btns.setChildren([updateB, editB, runB, likePub, pinB, uninstall, this.showcaseBtns()]);
