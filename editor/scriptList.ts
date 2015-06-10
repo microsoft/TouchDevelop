@@ -6094,7 +6094,7 @@
             "blockly": "fa-puzzle-piece,#5b80a5",
             "touchdevelop": "touchdevelop,#308919",
             "docs": "fa-file-text-o,#E00069",
-            "html": "fa-file-text-o,#E00069",
+            "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
             "*": "emptycircle,#85BB65",
         }
