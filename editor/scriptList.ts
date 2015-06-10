@@ -10038,7 +10038,8 @@
             super(par)
         }
         public persistentId() { return "pointer:" + this.publicId; }
-        public getTitle() { return this.script ? this.script.name : super.getTitle(); }
+        public getTitle() { return this.script ? this.script.name : 
+            this.ptr && this.ptr.redirect ? "-> " + this.ptr.redirect : super.getTitle(); }
 
         public getName() { return lf("page"); }
         public getId() { return "page"; }
@@ -10090,20 +10091,26 @@
 
 
             return this.withUpdate(res, (u:JsonPointer) => {
-                if (this.script) {
-                    var nm = this.script.name
+                if (this.ptr) {
+                    var nm = this.getTitle()
                     nm += " (" + this.ptr.path + ")"
                     nameBlock.setChildren([ nm ])
-                    author.setChildren([this.script.username]);
-                    addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
+                    author.setChildren([this.script ? this.script.username : this.ptr.username]);
+                    if (this.script)
+                        addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
                 }
             });
         }
 
         public initTab() {
             this.withUpdate(this.tabContent, (u:JsonPointer) => {
-                var ht = HelpTopic.fromJsonScript(this.script)
-                ht.render(e => this.tabContent.setChildren([e]))
+                if (this.script) {
+                    var ht = HelpTopic.fromJsonScript(this.script)
+                    ht.render(e => this.tabContent.setChildren([e]))
+                } else {
+                    if (this.ptr)
+                        this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
+                }
             });
         }
     }
