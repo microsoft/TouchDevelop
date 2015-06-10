@@ -2002,14 +2002,17 @@ module TDev
             if (this.currentScriptCompiling === src) {
                 // same script that's already compiling, nothing to do
                 Util.log("same compilation, skipping...");
+                HTML.showProgressNotification(lf("still compiling, please wait..."));
                 return;
             }
             this.currentScriptCompiling = src;
             
             btn.setFlag("working", true);
+            btn.classList.add("disabledItem");
             
             var notifyCompiled = () : boolean => {
                 btn.setFlag("working", false);
+                btn.classList.remove("disabledItem");
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
                 var r = src === this.currentScriptCompiling;
