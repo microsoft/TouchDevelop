@@ -1814,7 +1814,7 @@
                 this.showList("installed-scripts", s, tab);
                 return;
             }
-
+            
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -1837,8 +1837,6 @@
             this.syncTabVisibility();
 
             this.hdContainer.setChildren([s.mkBigBox()]);
-            if (!SizeMgr.phoneMode)
-                this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
 
             var allTabs = s.getAllTabs();
             var tabToLoad:BrowserTab = allTabs[0];
@@ -1852,6 +1850,8 @@
                 this.setCurrent();
 
             Util.showRightPanel(this.rightPane);
+            if (!SizeMgr.phoneMode)
+                this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
         }
 
         private getLocation(id:string) : BrowserPage { return this.locationCache[id]; }

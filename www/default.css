@@ -787,6 +787,10 @@ div.topButtons button {
   border-color: transparent;
 }
 
+#root.portrait[data-pane-hidden^="no"] .slRight {
+  display:none;
+}
+
 #root.assume-mouse .tabMenu-button:hover {
     border-color: #E72A59;
 }
