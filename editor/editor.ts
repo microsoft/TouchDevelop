@@ -1987,23 +1987,32 @@ module TDev
         }
         */
 
-        private compile(debug: boolean) {
+        private compile(btn : HTMLElement, debug: boolean) {
             if (Cloud.anonMode(lf("Native compilation")))
               return;
 
             if (AST.TypeChecker.tcApp(Script) > 0) {
-                ModalDialog.info(lf("Your script has errors!"), lf("Try to fix your errors and try again."));
+                ModalDialog.info(lf("Your script has errors!"), lf("Fix your errors and try again."));
                 return;
             }
-
+            
+            btn.setFlag("working", true);
+            
+            var notifyCompiled = () => {
+                btn.setFlag("working", false);
+                if (this.stepTutorial)
+                    this.stepTutorial.notify("compile");
+            }
+            
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);
+                    notifyCompiled();
                     return;
                 }
                 Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp).then(json => {
                     console.log(json);
-                    if (this.stepTutorial) this.stepTutorial.notify("compile");
+                    notifyCompiled();
                     if (!json.success) {
                         ModalDialog.showText(
                             "For debugging, here's the URL to the JSON file:\n"+json.url +
@@ -2014,25 +2023,27 @@ module TDev
                         document.location.href = json.hexurl;
                     }
                 }, json => {
+                    notifyCompiled();
                     ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
                 });
             }, (error: any) => {
-                if (this.stepTutorial)
-                    this.stepTutorial.notify("compile");
-                ModalDialog.info("Compilation error", error.message);
+                notifyCompiled();
+                ModalDialog.info(lf("Compilation error"), error.message);
             });
         }
 
         public setupPlayButton()
         {
-            var children = [];
+            var children : HTMLElement[] = [];
             if (this.currentRt && this.currentRt.canResume())
                 children = [ Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution()) ];
             else
                 children = [ Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
 
-            if (Cloud.isRestricted())
-                children.push(Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile((<MouseEvent> e).ctrlKey)));
+            if (Cloud.isRestricted()) {
+                var compileBtn: HTMLElement;
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey)));
+            }
 
             this.playBtnDiv.setChildren(children);
 
