@@ -2562,7 +2562,7 @@ a.md-bigbutton:hover {
 
 #root[data-pane-hidden^="no"] .slLeft {
   height: 100%;
-  background: white;
+  /* background: white; */
 }
 
 .portrait .slList {
@@ -2572,13 +2572,13 @@ a.md-bigbutton:hover {
   width: 100%;
   border-left: none;
   top: 3.9em;
-  background: white;
+  /* background: white; */
   display: none;
 }
 
 .portrait .slListHeader {
   pointer-events: auto;
-  background: white;
+  /* background: white; */
   border-bottom: 0.1em dotted #ccc;
   height: 4.5em;
   margin: 0;

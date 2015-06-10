@@ -206,6 +206,7 @@
 
         public applySizes()
         {
+            TipManager.setTip(null);
             this.updateSidePane();
             this.updateScroll();
         }

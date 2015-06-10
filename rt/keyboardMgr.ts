@@ -337,6 +337,7 @@ module TDev {
             } else if (this.autoHide() && this.paneState < 0) {
                 pane.style.display = "none";
             }
+            elt("root").setFlag("pane-hidden", pane.style.display == 'none');
         }
 
         public showSidePane()
