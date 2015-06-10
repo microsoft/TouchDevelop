@@ -168,7 +168,7 @@ module TDev {
                     .then(() => {
                         // [hd] is the local header; if the [instanceId] is "cloud", then no local modifications were performed, i.e. the
                         // local header is *exactly* baseSnapshot
-                        if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot) {
+                        if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot && hd.scriptVersion.baseSnapshot != header.scriptVersion.baseSnapshot) {
                             // We need to merge, because there's been a fork.  The base header is [hd.scriptVersion.baseSnapshot], "theirs" is
                             // [header], and "mine" is [hd].
                             log(header.guid + "/" + header.scriptId + ": " + header.name + " merging based on " + hd.scriptVersion.baseSnapshot);
@@ -566,6 +566,8 @@ module TDev {
                                 && header.scriptVersion.baseSnapshot != existingHeader.pendingMerge;
                             if (existingHeader.status == "deleted")
                                 isNewer = false
+                            if (!isNewer && existingHeader.status != header.status)
+                                isNewer = true;
                         } else
                             isNewer = Cloud.isVersionNewer(header.scriptVersion, existingHeader.scriptVersion);
                         if (header.recentUse < existingHeader.recentUse)
