@@ -2001,7 +2001,7 @@ module TDev.AST {
                 if (tp == "enum") {
                     annot.enumMap = {}
                     annot.hints = annot.hints.map(a => {
-                        var m = /(.*)=([a-z_\d]+)$/i.exec(a)
+                        var m = /([^=]*)=(.+)$/i.exec(a)
                         if (m) {
                             annot.enumMap[m[1]] = m[2]
                             return m[1]
