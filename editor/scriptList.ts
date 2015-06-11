@@ -6981,8 +6981,7 @@
                                                     return Promise.as();
                                                 }).done();
                                         }
-                                        if (pullMergeIds) {
-                                            HTML.showProgressNotification(lf("closing pull requests..."), true);
+                                        if (pullMergeIds && pullMergeIds.length > 0) {
                                             Promise.join(pullMergeIds.map(mid => {
                                                 var req = { kind: "comment", text: lf("Your changes have been pulled into {0}!", ' /' + this.cloudHeader.scriptId), userplatform: Browser.platformCaps };
                                                 return Cloud.postPrivateApiAsync(mid + "/comments", req);

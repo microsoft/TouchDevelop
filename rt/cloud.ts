@@ -781,14 +781,14 @@ module TDev.Cloud {
                 err => Util.setTimeout(1000, poll))
         }
 
-        HTML.showProgressNotification(lf("starting compilation"));
+        HTML.showProgressNotification(lf("compiling..."));
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: "proto",
             source: cppSource,
             meta: meta
         })
         .then(resp => {
-            HTML.showProgressNotification(lf("program accepted, compiling"));
+            // HTML.showProgressNotification(lf("program accepted, compiling"));
             pollUrl = resp.statusurl
             poll()
         })
