@@ -458,9 +458,12 @@ module TDev {
       TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
 
       // Start the simulator
-      Browser.TheApiCacheMgr.getAsync(deviceScriptId+"/text", false).then((s: string) => {
+      pullLatestLibraryVersion()
+      .then(() => ScriptCache.getScriptAsync(deviceScriptId))
+      .then((s: string) => {
         typeCheckAndRun(s, "_libinit");
-      });
+      })
+      .done();
     }
   }
 }
