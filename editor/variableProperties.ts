@@ -758,7 +758,42 @@ module TDev
                         ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
                     }
                 }
-            }
+            }        
+        
+        function uploadFiles(files: File[]) {
+            if (!Cloud.hasPermission("batch-art-upload")) return;
+
+            var m = new ModalDialog();
+            var template = HTML.mkTextArea("wall-input");
+            template.placeholder = lf("Art name template");
+            template.value = "{name}"
+            var descr = HTML.mkTextArea("wall-input");
+            descr.placeholder = lf("Enter the description");
+            m.add(div('wall-dialog-header', lf("uploading art {0} resources", files.length)));
+            m.add(template);
+            m.add(descr);
+            m.add(div("wall-dialog-body", lf("Everyone will be able to access those art resources. ")));
+            m.add(Cloud.mkLegalDiv());            
+            m.addOk(lf("upload"), () => {
+                var d = descr.value || "";
+                var t = template.value; if (t.indexOf("{name}") < 0) t += "{name}";
+                var ps = files.map(file =>
+                    HTML.fileReadAsDataURLAsync(file)
+                        .then(uri => {
+                            if (!uri) return Promise.as();
+                            else {
+                                var name = file.name.substr(0, RT.String_.last_index_of(file.name, '.', file.name.length));
+                                name = t.replace("{name}", name);
+                                Util.log('uploading ' + file.name + '->' + name)
+                                return uploadArtAsync(name, d, uri);
+                            }
+                        })
+                    );
+                Promise.join(ps)
+                    .done(() => m.dismiss());
+            });
+            m.show();
+        }
         
         export function setupDragAndDrop(r: HTMLElement) {
 
@@ -767,12 +802,20 @@ module TDev
             r.addEventListener('paste', function(e: any /*: ClipboardEvent*/) {
                 Util.log('clipboard paste');
                 if (e.clipboardData) {
-                    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+                    // has file?
+                    var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
+                    if (Cloud.hasPermission("batch-art-upload") && files.length > 1) {
+                        e.stopPropagation(); // Stops some browsers from redirecting.
+                        e.preventDefault();
+                        uploadFiles(files);
+                    }                    
+                    else if (files.length > 0) {
                         e.stopPropagation(); // Stops some browsers from redirecting.
                         e.preventDefault();
                         uploadFile(e.clipboardData.files[0])
                     }
-                    if (e.clipboardData.items && e.clipboardData.items.length > 0) {
+                    // has item?
+                    else if (e.clipboardData.items && e.clipboardData.items.length > 0) {
                         var f = e.clipboardData.items[0].getAsFile()
                         if (f) {
                             e.stopPropagation(); // Stops some browsers from redirecting.
@@ -790,11 +833,15 @@ module TDev
                 }
             }, false);
             r.addEventListener('drop', (e) => {
-                var file = e.dataTransfer.files[0];
-                if (file) {
+                var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
+                if (Cloud.hasPermission("batch-art-upload") && files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
-                    uploadFile(file);
+                    uploadFiles(files);
+                } else if (files.length > 0) {
+                    e.stopPropagation(); // Stops some browsers from redirecting.
+                    e.preventDefault();
+                    uploadFile(files[0]);
                 }
                 return false;
             }, false);
