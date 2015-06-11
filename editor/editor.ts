@@ -1987,7 +1987,7 @@ module TDev
         }
         */
 
-        private currentScriptCompiling: string;        
+        private currentScriptCompiling: string;
         private compile(btn : HTMLElement, debug: boolean) {
             Util.log("compiling script");
             if (Cloud.anonMode(lf("Native compilation")))
@@ -1997,7 +1997,7 @@ module TDev
                 ModalDialog.info(lf("Your script has errors!"), lf("Fix your errors and try again."));
                 return;
             }
-            
+
             var src = Script.serialize();
             if (this.currentScriptCompiling === src) {
                 // same script that's already compiling, nothing to do
@@ -2006,10 +2006,10 @@ module TDev
                 return;
             }
             this.currentScriptCompiling = src;
-            
+
             btn.setFlag("working", true);
             btn.classList.add("disabledItem");
-            
+
             var notifyCompiled = () : boolean => {
                 btn.setFlag("working", false);
                 btn.classList.remove("disabledItem");
@@ -2018,10 +2018,10 @@ module TDev
                 var r = src === this.currentScriptCompiling;
                 this.currentScriptCompiling = undefined;
                 if (!r)
-                    Util.log("compilation outdated, skipping...");  
-                return r;              
+                    Util.log("compilation outdated, skipping...");
+                return r;
             }
-            
+
             Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);
@@ -2040,7 +2040,7 @@ module TDev
                         } else {
                             document.location.href = json.hexurl;
                         }
-                    }    
+                    }
                 }, json => {
                     if(notifyCompiled())
                         ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
