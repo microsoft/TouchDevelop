@@ -1347,7 +1347,7 @@ module TDev.AST
             }
 
             if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0) {
-                this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
+              //  this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
             }
 
 
