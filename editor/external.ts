@@ -338,7 +338,9 @@ module TDev {
             }
             cpp.then((cpp: string) => {
               console.log(cpp);
-              Cloud.postUserInstalledCompileAsync(this.guid, cpp).then(json => {
+              Cloud.postUserInstalledCompileAsync(this.guid, cpp, {
+                name: message1.name
+              }).then(json => {
                 // Success.
                 console.log(json);
                 if (json.success) {

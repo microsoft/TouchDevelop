@@ -412,7 +412,8 @@ module TDev {
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
       text: ast,
-      language: External.Language.TouchDevelop
+      language: External.Language.TouchDevelop,
+      name: getName(),
     });
   }
 
