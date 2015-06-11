@@ -608,8 +608,7 @@ module TDev.Browser {
             var copyrights = "<div class='beta-legal'>" + 
                 betaNote +
                 "<span class='beta-black'>© 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
-                (Cloud.getUserId() ? "<span class='beta-underline'>sign out</span>&nbsp;&nbsp;" : "") +
-                "<span class='beta-underline'>privacy</span>&nbsp;&nbsp;<span class='beta-underline'>legal</span></div>";
+                "<span class='beta-underline'>terms of use</span>&nbsp;&nbsp;<span class='beta-underline'>privacy policy</span></div>";
 
             Browser.setInnerHTML(beta, copyrights);
 
