@@ -54,6 +54,7 @@ module TDev {
             type: MessageType; // == MessageType.Compile
             text: any; // string if language == CPlusPlus, TDev.AST.Json.JApp if language == TouchDevelop
             language: Language;
+            name?: string; // Name of the script
         }
 
         export interface Message_CompileAck extends Message {
