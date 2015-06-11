@@ -272,7 +272,7 @@ module TDev {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var prefixedName = t.lib
             ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
-            : H.mangleName(name);
+            : this.resolveCall(env, H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
 

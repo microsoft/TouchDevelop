@@ -339,6 +339,14 @@ module TDev {
           parent: null,
         }
       }
+
+      export function mkCodeRef() {
+        return {
+          nodeType: "singletonRef",
+          id: null,
+          name: "code"
+        };
+      }
     }
   }
 }
