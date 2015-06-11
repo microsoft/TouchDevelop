@@ -2971,7 +2971,7 @@ module TDev
                     Ticker.dbg("Editor.loadHashCore.cannotLoad");
                     fail()
                 } else {
-                    return this.prepareForLoadAsync("reloading script", () =>
+                    return this.prepareForLoadAsync(lf("reloading script"), () =>
                         this.loadScriptAsync(hd))
                 }
             });

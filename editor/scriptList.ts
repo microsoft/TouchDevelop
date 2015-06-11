@@ -6968,7 +6968,6 @@
                                         if (descr && this.cloudHeader.status == 'published') {
                                             tick(Ticks.browsePublicationNotes);
                                             var req = { kind: "comment", text: descr + ' #publicationNotes', userplatform: Browser.platformCaps };
-                                            HTML.showProgressNotification(lf("saving publication notes..."), true);
                                             Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/comments", req)
                                                 .then((jscom: JsonComment) => {
                                                     if (jscom && sendPullRequest) {
@@ -6994,7 +6993,7 @@
                                 }
                             } else {
                                 if (!ModalDialog.currentIsVisible())
-                                    ModalDialog.info("publishing unsuccessful", lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
+                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
                             }
                         }).done();
                     })
