@@ -193,14 +193,22 @@ a.command:hover {
   text-decoration: underline;
 }
 
-/* Block styles */
+/* Override a few blockly styles. */
 .blocklyMainBackground {
-  fill: white !important;
+  display: none;
 }
 
 .blocklyError > .blocklyPath {
   stroke: #d9301a !important;
   stroke-width: 3px;
+}
+
+.blocklySvg {
+  background-color: transparent !important;
+}
+
+.blocklyToolboxDiv {
+  background-color: rgba(180, 180, 180, .25) !important;
 }
 
 /* vim: set ts=2 sw=2 sts=2: */
