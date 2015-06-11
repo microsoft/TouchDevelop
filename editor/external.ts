@@ -148,7 +148,9 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
-        document.getElementById("externalEditorSide").appendChild(w);
+        var logo = div("wallFullScreenLogo", HTML.mkA("", "https://www.touchdevelop.com/blocks", "", "Microsoft Research Blocks"));
+
+        elt("externalEditorSide").setChildren([w, logo]);        
       }
 
       public fullWallWidth() {
