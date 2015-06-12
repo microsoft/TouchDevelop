@@ -96,9 +96,13 @@ module TDev.RT {
         //@ robust
         export function to_upper_case(self:string) : string { return self.toLocaleUpperCase(); }
 
-        //? Converts a single character string into its unicode number
+        //? Use ``to_character_code`` instead
+        //@ hidden
         export function to_unicode(self:string) : number { return self.length == 1 ? self.charCodeAt(0) : undefined; }
 
+        //? Converts the first character into the character code number (unicode)
+        export function to_character_code(self:string) : number { return self.length == 1 ? self.charCodeAt(0) : 0; }
+        
         //? Compares two pieces of text
         //@ robust
         export function compare(self:string, other:string) : number
