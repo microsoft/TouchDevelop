@@ -308,16 +308,16 @@ module TDev.RT {
         }
 
         //? Parses the string as a number
-        export function to_number(self:string) : number
-        {
+        export function to_number(self: string): number {
             // TODO: localization
+            var r: number = undefined;
             if (/^\s*[-+]?\d*\.?(\d+([eE][-+]?\d+)?)?\s*$/.test(self)) {
-                var r = parseFloat(self);
-                if (isNaN(r)) return undefined;
-                return r;
-            } else {
-                return undefined;
+                r = parseFloat(self);
+            } else if (/^\s*[-+]?0x[a-z0-9]{1,4}\s*$/i.test(self)) {
+                r = parseInt(self);
             }
+            if (isNaN(r)) return undefined;
+            return r;
         }
 
         //? Parses the string as a boolean
