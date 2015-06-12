@@ -316,9 +316,10 @@ module TDev {
         return ret;
       }
 
-      // JStringLiteral { value: VALUE } -> VALUE
+      // JStringLiteral { value: VALUE } -> VALUE (empty string is also a valid
+      // literal).
       export function isStringLiteral(x: J.JNode) {
-        return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || null;
+        return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value !== null || null;
       }
 
       export function willCompile (f: J.JAction) {

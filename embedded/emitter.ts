@@ -210,7 +210,7 @@ module TDev {
         if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (!x)
-            throw new Error("create image takes a string literal only");
+            throw new Error("create image / show animation takes a string literal only");
           var r = "literals::bitmap"+this.imageLiterals.length;
           var otherArgs = actualArgs.splice(1).map((x: J.JExpr) => this.visit(e, x));
           var code = f+"("+r+"_w, "+r+"_h, "+r+
