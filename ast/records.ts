@@ -816,6 +816,8 @@ module TDev.AST {
         public locallypersisted() { return this.persistent && !(this.cloudEnabled || this.cloudPartiallyEnabled); }
 
         public hasErrors() { return !!this.getError() || this.getFields().some((r) => !!r.getError()); }
+        
+        public isExtensionAction() { return false; }
 
         public children(): AstNode[] {
             return [
