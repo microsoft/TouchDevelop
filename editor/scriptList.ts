@@ -7699,6 +7699,14 @@
                 Cloud.anonMode(lf("editing user settings"), null, true);
             }
 
+            var astModes = div('ast-modes');
+            function updateModes() {
+                astModes.setChildren(EditorSettings.createChooseASTModeElements(mode => {
+                    EditorSettings.editorMode().astMode = mode;
+                    updateModes();
+                }));
+            }
+
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
@@ -7709,7 +7717,13 @@
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
                     HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
                 ]);
+                
+                // editor selector
+                ch.unshift(astModes);                
+                ch.unshift(div("input-label", lf("editor theme")));
+                updateModes();
 
+                // user name                
                 var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
                     HTML.showProgressNotification("saving...");
                     Cloud.postUserSettingsAsync({ nickname: nameInput.value })

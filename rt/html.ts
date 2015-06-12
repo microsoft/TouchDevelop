@@ -1041,7 +1041,7 @@ module TDev.HTML {
     {
         if (!url) return "";
         var u = "url(" + proxyResource(url) + ")";
-        if (opacity <= 1)
+        if (opacity < 1)
             u = Util.fmt("linear-gradient(to bottom, rgba(255,255,255,{0}) 0%,rgba(255,255,255,{0}) 100%), {1}", (1-opacity).toFixed(3) , u);
         return u;
     }

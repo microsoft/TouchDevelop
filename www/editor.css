@@ -5625,6 +5625,9 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 .editor-mode .descr {
     font-size:0.8em;
 }
+.editor-mode[data-selected^=no] .pic {
+  opacity: 0.4;
+}
 
 /*
  *
