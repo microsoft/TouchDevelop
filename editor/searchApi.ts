@@ -423,7 +423,7 @@ module TDev
                         .forEach(addProp);
                 });
                 Script.libraries().forEach((l) => {
-                    l.getKind().listProperties().filter(p => p.isBrowsable()).forEach(addProp);
+                    l.getKind().listProperties().filter(p => p.isBrowsable() && !(<AST.LibraryRefAction>p)._extensionAction).forEach(addProp);
                 });
                 props.sort((a: IProperty, b: IProperty) => {
                     if (a.lastMatchScore != b.lastMatchScore) return b.lastMatchScore - a.lastMatchScore;
