@@ -486,8 +486,8 @@ module TDev.Browser {
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
                 HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
-                link(lf("privacy and cookies"), "/privacy"),
-                link(lf("legal"), "/legal")
+                link(lf("terms of use"), "/legal"),
+                link(lf("privacy and cookies"), "/privacy")
                 ));
 
             if (EditorSettings.widgets().githubLinks) {
