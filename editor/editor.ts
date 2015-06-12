@@ -4072,6 +4072,10 @@ module TDev
         public logoutAsync(everywhere: boolean, url: string = undefined) {
             tick(Ticks.mainResetWorld);
 
+            var logoutUrl = ""
+            if (Cloud.getAccessToken())
+                logoutUrl = Cloud.getPrivateApiUrl("logout")
+
             var userId = Cloud.getUserId();
             // when users don't have an picture, the dialog has a broken image which looks really bad
             // var meImg = userId  ? HTML.mkImg(Cloud.getPublicApiUrl(userId + "/picture?type=normal")) : null;
@@ -4090,8 +4094,21 @@ module TDev
             return this.resetWorldAsync().then(() => {
                 // don't stop progress; keep animation running until we actually navigate away
                 window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
-                if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
-                Util.navigateInWindow(url);
+                if (Cloud.lite && logoutUrl) {
+                    Util.httpPostRealJsonAsync(logoutUrl, { everywhere: everywhere })
+                    .then(resp => {
+                        if (!url && resp && resp.redirect)
+                            url = resp.redirect
+                    }, e => {})
+                    .then(() => {
+                        if (!url) url = Cloud.getServiceUrl() + "/user/logout";
+                        Util.navigateInWindow(url);
+                    })
+                    .done()
+                } else {
+                    if (!url) url = Cloud.getServiceUrl() + "/user/logout" + (everywhere ? "" : "?local=true");
+                    Util.navigateInWindow(url);
+                }
             });
         }
 
@@ -4135,11 +4152,11 @@ module TDev
                     var m = new ModalDialog();
                     var options = {};
                     if (isOnline && userId)
-                        options["sign out everywhere"] = () => {
+                        options[lf("sign out everywhere")] = () => {
                             m.dismiss();
                             TheEditor.logoutAsync(true).done();
                         };
-                    options["sign out"] = () => {
+                    options[lf("sign out")] = () => {
                         m.dismiss();
                         TheEditor.logoutAsync(false).done();
                     };
