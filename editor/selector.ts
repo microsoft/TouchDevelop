@@ -714,11 +714,11 @@ module TDev
             };
             addOpStmt("show", lf("display value"))
             Selector.insertionButtons().forEach(add);
-            if (this.editor.widgetEnabled("comment"))
-                add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
+            addOpStmt("return", lf("stop function"))
             addOpStmt("break", lf("stop loop"))
             addOpStmt("continue", lf("skip iteration"))
-            addOpStmt("return", lf("stop function"))
+            if (this.editor.widgetEnabled("comment"))
+                add({ name: lf("// comment"), desc: lf("insert comment"), node: "//" });
 
             return res;
         }
