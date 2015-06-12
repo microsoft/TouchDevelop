@@ -1538,8 +1538,6 @@ module TDev.AST {
         public thingSetKindName() { return this.isResource ? "art" : "data"; }
 
         public getCategory() { return PropertyCategory.Data; }
-        
-        public isExtensionAction() { return false; }
 
         public setKind(k:Kind)
         {

@@ -619,10 +619,6 @@ module TDev.AST {
             if (followingTutorial && /^_/.test(this.getName())) return false
             return true
         }
-        
-        public isExtensionAction() : boolean {
-            return false;
-        }
 
         private updateSubstitutions()
         {

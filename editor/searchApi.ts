@@ -418,13 +418,12 @@ module TDev
 
                 var profile = this.editor.intelliProfile;
                 Script.getKinds().filter(k => (!profile || profile.hasKind(k))).forEach((k) => {
-                       k.listProperties()
+                    k.listProperties()
                         .filter(prop => prop.isBrowsable() && (!profile || profile.hasProperty(prop)))
                         .forEach(addProp);
                 });
                 Script.libraries().forEach((l) => {
-                    l.getKind().listProperties().filter(p =>
-                        p.isBrowsable() && !p.isExtensionAction()).forEach(addProp);
+                    l.getKind().listProperties().filter(p => p.isBrowsable()).forEach(addProp);
                 });
                 props.sort((a: IProperty, b: IProperty) => {
                     if (a.lastMatchScore != b.lastMatchScore) return b.lastMatchScore - a.lastMatchScore;

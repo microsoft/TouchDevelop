@@ -1260,7 +1260,6 @@ module TDev {
         isBeta():boolean;
         canRename(): boolean;
         deleted: boolean;
-        isExtensionAction(): boolean;
 
 
         // compilation
@@ -1371,10 +1370,6 @@ module TDev {
             this.flags |= f;
         }
 
-        public isExtensionAction() : boolean {
-            return false;
-        }
-        
         public md_async() {
             if (this._implStatus & ImplementationStatus.Pauses) this.flags |= PropertyFlags.Async;
             else this.md_oops("async specified on method with no ResumeCtx")
