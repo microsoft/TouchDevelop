@@ -370,9 +370,9 @@ module TDev {
             h++;
             lit += "}";
             var r = "bitmap"+n;
-            return "  int "+r+"_w = "+w+";\n" +
-              "  int "+r+"_h = "+h+";\n"+
-              "  uint8_t "+r+"[] = "+lit+";\n";
+            return "  const int "+r+"_w = "+w+";\n" +
+              "  const int "+r+"_h = "+h+";\n"+
+              "  const uint8_t "+r+"[] = "+lit+";\n";
           }).join("\n") +
         "}\n\n";
       }
