@@ -7298,7 +7298,6 @@
             if (!this.jsonScript) return;
 
             var config = Cloud.config;            
-                config.tutorialAvatarArtId = "lqakekjj";
             this.browser().updateInstalledHeaderCacheAsync()
                 .then(() => World.getAnyScriptAsync(this.getGuid()))
                 .then(scriptText => {
