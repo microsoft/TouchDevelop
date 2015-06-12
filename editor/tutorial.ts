@@ -1189,11 +1189,10 @@ module TDev
                 ));
             m.add(div('wall-dialog-body', lf("name your app:"), nameTextbox));
             // add tracking pixel to dialog + notice
-            if (this.hourOfCode)
+            if (this.hourOfCode) {
                 m.addHTML("<div class='hoc-notice'>The 'Hour of Code™' is a nationwide initiative by Computer Science Education Week and Code.org to introduce millions of students to one hour of computer science and computer programming.</div>");
-            m.add(div('dialog-beta', TDev.Browser.EditorSettings.mkBetaNote(), div("tutorialLogo", SVG.getTopLogo())));
-            if (this.hourOfCode)
                 m.add(HTML.mkImg('https://code.org/api/hour/begin_touchdevelop.png', 'tracking-pixel'));
+            }
             m.setScroll();
             m.show();
 

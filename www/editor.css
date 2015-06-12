@@ -4931,7 +4931,7 @@ height: 2.2em;
 
 .md-box-avatar-body {
   position:relative;
-  padding:0em 0.5em 0em 0.5em;
+  padding:0em 0.5em 0.5em 0.5em;
   color:#000;
   background:#eeeeee; /* default background for browsers without gradient support */
   margin-left:1.5em;
