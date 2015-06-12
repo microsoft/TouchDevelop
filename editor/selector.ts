@@ -49,20 +49,24 @@ module TDev
         public phoneNarrow() { return true }
 
         static insertionButtons(): { name: string; desc: string; tick: Ticks; node: string; widget: string; }[]{
+            var inTutorial = !!TheEditor.stepTutorial;
             var widgets = Browser.EditorSettings.widgets();
+            var ifDefault = inTutorial ? null : widgets.ifConditionDefault;
+            var forDefault = inTutorial ? null : widgets.forConditionDefault;
+            var whileDefault = inTutorial ? null : widgets.whileConditionDefault;
             return [{
                     name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
-                    node: "if " + (widgets.ifConditionDefault || "\\u0001need_Boolean\\u003Acondition") + " then { }",
+                    node: "if " + (ifDefault || "\\u0001need_Boolean\\u003Acondition") + " then { }",
                     widget:''
                 },
                 {
                     name: "for", desc: lf("repeat n times"), tick: Ticks.codeFor,
-                    node: "for 0 <= i < " + (widgets.forConditionDefault || "\\u0001need_Number") + " do { }",
+                    node: "for 0 <= i < " + (forDefault || "\\u0001need_Number") + " do { }",
                     widget: ''
                 },
                 {
                     name: "while", desc: lf("repeat while"), tick: Ticks.codeWhile,
-                    node: "while " + (widgets.whileConditionDefault || "\\u0001need_Boolean\\u003Aloop_condition") + " do { }",
+                    node: "while " + (whileDefault || "\\u0001need_Boolean\\u003Aloop_condition") + " do { }",
                     widget: ''
                 },
                 {
