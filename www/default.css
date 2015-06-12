@@ -172,6 +172,7 @@ input.logSearchInput {
   position: relative;
 }
 
+.modalDialog .link-button,
 .modalDialog a,
 .modalDialog a:visited {
   text-decoration: none;
@@ -179,13 +180,18 @@ input.logSearchInput {
   color: #EE1300;
   color: #ff0;
 }
+.modalDialog .link-button:hover,
 .modalDialog a:hover {
   text-decoration: underline;
 }
+
+.modalFullYellow .link-button,
 .modalFullYellow a,
 .modalFullYellow a:visited,
+.modalFullWhite .link-button,
 .modalFullWhite a,
 .modalFullWhite a:visited,
+.modalFullBlack .link-button,
 .modalFullBlack a,
 .modalFullBlack a:visited {
   color: #008b00;
