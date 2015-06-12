@@ -295,7 +295,7 @@ module TDev
                         }
                     } else if (decl instanceof AST.GlobalDef) {
                         var glob = <AST.GlobalDef>decl;
-                        if (glob.isResource && glob.getKind() == api.core.String) {
+                        if (glob.isResource && (glob.getKind() == api.core.String || glob.getKind() == api.core.JsonObject)) {
                             var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditString,
                                 () => {
                                     TheEditor.renderDecl(glob);
