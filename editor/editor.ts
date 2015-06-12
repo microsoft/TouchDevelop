@@ -4150,16 +4150,6 @@ module TDev
                     progressDialog.dismiss();
 
                     var m = new ModalDialog();
-                    var options = {};
-                    if (isOnline && userId)
-                        options[lf("sign out everywhere")] = () => {
-                            m.dismiss();
-                            TheEditor.logoutAsync(true).done();
-                        };
-                    options[lf("sign out")] = () => {
-                        m.dismiss();
-                        TheEditor.logoutAsync(false).done();
-                    };
                     var sm;
                     m.add([
                         div("wall-dialog-header", div("", lf("sign out")), Editor.mkHelpLink("user accounts")),
@@ -4171,7 +4161,7 @@ module TDev
                         sm = div("wall-dialog-body", lf("If suspect your account has been compromised, "),
                                 HTML.mkLinkButton(lf("sign out on all your devices"), () => {
                                     m.dismiss(); 
-                                    TheEditor.logoutAsync(false).done() 
+                                    TheEditor.logoutAsync(true).done() 
                                 }))
                     ]);
                     sm.style.marginTop = "2em"
