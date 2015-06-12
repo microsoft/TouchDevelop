@@ -318,7 +318,7 @@ module TDev.Cloud {
                 var ignoreDismiss = false;
                 m.add(div("wall-dialog-buttons",
                     HTML.mkButton(lf("maybe later"), () => { m.dismiss() }, "gray-button"),
-                    HTML.mkButtonElt("wall-button login-button", SVG.getLoginButton()).withClick(() => {
+                    HTML.mkButton(lf("sign in"), () => {
                         ignoreDismiss = true;
                         m.dismiss()
                         if (login) login.show();

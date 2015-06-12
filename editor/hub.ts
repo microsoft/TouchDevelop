@@ -1322,7 +1322,7 @@ module TDev.Browser {
                 )
             m.fullWhite();
             m.add(div("wall-dialog-buttons",
-                HTML.mkButtonElt("wall-button login-button", SVG.getLoginButton()).withClick(() => {
+                HTML.mkButton(lf("sign in"), () => {
                     Login.show(hash);
                 })));
             m.show();
