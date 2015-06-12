@@ -7699,11 +7699,20 @@
                 Cloud.anonMode(lf("editing user settings"), null, true);
             }
 
-            var astModes = div('ast-modes');
+            var astModes = div('ast-modes center');
             function updateModes() {
-                astModes.setChildren(EditorSettings.createChooseASTModeElements(mode => {
-                    EditorSettings.editorMode().astMode = mode;
-                    updateModes();
+                astModes.setChildren([editorModes['block'], editorModes['classic']].map(mode => {
+                    var pic = div('pic');
+                    pic.style.backgroundImage = Cloud.artCssImg(mode.artId);
+                    pic.style.backgroundSize = "cover";
+
+                    var d = div('editor-mode', pic.withClick(() => {
+                        Ticker.rawTick('astMode' + mode.id);
+                        EditorSettings.editorMode().astMode = mode.astMode;
+                        updateModes();
+                    }));
+                    d.setFlag("selected", mode.astMode == EditorSettings.editorMode().astMode);
+                    return d;
                 }));
             }
 
@@ -7719,9 +7728,11 @@
                 ]);
                 
                 // editor selector
-                ch.unshift(astModes);                
-                ch.unshift(div("input-label", lf("editor theme")));
-                updateModes();
+                if (Cloud.isRestricted()) {
+                    ch.unshift(astModes);
+                    ch.unshift(div("input-label", lf("editor theme")));
+                    updateModes();
+                }
 
                 // user name                
                 var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {

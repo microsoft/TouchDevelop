@@ -753,22 +753,6 @@ module TDev.Browser {
             }));
         }
 
-        export function createChooseASTModeElements(click?: (mode : number) => void): HTMLElement[] {
-            return Util.values(editorModes).map((mode, index) => {
-                var pic = div('pic');
-                pic.style.backgroundImage = HTML.cssImage("https://az31353.vo.msecnd.net/pub/" + mode.artId);
-                pic.style.backgroundSize = "cover";
-                    
-                var d = div('editor-mode', pic.withClick(() => {
-                    Ticker.rawTick('astMode' + mode.id);
-                    if (click) click(mode.astMode);
-                }));
-                d.setFlag("selected", mode.astMode == EditorSettings.editorMode().astMode);
-                
-                return d;
-            });
-        }
-        
         export function createChooseSkillLevelElements(click?: () => void): HTMLElement[] {
             return Util.values(editorModes).map((mode, index) => {
                 var pic = div('pic');
