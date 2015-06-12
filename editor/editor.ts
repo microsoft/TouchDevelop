@@ -4160,13 +4160,22 @@ module TDev
                         m.dismiss();
                         TheEditor.logoutAsync(false).done();
                     };
+                    var sm;
                     m.add([
                         div("wall-dialog-header", div("", lf("sign out")), Editor.mkHelpLink("user accounts")),
                         div("wall-dialog-body", lf("Are you sure?\nAll your script data and any unsynchronized script changes will be lost.")),
-                        div("wall-dialog-buttons",
-                            Object.keys(options).map((k: string) =>
-                                HTML.mkButton(k, () => { m.dismiss(); options[k](); })))
+                        div("wall-dialog-buttons", HTML.mkButton(lf("sign out"), () => { 
+                                m.dismiss(); 
+                                TheEditor.logoutAsync(false).done() 
+                        })),
+                        sm = div("wall-dialog-body", lf("If suspect your account has been compromised, "),
+                                HTML.mkLinkButton(lf("sign out on all your devices"), () => {
+                                    m.dismiss(); 
+                                    TheEditor.logoutAsync(false).done() 
+                                }))
                     ]);
+                    sm.style.marginTop = "2em"
+                    sm.style.fontSize = "0.6em"
                     m.show();
             })).done();
         }
