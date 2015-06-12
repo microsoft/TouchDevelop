@@ -2109,7 +2109,7 @@ module TDev
                 if (l instanceof AST.FieldName || l instanceof AST.RecordName)
                     e.nameOverride = lf("rename");
                 else if (/^bitmatrix$/.test(l.languageHint)) {
-                    e.nameOverride = lf("edit image");
+                    e.nameOverride = lf("edit");
                     e.imageOverride = Cloud.artUrl("jbrtborw");
                 } else e.nameOverride = lf("edit");
                 e.descOverride = lf("change contents");
