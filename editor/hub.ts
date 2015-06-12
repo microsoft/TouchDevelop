@@ -382,8 +382,8 @@ module TDev.Browser {
                     splitButton: true,
                     actionSettings: true,
                     scriptHistoryTab: true,
-                    scriptAddToChannel: true,
-                    hubChannels: true,
+                    //scriptAddToChannel: true,
+                    //hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                 }
