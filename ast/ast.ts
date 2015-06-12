@@ -4961,7 +4961,17 @@ module TDev.AST {
         public visitGlobalDef(t: GlobalDef)
         {
             this.incr("addNewButton");
-            this.incr("dataSection");
+            if (t.isResource) {
+                this.incr("artSection");
+                if (t.getKind() == api.core.Picture || t.getKind() == api.core.Sound) {
+                    this.incr("calcSearchArt");
+                    this.incr("searchArtRefactoring");                    
+                }
+            }
+            else {
+                this.incr("dataSection");
+                this.incr("promoteRefactoring");
+            }
             super.visitGlobalDef(t);
         }
 

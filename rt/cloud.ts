@@ -12,6 +12,7 @@ module TDev.Cloud {
         selectStatements?: boolean;
 
         // refactoring
+        calcSearchArt?: boolean;
         promoteRefactoring?: boolean;
         searchArtRefactoring?: boolean;
         makeAsyncRefactoring?: boolean;

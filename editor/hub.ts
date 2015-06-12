@@ -27,10 +27,11 @@ module TDev.Browser {
                 splitScreenOnLoad: true,
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
+                calcSearchArt: true,
                 scriptPropertiesIcons: true,
                 // statements
                 stringConcatProperty: true,
-                show: true,
+                show: true,                
                 "return": true,
                 // sections
                 dataSection: true,
@@ -68,6 +69,7 @@ module TDev.Browser {
                 splitScreen: true,
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
+                calcSearchArt: true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,
@@ -142,6 +144,7 @@ module TDev.Browser {
                 splitScreen: true,
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
+                calcSearchArt: true,
                 makeAsyncRefactoring: true,
                 // misc
                 groupAllowExportApp: true,
@@ -378,6 +381,8 @@ module TDev.Browser {
                     scriptHistoryTab: true,
                     scriptAddToChannel: true,
                     hubChannels: true,
+                    calcSearchArt: true,
+                    searchArtRefactoring: true,
                 }
             },
         },
@@ -437,6 +442,8 @@ module TDev.Browser {
                     scriptHistoryTab: true,
                     scriptAddToChannel: true,
                     hubChannels: true,
+                    calcSearchArt: true,
+                    searchArtRefactoring: true,
 
                     // editor specific                  
                     publishDescription: true,
