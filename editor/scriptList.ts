@@ -7317,18 +7317,21 @@
                 converter.visitChildren(clone);
 
                 // add main
-                var main = AST.Parser.parseDecl("action main {\n"
+                var mainSrc = "action main {\n"
                     + "// {template:" + (m.isPage() ? "emptyapp" : "empty") + "}\n"
                     + "// {templatename:ADJ script}\n"
-                    + "// {widgets:}\n"
-                    + "// " + lf("TODO: describe your tutorial here.") + "\n"
-                    + "}");
+                    + "// {widgets:}\n";
+                if (config.tutorialAvatarArtId) mainSrc += "// {box:avatar:avatar}\n";
+                mainSrc += "// " + lf("TODO: describe your tutorial here.") + "\n";
+                if (config.tutorialAvatarArtId) mainSrc += "// {/box}\n";
+                mainSrc += "}";
+                var main = AST.Parser.parseDecl(mainSrc);
                 clone.addDecl(main);
                 
                 // if avatar, insert resource
                 if (config.tutorialAvatarArtId) {
                     var d = new AST.GlobalDef();
-                    d.setStableName("avatar");
+                    d.setName("avatar");
                     d.isTransient = true;
                     d.isResource = true;
                     d.setKind(api.core.Picture);
@@ -7407,9 +7410,10 @@
                 var step = /^(exprStmt|if|for|while|boxed|foreach)$/.test(stmt.nodeType());
                 if (step) {
                     var c = new AST.Comment();
+                    c.text = "";
                     if (this.avatarArtId)
                         c.text += lf("{box:avatar:avatar}\n");
-                    c.text = lf("TODO: describe the current step");
+                    c.text += lf("TODO: describe the current step");
                     if (this.tutorial) c.text += "\n{stcode}";
                     if (this.avatarArtId)
                         c.text += "\n{/box}";
