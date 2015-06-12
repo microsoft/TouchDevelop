@@ -7297,6 +7297,8 @@
         public convertToTutorial() {
             if (!this.jsonScript) return;
 
+            var config = Cloud.config;            
+                config.tutorialAvatarArtId = "lqakekjj";
             this.browser().updateInstalledHeaderCacheAsync()
                 .then(() => World.getAnyScriptAsync(this.getGuid()))
                 .then(scriptText => {
@@ -7310,6 +7312,7 @@
                 
                 // insert steps
                 var converter = new TutorialConverter();
+                converter.avatarArtId = config.tutorialAvatarArtId;
                 converter.tutorial = true;
                 converter.visitChildren(clone);
 
@@ -7321,7 +7324,19 @@
                     + "// " + lf("TODO: describe your tutorial here.") + "\n"
                     + "}");
                 clone.addDecl(main);
-
+                
+                // if avatar, insert resource
+                if (config.tutorialAvatarArtId) {
+                    var d = new AST.GlobalDef();
+                    d.setStableName("avatar");
+                    d.isTransient = true;
+                    d.isResource = true;
+                    d.setKind(api.core.Picture);
+                    d.url = Cloud.artUrl(config.tutorialAvatarArtId);
+                    d.comment = lf("The tutorial avatar head");
+                    clone.addDecl(d);
+                }    
+               
                 var text = clone.serialize();
                 Util.log(text);
                 var scriptStub = {
@@ -7357,7 +7372,7 @@
                     c.text += "\n{decl*:}";
                     main.body.stmts.push(c)
                 }
-               
+                
                 var text = clone.serialize();
                 Util.log(text);
                 var scriptStub = {
@@ -7380,6 +7395,8 @@
     class TutorialConverter extends AST.NodeVisitor
     {
         public tutorial = false;
+        public avatarArtId: string;
+        
         public visitAction(n: AST.Action) {
             this.visitBlock(n.body);
         }
@@ -7390,8 +7407,12 @@
                 var step = /^(exprStmt|if|for|while|boxed|foreach)$/.test(stmt.nodeType());
                 if (step) {
                     var c = new AST.Comment();
+                    if (this.avatarArtId)
+                        c.text += lf("{box:avatar:avatar}\n");
                     c.text = lf("TODO: describe the current step");
                     if (this.tutorial) c.text += "\n{stcode}";
+                    if (this.avatarArtId)
+                        c.text += "\n{/box}";
                     n.stmts.push(c);
                 }
                 n.stmts.push(stmt);

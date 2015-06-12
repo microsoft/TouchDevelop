@@ -193,6 +193,8 @@ module TDev.Cloud {
         anonToken?: string;
 
         theme?: ClientTheme;
+        
+        tutorialAvatarArtId?: string;
     }
 
     export var config: ClientConfig = {
