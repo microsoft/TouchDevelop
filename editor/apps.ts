@@ -1345,6 +1345,41 @@ module TDev.AppExport
         m.add(npm);
     }
 
+    export function exportBtn(app = Script)
+    {
+        TheEditor.dismissSidePane();
+        TDev.RT.App.clearLogs();
+        var wa = Azure.getWebsiteAuthForApp(app)
+        var recompile = Promise.as()
+        if (app != Script)
+            recompile =
+                TheEditor.saveStateAsync({ forReal: true })
+                .then(() => AST.loadScriptAsync(World.getAnyScriptAsync, app.localGuid))
+                .then(res => {
+                    Script.editorState = app.editorState
+                    Script.localGuid = app.localGuid
+                    app = Script
+                    TheEditor.parentScript = Script
+                    Script = res.prevScript
+                })
+
+        if (app.usesCloudLibs()) {
+            recompile
+                .then(() => AppExport.deployLocalWebappAsync(app, wa))
+                .done(
+                () => AppExport.showStatus(wa),
+                err => {
+                    if (app == Script)
+                        AppExport.setupAzure()
+                    else
+                        ModalDialog.info(lf("deployment not configured"),
+                            lf("Go to the main script and try to deploy from there."))
+                });
+        } else {
+            recompile.done(() => AppExport.deployCordova(app, TheEditor.getBaseScriptId()));
+        }
+    }
+
     export function deployCordova(app: AST.App, baseScriptId: string) {
         if (Cloud.anonMode(lf("export to cordova app"))) return;
 

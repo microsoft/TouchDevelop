@@ -2258,6 +2258,12 @@ module TDev
             if (inDebugMode) this.spyManager.onDebug(Script);
             else this.spyManager.onRun(Script);
 
+            if (Script && Script.isCloud) {
+                AppExport.exportBtn()
+                return
+            }
+
+
             this.dismissSidePane();
 
             if (this.isDebuggerMode()) this.leaveDebuggerMode();
