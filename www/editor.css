@@ -5846,3 +5846,32 @@ table.dashboard tr td[data-completed^="yes"] {
     background-color:#0c0;
     color:white;
 }
+
+.powered-by {
+  width: 7em;
+  margin-top: 2em;
+  margin-left: 1em;
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.powered-by-first {
+}
+
+.powered-by .text {
+  font-size: 0.5em;
+  opacity: 0.5;
+}
+
+.powered-by svg {
+  margin: 0.4em 0;
+}
+
+.powered-by .hidden-portrait {
+  display: block;
+}
+
+.powered-by img {
+  width: 100%;
+}
