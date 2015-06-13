@@ -11,6 +11,7 @@ module TDev.AST {
         public template: Action;
         public wasUsed: boolean;
         public _extensionAction:LibExtensionAction;
+        public _weight = 50;
 
         constructor(public _lib:LibraryRef) {
             super()
@@ -708,6 +709,15 @@ module TDev.AST {
                 this._publicActions = this.resolved.actions()
                     .filter((a) => !a.isPrivate)
                     .map((a) => new LibraryRefAction(this).fromTemplate(a));
+
+                var maxW = 0
+                this._publicActions.forEach(a => {
+                    var m = /{weight:(\d+)}/.exec(a.getDescription())
+                    if (m) 
+                        a._weight = parseInt(m[1])
+                    maxW = Math.max(a._weight, maxW)
+                })
+                this._publicActions.forEach(a => { a.getUsage().apiFreq = a._weight / (maxW + 1) })
             }
         }
 
