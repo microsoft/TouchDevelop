@@ -2212,6 +2212,9 @@
         public lastUse = 0;
         private suspended = false;
         private attachedIds:string[] = [];
+        private lastFetch:number;
+
+        static timeout = 60*1000;
 
         constructor(public path:string, public mgr:ApiCacheMgr) {
         }
@@ -2238,7 +2241,15 @@
             }
         }
 
-        public isCurrent() { return this.state == EntryState.current; }
+        public isCurrent() {
+            if (this.state != EntryState.current)
+                return false;
+            if (Date.now() - this.lastFetch > ApiCacheEntry.timeout) {
+                this.state = EntryState.stale;
+                return false;
+            }
+            return true;
+        }
 
         public fetch()
         {
@@ -2249,7 +2260,7 @@
 
         public suspend()
         {
-            if (this.state != EntryState.current) {
+            if (!this.isCurrent()) {
                 this.suspended = true;
             }
         }
@@ -2266,6 +2277,7 @@
         public validate()
         {
             this.state = EntryState.current;
+            this.lastFetch = Date.now();
         }
 
         public invalidate(poke = false)
@@ -2292,7 +2304,7 @@
             this.hardSerialized = 0
             this.currentData = data;
             if (this.state == EntryState.fetching)
-                this.state = EntryState.current;
+                this.validate();
             var cbs = this.callbacks;
             // it is critical that this list gets cleared;
             // otherwise they will keep accumulating as the user navigates around
@@ -2321,19 +2333,20 @@
             this.etag = ""
 
             if (!weak) {
-                this.state = EntryState.current;
-                this.refresh();
+                this.validate();
+                this.refresh(); // set lastUse
             }
         }
 
         public refresh()
         {
-            this.lastUse = new Date().getTime();
+            this.lastUse = Date.now();
+            this.isCurrent();
             if (this.state == EntryState.stale)
                 this.fetch();
         }
 
-        private currentOptions() { return <DataOptions>{ isDefinitive: this.state == EntryState.current, isSame: false }; }
+        private currentOptions() { return <DataOptions>{ isDefinitive: this.isCurrent(), isSame: false }; }
 
         public whenUpdated(f:(x:any, opts:DataOptions) => void)
         {
@@ -3759,7 +3772,7 @@
                 var cont = div(null)
                 var getFor = (id: string) => {
                     Util.assert(!!id, "missing comment id");
-                    TheApiCacheMgr.getAsync(id + "/base").done(resp => {
+                    TheApiCacheMgr.getAsync(id + "/base", true).done(resp => {
                         versionDepth++;
                         if (!resp) return
                         var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
