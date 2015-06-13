@@ -2365,7 +2365,9 @@ module TDev
                 }
 */
 
-                var s:IProperty[] = k.primaryKind.listProperties().slice(0);
+                var s: IProperty[] = k.primaryKind.listProperties().slice(0);
+                if (k.primaryKind instanceof AST.LibraryRefKind)
+                    s = s.filter(p => !(<AST.LibraryRefAction>p)._extensionAction);
                 var downgradeConcat = false;
                 if (k.definition != null)
                     this.addGoTo(k.definition);
