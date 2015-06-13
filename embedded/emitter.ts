@@ -335,11 +335,11 @@ module TDev {
         return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
-      private compileImageLiterals() {
+      private compileImageLiterals(e: EmitterEnv) {
         if (!this.imageLiterals.length)
           return "";
 
-        return "namespace literals {\n" +
+        return e.indent + "namespace literals {\n" +
           this.imageLiterals.map((s: string, n: number) => {
             var x = 0;
             var w = 0;
@@ -370,11 +370,11 @@ module TDev {
             h++;
             lit += "}";
             var r = "bitmap"+n;
-            return "  const int "+r+"_w = "+w+";\n" +
-              "  const int "+r+"_h = "+h+";\n"+
-              "  const uint8_t "+r+"[] = "+lit+";\n";
+            return e.indent + "  const int "+r+"_w = "+w+";\n" +
+              e.indent + "  const int "+r+"_h = "+h+";\n"+
+              e.indent + "  const uint8_t "+r+"[] = "+lit+";\n";
           }).join("\n") +
-        "}\n\n";
+        e.indent + "}\n\n";
       }
 
       // This function runs over all declarations. After execution, the three
@@ -433,7 +433,7 @@ module TDev {
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
         this.prototypes = globalsCode + forwardDeclarations.join("\n");
-        this.code = this.compileImageLiterals() + userFunctions.join("\n");
+        this.code = this.compileImageLiterals(e) + userFunctions.join("\n");
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
