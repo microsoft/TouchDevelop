@@ -397,7 +397,7 @@ Blockly.Blocks['device_scroll_image'] = {
     this.appendValueInput("frame offset")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("frame offset");
+        .appendField("offset");
     this.appendValueInput("delay")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
