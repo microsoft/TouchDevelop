@@ -761,7 +761,7 @@ module TDev
             }        
         
         function uploadFiles(files: File[]) {
-            if (!Cloud.hasPermission("batch-post-art")) return;
+            if (!Cloud.hasPermission("batch-post-art") && !TDev.dbg) return;
 
             var m = new ModalDialog();
             var template = HTML.mkTextArea("wall-input");
@@ -804,7 +804,7 @@ module TDev
                 if (e.clipboardData) {
                     // has file?
                     var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
-                    if (Cloud.hasPermission("batch-post-art") && files.length > 1) {
+                    if ((Cloud.hasPermission("batch-post-art") || TDev.dbg) && files.length > 1) {
                         e.stopPropagation(); // Stops some browsers from redirecting.
                         e.preventDefault();
                         uploadFiles(files);
@@ -834,7 +834,7 @@ module TDev
             }, false);
             r.addEventListener('drop', (e) => {
                 var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
-                if (Cloud.hasPermission("batch-post-art") && files.length > 1) {
+                if ((Cloud.hasPermission("batch-post-art")  || TDev.dbg) && files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
                     uploadFiles(files);
