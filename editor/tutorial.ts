@@ -786,9 +786,8 @@ module TDev
                 if (!this.seenDoItYourself) {
                     this.seenDoItYourself = true;
                     this.youCanGoFasterAsync()
-                        .done(() => this.startAsync());
-                } else
-                    this.startAsync().done();
+                        .done();
+                }
             }
             this.update()
         }
