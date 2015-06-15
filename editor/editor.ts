@@ -4494,15 +4494,21 @@ module TDev
 
             if (Cloud.lite) {
                 var incoming = false;
+                // For both these callbacks, no [Script] is ok because it may be
+                // an external editor.
                 World.incomingHeaderAsync = (guid) => {
-                    if (!Script || Script.localGuid != guid)
+                    if (ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid != guid)
                         return Promise.as()
                     if (!incoming) {
                         incoming = true
                         ProgressOverlay.show(lf("getting new version of the script"))
                     }
                     Util.log("incoming cloud header, saving script");
-                    return this.saveStateAsync()
+                    if (Script)
+                        return this.saveStateAsync()
+                    else
+                        // External editor...
+                        return Promise.as();
                 };
 
                 World.newHeaderCallbackAsync = (hd, state) => {
@@ -4510,7 +4516,7 @@ module TDev
                         ScriptEditorWorldInfo.baseSnapshot = hd.scriptVersion.baseSnapshot
                     }
 
-                    if (!Script || Script.localGuid != hd.guid)
+                    if (Script && Script.localGuid != hd.guid)
                         return Promise.as()
 
                     Util.log("new cloud header, state=" + state);
@@ -4519,7 +4525,8 @@ module TDev
                         if (incoming) ProgressOverlay.hide()
                         this.reload()
                     } else if (state == "uploaded") {
-                        // snapshot already set above
+                        if (hd.editor)
+                            External.pickUpNewBaseVersion();
                     } else if (state == "published") {
                         this.reload()
                     }

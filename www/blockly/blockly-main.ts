@@ -60,6 +60,11 @@ module TDev {
 
       case External.MessageType.CompileAck:
         compileAck(<External.Message_CompileAck> message);
+        break;
+
+      case External.MessageType.NewBaseVersion:
+        newBaseVersion(<External.Message_NewBaseVersion> message);
+        break;
     }
   }
 
@@ -123,6 +128,13 @@ module TDev {
   }
 
   var mergeDisabled = true;
+
+  function newBaseVersion(msg: External.Message_NewBaseVersion) {
+    statusMsg("✎ got assigned our first base version", External.Status.Ok);
+    // We've been assigned a base version number for the first time. All further
+    // save messages will be on top of that current version.
+    currentVersion = msg.baseSnapshot;
+  }
 
   function promptMerge(merge: External.PendingMerge) {
     if (mergeDisabled) {
