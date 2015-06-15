@@ -318,7 +318,7 @@ module TDev {
 
       // JStringLiteral { value: VALUE } -> VALUE
       export function isStringLiteral(x: J.JNode) {
-        return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value || null;
+        return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value;
       }
 
       export function willCompile (f: J.JAction) {
