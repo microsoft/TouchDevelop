@@ -377,9 +377,23 @@ module TDev {
         e.indent + "}\n\n";
       }
 
+      private wrapNamespaceIf (s: string) {
+        if (this.libName != null)
+          return "namespace "+this.libName+" {\n"+
+            "  // Disclaimer: some of these declarations/definitions may be useless.\n"+
+            "  // TODO: prune unused variable declarations and function definitions.\n"+
+            s+
+          "\n}";
+        else
+          return s;
+      }
+
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
+        if (this.libName)
+          e = indent(e);
+
         // Some parts of the emitter need to lookup library names by their id
         decls.forEach((x: J.JDecl) => {
           if (x.nodeType == "library") {
@@ -432,8 +446,8 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = globalsCode + forwardDeclarations.join("\n");
-        this.code = this.compileImageLiterals(e) + userFunctions.join("\n");
+        this.prototypes = this.wrapNamespaceIf(globalsCode + forwardDeclarations.join("\n"));
+        this.code = this.wrapNamespaceIf(this.compileImageLiterals(e) + userFunctions.join("\n"));
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
