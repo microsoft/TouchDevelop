@@ -116,6 +116,7 @@ module TDev {
   }
 
   function compileAck(message: External.Message_CompileAck) {
+    $("#command-compile > .roundsymbol").removeClass("compiling");
     switch (message.status) {
       case External.Status.Error:
         statusMsg("compilation error: "+message.error, message.status);
@@ -421,6 +422,7 @@ module TDev {
     var ast = compileOrError(msgSel);
     if (!ast)
       return;
+    $("#command-compile > .roundsymbol").addClass("compiling");
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
       text: ast,
