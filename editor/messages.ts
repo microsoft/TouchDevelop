@@ -19,7 +19,8 @@ module TDev {
             Save, SaveAck,
             Compile, CompileAck,
             Merge, Quit, // [Quit] has no attached data, so not defining a special interface
-            Upgrade, Run
+            Upgrade, Run,
+            NewBaseVersion
         };
 
         export interface Message_Init extends Message {
@@ -72,6 +73,17 @@ module TDev {
         export interface Message_Run extends Message {
             type: MessageType; // == MessageType.Message_Run
             ast: any // AST.Json.JApp
+        }
+
+        // This message is (currently) sent in the following situation. External
+        // editor requests a save for the first time; sync happens; we get back
+        // an "echo" from the server with the [baseSnapshot] that has been
+        // assigned to us. The external editor must change its internal base
+        // version from the empty string to this string. Failing to do that will
+        // result in the sync code refusing to take into account save messages
+        // that have an empty [baseSnapshot].
+        export interface Message_NewBaseVersion extends Message {
+            baseSnapshot: string;
         }
 
         // A saved script has some text (this is what ends up published when the

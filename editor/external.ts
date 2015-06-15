@@ -465,6 +465,13 @@ module TDev {
       })
       .done();
     }
+
+    export function pickUpNewBaseVersion() {
+      TheChannel.post(<Message_NewBaseVersion> {
+        type: MessageType.NewBaseVersion,
+        baseSnapshot: ScriptEditorWorldInfo.baseSnapshot
+      });
+    }
   }
 }
 
