@@ -145,11 +145,11 @@ module TDev
             if (asAction) this.actionName.readOnly = true;
             var propDivs =
                  [div("prop-spacer"),
-                  div(null, span("varLabel", "action")),
+                  div(null, span("varLabel", lf("function"))),
                   this.actionName,
                   !showSettings || ev ? null : this.privateAction,
                   !showSettings || ev ? null : div("formHint",
-                    Script.isLibrary ? lf("Private actions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
+                    Script.isLibrary ? lf("Private functions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
                   !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
                   ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
                   ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
