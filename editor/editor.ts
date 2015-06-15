@@ -4500,7 +4500,7 @@ module TDev
                 // For both these callbacks, no [Script] is ok because it may be
                 // an external editor.
                 World.incomingHeaderAsync = (guid) => {
-                    if (ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid != guid)
+                    if (!ScriptEditorWorldInfo || ScriptEditorWorldInfo.guid != guid)
                         return Promise.as()
                     if (!incoming) {
                         incoming = true
@@ -4515,12 +4515,11 @@ module TDev
                 };
 
                 World.newHeaderCallbackAsync = (hd, state) => {
-                    if (state == "uploaded" && ScriptEditorWorldInfo && ScriptEditorWorldInfo.guid == hd.guid) {
-                        ScriptEditorWorldInfo.baseSnapshot = hd.scriptVersion.baseSnapshot
-                    }
-
-                    if (Script && Script.localGuid != hd.guid)
+                    if (!ScriptEditorWorldInfo || ScriptEditorWorldInfo.guid != hd.guid)
                         return Promise.as()
+
+                    if (state == "uploaded")
+                        ScriptEditorWorldInfo.baseSnapshot = hd.scriptVersion.baseSnapshot
 
                     Util.log("new cloud header, state=" + state);
 
