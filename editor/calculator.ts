@@ -3286,16 +3286,18 @@ module TDev
                 }
             }
 
+            // decide when to show "store in var". We used to hide it when the rhs was a local but this breaks tutorials
+            // instead, we'll bump down the priority in that case.
             if (this.stmt instanceof AST.ExprStmt &&
-                (this.expr.tokens.length > 1 ||
-                 (this.expr.tokens.length > 0 && !(this.expr.tokens[0].getThing() instanceof AST.LocalDef))))
+                (this.expr.tokens.length > 0))
             {
                 if (this.expr.tokens.every((t) => !t.getError()) &&
                     (this.expr.getKind().hasContext(KindContext.Parameter) ||
                      (this.expr.parsed.anyCalledAction() &&
                       this.expr.parsed.anyCalledAction().hasOutParameters())))
                 {
-                    var e = this.mkIntelliItem(1.1e20, Ticks.calcStoreInVar);
+                    var score = this.expr.tokens[0].getThing() instanceof AST.LocalDef ? this.promoteMult() * 1.0 : 1.1e20;
+                    var e = this.mkIntelliItem(score, Ticks.calcStoreInVar);
                     e.nameOverride = lf("store in var");
                     e.descOverride = lf("new variable");
                     e.cbOverride = () => {
