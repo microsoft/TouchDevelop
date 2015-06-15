@@ -803,7 +803,7 @@ module TDev
                 Util.log('clipboard paste');
                 if (e.clipboardData) {
                     // has file?
-                    var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
+                    var files = Util.toArray<File>(e.clipboardData.files).filter((file: File) => /^(image|sound)/.test(file.type));
                     if ((Cloud.hasPermission("batch-post-art") || TDev.dbg) && files.length > 1) {
                         e.stopPropagation(); // Stops some browsers from redirecting.
                         e.preventDefault();
