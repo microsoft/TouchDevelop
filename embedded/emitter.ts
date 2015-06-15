@@ -209,7 +209,7 @@ module TDev {
       private specialTreatment(e: EmitterEnv, f: string, actualArgs: J.JExpr[]) {
         if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation") {
           var x = H.isStringLiteral(actualArgs[0]);
-          if (x === null)
+          if (!x && x !== "")
             throw new Error("create image / show animation takes a string literal only");
           var r = "literals::bitmap"+this.imageLiterals.length;
           var otherArgs = actualArgs.splice(1).map((x: J.JExpr) => this.visit(e, x));
