@@ -211,4 +211,24 @@ a.command:hover {
   background-color: rgba(180, 180, 180, .25) !important;
 }
 
+/* Animation for the compilation button */
+.compiling {
+  animation-duration: 1.5s;
+  animation-name: rotating;
+  animation-iteration-count: infinite;
+
+  color: #888;
+  border-color: #888;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0turn);
+  }
+
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 /* vim: set ts=2 sw=2 sts=2: */

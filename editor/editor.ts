@@ -3879,7 +3879,10 @@ module TDev
                             }
 
                             var editorMode = ht.templateEditorMode();
-                            if (editorMode) Browser.EditorSettings.showChooseEditorModeAsync(editorMode).done();
+                            if (editorMode) {                                
+                                Util.log('tutorial requested editor mode ' + editorMode);
+                                Browser.EditorSettings.loadEditorMode(editorMode);
+                            }
                         }
 
                         // we've got kicked out of the editor in the meantime?
