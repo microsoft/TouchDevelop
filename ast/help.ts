@@ -1803,7 +1803,7 @@ module TDev {
 
         public templateEditorMode(): string {
             var m = /\{steditormode:([^\}]+)\}/i.exec(this.json.text);
-            if (m) return m[1];
+            if (m) return m[1].trim().toLowerCase();
             return "";
         }
 

@@ -701,6 +701,7 @@ module TDev.Browser {
         }
 
         export function loadEditorMode(id: string) {
+            if (id === "coder") id = 'classic'; // legacy
             var mode =  editorModes[id] || editorModes['block'];
             if (mode)
                 Browser.EditorSettings.setEditorMode(mode, false);
