@@ -14,17 +14,12 @@ module TDev {
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
     function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string; libName: string } {
-      var i = libs.indexOf(a);
-      var libRef: J.JCall = null;
-      if (i >= 0) {
-        libRef = H.mkLibraryRef(libs[i].name);
-      }
-
       try {
         lift(a);
-        var libName = i >= 0 ? H.mangleName(libs[i].name) : null;
+        var libRef: J.JCall = a.isLibrary ? H.mkLibraryRef(a.name) : null;
+        var libName = a.isLibrary ? H.mangleName(a.name) : null;
         var e = new Emitter(libRef, libName, libs);
-        e.visit(i >= 0 ? indent(emptyEnv()) : emptyEnv(), a);
+        e.visit(emptyEnv(), a);
         return e;
       } catch (e) {
         console.error("Compilation error", e);
@@ -45,24 +40,20 @@ module TDev {
           return Promise.as(J.dump(s));
         });
       });
-      return Promise.join(textPromises).then((libs: J.JApp[]) => {
-        var compiled = libs.concat([a]).map((a: J.JApp) => compile1(libs, a));
-        var wrapNamespaceIf = (x: { libName: string }, s: string) => {
-          if (x.libName != null)
-            return "namespace "+x.libName+" {\n"+
-              "  // Disclaimer: some of these declarations/definitions may be useless.\n"+
-              "  // TODO: prune unused variable declarations and function definitions.\n"+
-              s+
-            "\n}";
-          else
-            return s;
-        };
+      textPromises.push(Promise.as(a));
+      return Promise.join(textPromises).then((everything: J.JApp[]) => {
+        var compiled = everything.map((a: J.JApp) => compile1(everything, a));
         return Promise.as(
                   compiled.map(x => x.prelude)
-          .concat(compiled.map(x => wrapNamespaceIf(x, x.prototypes)))
-          .concat(compiled.map(x => wrapNamespaceIf(x, x.code)))
+          .concat(compiled.map(x => x.prototypes))
+          .concat(compiled.map(x => x.code))
           .filter(x => x != "")
-          .join("\n")
+          .join("\n") +
+          (a.isLibrary
+            ? "\nvoid app_main() {\n"+
+              "  uBit.display.scrollString(\"Error: trying to run a library\");\n"+
+              "}\n"
+            : "")
         );
       });
     }
