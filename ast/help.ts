@@ -650,7 +650,7 @@ module TDev {
                 } else if (v.hasAttribute("data-videosrc")) {
                     var vtid = v.getAttribute("data-videosrc");
                     var pid = v.getAttribute("data-videoposter");
-                    v.withClick(() => {
+                    if (autoPlay) {
                         var video = <HTMLVideoElement>createElement("video");
                         (<any>video).crossOrigin = "anonymous";
                         video.width = 300;
@@ -660,8 +660,20 @@ module TDev {
                         video.src = decodeURI(vtid);
                         video.poster = decodeURI(pid);
                         v.setChildren(video);
-                        v.withClick(() => { });
-                    });
+                    } else {
+                        v.withClick(() => {
+                            var video = <HTMLVideoElement>createElement("video");
+                            (<any>video).crossOrigin = "anonymous";
+                            video.width = 300;
+                            video.height = 150;
+                            video.controls = true;
+                            video.autoplay = true;
+                            video.src = decodeURI(vtid);
+                            video.poster = decodeURI(pid);
+                            v.setChildren(video);
+                            v.withClick(() => { });
+                        });                        
+                    }
                 }
             });
         }
