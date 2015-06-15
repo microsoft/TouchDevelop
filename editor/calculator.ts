@@ -4123,8 +4123,8 @@ module TDev
             TheEditor.stepTutorial.goalTips++;
             TipManager.setTip({
                 el: this.templateLine,
-                title: lf("stuck? tap on the goal line"),
-                description: lf("enter code you see in the goal line"),
+                title: lf("code the goal line"),
+                description: lf("or tap to get help"),
                 forceBottom: true,
             })
         }

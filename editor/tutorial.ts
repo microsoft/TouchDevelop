@@ -724,7 +724,7 @@ module TDev
                 Script.editorState.tutorialNumSteps = this.steps.length;
 
                 this.finalHTML = this.getHTML("final");
-                this.initialHTML = this.getHTML("main") || ("<h2>" + this.app.getName() + "</h2>");
+                this.initialHTML = this.getHTML("main") || ("<h2>" + Util.htmlEscape(this.app.getName()) + "</h2>");
 
                 if (firstTime) {
                     this.stepStartTime = new Date().getTime();
@@ -779,11 +779,16 @@ module TDev
             return Math.min(500 + this.currentStep * 1000, this.maxProgressDelay)
         }
 
-        public needHelp()
-        {
+        public needHelp() {
             if (!this.initialMode) {
                 this.needHelpCount++;
                 this.recoveryMode = true;
+                if (!this.seenDoItYourself) {
+                    this.seenDoItYourself = true;
+                    this.youCanGoFasterAsync()
+                        .done(() => this.startAsync());
+                } else
+                    this.startAsync().done();
             }
             this.update()
         }
@@ -1254,8 +1259,7 @@ module TDev
             if (st.data.hintLevel != "semi" || this.seenDoItYourself || ModalDialog.currentIsVisible()) return false;
             var tmpl = TheEditor.calculator.goalHTML()
             if (!tmpl) return false;
-            this.seenDoItYourself = true;
-            this.youCanGoFasterAsync().done()
+            // the do it yourself dialog is shown when tapping the goal line
             return true
         }
 
@@ -1805,7 +1809,7 @@ module TDev
             // HTML.showProgressNotification("ds: " + ins.diffSize + " (prev: " + this.prevDiffSize + ")")
 
             if (!this.goalTimer.running)
-                this.goalTimer.start(3000);
+                this.goalTimer.start(15000);
 
             if (this.prevDiffSize < 0) {
                 this.prevDiffSize = ins.diffSize;
@@ -1816,7 +1820,7 @@ module TDev
                 }
                 if (progress > 0) {
                     this.prevDiffSize = ins.diffSize;
-                    this.goalTimer.start(20000);
+                    this.goalTimer.start(15000);
                 }
             }
 
