@@ -12,6 +12,7 @@ module TDev.AST {
         public wasUsed: boolean;
         public _extensionAction:LibExtensionAction;
         public _weight = 50;
+        public namespace: string;
 
         constructor(public _lib:LibraryRef) {
             super()
@@ -712,10 +713,13 @@ module TDev.AST {
 
                 var maxW = 0
                 this._publicActions.forEach(a => {
-                    var m = /{weight:(\d+)}/.exec(a.getDescription())
-                    if (m) 
-                        a._weight = parseInt(m[1])
+                    var ad = a.getDescription();
+                    var m = /{weight:(\d+)}/i.exec(ad)
+                    if (m) a._weight = parseInt(m[1])
                     maxW = Math.max(a._weight, maxW)
+                    
+                    m = /{namespace:[^}]+}/i.exec(ad);
+                    if (m) a.namespace = m[1];
                 })
                 this._publicActions.forEach(a => { a.getUsage().apiFreq = a._weight / (maxW + 1) })
             }

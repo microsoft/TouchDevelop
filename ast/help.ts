@@ -849,7 +849,7 @@ module TDev {
                     args[1])
             } else if (macro == "hide" || macro == "priority" || macro == "template" || macro == "highlight" ||
                 macro == 'box' || macro == "code" || macro == "widgets" || macro == "templatename" ||
-                macro == "hints" || macro == "pichints" || macro == "enum" || macro == "language" || macro == "weight" ||
+                macro == "hints" || macro == "pichints" || macro == "enum" || macro == "language" || macro == "weight" || macro == "namespace" ||
                 macro == "parenttopic" || macro == "docflags" || macro == "stprecise" || macro == "flags" || macro == "action" ||
                 macro == "topic" ||
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||

@@ -1819,8 +1819,8 @@ module TDev.AST {
             this.eventInfo = ei;
             this.isAtomic = false;
             if (!!ei) {
-                this.header.inParameters.immutableReason = "Types, order, and number of event parameters cannot be edited.";
-                this.header.outParameters.immutableReason = "Events cannot have out parameters.";
+                this.header.inParameters.immutableReason = lf("Types, order, and number of event parameters cannot be edited.");
+                this.header.outParameters.immutableReason = lf("Events cannot have out parameters.");
             }
         }
 
