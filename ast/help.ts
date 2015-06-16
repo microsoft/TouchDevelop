@@ -578,6 +578,7 @@ module TDev {
                     video.height = 150;
                     video.controls = true;
                     video.autoplay = autoPlay; // option?
+                    video.preload = autoPlay ? "auto" : "none";
                     video.poster = jssource.poster || jsvideo.poster;
                     var source = <HTMLSourceElement>createElement("source");
                     source.src = jssource.src;
