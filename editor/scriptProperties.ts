@@ -313,7 +313,7 @@ module TDev
             m.addHTML("loading...")
             prog.start()
 
-            getScrAsync.done((scr:AST.App) => {
+            getScrAsync.done((scr: AST.App) => {
                 if (!scr) {
                     m.dismiss();
                     return;
@@ -352,20 +352,21 @@ module TDev
                 Util.setupDragToScroll(d)
                 d.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
 
-                var btns:HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
+                var btns: HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
 
                 if (jumpNodes.length > 0) {
                     btns.push(
-                        HTML.mkButton(lf("prev diff"), () => {
+                        HTML.mkButton(lf("prev difference"), () => {
                             if (jumpPos > 0) jumpPos--;
                             goTo()
                         }),
-                        HTML.mkButton(lf("next diff"), () => {
+                        HTML.mkButton(lf("next difference"), () => {
                             if (jumpPos < jumpNodes.length - 1) jumpPos++;
                             goTo()
                         }))
+                    btns.push(div('', span("diffTokenAdded diffTokenLegend", lf("code added")), span("diffTokenRemoved diffTokenLegend", lf("code deleted"))));
                 } else {
-                    btns.push(div("diffSame", lf("seems the same")))
+                    btns.push(div("diffSame", lf("both scripts seems the same")))
                 }
 
                 m.add(div("diffButtons", btns))

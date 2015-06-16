@@ -5239,6 +5239,11 @@ div.validation-error {
 .diffTokenRemoved {
   background-color: #fbd;
 }
+.diffTokenLegend {
+  margin-left: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
 
 .diffMoveMarker {
   font-size: 0.6em;
