@@ -434,6 +434,10 @@ module TDev {
                     );
             this.fullScreenBtnRow = divId("wallFullScreenBtns", "", this.additionalFullScreenButtons());
             this.bottomBtnsDiv = divId("wallBottomBtns", "bottomButtons");
+            var legalDiv: HTMLElement;
+            if (Cloud.isRestricted()) {
+                legalDiv = div('wallLogo', HTML.mkImg(Cloud.artUrl("hrztfaux")));
+            }
             this.setFullScreenElement(null);
             this.bgPictureContainer.setChildren([])
             wall.setChildren([
@@ -442,7 +446,8 @@ module TDev {
                 this.fullScreenContainer,
                 this.topBtnRow,
                 this.fullScreenBtnRow,
-                this.bottomBtnsDiv
+                this.bottomBtnsDiv,
+                legalDiv
             ]);
             if (this.currentRt.compiled.showAd) {
                 wall.appendChildren([this.adContainer]);

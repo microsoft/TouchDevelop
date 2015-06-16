@@ -1254,6 +1254,16 @@ input[data-invalid^="yes"]
   height: 100%;
 }
 
+.wallLogo {
+  position: absolute;
+  bottom: 0.5em;
+  left: 0.5em;
+}
+
+.wallLogo img {
+  width: 12em;
+}
+
 .landscape .wallWithColumns .classic-page
 {
   column-width: 18.5em;                      /*CSSpref*/  -webkit-column-width: 18.5em;  -moz-column-width: 18.5em;
