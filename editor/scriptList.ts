@@ -9132,21 +9132,6 @@
 
             if (id) {
                 Ticker.tick(Ticks.coreRun, id)
-                var btn = HTML.mkButtonTick(lf("edit this topic"), Ticks.docsEdit, () => {
-                    var m = new ModalDialog();
-                    m.add(div('wall-dialog-header', lf("ready to edit this topic?")));
-                    m.add(div('wall-dialog-body', lf("Once you are happy with your changes, publish the script and send a pull request to get your changes integrated."),
-                        Editor.mkHelpLink("howtoeditthedocs", lf("read more..."))));
-                    m.add(div('wall-dialog-buttons',
-                        HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                        HTML.mkButton(lf("let's do it!"), () => {
-                            m.dismiss();
-                            var docInfo = this.browser().getScriptInfoById(this.topic.json.id)
-                        if (docInfo) docInfo.edit();
-                        })));
-                    m.show();
-                });
-
                 btn2 = HTML.mkButton(lf("view as script"), viewAsScript)
                 noChromeDiv.setChildren([
                     HTML.mkLinkButton(lf("view as script"), viewAsScript)])
@@ -9214,13 +9199,7 @@
             }
 
             allBottomDiv.setChildren([
-                div("sdBottomButtons", btn, btn2,
-                  Editor.mkHelpLink("how to edit the docs", lf("about editing docs"))
-                  ),
-                //div(null, div("sdHeading inlineBlock", lf("related docs"))
-                  // , Editor.mkHelpButton("add your own docs", "adding docs")
-                //),
-                //docsList,
+                div("sdBottomButtons", btn2),
                 comments,
                 requestDocs
             ])
