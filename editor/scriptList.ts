@@ -22,23 +22,6 @@
             this.populateSiteHeader(false);
         }
         
-        private showTutorialTip() {
-            if (!this.visible) return;
-            var el = SizeMgr.portraitMode ? elt("siteMenuMoretutorials") : elt("siteMenuBtntutorials");
-            if (!el) return;
-
-            if (ModalDialog.currentIsVisible()) {
-                Util.setTimeout(1000, () => this.showTutorialTip())
-                return;
-            }
-            TipManager.setTip(null)
-            TipManager.setTip({
-                title: lf("tap here"),
-                description: lf("Follow tutorials to get started."),
-                el: el
-            })
-        }
-        
         private populateSiteHeader(settings = false, username = "") {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
@@ -1719,8 +1702,6 @@
                                 this.moreDiv.setChildren([])
                             this.syncView(false)
                         })]);
-                    } else if (!this.hasMore && this.topLocations.length == 0) {
-                        Util.setTimeout(1000, () => this.showTutorialTip())
                     }
                 }, noCache, includeETags);
             }
