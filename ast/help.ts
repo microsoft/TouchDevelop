@@ -1374,6 +1374,10 @@ module TDev {
                                 boxClass = 'avatar';
                                 boxDir = "dir='ltr'";
                                 break;
+                            case "column":
+                                boxHd = "";
+                                boxCss = "col-xs-12 col-sm-6 col-md-4";
+                                break;
                             default:
                                 boxHd = MdComments.error("no such box type " + m[1] + ", use hint, exercise, example or nointernet")
                                 boxClass = 'hint'
