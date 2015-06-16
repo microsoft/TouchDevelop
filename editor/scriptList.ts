@@ -845,7 +845,7 @@
                         div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux")) )))
                     , div("powered-by",
                         div("text", lf("Compilation services by")),
-                        div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("rwwmepjr")))))
+                        div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah")))))
                     ];
             }
             return [];
