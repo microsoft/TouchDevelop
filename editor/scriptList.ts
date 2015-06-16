@@ -830,19 +830,25 @@
 
             if (allHelpBtn) this.listDivs.push(allHelpBtn)
 
-            if (Cloud.isRestricted()) {
-                this.listDivs.push(div("powered-by powered-by-first",
-                    div("text", lf("Cloud services by:")),
-                    div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux")) ))));
-                this.listDivs.push(div("powered-by",
-                    div("text", lf("Compilation services by:")),
-                    div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("rwwmepjr")))))
-                    );
-            }
+            this.listDivs.pushRange(this.poweredByElements());            
 
             this.theList.setChildren(this.listDivs);
 
             this.setCurrent(showCurrent);
+        }
+        
+        public poweredByElements(): HTMLElement[]{
+            if (Cloud.isRestricted()) {
+                return [
+                    div("powered-by powered-by-first",
+                        div("text", lf("Cloud services by")),
+                        div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux")) )))
+                    , div("powered-by",
+                        div("text", lf("Compilation services by")),
+                        div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("rwwmepjr")))))
+                    ];
+            }
+            return [];
         }
 
         private massUninstall(items:Cloud.Header[])

@@ -1990,7 +1990,7 @@ module TDev
         private currentScriptCompiling: string;
         private compile(btn : HTMLElement, debug: boolean) {
             Util.log("compiling script");
-            if (Cloud.anonMode(lf("Native compilation")))
+            if (Cloud.anonMode(lf("C++ compilation")))
               return;
 
             if (AST.TypeChecker.tcApp(Script) > 0) {
@@ -2007,12 +2007,21 @@ module TDev
             }
             this.currentScriptCompiling = src;
 
+            var m = new ModalDialog();
+            var progress = HTML.mkProgressBar(); progress.start();
+            m.add(progress);
+            m.add(div("wall-dialog-header", lf("compiling...")));
+            m.add(div("wall-dialog-body", lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")));
+            m.add(Browser.TheHost.poweredByElements());
+            m.fullWhite();
+            m.show();
             btn.setFlag("working", true);
             btn.classList.add("disabledItem");
 
-            var notifyCompiled = () : boolean => {
+            var notifyCompiled = (): boolean => {
+                m.dismiss();
                 btn.setFlag("working", false);
-                btn.classList.remove("disabledItem");
+                btn.classList.remove("disabledItem");                
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
                 var r = src === this.currentScriptCompiling;

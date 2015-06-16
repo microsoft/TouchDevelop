@@ -2418,9 +2418,11 @@ div.decl > div.stmt {
   overflow: hidden;
 }
 
+/*
 .portrait .progressBar {
   left: 50%;
 }
+*/
 
 .progressDot {
   background: #008b00;
