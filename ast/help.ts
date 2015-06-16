@@ -494,7 +494,8 @@ module TDev {
     export class MdComments
     {
         public userid:string;
-        public scriptid:string;
+        public scriptid: string;
+        public print = false;
         public showCopy = true;
         public useSVG = true;
         public useExternalLinks = false;
@@ -1994,25 +1995,30 @@ module TDev {
                 if (this.apiProperty instanceof AST.LibraryRefAction) {
                     acts = acts.filter(a => a.getName() == "docs " + this.apiProperty.getName())
                 } else {
-                    acts = acts.filter((a) => a.isNormalAction() && /^example/.test(a.getName()))
-                    if (acts.length == 0 && this.app.mainAction()) acts = [this.app.mainAction()];
+                    if (this.isTutorial())
+                        acts = acts.filter(a => /^main$/.test(a.getName()));
+                    else {
+                        acts = acts.filter((a) => a.isNormalAction() && /^example/.test(a.getName()))
+                        if (acts.length == 0 && this.app.mainAction()) acts = [this.app.mainAction()];
+                    }
                 }
-                var tutorialSteps = noTutorial ? [] : AST.Step.splitActions(this.app);
-
                 acts.forEach((a) => {
                     ch += mdcmt.extract(a);
                 })
+                
+                if (mdcmt.print) {
+                    var tutorialSteps = noTutorial ? [] : AST.Step.splitActions(this.app);
+                    if (tutorialSteps.length > 0) {
+                        tutorialSteps.forEach((s) => {
+                            if (s.printOut) {
+                                ch += mdcmt.mkDeclSnippet(s.printOut, false, true, "tutorial-step", 1);
+                            }
+                        })
 
-                if (tutorialSteps.length > 0) {
-                    tutorialSteps.forEach((s) => {
-                        if (s.printOut) {
-                            ch += mdcmt.mkDeclSnippet(s.printOut, false, true, "tutorial-step", 1);
-                        }
-                    })
-
-                    var finalAct = this.app.actions().filter(a => a.getName() == "final")[0];
-                    if (finalAct)
-                        ch += mdcmt.extract(finalAct)
+                        var finalAct = this.app.actions().filter(a => a.getName() == "final")[0];
+                        if (finalAct)
+                            ch += mdcmt.extract(finalAct)
+                    }
                 }
             }
 
@@ -2167,6 +2173,7 @@ module TDev {
             md.useSVG = false;
             md.useExternalLinks = true;
             md.showCopy = false;
+            md.print = true;
             return this.renderAsync(md).then((text) => {
                 if (newsletter)
                     return CopyRenderer.inlineStyles(text);
