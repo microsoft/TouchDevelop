@@ -5876,12 +5876,12 @@ table.dashboard tr td[data-completed^="yes"] {
 
 .powered-by img {
   margin-top: 0.5em;
-  height: 1.2em;
+  width: 6em;
 }
 
 .powered-by-first img {
   margin-top: 0.3em;
-  height: 1.6em;
+  width: 6em;
 }
 
 .portrait .powered-by {
