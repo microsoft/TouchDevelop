@@ -597,7 +597,7 @@
             var searchAdd = []
             switch (this.apiPath) {
                 case "installed-scripts":
-                    if (Cloud.isRestricted()) break
+                    // if (Cloud.isRestricted()) break
                 case "recent-scripts":
                     searchPath = "scripts";
                     break;
