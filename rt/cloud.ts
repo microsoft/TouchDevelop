@@ -83,6 +83,8 @@ module TDev.Cloud {
         // hub
         scriptAddToChannel?: boolean;
         scriptConvertToDocs?: boolean;
+        scriptPrintScript?: boolean;
+        scriptPrintTopic?: boolean;
         notifyAppReloaded?: boolean;
         showTemporaryNotice?: boolean;
         hubChannels?: boolean;

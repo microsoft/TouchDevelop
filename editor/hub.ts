@@ -127,6 +127,8 @@ module TDev.Browser {
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
+                scriptPrintScript: true,
+                scriptPrintTopic: true,
             }
         },
         'pro': {
@@ -251,6 +253,8 @@ module TDev.Browser {
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
+                scriptPrintScript: true,
+                scriptPrintTopic: true,
             }
         }
     }

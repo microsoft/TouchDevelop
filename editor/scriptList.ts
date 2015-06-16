@@ -5888,9 +5888,11 @@
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
         public shareButtons() {
-            return super.shareButtons().concat(
+            var btns = super.shareButtons();            
+            if (EditorSettings.widgets().scriptPrintScript) btns.push(
                 div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
                 );
+            return btns;
         }
 
         static compareScripts(a: ScriptInfo, b: ScriptInfo) : number {
@@ -9012,9 +9014,11 @@
         private getIcon() { return HTML.mkImg(this.getIconUrl()); }
 
         public shareButtons() {
-            return super.shareButtons().concat(
+            var btns = super.shareButtons();            
+            if (EditorSettings.widgets().scriptPrintTopic) btns.push(
                 div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { this.topic.print() })
-            );
+                );
+            return btns;
         }
 
         private likeBtn(showCount = false)
