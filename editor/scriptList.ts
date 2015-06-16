@@ -7763,6 +7763,11 @@
                     ch.unshift(astModes);
                     ch.unshift(div("input-label", lf("editor theme")));
                     updateModes();
+
+                    var s = Cloud.recentUserSettings()
+                    if (s && s.credit) {
+                        ch.unshift(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
+                    }
                 }
 
                 // user name                
@@ -7792,6 +7797,19 @@
                                     t => {
                                         return Cloud.postPrivateApiAsync(path, { permissions: t })
                                             .then(r => {}, e => World.handlePostingError(e, lf("set permissions")))
+                                    })
+                            })
+                        }))
+                accountButtons.appendChild(
+                    HTML.mkButton(lf("credit"),
+                        () => {
+                            var path = this.publicId + "/permissions"
+                            Cloud.getPrivateApiAsync(path)
+                            .done(resp => {
+                                ModalDialog.editText(lf("user activation credit"), resp.credit,
+                                    t => {
+                                        return Cloud.postPrivateApiAsync(path, { credit: parseInt(t) || resp.credit })
+                                            .then(r => {}, e => World.handlePostingError(e, lf("set credit")))
                                     })
                             })
                         }))
