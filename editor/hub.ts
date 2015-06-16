@@ -123,6 +123,7 @@ module TDev.Browser {
                 startTutorialButton: true,
                 translateComments: true,
                 searchHelp: true,
+                outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
@@ -246,6 +247,7 @@ module TDev.Browser {
                 hubMyArt: true,
                 translateComments: true,
                 searchHelp: true,
+                outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
                 scriptAddToChannel: Cloud.lite,
