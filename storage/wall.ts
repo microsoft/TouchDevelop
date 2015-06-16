@@ -243,8 +243,8 @@ module TDev {
                         link("try touchdevelop", "")));
 
                 m.add(div("wall-dialog-buttons",
-                    link(lf("privacy and cookies"), "/privacy"),
-                    link(lf("legal"), "/legal")
+                    link(lf("terms of use"), "/terms-of-use"),
+                    link(lf("privacy and cookies"), "/privacy")
                     ));
 
                 m.show();

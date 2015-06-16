@@ -261,7 +261,7 @@ module TDev.Cloud {
             HTML.mkA(null, getServiceUrl() + lnk, "_blank", text);
         return div("wall-dialog-body", div("smallText",
                 lf("Publishing is subject to our "),
-                link(lf("terms of use"), "/legal"),
+                link(lf("terms of use"), "/terms-of-use"),
                 lf(". Please read our information about "), link(lf("privacy and cookies"), "/privacy"), "."))
     }
 
