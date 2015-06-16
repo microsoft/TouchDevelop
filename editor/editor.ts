@@ -406,26 +406,28 @@ module TDev
         {
             var heart: HTMLElement = undefined;
             var pause: HTMLElement;
-            if (TheEditor.isDebuggerMode()) {
-                if (this.currentRt.isStopped()) {
-                    pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
-                } else if (this.currentRt.debuggerStopped()) {
-                    pause = HTML.mkRoundButton("svg:play,black", lf("continue"), Ticks.debuggerContinue, () => this.debuggerContinueBtnHandler())
+            if (TheEditor.widgetEnabled("wallStop")) {
+                if (TheEditor.isDebuggerMode()) {
+                    if (this.currentRt.isStopped()) {
+                        pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
+                    } else if (this.currentRt.debuggerStopped()) {
+                        pause = HTML.mkRoundButton("svg:play,black", lf("continue"), Ticks.debuggerContinue, () => this.debuggerContinueBtnHandler())
+                    } else {
+                        pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.debuggerPauseWall, () => this.debuggerPauseBtnHandler())
+                    }
+                } else if (this.currentRt.isStopped()) {
+                    if (this.currentRt.canResume())
+                        pause = HTML.mkRoundButton("svg:resume,black", lf("resume"), Ticks.wallResume, () => this.resumeBtnHandler())
+                    else
+                        pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
                 } else {
-                    pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.debuggerPauseWall, () => this.debuggerPauseBtnHandler())
+                    if (!TheEditor.stepTutorial && this.currentRt.canPause())
+                        pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.wallPause, () => this.pauseBtnHandler())
+                    else
+                        pause = HTML.mkRoundButton("svg:stop,black", lf("stop"), Ticks.wallStop, () => this.stopBtnHandler())
                 }
-            } else if (this.currentRt.isStopped()) {
-                if (this.currentRt.canResume())
-                    pause = HTML.mkRoundButton("svg:resume,black", lf("resume"), Ticks.wallResume, () => this.resumeBtnHandler())
-                else
-                    pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
-            } else {
-                if (!TheEditor.stepTutorial && this.currentRt.canPause())
-                    pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.wallPause, () => this.pauseBtnHandler())
-                else
-                    pause = HTML.mkRoundButton("svg:stop,black", lf("stop"), Ticks.wallStop, () => this.stopBtnHandler())
-            }
-            if (!TheEditor.isDebuggerMode() && this.currentRt.currentScriptId) {
+            }    
+            if (TheEditor.widgetEnabled("wallHeart") && !TheEditor.isDebuggerMode() && this.currentRt.currentScriptId) {
                 heart = div('');
                 heart.style.display = 'inline-block';
                 TDev.Browser.ScriptInfo.setupLike(this.currentRt.currentScriptId, (s, h, f) => {

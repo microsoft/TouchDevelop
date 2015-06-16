@@ -38,6 +38,7 @@ module TDev.Browser {
                 artSection: true,
                 // ui
                 wallScreenshot: true,
+                wallHeart: true,
                 startTutorialButton: true,
                 nextTutorialsList: true,
                 // hub
@@ -89,6 +90,8 @@ module TDev.Browser {
                 tutorialGoToPreviousStep: true,
                 helpLinks: true,
                 wallScreenshot: true,
+                wallHeart: true,
+                wallStop: true,
                 scriptConvertToDocs: true,
                 nextTutorialsList: true,
                 // section
@@ -168,6 +171,8 @@ module TDev.Browser {
                 tutorialGoToPreviousStep: true,
                 helpLinks: true,
                 wallScreenshot: true,
+                wallHeart: true,
+                wallStop: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
