@@ -213,12 +213,25 @@ a.command:hover {
 
 /* Animation for the compilation button */
 .compiling {
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-name: rotating;
+  -webkit-animation-iteration-count: infinite;
   animation-duration: 1.5s;
   animation-name: rotating;
   animation-iteration-count: infinite;
 
   color: #888;
   border-color: #888;
+}
+
+@-webkit-keyframes rotating {
+  from {
+    -webkit-transform: rotate(0turn);
+  }
+
+  to {
+    -webkit-transform: rotate(1turn);
+  }
 }
 
 @keyframes rotating {
