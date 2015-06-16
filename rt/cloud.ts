@@ -673,6 +673,7 @@ module TDev.Cloud {
         school?: string;
         wallpaper?: string;
         permissions?: string;
+        credit?: number;
     }
     export function getUserInstalledAsync() : Promise // of InstalledHeaders
     {
@@ -832,14 +833,23 @@ module TDev.Cloud {
     export function getUserApiKeysAsync(): Promise {
         return Util.httpGetJsonAsync(getPrivateApiUrl("me/keys"));
     }
+
+    export function recentUserSettings():UserSettings
+    {
+        var s = localStorage['cachedSettings']
+        if (s) return JSON.parse(s)
+        return null
+    }
+
     export function getUserSettingsAsync(): Promise {
         return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"))
             .then(sett => {
                 // this is for the non-webapp part of the website in case it needs it
-                if (Cloud.lite && sett) localStorage["cachedSettings"] = JSON.stringify(sett)
+                if (sett) localStorage["cachedSettings"] = JSON.stringify(sett)
                 return sett
             })
     }
+
     export function postUserSettingsAsync(body: UserSettings) : Promise // of void
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/settings"), body);

@@ -5848,15 +5848,16 @@ table.dashboard tr td[data-completed^="yes"] {
 }
 
 .powered-by {
-  width: 7em;
+  width: 6em;
   margin-top: 2em;
-  margin-left: 1em;
+  margin-left: 2em;
   position: relative;
   display: inline-block;
   vertical-align: top;
 }
 
 .powered-by-first {
+  margin-left: 1.5em;
 }
 
 .powered-by .text {
@@ -5864,14 +5865,20 @@ table.dashboard tr td[data-completed^="yes"] {
   opacity: 0.5;
 }
 
-.powered-by svg {
-  margin: 0.4em 0;
-}
-
 .powered-by .hidden-portrait {
   display: block;
 }
 
 .powered-by img {
-  width: 100%;
+  margin-top: 0.5em;
+  height: 1.2em;
+}
+
+.powered-by-first img {
+  margin-top: 0.3em;
+  height: 1.6em;
+}
+
+.portrait .powered-by {
+  font-size: 1.1em;
 }
