@@ -110,6 +110,10 @@ module Helpers {
     return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
   }
 
+  export function booleanCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef("Boolean"), args);
+  }
+
   export function mkGlobalRef(name: string): J.JCall {
     return mkCall(name, mkTypeRef("data"), [mkSingletonRef("data")]);
   }
@@ -364,6 +368,12 @@ function assert(x: boolean) {
     throw new Error("Assertion failure");
 }
 
+function throwBlockError(msg: string, block: B.Block) {
+  var e = new Error(msg);
+  (<any> e).block = block;
+  throw e;
+}
+
 module Errors {
 
   export interface CompilationError {
@@ -513,6 +523,20 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
   var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
+
+  if (t == Type.Boolean) {
+    // First case: we can compile = and != for Booleans, that's all.
+    if (bOp == "EQ")
+      return H.booleanCall("equals", args);
+    else if (bOp == "NEQ")
+      return H.booleanCall("not", [H.booleanCall("equals", args)]);
+    else
+      throwBlockError("Operation "+opToTok[bOp]+" is not supported for booleans", b);
+  } else if (t != Type.Number) {
+    // Easy case: if it's not a number or a boolean, we bail out!
+    throwBlockError("Cannot compare things of type "+typeToString(t), b);
+  }
+
   if (bOp == "POWER")
     return H.mathCall("pow", args);
   else
@@ -538,8 +562,8 @@ function compileVariableGet(e: Environment, b: B.Block, t: Type): J.JExpr {
   if (binding.type == null)
     binding.type = t;
   if (t != binding.type)
-    throw new Error("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
-        ", but is used here as a "+typeToString(t));
+    throwBlockError("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
+        ", but is used here as a "+typeToString(t), b);
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
 }
 
@@ -568,6 +592,8 @@ function defaultValueForType(t: Type): J.JExpr {
       return H.mkNumberLiteral(0);
     case Type.String:
       return H.mkStringLiteral("");
+    case Type.Image:
+      return H.stdCall("create image", [H.mkStringLiteral("")]);
   }
   throw new Error("No default value for type");
 }
@@ -577,7 +603,7 @@ function defaultValueForType(t: Type): J.JExpr {
 function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   // Happens if we couldn't infer the type for a variable.
   if (t == null)
-    throw new Error("No type for subexpression");
+    throwBlockError("I can't figure out the type of this block", b);
 
   if (b == null)
     return defaultValueForType(t);
@@ -587,7 +613,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   // we haven't determined the type of the variable. It will be determined to be
   // [t], now.
   if (t != actualType && b.type != "variables_get")
-    throw new Error("We need "+typeToString(t)+" here, but we got "+typeToString(actualType));
+    throwBlockError("We need "+typeToString(t)+" here, but we got "+typeToString(actualType), b);
 
   switch (b.type) {
     case "math_number":
@@ -600,7 +626,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
-      return compileArithmetic(e, b, Type.Number);
+      return compileArithmetic(e, b, actualType);
     case "logic_operation":
       return compileArithmetic(e, b, Type.Boolean);
     case "logic_boolean":
@@ -986,7 +1012,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
             console.log("Not generating code for (not a statement / not supported): "+b.type);
       }
     } catch (e) {
-      Errors.report(e+"", b);
+      if ((<any> e).block)
+        Errors.report(e+"", (<any> e).block);
+      else
+        throw e;
     }
     b = b.getNextBlock();
   }
@@ -1067,6 +1096,10 @@ function mkEnv(w: B.Workspace): Environment {
     // able to compile it as a TouchDevelop for-loop.
     w.getAllBlocks().forEach((b: B.Block) => {
       if (b.type == "variables_set") {
+        var x = b.getFieldValue("VAR");
+        if (lookup(e, x) == null)
+          e = extend(e, x, null);
+
         // If this is something we won't know how to compile, don't bother. Error
         // will be flagged later.
         var t = inferType(e, b.getInputTargetBlock("VALUE"));
@@ -1078,24 +1111,19 @@ function mkEnv(w: B.Workspace): Environment {
         // Add a binding, if needed. The strategy is "first type we can infer
         // wins". Again, errors will be flagged later when compiling an
         // assignment.
-        var x = b.getFieldValue("VAR");
         var binding = lookup(e, x);
-        if (!binding)
-          e = extend(e, x, t);
-        else if (binding.type == null)
-          // Maybe we saw the "variables_get" block first.
+        if (binding.type == null)
           binding.type = t;
-        else if (binding && binding.isForVariable)
+        if (binding && binding.isForVariable)
           // Second reason why we can't compile as a TouchDevelop for-loop: loop
           // index is assigned to
           binding.incompatibleWithFor = true;
       } else if (b.type == "variables_get") {
         var x = b.getFieldValue("VAR");
-        var binding = lookup(e, x);
-        if (lookup(e, x) == null) {
+        if (lookup(e, x) == null)
           e = extend(e, x, null);
-          binding = lookup(e, x);
-        }
+
+        var binding = lookup(e, x);
         if (binding.isForVariable && !variableIsScoped(b, x))
           // Third reason why we can't compile to a TouchDevelop for-loop: loop
           // index is read outside the loop.
@@ -1136,7 +1164,7 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   // cases where there's a lone "variables_get" block.)
   var undetermined = e.bindings.filter((b: Binding) => b.type == null);
   if (undetermined.length > 0)
-    throw new Error("I could not determine the type of "+undetermined[0].name);
+    throw new Error("I could not determine the type of variable "+undetermined[0].name);
   e.bindings.forEach((b: Binding) => {
     if (!isCompiledAsLocal(b)) {
       decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
