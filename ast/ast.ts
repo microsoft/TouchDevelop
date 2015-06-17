@@ -4932,6 +4932,12 @@ module TDev.AST {
         {
             if (a._skipIntelliProfile)
                 return
+            a.getInParameters().forEach(ai => {
+                this.incr(ai.getKind().getName());
+            })
+            a.getOutParameters().forEach(ai => {
+                this.incr(ai.getKind().getName());
+            })
             this.visitChildren(a);
         }
 
@@ -4972,6 +4978,7 @@ module TDev.AST {
         public visitGlobalDef(t: GlobalDef)
         {
             this.incr("addNewButton");
+            this.incr(t.getKind().getName());
             if (t.isResource) {
                 this.incr("artSection");
                 if (t.getKind() == api.core.Picture || t.getKind() == api.core.Sound) {

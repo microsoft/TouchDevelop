@@ -818,7 +818,7 @@ module TDev.Browser {
                     AST.TypeChecker.tcApp(app);
                     currentThemeIntelliProfile = new AST.IntelliProfile();
                     currentThemeIntelliProfile.allowAllLibraries = true;
-                    currentThemeIntelliProfile.loadFrom(app.actions()[0], false);
+                    currentThemeIntelliProfile.loadFrom(app, false);
 
                     return currentThemeIntelliProfile;
                 }, e => { return Promise.as(undefined) })
