@@ -511,7 +511,7 @@ Blockly.Blocks['device_while'] = {
         .appendField("do");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('Run the same sequence of actions while the condition is met. Don\t forget to pause!');
+    this.setTooltip('Run the same sequence of actions while the condition is met. Don\'t forget to pause!');
   }
 };
 
