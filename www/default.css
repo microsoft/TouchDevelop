@@ -1257,11 +1257,11 @@ input[data-invalid^="yes"]
 .wallLogo {
   position: absolute;
   bottom: 0.5em;
-  left: 0.5em;
+  right: 0.5em;
 }
 
 .wallLogo img {
-  width: 12em;
+  width: 9em;
 }
 
 .landscape .wallWithColumns .classic-page
