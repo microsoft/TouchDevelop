@@ -2,7 +2,7 @@
 module TDev.RT {
     export module EditorServices {
         export function getTokenAsync(aud: string): Promise {
-            if (!Cloud.getAccessToken()) return Promise.as(undefined);
+            if (!Cloud.hasAccessToken()) return Promise.as(undefined);
 
             var tokens: TDev.StringMap<string>;
             try {

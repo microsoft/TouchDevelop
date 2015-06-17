@@ -61,7 +61,7 @@ module TDev.RT.Perf {
         compilerVersion = compversion;
         releaseId = release;
 
-        if (Cloud.getAccessToken() && Cloud.isOnline())
+        if (Cloud.hasAccessToken() && Cloud.isOnline())
             sendPerfEvents();
     }
 
@@ -82,7 +82,7 @@ module TDev.RT.Perf {
             newVal = "[]";
         window.localStorage["archivedPerfData"] = newVal;
 
-        if (sendToCloud && Cloud.getAccessToken() && Cloud.isOnline())
+        if (sendToCloud && Cloud.hasAccessToken() && Cloud.isOnline())
             return sendPerfEvents();
         else
             return Promise.as(undefined);

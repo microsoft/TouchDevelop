@@ -931,7 +931,7 @@
                         m.show();
                     }
                 };
-                if (Cloud.getAccessToken() && Cloud.getUserId()) {
+                if (Cloud.hasAccessToken() && Cloud.getUserId()) {
                     World.syncAsync(true, undefined, false,
                         () => {
                             Cloud.isOnlineWithPingAsync()
@@ -2233,7 +2233,7 @@
             else if (resp.code == 404)
                 this.got404();
             else {
-                if (resp.code == 400 && window.localStorage["everLoggedIn"] && !Cloud.isOffline() && !Cloud.getAccessToken())
+                if (resp.code == 400 && window.localStorage["everLoggedIn"] && !Cloud.isOffline() && !Cloud.hasAccessToken())
                     Login.show();
                 TheApiCacheMgr.handleError("wrong code " + resp.code, this)
             }
@@ -2858,7 +2858,7 @@
 
             var r = new PromiseInv()
 
-            if (this.websocket && !this.websocketAuthenticated && Cloud.getAccessToken()) {
+            if (this.websocket && !this.websocketAuthenticated && Cloud.hasAccessToken()) {
                 this.closeWebsocket()
             }
 
@@ -2866,7 +2866,7 @@
                 var ws = new WebSocket(Cloud.getPrivateApiUrl("socket").replace(/^http/, "ws"))
                 this.websocketLastOpen = Date.now()
                 this.websocket = ws
-                this.websocketAuthenticated = !!Cloud.getAccessToken()
+                this.websocketAuthenticated = Cloud.hasAccessToken()
                 ws.onopen = () => {
                     if (ws == this.websocket) {
                         this.websocketReady = ws
@@ -6869,7 +6869,7 @@
                 return Promise.as();
             }
 
-            if (!Cloud.getAccessToken()) {
+            if (!Cloud.hasAccessToken()) {
                 return Cloud.authenticateAsync(lf("publishing scripts")).then((auth) => {
                     if (auth) this.publishAsync(fromHub, noDialog, screenshotDataUri);
                     else return Promise.as();

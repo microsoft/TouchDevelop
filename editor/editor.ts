@@ -4093,7 +4093,7 @@ module TDev
             tick(Ticks.mainResetWorld);
 
             var logoutUrl = ""
-            if (Cloud.getAccessToken())
+            if (Cloud.hasAccessToken())
                 logoutUrl = Cloud.getPrivateApiUrl("logout")
 
             var userId = Cloud.getUserId();

@@ -350,7 +350,7 @@ module TDev.RT {
 
         export function proxy(url: string) {
             // don't proxy when not authenticated
-            if (!Cloud.getAccessToken()) return url;
+            if (!Cloud.hasAccessToken()) return url;
             // don't proxy localhost
             if (!url || /^http:\/\/localhost(:[0-9]+)?\//i.test(url)) return url;
             // don't proxy private ip ranges

@@ -381,11 +381,14 @@ module TDev.Cloud {
         return true;
     }
 
+    export function hasAccessToken() : boolean {
+        return !!getAccessToken();
+    }
     export function getAccessToken() : string {
         return window.localStorage.getItem("access_token");
     }
     export function isAccessTokenExpired() : boolean {
-        return !getAccessToken() || !!window.localStorage.getItem("access_token_expired");
+        return !hasAccessToken() || !!window.localStorage.getItem("access_token_expired");
     }
     export function accessTokenExpired() : void {
         window.localStorage.setItem("access_token_expired",  "1")
@@ -914,7 +917,7 @@ module TDev.Cloud {
         });
     }
     export function postPendingProgressAsync() {
-        if (!getUserId() || !getAccessToken() || isOffline()) return Promise.as();
+        if (!getUserId() || !hasAccessToken() || isOffline()) return Promise.as();
         var data = loadPendingProgress();
         if (Object.keys(data).length == 0) return Promise.as();
         Util.log('progress: ' + JSON.stringify(data));

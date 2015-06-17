@@ -719,7 +719,7 @@ module TDev
 
         /* SYNTHESIS
         private runSynthesisAsync(search: string): Promise {
-            if (!Cloud.getAccessToken() || Cloud.isOffline() || !Browser.canLogin) return Promise.as(); // better offline experience
+            if (!Cloud.hasAccessToken() || Cloud.isOffline() || !Browser.canLogin) return Promise.as(); // better offline experience
 
             if (!this.calc || !this.calc.expr)
                 return Promise.as();

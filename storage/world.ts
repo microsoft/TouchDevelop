@@ -696,7 +696,7 @@ module TDev {
                     //(Cloud.isOnline() && /localhost/.test(document.URL)) // because of CORS on localhost when not logged in yet
                 {
                     var message = status == 403
-                        ? Cloud.getAccessToken()
+                        ? Cloud.hasAccessToken()
                             ? onNotLoggedIn
                                 ? lf("cannot sync - your access token has expired and will renew automatically") + info
                                 : lf("cannot sync - your access token has expired") + info

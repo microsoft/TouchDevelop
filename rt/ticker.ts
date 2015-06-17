@@ -663,7 +663,7 @@ module TDev {
                 newVal = "[]" // drop it if it's getting big
             window.localStorage["archivedEvents"] = newVal
 
-            if (sendCurrent && Cloud.getAccessToken() && Cloud.isOnline())
+            if (sendCurrent && Cloud.hasAccessToken() && Cloud.isOnline())
                 (<any>sendOutEvents)(prevEvents); // TSBUG: stack overflow
         }
 
