@@ -132,7 +132,7 @@ module TDev.AST {
         }
     }
 
-    export class LibNamespaceAction
+    export class LibExtensionAction
         extends LibraryRefAction
     {
         constructor(public shortcutTo:LibraryRefAction)
@@ -141,6 +141,14 @@ module TDev.AST {
             this.fromTemplateCore(shortcutTo)
         }
 
+        public updateSubstitution()
+        {
+            super.updateSubstitution()
+            this.parentKind = this.getInParameters()[0].getKind();
+            this.header.inParameters.stmts.shift()
+        }
+
+        public isExtensionAction() { return true }
         public extensionForward():Action { return this.shortcutTo }
 
         public getDescription()
@@ -156,24 +164,6 @@ module TDev.AST {
         public markUsed() {
             super.markUsed()
             this.shortcutTo.markUsed();
-        }
-    }
-
-    export class LibExtensionAction
-        extends LibNamespaceAction
-    {
-        public isExtensionAction() { return true }
-
-        constructor(shortcutTo)
-        {
-            super(shortcutTo)
-        }
-
-        public updateSubstitution()
-        {
-            super.updateSubstitution()
-            this.parentKind = this.getInParameters()[0].getKind();
-            this.header.inParameters.stmts.shift()
         }
     }
 
