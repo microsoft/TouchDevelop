@@ -428,6 +428,9 @@ enum Type { Number = 1, Boolean, String, Image, Unit };
 // block and figuring out, from the look of it, what type of expression it
 // holds.
 function inferType(e: Environment, b: B.Block): Type {
+  if (!b)
+    return null;
+
   if (!b.outputConnection)
     return Type.Unit;
 
@@ -522,6 +525,18 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
+
+  // Mini type-inference again. This is incomplete, as we should do unification
+  // here.
+  if (t == null) {
+    var tl = inferType(e, left);
+    var tr = inferType(e, right);
+    if (tl && tr && tl != tr)
+      throwBlockError("The left side of this comparison operator has type "+typeToString(tl)+
+          " but the right side has type "+typeToString(tr), b);
+    t = tl || tr;
+  }
+
   var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
 
   if (t == Type.Boolean) {
@@ -626,7 +641,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
-      return compileArithmetic(e, b, actualType);
+      return compileArithmetic(e, b, null);
     case "logic_operation":
       return compileArithmetic(e, b, Type.Boolean);
     case "logic_boolean":
@@ -1164,7 +1179,8 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   // cases where there's a lone "variables_get" block.)
   var undetermined = e.bindings.filter((b: Binding) => b.type == null);
   if (undetermined.length > 0)
-    throw new Error("I could not determine the type of variable "+undetermined[0].name);
+    throw new Error("I could not determine the type of variable "+undetermined[0].name+". "+
+        "This may cause further errors below.");
   e.bindings.forEach((b: Binding) => {
     if (!isCompiledAsLocal(b)) {
       decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
