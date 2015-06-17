@@ -1258,7 +1258,17 @@ module TDev
             if (st.data.hintLevel != "semi" || this.seenDoItYourself || ModalDialog.currentIsVisible()) return false;
             var tmpl = TheEditor.calculator.goalHTML()
             if (!tmpl) return false;
+            var goal = elt("calcGoalLine");
             // the do it yourself dialog is shown when tapping the goal line
+            if (!this.seenDoItYourself && goal) {
+                TipManager.setTip(<Tip>{
+                    title: lf("no more hints!"),
+                    description: lf("if you are stuck, tap the goal line"),
+                    el: goal,
+                    forceBottom: true                    
+                })
+                return false;
+            }
             return true
         }
 

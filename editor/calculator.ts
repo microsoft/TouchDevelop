@@ -67,7 +67,7 @@ module TDev
         private calcMessage = div("errorMessage");
         private searchDiv = div("stmtEditorSide");
         private apiHelpDiv = div("calcApiHelp");
-        private templateLine = div("calcTemplate");
+        private templateLine = divId("calcGoalLine", "calcTemplate");
         public enableNewPredictor = false;
         private calcDebugging = div("calcDebug");
         private suggestedAssignment = false;
