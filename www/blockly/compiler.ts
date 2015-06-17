@@ -1182,7 +1182,8 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   var undetermined = e.bindings.filter((b: Binding) => b.type == null);
   if (undetermined.length > 0)
     throw new Error("I could not determine the type of variable "+undetermined[0].name+". "+
-        "This may cause further errors below.");
+        "This may cause further errors below. "+
+        "Please assign an initial value to "+undetermined[0].name+".");
   e.bindings.forEach((b: Binding) => {
     if (!isCompiledAsLocal(b)) {
       decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
