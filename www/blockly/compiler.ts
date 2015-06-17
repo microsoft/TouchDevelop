@@ -592,6 +592,8 @@ function defaultValueForType(t: Type): J.JExpr {
       return H.mkNumberLiteral(0);
     case Type.String:
       return H.mkStringLiteral("");
+    case Type.Image:
+      return H.stdCall("create image", [H.mkStringLiteral("")]);
   }
   throw new Error("No default value for type");
 }
