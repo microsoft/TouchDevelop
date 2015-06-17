@@ -30,6 +30,10 @@ module TDev {
             setTip(null)
             scheduledTip = tip;
         }
+        
+        export function isCurrent(tip: Tip) {
+            return currentTip == tip;
+        }
 
         export function isScheduled()
         {

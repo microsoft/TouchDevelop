@@ -719,8 +719,8 @@ module TDev
                 })
 
                 this.currentStep = Script.editorState.tutorialStep || 0;
-                if (this.steps.slice(0, this.currentStep + 1).some(s => s.data.hintLevel == "semi"))
-                    this.seenDoItYourself = true;
+               // if (this.steps.slice(0, this.currentStep + 1).some(s => s.data.hintLevel == "semi"))
+                //    this.seenDoItYourself = true;
                 Script.editorState.tutorialNumSteps = this.steps.length;
 
                 this.finalHTML = this.getHTML("final");
@@ -780,14 +780,11 @@ module TDev
         }
 
         public needHelp() {
+            this.disableUpdate = false;
+            
             if (!this.initialMode) {
                 this.needHelpCount++;
                 this.recoveryMode = true;
-                if (!this.seenDoItYourself) {
-                    this.seenDoItYourself = true;
-                    this.youCanGoFasterAsync()
-                        .done();
-                }
             }
             this.update()
         }
@@ -1226,6 +1223,7 @@ module TDev
             m.show()
             return r
         }
+        
 
         private youAreOnYourOwnAsync() {
             var r = new PromiseInv()
@@ -1261,15 +1259,24 @@ module TDev
             var goal = elt("calcGoalLine");
             // the do it yourself dialog is shown when tapping the goal line
             if (!this.seenDoItYourself && goal) {
-                TipManager.setTip(<Tip>{
+                this.seenDoItYourself = true;
+                this.disableUpdate = true;
+                var tip = <Tip>{
                     title: lf("no more hints!"),
                     description: lf("if you are stuck, tap the goal line"),
                     el: goal,
-                    forceBottom: true                    
+                    forceBottom: true
+                };
+                TipManager.setTip(tip);
+                Util.setTimeout(10000, () => {
+                    if (TipManager.isCurrent(tip)) {
+                        this.disableUpdate = false;
+                        this.update();
+                    }
                 })
-                return false;
+                return true;
             }
-            return true
+            return false
         }
 
         private isFirstStep()
