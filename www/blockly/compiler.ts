@@ -1067,6 +1067,10 @@ function mkEnv(w: B.Workspace): Environment {
     // able to compile it as a TouchDevelop for-loop.
     w.getAllBlocks().forEach((b: B.Block) => {
       if (b.type == "variables_set") {
+        var x = b.getFieldValue("VAR");
+        if (lookup(e, x) == null)
+          e = extend(e, x, null);
+
         // If this is something we won't know how to compile, don't bother. Error
         // will be flagged later.
         var t = inferType(e, b.getInputTargetBlock("VALUE"));
@@ -1078,24 +1082,19 @@ function mkEnv(w: B.Workspace): Environment {
         // Add a binding, if needed. The strategy is "first type we can infer
         // wins". Again, errors will be flagged later when compiling an
         // assignment.
-        var x = b.getFieldValue("VAR");
         var binding = lookup(e, x);
-        if (!binding)
-          e = extend(e, x, t);
-        else if (binding.type == null)
-          // Maybe we saw the "variables_get" block first.
+        if (binding.type == null)
           binding.type = t;
-        else if (binding && binding.isForVariable)
+        if (binding && binding.isForVariable)
           // Second reason why we can't compile as a TouchDevelop for-loop: loop
           // index is assigned to
           binding.incompatibleWithFor = true;
       } else if (b.type == "variables_get") {
         var x = b.getFieldValue("VAR");
-        var binding = lookup(e, x);
-        if (lookup(e, x) == null) {
+        if (lookup(e, x) == null)
           e = extend(e, x, null);
-          binding = lookup(e, x);
-        }
+
+        var binding = lookup(e, x);
         if (binding.isForVariable && !variableIsScoped(b, x))
           // Third reason why we can't compile to a TouchDevelop for-loop: loop
           // index is read outside the loop.
