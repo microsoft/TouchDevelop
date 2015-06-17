@@ -364,6 +364,12 @@ function assert(x: boolean) {
     throw new Error("Assertion failure");
 }
 
+function throwBlockError(msg: string, block: B.Block) {
+  var e = new Error(msg);
+  (<any> e).block = block;
+  throw e;
+}
+
 module Errors {
 
   export interface CompilationError {
@@ -538,8 +544,8 @@ function compileVariableGet(e: Environment, b: B.Block, t: Type): J.JExpr {
   if (binding.type == null)
     binding.type = t;
   if (t != binding.type)
-    throw new Error("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
-        ", but is used here as a "+typeToString(t));
+    throwBlockError("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
+        ", but is used here as a "+typeToString(t), b);
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
 }
 
@@ -577,7 +583,7 @@ function defaultValueForType(t: Type): J.JExpr {
 function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   // Happens if we couldn't infer the type for a variable.
   if (t == null)
-    throw new Error("No type for subexpression");
+    throwBlockError("I can't figure out the type of this block", b);
 
   if (b == null)
     return defaultValueForType(t);
@@ -587,7 +593,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   // we haven't determined the type of the variable. It will be determined to be
   // [t], now.
   if (t != actualType && b.type != "variables_get")
-    throw new Error("We need "+typeToString(t)+" here, but we got "+typeToString(actualType));
+    throwBlockError("We need "+typeToString(t)+" here, but we got "+typeToString(actualType), b);
 
   switch (b.type) {
     case "math_number":
@@ -986,7 +992,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
             console.log("Not generating code for (not a statement / not supported): "+b.type);
       }
     } catch (e) {
-      Errors.report(e+"", b);
+      if ((<any> e).block)
+        Errors.report(e+"", (<any> e).block);
+      else
+        throw e;
     }
     b = b.getNextBlock();
   }
@@ -1135,7 +1144,7 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
   // cases where there's a lone "variables_get" block.)
   var undetermined = e.bindings.filter((b: Binding) => b.type == null);
   if (undetermined.length > 0)
-    throw new Error("I could not determine the type of "+undetermined[0].name);
+    throw new Error("I could not determine the type of variable "+undetermined[0].name);
   e.bindings.forEach((b: Binding) => {
     if (!isCompiledAsLocal(b)) {
       decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
