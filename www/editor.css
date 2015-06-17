@@ -1805,16 +1805,9 @@ span.errorSq .kw
     flex: 1;
 }
 
-#externalEditorSide .wallFullScreenLogo {
-  background:#000;
-  color:#fff;
-  font-size: 1em;
-  padding:0.5em;
-}
-
-#externalEditorSide .wallFullScreenLogo a {
-  color:#fff;
-  text-decoration: none;
+#externalEditorSide .wallFullScreenLogo img {
+    width: calc(100% - 2em);
+    padding: 1em;
 }
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
