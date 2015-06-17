@@ -564,7 +564,7 @@ module TDev.AST {
             if (api.getThing(name)) return
 
             var k = new Kind(name, lf("Extensions"));
-            k._contexts = KindContext.General;
+            k._contexts = KindContext.None;
             var th = mkSingletonDef(name, k);
             th.isExtension = true;
             this.singletonList.push(th)
