@@ -110,6 +110,10 @@ module Helpers {
     return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
   }
 
+  export function booleanCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef("Boolean"), args);
+  }
+
   export function mkGlobalRef(name: string): J.JCall {
     return mkCall(name, mkTypeRef("data"), [mkSingletonRef("data")]);
   }
@@ -519,6 +523,20 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
   var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
+
+  if (t == Type.Boolean) {
+    // First case: we can compile = and != for Booleans, that's all.
+    if (bOp == "EQ")
+      return H.booleanCall("equals", args);
+    else if (bOp == "NEQ")
+      return H.booleanCall("not", [H.booleanCall("equals", args)]);
+    else
+      throwBlockError("Operation "+opToTok[bOp]+" is not supported for booleans", b);
+  } else if (t != Type.Number) {
+    // Easy case: if it's not a number or a boolean, we bail out!
+    throwBlockError("Cannot compare things of type "+typeToString(t), b);
+  }
+
   if (bOp == "POWER")
     return H.mathCall("pow", args);
   else
@@ -606,7 +624,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
-      return compileArithmetic(e, b, Type.Number);
+      return compileArithmetic(e, b, actualType);
     case "logic_operation":
       return compileArithmetic(e, b, Type.Boolean);
     case "logic_boolean":
