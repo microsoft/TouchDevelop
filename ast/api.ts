@@ -121,12 +121,18 @@ module TDev {
 
         public getKind(name:string) : Kind
         {
+            if (!this._kinds.hasOwnProperty(name))
+                return null
             return this._kinds[name];
         }
 
         public getThing(name:string) : AST.SingletonDef
         {
-            return this._singletons[name];
+            if (this._singletons.hasOwnProperty(name))
+                return this._singletons[name];
+            if (Script && Script.libNamespaceCache.singletons.hasOwnProperty(name))
+                return Script.libNamespaceCache.singletons[name];
+            return null;
         }
 
         public getKinds() : Kind[] { return this._kindList; }
@@ -140,7 +146,11 @@ module TDev {
             })
         }
 
-        public getSingletons() : AST.SingletonDef[] { return this._singletonList; }
+        public getSingletons() : AST.SingletonDef[] {
+            if (!Script || Script.libNamespaceCache.singletonList.length == 0)
+                return this._singletonList;
+            return this._singletonList.concat(Script.libNamespaceCache.singletonList)
+        }
 
         static runtimeName(s:string)
         {
@@ -720,11 +730,24 @@ module TDev {
 
         public getProperty(name:string) : IProperty
         {
-            return this._propByName.hasOwnProperty(name) ? this._propByName[name] : null;
+            if (!this._propByName.hasOwnProperty(name)) {
+                var e = this.singletonExtensions()
+                if (e && e.actions.hasOwnProperty(name)) return e.actions[name]
+                return null
+            }
+            return this._propByName[name];
+        }
+
+        public singletonExtensions():AST.SingletonExtensions
+        {
+            if (this.isData || !Script) return null
+            return Script.libNamespaceCache.extensions[this.getName()]
         }
 
         public listProperties() : IProperty[]
         {
+            var e = this.singletonExtensions()
+            if (e) return (<IProperty[]>this._propList).concat(e.actionList)
             return this._propList;
         }
 

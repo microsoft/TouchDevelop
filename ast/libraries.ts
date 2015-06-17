@@ -12,7 +12,6 @@ module TDev.AST {
         public wasUsed: boolean;
         public _extensionAction:LibExtensionAction;
         public _weight = 50;
-        public namespace: string;
 
         constructor(public _lib:LibraryRef) {
             super()
@@ -133,7 +132,7 @@ module TDev.AST {
         }
     }
 
-    export class LibExtensionAction
+    export class LibNamespaceAction
         extends LibraryRefAction
     {
         constructor(public shortcutTo:LibraryRefAction)
@@ -142,14 +141,6 @@ module TDev.AST {
             this.fromTemplateCore(shortcutTo)
         }
 
-        public updateSubstitution()
-        {
-            super.updateSubstitution()
-            this.parentKind = this.getInParameters()[0].getKind();
-            this.header.inParameters.stmts.shift()
-        }
-
-        public isExtensionAction() { return true }
         public extensionForward():Action { return this.shortcutTo }
 
         public getDescription()
@@ -165,6 +156,24 @@ module TDev.AST {
         public markUsed() {
             super.markUsed()
             this.shortcutTo.markUsed();
+        }
+    }
+
+    export class LibExtensionAction
+        extends LibNamespaceAction
+    {
+        public isExtensionAction() { return true }
+
+        constructor(shortcutTo)
+        {
+            super(shortcutTo)
+        }
+
+        public updateSubstitution()
+        {
+            super.updateSubstitution()
+            this.parentKind = this.getInParameters()[0].getKind();
+            this.header.inParameters.stmts.shift()
         }
     }
 
@@ -544,6 +553,56 @@ module TDev.AST {
         }
     }
 
+    export interface SingletonExtensions
+    {
+        actionList:AST.LibraryRefAction[];
+        actions:StringMap<AST.LibraryRefAction>;
+    }
+
+    export class LibNamespaceCache
+    {
+        public singletonList:AST.SingletonDef[] = [];
+        public singletons:StringMap<AST.SingletonDef> = {};
+        public extensions:StringMap<SingletonExtensions> = {};
+
+        constructor(private app:App)
+        {
+        }
+
+        private addSingleton(name:string)
+        {
+            if (api.getThing(name)) return
+
+            var k = new Kind(name, lf("Extensions"));
+            k._contexts = KindContext.General;
+            var th = mkSingletonDef(name, k)
+            this.singletonList.push(th)
+            this.singletons[th.getName()] = th
+        }
+
+        public recompute()
+        {
+            Util.assert(this.app == Script)
+
+            this.singletons = {};
+            this.singletonList = [];
+            this.extensions = {};
+
+            this.app.libraries().forEach(l => {
+                l.getPublicActions().forEach(a => {
+                    a.getNamespaces().forEach(ns => {
+                        this.addSingleton(ns)
+                        if (!this.extensions.hasOwnProperty(ns))
+                            this.extensions[ns] = { actions: {}, actionList: [] }
+                        var e = this.extensions[ns];
+                        e.actionList.push(<LibraryRefAction>a);
+                        e.actions[a.getName()] = <LibraryRefAction>a;
+                    })
+                })
+            })
+        }
+    }
+
     export class LibraryRef
         extends PropertyDecl
         implements IProperty
@@ -717,9 +776,6 @@ module TDev.AST {
                     var m = /{weight:(\d+)}/i.exec(ad)
                     if (m) a._weight = parseInt(m[1])
                     maxW = Math.max(a._weight, maxW)
-                    
-                    m = /{namespace:[^}]+}/i.exec(ad);
-                    if (m) a.namespace = m[1];
                 })
                 this._publicActions.forEach(a => { a.getUsage().apiFreq = a._weight / (maxW + 1) })
             }

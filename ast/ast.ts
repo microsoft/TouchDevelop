@@ -1704,6 +1704,15 @@ module TDev.AST {
             return null
         }
 
+        public getNamespaces():string[]
+        {
+            var desc = this.getDescription()
+            if (!/{namespace:/.test(desc)) return []
+            var res = [];
+            desc.replace(/{namespace:([^}]+)}/g, (m, ns) => { res.push(ns); return "" })
+            return res
+        }
+
         public getFlags()
         {
             var flags = !this.isAtomic ? PropertyFlags.Async : PropertyFlags.None
@@ -2325,6 +2334,7 @@ module TDev.AST {
         public diffRemovedThings: Decl[];
         public imports = new AppImports();
         public notifyVersionMarker:any = new Object();
+        public libNamespaceCache = new LibNamespaceCache(this);
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;
@@ -3322,6 +3332,7 @@ module TDev.AST {
 
         public data:string;
         public def:Decl;
+        public namespaceLibrary:LibraryRef;
         public _lastTypechecker:any;
         constructor() {
             super()

@@ -544,6 +544,7 @@ module TDev.AST.Json
                     nodeType: "singletonRef",
                     name: n.getText(),
                     type: n.def.getKind(),
+                    libraryName: n.namespaceLibrary ? n.namespaceLibrary.getName() : undefined,
                 }
             } else
                 Util.oops("unknown def " + (n.def ? n.def.nodeType() : "null"))

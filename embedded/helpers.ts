@@ -269,6 +269,8 @@ module TDev {
 
       // JCall { args: [ JSingletonRef { name = ♻ } ], name = NAME } -> NAME
       export function isLibrary(e: J.JExpr): string {
+        if (e.nodeType == "singletonRef")
+          return (<J.JSingletonRef>e).libraryName;
         return (
           e.nodeType == "call" &&
           (<J.JCall> e).args[0].nodeType == "singletonRef" &&

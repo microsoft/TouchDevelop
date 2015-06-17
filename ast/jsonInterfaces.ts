@@ -119,6 +119,7 @@ module TDev.AST.Json
         name:string;
         // type is ignored when building
         type:JTypeRef;
+        libraryName?:string; // if this is a reference to a namespace in a library, this gives the name of library
     }
 
     // It seems like TouchDevelop has an extra invariant that a [JCall] must

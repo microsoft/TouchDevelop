@@ -135,6 +135,8 @@ module TDev.AST
             try {
                 setGlobalScript(a);
                 ctx.typecheckLibraries(a);
+                // this may be too often
+                a.libNamespaceCache.recompute();
                 ctx.typeResolver.dispatch(a);
 
                 if (isTop) {
@@ -2015,7 +2017,14 @@ module TDev.AST
                     if (i > 0)
                         this.typeCheckExpr(args[i]);
                 } else {
-                    this.expectExpr(args[i], inP[i].getKind(), prop.getName(), i == 0);
+                    var expK = inP[i].getKind();
+                    if (i == 0 &&
+                        args[i].getThing() instanceof SingletonDef &&
+                        expK instanceof LibraryRefKind) {
+                        (<ThingRef>args[i]).namespaceLibrary = (<LibraryRefKind>expK).lib
+                    } else {
+                        this.expectExpr(args[i], expK, prop.getName(), i == 0);
+                    }
                     args[i].languageHint = inP[i].languageHint
                     var str = inP[i].getStringValues()
                     var emap = str && (<any>str).enumMap
