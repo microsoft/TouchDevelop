@@ -6,7 +6,7 @@
 .vbox {
   display: flex;
   display: -webkit-flex;
-  display: -ms-flex;
+  display: -ms-flexbox;
   flex-direction: column;
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
@@ -15,7 +15,7 @@
 .hbox {
   display: flex;
   display: -webkit-flex;
-  display: -ms-flex;
+  display: -ms-flexbox;
 }
 
 .flex1 {
@@ -160,7 +160,7 @@ body, input {
 /* Buttons */
 .roundbutton {
   display: -webkit-flex;
-  display: -ms-flex;
+  display: -ms-flexbox;
   display: flex;
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
