@@ -711,9 +711,8 @@ var empty: Environment = {
 
 function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
-  // Notice the <= (if there's no else-if, we still compile the primary if). The
-  // NaN thing is a Blockly weirdness.
-  for (var i = 0; i <= (b.elseifCount_ != b.elseifCount_ ? 0 : b.elseifCount_); ++i) {
+  // Notice the <= (if there's no else-if, we still compile the primary if).
+  for (var i = 0; i <= b.elseifCount_; ++i) {
     var cond = compileExpression(e, b.getInputTargetBlock("IF"+i), Type.Boolean);
     var thenBranch = compileStatements(e, b.getInputTargetBlock("DO"+i));
     stmts.push(H.mkSimpleIf(H.mkExprHolder([], cond), thenBranch));
