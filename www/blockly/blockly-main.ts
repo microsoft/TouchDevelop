@@ -250,20 +250,18 @@ module TDev {
 
   function setDescription(x: string) {
     $("#script-description").text(x);
-    $("#input-script-description").val(x || "");
   }
 
   function setName(x: string) {
     $("#script-name").text(x);
-    $("#input-script-name").val(x);
   }
 
   function getDescription() {
-    return $("#input-script-description").val();
+    return $("#script-description").text();
   }
 
   function getName() {
-    return $("#input-script-name").val();
+    return $("#script-name").text();
   }
 
   var dirty = false;
@@ -322,19 +320,19 @@ module TDev {
         dirty = true;
       });
     }, 1);
-    $("#input-script-name").on("input", () => {
-      $("#script-name").text($("#input-script-name").val());
+    $("#script-name").on("input", () => {
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
-    $("#input-script-description").on("input", () => {
-      $("#script-description").text($("#input-script-description").val());
+    $("#script-description").on("input", () => {
       statusMsg("✎ local changes", External.Status.Ok);
       dirty = true;
     });
 
     setName(message.script.metadata.name);
     setDescription(message.script.metadata.comment);
+    if (!message.script.baseSnapshot && !message.script.metadata.comment)
+      setDescription("A #blocks script");
 
     // That's triggered when the user closes or reloads the whole page, but
     // doesn't help if the user hits the "back" button in our UI.
@@ -350,7 +348,6 @@ module TDev {
       doSave();
     }, 5000);
 
-    setupPopup($("#link-edit"), $("#popup-edit"));
     setupPopup($("#link-log"), $("#popup-log"));
     setupPopups();
 

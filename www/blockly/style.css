@@ -194,10 +194,6 @@ a.command:hover {
 }
 
 /* Override a few blockly styles. */
-.blocklyMainBackground {
-  display: none;
-}
-
 .blocklyError > .blocklyPath {
   stroke: #d9301a !important;
   stroke-width: 3px;

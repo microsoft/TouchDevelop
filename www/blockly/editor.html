@@ -41,16 +41,13 @@
         <div id="merge-commands" class="vbox flex1">
         </div>
         <div class="vbox" id="script-box">
-          <div id="script-name" class="flex1">
+          <div id="script-name" class="flex1" contenteditable>
           </div>
-          <div id="script-description">
+          <div id="script-description" contenteditable>
           </div>
           <div id="script-icons" class="hbox">
             <div id="cloud-status" class="flex1">
               <i class="fa fa-cloud-upload" title="Script loaded"></i>
-            </div>
-            <div>
-              <i id="link-edit" class="fa fa-pencil-square"></i>
             </div>
             <div>
               <i id="link-log" class="fa fa-info-circle"></i>
@@ -293,12 +290,6 @@
           I could not understand some blocks. Fix errors or
           <a class="command" href="#" id="command-force-compile">compile anyway</a>.
         </div>
-      </div>
-    </div>
-    <div class="popup hidden" id="popup-edit">
-      <div class="popup-inner">
-        <div><b>Your script name:</b> <input id="input-script-name" /></div>
-        <div><b>Your script description:</b> <input id="input-script-description" /></div>
       </div>
     </div>
   </body>
