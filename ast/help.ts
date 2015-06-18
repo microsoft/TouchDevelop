@@ -1193,8 +1193,8 @@ module TDev {
             }
 
             if (/^    /.test(s)) return "<pre>" + Util.htmlEscape(s.slice(4)) + "</pre>";
-            if (/^-{3,}\s*$/.test(s)) return this.designTime ? s : "<hr/>";
-            if (/^\*{3,}\s*$/.test(s)) return this.designTime ? s : "<div style='page-break-after:always'></div>";
+            if (/^-{5,}\s*$/.test(s)) return this.designTime ? s : "<hr/>";
+            if (/^\*{5,}\s*$/.test(s)) return this.designTime ? s : "<div style='page-break-after:always'></div>";
 
             s = s.replace(/^#\s+(.*)/, wrap("h1"));
             s = s.replace(/^##\s+(.*)/, wrap("h2"));
