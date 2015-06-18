@@ -1328,8 +1328,7 @@ module TDev.Browser {
                 Util.fmt("<h3>{0:q} requires sign&nbsp;in</h3>", name) +
                   "<p class='agree'>" +
                   "This tutorial uses cloud data which is shared with other users." +
-                  "</p>" +
-                  "<p class='agree'>You can sign in with your Microsoft, Google, Facebook or Yahoo account.</p>"
+                  "</p>"
                 )
             m.fullWhite();
             m.add(div("wall-dialog-buttons",
@@ -2043,7 +2042,7 @@ module TDev.Browser {
                             d.canDismiss = true;
                             d.dismiss();
                         }
-                    }, "gray-button")
+                    }, "green-button")
                 ));
                 d.fullWhite()
                     d.canDismiss = false;

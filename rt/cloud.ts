@@ -314,11 +314,8 @@ module TDev.Cloud {
                     Util.fmt("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
                     (!(<any>TDev).TheEditor ? "" :
                       "<p class='agree'>" +
-                      "After you sign in we will back up and sync scripts between your devices. " +
-                      "You will be able to publish scripts, join and create groups, post comments, post leaderboard scores, and give hearts. " +
-                      "In short, it's totally awesome!" +
-                      "</p>") +
-                      "<p class='agree'>You can sign in with your Microsoft, Google, Facebook or Yahoo account.</p>"
+                      lf("After you sign in we will back up and sync scripts between your devices.") +
+                      "</p>")
                     )
                 m.fullWhite();
                 var ignoreDismiss = false;
@@ -329,7 +326,7 @@ module TDev.Cloud {
                         m.dismiss()
                         if (login) login.show();
                         else loginAsync().done(v => r.success(v))
-                    })));
+                    }, "green-button")));
                 m.onDismiss = () => {
                     if (!ignoreDismiss) r.success(false);
                 };
