@@ -936,7 +936,7 @@ module TDev {
                     return "";
                 else
                     return "<div class='md-tutorial md-warning'>" +
-                        "<strong>This code might not work on your current device</strong>: missing " + AST.App.capabilityName(missing) + " capabilities." +
+                        "<strong>" + lf("This code might not work on your current device") + "</strong>: " + lf("missing {0} capabilities.", AST.App.capabilityName(missing)) +
                         "</div>";
             } else if (macro == "webonly") {
                 if (this.designTime)
@@ -1192,15 +1192,16 @@ module TDev {
                 }
             }
 
-            if (/^    /.test(s)) {
-                return "<pre>" + Util.htmlEscape(s.slice(4)) + "</pre>";
-            }
+            if (/^    /.test(s)) return "<pre>" + Util.htmlEscape(s.slice(4)) + "</pre>";
+            if (/^-{3,}\s*$/.test(s)) return this.designTime ? s : "<hr/>";
+            if (/^\*{3,}\s*$/.test(s)) return this.designTime ? s : "<div style='page-break-after:always'></div>";
 
             s = s.replace(/^#\s+(.*)/, wrap("h1"));
             s = s.replace(/^##\s+(.*)/, wrap("h2"));
             s = s.replace(/^###\s+(.*)/, wrap("h3"));
             s = s.replace(/^####\s+(.*)/, wrap("h4"));
             s = s.replace(/^>\s+(.*)/, wrap("blockquote"));
+            
 
             s = s.replace(/^[-+*]\s+(.*)/, wrap("ul><li", "/li></ul"));
             s = s.replace(/^\d+\.\s+(.*)/, wrap("ol><li", "/li></ol"));
