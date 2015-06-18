@@ -1805,9 +1805,14 @@ span.errorSq .kw
     flex: 1;
 }
 
+#externalEditorSide .wallFullScreenLogo {
+    text-align: center;
+}
+
 #externalEditorSide .wallFullScreenLogo img {
     width: calc(100% - 2em);
-    padding: 1em;
+    max-width: 225px;
+    margin: 1em;
 }
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
