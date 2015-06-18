@@ -1032,7 +1032,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
       if ((<any> e).block)
         Errors.report(e+"", (<any> e).block);
       else
-        throw e;
+        Errors.report(e+"", b);
     }
     b = b.getNextBlock();
   }
