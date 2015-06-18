@@ -861,6 +861,16 @@ module TDev {
                 return Util.fmt("<!-- FOLLOW --><a href=\"{0:q}\">{1:q}</a>",
                     this.appLink("#pub:" + MdComments.shrink(args[0])),
                     args[1])
+            } else if (macro == "section") {
+                var mm = /^([^:;]+)[;:](.*)/.exec(arg)
+                var sectName = mm ? mm[1] : arg
+                var output = Util.fmt("--------------------------- <b>{0:q}</b> ---------------------------", sectName)
+                if (mm) {
+                    mm[2].split(';').forEach(a => {
+                        output += Util.fmt("<div class='md-section'>;; {0:q}</div>", a)
+                    })
+                }
+                return output;
             } else if (macro == "hide" || macro == "priority" || macro == "template" || macro == "highlight" ||
                 macro == 'box' || macro == "code" || macro == "widgets" || macro == "templatename" ||
                 macro == "hints" || macro == "pichints" || macro == "enum" || macro == "language" || macro == "weight" || macro == "namespace" ||
@@ -1333,6 +1343,11 @@ module TDev {
                         }
                         output += this.mkSnippet(stmts.slice(i + 1, j));
                         i = j + 1;
+                    } else if ((m = /^\s*\{section:(.*)\}\s*$/.exec(cmt)) != null) {
+                        var mm = /^([^:;]+)[;:](.*)/.exec(m[1])
+                        var sectName = mm ? mm[1] : m[1]
+                        output += Util.fmt("<hr class='md-section' data-name='{0:uri}' data-arguments='{1:uri}' />", sectName, mm ? mm[2] : "")
+                        i++;
                     } else if ((m = /^\s*\{box:([^{}]*)\}\s*$/.exec(cmt)) != null) {
                         if (currBox) output += "</div>";
                         var parts = m[1].split(':');

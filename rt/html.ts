@@ -1110,6 +1110,7 @@ module TDev.HTML {
 "audio": 1,         // Sound content
 "track": 1,         // Text tracks for media elements (<video> and <audio>)
 "small": 1,         // Smaller text (supported by bootstrap)
+"hr": 1,            // A thematic change in the content
 
 "iframe": 1,        // An inline frame
 
@@ -1144,7 +1145,6 @@ module TDev.HTML {
 "footer": 2,        // A footer for a document or section
 "header": 2,        // A header for a document or section
 "hgroup": 2,        // A group of headings
-"hr": 2,            // A thematic change in the content
 "input": 2,         // An input control
 "ins": 2,           // A text that has been inserted into a document
 "kbd": 2,           // Keyboard input
