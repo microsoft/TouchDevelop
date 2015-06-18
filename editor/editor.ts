@@ -1989,41 +1989,32 @@ module TDev
         }
         */
 
-        private currentScriptCompiling: string;
-        private compile(btn : HTMLElement, debug: boolean) {
-            Util.log("compiling script");
-            if (Cloud.anonMode(lf("C++ compilation")))
-              return;
+        private currentCompilationModalDialog;
 
-            if (AST.TypeChecker.tcApp(Script) > 0) {
-                ModalDialog.info(lf("Your script has errors!"), lf("Fix your errors and try again."));
-                return;
-            }
-
-            var src = Script.serialize();
-            if (this.currentScriptCompiling === src) {
-                // same script that's already compiling, nothing to do
-                Util.log("same compilation, skipping...");
-                HTML.showProgressNotification(lf("still compiling, please wait..."));
-                return;
-            }
-            this.currentScriptCompiling = src;
-
-            var m = new ModalDialog();
+        // Does the right thing™ with the UI and handles: retries (user tries to
+        // compile the script while we're still waiting), errors, debug
+        // information. Returns a promise with the JSON returned from the cloud
+        // (structure unknown).
+        public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
+            this.currentCompilationModalDialog = new ModalDialog();
             var progress = HTML.mkProgressBar(); progress.start();
-            m.add(progress);
-            m.add(div("wall-dialog-header", lf("compiling...")));
-            m.add(div("wall-dialog-body", lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")));
-            m.add(Browser.TheHost.poweredByElements());
-            m.fullWhite();
-            m.show();
-            btn.setFlag("working", true);
-            btn.classList.add("disabledItem");
+            this.currentCompilationModalDialog.add(progress);
+            this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
+            this.currentCompilationModalDialog.add(div("wall-dialog-body", lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")));
+            this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
+            this.currentCompilationModalDialog.fullWhite();
+            this.currentCompilationModalDialog.show();
+            if (btn) {
+                btn.setFlag("working", true);
+                btn.classList.add("disabledItem");
+            }
 
-            var notifyCompiled = (): boolean => {
-                m.dismiss();
-                btn.setFlag("working", false);
-                btn.classList.remove("disabledItem");                
+            var notifyCompiled = (src: string): boolean => {
+                if (btn) {
+                    btn.setFlag("working", false);
+                    btn.classList.remove("disabledItem");                
+                }
+                this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
                 var r = src === this.currentScriptCompiling;
@@ -2033,15 +2024,24 @@ module TDev
                 return r;
             }
 
-            Embedded.compile(AST.Json.dump(Script)).then((cpp: string) => {
+            return cpp.then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);
-                    notifyCompiled();
+                    notifyCompiled(cpp);
                     return;
                 }
-                Cloud.postUserInstalledCompileAsync(ScriptEditorWorldInfo.guid, cpp, { name: Script.getName() }).then(json => {
+
+                if (this.currentScriptCompiling === cpp) {
+                    // same script that's already compiling, nothing to do
+                    Util.log("same compilation, skipping...");
+                    HTML.showProgressNotification(lf("still compiling, please wait..."));
+                    return;
+                }
+                this.currentScriptCompiling = cpp;
+
+                return Cloud.postUserInstalledCompileAsync(guid, cpp, { name: name }).then(json => {
                     console.log(json);
-                    if (notifyCompiled()) {
+                    if (notifyCompiled(cpp)) {
                         if (!json.success) {
                             ModalDialog.showText(
                                 "For debugging, here's the URL to the JSON file:\n" + json.url +
@@ -2052,14 +2052,30 @@ module TDev
                             document.location.href = json.hexurl;
                         }
                     }
+                    return json;
                 }, json => {
-                    if(notifyCompiled())
+                    if (notifyCompiled(cpp))
                         ModalDialog.info(lf("Compilation error"), lf("Unknown early compilation error"));
+                    return json;
                 });
             }, (error: any) => {
-                if(notifyCompiled())
+                if (notifyCompiled(""))
                     ModalDialog.info(lf("Compilation error"), error.message);
             });
+        }
+
+        private currentScriptCompiling: string;
+        private compile(btn : HTMLElement, debug: boolean) {
+            if (Cloud.anonMode(lf("C++ compilation")))
+                return;
+
+            if (AST.TypeChecker.tcApp(Script) > 0) {
+                ModalDialog.info(lf("Your script has errors!"), lf("Fix your errors and try again."));
+                return;
+            }
+
+            Util.log("compiling script");
+            this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn);
         }
 
         public setupPlayButton()

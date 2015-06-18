@@ -338,38 +338,34 @@ module TDev {
                 });
                 break;
             }
-            cpp.then((cpp: string) => {
-              console.log(cpp);
-              Cloud.postUserInstalledCompileAsync(this.guid, cpp, {
-                name: message1.name
-              }).then(json => {
-                // Success.
-                console.log(json);
-                if (json.success) {
-                  this.post(<Message_CompileAck>{
-                    type: MessageType.CompileAck,
-                    status: Status.Ok
-                  });
-                  document.location.href = json.hexurl;
-                } else {
-                  var errorMsg = makeOutMbedErrorMsg(json);
-                  this.post(<Message_CompileAck>{
-                    type: MessageType.CompileAck,
-                    status: Status.Error,
-                    error: errorMsg
-                  });
-                }
-              }, (json: string) => {
-                // Failure
-                console.log(json);
+            TheEditor.compileWithUi(this.guid, cpp, message1.name).then(json => {
+              console.log(json);
+              // Aborted because of a retry, perhaps.
+              if (!json)
+                return;
+
+              if (json.success) {
+                this.post(<Message_CompileAck>{
+                  type: MessageType.CompileAck,
+                  status: Status.Ok
+                });
+                document.location.href = json.hexurl;
+              } else {
+                var errorMsg = makeOutMbedErrorMsg(json);
                 this.post(<Message_CompileAck>{
                   type: MessageType.CompileAck,
                   status: Status.Error,
-                  error: "early error"
+                  error: errorMsg
                 });
+              }
+            }, (json: string) => {
+              // Failure
+              console.log(json);
+              this.post(<Message_CompileAck>{
+                type: MessageType.CompileAck,
+                status: Status.Error,
+                error: "early error"
               });
-            }, (error: any) => {
-              ModalDialog.info(lf("Compilation error"), error.message);
             });
             break;
 
