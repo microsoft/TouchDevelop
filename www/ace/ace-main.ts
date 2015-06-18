@@ -113,7 +113,7 @@ module TDev {
                     baseSnapshot: currentVersion,
                     metadata: {
                         name: scriptName,
-                        description: ""
+                        comment: ""
                     }
                 },
             };

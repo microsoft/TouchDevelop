@@ -108,7 +108,7 @@ module TDev {
 
         export interface Metadata {
             name: string;
-            description: string;
+            comment: string;
         }
 
         // In case local and remote modifications have been posted on top of the same cloud

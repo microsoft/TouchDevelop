@@ -393,7 +393,7 @@ module TDev {
 
           default:
             // Apparently the runtime loop of the simulator is implemented using
-            // messages on any origins... see [rt/util.ts]. So just don't do
+            // messages sent to all origins... see [rt/util.ts]. So just don't do
             // anything if we receive an unrecognized message.
             break;
         }

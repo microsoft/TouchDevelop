@@ -167,12 +167,12 @@ module TDev {
     var theirsButton = mkButton("🔍", "see theirs", () => {
       loadBlockly(merge.theirs.scriptText);
       setName(merge.theirs.metadata.name);
-      setDescription(merge.theirs.metadata.description);
+      setDescription(merge.theirs.metadata.comment);
     });
     var baseButton = mkButton("🔍", "see base", () => {
       loadBlockly(merge.base.scriptText);
       setName(merge.base.metadata.name);
-      setDescription(merge.base.metadata.description);
+      setDescription(merge.base.metadata.comment);
     });
     var mergeButton = mkButton("👍", "finish merge", () => {
       inMerge = false;
@@ -318,7 +318,7 @@ module TDev {
     });
 
     setName(message.script.metadata.name);
-    setDescription(message.script.metadata.description);
+    setDescription(message.script.metadata.comment);
 
     // That's triggered when the user closes or reloads the whole page, but
     // doesn't help if the user hits the "back" button in our UI.
@@ -365,7 +365,7 @@ module TDev {
         baseSnapshot: currentVersion,
         metadata: {
           name: getName(),
-          description: getDescription()
+          comment: getDescription()
         }
       },
     });
