@@ -388,7 +388,6 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
-                    publishDescription: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
@@ -451,7 +450,6 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
-                    publishDescription: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
@@ -462,6 +460,7 @@ module TDev.Browser {
                     searchArtRefactoring: true,
 
                     // editor specific                  
+                    publishDescription: true,
                     sendPullRequest: true,
                     scriptPullChanges: true,
                     testAction: true,
