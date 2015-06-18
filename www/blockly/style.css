@@ -200,6 +200,34 @@ a.command:hover {
   text-decoration: underline;
 }
 
+/* Some overrides for narrow displays */
+@media (max-width: 1024px) {
+  .roundbutton {
+    display: inline;
+  }
+
+  .roundsymbol {
+    width: 2rem;
+    height: 2rem;
+    line-height: 2.05rem;
+    font-size: 1.3rem;
+    margin: 0;
+  }
+
+  .roundbutton > * {
+    display: inline-block;
+  }
+
+  #toolbox {
+    flex-direction: column;
+    -ms-flex-direction: column;
+  }
+
+  #script-name {
+    font-size: 2rem;
+  }
+}
+
 /* Override a few blockly styles. */
 .blocklyError > .blocklyPath {
   stroke: #d9301a !important;
