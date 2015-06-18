@@ -102,6 +102,7 @@ module TDev.Browser {
                 librariesSection: true,
                 scriptPropertiesIcons: true,
                 scriptPropertiesSettings: true,
+                scriptPropertiesPropertyAtomic: true,
                 scriptPropertiesManagement: true,
                 databaseSection: true,
                 persistanceRadio: true,
@@ -179,6 +180,7 @@ module TDev.Browser {
                 artSection: true,
                 librariesSection: true,
                 scriptPropertiesSettings: true,
+                scriptPropertiesPropertyAtomic: true,
                 databaseSection: true,
                 // statements
                 comment: true,
@@ -424,6 +426,7 @@ module TDev.Browser {
                     codeSearch: true,
                     librariesSection: true,
                     scriptPropertiesSettings: true,
+                    scriptPropertiesPropertyAtomic: true,
                     editorRunOnLoad: true,
                     whileConditionDefault: "true",
                     forConditionDefault: "5",

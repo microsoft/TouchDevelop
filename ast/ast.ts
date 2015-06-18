@@ -4933,6 +4933,8 @@ module TDev.AST {
         {
             if (a._skipIntelliProfile)
                 return
+            if (a.isAtomic)
+                this.incr("scriptPropertiesPropertyAtomic");
             a.getInParameters().forEach(ai => {
                 this.incr(ai.getKind().getName());
             })

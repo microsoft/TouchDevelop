@@ -140,6 +140,7 @@ module TDev
             this.actionName.readOnly = ev;
             var act = this.theAction.action;
             var showSettings = TheEditor.widgetEnabled("actionSettings");
+            var showAtomic = showSettings && TheEditor.widgetEnabled("scriptPropertiesPropertyAtomic");
             var asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
             var singleReturnValue = TheEditor.widgetEnabled("singleReturnValue");
             if (asAction && !Script.isLibrary) this.actionName.readOnly = true;
@@ -150,7 +151,7 @@ module TDev
                   !showSettings || ev ? null : this.privateAction,
                   !showSettings || ev ? null : div("formHint",
                     Script.isLibrary ? lf("Private functions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
-                  !showSettings || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
+                  !showAtomic || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
                   ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
                   ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
                   ActionProperties.copyCutRefs(lf("the current function"), this.theAction.action),

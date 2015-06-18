@@ -133,6 +133,7 @@ module TDev.Cloud {
         wallLogsButton?: boolean;
         scriptPropertiesPropertyCloud?: boolean;
         scriptPropertiesPropertyAllowExport?: boolean;
+        scriptPropertiesPropertyAtomic?: boolean;
         stringEditFullScreen?: boolean;
         persistanceRadio?: boolean;
         wallScreenshot?: boolean;
