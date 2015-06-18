@@ -32,8 +32,8 @@ function echo(s:string)
 var braceBalance = (s:string) =>
     s.replace(/[^{]/g, "").length - s.replace(/[^}]/g, "").length;
 
-var prefixedProperties = /^(transform|transition|animation|box-sizing|column-)[-a-z]*$/;
-var prefixes = ["webkit", "moz"];
+var prefixedProperties = /^(flex|flex-|transform|transition|animation|box-sizing|column-)[-a-z]*$/;
+var prefixes = ["webkit", "moz", "ms"];
 
 var addPrefixToContent = (pref:string, cont:string) =>
     (<any>cont).replace(/( )([-a-z]+)([ ;:]|$)/g, function (str, a, b, c) {
@@ -79,7 +79,7 @@ forEachFile("www", function (s) {
             }
         }
 
-        var res = /^(\s*)([\-a-z]*)\s*:(.*)/.exec(line);
+        var res = /^(\s*)([\-a-z]*)\s*:(\s*([^;]+).*)/.exec(line);
 
         if (!!res) {
             var spc = res[1];
@@ -90,6 +90,11 @@ forEachFile("www", function (s) {
                 line += "                      /*CSSpref*/";
                 prefixes.forEach(function (pref) {
                     line += "  -" + pref + "-" + propname + ":" + addPrefixToContent(pref, content);
+                });
+            } else if (prefixedProperties.test(res[4])) {
+                line += "                      /*CSSpref*/";
+                prefixes.forEach(function (pref) {
+                    line += "  "+propname + ":" + addPrefixToContent(pref, content);
                 });
             }
         }

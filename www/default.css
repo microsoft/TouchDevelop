@@ -74,7 +74,7 @@ span.bold {
 }
 
 textarea {
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
 }
 
 .logView {
@@ -120,7 +120,7 @@ textarea {
 
 input.logSearchInput {
     width: 100%;
-    box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+    box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
     margin: 0px 0px 0.5em 0em;
 }
 
@@ -359,7 +359,7 @@ font-size:1.2em;
 .modalSearch input {
   margin: 0;
   width: 100%;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
 }
 
 .modalSearchHeader {
@@ -623,7 +623,7 @@ div.wall-dialog {
   padding: 0.5em;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
-  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;  -ms-column-break-inside: avoid;
 }
 
 div.wallExnBlock {
@@ -1117,7 +1117,7 @@ table.traces td
 .picker-input input.wall-textbox {
   width: 100%;
   margin: 0;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
 }
 
 input[data-invalid^="yes"]
@@ -1266,8 +1266,8 @@ input[data-invalid^="yes"]
 
 .landscape .wallWithColumns .classic-page
 {
-  column-width: 18.5em;                      /*CSSpref*/  -webkit-column-width: 18.5em;  -moz-column-width: 18.5em;
-  column-fill: auto;                      /*CSSpref*/  -webkit-column-fill: auto;  -moz-column-fill: auto;
+  column-width: 18.5em;                      /*CSSpref*/  -webkit-column-width: 18.5em;  -moz-column-width: 18.5em;  -ms-column-width: 18.5em;
+  column-fill: auto;                      /*CSSpref*/  -webkit-column-fill: auto;  -moz-column-fill: auto;  -ms-column-fill: auto;
   padding-left: 1.5em;
   padding-bottom: 1.5em;
 }
@@ -1466,7 +1466,7 @@ height: 100%;
 .expandingTextAreaContainer textarea {
   height: 100%;
   width: 100%;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
   overflow: hidden;
   position: absolute;
   line-height: normal;
@@ -1505,7 +1505,7 @@ height: 100%;
   margin-top: 0.5em;
   margin-bottom: 1em;
   position: relative;
-  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;                      /*CSSpref*/  -webkit-column-break-inside: avoid;  -moz-column-break-inside: avoid;  -ms-column-break-inside: avoid;
 }
 
 .item .item-crash {
@@ -1771,7 +1771,7 @@ height: 100%;
 
 
 .showFromBelow {
-  animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);                      /*CSSpref*/  -webkit-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);  -moz-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);                      /*CSSpref*/  -webkit-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);  -moz-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);  -ms-animation: showFromBelow 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
 .bg-critical {
@@ -1781,88 +1781,88 @@ height: 100%;
 @keyframes showFromBelow {
   from {
     opacity: 0;
-    transform: translate(0, 1em);                      /*CSSpref*/  -webkit-transform: translate(0, 1em);  -moz-transform: translate(0, 1em);
+    transform: translate(0, 1em);                      /*CSSpref*/  -webkit-transform: translate(0, 1em);  -moz-transform: translate(0, 1em);  -ms-transform: translate(0, 1em);
   }
   to {
     opacity: 1;
-    transform: none;                      /*CSSpref*/  -webkit-transform: none;  -moz-transform: none;
+    transform: none;                      /*CSSpref*/  -webkit-transform: none;  -moz-transform: none;  -ms-transform: none;
   }
-}   /*CSSpref*/ @-webkit-keyframes showFromBelow { from { opacity: 0; -webkit-transform: translate(0, 1em); } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showFromBelow { from { opacity: 0; -moz-transform: translate(0, 1em); } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showFromBelow { from { opacity: 0; -webkit-transform: translate(0, 1em); } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showFromBelow { from { opacity: 0; -moz-transform: translate(0, 1em); } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showFromBelow { from { opacity: 0; -ms-transform: translate(0, 1em); } to { opacity: 1; -ms-transform: none; } }
 
 
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-moz-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+}   /*CSSpref*/ @-webkit-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-moz-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }  @-ms-keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-moz-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-moz-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }  @-ms-keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @keyframes showPopup {
   from { opacity: 0; transform: translate(0, 2em); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPopup { from { opacity: 0; -webkit-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPopup { from { opacity: 0; -moz-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showPopup { from { opacity: 0; -webkit-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPopup { from { opacity: 0; -moz-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showPopup { from { opacity: 0; -ms-transform: translate(0, 2em); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes showRightPanel {
   from { opacity: 0; transform: translate(1em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showRightPanel { from { opacity: 0; -webkit-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showRightPanel { from { opacity: 0; -moz-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showRightPanel { from { opacity: 0; -webkit-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showRightPanel { from { opacity: 0; -moz-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showRightPanel { from { opacity: 0; -ms-transform: translate(1em, 0); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes showLeftPanel {
   from { opacity: 0; transform: translate(-1em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showLeftPanel { from { opacity: 0; -webkit-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showLeftPanel { from { opacity: 0; -moz-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showLeftPanel { from { opacity: 0; -webkit-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showLeftPanel { from { opacity: 0; -moz-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showLeftPanel { from { opacity: 0; -ms-transform: translate(-1em, 0); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes showBottomPanel {
   from { opacity: 0; transform: translate(0, 1em); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showBottomPanel { from { opacity: 0; -webkit-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showBottomPanel { from { opacity: 0; -moz-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showBottomPanel { from { opacity: 0; -webkit-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showBottomPanel { from { opacity: 0; -moz-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showBottomPanel { from { opacity: 0; -ms-transform: translate(0, 1em); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes flipTile {
   from { transform: none; }
   50% { transform: scale(-4, 4) }
   to { transform: scale(16, 16); }
-}   /*CSSpref*/ @-webkit-keyframes flipTile { from { -webkit-transform: none; } 50% { -webkit-transform: scale(-4, 4) } to { -webkit-transform: scale(16, 16); } }  @-moz-keyframes flipTile { from { -moz-transform: none; } 50% { -moz-transform: scale(-4, 4) } to { -moz-transform: scale(16, 16); } }
+}   /*CSSpref*/ @-webkit-keyframes flipTile { from { -webkit-transform: none; } 50% { -webkit-transform: scale(-4, 4) } to { -webkit-transform: scale(16, 16); } }  @-moz-keyframes flipTile { from { -moz-transform: none; } 50% { -moz-transform: scale(-4, 4) } to { -moz-transform: scale(16, 16); } }  @-ms-keyframes flipTile { from { -ms-transform: none; } 50% { -ms-transform: scale(-4, 4) } to { -ms-transform: scale(16, 16); } }
 
 @keyframes fadeSlide {
   from { transform: none; opacity: 1; }
   to { transform: translate(4em, -4em); opacity: 0; }
-}   /*CSSpref*/ @-webkit-keyframes fadeSlide { from { -webkit-transform: none; opacity: 1; } to { -webkit-transform: translate(4em, -4em); opacity: 0; } }  @-moz-keyframes fadeSlide { from { -moz-transform: none; opacity: 1; } to { -moz-transform: translate(4em, -4em); opacity: 0; } }
+}   /*CSSpref*/ @-webkit-keyframes fadeSlide { from { -webkit-transform: none; opacity: 1; } to { -webkit-transform: translate(4em, -4em); opacity: 0; } }  @-moz-keyframes fadeSlide { from { -moz-transform: none; opacity: 1; } to { -moz-transform: translate(4em, -4em); opacity: 0; } }  @-ms-keyframes fadeSlide { from { -ms-transform: none; opacity: 1; } to { -ms-transform: translate(4em, -4em); opacity: 0; } }
 
 @keyframes showPageLeft {
   from { opacity: 0; transform: translate(-10em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPageLeft { from { opacity: 0; -webkit-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageLeft { from { opacity: 0; -moz-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showPageLeft { from { opacity: 0; -webkit-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageLeft { from { opacity: 0; -moz-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showPageLeft { from { opacity: 0; -ms-transform: translate(-10em, 0); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes hidePageLeft {
   from { opacity: 1; transform: none; }
   to { opacity: 0; transform: translate(10em, 0); }
-}   /*CSSpref*/ @-webkit-keyframes hidePageLeft { from { opacity: 1; -webkit-transform: none; } to { opacity: 0; -webkit-transform: translate(10em, 0); } }  @-moz-keyframes hidePageLeft { from { opacity: 1; -moz-transform: none; } to { opacity: 0; -moz-transform: translate(10em, 0); } }
+}   /*CSSpref*/ @-webkit-keyframes hidePageLeft { from { opacity: 1; -webkit-transform: none; } to { opacity: 0; -webkit-transform: translate(10em, 0); } }  @-moz-keyframes hidePageLeft { from { opacity: 1; -moz-transform: none; } to { opacity: 0; -moz-transform: translate(10em, 0); } }  @-ms-keyframes hidePageLeft { from { opacity: 1; -ms-transform: none; } to { opacity: 0; -ms-transform: translate(10em, 0); } }
 
 @keyframes showPageRight {
   from { opacity: 0; transform: translate(10em, 0); }
   70% { opacity: 1; }
   to { opacity: 1; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes showPageRight { from { opacity: 0; -webkit-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageRight { from { opacity: 0; -moz-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes showPageRight { from { opacity: 0; -webkit-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -webkit-transform: none; } }  @-moz-keyframes showPageRight { from { opacity: 0; -moz-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -moz-transform: none; } }  @-ms-keyframes showPageRight { from { opacity: 0; -ms-transform: translate(10em, 0); } 70% { opacity: 1; } to { opacity: 1; -ms-transform: none; } }
 
 @keyframes hidePageDown {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, 10em) scale(0.5) }
   100% { transform: translate(0, 30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes hidePageDown { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageDown { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
+}   /*CSSpref*/ @-webkit-keyframes hidePageDown { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageDown { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-ms-keyframes hidePageDown { 0% { -ms-transform: translate(0,0) } 60% { -ms-transform: translate(0, 10em) scale(0.5) } 100% { -ms-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
 
 @keyframes hidePageUp {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, -10em) scale(0.5) }
   100% { transform: translate(0, -30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes hidePageUp { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, -10em) scale(0.5) } 100% { -webkit-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageUp { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, -10em) scale(0.5) } 100% { -moz-transform: translate(0, -30em) scale(0.5); opacity: 0 } }
+}   /*CSSpref*/ @-webkit-keyframes hidePageUp { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, -10em) scale(0.5) } 100% { -webkit-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-moz-keyframes hidePageUp { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, -10em) scale(0.5) } 100% { -moz-transform: translate(0, -30em) scale(0.5); opacity: 0 } }  @-ms-keyframes hidePageUp { 0% { -ms-transform: translate(0,0) } 60% { -ms-transform: translate(0, -10em) scale(0.5) } 100% { -ms-transform: translate(0, -30em) scale(0.5); opacity: 0 } }
 
 
 a.button, a.button:hover, a.button:visited {

@@ -592,7 +592,7 @@ div.calcCursor
   position: absolute;
   color: #E72A59;
   margin-left: -0.05em;
-  animation: blinkCursor 1s infinite;                      /*CSSpref*/  -webkit-animation: blinkCursor 1s infinite;  -moz-animation: blinkCursor 1s infinite;
+  animation: blinkCursor 1s infinite;                      /*CSSpref*/  -webkit-animation: blinkCursor 1s infinite;  -moz-animation: blinkCursor 1s infinite;  -ms-animation: blinkCursor 1s infinite;
 }
 
 @keyframes blinkCursor {
@@ -601,7 +601,7 @@ div.calcCursor
   41% { opacity: 0; }
   99% { opacity: 0; }
   100% { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }  @-moz-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }  @-moz-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }  @-ms-keyframes blinkCursor { 0% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0; } 99% { opacity: 0; } 100% { opacity: 1; } }
 
 div.calcButtonHelp
 {
@@ -621,7 +621,7 @@ div.calcButtonHelp
 
   color: #d01040;
   background: transparent;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
 }
 
 .phone div.calcButtonHelp {
@@ -1772,14 +1772,13 @@ span.errorSq .kw
 
 .tdLite {
     text-align: right;
-    flex: 1;
+    flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
     padding-right: .2em;
     font-weight: bold;
 }
 
 #externalEditorFrame > iframe {
-    flex: 1;
-    -webkit-flex: 1;
+    flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
     width: 100%;
     height: 100%;
 
@@ -1788,8 +1787,7 @@ span.errorSq .kw
 }
 
 #externalEditorFrame {
-    flex: 3;
-    -webkit-flex: 3;
+    flex: 3;                      /*CSSpref*/  -webkit-flex: 3;  -moz-flex: 3;  -ms-flex: 3;
 }
 
 #externalEditorSide .boardCanvas {
@@ -1799,10 +1797,8 @@ span.errorSq .kw
 
 #externalEditorSide .wallFullScreenContainer {
     margin: 0 1em;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex: 1;
-    flex: 1;
+    display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
+    flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
 }
 
 #externalEditorSide .wallFullScreenLogo {
@@ -1964,7 +1960,7 @@ div.decl > div.stmt {
   45% { background-color: #ffc; }
   60% { background-color: #ff0; }
   100% { background-color: inherit; }
-}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-ms-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }
 
 
 .codeSearchItem .navItemInner {
@@ -2084,22 +2080,17 @@ div.decl > div.stmt {
 /* Status bar */
 
 .vbox {
-  display: -webkit-flex;
-  display: flex;
-  flex-direction: column;
-  -webkit-flex-direction: column;
+  display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
+  flex-direction: column;                      /*CSSpref*/  -webkit-flex-direction: column;  -moz-flex-direction: column;  -ms-flex-direction: column;
 }
 
 .hbox {
-  display: -webkit-flex;
-  display: flex;
-  flex-direction: row;
-  -webkit-flex-direction: row;
+  display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
+  flex-direction: row;                      /*CSSpref*/  -webkit-flex-direction: row;  -moz-flex-direction: row;  -ms-flex-direction: row;
 }
 
 .flex1 {
-  flex: 1;
-  -webkit-flex: 1;
+  flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
 }
 
 .stOk, .stWarning, .stError {
@@ -2427,8 +2418,8 @@ div.decl > div.stmt {
   width: 0.3em;
   height: 0.3em;
   position: absolute;
-  animation: moveProgressDot 3s infinite;                      /*CSSpref*/  -webkit-animation: moveProgressDot 3s infinite;  -moz-animation: moveProgressDot 3s infinite;
-  transform: translate(-11em, 0);                      /*CSSpref*/  -webkit-transform: translate(-11em, 0);  -moz-transform: translate(-11em, 0);
+  animation: moveProgressDot 3s infinite;                      /*CSSpref*/  -webkit-animation: moveProgressDot 3s infinite;  -moz-animation: moveProgressDot 3s infinite;  -ms-animation: moveProgressDot 3s infinite;
+  transform: translate(-11em, 0);                      /*CSSpref*/  -webkit-transform: translate(-11em, 0);  -moz-transform: translate(-11em, 0);  -ms-transform: translate(-11em, 0);
 }
 
 .modalDialog .progressDot
@@ -2467,22 +2458,22 @@ a.md-bigbutton:hover {
 
 .progressDot-0 {
     left: 7em;
-  animation-delay: 0.9s;                      /*CSSpref*/  -webkit-animation-delay: 0.9s;  -moz-animation-delay: 0.9s;
+  animation-delay: 0.9s;                      /*CSSpref*/  -webkit-animation-delay: 0.9s;  -moz-animation-delay: 0.9s;  -ms-animation-delay: 0.9s;
 }
 
 .progressDot-1 {
     left: 8em;
-  animation-delay: 0.6s;                      /*CSSpref*/  -webkit-animation-delay: 0.6s;  -moz-animation-delay: 0.6s;
+  animation-delay: 0.6s;                      /*CSSpref*/  -webkit-animation-delay: 0.6s;  -moz-animation-delay: 0.6s;  -ms-animation-delay: 0.6s;
 }
 
 .progressDot-2 {
     left: 9em;
-  animation-delay: 0.3s;                      /*CSSpref*/  -webkit-animation-delay: 0.3s;  -moz-animation-delay: 0.3s;
+  animation-delay: 0.3s;                      /*CSSpref*/  -webkit-animation-delay: 0.3s;  -moz-animation-delay: 0.3s;  -ms-animation-delay: 0.3s;
 }
 
 .progressDot-3 {
     left: 10em;
-  animation-delay: 0s;                      /*CSSpref*/  -webkit-animation-delay: 0s;  -moz-animation-delay: 0s;
+  animation-delay: 0s;                      /*CSSpref*/  -webkit-animation-delay: 0s;  -moz-animation-delay: 0s;  -ms-animation-delay: 0s;
 }
 
 @keyframes moveProgressDot {
@@ -2490,7 +2481,7 @@ a.md-bigbutton:hover {
   35% { transform: translate(0, 0); }
   65% { transform: translate(0, 0); }
   100% { transform: translate(20em, 0); }
-}   /*CSSpref*/ @-webkit-keyframes moveProgressDot { 0% { -webkit-transform: translate(-11em, 0); } 35% { -webkit-transform: translate(0, 0); } 65% { -webkit-transform: translate(0, 0); } 100% { -webkit-transform: translate(20em, 0); } }  @-moz-keyframes moveProgressDot { 0% { -moz-transform: translate(-11em, 0); } 35% { -moz-transform: translate(0, 0); } 65% { -moz-transform: translate(0, 0); } 100% { -moz-transform: translate(20em, 0); } }
+}   /*CSSpref*/ @-webkit-keyframes moveProgressDot { 0% { -webkit-transform: translate(-11em, 0); } 35% { -webkit-transform: translate(0, 0); } 65% { -webkit-transform: translate(0, 0); } 100% { -webkit-transform: translate(20em, 0); } }  @-moz-keyframes moveProgressDot { 0% { -moz-transform: translate(-11em, 0); } 35% { -moz-transform: translate(0, 0); } 65% { -moz-transform: translate(0, 0); } 100% { -moz-transform: translate(20em, 0); } }  @-ms-keyframes moveProgressDot { 0% { -ms-transform: translate(-11em, 0); } 35% { -ms-transform: translate(0, 0); } 65% { -ms-transform: translate(0, 0); } 100% { -ms-transform: translate(20em, 0); } }
 
 /************** from scriptlist.css *************/
 .slLeft {
@@ -3385,7 +3376,7 @@ div.sdTabTileLabel {
   height: 5.3em;
   padding-top: 1.2em;
   padding-right: 1em;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
 }
 
 .sdScriptBox .sdHeaderOuter {
@@ -3624,8 +3615,8 @@ div.sdTabTileLabel {
 .sdDocsBtn[data-working^="yes"] .svg,
 .sdCmtPosting[data-working^="yes"] .svg,
 .sdCmtBtn[data-working^="yes"] .svg {
-  animation: pulse 0.5s;                      /*CSSpref*/  -webkit-animation: pulse 0.5s;  -moz-animation: pulse 0.5s;
-  animation-iteration-count: infinite;                      /*CSSpref*/  -webkit-animation-iteration-count: infinite;  -moz-animation-iteration-count: infinite;
+  animation: pulse 0.5s;                      /*CSSpref*/  -webkit-animation: pulse 0.5s;  -moz-animation: pulse 0.5s;  -ms-animation: pulse 0.5s;
+  animation-iteration-count: infinite;                      /*CSSpref*/  -webkit-animation-iteration-count: infinite;  -moz-animation-iteration-count: infinite;  -ms-animation-iteration-count: infinite;
 }
 
 .sdCmtBtn .svg {
@@ -3753,11 +3744,11 @@ right:4.5em;
   0% { transform: scale(1); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
-}   /*CSSpref*/ @-webkit-keyframes pulse { 0% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.2); } 100% { -webkit-transform: scale(1); } }  @-moz-keyframes pulse { 0% { -moz-transform: scale(1); } 50% { -moz-transform: scale(1.2); } 100% { -moz-transform: scale(1); } }
+}   /*CSSpref*/ @-webkit-keyframes pulse { 0% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.2); } 100% { -webkit-transform: scale(1); } }  @-moz-keyframes pulse { 0% { -moz-transform: scale(1); } 50% { -moz-transform: scale(1.2); } 100% { -moz-transform: scale(1); } }  @-ms-keyframes pulse { 0% { -ms-transform: scale(1); } 50% { -ms-transform: scale(1.2); } 100% { -ms-transform: scale(1); } }
 
 
 .showInstall {
-  animation: wave 3s;                      /*CSSpref*/  -webkit-animation: wave 3s;  -moz-animation: wave 3s;
+  animation: wave 3s;                      /*CSSpref*/  -webkit-animation: wave 3s;  -moz-animation: wave 3s;  -ms-animation: wave 3s;
 }
 
 @keyframes blinkOrange {
@@ -3766,7 +3757,7 @@ right:4.5em;
   40% { background: #fff; }
   60% { background: #f50; }
   100% { background: #fff; }
-}   /*CSSpref*/ @-webkit-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }  @-moz-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }  @-moz-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }  @-ms-keyframes blinkOrange { 0% { background: white; } 20% { background: #f50; } 40% { background: #fff; } 60% { background: #f50; } 100% { background: #fff; } }
 
 @keyframes wave {
   0% { transform: translate(0,5em) }
@@ -3777,14 +3768,14 @@ right:4.5em;
   60% { transform: translate(-0.5em,0) }
   80% { transform: translate(0.5em,0) }
   100% { transform: translate(0,0) }
-}   /*CSSpref*/ @-webkit-keyframes wave { 0% { -webkit-transform: translate(0,5em) } 5% { -webkit-transform: translate(0,0) } 10% { -webkit-transform: translate(1em,0) } 25% { -webkit-transform: translate(-1em,0) } 40% { -webkit-transform: translate(0.5em,0) } 60% { -webkit-transform: translate(-0.5em,0) } 80% { -webkit-transform: translate(0.5em,0) } 100% { -webkit-transform: translate(0,0) } }  @-moz-keyframes wave { 0% { -moz-transform: translate(0,5em) } 5% { -moz-transform: translate(0,0) } 10% { -moz-transform: translate(1em,0) } 25% { -moz-transform: translate(-1em,0) } 40% { -moz-transform: translate(0.5em,0) } 60% { -moz-transform: translate(-0.5em,0) } 80% { -moz-transform: translate(0.5em,0) } 100% { -moz-transform: translate(0,0) } }
+}   /*CSSpref*/ @-webkit-keyframes wave { 0% { -webkit-transform: translate(0,5em) } 5% { -webkit-transform: translate(0,0) } 10% { -webkit-transform: translate(1em,0) } 25% { -webkit-transform: translate(-1em,0) } 40% { -webkit-transform: translate(0.5em,0) } 60% { -webkit-transform: translate(-0.5em,0) } 80% { -webkit-transform: translate(0.5em,0) } 100% { -webkit-transform: translate(0,0) } }  @-moz-keyframes wave { 0% { -moz-transform: translate(0,5em) } 5% { -moz-transform: translate(0,0) } 10% { -moz-transform: translate(1em,0) } 25% { -moz-transform: translate(-1em,0) } 40% { -moz-transform: translate(0.5em,0) } 60% { -moz-transform: translate(-0.5em,0) } 80% { -moz-transform: translate(0.5em,0) } 100% { -moz-transform: translate(0,0) } }  @-ms-keyframes wave { 0% { -ms-transform: translate(0,5em) } 5% { -ms-transform: translate(0,0) } 10% { -ms-transform: translate(1em,0) } 25% { -ms-transform: translate(-1em,0) } 40% { -ms-transform: translate(0.5em,0) } 60% { -ms-transform: translate(-0.5em,0) } 80% { -ms-transform: translate(0.5em,0) } 100% { -ms-transform: translate(0,0) } }
 
 
 @keyframes delete {
   0% { transform: translate(0,0) }
   60% { transform: translate(0, 10em) scale(0.5) }
   100% { transform: translate(0, 30em) scale(0.5); opacity: 0 }
-}   /*CSSpref*/ @-webkit-keyframes delete { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes delete { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
+}   /*CSSpref*/ @-webkit-keyframes delete { 0% { -webkit-transform: translate(0,0) } 60% { -webkit-transform: translate(0, 10em) scale(0.5) } 100% { -webkit-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-moz-keyframes delete { 0% { -moz-transform: translate(0,0) } 60% { -moz-transform: translate(0, 10em) scale(0.5) } 100% { -moz-transform: translate(0, 30em) scale(0.5); opacity: 0 } }  @-ms-keyframes delete { 0% { -ms-transform: translate(0,0) } 60% { -ms-transform: translate(0, 10em) scale(0.5) } 100% { -ms-transform: translate(0, 30em) scale(0.5); opacity: 0 } }
 
 
 /* Screenshots */
@@ -4556,7 +4547,7 @@ span.videoCaption
 @keyframes pulseStar {
   0% { transform: none; }
   100% { transform: rotate(360deg); }
-}   /*CSSpref*/ @-webkit-keyframes pulseStar { 0% { -webkit-transform: none; } 100% { -webkit-transform: rotate(360deg); } }  @-moz-keyframes pulseStar { 0% { -moz-transform: none; } 100% { -moz-transform: rotate(360deg); } }
+}   /*CSSpref*/ @-webkit-keyframes pulseStar { 0% { -webkit-transform: none; } 100% { -webkit-transform: rotate(360deg); } }  @-moz-keyframes pulseStar { 0% { -moz-transform: none; } 100% { -moz-transform: rotate(360deg); } }  @-ms-keyframes pulseStar { 0% { -ms-transform: none; } 100% { -ms-transform: rotate(360deg); } }
 
 .tutorialLogo {
   font-size: 0.9em;
@@ -4695,7 +4686,7 @@ span.videoCaption
   0% { opacity: 0; }
   30% { opacity: 1; transform: scale(1.5, 1.5); }
   to { opacity: 1; }
-}   /*CSSpref*/ @-webkit-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -webkit-transform: scale(1.5, 1.5); } to { opacity: 1; } }  @-moz-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -moz-transform: scale(1.5, 1.5); } to { opacity: 1; } }
+}   /*CSSpref*/ @-webkit-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -webkit-transform: scale(1.5, 1.5); } to { opacity: 1; } }  @-moz-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -moz-transform: scale(1.5, 1.5); } to { opacity: 1; } }  @-ms-keyframes showTip { 0% { opacity: 0; } 30% { opacity: 1; -ms-transform: scale(1.5, 1.5); } to { opacity: 1; } }
 @keyframes shakeTip {
   0% { transform: none; }
   15% { transform: translate(-0.5em, 0); }
@@ -4704,7 +4695,7 @@ span.videoCaption
   60% { transform: translate(0.3em, 0); }
   75% { transform: translate(-0.1em, 0); }
   to { transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes shakeTip { 0% { -webkit-transform: none; } 15% { -webkit-transform: translate(-0.5em, 0); } 30% { -webkit-transform: translate(0.5em, 0); } 45% { -webkit-transform: translate(-0.3em, 0); } 60% { -webkit-transform: translate(0.3em, 0); } 75% { -webkit-transform: translate(-0.1em, 0); } to { -webkit-transform: none; } }  @-moz-keyframes shakeTip { 0% { -moz-transform: none; } 15% { -moz-transform: translate(-0.5em, 0); } 30% { -moz-transform: translate(0.5em, 0); } 45% { -moz-transform: translate(-0.3em, 0); } 60% { -moz-transform: translate(0.3em, 0); } 75% { -moz-transform: translate(-0.1em, 0); } to { -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes shakeTip { 0% { -webkit-transform: none; } 15% { -webkit-transform: translate(-0.5em, 0); } 30% { -webkit-transform: translate(0.5em, 0); } 45% { -webkit-transform: translate(-0.3em, 0); } 60% { -webkit-transform: translate(0.3em, 0); } 75% { -webkit-transform: translate(-0.1em, 0); } to { -webkit-transform: none; } }  @-moz-keyframes shakeTip { 0% { -moz-transform: none; } 15% { -moz-transform: translate(-0.5em, 0); } 30% { -moz-transform: translate(0.5em, 0); } 45% { -moz-transform: translate(-0.3em, 0); } 60% { -moz-transform: translate(0.3em, 0); } 75% { -moz-transform: translate(-0.1em, 0); } to { -moz-transform: none; } }  @-ms-keyframes shakeTip { 0% { -ms-transform: none; } 15% { -ms-transform: translate(-0.5em, 0); } 30% { -ms-transform: translate(0.5em, 0); } 45% { -ms-transform: translate(-0.3em, 0); } 60% { -ms-transform: translate(0.3em, 0); } 75% { -ms-transform: translate(-0.1em, 0); } to { -ms-transform: none; } }
 @keyframes pulseTarget {
   0% { }
   10% { transform: scale(1.4, 1.4); }
@@ -4713,7 +4704,7 @@ span.videoCaption
   60% { transform: scale(1, 1); }
   80% { transform: scale(1.1, 1.1); }
   100% { }
-}   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } }
+}   /*CSSpref*/ @-webkit-keyframes pulseTarget { 0% { } 10% { -webkit-transform: scale(1.4, 1.4); } 25% { -webkit-transform: scale(1, 1); } 40% { -webkit-transform: scale(1.2, 1.2); } 60% { -webkit-transform: scale(1, 1); } 80% { -webkit-transform: scale(1.1, 1.1); } 100% { } }  @-moz-keyframes pulseTarget { 0% { } 10% { -moz-transform: scale(1.4, 1.4); } 25% { -moz-transform: scale(1, 1); } 40% { -moz-transform: scale(1.2, 1.2); } 60% { -moz-transform: scale(1, 1); } 80% { -moz-transform: scale(1.1, 1.1); } 100% { } }  @-ms-keyframes pulseTarget { 0% { } 10% { -ms-transform: scale(1.4, 1.4); } 25% { -ms-transform: scale(1, 1); } 40% { -ms-transform: scale(1.2, 1.2); } 60% { -ms-transform: scale(1, 1); } 80% { -ms-transform: scale(1.1, 1.1); } 100% { } }
 
 div.bitmatrix, table.bitmatrix {
     display:inline-block;
@@ -5372,7 +5363,7 @@ img.tracking-pixel {
   position: relative;
   padding: 0.3em 0;
   font-size: 0.6em;
-  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+  box-sizing: border-box;                      /*CSSpref*/  -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;  -ms-box-sizing: border-box;
   width: 100%;
   overflow: hidden;
   cursor: pointer;
@@ -5731,28 +5722,28 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 @keyframes bgToWhite {
   50% { background: white; }
   100% { background: white; }
-}   /*CSSpref*/ @-webkit-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }  @-moz-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }
+}   /*CSSpref*/ @-webkit-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }  @-moz-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }  @-ms-keyframes bgToWhite { 50% { background: white; } 100% { background: white; } }
 
 @keyframes borderToWhite {
   50% { border-color: white; }
   100% { border-color: white; }
-}   /*CSSpref*/ @-webkit-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }  @-moz-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }
+}   /*CSSpref*/ @-webkit-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }  @-moz-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }  @-ms-keyframes borderToWhite { 50% { border-color: white; } 100% { border-color: white; } }
 
 @keyframes colorToBlack {
   50% { color: black; }
   100% { color: black; }
-}   /*CSSpref*/ @-webkit-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }  @-moz-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }
+}   /*CSSpref*/ @-webkit-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }  @-moz-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }  @-ms-keyframes colorToBlack { 50% { color: black; } 100% { color: black; } }
 
 @keyframes colorToBlue {
   50% { color: #41900d; }
   100% { color: #41900d; }
-}   /*CSSpref*/ @-webkit-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-moz-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }
+}   /*CSSpref*/ @-webkit-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-moz-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }  @-ms-keyframes colorToBlue { 50% { color: #41900d; } 100% { color: #41900d; } }
 
 @keyframes wrenchCode {
   0% { transform-origin: 20% 50% 0; transform: none; }
   70% { transform-origin: 20% 50% 0; transform: rotate(-5deg); }
   100% { transform-origin: 20% 50% 0; transform: none; }
-}   /*CSSpref*/ @-webkit-keyframes wrenchCode { 0% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } 70% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: rotate(-5deg); } 100% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } }  @-moz-keyframes wrenchCode { 0% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } 70% { -moz-transform-origin: 20% 50% 0; -moz-transform: rotate(-5deg); } 100% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } }
+}   /*CSSpref*/ @-webkit-keyframes wrenchCode { 0% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } 70% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: rotate(-5deg); } 100% { -webkit-transform-origin: 20% 50% 0; -webkit-transform: none; } }  @-moz-keyframes wrenchCode { 0% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } 70% { -moz-transform-origin: 20% 50% 0; -moz-transform: rotate(-5deg); } 100% { -moz-transform-origin: 20% 50% 0; -moz-transform: none; } }  @-ms-keyframes wrenchCode { 0% { -ms-transform-origin: 20% 50% 0; -ms-transform: none; } 70% { -ms-transform-origin: 20% 50% 0; -ms-transform: rotate(-5deg); } 100% { -ms-transform-origin: 20% 50% 0; -ms-transform: none; } }
 
 
 .stmt-inlineStmt {
@@ -5823,7 +5814,7 @@ table.dashboard tr.header {
 
 table.dashboard tr.header > td > div {
     white-space: nowrap;
-    transform: rotate(315deg);                      /*CSSpref*/  -webkit-transform: rotate(315deg);  -moz-transform: rotate(315deg);
+    transform: rotate(315deg);                      /*CSSpref*/  -webkit-transform: rotate(315deg);  -moz-transform: rotate(315deg);  -ms-transform: rotate(315deg);
     width: 30px;
 }
 
