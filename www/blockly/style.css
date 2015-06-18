@@ -6,23 +6,28 @@
 .vbox {
   display: flex;
   display: -webkit-flex;
+  display: -ms-flex;
   flex-direction: column;
   -webkit-flex-direction: column;
+  -ms-flex-direction: column;
 }
 
 .hbox {
   display: flex;
   display: -webkit-flex;
+  display: -ms-flex;
 }
 
 .flex1 {
   flex: 1;
   -webkit-flex: 1;
+  -ms-flex: 1;
 }
 
 .flex3 {
   flex: 3;
   -webkit-flex: 3;
+  -ms-flex: 3;
 }
 
 /* Whole page layout */
@@ -155,8 +160,10 @@ body, input {
 /* Buttons */
 .roundbutton {
   display: -webkit-flex;
+  display: -ms-flex;
   display: flex;
   -webkit-flex-direction: column;
+  -ms-flex-direction: column;
   flex-direction: column;
   color: black;
   text-decoration: none;
