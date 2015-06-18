@@ -32,7 +32,7 @@ module TDev.Cloud {
         // misc
         groupAllowExportApp?: boolean;
         changeSkillLevel?: boolean;
-        mainAlwaysAction?: boolean;
+        forceMainAsAction?: boolean;
         singleReturnValue?: boolean;
         integerNumbers?: boolean;
 

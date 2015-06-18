@@ -142,7 +142,7 @@ module TDev
             var showSettings = TheEditor.widgetEnabled("actionSettings");
             var asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
             var singleReturnValue = TheEditor.widgetEnabled("singleReturnValue");
-            if (asAction) this.actionName.readOnly = true;
+            if (asAction && !Script.isLibrary) this.actionName.readOnly = true;
             var propDivs =
                  [div("prop-spacer"),
                   div(null, span("varLabel", lf("function"))),
