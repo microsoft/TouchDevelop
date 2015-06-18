@@ -320,12 +320,14 @@ module TDev {
         dirty = true;
       });
     }, 1);
-    $("#script-name").on("input", () => {
+    $("#script-name").on("input keyup blur", () => {
       statusMsg("✎ local changes", External.Status.Ok);
+      statusIcon("pencil");
       dirty = true;
     });
-    $("#script-description").on("input", () => {
+    $("#script-description").on("input keyup blur", () => {
       statusMsg("✎ local changes", External.Status.Ok);
+      statusIcon("pencil");
       dirty = true;
     });
 
