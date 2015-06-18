@@ -88,6 +88,22 @@ module TDev {
   function statusIcon(icon: string) {
     var i = $("#cloud-status i");
     i.attr("class", "fa fa-"+icon);
+    switch (icon) {
+      case "cloud-upload":
+        i.attr("title", "Saved to cloud");
+        break;
+      case "floppy-o":
+        i.attr("title", "Saved locally");
+        break;
+      case "exclamation-triangle":
+        i.attr("title", "Error while saving -- see ⓘ for more information");
+        break;
+      case "pencil":
+        i.attr("title", "Local changes");
+        break;
+      default:
+        i.attr("title", "");
+    }
   }
 
   function saveAck(message: External.Message_SaveAck) {
