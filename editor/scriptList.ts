@@ -353,7 +353,7 @@
                         d.canDismiss = true;
                         d.dismiss();
                     }
-                }, "gray-button"),
+                }, "green-button"),
                 HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
                     tick(Ticks.legalNoticeAgree);
                     localStorage["legalNotice"] = notice;

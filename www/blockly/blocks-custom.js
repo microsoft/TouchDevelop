@@ -54,7 +54,7 @@ Blockly.Blocks['device_print_message'] = {
     this.appendValueInput("pausetime")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("pause (ms)");
+        .appendField("with interval (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Shows the specified string and scrolls it if necessary.');
@@ -75,7 +75,7 @@ Blockly.Blocks['device_show_number'] = {
     this.appendValueInput("pausetime")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("pause (ms)");
+        .appendField("with interval (ms)");
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
@@ -376,7 +376,7 @@ Blockly.Blocks['device_show_image_offset'] = {
     this.appendValueInput("sprite").setCheck('sprite');
     this.appendValueInput("offset")
         .setCheck("Number")
-        .appendField("offset");
+        .appendField("at offset");
     this.setTooltip('For a given (possibly big) image, display only frame, starting at offset.');
     this.setPreviousStatement(!0);
     this.setNextStatement(!0);
@@ -397,11 +397,11 @@ Blockly.Blocks['device_scroll_image'] = {
     this.appendValueInput("frame offset")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("offset");
+        .appendField("with offset");
     this.appendValueInput("delay")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("pause (ms)");
+        .appendField("and interval (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Display an image, scrolling it if it doesn\'t fit on the display.');
@@ -511,7 +511,7 @@ Blockly.Blocks['device_while'] = {
         .appendField("do");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setTooltip('Run the same sequence of actions while the condition is met. Don\t forget to pause!');
+    this.setTooltip('Run the same sequence of actions while the condition is met. Don\'t forget to pause!');
   }
 };
 

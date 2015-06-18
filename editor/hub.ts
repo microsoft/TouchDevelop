@@ -388,7 +388,6 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
-                    publishDescription: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
@@ -451,7 +450,6 @@ module TDev.Browser {
                     socialNetworkart: true,
                     publishAsHidden: true,
                     publishToComputingAtSchools: true,
-                    publishDescription: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
@@ -462,6 +460,7 @@ module TDev.Browser {
                     searchArtRefactoring: true,
 
                     // editor specific                  
+                    publishDescription: true,
                     sendPullRequest: true,
                     scriptPullChanges: true,
                     testAction: true,
@@ -818,7 +817,7 @@ module TDev.Browser {
                     AST.TypeChecker.tcApp(app);
                     currentThemeIntelliProfile = new AST.IntelliProfile();
                     currentThemeIntelliProfile.allowAllLibraries = true;
-                    currentThemeIntelliProfile.loadFrom(app.actions()[0], false);
+                    currentThemeIntelliProfile.loadFrom(app, false);
 
                     return currentThemeIntelliProfile;
                 }, e => { return Promise.as(undefined) })
@@ -1329,8 +1328,7 @@ module TDev.Browser {
                 Util.fmt("<h3>{0:q} requires sign&nbsp;in</h3>", name) +
                   "<p class='agree'>" +
                   "This tutorial uses cloud data which is shared with other users." +
-                  "</p>" +
-                  "<p class='agree'>You can sign in with your Microsoft, Google, Facebook or Yahoo account.</p>"
+                  "</p>"
                 )
             m.fullWhite();
             m.add(div("wall-dialog-buttons",
@@ -2044,7 +2042,7 @@ module TDev.Browser {
                             d.canDismiss = true;
                             d.dismiss();
                         }
-                    }, "gray-button")
+                    }, "green-button")
                 ));
                 d.fullWhite()
                     d.canDismiss = false;

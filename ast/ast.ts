@@ -1607,6 +1607,7 @@ module TDev.AST {
     export class SingletonDef
         extends Decl
     {
+        public isExtension = false;
         public _isBrowsable = true;
         constructor() {
             super()
@@ -1621,7 +1622,7 @@ module TDev.AST {
         public usageMult() { return 1; }
         public usageKey() {
             return Util.tagify(this.getKind().getName());
-        }
+        }        
     }
 
     export class PlaceholderDef
@@ -4932,7 +4933,18 @@ module TDev.AST {
         {
             if (a._skipIntelliProfile)
                 return
+            a.getInParameters().forEach(ai => {
+                this.incr(ai.getKind().getName());
+            })
+            a.getOutParameters().forEach(ai => {
+                this.incr(ai.getKind().getName());
+            })
             this.visitChildren(a);
+        }
+        
+        private incrKind(k: Kind) {
+            if (k && k != api.core.Unknown)
+                this.incr(k.getName());
         }
 
         private incr(n:string)
@@ -4950,10 +4962,8 @@ module TDev.AST {
         }
 
         public visitExpr(expr: Expr) {
-            var k = expr.getKind()
-            if (k && k != api.core.Unknown)
-                this.incr(k.getName());
-            super.visitExpr(expr);
+            this.incrKind(expr.getKind());
+           super.visitExpr(expr);
         }
 
         public visitCall(c:Call)
@@ -4972,6 +4982,7 @@ module TDev.AST {
         public visitGlobalDef(t: GlobalDef)
         {
             this.incr("addNewButton");
+            this.incrKind(t.getKind());
             if (t.isResource) {
                 this.incr("artSection");
                 if (t.getKind() == api.core.Picture || t.getKind() == api.core.Sound) {
@@ -4990,6 +5001,7 @@ module TDev.AST {
         {
             this.incr("addNewButton");
             this.incr("persistanceRadio");
+            this.incrKind(t.getKind());
             switch (t.recordType) {
                 case RecordType.Decorator:
                 case RecordType.Object:
@@ -5110,6 +5122,7 @@ module TDev.AST {
             if (p.getName() == AST.libSymbol)
                 // needs explicit #allow:libSingleton
                 return this.hasKey("libSingleton");
+            if (p instanceof SingletonDef && p.isExtension) return true;
             return this.hasTokenUsage(p) || this.hasKey(p.usageKey());
         }
 

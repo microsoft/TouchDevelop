@@ -1257,11 +1257,11 @@ input[data-invalid^="yes"]
 .wallLogo {
   position: absolute;
   bottom: 0.5em;
-  left: 0.5em;
+  right: 0.5em;
 }
 
 .wallLogo img {
-  width: 12em;
+  width: 9em;
 }
 
 .landscape .wallWithColumns .classic-page
@@ -1908,7 +1908,13 @@ a.button, a.button:hover, a.button:visited {
   font-size: 1em;
   vertical-align: top;
 }
-
+.green-button {
+  border: none;
+  background: #008b00;
+  color: #fff !important;
+  font-size: 1em;
+  vertical-align: top;
+}
 
 .radio-button {
   border: none;
