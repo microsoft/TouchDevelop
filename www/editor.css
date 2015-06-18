@@ -1792,7 +1792,6 @@ span.errorSq .kw
 
 #externalEditorSide .boardCanvas {
     width: 100% !important;
-    height: auto !important;
 }
 
 #externalEditorSide .wallFullScreenContainer {
@@ -1810,6 +1809,7 @@ span.errorSq .kw
     width: calc(100% - 2em);
     max-width: 225px;
     margin: 1em;
+    height: auto;
 }
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
