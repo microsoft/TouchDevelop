@@ -51,6 +51,7 @@ module TDev
         private table: HTMLElement;
         private plusBtn: HTMLElement;
         private minusBtn: HTMLElement;
+        private okBtn: HTMLElement;
         private rows: number;
         private frames: number;
         private bitCells: HTMLElement[];
@@ -72,6 +73,9 @@ module TDev
                     this.updateTable(v);
                 }
             });
+            this.okBtn = HTML.mkRoundButton("svg:check,black", lf("ok"), Ticks.noEvent, () => {
+                if (this.dialog) this.dialog.dismiss();
+            })
             this.table = div('bitmatrices');
             this.animTable = <HTMLTableElement>document.createElement("table");
             this.animTable.className = 'bitmatrix bitpreview';
@@ -84,7 +88,9 @@ module TDev
                     this.animCells[i * 5 + j].appendChild(div(''));
                 }
             });
-            this.root = div('bitmatrix', div('btns', this.animTable, this.plusBtn, this.minusBtn), this.table);
+            this.root = div('bitmatrix',
+                div('btns', this.animTable, this.plusBtn, this.minusBtn, this.okBtn),
+                this.table);
             
             this.updateTable(literal.data);
         }
