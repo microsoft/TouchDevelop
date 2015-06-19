@@ -752,6 +752,14 @@ function lookup(e: Environment, n: string): Binding {
   return null;
 }
 
+function fresh(e: Environment, s: string): string {
+  var i = 0;
+  var unique = s;
+  while (lookup(e, unique) != null)
+    unique = s + i++;
+  return unique;
+}
+
 var empty: Environment = {
   bindings: []
 };
@@ -777,18 +785,21 @@ function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
 }
 
 function isClassicForLoop(b: B.Block) {
-  assert(b.type == "controls_for");
-  var bBy = b.getInputTargetBlock("BY");
-  var bFrom = b.getInputTargetBlock("FROM");
-  return bBy.type.match(/^math_number/) && extractNumber(bBy) == 1 &&
-    bFrom.type.match(/^math_number/) && extractNumber(bFrom) == 0;
+  if (b.type == "controls_simple_for") {
+    return true;
+  } else if (b.type == "controls_for") {
+    var bBy = b.getInputTargetBlock("BY");
+    var bFrom = b.getInputTargetBlock("FROM");
+    return bBy.type.match(/^math_number/) && extractNumber(bBy) == 1 &&
+      bFrom.type.match(/^math_number/) && extractNumber(bFrom) == 0;
+  } else {
+    throw new Error("Invalid argument: isClassicForLoop");
+  }
 }
 
 function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bVar = b.getFieldValue("VAR");
-  var bFrom = b.getInputTargetBlock("FROM");
   var bTo = b.getInputTargetBlock("TO");
-  var bBy = b.getInputTargetBlock("BY");
   var bDo = b.getInputTargetBlock("DO");
 
   var binding = lookup(e, bVar);
@@ -806,23 +817,35 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
         compileStatements(e, bDo))
     ];
   else {
-    // In any other case, fallback to a while loop.
+    // Evaluate the bound first, and store it in b (bound may change over
+    // several loop iterations).
+    var local = fresh(e, "bound");
+    e = extend(e, local, Type.Number);
+    var eLocal = H.mkLocalRef(local);
+    var eTo = compileExpression(e, bTo, Type.Number);
+    var eVar = H.mkGlobalRef(bVar);
+    var eBy = H.mkNumberLiteral(1);
+    var eFrom = H.mkNumberLiteral(0);
+    // Fallback to a while loop followed by an assignment to
+    // make sure we don't overshoot the loop variable above the "to" field
+    // (since Blockly allows someone to read it afterwards).
     return [
+      // LOCAL = TO
+      H.mkAssign(eLocal, eTo),
       // VAR = FROM
-      H.mkAssign(H.mkGlobalRef(bVar), compileExpression(e, bFrom, Type.Number)),
+      H.mkAssign(eVar, eFrom),
       // while
       H.mkWhile(
-        // VAR <= TO
-        H.mkExprHolder([],
-          H.mkSimpleCall("≤", [H.mkGlobalRef(bVar), compileExpression(e, bTo, Type.Number)])),
+        // VAR <= B
+        H.mkExprHolder([], H.mkSimpleCall("≤", [eVar, eLocal])),
         // DO
         compileStatements(e, bDo).concat([
           H.mkExprStmt(
             H.mkExprHolder([],
               // VAR :=
-              H.mkSimpleCall(":=", [H.mkGlobalRef(bVar),
+              H.mkSimpleCall(":=", [eVar,
                 // VAR + BY
-                H.mkSimpleCall("+", [H.mkGlobalRef(bVar), compileExpression(e, bBy, Type.Number)])])))]))
+                H.mkSimpleCall("+", [eVar, eBy])])))])),
     ];
   }
 }
@@ -1041,6 +1064,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;
 
         case 'controls_for':
+        case 'controls_simple_for':
           append(stmts, compileControlsFor(e, b));
           break;
 
@@ -1129,7 +1153,7 @@ function mkEnv(w: B.Workspace): Environment {
 
   // First pass: collect loop variables.
   w.getAllBlocks().forEach((b: B.Block) => {
-    if (b.type == "controls_for") {
+    if (b.type == "controls_for" || b.type == "controls_simple_for") {
       var x = b.getFieldValue("VAR");
       // It's ok for two loops to share the same variable.
       if (lookup(e, x) == null)
@@ -1147,7 +1171,8 @@ function mkEnv(w: B.Workspace): Environment {
   var variableIsScoped = (b: B.Block, name: string): boolean => {
     if (!b)
       return false;
-    else if (b.type == "controls_for" && b.getFieldValue("VAR") == name)
+    else if ((b.type == "controls_for" || b.type == "controls_simple_for")
+             && b.getFieldValue("VAR") == name)
       return true;
     else
       return variableIsScoped(findParent(b), name);

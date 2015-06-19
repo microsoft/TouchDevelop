@@ -218,23 +218,30 @@
           </value>
         </block>
         <block type="device_while"></block>
-        <block type="controls_for">
-          <value name="FROM">
-            <block type="math_number">
-              <field name="NUM">0</field>
-            </block>
-          </value>
+        <block type="controls_simple_for">
           <value name="TO">
             <block type="math_number">
               <field name="NUM">4</field>
             </block>
           </value>
-          <value name="BY">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
         </block>
+        <!-- <block type="controls_for"> -->
+        <!--   <value name="FROM"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">0</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="TO"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">4</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!--   <value name="BY"> -->
+        <!--     <block type="math_number"> -->
+        <!--       <field name="NUM">1</field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
         <block type="device_forever"></block>
       </category>
       <category name="Logic">
