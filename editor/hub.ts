@@ -344,6 +344,8 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,
                 }
             },
         },
