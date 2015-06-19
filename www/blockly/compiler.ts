@@ -431,6 +431,9 @@ function inferType(e: Environment, b: B.Block): Type {
   if (!b)
     return null;
 
+  if (b.type == "variables_get")
+    return lookup(e, b.getFieldValue("VAR")).type;
+
   if (!b.outputConnection)
     return Type.Unit;
 
