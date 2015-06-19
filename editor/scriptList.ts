@@ -239,7 +239,7 @@
                     Cloud.setPermissions(settings.permissions);
                     EditorSettings.setThemeFromSettings();
                     Util.setUserLanguageSetting(settings.culture, true);
-                    EditorSettings.loadEditorMode(settings.editorMode);
+                    if (!EditorSettings.currentTheme) EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     this.initSignin(settings.nickname);
                 }, e => { });
