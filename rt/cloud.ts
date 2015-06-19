@@ -560,7 +560,12 @@ module TDev.Cloud {
         return appendAccessToken(getServiceUrl() + "/api" + (path == null ? "" : "/" + path));
     }
     export function getScriptTextAsync(id: string) : Promise {
-        return Util.httpGetTextAsync(getPublicApiUrl(encodeURIComponent(id) + "/text?original=true&ids=true"))
+        return Util.httpGetTextAsync(getPublicApiUrl(encodeURIComponent(id) + "/text?original=true"))
+            .then(text => {
+                if (/^.*upperplex/.test(text)) return text
+                else
+                    return Util.httpGetTextAsync(getPublicApiUrl(encodeURIComponent(id) + "/text?original=true&ids=true"))
+            })
     }
     export function getPrivateApiAsync(path: string) : Promise {
         return Util.httpGetJsonAsync(getPrivateApiUrl(path));
