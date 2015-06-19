@@ -562,7 +562,7 @@ module TDev.Cloud {
     export function getScriptTextAsync(id: string) : Promise {
         return Util.httpGetTextAsync(getPublicApiUrl(encodeURIComponent(id) + "/text?original=true"))
             .then(text => {
-                if (/^.*upperlex/.test(text)) return text
+                if (/^.*upperplex/.test(text)) return text
                 else
                     return Util.httpGetTextAsync(getPublicApiUrl(encodeURIComponent(id) + "/text?original=true&ids=true"))
             })
