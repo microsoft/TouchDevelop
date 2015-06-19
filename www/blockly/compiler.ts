@@ -110,6 +110,10 @@ module Helpers {
     return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
   }
 
+  export function stringCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef("String"), args);
+  }
+
   export function booleanCall(name: string, args: J.JExpr[]): J.JCall {
     return mkCall(name, mkTypeRef("Boolean"), args);
   }
@@ -513,48 +517,89 @@ var opToTok: { [index: string]: string } = {
   "MINUS": "-",
   "MULTIPLY": "*",
   "DIVIDE": "/",
-  "EQ":  "=",
-  "NEQ": "≠",
   "LT":  "<",
   "LTE": "≤",
   "GT": ">",
   "GTE": "≥",
   "AND": "and",
   "OR": "or",
+  "EQ":  "=",
+  "NEQ": "≠",
 };
 
+function throwTypeError(t1: Type, t2: Type, b: B.Block) {
+  throwBlockError("This block is a "+typeToString(t1)+
+      " but we need a "+typeToString(t2)+" here", b);
+}
 
+// [t] is the type of the operands, if known in advance
 function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
 
   // Mini type-inference again. This is incomplete, as we should do unification
-  // here.
-  if (t == null) {
-    var tl = inferType(e, left);
-    var tr = inferType(e, right);
-    if (tl && tr && tl != tr)
-      throwBlockError("The left side of this comparison operator has type "+typeToString(tl)+
-          " but the right side has type "+typeToString(tr), b);
-    t = tl || tr;
+  // here. This resolves the type of the operands based on the operator, and
+  // type inference on the arguments.
+  var tl = inferType(e, left);
+  var tr = inferType(e, right);
+  switch (bOp) {
+    case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
+    case "LT": case "LTE": case "GT": case "GTE":
+      // Monomorphic arithmetic operators
+      assert (t == null || t == Type.Number);
+      t = Type.Number;
+      break;
+    case "AND": case "OR":
+      // Monomorphic boolean operators
+      assert (t == null || t == Type.Boolean);
+      t = Type.Boolean;
+      break;
+    case "EQ": case "NEQ":
+      // Polymorphic comparison operators
+      if (t == null) {
+        if (tl && tr && tl != tr)
+          throwBlockError("The left side of this comparison operator is a "+typeToString(tl)+
+              " but the right side is a "+typeToString(tr), b);
+        t = tl || tr;
+      }
+      break;
   }
+
+  if (t == null)
+    throwBlockError("I cannot figure out if you're comparing booleans or numbers here", b);
+  if (tl != null && tl != t)
+    throwTypeError(tl, t, left);
+  if (tr != null && tr != t)
+    throwTypeError(tr, t, left);
+
+  tl = t;
+  tr = t;
 
   var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
 
-  if (t == Type.Boolean) {
-    // First case: we can compile = and != for Booleans, that's all.
+  if (t == Type.String) {
+    if (bOp == "EQ")
+      return H.stringCall("equals", args);
+    else if (bOp == "NEQ")
+      return H.booleanCall("not", [H.stringCall("equals", args)]);
+    else
+      throw new Error("Internal inference error");
+  } else if (t == Type.Boolean) {
     if (bOp == "EQ")
       return H.booleanCall("equals", args);
     else if (bOp == "NEQ")
       return H.booleanCall("not", [H.booleanCall("equals", args)]);
+    else if (bOp == "AND" || bOp == "OR")
+      return H.mkSimpleCall(opToTok[bOp], args);
     else
-      throwBlockError("Operation "+opToTok[bOp]+" is not supported for booleans", b);
+      throw new Error("Internal inference error");
   } else if (t != Type.Number) {
-    // Easy case: if it's not a number or a boolean, we bail out!
+    // User can still compare images, we need to bail out here.
     throwBlockError("Cannot compare things of type "+typeToString(t), b);
   }
 
+  // Compilation of math operators.
   if (bOp == "POWER")
     return H.mathCall("pow", args);
   else
@@ -644,6 +689,9 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
+      // The third argument for [compileArithmetic] is the expected type of the
+      // *operands*. Since "=" and "!=" are "polymorphic", we don't know ahead
+      // of time the type of the operands in this case.
       return compileArithmetic(e, b, null);
     case "logic_operation":
       return compileArithmetic(e, b, Type.Boolean);
