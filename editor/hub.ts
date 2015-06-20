@@ -438,7 +438,9 @@ module TDev.Browser {
                     //hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
-                    editLibraryButton: true,
+                    editLibraryButton: true,                    
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,                    
                 }
             },
         },
@@ -502,6 +504,8 @@ module TDev.Browser {
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,
 
                     // editor specific                  
                     publishDescription: true,

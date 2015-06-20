@@ -382,6 +382,8 @@ module TDev
         static winId = 0;
         static printScript(s:AST.App)
         {
+            if (!s) return;
+            
             var text: string;
             if (s.isLibrary) {
                 text = ScriptProperties.renderLibraryDocs(s, s.getName(), false, true);
