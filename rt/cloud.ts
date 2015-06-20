@@ -200,6 +200,7 @@ module TDev.Cloud {
         theme?: ClientTheme;
         
         tutorialAvatarArtId?: string;
+        printHeaderHtml?: string;
     }
 
     export var config: ClientConfig = {
