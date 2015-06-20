@@ -116,7 +116,7 @@ module TDev
                 TheEditor.queueNavRefresh();
             }
 
-            this.docs.setChildren(ScriptProperties.libraryDocs(this.theLibrary.resolved, this.theLibrary.getName(), true))
+            this.docs.setChildren(ScriptProperties.libraryDocs(this.theLibrary.resolved, this.theLibrary.getName(), true));
 
             this.resolves.setChildren([this.renderer.declDiv(this.theLibrary), this.rendererNoHooks.renderLibSignatures(this.theLibrary)]);
             this.renderer.attachHandlers();

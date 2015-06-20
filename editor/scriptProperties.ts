@@ -197,7 +197,7 @@ module TDev
                         ModalDialog.ask(lf("Do you really want to revert this script to the latest published version?"), lf("revert"), () => { this.revert(); });
                     }),
                     (Browser.isCellphone ? null :
-                    HTML.mkButton(lf("for print/email"), () => this.renderScript())),
+                    HTML.mkButton(lf("print"), () => this.renderScript())),
                     HTML.mkButton(lf("diff to base"), () => ScriptProperties.diffToBase()),
                     HTML.mkButton(lf("make atomic"), () => ScriptProperties.makeAtomic())
                     ),
@@ -383,15 +383,18 @@ module TDev
         static printScript(s:AST.App)
         {
             var r = new CopyRenderer();
-            var text = r.dispatch(s);
+            var text: string;
+            if (s.isLibrary)
+                text = ScriptProperties.renderLibraryDocs(s, s.getName(), false, true);
+            else text = r.dispatch(s);
             try {
                 var w = window.open("about:blank", "tdScript" + ScriptProperties.winId++);
                 w.document.write("<!DOCTYPE html><html><head>" + CopyRenderer.css +
                                  "<title>" + Util.htmlEscape("Source: " + s.getName()) + "</title>" +
                                  "</head><body>" + text + "</body></html>");
             } catch (e) {
-                ModalDialog.info("cannot print",
-                "we couldn't print open a new window to print this page. check the popup-blocker preferences.");
+                ModalDialog.info(lf("cannot print"),
+                lf("we couldn't print open a new window to print this page. check the popup-blocker preferences."));
             }
         }
 
@@ -829,8 +832,7 @@ module TDev
                 if (docs) {
                     this.mdRoot.setChildren([ div("varLabel", lf("library documentation")), <any>docs ])
                 } else {
-                    Browser.setInnerHTML(this.mdRoot,
-                        "No library documentation found. Consider <a href='#topic:libraries:docs'>adding some</a>.");
+                    Browser.setInnerHTML(this.mdRoot, lf("No library documentation found."));
                 }
             } else {
                 this.mdRoot.setChildren([]);
@@ -844,29 +846,36 @@ module TDev
             TheEditor.toggleWidgetVisibility("scriptPropertiesSettings", this.settingsSection);
             TheEditor.toggleWidgetVisibility("scriptPropertiesPlatform", this.platformSection);
         }
-
-        static libraryDocs(app:AST.App, libname, showCopy : boolean)
-        {
+        
+        static renderLibraryDocs(app: AST.App, libname: string, showCopy: boolean, print : boolean): string {
             if (!app) return null;
             var acts = <AST.Action[]> app.orderedThings().filter((a) => a instanceof AST.Action && /^example/.test(a.getName()));
             if (acts.length > 0) {
-                var md = new MdComments(new Renderer(), libname)
+                var renderer = print ? new CopyRenderer() : new Renderer();
+                var md = new MdComments(renderer, libname)
                 md.showCopy = showCopy
-                var d = div(null);
                 try {
                     var prevScript = Script;
                     setGlobalScript(app);
-                    Browser.setInnerHTML(d, acts.map((a) => md.extract(a)).join(""));
-                    HTML.fixWp8Links(d);
-                    Browser.TopicInfo.attachCopyHandlers(d);
-                    return d;
+                    var r = acts.map((a) => md.extract(a)).join("");
+                    return r;
                 } finally {
                     setGlobalScript(prevScript);
                 }
             }
             return null;
         }
-
+        
+        static libraryDocs(app: AST.App, libname: string, showCopy: boolean) {
+            var d = div(null);
+            var docs = ScriptProperties.renderLibraryDocs(app, libname, showCopy, false);
+            if (docs) {
+                HTML.fixWp8Links(d);
+                Browser.TopicInfo.attachCopyHandlers(d);
+            }
+            return d;
+        }
+        
         public renderCore(a:AST.Decl) { return this.load(<AST.App>a); }
 
         private load(a:AST.App) :void

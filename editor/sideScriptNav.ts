@@ -176,7 +176,7 @@ module TDev
                                 }
                             })
                         }),
-                        HTML.mkButton(lf("for print/email"), () => {
+                        HTML.mkButton(lf("print"), () => {
                             topic.print()
                         })
                     ])
