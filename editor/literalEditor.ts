@@ -76,6 +76,9 @@ module TDev
             this.okBtn = HTML.mkRoundButton("svg:check,black", lf("ok"), Ticks.noEvent, () => {
                 if (this.dialog) this.dialog.dismiss();
             })
+            this.okBtn.style.position = "absolute";
+            this.okBtn.style.bottom = "0em";
+            this.okBtn.style.right = "0em";
             this.table = div('bitmatrices');
             this.animTable = <HTMLTableElement>document.createElement("table");
             this.animTable.className = 'bitmatrix bitpreview';
@@ -89,8 +92,9 @@ module TDev
                 }
             });
             this.root = div('bitmatrix',
-                div('btns', this.animTable, this.plusBtn, this.minusBtn, this.okBtn),
-                this.table);
+                div('btns', this.animTable, this.plusBtn, this.minusBtn),
+                this.table,
+                this.okBtn);
             
             this.updateTable(literal.data);
         }
