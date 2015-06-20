@@ -14,7 +14,7 @@ results.html
 results.json
 build/
 temp/
-www/mbit.html
+www/mbit.*
 
 # visual studio
 *.suo
