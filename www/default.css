@@ -938,6 +938,8 @@ div.wall-box-tile>div.wall-box
   padding: 0.5em 3em;
   text-align: center;
   z-index:3;
+  margin: 0.5em;
+  border-radius: 0.2em;
 }
 
 .errorNotification {
@@ -969,6 +971,8 @@ div.wall-box-tile>div.wall-box
   cursor:pointer;
   padding-bottom:0.5em;
   padding-left:1em;
+  margin: 0.5em;
+  border-radius: 0.2em;
 }
 
 .warningNotification .frownie {

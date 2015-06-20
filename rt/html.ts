@@ -780,7 +780,7 @@ module TDev.HTML {
             undo();
         }));
         elt("root").appendChild(msg);
-        var fi = Animation.fadeIn(msg);
+        var fi = Animation.fadeIn(msg, 1000);
         fi.completed = () => {
             var a = Animation.fadeOut(msg);
             a.delay = 4000;
