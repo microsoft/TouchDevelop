@@ -321,7 +321,6 @@ module TDev.Browser {
                 astMode: 2,
                 widgets: {
                     hubTutorials: true,
-                    hubSocial:true,
                     addNewButton: true,
                     undoButton: true,
                     promoteRefactoring: true,
@@ -439,6 +438,7 @@ module TDev.Browser {
                     //hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
+                    editLibraryButton: true,
                 }
             },
         },
@@ -482,7 +482,6 @@ module TDev.Browser {
                     persistanceRadio: true,
                     databaseSection: true,
                     scriptPropertiesManagement: true,
-                    editLibraryButton: true,
                     hideMyScriptHeader: true,
                     //MORE
                     
@@ -502,6 +501,7 @@ module TDev.Browser {
                     hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
+                    editLibraryButton: true,
 
                     // editor specific                  
                     publishDescription: true,
