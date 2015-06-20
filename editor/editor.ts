@@ -5371,7 +5371,7 @@ module TDev
                     LibraryRefProperties.bindLibraryAsync(l, Browser.TheHost.getScriptInfoById(l.updateId)))
                 .done(() => {
                     ProgressOverlay.hide();
-                    this.queueNavRefresh();
+                    this.typeCheckNow();
                 })
             })
         }
