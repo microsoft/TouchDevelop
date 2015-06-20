@@ -312,7 +312,7 @@ module TDev.Browser {
             name:'Micro Bit',
             description: ' ',
             scriptSearch: '#microbit',
-            scriptTemplates: ['blank'],
+            scriptTemplates: ['blankmicrobit'],
             intelliProfileId: 'upfje',
             editorMode: {
                 id: 'microbit',
