@@ -487,13 +487,13 @@ module TDev
                     widget: "artSection",
                     things: vars.filter((v) => v.isResource),
                     createOne: () => [
-                        { decl: this.editor.freshPictureResource(), displayName: 'picture resource', tick: Ticks.sideAddResource, description: lf("A picture from the web") },
-                        { decl: this.editor.freshSoundResource(), displayName: 'sound resource', tick: Ticks.sideAddResource, description: lf("A sound from the web") },
-                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: true, displayName: 'string resource', tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web") },
-                        { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: 'document resource', tick: Ticks.sideAddResource, description: lf("A document from the web") },
-                        { decl: this.editor.freshArtResource("Json Object", "json"), initiallyHidden: true, displayName: 'JSON resource', tick: Ticks.sideAddResource, description: lf("JSON data") },
-                        { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: 'color resource', tick: Ticks.sideAddResource, description: lf("A color constant") },
-                        { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden: true, displayName: 'number resource', tick: Ticks.sideAddResource, description: lf("A number constant") }
+                        { decl: this.editor.freshPictureResource(), displayName: lf("picture resource"), tick: Ticks.sideAddResource, description: lf("A picture from the web") },
+                        { decl: this.editor.freshSoundResource(), displayName: lf("sound resource"), tick: Ticks.sideAddResource, description: lf("A sound from the web") },
+                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: AST.blockMode || AST.legacyMode, displayName: lf("string resource"), tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web") },
+                        Cloud.lite ? { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: lf("document resource"), tick: Ticks.sideAddResource, description: lf("A document from the web") } : undefined,
+                        { decl: this.editor.freshArtResource("Json Object", "json"), initiallyHidden: true, displayName: lf("JSON resource"), tick: Ticks.sideAddResource, description: lf("JSON data") },
+                        { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: lf("color resource"), tick: Ticks.sideAddResource, description: lf("A color constant") },
+                        { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden: true, displayName: lf("number resource"), tick: Ticks.sideAddResource, description: lf("A number constant") }
                     ],
                     newName: lf("art resource")
                 }, <ThingSection>{
@@ -504,17 +504,16 @@ module TDev
                     createOne: () => [{
                         decl: this.editor.freshActionTypeDef(),
                         tick: Ticks.sideAddActionTypeDef,
-                        displayName: 'callback',
+                        displayName: lf("callback"),
                         description: lf("A signature definition of an function")
                     }],
                 }, <ThingSection>{
                     label: lf("libraries"),
                     widget: "librariesSection",
                     things: things.filter((t) => t instanceof AST.LibraryRef),
-                    initiallyHidden: AST.blockMode,
                     createOne: () => [{
                         decl: this.editor.freshLibrary(),
-                        displayName: 'library',
+                        displayName: lf("library"),
                         tick: Ticks.sideAddLibrary,
                         description: lf("A reference to a library script")
                     }],
@@ -536,7 +535,7 @@ module TDev
                 sections.forEach((sect) => {
                     if (!sect.createOne) return
                     if (sect.widget && !TheEditor.widgetEnabled(sect.widget)) return;
-                    sect.createOne().forEach((ds, i) => {
+                    sect.createOne().filter(ds => !!ds).forEach((ds, i) => {
                         // d.setName(sect.newName
                         var d = ds.decl;
                         var dname = (d instanceof AST.RecordDef) ? (<AST.RecordDef> d).getCoreName() : d.getName();
