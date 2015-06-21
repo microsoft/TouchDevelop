@@ -728,20 +728,9 @@ module TDev {
                 d.addFirst(div("floatingFrown", ":("))
             }
 
-            if(this.canEditCode() && !!e.syntaxErrorDeclName) {
-                var dial = ModalDialog.buttons(
-                    lf("errors in the code?"),
-                    lf("the script appears to have some errors. fix each error marked with a red :( symbol and try to run again"),
-                    "",//"message",
-                    "",//error,
-                    HTML.mkButton(lf("edit code"), () => {
-                        tick(Ticks.crashDialogEdit);
-                        dial.dismiss(); this.fixErrorIn(e.syntaxErrorDeclName, error);
-                    })
-                    );
-                dial.fullYellow();
-                frown(dial)
-            } else if(!!e.isUserError) {
+            if (this.canEditCode() && !!e.syntaxErrorDeclName) {
+                this.fixErrorIn(e.syntaxErrorDeclName, error);
+            } else if (!!e.isUserError) {
                 var dial = ModalDialog.buttons(
                     lf("the script crashed"),
                     this.canEditCode() ? lf("do you want do debug it?") : null,
