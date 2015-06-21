@@ -4718,7 +4718,10 @@ div.bitmatrix, table.bitmatrix {
     display:inline-block;
 }
 
-div.bitmatrix { width:100%;}
+div.bitmatrix {
+  min-height: 16em;
+  width:100%;
+}
 
 table.bitmatrix {
   table-layout:fixed;
