@@ -268,6 +268,11 @@ module TDev.Browser {
     }
             
     export var themes: StringMap<Cloud.ClientTheme> = {
+        'expert': {
+            name: lf("Expert"),
+            description: lf("All options turned on"),
+            editorMode: editorModes['pro']
+        },
         'minecraft': {
             name: "Minecraft",
             description: lf("Learn to code with Minecraft"),
