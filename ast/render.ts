@@ -184,7 +184,8 @@ module TDev
             var bits: Number[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => parseInt(s)));
 
             var c = '#f00'; var b = '#ccc';
-            var r = "";
+            var r1 = "";
+            var r0 = "";
             var w = 0;
             var rows = bits.length;
             var h = rows * 50;
@@ -196,11 +197,13 @@ module TDev
                 ellipse = ellipse || cols < row.length;
                 for (var x = 0; x < cols; ++x) {
                     var bit = !!row[x];
-                    r += Util.fmt("<rect fill='{0}' width='23' height='23' x='{1}' y='{2}' rx='3' ry='3'/>", bit ? c : b, 50 * x, 50 * y)
+                    var path = Util.fmt(" M {0} {1} l 25 0 l 0 25 l -25 0 Z", 50 * x, 50 * y);
+                    if (bit) r1 += path; else r0 += path;
                 }
             }
             var viewPort = Util.fmt("0 0 {0} {1}", w, h);
-            var result = Renderer.tspanRaw('kbm', SVG.svgBoilerPlate(viewPort, r));
+            var svg = Util.fmt("<path fill='#f00' d='{0}'/><path fill='#ccc' d='{1}'/>", r1, r0);
+            var result = Renderer.tspanRaw('kbm', SVG.svgBoilerPlate(viewPort, svg));
             if (ellipse) result += Renderer.tspan("stringLiteral", "...");
             return result;
         }
