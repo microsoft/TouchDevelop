@@ -36,6 +36,7 @@ module TDev.Browser {
                 // sections
                 dataSection: true,
                 artSection: true,
+                librariesSection: true,
                 // ui
                 wallScreenshot: true,
                 wallHeart: true,
