@@ -179,6 +179,31 @@ module TDev
                     );
             return this.renderString(v, 200);
         }
+        
+        public renderBitmatrix(v: string): string {
+            var bits: Number[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => parseInt(s)));
+
+            var c = '#f00'; var b = '#ccc';
+            var r = "";
+            var w = 0;
+            var rows = bits.length;
+            var h = rows * 50;
+            var ellipse = false;
+            for (var y = 0; y < rows; ++y) {
+                var row = bits[y];
+                var cols = Math.min(row.length, 25);
+                w = Math.max(w, cols * 50);
+                ellipse = ellipse || cols < row.length;
+                for (var x = 0; x < cols; ++x) {
+                    var bit = !!row[x];
+                    r += Util.fmt("<rect fill='{0}' width='23' height='23' x='{1}' y='{2}' rx='3' ry='3'/>", bit ? c : b, 50 * x, 50 * y)
+                }
+            }
+            var viewPort = Util.fmt("0 0 {0} {1}", w, h);
+            var result = Renderer.tspanRaw('kbm', SVG.svgBoilerPlate(viewPort, r));
+            if (ellipse) result += Renderer.tspan("stringLiteral", "...");
+            return result;
+        }
 
         public renderString(v:string, lim = this.stringLimit) : string
         {
@@ -207,7 +232,8 @@ module TDev
                 div = Renderer.tspan("kw", v ? "true" : "false");
                 break;
             case "string":
-                div = this.renderString(v);
+                if (/^bitmatrix$/.test(n.languageHint)) div = this.renderBitmatrix(v);
+                else div = this.renderString(v);
                 break;
             default:
                 Util.die();

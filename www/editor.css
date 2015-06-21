@@ -1309,6 +1309,11 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
     font-weight: bold;
 }
 
+.kbm svg {
+  height: 1em;
+  vertical-align: middle;
+  margin-left: 0.2em;
+}
 
 .st
 {
