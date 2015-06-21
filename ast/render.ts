@@ -181,22 +181,23 @@ module TDev
         }
         
         public renderBitmatrix(v: string): string {
-            var bits: Number[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => parseInt(s)));
+            var bits: boolean[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => !!s));
 
             var c = '#f00'; var b = '#ccc';
             var r1 = "";
             var r0 = "";
             var w = 0;
             var rows = bits.length;
+            if (!v) rows = 5;
             var h = rows * 50;
             var ellipse = false;
             for (var y = 0; y < rows; ++y) {
-                var row = bits[y];
-                var cols = Math.min(row.length, 25);
+                var row = bits[y] || [];
+                var cols = Math.max(rows, Math.min(row.length, 25));
                 w = Math.max(w, cols * 50);
                 ellipse = ellipse || cols < row.length;
                 for (var x = 0; x < cols; ++x) {
-                    var bit = !!row[x];
+                    var bit = row[x];
                     var left = 50 * x;
                     var top = 50 * y;
                     var path = Util.fmt(" M {0} {1} {2} {3} {4} {5} {6} {7} Z",
