@@ -181,7 +181,10 @@ module TDev
         }
         
         public renderBitmatrix(v: string): string {
-            var bits: boolean[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => !!s));
+            var bits: boolean[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => {
+                var x = parseInt(s); if (isNaN(x)) x = 0;
+                return !!x;
+            }));
 
             var c = '#f00'; var b = '#ccc';
             var r1 = "";
