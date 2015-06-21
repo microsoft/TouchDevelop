@@ -848,36 +848,36 @@ module TDev{
     }
 
     export var colors = [
-        "#F4BBFF", // electric lavender
-        "#FF91A4", // salmon
+       // "#F4BBFF", // electric lavender
+       // "#FF91A4", // salmon
         "#FF00FF", // magenta
-        "#E3256B", // razzmatazz
+      //  "#E3256B", // razzmatazz
         "#800080", // purple
-        "#9955BB", // deep lilac
+      //  "#9955BB", // deep lilac
         "#A52A2A", // brown
-        "#B7410E", // rust
+      //  "#B7410E", // rust
         "#E25822", // flame
         "#FF0038", // carmine red
-        "#FF2800", // red
-        "#FF7518", // pumpkin
+       // "#FF2800", // red
+     //   "#FF7518", // pumpkin
         "#FFA500", // orange
-        "#FFDF00", // golden yellow
-        "#FDEE00", // aureolin
-        "#DAA520", // goldenrod
-        "#EEDC82", // flax
-        "#F5DEB3", // wheat
+      //  "#FFDF00", // golden yellow
+       // "#FDEE00", // aureolin
+     //   "#DAA520", // goldenrod
+    //    "#EEDC82", // flax
+      //  "#F5DEB3", // wheat
         "#008080", // teal
         "#00008B", // dark blue
-        "#007FFF", // azure
-        "#A1CAF1", // baby blue eyes
-        "#90EE90", // light green
-        "#008000", // green
-        "#66FF00",  // bright green
-        "#00CC99", // carribean green
+     //   "#007FFF", // azure
+      //  "#A1CAF1", // baby blue eyes
+      //  "#90EE90", // light green
+     //   "#008000", // green
+      //  "#66FF00",  // bright green
+    //    "#00CC99", // carribean green
         "#004B49", // deep jungle green
-        "#85BB65", // dollar bill
+  //      "#85BB65", // dollar bill
 
-        "#ffffff" // white
+//        "#ffffff" // white
     ];
 
     export function svgGravatar(id : string) : string
@@ -888,19 +888,27 @@ module TDev{
             hash = advance(hash, id.charCodeAt(i))
         }
 
+        var n = hash & 0xffff;
+        var idx = n % (colors.length - 1);
+        var c = colors[idx];
         var svg = "";
-        for (var x = 0; x < 2; ++x) {
-            for (var y = 0; y < 2; ++y) {
+        for (var x = 0; x < 3; ++x) {
+            for (var y = 0; y < 5; ++y) {
                 hash = advance(hash, 0)
-                var n = hash & 0xffff;
-                var idx = n%(colors.length-1);
-                if (n > 30000)
-                    svg += Util.fmt("<circle fill='white' stroke-width='5' stroke='{0}' r='20.5' cx='{1}' cy='{2}'/>", colors[idx], 25+50*x, 25+50*y)
-                else
-                    svg += Util.fmt("<circle fill='{0}' r='23' cx='{1}' cy='{2}'/>", colors[idx], 25+50*x, 25+50*y)
+                n = hash & 0xffff;
+                if (n > 30000) {
+                  //  svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * x, 50 * y)
+                  //  if (x != 2)
+                    //    svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * (4-x), 50 * y)
+                }
+                else {
+                    svg += Util.fmt("<rect fill='{0}' width='23' height='23' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * x, 50 * y)
+                    if (x != 2)
+                        svg += Util.fmt("<rect fill='{0}' width='23' height='23' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * (4-x), 50 * y)
+                }
             }
         }
-        return SVG.svgBoilerPlate('0 0 100 100', svg);
+        return SVG.svgBoilerPlate('0 0 250 250', svg);
     }
 
 
