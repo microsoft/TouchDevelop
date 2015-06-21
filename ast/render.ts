@@ -197,7 +197,10 @@ module TDev
                 ellipse = ellipse || cols < row.length;
                 for (var x = 0; x < cols; ++x) {
                     var bit = !!row[x];
-                    var path = Util.fmt(" M {0} {1} l 25 0 l 0 25 l -25 0 Z", 50 * x, 50 * y);
+                    var left = 50 * x;
+                    var top = 50 * y;
+                    var path = Util.fmt(" M {0} {1} {2} {3} {4} {5} {6} {7} Z",
+                        left, top, left+25, top, left+25, top+25, left, top+25);
                     if (bit) r1 += path; else r0 += path;
                 }
             }

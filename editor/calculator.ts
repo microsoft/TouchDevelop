@@ -2108,10 +2108,7 @@ module TDev
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
                 if (l instanceof AST.FieldName || l instanceof AST.RecordName)
                     e.nameOverride = lf("rename");
-                else if (/^bitmatrix$/.test(l.languageHint)) {
-                    e.nameOverride = lf("edit");
-                    e.imageOverride = Cloud.artUrl("jbrtborw");
-                } else e.nameOverride = lf("edit");
+                else e.nameOverride = lf("edit");
                 e.descOverride = lf("change contents");
                 e.cbOverride = () => { this.inlineEdit(l) };
             } else if (typeof l.data == "boolean") {
