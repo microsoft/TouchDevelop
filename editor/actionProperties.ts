@@ -143,7 +143,7 @@ module TDev
             var showAtomic = showSettings && TheEditor.widgetEnabled("scriptPropertiesPropertyAtomic");
             var asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
             var singleReturnValue = TheEditor.widgetEnabled("singleReturnValue");
-            if (asAction && !Script.isLibrary) this.actionName.readOnly = true;
+            if (asAction && !Script.isLibrary && !Script.isDocsTopic()) this.actionName.readOnly = true;
             var propDivs =
                  [div("prop-spacer"),
                   div(null, span("varLabel", lf("function"))),
