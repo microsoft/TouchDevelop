@@ -8,23 +8,25 @@
   >
   <WorkerRole name="ShellRole">
     <ConfigurationSettings>
-      <Setting name="AZURE_STORAGE_ACCOUNT" />
-      <Setting name="AZURE_STORAGE_ACCESS_KEY" />
       <Setting name="TD_DEPLOYMENT_KEY" />
       <Setting name="TD_BLOB_DEPLOY_CHANNEL" />
       <Setting name="ZIP_URL" />
+
+      <!-- Traditional config -->
+      <Setting name="AZURE_STORAGE_ACCOUNT" />
+      <Setting name="AZURE_STORAGE_ACCESS_KEY" />
       <Setting name="TD_HTTPS_PFX" />
+
+      <!-- Alternatively, Azure Key Vault config -->
+      <Setting name="KEY_VAULT_CLIENT_ID" />
+      <Setting name="KEY_VAULT_CLIENT_SECRET" />
+      <Setting name="KEY_VAULT_URL" />
+
     </ConfigurationSettings>
     <Imports/>
     <Startup>
       <Task commandLine="setup_worker.cmd 1&lt;&amp;2 &gt;&gt; log.txt" executionContext="elevated">
         <Environment>
-        <Variable name="AZURE_STORAGE_ACCOUNT">
-          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCOUNT']/@value" />
-        </Variable>
-        <Variable name="AZURE_STORAGE_ACCESS_KEY">
-          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='AZURE_STORAGE_ACCESS_KEY']/@value" />
-        </Variable>
         <Variable name="ZIP_URL">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='ZIP_URL']/@value" />
         </Variable>
@@ -60,6 +62,15 @@
         </Variable>
         <Variable name="TD_HTTPS_PFX">
           <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='TD_HTTPS_PFX']/@value" />
+        </Variable>
+        <Variable name="KEY_VAULT_URL">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='KEY_VAULT_URL']/@value" />
+        </Variable>
+        <Variable name="KEY_VAULT_CLIENT_ID">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='KEY_VAULT_CLIENT_ID']/@value" />
+        </Variable>
+        <Variable name="KEY_VAULT_CLIENT_SECRET">
+          <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/ConfigurationSettings/ConfigurationSetting[@name='KEY_VAULT_CLIENT_SECRET']/@value" />
         </Variable>
       </Environment>
       <EntryPoint>

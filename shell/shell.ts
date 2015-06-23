@@ -281,6 +281,21 @@ function downloadStream(u:string, f:(str:any)=>void)
     });
 }
 
+function readRes(g, f) {
+    var bufs = []
+    g.on('data', (c) => {
+        if (typeof c === "string")
+            bufs.push(new Buffer(c, "utf8"))
+        else
+            bufs.push(c)
+    });
+
+    g.on('end', () => {
+        var total = Buffer.concat(bufs)
+        f(total)
+    })
+}
+
 function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
 {
     var p:any = url.parse(u);
@@ -307,16 +322,7 @@ function downloadFile(u:string, f:(err:any, s:NodeBuffer, h?:any)=>void)
                 // (<any>res).setEncoding('utf8');
             }
 
-            var bufs = []
-            g.on('data', (c) => {
-                if (typeof c === "string")
-                    bufs.push(new Buffer(c, "utf8"))
-                else
-                    bufs.push(c)
-            });
-
-            g.on('end', () => {
-                var total = Buffer.concat(bufs)
+            readRes(g, total => {
                 f(null, total, (<any>res).headers)
             })
 
@@ -346,6 +352,78 @@ function downloadJson(u:string, f:(err:any, d:any)=>void)
             f(null, d)
         }
     })
+}
+
+var vaultToken = ""
+var vaultClientId = ""
+var vaultSecret = ""
+var vaultUrl = ""
+var numRetries = 0
+
+function downloadSecret(uri:string, f:(d:any) => void, opts:any = {})
+{
+    var p:any = url.parse(uri + "?api-version=2015-02-01-preview")
+    p.headers = {}
+    if (vaultToken)
+        p.headers['Authorization'] = 'Bearer ' + vaultToken
+    if (opts.put) {
+        p.method = 'PUT'
+        var data = new Buffer(JSON.stringify(opts.put), "utf8")
+        p.headers['Content-Length'] = data.length
+        p.headers['Content-Type'] = "application/json;charset=utf8"
+    }
+    var r = https.request(p, (res:http.ClientResponse) => {
+        if (res.statusCode == 401) {
+            if (numRetries > 3) {
+                error.log("too many retries")
+                return
+                //process.exit(1)
+            }
+            var m = /authorization="([^"]+)".*resource="([^"]+)"/.exec(res.headers['www-authenticate'])
+            if (!m) {
+                error.log("bad auth header, " + JSON.stringify(res.headers))
+                return
+                //process.exit(1)
+            }
+
+            var d = "grant_type=client_credentials" +
+                    "&client_id=" + encodeURIComponent(vaultClientId) +
+                    "&client_secret=" + encodeURIComponent(vaultSecret) +
+                    "&resource=" + encodeURIComponent(m[2]);
+            var pp:any = url.parse(m[1] + "/oauth2/token")
+            pp.headers =  {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            pp.method = 'POST';
+            var r = https.request(pp, (res:http.ClientResponse) => {
+                readRes(res, total => {
+                    if (res.statusCode != 200) {
+                        error.log("get token failed for " + uri)
+                        error.log(total.toString("utf8"))
+                        return
+                    }
+                    var j = JSON.parse(total.toString("utf8"))
+                    vaultToken = j.access_token
+                    numRetries++
+                    downloadSecret(uri, f, opts)
+                })
+            })
+            r.end(d)
+        } else {
+            numRetries = 0
+            readRes(res, total => {
+                if (res.statusCode != 200) {
+                    error.log("get failed for " + uri)
+                    error.log(total.toString("utf8"))
+                    return
+                } else {
+                    f(JSON.parse(total.toString("utf8")))
+                }
+            })
+        }
+    })
+
+    r.end(data)
 }
 
 interface StringMap<T>
@@ -2255,27 +2333,30 @@ function checkUpdate()
 
                 if (d.did == lastAzureDeployment) return // race?
 
-                getBlobJson(d.blob, (err, data) => {
-                    lastAzureDeployment = d.did
-                    if (data) {
-                        if (!data.dmeta) data.dmeta = {}
-                        data.dmeta.blobid = d.blob
-                        data.dmeta.deploytime = d.time
-                        deploy(data, (err, resp) => {
-                            var f = blobDeployCallback
-                            blobDeployCallback = null
-                            if (f) f(err, resp)
-                            if (err)
-                                error.log("cannot deploy: " + err)
-                            else
-                                info.log(resp)
+                var fin = () =>
+                    getBlobJson(d.blob, (err, data) => {
+                        lastAzureDeployment = d.did
+                        if (data) {
+                            if (!data.dmeta) data.dmeta = {}
+                            data.dmeta.blobid = d.blob
+                            data.dmeta.deploytime = d.time
+                            deploy(data, (err, resp) => {
+                                var f = blobDeployCallback
+                                blobDeployCallback = null
+                                if (f) f(err, resp)
+                                if (err)
+                                    error.log("cannot deploy: " + err)
+                                else
+                                    info.log(resp)
+                                reset()
+                            })
+                        } else {
+                            error.log("cannot fetch deployment: " + err.message)
                             reset()
-                        })
-                    } else {
-                        error.log("cannot fetch deployment: " + err.message)
-                        reset()
-                    }
-                })
+                        }
+                    })
+
+                withVault(fin)
             })
         } else {
             if (err && err.statusCode != 404)
@@ -2314,6 +2395,23 @@ function networkIP(): string {
     return "localhost";
 }
 
+function withVault(inner:()=>void) {
+    if (vaultUrl) {
+        downloadSecret(vaultUrl, d => {
+            var env = JSON.parse(d.value)
+            var pfx0 = env['TD_HTTPS_PFX']
+            delete env['TD_HTTPS_PFX']
+            if (pfx0) pfx = pfx0
+            Object.keys(env).forEach(k => {
+                process.env[k] = env[k]
+            })
+            inner()
+        })
+    } else inner()
+}
+
+
+var pfx = null
 function main()
 {
     var agent = (<any>http).globalAgent;
@@ -2366,6 +2464,11 @@ function main()
         console.error("HTTPS support:")
         console.error("TD_HTTPS_PFX            -- if set to base64-encoded .pfx file, enables TLS/SSL/HTTPS")
         console.error("HTTPS_PORT              -- defaults to 443; only used when TD_HTTPS_PFX is set")
+        console.error("")
+        console.error("KEY_VAULT_URL           -- eg: https://foobar.vault.azure.net/secrets/myenv")
+        console.error("KEY_VAULT_CLIENT_ID     -- eg: 58127cfc-dc7e-46d3-9ab6-3d33ae67de0f")
+        console.error("KEY_VAULT_CLIENT_SECRET -- eg: m/c4FooBaR42eNa+VCfOObAr42dkL4D42i+u90uIq1c=")
+        console.error("  --putsecret FILE      -- upload given Key Vault secret")
 
         process.exit(1)
     }
@@ -2385,9 +2488,9 @@ function main()
     }
 
     var sslport = process.env.HTTPS_PORT || 443;
-    var pfx = process.env['TD_HTTPS_PFX']
+    pfx = process.env['TD_HTTPS_PFX']
+    var putSecret = ""
     delete process.env['TD_HTTPS_PFX'] // we don't really want the workers to see this
-    if (!pfx) sslport = 0
 
     while (args.length > 0) {
         switch (args[0]) {
@@ -2429,6 +2532,10 @@ function main()
             case "--usehome":
                 args.shift();
                 useHome = true;
+                break;
+            case "--putsecret":
+                args.shift()
+                putSecret = args.shift()
                 break;
             default:
                 var m = /^([A-Za-z0-9_]+)=(.*)$/.exec(args[0])
@@ -2507,6 +2614,35 @@ function main()
 
     process.on('uncaughtException', handleError)
 
+    vaultUrl = process.env['KEY_VAULT_URL']
+    vaultSecret = process.env['KEY_VAULT_CLIENT_SECRET']
+    vaultClientId = process.env['KEY_VAULT_CLIENT_ID']
+    delete process.env['KEY_VAULT_URL']
+    delete process.env['KEY_VAULT_CLIENT_ID']
+    delete process.env['KEY_VAULT_CLIENT_SECRET']
+
+    if (vaultUrl) {
+        if (!vaultSecret || !vaultClientId) {
+            error.log("missing KEY_VAULT_CLIENT_ID or KEY_VAULT_CLIENT_SECRET")
+            process.exit(1)
+        }
+
+        if (putSecret) {
+            var j = JSON.parse(fs.readFileSync(putSecret, "utf8"))
+            downloadSecret(vaultUrl, d => {
+                console.log(d)
+                info.log("secret uploaded")
+                process.exit(0)
+            }, { 
+                put: {
+                    value: JSON.stringify(j, null, 4)
+                }
+            })
+            return
+        }
+    }
+
+
     var startUp = () => {
         if (internet) {
             app.listen(port);
@@ -2570,26 +2706,34 @@ function main()
             }
         })
 
-    var app = http.createServer(handleReq);
-    app.on("upgrade", webSocketHandler)
+    var app
+    var sslapp
 
-    if (sslport) {
-        var sslapp = https.createServer({
-          pfx: new Buffer(pfx, "base64")
-        })
-        sslapp.on("request", handleReq)
-        sslapp.on("upgrade", webSocketHandler)
+    var innerMain = () => {
+        if (!pfx) sslport = 0
+        app = http.createServer(handleReq);
+        app.on("upgrade", webSocketHandler)
+
+        if (sslport) {
+            sslapp = https.createServer({
+              pfx: new Buffer(pfx, "base64")
+            })
+            sslapp.on("request", handleReq)
+            sslapp.on("upgrade", webSocketHandler)
+        }
+
+        if (scriptId) {
+            shouldStart = false;
+            runScript(scriptId, startUp, reload)
+        } else {
+            if (blobChannel)
+                loadAzureStorage(startUp)
+            else
+                reload()
+        }
     }
 
-    if (scriptId) {
-        shouldStart = false;
-        runScript(scriptId, startUp, reload)
-    } else {
-        if (blobChannel)
-            loadAzureStorage(startUp)
-        else
-            reload()
-    }
+    withVault(innerMain)
 }
 
 main();
