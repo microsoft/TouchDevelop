@@ -3199,7 +3199,10 @@ module TDev
                 if (!shouldRun) {
                     this.setMode()
                     var st = Script.editorState
-                    if (st.splitScreen || this.widgetEnabled("splitScreenOnLoad") || Browser.EditorSettings.widgets().splitScreenOnLoad)
+                    var splitOnLoad = this.widgetEnabled("splitScreenOnLoad") || Browser.EditorSettings.widgets().splitScreenOnLoad
+                    if (Script.isDocsTopic() || Script.isLibrary)
+                        splitOnLoad = false;
+                    if (st.splitScreen || splitOnLoad)
                         this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
@@ -4415,7 +4418,8 @@ module TDev
 
         public setSplitScreen(split:boolean, save = false)
         {
-            if (Cloud.isUserRestricted()) split = true; // always split in cloud restricted mode
+            if (Cloud.isRestricted() && !Browser.EditorSettings.widgets().splitScreen)
+                split = true; // always split in cloud restricted mode
 
             if (save && Script)
                 Script.editorState.splitScreen = split
