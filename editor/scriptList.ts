@@ -7756,7 +7756,6 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            ch.unshift(accountButtons);
             if (this.isMe() && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
@@ -7790,6 +7789,7 @@
                 ch.unshift(nameInput);
                 ch.unshift(div('input-label', 'nickname'));
             }
+            ch.unshift(accountButtons);
             ch.unshift(hd);
 
             if (Cloud.hasPermission("user-mgmt")) {
