@@ -7776,7 +7776,11 @@
                 }
 
                 // user name                
-                var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
+                var max = 25
+                var msg = Cloud.lite ? 
+                    lf("Enter your nickname (at most {0} characters)", max) :
+                    lf("Enter your nickname (at least 8 characters)");
+                var nameInput = HTML.mkTextInputWithOk("text", msg, () => {
                     HTML.showProgressNotification("saving...");
                     Cloud.postUserSettingsAsync({ nickname: nameInput.value })
                         .done(resp => {
@@ -7785,6 +7789,7 @@
                         TheApiCacheMgr.invalidate("me");
                     }, e => World.handlePostingError(e, lf("saving nickname")));
                 });
+                if (Cloud.lite) nameInput.maxLength = max;
                 nameInput.value = this.userName;
                 ch.unshift(nameInput);
                 ch.unshift(div('input-label', 'nickname'));
