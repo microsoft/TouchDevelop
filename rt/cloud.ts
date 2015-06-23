@@ -241,6 +241,8 @@ module TDev.Cloud {
             if (t)
                 litePermissions[t] = true
         })
+        if (/http:\/\/localhost/i.test(document.URL))
+            litePermissions['internal'] = true
     }
 
     export function hasPermission(perm:string)
@@ -251,11 +253,6 @@ module TDev.Cloud {
     export function isRestricted()
     {
         return !!lite;
-    }
-
-    export function isUserRestricted()
-    {
-        return !!lite && !Cloud.hasPermission("root-ptr");
     }
 
     export function getServiceUrl() { return config.rootUrl; }
