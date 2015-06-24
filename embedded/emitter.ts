@@ -287,7 +287,11 @@ module TDev {
         else if (callType == "field")
           return this.visit(env, args[0]) + "->" + H.mangleName(name);
 
-        // 6) Reference to a built-in library method, e.g. Math→ max
+        // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
+        else if (args.length && H.isSingletonRef(args[0]) == "♻")
+          return "";
+
+        // 6b) Reference to a built-in library method, e.g. Math→ max
         else if (args.length && H.isSingletonRef(args[0]))
           return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name), true);
 
