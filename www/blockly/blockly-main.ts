@@ -394,6 +394,7 @@ module TDev {
     clearPopups();
     $("#errorsGraduate").addClass("hidden");
     $("#errorsCompile").addClass("hidden");
+    $("#errorsRun").addClass("hidden");
 
     try {
       ast = compile(Blockly.mainWorkspace, {
@@ -466,7 +467,9 @@ module TDev {
       e.stopPropagation();
     });
     $("#command-run").click(() => {
-      var ast = compileOrError();
+      var ast = compileOrError("#errorsRun");
+      if (!ast)
+        return;
       post(<External.Message_Run> {
         type: External.MessageType.Run,
         ast: <any> ast,

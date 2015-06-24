@@ -150,14 +150,19 @@ module TDev {
           elseBranch: J.JStmt[],
           isElseIf: boolean)
       {
-        return [
-          env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
-          this.visitMany(indent(env), thenBranch) + "\n",
-          env.indent, "}",
-          elseBranch ? " else {\n" : "",
-          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
-          elseBranch ? env.indent + "}" : ""
-        ].join("");
+        // TouchDevelop abuses "if false" to comment out code. Commented out
+        // code is not type-checked, so don't try to compile it.
+        if (cond.tree.nodeType == "booleanLiteral" && (<J.JBooleanLiteral> cond.tree).value === false)
+          return "";
+        else
+          return [
+            env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
+            this.visitMany(indent(env), thenBranch) + "\n",
+            env.indent, "}",
+            elseBranch ? " else {\n" : "",
+            elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
+            elseBranch ? env.indent + "}" : ""
+          ].join("");
       }
 
       private resolveCall(env: EmitterEnv, receiver: J.JExpr, name: string) {
@@ -282,7 +287,11 @@ module TDev {
         else if (callType == "field")
           return this.visit(env, args[0]) + "->" + H.mangleName(name);
 
-        // 6) Reference to a built-in library method, e.g. Math→ max
+        // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
+        else if (args.length && H.isSingletonRef(args[0]) == "♻")
+          return "";
+
+        // 6b) Reference to a built-in library method, e.g. Math→ max
         else if (args.length && H.isSingletonRef(args[0]))
           return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name), true);
 
@@ -299,7 +308,9 @@ module TDev {
         if (n == "$skip")
           return "";
         else
-          return n;
+          // Reference to "data", "Math" (or other namespaces), that makes no
+          // sense.
+          return "";
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
