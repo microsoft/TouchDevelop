@@ -130,6 +130,7 @@ module TDev.AST {
         private stableName: string;
         private stableVersions : string[];
         public tutorialWarning: string;
+        public isUnreachable:boolean;
         public _hint:string;
         public _compilerBreakLabel:any;
         public _compilerContinueLabel:any;
@@ -138,6 +139,7 @@ module TDev.AST {
             super()
         }
         public isStmt() { return true; }
+        public isJump() { return false; }
         public isExecutableStmt() { return false; }
         public primaryBody():Block { return null; }
         public calcNode():ExprHolder { return null; }
@@ -157,7 +159,7 @@ module TDev.AST {
                 r = this.calcNode().hint
             if (!r) return this._hint
             if (this._hint) return r + "\n" + this._hint
-            return null
+            return r
         }
         public addHint(msg:string)
         {
@@ -168,6 +170,7 @@ module TDev.AST {
         {
             this._error = null
             this._hint = null
+            this.isUnreachable = false
         }
 
         public debuggerRenderContext: {
@@ -893,6 +896,17 @@ module TDev.AST {
         public isExecutableStmt() { return true; }
 
         public allowSimplify() { return true }
+        public isJump()
+        {
+            if (this.expr.parsed) {
+                var p = this.expr.parsed.getCalledProperty()
+                if (p == api.core.ReturnProp ||
+                    p == api.core.BreakProp ||
+                    p == api.core.ContinueProp)
+                    return true
+            }
+            return false
+        }
 
         public helpTopic() { return this.isVarDef() ? "var" : "commands"; }
 
