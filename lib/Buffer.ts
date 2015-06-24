@@ -12,7 +12,7 @@ module TDev.RT {
         static fromString(s:string, encoding:string)
         {
             function bin(b:string) {
-                if (!b) return undefined;
+                if (b == null) return undefined;
                 return Buffer.fromTypedArray(Util.stringToUint8Array(b))
             }
 
