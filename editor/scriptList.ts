@@ -3554,6 +3554,7 @@
 
             box.withClick(() => {
                 var scrProm = new PromiseInv();
+                var htext = "";
                 var m:ModalDialog = ScriptProperties.showDiff(scrProm, {
                     "restore": () => {
                         var prog = HTML.mkProgressBar()
@@ -3561,18 +3562,34 @@
                         m.empty()
                         m.add(prog)
                         m.addHTML("restoring...")
-                        Util.childNodes(<HTMLElement>box.parentNode).forEach(n => n.setFlag("selected", false));
-                        Cloud.postPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history/" + it.historyid, {})
-                            .then(resp => {
-                                box.setFlag("selected", true)
-                                return World.syncAsync(false)
+                        if (Cloud.lite) {
+                            if (!htext) return
+                            var app0 = AST.Parser.parseScript(htext)
+                            World.getInstalledHeaderAsync(guid)
+                            .then((hd) => {
+                                hd.name = app0.getName()
+                                return World.updateInstalledScriptAsync(hd, htext, null)
                             })
                             .then(() => {
                                 prog.stop()
                                 m.dismiss()
-                                Util.setTimeout(500, () => TheEditor.historyMgr.reload(HistoryMgr.windowHash()))
+                                this.browser().loadTab(this.parent)
                             })
                             .done()
+                        } else {
+                            Util.childNodes(<HTMLElement>box.parentNode).forEach(n => n.setFlag("selected", false));
+                            Cloud.postPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history/" + it.historyid, {})
+                                .then(resp => {
+                                    box.setFlag("selected", true)
+                                    return World.syncAsync(false)
+                                })
+                                .then(() => {
+                                    prog.stop()
+                                    m.dismiss()
+                                    Util.setTimeout(500, () => TheEditor.historyMgr.reload(HistoryMgr.windowHash()))
+                                })
+                                .done()
+                        }
                     }
                 })
 
@@ -3581,6 +3598,7 @@
                     if (!texts[0] || !texts[1])
                         return;
                     var app0 = AST.Parser.parseScript(texts[0]);
+                    htext = texts[0]
                     var app1 = AST.Parser.parseScript(texts[1]);
                     AST.Diff.diffApps(app0, app1)
                     scrProm.success(app1)
