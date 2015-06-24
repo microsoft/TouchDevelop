@@ -545,7 +545,7 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var tr = inferType(e, right);
   switch (bOp) {
     case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
-    case "LT": case "LTE": case "GT": case "GTE":
+    case "LT": case "LTE": case "GT": case "GTE": case "POWER":
       // Monomorphic arithmetic operators
       assert (t == null || t == Type.Number);
       t = Type.Number;
