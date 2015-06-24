@@ -226,6 +226,18 @@ a.command:hover {
   #script-name {
     font-size: 2rem;
   }
+
+  .blocklyTreeRow {
+    padding-right: .3em !important;
+  }
+
+  .blocklyTreeIcon {
+    width: 6px !important;
+  }
+
+  .blocklyTreeLabel {
+    font-size: 12px !important;
+  }
 }
 
 /* Override a few blockly styles. */

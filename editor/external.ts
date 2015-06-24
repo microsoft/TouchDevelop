@@ -190,6 +190,9 @@ module TDev {
         var main = compiledScript.actionsByName[mainName];
         rt.stopAsync().done(() => {
           rt.run(main, []);
+          // So that key events, such as escape, are not caught by Blockly.
+          if (document.activeElement instanceof HTMLElement)
+            (<HTMLElement> document.activeElement).blur();
         });
       });
     }
@@ -385,6 +388,9 @@ module TDev {
 
           case MessageType.Run:
             var message3 = <Message_Run> event.data;
+            document.getElementById("externalEditorSide").classList.remove("dismissed");
+            // So that key events such as escape are caught by the editor, not
+            // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
             addDeviceLibrary(ast);
             var text = J.serialize(ast);
