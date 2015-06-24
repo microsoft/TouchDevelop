@@ -308,7 +308,9 @@ module TDev {
         if (n == "$skip")
           return "";
         else
-          return n;
+          // Reference to "data", "Math" (or other namespaces), that makes no
+          // sense.
+          return "";
       }
 
       public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
