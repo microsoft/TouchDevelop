@@ -469,10 +469,11 @@ module TDev {
     }
 
     export function pickUpNewBaseVersion() {
-      TheChannel.post(<Message_NewBaseVersion> {
-        type: MessageType.NewBaseVersion,
-        baseSnapshot: ScriptEditorWorldInfo.baseSnapshot
-      });
+      if (TheChannel)
+        TheChannel.post(<Message_NewBaseVersion> {
+          type: MessageType.NewBaseVersion,
+          baseSnapshot: ScriptEditorWorldInfo.baseSnapshot
+        });
     }
   }
 }
