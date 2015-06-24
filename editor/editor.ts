@@ -1624,7 +1624,8 @@ module TDev
                         return;
                     }
 
-                    var saveAndRun = () => this.saveStateAsync().done(() => {
+                    var saveAndRun = () => this.saveStateAsync()
+                    .then(() => {
                         if (!Script) {
                             ProgressOverlay.hide();
                             return;
@@ -1649,6 +1650,12 @@ module TDev
                             this.currentRt.eventQ.profiling = opts.profiling;
 
                         this.runActionCore(a, args, !!opts.debugging);
+                    })
+                    .done(() => {}, 
+                    e => {
+                        Util.reportError("script-run", e, false)
+                        HTML.showErrorNotification(lf("we couldn't run your script; sorry"))
+                        ProgressOverlay.hide();
                     });
                     saveAndRun()
                 }, Cloud.artUrl(Script.splashArtId));
@@ -3164,7 +3171,7 @@ module TDev
             }).then(() => {
                 if (!Script) return;
                 // if the script is not edited and it requires split screen, load split screen mode from meta
-                if (header.status === "published" && !!Script.splitScreen) {
+                if (header.status === "published" && !!Script.splitScreen && !Script.isLibrary && !Script.isDocsTopic()) {
                     Util.log('published script used split mode, splitting...');
                     this.setSplitScreen(true);
                 }
@@ -3238,7 +3245,7 @@ module TDev
                     if (runPlugin) return;
                     if (shouldRun || (TheEditor.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode && SizeMgr.splitScreen)) {
                         this.runAction(Script.mainAction(), null)
-                }
+                    }
             }, (e) => {
                 ProgressOverlay.hide();
                 throw e;
