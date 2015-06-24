@@ -1797,6 +1797,7 @@ span.errorSq .kw
 
 #externalEditorSide .boardCanvas {
     width: 100% !important;
+    height: auto !important;
 }
 
 #externalEditorSide .wallFullScreenContainer {
