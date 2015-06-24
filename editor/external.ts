@@ -150,7 +150,7 @@ module TDev {
         w.style.display = "";
         var logo = div("wallFullScreenLogo", HTML.mkImg(Cloud.artUrl("hrztfaux")));
 
-        elt("externalEditorSide").setChildren([w, logo]);        
+        elt("externalEditorSide").setChildren([w, logo]);
       }
 
       public fullWallWidth() {
