@@ -794,8 +794,11 @@ module TDev.Cloud {
         }
 
         HTML.showProgressNotification(lf("compiling..."));
+        var config = document.location.href.indexOf("fota=1") > 0
+            ? "fota"
+            : "proto";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
-            config: "proto",
+            config: config,
             source: cppSource,
             meta: meta
         })
