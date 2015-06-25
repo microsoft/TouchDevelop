@@ -204,6 +204,7 @@ module TDev {
        scriptname: string; // script name, mined from the script code
        scriptdescription: string; // script description, mined from the script code
        scriptid: string; // publication id if scriptstatus==”published”
+       scriptsize?: number;
        isactive: boolean; // whether this history item is the currently active backup
 
        entryNo?: number; // assigned when the thing is displayed

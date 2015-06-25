@@ -3548,7 +3548,9 @@
                             div("sdNameBlock", div("sdName", spanDirAuto(it.scriptname + (it.entryNo === undefined ? "" : " #" + it.entryNo)))),
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
-                                    Util.timeSince(it.time) + (scrid ? " :: /" + scrid : ""))),
+                                    Util.timeSince(it.time) 
+                                        + (scrid ? " :: /" + scrid : "") 
+                                        + (it.scriptsize ? lf(", size: {0}", it.scriptsize) : ""))),
                             div("sdAuthor", div("sdAuthorInner showWhenSelected", lf("current"))))))
             box.setFlag("selected", it.isactive)
 
