@@ -449,7 +449,8 @@ module TDev {
           TheChannel.post(<Message_Init> {
             type: MessageType.Init,
             script: data,
-            merge: ("theirs" in extra) ? extra : null
+            merge: ("theirs" in extra) ? extra : null,
+            fota: Cloud.isFota(),
           });
         });
       });

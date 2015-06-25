@@ -779,6 +779,11 @@ module TDev.Cloud {
             url += "&mergeids=" + encodeURIComponent(mergeIds)
         return Util.httpPostJsonAsync(getPrivateApiUrl(url), Cloud.lite ? meta : "")
     }
+
+    export function isFota() {
+        return document.location.href.indexOf("fota=1") > 0;
+    }
+
     export function postUserInstalledCompileAsync(guid:string, cppSource:string, meta:any = {}) : Promise
     {
         var r = new PromiseInv()
@@ -794,9 +799,7 @@ module TDev.Cloud {
         }
 
         HTML.showProgressNotification(lf("compiling..."));
-        var config = document.location.href.indexOf("fota=1") > 0
-            ? "fota"
-            : "proto";
+        var config = isFota() ? "fota" : "proto";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,

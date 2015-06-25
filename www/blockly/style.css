@@ -190,6 +190,14 @@ body, input {
   text-align: center;
 }
 
+body:not(.hasFota) .fota {
+  display: none;
+}
+
+body.hasFota .notfota {
+  display: none;
+}
+
 /* Misc */
 a.command, a.command:visited {
   color: black;

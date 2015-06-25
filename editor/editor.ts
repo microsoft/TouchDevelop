@@ -2095,7 +2095,8 @@ module TDev
 
             if (Cloud.isRestricted()) {
                 var compileBtn: HTMLElement;
-                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey)));
+                var str = Cloud.isFota() ? lf("flash") : lf("compile");
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey)));
             }
 
             this.playBtnDiv.setChildren(children);
