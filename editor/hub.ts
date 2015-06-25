@@ -382,6 +382,7 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                 }
             },
         },
@@ -418,6 +419,7 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                     
                     // for docs
                     artSection: true,
@@ -434,7 +436,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptHistoryTab: true,
                     //scriptAddToChannel: true,
                     //hubChannels: true,
                     calcSearchArt: true,
@@ -486,6 +487,7 @@ module TDev.Browser {
                     databaseSection: true,
                     scriptPropertiesManagement: true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                     //MORE
                     
                     // teacher specific
@@ -499,7 +501,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptHistoryTab: true,
                     scriptAddToChannel: true,
                     hubChannels: true,
                     calcSearchArt: true,
@@ -1260,12 +1261,12 @@ module TDev.Browser {
                                     return;
                                 }
                                 var t: ScriptTemplate = {
-                                    title: lf("Create a {0}", scr.name),
+                                    title: lf("Create a {0}", scr.name.replace(/ADJ/, "")),
                                     id: "derive",
                                     scriptid: scr.id,
                                     icon: "",
                                     description: "",
-                                    name: lf("ADJ script"),
+                                    name: /ADJ/.test(scr.name) ? scr.name : lf("ADJ script"),
                                     source: txt,
                                     section: "",
                                     editorMode: 0,
@@ -1426,20 +1427,23 @@ module TDev.Browser {
                     nameBox.value = this.browser().newScriptName(name)
                     var m = new ModalDialog();
                     m.onDismiss = () => onSuccess(undefined);
+                    var create = () => {
+                        m.onDismiss = undefined;
+                        m.dismiss();
+                        template.name = nameBox.value;
+                        this.browser()
+                            .clearAsync(false)
+                            .done(() => onSuccess(template), e => onSuccess(undefined))
+                    }
+                    // no cancel when using #derive:... route
+                    if (template.id == "derive")
+                        m.onDismiss = create;
                     m.add([
                         div("wall-dialog-header", lf_static(template.title, true)),
                         div("wall-dialog-body", lf_static(template.description, true)),
                         div("wall-dialog-line-textbox", nameBox),
                         //div("wall-dialog-body", lf("Tip: pick a good name for your script.")),
-                        div("wall-dialog-buttons",
-                            HTML.mkButton(lf("create"), () => {
-                                m.onDismiss = undefined;
-                                m.dismiss();
-                                template.name = nameBox.value;
-                                this.browser()
-                                    .clearAsync(false)
-                                    .done(() => onSuccess(template), e => onSuccess(undefined));
-                        }))
+                        div("wall-dialog-buttons", HTML.mkButton(lf("create"), create))
                     ]);
                     m.show();
                 }));
