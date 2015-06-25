@@ -122,6 +122,7 @@ body, input {
 }
 
 #commands a {
+  text-align: center;
   padding-right: .5em;
   margin-right: 1em;
 }
@@ -212,6 +213,10 @@ a.command:hover {
     line-height: 2.05rem;
     font-size: 1.3rem;
     margin: 0;
+  }
+
+  .roundlabel {
+    padding-top: 0;
   }
 
   .roundbutton > * {
