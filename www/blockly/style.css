@@ -122,6 +122,7 @@ body, input {
 }
 
 #commands a {
+  text-align: center;
   padding-right: .5em;
   margin-right: 1em;
 }
@@ -214,6 +215,10 @@ a.command:hover {
     margin: 0;
   }
 
+  .roundlabel {
+    padding-top: 0;
+  }
+
   .roundbutton > * {
     display: inline-block;
   }
@@ -225,6 +230,18 @@ a.command:hover {
 
   #script-name {
     font-size: 2rem;
+  }
+
+  .blocklyTreeRow {
+    padding-right: .3em !important;
+  }
+
+  .blocklyTreeIcon {
+    width: 6px !important;
+  }
+
+  .blocklyTreeLabel {
+    font-size: 12px !important;
   }
 }
 

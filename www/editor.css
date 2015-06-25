@@ -1818,6 +1818,45 @@ span.errorSq .kw
     height: auto;
 }
 
+@media (max-width: 1440px) {
+    #externalEditorPanes {
+        position: relative;
+    }
+
+    #externalEditorSide {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, .5);
+    }
+
+    #externalEditorSide.dismissed {
+        display: none;
+    }
+
+    #externalEditorSide .wallFullScreenContainer {
+        margin: 5%;
+        height: auto !important;
+        display: flex !important;
+    }
+
+    #externalEditorSide .wallFullScreenLogo {
+        padding: .5em;
+    }
+
+    #externalEditorSide .wallFullScreenLogo img {
+        background-color: white;
+        padding: .5em;
+    }
+
+    #externalEditorSide .boardCanvas {
+        width: inherit !important;
+        height: inherit !important;
+    }
+}
+
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
   display: none;
 }

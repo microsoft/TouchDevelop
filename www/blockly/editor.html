@@ -68,13 +68,13 @@
     </div>
     <xml id="blockly-toolbox" style="display: none">
       <category name="Basic">
-        <block type="text"></block>
-        <block type="math_number">
-          <field name="NUM">0</field>
-        </block>
-        <block type="math_number">
-          <field name="NUM">1</field>
-        </block>
+        <!-- <block type="text"></block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">0</field> -->
+        <!-- </block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">1</field> -->
+        <!-- </block> -->
         <!-- <block type="device_show_letter"> -->
         <!--   <value name="letter"> -->
         <!--     <block type="text"> -->
@@ -94,13 +94,6 @@
             </block>
           </value>
         </block>
-        <block type="device_pause">
-          <value name="pause">
-            <block type="math_number">
-              <field name="NUM">100</field>
-            </block>
-          </value>
-        </block>
         <block type="device_print_message">
           <value name="message">
             <block type="text">
@@ -108,6 +101,15 @@
             </block>
           </value>
           <value name="pausetime">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <block type="device_clear_display"></block>
+        <block type="device_forever"></block>
+        <block type="device_pause">
+          <value name="pause">
             <block type="math_number">
               <field name="NUM">100</field>
             </block>

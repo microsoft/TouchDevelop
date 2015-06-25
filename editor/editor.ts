@@ -4380,7 +4380,7 @@ module TDev
                         divId("externalEditorChrome", "hbox"),
                         divId("externalEditorPanes", "hbox flex1",
                             divId("externalEditorFrame", "vbox"),
-                            divId("externalEditorSide", "vbox flex1"))),
+                            divId("externalEditorSide", "vbox flex1 dismissed"))),
 
                       divId("wallOverlay", null));
             r.style.display = "none";
@@ -4520,6 +4520,10 @@ module TDev
             Util.clickHandler(this.codeOuter, () => {
                 this.dismissSidePane();
             });
+            Util.clickHandler(elt("externalEditorSide"), () => {
+                elt("externalEditorSide").classList.add("dismissed");
+            });
+
 
             elt("scriptEditor").withClick(() => {}) // disable text selection
 
@@ -5045,6 +5049,7 @@ module TDev
                     this.dismissSidePane();
                     return true;
                 }
+                elt("externalEditorSide").classList.add("dismissed");
                 break;
 
             case "PageUp":
