@@ -4567,12 +4567,14 @@ module TDev
 
                     if (state == "downloaded") {
                         if (incoming) ProgressOverlay.hide()
-                        this.reload()
+                        if (Script)
+                            this.reload()
                     } else if (state == "uploaded") {
                         if (hd.editor)
                             External.pickUpNewBaseVersion();
                     } else if (state == "published") {
-                        this.reload()
+                        if (Script)
+                            this.reload()
                     }
 
                     return Promise.as()
