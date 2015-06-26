@@ -150,19 +150,18 @@ module TDev {
           elseBranch: J.JStmt[],
           isElseIf: boolean)
       {
+        var isIfFalse = cond.tree.nodeType == "booleanLiteral" && (<J.JBooleanLiteral> cond.tree).value === false;
         // TouchDevelop abuses "if false" to comment out code. Commented out
-        // code is not type-checked, so don't try to compile it.
-        if (cond.tree.nodeType == "booleanLiteral" && (<J.JBooleanLiteral> cond.tree).value === false)
-          return "";
-        else
-          return [
-            env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
-            this.visitMany(indent(env), thenBranch) + "\n",
-            env.indent, "}",
-            elseBranch ? " else {\n" : "",
-            elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
-            elseBranch ? env.indent + "}" : ""
-          ].join("");
+        // code is not type-checked, so don't try to compile it. However, an
+        // "if false" followed by an "else" is *not* understood to be a comment.
+        return [
+          env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
+          isIfFalse ? "" : this.visitMany(indent(env), thenBranch) + "\n",
+          env.indent, "}",
+          elseBranch ? " else {\n" : "",
+          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
+          elseBranch ? env.indent + "}" : ""
+        ].join("");
       }
 
       private resolveCall(env: EmitterEnv, receiver: J.JExpr, name: string) {
