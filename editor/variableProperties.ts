@@ -913,20 +913,7 @@ module TDev
                             ModalDialog.info(lf("document published!"), lf("You can find your document under 'my art' in the hub."));
                         }
                     }, e => {
-                            Util.log('upload documeent: error ' + e.status);
-                            publishBtn.style.display = null
-                            progressBar.stop();
-                            progressDiv.setChildren([]);
-                            if (e.status == 502)
-                                errorDiv.setChildren([lf("Could not publish document. ") + Cloud.onlineInfo()]);
-                            else if (e.status == 503)
-                                errorDiv.setChildren([lf("Could not publish documeent. Did you publish a lot recently? Please try again later.")]);
-                            else if (e.status == 403)
-                                errorDiv.setChildren([lf("Access denied; Please return to the main hub and then try again.")]);
-                            else if (e.status == 400)
-                                errorDiv.setChildren([lf("Could not publish document: ") + e.errorMessage]);
-                            else
-                                throw e;
+                            World.handlePostingError(e, lf("upload document"))
                         });
                 })));
                 m.show();
@@ -994,19 +981,7 @@ module TDev
                                 ModalDialog.info(lf("sound published!"), lf("You can find your sound under 'my art' in the hub."));
                             }
                         }, e => {
-                            Util.log('upload sound: error ' + e.status);
-                            progressBar.stop();
-                            progressDiv.setChildren([]);
-                            if (e.status == 502)
-                                errorDiv.setChildren([lf("Could not publish sound. ") + Cloud.onlineInfo()]);
-                            else if (e.status == 503)
-                                errorDiv.setChildren([lf("Could not publish sound. Did you publish a lot recently? Please try again later.")]);
-                            else if (e.status == 403)
-                                errorDiv.setChildren([lf("Access denied; Please return to the main hub and then try again.")]);
-                            else if (e.status == 400)
-                                errorDiv.setChildren([lf("Could not publish sound: ") + e.errorMessage]);
-                            else
-                                throw e;
+                            World.handlePostingError(e, lf("upload sound"))
                         });
                 })));
                 m.show();
@@ -1121,16 +1096,7 @@ module TDev
                                 }
                             }
                         }, e => {
-                            if (e.status == 502)
-                                errorDiv.setChildren([lf("Could not publish picture. ") + Cloud.onlineInfo()]);
-                            else if (e.status == 503)
-                                errorDiv.setChildren([lf("Could not publish picture. Did you publish a lot recently? Please try again later.")]);
-                            else if (e.status == 403)
-                                errorDiv.setChildren([lf("Access denied; Please return to the main hub and then try again.")]);
-                            else if (e.status == 400)
-                                errorDiv.setChildren([lf("Could not publish picture: ") + e.errorMessage]);
-                            else
-                                throw e;
+                            World.handlePostingError(e, lf("upload picture"))
                         });
                     })));
                 m.setScroll();
