@@ -2007,7 +2007,10 @@ module TDev
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
-            this.currentCompilationModalDialog.add(div("wall-dialog-body", lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")));
+            var msg = Cloud.isFota()
+                ? lf("Please wait while we prepare your .hex file. Once the .hex file is ready, it will be flashed onto your micro:bit!")
+                : lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")
+            this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
@@ -2019,7 +2022,7 @@ module TDev
             var notifyCompiled = (src: string): boolean => {
                 if (btn) {
                     btn.setFlag("working", false);
-                    btn.classList.remove("disabledItem");                
+                    btn.classList.remove("disabledItem");
                 }
                 this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
