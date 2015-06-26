@@ -489,6 +489,8 @@ module TDev {
     ];
     
     export function socialNetworks(widgets : Cloud.EditorWidgets) : SocialNetwork[] {
+        if (!Cloud.hasPermission("post-script-meta"))
+            return [];
         return _socialNetworks.filter(sn => !!widgets["socialNetwork" + sn.id]);
     }
 
