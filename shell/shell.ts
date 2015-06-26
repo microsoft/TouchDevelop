@@ -372,6 +372,7 @@ function downloadSecret(uri:string, f:(d:any) => void, opts:any = {})
         p.headers['Content-Length'] = data.length
         p.headers['Content-Type'] = "application/json;charset=utf8"
     }
+    debug.log("vault: downloading secret from " + uri)
     var r = https.request(p, (res:http.ClientResponse) => {
         if (res.statusCode == 401) {
             if (numRetries > 3) {
@@ -417,7 +418,9 @@ function downloadSecret(uri:string, f:(d:any) => void, opts:any = {})
                     error.log(total.toString("utf8"))
                     return
                 } else {
-                    f(JSON.parse(total.toString("utf8")))
+                    var d = JSON.parse(total.toString("utf8"))
+                    debug.log("vault: got secret, " + (d && d.value ? d.value.length : "<nil>"))
+                    f(d)
                 }
             })
         }
@@ -2397,12 +2400,15 @@ function networkIP(): string {
 
 function withVault(inner:()=>void) {
     if (vaultUrl) {
+        vaultToken = ""
         downloadSecret(vaultUrl, d => {
             var env = JSON.parse(d.value)
             var pfx0 = env['TD_HTTPS_PFX']
             delete env['TD_HTTPS_PFX']
             if (pfx0) pfx = pfx0
             Object.keys(env).forEach(k => {
+                if (process.env[k] != env[k])
+                    debug.log("vault: setting " + k)
                 process.env[k] = env[k]
             })
             inner()
