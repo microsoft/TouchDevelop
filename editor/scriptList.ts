@@ -409,10 +409,6 @@
                 this.initialSearch = "";
                 this.progressBar.reset();
                 
-                World.continuouslySyncAsync(false, () => {
-                    this.searchKey();
-                    return Promise.as();
-                }).done();
             }
         }
 
@@ -1057,7 +1053,13 @@
                                         .done(undefined, () => { }); // ignore network errors
                             };
                             m.show();
-                      }, noOtherAsk).done(message => { Browser.TheHost.notifySyncDone() });
+                      }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
+                      .then(() => 
+                        World.continuouslySyncAsync(false, () => {
+                            this.searchKey();
+                            return Promise.as();
+                        }))
+                      .done();
                 }
                 else {
                     // user never registered; just skip
