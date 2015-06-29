@@ -1821,7 +1821,7 @@ span.errorSq .kw
     height: auto;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1400px) {
     #externalEditorPanes {
         position: relative;
     }
