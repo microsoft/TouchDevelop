@@ -201,9 +201,9 @@ Blockly.Blocks['device_get_brightness'] = {
         this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("brightness (%)");
+            .appendField("brightness");
         this.setOutput(true, "Number");
-        this.setTooltip('Get the current brightness of the screen (between 0 and 100).');
+        this.setTooltip('Get the current brightness of the screen (between 0 and 255).');
     }
 };
 
@@ -212,13 +212,13 @@ Blockly.Blocks['device_set_brightness'] = {
         this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
         this.setColour(160);
         this.appendDummyInput()
-            .appendField("set brightness (%)");
+            .appendField("set brightness");
         this.appendValueInput("value")
             .setCheck("Number");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('Set the current brightness of the screen (between 0 and 100).');
+        this.setTooltip('Set the current brightness of the screen (between 0 and 255).');
     }
 };
 
