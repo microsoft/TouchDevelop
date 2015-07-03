@@ -32,7 +32,23 @@ module TDev {
         origin: origin,
         path: path + "ace/editor.html"
         icon: ""
-      }, */ {
+      }, */
+        {
+          company: "Code Kingdoms",
+          name: "CK JavaScript",
+          description: "Code JavaScript with the CK editor",
+          id: 'codekingdoms',
+
+          origin: 'http://microbit-staging.codekingdoms.com',
+          path: '/',
+
+          // Local testing
+          // origin: 'http://localhost:8888',
+          // path: '/ck-client/game/',
+
+          logoUrl: origin + path + 'img/codekingdoms-microbit.png'
+        },
+      {
         company: "Microsoft",
         name: "Block Editor",
         description: "Drag and drop",
