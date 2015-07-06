@@ -9,7 +9,9 @@ module TDev {
         export var getScriptMeta : (s:string) => any;
         export var sanitizeScriptTextForCloud : (s:string) => string;
         export var waitForUpdate = (id:string) => false;
-        export var kPendingMerge = "!!!PENDINGMERGE!!!";
+
+        // for now disable merge on sync in the lite cloud
+        export var disableMerge = true;
 
         // this is so that the Editor can react to changes made by sync
         // state is: 
@@ -159,6 +161,7 @@ module TDev {
                 var baseVer:ScriptBlob;
                 var currVer:ScriptBlob;
                 var hd:Cloud.Header; // local header
+                var skipMsg = false
 
                 return getScriptBlobAsync(header.scriptVersion.baseSnapshot)
                     .then(v => theirs = v)
@@ -168,7 +171,19 @@ module TDev {
                     .then(() => {
                         // [hd] is the local header; if the [instanceId] is "cloud", then no local modifications were performed, i.e. the
                         // local header is *exactly* baseSnapshot
+                        var touch = () => {
+                            header.scriptVersion.instanceId = Cloud.getWorldId()
+                            header.scriptVersion.time = getCurrentTime();
+                            header.scriptVersion.version++;
+                            header.status = "unpublished";
+                        }
                         if (hd && hd.scriptVersion.instanceId != "cloud" && hd.scriptVersion.baseSnapshot && hd.scriptVersion.baseSnapshot != header.scriptVersion.baseSnapshot) {
+                            if (disableMerge) {
+                                touch()
+                                skipMsg = true
+                                // setInstalledAsync() will not update to null
+                                return <ScriptBlob>{ script: null, editorState: null }
+                            }
                             // We need to merge, because there's been a fork.  The base header is [hd.scriptVersion.baseSnapshot], "theirs" is
                             // [header], and "mine" is [hd].
                             log(header.guid + "/" + header.scriptId + ": " + header.name + " merging based on " + hd.scriptVersion.baseSnapshot);
@@ -212,10 +227,7 @@ module TDev {
                                         // [baseSnapshot] is still the one from the cloud header, this means that we've been creating a new
                                         // version *on top of* the cloud header. This new version has not been synced to the cloud, and
                                         // therefore does not have a [baseSnapshot] yet.
-                                        header.scriptVersion.instanceId = Cloud.getWorldId()
-                                        header.scriptVersion.time = getCurrentTime();
-                                        header.scriptVersion.version++;
-                                        header.status = "unpublished";
+                                        touch()
                                         return <ScriptBlob>{
                                             script:      mergeScripts(baseVer.script, currVer.script, theirs.script),
                                             editorState: mergeEditorStates(baseVer.editorState, currVer.editorState, theirs.editorState),
@@ -228,7 +240,7 @@ module TDev {
                     })
                     .then(resp =>
                         setInstalledAsync(indexTable, scriptsTable, header, resp.script, resp.editorState, null, JSON.stringify(resp.extra || {})))
-                    .then(() => newHeaderCallbackAsync(header, "downloaded"))
+                    .then(() => skipMsg ? Promise.as() : newHeaderCallbackAsync(header, "downloaded"))
                     .then(() => header.scriptVersion.instanceId == "cloud" ? Promise.as() : uploadInstalledAsync(indexTable, scriptsTable, header))
             }
 
@@ -310,6 +322,9 @@ module TDev {
                 else
                     body.script = undefined;
                 body.editorState = data.editorState;
+                if (Cloud.lite && disableMerge) {
+                    body.scriptVersion.baseSnapshot = "*"
+                }
                 return Cloud.postUserInstalledAsync(<Cloud.InstalledBodies>{ bodies: [body] })
                     .then(resp => {
                         if (Cloud.lite && !resp.numErrors) {

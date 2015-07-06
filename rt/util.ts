@@ -3051,6 +3051,10 @@ module TDev{
         onGoBack();
     }
 
+    export function mkAbsoluteUrl(relativeUrl: string): string {
+        return Ticker.mainJsName.replace(/main.js$/, "") + relativeUrl;
+    }
+
 
     export var translationDebug = false
     export var translations:StringMap<string> = {

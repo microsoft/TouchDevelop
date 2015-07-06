@@ -645,7 +645,7 @@ module TDev.AST
                     this.profilingBlocks[blockId] = [];
             }
 
-            var res = b.stmts.collect((s: Stmt): JsStmt[] => this.dispatch(s));
+            var res = b.stmts.collect((s: Stmt): JsStmt[] => s.isUnreachable ? [] : this.dispatch(s));
 
             if (this.needsProfiling()) {
                 var blockId = b.stableId.replace(/\./g, "_");

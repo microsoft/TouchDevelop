@@ -27,6 +27,7 @@ module TDev {
             type: MessageType; // == MessageType.Init
             script: SavedScript;
             merge?: PendingMerge;
+            fota: boolean; // Are we flashing over the air?
         }
 
         export interface Message_Save extends Message {

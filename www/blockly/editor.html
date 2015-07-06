@@ -31,7 +31,8 @@
           </a>
           <a href="#" class="roundbutton" id="command-compile">
             <div class="roundsymbol"><i class="fa fa-download"></i></div>
-            <div class="roundlabel">compile</div>
+            <div class="roundlabel notfota">compile</div>
+            <div class="roundlabel fota">flash</div>
           </a>
           <a href="#" class="roundbutton" id="command-graduate">
             <div class="roundsymbol"><i class="fa fa-code"></i></div>
@@ -68,13 +69,13 @@
     </div>
     <xml id="blockly-toolbox" style="display: none">
       <category name="Basic">
-        <block type="text"></block>
-        <block type="math_number">
-          <field name="NUM">0</field>
-        </block>
-        <block type="math_number">
-          <field name="NUM">1</field>
-        </block>
+        <!-- <block type="text"></block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">0</field> -->
+        <!-- </block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">1</field> -->
+        <!-- </block> -->
         <!-- <block type="device_show_letter"> -->
         <!--   <value name="letter"> -->
         <!--     <block type="text"> -->
@@ -94,13 +95,6 @@
             </block>
           </value>
         </block>
-        <block type="device_pause">
-          <value name="pause">
-            <block type="math_number">
-              <field name="NUM">100</field>
-            </block>
-          </value>
-        </block>
         <block type="device_print_message">
           <value name="message">
             <block type="text">
@@ -108,6 +102,15 @@
             </block>
           </value>
           <value name="pausetime">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <block type="device_clear_display"></block>
+        <block type="device_forever"></block>
+        <block type="device_pause">
+          <value name="pause">
             <block type="math_number">
               <field name="NUM">100</field>
             </block>
@@ -293,9 +296,15 @@
           I could not understand some blocks. Fix errors or
           <a class="command" href="#" id="command-force-graduate">convert anyway</a>.
         </div>
+        <div id="errorsRun" class="hidden">
+          I could not understand some blocks, and I cannot run this script.
+        </div>
         <div id="errorsCompile" class="hidden">
           I could not understand some blocks. Fix errors or
-          <a class="command" href="#" id="command-force-compile">compile anyway</a>.
+          <a class="command" href="#" id="command-force-compile">
+            <span class="fota">flash</span>
+            <span class="notfota">compile</span>
+            anyway</a>.
         </div>
       </div>
     </div>

@@ -254,9 +254,7 @@ module TDev {
         ].join("");
       }
 
-      // Generate the return instruction for the function.  Currently uses
-      // [return], but XXX will change later when in CPS. Possibly parameterized
-      // over whether we're in an atomic action or not.
+      // Generate the return instruction for the function.
       export function mkReturn(exprCode: string) {
         return "return "+exprCode+";";
       }

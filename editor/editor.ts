@@ -1624,7 +1624,8 @@ module TDev
                         return;
                     }
 
-                    var saveAndRun = () => this.saveStateAsync().done(() => {
+                    var saveAndRun = () => this.saveStateAsync()
+                    .then(() => {
                         if (!Script) {
                             ProgressOverlay.hide();
                             return;
@@ -1649,6 +1650,12 @@ module TDev
                             this.currentRt.eventQ.profiling = opts.profiling;
 
                         this.runActionCore(a, args, !!opts.debugging);
+                    })
+                    .done(() => {}, 
+                    e => {
+                        Util.reportError("script-run", e, false)
+                        HTML.showErrorNotification(lf("we couldn't run your script; sorry"))
+                        ProgressOverlay.hide();
                     });
                     saveAndRun()
                 }, Cloud.artUrl(Script.splashArtId));
@@ -2000,7 +2007,10 @@ module TDev
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
-            this.currentCompilationModalDialog.add(div("wall-dialog-body", lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")));
+            var msg = Cloud.isFota()
+                ? lf("Please wait while we prepare your .hex file. Once the .hex file is ready, it will be flashed onto your micro:bit!")
+                : lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")
+            this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
@@ -2012,7 +2022,7 @@ module TDev
             var notifyCompiled = (src: string): boolean => {
                 if (btn) {
                     btn.setFlag("working", false);
-                    btn.classList.remove("disabledItem");                
+                    btn.classList.remove("disabledItem");
                 }
                 this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
@@ -2088,7 +2098,8 @@ module TDev
 
             if (Cloud.isRestricted()) {
                 var compileBtn: HTMLElement;
-                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", lf("compile"), Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey)));
+                var str = Cloud.isFota() ? lf("flash") : lf("compile");
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M", (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey)));
             }
 
             this.playBtnDiv.setChildren(children);
@@ -3164,7 +3175,7 @@ module TDev
             }).then(() => {
                 if (!Script) return;
                 // if the script is not edited and it requires split screen, load split screen mode from meta
-                if (header.status === "published" && !!Script.splitScreen) {
+                if (header.status === "published" && !!Script.splitScreen && !Script.isLibrary && !Script.isDocsTopic()) {
                     Util.log('published script used split mode, splitting...');
                     this.setSplitScreen(true);
                 }
@@ -3199,7 +3210,10 @@ module TDev
                 if (!shouldRun) {
                     this.setMode()
                     var st = Script.editorState
-                    if (st.splitScreen || this.widgetEnabled("splitScreenOnLoad") || Browser.EditorSettings.widgets().splitScreenOnLoad)
+                    var splitOnLoad = this.widgetEnabled("splitScreenOnLoad") || Browser.EditorSettings.widgets().splitScreenOnLoad
+                    if (Script.isDocsTopic() || Script.isLibrary)
+                        splitOnLoad = false;
+                    if (st.splitScreen || splitOnLoad)
                         this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
@@ -3235,7 +3249,7 @@ module TDev
                     if (runPlugin) return;
                     if (shouldRun || (TheEditor.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode && SizeMgr.splitScreen)) {
                         this.runAction(Script.mainAction(), null)
-                }
+                    }
             }, (e) => {
                 ProgressOverlay.hide();
                 throw e;
@@ -4370,7 +4384,7 @@ module TDev
                         divId("externalEditorChrome", "hbox"),
                         divId("externalEditorPanes", "hbox flex1",
                             divId("externalEditorFrame", "vbox"),
-                            divId("externalEditorSide", "vbox flex1"))),
+                            divId("externalEditorSide", "vbox flex1 dismissed"))),
 
                       divId("wallOverlay", null));
             r.style.display = "none";
@@ -4415,7 +4429,8 @@ module TDev
 
         public setSplitScreen(split:boolean, save = false)
         {
-            if (Cloud.isUserRestricted()) split = true; // always split in cloud restricted mode
+            if (Cloud.isRestricted() && !Browser.EditorSettings.widgets().splitScreen)
+                split = true; // always split in cloud restricted mode
 
             if (save && Script)
                 Script.editorState.splitScreen = split
@@ -4509,6 +4524,10 @@ module TDev
             Util.clickHandler(this.codeOuter, () => {
                 this.dismissSidePane();
             });
+            Util.clickHandler(elt("externalEditorSide"), () => {
+                elt("externalEditorSide").classList.add("dismissed");
+            });
+
 
             elt("scriptEditor").withClick(() => {}) // disable text selection
 
@@ -4552,12 +4571,14 @@ module TDev
 
                     if (state == "downloaded") {
                         if (incoming) ProgressOverlay.hide()
-                        this.reload()
+                        if (Script)
+                            this.reload()
                     } else if (state == "uploaded") {
                         if (hd.editor)
                             External.pickUpNewBaseVersion();
                     } else if (state == "published") {
-                        this.reload()
+                        if (Script)
+                            this.reload()
                     }
 
                     return Promise.as()
@@ -5034,6 +5055,7 @@ module TDev
                     this.dismissSidePane();
                     return true;
                 }
+                elt("externalEditorSide").classList.add("dismissed");
                 break;
 
             case "PageUp":

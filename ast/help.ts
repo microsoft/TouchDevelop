@@ -204,6 +204,7 @@ module TDev {
        scriptname: string; // script name, mined from the script code
        scriptdescription: string; // script description, mined from the script code
        scriptid: string; // publication id if scriptstatus==”published”
+       scriptsize?: number;
        isactive: boolean; // whether this history item is the currently active backup
 
        entryNo?: number; // assigned when the thing is displayed
@@ -488,6 +489,8 @@ module TDev {
     ];
     
     export function socialNetworks(widgets : Cloud.EditorWidgets) : SocialNetwork[] {
+        if (!Cloud.hasPermission("post-script-meta"))
+            return [];
         return _socialNetworks.filter(sn => !!widgets["socialNetwork" + sn.id]);
     }
 

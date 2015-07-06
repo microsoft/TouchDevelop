@@ -387,6 +387,7 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                 }
             },
         },
@@ -423,6 +424,7 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                     
                     // for docs
                     artSection: true,
@@ -439,7 +441,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptHistoryTab: true,
                     //scriptAddToChannel: true,
                     //hubChannels: true,
                     calcSearchArt: true,
@@ -491,6 +492,7 @@ module TDev.Browser {
                     databaseSection: true,
                     scriptPropertiesManagement: true,
                     hideMyScriptHeader: true,
+                    scriptHistoryTab: true,
                     //MORE
                     
                     // teacher specific
@@ -504,7 +506,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptHistoryTab: true,
                     scriptAddToChannel: true,
                     hubChannels: true,
                     calcSearchArt: true,
@@ -566,8 +567,8 @@ module TDev.Browser {
                     );
             }
             
-            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal"].some(perm => Cloud.hasPermission(perm))) {
-                m.add(div("wall-dialog-header", lf("admin")));
+            if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal", "global-list"].some(perm => Cloud.hasPermission(perm))) {
+                m.add(div("wall-dialog-header", lf("internal")));
                 var versionInfo = HTML.mkTextArea() 
                 versionInfo.rows = 4;
                 versionInfo.style.fontSize = "0.8em";
@@ -582,13 +583,11 @@ module TDev.Browser {
                                 lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
                                 lf("Service activation: {0}", tm(resp.activationtime));
                     })
-                m.add([div("wall-dialog-body", versionInfo), div("wall-dialog-body", [
-                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("release /{0}", Cloud.config.relid), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }) : null),
-                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("show users"), () => { Util.setHash("#list:users") }) : null),
+                m.add(div("wall-dialog-body", versionInfo))
+                m.add(div("wall-dialog-body", [
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
-                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("page map"), () => { Browser.TheHub.showPointers() }) : null),
                     (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports")  }) : null),
@@ -636,7 +635,17 @@ module TDev.Browser {
                             })))
                         m.show()
                     }) : null)
-                ])])
+                ]))
+                if (Cloud.hasPermission("global-list")) {
+                    m.add(div("wall-dialog-header", lf("global lists")));
+                    m.add(div("wall-dialog-body", [
+                        HTML.mkButton(lf("users"), () => { Util.setHash("#list:users") }),
+                        HTML.mkButton(lf("scripts"), () => { Util.setHash("#list:new-scripts") }),
+                        HTML.mkButton(lf("art"), () => { Util.setHash("#list:art") }),
+                        HTML.mkButton(lf("page map"), () => { Browser.TheHub.showPointers() }),
+                        HTML.mkButton(lf("releases"), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }),
+                    ]))
+                }
             }
 
             var users = Object.keys(Cloud.litePermissions).filter(k => /^signin-/.test(k)).map(k => k.replace(/signin-/, ""))
@@ -1265,12 +1274,12 @@ module TDev.Browser {
                                     return;
                                 }
                                 var t: ScriptTemplate = {
-                                    title: lf("Create a {0}", scr.name),
+                                    title: lf("Create a {0}", scr.name.replace(/ADJ/, "")),
                                     id: "derive",
                                     scriptid: scr.id,
                                     icon: "",
                                     description: "",
-                                    name: lf("ADJ script"),
+                                    name: /ADJ/.test(scr.name) ? scr.name : lf("ADJ script"),
                                     source: txt,
                                     section: "",
                                     editorMode: 0,
@@ -1431,20 +1440,23 @@ module TDev.Browser {
                     nameBox.value = this.browser().newScriptName(name)
                     var m = new ModalDialog();
                     m.onDismiss = () => onSuccess(undefined);
+                    var create = () => {
+                        m.onDismiss = undefined;
+                        m.dismiss();
+                        template.name = nameBox.value;
+                        this.browser()
+                            .clearAsync(false)
+                            .done(() => onSuccess(template), e => onSuccess(undefined))
+                    }
+                    // no cancel when using #derive:... route
+                    if (template.id == "derive")
+                        m.onDismiss = create;
                     m.add([
                         div("wall-dialog-header", lf_static(template.title, true)),
                         div("wall-dialog-body", lf_static(template.description, true)),
                         div("wall-dialog-line-textbox", nameBox),
                         //div("wall-dialog-body", lf("Tip: pick a good name for your script.")),
-                        div("wall-dialog-buttons",
-                            HTML.mkButton(lf("create"), () => {
-                                m.onDismiss = undefined;
-                                m.dismiss();
-                                template.name = nameBox.value;
-                                this.browser()
-                                    .clearAsync(false)
-                                    .done(() => onSuccess(template), e => onSuccess(undefined));
-                        }))
+                        div("wall-dialog-buttons", HTML.mkButton(lf("create"), create))
                     ]);
                     m.show();
                 }));

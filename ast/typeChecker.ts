@@ -723,8 +723,20 @@ module TDev.AST
         {
             this.scope(() => {
                 var ss = node.stmts;
-                for (var i = 0; i < ss.length; ++i)
+                var unreach = false
+                var reported = false
+                for (var i = 0; i < ss.length; ++i) {
                     this.typeCheck(ss[i])
+                    if (unreach) {
+                        ss[i].isUnreachable = true
+                        if (!reported) {
+                            reported = true
+                            ss[i].addHint(lf("code after return, break or continue won't ever run"))
+                        }
+                    }
+                    if (ss[i].isJump())
+                        unreach = true
+                }
                 for (var i = 0; i < ss.length; ++i) {
                     if (ss[i] instanceof If) {
                         var si = <If>ss[i]

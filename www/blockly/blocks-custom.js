@@ -201,9 +201,9 @@ Blockly.Blocks['device_get_brightness'] = {
         this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
         this.setColour(230);
         this.appendDummyInput()
-            .appendField("brightness (%)");
+            .appendField("brightness");
         this.setOutput(true, "Number");
-        this.setTooltip('Get the current brightness of the screen (between 0 and 100).');
+        this.setTooltip('Get the current brightness of the screen (between 0 and 255).');
     }
 };
 
@@ -212,13 +212,13 @@ Blockly.Blocks['device_set_brightness'] = {
         this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
         this.setColour(160);
         this.appendDummyInput()
-            .appendField("set brightness (%)");
+            .appendField("set brightness");
         this.appendValueInput("value")
             .setCheck("Number");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('Set the current brightness of the screen (between 0 and 100).');
+        this.setTooltip('Set the current brightness of the screen (between 0 and 255).');
     }
 };
 
@@ -588,6 +588,8 @@ Blockly.Blocks['controls_simple_for'] = {
       var name = this.getFieldValue('VAR');
       option.text = Blockly.Msg.VARIABLES_SET_CREATE_GET.replace('%1', name);
       var xmlField = goog.dom.createDom('field', null, name);
+      xmlField.setAttribute('name', 'VAR');
+      var xmlBlock = goog.dom.createDom('block', null, xmlField);
       xmlBlock.setAttribute('type', 'variables_get');
       option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
       options.push(option);
@@ -596,5 +598,3 @@ Blockly.Blocks['controls_simple_for'] = {
 };
 
 Blockly.pathToMedia = "./media/";
-      xmlField.setAttribute('name', 'VAR');
-      var xmlBlock = goog.dom.createDom('block', null, xmlField);

@@ -18,10 +18,10 @@
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkBetaNote());
-            
+
             this.populateSiteHeader(false);
         }
-        
+
         private populateSiteHeader(settings = false, username = "") {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
@@ -37,7 +37,7 @@
                 if (!Cloud.getUserId())
                     menuItems.push({ id: "signin", name: lf("Sign In"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
-                
+
                 var siteLogo = elt("siteLogo");
                 if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
@@ -168,10 +168,10 @@
 
             this.setBackButton();
             this.initMeAsync().done(() => { }, () => { });
-            
+
             if (dbg) bugsEnabled = true;
         }
-        
+
         private initSignin(username:string = "") {
             this.populateSiteHeader(true, username);
         }
@@ -197,7 +197,7 @@
         }
 
         private setBackButton()
-        {           
+        {
             var icon = "svg:back,black";
             var btn: HTMLElement;
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething)
@@ -206,11 +206,11 @@
                 btn = ScriptInfo.mkBtn(icon, lf("script"), () => this.showHub());
             else if (!Cloud.isRestricted()) // hub not available
                 btn = ScriptInfo.mkBtn(icon, lf("the hub"), () => this.showHub());
-            else 
+            else
                 btn = ScriptInfo.mkBtn(icon, lf("back"), () => window.location.href = "/");
             this.backContainer.setChildren([btn]);
         }
-        
+
         private initBadgeTag() {
             // update polling URI; relevant on Win8 when app is pinned
             var badgeTag = document.getElementsByName("msapplication-badge")[0];
@@ -219,7 +219,7 @@
                 try {
                     (<any>(window.external)).msSiteModeRefreshBadge(); // don't test for it, just invoke --- testing would lie
                 } catch (e) {
-                }            
+                }
         }
 
         public initMeAsync(): Promise {
@@ -228,11 +228,11 @@
                 this.initSignin();
                 return Promise.as();
             }
-            this.initBadgeTag();            
+            this.initBadgeTag();
             TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
                 (<any>window).userName = u.name;
                 (<any>window).userScore = u.score;
-                (<any>window).userId = id;                
+                (<any>window).userId = id;
             });
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
@@ -259,7 +259,7 @@
 
             return false;
         }
-        
+
         public createChannel() {
             if (Cloud.anonMode(lf("creating channels"))) return;
 
@@ -295,22 +295,22 @@
             ]);
             m.show();
         }
-        
-        private notificationsCount = -1;        
+
+        private notificationsCount = -1;
         public addNotificationCounter(notificationBox : HTMLElement) {
             var notificationsBtn = HTML.mkImg('svg:bell,#444');
             notificationsBtn.id = "notificationsBtn";
             var notificationsCounterDiv = div('notificationCounter');
-            
+
             var updateCount = () => {
                 Browser.setInnerHTML(notificationsCounterDiv, this.notificationsCount > 0 ? this.notificationsCount.toString() : '');
-                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");                
+                notificationsCounterDiv.setAttribute("data-notifications", this.notificationsCount > 0 ? "yes" : "no");
             }
-            
+
             updateCount();
-            
+
             notificationBox.setChildren([notificationsBtn, notificationsCounterDiv])
-            notificationBox.withClick(() => { 
+            notificationBox.withClick(() => {
                 this.notificationsCount = 0;
                 updateCount();
                 TheApiCacheMgr.invalidate(Cloud.getUserId() + "/notifications");
@@ -324,13 +324,13 @@
                 updateCount();
             };
         }
-        
+
         public showLegalNotice()
         {
             if (!Runtime.legalNotice ||
                 localStorage["legalNotice"] == Runtime.legalNotice)
                 return;
-            
+
             var d = new ModalDialog();
             var noticeHTML = Runtime.legalNoticeHeader ||
                 (lf("<h3>welcome to TouchDevelop</h3>") +
@@ -364,7 +364,7 @@
             d.fullWhite()
             d.canDismiss = false;
             d.show();
-        }        
+        }
 
         public showHub()
         {
@@ -408,11 +408,7 @@
                     this.searchBox.blur();
                 this.initialSearch = "";
                 this.progressBar.reset();
-                
-                World.continuouslySyncAsync(false, () => {
-                    this.searchKey();
-                    return Promise.as();
-                }).done();
+
             }
         }
 
@@ -830,13 +826,13 @@
 
             if (allHelpBtn) this.listDivs.push(allHelpBtn)
 
-            this.listDivs.pushRange(this.poweredByElements());            
+            this.listDivs.pushRange(this.poweredByElements());
 
             this.theList.setChildren(this.listDivs);
 
             this.setCurrent(showCurrent);
         }
-        
+
         public poweredByElements(): HTMLElement[]{
             if (Cloud.isRestricted()) {
                 return [
@@ -1057,7 +1053,13 @@
                                         .done(undefined, () => { }); // ignore network errors
                             };
                             m.show();
-                      }, noOtherAsk).done(message => { Browser.TheHost.notifySyncDone() });
+                      }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
+                      .then(() =>
+                        World.continuouslySyncAsync(false, () => {
+                            this.searchKey();
+                            return Promise.as();
+                        }))
+                      .done();
                 }
                 else {
                     // user never registered; just skip
@@ -1541,7 +1543,7 @@
         }
 
         public showList(path:string, item:BrowserPage = null, tab = "", noCache = false, includeETags = false)
-        {      
+        {
             this.setSearch("");
             var header = path.replace(/-scripts/, "").replace(/\/scripts/, "");
             this.shownSomething = false;
@@ -1598,8 +1600,8 @@
                     header = lf("my groups");
                     if (Cloud.getUserId()) path = Cloud.getUserId() + "/groups";
                     else path = null;
-                    this.botDiv = div(null, 
-                        HTML.mkButtonTick(lf("create group"), Ticks.hubCreateGroup, 
+                    this.botDiv = div(null,
+                        HTML.mkButtonTick(lf("create group"), Ticks.hubCreateGroup,
                             () => { this.createNewGroup() })
                     )
                     break;
@@ -1725,7 +1727,7 @@
             } else {
                 this.syncView(true);
             }
-            
+
             this.showLegalNotice();
         }
 
@@ -1814,7 +1816,7 @@
                 this.showList("installed-scripts", s, tab);
                 return;
             }
-            
+
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -3178,7 +3180,7 @@
             var text = this.twitterMessage();
 
             btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
-           
+
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["twitter", "facebook"].map(network =>
                     div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
@@ -3548,12 +3550,15 @@
                             div("sdNameBlock", div("sdName", spanDirAuto(it.scriptname + (it.entryNo === undefined ? "" : " #" + it.entryNo)))),
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
-                                    Util.timeSince(it.time) + (scrid ? " :: /" + scrid : ""))),
+                                    Util.timeSince(it.time)
+                                        + (scrid ? " :: /" + scrid : "")
+                                        + (it.scriptsize ? lf(", size: {0}", it.scriptsize) : ""))),
                             div("sdAuthor", div("sdAuthorInner showWhenSelected", lf("current"))))))
             box.setFlag("selected", it.isactive)
 
             box.withClick(() => {
                 var scrProm = new PromiseInv();
+                var htext = "";
                 var m:ModalDialog = ScriptProperties.showDiff(scrProm, {
                     "restore": () => {
                         var prog = HTML.mkProgressBar()
@@ -3561,18 +3566,34 @@
                         m.empty()
                         m.add(prog)
                         m.addHTML("restoring...")
-                        Util.childNodes(<HTMLElement>box.parentNode).forEach(n => n.setFlag("selected", false));
-                        Cloud.postPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history/" + it.historyid, {})
-                            .then(resp => {
-                                box.setFlag("selected", true)
-                                return World.syncAsync(false)
+                        if (Cloud.lite) {
+                            if (!htext) return
+                            var app0 = AST.Parser.parseScript(htext)
+                            World.getInstalledHeaderAsync(guid)
+                            .then((hd) => {
+                                hd.name = app0.getName()
+                                return World.updateInstalledScriptAsync(hd, htext, null)
                             })
                             .then(() => {
                                 prog.stop()
                                 m.dismiss()
-                                Util.setTimeout(500, () => TheEditor.historyMgr.reload(HistoryMgr.windowHash()))
+                                this.browser().loadTab(this.parent)
                             })
                             .done()
+                        } else {
+                            Util.childNodes(<HTMLElement>box.parentNode).forEach(n => n.setFlag("selected", false));
+                            Cloud.postPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history/" + it.historyid, {})
+                                .then(resp => {
+                                    box.setFlag("selected", true)
+                                    return World.syncAsync(false)
+                                })
+                                .then(() => {
+                                    prog.stop()
+                                    m.dismiss()
+                                    Util.setTimeout(500, () => TheEditor.historyMgr.reload(HistoryMgr.windowHash()))
+                                })
+                                .done()
+                        }
                     }
                 })
 
@@ -3581,6 +3602,7 @@
                     if (!texts[0] || !texts[1])
                         return;
                     var app0 = AST.Parser.parseScript(texts[0]);
+                    htext = texts[0]
                     var app1 = AST.Parser.parseScript(texts[1]);
                     AST.Diff.diffApps(app0, app1)
                     scrProm.success(app1)
@@ -3676,7 +3698,7 @@
                 ScreenShotTab,
                 ScriptHeartsTab,
                 Cloud.lite ? ChannelListTab : null,
-                TagsTab,               
+                TagsTab,
                 ArtTab,
                 ConsumersTab,
                 SuccessorsTab,
@@ -4227,7 +4249,7 @@
                         },
                         e => {});
             }
-            
+
             // parsing social network links
             socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync)
                 .forEach(sn => sn.parseIds(c.text)
@@ -4667,7 +4689,7 @@
         public tabBox(cc:JsonIdObject):HTMLElement
         {
             var c = <JsonAbuseReport>cc;
-            return div(null, 
+            return div(null,
                 ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
                 ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
         }
@@ -4830,7 +4852,7 @@
             case "abusereport":
                 return div(null, lab(lf("abuse report")),
                                  lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
-                
+
             // missing: tag, crash buckets
             default:
                 debugger;
@@ -5682,8 +5704,8 @@
                         AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
                     }
 
-                    
-                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && 
+
+                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript &&
                         (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt"))) {
                         socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
@@ -5698,7 +5720,7 @@
                                 }, e => World.handlePostingError(e, "saving metadata"));
                             }));
                             if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
-                        divs.push(meta);                        
+                        divs.push(meta);
                         });
                     }
 
@@ -5875,7 +5897,7 @@
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
         public shareButtons() {
-            var btns = super.shareButtons();            
+            var btns = super.shareButtons();
             if (EditorSettings.widgets().scriptPrintScript) btns.push(
                 div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
                 );
@@ -6104,7 +6126,7 @@
         }
 
         static editorIcons = {
-            "blockly": "fa-puzzle-piece,#5b80a5",
+            "blockly": "fa-puzzle-piece,#517EC0",
             "touchdevelop": "touchdevelop,#308919",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
@@ -6120,7 +6142,13 @@
             if (!ic) ic = ScriptInfo.editorIcons["*"]
             ic = ic.replace(/,.*/, "")
 
-            return HTML.mkImg("svg:" + ic + ",white")
+            // The mkImg function seems to require that the SVG be made up of a
+            // single path, which the Blockly logo isn't, so unfortunately,
+            // we need to special-case this.
+            if (this.getScriptType() == "blockly")
+                return HTML.mkImg(Util.mkAbsoluteUrl("blockly/icon.svg"));
+            else
+                return HTML.mkImg("svg:" + ic + ",white")
         }
 
         public iconBgColor():string
@@ -6784,7 +6812,7 @@
                     m.addBody([
                           HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
                           " ",
-                          HTML.mkAsyncButton(lf("overwrite current"), () => 
+                          HTML.mkAsyncButton(lf("overwrite current"), () =>
                                 Cloud.postPrivateApiAsync("pointers", {
                                     path: this.docPath,
                                     scriptid: id,
@@ -6792,7 +6820,7 @@
                                 }))
                     ])
             })()
-            
+
             if (EditorSettings.widgets().publishToComputingAtSchools) {
                 m.add(div("wall-dialog-buttons text-left",
                     HTML.mkButton(lf("publish at ComputingAtSchool.org.uk"), () => {
@@ -6807,8 +6835,8 @@
                             + '&revision[short_description]=' + encodeURIComponent(descr)
                             + '&revision[description]=' + encodeURIComponent(d)
                             + '&category=139';
-                        window.location.href = casUrl;                
-                    })));                
+                        window.location.href = casUrl;
+                    })));
             }
 
             if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud()) {
@@ -7132,7 +7160,7 @@
                 m.addHTML(lf("A comment about your pull request was added."));
             else {
                 var txtAddress = HTML.mkTextInput('text', lf("script url"));
-                txtAddress.value = Cloud.config.shareUrl + "/" + 
+                txtAddress.value = Cloud.config.shareUrl + "/" +
                     (this.docPathCurrent ? this.docPath.replace(/^usercontent\//, "u/") : this.publicId);
                 txtAddress.readOnly = true;
                 Util.selectOnFocus(txtAddress);
@@ -7310,7 +7338,7 @@
         public convertToTutorial() {
             if (!this.jsonScript) return;
 
-            var config = Cloud.config;            
+            var config = Cloud.config;
             this.browser().updateInstalledHeaderCacheAsync()
                 .then(() => World.getAnyScriptAsync(this.getGuid()))
                 .then(scriptText => {
@@ -7321,7 +7349,7 @@
                 // rename main to #0 main
                 var m = clone.actions().filter(a => a.getName() == "main")[0];
                 if (m) m.setName("#0 main");
-                
+
                 // insert steps
                 var converter = new TutorialConverter();
                 converter.avatarArtId = config.tutorialAvatarArtId;
@@ -7339,7 +7367,7 @@
                 mainSrc += "}";
                 var main = AST.Parser.parseDecl(mainSrc);
                 clone.addDecl(main);
-                
+
                 // if avatar, insert resource
                 if (config.tutorialAvatarArtId) {
                     var d = new AST.GlobalDef();
@@ -7350,8 +7378,8 @@
                     d.url = Cloud.artUrl(config.tutorialAvatarArtId);
                     d.comment = lf("The tutorial avatar head");
                     clone.addDecl(d);
-                }    
-               
+                }
+
                 var text = clone.serialize();
                 Util.log(text);
                 var scriptStub = {
@@ -7364,7 +7392,7 @@
                 this.browser().createInstalled(header).edit();
             });
         }
-        
+
         public convertToLesson() {
             if (!this.jsonScript) return;
 
@@ -7379,7 +7407,7 @@
                 var converter = new TutorialConverter();
                 converter.visitChildren(clone);
 
-                // insert final full code step                 
+                // insert final full code step
                 var main = clone.mainAction();
                 if (main) {
                     var c = new AST.Comment();
@@ -7387,7 +7415,7 @@
                     c.text += "\n{decl*:}";
                     main.body.stmts.push(c)
                 }
-                
+
                 var text = clone.serialize();
                 Util.log(text);
                 var scriptStub = {
@@ -7411,7 +7439,7 @@
     {
         public tutorial = false;
         public avatarArtId: string;
-        
+
         public visitAction(n: AST.Action) {
             this.visitBlock(n.body);
         }
@@ -7730,6 +7758,7 @@
 
         private askedToLogin:boolean;
         private scriptsTab: ScriptsTab;
+        private artTab: ArtTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -7756,14 +7785,13 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            ch.unshift(accountButtons);
             if (this.isMe() && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
                     HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
                 ]);
-                
+
                 // editor selector
                 if (Cloud.isRestricted()) {
                     ch.unshift(astModes);
@@ -7776,8 +7804,12 @@
                     }
                 }
 
-                // user name                
-                var nameInput = HTML.mkTextInputWithOk("text", lf("Enter your nickname (at least 8 characters)"),() => {
+                // user name
+                var max = 25
+                var msg = Cloud.lite ?
+                    lf("Enter your nickname (at most {0} characters)", max) :
+                    lf("Enter your nickname (at least 8 characters)");
+                var nameInput = HTML.mkTextInputWithOk("text", msg, () => {
                     HTML.showProgressNotification("saving...");
                     Cloud.postUserSettingsAsync({ nickname: nameInput.value })
                         .done(resp => {
@@ -7786,10 +7818,12 @@
                         TheApiCacheMgr.invalidate("me");
                     }, e => World.handlePostingError(e, lf("saving nickname")));
                 });
+                if (Cloud.lite) nameInput.maxLength = max;
                 nameInput.value = this.userName;
                 ch.unshift(nameInput);
                 ch.unshift(div('input-label', 'nickname'));
             }
+            ch.unshift(accountButtons);
             ch.unshift(hd);
 
             if (Cloud.hasPermission("user-mgmt")) {
@@ -7821,12 +7855,22 @@
                         }))
             }
 
+            ch.push(div("", text(lf("Scripts by this user:"))));
             if (!this.scriptsTab) {
                 this.scriptsTab = new ScriptsTab(this);
                 this.scriptsTab.initElements();
                 this.scriptsTab.initTab();
             }
             ch.push(this.scriptsTab.tabContent);
+
+            ch.push(div("sdDesc", text(" ")));
+            ch.push(div("", text(lf("Art by this user:"))));
+            if (!this.artTab) {
+                this.artTab = new ArtTab(this);
+                this.artTab.initElements();
+                this.artTab.initTab();
+            }
+            ch.push(this.artTab.tabContent);
 
             this.tabContent.setChildren(ch);
 
@@ -8736,7 +8780,7 @@
 
         public mkSmallBox():HTMLElement
         {
-            return this.mkBoxCore(false).withClick(() => 
+            return this.mkBoxCore(false).withClick(() =>
                 TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, this.publicId)));
         }
 
@@ -8806,7 +8850,7 @@
                             div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
                             div("", inp),
                             err,
-                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") : 
+                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
                                     lf("No abuse reports so far.")),
                         ])
                     }
@@ -9019,7 +9063,7 @@
         private getIcon() { return HTML.mkImg(this.getIconUrl()); }
 
         public shareButtons() {
-            var btns = super.shareButtons();            
+            var btns = super.shareButtons();
             if (EditorSettings.widgets().scriptPrintTopic) btns.push(
                 div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { this.topic.print() })
                 );
@@ -9818,7 +9862,7 @@
                     ));
 
                 if (u.commit)
-                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank", 
+                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank",
                     lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
 
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
@@ -9862,7 +9906,7 @@
             Util.assert(!!id);
             this.publicId = id;
         }
-        
+
         public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
 
         public mkBoxCore(big: boolean) : HTMLElement {
@@ -9930,7 +9974,7 @@
         public mkTile(sz: number) : HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
-            return this.withUpdate(d, (u: JsonChannel) => {                
+            return this.withUpdate(d, (u: JsonChannel) => {
                 this.json = u;
 
                 var cont = [];
@@ -10066,7 +10110,7 @@
                     Cloud.deletePrivateApiAsync(c.id + "/channels/" + this.parent.publicId)
                     .done(() => {
                         list.invalidateCaches();
-                        el.removeSelf(); 
+                        el.removeSelf();
                     }, e => World.handlePostingError(e, lf("remove script")));
                 })));
             }
@@ -10104,7 +10148,7 @@
             super(par)
         }
         public persistentId() { return "pointer:" + this.publicId; }
-        public getTitle() { return this.script ? this.script.name : 
+        public getTitle() { return this.script ? this.script.name :
             this.ptr && this.ptr.redirect ? "-> " + this.ptr.redirect : super.getTitle(); }
 
         public getName() { return lf("page"); }

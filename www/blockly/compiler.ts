@@ -545,7 +545,7 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
   var tr = inferType(e, right);
   switch (bOp) {
     case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
-    case "LT": case "LTE": case "GT": case "GTE":
+    case "LT": case "LTE": case "GT": case "GTE": case "POWER":
       // Monomorphic arithmetic operators
       assert (t == null || t == Type.Number);
       t = Type.Number;
@@ -668,7 +668,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
   if (t == null)
     throwBlockError("I can't figure out the type of this block", b);
 
-  if (b == null)
+  if (b == null || b.disabled)
     return defaultValueForType(t);
 
   var actualType = inferType(e, b);
@@ -867,13 +867,9 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
-  return H.mkWhile(
-    H.mkExprHolder([], H.mkBooleanLiteral(true)),
-    compileStatements(e, b.getInputTargetBlock("HANDLER")).concat([
-      H.mkExprStmt(H.mkExprHolder([],
-        H.stdCall("pause", [H.mkNumberLiteral(0)], false)
-      ))
-    ]));
+  var bBody = b.getInputTargetBlock("HANDLER");
+  var body = compileStatements(e, bBody);
+  return mkCallWithCallback(e, "forever", [], body);
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
@@ -1057,56 +1053,58 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
   var stmts: J.JStmt[] = [];
   while (b) {
-    try {
-      switch (b.type) {
-        case 'controls_if':
-          append(stmts, compileControlsIf(e, <B.IfBlock> b));
-          break;
+    if (!b.disabled) {
+      try {
+        switch (b.type) {
+          case 'controls_if':
+            append(stmts, compileControlsIf(e, <B.IfBlock> b));
+            break;
 
-        case 'controls_for':
-        case 'controls_simple_for':
-          append(stmts, compileControlsFor(e, b));
-          break;
+          case 'controls_for':
+          case 'controls_simple_for':
+            append(stmts, compileControlsFor(e, b));
+            break;
 
-        case 'text_print':
-          stmts.push(compilePrint(e, b));
-          break;
+          case 'text_print':
+            stmts.push(compilePrint(e, b));
+            break;
 
-        case 'variables_set':
-          stmts.push(compileSet(e, b));
-          break;
+          case 'variables_set':
+            stmts.push(compileSet(e, b));
+            break;
 
-        case 'device_comment':
-          stmts.push(compileComment(e, b));
-          break;
+          case 'device_comment':
+            stmts.push(compileComment(e, b));
+            break;
 
-        case 'device_forever':
-          stmts.push(compileForever(e, b));
-          break;
+          case 'device_forever':
+            stmts.push(compileForever(e, b));
+            break;
 
-        case 'controls_repeat_ext':
-          stmts.push(compileControlsRepeat(e, b));
-          break;
+          case 'controls_repeat_ext':
+            stmts.push(compileControlsRepeat(e, b));
+            break;
 
-        case 'device_while':
-          stmts.push(compileWhile(e, b));
-          break;
+          case 'device_while':
+            stmts.push(compileWhile(e, b));
+            break;
 
-        case 'device_button_event':
-          stmts.push(compileButtonEvent(e, b));
-          break;
+          case 'device_button_event':
+            stmts.push(compileButtonEvent(e, b));
+            break;
 
-        default:
-          if (b.type in stdCallTable)
-            stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
-          else
-            console.log("Not generating code for (not a statement / not supported): "+b.type);
+          default:
+            if (b.type in stdCallTable)
+              stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
+            else
+              console.log("Not generating code for (not a statement / not supported): "+b.type);
+        }
+      } catch (e) {
+        if ((<any> e).block)
+          Errors.report(e+"", (<any> e).block);
+        else
+          Errors.report(e+"", b);
       }
-    } catch (e) {
-      if ((<any> e).block)
-        Errors.report(e+"", (<any> e).block);
-      else
-        Errors.report(e+"", b);
     }
     b = b.getNextBlock();
   }

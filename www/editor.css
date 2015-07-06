@@ -1309,6 +1309,9 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
     font-weight: bold;
 }
 
+.kbm {
+  display:inline-block;
+}
 .kbm svg {
   height: 1em;
   vertical-align: middle;
@@ -1797,6 +1800,7 @@ span.errorSq .kw
 
 #externalEditorSide .boardCanvas {
     width: 100% !important;
+    height: auto !important;
 }
 
 #externalEditorSide .wallFullScreenContainer {
@@ -1815,6 +1819,45 @@ span.errorSq .kw
     max-width: 225px;
     margin: 1em;
     height: auto;
+}
+
+@media (max-width: 1400px) {
+    #externalEditorPanes {
+        position: relative;
+    }
+
+    #externalEditorSide {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, .5);
+    }
+
+    #externalEditorSide.dismissed {
+        display: none;
+    }
+
+    #externalEditorSide .wallFullScreenContainer {
+        margin: 5%;
+        height: auto !important;
+        display: flex !important;
+    }
+
+    #externalEditorSide .wallFullScreenLogo {
+        padding: .5em;
+    }
+
+    #externalEditorSide .wallFullScreenLogo img {
+        background-color: white;
+        padding: .5em;
+    }
+
+    #externalEditorSide .boardCanvas {
+        width: inherit !important;
+        height: inherit !important;
+    }
 }
 
 #root.portrait #editorContainer[data-debuggerMode^="yes"] .editorSearchContainer .wall-textbox {
@@ -5612,7 +5655,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 }
 
 .editor-mode {
-    width:9em;
+    width:6em;
     cursor:pointer;
     display:inline-block;
     align-content:center;
@@ -5620,10 +5663,11 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
     margin-right:0.5em;
     padding-top:1em;
     padding-bottom:1em;
+    border: 0.2em solid #00f;
 }
 .editor-mode .pic {
     width:100%;
-    height:9em;
+    height:6em;
 }
 .editor-mode .title {
     width:100%;
@@ -5632,8 +5676,8 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 .editor-mode .descr {
     font-size:0.8em;
 }
-.editor-mode[data-selected^=no] .pic {
-  opacity: 0.2;
+.editor-mode[data-selected^=no]  {
+  border-color: #ccc;
 }
 
 /*

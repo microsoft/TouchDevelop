@@ -20,6 +20,7 @@ declare module Blockly {
         svgGroup_: SVGElement;
         parentBlock_: Block;
         inputList: Input[];
+        disabled: boolean;
     }
 
     // if type == controls_if
