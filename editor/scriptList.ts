@@ -1056,7 +1056,8 @@
                       }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
                       .then(() =>
                         World.continuouslySyncAsync(false, () => {
-                            this.searchKey();
+                            this.syncView();
+                            //this.searchKey();
                             return Promise.as();
                         }))
                       .done();
