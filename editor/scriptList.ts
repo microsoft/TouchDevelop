@@ -7765,23 +7765,6 @@
                 Cloud.anonMode(lf("editing user settings"), null, true);
             }
 
-            var astModes = div('ast-modes center');
-            function updateModes() {
-                astModes.setChildren([editorModes['block'], editorModes['classic']].map(mode => {
-                    var pic = div('pic');
-                    pic.style.backgroundImage = Cloud.artCssImg(mode.artId);
-                    pic.style.backgroundSize = "cover";
-
-                    var d = div('editor-mode', pic.withClick(() => {
-                        Ticker.rawTick('astMode' + mode.id);
-                        EditorSettings.editorMode().astMode = mode.astMode;
-                        updateModes();
-                    }));
-                    d.setFlag("selected", mode.astMode == EditorSettings.editorMode().astMode);
-                    return d;
-                }));
-            }
-
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
@@ -7794,10 +7777,6 @@
 
                 // editor selector
                 if (Cloud.isRestricted()) {
-                    ch.unshift(astModes);
-                    ch.unshift(div("input-label", lf("editor theme")));
-                    updateModes();
-
                     var s = Cloud.recentUserSettings()
                     if (s && s.credit) {
                         ch.unshift(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
