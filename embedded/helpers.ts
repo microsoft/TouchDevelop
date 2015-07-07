@@ -172,6 +172,8 @@ module TDev {
         var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
         if (candidate in cppKeywords)
           candidate += "_";
+        else if (candidate.match(/^\d/))
+          candidate = "_" + candidate;
         return candidate;
       }
 
