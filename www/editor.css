@@ -2898,6 +2898,7 @@ div.iconThumb {
   position: absolute;
   left: 0;
   top: -0.3em;
+  right: 0;
 }
 
 .sdCommentBlock {
@@ -2925,8 +2926,10 @@ div.iconThumb {
 
 .sdName {
   font-size: 1.6em;
-  display: inline-block;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .sdNumbers {
