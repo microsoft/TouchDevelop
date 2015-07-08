@@ -9826,7 +9826,7 @@
 
         public initTab() {
             this.withUpdate(this.tabContent, (u:JsonRelease) => {
-                var ch = ["current", "beta", "cloud"].map(n => HTML.mkButton("make " + n, () => {
+                var ch = ["current", "beta", "latest", "cloud"].map(n => HTML.mkButton("make " + n, () => {
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())
