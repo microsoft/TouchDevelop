@@ -5899,7 +5899,7 @@
 
         public shareButtons() {
             var btns = super.shareButtons();
-            if (EditorSettings.widgets().scriptPrintScript) btns.push(
+            if (!this.editor() && EditorSettings.widgets().scriptPrintScript) btns.push(
                 div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
                 );
             return btns;
