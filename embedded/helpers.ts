@@ -150,8 +150,6 @@ module TDev {
       // the original name, but uses the id to make sure there's no collisions
       // in the generated code.
       export function mangleUnique(env: Env, name: string, id: string) {
-        if (id.match(/^init/))
-          debugger;
         if (id in env.ident_of_id)
           return env.ident_of_id[id];
         else {
@@ -301,6 +299,14 @@ module TDev {
         );
       }
 
+      export function isShim(s: string) {
+        var matches = s.match(/^{shim:([^}]*)}\s*$/);
+        if (matches)
+          return matches[1];
+        else
+          return null;
+      }
+
       // [ ..., JComment { text: "{shim:VALUE}" }, ... ] -> VALUE
       // Beware:
       // - null means "function has to be compiled in C++ land";
@@ -311,9 +317,9 @@ module TDev {
       export function isShimBody(body: J.JStmt[]): string {
         var ret = null;
         body.forEach((s: J.JStmt) => {
-          var matches = s.nodeType == "comment" && (<J.JComment> s).text.match(/^{shim:([^}]*)}$/);
-          if (matches)
-            ret = matches[1];
+          var shim = s.nodeType == "comment" && isShim((<J.JComment> s).text);
+          if (shim || shim === "")
+            ret = shim;
         });
         return ret;
       }

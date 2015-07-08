@@ -2085,7 +2085,7 @@ module TDev
             }
 
             Util.log("compiling script");
-            this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn);
+            this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
         }
 
         public setupPlayButton()
