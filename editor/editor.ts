@@ -2311,7 +2311,12 @@ module TDev
                 TestMgr.testCurrentScript();
             } else {
                 var a = Script.mainAction();
-                if (!a) return;
+                if (!a) {
+                    ModalDialog.info(
+                        lf("We cannot run this script"),
+                        lf("There is no public action called main"));
+                    return;
+                }
                 this.runAction(a, null, inDebugMode ? { debugging: true } : {});
             }
         }
