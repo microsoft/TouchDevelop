@@ -409,7 +409,9 @@ module TDev {
     var errors = Errors.get();
     if (errors.length && msgSel) {
       var text = "";
-      errors.forEach((e: Errors.CompilationError) => {
+      errors
+      .slice(0, 1) // Just display the first error
+      .forEach((e: Errors.CompilationError) => {
         var block = e.block;
         $(block.svgGroup_).attr("class", "blocklySelected blocklyError");
         text += e.msg + "\n";
