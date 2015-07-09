@@ -6650,7 +6650,7 @@
                     })])
                 }
 
-                if (this.correspondingTopic) {
+                if (this.correspondingTopic && this.correspondingTopic.topic && this.correspondingTopic.topic.isTutorial()) {
                     docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"),() => {
                         tick(Ticks.browseFollowTopic)
                         this.correspondingTopic.follow()
