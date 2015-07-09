@@ -2395,10 +2395,13 @@ module TDev.AST
                     return;
                 } else if (n.category() == JsNodeCategory.Goto) {
                     this.dumpSimple(n);
-                    if (idx == nodes.length - 1) return;
-                    Util.assertCode(nodes[idx+1].category() == JsNodeCategory.Label);
-                    this.todo.push(() => { this.dumpFunction(nodes, idx + 1); });
-                    return;
+                    while (++idx < nodes.length) {
+                        if (nodes[idx].category() == JsNodeCategory.Label) {
+                            this.todo.push(() => { this.dumpFunction(nodes, idx); });
+                            return
+                        }
+                    }
+                    return
                 } else if (n.category() == JsNodeCategory.If) {
                     var i = <JsIf> n;
                     this.wr("  " + (i.isWhile ? "while" : "if") + " (" + i.condition.toString() + ") {\n");

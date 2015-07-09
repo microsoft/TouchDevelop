@@ -191,6 +191,17 @@ module TDev.AST {
         public diffFeatures:any;
         public stepState:any;
 
+        public nextStmt():Stmt
+        {
+            if (this.parent instanceof Block) {
+                var stmts = (<Block>this.parent).stmts
+                var idx = stmts.indexOf(this)
+                if (idx >= 0)
+                    return stmts[idx + 1]
+            }
+            return null
+        }
+
         public isCommentedOut()
         {
             return this.parent && (this.parent.isTopCommentedOut() || this.parent.isCommentedOut())
@@ -801,7 +812,13 @@ module TDev.AST {
 
         public isTopCommentedOut()
         {
-            return !this.isElseIf && this.rawElseBody.isBlockPlaceholder() && this.rawCondition.getLiteral() === false
+            if (!this.isElseIf && this.rawElseBody.isBlockPlaceholder() && this.rawCondition.getLiteral() === false) {
+                var n = this.nextStmt()
+                if (n instanceof If && (<If>n).isElseIf)
+                    return false
+                return true
+            }
+            return false
         }
 
         public primaryBody() { return this.rawThenBody; }
