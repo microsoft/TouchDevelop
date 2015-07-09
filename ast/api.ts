@@ -1036,7 +1036,7 @@ module TDev {
             this.isData = true;
             this.md_addProperty(new UserActionRunProperty(this))
 
-            var invl = Property.md_make(0, this, "is invalid", "Returns true if the current instance is useless", [], api.core.Boolean)
+            var invl = Property.md_make(0, this, "is invalid", lf("Returns true if the current instance is useless"), [], api.core.Boolean)
             invl.md_runOnInvalid();
             this.md_addProperty(invl);
         }

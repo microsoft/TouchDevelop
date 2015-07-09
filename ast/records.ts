@@ -437,14 +437,14 @@ module TDev.AST {
             if (!this.propertyCache) {
                 if (this.isKey) {
                     var sp =
-                        new SimpleProperty(this, "get the " + this.dataKind.toString() + " key", false,
+                        new SimpleProperty(this, lf("get the {0} key", this.dataKind.toString()), false,
                                             this.def().entryKind, this.dataKind, true);
                     sp.isKey = true;
                     this.propertyCache = sp;
                 }
                 else {
                     this.propertyCache =
-                        new SimpleProperty(this, "access the " + this.dataKind.toString() + " field", false,
+                        new SimpleProperty(this, lf("access the {0} field", this.dataKind.toString()), false,
                                             this.def().entryKind, this.dataKind, true);
                 }
                 var s = this;
@@ -596,30 +596,30 @@ module TDev.AST {
         private getCommonProps()
         {
             if (!this.props) {
-                var clear = new SimpleProperty("clear fields", "sets all fields to their default values", true, this, api.core.Nothing)
-                var eq    = new SimpleProperty("equals", "tests if two references refer to the same object", false, this, api.core.Boolean, false, this)
-                var post = new SimpleProperty("post to wall", "displays the object on the wall", false, this, api.core.Nothing)
-                var tojson = new SimpleProperty("to json", "export a JSON representation of the contents", false, this, api.core.JsonObject)
+                var clear = new SimpleProperty("clear fields", lf("sets all fields to their default values"), true, this, api.core.Nothing)
+                var eq    = new SimpleProperty("equals", lf("tests if two references refer to the same object"), false, this, api.core.Boolean, false, this)
+                var post = new SimpleProperty("post to wall", lf("displays the object on the wall"), false, this, api.core.Nothing)
+                var tojson = new SimpleProperty("to json", lf("export a JSON representation of the contents"), false, this, api.core.JsonObject)
 
                 switch (this.record.recordType) {
                 case RecordType.Object:
                     this.props = [
                         post, clear, eq,
-                        new SimpleProperty("is invalid", "checks if reference has not been set", false, this, api.core.Boolean),
+                        new SimpleProperty("is invalid", lf("checks if reference has not been set"), false, this, api.core.Boolean),
                         tojson,
-                        new SimpleProperty("from json", "import field values from a JSON object", false, this, api.core.Nothing, false, api.core.JsonObject)
+                        new SimpleProperty("from json", lf("import field values from a JSON object"), false, this, api.core.Nothing, false, api.core.JsonObject)
                     ];
                     break;
                 case RecordType.Table:
-                    var dr = new SimpleProperty("delete row", "deletes this row from the table", true, this, api.core.Nothing);
-                    var conf = new SimpleProperty("confirmed", "true if last update of row has been confirmed by server", false, this, api.core.Boolean)
+                    var dr = new SimpleProperty("delete row", lf("deletes this row from the table"), true, this, api.core.Nothing);
+                    var conf = new SimpleProperty("confirmed", lf("true if last update of row has been confirmed by server"), false, this, api.core.Boolean)
                     this.props = [
                         post, eq,
                         dr,
                         tojson,
-                        new SimpleProperty("from json", "import column values from a JSON object", false, this, api.core.Nothing, false, api.core.JsonObject),
-                        new SimpleProperty("is invalid", "checks if reference has not been set", false, this, api.core.Boolean),
-                        new SimpleProperty("is deleted", "checks if this row (or any of its linked rows) has been deleted", false, this, api.core.Boolean),
+                        new SimpleProperty("from json", lf("import column values from a JSON object"), false, this, api.core.Nothing, false, api.core.JsonObject),
+                        new SimpleProperty("is invalid", lf("checks if reference has not been set"), false, this, api.core.Boolean),
+                        new SimpleProperty("is deleted", lf("checks if this row (or any of its linked rows) has been deleted"), false, this, api.core.Boolean),
                         conf
                     ];
                     if (!(this.record.cloudEnabled || this.record.cloudPartiallyEnabled))
@@ -628,16 +628,16 @@ module TDev.AST {
                     case RecordType.Decorator:
                         this.props = [post, clear, eq,
                             tojson,
-                            new SimpleProperty("from json", "import field values from a JSON object", false, this, api.core.Nothing, false, api.core.JsonObject),
+                            new SimpleProperty("from json", lf("import field values from a JSON object"), false, this, api.core.Nothing, false, api.core.JsonObject),
                         ];
                         break;
                 case RecordType.Index:
                     this.props = [post, clear, eq,
                         tojson,
-                        new SimpleProperty("from json", "import field values from a JSON object", false, this, api.core.Nothing, false, api.core.JsonObject),
-                        new SimpleProperty("is invalid", "checks if reference has not been set", false, this, api.core.Boolean),
-                        new SimpleProperty("is deleted", "checks if this index entry is deleted, i.e. has a deleted row key", false, this, api.core.Boolean),
-                        new SimpleProperty("confirmed", "true if last update of entry has been confirmed by server", false, this, api.core.Boolean)
+                        new SimpleProperty("from json", lf("import field values from a JSON object"), false, this, api.core.Nothing, false, api.core.JsonObject),
+                        new SimpleProperty("is invalid", lf("checks if reference has not been set"), false, this, api.core.Boolean),
+                        new SimpleProperty("is deleted", lf("checks if this index entry is deleted, i.e. has a deleted row key"), false, this, api.core.Boolean),
+                        new SimpleProperty("confirmed", lf("true if last update of entry has been confirmed by server"), false, this, api.core.Boolean)
                     ];
                     break;
                 default: Util.die();
@@ -1010,66 +1010,66 @@ module TDev.AST {
             if (this._properties) return;
             switch (this.recordType) {
                 case RecordType.Object:
-                    var p = new SimpleProperty("create collection", "creates an empty collection of objects", false, this.tableKind, this.entryKind.collectionKind);
+                    var p = new SimpleProperty("create collection", lf("creates an empty collection of objects"), false, this.tableKind, this.entryKind.collectionKind);
                     p.md_writesMutable();
-                    var p1 = new SimpleProperty("invalid", "Create an invalid value of this object type", false, this.tableKind, this.entryKind);
+                    var p1 = new SimpleProperty("invalid", lf("Create an invalid value of this object type"), false, this.tableKind, this.entryKind);
                     this._properties = [p, p1];
                     break;
                 case RecordType.Table:
-                    var p = new SimpleProperty("create collection", "creates an empty collection of rows", false, this.tableKind, this.entryKind.collectionKind);
+                    var p = new SimpleProperty("create collection", lf("creates an empty collection of rows"), false, this.tableKind, this.entryKind.collectionKind);
                     p.md_writesMutable();
-                    var p2 = new SimpleProperty("copy to collection", "loads the table rows into a collection", false, this.tableKind, this.entryKind.collectionKind);
+                    var p2 = new SimpleProperty("copy to collection", lf("loads the table rows into a collection"), false, this.tableKind, this.entryKind.collectionKind);
                     p2.md_writesMutable();
                     this._properties = [
-                        new SimpleProperty("post to wall", "Post all rows to the wall", false, this.tableKind, api.core.Nothing),
-                        new SimpleProperty("count", "Counts the number of rows", false, this.tableKind, api.core.Number),
-                        new SimpleProperty("clear", "Clear all rows from the table", true, this.tableKind, api.core.Nothing),
+                        new SimpleProperty("post to wall", lf("Post all rows to the wall"), false, this.tableKind, api.core.Nothing),
+                        new SimpleProperty("count", lf("Counts the number of rows"), false, this.tableKind, api.core.Number),
+                        new SimpleProperty("clear", lf("Clear all rows from the table"), true, this.tableKind, api.core.Nothing),
                         p,
                         p2,
-                        new SimpleProperty("invalid row", "Creates an invalid reference to a row", false, this.tableKind, this.entryKind).makeObsolete(),
-                        new SimpleProperty("invalid", "Creates an invalid reference to a row", false, this.tableKind, this.entryKind),
-                        new SimpleProperty("row at", "Gets the row at the specified position. Returns invalid if out of range", false, this.tableKind, this.entryKind, false, api.core.Number),
+                        new SimpleProperty("invalid row", lf("Creates an invalid reference to a row"), false, this.tableKind, this.entryKind).makeObsolete(),
+                        new SimpleProperty("invalid", lf("Creates an invalid reference to a row"), false, this.tableKind, this.entryKind),
+                        new SimpleProperty("row at", lf("Gets the row at the specified position. Returns invalid if out of range"), false, this.tableKind, this.entryKind, false, api.core.Number),
                     ];
                     //this._properties.push(new SimpleProperty("on changed", "sets an action to perform after data in this table changes", true, this.tableKind, api.core.EventBinding, false, api.core.Action).ignoreReturnValue());
-                    this._properties.push(p = new SimpleProperty("wait for update", "waits until there is an update (possibly change) to the table contents", false, this.tableKind, api.core.Nothing));
+                    this._properties.push(p = new SimpleProperty("wait for update", lf("waits until there is an update (possibly change) to the table contents"), false, this.tableKind, api.core.Nothing));
                     p.md_resumes(); p.md_async(); p.md_betaOnly();
                     if (this.keys.stmts.length >= 1) {
 
-                        var p3 = new SimpleProperty("entries linked to", "returns all rows with matching links", false, this.tableKind, this.entryKind.collectionKind);
+                        var p3 = new SimpleProperty("entries linked to", lf("returns all rows with matching links"), false, this.tableKind, this.entryKind.collectionKind);
                         p3.setParameterKinds(this.keys.stmts.map((p: RecordField) => p.dataKind))
                         p3.md_writesMutable();
                         this._properties.push(p3);
                     }
-                    this._properties.push(new SimpleProperty("to json", "export a JSON representation of the table contents", false, this.tableKind, api.core.JsonObject));
-                    this._properties.push(new SimpleProperty("from json", "import a JSON representation of the table contents", false, this.tableKind, api.core.Nothing, false, api.core.JsonObject));
+                    this._properties.push(new SimpleProperty("to json", lf("export a JSON representation of the table contents"), false, this.tableKind, api.core.JsonObject));
+                    this._properties.push(new SimpleProperty("from json", lf("import a JSON representation of the table contents"), false, this.tableKind, api.core.Nothing, false, api.core.JsonObject));
                     break;
                 case RecordType.Index:
-                    var p = new SimpleProperty("create collection", "creates an empty collection of entries", false, this.tableKind, this.entryKind.collectionKind);
+                    var p = new SimpleProperty("create collection", lf("creates an empty collection of entries"), false, this.tableKind, this.entryKind.collectionKind);
                     p.md_writesMutable();
-                    var p2 = new SimpleProperty("copy to collection", "loads the index entries into a collection", false, this.tableKind, this.entryKind.collectionKind);
+                    var p2 = new SimpleProperty("copy to collection", lf("loads the index entries into a collection"), false, this.tableKind, this.entryKind.collectionKind);
                     p2.md_writesMutable();
                     this._properties = [
-                        new SimpleProperty("post to wall", "Posts all non-empty entries (i.e. entries with at least one non-default field) to the wall", false, this.tableKind, api.core.Nothing),
-                        new SimpleProperty("count", "Counts the number of entries that contain non-default values", false, this.tableKind, api.core.Number),
-                        new SimpleProperty("clear", "Clear all entries, all fields assume default value", true, this.tableKind, api.core.Nothing),
+                        new SimpleProperty("post to wall", lf("Posts all non-empty entries (i.e. entries with at least one non-default field) to the wall"), false, this.tableKind, api.core.Nothing),
+                        new SimpleProperty("count", lf("Counts the number of entries that contain non-default values"), false, this.tableKind, api.core.Number),
+                        new SimpleProperty("clear", lf("Clear all entries, all fields assume default value"), true, this.tableKind, api.core.Nothing),
                         p,
                         p2,
-                        new SimpleProperty("invalid", "Creates an invalid reference to an entry", false, this.tableKind, this.entryKind)
+                        new SimpleProperty("invalid", lf("Creates an invalid reference to an entry"), false, this.tableKind, this.entryKind)
                     ];
                     if (this.isUserIndex()) {
-                        var p2 = new SimpleProperty("my entries", "returns all non-empty entries whose first key matchest the current user", false, this.tableKind, this.entryKind.collectionKind);
+                        var p2 = new SimpleProperty("my entries", lf("returns all non-empty entries whose first key matchest the current user"), false, this.tableKind, this.entryKind.collectionKind);
                         p2.md_writesMutable();
                         this._properties.push(p2);
                     }
                     //this._properties.push(new SimpleProperty("on changed", "sets an action to perform after data in this index changes", true, this.tableKind, api.core.EventBinding, false, api.core.Action).ignoreReturnValue());
-                    this._properties.push(p = new SimpleProperty("wait for update", "waits until there is an update (possibly change) to the index contents", false, this.tableKind, api.core.Nothing));
+                    this._properties.push(p = new SimpleProperty("wait for update", lf("waits until there is an update (possibly change) to the index contents"), false, this.tableKind, api.core.Nothing));
                     p.md_resumes(); p.md_async(); p.md_betaOnly();
-                    this._properties.push(new SimpleProperty("to json", "export a JSON representation of the table contents", false, this.tableKind, api.core.JsonObject));
-                    this._properties.push(new SimpleProperty("from json", "import a JSON representation of the table contents", false, this.tableKind, api.core.Nothing, false, api.core.JsonObject));
+                    this._properties.push(new SimpleProperty("to json", lf("export a JSON representation of the table contents"), false, this.tableKind, api.core.JsonObject));
+                    this._properties.push(new SimpleProperty("from json", lf("import a JSON representation of the table contents"), false, this.tableKind, api.core.Nothing, false, api.core.JsonObject));
                    break;
                 case RecordType.Decorator:
                     this._properties = [
-                        new SimpleProperty("clear", "Clears all decorations, all fields assume initial value", true, this.tableKind, api.core.Nothing)
+                        new SimpleProperty("clear", lf("Clears all decorations, all fields assume initial value"), true, this.tableKind, api.core.Nothing)
                     ];
                     break;
                 default: Util.die();
