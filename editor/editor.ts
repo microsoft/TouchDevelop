@@ -49,10 +49,15 @@ module TDev
         public otherwiseBack()
         {
         }
-
+        
         public canEditCode()
         {
             return this.canEdit;
+        }        
+
+        public canDebugCode()
+        {
+            return this.canEditCode() && Browser.EditorSettings.widgets().debugButton;
         }
 
         /* override */

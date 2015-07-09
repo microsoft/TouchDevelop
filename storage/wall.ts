@@ -640,8 +640,13 @@ module TDev {
         public attachDebuggingInfo(runMap: RunBitMap, stackTrace: IPackedStackTrace, errorMessage: string): void
         {
         }
-
+        
         public canEditCode()
+        {
+            return false
+        }
+
+        public canDebugCode()
         {
             return false
         }
@@ -733,10 +738,10 @@ module TDev {
             } else if (!!e.isUserError) {
                 var dial = ModalDialog.buttons(
                     lf("the script crashed"),
-                    this.canEditCode() ? lf("do you want do debug it?") : null,
+                    this.canDebugCode() ? lf("do you want do debug it?") : null,
                     lf("error message"),
                     error,
-                    this.canEditCode() ? HTML.mkButton(lf("debug"), () => {
+                    this.canDebugCode() ? HTML.mkButton(lf("debug"), () => {
                         tick(Ticks.crashDialogDebug);
                         dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction();
                     }) : null,
@@ -759,9 +764,9 @@ module TDev {
 
                 var dial = ModalDialog.buttons(
                     "TouchDevelop crashed",
-                    this.canEditCode() ? "do you want do debug the script?" : null,
+                    this.canDebugCode() ? "do you want do debug the script?" : null,
                     null, null,
-                    this.canEditCode() ? HTML.mkButton(lf("debug"), () => { dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction(); }) : null,
+                    this.canDebugCode() ? HTML.mkButton(lf("debug"), () => { dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction(); }) : null,
                     jsinfo,
                     HTML.mkButton(lf("cancel"), () => { dial.dismiss() })
                 );
