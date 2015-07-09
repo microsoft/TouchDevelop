@@ -300,6 +300,12 @@ module TDev {
     popup.css("top", Math.round(y + h + 10 + 5)+"px");
   }
 
+  function markLocalChanges() {
+    statusMsg("✎ local changes", External.Status.Ok);
+    statusIcon("pencil");
+    dirty = true;
+  }
+
   // Called once at startup
   function setupEditor(message: External.Message_Init) {
     var state = <MyEditorState> message.script.editorState;
@@ -315,26 +321,22 @@ module TDev {
     // does not receive that initial event, we schedule it for slightly later.
     window.setTimeout(() => {
       Blockly.addChangeListener(() => {
-        statusMsg("✎ local changes", External.Status.Ok);
-        statusIcon("pencil");
-        dirty = true;
+        markLocalChanges();
       });
     }, 1);
     $("#script-name").on("input keyup blur", () => {
-      statusMsg("✎ local changes", External.Status.Ok);
-      statusIcon("pencil");
-      dirty = true;
+      markLocalChanges();
     });
     $("#script-description").on("input keyup blur", () => {
-      statusMsg("✎ local changes", External.Status.Ok);
-      statusIcon("pencil");
-      dirty = true;
+      markLocalChanges();
     });
 
     setName(message.script.metadata.name);
     setDescription(message.script.metadata.comment);
-    if (!message.script.baseSnapshot && !message.script.metadata.comment)
+    if (!message.script.baseSnapshot && !message.script.metadata.comment) {
       setDescription("A terrific micro:bit program written with the Block Editor!");
+      markLocalChanges();
+    }
 
     // That's triggered when the user closes or reloads the whole page, but
     // doesn't help if the user hits the "back" button in our UI.
