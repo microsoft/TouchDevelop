@@ -1919,10 +1919,15 @@ module TDev.AST {
         }
 
 
-        public isRunnable()
-        {
-            return !this.isActionTypeDef() && !this.isEvent() && !this.isPrivate && (this.isPlugin() || this.isButtonPlugin() || !this.hasInParameters() ||
-                (!this.isPage() && this.getInParameters().every((a) => !!a.getKind().picker)));
+        public isRunnable() {
+            if (this.isActionTypeDef() || this.isEvent() || this.isPrivate) return false;
+
+            if (Cloud.isRestricted() && this.hasInParameters()) return false; // input parameters not support in restricted
+
+            return this.isPlugin()
+                || this.isButtonPlugin()
+                || !this.hasInParameters()
+                || (!this.isPage() && this.getInParameters().every((a) => !!a.getKind().picker));
         }
 
         public writeHeader(tw:TokenWriter, forLibSig = false)
