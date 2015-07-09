@@ -508,6 +508,7 @@ module TDev {
         public allowImages = true;
         public allowVideos = true;
         public designTime = false;
+        public forWeb = false;
         private currComment:AST.Comment;
 
         constructor(public renderer:Renderer = null, private libName:string = null)
@@ -2024,9 +2025,12 @@ module TDev {
                 acts.forEach((a) => {
                     ch += mdcmt.extract(a);
                 })
-                
+
+                var tutorialSteps = noTutorial ? [] : AST.Step.splitActions(this.app);
+                if (tutorialSteps.length > 0 && mdcmt.forWeb)
+                    ch = ch.replace(/<\/div>$/, "<hr class='md-section' data-name='startTutorial' data-arguments='' /></div>")
+
                 if (mdcmt.print) {
-                    var tutorialSteps = noTutorial ? [] : AST.Step.splitActions(this.app);
                     if (tutorialSteps.length > 0) {
                         tutorialSteps.forEach((s) => {
                             if (s.printOut) {

@@ -218,7 +218,7 @@ function statsResp(ar:ApiRequest) {
     })
 }
 
-function renderHelpTopicAsync(ht:TDev.HelpTopic, blockLinks = false)
+function renderHelpTopicAsync(ht:TDev.HelpTopic, blockLinks = false, forweb = false)
 {
     var res = "";
     var md = new TDev.MdComments(new TDev.CopyRenderer());
@@ -226,6 +226,7 @@ function renderHelpTopicAsync(ht:TDev.HelpTopic, blockLinks = false)
     md.showCopy = false;
     md.useExternalLinks = true;
     md.blockExternalLinks = blockLinks;
+    md.forWeb = forweb;
     return ht.renderAsync(md).then((text) => {
         return "<h1>" + TDev.Util.htmlEscape(ht.json.name) + "</h1>"
                + text;
@@ -795,14 +796,14 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "raw-docs":
-        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), true).done(top => ar.ok({
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), true, true).done(top => ar.ok({
             body: top,
             template: "docs", // TODO get from script text
         }))
         break;
 
     case "raw-docs-official":
-        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), false).done(top => ar.ok({
+        renderHelpTopicAsync(TDev.HelpTopic.fromScript(TDev.Script), false, true).done(top => ar.ok({
             body: top,
             template: "docs", // TODO get from script text
         }))
