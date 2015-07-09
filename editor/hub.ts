@@ -872,6 +872,10 @@ module TDev.Browser {
             return TheApiCacheMgr.getAsync(currentTheme.intelliProfileId, true)
                 .then((script : JsonScript) => ScriptCache.getScriptAsync(script.updateid))
                 .then((text: string) => {
+                    if (!text) {
+                        Util.log('failed to load intelliprofile script');
+                        return undefined;
+                    }
                     Util.log('loading intelliprofile for theme');
                     var app = AST.Parser.parseScript(text);
                     AST.TypeChecker.tcApp(app);
