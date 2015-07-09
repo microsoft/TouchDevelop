@@ -1982,8 +1982,13 @@ module TDev
                     if (p.parentKind.isData) {
                         toks.pushRange(this.findDefault(parms[0]));
                     } else if (p.parentKind instanceof AST.LibraryRefKind) {
-                        toks.push(AST.mkThing(AST.libSymbol))
-                        toks.push(AST.mkPropRef((<AST.LibraryRefKind>p.parentKind).lib.getName()))
+                        var ns: string;
+                        if ((<any>p).getNamespaces && (ns = (<any>p).getNamespaces()[0])) {
+                            toks.push(AST.mkThing(ns));
+                        } else {
+                            toks.push(AST.mkThing(AST.libSymbol))
+                            toks.push(AST.mkPropRef((<AST.LibraryRefKind>p.parentKind).lib.getName()))
+                        }    
                     } else {
                         toks.push(AST.mkThing(p.parentKind.singleton.getName()));
                     }
