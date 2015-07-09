@@ -46,6 +46,7 @@ module TDev.Browser {
                 hubTutorials : true,
                 hubShowcase : true,
                 hubSocial: true,
+                publicationComments: true,
                 translateComments: true,
 
                 whileConditionDefault: "true",
@@ -126,6 +127,7 @@ module TDev.Browser {
                 hubUsers: true,
                 notifyAppReloaded: true,
                 startTutorialButton: true,
+                publicationComments: true,
                 translateComments: true,
                 searchHelp: true,
                 outAssign: true,
@@ -255,6 +257,7 @@ module TDev.Browser {
                 hubUsers: true,
                 hubTags: true,
                 hubMyArt: true,
+                publicationComments: true,
                 translateComments: true,
                 searchHelp: true,
                 outAssign: true,
@@ -446,6 +449,7 @@ module TDev.Browser {
                     editLibraryButton: true,                    
                     scriptPrintScript: true,
                     scriptPrintTopic: true,                    
+                    publicationComments: true,
                 }
             },
         },
@@ -510,6 +514,7 @@ module TDev.Browser {
                     editLibraryButton: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
+                    publicationComments: true,
 
                     // editor specific                  
                     publishDescription: true,

@@ -6289,7 +6289,8 @@
                     addNum(this.jsonScript.runs, "runs");
                 } else {
                     addNum(getScriptHeartCount(this.jsonScript), "♥");
-                    addNum(this.jsonScript.comments, "✉");
+                    if (EditorSettings.widgets().publicationComments)
+                        addNum(this.jsonScript.comments, "✉");
                 }
                 if (this.app.isLibrary) {
                     var sp = document.createElement('span'); sp.className = 'sdNumber symbol';
@@ -6339,7 +6340,8 @@
                 var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(getScriptHeartCount(this.jsonScript), "♥");
                 if (sz > 1) {
-                    addNum(this.jsonScript.comments, "✉");
+                    if (EditorSettings.widgets().publicationComments)
+                        addNum(this.jsonScript.comments, "✉");
                     //addNum(jsonScript.installations, "users");
                     //addNum(jsonScript.runs, "runs");
                 }
@@ -6675,7 +6677,7 @@
                         .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
                 }
 
-                if (this.getPublicationIdOrBaseId()) {
+                if (EditorSettings.widgets().publicationComments && this.getPublicationIdOrBaseId()) {
                     if (!this.commentsTab) {
                         this.commentsTab = new CommentsTab(this);
                         this.commentsTab.initElements();
@@ -8329,7 +8331,8 @@
                 var cont = [];
                 var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.positivereviews, "♥");
-                addNum(u.comments, "✉");
+                if (EditorSettings.widgets().publicationComments)
+                    addNum(u.comments, "✉");
                 /* if (big) {
                     addNum(u.subscribers, "svg:Person,black,clip=80");
                 } */
@@ -9955,7 +9958,8 @@
                 var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(this.json.positivereviews, "♥");
                 if (sz > 1) {
-                    addNum(this.json.comments, "✉");
+                    if (EditorSettings.widgets().publicationComments)
+                        addNum(this.json.comments, "✉");
                 }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));

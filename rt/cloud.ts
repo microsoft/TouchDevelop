@@ -110,6 +110,7 @@ module TDev.Cloud {
         hubShowcase?: boolean;
         hubSocial?: boolean;
         startTutorialButton?: boolean;
+        publicationComments?: boolean;
         translateComments?: boolean;
         searchHelp?: boolean;
         hideMyScriptHeader?: boolean;
