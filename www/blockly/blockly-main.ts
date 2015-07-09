@@ -334,7 +334,7 @@ module TDev {
     setName(message.script.metadata.name);
     setDescription(message.script.metadata.comment);
     if (!message.script.baseSnapshot && !message.script.metadata.comment)
-      setDescription("A #blocks script");
+      setDescription("A terrific micro:bit program written with the Block Editor!");
 
     // That's triggered when the user closes or reloads the whole page, but
     // doesn't help if the user hits the "back" button in our UI.

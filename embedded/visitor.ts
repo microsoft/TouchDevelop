@@ -27,7 +27,7 @@ module TDev {
               return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
             case "globalDef":
               var n13 = <J.JGlobalDef> n;
-              return this.visitGlobalDef(env, n13.name, n13.type);
+              return this.visitGlobalDef(env, n13.name, n13.type, n13.comment);
             case "localDef":
               var n1 = <J.JLocalDef> n;
               return this.visitLocalDef(env, n1.name, n1.id, n1.type);
@@ -80,10 +80,10 @@ module TDev {
               return this.visitLibrary(env, (<J.JLibrary> n).scriptName);
             case "art":
               var n12 = <J.JArt> n;
-              return this.visitArt(env, n12.name, n12.type, n12.url);
+              return this.visitArt(env, n12.name, n12.type, n12.url, n12.comment);
             case "data":
               var n14 = <J.JData> n;
-              return this.visitData(env, n14.name, n14.type);
+              return this.visitData(env, n14.name, n14.type, n14.comment);
             case "record":
               var n15 = <J.JRecord> n;
               return this.visitRecord(env, n15.name, n15.keys, n15.fields, n15.isExported);
@@ -157,15 +157,18 @@ module TDev {
         env: T,
         name: string,
         type: J.JTypeRef,
-        url: string): U                                                   { return this.visitGlobalDef(env, name, type); }
+        url: string,
+        comment: string): U                                               { return this.visitGlobalDef(env, name, type, comment); }
       public visitData(
         env: T,
         name: string,
-        type: J.JTypeRef): U                                              { return this.visitGlobalDef(env, name, type); }
+        type: J.JTypeRef,
+        comment: string): U                                               { return this.visitGlobalDef(env, name, type, comment); }
       public visitGlobalDef(
         env: T,
         name: string,
-        type: J.JTypeRef): U                                              { return this.visitDecl(env, name); }
+        type: J.JTypeRef,
+        comment: string): U                                               { return this.visitDecl(env, name); }
       public visitRecord(
         env: T,
         name: string,

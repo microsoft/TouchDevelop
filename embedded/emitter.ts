@@ -312,8 +312,14 @@ module TDev {
           return "";
       }
 
-      public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef) {
+      public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef, comment: string) {
         H.reserveName(e, name);
+
+        // TODO: we skip definitions marked as shims, but we do not do anything
+        // meaningful when we *refer* to them.
+        var s = H.isShim(comment);
+        if (s !== null)
+          return null;
 
         var x = H.defaultValueForType(this.libraryMap, t);
         // A reference to a global is already unique (i.e. un-ambiguous).
@@ -391,11 +397,11 @@ module TDev {
 
       private wrapNamespaceIf (s: string) {
         if (this.libName != null)
-          return "namespace "+this.libName+" {\n"+
-            "  // Disclaimer: some of these declarations/definitions may be useless.\n"+
-            "  // TODO: prune unused variable declarations and function definitions.\n"+
-            s+
-          "\n}";
+          return (s.length
+            ? "namespace "+this.libName+" {\n"+
+                s +
+              "\n}"
+            : "");
         else
           return s;
       }

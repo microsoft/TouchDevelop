@@ -6127,7 +6127,7 @@
         }
 
         static editorIcons = {
-            "blockly": "fa-puzzle-piece,#517EC0",
+            "blockly": "blockeditor,#517EC0",
             "touchdevelop": "touchdevelop,#308919",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
@@ -6143,13 +6143,7 @@
             if (!ic) ic = ScriptInfo.editorIcons["*"]
             ic = ic.replace(/,.*/, "")
 
-            // The mkImg function seems to require that the SVG be made up of a
-            // single path, which the Blockly logo isn't, so unfortunately,
-            // we need to special-case this.
-            if (this.getScriptType() == "blockly")
-                return HTML.mkImg(Util.mkAbsoluteUrl("blockly/icon.svg"));
-            else
-                return HTML.mkImg("svg:" + ic + ",white")
+            return HTML.mkImg("svg:" + ic + ",white")
         }
 
         public iconBgColor():string
@@ -9826,7 +9820,7 @@
 
         public initTab() {
             this.withUpdate(this.tabContent, (u:JsonRelease) => {
-                var ch = ["current", "beta", "cloud"].map(n => HTML.mkButton("make " + n, () => {
+                var ch = ["current", "beta", "latest", "cloud"].map(n => HTML.mkButton("make " + n, () => {
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())
