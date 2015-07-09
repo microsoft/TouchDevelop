@@ -253,7 +253,11 @@ module TDev
                     sig = span("navSig", decl.getSignature());
                 }
             }
-            if (decl.getNamespace) {
+            if (decl.getNamespaces) {
+                var namespaces : string[] = <string[]>decl.getNamespaces();
+                if (namespaces && namespaces[0]) ns = span("navSig", namespaces[0] +  " → ");
+            }
+            if (!ns && decl.getNamespace) {
                 ns = span("navSig symbol", decl.getNamespace());
             }
             var descDiv = div("navDescription md-inline")
