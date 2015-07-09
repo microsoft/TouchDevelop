@@ -1076,6 +1076,7 @@ module TDev
                       ".hint { color: #444; }\n" +
                       ".errorNumber { color: #aaa; }\n" +
                       ".kw, .keyword { font-weight: bold; color: black; }\n" +
+                      ".kbm { display:inline-block;} .kbm svg { height: 1em; vertical-align: middle; margin-left: 0.2em; }\n" +
                       ".code-highlight { border: 1px dashed gray; font-weight:bold; }\n" +
                       ".comment { color:#444; font-style:italic; }\n" +
                       ".greyed { color:#444; }\n" +
