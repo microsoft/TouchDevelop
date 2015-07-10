@@ -305,73 +305,78 @@ module TDev
                             })
         }
 
-        static showDiff(getScrAsync:Promise, additionalActions:any = {}, showAll = false)
+        static showDiff(getScrAsync:Promise, additionalActions:any = {}, showAll = false, hd?: Cloud.Header)
         {
             var m = new ModalDialog()
-            var prog = HTML.mkProgressBar()
-            m.add(prog)
-            m.addHTML("loading...")
-            prog.start()
+            var btns: HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
 
-            getScrAsync.done((scr: AST.App) => {
-                if (!scr) {
-                    m.dismiss();
-                    return;
-                }
-
-                var r = new Renderer()
-                var s = r.renderDiff(scr, showAll)
-                var d = div("diffOuter")
-                Browser.setInnerHTML(d, s)
-
-                var jumpNodes = []
-                var jumpPos = 0
-                var prevJumpPos = 0
-
-                Util.iterHtml(d, e => {
-                    if (/diff(Decl|Stmt|Tokens)/.test(e.className)) {
-                        jumpNodes.push(e)
-                        return true;
-                    }
-
-                    return false;
-                })
-
-                var goTo = () => {
-                    if (jumpNodes[prevJumpPos])
-                        jumpNodes[prevJumpPos].setFlag("diff-selected", false)
-                    if (jumpNodes[jumpPos]) {
-                        jumpNodes[jumpPos].setFlag("diff-selected", true)
-                        prevJumpPos = jumpPos
-                        Util.ensureVisible(jumpNodes[jumpPos], d)
-                    }
-                };
-
-                m.empty()
-                m.add(d)
-                Util.setupDragToScroll(d)
-                d.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
-
-                var btns: HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
-
-                if (jumpNodes.length > 0) {
-                    btns.push(
-                        HTML.mkButton(lf("prev difference"), () => {
-                            if (jumpPos > 0) jumpPos--;
-                            goTo()
-                        }),
-                        HTML.mkButton(lf("next difference"), () => {
-                            if (jumpPos < jumpNodes.length - 1) jumpPos++;
-                            goTo()
-                        }))
-                    btns.push(div('', span("diffTokenAdded diffTokenLegend", lf("code added")), span("diffTokenRemoved diffTokenLegend", lf("code deleted"))));
-                } else {
-                    btns.push(div("diffSame", lf("both scripts seems the same")))
-                }
-
+            if (hd && hd.editor) {
+                m.add(div("", text(lf("We cannot show the difference between these two versions."))));
                 m.add(div("diffButtons", btns))
-                goTo();
-            })
+            } else {
+                var prog = HTML.mkProgressBar()
+                m.add(prog)
+                m.addHTML("loading...")
+                prog.start()
+
+                getScrAsync.done((scr: AST.App) => {
+                    if (!scr) {
+                        m.dismiss();
+                        return;
+                    }
+
+                    var r = new Renderer()
+                    var s = r.renderDiff(scr, showAll)
+                    var d = div("diffOuter")
+                    Browser.setInnerHTML(d, s)
+
+                    var jumpNodes = []
+                    var jumpPos = 0
+                    var prevJumpPos = 0
+
+                    Util.iterHtml(d, e => {
+                        if (/diff(Decl|Stmt|Tokens)/.test(e.className)) {
+                            jumpNodes.push(e)
+                            return true;
+                        }
+
+                        return false;
+                    })
+
+                    var goTo = () => {
+                        if (jumpNodes[prevJumpPos])
+                            jumpNodes[prevJumpPos].setFlag("diff-selected", false)
+                        if (jumpNodes[jumpPos]) {
+                            jumpNodes[jumpPos].setFlag("diff-selected", true)
+                            prevJumpPos = jumpPos
+                            Util.ensureVisible(jumpNodes[jumpPos], d)
+                        }
+                    };
+
+                    m.empty()
+                    m.add(d)
+                    Util.setupDragToScroll(d)
+                    d.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
+
+                    if (jumpNodes.length > 0) {
+                        btns.push(
+                            HTML.mkButton(lf("prev difference"), () => {
+                                if (jumpPos > 0) jumpPos--;
+                                goTo()
+                            }),
+                            HTML.mkButton(lf("next difference"), () => {
+                                if (jumpPos < jumpNodes.length - 1) jumpPos++;
+                                goTo()
+                            }))
+                        btns.push(div('', span("diffTokenAdded diffTokenLegend", lf("code added")), span("diffTokenRemoved diffTokenLegend", lf("code deleted"))));
+                    } else {
+                        btns.push(div("diffSame", lf("both scripts seems the same")))
+                    }
+
+                    m.add(div("diffButtons", btns))
+                    goTo();
+                })
+            }
 
             m.fullWhite()
             m.stretchWide()

@@ -15,7 +15,7 @@ module TDev {
 
         export enum MessageType {
             Init,
-            Metadata, MetadataAck,
+            Metadata, MetadataAck, // Not implemented, left here so that the enum doesn't change.
             Save, SaveAck,
             Compile, CompileAck,
             Merge, Quit, // [Quit] has no attached data, so not defining a special interface

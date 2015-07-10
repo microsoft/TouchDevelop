@@ -3596,7 +3596,7 @@
                                 .done()
                         }
                     }
-                })
+                }, false, (<ScriptInfo> this.parent).cloudHeader)
 
                 Promise.join([HistoryTab.historicalTextAsync(Cloud.getUserId(), this.script().getGuid(), it),
                               s.getScriptTextAsync()]).done(texts => {
@@ -5869,7 +5869,7 @@
         public jsonScript:JsonScript;
         private _jsonScriptPromise:ApiCacheEntry;
         private basedOnPub:string;
-        private cloudHeader:Cloud.Header;
+        public cloudHeader:Cloud.Header;
         private platform:PlatformCapability;
         private correspondingTopic:TopicInfo;
 
