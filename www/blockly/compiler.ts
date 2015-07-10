@@ -134,7 +134,7 @@ module Helpers {
   }
 
   export function mkLTypeRef(t: string): J.JTypeRef {
-    return <any> JSON.stringify(<J.JLibraryType> { o: t, l: <any> "__DEVICE__" });
+    return <any> JSON.stringify(<J.JLibraryType> { o: t, l: <any> libraryName });
   }
 
   export function mkGTypeRef(t: string): J.JTypeRef {

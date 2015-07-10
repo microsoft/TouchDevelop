@@ -1704,14 +1704,14 @@ module TDev.Browser {
                     if (!editor) return;
                     var p = Promise.as("");
                     if (editor == "touchdevelop")
-                        p = External.pullLatestLibraryVersion()
-                            .then(() => {
+                        p = External.pullLatestLibraryVersion(External.microbitScriptId)
+                            .then((pubId: string) => {
                             var text = '// A #microbit script\n' +
                                 'action main() {\n' +
-                                '    skip;\n' +                                
+                                '    skip;\n' +
                                 '}\n' +
-                                'meta import ' + AST.Lexer.quoteId(External.deviceLibraryName) + ' {\n' +
-                                '  pub "' + External.deviceScriptId + '"\n' +
+                                'meta import ' + AST.Lexer.quoteId("micro:bit") + ' {\n' +
+                                '  pub "' + pubId + '"\n' +
                                 '}\n';
                                 return text;
                             });

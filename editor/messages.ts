@@ -52,10 +52,16 @@ module TDev {
             merge: PendingMerge;
         }
 
+        // The [libs] field is a map from library name (e.g. "micro:bit") to the
+        // corresponding publication id. The receiver of the message takes care
+        // of fetching the latest version of the library, and gluing it to the
+        // provided AST. (This, naturally, only makes sense if the language is
+        // TouchDevelop).
         export interface Message_Compile extends Message {
             type: MessageType; // == MessageType.Compile
             text: any; // string if language == CPlusPlus, TDev.AST.Json.JApp if language == TouchDevelop
             language: Language;
+            libs: { [libName: string]: string };
             name?: string; // Name of the script
         }
 
@@ -65,15 +71,18 @@ module TDev {
             error?: string; // non-null iff status == Error
         }
 
+        // The [libs] fields is the same as in [Message_Compile].
         export interface Message_Upgrade extends Message {
             type: MessageType; // == MessageType.Message_Upgrade
             name: string;
-            ast: any // AST.Json.JApp
+            ast: any; // AST.Json.JApp
+            libs: { [libName: string]: string };
         }
 
         export interface Message_Run extends Message {
             type: MessageType; // == MessageType.Message_Run
-            ast: any // AST.Json.JApp
+            ast: any; // AST.Json.JApp
+            libs: { [libName: string]: string };
         }
 
         // This message is (currently) sent in the following situation. External

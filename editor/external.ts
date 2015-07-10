@@ -50,11 +50,8 @@ module TDev {
 
   export module External {
     export var TheChannel: Channel = null;
-    // [initAsync] will find the latest version of this script by walking up the
-    // update chain, but in order to save on some API calls, this script id
-    // should be refreshed at regular intervals.
-    export var deviceScriptId = "lwhfye";
-    export var deviceLibraryName = "micro:bit";
+    // We need that to setup the simulator.
+    export var microbitScriptId = "lwhfye";
 
     import J = AST.Json;
 
@@ -70,43 +67,49 @@ module TDev {
       return errorMsg;
     }
 
-    export function pullLatestLibraryVersion(): Promise { // of nothing
-      var r = new PromiseInv()
-
-      var set = (script: JsonScript) => {
-          if (!script || !r.isPending()) return
-          deviceScriptId = script.updateid;
-          r.success(null)
-      }
-
-      Browser.TheApiCacheMgr.getAsync(deviceScriptId, false)
-        .then(set)
-        .done()
-
-      // in case the one above fails, we also try the stale one from the cache
-      Browser.TheApiCacheMgr.getAsync(deviceScriptId, true)
-          .then(() => Promise.delay(2000))
-          .then(set)
-          .done()
-
-      return r
+    export function pullLatestLibraryVersion(pubId: string): Promise { // of string
+      return Browser.TheApiCacheMgr.getAsync(pubId, false)
+        .then((script: JsonScript) => {
+          if (script) {
+            return script.updateid;
+          } else {
+            // in case the one above fails, we also try the stale one from the
+            // cache
+            return Browser.TheApiCacheMgr.getAsync(pubId, true)
+              .then(() => Promise.delay(2000))
+              .then((script: JsonScript) => {
+                if (script)
+                  return script.updateid;
+                else
+                  return pubId;
+              });
+          }
+        });
     }
 
     // This function modifies its argument by adding an extra [J.JLibrary]
     // to its [decls] field that references the device's library.
-    function addDeviceLibrary(app: J.JApp) {
+    function addLibrary(name: string, pubId: string, app: J.JApp) {
       var lib = <AST.LibraryRef> AST.Parser.parseDecl(
-        'meta import ' + AST.Lexer.quoteId(deviceLibraryName) + ' {' +
-        '  pub "' + deviceScriptId + '"'+
+        'meta import ' + AST.Lexer.quoteId(name) + ' {' +
+        '  pub "' + pubId + '"'+
         '}'
       );
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
-      // There's an implicit convention here. The external editor needs to
-      // generate references to the device library (to talk about the image
-      // type, for instance), but doesn't know yet which id will be assigned to
-      // it. So both the external editor and this module agree on a common id.
-      jLib.id = "__DEVICE__";
+      jLib.id = name;
       app.decls.push(jLib);
+    }
+
+    function addLibraries(app: J.JApp, libs: { [i: string]: string }): Promise {
+      var keys = Object.keys(libs);
+      var latestVersions = keys.map((name: string) => {
+        return pullLatestLibraryVersion(libs[name]);
+      });
+      return Promise.join(latestVersions).then((latestVersions: string[]) => {
+        latestVersions.map((pubId: string, i: number) => {
+          addLibrary(keys[i], pubId, app);
+        });
+      });
     }
 
     function parseScript(text: string): Promise { // of AST.App
@@ -127,15 +130,17 @@ module TDev {
 
     // Takes a [JApp] and runs its through various hoops to make sure
     // everything is type-checked and resolved properly.
-    function roundtrip(a: J.JApp): Promise { // of J.JApp
-      addDeviceLibrary(a);
-      var text = J.serialize(a);
-      return parseScript(text).then((a: AST.App) => {
-        if (AST.TypeChecker.tcApp(a) > 0) {
-          throw new Error("We received a script with errors and cannot compile it. " +
-              "Try converting then fixing the errors manually.");
-        }
-        return Promise.as(J.dump(a)); });
+    function roundtrip(a: J.JApp, libs: { [i: string]: string }): Promise { // of J.JApp
+      return addLibraries(a, libs).then(() => {
+        var text = J.serialize(a);
+        return parseScript(text).then((a: AST.App) => {
+          if (AST.TypeChecker.tcApp(a) > 0) {
+            throw new Error("We received a script with errors and cannot compile it. " +
+                "Try converting then fixing the errors manually.");
+          }
+          return Promise.as(J.dump(a)); }
+        );
+      });
     }
 
     class ExternalHost extends EditorHost {
@@ -195,14 +200,6 @@ module TDev {
             (<HTMLElement> document.activeElement).blur();
         });
       });
-    }
-
-    export function mkChannelAsync(
-      editor: ExternalEditor,
-      iframe: HTMLIFrameElement,
-      guid: string): Promise // of Channel
-    {
-      return pullLatestLibraryVersion().then(() => new Channel(editor, iframe, guid));
     }
 
     export class Channel {
@@ -336,7 +333,7 @@ module TDev {
                 cpp = Promise.as(message1.text);
                 break;
               case Language.TouchDevelop:
-                cpp = roundtrip(message1.text).then((a: J.JApp) => {
+                cpp = roundtrip(message1.text, message1.libs).then((a: J.JApp) => {
                   return Embedded.compile(a);
                 });
                 break;
@@ -375,14 +372,15 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             var ast: AST.Json.JApp = message2.ast;
-            addDeviceLibrary(ast);
-            console.log("Attempting to serialize", ast);
-            var text = J.serialize(ast);
-            console.log("Attempting to edit script text", text);
-            Browser.TheHost.openNewScriptAsync({
-              editorName: "touchdevelop",
-              scriptName: message2.name,
-              scriptText: text
+            addLibraries(ast, message2.libs).then(() => {;
+              console.log("Attempting to serialize", ast);
+              var text = J.serialize(ast);
+              console.log("Attempting to edit script text", text);
+              Browser.TheHost.openNewScriptAsync({
+                editorName: "touchdevelop",
+                scriptName: message2.name,
+                scriptText: text
+              }).done();
             }).done();
             break;
 
@@ -392,9 +390,10 @@ module TDev {
             // So that key events such as escape are caught by the editor, not
             // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
-            addDeviceLibrary(ast);
-            var text = J.serialize(ast);
-            typeCheckAndRun(text);
+            addLibraries(ast, message3.libs).then(() => {
+              var text = J.serialize(ast);
+              typeCheckAndRun(text);
+            }).done();
             break;
 
           default:
@@ -443,15 +442,13 @@ module TDev {
       // allow-popups is for the Blockly help menu item
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", function () {
-        mkChannelAsync(editor, iframe, data.guid).done((channel: Channel) => {
-          TheChannel = channel;
-          var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-          TheChannel.post(<Message_Init> {
-            type: MessageType.Init,
-            script: data,
-            merge: ("theirs" in extra) ? extra : null,
-            fota: Cloud.isFota(),
-          });
+        TheChannel = new Channel(editor, iframe, data.guid);
+        var extra = JSON.parse(data.scriptVersionInCloud || "{}");
+        TheChannel.post(<Message_Init> {
+          type: MessageType.Init,
+          script: data,
+          merge: ("theirs" in extra) ? extra : null,
+          fota: Cloud.isFota(),
         });
       });
       iframe.setAttribute("src", editor.origin + editor.path);
@@ -461,8 +458,8 @@ module TDev {
       TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
 
       // Start the simulator
-      pullLatestLibraryVersion()
-      .then(() => ScriptCache.getScriptAsync(deviceScriptId))
+      pullLatestLibraryVersion(microbitScriptId)
+      .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
       .then((s: string) => {
         typeCheckAndRun(s, "_libinit");
       })

@@ -427,6 +427,10 @@ module TDev {
     return ast;
   }
 
+  var libs: { [index: string]: string } = {
+    "micro:bit": "lwhfye"
+  };
+
   function doGraduate(msgSel?: string) {
     var ast = compileOrError(msgSel);
     if (!ast)
@@ -435,6 +439,7 @@ module TDev {
       type: External.MessageType.Upgrade,
       ast: ast,
       name: getName()+" (converted)",
+      libs: libs,
     });
   }
 
@@ -448,6 +453,7 @@ module TDev {
       text: ast,
       language: External.Language.TouchDevelop,
       name: getName(),
+      libs: libs,
     });
   }
 
@@ -480,6 +486,7 @@ module TDev {
       post(<External.Message_Run> {
         type: External.MessageType.Run,
         ast: <any> ast,
+        libs: libs,
       });
     });
   }
