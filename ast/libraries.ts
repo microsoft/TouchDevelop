@@ -559,14 +559,20 @@ module TDev.AST {
         {
         }
 
-        private addSingleton(name:string)
+        public createSingleton(name:string):SingletonDef
         {
-            if (api.getThing(name)) return
-
             var k = new Kind(name, lf("Extensions"));
             k._contexts = KindContext.None;
             var th = mkSingletonDef(name, k);
             th.isExtension = true;
+            return th
+        }
+
+        private addSingleton(name:string)
+        {
+            if (api.getThing(name)) return
+
+            var th = this.createSingleton(name)
             this.singletonList.push(th)
             this.singletons[th.getName()] = th
         }

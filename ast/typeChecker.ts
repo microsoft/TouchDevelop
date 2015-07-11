@@ -1332,6 +1332,11 @@ module TDev.AST
                 if (!!t.def && !t.def.deleted && t.data != t.def.getName())
                     t.data = t.def.getName();
                 t.def = this.lookupSymbol(t);
+                if (!t.def && t.namespaceLibraryName()) {
+                    if (!t.namespaceLibrary || t.namespaceLibrary.deleted)
+                        t.namespaceLibrary = Script.libraries().filter(l => l.getName() == t.namespaceLibraryName())[0]
+                    t.def = Script.libNamespaceCache.createSingleton(t.data)
+                }
                 if (!t.def) {
                     this.markError(t, lf("TD101: cannot find '{0}'", t.data));
                     var loc = mkLocal(t.data, this.core.Unknown);
@@ -1842,6 +1847,12 @@ module TDev.AST
                         prop = k0.getProperty(AST.propRenames[autoRenameKey])
                 }
 
+                if (!prop && args[0] instanceof ThingRef) {
+                    var nl = (<ThingRef>args[0]).namespaceLibrary
+                    if (nl && !nl.deleted)
+                        prop = nl.getKind().getProperty(t.propRef.data)
+                }
+
                 if (!prop) {
                     if (prevErr == this.errorCount)
                         this.markError(t, lf("TD112: i cannot find property '{0}' on {1}", t.propRef.data, k0));
@@ -2033,7 +2044,8 @@ module TDev.AST
                     if (i == 0 &&
                         args[i].getThing() instanceof SingletonDef &&
                         expK instanceof LibraryRefKind) {
-                        (<ThingRef>args[i]).namespaceLibrary = (<LibraryRefKind>expK).lib
+                        (<ThingRef>args[i]).namespaceLibrary = (<LibraryRefKind>expK).lib;
+                        (<ThingRef>args[i]).namespaceLibraryName();
                     } else {
                         this.expectExpr(args[i], expK, prop.getName(), i == 0);
                     }

@@ -3370,6 +3370,7 @@ module TDev.AST {
         public data:string;
         public def:Decl;
         public namespaceLibrary:LibraryRef;
+        public _namespaceLibraryName:string;
         public _lastTypechecker:any;
         constructor() {
             super()
@@ -3391,12 +3392,21 @@ module TDev.AST {
             return this.def instanceof PlaceholderDef && !!(<PlaceholderDef>this.def).escapeDef
         }
 
+        public namespaceLibraryName()
+        {
+            if (this.namespaceLibrary)
+                return (this._namespaceLibraryName = this.namespaceLibrary.getName())
+            return this._namespaceLibraryName
+        }
+
         public writeTo(tw:TokenWriter)
         {
             if (this.def instanceof LocalDef)
                 tw.sep().op0("$").id0(this.getText());
             else if (this.def instanceof PlaceholderDef)
                 tw.id("\u0001" + this.def.getName())
+            else if (this.namespaceLibraryName())
+                tw.id(this.getText()).op0("[").id("lib").id(this.namespaceLibraryName()).op0("]")
             else
                 tw.id(this.getText());
         }

@@ -505,6 +505,23 @@ module TDev { export module AST {
                             var id = this.parseId();
                             this.tokenPos = pos; // there is Shift() down the line
                             add("thingRef", { data: id, forceLocal: true });
+                        } else if (t.data == "[") {
+                            var annot:string[] = []
+                            this.shift()
+                            while (this.curr().category == TokenType.Id) {
+                                annot.push(this.curr().data)
+                                this.shift()
+                            }
+                            this.skipOp("]")
+                            this.tokenPos--; // shift() down the line
+
+                            if (annot[0] == "lib") {
+                                var l = <ThingRef>toks.peek()
+                                if (l instanceof ThingRef) {
+                                   l._namespaceLibraryName = annot[1]
+                                }
+                            }
+
                         } else {
                             add("operator");
                         }
