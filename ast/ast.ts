@@ -1099,6 +1099,8 @@ module TDev.AST {
             }
             var hd = p.parseActionHeader();
             this.name = mkLocal(hd.name, api.core.Unknown);
+            if (this.isImplicit)
+                this.name.isSynthetic = true;
             this.inParameters = hd.inParameters.map((p) => p.local);
             this.outParameters = hd.outParameters.map((p) => p.local);
 
@@ -2119,6 +2121,7 @@ module TDev.AST {
         public lastUsedAt = 0;
         public lambdaNameStatus:number;
         public isRegular:boolean;
+        public isSynthetic:boolean;
         public isHiddenOut:boolean;
         public isOut:boolean;
         public _lastWriteLocation:Stmt;

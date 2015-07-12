@@ -1760,7 +1760,7 @@ module TDev
             })
 
             var locs = this.expr.locals.concat(res)
-            locs = locs.filter(loc => !/^_body_$/i.test(loc.getName()));
+            locs = locs.filter(loc => !loc.isSynthetic)
             return locs;
         }
 
@@ -2088,6 +2088,7 @@ module TDev
 
             if (implicitAction) {
                 var nm = AST.mkLocal("_body_", implicitAction.getKind());
+                nm.isSynthetic = true;
                 var ia = AST.InlineAction.mk(nm);
                 ia.isImplicit = true
                 inl.actions.push(ia);
@@ -4013,8 +4014,14 @@ module TDev
                     var d = this.cursorPosition - (e.loc.beg + e.loc.len);
                     if (d == 0 || d == -1) {
                         var prevTok = <AST.Operator> this.expr.tokens[this.cursorPosition - 1];
-                        if (prevTok instanceof AST.Operator && (prevTok.data == "," || prevTok.data == "("))
+                        if (prevTok instanceof AST.Operator && (prevTok.data == "," || prevTok.data == "(")) {
                             idx = c.args.length;
+                            // skip the implicit _body_ argument
+                            if (c.args[idx - 1] instanceof AST.ThingRef &&
+                                c.args[idx - 1].getLocalDef() &&
+                                c.args[idx - 1].getLocalDef().isSynthetic)
+                                idx--;
+                        }
                     }
                 }
 
