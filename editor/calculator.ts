@@ -2086,7 +2086,9 @@ module TDev
                 }
             })
 
-            if (implicitAction) {
+            var hasImplicit = inl.actions.stmts.some(s => (<AST.InlineAction>s).isImplicit)
+
+            if (implicitAction && !hasImplicit) {
                 var nm = AST.mkLocal("_body_", implicitAction.getKind());
                 nm.isSynthetic = true;
                 var ia = AST.InlineAction.mk(nm);
