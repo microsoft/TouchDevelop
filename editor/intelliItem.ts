@@ -51,6 +51,8 @@ module TDev
             var n = d.getName();
             if (!(d instanceof AST.LibraryRefAction) && d.getNamespace) {
                 n = d.getNamespace() + n;
+            } else if (d.getNamespaces && d.getNamespaces()[0]) {
+                n = d.getNamespaces()[0] + (this.prop ? this.prop.getArrow() : " ") + n;
             } else if (this.isAttachedTo)
                 n = this.isAttachedTo.getPropPrefix() + (this.prop ? this.prop.getArrow() : " ") + n;
             else if (this.prop)
