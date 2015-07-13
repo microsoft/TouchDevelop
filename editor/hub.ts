@@ -648,6 +648,7 @@ module TDev.Browser {
                         HTML.mkButton(lf("releases"), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }),
                     ]))
                 }
+                m.setScroll();
             }
 
             var users = Object.keys(Cloud.litePermissions).filter(k => /^signin-/.test(k)).map(k => k.replace(/signin-/, ""))
@@ -676,7 +677,9 @@ module TDev.Browser {
                         ModalDialog.info(lf("parse error"), err)
                     })
                     if (r && r.value()) {
-                        ModalDialog.ask(JSON.stringify(r.value(), null, 2), "update", () => {
+                        var str = JSON.stringify(r.value(), null, 1)
+                        if (str.length > 300) str = str.slice(0, 300) + "...";
+                        ModalDialog.ask(str, "update", () => {
                             Cloud.postPrivateApiAsync(name, r.value()).done()
                         })
                     }
