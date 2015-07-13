@@ -483,7 +483,6 @@ module TDev
                 Cloud.config.rootUrl = "https://" + mx[1]
             else
                 Cloud.config.rootUrl = "http://" + mx[1] + ".cloudapp.net"
-            TDev.Ticker.disable()
         }
 
         if ((<any>window).tdlite) {
@@ -494,7 +493,6 @@ module TDev
             } else {
                 Cloud.config.rootUrl = (<any>window).tdlite;
             }
-            TDev.Ticker.disable()
             var cfg = (<any>window).tdConfig
             if (cfg) Object.keys(cfg).forEach(k => Cloud.config[k] = cfg[k])
         }
