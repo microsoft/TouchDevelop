@@ -1,6 +1,5 @@
 ///<reference path='refs.ts'/>
 
-
 //declare var Windows:any;
 
 module TDev.Login
