@@ -22,7 +22,7 @@ module TDev.Login
         if (hash)
             hereUrl = hereUrl.replace(/#.*/, "") + "#" + hash
         var url = Cloud.getServiceUrl() + "/oauth/dialog?response_type=token&client_id=" +
-            encodeURIComponent("webapp") +
+            encodeURIComponent(Cloud.lite ? "webapp2" : "webapp") +
             "&redirect_uri=" + encodeURIComponent(hereUrl) +
             "&identity_provider=" + encodeURIComponent(Cloud.getIdentityProvider() || "") +
             "&state=" + encodeURIComponent(Cloud.oauthStates()[0]) + addParameters;

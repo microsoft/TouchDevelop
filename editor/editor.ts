@@ -4174,7 +4174,7 @@ module TDev
 
         static loginAs(id:string)
         {
-            Cloud.postPrivateApiAsync(id + "/token", {})
+            Cloud.postPrivateApiAsync(id + "/token", { client_id: "webapp2" })
                 .then(tok => {
                     World.cancelSync();
                     Cloud.setAccessToken(undefined);

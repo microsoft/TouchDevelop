@@ -347,6 +347,56 @@ module TDev{
         return httpRequestAsync(url, "DELETE");
     }
 
+    // convert query-string parameters to headers
+    function authenticationOverride(client:XMLHttpRequest, url:string, headers:any):string
+    {
+        if (!Cloud.lite) return url
+
+        var pref = Cloud.getServiceUrl() + "/api"
+
+        if (!(url.slice(0, pref.length) == pref && /^[\/\?]/.test(url.slice(pref.length)))) return url
+
+        // The lite cloud requires a cookie for authentication
+        client.withCredentials = true;
+
+        var m = /([^\?]+)\?(.*)/.exec(url)
+        var qs = ""
+        if (m) {
+            m[2].split(/&/).forEach(kv => {
+                var k = kv
+                var v = "true"
+                var mm = /([^=]+)=(.*)/.exec(kv)
+                if (mm) {
+                    k = mm[1]
+                    v = decodeURIComponent(mm[2])
+                }
+                k = decodeURIComponent(k)
+                switch (k) {
+                    case "user_platform":
+                        if (Cloud.isRestricted()) break
+                    case "world_id":
+                    case "release_id":
+                    case "access_token":
+                        if (v)
+                            headers["x-td-" + k.replace(/_/g, "-")] = v
+                        break
+                    case "anon_token":
+                        if (v)
+                            headers["authorization"] = v
+                        break
+                    default:
+                        if (qs) qs += "&"
+                        else qs += "?"
+                        qs += kv
+                        break
+                }
+            })
+            url = m[1] + qs
+        }
+
+        return url
+    }
+
     export var httpRequestAsync = (url:string, method:string = "GET", body:string = undefined, contentTypeOrHeaders:any = null) : Promise => {
         // TODO: clean up dependency between cloud and Util
         if (Cloud.isOffline()) return Cloud.offlineErrorAsync();
@@ -386,6 +436,10 @@ module TDev{
                 })
 
             client = new XMLHttpRequest();
+
+            if (Cloud.lite)
+                url = authenticationOverride(client, url, headers)
+
             client.onreadystatechange = ready;
             client.open(method, url);
             
