@@ -9828,6 +9828,9 @@
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())
                     if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit)
+                    else if (n == "cloud" && /(test|stage)/.test(Cloud.getServiceUrl()))
+                        ModalDialog.ask(lf("'cloud' label should be only pushed from 'live'"), 
+                            lf("move {0} anyway", n), doit)
                     else doit()
                 }))
 
