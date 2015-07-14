@@ -729,7 +729,7 @@ module TDev.AST
                     this.typeCheck(ss[i])
                     if (unreach) {
                         ss[i].isUnreachable = true
-                        if (!reported) {
+                        if (!reported && !(ss[i] instanceof Comment)) {
                             reported = true
                             ss[i].addHint(lf("code after return, break or continue won't ever run"))
                         }
