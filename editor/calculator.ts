@@ -3778,7 +3778,7 @@ module TDev
             var keys = this.keyBlock(SizeMgr.portraitMode ? 0 : 6, SizeMgr.phoneMode ? 4 : 6, 0, 2);
             var cleared = false;
             var keyNum = keys.length - 1;
-            var maxPages = SizeMgr.phoneMode ? 3 : 2;
+            var maxPages = (SizeMgr.phoneMode || TheEditor.stepTutorial) ? 3 : 2;
             var origItems = items
             items = items.slice(0, maxPages * keyNum - 1)
 
