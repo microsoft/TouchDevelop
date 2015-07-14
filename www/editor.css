@@ -5927,6 +5927,7 @@ table.dashboard tr td[data-completed^="yes"] {
   margin-top: 0.55em;
   width: 6em;
   height: auto;
+  border: none;
 }
 
 .powered-by-first img {
