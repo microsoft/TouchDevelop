@@ -130,6 +130,8 @@ module TDev
         public renderSnippet(s:AST.AstNode[])
         {
             var res = "";
+            var prevHl = this.highlightLevel
+            var prevSnip = this.renderingSnippet
             this.highlightLevel = 0;
             this.renderingSnippet = true;
             try {
@@ -137,7 +139,8 @@ module TDev
                     res += s[i].accept(this);
                 return Renderer.tdiv("block", res);
             } finally {
-                this.renderingSnippet = false;
+                this.renderingSnippet = prevSnip
+                this.highlightLevel = prevHl
             }
         }
 
