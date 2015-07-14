@@ -509,20 +509,29 @@ module TDev {
         public allowVideos = true;
         public designTime = false;
         public forWeb = false;
+        public relativeLinks = false;
         private currComment:AST.Comment;
 
         constructor(public renderer:Renderer = null, private libName:string = null)
         {
         }
 
+        public serviceUrlOr(path:string, local:string)
+        {
+            if (this.useExternalLinks)
+                return this.relativeLinks ? path : Cloud.getServiceUrl() + path
+            else
+                return local
+        }
+
         public topicLink(id:string)
         {
-            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/docs/" : "#topic:") + MdComments.shrink(id);
+            return this.serviceUrlOr("/docs/", "#topic:") + MdComments.shrink(id);
         }
 
         public appLink(id:string)
         {
-            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/app/" : "") + id
+            return this.serviceUrlOr("/app/", "") + id
         }
 
         static shrink(s:string)
@@ -909,7 +918,7 @@ module TDev {
                 else {
                     return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
                         Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1", arg),
-                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), arg))
+                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), arg))
                         );
                 }
             } else if (macro == "channel9") {
@@ -1106,7 +1115,7 @@ module TDev {
                     false))
                     continue;
 
-                var tdev = Cloud.getServiceUrl() + "/";
+                var tdev = this.serviceUrlOr("/", "")
                 if (allowRepl && (
                     applySpan(/^\{\#(\w+)\}/g, (m) => "<a name='" + quote(m[1]) + "'></a>") ||
                     applySpan(/^\[([^\[\]]*)\]\s*\(([^ \(\)\s]+)\)/, (m) => {
@@ -1125,7 +1134,7 @@ module TDev {
                             href = this.topicLink(href.slice(1));
                         else if (/^\/script:\w+$/.test(href)) {
                             acls = 'md-link';
-                            href = (this.useExternalLinks ? Cloud.config.shareUrl + "/" + href.slice(8) : "#" + href.slice(1));
+                            href = (this.useExternalLinks ? tdev + href.slice(8) : "#" + href.slice(1));
                         }
                         else if (/^#[\w\-]+:[\w,\-:]*$/.test(href))
                             href = (this.useExternalLinks ? tdev + "/app/#" : "#") + href.slice(1);
