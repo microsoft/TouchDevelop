@@ -1285,7 +1285,7 @@ module TDev
 
                 var v0 = TheEditor.tutorializeName(inp.value)
 
-                if (l.getName() == v0 || !a) {
+                if (l.getName() == v0 || !a || /^\s*$/.test(v0)) {
                     this.fullDisplay()
                     return
                 }
