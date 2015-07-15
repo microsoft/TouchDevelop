@@ -2011,6 +2011,8 @@ module TDev
             this.currentCompilationModalDialog = new ModalDialog();
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
+            if (TDev.Cloud.config.companyLogoHorizontalUrl)
+                this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
             var msg = Cloud.isFota()
                 ? lf("Please wait while we prepare your .hex file. Once the .hex file is ready, it will be flashed onto your micro:bit!")

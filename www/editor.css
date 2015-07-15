@@ -5909,6 +5909,16 @@ table.dashboard tr td[data-completed^="yes"] {
     color:white;
 }
 
+.powered-by-logo {
+  margin:1em auto;
+  width:100%;
+  text-align: center;
+}
+
+.powered-by-logo img {
+  width:15em;
+}
+
 .powered-by {
   width: 6em;
   margin-top: 2em;

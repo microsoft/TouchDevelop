@@ -202,6 +202,7 @@ module TDev.Cloud {
         
         tutorialAvatarArtId?: string;
         printHeaderHtml?: string;
+        companyLogoHorizontalUrl?: string;
     }
 
     export var config: ClientConfig = {
