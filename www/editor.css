@@ -5031,6 +5031,14 @@ h1.stepid > span {
   clear:both;
 }
 
+.md-snippet .signature {
+  padding:0em 0.2em 0em 0.2em;
+}
+
+.md-snippet .name {
+  font-weight: bold;
+}
+
 .md-snippet .code-button,
 .md-snippet .wall-button {
   position: absolute;
@@ -5927,6 +5935,7 @@ table.dashboard tr td[data-completed^="yes"] {
   margin-top: 0.55em;
   width: 6em;
   height: auto;
+  border: none;
 }
 
 .powered-by-first img {

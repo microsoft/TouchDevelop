@@ -1282,7 +1282,8 @@
                                     return Promise.as()
                                 return groupInfo.changePictureAsync();
                             })
-                            .done(() => TheHost.loadDetails(groupInfo, "settings"));
+                            .done(() => TheHost.loadDetails(groupInfo, "settings"),
+                                e => World.handlePostingError(e, lf("create group")));
                     }))
             ]);
             m.show();
@@ -3438,11 +3439,7 @@
                             ModalDialog.ask(lf("Are you sure you want to delete this key? There is no undo for this operation."), lf("delete it"), () => {
                                 HTML.showProgressNotification(lf("deleting key..."));
                                 Cloud.deletePrivateApiAsync("me/keys?uri=" + encodeURIComponent(c.uri))
-                                    .done(() => {
-                                        d.removeSelf();
-                                    }, e => {
-                                        HTML.showProgressNotification(lf("error deleting key; are you connected to internet?"));
-                                    });
+                                    .done(() => d.removeSelf(), e => World.handlePostingError(e, lf("delete key")));
                             });
                         })
                     )
@@ -3588,12 +3585,15 @@
                                     box.setFlag("selected", true)
                                     return World.syncAsync(false)
                                 })
-                                .then(() => {
+                                .done(() => {
                                     prog.stop()
                                     m.dismiss()
                                     Util.setTimeout(500, () => TheEditor.historyMgr.reload(HistoryMgr.windowHash()))
+                                }, e => {
+                                    prog.stop()
+                                    m.dismiss()
+                                    World.handlePostingError(e, lf("restoring version"));
                                 })
-                                .done()
                         }
                     }
                 }, false, (<ScriptInfo> this.parent).cloudHeader)
@@ -7007,7 +7007,7 @@
                                             tick(Ticks.browsePublicationNotes);
                                             var req = { kind: "comment", text: descr + ' #publicationNotes', userplatform: Browser.platformCaps };
                                             Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/comments", req)
-                                                .then((jscom: JsonComment) => {
+                                                .done((jscom: JsonComment) => {
                                                     if (jscom && sendPullRequest) {
                                                         tick(Ticks.browseSendPullRequest);
                                                         Util.log('send pull request');
@@ -7016,7 +7016,7 @@
                                                         return Cloud.postPrivateApiAsync(sendPullRequestId + "/comments", req);
                                                     }
                                                     return Promise.as();
-                                                }).done();
+                                                }, e => World.handlePostingError(e, lf("send pull request")));
                                         }
                                         if (pullMergeIds && pullMergeIds.length > 0) {
                                             Promise.join(pullMergeIds.map(mid => {
@@ -7064,8 +7064,8 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("DO NOT STORE PASSWORDS or other confidential information in your script code. ") +
-                        lf("Everyone will be able to see your script on the Internet forever. ")
+                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ") +
+                        lf("Everyone will be able to see your script on the Internet. ")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
@@ -7116,12 +7116,11 @@
                     contentType: contentType,
                     content: base64content,
                     userplatform: Browser.platformCaps
-                    }).then(() => {
+                    }).done(() => {
                         HTML.showProgressNotification(lf("screenshot uploaded"), true);
                     }, e => {
-                        HTML.showProgressNotification(lf("screenshot upload failed"), true);
-                        World.handlePostingError(e, lf("post screenshot"));
-                   }).done();
+                        World.handlePostingError(e, lf("upload screenshot"));
+                   });
             }
         }
 
@@ -8788,11 +8787,10 @@
                                     lf("delete"),
                                     () => {
                                         Cloud.deletePrivateApiAsync(pubid)
-                                        .then(() => {
+                                        .done(() => {
                                             TheApiCacheMgr.refetch(pubid)
                                             HTML.showProgressNotification(lf("gone."))
-                                        })
-                                        .done()
+                                        }, e => World.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
                                         // TODO show it's gone in the UI
                                     })
                 }
@@ -8840,10 +8838,12 @@
                                 if (inp.value.trim().length < 5)
                                     err.setChildren(lf("Need some reason."))
                                 else {
-                                    m.dismiss()
+                                    m.dismiss();
                                     Cloud.postPrivateApiAsync(pubid + "/abusereports", { text: inp.value })
-                                    .then(() => HTML.showProgressNotification(lf("reported.")))
-                                    .done()
+                                    .done(
+                                        () => HTML.showProgressNotification(lf("reported.")),
+                                        e => World.handlePostingError(e, lf("report abuse"))
+                                    );
                                 }
                             }),
                             abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), () => setstatus("ignored")),

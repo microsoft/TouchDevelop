@@ -1,12 +1,12 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	"editor.formatOnType": true,
-	"search.excludeFolders": [
-		".git",
-		"node_modules",
-		"bower_components",
-		"build",
-		"temp",
-		"shell/npm" 
-		]
+	"search.exclude": {
+		".git":true,
+		"node_modules/**":true,
+		"bower_components/**":true,
+		"build/**":true,
+		"temp/**":true,
+		"shell/npm/**":true
+	}
 }

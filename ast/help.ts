@@ -509,20 +509,29 @@ module TDev {
         public allowVideos = true;
         public designTime = false;
         public forWeb = false;
+        public relativeLinks = false;
         private currComment:AST.Comment;
 
         constructor(public renderer:Renderer = null, private libName:string = null)
         {
         }
 
+        public serviceUrlOr(path:string, local:string)
+        {
+            if (this.useExternalLinks)
+                return this.relativeLinks ? path : Cloud.getServiceUrl() + path
+            else
+                return local
+        }
+
         public topicLink(id:string)
         {
-            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/docs/" : "#topic:") + MdComments.shrink(id);
+            return this.serviceUrlOr("/docs/", "#topic:") + MdComments.shrink(id);
         }
 
         public appLink(id:string)
         {
-            return (this.useExternalLinks ? Cloud.getServiceUrl() + "/app/" : "") + id
+            return this.serviceUrlOr("/app/", "") + id
         }
 
         static shrink(s:string)
@@ -709,6 +718,33 @@ module TDev {
             if (track) return track;
             return tracks[0];
         }
+        
+        private sig(arg: string) {
+            var m = arg.split(/->/);
+            var property: IProperty = undefined;
+            if (m) {
+                // find type / property
+                var kindName = m[0];
+                var propertyName = m[1];
+                if (kindName && propertyName) {
+                    if (Script) {
+                        var lib = Script.librariesAndThis().filter(lib => lib.getName() == kindName)[0];
+                        if (lib) {
+                            var action = lib.getPublicActions().filter(action => action.getName() == propertyName)[0];
+                            if (action) {
+                                // bingo!
+                                var r = "<div class=notranslate translate=no dir=ltr><div class='md-snippet'>";
+                                r += this.renderer.renderPropertySig(action, false, true);
+                                r += "</div></div>";
+                                return r;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return lf("could not find decl '{0}'", m);
+        }
 
         private apiList(arg:string)
         {
@@ -817,12 +853,12 @@ module TDev {
                 if (!Script) return MdComments.error(lf("import can only be used from a script context"));
                 var r = "";
                 [
-                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.imports.npmModules},
-                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.imports.cordovaPlugins},
-                 {name: 'bower', url: 'https://www.npmjs.com/package/{0:q}/', pkgs: Script.imports.bowerModules },
-                 {name:'client', url: '{0}', pkgs: Script.imports.clientScripts },
-                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.imports.pipPackages},
-                 {name:'touchdevelop', url:'#pub:{0:q}', pkgs:Script.imports.touchDevelopPlugins}
+                    { name: 'npm', url: 'https://www.npmjs.com/package/{0:q}', pkgs: Script.imports.npmModules },
+                    { name: 'cordova', url: 'http://plugins.cordova.io/#/package/{0:q}/', pkgs: Script.imports.cordovaPlugins },
+                    { name: 'bower', url: 'https://www.npmjs.com/package/{0:q}/', pkgs: Script.imports.bowerModules },
+                    { name: 'client', url: '{0}', pkgs: Script.imports.clientScripts },
+                    { name: 'pip', url: 'https://pypi.python.org/pypi/{0:q}/', pkgs: Script.imports.pipPackages },
+                    { name: 'touchdevelop', url: '#pub:{0:q}', pkgs: Script.imports.touchDevelopPlugins }
                 ].forEach(imports => {
                     var keys = Object.keys(imports.pkgs);
                     if (keys.length > 0) {
@@ -890,6 +926,8 @@ module TDev {
                 else return "";
             } else if (macro == "api") {
                 return this.apiList(arg);
+            } else if (macro == "sig") {
+                return this.sig(arg);            
             } else if (macro == "youtube") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
@@ -909,7 +947,7 @@ module TDev {
                 else {
                     return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
                         Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1", arg),
-                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), arg))
+                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), arg))
                         );
                 }
             } else if (macro == "channel9") {
@@ -1106,7 +1144,7 @@ module TDev {
                     false))
                     continue;
 
-                var tdev = Cloud.getServiceUrl() + "/";
+                var tdev = this.serviceUrlOr("/", "")
                 if (allowRepl && (
                     applySpan(/^\{\#(\w+)\}/g, (m) => "<a name='" + quote(m[1]) + "'></a>") ||
                     applySpan(/^\[([^\[\]]*)\]\s*\(([^ \(\)\s]+)\)/, (m) => {
@@ -1125,7 +1163,7 @@ module TDev {
                             href = this.topicLink(href.slice(1));
                         else if (/^\/script:\w+$/.test(href)) {
                             acls = 'md-link';
-                            href = (this.useExternalLinks ? Cloud.config.shareUrl + "/" + href.slice(8) : "#" + href.slice(1));
+                            href = (this.useExternalLinks ? tdev + href.slice(8) : "#" + href.slice(1));
                         }
                         else if (/^#[\w\-]+:[\w,\-:]*$/.test(href))
                             href = (this.useExternalLinks ? tdev + "/app/#" : "#") + href.slice(1);

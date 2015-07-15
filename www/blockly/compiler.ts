@@ -95,12 +95,30 @@ module Helpers {
 
   // Call function [name] from the standard device library with arguments
   // [args].
-  export function stdCall(name: string, args: J.JExpr[], isExtensionMethod?: boolean): J.JCall {
-    if (isExtensionMethod) {
-      return mkCall(name, mkTypeRef("call"), args);
-    } else {
-      return mkCall(name, mkTypeRef(libraryName), [<J.JExpr> mkLibrary(libraryName)].concat(args));
-    }
+  export function stdCall(name: string, args: J.JExpr[]): J.JCall {
+    return mkCall(name, mkTypeRef(libraryName), [<J.JExpr> mkLibrary(libraryName)].concat(args));
+  }
+
+  // Call extension method [name] on the first argument
+  export function extensionCall(name: string, args: J.JExpr[]) {
+    return mkCall(name, mkTypeRef("call"), args);
+  }
+
+  function mkNamespaceRef(lib: string, namespace: string): J.JSingletonRef {
+    return {
+      nodeType: "singletonRef",
+      id: null,
+      libraryName: lib,
+      name: namespace.toLowerCase(),
+      type: mkTypeRef(namespace)
+    };
+  }
+
+  // Call function [name] from the specified [namespace] in the micro:bit
+  // library.
+  export function namespaceCall(namespace: string, name: string, args: J.JExpr[]) {
+    return mkCall(name, mkTypeRef(libraryName),
+      [<J.JExpr> mkNamespaceRef(libraryName, namespace)].concat(args));
   }
 
   // Call a function from the Math library. Apparently, the Math library is a
@@ -656,7 +674,7 @@ function defaultValueForType(t: Type): J.JExpr {
     case Type.String:
       return H.mkStringLiteral("");
     case Type.Image:
-      return H.stdCall("create image", [H.mkStringLiteral("")]);
+      return H.namespaceCall("image", "create image", [H.mkStringLiteral("")]);
   }
   throw new Error("No default value for type");
 }
@@ -902,7 +920,13 @@ function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
       return compileExpression(e, b.getInputTargetBlock(p), t)
     }
   });
-  return H.stdCall(func.f, args, func.isExtensionMethod);
+  if (func.isExtensionMethod) {
+    return H.extensionCall(func.f, args);
+  } else if (func.namespace) {
+    return H.namespaceCall(func.namespace, func.f, args);
+  } else {
+    return H.stdCall(func.f, args);
+  }
 }
 
 function compileStdBlock(e: Environment, b: B.Block, f: StdFunc) {
@@ -944,7 +968,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
       state += /TRUE/.test(b.getFieldValue("LED" + j + i)) ? "1" : "0";
     }
   }
-  return H.stdCall("create image", [H.mkStringLiteral(state)]);
+  return H.namespaceCall("image", "create image", [H.mkStringLiteral(state)]);
 }
 
 // A description of each function from the "device library". Types are fetched
@@ -956,18 +980,23 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
 //   field value is found, then this generates a string expression
 // - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
 //   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
+// - [namespace] is also an optional flag to generate a "namespace" call, that
+//   is, "basic -> show image" instead of "micro:bit -> show image".
 interface StdFunc {
   f: string;
   args: string[];
   isExtensionMethod?: boolean
+  namespace?: string;
 }
 
 var stdCallTable: { [blockType: string]: StdFunc } = {
   device_clear_display: {
+    namespace: "basic",
     f: "clear screen",
     args: []
   },
   device_show_number: {
+    namespace: "basic",
     f: "show number",
     args: [ "number", "pausetime" ]
   },
@@ -976,26 +1005,32 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     args: [ "letter" ]
   },
   device_pause: {
+    namespace: "basic",
     f: "pause",
     args: [ "pause" ]
   },
   device_print_message: {
+    namespace: "basic",
     f: "show string",
     args: [ "message", "pausetime" ]
   },
   device_plot: {
+    namespace: "led",
     f: "plot",
     args: [ "x", "y" ]
   },
   device_unplot: {
+    namespace: "led",
     f: "unplot",
     args: [ "x", "y" ]
   },
   device_point: {
+    namespace: "led",
     f: "point",
     args: [ "x", "y" ]
   },
   device_heading: {
+    namespace: "input",
     f: "compass heading",
     args: []
   },
@@ -1014,34 +1049,42 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     isExtensionMethod: true
   },
   device_get_button: {
+    namespace: "input",
     f: "button is pressed",
     args: [ "NAME" ]
   },
   device_get_acceleration: {
+    namespace: "input",
     f: "acceleration",
     args: [ "NAME" ]
   },
   device_get_digital_pin: {
+    namespace: "pins",
     f: "digital read pin",
     args: [ "name" ]
   },
   device_set_digital_pin: {
+    namespace: "pins",
     f: "digital write pin",
     args: [ "name", "value" ]
   },
   device_get_analog_pin: {
+    namespace: "pins",
     f: "analog read pin",
     args: [ "name" ]
   },
   device_set_analog_pin: {
+    namespace: "pins",
     f: "analog write pin",
     args: [ "name", "value" ]
   },
   device_get_brightness: {
+    namespace: "led",
     f: "brightness",
     args: []
   },
   device_set_brightness: {
+    namespace: "led",
     f: "set brightness",
     args: [ "value" ]
   },

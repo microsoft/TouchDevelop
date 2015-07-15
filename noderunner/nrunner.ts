@@ -227,6 +227,8 @@ function renderHelpTopicAsync(ht:TDev.HelpTopic, blockLinks = false, forweb = fa
     md.useExternalLinks = true;
     md.blockExternalLinks = blockLinks;
     md.forWeb = forweb;
+    if (forweb)
+        md.relativeLinks = true
     return ht.renderAsync(md).then((text) => {
         return "<h1>" + TDev.Util.htmlEscape(ht.json.name) + "</h1>"
                + text;

@@ -1285,7 +1285,7 @@ module TDev
 
                 var v0 = TheEditor.tutorializeName(inp.value)
 
-                if (l.getName() == v0 || !a) {
+                if (l.getName() == v0 || !a || /^\s*$/.test(v0)) {
                     this.fullDisplay()
                     return
                 }
@@ -1983,7 +1983,7 @@ module TDev
                         toks.pushRange(this.findDefault(parms[0]));
                     } else if (p.parentKind instanceof AST.LibraryRefKind) {
                         var ns: string;
-                        if ((<any>p).getNamespaces && (ns = (<any>p).getNamespaces()[0])) {
+                        if ((<IPropertyWithNamespaces>p).getNamespaces && (ns = (<IPropertyWithNamespaces>p).getNamespaces()[0])) {
                             toks.push(AST.mkThing(ns));
                         } else {
                             toks.push(AST.mkThing(AST.libSymbol))
@@ -3781,7 +3781,7 @@ module TDev
             var keys = this.keyBlock(SizeMgr.portraitMode ? 0 : 6, SizeMgr.phoneMode ? 4 : 6, 0, 2);
             var cleared = false;
             var keyNum = keys.length - 1;
-            var maxPages = SizeMgr.phoneMode ? 3 : 2;
+            var maxPages = (SizeMgr.phoneMode || TheEditor.stepTutorial) ? 3 : 2;
             var origItems = items
             items = items.slice(0, maxPages * keyNum - 1)
 

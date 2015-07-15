@@ -1574,6 +1574,8 @@ module TDev.AST.Json
 
             "singletonRef": (n:JSingletonRef) => {
                 tw.id(n.name);
+                if (n.libraryName) 
+                    tw.op0("[").id("lib").id(n.libraryName).op0("]")
             },
 
             "localRef": (n:JLocalRef) => {
