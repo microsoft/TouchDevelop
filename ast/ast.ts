@@ -1685,7 +1685,7 @@ module TDev.AST {
 
     export class Action
         extends PropertyDecl
-        implements IProperty
+        implements IPropertyWithNamespaces
     {
         constructor() {
             super()

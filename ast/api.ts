@@ -1308,6 +1308,10 @@ module TDev {
         getArrow():string;
         showIntelliButton():boolean;
     }
+    
+    export interface IPropertyWithNamespaces extends IProperty {
+        getNamespaces(): string[];
+    }
 
     export interface IPropertyWithCache
         extends IProperty

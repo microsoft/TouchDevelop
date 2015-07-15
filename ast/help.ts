@@ -718,6 +718,33 @@ module TDev {
             if (track) return track;
             return tracks[0];
         }
+        
+        private sig(arg: string) {
+            var m = arg.split(/->/);
+            var property: IProperty = undefined;
+            if (m) {
+                // find type / property
+                var kindName = m[0];
+                var propertyName = m[1];
+                if (kindName && propertyName) {
+                    if (Script) {
+                        var lib = Script.librariesAndThis().filter(lib => lib.getName() == kindName)[0];
+                        if (lib) {
+                            var action = lib.getPublicActions().filter(action => action.getName() == propertyName)[0];
+                            if (action) {
+                                // bingo!
+                                var r = "<div class=notranslate translate=no dir=ltr><div class='md-snippet'>";
+                                r += this.renderer.renderPropertySig(action, false, true);
+                                r += "</div></div>";
+                                return r;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return lf("could not find decl '{0}'", m);
+        }
 
         private apiList(arg:string)
         {
@@ -826,12 +853,12 @@ module TDev {
                 if (!Script) return MdComments.error(lf("import can only be used from a script context"));
                 var r = "";
                 [
-                 {name:'npm', url:'https://www.npmjs.com/package/{0:q}', pkgs:Script.imports.npmModules},
-                 {name:'cordova', url:'http://plugins.cordova.io/#/package/{0:q}/', pkgs:Script.imports.cordovaPlugins},
-                 {name: 'bower', url: 'https://www.npmjs.com/package/{0:q}/', pkgs: Script.imports.bowerModules },
-                 {name:'client', url: '{0}', pkgs: Script.imports.clientScripts },
-                 {name:'pip', url:'https://pypi.python.org/pypi/{0:q}/', pkgs:Script.imports.pipPackages},
-                 {name:'touchdevelop', url:'#pub:{0:q}', pkgs:Script.imports.touchDevelopPlugins}
+                    { name: 'npm', url: 'https://www.npmjs.com/package/{0:q}', pkgs: Script.imports.npmModules },
+                    { name: 'cordova', url: 'http://plugins.cordova.io/#/package/{0:q}/', pkgs: Script.imports.cordovaPlugins },
+                    { name: 'bower', url: 'https://www.npmjs.com/package/{0:q}/', pkgs: Script.imports.bowerModules },
+                    { name: 'client', url: '{0}', pkgs: Script.imports.clientScripts },
+                    { name: 'pip', url: 'https://pypi.python.org/pypi/{0:q}/', pkgs: Script.imports.pipPackages },
+                    { name: 'touchdevelop', url: '#pub:{0:q}', pkgs: Script.imports.touchDevelopPlugins }
                 ].forEach(imports => {
                     var keys = Object.keys(imports.pkgs);
                     if (keys.length > 0) {
@@ -899,6 +926,8 @@ module TDev {
                 else return "";
             } else if (macro == "api") {
                 return this.apiList(arg);
+            } else if (macro == "sig") {
+                return this.sig(arg);            
             } else if (macro == "youtube") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")

@@ -1983,7 +1983,7 @@ module TDev
                         toks.pushRange(this.findDefault(parms[0]));
                     } else if (p.parentKind instanceof AST.LibraryRefKind) {
                         var ns: string;
-                        if ((<any>p).getNamespaces && (ns = (<any>p).getNamespaces()[0])) {
+                        if ((<IPropertyWithNamespaces>p).getNamespaces && (ns = (<IPropertyWithNamespaces>p).getNamespaces()[0])) {
                             toks.push(AST.mkThing(ns));
                         } else {
                             toks.push(AST.mkThing(AST.libSymbol))

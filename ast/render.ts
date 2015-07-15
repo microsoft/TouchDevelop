@@ -74,6 +74,7 @@ module TDev
         public kw0(k:string) { return Renderer.tspan("kw", k); }
         public greyKw(k:string) { return Renderer.tspan("greyed", " " + k + " "); }
         public id(kw:string) { return Util.htmlEscape(kw); }
+        public name(name: string) { return Renderer.tspan("name", Util.htmlEscape(name));}
         public kind(k:Kind) { return Util.htmlEscape(k.toString()); }
         public op(kw:string) { return Util.htmlEscape(Renderer.spacedText(kw)); }
         public st(kw:string) { return Renderer.tspan("st", kw); }
@@ -1045,11 +1046,15 @@ module TDev
             if (withKind) {
                 if (prop.parentKind.singleton)
                     hd += topicLink(prop.parentKind.singleton.getName())
-                else
-                    hd += "(" + kindLink(prop.parentKind) + ")";
+                else {
+                    var ns: string = (<IPropertyWithNamespaces>prop).getNamespaces ? (<IPropertyWithNamespaces>prop).getNamespaces()[0] : undefined;
+                    this.id
+                    if (ns) hd += this.name(ns);
+                    else hd += "(" + kindLink(prop.parentKind) + ")";
+                }
                 hd += "\u200A\u2192\u00A0";
             }
-            hd += this.id(prop.getName())
+            hd += this.name(prop.getName())
 
             var parms = prop.getParameters().slice(1).map((p) =>
                 (withLinks ? "<br/>" : "") +
@@ -1085,6 +1090,8 @@ module TDev
                       ".greyed { color:#444; }\n" +
                       ".api-kind { border: 1px dotted #BBB; padding: 0.4em; clear: both; font-size: 1.2em; margin-bottom: 0.6em; }\n" +
                       ".md-snippet { border: 1px dotted #bbb; padding: 0.4em 0; clear: both; line-height: 1.3em; page-break-inside:avoid; }\n" +
+                      ".md-snippet .signature { padding:0em 0.2em 0em 0.2em; }\n" + 
+                      ".md-snippet .name { font-weight: bold;}\n" +
                       ".md-img { margin:0.5em; clear:both; width:100%; text-align:center; position:relative; }\n" +
                       ".md-img-inner { position:relative; display:inline-block; width:100%; }\n" +
                       ".md-img .caption { font-size:0.8em; }\n" +
