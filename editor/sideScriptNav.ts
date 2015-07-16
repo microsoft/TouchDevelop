@@ -69,7 +69,12 @@ module TDev
         }
 
         static publishScript(noDialog = false, screenshotDataUri : string = null, app:AST.App = null)
-        {
+        {            
+            if (Cloud.isOffline()) {
+                Cloud.showModalOnlineInfo(lf("publishing cancelled"));
+                return;
+            }
+            
             if (!app) app = Script
 
             TheEditor.saveStateAsync({ forReal: true, forPublishing: true }).then(() => {
