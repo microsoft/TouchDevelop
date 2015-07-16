@@ -75,7 +75,7 @@ module TDev.Meta {
     }
 
     export function searchArtAsync(terms: string, type: string) { // ArtInfo[]
-        if (!terms) return Promise.as([]);
+        if (!terms || Cloud.isOffline()) return Promise.as([]);
         
         if (Cloud.isRestricted()) {
             var url = "art?q=" + encodeURIComponent(terms);
