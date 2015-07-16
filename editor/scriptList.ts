@@ -748,7 +748,14 @@
                             }, e => {});
                     }
                 }
-                searchDiv.setChildren([div("sdLoadingMore", lf("searching..."))]);
+                
+                if (Cloud.isOffline()) {
+                    this.progressBar.stop();
+                    searchDiv.setChildren([div("sdLoadingMore", lf("can't search, are you connected to internet?"))]);    
+                    return;
+                }
+                
+                searchDiv.setChildren([div("sdLoadingMore", lf("searching..."))]);                
 
                 var path = searchPath + "?" + cont + "count=" + searchCount + "&q=" + encodeURIComponent(terms.concat(searchAdd).join(" "))
                 if (bugStatus)
