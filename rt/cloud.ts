@@ -23,6 +23,7 @@ module TDev.Cloud {
         simplify?: boolean;
         moveToLibrary?: boolean;
         stripBlock?: boolean;
+        tokenRefactoring?: boolean;
 
         //navigation
         codeSearch?: boolean;

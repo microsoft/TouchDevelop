@@ -2794,6 +2794,9 @@ module TDev
 
         private addSelectionButtons()
         {
+            if (!TheEditor.widgetEnabled("tokenRefactoring"))
+                return;    
+            
             var toks = this.expr.tokens.slice(this.selectionStart, this.selectionEnd);
             var isPlaceholder = toks.length == 1 && this.isPlaceholderToken(toks[0])
 

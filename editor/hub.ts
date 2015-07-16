@@ -73,6 +73,7 @@ module TDev.Browser {
                 shareScriptToGroup: true,
                 searchArtRefactoring: true,
                 calcSearchArt: true,
+                tokenRefactoring:true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,
@@ -156,6 +157,7 @@ module TDev.Browser {
                 searchArtRefactoring: true,
                 calcSearchArt: true,
                 makeAsyncRefactoring: true,
+                tokenRefactoring:true,
                 // misc
                 groupAllowExportApp: true,
                 changeSkillLevel: true,
@@ -522,6 +524,7 @@ module TDev.Browser {
                     scriptPullChanges: true,
                     testAction: true,
                     testsSection: true,
+                    tokenRefactoring:true,
                 }
             }
         }
