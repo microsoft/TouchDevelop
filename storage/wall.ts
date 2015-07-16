@@ -434,6 +434,9 @@ module TDev {
                     );
             this.fullScreenBtnRow = divId("wallFullScreenBtns", "", this.additionalFullScreenButtons());
             this.bottomBtnsDiv = divId("wallBottomBtns", "bottomButtons");
+            var logoDiv: HTMLElement;
+            if (TDev.Cloud.config.companyLogoHorizontalUrl)
+                logoDiv = div('wallUpperLogo', HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl));
             var legalDiv: HTMLElement;
             if (Cloud.isRestricted()) {
                 legalDiv = div('wallLogo', HTML.mkImg(Cloud.artUrl("hrztfaux")));
@@ -447,7 +450,8 @@ module TDev {
                 this.topBtnRow,
                 this.fullScreenBtnRow,
                 this.bottomBtnsDiv,
-                legalDiv
+                legalDiv,
+                logoDiv
             ]);
             if (this.currentRt.compiled.showAd) {
                 wall.appendChildren([this.adContainer]);

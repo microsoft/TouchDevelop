@@ -1263,10 +1263,20 @@ input[data-invalid^="yes"]
   bottom: 0.5em;
   right: 0.5em;
 }
-
 .wallLogo img {
-  width: 9em;
+  width:8em;
 }
+
+.wallUpperLogo {
+  position: absolute;
+  top: 1.5em;
+  right: 0.5em;
+}
+.wallUpperLogo img {
+  width:9em;
+}
+
+
 
 .landscape .wallWithColumns .classic-page
 {
