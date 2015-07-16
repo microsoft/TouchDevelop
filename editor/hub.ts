@@ -1738,8 +1738,8 @@ module TDev.Browser {
                 m.onDismiss = () => onSuccess(undefined);
 
                 var editors = [{
-                    company: "Microsoft Research",
-                    name: "TouchDevelop",
+                    company: "Microsoft",
+                    name: "Touch Develop",
                     description: lf("A beginner friendly editor"),
                     id: "touchdevelop",
                     origin: "",
@@ -1766,7 +1766,7 @@ module TDev.Browser {
                     });
                     elts.push(res)
                 })
-                m.choose(elts, { header: lf("pick an editor...") });
+                m.choose(elts, { header: lf("create code with...") });
             });
         }
 

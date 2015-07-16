@@ -26,7 +26,12 @@
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems = [
-                    { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => Util.navigateInWindow("/create-code") },
+                    { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
+                        if (Cloud.isOffline())
+                            TheHub.createScript();
+                        else     
+                            Util.navigateInWindow("/create-code");
+                    } },
                     { id: "tutorials", name: lf("Tutorials"), tick: Ticks.siteMenuTutorials, handler: () => Util.navigateInWindow("/tutorials") },
                     { id: "projects", name: lf("Projects"), tick: Ticks.siteMenuProjects, handler: () => Util.navigateInWindow("/projects") },
                     { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },

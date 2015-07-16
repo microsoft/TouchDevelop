@@ -31,8 +31,8 @@ module TDev {
         path: path + "ace/editor.html"
         icon: ""
       }, */ {
-        company: "Microsoft Research",
-        name: "Blocks",
+        company: "Microsoft",
+        name: "Block Editor",
         description: "Drag and drop",
         id: "blockly",
         origin: origin,
