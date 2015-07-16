@@ -74,9 +74,18 @@ module TDev.Meta {
         })
     }
 
-    export function searchArtAsync(terms: string, type: string, skip: number = 0, top: number = 50) {
+    export function searchArtAsync(terms: string, type: string) { // ArtInfo[]
         if (!terms) return Promise.as([]);
-
+        
+        if (Cloud.isRestricted()) {
+            var url = "art?q=" + encodeURIComponent(terms);
+            if (type) url += "&type=" + encodeURIComponent(type);
+            return Cloud.getPrivateApiAsync(url)
+                .then((result: JsonList) => result.items.map(item => Browser.TheHost.getArtInfoById(item.id)));
+        }
+        
+        var skip = 0;
+        var top = 50;
         var indexName = "art1";
         var apiKey = Cloud.config.searchApiKey;
         var serviceUrl = Cloud.config.searchUrl;

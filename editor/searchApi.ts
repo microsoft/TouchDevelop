@@ -585,7 +585,7 @@ module TDev
             var uploadPicBtn, uploadSndBtn;
             this.progressBar.start();
 
-            return Meta.searchArtAsync(terms, kind, 0).then(arts => {
+            return Meta.searchArtAsync(terms, kind).then(arts => {
                 this.progressBar.stop();
                 if (!this.autoUpdate.resultsCurrent(terms)) {
                     return;
