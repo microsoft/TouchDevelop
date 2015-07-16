@@ -1552,8 +1552,8 @@ module TDev
         public compileScript(app:AST.App, opts:AST.CompilerOptions = {})
         {
             AST.TypeChecker.tcApp(app)
-            var cs:CompiledScript;
-
+            var cs: CompiledScript;
+            
             Util.time("compile", () => {
                 var newOpts: AST.CompilerOptions = {
                     optimizeLoops: /optimizeLoops/.test(document.URL),
@@ -1610,7 +1610,11 @@ module TDev
 
         static runCount = 0;
         public onBack = () => {};
-        public runAction(a: AST.Decl, args: any[]= null, opts: AST.CompilerOptions = {}) {
+        public runAction(a: AST.Decl, args: any[] = null, opts: AST.CompilerOptions = {}) {
+            
+            // display logo if needed
+            opts.logoUrl = TDev.Cloud.config.touchDevelopLogoUrl;
+            
             if (Collab.AstSession && Collab.AstSession.loaded) {
                 var old = Collab.getAutomaticPullEnabled();
                 Collab.setAutomaticPullEnabled(false);

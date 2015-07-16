@@ -2805,6 +2805,7 @@ module TDev
         public authorId: string;
         public scriptId: string;
         public baseScriptId: string;
+        public logoUrl: string;
         public hasCloudData: boolean;
         public hasLocalData: boolean;
         public hasPartialData: boolean;

@@ -203,6 +203,7 @@ module TDev.Cloud {
         tutorialAvatarArtId?: string;
         printHeaderHtml?: string;
         companyLogoHorizontalUrl?: string;
+        touchDevelopLogoUrl?: string;
     }
 
     export var config: ClientConfig = {

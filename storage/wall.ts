@@ -438,9 +438,8 @@ module TDev {
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
                 logoDiv = div('wallUpperLogo', HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl));
             var legalDiv: HTMLElement;
-            if (Cloud.isRestricted()) {
-                legalDiv = div('wallLogo', HTML.mkImg(Cloud.artUrl("hrztfaux")));
-            }
+            if (this.currentRt && this.currentRt.compiled && this.currentRt.compiled.logoUrl)
+                legalDiv = div('wallLogo', HTML.mkImg(this.currentRt.compiled.logoUrl));
             this.setFullScreenElement(null);
             this.bgPictureContainer.setChildren([])
             wall.setChildren([

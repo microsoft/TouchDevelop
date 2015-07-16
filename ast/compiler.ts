@@ -456,6 +456,7 @@ module TDev.AST
         scriptId?: string; // if present, the ids of libraries will be also baked into the script
         scriptGuid?: string;
         baseScriptId?: string;
+        logoUrl?: string;
         hasCloudData?: boolean;
         hasLocalData?: boolean;
         hasPartialData?: boolean;
@@ -3038,6 +3039,8 @@ module TDev.AST
                 this.wr("cs.scriptGuid = " + this.stringLiteral(this.options.scriptGuid) + ";\n");
             if (this.options.baseScriptId && !/-/.test(this.options.baseScriptId))
                 this.wr("cs.baseScriptId = " + this.stringLiteral(this.options.baseScriptId) + ";\n");
+            if (this.options.logoUrl)
+                this.wr("cs.logoUrl = " + this.stringLiteral(this.options.logoUrl) + ";\n");    
             if (this.options.hasCloudData)
                 this.wr("cs.hasCloudData = 1;\n");
             if (this.options.hasPartialData)
