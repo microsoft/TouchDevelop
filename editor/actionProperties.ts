@@ -7,6 +7,8 @@ module TDev
     {
         private theAction:AST.ActionHeader;
         private lastName = "";
+        private asAction: boolean;
+        
         constructor() {
             super()
         }
@@ -141,19 +143,22 @@ module TDev
             var act = this.theAction.action;
             var showSettings = TheEditor.widgetEnabled("actionSettings");
             var showAtomic = showSettings && TheEditor.widgetEnabled("scriptPropertiesPropertyAtomic");
-            var asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
+            this.asAction = this.theAction.getName() == "main" && TheEditor.widgetEnabled("forceMainAsAction");
             var singleReturnValue = TheEditor.widgetEnabled("singleReturnValue");
-            if (asAction && !Script.isLibrary && !Script.isDocsTopic()) this.actionName.readOnly = true;
+            if (this.asAction && !Script.isLibrary && !Script.isDocsTopic()) {
+                this.actionName.readOnly = true;
+                this.theAction.action.isPrivate = false;
+            }
             var propDivs =
                  [div("prop-spacer"),
                   div(null, span("varLabel", lf("function"))),
                   this.actionName,
-                  !showSettings || ev ? null : this.privateAction,
+                  !showSettings || ev || this.asAction ? null : this.privateAction,
                   !showSettings || ev ? null : div("formHint",
                     Script.isLibrary ? lf("Private functions cannot be called from outside the library. ") : lf("Private actions do not get a run button. ")),
                   !showAtomic || a.action.isPage() || ev || !asyncEnabled ? null : this.syncBox,
-                  ev || asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
-                  ev || act.isPage() || asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
+                  ev || this.asAction ? null : this.mkParam("input", lf("add input parameter"), Ticks.sideActionAddInput),
+                  ev || act.isPage() || this.asAction || (singleReturnValue && this.theAction.outParameters.count() > 0) ? null : this.mkParam("output", lf("add output parameter"), Ticks.sideActionAddOutput),
                   ActionProperties.copyCutRefs(lf("the current function"), this.theAction.action),
 
                   !TheEditor.widgetEnabled("testAction") || ev || tp ? null : this.testAction,
@@ -167,7 +172,7 @@ module TDev
         public bye()
         {
             if (!this.theAction) return;
-            this.theAction.action.isPrivate = HTML.getCheckboxValue(this.privateAction);
+            this.theAction.action.isPrivate = HTML.getCheckboxValue(this.privateAction) && !this.asAction;
             this.theAction.action._isTest = HTML.getCheckboxValue(this.testAction);
             this.theAction.action.isOffline = HTML.getCheckboxValue(this.offlineAction);
             this.theAction.action.isQuery = HTML.getCheckboxValue(this.queryAction);
