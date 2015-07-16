@@ -826,8 +826,6 @@
 
             if (allHelpBtn) this.listDivs.push(allHelpBtn)
 
-            this.listDivs.pushRange(this.poweredByElements());
-
             this.theList.setChildren(this.listDivs);
 
             this.setCurrent(showCurrent);
