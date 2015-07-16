@@ -1709,13 +1709,13 @@ module TDev.Browser {
                     if (editor == "touchdevelop")
                         p = External.pullLatestLibraryVersion(External.microbitScriptId)
                             .then((pubId: string) => {
-                            var text = '// A #microbit script\n' +
-                                'action main() {\n' +
-                                '    skip;\n' +
-                                '}\n' +
-                                'meta import ' + AST.Lexer.quoteId("micro:bit") + ' {\n' +
-                                '  pub "' + pubId + '"\n' +
-                                '}\n';
+                                var text = '// A #microbit script\n' +
+                                    'action main() {\n' +
+                                    '    skip;\n' +
+                                    '}\n' +
+                                    'meta import ' + AST.Lexer.quoteId("micro:bit") + ' {\n' +
+                                    '  pub "' + pubId + '"\n' +
+                                    '}\n';
                                 return text;
                             });
                     p.then(src => {
@@ -1739,7 +1739,7 @@ module TDev.Browser {
 
                 var editors = [{
                     company: "Microsoft",
-                    name: "Touch Develop",
+                    name: "TouchDevelop",
                     description: lf("A beginner friendly editor"),
                     id: "touchdevelop",
                     origin: "",

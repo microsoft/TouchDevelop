@@ -68,7 +68,7 @@ module TDev {
     }
 
     export function pullLatestLibraryVersion(pubId: string): Promise { // of string
-      return Browser.TheApiCacheMgr.getAsync(pubId, false)
+      return Browser.TheApiCacheMgr.getAsync(pubId, Cloud.isOffline())
         .then((script: JsonScript) => {
           if (script) {
             return script.updateid;
