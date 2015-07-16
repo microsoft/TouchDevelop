@@ -1269,7 +1269,7 @@ input[data-invalid^="yes"]
 
 .wallUpperLogo {
   position: absolute;
-  top: 1.5em;
+  top: 0.5em;
   right: 0.5em;
 }
 .wallUpperLogo img {
