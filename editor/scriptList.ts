@@ -5943,7 +5943,10 @@
 
         public edit()
         {
-            this.editAsync().done();
+            this.editAsync().done(
+                () => { },
+                e => World.handlePostingError(e, "edit script")
+                );
         }
 
         public update()
