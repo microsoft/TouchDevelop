@@ -682,7 +682,7 @@ module TDev {
         }
 
         function sendOutEvents(events:RecordedEvents[])
-        {
+        {            
             if (events.length == 0) return;
             var currId = events[0].chunkId
             var req = <TicksReport>{
@@ -695,14 +695,19 @@ module TDev {
             if (fillEditorInfoTicksReport)
                 fillEditorInfoTicksReport(req);
 
-            Cloud.postTicksAsync(req).done(() => {
+            function sendNextEvents() {
                 var events = window.localStorage["archivedEvents"]
                 if (events) {
                     var newEvents:RecordedEvents[] = JSON.parse(events);
                     window.localStorage["archivedEvents"] = JSON.stringify(newEvents.filter((t) => t.chunkId != currId))
                     sendOutEvents(newEvents)
-                }
-            }, e => { }) // ignore error; will try again later
+                }                
+            }
+
+            if (Object.keys(req.sessionEvents).length == 0) // any event to send?
+                sendNextEvents();            
+            else
+                Cloud.postTicksAsync(req).done(() => sendNextEvents(), e => { }) // ignore error; will try again later
         }
 
 
