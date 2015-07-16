@@ -351,20 +351,12 @@
                 d.addHTML(notice);
 
             d.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("sign in"), () => {
-                    tick(Ticks.legalNoticeSignIn);
-                    if(Login.show()) {
-                        localStorage["legalNotice"] = notice;
-                        d.canDismiss = true;
-                        d.dismiss();
-                    }
-                }, "green-button"),
-                HTML.mkButton(Runtime.legalNotice ? lf("agree, let's get started") : lf("let's get started!"), () => {
+                HTML.mkButton(lf("agree"), () => {
                     tick(Ticks.legalNoticeAgree);
                     localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
                     d.dismiss();
-                }, "gray-button")
+                }, "green-button")
             ));
             d.fullWhite()
             d.canDismiss = false;
