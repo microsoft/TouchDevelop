@@ -15,13 +15,14 @@ module TDev.RT.Cordova
         }, false);
         
         document.addEventListener('deviceready', () => {
-            if(WinJS){
+            if(WinJS && WinJS.Application){
                 WinJS.Application.onbackclick = function (e) {
                     if (!TDev.Runtime.theRuntime || TDev.Runtime.theRuntime.getPageCount() == 1)
                         return false;
                     else
                         TDev.Util.goBack();
-                    return true; }
+                    return true;
+                }
             }
         }, false);
     }
