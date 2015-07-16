@@ -549,6 +549,9 @@ module TDev {
         function reportBrowser(browser:string)
         {
           try {
+            if ((<any>window).tdlite)
+                return
+
             var serviceUrl = getServiceUrl();
             if (!serviceUrl) return;
 
