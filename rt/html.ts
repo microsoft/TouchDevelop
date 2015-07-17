@@ -72,7 +72,7 @@ module TDev.HTML {
     }
 
     export function mkVideoIframe(iframeSrc:string) {
-        return Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' allowfullscreen=''></iframe></div>",iframeSrc);
+        return Util.fmt("<div class='md-video-wrapper'><iframe src='{0:url}' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>",iframeSrc);
     }
 
     export function mkLazyVideoPlayer(preview: string, iframeSrc:string): HTMLElement {
