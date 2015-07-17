@@ -733,7 +733,7 @@ module TDev {
                             var action = lib.getPublicActions().filter(action => action.getName() == propertyName)[0];
                             if (action) {
                                 // bingo!
-                                var r = "<div class=notranslate translate=no dir=ltr><div class='md-snippet'>";
+                                var r = "<div class=notranslate translate=no dir=ltr style='display:inline-block'><div class='md-snippet'>";
                                 r += this.renderer.renderPropertySig(action, false, true, false);
                                 r += "</div></div>";
                                 return r;
