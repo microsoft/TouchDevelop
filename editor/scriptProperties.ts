@@ -385,10 +385,14 @@ module TDev
         }
 
         static winId = 0;
-        static printScript(s:AST.App)
-        {
+        static printScript(s: AST.App) {
             if (!s) return;
-            
+            if (s.isDocsTopic()) {
+                var topic = HelpTopic.fromScript(s, true);
+                topic.print();
+                return;
+            }
+
             var text: string;
             if (s.isLibrary) {
                 text = ScriptProperties.renderLibraryDocs(s, s.getName(), false, true);
@@ -397,19 +401,8 @@ module TDev
                 var r = new CopyRenderer();
                 text = r.dispatch(s);
             }
-            try {
-                var w = window.open("about:blank", "tdScript" + ScriptProperties.winId++);
-                w.document.write("<!DOCTYPE html><html><head>"
-                                 + "<meta name='microsoft' content='notranslateclasses stmt keyword'/>"
-                                 + "</head><body onload='try { window.print(); } catch(ex) {}'>"
-                                 + (Cloud.config.printHeaderHtml || ("<div><img src='" + HTML.proxyResource("https://az31353.vo.msecnd.net/c04/uxoj.png") + "' alt='" + lf("TouchDevelop by Microsoft Research") + "'></div>"))
-                                 + CopyRenderer.css
-                                 + "<title>" + Util.htmlEscape("Source: " + s.getName()) + "</title>"
-                                 + "</head><body>" + text + "</body></html>");
-            } catch (e) {
-                ModalDialog.info(lf("cannot print"),
-                lf("we couldn't print open a new window to print this page. check the popup-blocker preferences."));
-            }
+            
+            HelpTopic.printText(text, s.getName());
         }
 
         private renderScript()
