@@ -647,6 +647,7 @@ module TDev.Browser {
                         HTML.mkButton(lf("users"), () => { Util.setHash("#list:users") }),
                         HTML.mkButton(lf("scripts"), () => { Util.setHash("#list:new-scripts") }),
                         HTML.mkButton(lf("art"), () => { Util.setHash("#list:art") }),
+                        HTML.mkButton(lf("pointers"), () => { Util.setHash("#list:pointers")}),
                         HTML.mkButton(lf("page map"), () => { Browser.TheHub.showPointers() }),
                         HTML.mkButton(lf("releases"), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }),
                     ]))

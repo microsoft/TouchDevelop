@@ -605,6 +605,7 @@
                 case "art":
                 case "users":
                 case "comments":
+                case "pointers":    
                     searchPath = this.apiPath;
                     break;
                 case "myart":
@@ -10173,10 +10174,10 @@
 
             var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
             var pubId = div("sdAddInfoOuter", addInfoInner);
-
+            
             var res = div("sdHeaderOuter",
                             div("sdHeader", icon,
-                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big)
                                     )));
 
             if (big)
@@ -10185,8 +10186,7 @@
 
             return this.withUpdate(res, (u:JsonPointer) => {
                 if (this.ptr) {
-                    var nm = this.getTitle()
-                    nm += " (" + this.ptr.path + ")"
+                    var nm = this.ptr.path;
                     nameBlock.setChildren([ nm ])
                     author.setChildren([this.script ? this.script.username : this.ptr.username]);
                     if (this.script)
@@ -10198,8 +10198,13 @@
         public initTab() {
             this.withUpdate(this.tabContent, (u:JsonPointer) => {
                 if (this.script) {
+                    var preview = div("");
+                    this.tabContent.setChildren([
+                        div('wall-dialog-header', this.getTitle()),
+                        preview
+                    ])
                     var ht = HelpTopic.fromJsonScript(this.script)
-                    ht.render(e => this.tabContent.setChildren([e]))
+                    ht.render(e => preview.setChildren([e]));
                 } else {
                     if (this.ptr)
                         this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
