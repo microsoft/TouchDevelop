@@ -148,7 +148,7 @@ module TDev.AST {
             this.header.inParameters.stmts.shift()
         }
 
-        public isExtensionAction() { return true }
+        public isExtensionAction() :boolean{ return true }
         public extensionForward():Action { return this.shortcutTo }
 
         public getDescription()

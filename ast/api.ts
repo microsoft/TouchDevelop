@@ -1311,6 +1311,7 @@ module TDev {
     
     export interface IPropertyWithNamespaces extends IProperty {
         getNamespaces(): string[];
+        isExtensionAction(): boolean;
     }
 
     export interface IPropertyWithCache

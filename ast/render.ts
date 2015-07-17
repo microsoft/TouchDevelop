@@ -1038,27 +1038,38 @@ module TDev
             }
 
             var kindLink = (k:Kind) => {
-                if (!withLinks) return this.kind(k);
+                //if (!withLinks) return this.kind(k);
+                if (!withLinks) return this.id(k.getName());
                 return "<a href='#topic:" + MdComments.shrink(k.getName()) + "'>" + this.kind(k) + "</a>";
             }
 
+            if ((<any>prop)._extensionAction) prop = (<any>prop)._extensionAction;            
+            var propi = <IPropertyWithNamespaces>prop;            
+            var isExtension = propi.isExtensionAction && propi.isExtensionAction();            
+            var params = prop.getParameters();
             var hd = "";            
             if (withKeyword)           
                 hd += this.kw("function ");
             if (withKind) {
-                if (prop.parentKind.singleton)
-                    hd += topicLink(prop.parentKind.singleton.getName())
-                else {
-                    var ns: string = (<IPropertyWithNamespaces>prop).getNamespaces ? (<IPropertyWithNamespaces>prop).getNamespaces()[0] : undefined;
-                    this.id
-                    if (ns) hd += this.name(ns);
-                    else hd += "(" + kindLink(prop.parentKind) + ")";
-                }
+                if (isExtension) {
+                    var __this = params[0];
+                    hd += kindLink(__this.getKind());
+                } else {
+                    if (prop.parentKind.singleton)
+                        hd += topicLink(prop.parentKind.singleton.getName())
+                    else {
+                        var ns: string = (<IPropertyWithNamespaces>prop).getNamespaces ? (<IPropertyWithNamespaces>prop).getNamespaces()[0] : undefined;
+                        this.id
+                        if (ns) hd += this.name(ns);
+                        else hd += "(" + kindLink(prop.parentKind) + ")";
+                    }
+                }    
+                params.shift();
                 hd += "\u200A\u2192\u00A0";
             }
             hd += this.name(prop.getName())
 
-            var parms = prop.getParameters().slice(1).map((p) =>
+            var parms = params.map((p) =>
                 (withLinks ? "<br/>" : "") +
                 "<span class='sig-parameter'>" + this.id(p.getName()) + "</span>" + this.op(":") + kindLink(p.getKind()))
 

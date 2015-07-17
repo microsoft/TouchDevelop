@@ -1725,7 +1725,7 @@ module TDev.AST {
         public thingSetKindName() { return this.isEvent() ? null : "code"; }
         public isActionTypeDef() { return this._isActionTypeDef; }
 
-        public isExtensionAction() { return false }
+        public isExtensionAction() : boolean { return false }
         public extensionForward():Action { return this }
         public hasWarnings() { return this.numUnsupported > 0 }
 
