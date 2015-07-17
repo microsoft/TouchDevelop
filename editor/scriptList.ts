@@ -8781,6 +8781,11 @@
 
         static abuseOrDelete(pubid:string, abuseid:string = "")
         {
+            if (Cloud.isOffline()) {
+                Cloud.showModalOnlineInfo("report/delete");
+                return;
+            }
+            
             if (!Cloud.lite) {
                 window.open(Cloud.getServiceUrl() + "/user/report/" + pubid)
                 return
@@ -8859,7 +8864,7 @@
                     m.show()
                 }
             })
-            .done()
+            .done(() => { }, e => World.handlePostingError(e, "report/delete"));
         }
 
     }
