@@ -1126,7 +1126,7 @@ module TDev
                       ".block .md-para { margin: 0; }\n"+
                       "span.stringLiteral { word-break: break-all; } div.stringLiteral { white-space:pre-wrap; }\n" +
                       ".md-warning { background-color:lightyellow; border-left:solid 0.25em red; padding:0.5em; margin-left:2em;}\n"+
-                      "div.md-video-link { position: relative; } div.md-video-link > img { width: calc(100 % - 1em); } div.md-video-link > svg { position: absolute;left:0em; } @media print { div.md-video-link > svg { display:none; }  }\n" +
+                      "div.md-video-link { position: relative; } div.md-video-link > img { width: calc(100 % - 1em); } div.md-video-link > svg { position: absolute;left:0em; bottom: 0em; width:25%; } @media print { div.md-video-link > svg { display:none; }  }\n" +
                       "@media print { a.md-external-link:link:after, a.md-external-link:visited:after { content: ' (' attr(href) ') '; font-size: 80%; } }\n"+
                       "svg.video-play { width: calc(100% - 1em); background-size:cover; background-repeat:no-repeat;}\n"+
                       ".nopara .md-para { margin:0; }\n"+

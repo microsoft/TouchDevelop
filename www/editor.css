@@ -1517,6 +1517,8 @@ div.md-video-link > img {
 div.md-video-link > svg {
   position:absolute;
   left:0em;
+  bottom: 0em;
+  width: 25%;
 }
 
 @media print {
