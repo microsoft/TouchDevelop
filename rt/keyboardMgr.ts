@@ -294,7 +294,6 @@ module TDev {
                 else
                     Util.setHash(scr, true)
             } else {
-                HTML.showErrorNotification("cannot load requested script");
                 Util.setHash("hub", true)
             }
         }
