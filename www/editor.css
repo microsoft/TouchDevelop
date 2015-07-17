@@ -4959,7 +4959,7 @@ height: 2.2em;
 .md-box-screen { /* not visible in print mode */
 }
 .md-box-card {
-  border: solid 0.05em black;
+  border: solid 1px black;
   background: inherit;
   margin-left:inherit;
   min-height:4em;
