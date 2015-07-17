@@ -4958,6 +4958,12 @@ height: 2.2em;
 }
 .md-box-screen { /* not visible in print mode */
 }
+.md-box-card {
+  border: solid 0.05em black;
+  background: inherit;
+  margin-left:inherit;
+  min-height:4em;
+}
 
 .md-box-header-print {
   display:none;
