@@ -942,12 +942,15 @@ module TDev {
             } else if (Cloud.lite && macro == "vimeo") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
-                if (!/^\d+$/.test(arg))
+                var args = arg.split(/:/);
+                if (!/^\d+$/.test(args[0]))
                     return MdComments.error("vimeo: video id should be a number");
                 else {
+                    var url = Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1&badge=0", args[0]);
+                    if (/loop/.test(args[1])) url += "&loop=1";
                     return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
-                        Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1", arg),
-                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), arg))
+                        url,
+                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), args[0]))
                         );
                 }
             } else if (macro == "channel9") {
