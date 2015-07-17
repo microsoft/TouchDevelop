@@ -2901,6 +2901,10 @@ div.iconThumb {
   right: 0;
 }
 
+.slRight .sdNameBlock {
+  right:4.5em;
+}
+
 .sdCommentBlock {
   left: 0;
   right: 0;
