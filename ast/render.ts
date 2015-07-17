@@ -1026,7 +1026,7 @@ module TDev
             return r;
         }
 
-        public renderPropertySig(prop:IProperty, withLinks = false, withKind = true)
+        public renderPropertySig(prop:IProperty, withLinks = false, withKind = true, withKeyword = true)
         {
             var inParms = "";
             var returns = "";
@@ -1042,7 +1042,9 @@ module TDev
                 return "<a href='#topic:" + MdComments.shrink(k.getName()) + "'>" + this.kind(k) + "</a>";
             }
 
-            var hd = this.kw("function ");
+            var hd = "";            
+            if (withKeyword)           
+                hd += this.kw("function ");
             if (withKind) {
                 if (prop.parentKind.singleton)
                     hd += topicLink(prop.parentKind.singleton.getName())

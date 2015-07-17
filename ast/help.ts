@@ -734,7 +734,7 @@ module TDev {
                             if (action) {
                                 // bingo!
                                 var r = "<div class=notranslate translate=no dir=ltr><div class='md-snippet'>";
-                                r += this.renderer.renderPropertySig(action, false, true);
+                                r += this.renderer.renderPropertySig(action, false, true, false);
                                 r += "</div></div>";
                                 return r;
                             }
