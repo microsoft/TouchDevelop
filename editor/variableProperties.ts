@@ -913,7 +913,7 @@ module TDev
                             ModalDialog.info(lf("document published!"), lf("You can find your document under 'my art' in the hub."));
                         }
                     }, e => {
-                            World.handlePostingError(e, lf("upload document"))
+                            Cloud.handlePostingError(e, lf("upload document"))
                         });
                 })));
                 m.show();
@@ -981,7 +981,7 @@ module TDev
                                 ModalDialog.info(lf("sound published!"), lf("You can find your sound under 'my art' in the hub."));
                             }
                         }, e => {
-                            World.handlePostingError(e, lf("upload sound"))
+                            Cloud.handlePostingError(e, lf("upload sound"))
                         });
                 })));
                 m.show();
@@ -1096,7 +1096,7 @@ module TDev
                                 }
                             }
                         }, e => {
-                            World.handlePostingError(e, lf("upload picture"))
+                            Cloud.handlePostingError(e, lf("upload picture"))
                         });
                     })));
                 m.setScroll();

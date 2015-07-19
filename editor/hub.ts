@@ -634,7 +634,7 @@ module TDev.Browser {
                                             TDev.Cloud.postPrivateApiAsync("generatecodes", data)
                                                 .then(r => {
                                                     ModalDialog.showText(r.items.join("\n"), lf("your codes"))
-                                                }, e => World.handlePostingError(e, lf("generate codes"))))
+                                                }, e => Cloud.handlePostingError(e, lf("generate codes"))))
 
                                 return Promise.as()
                             })))
@@ -1248,7 +1248,7 @@ module TDev.Browser {
                                     Util.log('androidgcm: registered');
                                     Browser.Hub.askToEnableNotifications();
                                 }, e => {
-                                        World.handlePostingError(e, "android notifications");
+                                        Cloud.handlePostingError(e, "android notifications");
                                     });
                             } else {
                                 Util.log('androidgcm: cancelled, offline or not authenticated');

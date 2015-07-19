@@ -788,8 +788,7 @@ module TDev.Cloud {
         return document.location.href.indexOf("fota=1") > 0;
     }
 
-    export function postUserInstalledCompileAsync(guid:string, cppSource:string, meta:any = {}) : Promise
-    {
+    export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
         var r = new PromiseInv()
         var pollUrl = ""
         var poll = () => {
@@ -809,16 +808,44 @@ module TDev.Cloud {
             source: cppSource,
             meta: meta
         })
-        .then(resp => {
-            // HTML.showProgressNotification(lf("program accepted, compiling"));
+        .done(resp => {
+                // HTML.showProgressNotification(lf("program accepted, compiling"));
             pollUrl = resp.statusurl
             poll()
+        }, e => {
+            r.success(undefined);
+            Cloud.handlePostingError(e, lf("could not start compilation"));
         })
-        .done()
 
         return r
     }
 
+    export function handlePostingError(e: any, action: string) {
+        if (e) {
+            if (e.status == 502) {
+                Cloud.showModalOnlineInfo(lf("could not {0}", action));
+                return;
+            }
+            else if ((!Cloud.lite && e.status == 503) || (Cloud.lite && e.status == 429)) {
+                ModalDialog.info(lf("could not {0}", action), lf("Did you post a lot recently? Please try again later."));
+                return;
+            }
+            else if (e.status == 403) {
+                Cloud.accessTokenExpired();
+                ModalDialog.info(lf("access denied"), lf("Your access token might have expired. Please return to the main hub and then try again."));
+                return;
+            }
+            else if (e.status == 419 || e.status == 402) {
+                ModalDialog.info(lf("access denied"), lf("Your account is not authorized to perform this action."));
+                return;
+            }
+            else if (e.status == 400)
+                throw new Error(lf("Cloud precondition violated ({0})", e.errorMessage));
+        }
+        throw e;
+    }
+
+    
     export function postApiBatch(bundle: any) : Promise // of BatchResponses
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl(null), bundle);

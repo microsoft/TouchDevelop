@@ -294,7 +294,7 @@
                             }, e => {
                                 progress.stop();
                                 m.dismiss();
-                                World.handlePostingError(e, lf("create channel"));
+                                Cloud.handlePostingError(e, lf("create channel"));
                             });
                     }))
             ]);
@@ -1286,7 +1286,7 @@
                                 return groupInfo.changePictureAsync();
                             })
                             .done(() => TheHost.loadDetails(groupInfo, "settings"),
-                                e => World.handlePostingError(e, lf("create group")));
+                                e => Cloud.handlePostingError(e, lf("create group")));
                     }))
             ]);
             m.show();
@@ -3442,7 +3442,7 @@
                             ModalDialog.ask(lf("Are you sure you want to delete this key? There is no undo for this operation."), lf("delete it"), () => {
                                 HTML.showProgressNotification(lf("deleting key..."));
                                 Cloud.deletePrivateApiAsync("me/keys?uri=" + encodeURIComponent(c.uri))
-                                    .done(() => d.removeSelf(), e => World.handlePostingError(e, lf("delete key")));
+                                    .done(() => d.removeSelf(), e => Cloud.handlePostingError(e, lf("delete key")));
                             });
                         })
                     )
@@ -3595,7 +3595,7 @@
                                 }, e => {
                                     prog.stop()
                                     m.dismiss()
-                                    World.handlePostingError(e, lf("restoring version"));
+                                    Cloud.handlePostingError(e, lf("restoring version"));
                                 })
                         }
                     }
@@ -3928,7 +3928,7 @@
                     if (e && e.status == 400)
                         ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
                     else
-                        World.handlePostingError(e, lf("post comment"));
+                        Cloud.handlePostingError(e, lf("post comment"));
                 });
 
                 var cmtBox = div("sdCmtPosting", lf("posting..."));
@@ -4283,7 +4283,7 @@
                         r.removeSelf();
                     }, (e: any) => {
                         delBtn.setFlag("working", false);
-                        World.handlePostingError(e, "delete comment");
+                        Cloud.handlePostingError(e, "delete comment");
                     });
                 });
             }
@@ -4564,7 +4564,7 @@
                     Browser.Hub.askToEnableNotifications();
                 }, (e: any) => {
                     this.tagBtns[id].firstChild.setFlag("working", false);
-                    World.handlePostingError(e, "add tag");
+                    Cloud.handlePostingError(e, "add tag");
                 });
             }
 
@@ -4624,7 +4624,7 @@
                         this.updateTagTo(id, false);
                     }, (e: any) => {
                         elt.setFlag("working", false);
-                        World.handlePostingError(e, "remove tag");
+                        Cloud.handlePostingError(e, "remove tag");
                     }).done();
                 } else {
                     if (Cloud.anonMode(lf("adding tags"))) return;
@@ -4635,7 +4635,7 @@
                         Browser.Hub.askToEnableNotifications();
                     }, (e: any) => {
                         elt.setFlag("working", false);
-                        World.handlePostingError(e, "add tag");
+                        Cloud.handlePostingError(e, "add tag");
                     });
                 }
             });
@@ -4784,7 +4784,7 @@
                         btnDiv.setChildren(["subscribed!"])
                         Browser.Hub.askToEnableNotifications();
                     }, (e: any) => {
-                        World.handlePostingError(e, "subscribe");
+                        Cloud.handlePostingError(e, "subscribe");
                     }).done();
                 }))
 
@@ -4977,7 +4977,7 @@
                             box.setChildren([])
                             box.className = ""
                         }, (e: any) => {
-                            World.handlePostingError(e, lf("remove subscription"));
+                            Cloud.handlePostingError(e, lf("remove subscription"));
                         }).done();
                     }))
             }
@@ -5721,7 +5721,7 @@
                                     var payload = {}; payload[sn.id] = id;
                                     Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
                                     TheApiCacheMgr.invalidate(sc.jsonScript.id);
-                                }, e => World.handlePostingError(e, "saving metadata"));
+                                }, e => Cloud.handlePostingError(e, "saving metadata"));
                             }));
                             if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
                         divs.push(meta);
@@ -5950,7 +5950,7 @@
         {
             this.editAsync().done(
                 () => { },
-                e => World.handlePostingError(e, "edit script")
+                e => Cloud.handlePostingError(e, "edit script")
                 );
         }
 
@@ -7022,7 +7022,7 @@
                                                         return Cloud.postPrivateApiAsync(sendPullRequestId + "/comments", req);
                                                     }
                                                     return Promise.as();
-                                                }, e => World.handlePostingError(e, lf("send pull request")));
+                                                }, e => Cloud.handlePostingError(e, lf("send pull request")));
                                         }
                                         if (pullMergeIds && pullMergeIds.length > 0) {
                                             Promise.join(pullMergeIds.map(mid => {
@@ -7125,7 +7125,7 @@
                     }).done(() => {
                         HTML.showProgressNotification(lf("screenshot uploaded"), true);
                     }, e => {
-                        World.handlePostingError(e, lf("upload screenshot"));
+                        Cloud.handlePostingError(e, lf("upload screenshot"));
                    });
             }
         }
@@ -7263,7 +7263,7 @@
                     load(3, Math.max(ha,0)+1);
                     Browser.Hub.askToEnableNotifications();
                 }, (e: any) => {
-                    World.handlePostingError(e, "add hearts");
+                    Cloud.handlePostingError(e, "add hearts");
                 });
             }
 
@@ -7278,7 +7278,7 @@
                     TheApiCacheMgr.storeHeart(id, "");
                     load(3, Math.max(hd, 1)-1);
                 }, (e: any) => {
-                    World.handlePostingError(e, "remove hearts");
+                    Cloud.handlePostingError(e, "remove hearts");
                 });
             }
 
@@ -7797,7 +7797,7 @@
                         if (resp.message) HTML.showProgressNotification(resp.message);
                         else HTML.showProgressNotification(lf("nicknamed saved..."));
                         TheApiCacheMgr.invalidate("me");
-                    }, e => World.handlePostingError(e, lf("saving nickname")));
+                    }, e => Cloud.handlePostingError(e, lf("saving nickname")));
                 });
                 if (Cloud.lite) nameInput.maxLength = max;
                 nameInput.value = this.userName;
@@ -7817,7 +7817,7 @@
                                 ModalDialog.editText(lf("permissions"), resp.permissions,
                                     t => {
                                         return Cloud.postPrivateApiAsync(path, { permissions: t })
-                                            .then(r => {}, e => World.handlePostingError(e, lf("set permissions")))
+                                            .then(r => {}, e => Cloud.handlePostingError(e, lf("set permissions")))
                                     })
                             })
                         }))
@@ -7830,7 +7830,7 @@
                                 ModalDialog.editText(lf("user activation credit"), resp.credit,
                                     t => {
                                         return Cloud.postPrivateApiAsync(path, { credit: parseInt(t) || resp.credit })
-                                            .then(r => {}, e => World.handlePostingError(e, lf("set credit")))
+                                            .then(r => {}, e => Cloud.handlePostingError(e, lf("set credit")))
                                     })
                             })
                         }))
@@ -8801,7 +8801,7 @@
                                         .done(() => {
                                             TheApiCacheMgr.refetch(pubid)
                                             HTML.showProgressNotification(lf("gone."))
-                                        }, e => World.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
+                                        }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
                                         // TODO show it's gone in the UI
                                     })
                 }
@@ -8853,7 +8853,7 @@
                                     Cloud.postPrivateApiAsync(pubid + "/abusereports", { text: inp.value })
                                     .done(
                                         () => HTML.showProgressNotification(lf("reported.")),
-                                        e => World.handlePostingError(e, lf("report abuse"))
+                                        e => Cloud.handlePostingError(e, lf("report abuse"))
                                     );
                                 }
                             }),
@@ -8864,7 +8864,7 @@
                     m.show()
                 }
             })
-            .done(() => { }, e => World.handlePostingError(e, "report/delete"));
+            .done(() => { }, e => Cloud.handlePostingError(e, "report/delete"));
         }
 
     }
@@ -9274,7 +9274,7 @@
                         TheApiCacheMgr.invalidate(id1)
                         update();
                         if (!good) Browser.Hub.askToEnableNotifications();
-                    }, (e) => World.handlePostingError(e, "vote on docs"));
+                    }, (e) => Cloud.handlePostingError(e, "vote on docs"));
                 }
 
                 topDiv.setFlag("working", false);
@@ -10045,7 +10045,7 @@
                                 .done(() => {
                                 this.invalidateCaches();
                                 Util.setHash("list:lists");
-                            }, e => World.handlePostingError(e, lf("delete channel")));
+                            }, e => Cloud.handlePostingError(e, lf("delete channel")));
                         });
                     }));
                     if (!Cloud.isRestricted())
@@ -10072,7 +10072,7 @@
             return Cloud.postPrivateApiAsync(si.publicId + "/channels/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();
-                }, e => World.handlePostingError(e, lf("add script to channel")));
+                }, e => Cloud.handlePostingError(e, lf("add script to channel")));
         }
     }
 
@@ -10100,7 +10100,7 @@
                     .done(() => {
                         list.invalidateCaches();
                         el.removeSelf();
-                    }, e => World.handlePostingError(e, lf("remove script")));
+                    }, e => Cloud.handlePostingError(e, lf("remove script")));
                 })));
             }
             return el;

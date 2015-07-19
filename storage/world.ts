@@ -781,30 +781,6 @@ module TDev {
                     HTML.showSaveNotification("cannot back up to cloud - you appear to be offline");
             });
         }
-        export function handlePostingError(e: any, action: string) {
-            if (e) {
-                if (e.status == 502) {
-                    Cloud.showModalOnlineInfo("could not " + action);
-                    return;
-                }
-                else if ((!Cloud.lite && e.status == 503) || (Cloud.lite && e.status == 429)) {
-                    ModalDialog.info(lf("could not {0}", action), lf("Did you post a lot recently? Please try again later."));
-                    return;
-                }
-                else if (e.status == 403) {
-                    Cloud.accessTokenExpired();
-                    ModalDialog.info(lf("access denied"), lf("Your access token might have expired. Please return to the main hub and then try again."));
-                    return;
-                }
-                else if (e.status == 419 || e.status == 402) {
-                    ModalDialog.info(lf("access denied"), lf("Your account is not authorized to perform this action."));
-                    return;
-                }
-                else if (e.status == 400)
-                    throw new Error("Cloud precondition violated (" + e.errorMessage + ")");
-            }
-            throw e;
-        }
         function uninstall(header: Cloud.Header) {
             header.scriptVersion = <Cloud.Version>{ instanceId: Cloud.getWorldId(), version: 2147483647, time: 253402300799, baseSnapshot: header.scriptVersion.baseSnapshot };
             header.status = "deleted";

@@ -132,7 +132,7 @@ module TDev
                                 var value = inputs[index].value || "";
                                 return (value !== apiKey.value)
                                     ? Cloud.postPrivateApiAsync("me/keys", { uri: apiKey.url, value: inputs[index].value })
-                                           .then(() => { }, e => World.handlePostingError(e, lf("save key"))) : null;
+                                           .then(() => { }, e => Cloud.handlePostingError(e, lf("save key"))) : null;
                             }).filter(p => p != null);
                             if (promises.length == 0)
                                 onSuccess(false);
@@ -285,7 +285,7 @@ module TDev
                                             Browser.Hub.askToEnableNotifications();
                                         }, e => {
                                             HTML.showProgressNotification(lf("screenshot upload failed"), true);
-                                            World.handlePostingError(e, lf("post screenshot"));
+                                            Cloud.handlePostingError(e, lf("post screenshot"));
                                         });
                                 })),
                             previewImage
@@ -2063,6 +2063,7 @@ module TDev
                 return Cloud.postUserInstalledCompileAsync(guid, cpp, { name: name }).then(json => {
                     console.log(json);
                     if (notifyCompiled(cpp)) {
+                        if (!json) return; // something deeper was broken
                         if (!json.success) {
                             ModalDialog.showText(
                                 "For debugging, here's the URL to the JSON file:\n" + json.url +
