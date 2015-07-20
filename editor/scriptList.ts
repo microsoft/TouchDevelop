@@ -4813,7 +4813,7 @@
         public getId() { return "notifications"; }
         public getName() { return this.parent instanceof GroupInfo ? lf("activity") : lf("notifications"); }
 
-        public bgIcon() { return "svg:ExclamationCircleAlt"; }
+        public bgIcon() { return "svg:fa-bell"; }
         public noneText() { return lf("nothin' goin' on"); }
 
         public topContainer():HTMLElement
@@ -7800,40 +7800,55 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            if (this.isMe() && Cloud.getUserId()) {
+            if ((this.isMe() || Cloud.hasPermission("me-only")) && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
                     HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
                 ]);
 
-                // editor selector
-                if (Cloud.isRestricted()) {
-                    var s = Cloud.recentUserSettings()
-                    if (s && s.credit) {
-                        ch.unshift(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
-                    }
-                }
+                var settingsDiv = div(null, div('bigLoadingMore', lf("loading settings...")));
+                ch.unshift(settingsDiv)
 
-                // user name
-                var max = 25
-                var msg = Cloud.lite ?
-                    lf("Enter your nickname (at most {0} characters)", max) :
-                    lf("Enter your nickname (at least 8 characters)");
-                var nameInput = HTML.mkTextInputWithOk("text", msg, () => {
-                    HTML.showProgressNotification("saving...");
-                    Cloud.postUserSettingsAsync({ nickname: nameInput.value })
-                        .done(resp => {
-                        if (resp.message) HTML.showProgressNotification(resp.message);
-                        else HTML.showProgressNotification(lf("nicknamed saved..."));
-                        TheApiCacheMgr.invalidate("me");
-                    }, e => Cloud.handlePostingError(e, lf("saving nickname")));
-                });
-                if (Cloud.lite) nameInput.maxLength = max;
-                nameInput.value = this.userName;
-                ch.unshift(nameInput);
-                ch.unshift(div('input-label', 'nickname'));
+                Cloud.getPrivateApiAsync(this.publicId + "/settings?format=short")
+                .done((s:Cloud.UserSettings) => {
+                    if (!s) return
+
+                    var edit = (lbl:string, fld:string, maxLen = 100) => {
+                        var nameInput = HTML.mkTextInputWithOk("text", "", () => {
+                            HTML.showProgressNotification("saving...");
+                            var ss:any = {}
+                            ss[fld] = nameInput.value
+                            Cloud.postPrivateApiAsync(this.publicId + "/settings", ss)
+                                .done(resp => {
+                                if (resp.message) HTML.showProgressNotification(resp.message);
+                                else HTML.showProgressNotification(lf("setting saved"));
+                                TheApiCacheMgr.invalidate("me");
+                            }, e => Cloud.handlePostingError(e, lf("saving setting")));
+                        });
+                        nameInput.maxLength = maxLen;
+                        nameInput.value = s[fld]
+                        cc.push(div('inline-label', lbl));
+                        cc.push(nameInput);
+                    }
+
+                    var cc = []
+
+                    edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
+
+                    if (Cloud.hasPermission("adult")) {
+                        edit(lf("email (private; we won't spam you)"), "email")
+                        edit(lf("real name (private)"), "realname")
+                    }
+
+                    if (s.credit)
+                        cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
+
+                    settingsDiv.setChildren(cc)
+                })
+
             }
+
             ch.unshift(accountButtons);
             ch.unshift(hd);
 
