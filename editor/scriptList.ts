@@ -6198,6 +6198,12 @@
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time) + " :: ";
                 if (this.publicId) timeStr += "/" + this.publicId;
+                if (this.jsonScript) {
+                    if (this.jsonScript.ishidden)
+                        timeStr += " [h]"
+                    else if (this.jsonScript.unmoderated)
+                        timeStr += " [c]"
+                }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
 
@@ -6489,8 +6495,13 @@
             }
 
             var uninstall:HTMLElement;
+            var moderate:HTMLElement;
             var editWithGroup:HTMLElement;
             var btns: HTMLElement = div("sdRunBtns");
+
+            if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
+                moderate = mkBtn(Ticks.browseModerate, "svg:fa-globe,white", lf("make public"), null, () => this.moderate())
+            }
 
             if (this.cloudHeader) {
                 uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
@@ -6517,7 +6528,7 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -7187,6 +7198,21 @@
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
         }
 
+        private moderate()
+        {
+            ModalDialog.ask(
+              lf("Did you make sure there is no personal data about the kid in the script? The script will be available on the internet."), 
+              lf("make public"), () => {
+                  var hash = HistoryMgr.windowHash()
+                  Cloud.postPrivateApiAsync(this.publicId, { unmoderated: false })
+                    .then(r => {
+                        TheApiCacheMgr.invalidate(this.publicId);
+                        TheEditor.historyMgr.reload(hash)
+                    }, e => Cloud.handlePostingError(e, lf("moderate script")))
+                    .done()
+            })
+        }
+
         private uninstall()
         {
             tick(Ticks.browseUninstall);
@@ -7475,7 +7501,7 @@
         extends ListTab
     {
         constructor(par:BrowserPage, private _noneText : string = lf("no scripts published by this user"), private _name : string = lf("scripts"), private path:string = "scripts") {
-            super(par, "/" + path + "?applyupdates=" + (/hiddenScripts/.test(document.URL) ? "false" : "true"))
+            super(par, "/" + path + (Cloud.lite ? "" : "?applyupdates=" + (/hiddenScripts/.test(document.URL) ? "false" : "true")))
         }
         public getId() { return this.path; }
         public getName() { return this._name; }
