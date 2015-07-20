@@ -693,15 +693,16 @@ module TDev.Browser {
             })
         }
 
-
         export function mkBetaNote(): HTMLElement {
             var beta = div("beta-note");
             var betaFriendlyId = (<any>window).betaFriendlyId;
             var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
+            
             var copyrights = "<div class='beta-legal'>" + 
                 betaNote +
-                "<span class='beta-black'>© 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
-                "<span class='beta-underline'>terms of use</span>&nbsp;&nbsp;<span class='beta-underline'>privacy policy</span></div>";
+                "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
+                "<span class='beta-underline'>terms of use</span>&nbsp;|&nbsp;<span class='beta-underline'>privacy policy</span>" + 
+                "</div>";
 
             Browser.setInnerHTML(beta, copyrights);
 
