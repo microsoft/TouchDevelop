@@ -4820,7 +4820,9 @@
         {
             if (this.parent instanceof NotificationsPage)
                 return div("sdListLabel", spanDirAuto(lf("notifications")))
-            return div("sdListLabel", spanDirAuto(lf("members activity")))
+            if (this.parent instanceof GroupInfo)
+                return div("sdListLabel", spanDirAuto(lf("members activity")))
+            return div(null)
         }
 
         public tabBox(c:JsonPublication):HTMLElement
@@ -7774,6 +7776,8 @@
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
+            if (Cloud.hasPermission("me-only"))
+                tabs.push(new NotificationsTab(this));
             return tabs;
         }
 
