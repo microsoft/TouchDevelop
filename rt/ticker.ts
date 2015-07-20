@@ -434,6 +434,7 @@ module TDev {
         browsePin,
         browseHeart,
         browseUnHeart,
+        browseModerate,
         browsePublish,
         browseUninstall,
         browsePush,

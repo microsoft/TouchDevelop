@@ -4813,14 +4813,16 @@
         public getId() { return "notifications"; }
         public getName() { return this.parent instanceof GroupInfo ? lf("activity") : lf("notifications"); }
 
-        public bgIcon() { return "svg:ExclamationCircleAlt"; }
+        public bgIcon() { return "svg:fa-bell"; }
         public noneText() { return lf("nothin' goin' on"); }
 
         public topContainer():HTMLElement
         {
             if (this.parent instanceof NotificationsPage)
                 return div("sdListLabel", spanDirAuto(lf("notifications")))
-            return div("sdListLabel", spanDirAuto(lf("members activity")))
+            if (this.parent instanceof GroupInfo)
+                return div("sdListLabel", spanDirAuto(lf("members activity")))
+            return div(null)
         }
 
         public tabBox(c:JsonPublication):HTMLElement
@@ -6198,6 +6200,12 @@
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time) + " :: ";
                 if (this.publicId) timeStr += "/" + this.publicId;
+                if (this.jsonScript) {
+                    if (this.jsonScript.ishidden)
+                        timeStr += " [h]"
+                    else if (this.jsonScript.unmoderated)
+                        timeStr += " [c]"
+                }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
 
@@ -6489,8 +6497,13 @@
             }
 
             var uninstall:HTMLElement;
+            var moderate:HTMLElement;
             var editWithGroup:HTMLElement;
             var btns: HTMLElement = div("sdRunBtns");
+
+            if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
+                moderate = mkBtn(Ticks.browseModerate, "svg:fa-globe,white", lf("make public"), null, () => this.moderate())
+            }
 
             if (this.cloudHeader) {
                 uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
@@ -6517,7 +6530,7 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -7187,6 +7200,21 @@
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
         }
 
+        private moderate()
+        {
+            ModalDialog.ask(
+              lf("Did you make sure there is no personal data about the kid in the script? The script will be available on the internet."), 
+              lf("make public"), () => {
+                  var hash = HistoryMgr.windowHash()
+                  Cloud.postPrivateApiAsync(this.publicId, { unmoderated: false })
+                    .then(r => {
+                        TheApiCacheMgr.invalidate(this.publicId);
+                        TheEditor.historyMgr.reload(hash)
+                    }, e => Cloud.handlePostingError(e, lf("moderate script")))
+                    .done()
+            })
+        }
+
         private uninstall()
         {
             tick(Ticks.browseUninstall);
@@ -7475,7 +7503,7 @@
         extends ListTab
     {
         constructor(par:BrowserPage, private _noneText : string = lf("no scripts published by this user"), private _name : string = lf("scripts"), private path:string = "scripts") {
-            super(par, "/" + path + "?applyupdates=" + (/hiddenScripts/.test(document.URL) ? "false" : "true"))
+            super(par, "/" + path + (Cloud.lite ? "" : "?applyupdates=" + (/hiddenScripts/.test(document.URL) ? "false" : "true")))
         }
         public getId() { return this.path; }
         public getName() { return this._name; }
@@ -7748,6 +7776,8 @@
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
+            if (Cloud.hasPermission("me-only"))
+                tabs.push(new NotificationsTab(this));
             return tabs;
         }
 
@@ -7770,40 +7800,55 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            if (this.isMe() && Cloud.getUserId()) {
+            if ((this.isMe() || Cloud.hasPermission("me-only")) && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
                     HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
                 ]);
 
-                // editor selector
-                if (Cloud.isRestricted()) {
-                    var s = Cloud.recentUserSettings()
-                    if (s && s.credit) {
-                        ch.unshift(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
-                    }
-                }
+                var settingsDiv = div(null, div('bigLoadingMore', lf("loading settings...")));
+                ch.unshift(settingsDiv)
 
-                // user name
-                var max = 25
-                var msg = Cloud.lite ?
-                    lf("Enter your nickname (at most {0} characters)", max) :
-                    lf("Enter your nickname (at least 8 characters)");
-                var nameInput = HTML.mkTextInputWithOk("text", msg, () => {
-                    HTML.showProgressNotification("saving...");
-                    Cloud.postUserSettingsAsync({ nickname: nameInput.value })
-                        .done(resp => {
-                        if (resp.message) HTML.showProgressNotification(resp.message);
-                        else HTML.showProgressNotification(lf("nicknamed saved..."));
-                        TheApiCacheMgr.invalidate("me");
-                    }, e => Cloud.handlePostingError(e, lf("saving nickname")));
-                });
-                if (Cloud.lite) nameInput.maxLength = max;
-                nameInput.value = this.userName;
-                ch.unshift(nameInput);
-                ch.unshift(div('input-label', 'nickname'));
+                Cloud.getPrivateApiAsync(this.publicId + "/settings?format=short")
+                .done((s:Cloud.UserSettings) => {
+                    if (!s) return
+
+                    var edit = (lbl:string, fld:string, maxLen = 100) => {
+                        var nameInput = HTML.mkTextInputWithOk("text", "", () => {
+                            HTML.showProgressNotification("saving...");
+                            var ss:any = {}
+                            ss[fld] = nameInput.value
+                            Cloud.postPrivateApiAsync(this.publicId + "/settings", ss)
+                                .done(resp => {
+                                if (resp.message) HTML.showProgressNotification(resp.message);
+                                else HTML.showProgressNotification(lf("setting saved"));
+                                TheApiCacheMgr.invalidate("me");
+                            }, e => Cloud.handlePostingError(e, lf("saving setting")));
+                        });
+                        nameInput.maxLength = maxLen;
+                        nameInput.value = s[fld]
+                        cc.push(div('inline-label', lbl));
+                        cc.push(nameInput);
+                    }
+
+                    var cc = []
+
+                    edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
+
+                    if (Cloud.hasPermission("adult")) {
+                        edit(lf("email (private; we won't spam you)"), "email")
+                        edit(lf("real name (private)"), "realname")
+                    }
+
+                    if (s.credit)
+                        cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
+
+                    settingsDiv.setChildren(cc)
+                })
+
             }
+
             ch.unshift(accountButtons);
             ch.unshift(hd);
 

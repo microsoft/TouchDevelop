@@ -193,6 +193,7 @@ module TDev {
         editor?: string; // convention where empty means touchdevelop, for backwards compatibility
         meta?: JsonScriptMeta; // only in lite, bag of metadata
         updateroot: string; // lite-only
+        unmoderated?: boolean;
     }
 
     export interface JsonHistoryItem
