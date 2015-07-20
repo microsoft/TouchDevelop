@@ -88,7 +88,11 @@ class ApiRequest
 
     err(exn:any)
     {
-        reportBug("apiRequest" + (this.data && this.data.id ? ":" + this.data.id : ""), exn);
+        reportBug("apiRequest" 
+            + (this.data && this.data.id ? ":" + this.data.id : "")
+            + (this.request ? " U:" + this.request.url : "")
+            + " A:" + this.addInfo
+        , exn);
         this.response.writeHead(400, "Exception");
         this.response.end();
     }
@@ -1129,6 +1133,7 @@ var apiHandlers = {
     },
 
     "query": (ar:ApiRequest) => {
+        if (ar.data) ar.addInfo += ",p=" + ar.data.path + ","
         parseScript(ar, (tcRes) => handleQuery(ar, tcRes))
     },
 
@@ -1137,6 +1142,7 @@ var apiHandlers = {
         if (m) {
             ar.data = { path: m[2], id: m[1] }
             TDev.AST.reset();
+            ar.addInfo += ",p=" + ar.data.path + ","
             TDev.AST.loadScriptAsync(getScriptAsync, m[1]).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
         } else {
             ar.notFound()
@@ -1145,6 +1151,7 @@ var apiHandlers = {
 
     "query2": (ar:ApiRequest) => {
         TDev.AST.reset();
+        if (ar.data) ar.addInfo += ",p=" + ar.data.path + ","
         TDev.AST.loadScriptAsync(getScriptAsync, ar.data.id).done(ar.wrap(tcRes => handleQuery(ar, tcRes)), ar.errHandler())
     },
 
@@ -1958,6 +1965,7 @@ export function globalInit()
     TDev.Browser.detect();
 
     TDev.RT.Node.setup();
+    TDev.Util.logSz = 300;
 
     TDev.Promise.errorHandler = reportBug;
 
