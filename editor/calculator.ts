@@ -3304,7 +3304,7 @@ module TDev
                      (this.expr.parsed.anyCalledAction() &&
                       this.expr.parsed.anyCalledAction().hasOutParameters())))
                 {
-                    var score = this.expr.tokens[0].getThing() instanceof AST.LocalDef ? this.promoteMult() * 1.0 : 1.1e20;
+                    var score = (this.expr.tokens.length == 1 && this.expr.tokens[0].getThing() instanceof AST.LocalDef) ? this.promoteMult() * 1.0 : 1.1e20;
                     var e = this.mkIntelliItem(score, Ticks.calcStoreInVar);
                     e.nameOverride = lf("store in var");
                     e.descOverride = lf("new variable");
