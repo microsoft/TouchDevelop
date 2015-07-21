@@ -527,9 +527,9 @@ module TDev {
 
         public topicLink(id:string)
         {
-            return this.serviceUrlOr("/docs/", "#topic:") + MdComments.shrink(id);
+            return this.serviceUrlOr(Cloud.config.topicPath, Cloud.config.localTopicPath) + MdComments.shrink(id);
         }
-
+ 
         public appLink(id:string)
         {
             return this.serviceUrlOr("/app/", "") + id
@@ -2051,7 +2051,7 @@ module TDev {
                           "</div>";
 
                 if (mdcmt.useExternalLinks)
-                    ch = ch.replace(/#topic(:|%3a)/g, Cloud.config.rootUrl + "/docs/");
+                    ch = ch.replace(/#topic(:|%3a)/g, Cloud.config.rootUrl + Cloud.config.topicPath);
             }
 
             if (this.app) {

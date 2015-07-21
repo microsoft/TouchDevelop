@@ -192,6 +192,8 @@ module TDev.Cloud {
         translateCdnUrl: string;
         translateApiUrl: string;
         hashtag: string;
+        topicPath: string;
+        localTopicPath: string;
 
         tdVersion?: string;
         releaseid?: string;
@@ -218,6 +220,8 @@ module TDev.Cloud {
         shareUrl: "http://tdev.ly",
         hashtag:"#TouchDevelop",
         liteVersion: null,
+        topicPath: "/docs/",
+        localTopicPath: "#topic:",
     }
 
     export function isArtUrl(url : string) : boolean {

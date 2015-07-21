@@ -913,7 +913,7 @@ module TDev.HTML {
     {
         var msg = div("errorNotification",
             lf("Access Denied: Your web browser and the web site prevent cross-origin resource sharing (CORS)."),
-            mkA("", Cloud.config.rootUrl + "/docs/CORS", "_blank", "Learn more..."), mkBr(), span("smallText", "URL: " + url));
+            mkA("", Cloud.config.rootUrl + Cloud.config.topicPath + "CORS", "_blank", lf("Learn more...")), mkBr(), span("smallText", lf("URL: {0}", url)));
         showNotification(msg);
     }
 
