@@ -7823,7 +7823,7 @@
                     if (!s) return
 
                     var edit = (lbl:string, fld:string, maxLen = 100) => {
-                        var nameInput = HTML.mkTextInputWithOk("text", "", () => {
+                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
                             HTML.showProgressNotification("saving...");
                             var ss:any = {}
                             ss[fld] = nameInput.value
@@ -7857,7 +7857,7 @@
                         edit(lf("real name (private)"), "realname")
                     }
 
-                    if (s.credit)
+                    if (s.credit && Cloud.hasPermission("post-group"))
                         cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
