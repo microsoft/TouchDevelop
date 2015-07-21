@@ -1356,6 +1356,12 @@ module TDev {
             var rk = par.subst(this._result.getKind())
             var r = mk ? mk(params, rk) : new Property(par, this._name, this._help, params, rk);
             params.forEach(p => { p.parentProperty = r })
+
+            if (!r._inParameters[0] || !this._inParameters[0]) {
+                Util.oops("no inparms, len=" + this._inParameters.length + "; " + 
+                    this.parentKind.getName() + "->" + this.getName())
+            }
+
             r._inParameters[0]._flags = this._inParameters[0]._flags;
             r.flags = this.flags;
             r._runtimeName = this._runtimeName;
