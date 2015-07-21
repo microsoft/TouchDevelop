@@ -6207,11 +6207,11 @@
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time) + " :: ";
                 if (this.publicId) timeStr += "/" + this.publicId;
-                if (this.jsonScript) {
+                if (this.publicId && this.jsonScript) {
                     if (this.jsonScript.ishidden)
-                        timeStr += " [h]"
+                        timeStr += big ? lf(" [hidden]") : lf(" [h]")
                     else if (this.jsonScript.unmoderated)
-                        timeStr += " [c]"
+                        timeStr += big ? lf(" [class]") : lf(" [c]")
                 }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
@@ -7823,7 +7823,7 @@
                     if (!s) return
 
                     var edit = (lbl:string, fld:string, maxLen = 100) => {
-                        var nameInput = HTML.mkTextInputWithOk("text", "", () => {
+                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
                             HTML.showProgressNotification("saving...");
                             var ss:any = {}
                             ss[fld] = nameInput.value
@@ -7836,7 +7836,7 @@
                             }, e => Cloud.handlePostingError(e, lf("saving setting")));
                         });
                         nameInput.maxLength = maxLen;
-                        nameInput.value = s[fld]
+                        nameInput.value = s[fld] || ""
                         cc.push(div('inline-label', lbl));
                         cc.push(nameInput);
                     }
@@ -7846,12 +7846,18 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (Cloud.hasPermission("adult")) {
-                        edit(lf("email (private; we won't spam you{0})", 
-                            s.emailverified ? "" : "; " + lf("email is not verified")), "email")
+                        edit(lf("email (private; {0})", 
+                            s.emailverified 
+                              ? lf("we won't spam you") 
+                              : lf("email is not verified, {0}",
+                                     s.previousemail 
+                                       ? lf("previous email: {0}", s.previousemail) 
+                                       : lf("no previous email"))), 
+                                "email")
                         edit(lf("real name (private)"), "realname")
                     }
 
-                    if (s.credit)
+                    if (s.credit && Cloud.hasPermission("post-group"))
                         cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
