@@ -7660,7 +7660,7 @@
                     if (this.width + this.height == 0) loadAnon();
                 }
 
-                if (this.nopicture || this.browser().picturelessUsers.hasOwnProperty(id)) {
+                if (Cloud.isRestricted() || this.nopicture || this.browser().picturelessUsers.hasOwnProperty(id)) {
                     Util.setTimeout(1, loadAnon);
                 } else {
                     var img = HTML.mkImg(Cloud.getPublicApiUrl(id + "/picture?type=" + (thumb ? "normal" : "large")));

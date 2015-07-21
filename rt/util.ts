@@ -946,22 +946,28 @@ module TDev{
         var idx = n % (colors.length - 1);
         var c = colors[idx];
         var d = "";
-        for (var x = 0; x < 3; ++x) {
-            for (var y = 0; y < 5; ++y) {
-                hash = advance(hash, 0)
-                n = hash & 0xffff;
-                if (n > 30000) {
-                  //  svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * x, 50 * y)
-                  //  if (x != 2)
-                    //    svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * (4-x), 50 * y)
-                }
-                else {
-                    d += Util.fmt(" M {0} {1} l 23 0 0 23 -23 0 Z", 50*x+2,50*y+2);
-                    if (x != 2)
-                        d += Util.fmt(" M {0} {1} l 23 0 0 23 -23 0 Z", 50*(4-x)+2,50*y+2);
+        var numPixels = 0
+
+        while (numPixels < 5) {
+            for (var x = 0; x < 3; ++x) {
+                for (var y = 0; y < 5; ++y) {
+                    hash = advance(hash, 0)
+                    n = hash & 0xffff;
+                    if (n > 30000) {
+                      //  svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * x, 50 * y)
+                      //  if (x != 2)
+                        //    svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * (4-x), 50 * y)
+                    }
+                    else {
+                        d += Util.fmt(" M {0} {1} l 23 0 0 23 -23 0 Z", 50*x+2,50*y+2);
+                        if (x != 2)
+                            d += Util.fmt(" M {0} {1} l 23 0 0 23 -23 0 Z", 50*(4-x)+2,50*y+2);
+                        numPixels++
+                    }
                 }
             }
         }
+
         var svg = Util.fmt("<path fill='{0}' d='{1}' />", c, d);
         return SVG.svgBoilerPlate('0 0 250 250', svg);
     }
