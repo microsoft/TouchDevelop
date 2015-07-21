@@ -6209,9 +6209,9 @@
                 if (this.publicId) timeStr += "/" + this.publicId;
                 if (this.publicId && this.jsonScript) {
                     if (this.jsonScript.ishidden)
-                        timeStr += big ? lf(" [hidden]") : lf(" [h]")
+                        timeStr += lf(" [hidden]")
                     else if (this.jsonScript.unmoderated)
-                        timeStr += big ? lf(" [class]") : lf(" [c]")
+                        timeStr += lf(" [class]")
                 }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
