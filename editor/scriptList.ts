@@ -9276,11 +9276,6 @@
             })
 
             var requestDocs = null
-
-            if (this.topic.isBuiltIn) {
-                requestDocs = this.needMore();
-            }
-
             var comments = div(null)
             if (id) {
                 if (!this.commentsTab) {
@@ -9313,60 +9308,6 @@
             ])
             if (this.commentsTab)
                 this.commentsTab.initTab();
-        }
-
-        private needMore()
-        {
-            if (!Cloud.getUserId()) return null;
-
-            var topDiv = div("sdVotingButtons", lf("Loading voting device; watch this space."))
-
-            var update = () => {
-                var id0 = "docs/" + this.topic.id
-                var id1 = Cloud.getUserId() + "/docs/" + this.topic.id
-                var btn0:HTMLElement, btn1:HTMLElement;
-
-                var vote = (good) => () => {
-                    btn0.setFlag("disabled", true);
-                    btn1.setFlag("disabled", true);
-                    topDiv.setFlag("working", true);
-                    Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id0),
-                                           { sufficient: good ? 1 : 0, insufficient: good ? 0 : 1 })
-                    .done((resp) => {
-                        TheApiCacheMgr.invalidate(id0)
-                        TheApiCacheMgr.invalidate(id1)
-                        update();
-                        if (!good) Browser.Hub.askToEnableNotifications();
-                    }, (e) => Cloud.handlePostingError(e, "vote on docs"));
-                }
-
-                topDiv.setFlag("working", false);
-                Promise.join([TheApiCacheMgr.getAsync(id0), TheApiCacheMgr.getAsync(id1)]).done((results) => {
-                    btn0 = HTML.mkDisablableButton(lf("I need more docs"), vote(false));
-                    btn1 = HTML.mkDisablableButton(lf("this is good enough"), vote(true));
-                    var all = results[0]
-                    var me = results[1]
-
-                    if (me.sufficient) btn1.setFlag("disabled", true);
-                    else if (me.insufficient) btn0.setFlag("disabled", true);
-
-                    topDiv.setChildren([
-                        div(null, btn1,
-                            all.sufficient == 0 ? lf("No one said so yet.") :
-                            me.sufficient && all.sufficient == 1 ? lf("You said so.") :
-                            me.sufficient ? Util.fmt("You and {0} other{0:s} are happy with it.", all.sufficient - 1)
-                                          : Util.fmt("{0} user{0:s} are happy with it.", all.sufficient)),
-                        div(null, btn0,
-                            all.insufficient == 0 ? lf("No one said so yet.") :
-                            me.insufficient && all.insufficient == 1 ? ("You said so.") :
-                            me.insufficient ? Util.fmt("You and {0} other{0:s} need more.", all.insufficient - 1)
-                            : Util.fmt("{0} user{0:s} need more.", all.insufficient)),
-                    ])
-                })
-            }
-            update();
-
-            return topDiv;
         }
 
         public match(terms:string[], fullName:string)
