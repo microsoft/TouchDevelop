@@ -4956,6 +4956,7 @@ height: 2.2em;
   margin-left:2em;
   margin-bottom:0.5em;
   overflow:hidden;
+  page-break-inside: avoid;
 }
 
 .md-box-header {
