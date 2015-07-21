@@ -1286,7 +1286,14 @@
                                 return groupInfo.changePictureAsync();
                             })
                             .done(() => TheHost.loadDetails(groupInfo, "settings"),
-                                e => Cloud.handlePostingError(e, lf("create group")));
+                                e => {
+                                    if (e && e.status == 405) {
+                                        ModalDialog.info(lf("we need your email"), 
+                                            lf("You need to have your email address set and verified to create groups."));
+                                    } else {
+                                        Cloud.handlePostingError(e, lf("create group"));
+                                    }
+                                })
                     }))
             ]);
             m.show();
@@ -7660,7 +7667,7 @@
                     if (this.width + this.height == 0) loadAnon();
                 }
 
-                if (this.nopicture || this.browser().picturelessUsers.hasOwnProperty(id)) {
+                if (Cloud.isRestricted() || this.nopicture || this.browser().picturelessUsers.hasOwnProperty(id)) {
                     Util.setTimeout(1, loadAnon);
                 } else {
                     var img = HTML.mkImg(Cloud.getPublicApiUrl(id + "/picture?type=" + (thumb ? "normal" : "large")));
@@ -7810,6 +7817,7 @@
                 var settingsDiv = div(null, div('bigLoadingMore', lf("loading settings...")));
                 ch.unshift(settingsDiv)
 
+                var refreshSettings = () =>
                 Cloud.getPrivateApiAsync(this.publicId + "/settings?format=short")
                 .done((s:Cloud.UserSettings) => {
                     if (!s) return
@@ -7824,6 +7832,7 @@
                                 if (resp.message) HTML.showProgressNotification(resp.message);
                                 else HTML.showProgressNotification(lf("setting saved"));
                                 TheApiCacheMgr.invalidate("me");
+                                refreshSettings()
                             }, e => Cloud.handlePostingError(e, lf("saving setting")));
                         });
                         nameInput.maxLength = maxLen;
@@ -7837,7 +7846,8 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (Cloud.hasPermission("adult")) {
-                        edit(lf("email (private; we won't spam you)"), "email")
+                        edit(lf("email (private; we won't spam you{0})", 
+                            s.emailverified ? "" : "; " + lf("email is not verified")), "email")
                         edit(lf("real name (private)"), "realname")
                     }
 
@@ -7846,6 +7856,8 @@
 
                     settingsDiv.setChildren(cc)
                 })
+
+                refreshSettings()
 
             }
 
