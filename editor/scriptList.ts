@@ -37,6 +37,8 @@
                     { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
                 ];
+                if (settings && Cloud.hasPermission("post-group"))
+                    menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
                 if (settings && EditorSettings.widgets().hubChannels)
                     menuItems.push({ id: "channels", name: lf("Channels"), tick: Ticks.siteMenuChannels, handler: () => this.showList("channels") });
                 if (!Cloud.getUserId())

@@ -173,6 +173,7 @@ module TDev {
         actionPropAtomic,
         
         siteMenuCreateCode,
+        siteMenuGroups,
         siteMenuTutorials,
         siteMenuProjects,
         siteMenuGettingStarted,
