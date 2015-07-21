@@ -7836,7 +7836,7 @@
                             }, e => Cloud.handlePostingError(e, lf("saving setting")));
                         });
                         nameInput.maxLength = maxLen;
-                        nameInput.value = s[fld]
+                        nameInput.value = s[fld] || ""
                         cc.push(div('inline-label', lbl));
                         cc.push(nameInput);
                     }
@@ -7846,8 +7846,14 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (Cloud.hasPermission("adult")) {
-                        edit(lf("email (private; we won't spam you{0})", 
-                            s.emailverified ? "" : "; " + lf("email is not verified")), "email")
+                        edit(lf("email (private; {0})", 
+                            s.emailverified 
+                              ? lf("we won't spam you") 
+                              : lf("email is not verified, {0}",
+                                     s.previousemail 
+                                       ? lf("previous email: {0}", s.previousemail) 
+                                       : lf("no previous email"))), 
+                                "email")
                         edit(lf("real name (private)"), "realname")
                     }
 
