@@ -675,6 +675,7 @@ module TDev.Cloud {
         emailnewsletter2?: string;
         emailfrequency?: string;
         email?: string;
+        emailverified?: boolean;
         location?: string;
         twitterhandle?: string;
         githubuser?: string;
