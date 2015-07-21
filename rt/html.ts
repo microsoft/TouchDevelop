@@ -604,6 +604,7 @@ module TDev.HTML {
             okBtn = null
             res.style.width = "";
             if (b) b.removeSelf();
+            if (onOk) onOk();
         }, false)
 
         return res
