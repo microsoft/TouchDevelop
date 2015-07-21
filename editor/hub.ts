@@ -555,7 +555,7 @@ module TDev.Browser {
             m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
-                HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()),
+                Cloud.getUserId() ? HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()) : undefined,
                 link(lf("terms of use"), "/terms-of-use"),
                 link(lf("privacy and cookies"), "/privacy")
                 ));

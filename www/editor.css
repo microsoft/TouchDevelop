@@ -4924,6 +4924,11 @@ height: 2.2em;
   margin-bottom: 1.5em;
 }
 
+@media print {
+  .md-tutorial a:link:after, .md-tutorial a:visited:after
+  { content:" (" attr(href) ") "; }
+}
+
 .md-video-link {
   text-align:center;
   cursor:pointer;

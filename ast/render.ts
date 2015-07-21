@@ -1092,6 +1092,7 @@ module TDev
         static css = "<style>\n" +
                      "@page { margin: 1in; }\n" +
                       ".md-tutorial { font-size: 1.0em; line-height: 1.4em; }\n"+
+                      "@media print { .md-tutorial a:link:after, .md-tutorial a:visited:after  { content:\" (\" attr(href) \") \"; } }\n"+                      
                       ".parse-error, .decl { margin-bottom: 1em; }\n" +
                       ".parse-error, .error { color: #d00; }\n" +
                       ".hint { color: #444; }\n" +
