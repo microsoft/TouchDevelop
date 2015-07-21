@@ -6207,11 +6207,11 @@
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time) + " :: ";
                 if (this.publicId) timeStr += "/" + this.publicId;
-                if (this.jsonScript) {
+                if (this.publicId && this.jsonScript) {
                     if (this.jsonScript.ishidden)
-                        timeStr += " [h]"
+                        timeStr += big ? lf(" [hidden]") : lf(" [h]")
                     else if (this.jsonScript.unmoderated)
-                        timeStr += " [c]"
+                        timeStr += big ? lf(" [class]") : lf(" [c]")
                 }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
