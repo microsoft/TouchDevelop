@@ -12,6 +12,8 @@ module TDev {
     origin: string;
     // The path from the domain root to the editor main document.
     path: string;
+    // url to the logo image
+    logoUrl: string;
   }
 
   var externalEditorsCache: ExternalEditor[] = null;
@@ -36,7 +38,8 @@ module TDev {
         description: "Drag and drop",
         id: "blockly",
         origin: origin,
-        path: path + "blockly/editor.html"
+        path: path + "blockly/editor.html",
+        logoUrl: "https://microbit0.blob.core.windows.net/pub/vtadprog"
       }];
     }
     return externalEditorsCache;
