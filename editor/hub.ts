@@ -553,11 +553,11 @@ module TDev.Browser {
             m.fullWhite();
             m.add(div("wall-dialog-header", Runtime.appName));
             m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
+            var legalButtons = Cloud.config.legalButtons.map(b => link(b.name, b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
-                Cloud.getUserId() ? HTML.mkButton(lf("sign out"),() => TheEditor.logoutDialog()) : undefined,
-                link(lf("terms of use"), "/terms-of-use"),
-                link(lf("privacy and cookies"), "/privacy")
+                Cloud.getUserId() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : undefined,
+                legalButtons
                 ));
 
             if (EditorSettings.widgets().githubLinks) {
@@ -701,7 +701,7 @@ module TDev.Browser {
             var copyrights = "<div class='beta-legal'>" + 
                 betaNote +
                 "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
-                "<span class='beta-underline'>terms of use</span>&nbsp;|&nbsp;<span class='beta-underline'>privacy policy</span>" + 
+                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;")
                 "</div>";
 
             Browser.setInnerHTML(beta, copyrights);

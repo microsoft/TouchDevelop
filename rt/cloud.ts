@@ -194,6 +194,7 @@ module TDev.Cloud {
         hashtag: string;
         topicPath: string;
         localTopicPath: string;
+        legalButtons: { name: string; url: string; }[];
 
         tdVersion?: string;
         releaseid?: string;
@@ -222,6 +223,10 @@ module TDev.Cloud {
         liteVersion: null,
         topicPath: "/docs/",
         localTopicPath: "#topic:",
+        legalButtons: [
+            { name: "terms of use", url: "/terms-of-use" },
+            { name: "privacy and cookies", url: "/privacy"}
+        ]
     }
 
     export function isArtUrl(url : string) : boolean {

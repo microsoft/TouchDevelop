@@ -243,8 +243,7 @@ module TDev {
                         link("try touchdevelop", "")));
 
                 m.add(div("wall-dialog-buttons",
-                    link(lf("terms of use"), "/terms-of-use"),
-                    link(lf("privacy and cookies"), "/privacy")
+                    Cloud.config.legalButtons.map(b => link(b.name, b.url))
                     ));
 
                 m.show();
