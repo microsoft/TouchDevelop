@@ -2777,6 +2777,10 @@ a.md-bigbutton:hover {
   line-height:2em;
 }
 
+.sdMoreDiv {
+  min-height:2em;
+}
+
 .phone .sdTabLabel {
   font-size: 1.3em;
 }

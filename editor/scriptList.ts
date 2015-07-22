@@ -1693,7 +1693,7 @@
                     else
                         this.displayLimit = this.topLocations.length;
 
-                    this.moreDiv = div(null)
+                    this.moreDiv = div('sdMoreDiv')
                     this.syncView(!cont);
 
                     if (loadItem) {
@@ -9450,7 +9450,7 @@
 
                 if (hidden.length > 0) {
                     ch.push(div("sdLoadingMore", lf("unrated topics found; give them hearts to expand them by default!")));
-                    var moreDiv = div(null,
+                    var moreDiv = div("sdMoreDiv",
                         HTML.mkButton(lf("show unrated topics"), () => {
                             var ch = hidden.map(render);
                             ch.push(searchRelated);
