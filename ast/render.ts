@@ -190,25 +190,27 @@ module TDev
                 return !!x;
             }));
 
+            var maxCols = 45;            
             var c = '#f00'; var b = '#ccc';
+            var f = 50; var f2 = f / 2;
             var r1 = "";
             var r0 = "";
-            var w = 0;
+            var w = 0;            
             var rows = bits.length;
             if (!v) rows = 5;
-            var h = rows * 50;
+            var h = rows * f;
             var ellipse = false;
             for (var y = 0; y < rows; ++y) {
                 var row = bits[y] || [];
-                var cols = Math.max(rows, Math.min(row.length, 25));
-                w = Math.max(w, cols * 50);
+                var cols = Math.max(rows, Math.min(row.length, maxCols));
+                w = Math.max(w, cols * f + Math.floor(cols /5) * f);
                 ellipse = ellipse || cols < row.length;
                 for (var x = 0; x < cols; ++x) {
                     var bit = row[x];
-                    var left = 50 * x;
-                    var top = 50 * y;
+                    var left = f * x + Math.floor(x / 5) * f;
+                    var top = f * y;
                     var path = Util.fmt(" M {0} {1} {2} {3} {4} {5} {6} {7} Z",
-                        left, top, left+25, top, left+25, top+25, left, top+25);
+                        left, top, left+f2, top, left+f2, top+f2, left, top+f2);
                     if (bit) r1 += path; else r0 += path;
                 }
             }
