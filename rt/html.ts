@@ -592,19 +592,23 @@ module TDev.HTML {
             okBtn = mkButton(lf("ok"), () => {
                 var b = okBtn
                 okBtn = null
+                var h = onOk;
+                onOk = null;
                 res.style.width = "";
                 if (b) b.removeSelf();
                 res.blur()
-                if (onOk) onOk();
+                if (h) h();
             }, "input-confirm");
             res.parentNode.insertBefore(okBtn, res.nextSibling)
         })
         res.addEventListener("blur", () => {
             var b = okBtn
             okBtn = null
+            var h = onOk;
+            onOk = null;
             res.style.width = "";
             if (b) b.removeSelf();
-            if (onOk) onOk();
+            if (h) h();
         }, false)
 
         return res
