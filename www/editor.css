@@ -5946,11 +5946,11 @@ table.dashboard tr td[data-completed^="yes"] {
 }
 
 .powered-by-logo img {
-  width:12em;
+  width:10em;
 }
 
 .powered-by {
-  width: 6em;
+  width: 5em;
   margin-top: 2em;
   margin-left: 2em;
   position: relative;
@@ -5959,7 +5959,7 @@ table.dashboard tr td[data-completed^="yes"] {
 }
 
 .powered-by-first {
-  margin-left: 1.5em;
+  margin-left: 1em;
 }
 
 .powered-by .text {
@@ -5980,7 +5980,7 @@ table.dashboard tr td[data-completed^="yes"] {
 
 .powered-by-first img {
   margin-top: 0.3em;
-  width: 6em;
+  width: 5em;
   height: auto;
 }
 

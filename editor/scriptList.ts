@@ -845,7 +845,10 @@
                         div("text", lf("Cloud services by")),
                         div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux")) )))
                     , div("powered-by",
-                        div("text", lf("Compilation services by")),
+                        div("text", lf("micro:bit runtime by")),
+                        div("img", HTML.mkA("", "http://www.lancaster.ac.uk/", "_blank", HTML.mkImg(Cloud.artUrl("fcyoveaf")))))
+                    , div("powered-by",
+                        div("text", lf("Compiler services by")),
                         div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah")))))
                     ];
             }
