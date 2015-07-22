@@ -6930,8 +6930,9 @@
             }
 
             var m: ModalDialog;
-            var sendPullRequest = false;
+            var sendPullRequest = false                
             var sendPullRequestId = this.cloudHeader.scriptId;
+            var baseId = this.cloudHeader.scriptId;
             var pullMergeIds : string[] = undefined;
             var changeDescription = HTML.mkTextInput('text', lf("add a publication note"));
             changeDescription.classList.add('pub-notes');
@@ -7035,7 +7036,7 @@
                                             tick(Ticks.browsePublicationNotes);
                                             var req = { kind: "comment", text: descr + ' #publicationNotes', userplatform: Browser.platformCaps };
                                             Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/comments", req)
-                                                .done((jscom: JsonComment) => {
+                                                .then((jscom: JsonComment) => {
                                                     if (jscom && sendPullRequest) {
                                                         tick(Ticks.browseSendPullRequest);
                                                         Util.log('send pull request');
@@ -7044,15 +7045,25 @@
                                                         return Cloud.postPrivateApiAsync(sendPullRequestId + "/comments", req);
                                                     }
                                                     return Promise.as();
-                                                }, e => Cloud.handlePostingError(e, lf("send pull request")));
+                                                }).done(() => { }, e => Cloud.handlePostingError(e, lf("send pull request")));
                                         }
                                         if (pullMergeIds && pullMergeIds.length > 0) {
                                             Promise.join(pullMergeIds.map(mid => {
                                                 var req = { kind: "comment", text: lf("Your changes have been pulled into {0}!", ' /' + this.cloudHeader.scriptId), userplatform: Browser.platformCaps };
                                                 return Cloud.postPrivateApiAsync(mid + "/comments", req);
-                                            })).done(() => {}, (e) => {});
+                                            })).done(() => {}, (e) => {}); // swallow error
                                         }
-
+                                        if (Cloud.lite && baseId) {
+                                            var baseMeta = undefined;
+                                            Cloud.getPrivateApiAsync(baseId)
+                                                .then((baseJson: JsonScript) => {
+                                                    baseMeta = baseJson.meta;
+                                                    if (!baseMeta) return Promise.as();
+                                                    else Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/meta", baseJson.meta);
+                                                }).done(() => { 
+                                                    if (baseMeta) TheApiCacheMgr.invalidate(this.cloudHeader.scriptId)
+                                                }, e => Cloud.handlePostingError(e, lf("updating meta")));
+                                        }
                                         return this.setupDocPathAsync(true)
                                             .then(() => this.publishFinished(m, fromHub, sendPullRequest))
                                     }).done()
