@@ -191,7 +191,6 @@ module TDev
             }));
 
             var maxCols = 45;            
-            var c = '#f00'; var b = '#ccc';
             var f = 50; var f2 = f / 2;
             var r1 = "";
             var r0 = "";
@@ -209,13 +208,15 @@ module TDev
                     var bit = row[x];
                     var left = f * x + Math.floor(x / 5) * f;
                     var top = f * y;
+                    var width = f2;
+                    if (bit) { width += 4; left -= 2; top -= 2; }
                     var path = Util.fmt(" M {0} {1} {2} {3} {4} {5} {6} {7} Z",
-                        left, top, left+f2, top, left+f2, top+f2, left, top+f2);
+                        left, top, left+width, top, left+width, top+width, left, top+width);
                     if (bit) r1 += path; else r0 += path;
                 }
             }
             var viewPort = Util.fmt("0 0 {0} {1}", w, h);
-            var svg = Util.fmt("<path fill='#f00' d='{0}'/><path fill='#ccc' d='{1}'/>", r1, r0);
+            var svg = Util.fmt("<path class='biton' d='{0}'/><path class='bitoff' d='{1}'/>", r1, r0);
             var result = Util.fmt("<span class='kbm' style='width:{0}em'>{1}</span>",
                             w / h + 0.3,
                             SVG.svgBoilerPlate(viewPort, svg));
@@ -1101,6 +1102,7 @@ module TDev
                       ".errorNumber { color: #aaa; }\n" +
                       ".kw, .keyword { font-weight: bold; color: black; }\n" +
                       ".kbm { display:inline-block;} .kbm svg { height: 1em; vertical-align: middle; margin-left: 0.2em; }\n" +
+                      ".kbm svg > path.biton { fill:#000; } .kbm svg > path.bitoff { fill:#ccc; }\n" +
                       ".code-highlight { border: 1px dashed gray; font-weight:bold; }\n" +
                       ".comment { color:#444; font-style:italic; }\n" +
                       ".greyed { color:#444; }\n" +
