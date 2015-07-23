@@ -232,6 +232,13 @@ module TDev
                 btns.push(HTML.mkRoundButton("svg:camera,black", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
             return btns;
         }
+        
+        public runById(scriptId: string) {
+            // TODO handle script id
+            if (!Script) return;
+            var rt = this.currentRt;
+            rt.rerunAsync().done();
+        }
 
         public takeScreenshot() {
             if (!Script) return;
