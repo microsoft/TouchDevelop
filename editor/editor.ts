@@ -233,7 +233,7 @@ module TDev
             return btns;
         }
         
-        public runById(scriptId: string) {
+        public runByScriptId(scriptId: string) {
             var rt = this.currentRt;
             if (Script && rt && (!scriptId || rt.currentScriptId == scriptId)) {
                 Util.log("rerun script");
