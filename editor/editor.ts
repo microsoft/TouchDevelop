@@ -1275,6 +1275,11 @@ module TDev
 
         public displayLeft(nodes: any) {
             this.codeInner.setChildren(nodes);
+            if (this.widgetEnabled("calcHelpOverlay")) {
+                this.codeInner.appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,black', lf("help"), Ticks.calcHelpOverlay, () => {
+                    Util.navigateInWindow(Cloud.config.helpPath);
+                })));
+            }    
         }
 
         public topScriptOp(f:()=>void)

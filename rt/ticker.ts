@@ -126,6 +126,7 @@ module TDev {
         calcAddBoxProperty,
         calcInsertStringParamterValue,
         calcHelp,
+        calcHelpOverlay,
         calcElseIf,
         calcUnElseIf,
         calcBindGlobal,

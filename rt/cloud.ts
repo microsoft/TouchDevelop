@@ -45,6 +45,7 @@ module TDev.Cloud {
         splitButton?: boolean;
         uploadArtInSearchButton?: boolean;
         calcApiHelp?: boolean;
+        calcHelpOverlay?: boolean;
         sideRunButton?: boolean;
         tutorialGoToPreviousStep?: boolean;
         helpLinks?: boolean;

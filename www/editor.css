@@ -2051,6 +2051,16 @@ div.decl > div.stmt {
     position: relative;
 }
 
+#leftPaneContent > .helpBtnOverlay {
+  position: absolute;
+  right: 0.5em;
+  bottom: 0.5em;
+}
+
+#leftPaneContent > .helpBtnOverlay svg {
+  padding-left:0.2em;
+}
+
 .sideTabScroll {
     padding-bottom: 1.5em;
 }
@@ -4641,7 +4651,8 @@ span.videoCaption
 }
 
 #root[data-wall-visible="yes"] #scriptEditor > .beta-note,
-#root[data-stmt-editor-visible="yes"] #scriptEditor > .beta-note
+#root[data-stmt-editor-visible="yes"] #scriptEditor > .beta-note,
+#root[data-stmt-editor-visible="yes"] #leftPaneContent > .helpBtnOverlay
 {
   display: none;
 }
