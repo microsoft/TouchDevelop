@@ -234,10 +234,14 @@ module TDev
         }
         
         public runById(scriptId: string) {
-            // TODO handle script id
-            if (!Script) return;
             var rt = this.currentRt;
-            rt.rerunAsync().done();
+            if (Script && rt && (!scriptId || rt.currentScriptId == scriptId)) {
+                Util.log("rerun script");
+                rt.rerunAsync().done();
+            } else {
+                Util.log("running " + scriptId);
+                Browser.TheHost.getScriptInfoById(scriptId).run();
+            }
         }
 
         public takeScreenshot() {
