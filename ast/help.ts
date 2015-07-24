@@ -920,7 +920,7 @@ module TDev {
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||
                 macro == "stcode" || macro == "storder" || macro == "stdelete" || macro == "stcheckpoint" || macro == "sthashtags" ||
                 macro == "stnocheers" || macro == "steditormode" || macro == "stnexttutorials" || macro == "stmoretutorials" ||
-                macro == "translations" || macro == "stpixeltracking" || macro == "steventhubstracking" || macro == "icon"
+                macro == "translations" || macro == "stpixeltracking" || macro == "steventhubstracking" || macro == "icon" || macro == "help"
                 ) {
                 if (this.designTime)
                     return "{" + macro + (arg ? ":" + Util.htmlEscape(arg) : "") + "}";
@@ -1545,7 +1545,8 @@ module TDev {
         priority:number;
         platforms?:string[];
         parentTopic?:string;
-        screenshot?:string;
+        screenshot?: string;
+        helpPath?: string;
     }
 
     export interface HelpTopicInfoJson {
@@ -1659,7 +1660,8 @@ module TDev {
                 iconbackground: "#008800",
                 text: "",
                 rootid: "none",
-                priority: 20000
+                priority: 20000,
+                helpPath: act.getHelpPath()
             })
 
             t.apiProperty = act

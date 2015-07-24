@@ -1737,6 +1737,12 @@ module TDev.AST {
                 return p[0].getKind()
             return null
         }
+        
+        public getHelpPath() : string  {
+            var desc = this.getDescription()
+            var m = /{help:([^}]+)}/i.test(desc);
+            return m ? m[1] : undefined;
+        }
 
         public getNamespaces():string[]
         {

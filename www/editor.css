@@ -1039,6 +1039,7 @@ textarea.commentEdit {
  right: 0.3em;
  text-decoration: underline;
  color: blue;
+ cursor:pointer;
 }
 
 

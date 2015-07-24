@@ -192,6 +192,7 @@ module TDev.Cloud {
         translateCdnUrl: string;
         translateApiUrl: string;
         hashtag: string;
+        helpPath: string;
         topicPath: string;
         localTopicPath: string;
         legalButtons: { name: string; url: string; }[];
@@ -221,6 +222,7 @@ module TDev.Cloud {
         shareUrl: "http://tdev.ly",
         hashtag:"#TouchDevelop",
         liteVersion: null,
+        helpPath: "/docs",
         topicPath: "/docs/",
         localTopicPath: "#topic:",
         legalButtons: [

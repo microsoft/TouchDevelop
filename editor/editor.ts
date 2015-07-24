@@ -5357,9 +5357,12 @@ module TDev
         {
             tick(Ticks.calcHelp);
             if (HelpTopic.contextTopics.length == 0) {
-                Util.setHash("#help")
+                if (Cloud.lite) Util.navigateInWindow(Cloud.config.helpPath);
+                else Util.setHash("#help")
             } else {
-                Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
+                var topic = HelpTopic.contextTopics[0];
+                if (Cloud.lite && topic.json && topic.json.helpPath) Util.navigateInWindow("/" + topic.json.helpPath);
+                else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }
         }
 
