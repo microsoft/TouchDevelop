@@ -35,6 +35,7 @@
                     { id: "tutorials", name: lf("Tutorials"), tick: Ticks.siteMenuTutorials, handler: () => Util.navigateInWindow("/tutorials") },
                     { id: "projects", name: lf("Projects"), tick: Ticks.siteMenuProjects, handler: () => Util.navigateInWindow("/projects") },
                     { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
+                    { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
                 ];
                 if (settings && Cloud.hasPermission("post-group"))
@@ -5723,8 +5724,8 @@
                     }
 
 
-                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript &&
-                        (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt"))) {
+                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
+                        (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("post-script-meta"))) {
                         socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),

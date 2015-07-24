@@ -176,6 +176,7 @@ module TDev {
         siteMenuGroups,
         siteMenuTutorials,
         siteMenuProjects,
+        siteMenuHelp,
         siteMenuGettingStarted,
         siteMenuMyScripts,
         siteMenuSignIn,
