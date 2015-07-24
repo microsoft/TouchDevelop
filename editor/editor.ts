@@ -2030,8 +2030,8 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
             var msg = Cloud.isFota()
-                ? lf("Please wait while we prepare your .hex file. Once the .hex file is ready, it will be flashed onto your micro:bit!")
-                : lf("Please wait while we prepare your .hex file. Once the .hex file is downloaded, drag and drop it into your device drive then press the system button.")
+                ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
+                : lf("Please wait while we prepare your hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive. Press the reset button.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
