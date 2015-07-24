@@ -1030,18 +1030,7 @@ textarea.commentEdit {
   width: auto;
   height: auto;
   position: absolute;
-  cursor:pointer;
 }
-
-.calcApiHelpMore {
- bottom: 0.3em;
- position: absolute;
- right: 0.3em;
- text-decoration: underline;
- color: blue;
- cursor:pointer;
-}
-
 
 .calcApiHelpCurrentParameter {
   font-weight: bold

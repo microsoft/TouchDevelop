@@ -1740,7 +1740,7 @@ module TDev.AST {
         
         public getHelpPath() : string  {
             var desc = this.getDescription()
-            var m = /{help:([^}]+)}/i.test(desc);
+            var m = /{help:([^}]+)}/i.exec(desc);
             return m ? m[1] : undefined;
         }
 

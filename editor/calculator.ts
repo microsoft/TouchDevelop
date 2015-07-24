@@ -3729,10 +3729,10 @@ module TDev
             var setHelp = (args:any) => {
                 didIt = true
                 this.apiHelpDiv.setChildren(div("calcApiHelpInner", args));
-                if (TheEditor.widgetEnabled("calcApiHelp") && Cloud.isOnline())
-                    this.apiHelpDiv.appendChild(
-                        div('calcApiHelpMore', lf("read more...")).withClick(() => TheEditor.displayHelp())
-                    );
+                if (TheEditor.widgetEnabled("calcApiHelp") && Cloud.isOnline()) {
+                    this.apiHelpDiv.style.cursor = 'pointer';
+                    this.apiHelpDiv.withClick(() => TheEditor.displayHelp());
+                }
             }
 
             this.findCallAndArg(this.expr.parsed, results);
