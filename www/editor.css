@@ -5958,7 +5958,7 @@ table.dashboard tr td[data-completed^="yes"] {
 }
 
 .powered-by {
-  width: 6em;
+  width: 5em;
   margin-top: 2em;
   margin-left: 2em;
   position: relative;
