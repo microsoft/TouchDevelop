@@ -33,6 +33,15 @@ module TDev {
         path: path + "ace/editor.html"
         icon: ""
       }, */
+      {
+        company: "Microsoft",
+        name: "Block Editor",
+        description: "Drag and drop blocks to code!",
+        id: "blockly",
+        origin: origin,
+        path: path + "blockly/editor.html",
+        logoUrl: "https://microbit0.blob.core.windows.net/pub/vtadprog"
+        },
         {
           company: "Code Kingdoms",
           name: "CK JavaScript",
@@ -47,16 +56,8 @@ module TDev {
           // path: '/ck-client/game/',
 
           logoUrl: origin + path + 'img/codekingdoms-microbit.png'
-        },
-      {
-        company: "Microsoft",
-        name: "Block Editor",
-        description: "Drag and drop",
-        id: "blockly",
-        origin: origin,
-        path: path + "blockly/editor.html",
-        logoUrl: "https://microbit0.blob.core.windows.net/pub/vtadprog"
-      }];
+        }
+      ];
     }
     return externalEditorsCache;
   }
