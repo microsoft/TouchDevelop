@@ -301,6 +301,8 @@ export module SVG {
         });
 
         var lname = name.toLowerCase()
+        
+        if (lname == "codekingdoms") return codekingdomsLogo;
 
         if (iconMapping.hasOwnProperty(lname))
             lname = iconMapping[lname]
