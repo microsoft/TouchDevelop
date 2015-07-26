@@ -6851,7 +6851,7 @@
                     ])
             })()
 
-            if (EditorSettings.widgets().publishToComputingAtSchools) {
+            if (EditorSettings.widgets().computingAtSchool) {
                 m.add(div("wall-dialog-buttons text-left",
                     HTML.mkButton(lf("publish at ComputingAtSchool.org.uk"), () => {
                         var descr = this.app.getDescription();

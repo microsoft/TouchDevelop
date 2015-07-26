@@ -1277,7 +1277,16 @@ module TDev
             this.codeInner.setChildren(nodes);
             if (this.widgetEnabled("calcHelpOverlay")) {
                 this.codeInner.appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,black', lf("help"), Ticks.calcHelpOverlay, () => {
-                    Util.navigateInWindow(Cloud.config.helpPath);
+                    var m = new ModalDialog();
+                    m.add(div('wall-dialog-header', lf("got a question?")));
+                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
+                    m.add(div('wall-dialog-buttons',
+                        HTML.mkButton(lf("read the docs"), () => Util.navigateInWindow(Cloud.config.helpPath)),
+                        this.widgetEnabled("computingAtSchool") ? HTML.mkButton(lf("CAS forum"), () => Util.navigateInWindow("http://community.computingatschool.org.uk/forums/1")) : undefined,
+                        this.widgetEnabled("userVoice") ? HTML.mkButton("Post an idea", () => Util.navigateInWindow("https://touchdevelop.uservoice.com")) : undefined,
+                        HTML.mkButton(lf("cancel"), () => m.dismiss())
+                        ));
+                    m.show();
                 })));
             }    
         }
