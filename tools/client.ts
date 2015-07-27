@@ -3541,6 +3541,35 @@ function copyscript(args:string[])
     })
 }
 
+function uploadhtml(args:string[])
+{
+    var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
+    if (!mm) {
+        console.log("invalid or missing $TD_UPLOAD_KEY")
+        return
+    }
+
+    if (args.length < 1) {
+        console.log("usage: uploadhtml file.html")
+        return
+    }
+
+    var text = fs.readFileSync(args[0], "utf8")
+
+    
+    var liteUrl = mm[1]
+    var key = mm[2]
+
+    tdevGet(liteUrl + "api/scripts" + key, resp => {
+        console.log(resp)
+    }, 1, {
+        raw: "html",
+        editor: "html",
+        name: args[0],
+        text: text,
+    })
+}
+
 function tdupload(args:string[])
 {
     if (process.env.TD_SOURCE_MAPS && !process.env.TRAVIS)
@@ -3758,6 +3787,7 @@ var cmds = {
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
     "setlabel": { f:setlabel, a:'KEY RELID LABEL', h:'set release label'},
     "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
+    "uploadhtml": { f:uploadhtml, a:'FILENAME.html', h:'upload html file as script'},
 }
 
 export interface ScriptTemplate {
