@@ -6478,6 +6478,8 @@
             var editB = mkBtn(Ticks.browseEdit, "svg:edit,white", lf("edit"), null, () => { this.edit() });
             if (TDev.RT.Wab && this.getGuid() && TDev.RT.Wab.isSupportedAction(TDev.RT.Wab.Action.UPDATE_TILE)) {
                 pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
+            } else if (TDev.RT.App.env().has_host() && this.publicId) {
+                pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });               
             }
             if (World.updateFor(this.cloudHeader)) {
                 updateB = mkBtn(Ticks.browseEdit, "svg:fa-refresh,white", lf("update"), null, () => { this.update() });
@@ -7068,15 +7070,8 @@
                                                 }).done(() => { 
                                                     if (baseMeta) TheApiCacheMgr.invalidate(this.cloudHeader.scriptId)
                                                 }, e => Cloud.handlePostingError(e, lf("updating meta")));
-                                        }
-                                        
-                                        if (TDev.RT.App.env().has_host()) {
-                                            Util.log('app host: notify script published');
-                                            TDev.RT.App.hostExecAsync("touchdevelop.script(" + this.cloudHeader.scriptId + "," + this.getTitle().replace(/[,\)\.]/g, "") + ")").done(
-                                                () => { },
-                                                e => Util.log('app host script notification failed'));
-                                        }
-                                        
+                                        }                                        
+                                        this.sendScriptIdToAppHost();                                        
                                         return this.setupDocPathAsync(true)
                                             .then(() => this.publishFinished(m, fromHub, sendPullRequest))
                                     }).done()
@@ -7153,6 +7148,15 @@
                     m.onDismiss = () => onSuccess(undefined);
                     m.show();
                 });
+            }
+        }
+        
+        private sendScriptIdToAppHost() {
+            if (TDev.RT.App.env().has_host()) {
+                Util.log('app host: notify script published');
+                TDev.RT.App.hostExecAsync("touchdevelop.script(" + this.cloudHeader.scriptId + "," + this.getTitle().replace(/[,\)\.]/g, "") + ")").done(
+                    () => { },
+                    e => Util.log('app host script notification failed'));
             }
         }
 
