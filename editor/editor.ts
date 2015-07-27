@@ -4252,7 +4252,7 @@ module TDev
                                 m.dismiss(); 
                                 TheEditor.logoutAsync(false).done() 
                         })),
-                        sm = div("wall-dialog-body", lf("If suspect your account has been compromised, "),
+                        sm = div("wall-dialog-body", lf("If you suspect your account has been compromised, "),
                                 HTML.mkLinkButton(lf("sign out on all your devices"), () => {
                                     m.dismiss(); 
                                     TheEditor.logoutAsync(true).done() 
