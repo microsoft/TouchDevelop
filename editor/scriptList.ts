@@ -6479,7 +6479,7 @@
             if (TDev.RT.Wab && this.getGuid() && TDev.RT.Wab.isSupportedAction(TDev.RT.Wab.Action.UPDATE_TILE)) {
                 pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
             } else if (TDev.RT.App.env().has_host() && this.publicId) {
-                pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });               
+                pinB = mkBtn(Ticks.browsePin, "svg:arrowdownl,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });               
             }
             if (World.updateFor(this.cloudHeader)) {
                 updateB = mkBtn(Ticks.browseEdit, "svg:fa-refresh,white", lf("update"), null, () => { this.update() });
