@@ -7889,8 +7889,10 @@
                     settingsDiv.setChildren(cc)
                 })
 
-                refreshSettings()
-
+                if (this.isMe())
+                    refreshSettings()
+                else
+                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit email, ..."), refreshSettings))
             }
 
             ch.unshift(accountButtons);
