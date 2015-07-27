@@ -1282,7 +1282,7 @@ module TDev
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
                     m.add(div('wall-dialog-buttons',
                         HTML.mkButton(lf("read the docs"), () => Util.navigateInWindow(Cloud.config.helpPath)),
-                        this.widgetEnabled("computingAtSchool") ? HTML.mkButton(lf("CAS forum"), () => Util.navigateInWindow("http://community.computingatschool.org.uk/forums/1")) : undefined,
+                        this.widgetEnabled("computingAtSchool") ? HTML.mkButton(lf("CAS forum"), () => Util.navigateInWindow("http://community.computingatschool.org.uk/forums/23")) : undefined,
                         this.widgetEnabled("userVoice") ? HTML.mkButton("Post an idea", () => Util.navigateInWindow("https://touchdevelop.uservoice.com")) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())
                         ));
