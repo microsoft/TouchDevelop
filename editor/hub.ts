@@ -603,12 +603,14 @@ module TDev.Browser {
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports")  }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
+                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
                         var perm = HTML.mkTextInput("text", "")
                         var count = HTML.mkTextInput("text", "")
                         var credit = HTML.mkTextInput("text", "")
                         var groups = HTML.mkTextInput("text", "")
+                        var desc = HTML.mkTextInput("text", "")
                         var numuses = HTML.mkTextInput("text", "")
                         perm.value = "educator"
                         count.value = "1"
@@ -619,6 +621,7 @@ module TDev.Browser {
                             lf("Number of codes: "), count,
                             lf("Credit for each code: "), credit,
                             lf("Number of uses for each code: "), numuses,
+                            lf("Code description (purpouse): "), desc,
                             lf("Groups to join: "), groups,
                             HTML.mkAsyncButton(lf("generate"), () => {
                                 var data = {
@@ -627,11 +630,13 @@ module TDev.Browser {
                                     singlecredit: parseInt(credit.value),
                                     permissions: perm.value.replace(/[,\s]+/g, ","),
                                     groups: groups.value.replace(/[,\s]+/g, ","),
+                                    description: desc.value,
                                 }
                                 if (!data.count) HTML.wrong(count)
                                 else if (!data.singlecredit) HTML.wrong(credit)
                                 else if (!data.credit) HTML.wrong(numuses)
                                 else if (!data.permissions) HTML.wrong(perm)
+                                else if (!data.description) HTML.wrong(desc)
                                 else 
                                     ModalDialog.ask(
                                         lf("Creating this code will let up to {0} users into the system.", data.count * data.credit),
