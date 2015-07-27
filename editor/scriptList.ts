@@ -7072,7 +7072,7 @@
                                         
                                         if (TDev.RT.App.env().has_host()) {
                                             Util.log('app host: notify script published');
-                                            TDev.RT.App.hostExecAsync("touchdevelop.script(" + this.cloudHeader.scriptId + ")").done(
+                                            TDev.RT.App.hostExecAsync("touchdevelop.script(" + this.cloudHeader.scriptId + "," + this.getTitle().replace(/[,\)\.]/g, "") + ")").done(
                                                 () => { },
                                                 e => Util.log('app host script notification failed'));
                                         }
