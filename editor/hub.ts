@@ -1153,6 +1153,11 @@ module TDev.Browser {
                 }
             }
 
+            if (h[1] == "signout") {
+                TheEditor.logoutDialog()
+                return
+            }
+
             if (h[1] == 'new') {
                 HistoryMgr.instance.setHash(this.screenId() + ":" + h[1] + ":" + h[2], null)
                 this.newScriptHash(h[2], h[3]);

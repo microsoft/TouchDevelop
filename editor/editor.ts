@@ -5982,6 +5982,10 @@ module TDev
                     case "landing":
                         hs = ["hub", "install-run", hs[1]]
                         break;
+                    case "signout":
+                    case "logout":
+                        hs = ["hub", "signout"]
+                        break;
                 }
 
                 if (hs[0] == "list" && hs[1] == "help") inEditor = true;
