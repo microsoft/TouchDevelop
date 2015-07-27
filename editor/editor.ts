@@ -481,8 +481,11 @@ module TDev
             TheEditor.debuggerContinue();
         }
 
-        private stopBtnHandler()
-        {
+        private stopBtnHandler() {
+            this.stopRun();
+        }
+        
+        public stopRun() {
             if(TheEditor.isDebuggerMode()) {
                 TheEditor.leaveDebuggerMode();
             } else this.currentRt.stopAsync().done();
