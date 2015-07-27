@@ -171,7 +171,7 @@ module TDev.RT {
         //? Indicates if the string matches a regular expression
         export function is_match_regex(self: string, pattern: string): boolean
         {
-            var rx = new RegExp(pattern, "gm");
+            var rx = new RegExp(pattern, "");
             return rx.test(self);
         }
 
@@ -183,7 +183,7 @@ module TDev.RT {
         export function match(self: string, pattern: string): Collection<string>
         {
             try {
-                var rx = new RegExp(pattern, "m");
+                var rx = new RegExp(pattern, "");
                 var r = rx.exec(self);
                 if (!r)
                     return Collections.create_string_collection();
@@ -199,7 +199,7 @@ module TDev.RT {
         export function matches(self: string, pattern: string): Collection<string>
         {
             try {
-                var rx = new RegExp(pattern, "gm");
+                var rx = new RegExp(pattern, "g");
                 var r = self.match(rx);
                 return Collection.mkStrings(r || []);
             }
@@ -225,7 +225,7 @@ module TDev.RT {
         {
             try
             {
-                var rx = new RegExp(pattern, "gm");
+                var rx = new RegExp(pattern, "g");
                 return self.replace(rx, replace);
             }
             catch (e)
@@ -240,7 +240,7 @@ module TDev.RT {
         {
             try
             {
-                var rx = new RegExp(pattern, "gm");
+                var rx = new RegExp(pattern, "g");
             }
             catch (e)
             {
