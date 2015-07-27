@@ -11,7 +11,7 @@ module TDev {
 
     import H = Helpers
 
-    export var mbedRuntimeRevision = "5:813626068edc"    
+    export var mbedRuntimeRevision = "7:17dd2cfe0ff4"    
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
     function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string; libName: string } {
