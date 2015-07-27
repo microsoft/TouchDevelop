@@ -48,7 +48,7 @@ module TDev {
           description: "Code JavaScript with the CK editor",
           id: 'codekingdoms',
 
-          origin: 'http://microbit-staging.codekingdoms.com',
+          origin: 'https://microbit-staging.codekingdoms.com',
           path: '/',
 
           // Local testing
