@@ -3127,18 +3127,18 @@
             return this.mkBoxCore(true);
         }
 
-        public reportAbuse(big:boolean):HTMLElement
+        public reportAbuse(big:boolean, doubleConfirm = false):HTMLElement
         {
             if (!big || !this.getPublicationId()) return null;
 
             if (Cloud.lite) {
                 return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report/delete")).withClick(() => {
-                    AbuseReportInfo.abuseOrDelete(this.getPublicationId())
+                    AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm)
                 });
             }
 
             return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
-                AbuseReportInfo.abuseOrDelete(this.getPublicationId())
+                AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm)
             });
 
         }
@@ -7741,7 +7741,7 @@
             var author = div("sdAuthorInner");
             var pubId = div("sdAddInfoOuter", div("sdAddInfoInner", "/" + this.publicId));
             var res = div("sdHeaderOuter", div("sdHeader", icon,
-                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big))));
+                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big, true))));
 
             if (big)
                 res.className += " sdBigHeader";
@@ -8863,7 +8863,7 @@
         public mkSmallBox():HTMLElement
         {
             return this.mkBoxCore(false).withClick(() =>
-                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, this.publicId)));
+                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, false, this.publicId)));
         }
 
         public initTab()
@@ -8879,7 +8879,7 @@
 
         public mkTabsCore():BrowserTab[] { return [this]; }
 
-        static abuseOrDelete(pubid:string, abuseid:string = "")
+        static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "")
         {
             if (Cloud.isOffline()) {
                 Cloud.showModalOnlineInfo("report/delete");
@@ -8890,19 +8890,27 @@
                 window.open(Cloud.getServiceUrl() + "/user/report/" + pubid)
                 return
             }
+            
+            
             Cloud.getPrivateApiAsync(pubid + "/candelete")
             .then((resp:CanDeleteResponse) => {
                 var b = TheHost
+                var del = () => {
+                    Cloud.deletePrivateApiAsync(pubid)
+                    .done(() => {
+                        TheApiCacheMgr.refetch(pubid)
+                        HTML.showProgressNotification(lf("gone."))
+                    }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
+                    // TODO show it's gone in the UI
+                }
+
                 var godelete = () => {
                     ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname),
                                     lf("delete"),
                                     () => {
-                                        Cloud.deletePrivateApiAsync(pubid)
-                                        .done(() => {
-                                            TheApiCacheMgr.refetch(pubid)
-                                            HTML.showProgressNotification(lf("gone."))
-                                        }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
-                                        // TODO show it's gone in the UI
+                                        if (doubleConfirm)
+                                            ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
+                                        else del();
                                     })
                 }
                 var viewreports = () => {

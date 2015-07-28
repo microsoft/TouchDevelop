@@ -204,7 +204,7 @@ module TDev
             if (f) f(this);
         }
 
-        static ask(msg:string, confirmation:string, act:()=>void)
+        static ask(msg: string, confirmation: string, act: () => void, critical = false)
         {
             var m = new ModalDialog();
             m.add([
@@ -214,6 +214,8 @@ module TDev
                     HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButton(confirmation, () => { act(); m.dismiss(); }))
             ]);
+            if (critical)   
+                m.critical();
             m.show();
             return m;
         }
