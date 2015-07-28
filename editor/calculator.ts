@@ -290,11 +290,20 @@ module TDev
                         if (idx == this.expr.tokens.length) idx--;
                         if (idx < 0) this.unselect();
                         else {
-                            this.selectionStart = idx;
-                            this.selectionEnd = idx + 1;
-                            this.cursorPosition = this.selectionEnd;
-                            if (this.isPlaceholderToken(this.expr.tokens[idx]))
-                                this.deleteSelectedTokens();
+                            // double click on editable expression, pops the editor
+                            if (this.canInlineEdit(this.expr.tokens[idx])) {
+                                this.unselect();
+                                this.cursorPosition = idx + 1;
+                                this.inlineEdit(this.expr.tokens[idx]);
+                                return;
+                            }
+                            else {
+                                this.selectionStart = idx;
+                                this.selectionEnd = idx + 1;
+                                this.cursorPosition = this.selectionEnd;
+                                if (this.isPlaceholderToken(this.expr.tokens[idx]))
+                                    this.deleteSelectedTokens();
+                            }
                         }
                     }
                 }
