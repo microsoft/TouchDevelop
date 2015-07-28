@@ -2024,9 +2024,13 @@ module TDev
                             toks.push(AST.mkThing(loc.getName()));
                         } else {
                             toks.pushRange(this.findDefault(parms[i]));
+                            if (newCursorPos < 0 && k == api.core.String) {
+                                newCursorPos = this.cursorPosition + toks.length;
+                            }
                         }
                     }
-                    newCursorPos = this.cursorPosition + toks.length;
+                    if (newCursorPos < 0)
+                        newCursorPos = this.cursorPosition + toks.length;
                     toks.push(AST.mkOp(")"));
                 }
 
