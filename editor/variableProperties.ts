@@ -868,7 +868,7 @@ module TDev
                 m.add(div("wall-dialog-header", lf("upload document")));
                 m.add(div("wall-dialog-body",
                     [
-                        div('', div('', lf("1. choose a document (.txt, .pptx, .pdf, .css, .js, less than 1MB)")), file.element),
+                        div('', div('', lf("1. choose a document (.txt, .pptx, .pdf, .css, less than 1MB)")), file.element),
                         div('', div('', lf("2. give it a name (minimum 4 characters)")), name),
                         div('', div('', lf("3. describe it")), description),
                         div('', progressBar),
