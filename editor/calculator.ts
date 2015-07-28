@@ -263,9 +263,14 @@ module TDev
                 this.unselect();
             } else if (phase == DragPhase.Move) {
                 if (idx != this.cursorPosition) {
-                    this.selectionStart = Math.min(idx, this.cursorPosition);
-                    this.selectionEnd = Math.min(Math.max(idx, this.cursorPosition) + 1, this.expr.tokens.length);
-                    this.reselect();
+                    if (TheEditor.widgetEnabled("selectExpressions")) {
+                        this.selectionStart = Math.min(idx, this.cursorPosition);
+                        this.selectionEnd = Math.min(Math.max(idx, this.cursorPosition) + 1, this.expr.tokens.length);
+                        this.reselect();                        
+                    } else {
+                        this.cursorPosition = idx;
+                        this.display();
+                    }
                 }
                 return;
             } else if (phase == DragPhase.ReleaseTap) {
@@ -277,11 +282,16 @@ module TDev
                     // picker was launched, don't do anything
                     return
                 } else if (selIdx >= 0 && !this.wasSelectedBeforeTap) {
-                    this.selectionStart = selIdx;
-                    this.selectionEnd = selIdx + 1;
-                    this.cursorPosition = this.selectionEnd;
-                    if (this.isPlaceholderToken(this.expr.tokens[selIdx]))
-                        this.deleteSelectedTokens();
+                    if (doubleTap && this.canInlineEdit(this.expr.tokens[selIdx])) {
+                        this.inlineEditAtPosition(selIdx);
+                        return;
+                    } else if (TheEditor.widgetEnabled("selectExpressions")) {
+                        this.selectionStart = selIdx;
+                        this.selectionEnd = selIdx + 1;
+                        this.cursorPosition = this.selectionEnd;
+                        if (this.isPlaceholderToken(this.expr.tokens[selIdx]))
+                            this.deleteSelectedTokens();
+                    }
                 } else if (doubleTap) {
                     if (this.expr.tokens.length == 0)
                         TheEditor.selector.startSelection()
@@ -292,12 +302,12 @@ module TDev
                         else {
                             // double click on editable expression, pops the editor
                             if (this.canInlineEdit(this.expr.tokens[idx])) {
-                                this.unselect();
-                                this.cursorPosition = idx + 1;
-                                this.inlineEdit(this.expr.tokens[idx]);
+                                this.inlineEditAtPosition(idx);
                                 return;
-                            }
-                            else {
+                            } else if (idx > 0 && this.canInlineEdit(this.expr.tokens[idx - 1])) {
+                                this.inlineEditAtPosition(idx - 1);
+                                return;
+                            } else if (TheEditor.widgetEnabled("selectExpressions")) {
                                 this.selectionStart = idx;
                                 this.selectionEnd = idx + 1;
                                 this.cursorPosition = this.selectionEnd;
@@ -313,9 +323,15 @@ module TDev
             } else {
                 Util.die();
             }
-
+            
             this.hideBottomScroller();
             this.display();
+        }
+        
+        private inlineEditAtPosition(idx: number) {
+            this.unselect();
+            this.cursorPosition = idx + 1;
+            this.inlineEdit(this.expr.tokens[idx]);
         }
 
         private resetState()
@@ -605,6 +621,8 @@ module TDev
 
         public reselect()
         {
+            if (!TheEditor.widgetEnabled("selectExpressions")) return;
+            
             this.displayElts.forEach((t, i) => {
                 t.setFlag("selected", (i >= this.selectionStart && i < this.selectionEnd));
             });

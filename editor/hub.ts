@@ -80,6 +80,7 @@ module TDev.Browser {
                 // edit
                 copyPaste: true,
                 selectStatements: true,
+                selectExpressions: true,
                 // features
                 actionSettings: true,
                 publishAsHidden: true,
@@ -164,6 +165,7 @@ module TDev.Browser {
                 // edit
                 copyPaste: true,
                 selectStatements: true,
+                selectExpressions: true,
                 // features
                 actionSettings: true,
                 publishAsHidden: true,
@@ -531,6 +533,7 @@ module TDev.Browser {
                     testAction: true,
                     testsSection: true,
                     tokenRefactoring:true,
+                    selectExpressions: true,
                 }
             }
         }
