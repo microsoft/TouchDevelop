@@ -2576,7 +2576,11 @@
                     });
                 },
                 (err:any) => {
-                    reqs.forEach((entry) => this.handleError(err, entry))
+                    try {
+                        Cloud.handlePostingError(err, lf("reading server data"))
+                    } catch (err) {
+                        reqs.forEach((entry) => this.handleError(err, entry))
+                    }
                 });
         }
 
