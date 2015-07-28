@@ -405,13 +405,17 @@ module TDev {
             parseIds: text => {
                 var links = [];
                 if (text)
-                    text.replace(/https?:\/\/vimeo\.com\/([^\s]+)/gi,(m, id) => {
+                    text.replace(/https?:\/\/vimeo\.com\/\S*?(\d{6,})/gi,(m, id) => {
                         links.push(id);
                     });
                 return links;
             },
             idToUrl: id => "https://vimeo.com/" + id,
             idToHTMLAsync: (id:string) : Promise => {
+                if (Cloud.lite)
+                    return Promise.as(HTML.mkLazyVideoPlayer(
+                        Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), id),
+                        "https://player.vimeo.com/video/" + id))
                 var url = 'https://vimeo.com/' + id;
                 var p = oembedCache[url] ? Promise.as(oembedCache[url])
                     : Util.httpGetJsonAsync("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/" + id)
