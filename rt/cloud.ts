@@ -10,6 +10,7 @@ module TDev.Cloud {
         undoButton?: boolean;
         copyPaste?: boolean;
         selectStatements?: boolean;
+        selectExpressions?: boolean;
 
         // refactoring
         calcSearchArt?: boolean;
