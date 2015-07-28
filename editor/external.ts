@@ -40,7 +40,7 @@ module TDev {
           id: "blockly",
           origin: origin,
           path: path + "blockly/editor.html",
-          logoUrl: "https://microbit0.blob.core.windows.net/pub/vtadprog"
+          logoUrl: "https://microbit0.blob.core.windows.net/pub/vrvndwmo"
         }];
         
       if (TDev.isBeta) {
@@ -175,9 +175,9 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
-        var logo = div("wallFullScreenLogo", HTML.mkImg(Cloud.artUrl("hrztfaux")));
+       var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
 
-        elt("externalEditorSide").setChildren([w, logo]);
+       elt("externalEditorSide").setChildren([w, logo]);
       }
 
       public fullWallWidth() {
@@ -226,7 +226,7 @@ module TDev {
 
     export class Channel {
       constructor(
-        private editor: ExternalEditor,
+        public editor: ExternalEditor,
         private iframe: HTMLIFrameElement,
         public guid: string) {
       }
