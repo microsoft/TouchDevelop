@@ -936,6 +936,8 @@ module TDev{
 
     export function svgGravatar(id : string) : string
     {
+        if (!id) id = "none";
+
         var advance = (hash:number, v:number) => ((hash << 16) + (hash << 6) + v - hash) << 0;
         var hash = 0;
         for (var i = 0; i < id.length; ++i) {
@@ -951,7 +953,7 @@ module TDev{
         while (numPixels < 6) {
             for (var x = 0; x < 3; ++x) {
                 for (var y = 0; y < 5; ++y) {
-                    hash = advance(hash, 0)
+                    hash = advance(hash, id.charCodeAt(i++ % id.length))
                     n = hash & 0xffff;
                     if (n > 30000) {
                       //  svg += Util.fmt("<rect fill='white' stroke-width='5' stroke='{0}' width='20.5' height='20.5' x='{1}' y='{2}' rx='3' ry='3'/>", c, 50 * x, 50 * y)
