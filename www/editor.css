@@ -588,6 +588,7 @@ div.calcDebug {
 
 div.calcCursor
 {
+  font-weight: bold;
   display: inline-block;
   position: absolute;
   color: #E72A59;
