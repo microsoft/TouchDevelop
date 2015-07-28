@@ -6148,9 +6148,9 @@
         }
 
         static editorIcons = {
-            "blockly": "blockeditor,#517EC0",
+            "blockly": "blockeditor,#AA2FE7",
             "codekingdoms": "codekingdoms,#ffffff",
-            "touchdevelop": "touchdevelop,#308919",
+            "touchdevelop": "touchdevelop,#0095ff",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
