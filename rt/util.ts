@@ -948,7 +948,7 @@ module TDev{
         var d = "";
         var numPixels = 0
 
-        while (numPixels < 5) {
+        while (numPixels < 6) {
             for (var x = 0; x < 3; ++x) {
                 for (var y = 0; y < 5; ++y) {
                     hash = advance(hash, 0)
@@ -966,6 +966,7 @@ module TDev{
                     }
                 }
             }
+            numPixels++
         }
 
         var svg = Util.fmt("<path fill='{0}' d='{1}' />", c, d);
