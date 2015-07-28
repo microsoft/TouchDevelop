@@ -7152,13 +7152,13 @@
         }
         
         private sendScriptIdToAppHost() {
-            if (TDev.RT.App.env().has_host()) {
+            if (TDev.RT.App.env().has_host() && this.publicId ) {
                 Util.log('app host: notify script published');
                 TDev.RT.App.hostExecAsync("touchdevelop.script(" +
-                    this.cloudHeader.scriptId + "," +
+                    this.publicId + "," +
                     this.getTitle().replace(/[,\)\.]/g, "") + "," +
                     this.iconBgColor() + "," +
-                    (this.jsonScript || this.jsonScript.iconArtId ? Cloud.artUrl(this.jsonScript.iconArtId) : "")
+                    (this.jsonScript && this.jsonScript.iconArtId ? Cloud.artUrl(this.jsonScript.iconArtId) : "")
                     + ")").done(
                     () => { },
                     e => Util.log('app host script notification failed'));
