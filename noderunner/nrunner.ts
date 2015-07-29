@@ -1941,7 +1941,7 @@ function getScriptAsync(id:string)
         console.log("fetching script " + id)
 
     var p = liteStorage ? 
-        TDev.Util.httpGetJsonAsync(liteStorage + "/scripttext/" + id).then(resp => resp ? resp.text : null, err => null)
+        TDev.Util.httpGetTextAsync(apiEndpoint + id + "/text" + accessToken + "&original=true")
         : TDev.Util.httpGetTextAsync("https://www.touchdevelop.com/api/" + encodeURIComponent(id) + "/text?original=true&ids=true")
 
     return p.then(text => {
