@@ -2577,7 +2577,7 @@
                 },
                 (err:any) => {
                     try {
-                        Cloud.handlePostingError(err, lf("reading server data"))
+                        Cloud.handlePostingError(err, lf("sync"), false)
                     } catch (err) {
                         reqs.forEach((entry) => this.handleError(err, entry))
                     }
