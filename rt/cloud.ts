@@ -835,10 +835,13 @@ module TDev.Cloud {
         return r
     }
 
-    export function handlePostingError(e: any, action: string) {
+    export function handlePostingError(e: any, action: string, modal = true) {
         if (e) {
             if (e.status == 502) {
-                Cloud.showModalOnlineInfo(lf("could not {0}", action));
+                if (modal)
+                    Cloud.showModalOnlineInfo(lf("could not {0}", action));
+                else
+                    HTML.showProgressNotification(lf("could not {0}, are you connected to internet?", action));
                 return;
             }
             else if ((!Cloud.lite && e.status == 503) || (Cloud.lite && e.status == 429)) {

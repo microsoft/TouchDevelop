@@ -2052,13 +2052,13 @@ div.decl > div.stmt {
     position: relative;
 }
 
-#leftPaneContent > .helpBtnOverlay {
+#leftPane > .helpBtnOverlay {
   position: absolute;
   right: 0.5em;
   bottom: 0.5em;
 }
 
-#leftPaneContent > .helpBtnOverlay svg {
+#leftPane > .helpBtnOverlay svg {
   padding-left:0.2em;
 }
 
@@ -5972,7 +5972,7 @@ table.dashboard tr td[data-completed^="yes"] {
 }
 
 .powered-by .text {
-  font-size: 0.5em;
+  font-size: 0.45em;
   opacity: 0.5;
 }
 

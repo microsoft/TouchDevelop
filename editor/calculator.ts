@@ -238,6 +238,13 @@ module TDev
 
             return idx;
         }
+        
+        private findEditableTokenIndex(start: number) : number {
+            if (this.canInlineEdit(this.expr.tokens[start])) return start;
+            if (start > 0 && this.canInlineEdit(this.expr.tokens[start - 1])) return start - 1;
+            if (start + 1 < this.expr.tokens.length && this.canInlineEdit(this.expr.tokens[start + 1])) return start + 1;
+            return -1;
+        }
 
         private handleExpressionTap(x:number, y:number, phase:DragPhase)
         {
@@ -254,6 +261,7 @@ module TDev
                 selIdx = -1;
             var editIdx = this.tokenIdxAt(x, y, 2);
             var idx = this.tokenIdxAt(x, y);
+            var editIdx = -1;
 
             //Util.log("tap: x={0} y={1} phase={2} tm={3}", x,y,phase,Util.now())
 
@@ -282,8 +290,8 @@ module TDev
                     // picker was launched, don't do anything
                     return
                 } else if (selIdx >= 0 && !this.wasSelectedBeforeTap) {
-                    if (doubleTap && this.canInlineEdit(this.expr.tokens[selIdx])) {
-                        this.inlineEditAtPosition(selIdx);
+                    if (doubleTap && (editIdx = this.findEditableTokenIndex(selIdx)) > -1) {
+                        this.inlineEditAtPosition(editIdx);
                         return;
                     } else if (TheEditor.widgetEnabled("selectExpressions")) {
                         this.selectionStart = selIdx;
@@ -301,11 +309,8 @@ module TDev
                         if (idx < 0) this.unselect();
                         else {
                             // double click on editable expression, pops the editor
-                            if (this.canInlineEdit(this.expr.tokens[idx])) {
-                                this.inlineEditAtPosition(idx);
-                                return;
-                            } else if (idx > 0 && this.canInlineEdit(this.expr.tokens[idx - 1])) {
-                                this.inlineEditAtPosition(idx - 1);
+                            if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                                this.inlineEditAtPosition(editIdx);
                                 return;
                             } else if (TheEditor.widgetEnabled("selectExpressions")) {
                                 this.selectionStart = idx;
@@ -316,6 +321,9 @@ module TDev
                             }
                         }
                     }
+                } else if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                    this.inlineEditAtPosition(editIdx);
+                    return;
                 }
                 this.wasSelectedBeforeTap = false;
             } else if (phase == DragPhase.ReleaseDrag) {

@@ -1120,6 +1120,7 @@ module TDev {
                     continue;
 
                 if (applySpan(/^\&(\w+|#\d+);/, (m) => m[0]) ||
+                    (allowStyle && applySpan(/^<br\s*\/>/, m => "<br/>"))||
                     applySpan(/^([<>&])/, (m) => Util.htmlEscape(m[1])) ||
                     applySpan(/^\t/, (m) => MdComments.error("<tab>")) ||
                     false)

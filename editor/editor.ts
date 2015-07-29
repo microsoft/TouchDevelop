@@ -1279,7 +1279,7 @@ module TDev
         public displayLeft(nodes: any) {
             this.codeInner.setChildren(nodes);
             if (this.widgetEnabled("calcHelpOverlay")) {
-                this.codeInner.appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,black', lf("help"), Ticks.calcHelpOverlay, () => {
+                elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,black', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
                     m.add(div('wall-dialog-header', lf("got a question?")));
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
@@ -2089,7 +2089,6 @@ module TDev
                 this.currentScriptCompiling = cpp;
 
                 return Cloud.postUserInstalledCompileAsync(guid, cpp, { name: name }).then(json => {
-                    Util.log(json.serialize(2));
                     if (notifyCompiled(cpp)) {
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
