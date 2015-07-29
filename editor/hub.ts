@@ -732,7 +732,7 @@ module TDev.Browser {
                 EditorSettings.setTheme(themes[m[2]]);
             else if (Cloud.isRestricted()) {
                 var theme = Cloud.hasPermission('full-editor') ? 'restrictededitor' : 
-                            Cloud.hasPermission('post-art') ? 'restrictedteacher' : 'restricted';
+                            Cloud.hasPermission('teacher-editor') ? 'restrictedteacher' : 'restricted';
                 EditorSettings.setTheme(themes[theme]);
             }
             else if (Browser.isRaspberryPiDebian) EditorSettings.setTheme(themes['rpi']);
