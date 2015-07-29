@@ -3131,18 +3131,18 @@
             return this.mkBoxCore(true);
         }
 
-        public reportAbuse(big:boolean, doubleConfirm = false):HTMLElement
+        public reportAbuse(big:boolean, doubleConfirm = false, onDeleted : () => void = undefined):HTMLElement
         {
             if (!big || !this.getPublicationId()) return null;
 
             if (Cloud.lite) {
                 return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report/delete")).withClick(() => {
-                    AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm)
+                    AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm, undefined, onDeleted)
                 });
             }
 
             return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
-                AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm)
+                AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm, undefined, onDeleted)
             });
 
         }
@@ -7744,8 +7744,11 @@
             var numbers = div("sdNumbers");
             var author = div("sdAuthorInner");
             var pubId = div("sdAddInfoOuter", div("sdAddInfoInner", "/" + this.publicId));
+            var me = this.isMe();
             var res = div("sdHeaderOuter", div("sdHeader", icon,
-                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big, true))));
+                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big, true, () => {
+                    if (me) TheEditor.logoutAsync(true).done(); 
+                }))));
 
             if (big)
                 res.className += " sdBigHeader";
@@ -8896,7 +8899,7 @@
 
         public mkTabsCore():BrowserTab[] { return [this]; }
 
-        static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "")
+        static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "", onDeleted : () => void = undefined)
         {
             if (Cloud.isOffline()) {
                 Cloud.showModalOnlineInfo("report/delete");
@@ -8917,6 +8920,7 @@
                     .done(() => {
                         TheApiCacheMgr.refetch(pubid)
                         HTML.showProgressNotification(lf("gone."))
+                        if (onDeleted) onDeleted();
                     }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
                     // TODO show it's gone in the UI
                 }
