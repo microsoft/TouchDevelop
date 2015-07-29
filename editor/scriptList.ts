@@ -2576,7 +2576,11 @@
                     });
                 },
                 (err:any) => {
-                    reqs.forEach((entry) => this.handleError(err, entry))
+                    try {
+                        Cloud.handlePostingError(err, lf("reading server data"))
+                    } catch (err) {
+                        reqs.forEach((entry) => this.handleError(err, entry))
+                    }
                 });
         }
 
@@ -7896,7 +7900,7 @@
                         cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
-                })
+                }, e => Cloud.handlePostingError(e, lf("getting settings")))
 
                 if (this.isMe())
                     refreshSettings()

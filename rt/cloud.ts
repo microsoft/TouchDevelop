@@ -327,7 +327,7 @@ module TDev.Cloud {
 
                 var m = new ModalDialog();
                 m.addHTML(
-                    Util.fmt("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
+                    lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
                     (!(<any>TDev).TheEditor ? "" :
                       "<p class='agree'>" +
                       lf("After you sign in we will back up and sync scripts between your devices.") +
@@ -847,7 +847,26 @@ module TDev.Cloud {
             }
             else if (e.status == 403) {
                 Cloud.accessTokenExpired();
-                ModalDialog.info(lf("access denied"), lf("Your access token might have expired. Please return to the main hub and then try again."));
+                if (Cloud.lite) {
+                    // in lite, 403 always means missing or expired access token
+                    if (localStorage['everLoggedIn'])
+                        Cloud.isOnlineWithPingAsync()
+                            .then(isOnline => {
+                                if (isOnline) {
+                                    var login = (<any>TDev).Login;
+                                    if (login && login.show) {
+                                        login.show()
+                                        return
+                                    }
+                                }
+                                ModalDialog.info(lf("sign-in required"), lf("Sign-in is required, but you appear to be offline."))
+                            })
+                            .done()
+                    else
+                        authenticateAsync(action).done()
+                } else {
+                    ModalDialog.info(lf("access denied"), lf("Your access token might have expired. Please return to the main hub and then try again."));
+                }
                 return;
             }
             else if (e.status == 419 || e.status == 402) {

@@ -5985,6 +5985,10 @@ module TDev
                     case "landing":
                         hs = ["hub", "install-run", hs[1]]
                         break;
+                    case "signin":
+                    case "login":
+                        hs = ["hub", "signin"]
+                        break;
                     case "signout":
                     case "logout":
                         hs = ["hub", "signout"]
