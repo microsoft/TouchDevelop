@@ -720,8 +720,13 @@ module TDev {
                             : lf("cannot sync - you are not signed in") + info
                         : lf("cannot sync") + info;
                     HTML.showProgressNotification(message)
-                    if (status == 403)
-                        Cloud.setAccessToken(undefined);
+
+                    if (status == 403) {
+                        if (!onNotLoggedIn)
+                            Cloud.handlePostingError(e, lf("sync"))
+                        else
+                            Cloud.accessTokenExpired();
+                    }
                     if (onNotLoggedIn) onNotLoggedIn();
                     return message;
                 }
@@ -772,11 +777,11 @@ module TDev {
                 if (status == 400)
                     throw new Error("Cloud precondition violated" + info);
                 else if (status == 403 ||
-                    (Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
+                    (!Cloud.lite && Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
                     {
                     HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)
-                        Cloud.setAccessToken(undefined);
+                        Cloud.accessTokenExpired();
                     if (onNotLoggedIn) onNotLoggedIn();
                 }
                 else
