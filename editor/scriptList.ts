@@ -8339,18 +8339,27 @@
             if ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id) {
                 var removeBtn = null;
                 user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
+                    if (Cloud.isOffline()) {
+                        Cloud.showModalOnlineInfo(lf("removing user cancelled"));
+                        return;            
+                    }
+                    
                     ModalDialog.ask(lf("Are you sure you want to remove this user from this group?"), lf("remove this user"), () => {
                         removeBtn.removeSelf();
                         HTML.showProgressNotification(lf("Removing user..."));
                         Cloud.deletePrivateApiAsync(c.id + "/groups/" + this.parent.publicId)
                             .done(() => {
                                 user.removeSelf();
-                            });
+                            }, e => Cloud.handlePostingError(e, lf("remove user")));
                     });
                 }));
 
                 if (grp && grp.isclass) {
                     user.appendChild(HTML.mkButton(lf("reset password"), () => {
+                        if (Cloud.isOffline()) {
+                            Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
+                            return;            
+                        }
                         Cloud.getPrivateApiAsync(c.id + "/resetpassword")
                         .done(resp => {
                             var boxes = resp.passwords.map(p => {
@@ -8359,13 +8368,17 @@
                                 return d.mkBox().withClick(() => {
                                     m.dismiss()
                                     Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
-                                    .then(() => {
-                                        var m = ModalDialog.info(lf("password is reset"), lf("new password:"))
-                                        var inp = HTML.mkTextInput("text", "")
-                                        inp.value = p
-                                        m.add(div(null, inp))
-                                    })
-                                    .done()
+                                        .done(() => {
+                                            var m = new ModalDialog();
+                                            m.add(div('wall-dialog-header', lf("password is reset")));
+                                            m.add(div('wall-dialog-body', lf("new password:")));
+                                            var inp = HTML.mkTextInput("text", "")
+                                            inp.value = p
+                                            inp.readOnly = true;
+                                            m.add(div(null, inp))
+                                            m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
+                                            m.show();
+                                        }, e => Cloud.handlePostingError(e, lf("reset password")));
                                 })
                             })
                             var m = new ModalDialog()
