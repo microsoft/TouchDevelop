@@ -3135,6 +3135,12 @@ module TDev.AST
             return pickerIf;
         }
 
+        static markUsedStuff(a:App)
+        {
+            var pre = new PreCompiler(<any>{})
+            pre.run(a)
+        }
+
     }
 
     class UsageComputer

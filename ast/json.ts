@@ -708,7 +708,8 @@ module TDev.AST.Json
                 isQuery: !!n.isQuery,
                 isOffline: !!n.isOffline,
                 isAsync: !n.isAtomic,
-                description: n.getInlineHelp() || ""
+                description: n.getInlineHelp() || "",
+                unused: n.visitorState !== true,
             }
 
             if (n.isPage()) {
@@ -753,6 +754,7 @@ module TDev.AST.Json
                 isTransient: n.isTransient,
                 isCloudEnabled: n.cloudEnabled,
                 value: n.stringResourceValue(),
+                unused: n.visitorState !== true,
             }
 
             if (n.isResource) {
@@ -818,6 +820,7 @@ module TDev.AST.Json
                 isExported: n.isExported(),
                 keys: n.keys,
                 fields: n.values,
+                unused: n.visitorState !== true,
             }
         }
 
@@ -829,6 +832,7 @@ module TDev.AST.Json
         }
 
         public visitApp(n:App) {
+            Compiler.markUsedStuff(n);
             n.stableId = "app";
             var r:any = {
                 textVersion: App.currentVersion,

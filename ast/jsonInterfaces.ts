@@ -46,6 +46,7 @@ module TDev.AST.Json
     /*abstract*/ export interface JDecl extends JNode
     {
         name: string;
+        unused?: boolean;
     }
 
     /*abstract*/ export interface JToken extends JNode { }
