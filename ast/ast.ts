@@ -1459,6 +1459,7 @@ module TDev.AST {
         public isBeta() { return false }
         public showIntelliButton() { return true }
         public getImports() : IImport[] { return undefined; }
+        public isExtensionAction() { return false; }
 
         public shouldPauseInterperter() { return false; }
         public isImplemented() { return true; }
@@ -1555,6 +1556,7 @@ module TDev.AST {
                 return lf("color #{0}", this.url);
             return lf("a global variable")
         }
+                
         public forSearch()
         {
             return this.stringResourceValue() || this.url || ""

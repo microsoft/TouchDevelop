@@ -1277,13 +1277,13 @@ module TDev {
         parentKind:Kind;
         getCapability():PlatformCapability;
         getExplicitCapability():PlatformCapability;
+        isExtensionAction(): boolean;
         runtimeName():string;
         helpTopic():string;
         usageKey():string;
         isBeta():boolean;
         canRename(): boolean;
         deleted: boolean;
-
 
         // compilation
         shouldPauseInterperter():boolean;
@@ -1311,7 +1311,6 @@ module TDev {
     
     export interface IPropertyWithNamespaces extends IProperty {
         getNamespaces(): string[];
-        isExtensionAction(): boolean;
     }
 
     export interface IPropertyWithCache
@@ -1344,6 +1343,8 @@ module TDev {
             for (var i = 0; i < parms.length; ++i) parms[i].parentProperty = this;
             this._result.parentProperty = this;
         }
+        
+        public isExtensionAction() : boolean { return false; }
 
         public substFor(par:ParametricKind)
         {

@@ -419,7 +419,7 @@ module TDev
                 var profile = this.editor.intelliProfile;
                 Script.getKinds().filter(k => (!profile || profile.hasKind(k))).forEach((k) => {
                     k.listProperties()
-                        .filter(prop => prop.isBrowsable() && (!profile || profile.hasProperty(prop)))
+                        .filter(prop => prop.isBrowsable() && !prop.isExtensionAction() && (!profile || profile.hasProperty(prop)))
                         .forEach(addProp);
                 });
                 Script.libraries().forEach((l) => {
