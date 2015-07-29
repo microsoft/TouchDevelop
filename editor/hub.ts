@@ -1161,6 +1161,11 @@ module TDev.Browser {
                 return
             }
 
+            if (h[1] == "signin") {
+                Login.show("list:installed-scripts")
+                return
+            }
+
             if (h[1] == 'new') {
                 HistoryMgr.instance.setHash(this.screenId() + ":" + h[1] + ":" + h[2], null)
                 this.newScriptHash(h[2], h[3]);
