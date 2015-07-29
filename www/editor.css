@@ -2052,13 +2052,13 @@ div.decl > div.stmt {
     position: relative;
 }
 
-#leftPaneContent > .helpBtnOverlay {
+#leftPane > .helpBtnOverlay {
   position: absolute;
   right: 0.5em;
   bottom: 0.5em;
 }
 
-#leftPaneContent > .helpBtnOverlay svg {
+#leftPane > .helpBtnOverlay svg {
   padding-left:0.2em;
 }
 
