@@ -263,9 +263,7 @@ module TDev
 
         Revisions.parseUrlParameters(url);
 
-        if ((<any>window).betaFriendlyId)
-            isBeta = true;
-        if (dbg || /localhost/.test(url))
+        if ((<any>window).betaFriendlyId || dbg || /localhost/.test(url))
             isBeta = true;
 
         if (/nobeta/.test(url))
@@ -274,6 +272,9 @@ module TDev
         if (isBeta) {
             //Browser.compilerBlockChaining = true;
             //Browser.compilerInlining = true;
+        } else {
+            // disable console
+            Browser.useConsoleLog = false;
         }
 
         Ticker.init()

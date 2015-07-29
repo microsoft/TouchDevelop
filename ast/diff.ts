@@ -584,10 +584,10 @@ module TDev.AST.Diff {
                                     (a, b) => a=="" || b=="" ? 1 : a.toLowerCase() == b.toLowerCase() ? 0 : 2)
         var r1 = toStr();
 
-        if (r0 != r1) {
-            console.log(r0)
-            console.log(r1)
-        }
+        //if (r0 != r1) {
+        //    console.log(r0)
+        //    console.log(r1)
+        //}
     }
 
     // returns an array R of minimal length, such that

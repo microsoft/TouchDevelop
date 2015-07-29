@@ -365,7 +365,7 @@ module TDev
                 this.searchApi.dismissing();
 
             this.checkNextDisplay();
-            console.log("about to resetstate");
+            Util.log("about to resetstate");
             this.resetState();
             TheEditor.sideKeyFocus = false;
             TDev.Collab.setTemporaryPullSuppression(false);

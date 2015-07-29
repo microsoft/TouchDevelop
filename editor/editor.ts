@@ -2089,7 +2089,7 @@ module TDev
                 this.currentScriptCompiling = cpp;
 
                 return Cloud.postUserInstalledCompileAsync(guid, cpp, { name: name }).then(json => {
-                    console.log(json);
+                    Util.log(json.serialize(2));
                     if (notifyCompiled(cpp)) {
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
@@ -5644,7 +5644,7 @@ module TDev
                 Browser.TheApiCacheMgr.snapshotCacheAsync(store),
                 Browser.Showcase.snapshotCacheAsync(store),
             ]).then(() => {
-                console.log(store)
+                Util.log('snapshot cache: {0}', store)
                 return store
             })
         }

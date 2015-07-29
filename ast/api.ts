@@ -330,7 +330,7 @@ module TDev {
                     byReason[r] += "      " + p.parentKind.toString() + "->" + p.getName() + "\n"
                 })
             })
-            console.log(Object.keys(byReason).map(k => byReason[k]).join(""))
+            // console.log(Object.keys(byReason).map(k => byReason[k]).join(""))
         }
     }
 

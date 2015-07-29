@@ -4,7 +4,7 @@ module TDev.RT {
     export module ArtCache {
         export var enabled = true;
         export var runningTests = false;
-        function log(s: string) { Util.log("ArtCache: " + s); }
+        function log(s: string) { Util.log("art cace: " + s); }
         var getArtCacheTableAsync = () => Storage.getTableAsync("ArtCache");
         export var getMaxItems = () =>
         {
@@ -31,11 +31,11 @@ module TDev.RT {
             var bytes = response.contentAsArraybuffer(); if (!bytes) return null;
             var contentType = response.header('Content-Type');
             if (!contentType) {
-                Util.log('art cache: missing Content-Type');
+                log('missing Content-Type');
                 return null;
             }
             if (bytes.length > ArtCache.getMaxItemSize()) {
-                Util.log('art cache: item too big ' + (bytes.length / 1e6).toFixed(1) + 'Mb');
+                log('item too big ' + (bytes.length / 1e6).toFixed(1) + 'Mb');
                 return "data:none";
             }
             var encoded = Util.base64EncodeBytes(<number[]><any>bytes);
@@ -76,7 +76,7 @@ module TDev.RT {
 
             // make sure we have a url and not a data uri
             if (!url || !/^https?:\/\//.test(url)) {
-                Util.log('art cache: must be absolute url');
+                log('must be absolute url');
                 return Promise.as(null);
             }
 
