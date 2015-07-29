@@ -2089,7 +2089,6 @@ module TDev
                 this.currentScriptCompiling = cpp;
 
                 return Cloud.postUserInstalledCompileAsync(guid, cpp, { name: name }).then(json => {
-                    Util.log(json.serialize(2));
                     if (notifyCompiled(cpp)) {
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
