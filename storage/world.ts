@@ -268,9 +268,10 @@ module TDev {
 
         function publishInstalledAsync(indexTable: Storage.Table, scriptsTable: Storage.Table, header: Cloud.Header) : Promise {
             log(header.guid + "/" + header.scriptId + ": " + header.name + " is to be published");
+            var hidden = header.publishAsHidden
             return indexTable.getValueAsync(header.guid)
             .then(resp => { header = JSON.parse(resp) })
-            .then(() => Cloud.postUserInstalledPublishAsync(header.guid, header.publishAsHidden, JSON.stringify(header.scriptVersion), header.meta))
+            .then(() => Cloud.postUserInstalledPublishAsync(header.guid, hidden, JSON.stringify(header.scriptVersion), header.meta))
             .then(function (installedBodies: Cloud.InstalledBodies) {
                 var body = <Cloud.Body>undefined;
                 installedBodies.bodies.forEach(function (b) { if (b.guid == header.guid) body = b; });
