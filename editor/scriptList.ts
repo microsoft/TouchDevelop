@@ -743,6 +743,31 @@
                                 if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
                             }, e => {});
                     }
+
+                    if (Cloud.lite && /^[a-z]{10}$/.test(terms[0])) {
+                        Cloud.getPrivateApiAsync("me/code/" + terms[0])
+                            .done((rc : JsonCode) => {
+                                if (rc.verb == "ActivationCode") {
+                                    var m = ModalDialog.ask(
+                                        lf("You've entered a valid activation code with {0} credit(s). Do you want to apply it?",
+                                            rc.credit || 0),
+                                        lf("apply code"), 
+                                        () => {
+                                            m.dismiss()
+                                            Cloud.postPrivateApiAsync("me/code/" + terms[0], {})
+                                                .done(() => {
+                                                    Cloud.getUserSettingsAsync()
+                                                    .done(r => HTML.showProgressNotification(
+                                                        lf("You now have {0} credit(s).", r.credit || 0)))
+                                                }, e => Cloud.handlePostingError(e, lf("apply code")))
+                                        })
+                                } else if (rc.verb == "SpentActivationCode") {
+                                    ModalDialog.info(lf("code already used"), lf("This activation code has already been used."))
+                                } else if (rc.verb == "MultiActivationCode") {
+                                    ModalDialog.info(lf("code can't be used here"), lf("This code can be only used in creation of new accounts."))
+                                }
+                            }, e => {});
+                    }
                 }
                 
                 if (Cloud.isOffline()) {

@@ -155,6 +155,7 @@ module TDev {
         userhaspicture: boolean;
         verb: string; // “JoinGroup” for group invitation codes
         data: string; // groupid for group invitation codes
+        credit?: number;
     }
 
     export interface JsonScriptMeta {
