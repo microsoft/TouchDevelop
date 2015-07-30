@@ -816,7 +816,6 @@ module TDev.Cloud {
                 err => Util.setTimeout(1000, poll))
         }
 
-        HTML.showProgressNotification(lf("compiling..."));
         var config = isFota() ? "fota" : "proto";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
