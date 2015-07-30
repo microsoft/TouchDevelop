@@ -1347,6 +1347,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
   padding: 0em 0.2em 0.1em 0.2em;
   color: black;
   background-color:white;
+  white-space: nowrap;
 }
 
 .md-tutorial code.md-ui,
@@ -1354,6 +1355,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .md-inline code.md-ui
 {
   border: 2px solid #777;
+  white-space: nowrap;
 }
 
 .md-tutorial .md-img {
