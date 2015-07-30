@@ -4855,7 +4855,9 @@
 
             switch (kind) {
             case "script":
-                return div(null, lab(notkind == "onmine" ? lf("forked") : lf("published")))
+                return div(null, lab(notkind == "moderated" ? lf("made public") :
+                                     notkind == "onmine" ? lf("forked") 
+                                     : lf("published")))
             case "comment":
                 //return div(null, lab(own ? lf("wrote") : lf("reply")))
                 return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
