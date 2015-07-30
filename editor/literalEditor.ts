@@ -142,6 +142,10 @@ module TDev
                         cell.withClick(() => {
                             cell.setFlag('on', !cell.getFlag('on'));
                         });
+                        cell.onmouseenter = (e: MouseEvent) => {
+                            if (e.buttons)
+                                cell.setFlag('on', !cell.getFlag('on'));                            
+                        }
                         cell.appendChild(div(''));
                     });
                 });
