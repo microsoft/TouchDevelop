@@ -290,7 +290,7 @@ module TDev
                     // picker was launched, don't do anything
                     return
                 } else if (selIdx >= 0 && !this.wasSelectedBeforeTap) {
-                    if (doubleTap && (editIdx = this.findEditableTokenIndex(selIdx)) > -1) {
+                    if ((editIdx = this.findEditableTokenIndex(selIdx)) > -1) {
                         this.inlineEditAtPosition(editIdx);
                         return;
                     } else if (TheEditor.widgetEnabled("selectExpressions")) {
