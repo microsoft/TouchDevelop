@@ -2,7 +2,7 @@
 
 module TDev {
   export interface ExternalEditor {
-    // 3 ields are for our UI
+    // 3 fields are for our UI
     company: string;
     name: string;
     description: string;
@@ -42,7 +42,7 @@ module TDev {
           path: path + "blockly/editor.html",
           logoUrl: "https://microbit0.blob.core.windows.net/pub/vrvndwmo"
         }];
-        
+
       if (TDev.isBeta) {
         externalEditorsCache.push({
           company: "Code Kingdoms",
@@ -482,9 +482,7 @@ module TDev {
       // Start the simulator
       pullLatestLibraryVersion(microbitScriptId)
       .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-      .then((s: string) => {
-        typeCheckAndRun(s, "_libinit");
-      })
+      .then((s: string) => typeCheckAndRun(s))
       .done();
     }
 
