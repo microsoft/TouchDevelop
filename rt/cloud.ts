@@ -800,7 +800,7 @@ module TDev.Cloud {
     }
 
     export function isFota() {
-        return document.location.href.indexOf("fota=1") > 0;
+        return navigator.userAgent.indexOf("SamsungBrowser/microbit") > 0;
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
