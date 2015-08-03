@@ -7,6 +7,7 @@ goog.require('Blockly.Blocks');
 var buttonsDropdown =[
   ["A", "A"],
   ["B", "B"],
+  ["A+B", "A+B"],
 ];
 
 var analogPinsDropdown = [
