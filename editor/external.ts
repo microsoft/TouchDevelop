@@ -410,7 +410,10 @@ module TDev {
 
           case MessageType.Run:
             var message3 = <Message_Run> event.data;
-            document.getElementById("externalEditorSide").classList.remove("dismissed");
+            var side = document.getElementById("externalEditorSide");
+            if (message3.onlyIfSplit && side.offsetWidth == 0)
+              break;
+            side.classList.remove("dismissed");
             // So that key events such as escape are caught by the editor, not
             // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
@@ -467,20 +470,23 @@ module TDev {
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", () => {
         TheChannel = new Channel(editor, iframe, data.guid);
-        var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-        TheChannel.post(<Message_Init> {
-          type: MessageType.Init,
-          script: data,
-          merge: ("theirs" in extra) ? extra : null,
-          fota: Cloud.isFota(),
-        });
 
         // Start the simulator. This assumes that [TheChannel] is properly
         // setup.
         pullLatestLibraryVersion(microbitScriptId)
         .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
         .then((s: string) => typeCheckAndRun(s, "_libinit"))
-        .done();
+        .done(() => {
+          // Send the initialization message once the simulator is properly
+          // setup.
+          var extra = JSON.parse(data.scriptVersionInCloud || "{}");
+          TheChannel.post(<Message_Init> {
+            type: MessageType.Init,
+            script: data,
+            merge: ("theirs" in extra) ? extra : null,
+            fota: Cloud.isFota(),
+          });
+        });
       });
       iframe.setAttribute("src", editor.origin + editor.path);
       iframeDiv.appendChild(iframe);
