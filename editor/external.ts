@@ -175,9 +175,9 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
-       var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
+        var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
 
-       elt("externalEditorSide").setChildren([w, logo]);
+        elt("externalEditorSide").setChildren([w, logo]);
       }
 
       public fullWallWidth() {
