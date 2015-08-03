@@ -212,6 +212,8 @@ module TDev {
         if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
         rt.initPageStack();
+        // Requires [TheChannel] to be setup properly (so that we know which
+        // editor logo to show).
         (<EditorHost> rt.host).showWall();
 
         var main = compiledScript.actionsByName[mainName];
@@ -463,7 +465,7 @@ module TDev {
       var iframe = document.createElement("iframe");
       // allow-popups is for the Blockly help menu item
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
-      iframe.addEventListener("load", function () {
+      iframe.addEventListener("load", () => {
         TheChannel = new Channel(editor, iframe, data.guid);
         var extra = JSON.parse(data.scriptVersionInCloud || "{}");
         TheChannel.post(<Message_Init> {
@@ -472,18 +474,19 @@ module TDev {
           merge: ("theirs" in extra) ? extra : null,
           fota: Cloud.isFota(),
         });
+
+        // Start the simulator. This assumes that [TheChannel] is properly
+        // setup.
+        pullLatestLibraryVersion(microbitScriptId)
+        .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
+        .then((s: string) => typeCheckAndRun(s))
+        .done();
       });
       iframe.setAttribute("src", editor.origin + editor.path);
       iframeDiv.appendChild(iframe);
 
       // Change the hash and the window title.
       TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
-
-      // Start the simulator
-      pullLatestLibraryVersion(microbitScriptId)
-      .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-      .then((s: string) => typeCheckAndRun(s))
-      .done();
     }
 
     export function pickUpNewBaseVersion() {
