@@ -362,7 +362,7 @@ var numRetries = 0
 
 function downloadSecret(uri:string, f:(d:any) => void, opts:any = {})
 {
-    var p:any = url.parse(uri + "?api-version=2015-02-01-preview")
+    var p:any = url.parse(uri + "?api-version=2015-06-01")
     p.headers = {}
     if (vaultToken)
         p.headers['Authorization'] = 'Bearer ' + vaultToken
