@@ -479,7 +479,7 @@ module TDev {
         // setup.
         pullLatestLibraryVersion(microbitScriptId)
         .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-        .then((s: string) => typeCheckAndRun(s))
+        .then((s: string) => typeCheckAndRun(s, "_libinit"))
         .done();
       });
       iframe.setAttribute("src", editor.origin + editor.path);
