@@ -800,7 +800,7 @@ module TDev.Cloud {
     }
 
     export function isFota() {
-        return navigator.userAgent.indexOf("SamsungBrowser/microbit") > 0;
+        return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
