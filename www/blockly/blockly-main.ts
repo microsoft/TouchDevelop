@@ -312,7 +312,8 @@ module TDev {
 
     Blockly.inject($("#editor")[0], {
       toolbox: $("#blockly-toolbox")[0],
-      scrollbars: true
+      scrollbars: true,
+      media: "./media/",
     });
     loadBlockly(message.script.scriptText);
     // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual
@@ -354,6 +355,17 @@ module TDev {
 
     setupPopup($("#link-log"), $("#popup-log"));
     setupPopups();
+
+    // Run the program when loaded if it compiles and if the simulator is
+    // already visible.
+    var ast = compileOrError();
+    if (ast)
+      post(<External.Message_Run> {
+        type: External.MessageType.Run,
+        ast: <any> ast,
+        libs: libs,
+        onlyIfSplit: true,
+      });
 
     console.log("[loaded] cloud version " + message.script.baseSnapshot +
       "(dated from: "+state.lastSave+")");

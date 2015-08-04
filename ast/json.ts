@@ -831,8 +831,9 @@ module TDev.AST.Json
             }
         }
 
-        public visitApp(n:App) {
-            Compiler.markUsedStuff(n);
+        public visitApp(n: App) {
+            // C++ compiler does not set TDev.Script which creates issues down the road.
+            // Compiler.markUsedStuff(n);
             n.stableId = "app";
             var r:any = {
                 textVersion: App.currentVersion,

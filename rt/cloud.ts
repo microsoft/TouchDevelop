@@ -800,7 +800,7 @@ module TDev.Cloud {
     }
 
     export function isFota() {
-        return document.location.href.indexOf("fota=1") > 0;
+        return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
@@ -816,7 +816,6 @@ module TDev.Cloud {
                 err => Util.setTimeout(1000, poll))
         }
 
-        HTML.showProgressNotification(lf("compiling..."));
         var config = isFota() ? "fota" : "proto";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,

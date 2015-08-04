@@ -6981,6 +6981,11 @@
                 var waitList: Promise[] = []
                 var numPublished = 0
 
+                if (Cloud.isOffline()) {
+                    Cloud.showModalOnlineInfo(lf("publishing cancelled"));
+                    return Promise.as();
+                }
+                
                 tick(hidden ? Ticks.corePublishHidden : Ticks.corePublishPublic)
 
                 var trigger = (guid: string) => {

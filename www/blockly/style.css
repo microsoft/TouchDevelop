@@ -264,7 +264,7 @@ a.command:hover {
 }
 
 .blocklyToolboxDiv {
-  background-color: rgba(180, 180, 180, .25) !important;
+  background-image: url(https://microbit0.blob.core.windows.net/pub/prcwhomc) !important;
 }
 
 /* Animation for the compilation button */

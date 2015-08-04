@@ -83,6 +83,7 @@ module TDev {
             type: MessageType; // == MessageType.Message_Run
             ast: any; // AST.Json.JApp
             libs: { [libName: string]: string };
+            onlyIfSplit?: boolean; // Run the program only if in "split mode".
         }
 
         // This message is (currently) sent in the following situation. External

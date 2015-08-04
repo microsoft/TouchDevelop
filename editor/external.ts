@@ -2,7 +2,7 @@
 
 module TDev {
   export interface ExternalEditor {
-    // 3 ields are for our UI
+    // 3 fields are for our UI
     company: string;
     name: string;
     description: string;
@@ -42,7 +42,7 @@ module TDev {
           path: path + "blockly/editor.html",
           logoUrl: "https://microbit0.blob.core.windows.net/pub/vrvndwmo"
         }];
-        
+
       if (TDev.isBeta) {
         externalEditorsCache.push({
           company: "Code Kingdoms",
@@ -175,9 +175,9 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
-       var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
+        var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
 
-       elt("externalEditorSide").setChildren([w, logo]);
+        elt("externalEditorSide").setChildren([w, logo]);
       }
 
       public fullWallWidth() {
@@ -212,6 +212,8 @@ module TDev {
         if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
         rt.initPageStack();
+        // Requires [TheChannel] to be setup properly (so that we know which
+        // editor logo to show).
         (<EditorHost> rt.host).showWall();
 
         var main = compiledScript.actionsByName[mainName];
@@ -408,7 +410,10 @@ module TDev {
 
           case MessageType.Run:
             var message3 = <Message_Run> event.data;
-            document.getElementById("externalEditorSide").classList.remove("dismissed");
+            var side = document.getElementById("externalEditorSide");
+            if (message3.onlyIfSplit && side.offsetWidth == 0)
+              break;
+            side.classList.remove("dismissed");
             // So that key events such as escape are caught by the editor, not
             // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
@@ -463,14 +468,24 @@ module TDev {
       var iframe = document.createElement("iframe");
       // allow-popups is for the Blockly help menu item
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
-      iframe.addEventListener("load", function () {
+      iframe.addEventListener("load", () => {
         TheChannel = new Channel(editor, iframe, data.guid);
-        var extra = JSON.parse(data.scriptVersionInCloud || "{}");
-        TheChannel.post(<Message_Init> {
-          type: MessageType.Init,
-          script: data,
-          merge: ("theirs" in extra) ? extra : null,
-          fota: Cloud.isFota(),
+
+        // Start the simulator. This assumes that [TheChannel] is properly
+        // setup.
+        pullLatestLibraryVersion(microbitScriptId)
+        .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
+        .then((s: string) => typeCheckAndRun(s, "_libinit"))
+        .done(() => {
+          // Send the initialization message once the simulator is properly
+          // setup.
+          var extra = JSON.parse(data.scriptVersionInCloud || "{}");
+          TheChannel.post(<Message_Init> {
+            type: MessageType.Init,
+            script: data,
+            merge: ("theirs" in extra) ? extra : null,
+            fota: Cloud.isFota(),
+          });
         });
       });
       iframe.setAttribute("src", editor.origin + editor.path);
@@ -478,14 +493,6 @@ module TDev {
 
       // Change the hash and the window title.
       TheEditor.historyMgr.setHash("edit:" + data.guid, editor.name);
-
-      // Start the simulator
-      pullLatestLibraryVersion(microbitScriptId)
-      .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-      .then((s: string) => {
-        typeCheckAndRun(s, "_libinit");
-      })
-      .done();
     }
 
     export function pickUpNewBaseVersion() {

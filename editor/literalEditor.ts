@@ -66,6 +66,15 @@ module TDev
             this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add frame"), Ticks.noEvent,() => {
                 var v = this.serialize(this.frames + 1);
                 this.updateTable(v);
+                if (this.frames > 1) {
+                    // clone cells
+                    for (var i = 0; i < 5; ++i)
+                        for (var j = 0; j < 5; ++j) {
+                            var k = this.cellIndex(i, (this.frames - 2) * this.rows + j);
+                            var kf = this.cellIndex(i, (this.frames - 1) * this.rows + j);
+                            this.bitCells[kf].setFlag('on', this.bitCells[k].getFlag('on'));
+                        }
+                }
             });
             this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove frame"), Ticks.noEvent,() => {
                 if (this.frames > 1) {
@@ -136,12 +145,16 @@ module TDev
                     Util.range(frame * this.rows, this.rows).forEach(j => {
                         var cell = HTML.td(row, 'bit');
                         cell.title = "(" + j + ", " + i + ")";
-                        var k = i * this.frames * this.rows + j;
+                        var k = this.cellIndex(i,j);
                         this.bitCells[k] = cell;
                         cell.setFlag('on', !!bits[k]);
                         cell.withClick(() => {
                             cell.setFlag('on', !cell.getFlag('on'));
                         });
+                        cell.onmouseenter = (e: MouseEvent) => {
+                            if (e.buttons)
+                                cell.setFlag('on', !cell.getFlag('on'));                            
+                        }
                         cell.appendChild(div(''));
                     });
                 });
@@ -160,6 +173,10 @@ module TDev
                 this.dialog.onDismiss = () => this.calculator.checkNextDisplay();
                 this.dialog.show();
             }
+        }
+        
+        private cellIndex(i: number, j: number): number {
+            return i * this.frames * this.rows + j;
         }
 
         private animate() {
