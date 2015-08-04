@@ -649,8 +649,7 @@ module TDev {
                     if (isIndex)
                         reportBrowser(browserShortName);
                     else
-                        supportedBrowsers("<p>Your browser is supported.</p>" +
-                                          "<p><a href='" + getServiceUrl() + "/app/?c'>Open TouchDevelop</a></p>");
+                        supportedBrowsers("<p>Your browser is supported.</p>");
                 } else {
                     statusMsg("browser detector failed: " + browserShortName);
                     if (isIndex) {
