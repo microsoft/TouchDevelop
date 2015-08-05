@@ -7881,11 +7881,11 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            if ((this.isMe() || Cloud.hasPermission("me-only")) && Cloud.getUserId()) {
+            if ((this.isMe() || Cloud.hasPermission("adult")) && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
-                    HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
+                    this.isMe() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : null
                 ]);
 
                 var settingsDiv = div(null, div('bigLoadingMore', lf("loading settings...")));
@@ -7919,7 +7919,7 @@
 
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
-                    if (Cloud.hasPermission("adult")) {
+                    if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private; {0})", 
                             s.emailverified 
                               ? lf("we won't spam you") 
@@ -7931,8 +7931,8 @@
                         edit(lf("real name (private)"), "realname")
                     }
 
-                    if (s.credit && Cloud.hasPermission("post-group"))
-                        cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
+                    if (s.credit && /,post-group,/.test(s.permissions))
+                        cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
                 }, e => Cloud.handlePostingError(e, lf("getting settings")))
@@ -7940,7 +7940,7 @@
                 if (this.isMe())
                     refreshSettings()
                 else
-                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit email, ..."), refreshSettings))
+                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit name, email, ..."), refreshSettings))
             }
 
             ch.unshift(accountButtons);
