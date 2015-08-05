@@ -1944,7 +1944,7 @@ module TDev
                 if (trg)
                     TipManager.setTip({
                         el: trg,
-                        title: lf("enter text: ") + ins.targetName,
+                        title: lf("type: {0}", ins.targetName),
                         description: lf("tap [ok] when done"),
                     })
                 else
