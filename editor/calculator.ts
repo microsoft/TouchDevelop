@@ -4405,9 +4405,12 @@ module TDev
                 }
 
                 if (ins.editString && this.inlineEditToken == ins.addAfter) {
+                    var ds = ins.editString
+                        .replace(/\n/g, "[Enter]")
+                        .replace(/\t/g, "[Tab]");
                     TipManager.setTip({
                         el: elt("inlineEditCloseBtn"),
-                        title: lf("type: ") + ins.editString,
+                        title: lf("type: {0}", ds),
                         description: lf("tap here when done"),
                     })
                     return;
