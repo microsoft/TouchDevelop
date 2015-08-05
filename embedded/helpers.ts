@@ -277,7 +277,7 @@ module TDev {
         );
       }
 
-      export function isEnumLiteral(e: J.JExpr): number {
+      export function isEnumLiteral(e: J.JExpr): string {
         return (
           e.nodeType == "stringLiteral" &&
           (<J.JStringLiteral> e).enumValue

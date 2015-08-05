@@ -1342,12 +1342,13 @@ module TDev
             return inp;
         }
 
-        private canInlineEditString(t: AST.Token) {
+        private canInlineEditString(t: AST.Token) : boolean {
             if (!t) return false
-            return typeof t.getLiteral() == "string";            
+            return typeof t.getLiteral() == "string" &&
+                !(<AST.Literal>t).enumVal
         }
         
-        private canInlineEdit(t:AST.Token)
+        private canInlineEdit(t:AST.Token) : boolean
         {
             if (!t) return false
 

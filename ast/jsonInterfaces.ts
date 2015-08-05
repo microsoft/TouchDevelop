@@ -76,7 +76,7 @@ module TDev.AST.Json
 
     export interface JStringLiteral extends JExpr {
         value:string;
-        enumValue?:number;
+        enumValue?:string;
     }
     export interface JBooleanLiteral extends JExpr { value:boolean; }
 

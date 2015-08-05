@@ -3209,7 +3209,7 @@ module TDev.AST {
     {
         public loc:StackOp;
         public languageHint:string;
-        public enumVal:number;
+        public enumVal:string;
 
         constructor() {
             super()
