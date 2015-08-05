@@ -135,7 +135,6 @@ module TDev.Browser {
                 outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
-                scriptAddToChannel: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
             }
@@ -267,7 +266,6 @@ module TDev.Browser {
                 outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
-                scriptAddToChannel: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
             }
@@ -450,8 +448,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    //scriptAddToChannel: true,
-                    //hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,                    
@@ -517,8 +513,6 @@ module TDev.Browser {
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptAddToChannel: true,
-                    hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,
