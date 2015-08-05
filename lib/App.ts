@@ -770,6 +770,11 @@ module TDev.RT {
             else
                 r.rt.stopAsync().done();
         }
+        
+        //? Gets the app script id if any; invalid if not available
+        export function script_id(s: IStackFrame): string {
+            return s.rt.currentScriptId || undefined;
+        }
 
         //? Restarts the app and pops a restart dialog
         export function restart(message: string, r: ResumeCtx): void {
@@ -778,9 +783,6 @@ module TDev.RT {
             var scriptId = rt.currentScriptId;
 
             rt.stopAsync().done(() => {
-                // if script is not published yet, don't restart - it interferes with tutorial engine
-                if (!scriptId) return;
-
                 var m = new ModalDialog();
                 m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
                 if (score > 0)
@@ -797,7 +799,7 @@ module TDev.RT {
                         Util.externalNotify("exit");
                     }) : null
                     ));
-                if (score > 0) {
+                if (scriptId && score > 0) {
                     Bazaar.loadLeaderboardItemsAsync(scriptId)
                         .done((els: HTMLElement[]) => {
                         if (els && els.length > 0) {
