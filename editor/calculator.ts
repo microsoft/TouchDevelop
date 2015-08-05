@@ -205,8 +205,6 @@ module TDev
                 var idx0 = (<any>e).cursorIndex;
                 if (idx0 === undefined) continue;
 
-                // Util.log("check: " + e.offsetLeft + " " + e.offsetTop + " sz: " + e.offsetWidth + " " + e.offsetHeight);
-
                 var xx = e.offsetLeft + e.offsetWidth;
                 var xm = e.offsetLeft + e.offsetWidth / 2;
                 var yy = e.offsetTop + e.offsetHeight;
