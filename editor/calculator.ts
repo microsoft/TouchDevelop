@@ -237,10 +237,10 @@ module TDev
             return idx;
         }
         
-        private findEditableTokenIndex(start: number) : number {
-            if (this.canInlineEdit(this.expr.tokens[start])) return start;
-            if (start > 0 && this.canInlineEdit(this.expr.tokens[start - 1])) return start - 1;
-            if (start + 1 < this.expr.tokens.length && this.canInlineEdit(this.expr.tokens[start + 1])) return start + 1;
+        private findInlineEditStringTokenIndex(start: number) : number {
+            if (this.canInlineEditString(this.expr.tokens[start])) return start;
+            if (start > 0 && this.canInlineEditString(this.expr.tokens[start - 1])) return start - 1;
+            if (start + 1 < this.expr.tokens.length && this.canInlineEditString(this.expr.tokens[start + 1])) return start + 1;
             return -1;
         }
 
@@ -288,7 +288,7 @@ module TDev
                     // picker was launched, don't do anything
                     return
                 } else if (selIdx >= 0 && !this.wasSelectedBeforeTap) {
-                    if ((editIdx = this.findEditableTokenIndex(selIdx)) > -1) {
+                    if ((editIdx = this.findInlineEditStringTokenIndex(selIdx)) > -1) {
                         this.inlineEditAtPosition(editIdx);
                         return;
                     } else if (TheEditor.widgetEnabled("selectExpressions")) {
@@ -307,7 +307,7 @@ module TDev
                         if (idx < 0) this.unselect();
                         else {
                             // double click on editable expression, pops the editor
-                            if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                            if ((editIdx = this.findInlineEditStringTokenIndex(idx)) > -1) {
                                 this.inlineEditAtPosition(editIdx);
                                 return;
                             } else if (TheEditor.widgetEnabled("selectExpressions")) {
@@ -319,7 +319,7 @@ module TDev
                             }
                         }
                     }
-                } else if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                } else if ((editIdx = this.findInlineEditStringTokenIndex(idx)) > -1) {
                     this.inlineEditAtPosition(editIdx);
                     return;
                 }
@@ -1342,11 +1342,17 @@ module TDev
             return inp;
         }
 
-        private canInlineEdit(t:AST.Token)
+        private canInlineEditString(t: AST.Token) : boolean {
+            if (!t) return false
+            return typeof t.getLiteral() == "string" &&
+                !(<AST.Literal>t).enumVal
+        }
+        
+        private canInlineEdit(t:AST.Token) : boolean
         {
             if (!t) return false
 
-            return typeof t.getLiteral() == "string" ||
+            return this.canInlineEditString(t) ||
                    t.getThing() instanceof AST.LocalDef ||
                    (t.getProperty() && t.getProperty().canRename());
         }
