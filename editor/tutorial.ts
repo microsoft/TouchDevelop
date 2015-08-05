@@ -1789,6 +1789,15 @@ module TDev
                         return;
                     case "compile":
                         TheEditor.intelliProfile.incr("codeCompile");
+                        if (TheEditor.hasModalPane()) {
+                            TipManager.setTip({
+                                tick: Ticks.calcSearchBack,
+                                title: lf("tap there"),
+                                description: lf("need to edit elsewhere")
+                            })
+                            TheEditor.calculator.applyInstruction(null);
+                            return false;   
+                        }
                         this.waitingFor = "compile"
                         TipManager.setTip({
                             tick: Ticks.codeCompile,
@@ -1941,7 +1950,7 @@ module TDev
                 else
                     TipManager.setTip({
                         el: elt("inlineEditCloseBtn"),
-                        title: lf("type: ") + ins.targetName,
+                        title: lf("type: {0}", ins.targetName),
                         description: lf("tap here when done"),
                     })
             } else if (ins.targetKind) {
