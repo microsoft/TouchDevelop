@@ -4988,11 +4988,8 @@ height: 2.2em;
   font-size: 1.2em;
   padding: 0.2em 0.75em;
 }
-.md-box-print { /* visible in print mode */
-  display:none;
-}
-.md-box-screen { /* not visible in print mode */
-}
+@media screen { .md-box-print { display:none; } }
+@media print { .md-box-screen { display:none; } }
 .md-box-card {
   border: solid 1px black;
   background: inherit;
