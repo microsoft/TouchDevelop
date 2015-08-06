@@ -2383,6 +2383,7 @@ module TDev.AST {
         public imports = new AppImports();
         public notifyVersionMarker:any = new Object();
         public libNamespaceCache = new LibNamespaceCache(this);
+        public blockExternalLinks:boolean = undefined;
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;
