@@ -2384,6 +2384,7 @@ module TDev.AST {
         public notifyVersionMarker:any = new Object();
         public libNamespaceCache = new LibNamespaceCache(this);
         public blockExternalLinks:boolean = undefined;
+        public entireShim = false;
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;

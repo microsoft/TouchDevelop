@@ -858,7 +858,7 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
-            this.inShim = /{shim:.*}/.test(node.getDescription())
+            this.inShim = this.topApp.entireShim || /{shim:.*}/.test(node.getDescription())
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1116,6 +1116,11 @@ module TDev.AST
         public visitApp(node:App)
         {
             this.typecheckLibraries(node);
+            if (Cloud.isRestricted())
+                node.entireShim = 
+                    /#entireshim/i.test(node.comment) || 
+                    node.actions().some(a => a.isPage()) || 
+                    node.libraries().some(l => l.resolved && l.resolved.entireShim)
             node.things.forEach((n:Decl) => {
                 var wt = n._wasTypechecked;
                 n._wasTypechecked = true;
@@ -1366,7 +1371,7 @@ module TDev.AST
             }
 
             if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0) {
-              //  this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
+                this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
             }
 
 
