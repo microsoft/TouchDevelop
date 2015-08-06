@@ -195,6 +195,7 @@ module TDev {
         meta?: JsonScriptMeta; // only in lite, bag of metadata
         updateroot: string; // lite-only
         unmoderated?: boolean;
+        noexternallinks?:boolean;
     }
 
     export interface JsonHistoryItem
@@ -2004,6 +2005,8 @@ module TDev {
             return TDev.AST.loadScriptAsync(loadScript).then((tcRes:AST.LoadScriptResult) => {
                 var s = Script;
                 setGlobalScript(tcRes.prevScript);
+                if (this.fromJson)
+                    s.blockExternalLinks = this.fromJson.noexternallinks;
                 return s;
             })
         }
@@ -2031,6 +2034,8 @@ module TDev {
                 var rend = new Renderer();
                 rend.stringLimit = 90;
                 mdcmt = new MdComments(rend, null);
+                if (this.app)
+                    mdcmt.blockExternalLinks = this.app.blockExternalLinks
             }
 
             var ch = ""

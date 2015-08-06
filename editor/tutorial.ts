@@ -712,6 +712,7 @@ module TDev
                 rend.hideErrors = true;
                 this.mdcmt = new MdComments(rend, null);
                 this.mdcmt.showCopy = false;
+                this.mdcmt.blockExternalLinks = app.blockExternalLinks;
 
                 this.goalTimer = new MultiTimer(() => {
                     if (!this.disableUpdate && !this.initialMode)
