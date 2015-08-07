@@ -286,7 +286,53 @@ module TDev.Browser {
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
-            editorMode: editorModes['block'],
+            editorMode: {
+                id: 'minecraft',
+                name: lf("minecraft"),
+                descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
+                astMode: 1,
+                artId: 'brfljsds',
+                widgets: {
+                    // edit
+                    addNewButton: true,
+                    undoButton: true,
+                    changeSkillLevel: true,
+                    // refactoring
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    splitScreen: false,
+                    splitScreenOnLoad: true,
+                    shareScriptToGroup: true,
+                    // searchArtRefactoring: true,
+                    // calcSearchArt: true,
+                    scriptPropertiesIcons: true,
+                    // statements
+                    stringConcatProperty: true,
+                    show: true,                
+                    "return": true,
+                    // sections
+                    dataSection: true,
+                    // artSection: true,
+                    librariesSection: true,
+                    // ui
+                    wallScreenshot: true,
+                    wallHeart: true,
+                    startTutorialButton: true,
+                    nextTutorialsList: true,
+                    // hub
+                    hubTutorials : true,
+                    // hubShowcase : true,
+                    // hubSocial: true,
+                    publicationComments: true,
+                    translateComments: true,
+    
+                    whileConditionDefault: "true",
+                    forConditionDefault: "5",
+                    ifConditionDefault: "true",
+    
+                    scriptSocialLinks: Cloud.lite,
+                }
+            }
         },
         'rpi': {
             name: "Raspberry Pi",
