@@ -7057,7 +7057,9 @@
                         headers = h;
 
                         trigger(this.getGuid())
-                        Promise.join(waitList).then(() => World.syncAsync()).then(message => {
+                        Promise.join(waitList)
+                            .then(() => World.syncAsync())
+                            .then(message => {
                             if (!message) {
                                 if (prePub != numPublished)
                                     fixpoint();
@@ -7116,7 +7118,7 @@
                                     }).done()
                                 }
                             } else {
-                                if (!ModalDialog.currentIsVisible())
+                                if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
                                     ModalDialog.info(lf("publishing unsuccessful"), lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
                             }
                         }).done();
