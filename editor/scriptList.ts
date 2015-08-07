@@ -27,7 +27,7 @@
             if (siteHeader) {
                 var menuItems = [
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
-                        if (Cloud.isOffline() || Cloud.isFota() || /http:\/\/localhost/i.test(document.URL))
+                        if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
                             TheHub.createScript();
                         else     
                             Util.navigateInWindow("/create-code");
