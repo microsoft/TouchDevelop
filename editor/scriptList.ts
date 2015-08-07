@@ -6219,7 +6219,10 @@
             var numbers = div("sdNumbers");
             var author = div("sdAuthorInner");
             var addInfo = div("sdAddInfoInner", this.publicId);
-            var abuseDiv = big ? div(null, this.reportAbuse(true)) : null;
+            var abuseDiv = big ? div(null, this.reportAbuse(true, false, () => {
+                // upon deleting uninstall as well.
+                this.uninstall(false);
+            })) : null;
             var facebook = div("sdShare");
             //var pubId = div("sdPubId", !!publicId ? "/" + publicId : null);
             var screenShot = div("sdScriptShot");
@@ -7293,7 +7296,7 @@
             })
         }
 
-        private uninstall()
+        private uninstall(allowUndo = true)
         {
             tick(Ticks.browseUninstall);
             Editor.updateEditorStateAsync(this.getGuid(),(st) => {
@@ -7318,20 +7321,20 @@
                 .then(() => {
                     var hash = HistoryMgr.windowHash()
 
-                    HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()),() => {
-                        restoreAsync()
-                        .then(() => this.browser().updateInstalledHeaderCacheAsync())
-                        .then(() => TheEditor.historyMgr.reload(hash))
-                        .done()
-                    });
+                    if (allowUndo) {
+                        HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            restoreAsync()
+                                .then(() => this.browser().updateInstalledHeaderCacheAsync())
+                                .then(() => TheEditor.historyMgr.reload(hash))
+                                .done()
+                        });
+                    }    
 
                     this.cloudHeader = null;
-                    if (this.publicId)
-                        TheEditor.historyMgr.reload(hash);
-                    else {
-                        this.browser().skipOneSync = true;
-                        Util.setHash("list:installed-scripts");
-                    }
+                    // always reload script list after uninstalling script
+                    // for better experience with delted scripts
+                    this.browser().skipOneSync = true;                    
+                    Util.setHash("list:installed-scripts");
                 })
                 .done()
 
@@ -8943,11 +8946,12 @@
                 return
             }
             
-            
+
             Cloud.getPrivateApiAsync(pubid + "/candelete")
             .then((resp:CanDeleteResponse) => {
                 var b = TheHost
                 var del = () => {
+                    HTML.showProgressNotification(lf("deleting..."));            
                     Cloud.deletePrivateApiAsync(pubid)
                     .done(() => {
                         TheApiCacheMgr.refetch(pubid)
