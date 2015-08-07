@@ -1817,7 +1817,7 @@ span.errorSq .kw
 }
 
 #externalEditorSide .wallFullScreenLogo {
-    text-align: center;
+    text-align: right;
 }
 
 #externalEditorSide .wallFullScreenLogo img {
@@ -1858,11 +1858,15 @@ span.errorSq .kw
     #externalEditorSide .wallFullScreenLogo img {
         background-color: white;
         padding: .5em;
+        border: .2em solid black;
     }
 
     #externalEditorSide .boardCanvas {
         width: inherit !important;
         height: inherit !important;
+        background-color: white;
+        padding: 1em;
+        border: .2em solid black;
     }
 }
 
