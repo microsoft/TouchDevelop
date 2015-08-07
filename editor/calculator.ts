@@ -2175,6 +2175,8 @@ module TDev
         {
             var nextTok = this.expr.tokens[this.cursorPosition];
             var isAssign = nextTok && nextTok.getOperator() == ":=";
+            if (/TD208/.test(this.stmt.getError()))
+                isAssign = true;
             return isAssign || this.inSelectionMode() ? 1e20 : 1e-200;
         }
 
