@@ -953,12 +953,11 @@ module TDev {
                 if (!/^\d+$/.test(args[0]))
                     return MdComments.error("vimeo: video id should be a number");
                 else {
-                    var url = Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1&badge=0", args[0]);
-                    if (/loop/.test(args[1])) url += "&loop=1";
-                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
-                        url,
-                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), args[0]))
-                        );
+                    var prefix = this.relativeLinks ? "" : Cloud.getServiceUrl();
+                    var url = Util.fmt("{0}/vimeo/{1:uri}/sd", prefix, args[0]);
+                    var posterUrl = Util.fmt("{0}/vimeo/{1:uri}/thumb512", prefix, args[0]);
+                    // TODO: support looping
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
                 }
             } else if (macro == "channel9") {
                 if (!this.allowVideos) return "";
