@@ -147,8 +147,7 @@ module TDev {
             splitScreen = splitScreenRequested && canSplitScreen()
             if (phoneMode || splitScreen) portraitMode = true;
 
-            Util.log("phone mode: " + (phoneMode ? "on" : "off"));
-            Util.log("resize " + w + "x" + h);
+            Util.log("view:" + (portraitMode ? " portrait" : " landscape") + (phoneMode ? " phone" : "") + (splitScreen ? " split" : "") + " size:" + w + "x" + h);
 
             var statusBarSize = 0;
 
@@ -201,7 +200,7 @@ module TDev {
                 rootStyle.background = "#fff";
                 document.body.style.background = "#666";
             }
-
+            
             if (currentScreen)
                 currentScreen.applySizes();
         }

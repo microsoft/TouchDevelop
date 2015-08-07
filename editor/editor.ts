@@ -74,6 +74,7 @@ module TDev
             super.showWall();
             this.backBtn = <HTMLElement>this.backBtnDiv.firstChild;
             this.scriptBtn = HTML.mkRoundButton("svg:script,black", lf("back"), Ticks.wallBack, () => this.scriptBtnHandler());
+            this.justShowTheWall();
         }
 
         public updateButtonsVisibility() {
@@ -457,7 +458,7 @@ module TDev
                 });
             }
             this.pauseBtnDiv.setChildren([heart, pause]);
-            this.currentRt.applyPageAttributes();
+            if (this.currentRt) this.currentRt.applyPageAttributes();
             //keyMgr.btnShortcut(pause, "Esc");
         }
 
@@ -1348,7 +1349,13 @@ module TDev
 
             this.sizeSplitScreen();
             this.dismissModalPane();
-
+            
+            if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode || !SizeMgr.splitScreen)) {
+                this.host.justConcealTheWall();
+            } if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode && SizeMgr.splitScreen)) {
+                this.host.justShowTheWall();
+            }
+            
             // Re-run the layouting algorithm.
             if (this.resumeAction) {
                 this.currentRt.forcePageRefresh()
@@ -1735,7 +1742,8 @@ module TDev
                 return
             }
 
-            run();
+            if (this.currentRt) this.currentRt.stopAsync().then(() => run());            
+            else run();
         }
 
         private runActionCore(a:AST.Decl, args:any[], debugMode: boolean = false)

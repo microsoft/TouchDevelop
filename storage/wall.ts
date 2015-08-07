@@ -38,7 +38,7 @@ module TDev {
 
         public isHeadless()
         {
-            return Browser.isHeadless || this.currentRt.headlessPluginMode
+            return Browser.isHeadless || (this.currentRt && this.currentRt.headlessPluginMode)
         }
 
         public fullWallHeight() {
