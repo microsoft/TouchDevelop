@@ -8958,7 +8958,6 @@
                         HTML.showProgressNotification(lf("gone."))
                         if (onDeleted) onDeleted();
                     }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
-                    // TODO show it's gone in the UI
                 }
 
                 var godelete = () => {
