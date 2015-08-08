@@ -7878,6 +7878,7 @@
         private askedToLogin:boolean;
         private scriptsTab: ScriptsTab;
         private artTab: ArtTab;
+        private groupsTab: GroupsTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -7979,6 +7980,16 @@
                                     })
                             })
                         }))
+            }
+
+            if (Cloud.isRestricted()) {
+                ch.push(div("", text(lf("Groups of this user:"))));
+                if (!this.groupsTab) {
+                    this.groupsTab = new GroupsTab(this);
+                    this.groupsTab.initElements();
+                    this.groupsTab.initTab();
+                }
+                ch.push(this.groupsTab.tabContent);
             }
 
             ch.push(div("", text(lf("Scripts by this user:"))));
