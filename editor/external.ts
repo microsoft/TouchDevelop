@@ -83,10 +83,14 @@ module TDev {
       var errorMsg = "unknown error";
       // This JSON format is *very* unstructured...
       if (json.mbedresponse) {
-        var messages = json.messages.filter(m =>
-          m.severity == "error" || m.type == "Error"
-        );
-        errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+        if (json.messages) {
+          var messages = json.messages.filter(m =>
+            m.severity == "error" || m.type == "Error"
+          );
+          errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+        } else if (json.mbedresponse.result) {
+          errorMsg = json.mbedresponse.result.exception;
+        }
       }
       return errorMsg;
     }
