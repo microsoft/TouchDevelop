@@ -818,7 +818,7 @@
                     if (xcont) {
                         searchDiv = div(null, HTML.mkButton(lf("load more"), () => { searchFrom("continuation=" + xcont + "&") }));
                         elts.push(searchDiv);
-                    } else if (items.length == 0) {
+                    } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
                         if (EditorSettings.widgets().searchHelp) {
                             var t = HelpTopic.findById("howtosearch");
