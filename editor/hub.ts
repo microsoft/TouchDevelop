@@ -623,19 +623,19 @@ module TDev.Browser {
             
             if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal", "global-list"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("internal")));
-                var versionInfo = HTML.mkTextArea() 
+                var versionInfo = HTML.mkTextArea()
                 versionInfo.rows = 4;
                 versionInfo.style.fontSize = "0.8em";
                 versionInfo.style.width = "100%";
                 versionInfo.value = lf("Loading version info...")
-                
+
                 Cloud.getPrivateApiAsync("stats/dmeta")
                     .done(resp => {
-                        var tm = (n:number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
-                        versionInfo.value = 
-                                lf("Web App version: {0} {1} /{2}", Cloud.config.releaseLabel, Cloud.config.tdVersion, Cloud.config.relid) + "\n" +
-                                lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
-                                lf("Service activation: {0}", tm(resp.activationtime));
+                        var tm = (n: number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
+                        versionInfo.value =
+                        lf("Web App version: {0} {1} /{2}", Cloud.config.releaseLabel, Cloud.config.tdVersion, Cloud.config.relid) + "\n" +
+                        lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
+                        lf("Service activation: {0}", tm(resp.activationtime));
                     })
                 m.add(div("wall-dialog-body", versionInfo))
                 m.add(div("wall-dialog-body", [
@@ -644,9 +644,13 @@ module TDev.Browser {
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
                     (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
-                    (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports")  }) : null),
+                    (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
+                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => {
+                        return Cloud.getPrivateApiAsync("videos")
+                            .then((videos: JsonList) => Promise.join(videos.items.map(video => Cloud.deletePrivateApiAsync(video.id).then(() => { }, () => { Util.log('failed to delete video ' + video.id) }))))
+                    }) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
                         var perm = HTML.mkTextInput("text", "")
