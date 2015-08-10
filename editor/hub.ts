@@ -647,10 +647,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
-                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => {
-                        return Cloud.getPrivateApiAsync("videos")
-                            .then((videos: JsonList) => Promise.join(videos.items.map(video => Cloud.deletePrivateApiAsync(video.id).then(() => { }, () => { Util.log('failed to delete video ' + video.id) }))))
-                    }) : null),
+                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
                         var perm = HTML.mkTextInput("text", "")
@@ -727,6 +724,13 @@ module TDev.Browser {
             }
 
             m.show();
+        }
+        
+        function clearVideosAsync(cont: string) : Promise {
+            return Cloud.getPrivateApiAsync("videos" + (cont ? "?continuation=" + cont : ""))
+                .then((videos: JsonList) => Promise.join(
+                    videos.items.map(video => Cloud.deletePrivateApiAsync(video.id).then(() => { }, () => { Util.log('failed to delete video ' + video.id) }))
+                        .concat(videos.continuation ? clearVideosAsync(videos.continuation) : Promise.as())));
         }
 
         export function editApiConfig()
