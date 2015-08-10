@@ -446,6 +446,7 @@ module TDev {
       scriptVersionInCloud: string;
       baseSnapshot: string;
       metadata: Metadata;
+      pubId: string;
     };
 
     // The [scriptVersionInCloud] name is the one that's used by [world.ts];
@@ -492,6 +493,7 @@ module TDev {
             script: data,
             merge: ("theirs" in extra) ? extra : null,
             fota: Cloud.isFota(),
+            pubId: data.pubId,
           });
         });
       });

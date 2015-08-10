@@ -3208,6 +3208,7 @@ module TDev
                         editorState: JSON.parse(editorState || "{}"),
                         baseSnapshot: header.scriptVersion.baseSnapshot,
                         metadata: header.meta,
+                        pubId: header.scriptId
                     });
                     ProgressOverlay.hide();
                     return new PromiseInv();
