@@ -7321,6 +7321,7 @@
                 World.getScriptRestoreAsync(id)
                 .then(r => restoreAsync = r)
                 .then(() => World.uninstallAsync(id))
+                .then(() => World.syncAsync())
                 .then(() => {
                     var hash = HistoryMgr.windowHash()
 
@@ -7338,8 +7339,7 @@
                     // for better experience with delted scripts
                     this.browser().skipOneSync = true;                    
                     Util.setHash("list:installed-scripts");
-                })
-                .done()
+                }).done()
 
             }).done();
         }
