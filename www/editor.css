@@ -203,6 +203,7 @@ button.navItem[data-current^="yes"]
     position: absolute;
     left: 4em;
     top: 0;
+    right:0;
     /*margin-top: -5px;
     margin-left: 62px;*/
     white-space: nowrap;
@@ -224,6 +225,10 @@ button.navItem[data-current^="yes"]
 {
     font-size: 1.2em;
     margin-bottom: 0.2em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 2.3em);
 }
 
 .navDescription
