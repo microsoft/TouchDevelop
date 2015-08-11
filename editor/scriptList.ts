@@ -1090,9 +1090,9 @@
                       }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
                       .then(() =>
                         World.continuouslySyncAsync(false, () => {
-                            this.syncView();
-                            //this.searchKey();
-                            return Promise.as();
+                            return this.updateInstalledHeaderCacheAsync().then(() => {
+                                this.syncDone();
+                            });
                         }))
                       .done();
                 }
