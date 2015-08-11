@@ -1237,6 +1237,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .varHalf {
   display: inline-block;
   vertical-align: top;
+  width:50%;
 }
 
 .recordProperties .left {
@@ -1252,6 +1253,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 
 .varHalf .formHint {
   padding-left: 0.5em;
+  width: calc(50% - 0.5em);
 }
 .varHalf .navItem {
   border-left: none;
