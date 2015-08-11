@@ -58,6 +58,15 @@ module TDev {
           // path: '/ck-client/game/',
 
           logoUrl: origin + path + 'img/codekingdoms-microbit.png'
+        },
+        {
+          company: "The Python Software Foundation",
+          name: "MicroPython",
+          description: "Hack your micro:bit with MicroPython!",
+          id: "python",
+          origin: "https://microbit.pythonanywhere.com",
+          path: "/editor.html",
+          logoUrl: origin + '/static/img/python-powered.png'
         })
       }
     }
