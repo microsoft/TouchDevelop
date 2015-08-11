@@ -24,6 +24,7 @@ import child_process = require('child_process');
 import os = require('os');
 import events = require('events');
 import net = require("net");
+import tls = require("tls");
 
 var config:any;
 var currentReqNo = 0;
@@ -2787,6 +2788,8 @@ function main()
     var app
     var sslapp
 
+    tls.CLIENT_RENEG_LIMIT = 0
+
     var innerMain = () => {
         if (!pfx) sslport = 0
         app = http.createServer(handleReq);
@@ -2801,7 +2804,6 @@ function main()
         }, Math.round((Math.random()+0.5) * 2000))
 
         var ciphers = process.env["TD_TLS_CIPHERS"] || defaultCiphers
-        console.log(ciphers)
 
         if (sslport) {
             sslapp = https.createServer({
