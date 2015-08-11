@@ -2416,6 +2416,12 @@ module TDev
 */
 
                 var s: IProperty[] = k.primaryKind.listProperties().slice(0);
+                var t = this.expr.tokens[this.cursorPosition-1];
+                if (k.primaryKind == api.core.String && t && t instanceof AST.Literal && (<AST.Literal>t).enumVal) {
+                    // don't allow string editing on enum values
+                    s = [];
+                }
+                    
                 if (k.primaryKind instanceof AST.LibraryRefKind)
                     s = s.filter(p => !(<AST.LibraryRefAction>p)._extensionAction);
                 var downgradeConcat = false;
@@ -2449,7 +2455,7 @@ module TDev
                     downgradeConcat = true;
                 }
                 
-                s = s.filter(p => p.isBrowsable() && (!profile || profile.hasProperty(p)));                
+                s = s.filter(p => p.isBrowsable() && (!profile || profile.hasProperty(p))); 
                 s = Calculator.sortDecls(s);
 
                 s.forEach((p: IProperty) => {
