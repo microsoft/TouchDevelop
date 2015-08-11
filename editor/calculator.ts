@@ -2155,7 +2155,7 @@ module TDev
 
         private literalEdit(l:AST.Literal)
         {
-            if (typeof l.data == "string") {
+            if (typeof l.data == "string" && !l.enumVal) {
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
                 if (l instanceof AST.FieldName || l instanceof AST.RecordName)
                     e.nameOverride = lf("rename");
