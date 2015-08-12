@@ -6182,6 +6182,7 @@
         static editorIcons = {
             "blockly": "blockeditor,#AA2FE7",
             "codekingdoms": "codekingdoms,#ffffff",
+            "python": "python,#ffffff",
             "touchdevelop": "touchdevelop,#0095ff",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
