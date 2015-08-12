@@ -946,6 +946,17 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
                         );
                 }
+            } else if (Cloud.lite && macro == "bbc") {
+                if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
+                if (!arg)
+                    return MdComments.error("bbc: missing video id");
+                else {
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
+                        Util.fmt("https://files.microbit.co.uk/clips/{0:uri}/embed", arg),
+                        SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', arg))
+                        );
+                }
             } else if (Cloud.lite && macro == "vimeo") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
