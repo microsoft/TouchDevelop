@@ -646,6 +646,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
@@ -752,6 +753,50 @@ module TDev.Browser {
                 })
                 .done()
                 return r
+            })
+        }
+
+        function permissionReview()
+        {
+            ModalDialog.editText(lf("Ignored permissions"), "student,preview,educator", perms => {
+                var okperms = {}
+                perms.split(/,/).forEach(p => okperms[p] = 1)
+                okperms[""] = 1
+
+                var users = []
+                var loop = (cont) =>
+                    Browser.TheApiCacheMgr.getAsync("users?count=1000" + cont)
+                    .then(resp => {
+                        users.pushRange(resp.items)
+                        if (resp.continuation)
+                            loop("&continuation=" + resp.continuation)
+                        else fin()
+                    })
+                    .done()
+                var userList = ""
+                var csv = l => l.map(s => "\"" + (s||"").replace(/[\\"]/g, " ") + "\"").join(",") + "\n"
+                var fin = () => {
+                    userList += csv(["User ID", "Nickname", "Real name", "Email", "Permission"])
+                    var pp = users.map(u =>
+                        Browser.TheApiCacheMgr.getAsync(u.id + "/permissions")
+                        .then(r => {
+                            if (r.permissions.split(/,/).every(p => okperms[p]))
+                                return Promise.as()
+                            var per = r.permissions.split(/,/).filter(p => !!p)
+                            per.sort()
+                            return Browser.TheApiCacheMgr.getAsync(u.id + "/settings?format=short")
+                            .then(set => {
+                                userList += csv([u.id, u.name, set.realname, set.email, per.join(", ")])
+                            })
+                        }))
+                    Promise.join(pp).then(() => {
+                        ModalDialog.showText(userList)
+                    })
+                    .done()
+                }
+                loop("")
+
+                return new PromiseInv()
             })
         }
 

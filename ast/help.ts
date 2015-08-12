@@ -959,6 +959,8 @@ module TDev {
                 }
             } else if (Cloud.lite && macro == "vimeo") {
                 if (!this.allowVideos) return "";
+                if (!arg)
+                    return MdComments.error("vimeo: missing video id");
                 if (this.blockExternal()) return this.blockLink("")
                 var args = arg.split(/:/);
                 if (!/^\d+$/.test(args[0]))
