@@ -2062,7 +2062,10 @@ module TDev.AST {
                             annot.enumMap[m[1]] = m[2]
                             return m[1]
                         }
-                        else return a
+                        else {
+                            annot.enumMap[a] = a;
+                            return a
+                        }
                     });
                     (<any>annot.hints).enumMap = annot.enumMap
                 }
