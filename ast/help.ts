@@ -959,6 +959,11 @@ module TDev {
                     var id = args[0].replace(/^\/+/, "")
                     var url = Util.fmt("{0}/{1}/sd", prefix, id);
                     var posterUrl = Util.fmt("{0}/{1}/thumb", prefix, id);
+                    if (Cloud.config.anonToken) {
+                        var suff = "?anon_token=" + encodeURIComponent(Cloud.config.anonToken)
+                        url += suff
+                        posterUrl += suff
+                    }
                     // TODO: support looping
                     return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
                 }
