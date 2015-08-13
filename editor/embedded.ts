@@ -51,7 +51,7 @@ module TDev {
           .join("\n") +
           (a.isLibrary
             ? "\nvoid app_main() {\n"+
-              "  uBit.display.scrollString(\"Error: trying to run a library\");\n"+
+              "  uBit.display.scroll(\"Error: trying to run a library\");\n"+
               "}\n"
             : "")
         );
