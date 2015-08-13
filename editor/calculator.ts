@@ -2481,7 +2481,7 @@ module TDev
                 var libSingl: IntelliItem = null;
                 var dataSingl: IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
-                    var sc = s.usage.count() * 1e-20;
+                    var sc = s.usage.count() + 1e-20;
                     sc *= s.usageMult();
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
                     if (sc > maxScore) maxScore = sc;
