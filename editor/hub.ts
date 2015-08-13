@@ -298,6 +298,7 @@ module TDev.Browser {
                     undoButton: true,
                     changeSkillLevel: true,
                     // refactoring
+                    updateButton: true,
                     promoteRefactoring: true,
                     fixItButton: true,
                     splitScreen: false,
