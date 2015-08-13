@@ -5097,7 +5097,7 @@ module TDev.AST {
                 return ""
             })
 
-            var dummy2 = c.text.replace(/\{topic:([\w-\/]*)\}/, (match:string, top:string) => {
+            var dummy2 = c.text.replace(/\{topic:([\w-\/@]*)\}/, (match:string, top:string) => {
                 this.topicPath = top;
                 return ""
             })
