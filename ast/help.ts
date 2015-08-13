@@ -946,6 +946,22 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
                         );
                 }
+            } else if (Cloud.lite && macro == "videoptr") {
+                if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
+                if (!arg)
+                    return MdComments.error("videoptr: missing video id");
+                else {
+                    var prefix = this.relativeLinks ? "" : Cloud.getServiceUrl();
+                    var args = arg.split(/:/);
+                    if (!/^[a-z0-9\-\/@]+$/.test(args[0]))
+                        return MdComments.error("videoptr: invalid pointer path");
+                    var id = args[0].replace(/^\/+/, "")
+                    var url = Util.fmt("{0}/{1}/sd", prefix, id);
+                    var posterUrl = Util.fmt("{0}/{1}/thumb", prefix, id);
+                    // TODO: support looping
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
+                }
             } else if (Cloud.lite && macro == "bbc") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
