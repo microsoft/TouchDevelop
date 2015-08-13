@@ -2481,7 +2481,7 @@ module TDev
                 var libSingl: IntelliItem = null;
                 var dataSingl: IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
-                    var sc = s.usage.count() + 1e-20;
+                    var sc = s.usage.count() * 1e-20;
                     sc *= s.usageMult();
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
                     if (sc > maxScore) maxScore = sc;
@@ -2495,6 +2495,8 @@ module TDev
 
                 var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
                     var sc = l.getUsage().count() + 50;
+                    if (l.getPublicActions().some(p => !!p.getNamespaces()[0]))
+                        sc *= 1.-10;   
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliLibrary)
                     this.currentIntelliItems.pop()
                     if (sc > maxScore) maxScore = sc;
