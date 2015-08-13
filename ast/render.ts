@@ -218,7 +218,7 @@ module TDev
             var viewPort = Util.fmt("0 0 {0} {1}", w, h);
             var svg = Util.fmt("<path class='biton' d='{0}'/><path class='bitoff' d='{1}'/>", r1, r0);
             var result = Util.fmt("<span class='kbm' style='width:{0}em'>{1}</span>",
-                            w / h + 0.3,
+                            w / h + 0.1,
                             SVG.svgBoilerPlate(viewPort, svg));
             if (ellipse) result += Renderer.tspan("stringLiteral", "...");
             return result;
