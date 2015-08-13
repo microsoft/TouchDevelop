@@ -11,7 +11,6 @@ module TDev {
 
     import H = Helpers
 
-    export var mbedRuntimeRevision = "7:17dd2cfe0ff4"    
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
     function compile1(libs: J.JApp[], a: J.JApp): { prototypes: string; code: string; prelude: string; libName: string } {
@@ -45,8 +44,7 @@ module TDev {
       return Promise.join(textPromises).then((everything: J.JApp[]) => {
         var compiled = everything.map((a: J.JApp) => compile1(everything, a));
         return Promise.as(
-          ["// mbed library revision:" + Embedded.mbedRuntimeRevision]
-          .concat(compiled.map(x => x.prelude))
+          compiled.map(x => x.prelude)
           .concat(compiled.map(x => x.prototypes))
           .concat(compiled.map(x => x.code))
           .filter(x => x != "")
