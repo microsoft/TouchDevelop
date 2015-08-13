@@ -307,6 +307,8 @@ module TDev.Browser {
                     // calcSearchArt: true,
                     scriptPropertiesIcons: true,
                     // statements
+                    copyPaste: true,
+                    selectStatements: true,
                     stringConcatProperty: true,
                     show: true,                
                     "return": true,
