@@ -290,7 +290,7 @@ module TDev.Browser {
                 id: 'minecraft',
                 name: lf("minecraft"),
                 descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
-                astMode: 1,
+                astMode: 2,
                 artId: 'brfljsds',
                 widgets: {
                     // edit
