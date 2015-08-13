@@ -6,7 +6,7 @@ using WpfApplication1;
 /// <summary>
 /// Class containing methods to retrieve specific file system paths.
 /// </summary>
-public static class KnownFolders
+public static class KnownFoldersNativeMethods
 {
     public static void WatchDrives(Action handler)
     {

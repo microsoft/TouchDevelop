@@ -21,23 +21,21 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private FileSystemWatcher watcher;
-
         public MainWindow()
         {
             InitializeComponent();
             this.updateStatus("loading...");
-            var downloads = KnownFolders.GetDownloadPath();
+            var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
                 this.updateStatus("oops, can't find the Downloads folder");
                 return;
             }
 
-            this.watcher = new FileSystemWatcher(downloads);
-            this.watcher.Renamed += (sender, e) => handleFileEvent(e);
-            this.watcher.Created += (sender, e) => handleFileEvent(e);
-            this.watcher.EnableRaisingEvents = true;
+            var watcher = new FileSystemWatcher(downloads);
+            watcher.Renamed += (sender, e) => handleFileEvent(e);
+            watcher.Created += (sender, e) => handleFileEvent(e);
+            watcher.EnableRaisingEvents = true;
 
             this.updateStatus("Ready to copy your .hex file to your BBC micro:bit.");
             this.handleActivation();
