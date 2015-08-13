@@ -211,12 +211,12 @@ module TDev {
       // (which maps a string literal to a constant). This function transforms
       // the arguments for some known specific C++ functions.
       private specialTreatment(e: EmitterEnv, f: string, actualArgs: J.JExpr[]) {
-        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation") {
+        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation" || f == "micro_bit::plotImage") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (x === "")
             x = "0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n";
           if (!x)
-            throw new Error("create image / show animation takes a string literal only");
+            throw new Error("create image / show animation / plot image takes a string literal only");
           var r = "literals::bitmap"+this.imageLiterals.length;
           var otherArgs = actualArgs.splice(1).map((x: J.JExpr) => this.visit(e, x));
           var code = f+"("+r+"_w, "+r+"_h, "+r+
