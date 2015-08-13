@@ -2480,18 +2480,22 @@ module TDev
                 var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
                 var libSingl: IntelliItem = null;
                 var dataSingl: IntelliItem = null;
+                var codeSingl: IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
                     var sc = s.usage.count() + 1e-20;
                     sc *= s.usageMult();
+                    if (s.isExtension) sc += 50;
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
                     if (sc > maxScore) maxScore = sc;
                     if (skill < s.getKind().minSkill) e.score *= 1e-10;
                     e.decl = s;
-                    if (s.getName() == AST.libSymbol)
-                        libSingl = e;
-                    else if (s.getName() == "data")
-                        dataSingl = e;
+                    if (s.getName() == AST.libSymbol) libSingl = e;
+                    else if (s.getName() == "data") dataSingl = e;
+                    else if (s.getName() == "code") codeSingl = e;
                 });
+                
+                // bump down code singleton
+                if (codeSingl) codeSingl.score *= 1e-2;
 
                 var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
                     var sc = l.getUsage().count() + 50;
