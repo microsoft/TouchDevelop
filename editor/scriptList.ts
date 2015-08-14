@@ -1212,7 +1212,7 @@
                         .then((code: JsonCode) => {
                             lastCode = code;
                             if(code.verb == 'JoinGroup')
-                                return Cloud.getPrivateApiAsync(code.data)
+                                return Cloud.getPrivateApiAsync(Cloud.lite ? code.data + "?code=" + codeid : code.data)
                             else
                                 return Promise.as(undefined);
                         })
@@ -1220,6 +1220,7 @@
                             if (group) {
                                 showBtn();
                                 groupid = group.id;
+                                TheApiCacheMgr.store(group.id, group);
                                 var groupInfo = this.getGroupInfoById(groupid);
                                 errorDiv.setChildren([
                                     div('wall-dialog-header', lf("for group")),
