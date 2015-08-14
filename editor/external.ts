@@ -40,7 +40,7 @@ module TDev {
           id: "blockly",
           origin: origin,
           path: path + "blockly/editor.html",
-          logoUrl: "https://microbit0.blob.core.windows.net/pub/vrvndwmo"
+          logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo"
         }];
 
       if (TDev.isBeta) {
