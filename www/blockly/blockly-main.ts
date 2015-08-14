@@ -316,6 +316,14 @@ module TDev {
       toolbox: document.getElementById("blockly-toolbox"),
       scrollbars: true,
       media: "./media/",
+      zoom: {
+        enabled: true,
+        controls: true,
+        wheel: true,
+        maxScale: 2,
+        minScale: .1,
+        scaleSpeed: 1.1
+      },
     });
     var onResize = () => {
       // Compute the absolute coordinates and dimensions of blocklyArea.
