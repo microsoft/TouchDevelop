@@ -62,6 +62,7 @@ module TDev {
         calcPromoteToParameter,
         calcGoToDef,
         calcFindRefs,
+        calcAddDataVar,
         calcUnselect,
         calcExtend,
         calcReplaceInScript,

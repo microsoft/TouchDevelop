@@ -310,11 +310,32 @@ module TDev {
   function setupEditor(message: External.Message_Init) {
     var state = <MyEditorState> message.script.editorState;
 
-    Blockly.inject($("#editor")[0], {
-      toolbox: $("#blockly-toolbox")[0],
+    var blocklyArea = document.getElementById('editor');
+    var blocklyDiv = document.getElementById('blocklyDiv');
+    var workspace = Blockly.inject(blocklyDiv, {
+      toolbox: document.getElementById("blockly-toolbox"),
       scrollbars: true,
       media: "./media/",
     });
+    var onResize = () => {
+      // Compute the absolute coordinates and dimensions of blocklyArea.
+      var element = blocklyArea;
+      var x = 0;
+      var y = 0;
+      do {
+        x += element.offsetLeft;
+        y += element.offsetTop;
+        element = <HTMLElement> element.offsetParent;
+      } while (element);
+      // Position blocklyDiv over blocklyArea.
+      blocklyDiv.style.left = x + 'px';
+      blocklyDiv.style.top = y + 'px';
+      blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+      blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+    };
+    window.addEventListener('resize', onresize, false);
+    onResize();
+
     loadBlockly(message.script.scriptText);
     // Hack alert! Blockly's [fireUiEvent] function [setTimeout]'s (with a 0 delay) the actual
     // firing of the event, meaning that the call to [inject] above schedule a change event to

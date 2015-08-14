@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -21,23 +22,22 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private FileSystemWatcher watcher;
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public MainWindow()
         {
             InitializeComponent();
             this.updateStatus("loading...");
-            var downloads = KnownFolders.GetDownloadPath();
+            var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
                 this.updateStatus("oops, can't find the Downloads folder");
                 return;
             }
 
-            this.watcher = new FileSystemWatcher(downloads);
-            this.watcher.Renamed += (sender, e) => handleFileEvent(e);
-            this.watcher.Created += (sender, e) => handleFileEvent(e);
-            this.watcher.EnableRaisingEvents = true;
+            var watcher = new FileSystemWatcher(downloads);
+            watcher.Renamed += (sender, e) => handleFileEvent(e);
+            watcher.Created += (sender, e) => handleFileEvent(e);
+            watcher.EnableRaisingEvents = true;
 
             this.updateStatus("Ready to copy your .hex file to your BBC micro:bit.");
             this.handleActivation();
@@ -56,7 +56,9 @@ namespace WpfApplication1
                         var path = uri.AbsolutePath;
                         ThreadPool.QueueUserWorkItem(data => this.handleFile(path));
                     }
-                    catch (Exception)
+                    catch (ArgumentNullException)
+                    { }
+                    catch (UriFormatException)
                     { }
                 }
             }
@@ -77,10 +79,13 @@ namespace WpfApplication1
         static string getVolumeLabel(DriveInfo di)
         {
             try { return di.VolumeLabel; }
-            catch(Exception)
-            {
-                return "";
-            }
+            catch (IOException)
+            { }
+            catch (SecurityException)
+            { }
+            catch(UnauthorizedAccessException)
+            {}
+            return "";
         }
 
         void handleFileEvent(FileSystemEventArgs e)
@@ -108,14 +113,16 @@ namespace WpfApplication1
                 this.updateStatus("flashing " + info.Name);
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
-                File.Copy(info.FullName, trg);
+                File.Copy(info.FullName, trg, true);
 
                 this.updateStatus("flashed " + info.Name);
+                return;
             }
-            catch (Exception)
-            {
-                this.updateStatus("oops, something wrong happened");
-            }
+            catch (IOException) { }
+            catch (NotSupportedException) { }
+            catch (UnauthorizedAccessException) { }
+            catch (ArgumentException) { }
+            this.updateStatus("oops, something wrong happened");
         }
     }
 }

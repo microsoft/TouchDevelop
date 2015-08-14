@@ -58,6 +58,10 @@ body, input {
   margin: 0;
 }
 
+#blocklyDiv {
+  position: absolute;
+}
+
 /* Script info box */
 #script-box {
   margin-right: 1rem;
