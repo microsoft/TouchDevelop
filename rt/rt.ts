@@ -1830,7 +1830,9 @@ module TDev
                         }
                         else
                             ProgressOverlay.hide();
-                        Util.assert(this.isStopped())
+                        // Someone else must've restarted the script.
+                        if (!this.isStopped())
+                            return;
                         // missing must be setup after the loading dialog is gone
                         this.host.initApiKeysAsync()
                             .then(() => this.host.agreeTermsOfUseAsync())
