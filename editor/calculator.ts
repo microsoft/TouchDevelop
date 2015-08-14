@@ -2425,20 +2425,31 @@ module TDev
                 if (k.primaryKind instanceof AST.LibraryRefKind)
                     s = s.filter(p => !(<AST.LibraryRefAction>p)._extensionAction);                
                 
-                if (k.primaryKind.getName() == "data" && TheEditor.widgetEnabled("promoteRefactoring")) {
-                    var e1 = this.mkIntelliItem(1e-10, Ticks.calcAddDataVar);
-                    e1.matchAny = true;
-                    e1.nameOverride = lf("new global var");
-                    e1.descOverride = lf("create new data variable");
-                    e1.cbOverride = () => {
-                        var ds = TheEditor.freshVar(api.core.Number);
-                        ds.setName(Script.freshName(this.searchApi.query() || "v"));
-                        
-                        this.insertToken(AST.mkPropRef(ds.getName()))
-                        
-                        TheEditor.addNode(ds);                        
-                    };                    
-                }                
+                if (TheEditor.widgetEnabled("promoteRefactoring")) {
+                    if (k.primaryKind.getName() == "data") {
+                        var e1 = this.mkIntelliItem(1e-10, Ticks.calcAddDataVar);
+                        e1.matchAny = true;
+                        e1.nameOverride = lf("new global var");
+                        e1.descOverride = lf("create new data variable");
+                        e1.cbOverride = () => {
+                            var ds = TheEditor.freshVar(api.core.Number);
+                            ds.setName(Script.freshName(this.searchApi.query() || "v"));
+                            this.insertToken(AST.mkPropRef(ds.getName()))
+                            TheEditor.addNode(ds);
+                        };
+                    } else if (k.primaryKind.getName() == "code") {
+                        var e1 = this.mkIntelliItem(1e-10, Ticks.calcAddDataVar);
+                        e1.matchAny = true;
+                        e1.nameOverride = lf("new function");
+                        e1.descOverride = lf("create new function");
+                        e1.cbOverride = () => {
+                            var fn = TheEditor.freshAsyncAction();
+                            fn.setName(Script.freshName(this.searchApi.query() || "v"));
+                            this.insertToken(AST.mkPropRef(fn.getName()))
+                            TheEditor.addNode(fn);
+                        };                        
+                    }
+                }
                 
                 var downgradeConcat = false;
                 if (k.definition != null)
