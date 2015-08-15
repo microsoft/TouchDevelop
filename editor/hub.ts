@@ -297,7 +297,8 @@ module TDev.Browser {
                     addNewButton: true,
                     undoButton: true,
                     changeSkillLevel: true,
-                    // refactoring
+                    async: true,
+                    // refactoring                    
                     updateButton: true,
                     promoteRefactoring: true,
                     fixItButton: true,
