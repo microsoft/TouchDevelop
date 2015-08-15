@@ -110,10 +110,11 @@ module TDev {
 
       // Allows the target to redefine their own string type.
       public visitStringLiteral(env: EmitterEnv, s: string) {
-        return 'touch_develop::mk_string("'+s.replace(/["\\\n]/g, c => {
+        return 'touch_develop::mk_string("'+s.replace(/["\\\n\r]/g, c => {
           if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
           if (c == "\n") return '\\n';
+          if (c == "\r") return '\\r';
         }) + '")';
       }
 

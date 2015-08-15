@@ -651,6 +651,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
+                    (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
@@ -760,6 +761,41 @@ module TDev.Browser {
             })
         }
 
+        function csv(l:string[]) {
+            return l.map(s => "\"" + (s||"").replace(/[\\"]/g, " ") + "\"").join(",") + "\n"
+        }
+
+        function pointerReview()
+        {
+            ModalDialog.editText(lf("Ignored paths"), "usercontent/,td/,functions/,device/,signin/,templates/", perms => {
+                var okpaths = perms.split(/\s*,\s*/).filter(p => !!p)
+
+                var pointers = []
+                var loop = (cont) =>
+                    Browser.TheApiCacheMgr.getAsync("pointers?count=1000" + cont)
+                    .then(resp => {
+                        pointers.pushRange(resp.items)
+                        if (resp.continuation)
+                            loop("&continuation=" + resp.continuation)
+                        else fin()
+                    })
+                    .done()
+                var pointerList = ""
+                var fin = () => {
+                    pointerList += csv(["Path", "User Name", "Description", "Script"])
+                    pointers.forEach(p => {
+                        if (okpaths.some(pp => p.path.slice(0, pp.length) == pp))
+                            return
+                        pointerList += csv([p.path, p.username, p.description, p.redirect || p.scriptid])
+                    })
+                    ModalDialog.showText(pointerList)
+                }
+                loop("")
+
+                return new PromiseInv()
+            })
+        }
+
         function permissionReview()
         {
             ModalDialog.editText(lf("Ignored permissions"), "student,preview,educator", perms => {
@@ -778,7 +814,6 @@ module TDev.Browser {
                     })
                     .done()
                 var userList = ""
-                var csv = l => l.map(s => "\"" + (s||"").replace(/[\\"]/g, " ") + "\"").join(",") + "\n"
                 var fin = () => {
                     userList += csv(["User ID", "Nickname", "Real name", "Email", "Permission"])
                     var pp = users.map(u =>
