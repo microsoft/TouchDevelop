@@ -6886,7 +6886,8 @@
                                     path: this.docPath,
                                     scriptid: id,
                                     description: this.getTitle(),
-                                }))
+                                })
+                                .then(r => r, e => Cloud.handlePostingError(e, lf("update pointer"))))
                     ])
             })()
 
