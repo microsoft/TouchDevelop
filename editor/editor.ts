@@ -2056,7 +2056,7 @@ module TDev
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
             var msg = Cloud.isFota()
                 ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
-                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive. Press the reset button.")
+                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
