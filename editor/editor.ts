@@ -2074,7 +2074,7 @@ module TDev
                 this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
-                var r = src === this.currentScriptCompiling;
+                var r = src === this.currentScriptCompiling || src === "";
                 this.currentScriptCompiling = undefined;
                 if (!r)
                     Util.log("compilation outdated, skipping...");
