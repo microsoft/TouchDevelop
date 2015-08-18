@@ -363,8 +363,14 @@ module TDev {
             break;
 
           case MessageType.Compile:
-            if (Cloud.anonMode(lf("Native compilation")))
+            if (Cloud.anonMode(lf("Native compilation"))) {
+              this.post(<Message_CompileAck>{
+                type: MessageType.CompileAck,
+                status: Status.Error,
+                error: "please log in for compilation"
+              });
               return;
+            }
 
             var message1 = <Message_Compile> event.data;
             var cpp;
