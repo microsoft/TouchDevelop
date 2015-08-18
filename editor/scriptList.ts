@@ -260,7 +260,7 @@
                 this.updateIsWaiting = false;
                 tick(Ticks.appUpdate);
                 window.localStorage["appUpdated"] = "1";
-                window.localStorage["lastForcedUpdate"] = "";
+                window.localStorage.removeItem("lastForcedUpdate");
                 window.location.reload();
                 return true;
             }
@@ -339,6 +339,9 @@
                 localStorage["legalNotice"] == Runtime.legalNotice)
                 return;
 
+            if (Cloud.lite && /ckns_accept=111/.test(document.cookie))
+                return
+
             var d = new ModalDialog();
             var noticeHTML = Runtime.legalNoticeHeader ||
                 (lf("<h3>welcome to TouchDevelop</h3>") +
@@ -356,7 +359,10 @@
             d.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("agree"), () => {
                     tick(Ticks.legalNoticeAgree);
-                    localStorage["legalNotice"] = notice;
+                    if (Cloud.lite)
+                        document.cookie = "ckns_accept=111; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT"
+                    else
+                        localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
                     d.dismiss();
                 }, "green-button")

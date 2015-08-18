@@ -2632,6 +2632,8 @@ module TDev{
         } catch (e) {
             debugger;
         }
+
+        /*
         if (willReload) {
             try {
                 window.localStorage["storedBug"] = JSON.stringify(bug);
@@ -2640,6 +2642,7 @@ module TDev{
                 debugger;
             }
         }
+        */
 
         Cloud.postBugReportAsync(bug).done(() => { }, e => undefined); // ignore errors
     }
@@ -2650,7 +2653,7 @@ module TDev{
     {
         var b = window.localStorage["storedBug"];
         if (b) {
-            window.localStorage["storedBug"] = "";
+            window.localStorage.removeItem("storedBug");
             try {
                 sendErrorReport(JSON.parse(b));
             } catch (e) {
@@ -2726,6 +2729,22 @@ module TDev{
 
         if (willReload && !Storage.showTemporaryWarning()) {
             try {
+                ProgressOverlay.show(lf("Whoops! Something went wrong."))
+                ProgressOverlay.setProgress("")
+                ProgressOverlay.setAddInfo([
+                            div(null, lf("We're reloading the page.")),
+                            div("item-subtle", lf("Technical information: {0}", bug.exceptionMessage || "None"))
+                ])
+            } catch (e) {
+                debugger;
+            }
+            Util.setTimeout(3000, () => { 
+                window.location.reload() 
+            })
+            return
+
+            /*
+            try {
                 var msg = bug.exceptionMessage;
                 if (!msg) msg = "OOPS";
                 window.localStorage["lastExceptionMessage"] = msg;
@@ -2735,6 +2754,7 @@ module TDev{
             } catch (e) {
                 debugger;
             }
+            */
         }
 
         try {

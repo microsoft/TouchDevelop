@@ -2056,7 +2056,7 @@ module TDev
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
             var msg = Cloud.isFota()
                 ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
-                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive. Press the reset button.")
+                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
@@ -2074,7 +2074,7 @@ module TDev
                 this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
-                var r = src === this.currentScriptCompiling;
+                var r = src === this.currentScriptCompiling || src === "";
                 this.currentScriptCompiling = undefined;
                 if (!r)
                     Util.log("compilation outdated, skipping...");
@@ -4229,7 +4229,7 @@ module TDev
                         Cloud.setUserId(id)
                         Cloud.setAccessToken(tok.token)
                         localStorage["experimentalVersion"] = ver
-                        localStorage["legalNotice"] = Runtime.legalNotice
+                        //localStorage["legalNotice"] = Runtime.legalNotice
                         window.location.reload()
                     });
                 })

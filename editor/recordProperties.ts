@@ -23,9 +23,9 @@ module TDev
         private kindContainer:HTMLElement;
         private fields = div(null);
         private renderer = new TDev.EditorRenderer();
-        private mkKey = div("varHalf");
-        private mkVal = div("varHalf");
-        private mkAct = div("varHalf");
+        private mkKey = div("inline-block");
+        private mkVal = div("inline-block");
+        private mkAct = div("inline-block");
         private exported: HTMLElement;
         public getTick() { return Ticks.viewRecordInit; }
 
