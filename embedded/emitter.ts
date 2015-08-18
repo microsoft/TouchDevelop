@@ -29,6 +29,10 @@ module TDev {
       };
     }
 
+    function assert(x: boolean) {
+      if (!x)
+        throw new Error("Assert failure");
+    }
 
     // --- The code emitter.
 
@@ -236,7 +240,8 @@ module TDev {
         name: string,
         args: J.JExpr[],
         parent: J.JTypeRef,
-        callType: string)
+        callType: string,
+        typeArgument: string = null)
       {
         var mkCall = (f: string, skipReceiver: boolean) => {
           var actualArgs = skipReceiver ? args.slice(1) : args;
@@ -252,13 +257,29 @@ module TDev {
                 else
                   return this.visit(env, a)
               });
-            return f + "(" + argsCode.join(", ") + ")";
+            var t = typeArgument ? "<" + typeArgument + ">" : "";
+            return f + t + "(" + argsCode.join(", ") + ")";
           }
         };
 
         // The [JCall] node has several, different, often unrelated purposes.
         // This function identifies (tentatively) the different cases and
         // compiles each one of them into something that makes sense.
+
+        // 0) Some methods take a type-level argument at the end, e.g.
+        // "create -> collection of -> number". TouchDevelop represents this as
+        // calling the method "Number" on "create -> collection of". C++ wants
+        // the type argument to be passed as a template parameter to "collection of"
+        // so we pop the type arguments off and call ourselves recursively with
+        // the extra type argument.
+        if (<any> parent == "Unfinished Type") {
+          var newTypeArg = typeArgument
+            ? H.mangleName(name) + "<" + typeArgument + ">"
+            : H.mangleName(name);
+          assert(args.length && args[0].nodeType == "call");
+          var call = <J.JCall> args[0];
+          return this.visitCall(env, call.name, call.args, call.parent, call.callType, newTypeArg);
+        }
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
@@ -293,9 +314,13 @@ module TDev {
         else if (args.length && H.isSingletonRef(args[0]) == "♻")
           return "";
 
-        // 6b) Reference to a built-in library method, e.g. Math→ max
+        // 6b) Reference to a built-in library method, e.g. Math→ max. The
+        // first call to lowercase avoids a conflict between Number (the type)
+        // and Number (the namespace). The second call to lowercase avoids a
+        // conflict between Collection_of (the type) and Collection_of (the
+        // function).
         else if (args.length && H.isSingletonRef(args[0]))
-          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name), true);
+          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name).toLowerCase(), true);
 
         // 7) Instance method (e.g. Number's > operator, for which the receiver
         // is the number itself). Lowercase so that "number" is the namespace

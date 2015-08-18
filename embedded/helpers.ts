@@ -199,25 +199,43 @@ module TDev {
 
       export interface LibMap { [id: string]: string }
 
+      export interface Type {
+        lib: string;
+        type: string;
+        args: Type[];
+      }
+
+      function resolveStructuredTypeRef(libMap: LibMap, t: any): Type {
+        if (typeof t == "string") {
+          // Simple, flat type, e.g. "Number"
+          return {
+            lib: "",
+            type: t,
+            args: []
+          };
+        } else {
+          if (!(t.o || t.g))
+            throw new Error("Unsupported type reference");
+          // Sophisticated type (prefixed by a library, or parameterized).
+          return {
+            lib: t.l ? libMap[t.l] : "",
+            type: t.o || t.g,
+            args: t.a && t.a.length
+              ? t.a.map((x: J.JTypeRef) => resolveStructuredTypeRef(libMap, x))
+              : []
+          };
+        }
+      }
+
       // Resolve a type reference to either "t" (no scope for this type) or
       // "l::t" (reference to a library-defined type). If the former case, lib
       // is the empty string; in the latter case, lib is "l".
-      export function resolveTypeRef(libMap: LibMap, typeRef: J.JTypeRef): { lib: string; type: string } {
+      export function resolveTypeRef(libMap: LibMap, typeRef: J.JTypeRef): Type {
         var s = <any> typeRef;
-        if (s.length && s[0] == "{") {
-          var t = JSON.parse(<any> typeRef);
-          if (!(t.o || t.g))
-            throw new Error("Unsupported type reference");
-          return {
-            lib: t.l ? libMap[t.l] : "",
-            type: t.o || t.g
-          };
-        } else {
-          return {
-            lib: "",
-            type: s
-          };
-        }
+        if (s.length && s[0] == "{")
+          return resolveStructuredTypeRef(libMap, JSON.parse(s));
+        else
+          return resolveStructuredTypeRef(libMap, s);
       }
 
       export function defaultValueForType(libMap: LibMap, t1: J.JTypeRef) {
@@ -232,9 +250,15 @@ module TDev {
           return null;
       }
 
+      function toCppType (env: Env, t: Type): string {
+        var args = t.args.map((t: Type) => toCppType(env, t));
+        var r = manglePrefixedName(env, t.lib, t.type) +
+          (args.length ? "<" + args.join(", ") + ">" : "");
+        return r;
+      }
+
       export function mkType(env: Env, libMap: LibMap, type: J.JTypeRef) {
-        var t = resolveTypeRef(libMap, type);
-        return manglePrefixedName(env, t.lib, t.type);
+        return toCppType(env, resolveTypeRef(libMap, type));
       }
 
       export function mkParam(env: Env, libMap: LibMap, p: J.JLocalDef) {
