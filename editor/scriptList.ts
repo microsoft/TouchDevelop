@@ -5446,6 +5446,8 @@
                         else audio.play();
                     });
                     img = div('checker', playBtn);
+                } else if (a.arttype == "video") {
+                    img = HTML.mkImg("svg:videoptr,black");
                 } else if (a.bloburl) {
                     img = HTML.mkImg("svg:document,black");
                 }
@@ -5460,6 +5462,38 @@
                 //addNum(a.features, "svg:Award,black,clip=110");
                 numbers.setChildren(cont);
             });
+        }
+
+        public getContent(a:JsonArt):HTMLElement[]
+        {
+            if (a.mediumthumburl || a.pictureurl) {
+                var img = HTML.mkImg(a.mediumthumburl || a.pictureurl);
+                img.className += " checker";
+
+                img.withClick(() => {
+                    var m = new ModalDialog();
+                    var d = div("sdScreenShotFrame");
+                    d.withClick(() => { m.dismiss() });
+                    var loading = div("sdScreenShotImgLoading", lf("loading art ..."));
+                    var fullimg = HTML.mkImg(a.pictureurl);
+                    // TSBUG onLoadHandler was defined inline
+                    var onLoadHandler = () => { loading.removeSelf() }
+                    fullimg.onload = onLoadHandler;
+                    d.appendChild(div("sdScreenShotImg", loading, fullimg));
+                    m.showBare(d);
+                });
+                return [img]
+            } else if (a.wavurl) {
+                return [HTML.mkAudio(a.wavurl, a.aacurl, null, true)]
+            } else if (a.arttype == "video") {
+                var vid = document.createElement("video")
+                vid.style.width = "20em"
+                vid.controls = true;
+                vid.src = a.bloburl;
+                return [vid]
+            } else if (a.bloburl) {
+                return [HTML.mkA("", a.bloburl, "_blank", a.bloburl)]
+            }
         }
 
         public initTab()
@@ -5485,28 +5519,7 @@
                 this.loadFromJson(a);
                 hd.setChildren([Host.expandableTextBox(a.description)]);
 
-                if (a.mediumthumburl || a.pictureurl) {
-                    var img = HTML.mkImg(a.mediumthumburl || a.pictureurl);
-                    img.className += " checker";
-                    id.setChildren([img]);
-
-                    img.withClick(() => {
-                        var m = new ModalDialog();
-                        var d = div("sdScreenShotFrame");
-                        d.withClick(() => { m.dismiss() });
-                        var loading = div("sdScreenShotImgLoading", lf("loading art ..."));
-                        var fullimg = HTML.mkImg(a.pictureurl);
-                        // TSBUG onLoadHandler was defined inline
-                        var onLoadHandler = () => { loading.removeSelf() }
-                        fullimg.onload = onLoadHandler;
-                        d.appendChild(div("sdScreenShotImg", loading, fullimg));
-                        m.showBare(d);
-                    });
-                } else if (a.wavurl) {
-                    id.setChildren([HTML.mkAudio(a.wavurl, a.aacurl, null, true)]);
-                } else if (a.bloburl) {
-                    //
-                }
+                id.setChildren(this.getContent(a))
 
                 var uid = this.browser().getCreatorInfo(a);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
@@ -10258,6 +10271,8 @@
         extends BrowserPage
     {
         private ptr:JsonPointer;
+        private redirect:string;
+        private art:JsonArt;
         private script:JsonScript;
         private text:string;
 
@@ -10265,8 +10280,13 @@
             super(par)
         }
         public persistentId() { return "pointer:" + this.publicId; }
-        public getTitle() { return this.script ? this.script.name :
-            this.ptr && this.ptr.redirect ? "-> " + this.ptr.redirect : super.getTitle(); }
+        public getTitle()
+        { 
+            return this.redirect ? "-> " + this.redirect :
+                   this.art ? "\u273f " + this.art.name :
+                   this.script ? this.script.name :
+                   super.getTitle()
+        }
 
         public getName() { return lf("page"); }
         public getId() { return "page"; }
@@ -10280,7 +10300,21 @@
         {
             return super.withUpdate(elt, d => {
                 this.ptr = d
-                if (this.ptr.scriptid) {
+                this.redirect = null
+                this.art = null
+                this.script = null
+                this.text = null
+                if (this.ptr.redirect) {
+                    this.redirect = this.ptr.redirect
+                    update(d)
+                }
+                else if (this.ptr.artid)
+                    TheApiCacheMgr.getAsync(this.ptr.artid, true)
+                    .done(r => {
+                        this.art = r
+                        update(d)
+                    })
+                else if (this.ptr.scriptid) {
                     Promise.join([ScriptCache.getScriptAsync(this.ptr.scriptid),
                                   TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
                     .done(rr => {
@@ -10289,8 +10323,6 @@
                         update(d)
                     })
                 } else {
-                    this.script = null
-                    this.text = null
                     update(d)
                 }
             })
@@ -10321,9 +10353,21 @@
                 if (this.ptr) {
                     var nm = this.ptr.path;
                     nameBlock.setChildren([ nm ])
-                    author.setChildren([this.script ? this.script.username : this.ptr.username]);
-                    if (this.script)
+                    author.setChildren([this.script ? this.script.username : 
+                                        this.art ? this.art.username : this.ptr.username]);
+                    if (this.script) {
                         addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
+                    }
+                    else if (this.art) {
+                        if (this.art.arttype == "picture")
+                            icon.setChildren([HTML.mkImg("svg:art,white")])
+                        else if (this.art.arttype == "video")
+                            icon.setChildren([HTML.mkImg("svg:videoptr,white")])
+                        addInfoInner.setChildren(["/" + this.art.id + ", " + Util.timeSince(this.art.time)]);
+                    }
+                    else {
+                        addInfoInner.setChildren(["-> " + this.redirect + ", " + Util.timeSince(this.ptr.time)]);
+                    }
                 }
             });
         }
@@ -10338,9 +10382,14 @@
                     ])
                     var ht = HelpTopic.fromJsonScript(this.script)
                     ht.render(e => preview.setChildren([e]));
-                } else {
-                    if (this.ptr)
-                        this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
+                } else if (this.redirect) {
+                    this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
+                } else if (this.art) {
+                    var ai = this.browser().getArtInfoById(this.art.id)
+                    this.tabContent.setChildren([
+                        ScriptInfo.labeledBox(lf("points to"), ai.mkSmallBox()),
+                        div(null, ai.getContent(this.art))
+                        ])
                 }
             });
         }

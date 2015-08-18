@@ -232,6 +232,7 @@ module TDev {
     {
         path: string; // "td/contents"
         scriptid: string; // where is it pointing to
+        artid: string; // where is it pointing to
         redirect: string; // full URL or /something/on/the/same/host
         description: string; // set to script title from the client
     }
