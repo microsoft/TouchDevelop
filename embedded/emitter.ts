@@ -47,7 +47,8 @@ module TDev {
       constructor(
         private libRef: J.JCall,
         public libName: string,
-        private libs: J.JApp[]
+        private libs: J.JApp[],
+        private resolveMap: { [index:string]: string }
       ) {
         super();
       }
@@ -188,7 +189,8 @@ module TDev {
         var n = H.isLibrary(receiver);
         if (n) {
           // I expect all libraries and all library calls to be properly resolved.
-          var lib = this.libs.filter(l => l.name == n)[0];
+          var key = this.resolveMap[n] || n;
+          var lib = this.libs.filter(l => l.name == key)[0];
           var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
           var s = H.isShimBody((<J.JAction> action).body);
           if (s != null) {
