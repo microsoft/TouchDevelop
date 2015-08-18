@@ -111,6 +111,8 @@ export module SVG {
         award: "fa-trophy",
         person: "fa-user",
         art: "fa-paint-brush",
+        videoptr: "fa-video-camera",
+        bbc: "play",
     };
 
     var fontAwesomeIconsByDaveGandy:any = {

@@ -401,6 +401,46 @@ module TDev {
             idToUrl: id => 'https://youtu.be/' + id,
             idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
         }, {
+            id: "videoptr",
+            name: "TouchDevelop Video",
+            description: lf("TouchDevelop video (/td/videos/...)"),
+            parseIds: text => {
+                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+                if (m)
+                    text = m[1]
+                text = text.replace(/^\/+/, "")
+                text = text.replace(/^embed\//, "")
+                text = text.replace(/[^a-z0-9-\/]/g, "-")
+                return [text]
+            },
+            idToUrl: id => Cloud.getServiceUrl() + "/embed/" + id,
+            idToHTMLAsync: id => {
+                    id = id.replace(/[^a-z0-9-\/]/g, "-")
+                    return Promise.as(HTML.mkLazyVideoPlayer(
+                        Util.fmt("{0}/{1}/thumb", Cloud.getServiceUrl(), id),
+                        Util.fmt("{0}/embed/{1}", Cloud.getServiceUrl(), id)))
+            }
+        }, {
+            id: "bbc",
+            name: "BBC Video",
+            description: lf("BBC video (https://files.microbit.co.uk/clips/...)"),
+            parseIds: text => {
+                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+                if (m)
+                    text = m[1]
+                text = text.replace(/^\/+/, "")
+                text = text.replace(/^clips\//, "")
+                text = text.replace(/[^a-z0-9-\/]/g, "-")
+                return [text]
+            },
+            idToUrl: id => "https://files.microbit.co.uk/clips/" + id,
+            idToHTMLAsync: id => {
+                    id = id.replace(/[^a-z0-9-\/]/g, "-")
+                    return Promise.as(HTML.mkLazyVideoPlayer(
+                        Util.fmt("https://files.microbit.co.uk/clips/{0}/thumb", id),
+                        Util.fmt("https://files.microbit.co.uk/clips/{0}/embed", id)))
+            }
+        }, {
             id: "vimeo",
             name: "Vimeo",
             description: lf("vimeo video (https://vimeo.com/...)"),
