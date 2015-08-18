@@ -32,10 +32,12 @@ module TDev {
       // We need the library text for all the libraries referenced by this
       // script.
       var libraries = a.decls.filter((d: J.JDecl) => d.nodeType == "library");
-      var textPromises = libraries.map((j: J.JDecl) => {
+      var textPromises = libraries.map((j: J.JDecl, i: number) => {
         var pubId = (<J.JLibrary> j).libIdentifier;
         return AST.loadScriptAsync(World.getAnyScriptAsync, pubId).then((resp: AST.LoadScriptResult) => {
           var s = Script;
+          // Use the name by which this library is referred to in the script.
+          (<any> s)._name = libraries[i].name;
           Script = resp.prevScript;
           return Promise.as(J.dump(s));
         });
