@@ -887,7 +887,7 @@ function compileWhile(e: Environment, b: B.Block): J.JStmt {
 function compileForever(e: Environment, b: B.Block): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "forever", [], body);
+  return mkCallWithCallback(e, "basic", "forever", [], body);
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
@@ -939,20 +939,20 @@ function compileComment(e: Environment, b: B.Block): J.JStmt {
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
 
-function mkCallWithCallback(e: Environment, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
+function mkCallWithCallback(e: Environment, n: string, f: string, args: J.JExpr[], body: J.JStmt[]): J.JStmt {
   var def = H.mkDef("_body_", H.mkGTypeRef("Action"));
   return H.mkInlineActions(
     [ H.mkInlineAction(body, true, def) ],
     H.mkExprHolder(
       [ def ],
-      H.stdCall(f, args)));
+      H.namespaceCall(n, f, args)));
 }
 
 function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var name = H.mkStringLiteral(b.getFieldValue("NAME"));
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "on button pressed", [name], body);
+  return mkCallWithCallback(e, "input", "on button pressed", [name], body);
 }
 
 function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
