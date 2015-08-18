@@ -4229,7 +4229,7 @@ module TDev
                         Cloud.setUserId(id)
                         Cloud.setAccessToken(tok.token)
                         localStorage["experimentalVersion"] = ver
-                        localStorage["legalNotice"] = Runtime.legalNotice
+                        //localStorage["legalNotice"] = Runtime.legalNotice
                         window.location.reload()
                     });
                 })
