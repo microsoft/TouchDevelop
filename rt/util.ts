@@ -2650,7 +2650,7 @@ module TDev{
     {
         var b = window.localStorage["storedBug"];
         if (b) {
-            window.localStorage["storedBug"] = "";
+            window.localStorage.removeItem("storedBug");
             try {
                 sendErrorReport(JSON.parse(b));
             } catch (e) {

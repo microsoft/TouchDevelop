@@ -260,7 +260,7 @@
                 this.updateIsWaiting = false;
                 tick(Ticks.appUpdate);
                 window.localStorage["appUpdated"] = "1";
-                window.localStorage["lastForcedUpdate"] = "";
+                window.localStorage.removeItem("lastForcedUpdate");
                 window.location.reload();
                 return true;
             }
