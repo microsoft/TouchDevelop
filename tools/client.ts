@@ -57,7 +57,7 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     // console.log("GET " + uri + " " + reqNo)
     var handle = (res:http.ClientResponse) => {
         if (res.statusCode != 200) {
-            console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, uri);
+            console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, uri.replace(/access_token.*/, ""));
             numErrors++;
             finish(null);
         }
