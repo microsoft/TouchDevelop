@@ -650,6 +650,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
                     (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
@@ -793,6 +794,32 @@ module TDev.Browser {
 
                 return new PromiseInv()
             })
+        }
+
+        function mbedintUpdate()
+        {
+            ModalDialog.editText(lf("Target"), "gcc", perms =>
+                Cloud.postPrivateApiAsync("admin/mbedint/" + perms, { 
+                     op: "update", 
+                })
+                .then(r => {
+                    var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
+                    var m = ModalDialog.showText("...[snip]...\n" + full.slice(-3000), null, <any>div(null, 
+                        HTML.mkButton("full", () => {
+                            ModalDialog.showText(full)
+                        }),
+                        HTML.mkAsyncButton("update " + perms, () =>
+                            Cloud.getPrivateApiAsync("config/compile")
+                            .then(res => {
+                                res[perms].repourl = r.imageid
+                                return Cloud.postPrivateApiAsync("config/compile", res)
+                            })
+                            .then(r => r, e => Cloud.handlePostingError(e, ""))
+                        ),
+                        HTML.mkButton("cancel", () => {
+                            m.dismiss()
+                    })))
+                }, e => Cloud.handlePostingError(e, "")))
         }
 
         function permissionReview()
