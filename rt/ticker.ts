@@ -560,6 +560,9 @@ module TDev {
         kind: string;
         attachments: string[];
         tdVersion?: string;
+        logMessages?: LogMessage[];
+        
+        reportId:string;
     }
 
     export interface TicksReport {
@@ -744,6 +747,11 @@ module TDev {
             return r;
         }
 
+        export function mkReportId()
+        {
+            return "BuG" + (20000000000000 - Date.now()) + Random.uniqueId(12)
+        }
+
         export function mkBugReport(err:any, ctx = "")
         {
             var r:BugReport = {
@@ -765,6 +773,7 @@ module TDev {
                 platform: [],
                 attachments: [],
                 tdVersion: Cloud.config.tdVersion || "",
+                reportId: mkReportId(),
             }
 
             if (fillEditorInfoBugReport)
@@ -772,6 +781,11 @@ module TDev {
 
             if (Array.isArray(err.bugAttachments))
                 r.attachments.pushRange(err.bugAttachments)
+
+            var meta = err.tdMeta
+            if (meta) {
+                if (meta.reportId) r.reportId = meta.reportId
+            }
 
             try {
                 var isDatabaseError = Util.isError(err, e => e.isDatabaseError);
@@ -821,7 +835,8 @@ module TDev {
                 if (/QUOTA/.test(r.exceptionMessage))
                     r.exceptionMessage += "  " + localStorageState();
 
-                Ticker.dbg("CRASH REPORT " + r.exceptionMessage); // in case there is another crash report later
+                if (ctx != "custom")
+                    Ticker.dbg("CRASH REPORT " + r.exceptionMessage); // in case there is another crash report later
 
                 if (err.sourceURL)
                     r.sourceURL = err.sourceURL;
@@ -832,18 +847,33 @@ module TDev {
             }
 
             try {
-                r.eventTrace = getRecentEvents().map((e) => {
-                    var s = 1000000000 + (r.timestamp - e.timestamp) + "";
-                    s = s.slice(-9);
-                    return s.slice(0, 6) + "." + s.slice(6, 9) + ": " + tickName(e.event) + (e.arg ? "|" + e.arg : "");
-                }).join("\n")
-                if (!r.eventTrace)
-                    r.eventTrace = Util.getLogMsgs().map(m => m.elapsed + ": " + m.msg).join("\n");
+                if (Cloud.lite || ctx == "custom") {
+                    r.logMessages = Util.getLogMsgs();
+                    r.logMessages.reverse()
+                    var maxSize = 100000
+                    var maxIter = 20
+                    while (JSON.stringify(r.logMessages).length > maxSize) {
+                        r.logMessages = r.logMessages.slice(0, Math.floor(r.logMessages.length / 2))
+                        if (maxIter-- < 0) {
+                            r.logMessages = []
+                            break
+                        }
+                    }
+                    r.eventTrace = ""
+                } else {
+                    r.eventTrace = getRecentEvents().map((e) => {
+                        var s = 1000000000 + (r.timestamp - e.timestamp) + "";
+                        s = s.slice(-9);
+                        return s.slice(0, 6) + "." + s.slice(6, 9) + ": " + tickName(e.event) + (e.arg ? "|" + e.arg : "");
+                    }).join("\n")
+                    if (!r.eventTrace)
+                        r.eventTrace = Util.getLogMsgs().map(m => m.elapsed + ": " + m.msg).join("\n");
+                }
             } catch (e) {
                 debugger;
             }
 
-            if ((<any>window).tdAppInsights)
+            if (ctx != "custom" && (<any>window).tdAppInsights)
                 try {
                 (<any>window).tdAppInsights.trackException(err, r);
                 } catch (e) { }

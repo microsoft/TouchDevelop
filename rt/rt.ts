@@ -1985,6 +1985,8 @@ module TDev
                     } catch (fail) { }
                 }
 
+                if (!e.tdMeta.reportId)
+                    e.tdMeta.reportId = Ticker.mkReportId()
             }
         }
 

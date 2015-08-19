@@ -473,6 +473,25 @@
 
         public getInstalledHeaders() { return this.installedHeaders }
 
+        static showBugReport(bug: BugReport)
+        {
+            var bb = Util.flatClone(bug);
+            bb.eventTrace = "";
+            bb.logMessages = []
+            var str = Ticker.bugReportToString(bb)
+
+            var view = new RT.AppLogView();
+            view.charts(false)
+            view.reversed(false)
+            view.append(bug.logMessages);
+            
+            var pre = div(null, str)
+            pre.style.whiteSpace = "pre";
+            view.prependHTML(pre)
+
+            return view.showAsync().done()
+        }
+
         private syncView(showCurrent = true)
         {
             var lst:BrowserPage[] = this.topLocations;
@@ -735,7 +754,7 @@
 
                 this.progressBar.start();
                 if (!cont && terms.length == 1) {
-                    if (/^\/?[a-zA-Z]+$/i.test(terms[0])) {
+                    if (/^\/?[a-zA-Z\-]+$/i.test(terms[0])) {
                         TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
                             if (version != this.searchVersion) return;
                             var inf = this.getAnyInfoByPub(e, "");
@@ -748,6 +767,9 @@
                             .done((rc : JsonCode) => {
                                 if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
                             }, e => {});
+                    } else if (/^BuG\d{14}\w{8,}$/.test(terms[0])) {
+                        Cloud.getPrivateApiAsync("bug/" + terms[0])
+                            .done(Host.showBugReport, e => {})
                     }
 
                     if (Cloud.lite && /^[a-z]{10}$/.test(terms[0])) {
@@ -5490,7 +5512,7 @@
                 vid.style.width = "20em"
                 vid.controls = true;
                 vid.src = a.bloburl;
-                return [vid]
+                return [vid, HTML.mkA("", a.bloburl, "_blank", a.bloburl)]
             } else if (a.bloburl) {
                 return [HTML.mkA("", a.bloburl, "_blank", a.bloburl)]
             }

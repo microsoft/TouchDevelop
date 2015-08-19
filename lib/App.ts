@@ -422,6 +422,11 @@ module TDev.RT {
             this.update();
         }
 
+        public prependHTML(e:HTMLElement)
+        {
+            this.logsEl.insertBefore(e, this.logsEl.firstElementChild);
+        }
+
         private series: TDev.StringMap<{ points: RT.Charts.Point[]; canvas?: HTMLCanvasElement; d? : HTMLElement }> = {};
         private generateLogCharts() : void {
             var els = Util.childNodes(this.logsEl).filter(el => el.style.display == 'block');

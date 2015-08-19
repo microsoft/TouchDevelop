@@ -2245,7 +2245,7 @@ function handleReq(req, resp)
 
 function handleError(err) {
     error.log("exception (top): " + err.toString() + "\n" + err.stack)
-    logException("unhandled exception, forgot lib.protect()? " + err.toString() + "\n" + err.stack)
+    logException("unhandled exception: " + err.toString() + "\n" + err.stack)
 }
 
 function openUrl(startUrl: string, cb?: () => void) {
