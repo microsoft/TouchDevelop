@@ -4285,28 +4285,6 @@ module TDev
             return window.localStorage["always_beta"] === "yes";
         }
 
-        static liteCrashFiles()
-        {
-            var m = new ModalDialog(lf("enter bug file id"))
-
-            var up = KeyboardAutoUpdate.createInput(lf("file id"), (v) => {
-                v = v.trim()
-                if (/^\d{12}/.test(v))
-                    Cloud.getPrivateApiAsync("bug/file/" + encodeURIComponent(v))
-                        .done(resp => {
-                            res.setChildren(HTML.mkA("", resp.url, "_blank", v))
-                        })
-                else
-                    res.setChildren([ lf("File id should start with a bunch of numbers.") ])
-            })
-
-            m.addBody(up.element)
-            var res = div("wall-dialog-body")
-            m.add(res)
-            m.addOk(lf("dismiss"), () => m.dismiss())
-            m.show()
-        }
-
         public popupMenu()
         {
             var m = new ModalDialog();

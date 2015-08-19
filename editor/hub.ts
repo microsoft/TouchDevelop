@@ -650,7 +650,6 @@ module TDev.Browser {
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
-                    (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
