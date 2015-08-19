@@ -999,6 +999,7 @@ module TDev {
                         return MdComments.error("videoptr: invalid pointer path");
                     var id = args[0].replace(/^\/+/, "")
                     var url = Util.fmt("{0}/{1}/sd", prefix, id);
+                    var playerUrl = Util.fmt("{0}/embed/{1}", prefix, id);
                     var posterUrl = Util.fmt("{0}/{1}/thumb", prefix, id);
                     if (Cloud.config.anonToken) {
                         var suff = "?anon_token=" + encodeURIComponent(Cloud.config.anonToken)
@@ -1006,7 +1007,8 @@ module TDev {
                         posterUrl += suff
                     }
                     // TODO: support looping
-                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
+                    // return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}'>{2}</div>", posterUrl, playerUrl, SVG.getVideoPlay(posterUrl));
                 }
             } else if (Cloud.lite && macro == "bbc") {
                 if (!this.allowVideos) return "";
@@ -1021,6 +1023,8 @@ module TDev {
                 }
             } else if (Cloud.lite && macro == "vimeo") {
                 if (!this.allowVideos) return "";
+                if (Cloud.isRestricted())
+                    return MdComments.error("vimeo not allowed");
                 if (!arg)
                     return MdComments.error("vimeo: missing video id");
                 if (this.blockExternal()) return this.blockLink("")
