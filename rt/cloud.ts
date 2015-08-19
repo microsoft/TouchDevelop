@@ -817,6 +817,8 @@ module TDev.Cloud {
         }
 
         var config = isFota() ? "ws-fota" : "ws";
+        if (document.location.href.match(/usegcc=1/))
+            config += "-gcc";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,
