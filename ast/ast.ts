@@ -334,6 +334,8 @@ module TDev.AST {
         }
         public forSearch() { return this.text.toLowerCase(); }
         public docText() { return this.text }
+        // this means normal statement, and not Record or Field
+        public isExecutableStmt() { return true; }
     }
 
     export class FieldComment
