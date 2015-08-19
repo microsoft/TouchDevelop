@@ -7970,10 +7970,15 @@
 
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
+                    // From BBC:
+                    //   
+                    //  
+                    // it on to third parties.
+                        
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private; {0})", 
                             s.emailverified 
-                              ? lf("we won't spam you") 
+                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
