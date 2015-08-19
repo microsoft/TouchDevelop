@@ -825,6 +825,9 @@ module TDev.HTML {
 
 
     export function showWebNotification(aTitle: string, aOptions: NotificationOptions = {}, aTimeout=10000) {
+        if (Cloud.isRestricted())
+            return;
+
         if (!("Notification" in window))
             return;
 
