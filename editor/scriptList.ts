@@ -4924,6 +4924,28 @@
             case "art":
                 return div(null, lab(lf("art")));
             case "group":
+                if (notkind == "groupapproval") {
+                    var grpuser = this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()
+                    var joinid = jn.supplementalid + "/groups/" + jn.publicationid
+                    var existing = <HTMLElement>grpuser.getElementsByClassName("sdNumbers")[0]
+                    if (existing)
+                        existing.removeSelf()
+                    var nums = div("sdNumbers")
+                    grpuser.appendChild(nums)
+                    TheApiCacheMgr.getAsync(joinid)
+                        .done(d => {
+                            nums.setChildren([
+                                d ? lf("approved") :
+                                HTML.mkAsyncButton(lf("approve"), 
+                                    () => Cloud.postPrivateApiAsync(joinid, {})
+                                          .then(r => {
+                                              nums.setChildren([lf("approved")])
+                                          }, e => Cloud.handlePostingError(e, lf("approve"))))
+                            ])
+                        })
+                    return div(null, lab(lf("wants to join"), grpuser),
+                                     lab(lf("your group")))
+                }
                 return div(null, lab(lf("group")));
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
