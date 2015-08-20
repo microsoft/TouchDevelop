@@ -178,11 +178,8 @@ module TDev {
       // Convert a prefixed name into a valid C++ identifier. Same as above,
       // only call this directly if you know that [n] is unique (i.e. is a
       // global, whose name is unique).
-      export function manglePrefixedName(e: Env, l: string, n: string) {
-        if (l)
-          return mangleName(l)+"::"+mangleName(n);
-        else
-          return mangleName(n);
+      export function manglePrefixedName(e: Env, ns: string[], t: string) {
+        return ns.concat([t]).map(mangleName).join("::");
       }
 
       export function mangleDef(env: Env, d: J.JLocalDef) {
@@ -200,7 +197,7 @@ module TDev {
       export interface LibMap { [id: string]: string }
 
       export interface Type {
-        lib: string;
+        libs: string[];
         type: string;
         args: Type[];
       }
@@ -209,7 +206,7 @@ module TDev {
         if (typeof t == "string") {
           // Simple, flat type, e.g. "Number"
           return {
-            lib: "",
+            libs: [],
             type: t,
             args: []
           };
@@ -218,7 +215,8 @@ module TDev {
             throw new Error("Unsupported type reference");
           // Sophisticated type (prefixed by a library, or parameterized).
           return {
-            lib: t.l ? libMap[t.l] : "",
+            libs: (t.l ? [ libMap[t.l] ] : [])
+              .concat(t.o ? [ "user_types" ] : []),
             type: t.o || t.g,
             args: t.a && t.a.length
               ? t.a.map((x: J.JTypeRef) => resolveStructuredTypeRef(libMap, x))
@@ -240,11 +238,11 @@ module TDev {
 
       export function defaultValueForType(libMap: LibMap, t1: J.JTypeRef) {
         var t = resolveTypeRef(libMap, t1);
-        if (!t.lib && t.type == "Number")
+        if (!t.libs.length && t.type == "Number")
           return "0";
-        else if (!t.lib && t.type == "Boolean")
+        else if (!t.libs.length && t.type == "Boolean")
           return "false";
-        else if (!t.lib && t.type == "Action")
+        else if (!t.libs.length && t.type == "Action")
           return "NULL";
         else
           return null;
@@ -252,7 +250,7 @@ module TDev {
 
       function toCppType (env: Env, t: Type): string {
         var args = t.args.map((t: Type) => toCppType(env, t));
-        var r = manglePrefixedName(env, t.lib, t.type) +
+        var r = manglePrefixedName(env, t.libs, t.type) +
           (args.length ? "<" + args.join(", ") + ">" : "");
         return r;
       }

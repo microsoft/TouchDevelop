@@ -11,10 +11,18 @@ module TDev {
 
     import H = Helpers
 
+    interface EmitterOutput {
+      prototypes: string;
+      code: string;
+      tPrototypes: string;
+      tCode: string;
+      prelude: string;
+      libName: string;
+    };
+
     // Assuming all library references have been resolved, compile either the
     // main app or one of said libraries.
-    function compile1(libs: J.JApp[], resolveMap: { [index: string]: string }, a: J.JApp):
-      { prototypes: string; code: string; prelude: string; libName: string }
+    function compile1(libs: J.JApp[], resolveMap: { [index: string]: string }, a: J.JApp): EmitterOutput
     {
       try {
         lift(a);
@@ -65,6 +73,8 @@ module TDev {
         var compiled = everything.map((a: J.JApp, i: number) => compile1(everything, resolveMap[i], a));
         return Promise.as(
           compiled.map(x => x.prelude)
+          .concat(compiled.map(x => x.tPrototypes))
+          .concat(compiled.map(x => x.tCode))
           .concat(compiled.map(x => x.prototypes))
           .concat(compiled.map(x => x.code))
           .filter(x => x != "")

@@ -42,6 +42,10 @@ module TDev {
       public prototypes = "";
       public code = "";
       public prelude = "";
+      // Type stubs. Then, type definitions. To allow for any kind of insane
+      // type-level recursion.
+      public tPrototypes = "";
+      public tCode = "";
 
       private libraryMap: H.LibMap = {};
 
@@ -207,7 +211,7 @@ module TDev {
             return s;
           } else {
             // Actual call to a library function
-            return H.manglePrefixedName(env, n, name);
+            return H.manglePrefixedName(env, [n], name);
           }
         }
 
@@ -293,15 +297,15 @@ module TDev {
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.manglePrefixedName(env, "globals", name);
+          return H.manglePrefixedName(env, ["globals"], name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
         // [resolveCall] again, so that we find the shim if any.
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          var prefixedName = t.lib
-            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
+          var prefixedName = t.libs.length > 1
+            ? this.resolveCall(env, H.mkLibraryRef(t.libs[0]), name)
             : this.resolveCall(env, H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
@@ -336,7 +340,7 @@ module TDev {
           return "";
         else
           // Reference to "data", "Math" (or other namespaces), that makes no
-          // sense.
+          // sense. TouchDevelop allows these.
           return "";
       }
 
@@ -423,7 +427,43 @@ module TDev {
         e.indent + "}\n\n";
       }
 
-      private wrapNamespaceIf (s: string) {
+      private typeDecl(e: EmitterEnv, r: J.JRecord) {
+        // Comments on record definitions can't be set via the TouchDevelop UI.
+        // Instead, fire up the console, and do something like:
+        //
+        //     TDev.Script.things.filter(function (x) {
+        //       return x instanceof TDev.AST.RecordDef
+        //     })[0].description = "{shim:}"
+        //
+        var s = H.isShim(r.comment);
+        if (s !== null)
+          return null;
+
+        var n = H.mangleName(r.name);
+        var fields = r.fields.map((f: J.JRecordField) => {
+          var t = H.mkType(e, this.libraryMap, f.type);
+          return e.indent + "  " + t + " " + H.mangleName(f.name) + ";";
+        }).join("\n");
+        return [
+          e.indent + "struct " + n + "_ {",
+          fields,
+          e.indent + "};",
+        ].join("\n");
+      }
+
+      private typeStub(e: EmitterEnv, r: J.JRecord) {
+        var s = H.isShim(r.comment);
+        if (s !== null)
+          return null;
+
+        var n = H.mangleName(r.name);
+        return [
+          e.indent + "struct " + n + "_;",
+          e.indent + "typedef ManagedType< " + n + "_> " + n + ";",
+        ].join("\n");
+      }
+
+      private wrapNamespaceIf(s: string) {
         if (this.libName != null)
           return (s.length
             ? "namespace "+this.libName+" {\n"+
@@ -432,6 +472,14 @@ module TDev {
             : "");
         else
           return s;
+      }
+
+      private wrapNamespaceDecls(e: EmitterEnv, n: string, s: string[]) {
+        return (s.length
+          ? e.indent + "namespace "+n+" {\n"+
+              s.join("\n") + "\n" +
+            e.indent + "}"
+          : "");
       }
 
       // This function runs over all declarations. After execution, the three
@@ -448,6 +496,31 @@ module TDev {
           }
         });
 
+        // Compile type "stubs". Because there may be any kind of recursion
+        // between types, we first declare the structs, then the resulting
+        // ref-counted type (which the TouchDevelop type maps onto):
+        //     struct Thing_;
+        //     typedef ManagedType<Thing_> Thing;
+        var typeStubs = decls.map((f: J.JDecl) => {
+          var e1 = indent(e)
+          if (f.nodeType == "record")
+            return this.typeStub(e1, <J.JRecord> f);
+          else
+            return null;
+        }).filter(x => x != null);
+        var typeStubsCode = this.wrapNamespaceDecls(e, "user_types", typeStubs);
+
+        // Then, we can emit the definition of the structs (Thing_) because they
+        // refer to TouchDevelop types (Thing).
+        var typeDefs = decls.map((f: J.JDecl) => {
+          var e1 = indent(e)
+          if (f.nodeType == "record")
+            return this.typeDecl(e1, <J.JRecord> f);
+          else
+            return null;
+        }).filter(x => x != null);
+        var typeDefsCode = this.wrapNamespaceDecls(e, "user_types", typeDefs);
+
         // Globals are in their own namespace (otherwise they would collide with
         // "math", "number", etc.).
         var globals = decls.map((f: J.JDecl) => {
@@ -457,11 +530,7 @@ module TDev {
           else
             return null;
         }).filter(x => x != null);
-        var globalsCode = globals.length
-          ?  e.indent + "namespace globals {\n" +
-            globals.join("\n") + "\n" +
-          e.indent + "}\n"
-          : "";
+        var globalsCode = this.wrapNamespaceDecls(e, "globals", globals);
 
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
@@ -494,6 +563,8 @@ module TDev {
         // within our namespace.
         this.prototypes = this.wrapNamespaceIf(globalsCode + forwardDeclarations.join("\n"));
         this.code = this.wrapNamespaceIf(this.compileImageLiterals(e) + userFunctions.join("\n"));
+        this.tPrototypes = this.wrapNamespaceIf(typeStubsCode);
+        this.tCode = this.wrapNamespaceIf(typeDefsCode);
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
