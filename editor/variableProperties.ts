@@ -721,8 +721,11 @@ module TDev
         function uploadFile(file: File) {
             if (!file) return;
                 if (Cloud.anonMode(lf("uploading art"))) return;
-                if (file.size > 1000000) {
-                    ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max 1Mb)"));
+                var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
+                var sizeLimit = 1
+                if (isDoc) sizeLimit = 8
+                if (file.size > sizeLimit*1024*1024) {
+                    ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
                 } else {
                     var name = file.name;
                     var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
@@ -747,7 +750,7 @@ module TDev
                                 TheEditor.addNode(n);
                             }
                         });
-                    } else if (Cloud.lite && !!HTML.documentMimeTypes[file.type]) {
+                    } else if (Cloud.lite && isDoc) {
                         ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                             if (art && Script) {
                                 var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
@@ -833,7 +836,7 @@ module TDev
                 }
             }, false);
             r.addEventListener('drop', (e) => {
-                var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => /^(image|sound)/.test(file.type));
+                var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
                 if ((Cloud.hasPermission("batch-post-art")  || TDev.dbg) && files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
@@ -868,7 +871,7 @@ module TDev
                 m.add(div("wall-dialog-header", lf("upload document")));
                 m.add(div("wall-dialog-body",
                     [
-                        div('', div('', lf("1. choose a document (.txt, .pptx, .pdf, .css, less than 1MB)")), file.element),
+                        div('', div('', lf("1. choose a document (.txt, .pptx, .pdf, .css, less than 8MB)")), file.element),
                         div('', div('', lf("2. give it a name (minimum 4 characters)")), name),
                         div('', div('', lf("3. describe it")), description),
                         div('', progressBar),
@@ -910,7 +913,7 @@ module TDev
                         } else {
                             Util.log('upload document: success');
                             m.dismiss();
-                            ModalDialog.info(lf("document published!"), lf("You can find your document under 'my art' in the hub."));
+                            showUrl(art)
                         }
                     }, e => {
                             Cloud.handlePostingError(e, lf("upload document"))
@@ -1086,14 +1089,7 @@ module TDev
                                 m.dismiss();
                                 if (!options.finalDialog)
                                     HTML.showProgressNotification(lf("picture published!"));
-                                else {
-                                    var sm = ModalDialog.info(lf("resource published!"), 
-                                        lf("Here's a URL."), null);
-                                    var inp = HTML.mkTextInput("text", "")
-                                    inp.value = art.pictureurl || art.aacurl || art.bloburl
-                                    sm.add(div(null, inp))
-                                    sm.addOk()
-                                }
+                                else showUrl(art)
                             }
                         }, e => {
                             Cloud.handlePostingError(e, lf("upload picture"))
@@ -1102,6 +1098,16 @@ module TDev
                 m.setScroll();
                 m.show();
             });
+        }
+
+        function showUrl(art:JsonArt)
+        {
+            var sm = ModalDialog.info(lf("resource published!"), 
+                lf("Here's a URL."), null);
+            var inp = HTML.mkTextInput("text", "")
+            inp.value = art.pictureurl || art.aacurl || art.bloburl
+            sm.add(div(null, inp))
+            sm.addOk()
         }
     }
 }
