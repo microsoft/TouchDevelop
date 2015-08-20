@@ -240,6 +240,14 @@ module TDev {
         }
       }
 
+      private safeGet(x: string, f: string): string {
+        return (
+          "("+x+".operator->() != NULL "+
+          "? "+x+"->"+f+" "+
+          ": (uBit.panic(MICROBIT_INVALID_VALUE), "+x+"->"+f+"))"
+        );
+      }
+
       public visitCall(env: EmitterEnv,
         name: string,
         args: J.JExpr[],
@@ -270,19 +278,38 @@ module TDev {
         // This function identifies (tentatively) the different cases and
         // compiles each one of them into something that makes sense.
 
-        // 0) Some methods take a type-level argument at the end, e.g.
+        // 0a) Some methods take a type-level argument at the end, e.g.
         // "create -> collection of -> number". TouchDevelop represents this as
         // calling the method "Number" on "create -> collection of". C++ wants
         // the type argument to be passed as a template parameter to "collection of"
         // so we pop the type arguments off and call ourselves recursively with
         // the extra type argument.
         if (<any> parent == "Unfinished Type") {
+          // In this case, it seems that the type information is completely
+          // unstructured. It should be a [JTypeRef], but we just get a textual
+          // representation, so try to figure things out...
+          var parseRawType = (t: string) => {
+            if (t[0] == "⌹")
+              return H.manglePrefixedName(env, ["user_types"], t.slice(1));
+            else
+              return H.mangleName(t);
+          };
           var newTypeArg = typeArgument
-            ? H.mangleName(name) + "<" + typeArgument + ">"
-            : H.mangleName(name);
+            ? parseRawType(name) + "<" + typeArgument + ">"
+            : parseRawType(name);
           assert(args.length && args[0].nodeType == "call");
           var call = <J.JCall> args[0];
           return this.visitCall(env, call.name, call.args, call.parent, call.callType, newTypeArg);
+        }
+
+        // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
+        // and TouchDevelop writes "÷point -> create".
+        if (H.isRecordConstructor(name, args)) {
+          // Note: we cannot call new on type definitions from other libraries.
+          // So the type we're looking for is always in the current scope's
+          // "user_types" namespace.
+          var struct_name = H.manglePrefixedName(env, ["user_types"], <any> parent)+"_";
+          return "ManagedType<"+struct_name+">(new "+struct_name+"())";
         }
 
         // 1) A call to a function, either in the current scope, or belonging to
@@ -312,7 +339,7 @@ module TDev {
 
         // 5) Field access for an object.
         else if (callType == "field")
-          return this.visit(env, args[0]) + "->" + H.mangleName(name);
+          return this.safeGet(this.visit(env, args[0]), H.mangleName(name));
 
         // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
         else if (args.length && H.isSingletonRef(args[0]) == "♻")

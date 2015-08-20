@@ -299,17 +299,27 @@ module TDev {
         );
       }
 
-      export function isEnumLiteral(e: J.JExpr): string {
-        return (
-          e.nodeType == "stringLiteral" &&
-          (<J.JStringLiteral> e).enumValue
-        );
-      }
-
       export function isSingletonRef(e: J.JExpr): string {
         return (
           e.nodeType == "singletonRef" &&
           (<J.JSingletonRef> e).name
+        );
+      }
+
+      export function isRecordConstructor(name: string, args: J.JExpr[]) {
+        return (
+          name == "create" &&
+          args.length == 1 && args[0].nodeType == "call" &&
+          <any> (<J.JCall> args[0]).parent == "records" &&
+          (<J.JCall> args[0]).args.length == 1 &&
+          isSingletonRef((<J.JCall> args[0]).args[0]) == "records"
+        );
+      }
+
+      export function isEnumLiteral(e: J.JExpr): string {
+        return (
+          e.nodeType == "stringLiteral" &&
+          (<J.JStringLiteral> e).enumValue
         );
       }
 
