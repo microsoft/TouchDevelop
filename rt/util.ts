@@ -2697,6 +2697,8 @@ module TDev{
         var lastBugReload = window.localStorage["lastBugReload"];
         if (lastBugReload && now() - lastBugReload < 30 * 1000)
             willReload = false;
+        if (now() - startupTime < 30 * 1000)
+            willReload = false;
 
         if (dbg)
             willReload = false;
