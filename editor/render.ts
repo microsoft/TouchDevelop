@@ -116,6 +116,8 @@ module TDev
         {
             if (!this.stmts) return;
 
+            var id = 1;
+
             var dod = Browser.dragAndDrop ? new DragAndDropContext() : undefined;
             this.stmts.forEach((s) => {
                 var e = <HTMLElement> document.getElementById(s.renderedAsId);
@@ -154,6 +156,7 @@ module TDev
                         if (blockCh[0])
                             prevLines.forEach(l => {
                                 (<any>l).node = blockCh[0]
+                                if (!l.id) l.id = "autoid-" + ++id
                                 dod.attachDragOverHandlers(blockCh[0], l)
                             })
                         blockCh.shift()
@@ -296,7 +299,7 @@ module TDev
                 if (this.targetElement) {
                     this.targetElement.classList.remove('node-drop-bottom');
                 }
-                Util.log('drag enter: ' + el.id);
+                Util.log('drag enter: ' + el.id + " - " + el.className);
                 el.classList.add('node-drop-bottom');
                 e.dataTransfer.dropEffect = 'move';
                 this.targetElement = el;
@@ -307,7 +310,7 @@ module TDev
         private handleDragLeave(e: DragEvent) {
             var el = <HTMLElement>e.target;
             if ((<any>el).node) {
-                Util.log('drag leave: ' + el.id);
+                Util.log('drag leave: ' + el.id + " - " + el.className);
                 el.classList.remove('node-drop-bottom');
                 if (el == this.targetElement)
                     this.targetElement = undefined;
