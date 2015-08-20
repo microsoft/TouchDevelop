@@ -1200,9 +1200,14 @@
                 hideBtn();
                 progressBar.start();
                 Cloud.postPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid, {})
-                    .done(() => {
+                    .done(resp => {
                         progressBar.stop();
                         m.dismiss();
+                        if (resp.status == "waiting") {
+                            ModalDialog.info(lf("Awaiting Approval"),
+                                lf("The owner of the group has been notified. You will be notified when approved to join."))
+                            return
+                        }
                         TheApiCacheMgr.invalidate("groups");
                         TheApiCacheMgr.invalidate("me/groups");
                         TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
@@ -4946,6 +4951,8 @@
                     return div(null, lab(lf("wants to join"), grpuser),
                                      lab(lf("your group")))
                 }
+                if (notkind == "groupapproved")
+                    return div(null, lab(lf("approved")));
                 return div(null, lab(lf("group")));
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
@@ -8804,7 +8811,8 @@
         private joinGroupDirect() {
             HTML.showProgressNotification(lf("Joining group..."));
             Cloud.postPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId, {})
-                .done(() => {
+                .done(resp => {
+
                     this.invalidateCaches();
                     this.browser().loadDetails(this);
             });
