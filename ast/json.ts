@@ -554,6 +554,11 @@ module TDev.AST.Json
             var r = this.visitPropertyRef(n.propRef)
             r.nodeType = "call";
             r.args = this.toJsons(n.args);
+            if (n.prop() instanceof MultiplexProperty) {
+                var args = (<MultiplexProperty> n.prop()).savedArgs;
+                if (args)
+                    r.typeArgs = args.map((x) => this.kindJson(x));
+            }
             if (n.calledExtensionAction() != null)
                 r.callType = "extension";
             if (n.referencedRecordField() != null)

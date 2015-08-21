@@ -22,7 +22,7 @@ module TDev {
               return this.visitPropertyRef(env, n9.name, <any> n9.parent);
             case "call":
               var n10 = <J.JCall> n;
-              return this.visitCall(env, n10.name, n10.args, n10.parent, n10.callType);
+              return this.visitCall(env, n10.name, n10.args, n10.typeArgs, n10.parent, n10.callType);
             case "singletonRef":
               return this.visitSingletonRef(env, (<J.JSingletonRef> n).name);
             case "globalDef":
@@ -103,6 +103,7 @@ module TDev {
         env: T,
         name: string,
         args: J.JExpr[],
+        typeArgs: J.JTypeRef[],
         parent: J.JTypeRef,
         callType: string): U                                              { throw new Error("Not implemented"); }
       public visitSingletonRef(env: T, name: string): U                   { throw new Error("Not implemented"); }
