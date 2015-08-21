@@ -237,13 +237,19 @@
                 return Promise.as();
             }
             this.initBadgeTag();
-            TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
-                (<any>window).userName = u.name;
-                (<any>window).userScore = u.score;
-                (<any>window).userId = id;
-            });
+            if (!Cloud.lite)
+                TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
+                    (<any>window).userName = u.name;
+                    (<any>window).userScore = u.score;
+                    (<any>window).userId = id;
+                });
             return Cloud.getUserSettingsAsync()
                 .then((settings: Cloud.UserSettings) => {
+                    if (Cloud.lite) {
+                        (<any>window).userName = settings.nickname;
+                        (<any>window).userScore = 0;
+                        (<any>window).userId = Cloud.getUserId();
+                    }
                     Cloud.setPermissions(settings.permissions);
                     EditorSettings.setThemeFromSettings();
                     Util.setUserLanguageSetting(settings.culture, true);
