@@ -1477,7 +1477,11 @@
                 apiPath += "&";
             else
                 apiPath += "?";
-            apiPath += "applyupdates=true";
+            if (/^(promo-scripts)/.test(apiPath)) {
+                apiPath += "applyupdates=false";
+            } else {
+                apiPath += "applyupdates=true";
+            }
 
             if (noCache) {
                 apiPath += "&etagsmode=includeetags";
@@ -7655,9 +7659,13 @@
                 var promo = arr[1]
                 var fields = cfg.fields || {}
                 var alltags = cfg.tags || ["all"]
-                fields["priority"] = { desc: lf("Priority (between -1000000 and 1000000; higher numbers show higher up)"), type: "number" }
-                fields["tags"] = { desc: lf("Tags ({0})", alltags.join(", ")) }
+                var autotags = cfg.autotags || ["all"]
+                fields["priority"] = { desc: lf("Publication time-shift (in hours); promos sorted by publication time plus time shift"), type: "number" }
+                fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
                 var inputs = {}
+                if (!promo.priority && promo.tags && promo.tags.length == 0) {
+                    promo.priority = -parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
+                }
                 Object.keys(fields).forEach(fn => {
                     var meta = fields[fn]
                     var inp = HTML.mkTextInput(meta.type || "text", "")
@@ -7674,12 +7682,22 @@
                         dsc += lf(" [override]")
                     m.add(div("wall-dialog-body", dsc, inp))
                 })
-                m.addOk(lf("save"), () => {
+                inputs["tags"].value = (promo["tags"] || []).filter(t => alltags.indexOf(t) >= 0).join(", ")
+
+                var thisAutoTags = ["all"]
+                thisAutoTags.push(json.editor || "touchdevelop")
+                if (/#docs/.test(json.description))
+                    thisAutoTags.push("docs")
+                m.addBody(lf("Automatic tags: {0}", thisAutoTags.join(", ")))
+
+                m.addOk(lf("save promo"), () => {
                     var wrong = [] 
                     var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
                     if (tags.some(t => alltags.indexOf(t) < 0)) {
                         wrong.push(inputs["tags"])
                     }
+
+                    if (tags.length > 0) tags = tags.concat(thisAutoTags)
 
                     var data = { tags: tags }
 
@@ -7690,7 +7708,7 @@
                         var val = inpt.value
 
                         if (meta.type == "number") {
-                            var v = parseInt(val)
+                            var v = parseFloat(val)
                             if (isNaN(v)) wrong.push(inpt)
                             else data[fn] = v
                         } else {
@@ -7704,7 +7722,10 @@
                         Cloud.postPrivateApiAsync(id + "/promo", data)
                         .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
                     }
-                }, "", [HTML.mkButton(lf("cancel"), () => m.dismiss())])
+                }, "", [
+                    //HTML.mkButton(lf("remove promo"), () => m.dismiss()),
+                    HTML.mkButton(lf("cancel"), () => m.dismiss())
+                    ])
             })
         }
 
