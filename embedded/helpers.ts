@@ -263,17 +263,17 @@ module TDev {
         return mkType(env, libMap, p.type)+" "+mangleDef(env, p);
       }
 
-      export function mkSignature(env: Env, libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+      export function mkSignature(env: Env, libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[], isLambda=false) {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         if (name == "main")
           name = "app_main";
-        return [
-          retType, " ", name, "(",
-          inParams.map(p => mkParam(env, libMap, p)).join(", "),
-          ")",
-        ].join("");
+        var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
+        if (isLambda)
+          return "[=] "+args+" -> "+retType;
+        else
+          return retType + " " + name + args;
       }
 
       // Generate the return instruction for the function.

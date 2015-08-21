@@ -129,7 +129,7 @@ module TDev {
       public visitContinue(env: T): U                                     { throw new Error("Not implemented"); }
       public visitInlineActions(
         env: T,
-        expr: J.JExpr,
+        expr: J.JExprHolder,
         actions: J.JInlineAction[]): U                                    { throw new Error("Not implemented"); }
       public visitWhile(env: T, cond: J.JExprHolder, body: J.JStmt[]): U  { throw new Error("Not implemented"); }
       public visitFor(
