@@ -2524,6 +2524,7 @@
         {
             if (Cloud.lite) {
                 this.massiveReviewObject = null
+                return
             }
 
             if (this.massiveReviewInitDone) return;
