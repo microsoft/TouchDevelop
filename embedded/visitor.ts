@@ -36,10 +36,14 @@ module TDev {
               return this.visitLocalRef(env, n11.name, <any> n11.localId);
             case "exprHolder":
               var n16 = <J.JExprHolder> n;
-              return this.visitExprHolder(env, n16.locals, n16.tree);
+              return this.visitExprHolder(env, n16.locals, n16.tree, n16.tokens);
             case "exprStmt":
-              var ex = <J.JExprStmt> n
-              var tr = ex.expr.tree
+              var ex = <J.JExprStmt> n;
+              var tr = ex.expr.tree;
+              // I don't understand why we skip the JExprHolder node here. I
+              // assume that the JExprHolder node is useless in case the
+              // "expression" is a return node? Is that meant to signify that
+              // this is a hack to avoid adding new varieties of statements?
               switch (tr.nodeType) {
                 case "show":
                   var nshow = <J.JShow> tr;
@@ -116,10 +120,11 @@ module TDev {
       public visitExprHolder(
         env: T,
         locals: J.JLocalDef[],
-        expr: J.JExpr): U                                                 { throw new Error("Not implemented"); }
+        expr: J.JExpr,
+        tokens: J.JToken[]): U                                            { throw new Error("Not implemented"); }
       public visitExprStmt(env: T, expr: J.JExpr): U                      { throw new Error("Not implemented"); }
-      public visitReturn(env: T, expr: J.JExpr): U                        { return this.visitExprStmt(env, expr); }
-      public visitShow(env: T, expr: J.JExpr): U                          { return this.visitExprStmt(env, expr); }
+      public visitReturn(env: T, expr: J.JExpr): U                        { throw new Error("Not implemented"); }
+      public visitShow(env: T, expr: J.JExpr): U                          { throw new Error("Not implemented"); }
       public visitBreak(env: T): U                                        { throw new Error("Not implemented"); }
       public visitContinue(env: T): U                                     { throw new Error("Not implemented"); }
       public visitInlineActions(
