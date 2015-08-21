@@ -7,64 +7,97 @@ module TDev {
     import J = AST.Json
     import H = Helpers
 
-    class Lifter extends JsonAstVisitor<{}, J.JInlineAction[]> {
+    function extend (e: string[], x: string) {
+      e.push(x);
+    }
+
+    function contains (e: string[], x: string) {
+      return e.indexOf(x) >= 0;
+    }
+
+    class Lifter extends JsonAstVisitor<string[], void> {
+
+      public as: J.JInlineAction[] = [];
 
       public visitMany(e, ss: J.JNode[]) {
-        return ss.reduce((as: J.JInlineAction[], s: J.JNode) => {
-          return as.concat(this.visit({}, s));
-        }, []);
+        ss.forEach((x) => this.visit(e, x));
       }
 
       // That's where we do the in-place modification.
       public visit(env, e: J.JNode) {
-        var as = super.visit(env, e);
         if (e.nodeType == "inlineActions") {
-          e.nodeType = "exprStmt";
-          (<J.JInlineActions> e).expr.locals = [];
+          var e1 = <J.JInlineActions> e;
+          var lifted: string[] = [];
+          e1.actions.forEach((a: J.JInlineAction) => {
+            try {
+              this.visit([], a);
+              this.as.push(a);
+              lifted.push(a.reference.id);
+            } catch (e) {
+              // Can't lift because it captures variables.
+            }
+          });
+          e1.actions = e1.actions.filter((a: J.JInlineAction) => lifted.indexOf(a.reference.id) < 0);
+          e1.expr.locals = e1.expr.locals.filter((l: J.JLocalDef) => lifted.indexOf(l.id) < 0);
+          if (e1.actions.length == 0)
+            e.nodeType = "exprStmt";
+        } else {
+          super.visit(env, e);
         }
-        return as;
       }
 
       // [InlineActions] are just at the level of statements.
       public visitExpr(env, e: J.JNode) {
-        return [];
       }
 
-      public visitExprStmt(env, expr: J.JExpr) {
-        return [];
+      public visitExprStmt(env, expr: J.JExprHolder) {
+        this.visit(env, expr);
+      }
+
+      public visitExprHolder(env, locals: J.JLocalDef[], tree: J.JExpr, tokens: J.JToken[]) {
+        locals.forEach((x: J.JLocalDef) => extend(env, x.id));
+        tokens.forEach((x: J.JToken) => {
+          if (x.nodeType == "localRef" && !contains(env, <any> (<J.JLocalRef> x).localId))
+            throw {};
+        });
       }
 
       public visitContinue(env) {
-        return [];
+      }
+
+      public visitReturn(env) {
       }
 
       public visitBreak(env) {
-        return [];
       }
 
-      public visitInlineActions(env, e: J.JExpr, actions: J.JInlineAction[]) {
-        // No need to visit [e], as expressions do not contain [JInlineActions].
-        return this.visitMany(env, actions).concat(actions);
+      public visitInlineActions(env, e: J.JExprHolder, actions: J.JInlineAction[]) {
+        this.visit(env, e);
+        this.visitMany(env, actions);
       }
 
       public visitInlineAction(env, r, i, o, body: J.JStmt[]) {
-        return this.visitMany(env, body);
+        var e = [];
+        i.forEach((x: J.JLocalDef) => extend(e, x.id));
+        o.forEach((x: J.JLocalDef) => extend(e, x.id));
+        this.visitMany(e, body);
       }
 
       public visitWhile(env, cond, body: J.JStmt[]) {
-          return this.visitMany(env, body);
+        this.visitMany(env, body);
       }
 
       public visitIf(env, cond, thenBranch: J.JStmt[], elseBranch: J.JStmt[], isElseIf) {
-        return this.visitMany(env, thenBranch).concat(this.visitMany(env, elseBranch || []));
+        this.visitMany(env, thenBranch);
+        this.visitMany(env, elseBranch || []);
       }
 
       public visitFor(env, index, bound, body: J.JStmt[]) {
-          return this.visitMany(env, body);
+        extend(env, index.id);
+        this.visitMany(env, body);
       }
 
       public visitComment(env, c) {
-        return [];
       }
 
       public visitAction(
@@ -76,27 +109,27 @@ module TDev {
         body: J.JStmt[],
         isPrivate: boolean)
       {
-        if (H.isShimBody(body) == null)
+        if (H.isShimBody(body) == null) {
           // No shim <==> function we compile
-          return this.visitMany(env, body);
-        else
-          return [];
+          var e = [];
+          inParams.forEach((x: J.JLocalDef) => extend(e, x.id));
+          // Out-params are assignable, hence in scope.
+          outParams.forEach((x: J.JLocalDef) => extend(e, x.id));
+          this.visitMany(e, body);
+        }
       }
 
       public visitLibrary(env, name) {
-        return [];
       }
 
       public visitApp(e, decls: J.JDecl[]) {
-        return this.visitMany(e, decls);
+        this.visitMany(e, decls);
       }
 
       public visitGlobalDef(e, n, t) {
-        return [];
       }
 
       public visitRecord(e, n, k, f) {
-        return [];
       }
     }
 
@@ -105,7 +138,9 @@ module TDev {
     // (a.k.a. [JAction]'s). It assumes that these closures contain no free
     // variables, i.e. that closure-conversion has been performed already.
     export function lift(a: J.JApp) {
-      var lambdas = (new Lifter()).visit({}, a).map((a: J.JInlineAction): J.JAction => {
+      var l = new Lifter();
+      l.visit([], a);
+      var lambdas = l.as.map((a: J.JInlineAction): J.JAction => {
         var name = a.reference.name;
         return {
           nodeType: "action",
