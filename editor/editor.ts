@@ -2101,6 +2101,7 @@ module TDev
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
                             ModalDialog.showText(
+                                "Have you tried updating your libraries? (Update button in the side pane.)\n\n"+
                                 "For debugging, here's the URL to the JSON file:\n" + json.url +
                                 "\n\nThis is ARM's error message:\n" + External.makeOutMbedErrorMsg(json) +
                                 "\n\nFor reference, here's the C++ we sent them:\n" + cpp,
