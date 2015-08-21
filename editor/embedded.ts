@@ -73,17 +73,21 @@ module TDev {
         var compiled = everything.map((a: J.JApp, i: number) => compile1(everything, resolveMap[i], a));
         return Promise.as(
           compiled.map(x => x.prelude)
-          .concat(compiled.map(x => x.tPrototypes))
-          .concat(compiled.map(x => x.tCode))
-          .concat(compiled.map(x => x.prototypes))
-          .concat(compiled.map(x => x.code))
+          .concat(["namespace touch_develop {"])
+            .concat(compiled.map(x => x.tPrototypes))
+            .concat(compiled.map(x => x.tCode))
+            .concat(compiled.map(x => x.prototypes))
+            .concat(compiled.map(x => x.code))
+          .concat(["}"])
           .filter(x => x != "")
-          .join("\n") +
+          .join("\n") + "\n" +
           (a.isLibrary
             ? "\nvoid app_main() {\n"+
               "  uBit.display.scroll(\"Error: trying to run a library\");\n"+
               "}\n"
-            : "")
+            : "\nvoid app_main() {\n"+
+              "  touch_develop::app_main();\n"+
+              "}\n")
         );
       });
     }

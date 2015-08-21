@@ -480,16 +480,16 @@ module TDev {
         var n = H.mangleName(r.name);
         return [
           e.indent + "struct " + n + "_;",
-          e.indent + "typedef ManagedType< " + n + "_> " + n + ";",
+          e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
         ].join("\n");
       }
 
       private wrapNamespaceIf(s: string) {
         if (this.libName != null)
           return (s.length
-            ? "namespace "+this.libName+" {\n"+
+            ? "  namespace "+this.libName+" {\n"+
                 s +
-              "\n}"
+              "\n  }"
             : "");
         else
           return s;
@@ -506,6 +506,7 @@ module TDev {
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
+        e = indent(e);
         if (this.libName)
           e = indent(e);
 
