@@ -2636,6 +2636,7 @@ function main()
         if (putSecret) {
             var j = JSON.parse(fs.readFileSync(putSecret, "utf8"))
             downloadSecret(vaultUrl, d => {
+                delete d.value;
                 console.log(d)
                 info.log("secret uploaded")
                 process.exit(0)
