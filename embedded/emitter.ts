@@ -29,6 +29,10 @@ module TDev {
       };
     }
 
+    function assert(x: boolean) {
+      if (!x)
+        throw new Error("Assert failure");
+    }
 
     // --- The code emitter.
 
@@ -38,6 +42,10 @@ module TDev {
       public prototypes = "";
       public code = "";
       public prelude = "";
+      // Type stubs. Then, type definitions. To allow for any kind of insane
+      // type-level recursion.
+      public tPrototypes = "";
+      public tCode = "";
 
       private libraryMap: H.LibMap = {};
 
@@ -47,7 +55,8 @@ module TDev {
       constructor(
         private libRef: J.JCall,
         public libName: string,
-        private libs: J.JApp[]
+        private libs: J.JApp[],
+        private resolveMap: { [index:string]: string }
       ) {
         super();
       }
@@ -110,10 +119,11 @@ module TDev {
 
       // Allows the target to redefine their own string type.
       public visitStringLiteral(env: EmitterEnv, s: string) {
-        return 'touch_develop::mk_string("'+s.replace(/["\\\n]/g, c => {
+        return 'touch_develop::mk_string("'+s.replace(/["\\\n\r]/g, c => {
           if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
           if (c == "\n") return '\\n';
+          if (c == "\r") return '\\r';
         }) + '")';
       }
 
@@ -187,7 +197,8 @@ module TDev {
         var n = H.isLibrary(receiver);
         if (n) {
           // I expect all libraries and all library calls to be properly resolved.
-          var lib = this.libs.filter(l => l.name == n)[0];
+          var key = this.resolveMap[n] || n;
+          var lib = this.libs.filter(l => l.name == key)[0];
           var action = lib.decls.filter((d: J.JDecl) => d.name == name)[0];
           var s = H.isShimBody((<J.JAction> action).body);
           if (s != null) {
@@ -200,7 +211,7 @@ module TDev {
             return s;
           } else {
             // Actual call to a library function
-            return H.manglePrefixedName(env, n, name);
+            return H.manglePrefixedName(env, [n], name);
           }
         }
 
@@ -211,12 +222,12 @@ module TDev {
       // (which maps a string literal to a constant). This function transforms
       // the arguments for some known specific C++ functions.
       private specialTreatment(e: EmitterEnv, f: string, actualArgs: J.JExpr[]) {
-        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation") {
+        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation" || f == "micro_bit::plotImage") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (x === "")
             x = "0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n";
           if (!x)
-            throw new Error("create image / show animation takes a string literal only");
+            throw new Error("create image / show animation / plot image takes a string literal only");
           var r = "literals::bitmap"+this.imageLiterals.length;
           var otherArgs = actualArgs.splice(1).map((x: J.JExpr) => this.visit(e, x));
           var code = f+"("+r+"_w, "+r+"_h, "+r+
@@ -229,11 +240,21 @@ module TDev {
         }
       }
 
+      private safeGet(x: string, f: string): string {
+        return (
+          "("+x+".operator->() != NULL "+
+          "? "+x+"->"+f+" "+
+          ": (uBit.panic(MICROBIT_INVALID_VALUE), "+x+"->"+f+"))"
+        );
+      }
+
       public visitCall(env: EmitterEnv,
         name: string,
         args: J.JExpr[],
+        typeArgs: J.JTypeRef[],
         parent: J.JTypeRef,
-        callType: string)
+        callType: string,
+        typeArgument: string = null)
       {
         var mkCall = (f: string, skipReceiver: boolean) => {
           var actualArgs = skipReceiver ? args.slice(1) : args;
@@ -249,13 +270,41 @@ module TDev {
                 else
                   return this.visit(env, a)
               });
-            return f + "(" + argsCode.join(", ") + ")";
+            var t = typeArgument ? "<" + typeArgument + ">" : "";
+            return f + t + "(" + argsCode.join(", ") + ")";
           }
         };
 
         // The [JCall] node has several, different, often unrelated purposes.
         // This function identifies (tentatively) the different cases and
         // compiles each one of them into something that makes sense.
+
+        // 0a) Some methods take a type-level argument at the end, e.g.
+        // "create -> collection of -> number". TouchDevelop represents this as
+        // calling the method "Number" on "create -> collection of". C++ wants
+        // the type argument to be passed as a template parameter to "collection of"
+        // so we pop the type arguments off and call ourselves recursively with
+        // the extra type argument.
+        // Extra bonus subtlety: we are able to get the "complete" type argument
+        // at the root of the call sequence, but we need skip "intermediate"
+        // nodes (that have types such as Collection<T> in there) until we hit
+        // the actual code arguments.
+        if (<any> parent == "Unfinished Type") {
+          var newTypeArg = typeArgument || H.mkType(env, this.libraryMap, typeArgs[0]);
+          assert(args.length && args[0].nodeType == "call");
+          var call = <J.JCall> args[0];
+          return this.visitCall(env, call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
+        }
+
+        // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
+        // and TouchDevelop writes "÷point -> create".
+        if (H.isRecordConstructor(name, args)) {
+          // Note: we cannot call new on type definitions from other libraries.
+          // So the type we're looking for is always in the current scope's
+          // "user_types" namespace.
+          var struct_name = H.manglePrefixedName(env, ["user_types"], <any> parent)+"_";
+          return "ManagedType<"+struct_name+">(new "+struct_name+"())";
+        }
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
@@ -269,30 +318,34 @@ module TDev {
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.manglePrefixedName(env, "globals", name);
+          return H.manglePrefixedName(env, ["globals"], name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
         // [resolveCall] again, so that we find the shim if any.
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          var prefixedName = t.lib
-            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
+          var prefixedName = t.libs.length > 1
+            ? this.resolveCall(env, H.mkLibraryRef(t.libs[0]), name)
             : this.resolveCall(env, H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
 
         // 5) Field access for an object.
         else if (callType == "field")
-          return this.visit(env, args[0]) + "->" + H.mangleName(name);
+          return this.safeGet(this.visit(env, args[0]), H.mangleName(name));
 
         // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
         else if (args.length && H.isSingletonRef(args[0]) == "♻")
           return "";
 
-        // 6b) Reference to a built-in library method, e.g. Math→ max
+        // 6b) Reference to a built-in library method, e.g. Math→ max. The
+        // first call to lowercase avoids a conflict between Number (the type)
+        // and Number (the namespace). The second call to lowercase avoids a
+        // conflict between Collection_of (the type) and Collection_of (the
+        // function).
         else if (args.length && H.isSingletonRef(args[0]))
-          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name), true);
+          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name).toLowerCase(), true);
 
         // 7) Instance method (e.g. Number's > operator, for which the receiver
         // is the number itself). Lowercase so that "number" is the namespace
@@ -308,7 +361,7 @@ module TDev {
           return "";
         else
           // Reference to "data", "Math" (or other namespaces), that makes no
-          // sense.
+          // sense. TouchDevelop allows these.
           return "";
       }
 
@@ -395,20 +448,65 @@ module TDev {
         e.indent + "}\n\n";
       }
 
-      private wrapNamespaceIf (s: string) {
+      private typeDecl(e: EmitterEnv, r: J.JRecord) {
+        // Comments on record definitions can't be set via the TouchDevelop UI.
+        // Instead, fire up the console, and do something like:
+        //
+        //     TDev.Script.things.filter(function (x) {
+        //       return x instanceof TDev.AST.RecordDef
+        //     })[0].description = "{shim:}"
+        //
+        var s = H.isShim(r.comment);
+        if (s !== null)
+          return null;
+
+        var n = H.mangleName(r.name);
+        var fields = r.fields.map((f: J.JRecordField) => {
+          var t = H.mkType(e, this.libraryMap, f.type);
+          return e.indent + "  " + t + " " + H.mangleName(f.name) + ";";
+        }).join("\n");
+        return [
+          e.indent + "struct " + n + "_ {",
+          fields,
+          e.indent + "};",
+        ].join("\n");
+      }
+
+      private typeStub(e: EmitterEnv, r: J.JRecord) {
+        var s = H.isShim(r.comment);
+        if (s !== null)
+          return null;
+
+        var n = H.mangleName(r.name);
+        return [
+          e.indent + "struct " + n + "_;",
+          e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
+        ].join("\n");
+      }
+
+      private wrapNamespaceIf(s: string) {
         if (this.libName != null)
           return (s.length
-            ? "namespace "+this.libName+" {\n"+
+            ? "  namespace "+this.libName+" {\n"+
                 s +
-              "\n}"
+              "\n  }"
             : "");
         else
           return s;
       }
 
+      private wrapNamespaceDecls(e: EmitterEnv, n: string, s: string[]) {
+        return (s.length
+          ? e.indent + "namespace "+n+" {\n"+
+              s.join("\n") + "\n" +
+            e.indent + "}"
+          : "");
+      }
+
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
+        e = indent(e);
         if (this.libName)
           e = indent(e);
 
@@ -420,6 +518,31 @@ module TDev {
           }
         });
 
+        // Compile type "stubs". Because there may be any kind of recursion
+        // between types, we first declare the structs, then the resulting
+        // ref-counted type (which the TouchDevelop type maps onto):
+        //     struct Thing_;
+        //     typedef ManagedType<Thing_> Thing;
+        var typeStubs = decls.map((f: J.JDecl) => {
+          var e1 = indent(e)
+          if (f.nodeType == "record")
+            return this.typeStub(e1, <J.JRecord> f);
+          else
+            return null;
+        }).filter(x => x != null);
+        var typeStubsCode = this.wrapNamespaceDecls(e, "user_types", typeStubs);
+
+        // Then, we can emit the definition of the structs (Thing_) because they
+        // refer to TouchDevelop types (Thing).
+        var typeDefs = decls.map((f: J.JDecl) => {
+          var e1 = indent(e)
+          if (f.nodeType == "record")
+            return this.typeDecl(e1, <J.JRecord> f);
+          else
+            return null;
+        }).filter(x => x != null);
+        var typeDefsCode = this.wrapNamespaceDecls(e, "user_types", typeDefs);
+
         // Globals are in their own namespace (otherwise they would collide with
         // "math", "number", etc.).
         var globals = decls.map((f: J.JDecl) => {
@@ -429,11 +552,7 @@ module TDev {
           else
             return null;
         }).filter(x => x != null);
-        var globalsCode = globals.length
-          ?  e.indent + "namespace globals {\n" +
-            globals.join("\n") + "\n" +
-          e.indent + "}\n"
-          : "";
+        var globalsCode = this.wrapNamespaceDecls(e, "globals", globals);
 
         // We need forward declarations for all functions (they're,
         // by default, mutually recursive in TouchDevelop).
@@ -466,6 +585,8 @@ module TDev {
         // within our namespace.
         this.prototypes = this.wrapNamespaceIf(globalsCode + forwardDeclarations.join("\n"));
         this.code = this.wrapNamespaceIf(this.compileImageLiterals(e) + userFunctions.join("\n"));
+        this.tPrototypes = this.wrapNamespaceIf(typeStubsCode);
+        this.tCode = this.wrapNamespaceIf(typeDefsCode);
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.

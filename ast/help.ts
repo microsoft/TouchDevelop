@@ -155,6 +155,7 @@ module TDev {
         userhaspicture: boolean;
         verb: string; // “JoinGroup” for group invitation codes
         data: string; // groupid for group invitation codes
+        credit?: number;
     }
 
     export interface JsonScriptMeta {
@@ -194,6 +195,7 @@ module TDev {
         meta?: JsonScriptMeta; // only in lite, bag of metadata
         updateroot: string; // lite-only
         unmoderated?: boolean;
+        noexternallinks?:boolean;
     }
 
     export interface JsonHistoryItem
@@ -230,6 +232,7 @@ module TDev {
     {
         path: string; // "td/contents"
         scriptid: string; // where is it pointing to
+        artid: string; // where is it pointing to
         redirect: string; // full URL or /something/on/the/same/host
         description: string; // set to script title from the client
     }
@@ -398,6 +401,46 @@ module TDev {
             },
             idToUrl: id => 'https://youtu.be/' + id,
             idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
+        }, {
+            id: "videoptr",
+            name: "TouchDevelop Video",
+            description: lf("TouchDevelop video (/td/videos/...)"),
+            parseIds: text => {
+                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+                if (m)
+                    text = m[1]
+                text = text.replace(/^\/+/, "")
+                text = text.replace(/^embed\//, "")
+                text = text.replace(/[^a-z0-9-\/]/g, "-")
+                return [text]
+            },
+            idToUrl: id => Cloud.getServiceUrl() + "/embed/" + id,
+            idToHTMLAsync: id => {
+                    id = id.replace(/[^a-z0-9-\/]/g, "-")
+                    return Promise.as(HTML.mkLazyVideoPlayer(
+                        Util.fmt("{0}/{1}/thumb", Cloud.getServiceUrl(), id),
+                        Util.fmt("{0}/embed/{1}", Cloud.getServiceUrl(), id)))
+            }
+        }, {
+            id: "bbc",
+            name: "BBC Video",
+            description: lf("BBC video (https://files.microbit.co.uk/clips/...)"),
+            parseIds: text => {
+                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+                if (m)
+                    text = m[1]
+                text = text.replace(/^\/+/, "")
+                text = text.replace(/^clips\//, "")
+                text = text.replace(/[^a-z0-9-\/]/g, "-")
+                return [text]
+            },
+            idToUrl: id => "https://files.microbit.co.uk/clips/" + id,
+            idToHTMLAsync: id => {
+                    id = id.replace(/[^a-z0-9-\/]/g, "-")
+                    return Promise.as(HTML.mkLazyVideoPlayer(
+                        Util.fmt("https://files.microbit.co.uk/clips/{0}/thumb", id),
+                        Util.fmt("https://files.microbit.co.uk/clips/{0}/embed", id)))
+            }
         }, {
             id: "vimeo",
             name: "Vimeo",
@@ -944,19 +987,56 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
                         );
                 }
+            } else if (Cloud.lite && macro == "videoptr") {
+                if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
+                if (!arg)
+                    return MdComments.error("videoptr: missing video id");
+                else {
+                    var prefix = this.relativeLinks ? "" : Cloud.getServiceUrl();
+                    var args = arg.split(/:/);
+                    if (!/^[a-z0-9\-\/@]+$/.test(args[0]))
+                        return MdComments.error("videoptr: invalid pointer path");
+                    var id = args[0].replace(/^\/+/, "")
+                    var url = Util.fmt("{0}/{1}/sd", prefix, id);
+                    var playerUrl = Util.fmt("{0}/embed/{1}", prefix, id);
+                    var posterUrl = Util.fmt("{0}/{1}/thumb", prefix, id);
+                    if (Cloud.config.anonToken) {
+                        var suff = "?anon_token=" + encodeURIComponent(Cloud.config.anonToken)
+                        url += suff
+                        posterUrl += suff
+                    }
+                    // TODO: support looping
+                    // return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}'>{2}</div>", posterUrl, playerUrl, SVG.getVideoPlay(posterUrl));
+                }
+            } else if (Cloud.lite && macro == "bbc") {
+                if (!this.allowVideos) return "";
+                if (this.blockExternal()) return this.blockLink("")
+                if (!arg)
+                    return MdComments.error("bbc: missing video id");
+                else {
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
+                        Util.fmt("https://files.microbit.co.uk/clips/{0:uri}/embed", arg),
+                        SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', arg))
+                        );
+                }
             } else if (Cloud.lite && macro == "vimeo") {
                 if (!this.allowVideos) return "";
+                if (Cloud.isRestricted())
+                    return MdComments.error("vimeo not allowed");
+                if (!arg)
+                    return MdComments.error("vimeo: missing video id");
                 if (this.blockExternal()) return this.blockLink("")
                 var args = arg.split(/:/);
                 if (!/^\d+$/.test(args[0]))
                     return MdComments.error("vimeo: video id should be a number");
                 else {
-                    var url = Util.fmt("//player.vimeo.com/video/{0:uri}?autoplay=1&badge=0", args[0]);
-                    if (/loop/.test(args[1])) url += "&loop=1";
-                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
-                        url,
-                        SVG.getVideoPlay(Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", this.relativeLinks ? "" : Cloud.getServiceUrl(), args[0]))
-                        );
+                    var prefix = this.relativeLinks ? "" : Cloud.getServiceUrl();
+                    var url = Util.fmt("{0}/vimeo/{1:uri}/sd", prefix, args[0]);
+                    var posterUrl = Util.fmt("{0}/vimeo/{1:uri}/thumb512", prefix, args[0]);
+                    // TODO: support looping
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
                 }
             } else if (macro == "channel9") {
                 if (!this.allowVideos) return "";
@@ -2003,6 +2083,8 @@ module TDev {
             return TDev.AST.loadScriptAsync(loadScript).then((tcRes:AST.LoadScriptResult) => {
                 var s = Script;
                 setGlobalScript(tcRes.prevScript);
+                if (this.fromJson)
+                    s.blockExternalLinks = this.fromJson.noexternallinks;
                 return s;
             })
         }
@@ -2030,6 +2112,8 @@ module TDev {
                 var rend = new Renderer();
                 rend.stringLimit = 90;
                 mdcmt = new MdComments(rend, null);
+                if (this.app)
+                    mdcmt.blockExternalLinks = this.app.blockExternalLinks
             }
 
             var ch = ""

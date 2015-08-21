@@ -16,6 +16,11 @@ module TDev.Login
         if (m)
             addParameters = "&" + m[0];
 
+        if (Cloud.lite) {
+            var uid = Cloud.getUserId()
+            if (uid) addParameters = "&u=" + encodeURIComponent(uid)
+        }
+
         var hereUrl = window.location.href;
         if (/^x-wmapp/.test(hereUrl)) hereUrl = "https://www.touchdevelop.com/app/current.error#wp8login";
         hereUrl = hereUrl.replace(/#modal.*/, "");

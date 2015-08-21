@@ -5,7 +5,7 @@
     <script type="application/javascript" src="blockly_compressed.js"></script>
     <script type="application/javascript" src="blocks_compressed.js"></script>
     <script type="application/javascript" src="en.js"></script>
-    <script type="application/javascript" src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="application/javascript" src="../jquery-2.1.4.min.js"></script>
     <!-- Use the lines below when working with a local checkout of blockly. -->
     <!-- <script type="application/javascript" src="blockly/blockly_uncompressed.js"></script> -->
     <!-- <script type="application/javascript" src="blockly/blocks_compressed.js"></script> -->
@@ -37,6 +37,10 @@
           <a href="#" class="roundbutton" id="command-graduate">
             <div class="roundsymbol"><i class="fa fa-code"></i></div>
             <div class="roundlabel">convert</div>
+          </a>
+          <a href="https://test.microbit.co.uk/blocks/contents" target="_blank" class="roundbutton" id="command-help">
+            <div class="roundsymbol"><i class="fa fa-question"></i></div>
+            <div class="roundlabel">help</div>
           </a>
         </div>
         <div id="merge-commands" class="vbox flex1">
@@ -185,7 +189,7 @@
         <block type="device_scroll_image">
             <value name="frame offset">
                 <block type="math_number">
-                    <field name="NUM">1</field>
+                    <field name="NUM">5</field>
                 </block>
             </value>
             <value name="delay">
@@ -308,6 +312,7 @@
         </div>
       </div>
     </div>
+    <div id="blocklyDiv"></div>
   </body>
 </html>
 <!-- vim: set ts=2 sw=2 sts=2: -->

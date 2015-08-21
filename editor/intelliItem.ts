@@ -20,7 +20,8 @@ module TDev
         public isAttachedTo:Kind = null;
         public usageKey:string;
         public cornerIcon:string;
-        public noButton:boolean;
+        public noButton: boolean;
+        public matchAny: boolean;
 
         public getName()
         {
@@ -39,6 +40,7 @@ module TDev
             if (this.decl && this.decl.getKind() instanceof ThingSetKind) return 10;
             if (this.prop instanceof AST.LibraryRef) return 5;
             if (this.prop && !Script.canUseProperty(this.prop)) return -10;
+            if (this.matchAny) return -1e10;
             return 0;
         }
 
@@ -266,6 +268,7 @@ module TDev
         // Returns match quality
         public match(terms:string[], fullName:string)
         {
+            if (this.matchAny) return this.score;
             if (!!this.prop) return IntelliItem.matchProp(this.prop, terms, fullName);
             if (terms.length == 0) return 1;
             var lowerName = this.getName().toLowerCase();

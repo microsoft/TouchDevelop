@@ -334,6 +334,8 @@ module TDev.AST {
         }
         public forSearch() { return this.text.toLowerCase(); }
         public docText() { return this.text }
+        // this means normal statement, and not Record or Field
+        public isExecutableStmt() { return true; }
     }
 
     export class FieldComment
@@ -2062,7 +2064,10 @@ module TDev.AST {
                             annot.enumMap[m[1]] = m[2]
                             return m[1]
                         }
-                        else return a
+                        else {
+                            annot.enumMap[a] = a;
+                            return a
+                        }
                     });
                     (<any>annot.hints).enumMap = annot.enumMap
                 }
@@ -2383,6 +2388,8 @@ module TDev.AST {
         public imports = new AppImports();
         public notifyVersionMarker:any = new Object();
         public libNamespaceCache = new LibNamespaceCache(this);
+        public blockExternalLinks:boolean = undefined;
+        public entireShim = false;
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;
@@ -3209,7 +3216,7 @@ module TDev.AST {
     {
         public loc:StackOp;
         public languageHint:string;
-        public enumVal:number;
+        public enumVal:string;
 
         constructor() {
             super()
@@ -5092,7 +5099,7 @@ module TDev.AST {
                 return ""
             })
 
-            var dummy2 = c.text.replace(/\{topic:([\w-\/]*)\}/, (match:string, top:string) => {
+            var dummy2 = c.text.replace(/\{topic:([\w-\/@]*)\}/, (match:string, top:string) => {
                 this.topicPath = top;
                 return ""
             })

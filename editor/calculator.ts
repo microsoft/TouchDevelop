@@ -205,8 +205,6 @@ module TDev
                 var idx0 = (<any>e).cursorIndex;
                 if (idx0 === undefined) continue;
 
-                // Util.log("check: " + e.offsetLeft + " " + e.offsetTop + " sz: " + e.offsetWidth + " " + e.offsetHeight);
-
                 var xx = e.offsetLeft + e.offsetWidth;
                 var xm = e.offsetLeft + e.offsetWidth / 2;
                 var yy = e.offsetTop + e.offsetHeight;
@@ -239,10 +237,10 @@ module TDev
             return idx;
         }
         
-        private findEditableTokenIndex(start: number) : number {
-            if (this.canInlineEdit(this.expr.tokens[start])) return start;
-            if (start > 0 && this.canInlineEdit(this.expr.tokens[start - 1])) return start - 1;
-            if (start + 1 < this.expr.tokens.length && this.canInlineEdit(this.expr.tokens[start + 1])) return start + 1;
+        private findInlineEditStringTokenIndex(start: number) : number {
+            if (this.canInlineEditString(this.expr.tokens[start])) return start;
+            if (start > 0 && this.canInlineEditString(this.expr.tokens[start - 1])) return start - 1;
+            if (start + 1 < this.expr.tokens.length && this.canInlineEditString(this.expr.tokens[start + 1])) return start + 1;
             return -1;
         }
 
@@ -290,7 +288,7 @@ module TDev
                     // picker was launched, don't do anything
                     return
                 } else if (selIdx >= 0 && !this.wasSelectedBeforeTap) {
-                    if ((editIdx = this.findEditableTokenIndex(selIdx)) > -1) {
+                    if ((editIdx = this.findInlineEditStringTokenIndex(selIdx)) > -1) {
                         this.inlineEditAtPosition(editIdx);
                         return;
                     } else if (TheEditor.widgetEnabled("selectExpressions")) {
@@ -309,7 +307,7 @@ module TDev
                         if (idx < 0) this.unselect();
                         else {
                             // double click on editable expression, pops the editor
-                            if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                            if ((editIdx = this.findInlineEditStringTokenIndex(idx)) > -1) {
                                 this.inlineEditAtPosition(editIdx);
                                 return;
                             } else if (TheEditor.widgetEnabled("selectExpressions")) {
@@ -321,7 +319,7 @@ module TDev
                             }
                         }
                     }
-                } else if ((editIdx = this.findEditableTokenIndex(idx)) > -1) {
+                } else if ((editIdx = this.findInlineEditStringTokenIndex(idx)) > -1) {
                     this.inlineEditAtPosition(editIdx);
                     return;
                 }
@@ -1344,11 +1342,17 @@ module TDev
             return inp;
         }
 
-        private canInlineEdit(t:AST.Token)
+        private canInlineEditString(t: AST.Token) : boolean {
+            if (!t) return false
+            return typeof t.getLiteral() == "string" &&
+                !(<AST.Literal>t).enumVal
+        }
+        
+        private canInlineEdit(t:AST.Token) : boolean
         {
             if (!t) return false
 
-            return typeof t.getLiteral() == "string" ||
+            return this.canInlineEditString(t) ||
                    t.getThing() instanceof AST.LocalDef ||
                    (t.getProperty() && t.getProperty().canRename());
         }
@@ -2151,7 +2155,7 @@ module TDev
 
         private literalEdit(l:AST.Literal)
         {
-            if (typeof l.data == "string") {
+            if (typeof l.data == "string" && !l.enumVal) {
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
                 if (l instanceof AST.FieldName || l instanceof AST.RecordName)
                     e.nameOverride = lf("rename");
@@ -2171,6 +2175,8 @@ module TDev
         {
             var nextTok = this.expr.tokens[this.cursorPosition];
             var isAssign = nextTok && nextTok.getOperator() == ":=";
+            if (/TD208/.test(this.stmt.getError()))
+                isAssign = true;
             return isAssign || this.inSelectionMode() ? 1e20 : 1e-200;
         }
 
@@ -2410,8 +2416,41 @@ module TDev
 */
 
                 var s: IProperty[] = k.primaryKind.listProperties().slice(0);
+                var t = this.expr.tokens[this.cursorPosition-1];
+                if (k.primaryKind == api.core.String && t && t instanceof AST.Literal && (<AST.Literal>t).enumVal) {
+                    // don't allow string editing on enum values
+                    s = [];
+                }
+                    
                 if (k.primaryKind instanceof AST.LibraryRefKind)
-                    s = s.filter(p => !(<AST.LibraryRefAction>p)._extensionAction);
+                    s = s.filter(p => !(<AST.LibraryRefAction>p)._extensionAction);                
+                
+                if (TheEditor.widgetEnabled("promoteRefactoring")) {
+                    if (k.primaryKind.getName() == "data") {
+                        var e1 = this.mkIntelliItem(1e-10, Ticks.calcAddDataVar);
+                        e1.matchAny = true;
+                        e1.nameOverride = lf("new global var");
+                        e1.descOverride = lf("create new data variable");
+                        e1.cbOverride = () => {
+                            var ds = TheEditor.freshVar(api.core.Number);
+                            ds.setName(Script.freshName(this.searchApi.query() || "v"));
+                            this.insertToken(AST.mkPropRef(ds.getName()))
+                            TheEditor.addNode(ds);
+                        };
+                    } else if (k.primaryKind.getName() == "code") {
+                        var e1 = this.mkIntelliItem(1e-10, Ticks.calcAddDataVar);
+                        e1.matchAny = true;
+                        e1.nameOverride = lf("new function");
+                        e1.descOverride = lf("create new function");
+                        e1.cbOverride = () => {
+                            var fn = TheEditor.freshAsyncAction();
+                            fn.setName(Script.freshName(this.searchApi.query() || "v"));
+                            this.insertToken(AST.mkPropRef(fn.getName()))
+                            TheEditor.addNode(fn);
+                        };                        
+                    }
+                }
+                
                 var downgradeConcat = false;
                 if (k.definition != null)
                     this.addGoTo(k.definition);
@@ -2442,10 +2481,10 @@ module TDev
                     s.push(api.core.StringConcatProp); // always available
                     downgradeConcat = true;
                 }
-                
-                s = s.filter(p => p.isBrowsable() && (!profile || profile.hasProperty(p)));                
+                                
+                s = s.filter(p => p.isBrowsable() && (!profile || profile.hasProperty(p))); 
                 s = Calculator.sortDecls(s);
-
+                
                 s.forEach((p: IProperty) => {
                     if (p.getInfixPriority() > 0 && p.getParameters().length == 1) {
                         // unary prefix operator; skip
@@ -2468,21 +2507,27 @@ module TDev
                 var skill = AST.blockMode ? 1 : AST.legacyMode ? 2 : 3;
                 var libSingl: IntelliItem = null;
                 var dataSingl: IntelliItem = null;
+                var codeSingl: IntelliItem = null;
                 singl.forEach((s:AST.SingletonDef) => {
                     var sc = s.usage.count() + 1e-20;
                     sc *= s.usageMult();
+                    if (s.isExtension) sc += 50;
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliSingleton);
                     if (sc > maxScore) maxScore = sc;
                     if (skill < s.getKind().minSkill) e.score *= 1e-10;
                     e.decl = s;
-                    if (s.getName() == AST.libSymbol)
-                        libSingl = e;
-                    else if (s.getName() == "data")
-                        dataSingl = e;
+                    if (s.getName() == AST.libSymbol) libSingl = e;
+                    else if (s.getName() == "data") dataSingl = e;
+                    else if (s.getName() == "code") codeSingl = e;
                 });
+                
+                // bump down code singleton
+                if (codeSingl) codeSingl.score *= 1e-2;
 
                 var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
                     var sc = l.getUsage().count() + 50;
+                    if (l.getPublicActions().some(p => !!p.getNamespaces()[0]))
+                        sc *= 1.-10;   
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliLibrary)
                     this.currentIntelliItems.pop()
                     if (sc > maxScore) maxScore = sc;
@@ -4405,9 +4450,12 @@ module TDev
                 }
 
                 if (ins.editString && this.inlineEditToken == ins.addAfter) {
+                    var ds = ins.editString
+                        .replace(/\n/g, "[Enter]")
+                        .replace(/\t/g, "[Tab]");
                     TipManager.setTip({
                         el: elt("inlineEditCloseBtn"),
-                        title: lf("type: ") + ins.editString,
+                        title: lf("type: {0}", ds),
                         description: lf("tap here when done"),
                     })
                     return;

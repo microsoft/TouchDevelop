@@ -40,7 +40,7 @@ module TDev {
           id: "blockly",
           origin: origin,
           path: path + "blockly/editor.html",
-          logoUrl: "https://microbit0.blob.core.windows.net/pub/vrvndwmo"
+          logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo"
         }];
 
       if (TDev.isBeta) {
@@ -58,6 +58,15 @@ module TDev {
           // path: '/ck-client/game/',
 
           logoUrl: origin + path + 'img/codekingdoms-microbit.png'
+        },
+        {
+          company: "The Python Software Foundation",
+          name: "MicroPython",
+          description: "Hack your micro:bit with MicroPython!",
+          id: "python",
+          origin: "https://microbit.pythonanywhere.com",
+          path: "/editor.html",
+          logoUrl: origin + '/static/img/python-powered.png'
         })
       }
     }
@@ -75,16 +84,22 @@ module TDev {
     // We need that to setup the simulator.
     export var microbitScriptId = "lwhfye";
 
+    var bbcLogoUrl = "https://az742082.vo.msecnd.net/files/images/logo.png";
+
     import J = AST.Json;
 
     export function makeOutMbedErrorMsg(json: any) {
       var errorMsg = "unknown error";
       // This JSON format is *very* unstructured...
       if (json.mbedresponse) {
-        var messages = json.messages.filter(m =>
-          m.severity == "error" || m.type == "Error"
-        );
-        errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+        if (json.messages) {
+          var messages = json.messages.filter(m =>
+            m.severity == "error" || m.type == "Error"
+          );
+          errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+        } else if (json.mbedresponse.result) {
+          errorMsg = json.mbedresponse.result.exception;
+        }
       }
       return errorMsg;
     }
@@ -175,9 +190,10 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
+        var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(bbcLogoUrl));
         var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
 
-        elt("externalEditorSide").setChildren([w, logo]);
+        elt("externalEditorSide").setChildren([bbcLogo, w, logo]);
       }
 
       public fullWallWidth() {
@@ -347,8 +363,14 @@ module TDev {
             break;
 
           case MessageType.Compile:
-            if (Cloud.anonMode(lf("Native compilation")))
+            if (Cloud.anonMode(lf("Native compilation"))) {
+              this.post(<Message_CompileAck>{
+                type: MessageType.CompileAck,
+                status: Status.Error,
+                error: "please log in for compilation"
+              });
               return;
+            }
 
             var message1 = <Message_Compile> event.data;
             var cpp;
@@ -439,6 +461,7 @@ module TDev {
       scriptVersionInCloud: string;
       baseSnapshot: string;
       metadata: Metadata;
+      pubId: string;
     };
 
     // The [scriptVersionInCloud] name is the one that's used by [world.ts];
@@ -485,6 +508,7 @@ module TDev {
             script: data,
             merge: ("theirs" in extra) ? extra : null,
             fota: Cloud.isFota(),
+            pubId: data.pubId,
           });
         });
       });

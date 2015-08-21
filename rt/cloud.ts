@@ -330,7 +330,7 @@ module TDev.Cloud {
                     lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
                     (!(<any>TDev).TheEditor ? "" :
                       "<p class='agree'>" +
-                      lf("After you sign in we will back up and sync scripts between your devices.") +
+                      lf("You can run and save your scripts locally, but to compile and access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
                       "</p>")
                     )
                 m.fullWhite();
@@ -800,7 +800,7 @@ module TDev.Cloud {
     }
 
     export function isFota() {
-        return navigator.userAgent.indexOf("SamsungBrowser/microbit") > 0;
+        return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
@@ -816,7 +816,9 @@ module TDev.Cloud {
                 err => Util.setTimeout(1000, poll))
         }
 
-        var config = isFota() ? "fota" : "proto";
+        var config = isFota() ? "ws-fota" : "ws";
+        if (document.location.href.match(/usegcc=1/))
+            config += "-gcc";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,

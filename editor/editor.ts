@@ -74,6 +74,7 @@ module TDev
             super.showWall();
             this.backBtn = <HTMLElement>this.backBtnDiv.firstChild;
             this.scriptBtn = HTML.mkRoundButton("svg:script,black", lf("back"), Ticks.wallBack, () => this.scriptBtnHandler());
+            this.justShowTheWall();
         }
 
         public updateButtonsVisibility() {
@@ -457,7 +458,7 @@ module TDev
                 });
             }
             this.pauseBtnDiv.setChildren([heart, pause]);
-            this.currentRt.applyPageAttributes();
+            if (this.currentRt) this.currentRt.applyPageAttributes();
             //keyMgr.btnShortcut(pause, "Esc");
         }
 
@@ -1348,7 +1349,13 @@ module TDev
 
             this.sizeSplitScreen();
             this.dismissModalPane();
-
+            
+            if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode || !SizeMgr.splitScreen)) {
+                this.host.justConcealTheWall();
+            } if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode && SizeMgr.splitScreen)) {
+                this.host.justShowTheWall();
+            }
+            
             // Re-run the layouting algorithm.
             if (this.resumeAction) {
                 this.currentRt.forcePageRefresh()
@@ -1735,7 +1742,8 @@ module TDev
                 return
             }
 
-            run();
+            if (this.currentRt) this.currentRt.stopAsync().then(() => run());            
+            else run();
         }
 
         private runActionCore(a:AST.Decl, args:any[], debugMode: boolean = false)
@@ -2048,7 +2056,7 @@ module TDev
             this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
             var msg = Cloud.isFota()
                 ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
-                : lf("Please wait while we prepare your hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive. Press the reset button.")
+                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
@@ -2066,7 +2074,7 @@ module TDev
                 this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
-                var r = src === this.currentScriptCompiling;
+                var r = src === this.currentScriptCompiling || src === "";
                 this.currentScriptCompiling = undefined;
                 if (!r)
                     Util.log("compilation outdated, skipping...");
@@ -2093,6 +2101,7 @@ module TDev
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
                             ModalDialog.showText(
+                                "Have you tried updating your libraries? (Update button in the side pane.)\n\n"+
                                 "For debugging, here's the URL to the JSON file:\n" + json.url +
                                 "\n\nThis is ARM's error message:\n" + External.makeOutMbedErrorMsg(json) +
                                 "\n\nFor reference, here's the C++ we sent them:\n" + cpp,
@@ -3200,6 +3209,7 @@ module TDev
                         editorState: JSON.parse(editorState || "{}"),
                         baseSnapshot: header.scriptVersion.baseSnapshot,
                         metadata: header.meta,
+                        pubId: header.scriptId
                     });
                     ProgressOverlay.hide();
                     return new PromiseInv();
@@ -4220,7 +4230,7 @@ module TDev
                         Cloud.setUserId(id)
                         Cloud.setAccessToken(tok.token)
                         localStorage["experimentalVersion"] = ver
-                        localStorage["legalNotice"] = Runtime.legalNotice
+                        //localStorage["legalNotice"] = Runtime.legalNotice
                         window.location.reload()
                     });
                 })
@@ -4274,28 +4284,6 @@ module TDev
         static isAlwaysBeta()
         {
             return window.localStorage["always_beta"] === "yes";
-        }
-
-        static liteCrashFiles()
-        {
-            var m = new ModalDialog(lf("enter bug file id"))
-
-            var up = KeyboardAutoUpdate.createInput(lf("file id"), (v) => {
-                v = v.trim()
-                if (/^\d{12}/.test(v))
-                    Cloud.getPrivateApiAsync("bug/file/" + encodeURIComponent(v))
-                        .done(resp => {
-                            res.setChildren(HTML.mkA("", resp.url, "_blank", v))
-                        })
-                else
-                    res.setChildren([ lf("File id should start with a bunch of numbers.") ])
-            })
-
-            m.addBody(up.element)
-            var res = div("wall-dialog-body")
-            m.add(res)
-            m.addOk(lf("dismiss"), () => m.dismiss())
-            m.show()
         }
 
         public popupMenu()

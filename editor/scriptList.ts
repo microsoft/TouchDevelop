@@ -27,7 +27,7 @@
             if (siteHeader) {
                 var menuItems = [
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
-                        if (Cloud.isOffline() || Cloud.isFota())
+                        if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
                             TheHub.createScript();
                         else     
                             Util.navigateInWindow("/create-code");
@@ -260,7 +260,7 @@
                 this.updateIsWaiting = false;
                 tick(Ticks.appUpdate);
                 window.localStorage["appUpdated"] = "1";
-                window.localStorage["lastForcedUpdate"] = "";
+                window.localStorage.removeItem("lastForcedUpdate");
                 window.location.reload();
                 return true;
             }
@@ -339,6 +339,9 @@
                 localStorage["legalNotice"] == Runtime.legalNotice)
                 return;
 
+            if (Cloud.lite && /ckns_accept=111/.test(document.cookie))
+                return
+
             var d = new ModalDialog();
             var noticeHTML = Runtime.legalNoticeHeader ||
                 (lf("<h3>welcome to TouchDevelop</h3>") +
@@ -356,7 +359,10 @@
             d.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("agree"), () => {
                     tick(Ticks.legalNoticeAgree);
-                    localStorage["legalNotice"] = notice;
+                    if (Cloud.lite)
+                        document.cookie = "ckns_accept=111; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT"
+                    else
+                        localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
                     d.dismiss();
                 }, "green-button")
@@ -466,6 +472,25 @@
         }
 
         public getInstalledHeaders() { return this.installedHeaders }
+
+        static showBugReport(bug: BugReport)
+        {
+            var bb = Util.flatClone(bug);
+            bb.eventTrace = "";
+            bb.logMessages = []
+            var str = Ticker.bugReportToString(bb)
+
+            var view = new RT.AppLogView();
+            view.charts(false)
+            view.reversed(false)
+            view.append(bug.logMessages);
+            
+            var pre = div(null, str)
+            pre.style.whiteSpace = "pre";
+            view.prependHTML(pre)
+
+            return view.showAsync().done()
+        }
 
         private syncView(showCurrent = true)
         {
@@ -729,7 +754,7 @@
 
                 this.progressBar.start();
                 if (!cont && terms.length == 1) {
-                    if (/^\/?[a-zA-Z]+$/i.test(terms[0])) {
+                    if (/^\/?[a-zA-Z\-]+$/i.test(terms[0])) {
                         TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
                             if (version != this.searchVersion) return;
                             var inf = this.getAnyInfoByPub(e, "");
@@ -741,6 +766,34 @@
                         Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + terms[0] : terms[0])
                             .done((rc : JsonCode) => {
                                 if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
+                            }, e => {});
+                    } else if (/^BuG\d{14}\w{8,}$/.test(terms[0])) {
+                        Cloud.getPrivateApiAsync("bug/" + terms[0])
+                            .done(Host.showBugReport, e => {})
+                    }
+
+                    if (Cloud.lite && /^[a-z]{10}$/.test(terms[0])) {
+                        Cloud.getPrivateApiAsync("me/code/" + terms[0])
+                            .done((rc : JsonCode) => {
+                                if (rc.verb == "ActivationCode") {
+                                    var m = ModalDialog.ask(
+                                        lf("You've entered a valid activation code with {0} credit(s). Do you want to apply it?",
+                                            rc.credit || 0),
+                                        lf("apply code"), 
+                                        () => {
+                                            m.dismiss()
+                                            Cloud.postPrivateApiAsync("me/code/" + terms[0], {})
+                                                .done(() => {
+                                                    Cloud.getUserSettingsAsync()
+                                                    .done(r => HTML.showProgressNotification(
+                                                        lf("You now have {0} credit(s).", r.credit || 0)))
+                                                }, e => Cloud.handlePostingError(e, lf("apply code")))
+                                        })
+                                } else if (rc.verb == "SpentActivationCode") {
+                                    ModalDialog.info(lf("code already used"), lf("This activation code has already been used."))
+                                } else if (rc.verb == "MultiActivationCode") {
+                                    ModalDialog.info(lf("code can't be used here"), lf("This code can be only used in creation of new accounts."))
+                                }
                             }, e => {});
                     }
                 }
@@ -793,7 +846,7 @@
                     if (xcont) {
                         searchDiv = div(null, HTML.mkButton(lf("load more"), () => { searchFrom("continuation=" + xcont + "&") }));
                         elts.push(searchDiv);
-                    } else if (items.length == 0) {
+                    } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
                         if (EditorSettings.widgets().searchHelp) {
                             var t = HelpTopic.findById("howtosearch");
@@ -1065,9 +1118,9 @@
                       }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
                       .then(() =>
                         World.continuouslySyncAsync(false, () => {
-                            this.syncView();
-                            //this.searchKey();
-                            return Promise.as();
+                            return this.updateInstalledHeaderCacheAsync().then(() => {
+                                this.syncDone();
+                            });
                         }))
                       .done();
                 }
@@ -1147,9 +1200,14 @@
                 hideBtn();
                 progressBar.start();
                 Cloud.postPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid, {})
-                    .done(() => {
+                    .done(resp => {
                         progressBar.stop();
                         m.dismiss();
+                        if (resp.status == "waiting") {
+                            ModalDialog.info(lf("Awaiting Approval"),
+                                lf("The owner of the group has been notified. You will be notified when approved to join."))
+                            return
+                        }
                         TheApiCacheMgr.invalidate("groups");
                         TheApiCacheMgr.invalidate("me/groups");
                         TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
@@ -1187,7 +1245,7 @@
                         .then((code: JsonCode) => {
                             lastCode = code;
                             if(code.verb == 'JoinGroup')
-                                return Cloud.getPrivateApiAsync(code.data)
+                                return Cloud.getPrivateApiAsync(Cloud.lite ? code.data + "?code=" + codeid : code.data)
                             else
                                 return Promise.as(undefined);
                         })
@@ -1195,6 +1253,7 @@
                             if (group) {
                                 showBtn();
                                 groupid = group.id;
+                                TheApiCacheMgr.store(group.id, group);
                                 var groupInfo = this.getGroupInfoById(groupid);
                                 errorDiv.setChildren([
                                     div('wall-dialog-header', lf("for group")),
@@ -4870,6 +4929,30 @@
             case "art":
                 return div(null, lab(lf("art")));
             case "group":
+                if (notkind == "groupapproval") {
+                    var grpuser = this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()
+                    var joinid = jn.supplementalid + "/groups/" + jn.publicationid
+                    var existing = <HTMLElement>grpuser.getElementsByClassName("sdNumbers")[0]
+                    if (existing)
+                        existing.removeSelf()
+                    var nums = div("sdNumbers")
+                    grpuser.appendChild(nums)
+                    TheApiCacheMgr.getAsync(joinid)
+                        .done(d => {
+                            nums.setChildren([
+                                d ? lf("approved") :
+                                HTML.mkAsyncButton(lf("approve"), 
+                                    () => Cloud.postPrivateApiAsync(joinid, {})
+                                          .then(r => {
+                                              nums.setChildren([lf("approved")])
+                                          }, e => Cloud.handlePostingError(e, lf("approve"))))
+                            ])
+                        })
+                    return div(null, lab(lf("wants to join"), grpuser),
+                                     lab(lf("your group")))
+                }
+                if (notkind == "groupapproved")
+                    return div(null, lab(lf("approved")));
                 return div(null, lab(lf("group")));
             case "leaderboardscore": // this one should not happen anymore
                 return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
@@ -5414,6 +5497,8 @@
                         else audio.play();
                     });
                     img = div('checker', playBtn);
+                } else if (a.arttype == "video") {
+                    img = HTML.mkImg("svg:videoptr,black");
                 } else if (a.bloburl) {
                     img = HTML.mkImg("svg:document,black");
                 }
@@ -5428,6 +5513,38 @@
                 //addNum(a.features, "svg:Award,black,clip=110");
                 numbers.setChildren(cont);
             });
+        }
+
+        public getContent(a:JsonArt):HTMLElement[]
+        {
+            if (a.mediumthumburl || a.pictureurl) {
+                var img = HTML.mkImg(a.mediumthumburl || a.pictureurl);
+                img.className += " checker";
+
+                img.withClick(() => {
+                    var m = new ModalDialog();
+                    var d = div("sdScreenShotFrame");
+                    d.withClick(() => { m.dismiss() });
+                    var loading = div("sdScreenShotImgLoading", lf("loading art ..."));
+                    var fullimg = HTML.mkImg(a.pictureurl);
+                    // TSBUG onLoadHandler was defined inline
+                    var onLoadHandler = () => { loading.removeSelf() }
+                    fullimg.onload = onLoadHandler;
+                    d.appendChild(div("sdScreenShotImg", loading, fullimg));
+                    m.showBare(d);
+                });
+                return [img]
+            } else if (a.wavurl) {
+                return [HTML.mkAudio(a.wavurl, a.aacurl, null, true)]
+            } else if (a.arttype == "video") {
+                var vid = document.createElement("video")
+                vid.style.width = "20em"
+                vid.controls = true;
+                vid.src = a.bloburl;
+                return [vid, HTML.mkA("", a.bloburl, "_blank", a.bloburl)]
+            } else if (a.bloburl) {
+                return [HTML.mkA("", a.bloburl, "_blank", a.bloburl)]
+            }
         }
 
         public initTab()
@@ -5453,28 +5570,7 @@
                 this.loadFromJson(a);
                 hd.setChildren([Host.expandableTextBox(a.description)]);
 
-                if (a.mediumthumburl || a.pictureurl) {
-                    var img = HTML.mkImg(a.mediumthumburl || a.pictureurl);
-                    img.className += " checker";
-                    id.setChildren([img]);
-
-                    img.withClick(() => {
-                        var m = new ModalDialog();
-                        var d = div("sdScreenShotFrame");
-                        d.withClick(() => { m.dismiss() });
-                        var loading = div("sdScreenShotImgLoading", lf("loading art ..."));
-                        var fullimg = HTML.mkImg(a.pictureurl);
-                        // TSBUG onLoadHandler was defined inline
-                        var onLoadHandler = () => { loading.removeSelf() }
-                        fullimg.onload = onLoadHandler;
-                        d.appendChild(div("sdScreenShotImg", loading, fullimg));
-                        m.showBare(d);
-                    });
-                } else if (a.wavurl) {
-                    id.setChildren([HTML.mkAudio(a.wavurl, a.aacurl, null, true)]);
-                } else if (a.bloburl) {
-                    //
-                }
+                id.setChildren(this.getContent(a))
 
                 var uid = this.browser().getCreatorInfo(a);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())]);
@@ -5729,9 +5825,9 @@
                         AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
                     }
 
-
                     if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
-                        (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("post-script-meta"))) {
+                        (Cloud.hasPermission("post-script-meta") &&
+                          (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt")))) {
                         socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
@@ -5813,7 +5909,8 @@
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
-                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
+                        var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.scriptPromo()) : null;
+                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull, promo));
                     }
 
                     if (EditorSettings.widgets().scriptStats) {
@@ -5848,6 +5945,73 @@
                     this.tabContent.setChildren(divs);
                 });
             });
+        }
+
+        public scriptPromo()
+        {
+            var m = new ModalDialog()
+            var id = this.parent.publicId
+            var json = this.script().jsonScript
+
+            m.addBody(lf("Editing promo for: {0}", json.name))
+            m.show()
+
+            Promise.join([TheApiCacheMgr.getAsync("config/promo"), 
+                          Cloud.getPrivateApiAsync(id + "/promo")])
+            .done(arr => {
+                var cfg = arr[0]
+                var promo = arr[1]
+                var fields = cfg.fields || {}
+                var alltags = cfg.tags || ["all"]
+                fields["priority"] = { desc: lf("Priority (between -1000000 and 1000000; higher numbers show higher up)"), type: "number" }
+                fields["tags"] = { desc: lf("Tags ({0})", alltags.join(", ")) }
+                var inputs = {}
+                Object.keys(fields).forEach(fn => {
+                    var meta = fields[fn]
+                    var inp = HTML.mkTextInput(meta.type || "text", "")
+                    inputs[fn] = inp
+                    if (promo.hasOwnProperty(fn))
+                        if (Array.isArray(promo[fn]))
+                            inp.value = promo[fn].join(", ")
+                        else
+                            inp.value = (promo[fn] + "")
+                    var dsc = meta.desc || fn
+                    if (meta.override)
+                        dsc += lf(" [override]")
+                    m.add(div("wall-dialog-body", meta.desc || fn, inp))
+                })
+                m.addOk(lf("save"), () => {
+                    var wrong = [] 
+                    var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
+                    if (tags.some(t => alltags.indexOf(t) < 0)) {
+                        wrong.push(inputs["tags"])
+                    }
+
+                    var data = { tags: tags }
+
+                    Object.keys(fields).forEach(fn => {
+                        if (fn == "tags") return
+                        var meta = fields[fn]
+                        var inpt = inputs[fn]
+                        var val = inpt.value
+
+                        if (meta.type == "number") {
+                            var v = parseInt(val)
+                            if (isNaN(v)) wrong.push(inpt)
+                            else data[fn] = v
+                        } else {
+                            data[fn] = val
+                        }
+                    })
+
+                    if (wrong.length > 0) {
+                        wrong.forEach(HTML.wrong)
+                    } else {
+                        Cloud.postPrivateApiAsync(id + "/promo", data)
+                        .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
+                    }
+                }, "", [HTML.mkButton(lf("cancel"), () => m.dismiss())])
+            })
         }
 
         static userPlatformDisplayText(uplat: string[]) {
@@ -6156,6 +6320,7 @@
         static editorIcons = {
             "blockly": "blockeditor,#AA2FE7",
             "codekingdoms": "codekingdoms,#ffffff",
+            "python": "python,#ffffff",
             "touchdevelop": "touchdevelop,#0095ff",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
@@ -6194,7 +6359,10 @@
             var numbers = div("sdNumbers");
             var author = div("sdAuthorInner");
             var addInfo = div("sdAddInfoInner", this.publicId);
-            var abuseDiv = big ? div(null, this.reportAbuse(true)) : null;
+            var abuseDiv = big ? div(null, this.reportAbuse(true, false, () => {
+                // upon deleting uninstall as well.
+                this.uninstall(false);
+            })) : null;
             var facebook = div("sdShare");
             //var pubId = div("sdPubId", !!publicId ? "/" + publicId : null);
             var screenShot = div("sdScriptShot");
@@ -6855,7 +7023,8 @@
                                     path: this.docPath,
                                     scriptid: id,
                                     description: this.getTitle(),
-                                }))
+                                })
+                                .then(r => r, e => Cloud.handlePostingError(e, lf("update pointer"))))
                     ])
             })()
 
@@ -6956,6 +7125,11 @@
                 var waitList: Promise[] = []
                 var numPublished = 0
 
+                if (Cloud.isOffline()) {
+                    Cloud.showModalOnlineInfo(lf("publishing cancelled"));
+                    return Promise.as();
+                }
+                
                 tick(hidden ? Ticks.corePublishHidden : Ticks.corePublishPublic)
 
                 var trigger = (guid: string) => {
@@ -7024,7 +7198,9 @@
                         headers = h;
 
                         trigger(this.getGuid())
-                        Promise.join(waitList).then(() => World.syncAsync()).then(message => {
+                        Promise.join(waitList)
+                            .then(() => World.syncAsync())
+                            .then(message => {
                             if (!message) {
                                 if (prePub != numPublished)
                                     fixpoint();
@@ -7083,7 +7259,7 @@
                                     }).done()
                                 }
                             } else {
-                                if (!ModalDialog.currentIsVisible())
+                                if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
                                     ModalDialog.info(lf("publishing unsuccessful"), lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
                             }
                         }).done();
@@ -7263,7 +7439,7 @@
             })
         }
 
-        private uninstall()
+        private uninstall(allowUndo = true)
         {
             tick(Ticks.browseUninstall);
             Editor.updateEditorStateAsync(this.getGuid(),(st) => {
@@ -7285,25 +7461,25 @@
                 World.getScriptRestoreAsync(id)
                 .then(r => restoreAsync = r)
                 .then(() => World.uninstallAsync(id))
+                .then(() => World.syncAsync())
                 .then(() => {
                     var hash = HistoryMgr.windowHash()
 
-                    HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()),() => {
-                        restoreAsync()
-                        .then(() => this.browser().updateInstalledHeaderCacheAsync())
-                        .then(() => TheEditor.historyMgr.reload(hash))
-                        .done()
-                    });
+                    if (allowUndo) {
+                        HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            restoreAsync()
+                                .then(() => this.browser().updateInstalledHeaderCacheAsync())
+                                .then(() => TheEditor.historyMgr.reload(hash))
+                                .done()
+                        });
+                    }    
 
                     this.cloudHeader = null;
-                    if (this.publicId)
-                        TheEditor.historyMgr.reload(hash);
-                    else {
-                        this.browser().skipOneSync = true;
-                        Util.setHash("list:installed-scripts");
-                    }
-                })
-                .done()
+                    // always reload script list after uninstalling script
+                    // for better experience with delted scripts
+                    this.browser().skipOneSync = true;                    
+                    Util.setHash("list:installed-scripts");
+                }).done()
 
             }).done();
         }
@@ -7842,6 +8018,7 @@
         private askedToLogin:boolean;
         private scriptsTab: ScriptsTab;
         private artTab: ArtTab;
+        private groupsTab: GroupsTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -7851,11 +8028,11 @@
             var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
             var hd = div("sdDesc");
             var accountButtons = div('');
-            if ((this.isMe() || Cloud.hasPermission("me-only")) && Cloud.getUserId()) {
+            if ((this.isMe() || Cloud.hasPermission("adult")) && Cloud.getUserId()) {
                 accountButtons.setChildren([
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
-                    HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog())
+                    this.isMe() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : null
                 ]);
 
                 var settingsDiv = div(null, div('bigLoadingMore', lf("loading settings...")));
@@ -7889,10 +8066,15 @@
 
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
-                    if (Cloud.hasPermission("adult")) {
+                    // From BBC:
+                    //   
+                    //  
+                    // it on to third parties.
+                        
+                    if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private; {0})", 
                             s.emailverified 
-                              ? lf("we won't spam you") 
+                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
@@ -7901,8 +8083,8 @@
                         edit(lf("real name (private)"), "realname")
                     }
 
-                    if (s.credit && Cloud.hasPermission("post-group"))
-                        cc.push(div("", lf("You have credit to sign-up up to {0} kid{0:s}.", s.credit)));
+                    if (s.credit && /,post-group,/.test(s.permissions))
+                        cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
                 }, e => Cloud.handlePostingError(e, lf("getting settings")))
@@ -7910,7 +8092,7 @@
                 if (this.isMe())
                     refreshSettings()
                 else
-                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit email, ..."), refreshSettings))
+                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit name, email, ..."), refreshSettings))
             }
 
             ch.unshift(accountButtons);
@@ -7943,6 +8125,16 @@
                                     })
                             })
                         }))
+            }
+
+            if (Cloud.isRestricted()) {
+                ch.push(div("", text(lf("Groups of this user:"))));
+                if (!this.groupsTab) {
+                    this.groupsTab = new GroupsTab(this);
+                    this.groupsTab.initElements();
+                    this.groupsTab.initTab();
+                }
+                ch.push(this.groupsTab.tabContent);
             }
 
             ch.push(div("", text(lf("Scripts by this user:"))));
@@ -8686,7 +8878,8 @@
         private joinGroupDirect() {
             HTML.showProgressNotification(lf("Joining group..."));
             Cloud.postPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId, {})
-                .done(() => {
+                .done(resp => {
+
                     this.invalidateCaches();
                     this.browser().loadDetails(this);
             });
@@ -8913,18 +9106,18 @@
                 return
             }
             
-            
+
             Cloud.getPrivateApiAsync(pubid + "/candelete")
             .then((resp:CanDeleteResponse) => {
                 var b = TheHost
                 var del = () => {
+                    HTML.showProgressNotification(lf("deleting..."));            
                     Cloud.deletePrivateApiAsync(pubid)
                     .done(() => {
                         TheApiCacheMgr.refetch(pubid)
                         HTML.showProgressNotification(lf("gone."))
                         if (onDeleted) onDeleted();
                     }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
-                    // TODO show it's gone in the UI
                 }
 
                 var godelete = () => {
@@ -10202,6 +10395,8 @@
         extends BrowserPage
     {
         private ptr:JsonPointer;
+        private redirect:string;
+        private art:JsonArt;
         private script:JsonScript;
         private text:string;
 
@@ -10209,8 +10404,13 @@
             super(par)
         }
         public persistentId() { return "pointer:" + this.publicId; }
-        public getTitle() { return this.script ? this.script.name :
-            this.ptr && this.ptr.redirect ? "-> " + this.ptr.redirect : super.getTitle(); }
+        public getTitle()
+        { 
+            return this.redirect ? "-> " + this.redirect :
+                   this.art ? "\u273f " + this.art.name :
+                   this.script ? this.script.name :
+                   super.getTitle()
+        }
 
         public getName() { return lf("page"); }
         public getId() { return "page"; }
@@ -10224,7 +10424,21 @@
         {
             return super.withUpdate(elt, d => {
                 this.ptr = d
-                if (this.ptr.scriptid) {
+                this.redirect = null
+                this.art = null
+                this.script = null
+                this.text = null
+                if (this.ptr.redirect) {
+                    this.redirect = this.ptr.redirect
+                    update(d)
+                }
+                else if (this.ptr.artid)
+                    TheApiCacheMgr.getAsync(this.ptr.artid, true)
+                    .done(r => {
+                        this.art = r
+                        update(d)
+                    })
+                else if (this.ptr.scriptid) {
                     Promise.join([ScriptCache.getScriptAsync(this.ptr.scriptid),
                                   TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
                     .done(rr => {
@@ -10233,8 +10447,6 @@
                         update(d)
                     })
                 } else {
-                    this.script = null
-                    this.text = null
                     update(d)
                 }
             })
@@ -10265,9 +10477,21 @@
                 if (this.ptr) {
                     var nm = this.ptr.path;
                     nameBlock.setChildren([ nm ])
-                    author.setChildren([this.script ? this.script.username : this.ptr.username]);
-                    if (this.script)
+                    author.setChildren([this.script ? this.script.username : 
+                                        this.art ? this.art.username : this.ptr.username]);
+                    if (this.script) {
                         addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
+                    }
+                    else if (this.art) {
+                        if (this.art.arttype == "picture")
+                            icon.setChildren([HTML.mkImg("svg:art,white")])
+                        else if (this.art.arttype == "video")
+                            icon.setChildren([HTML.mkImg("svg:videoptr,white")])
+                        addInfoInner.setChildren(["/" + this.art.id + ", " + Util.timeSince(this.art.time)]);
+                    }
+                    else {
+                        addInfoInner.setChildren(["-> " + this.redirect + ", " + Util.timeSince(this.ptr.time)]);
+                    }
                 }
             });
         }
@@ -10282,9 +10506,14 @@
                     ])
                     var ht = HelpTopic.fromJsonScript(this.script)
                     ht.render(e => preview.setChildren([e]));
-                } else {
-                    if (this.ptr)
-                        this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
+                } else if (this.redirect) {
+                    this.tabContent.setChildren(lf("Redirect -> {0}", this.ptr.redirect))
+                } else if (this.art) {
+                    var ai = this.browser().getArtInfoById(this.art.id)
+                    this.tabContent.setChildren([
+                        ScriptInfo.labeledBox(lf("points to"), ai.mkSmallBox()),
+                        div(null, ai.getContent(this.art))
+                        ])
                 }
             });
         }

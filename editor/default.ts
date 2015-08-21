@@ -49,13 +49,13 @@ module TDev
 
             if (window.localStorage["lastExceptionMessage"]) {
                 var msg = window.localStorage["lastExceptionMessage"];
-                window.localStorage["lastExceptionMessage"] = "";
+                window.localStorage.removeItem("lastExceptionMessage");
                 if (TDev.Browser.EditorSettings.widgets().notifyAppReloaded)
                     upd = div("app-updated", lf("Something went wrong and we reloaded the app"));
             }
 
             if (!upd && window.localStorage["appUpdated"]) {
-                window.localStorage["appUpdated"] = "";
+                window.localStorage.removeItem("appUpdated");
                 if (dbg)
                     upd = div("app-updated", lf("The TouchDevelop app has been updated."));
             }

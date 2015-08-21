@@ -858,7 +858,7 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
-            this.inShim = /{shim:.*}/.test(node.getDescription())
+            this.inShim = this.topApp.entireShim || /{shim:.*}/.test(node.getDescription())
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1116,6 +1116,11 @@ module TDev.AST
         public visitApp(node:App)
         {
             this.typecheckLibraries(node);
+            if (Cloud.isRestricted())
+                node.entireShim = 
+                    /#entireshim/i.test(node.comment) || 
+                    node.actions().some(a => a.isPage()) || 
+                    node.libraries().some(l => l.resolved && l.resolved.entireShim)
             node.things.forEach((n:Decl) => {
                 var wt = n._wasTypechecked;
                 n._wasTypechecked = true;
@@ -1366,7 +1371,7 @@ module TDev.AST
             }
 
             if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0) {
-              //  this.markError(t, lf("TD208: inline functions cannot access locals from outside, like '{0}'", l.getName()))
+                this.markError(t, lf("TD208: inline functions cannot access locals from outside; try 'promote to data' on '{0}'", l.getName()))
             }
 
 
@@ -2050,23 +2055,31 @@ module TDev.AST
                         this.expectExpr(args[i], expK, prop.getName(), i == 0);
                     }
                     args[i].languageHint = inP[i].languageHint
-                    var str = inP[i].getStringValues()
-                    var emap = str && (<any>str).enumMap
-                    if (emap) {
-                        var lit = args[i].getLiteral()
-                        if (typeof lit == "string") {
-                            if (str.indexOf(lit) >= 0) {
-                                args[i].enumVal = emap.hasOwnProperty(lit) ? emap[lit] : undefined
+                    var str = inP[i].getStringValues()      
+                    if (str) {
+                        var emap = (<any>str).enumMap
+                        if (emap) {
+                            var lit = args[i].getLiteral()
+                            if (typeof lit == "string") {
+                                if (str.indexOf(lit) >= 0) {
+                                    args[i].enumVal = emap.hasOwnProperty(lit) ? emap[lit] : undefined
+                                } else {
+                                    this.markError(args[i], lf("TD199: we didn't expect {0} here; try something like {1}",
+                                        JSON.stringify(lit),
+                                        str.map(s => JSON.stringify(s)).join(", ").slice(0, 100)))
+                                }
                             } else {
-                                this.markError(args[i], lf("TD199: we didn't expect {0} here; try something like {1}",
-                                    JSON.stringify(lit),
+                                this.markError(args[i], lf("TD198: we need an enum string here, something like {0}",
                                     str.map(s => JSON.stringify(s)).join(", ").slice(0, 100)))
                             }
-                        } else {
-                            this.markError(args[i], lf("TD198: we need an enum string here, something like {0}",
-                                str.map(s => JSON.stringify(s)).join(", ").slice(0, 100)))
-                        }
-                    } else if (/^bitmatrix$/.test(args[i].languageHint)) {
+                        } else { // hints                        
+                            var lit = args[i].getLiteral()
+                            if (typeof lit == "string" && str.indexOf(lit) >= 0)
+                                args[i].enumVal = lit;
+                        }                        
+                    }
+
+                    if (/^bitmatrix$/.test(args[i].languageHint)) {
                         var lit = args[i].getLiteral();
                         if (!(typeof lit == "string")) {
                             this.markError(args[i], lf("TD179: we need a string here"));

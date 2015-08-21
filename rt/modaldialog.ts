@@ -444,7 +444,9 @@ module TDev
                 limitedMode = false;
 
             var needKbd = false;
-
+            
+            function selectedItem(): HTMLElement { return Util.children(list).filter(el => el.getFlag("current"))[0]; }
+            
             function refresh(onlineOK:boolean) {
                 var allTerms = search.value;
                 var terms = allTerms.split(/\s+/).map((s:string) => s.toLowerCase()).filter((s) => s != "");
@@ -531,8 +533,35 @@ module TDev
             this.show();
 
             // this has to happen after show() - show() saves the keyboard state so later this handler is removed
-            if (needKbd)
-                KeyboardMgr.instance.register("***", (e:KeyboardEvent) => {
+            if (needKbd) {
+                KeyboardMgr.instance.register("Down", e => {
+                    var selected = selectedItem();
+                    if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
+                    else if(selected.nextElementSibling) {
+                        selected.setFlag("current", false);
+                        selected.nextElementSibling.setFlag("current", true);
+                        (<HTMLElement>selected.nextElementSibling).scrollIntoView(false);
+                    }
+                    return true;
+                });
+                KeyboardMgr.instance.register("Up", e => {
+                    var selected = selectedItem();
+                    if (!selected && list.lastElementChild) list.lastElementChild.setFlag("current", true);
+                    else if(selected.previousElementSibling) {
+                        selected.setFlag("current", false);
+                        selected.previousElementSibling.setFlag("current", true);
+                        (<HTMLElement>selected.previousElementSibling).scrollIntoView(false);
+                    }
+                    return true;
+                });
+                KeyboardMgr.instance.register("Enter", e => {
+                    var selected = selectedItem();
+                    if (selected && (<any>selected).clickHandler) {
+                        (<any>selected).clickHandler.fireClick(e);
+                    } else if (list.firstElementChild) list.firstElementChild.setFlag("current", true);    
+                    return true;
+                });                
+                KeyboardMgr.instance.register("***", (e: KeyboardEvent) => {
                     if (e.fromTextBox) return false;
                     var s = Util.keyEventString(e);
                     if (s) {
@@ -542,6 +571,7 @@ module TDev
                     }
                     return false;
                 });
+            }
 
             if (!options.dontStretchDown)
                 this.stretchDown(list, 2.8);

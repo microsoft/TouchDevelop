@@ -203,6 +203,7 @@ button.navItem[data-current^="yes"]
     position: absolute;
     left: 4em;
     top: 0;
+    right:0;
     /*margin-top: -5px;
     margin-left: 62px;*/
     white-space: nowrap;
@@ -224,6 +225,10 @@ button.navItem[data-current^="yes"]
 {
     font-size: 1.2em;
     margin-bottom: 0.2em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 2.3em);
 }
 
 .navDescription
@@ -1232,6 +1237,11 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .varHalf {
   display: inline-block;
   vertical-align: top;
+  width:50%;
+}
+
+.inline-block {
+  display:inline-block;
 }
 
 .recordProperties .left {
@@ -1247,6 +1257,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 
 .varHalf .formHint {
   padding-left: 0.5em;
+  width: calc(50% - 0.5em);
 }
 .varHalf .navItem {
   border-left: none;
@@ -1817,7 +1828,7 @@ span.errorSq .kw
 }
 
 #externalEditorSide .wallFullScreenLogo {
-    text-align: center;
+    text-align: right;
 }
 
 #externalEditorSide .wallFullScreenLogo img {
@@ -1858,11 +1869,15 @@ span.errorSq .kw
     #externalEditorSide .wallFullScreenLogo img {
         background-color: white;
         padding: .5em;
+        border: .2em solid black;
     }
 
     #externalEditorSide .boardCanvas {
         width: inherit !important;
         height: inherit !important;
+        background-color: white;
+        padding: 1em;
+        border: .2em solid black;
     }
 }
 
@@ -4988,11 +5003,8 @@ height: 2.2em;
   font-size: 1.2em;
   padding: 0.2em 0.75em;
 }
-.md-box-print { /* visible in print mode */
-  display:none;
-}
-.md-box-screen { /* not visible in print mode */
-}
+@media screen { .md-box-print { display:none; } }
+@media print { .md-box-screen { display:none; } }
 .md-box-card {
   border: solid 1px black;
   background: inherit;

@@ -178,11 +178,8 @@ module TDev {
       // Convert a prefixed name into a valid C++ identifier. Same as above,
       // only call this directly if you know that [n] is unique (i.e. is a
       // global, whose name is unique).
-      export function manglePrefixedName(e: Env, l: string, n: string) {
-        if (l)
-          return mangleName(l)+"::"+mangleName(n);
-        else
-          return mangleName(n);
+      export function manglePrefixedName(e: Env, ns: string[], t: string) {
+        return ns.concat([t]).map(mangleName).join("::");
       }
 
       export function mangleDef(env: Env, d: J.JLocalDef) {
@@ -199,42 +196,67 @@ module TDev {
 
       export interface LibMap { [id: string]: string }
 
-      // Resolve a type reference to either "t" (no scope for this type) or
-      // "l::t" (reference to a library-defined type). If the former case, lib
-      // is the empty string; in the latter case, lib is "l".
-      export function resolveTypeRef(libMap: LibMap, typeRef: J.JTypeRef): { lib: string; type: string } {
-        var s = <any> typeRef;
-        if (s.length && s[0] == "{") {
-          var t = JSON.parse(<any> typeRef);
-          if (!(t.o || t.g))
-            throw new Error("Unsupported type reference");
+      export interface Type {
+        libs: string[];
+        type: string;
+        args: Type[];
+      }
+
+      function resolveStructuredTypeRef(libMap: LibMap, t: any): Type {
+        if (typeof t == "string") {
+          // Simple, flat type, e.g. "Number"
           return {
-            lib: t.l ? libMap[t.l] : "",
-            type: t.o || t.g
+            libs: [],
+            type: t,
+            args: []
           };
         } else {
+          if (!(t.o || t.g))
+            throw new Error("Unsupported type reference");
+          // Sophisticated type (prefixed by a library, or parameterized).
           return {
-            lib: "",
-            type: s
+            libs: (t.l ? [ libMap[t.l] ] : [])
+              .concat(t.o ? [ "user_types" ] : []),
+            type: t.o || t.g,
+            args: t.a && t.a.length
+              ? t.a.map((x: J.JTypeRef) => resolveStructuredTypeRef(libMap, x))
+              : []
           };
         }
       }
 
+      // Resolve a type reference to either "t" (no scope for this type) or
+      // "l::t" (reference to a library-defined type). If the former case, lib
+      // is the empty string; in the latter case, lib is "l".
+      export function resolveTypeRef(libMap: LibMap, typeRef: J.JTypeRef): Type {
+        var s = <any> typeRef;
+        if (s.length && s[0] == "{")
+          return resolveStructuredTypeRef(libMap, JSON.parse(s));
+        else
+          return resolveStructuredTypeRef(libMap, s);
+      }
+
       export function defaultValueForType(libMap: LibMap, t1: J.JTypeRef) {
         var t = resolveTypeRef(libMap, t1);
-        if (!t.lib && t.type == "Number")
+        if (!t.libs.length && t.type == "Number")
           return "0";
-        else if (!t.lib && t.type == "Boolean")
+        else if (!t.libs.length && t.type == "Boolean")
           return "false";
-        else if (!t.lib && t.type == "Action")
+        else if (!t.libs.length && t.type == "Action")
           return "NULL";
         else
           return null;
       }
 
+      function toCppType (env: Env, t: Type): string {
+        var args = t.args.map((t: Type) => toCppType(env, t));
+        var r = manglePrefixedName(env, t.libs, t.type) +
+          (args.length ? "<" + args.join(", ") + ">" : "");
+        return r;
+      }
+
       export function mkType(env: Env, libMap: LibMap, type: J.JTypeRef) {
-        var t = resolveTypeRef(libMap, type);
-        return manglePrefixedName(env, t.lib, t.type);
+        return toCppType(env, resolveTypeRef(libMap, type));
       }
 
       export function mkParam(env: Env, libMap: LibMap, p: J.JLocalDef) {
@@ -277,17 +299,27 @@ module TDev {
         );
       }
 
-      export function isEnumLiteral(e: J.JExpr): number {
-        return (
-          e.nodeType == "stringLiteral" &&
-          (<J.JStringLiteral> e).enumValue
-        );
-      }
-
       export function isSingletonRef(e: J.JExpr): string {
         return (
           e.nodeType == "singletonRef" &&
           (<J.JSingletonRef> e).name
+        );
+      }
+
+      export function isRecordConstructor(name: string, args: J.JExpr[]) {
+        return (
+          name == "create" &&
+          args.length == 1 && args[0].nodeType == "call" &&
+          <any> (<J.JCall> args[0]).parent == "records" &&
+          (<J.JCall> args[0]).args.length == 1 &&
+          isSingletonRef((<J.JCall> args[0]).args[0]) == "records"
+        );
+      }
+
+      export function isEnumLiteral(e: J.JExpr): string {
+        return (
+          e.nodeType == "stringLiteral" &&
+          (<J.JStringLiteral> e).enumValue
         );
       }
 

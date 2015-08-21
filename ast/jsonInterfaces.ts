@@ -76,7 +76,7 @@ module TDev.AST.Json
 
     export interface JStringLiteral extends JExpr {
         value:string;
-        enumValue?:number;
+        enumValue?:string;
     }
     export interface JBooleanLiteral extends JExpr { value:boolean; }
 
@@ -128,6 +128,9 @@ module TDev.AST.Json
     export interface JCall extends JPropertyRef, JExpr
     {
         args:JExpr[];
+        // If we are calling a *type* T on an expression (e.g. create ->
+        // Collection of -> T), then T will be in there.
+        typeArgs?: JTypeRef[];
         // The field below, if present, determines without ambiguity the nature
         // of the call.
         // - extension (the new special syntax)

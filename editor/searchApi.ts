@@ -277,6 +277,8 @@ module TDev
             super.moveCarret(d);
             this.calc.onIntelliScroll();
         }
+        
+        public query() : string { return this.searchBox.value; }
 
         private searchKey() {
             this.searchBox.placeholder = "";

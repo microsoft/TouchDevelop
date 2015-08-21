@@ -262,7 +262,7 @@ module TDev
             }
             var descDiv = div("navDescription md-inline")
 
-            if (decl instanceof AST.Action && !decl.isAtomic)
+            if (decl instanceof AST.Action && !decl.isAtomic && AST.proMode)
                 desc = "<span class='actionAwait'>" + SVG.getIconSVGCore("clock2,#666,clip=60") + "</span>" + desc;
 
             Browser.setInnerHTML(descDiv, desc)

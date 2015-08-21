@@ -592,23 +592,18 @@ module TDev.HTML {
             okBtn = mkButton(lf("ok"), () => {
                 var b = okBtn
                 okBtn = null
-                var h = onOk;
-                onOk = null;
                 res.style.width = "";
                 if (b) b.removeSelf();
                 res.blur()
-                if (h) h();
             }, "input-confirm");
             res.parentNode.insertBefore(okBtn, res.nextSibling)
         })
         res.addEventListener("blur", () => {
             var b = okBtn
             okBtn = null
-            var h = onOk;
-            onOk = null;
             res.style.width = "";
             if (b) b.removeSelf();
-            if (h) h();
+            if (onOk) onOk();
         }, false)
 
         return res
@@ -830,6 +825,9 @@ module TDev.HTML {
 
 
     export function showWebNotification(aTitle: string, aOptions: NotificationOptions = {}, aTimeout=10000) {
+        if (Cloud.isRestricted())
+            return;
+
         if (!("Notification" in window))
             return;
 

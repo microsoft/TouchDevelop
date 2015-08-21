@@ -135,7 +135,6 @@ module TDev.Browser {
                 outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
-                scriptAddToChannel: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
             }
@@ -267,7 +266,6 @@ module TDev.Browser {
                 outAssign: true,
 
                 scriptSocialLinks: Cloud.lite,
-                scriptAddToChannel: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
             }
@@ -288,7 +286,57 @@ module TDev.Browser {
             scriptSearch: '#minecraft',
             scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
             noAnimations: true,
-            editorMode: editorModes['block'],
+            editorMode: {
+                id: 'minecraft',
+                name: lf("minecraft"),
+                descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
+                astMode: 2,
+                artId: 'brfljsds',
+                widgets: {
+                    // edit
+                    addNewButton: true,
+                    undoButton: true,
+                    changeSkillLevel: true,
+                    async: true,
+                    // refactoring                    
+                    updateButton: true,
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    splitScreen: false,
+                    splitScreenOnLoad: true,
+                    shareScriptToGroup: true,
+                    // searchArtRefactoring: true,
+                    // calcSearchArt: true,
+                    scriptPropertiesIcons: true,
+                    // statements
+                    copyPaste: true,
+                    selectStatements: true,
+                    stringConcatProperty: true,
+                    show: true,                
+                    "return": true,
+                    // sections
+                    dataSection: true,
+                    // artSection: true,
+                    librariesSection: true,
+                    // ui
+                    wallScreenshot: true,
+                    wallHeart: true,
+                    startTutorialButton: true,
+                    nextTutorialsList: true,
+                    // hub
+                    hubTutorials : true,
+                    // hubShowcase : true,
+                    // hubSocial: true,
+                    publicationComments: true,
+                    translateComments: true,
+    
+                    whileConditionDefault: "true",
+                    forConditionDefault: "5",
+                    ifConditionDefault: "true",
+    
+                    scriptSocialLinks: Cloud.lite,
+                }
+            }
         },
         'rpi': {
             name: "Raspberry Pi",
@@ -443,15 +491,14 @@ module TDev.Browser {
                     scriptDiffToBase: true,                    
                     scriptConvertToDocs: true,
                     socialNetworks: true,
-                    socialNetworkvimeo:true,
+                    socialNetworkvideoptr:true,
                     socialNetworkart: true,
+                    socialNetworkbbc: true,
                     publishAsHidden: true,
                     computingAtSchool: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    //scriptAddToChannel: true,
-                    //hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,                    
@@ -510,15 +557,14 @@ module TDev.Browser {
                     scriptDiffToBase: true,
                     scriptConvertToDocs: true,
                     socialNetworks: true,
-                    socialNetworkvimeo: true,
+                    socialNetworkvideoptr:true,
                     socialNetworkart: true,
+                    socialNetworkbbc: true,
                     publishAsHidden: true,
                     computingAtSchool: true,
                     splitScreen: true,
                     splitButton: true,
                     actionSettings: true,
-                    scriptAddToChannel: true,
-                    hubChannels: true,
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,
@@ -583,30 +629,33 @@ module TDev.Browser {
             
             if (Cloud.lite && ["upload", "admin", "view-bug", "root-ptr", "gen-code", "internal", "global-list"].some(perm => Cloud.hasPermission(perm))) {
                 m.add(div("wall-dialog-header", lf("internal")));
-                var versionInfo = HTML.mkTextArea() 
+                var versionInfo = HTML.mkTextArea()
                 versionInfo.rows = 4;
                 versionInfo.style.fontSize = "0.8em";
                 versionInfo.style.width = "100%";
                 versionInfo.value = lf("Loading version info...")
-                
+
                 Cloud.getPrivateApiAsync("stats/dmeta")
                     .done(resp => {
-                        var tm = (n:number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
-                        versionInfo.value = 
-                                lf("Web App version: {0} {1} /{2}", Cloud.config.releaseLabel, Cloud.config.tdVersion, Cloud.config.relid) + "\n" +
-                                lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
-                                lf("Service activation: {0}", tm(resp.activationtime));
+                        var tm = (n: number) => Util.isoTime(n) + " (" + Util.timeSince(n) + ")"
+                        versionInfo.value =
+                        lf("Web App version: {0} {1} /{2}", Cloud.config.releaseLabel, Cloud.config.tdVersion, Cloud.config.relid) + "\n" +
+                        lf("Service deployment: {0}", tm(resp.deploytime)) + "\n" +
+                        lf("Service activation: {0}", tm(resp.activationtime));
                     })
                 m.add(div("wall-dialog-body", versionInfo))
                 m.add(div("wall-dialog-body", [
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
-                    (Cloud.hasPermission("view-bug") ? HTML.mkButton(lf("crash files"), () => { Editor.liteCrashFiles() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
-                    (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports")  }) : null),
+                    (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
+                    (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
+                    (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
+                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
                         var perm = HTML.mkTextInput("text", "")
@@ -684,6 +733,13 @@ module TDev.Browser {
 
             m.show();
         }
+        
+        function clearVideosAsync(cont: string) : Promise {
+            return Cloud.getPrivateApiAsync("videos" + (cont ? "?continuation=" + cont : ""))
+                .then((videos: JsonList) => Promise.join(
+                    videos.items.map(video => Cloud.deletePrivateApiAsync(video.id).then(() => { }, () => { Util.log('failed to delete video ' + video.id) }))
+                        .concat(videos.continuation ? clearVideosAsync(videos.continuation) : Promise.as())));
+        }
 
         export function editApiConfig()
         {
@@ -704,6 +760,110 @@ module TDev.Browser {
                 })
                 .done()
                 return r
+            })
+        }
+
+        function csv(l:string[]) {
+            return l.map(s => "\"" + (s||"").replace(/[\\"]/g, " ") + "\"").join(",") + "\n"
+        }
+
+        function pointerReview()
+        {
+            ModalDialog.editText(lf("Ignored paths"), "usercontent/,td/,functions/,device/,signin/,templates/", perms => {
+                var okpaths = perms.split(/\s*,\s*/).filter(p => !!p)
+
+                var pointers = []
+                var loop = (cont) =>
+                    Browser.TheApiCacheMgr.getAsync("pointers?count=1000" + cont)
+                    .then(resp => {
+                        pointers.pushRange(resp.items)
+                        if (resp.continuation)
+                            loop("&continuation=" + resp.continuation)
+                        else fin()
+                    })
+                    .done()
+                var pointerList = ""
+                var fin = () => {
+                    pointerList += csv(["Path", "User Name", "Description", "Script"])
+                    pointers.forEach(p => {
+                        if (okpaths.some(pp => p.path.slice(0, pp.length) == pp))
+                            return
+                        pointerList += csv([p.path, p.username, p.description, p.redirect || p.scriptid])
+                    })
+                    ModalDialog.showText(pointerList)
+                }
+                loop("")
+
+                return new PromiseInv()
+            })
+        }
+
+        function mbedintUpdate()
+        {
+            ModalDialog.editText(lf("Target"), "gcc", perms =>
+                Cloud.postPrivateApiAsync("admin/mbedint/" + perms, { 
+                     op: "update", 
+                })
+                .then(r => {
+                    var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
+                    var m = ModalDialog.showText("...[snip]...\n" + full.slice(-3000), null, <any>div(null, 
+                        HTML.mkButton("full", () => {
+                            ModalDialog.showText(full)
+                        }),
+                        HTML.mkAsyncButton("update " + perms, () =>
+                            Cloud.getPrivateApiAsync("config/compile")
+                            .then(res => {
+                                res[perms].repourl = r.imageid
+                                return Cloud.postPrivateApiAsync("config/compile", res)
+                            })
+                            .then(r => r, e => Cloud.handlePostingError(e, ""))
+                        ),
+                        HTML.mkButton("cancel", () => {
+                            m.dismiss()
+                    })))
+                }, e => Cloud.handlePostingError(e, "")))
+        }
+
+        function permissionReview()
+        {
+            ModalDialog.editText(lf("Ignored permissions"), "student,preview,educator", perms => {
+                var okperms = {}
+                perms.split(/,/).forEach(p => okperms[p] = 1)
+                okperms[""] = 1
+
+                var users = []
+                var loop = (cont) =>
+                    Browser.TheApiCacheMgr.getAsync("users?count=1000" + cont)
+                    .then(resp => {
+                        users.pushRange(resp.items)
+                        if (resp.continuation)
+                            loop("&continuation=" + resp.continuation)
+                        else fin()
+                    })
+                    .done()
+                var userList = ""
+                var fin = () => {
+                    userList += csv(["User ID", "Nickname", "Real name", "Email", "Permission"])
+                    var pp = users.map(u =>
+                        Browser.TheApiCacheMgr.getAsync(u.id + "/permissions")
+                        .then(r => {
+                            if (r.permissions.split(/,/).every(p => okperms[p]))
+                                return Promise.as()
+                            var per = r.permissions.split(/,/).filter(p => !!p)
+                            per.sort()
+                            return Browser.TheApiCacheMgr.getAsync(u.id + "/settings?format=short")
+                            .then(set => {
+                                userList += csv([u.id, u.name, set.realname, set.email, per.join(", ")])
+                            })
+                        }))
+                    Promise.join(pp).then(() => {
+                        ModalDialog.showText(userList)
+                    })
+                    .done()
+                }
+                loop("")
+
+                return new PromiseInv()
             })
         }
 

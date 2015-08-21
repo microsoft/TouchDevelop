@@ -24,6 +24,7 @@ import child_process = require('child_process');
 import os = require('os');
 import events = require('events');
 import net = require("net");
+import tls = require("tls");
 
 var config:any;
 var currentReqNo = 0;
@@ -37,6 +38,30 @@ var useFileSockets = false;
 var allowEditor = false;
 var numWorkers = 1;
 var blobChannel = "";
+var restartInterval = 0;
+var defaultCiphers =
+"ECDHE-RSA-AES128-GCM-SHA256:" +
+"ECDHE-ECDSA-AES128-GCM-SHA256:" +
+"ECDHE-RSA-AES256-GCM-SHA384:" +
+"ECDHE-ECDSA-AES256-GCM-SHA384:" +
+"DHE-RSA-AES128-GCM-SHA256:" +
+"ECDHE-RSA-AES128-SHA256:" +
+"DHE-RSA-AES128-SHA256:" +
+"ECDHE-RSA-AES256-SHA384:" +
+"DHE-RSA-AES256-SHA384:" +
+"ECDHE-RSA-AES256-SHA256:" +
+"DHE-RSA-AES256-SHA256:" +
+"HIGH:" +
+"!aNULL:" +
+"!eNULL:" +
+"!EXPORT:" +
+"!DES:" +
+"!RC4:" +
+"!MD5:" +
+"!PSK:" +
+"!SRP:" +
+"!CAMELLIA" +
+"";
 
 function dataPath(p : string) : string {
   p = p || "";
@@ -676,6 +701,8 @@ function deploy(d:any, cb:(err:any,resp:any) => void, isScript = true)
     var runNpm = false
     var runPython = false
     var runPip = false
+
+    preventRestart(5);
 
     info.log("starting deployment")
 
@@ -1464,9 +1491,12 @@ class Worker {
     public child: child_process.ChildProcess
     public isready: boolean;
     public iscurrent:boolean;
+    public isdying:boolean;
+    public startTime = Date.now();
 
     public shutdown()
     {
+        this.isdying = true;
         setTimeout(() => {
                 if (this.child) this.child.kill()
                 setTimeout(() => {
@@ -1480,19 +1510,36 @@ class Worker {
         return "port:" + (this.socketPath || this.port) + ", pid:" + (this.child ? this.child.pid : "?")
     }
 
+    private died()
+    {
+        this.isready = false;
+        this.isdying = true;
+        if (this.child) {
+            this.child = null
+            var idx = workers.indexOf(this)
+            if (idx >= 0) {
+                workers.splice(idx, 1)
+                var runtime = Date.now() - this.startTime
+                info.log("worker was active, now have " + workers.length + " left, time: " + runtime)
+                if (workers.length <= numWorkers / 2 && runtime > 60000) {
+                    info.log("active worker died after at least a minute; restarting all workers")
+                    reloadScript()
+                }
+            }
+        }
+    }
+
     public init(cb:()=>void)
     {
         info.log("worker start " + this.description())
         this.child.on("exit", code => {
             info.log("worker exit " + code + " : " + this.description())
-            this.child = null
-            this.isready = false
+            this.died()
         })
 
         this.child.on("error", err => {
             error.log(err.message || err)
-            this.child = null
-            this.isready = false
+            this.died()
         })
 
         this.child.stderr.setEncoding("utf8")
@@ -1517,6 +1564,7 @@ class Worker {
             debug.log("worker ping, " + this.description())
             var creq = http.request(u, cres => {
                 if (cres.statusCode == 200) {
+                    if (this.isdying) return
                     if (!this.isready) {
                         info.log("worker ready, " + this.description())
                         this.isready = true
@@ -1571,6 +1619,7 @@ function startWorker(cb0, cb)
     env['TD_WORKER_ID'] = ++totalWorkers;
     env['TD_DEPLOYMENT_META'] = JSON.stringify(tdstate.dmeta || {})
 
+
     var fin = () => {
         debug.log("forking child script, " + w.description())
 
@@ -1597,6 +1646,15 @@ function startWorker(cb0, cb)
     }
 }
 
+var loadVersion = new Object();
+var restartTime = 0;
+
+function preventRestart(mins:number)
+{
+    loadVersion = new Object()
+    restartTime = Math.max(Date.now() + mins*60*1000, restartTime)
+}
+
 function loadScriptCoreAsync()
 {
     if (numWorkers < 0) {
@@ -1605,10 +1663,16 @@ function loadScriptCoreAsync()
     numWorkers = Math.round(numWorkers)
     if (numWorkers <= 0) numWorkers = 1
 
+    // at most 5min startup time
+    preventRestart(5);
+    var myVersion = loadVersion;
+    restartInterval = parseInt(additionalEnv['TD_RESTART_INTERVAL'] || process.env['TD_RESTART_INTERVAL'] || "0") || 0
+
     var newWorkers:Worker[] = []
 
     var numW = numWorkers
     var oneUp = () => {
+        if (loadVersion != myVersion) return
         if (--numW == 0) {
             allWorkers.forEach(w => w.iscurrent = false)
             newWorkers.forEach(w => w.iscurrent = true)
@@ -1620,6 +1684,12 @@ function loadScriptCoreAsync()
             var l = whenWorkers
             whenWorkers = []
             l.forEach(f => f())
+
+            if (restartInterval > 0)
+                // randomize the time a bit
+                restartTime = Date.now() + Math.round((restartInterval * (0.5 + Math.random()))*1000)
+            else
+                restartTime = 0;
         }
     }
 
@@ -2175,7 +2245,7 @@ function handleReq(req, resp)
 
 function handleError(err) {
     error.log("exception (top): " + err.toString() + "\n" + err.stack)
-    logException("unhandled exception, forgot lib.protect()? " + err.toString() + "\n" + err.stack)
+    logException("unhandled exception: " + err.toString() + "\n" + err.stack)
 }
 
 function openUrl(startUrl: string, cb?: () => void) {
@@ -2330,6 +2400,7 @@ function checkUpdate()
 
     getBlobJson("000ch-" + blobChannel, (err, d) => {
         if (d && d.blob && d.did != lastAzureDeployment) {
+            preventRestart(5);
             info.log("new deployment, " + d.blob)
             getBlobJson("000cfg-" + blobChannel, (err, cfg) => {
                 if (!err) applyConfig(cfg)
@@ -2462,6 +2533,7 @@ function main()
         console.error("TD_BLOB_DEPLOY_CHANNEL  -- deploy from Azure blob storage, using named channel")
         console.error("TD_WORKERS              -- same as --workers option")
         console.error("TD_TRUST_XFF            -- if non-empty trust X-Forwarded-For header")
+        console.error("TD_RESTART_INTERVAL     -- how often to restart workers, [s], 0 or unset to disable")
         console.error("")
         console.error("Azure Web Apps compatibility:")
         console.error("IISNODE_VERSION         -- same as TD_TRUST_XFF")
@@ -2469,6 +2541,7 @@ function main()
         console.error("")
         console.error("HTTPS support:")
         console.error("TD_HTTPS_PFX            -- if set to base64-encoded .pfx file, enables TLS/SSL/HTTPS")
+        console.error("TD_TLS_CIPHERS          -- :-separated list of ciphers; otherwise uses io.js (not node.js) defaults")
         console.error("HTTPS_PORT              -- defaults to 443; only used when TD_HTTPS_PFX is set")
         console.error("")
         console.error("KEY_VAULT_URL           -- eg: https://foobar.vault.azure.net/secrets/myenv")
@@ -2716,17 +2789,53 @@ function main()
     var app
     var sslapp
 
+    tls.CLIENT_RENEG_LIMIT = 0
+
     var innerMain = () => {
         if (!pfx) sslport = 0
         app = http.createServer(handleReq);
         app.on("upgrade", webSocketHandler)
 
+        setInterval(() => {
+            if (restartTime && Date.now() >= restartTime) {
+                restartTime = 0
+                info.log("restart-time reached; reloading")
+                reloadScript()
+            }
+        }, Math.round((Math.random()+0.5) * 2000))
+
+        var ciphers = process.env["TD_TLS_CIPHERS"] || defaultCiphers
+
         if (sslport) {
             sslapp = https.createServer({
-              pfx: new Buffer(pfx, "base64")
+              pfx: new Buffer(pfx, "base64"),
+              honorCipherOrder: true,
+              ciphers: ciphers
             })
             sslapp.on("request", handleReq)
             sslapp.on("upgrade", webSocketHandler)
+
+            var tlsSessionStoreCount = 0
+            var tlsSessionStore = {}
+            sslapp.on("newSession", (id, data, cb) => {
+                id = id.toString("hex")
+                console.log(id)
+                console.log(data.length)
+                console.log(data)
+                if (tlsSessionStoreCount > 50000) {
+                    tlsSessionStore = {}
+                    tlsSessionStoreCount = 0
+                }
+                if (!tlsSessionStore.hasOwnProperty(id))
+                    tlsSessionStoreCount++;
+                tlsSessionStore[id] = data;
+                cb(null)
+            })
+            sslapp.on("resumeSession", (id, cb) => {
+                id = id.toString("hex")
+                cb(null, tlsSessionStore[id] || null)
+            })
+
         }
 
         if (scriptId) {

@@ -58,6 +58,10 @@ body, input {
   margin: 0;
 }
 
+#blocklyDiv {
+  position: absolute;
+}
+
 /* Script info box */
 #script-box {
   margin-right: 1rem;
@@ -264,7 +268,7 @@ a.command:hover {
 }
 
 .blocklyToolboxDiv {
-  background-image: url(https://microbit0.blob.core.windows.net/pub/prcwhomc) !important;
+  background-image: url(https://az742082.vo.msecnd.net/pub/prcwhomc) !important;
 }
 
 /* Animation for the compilation button */
