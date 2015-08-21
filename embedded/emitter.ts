@@ -251,6 +251,7 @@ module TDev {
       public visitCall(env: EmitterEnv,
         name: string,
         args: J.JExpr[],
+        typeArgs: J.JTypeRef[],
         parent: J.JTypeRef,
         callType: string,
         typeArgument: string = null)
@@ -284,22 +285,15 @@ module TDev {
         // the type argument to be passed as a template parameter to "collection of"
         // so we pop the type arguments off and call ourselves recursively with
         // the extra type argument.
+        // Extra bonus subtlety: we are able to get the "complete" type argument
+        // at the root of the call sequence, but we need skip "intermediate"
+        // nodes (that have types such as Collection<T> in there) until we hit
+        // the actual code arguments.
         if (<any> parent == "Unfinished Type") {
-          // In this case, it seems that the type information is completely
-          // unstructured. It should be a [JTypeRef], but we just get a textual
-          // representation, so try to figure things out...
-          var parseRawType = (t: string) => {
-            if (t[0] == "⌹")
-              return H.manglePrefixedName(env, ["user_types"], t.slice(1));
-            else
-              return H.mangleName(t);
-          };
-          var newTypeArg = typeArgument
-            ? parseRawType(name) + "<" + typeArgument + ">"
-            : parseRawType(name);
+          var newTypeArg = typeArgument || H.mkType(env, this.libraryMap, typeArgs[0]);
           assert(args.length && args[0].nodeType == "call");
           var call = <J.JCall> args[0];
-          return this.visitCall(env, call.name, call.args, call.parent, call.callType, newTypeArg);
+          return this.visitCall(env, call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
         }
 
         // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
@@ -486,16 +480,16 @@ module TDev {
         var n = H.mangleName(r.name);
         return [
           e.indent + "struct " + n + "_;",
-          e.indent + "typedef ManagedType< " + n + "_> " + n + ";",
+          e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
         ].join("\n");
       }
 
       private wrapNamespaceIf(s: string) {
         if (this.libName != null)
           return (s.length
-            ? "namespace "+this.libName+" {\n"+
+            ? "  namespace "+this.libName+" {\n"+
                 s +
-              "\n}"
+              "\n  }"
             : "");
         else
           return s;
@@ -512,6 +506,7 @@ module TDev {
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
       public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
+        e = indent(e);
         if (this.libName)
           e = indent(e);
 
