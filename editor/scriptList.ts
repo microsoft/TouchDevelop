@@ -5825,7 +5825,6 @@
                         AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
                     }
 
-
                     if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
                         (Cloud.hasPermission("post-script-meta") &&
                           (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt")))) {
@@ -5910,7 +5909,8 @@
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
-                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
+                        var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.scriptPromo()) : null;
+                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull, promo));
                     }
 
                     if (EditorSettings.widgets().scriptStats) {
@@ -5945,6 +5945,73 @@
                     this.tabContent.setChildren(divs);
                 });
             });
+        }
+
+        public scriptPromo()
+        {
+            var m = new ModalDialog()
+            var id = this.parent.publicId
+            var json = this.script().jsonScript
+
+            m.addBody(lf("Editing promo for: {0}", json.name))
+            m.show()
+
+            Promise.join([TheApiCacheMgr.getAsync("config/promo"), 
+                          Cloud.getPrivateApiAsync(id + "/promo")])
+            .done(arr => {
+                var cfg = arr[0]
+                var promo = arr[1]
+                var fields = cfg.fields || {}
+                var alltags = cfg.tags || ["all"]
+                fields["priority"] = { desc: lf("Priority (between -1000000 and 1000000; higher numbers show higher up)"), type: "number" }
+                fields["tags"] = { desc: lf("Tags ({0})", alltags.join(", ")) }
+                var inputs = {}
+                Object.keys(fields).forEach(fn => {
+                    var meta = fields[fn]
+                    var inp = HTML.mkTextInput(meta.type || "text", "")
+                    inputs[fn] = inp
+                    if (promo.hasOwnProperty(fn))
+                        if (Array.isArray(promo[fn]))
+                            inp.value = promo[fn].join(", ")
+                        else
+                            inp.value = (promo[fn] + "")
+                    var dsc = meta.desc || fn
+                    if (meta.override)
+                        dsc += lf(" [override]")
+                    m.add(div("wall-dialog-body", meta.desc || fn, inp))
+                })
+                m.addOk(lf("save"), () => {
+                    var wrong = [] 
+                    var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
+                    if (tags.some(t => alltags.indexOf(t) < 0)) {
+                        wrong.push(inputs["tags"])
+                    }
+
+                    var data = { tags: tags }
+
+                    Object.keys(fields).forEach(fn => {
+                        if (fn == "tags") return
+                        var meta = fields[fn]
+                        var inpt = inputs[fn]
+                        var val = inpt.value
+
+                        if (meta.type == "number") {
+                            var v = parseInt(val)
+                            if (isNaN(v)) wrong.push(inpt)
+                            else data[fn] = v
+                        } else {
+                            data[fn] = val
+                        }
+                    })
+
+                    if (wrong.length > 0) {
+                        wrong.forEach(HTML.wrong)
+                    } else {
+                        Cloud.postPrivateApiAsync(id + "/promo", data)
+                        .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
+                    }
+                }, "", [HTML.mkButton(lf("cancel"), () => m.dismiss())])
+            })
         }
 
         static userPlatformDisplayText(uplat: string[]) {
