@@ -277,7 +277,9 @@ module TDev
             Browser.useConsoleLog = false;
         }
 
-        Ticker.init()
+        if (!Cloud.lite)
+            Ticker.init()
+
         RT.Perf.init(TDev.AST.Compiler.version, Cloud.currentReleaseId);
 
         tick(Ticks.mainInit);
