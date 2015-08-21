@@ -196,6 +196,7 @@ module TDev {
         updateroot: string; // lite-only
         unmoderated?: boolean;
         noexternallinks?:boolean;
+        promo?:any;
     }
 
     export interface JsonHistoryItem

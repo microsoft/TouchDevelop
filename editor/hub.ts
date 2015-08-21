@@ -715,6 +715,19 @@ module TDev.Browser {
                         HTML.mkButton(lf("releases"), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }),
                     ]))
                 }
+                if (Cloud.hasPermission("script-promo")) {
+                    m.add(div("wall-dialog-header", lf("manage promos")));
+                    var promoDiv = div("wall-dialog-body")
+                    m.add(promoDiv)
+                    Cloud.getPrivateApiAsync("config/promo")
+                        .then(resp => {
+                            (resp.autotags || []).concat((resp.tags || [])).forEach(t => {
+                                promoDiv.appendChild(
+                                    HTML.mkButton(t, () => { Util.setHash("#list:promo-scripts/" + t) }))
+                            })
+                        })
+                        .done()
+                }
                 m.setScroll();
             }
 

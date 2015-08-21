@@ -1713,6 +1713,9 @@
                     } else if (/\/scripts/.test(path)) {
                         tick(Ticks.browseListTags);
                         Ticker.rawTick("browseListTag_" + MdComments.shrink(header));
+                    } else if (/^promo-scripts\/[\w\-]+$/.test(path)) {
+                        tick(Ticks.browseListNew);
+                        header = lf("promo {0}", path.replace("promo-scripts/", ""))
                     } else {
                         header = lf("my scripts");
                         this.apiPath = path = "installed-scripts"
@@ -5909,8 +5912,8 @@
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
                         var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
-                        var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.scriptPromo()) : null;
-                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull, promo));
+                        //var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.script().editPromo()) : null;
+                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
                     }
 
                     if (EditorSettings.widgets().scriptStats) {
@@ -5945,73 +5948,6 @@
                     this.tabContent.setChildren(divs);
                 });
             });
-        }
-
-        public scriptPromo()
-        {
-            var m = new ModalDialog()
-            var id = this.parent.publicId
-            var json = this.script().jsonScript
-
-            m.addBody(lf("Editing promo for: {0}", json.name))
-            m.show()
-
-            Promise.join([TheApiCacheMgr.getAsync("config/promo"), 
-                          Cloud.getPrivateApiAsync(id + "/promo")])
-            .done(arr => {
-                var cfg = arr[0]
-                var promo = arr[1]
-                var fields = cfg.fields || {}
-                var alltags = cfg.tags || ["all"]
-                fields["priority"] = { desc: lf("Priority (between -1000000 and 1000000; higher numbers show higher up)"), type: "number" }
-                fields["tags"] = { desc: lf("Tags ({0})", alltags.join(", ")) }
-                var inputs = {}
-                Object.keys(fields).forEach(fn => {
-                    var meta = fields[fn]
-                    var inp = HTML.mkTextInput(meta.type || "text", "")
-                    inputs[fn] = inp
-                    if (promo.hasOwnProperty(fn))
-                        if (Array.isArray(promo[fn]))
-                            inp.value = promo[fn].join(", ")
-                        else
-                            inp.value = (promo[fn] + "")
-                    var dsc = meta.desc || fn
-                    if (meta.override)
-                        dsc += lf(" [override]")
-                    m.add(div("wall-dialog-body", meta.desc || fn, inp))
-                })
-                m.addOk(lf("save"), () => {
-                    var wrong = [] 
-                    var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
-                    if (tags.some(t => alltags.indexOf(t) < 0)) {
-                        wrong.push(inputs["tags"])
-                    }
-
-                    var data = { tags: tags }
-
-                    Object.keys(fields).forEach(fn => {
-                        if (fn == "tags") return
-                        var meta = fields[fn]
-                        var inpt = inputs[fn]
-                        var val = inpt.value
-
-                        if (meta.type == "number") {
-                            var v = parseInt(val)
-                            if (isNaN(v)) wrong.push(inpt)
-                            else data[fn] = v
-                        } else {
-                            data[fn] = val
-                        }
-                    })
-
-                    if (wrong.length > 0) {
-                        wrong.forEach(HTML.wrong)
-                    } else {
-                        Cloud.postPrivateApiAsync(id + "/promo", data)
-                        .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
-                    }
-                }, "", [HTML.mkButton(lf("cancel"), () => m.dismiss())])
-            })
         }
 
         static userPlatformDisplayText(uplat: string[]) {
@@ -6503,6 +6439,19 @@
                     cont.push(div("sdNumber", " \u24D8"));
                 //if (!this.willWork())
                 //    cont.push(span("sdNumber symbol", "⚠"));
+
+                if (this.publicId && Cloud.hasPermission("script-promo")) {
+                    var promo = this.jsonScript.promo
+                    var hasOne = (promo && promo.tags && promo.tags.length > 1)
+                    if (big)
+                        cont.push(div("sdNumber",
+                            HTML.mkLinkButton("★ " + (hasOne ? lf("edit promo") : lf("add promo")),
+                            () => this.editPromo())))
+                    else if (hasOne)
+                        cont.push(div("sdNumber", " ★"))
+
+                }
+
                 numbers.setChildren(cont);
                 if (!big)
                     author.setChildren([ this.jsonScript.username ]);
@@ -7687,6 +7636,78 @@
         {
             ScriptProperties.mergeScript(this.jsonScript)
         }
+
+        public editPromo()
+        {
+            var m = new ModalDialog()
+            var id = this.publicId
+            var json = this.jsonScript
+
+            m.addBody(lf("Editing promo for: {0}", json.name))
+            m.setScroll()
+            m.stretchWide()
+            m.show()
+
+            Promise.join([TheApiCacheMgr.getAsync("config/promo"), 
+                          Cloud.getPrivateApiAsync(id + "/promo")])
+            .done(arr => {
+                var cfg = arr[0]
+                var promo = arr[1]
+                var fields = cfg.fields || {}
+                var alltags = cfg.tags || ["all"]
+                fields["priority"] = { desc: lf("Priority (between -1000000 and 1000000; higher numbers show higher up)"), type: "number" }
+                fields["tags"] = { desc: lf("Tags ({0})", alltags.join(", ")) }
+                var inputs = {}
+                Object.keys(fields).forEach(fn => {
+                    var meta = fields[fn]
+                    var inp = HTML.mkTextInput(meta.type || "text", "")
+                    inputs[fn] = inp
+                    if (promo.hasOwnProperty(fn))
+                        if (Array.isArray(promo[fn]))
+                            inp.value = promo[fn].join(", ")
+                        else
+                            inp.value = (promo[fn] + "")
+                    else if (meta.override)
+                        inp.value = json[fn]
+                    var dsc = meta.desc || fn
+                    if (meta.override)
+                        dsc += lf(" [override]")
+                    m.add(div("wall-dialog-body", dsc, inp))
+                })
+                m.addOk(lf("save"), () => {
+                    var wrong = [] 
+                    var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
+                    if (tags.some(t => alltags.indexOf(t) < 0)) {
+                        wrong.push(inputs["tags"])
+                    }
+
+                    var data = { tags: tags }
+
+                    Object.keys(fields).forEach(fn => {
+                        if (fn == "tags") return
+                        var meta = fields[fn]
+                        var inpt = inputs[fn]
+                        var val = inpt.value
+
+                        if (meta.type == "number") {
+                            var v = parseInt(val)
+                            if (isNaN(v)) wrong.push(inpt)
+                            else data[fn] = v
+                        } else {
+                            data[fn] = val
+                        }
+                    })
+
+                    if (wrong.length > 0) {
+                        wrong.forEach(HTML.wrong)
+                    } else {
+                        Cloud.postPrivateApiAsync(id + "/promo", data)
+                        .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
+                    }
+                }, "", [HTML.mkButton(lf("cancel"), () => m.dismiss())])
+            })
+        }
+
     }
 
     class TutorialConverter extends AST.NodeVisitor
