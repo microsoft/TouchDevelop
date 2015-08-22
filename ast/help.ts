@@ -103,6 +103,7 @@ module TDev {
         subscribers:number; // number of users subscribed to this user
         score:number; // overall score of this user
         haspicture:boolean; // whether this use has a picture
+        isadult?:boolean;
     }
 
     export interface JsonScore {

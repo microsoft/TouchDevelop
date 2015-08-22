@@ -8582,7 +8582,8 @@
             var c = <JsonUser>cc;
             TheApiCacheMgr.store(c.id, c);
             var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
-            if ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id) {
+            if (Cloud.hasPermission("any-facilitator") ||
+                ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id)) {
                 var removeBtn = null;
                 user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
                     if (Cloud.isOffline()) {
@@ -8601,6 +8602,14 @@
                 }));
 
                 if (grp && grp.isclass) {
+                    if (c.isadult)
+                        user.appendChild(HTML.mkButton(lf("make group owner"), () => {
+                            Cloud.postPrivateApiAsync(grp.id, { userid: c.id })
+                            .done(r => ModalDialog.info(lf("The group has new owner"),
+                                         lf("Please reload the page to see it.")),
+                                  e => Cloud.handlePostingError(e, "make owner"))
+                        }))
+
                     user.appendChild(HTML.mkButton(lf("reset password"), () => {
                         if (Cloud.isOffline()) {
                             Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
