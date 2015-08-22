@@ -3002,7 +3002,6 @@ module TDev.AST {
         {
             return AstNode.freshNameCore(n,
                 (n:string) =>
-                    api.getThing(n) != null ||
                     n == "this" ||
                     this.things.some((d:Decl) => d.getName() == n || d.getCoreName() == n));
         }
