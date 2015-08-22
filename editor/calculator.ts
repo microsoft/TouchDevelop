@@ -4639,6 +4639,25 @@ module TDev
             }
 
             this.find(this.par.expr.parsed);
+
+            if (cursorPosition != this.par.expr.tokens.length - 1) {
+                // clone tokens
+                var eh = new AST.ExprHolder()
+                eh.tokens = this.par.expr.tokens.slice(0, cursorPosition)
+                eh = AST.Parser.parseExprHolder(eh.serialize(), Script)
+                var parsedPref = AST.ExprParser.parse1(eh.tokens)
+                if (!parsedPref) return
+                var prop = parsedPref.getCalledProperty()
+                if (!prop) return
+                // This is to show and/or when editing
+                //   x = 1 {cursor} y < 12
+                // The check below might be overrestrictive - we've went through all that
+                // pain to determine the type of the prefix.
+                // On the other hand, it will already show 'or' also one position to the right
+                // which might not be the best.
+                if (prop.getResult().getKind().equals(api.core.Boolean))
+                    this.setKind(api.core.Boolean)
+            }
         }
     }
 
