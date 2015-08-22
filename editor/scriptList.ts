@@ -3884,9 +3884,9 @@
                 if (js.id && js.rootid == js.id)
                     return div(null)
                 var cont = div(null)
-                var getFor = (id: string) => {
+                var getFor = (id: string, skipComments = false) => {
                     Util.assert(!!id, "missing comment id");
-                    TheApiCacheMgr.getAsync(id + "/base", true).done(resp => {
+                    TheApiCacheMgr.getAsync(Cloud.lite ? id : id + "/base", true).done(resp => {
                         versionDepth++;
                         if (!resp) return
                         var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
@@ -3927,12 +3927,12 @@
                         cont.appendChild(div(null, hd, d))
 
                         if (resp.rootid != resp.id) {
-                            if (versionDepth < 5) getFor(resp.id)
+                            if (versionDepth < 5) getFor(Cloud.lite ? resp.baseid : resp.id)
                             else {
                                 var loadMoreVersion = HTML.mkButton(lf("load more"),() => {
                                     loadMoreVersion.removeSelf();
                                     versionDepth = 0;
-                                    getFor(resp.id);
+                                    getFor(Cloud.lite ? resp.baseid : resp.id);
                                 });
                                 cont.appendChild(loadMoreVersion);
                             }
@@ -3940,7 +3940,24 @@
                     })
                 }
 
-                getFor(this.getParentId())
+
+                if (Cloud.lite)
+                    // the call to /family is there to prefetch typical parents
+                    TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
+                    .done((prefetch) => {
+                        prefetch.items.forEach((e, i) => {
+                            TheApiCacheMgr.store(e.id, e, prefetch.etags[i], true);
+                        })
+
+                        if (this.parent.publicId) {
+                            Util.assert(!!js.id)
+                            if (js.baseid) getFor(js.baseid)
+                        }
+                        else
+                            getFor(this.getParentId(), true)
+                    })
+                else
+                    getFor(this.getParentId())
 
                 return cont
             } else {

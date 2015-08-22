@@ -181,6 +181,7 @@ module TDev {
         flows:any[]; // ???
         haserrors:boolean; // whether this script has any compilation errors
         rootid:string; // refers to the earliest script along the chain of script bases
+        baseid?:string; // lite
         updateid:string; // refers to the latest published successor (along any path) of that script with the same name and from the same user
         updatetime:number;
         ishidden:boolean; // whether the user has indicated that this script should be hidden
