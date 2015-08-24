@@ -352,6 +352,11 @@ module TDev.HTML {
         Util.clickHandler(btn, f);
         return btn;
     }
+    
+    export function mkAButton(content: string, href: string): HTMLElement
+    {
+        return HTML.mkA('wall-button', href, '_blank', content);   
+    }
 
     export function mkLinkButton(content:string, f:()=>void, cls = "")
     {

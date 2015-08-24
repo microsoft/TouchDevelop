@@ -196,6 +196,13 @@ input.logSearchInput {
 .modalFullBlack a:visited {
   color: #008b00;
 }
+
+.modalDialog a.wall-button, .modalDialog a.wall-button:hover, .modalDialog a.wall-button:visited {
+  font-weight: normal;
+  text-decoration: none;
+  color:white;
+}
+
 .modalDialogChooseItem {
     margin:0.2em;
     padding:0.4em;
@@ -464,6 +471,7 @@ p.wall-record
 .menuItem,
 .radio-button
 {
+  text-decoration: none;
   font-size: inherit;
   font-family: inherit;
   border: 2px solid black;

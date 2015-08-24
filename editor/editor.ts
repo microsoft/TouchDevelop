@@ -1285,9 +1285,9 @@ module TDev
                     m.add(div('wall-dialog-header', lf("got a question?")));
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
                     m.add(div('wall-dialog-buttons',
-                        HTML.mkButton(lf("read the docs"), () => Util.navigateInWindow(Cloud.config.helpPath)),
-                        this.widgetEnabled("computingAtSchool") ? HTML.mkButton(lf("CAS forum"), () => Util.navigateInWindow("http://community.computingatschool.org.uk/forums/23")) : undefined,
-                        this.widgetEnabled("userVoice") ? HTML.mkButton("Post an idea", () => Util.navigateInWindow("https://touchdevelop.uservoice.com")) : undefined,
+                        HTML.mkAButton(lf("read the docs"), Cloud.config.helpPath),
+                        this.widgetEnabled("computingAtSchool") ? HTML.mkAButton(lf("CAS forum"), "http://community.computingatschool.org.uk/forums/23") : undefined,
+                        this.widgetEnabled("userVoice") ? HTML.mkAButton("Post an idea", "https://touchdevelop.uservoice.com") : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())
                         ));
                     m.show();
