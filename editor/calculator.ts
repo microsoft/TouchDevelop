@@ -1940,7 +1940,7 @@ module TDev
                             toks.push(AST.mkThing(loc.getName()));
                         } else {
                             toks.pushRange(this.findDefault(parms[i]));
-                            if (newCursorPos < 0 && k == api.core.String) {
+                            if (newCursorPos < 0 && (k == api.core.String || k == api.core.Number)) {
                                 newCursorPos = this.cursorPosition + toks.length;
                             }
                         }
