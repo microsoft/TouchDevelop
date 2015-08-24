@@ -3946,7 +3946,7 @@
                     TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
                     .done((prefetch) => {
                         prefetch.items.forEach((e, i) => {
-                            TheApiCacheMgr.store(e.id, e, prefetch.etags[i], true);
+                            TheApiCacheMgr.store(e.id, e, prefetch.etags ? prefetch.etags[i] : null, true);
                         })
 
                         if (this.parent.publicId) {
