@@ -1149,9 +1149,10 @@ module TDev
                       ".decl > .stmt { border: none; }\n" +
                       ".print-big { font-size: 1.5em; }\n" +
                       "a.md-bigbutton {}\n" +
-                      "@media print { #MicrosoftTranslatorWidget { display: none; } }\n" +
+                      "@media print { #MicrosoftTranslatorWidget { display: none; } .body, .inner, .primary-content__inner, .md-tutorial { margin:0; padding:0; } }\n" +
                       'body { font-family: Calibri, "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }\n' +
-                     "</style>";
+                      "@page { size: auto; margin: 1cm 1cm 1cm 1cm; }" +
+                      "</style>";
 
                       //".stmt-comment { border: none; }\n" +
                       //".stmt-comment > .line { margin-left: 0; }\n" +
