@@ -2342,7 +2342,6 @@ module TDev {
                 else
                     return (
                     "<h1>" + Util.htmlEscape(this.json.name) + "</h1>" +
-                    "<p>" + Util.htmlEscape(this.json.description) + "</p>" +
                     text)
             })
         }
