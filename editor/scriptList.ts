@@ -3946,7 +3946,7 @@
                     TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
                     .done((prefetch) => {
                         prefetch.items.forEach((e, i) => {
-                            TheApiCacheMgr.store(e.id, e, prefetch.etags ? prefetch.etags[i] : null, true);
+                            TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
                         })
 
                         if (this.parent.publicId) {
@@ -6781,8 +6781,13 @@
 
         public currentlyForwardsTo():BrowserPage
         {
-            if (this.correspondingTopic && !this.browser().treatAsScript[this.publicId])
-                return this.correspondingTopic;
+            if (this.correspondingTopic) {
+                var tas = this.browser().treatAsScript 
+                if (!tas.hasOwnProperty(this.publicId))
+                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr") ? false : true
+                if (tas[this.publicId])
+                    return this.correspondingTopic;
+            }
             return this;
         }
 
@@ -7688,7 +7693,7 @@
                 fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
                 var inputs = {}
                 if (!promo.priority && promo.tags && promo.tags.length == 0) {
-                    promo.priority = -parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
+                    promo.priority = parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
                 }
                 Object.keys(fields).forEach(fn => {
                     var meta = fields[fn]
