@@ -208,7 +208,6 @@ module TDev.Cloud {
         theme?: ClientTheme;
         
         tutorialAvatarArtId?: string;
-        printHeaderHtml?: string;
         companyLogoHorizontalUrl?: string;
         touchDevelopLogoUrl?: string;
         

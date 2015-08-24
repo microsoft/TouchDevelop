@@ -2355,7 +2355,6 @@ module TDev {
                                  + "<title>" + Util.htmlEscape(title) + "</title>"
                                  + "<meta name='microsoft' content='notranslateclasses stmt keyword'/>"
                                  + "</head><body onload='try { window.print(); } catch(ex) {}'>"
-                                 + (Cloud.config.printHeaderHtml || ("<div><img src='" + HTML.proxyResource("https://az31353.vo.msecnd.net/c04/uxoj.png") + "' alt='" + lf("TouchDevelop by Microsoft Research") + "'></div>"))                                 
                                  + text
                                  + "</body></html>");
                 w.document.close();
