@@ -1388,129 +1388,6 @@ module TDev
             this.display();
         }
 
-/*
-        private editNumber(tk: TokenKind)
-        {
-            // Look for the whole number expression
-            var numberRegExp = /^[0-9\.]$/;
-            var numChars: string[] = [];
-            var toks = tk.par.expr.tokens;
-            var beg = tk.par.cursorPosition;
-            var end = tk.par.cursorPosition;
-            for (end = beg; end < toks.length; end++)
-                if (!(toks[end] instanceof AST.Operator)
-                        || !numberRegExp.test((<AST.Operator>toks[end]).data))
-                    break;
-            end--;
-            for (beg = beg - 1; beg >= 0; beg--)
-                if (!(toks[beg] instanceof AST.Operator)
-                        || !numberRegExp.test((<AST.Operator>toks[beg]).data))
-                    break;
-            beg++;
-
-            var c = new NumberCharm();
-            c.init(toks.slice(beg, end + 1));
-
-            c.onUpdate = (toks: AST.Token[]) => {
-                if (c.getLastTokens() === null) {
-                    if (c.getInitialTokens() !== null) {
-                        this.deleteTokens(beg, c.getInitialTokens().length);
-                    }
-                } else {
-                    this.deleteTokens(beg, c.getLastTokens().length);
-                }
-                var cursorPosition = beg;
-                toks.forEach((t) => {
-                    this.expr.tokens.splice(cursorPosition++, 0, t);
-                });
-                this.notifyChange();
-                this.display();
-            };
-
-            c.onEntered = () => {
-                if (c.getLastTokens() !== null) {
-                    this.cursorPosition = beg + c.getLastTokens().length;
-                }
-                this.display();
-            };
-
-            c.onCancelled = () => {
-                if (c.getLastTokens() !== null) {
-                    this.deleteTokens(beg, c.getLastTokens().length);
-                    c.getInitialTokens().forEach((t) => {
-                        this.expr.tokens.splice(beg, 0, t);
-                    });
-                    this.notifyChange();
-                }
-                this.display();
-            };
-
-            var posLeft = Util.offsetIn(toks[beg].renderedAs, elt("scriptEditor"));
-            var posRight = Util.offsetIn(toks[end].renderedAs, elt("scriptEditor"));
-            var x = (posLeft.x + (posRight.x + toks[end].renderedAs.clientWidth)) / 2;
-            x -= c.getWidth() / 2;
-            var y = posLeft.y + SizeMgr.topFontSize * 1.5 + 5;
-            var w = c.getWidth();
-            var add = 14;
-            if (x + w + add > SizeMgr.windowWidth) {
-                x = SizeMgr.windowWidth - add - w;
-            }
-            c.show(x, y);
-        }
-*/
-
-/*
-        private editColor(th: AST.ThingRef)
-        {
-            var c = new ColorCharm();
-            c.init(th.loc.tokens.slice(th.loc.beg + th.loc.len));
-
-            c.onUpdate = (toks: AST.Token[]) => {
-                if (c.getLastTokens() === null) {
-                    if (c.getInitialTokens() !== null) {
-                        this.deleteTokens(this.cursorPosition, c.getInitialTokens().length);
-                    }
-                } else {
-                    this.deleteTokens(this.cursorPosition, c.getLastTokens().length);
-                }
-                var cursorPosition = this.cursorPosition;
-                toks.forEach((t) => {
-                    this.expr.tokens.splice(cursorPosition ++, 0, t);
-                });
-                this.notifyChange();
-                this.display();
-            };
-
-            c.onEntered = () => {
-                if (c.getLastTokens() !== null) {
-                    this.cursorPosition += c.getLastTokens().length;
-                }
-                this.display();
-            };
-
-            c.onCancelled = () => {
-                if (c.getLastTokens() !== null) {
-                    this.deleteTokens(this.cursorPosition, c.getLastTokens().length);
-                    c.getInitialTokens().forEach((t) => {
-                        this.expr.tokens.splice(this.cursorPosition, 0, t);
-                    });
-                }
-                this.notifyChange();
-                this.display();
-            };
-
-            var origElt = th.renderedAs;
-            var pos = Util.offsetIn(origElt, elt("scriptEditor"));
-            pos.y += SizeMgr.topFontSize * 1.5 + 5;
-            var w = c.getWidth();
-            var add = 14;
-            if (pos.x + w + add > SizeMgr.windowWidth) {
-                pos.x = SizeMgr.windowWidth - add - w;
-            }
-            c.show(pos.x, pos.y);
-        }
-*/
-
         private insertString()
         {
             var prev = this.expr.tokens[this.cursorPosition - 1];
@@ -2207,19 +2084,6 @@ module TDev
                     }
                 }
             }
-
-/*
-            if (TDev.dbg) {
-                if (!!t.def && t.def.nodeType() == "singletonDef") {
-                    if (t.data == "colors") {
-                        var e = this.mkIntelliItem(1e40, Ticks.calcPickColor);
-                        e.nameOverride = lf("pick color");
-                        e.descOverride = lf("from palette");
-                        e.cbOverride = () => { this.editColor(t) };
-                    }
-                }
-            }
-*/
         }
 
         static sortDecls(arr:any[]) : any[]
@@ -2405,15 +2269,6 @@ module TDev
 
             if (!placeholderKind && k.primaryKind != null) {
                 this.inPropertyPosition = true;
-
-/*
-                if (false && k.primaryKind === api.core.Number) {
-                    var e = this.mkIntelliItem(1e40, Ticks.calcPickNumber);
-                    e.nameOverride = lf("pick number")
-                    e.descOverride = lf("by drag and drop");
-                    e.cbOverride = () => { this.editNumber(k); };
-                }
-*/
 
                 var s: IProperty[] = k.primaryKind.listProperties().slice(0);
                 var t = this.expr.tokens[this.cursorPosition-1];
