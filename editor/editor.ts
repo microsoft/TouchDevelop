@@ -1139,11 +1139,11 @@ module TDev
                 el.style.display = 'none';
         }
 
-        public widgetEnabled(name: string): boolean {
+        public widgetEnabled(name: string, ignoreTutorialWidgets = false): boolean {
             var override = false
             if (this.intelliProfile) {
                 override = this.intelliProfile.hasKey(name)
-                if (this.intelliProfile.hasKey("tutorialWidgets")) return override
+                if (!ignoreTutorialWidgets && this.intelliProfile.hasKey("tutorialWidgets")) return override
             }
             return override || !!TDev.Browser.EditorSettings.widgets()[name];
         }
