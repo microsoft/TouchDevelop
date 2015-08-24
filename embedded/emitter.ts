@@ -99,7 +99,7 @@ module TDev {
           var n = H.mangleUnique(env, map[a.reference.id], a.reference.id);
           return (
             env.indent + "auto "+n+"_ = "+
-              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, true)+";\n" +
+              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
             env.indent + "auto "+n+" = new std::function<"+
                 H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
               ">("+n+"_);"
@@ -405,6 +405,7 @@ module TDev {
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
         body: J.JStmt[],
+        isPrivate,
         isLambda=false)
       {
         // This function is always called with H.willCompile == true, meaning
