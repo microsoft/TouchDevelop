@@ -738,21 +738,27 @@ module TDev {
             if (this.canEditCode() && !!e.syntaxErrorDeclName) {
                 this.fixErrorIn(e.syntaxErrorDeclName, error);
             } else if (!!e.isUserError) {
-                var dial = ModalDialog.buttons(
-                    lf("the script crashed"),
-                    this.canDebugCode() ? lf("do you want do debug it?") : null,
-                    lf("error message"),
-                    error,
-                    this.canDebugCode() ? HTML.mkButton(lf("debug"), () => {
-                        tick(Ticks.crashDialogDebug);
-                        dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction();
-                    }) : null,
-                    HTML.mkButton(lf("cancel"), () => {
-                        dial.dismiss()
-                    })
-                    );
-                dial.fullYellow();
-                frown(dial)
+                this.attachDebuggingInfo(runMap, stack, msg); 
+                if (!this.canDebugCode()) stackTraceAction();
+                else {
+                    var dial = ModalDialog.buttons(
+                        lf("the script crashed"),
+                        lf("do you want do debug it?"),
+                        "",
+                        error,
+                        HTML.mkButton(lf("debug"), () => {
+                            tick(Ticks.crashDialogDebug);
+                            dial.dismiss();
+                            debugAction();
+                        }),
+                        HTML.mkButton(lf("see code"), () => {
+                            dial.dismiss()
+                            stackTraceAction();
+                        })
+                        );
+                    dial.fullYellow();
+                    frown(dial)                    
+                }
             } else { //!isUserError
                 this.attachScriptStackTrace(bug);
                 Util.sendErrorReport(bug);
