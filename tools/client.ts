@@ -3641,6 +3641,7 @@ function tdupload(args:string[])
         ])
 
     var liteId = ""
+
     var uploadFiles = () => args.forEach(p => {
         if (!fs.existsSync(p))
             return;
@@ -3686,6 +3687,7 @@ function tdupload(args:string[])
     var mm = /^(http.*)(\?access_token=.*)/.exec(key)
 
     if (mm) {
+        process.env['TD_UPLOAD_KEY'] = key
         var liteUrl = mm[1]
         key = mm[2]
 
@@ -3702,6 +3704,17 @@ function tdupload(args:string[])
                         tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
+
+                    fetchlibraries([], function(err,txt) {
+                        tdevGet(liteUrl + "api/" + liteId + "/files" + key, resp => {
+                            console.log("libraries.js: " + resp)
+                        }, 1, {
+                            encoding: "utf8",
+                            filename: "libraries.js",
+                            contentType: "application/javascript",
+                            content: txt,
+                        })
+                    })
                     uploadFiles()
                 }
             }, 1, {
@@ -3732,6 +3745,57 @@ function setlabel(args:string[])
     tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
         console.log("channel: " + resp)
     }, 1, { name: channel })
+}
+
+function fetchlibraries(args, cb) {
+    var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
+    if (!mm) {
+        console.log("invalid or missing $TD_UPLOAD_KEY")
+        return
+    }
+
+    var liteUrl = mm[1]
+    var key = "&" + mm[2].slice(1)
+
+    var ids = [
+      'nmhibf' // adj script
+    , 'pvrktr' // adj widget
+    , 'jousad' // adj game
+    , 'vxwcfp' // micro:bit
+    , 'ldaqbf' // micro:bit game
+    , 'fdbsiw' // micro:bit serial
+    , 'xnkmqj' // micro:bit senses
+    , 'drdxps' // micro:bit screen
+    , 'lyusma' // micro:bit profile
+    , 'xczaux' // blocks new
+    , 'dceiba' // blocks blink
+    ]
+
+    var updates = {}
+    var text = {}
+    var togo = ids.length
+
+    console.log("fetching latest versions of " + ids.join(", "))
+
+    ids.forEach(id =>
+        tdevGet(liteUrl + "api/" + id + "/updates?count=1000" + key, resp => {
+            var parsed = JSON.parse(resp)
+            // TODO implement continuations
+            if (parsed.continuation) throw new Error("too many!? " + id)
+            parsed.items.forEach(it => {
+                updates[it.id] = it.updateid
+            })
+            tdevGet(liteUrl + "api/" + updates[id] + "/text?original=true" + key, t => {
+                text[updates[id]] = t
+                if (--togo == 0) {
+                    var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
+                        JSON.stringify({ updates: updates, text: text }, null, 1) + "\n"
+                    console.log("got latest versions of scripts; " + txt.length + " bytes")
+                    fs.writeFileSync("build/libraries.js", txt)
+                    if (cb) cb(null,txt)
+                }
+            })
+        }))
 }
 
 var cmds = {
@@ -3782,6 +3846,7 @@ var cmds = {
     "addstats": { f:addstats, a:'', h:'query detailed stats'},
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
+    "fetchlibraries": { f:fetchlibraries, a:'', h:'get latest versions of libraries'},
     "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
     "uploadwf": { f:uploadwf, a:'PATH FILE [LABEL]', h:'upload a webfile'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},
