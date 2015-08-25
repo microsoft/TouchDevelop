@@ -9974,18 +9974,7 @@
                         })
                     }
 
-                    if (false && TheHost.backToEditor) {
-                        if (!m) {
-                            justFollow();
-                        } else {
-                            ModalDialog.askMany(lf("use template?"),
-                                                lf("do you want to follow the tutorial using your existing script or start a new script, as the tutorial author intended?"),
-                                                { "use existing": justFollow,
-                                                  "start new":  startNew })
-                        }
-                    } else {
-                        startNew();
-                    }
+                    startNew();
                 });
         }
 
