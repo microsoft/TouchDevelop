@@ -3963,7 +3963,7 @@
                     TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
                     .done((prefetch) => {
                         prefetch.items.forEach((e, i) => {
-                            TheApiCacheMgr.store(e.id, e, prefetch.etags ? prefetch.etags[i] : null, true);
+                            TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
                         })
 
                         if (this.parent.publicId) {
@@ -6798,8 +6798,13 @@
 
         public currentlyForwardsTo():BrowserPage
         {
-            if (this.correspondingTopic && !this.browser().treatAsScript[this.publicId])
-                return this.correspondingTopic;
+            if (this.correspondingTopic) {
+                var tas = this.browser().treatAsScript 
+                if (!tas.hasOwnProperty(this.publicId))
+                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr") ? false : true
+                if (tas[this.publicId])
+                    return this.correspondingTopic;
+            }
             return this;
         }
 
@@ -7705,7 +7710,7 @@
                 fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
                 var inputs = {}
                 if (!promo.priority && promo.tags && promo.tags.length == 0) {
-                    promo.priority = -parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
+                    promo.priority = parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
                 }
                 Object.keys(fields).forEach(fn => {
                     var meta = fields[fn]
@@ -8127,7 +8132,9 @@
                     if (!s) return
 
                     var edit = (lbl:string, fld:string, maxLen = 100) => {
-                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
+                        var saved = false
+                        var saveIt = () => {
+                            saved = true
                             HTML.showProgressNotification("saving...");
                             var ss:any = {}
                             ss[fld] = nameInput.value
@@ -8138,6 +8145,19 @@
                                 TheApiCacheMgr.invalidate("me");
                                 refreshSettings()
                             }, e => Cloud.handlePostingError(e, lf("saving setting")));
+                        }
+                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
+                            if (Cloud.isRestricted() && fld == "nickname" && / [A-Z][a-z]/i.test(nameInput.value.trim())) {
+                                var m = ModalDialog.ask(
+                                    lf("Your nickname is displayed on public pages. Make sure you do not enter your last name there."),
+                                    lf("it's ok, save it!"),
+                                    saveIt, false, lf("Possible last name detected"))
+                                m.onDismiss = () => {
+                                    if (!saved) nameInput.value = s[fld]
+                                }
+                            }
+                            else saveIt()
+
                         });
                         nameInput.maxLength = maxLen;
                         nameInput.value = s[fld] || ""
@@ -8149,11 +8169,6 @@
 
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
-                    // From BBC:
-                    //   
-                    //  
-                    // it on to third parties.
-                        
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private; {0})", 
                             s.emailverified 
@@ -10175,6 +10190,7 @@
                 var nm = u.name
                 var labs = u.labels.map(l => l.name).join(", ")
                 if (labs) nm += " (" + labs + ")"
+                numbers.setChildren(labs ? [div("sdNumber", " ★")] : [])
                 nameBlock.setChildren([ nm ])
                 author.setChildren([u.username]);
                 addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(u.time)]);

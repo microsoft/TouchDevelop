@@ -204,11 +204,12 @@ module TDev
             if (f) f(this);
         }
 
-        static ask(msg: string, confirmation: string, act: () => void, critical = false)
+        static ask(msg: string, confirmation: string, act: () => void, critical = false, header: string = null)
         {
             var m = new ModalDialog();
+            if (header == null) header = confirmation + "?"
             m.add([
-                div("wall-dialog-header", confirmation + "?"),
+                div("wall-dialog-header", header),
                 div("wall-dialog-body", msg),
                 div("wall-dialog-buttons",
                     HTML.mkButton(lf("cancel"), () => m.dismiss()),

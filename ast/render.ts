@@ -535,7 +535,9 @@ module TDev
             if (node.annotations)
                 node.annotations.forEach(a => {
                     res += this.message(a.category == "error" ? "errorMessage fromPlugin" : "hintMessage fromPlugin",
-                                        "<span class='svg-symbol'>" + SVG.getIconSVGCore("plug,#7057D3,clip=100") + "</span> " +
+                                        "<span class='svg-symbol'>" + (a.pluginRef == "caller" ?
+                                            SVG.getIconSVGCore("bug,#7057D3,clip=100") :
+                                            SVG.getIconSVGCore("plug,#7057D3,clip=100")) + "</span> " +
                                         Util.htmlEscape(a.message))
                 })
 
