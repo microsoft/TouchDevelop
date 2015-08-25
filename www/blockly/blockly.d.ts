@@ -30,13 +30,18 @@ declare module Blockly {
     }
 
     class Input {
+        constructor(type: number, name: string, source: Block, target: Connection);
         name: string;
         connection: Connection;
         sourceBlock_: Block;
     }
 
     class Connection {
+        constructor(b: Block, type: number);
         check_: string[];
+        targetConnection: Connection;
+        sourceBlock_: Block;
+        targetBlock(): Block;
     }
 
     // if type is one of "procedures_def{,no}return", or "procedures_call{,no}return"
