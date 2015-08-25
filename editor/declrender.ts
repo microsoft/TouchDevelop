@@ -2,6 +2,11 @@
 
 module TDev
 {
+    export interface DeclBoxOptions {
+        signature?: boolean;
+        namespace?: boolean;
+    }
+    
     export class DeclEntry
     {
         public icon = "svg:hammer,white,clip=50";
@@ -15,9 +20,9 @@ module TDev
         private getName() { return this.name; }
         private getDescription() { return this.description; }
         private nodeType() { return "declEntry"; }
-        public mkBox():HTMLElement
+        public mkBox(options?: DeclBoxOptions):HTMLElement
         {
-            var r = DeclRender.mkBoxEx(this, this.nodeType());
+            var r = DeclRender.mkBoxEx(this, this.nodeType(), options);
             r.className += this.classAdd;
             return r;
         }
@@ -189,21 +194,23 @@ module TDev
                     l.resolved && l.resolved.icon ? l.resolved.iconPath() : "svg:recycleLib,white"),
         };
 
-        export function mkPropBox(p:IProperty)
+        export function mkPropBox(p:IProperty,options?: DeclBoxOptions)
         {
             var f = p.forwardsTo();
             if (f != null)
-                return mkBox(f);
+                return mkBox(f, options);
             else
-                return mkBoxEx(p, "property");
+                return mkBoxEx(p, "property", options);
         }
 
-        export function mkKindBox(p:Kind)
+        export function mkKindBox(p:Kind, options?: DeclBoxOptions)
         {
-            return mkBoxEx(p, "kind");
+            return mkBoxEx(p, "kind", options);
         }
 
-        export function mkBox(decl: AST.Decl) { return mkBoxEx(decl, decl.nodeType()); }
+        export function mkBox(decl: AST.Decl, options? : DeclBoxOptions) { 
+            return mkBoxEx(decl, decl.nodeType(), options);
+        }
 
         export function mkNameSpaceDecl(decl: any) {
             var ns = null;
@@ -229,7 +236,7 @@ module TDev
 
         var mdCmt:MdComments;
 
-        export function mkBoxEx(decl:any, tp:string):HTMLElement
+        export function mkBoxEx(decl:any, tp:string, options?: DeclBoxOptions):HTMLElement
         {
             if (!mdCmt) mdCmt = new MdComments();
 
@@ -240,25 +247,36 @@ module TDev
             var ns = null;
             var desc = decl.getBoxInfo ? Util.htmlEscape(decl.getBoxInfo()) : mdCmt.formatInline(decl.getDescription());
             var name = decl.getName();
-            var sigText = decl.getSignature && decl.getSignature();
-            if (sigText) {
-                var limit = 18;
-                if (decl instanceof Kind) limit = 40;
-                if ((name + sigText).length > limit && sigText != "()") {
-                    if (desc)
-                        desc = Util.htmlEscape(sigText) + " :: " + desc;
-                    else
-                        desc = Util.htmlEscape(sigText);
-                } else {
-                    sig = span("navSig", decl.getSignature());
+            if (options && options.signature) {
+                var sigText = decl.getSignature && decl.getSignature();
+                if (sigText) {
+                    var limit = 18;
+                    if (decl instanceof Kind) limit = 40;
+                    if ((name + sigText).length > limit && sigText != "()") {
+                        if (desc)
+                            desc = Util.htmlEscape(sigText) + " :: " + desc;
+                        else
+                            desc = Util.htmlEscape(sigText);
+                    } else {
+                        sig = span("navSig", decl.getSignature());
+                    }
                 }
             }
-            if (decl.getNamespaces) {
-                var namespaces : string[] = <string[]>decl.getNamespaces();
-                if (namespaces && namespaces[0]) ns = span("navSig", namespaces[0] +  " → ");
-            }
-            if (!ns && decl.getNamespace) {
-                ns = span("navSig symbol", decl.getNamespace());
+            if (options && options.namespace) {
+                if (decl.getNamespaces) {
+                    var namespaces: string[] = <string[]>decl.getNamespaces();
+                    if (namespaces && namespaces[0]) ns = span("navSig", namespaces[0] + " → ");
+                }
+                var namespace: string;
+                if (!ns && decl.getNamespace && (namespace = decl.getNamespace())) {
+                    // special handling of data
+                    if (namespace[0] == AST.dataSymbol) namespace = "var " + namespace;
+                    ns = span("navSig symbol", namespace);                    
+                }
+            } else {
+                var namespaces: string[];
+                if (decl.getNamespaces && (namespaces = decl.getNamespaces()) && namespaces[0])
+                    desc = lf("in <strong>{0}</strong>. ", namespaces[0]) + desc;
             }
             var descDiv = div("navDescription md-inline")
 
@@ -267,10 +285,9 @@ module TDev
 
             Browser.setInnerHTML(descDiv, desc)
             var suff = null
-            if (decl instanceof Kind) {
-                if ((<Kind>decl).isImmutable())
-                    suff = div("navDiamond", SVG.getIconSVG("diamond,#00f,clip=60"))
-            }
+            if (decl instanceof Kind && (<Kind>decl).isImmutable() && AST.proMode)
+                suff = div("navDiamond", SVG.getIconSVG("diamond,#00f,clip=60"))
+                
             var nameDiv = div("navName", ns, name, sig);
             innerElt.setChildren([icon, div("navContent", [nameDiv, descDiv]), suff]);
 

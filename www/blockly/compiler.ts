@@ -122,7 +122,7 @@ module Helpers {
   }
 
   // Call a function from the Math library. Apparently, the Math library is a
-  // different object than other libraries, so its AST representation is not the
+  // different object than other libraries, so its AST typeesentation is not the
   // same. Go figure.
   export function mathCall(name: string, args: J.JExpr[]): J.JCall {
     return mkCall(name, mkTypeRef("Math"), [<J.JExpr> mkSingletonRef("Math")].concat(args));
@@ -266,7 +266,7 @@ module Helpers {
   }
 
   // This function takes care of generating an if node *and* de-constructing the
-  // else branch to abide by the TouchDevelop representation (see comments in
+  // else branch to abide by the TouchDevelop typeesentation (see comments in
   // [jsonInterfaces.ts]).
   export function mkIf(condition: J.JExprHolder, thenBranch: J.JStmt[], elseBranch: J.JStmt[]): J.JIf[] {
     var ifNode = mkSimpleIf(condition, thenBranch)
@@ -446,25 +446,6 @@ module Errors {
 // Starts at 1, otherwise you can't write "if (type) ...".
 enum Type { Number = 1, Boolean, String, Image, Unit };
 
-// Infers the expected type of an expression by looking at the untranslated
-// block and figuring out, from the look of it, what type of expression it
-// holds.
-function inferType(e: Environment, b: B.Block): Type {
-  if (!b)
-    return null;
-
-  if (b.type == "variables_get")
-    return lookup(e, b.getFieldValue("VAR")).type;
-
-  if (!b.outputConnection)
-    return Type.Unit;
-
-  if (!b.outputConnection.check_ || !b.outputConnection.check_.length)
-    return null;
-
-  return toType(b.outputConnection.check_[0]);
-}
-
 // From a Blockly string annotation to a [Type].
 function toType(t: string): Type {
   switch (t) {
@@ -513,6 +494,253 @@ function typeToString(t: Type) {
   }
 }
 
+class Point {
+  constructor(
+    public link: Point,
+    public type: Type
+  ) {}
+}
+
+function find(p: Point): Point {
+  if (p.link)
+    return find(p.link);
+  else
+    return p;
+}
+
+function union(p1: Point, p2: Point) {
+  p1 = find(p1);
+  p2 = find(p2);
+  assert(p1.link == null && p2.link == null);
+  if (p1 == p2)
+    return;
+
+  var t = unify(p1.type, p2.type);
+  p1.link = p2;
+  p1.type = null;
+  p2.type = t;
+}
+
+// Ground types.
+function mkPoint(t: Type): Point {
+  return new Point(null, t);
+}
+var pNumber = mkPoint(Type.Number);
+var pBoolean = mkPoint(Type.Boolean);
+var pString = mkPoint(Type.String);
+var pImage = mkPoint(Type.Image);
+var pUnit = mkPoint(Type.Unit);
+
+function ground(t?: Type): Point {
+  switch (t) {
+    case Type.Number:
+      return pNumber;
+    case Type.Boolean:
+      return pBoolean;
+    case Type.String:
+      return pString;
+    case Type.Image:
+      return pImage;
+    case Type.Unit:
+      return pUnit;
+    default:
+      // Unification variable.
+      return mkPoint(null);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Type inference
+//
+// Expressions are now directly compiled as a tree. This requires knowing, for
+// each property ref, the right value for its [parent] property.
+///////////////////////////////////////////////////////////////////////////////
+
+// Infers the expected type of an expression by looking at the untranslated
+// block and figuring out, from the look of it, what type of expression it
+// holds.
+function returnType(e: Environment, b: B.Block): Point {
+  assert (b != null);
+
+  if (b.type == "placeholder")
+    return find((<any> b).p);
+
+  if (b.type == "variables_get")
+    return find(lookup(e, b.getFieldValue("VAR")).type);
+
+  assert(!b.outputConnection || b.outputConnection.check_ && b.outputConnection.check_.length > 0);
+
+  if (!b.outputConnection)
+    return ground(Type.Unit);
+
+  return ground(toType(b.outputConnection.check_[0]));
+}
+
+// Basic type unification routine; easy, because there's no structural types.
+function unify(t1: Type, t2: Type) {
+  if (t1 == null)
+    return t2;
+  else if (t2 == null)
+    return t1;
+  else if (t1 == t2)
+    return t1;
+  else
+    throw new Error("Cannot mix "+typeToString(t1)+" with "+typeToString(t2));
+}
+
+function mkPlaceholderBlock(): B.Block {
+  // XXX define a proper placeholder block type
+  return <any> {
+    type: "placeholder",
+    p: mkPoint(null),
+    workspace: Blockly.mainWorkspace,
+  };
+}
+
+function attachPlaceholderIf(b: B.Block, n: string) {
+  // Ugly hack to keep track of the type we want there.
+  if (!b.getInputTargetBlock(n)) {
+    var i = b.inputList.filter(x => x.name == n)[0];
+    assert(i != null);
+    i.connection.targetConnection = new B.Connection(mkPlaceholderBlock(), 0);
+  }
+}
+
+function removeAllPlaceholders(w: B.Workspace) {
+  w.getAllBlocks().forEach((b: B.Block) => {
+    b.inputList.forEach((i: B.Input) => {
+      if (i.connection && i.connection.targetBlock() != null
+          && i.connection.targetBlock().type == "placeholder")
+        i.connection.targetConnection = null;
+    });
+  });
+}
+
+// Unify the *return* type of the parameter [n] of block [b] with point [p].
+function unionParam(e: Environment, b: B.Block, n: string, p: Point) {
+  try {
+    attachPlaceholderIf(b, n);
+    union(returnType(e, b.getInputTargetBlock(n)), p);
+  } catch (e) {
+    throwBlockError("The parameter "+n+" of this block is of the wrong type", b);
+  }
+}
+
+function infer(e: Environment, w: B.Workspace) {
+  w.getAllBlocks().forEach((b: B.Block) => {
+    switch (b.type) {
+      case "math_op2":
+        unionParam(e, b, "x", ground(Type.Number));
+        unionParam(e, b, "y", ground(Type.Number));
+        break;
+
+      case "math_op3":
+        unionParam(e, b, "x", ground(Type.Number));
+        break;
+
+      case "math_arithmetic":
+      case "logic_compare":
+        switch (b.getFieldValue("OP")) {
+          case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
+          case "LT": case "LTE": case "GT": case "GTE": case "POWER":
+            unionParam(e, b, "A", ground(Type.Number));
+            unionParam(e, b, "B", ground(Type.Number));
+            break;
+          case "AND": case "OR":
+            unionParam(e, b, "A", ground(Type.Boolean));
+            unionParam(e, b, "B", ground(Type.Boolean));
+            break;
+          case "EQ": case "NEQ":
+            attachPlaceholderIf(b, "A");
+            attachPlaceholderIf(b, "B");
+            var p1 = returnType(e, b.getInputTargetBlock("A"));
+            var p2 = returnType(e, b.getInputTargetBlock("B"));
+            try {
+              union(p1, p2);
+            } catch (e) {
+              throwBlockError("Comparing objects of different types", b);
+            }
+            var t = find(p1).type;
+            if (t != Type.String && t != Type.Boolean && t != Type.Number && t != null)
+              throwBlockError("I can only compare strings, booleans and numbers", b);
+            break;
+        }
+        break;
+
+      case "logic_operation":
+        unionParam(e, b, "A", ground(Type.Boolean));
+        unionParam(e, b, "B", ground(Type.Boolean));
+        break;
+
+      case "logic_negate":
+        unionParam(e, b, "BOOL", ground(Type.Boolean));
+        break;
+
+      case "controls_if":
+        for (var i = 0; i <= (<B.IfBlock> b).elseifCount_; ++i)
+          unionParam(e, b, "IF"+i, ground(Type.Boolean));
+        break;
+
+      case "controls_simple_for":
+        unionParam(e, b, "TO", ground(Type.Number));
+        break;
+
+      case "text_print":
+        unionParam(e, b, "TEXT", ground(Type.String));
+        break;
+
+      case "variables_set":
+        var x = b.getFieldValue("VAR");
+        var p1 = lookup(e, x).type;
+        attachPlaceholderIf(b, "VALUE");
+        var rhs = b.getInputTargetBlock("VALUE");
+        if (rhs) {
+          var tr = returnType(e, rhs);
+          try {
+            union(p1, tr);
+          } catch (e) {
+            throwBlockError("Assigning a value of the wrong type to variable "+x, b);
+          }
+        }
+        break;
+
+      case "controls_comment":
+        unionParam(e, b, "comment", ground(Type.String));
+        break;
+
+      case "controls_repeat_ext":
+        unionParam(e, b, "TIMES", ground(Type.Number));
+        break;
+
+      case "controls_while":
+        unionParam(e, b, "COND", ground(Type.Boolean));
+        break;
+
+      default:
+        if (b.type in stdCallTable) {
+          stdCallTable[b.type].args.forEach((p: string) => {
+            if (!b.getFieldValue(p)) {
+              var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
+              // This will throw if someone modified blocks-custom.js and forgot to add
+              // [setCheck]s in the block definition. This is intentional and MUST be
+              // fixed.
+              var t = toType(i.connection.check_[0]);
+              unionParam(e, b, p, ground(t));
+            }
+          });
+          return compileStdCall(e, b, stdCallTable[b.type]);
+        }
+    }
+  });
+
+  // Last pass: if some variable has no type (because it was never used or
+  // assigned to), just unify it with int...
+  e.bindings.forEach((b: Binding) => {
+    if (find(b.type).type == null)
+      union(b.type, ground(Type.Number));
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Expressions
 //
@@ -545,64 +773,18 @@ var opToTok: { [index: string]: string } = {
   "NEQ": "≠",
 };
 
-function throwTypeError(t1: Type, t2: Type, b: B.Block) {
-  throwBlockError("This block is a "+typeToString(t1)+
-      " but we need a "+typeToString(t2)+" here", b);
-}
-
-// [t] is the type of the operands, if known in advance
-function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
+function compileArithmetic(e: Environment, b: B.Block): J.JExpr {
   var bOp = b.getFieldValue("OP");
   var left = b.getInputTargetBlock("A");
   var right = b.getInputTargetBlock("B");
-
-  // Mini type-inference again. This is incomplete, as we should do unification
-  // here. This resolves the type of the operands based on the operator, and
-  // type inference on the arguments.
-  var tl = inferType(e, left);
-  var tr = inferType(e, right);
-  switch (bOp) {
-    case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
-    case "LT": case "LTE": case "GT": case "GTE": case "POWER":
-      // Monomorphic arithmetic operators
-      assert (t == null || t == Type.Number);
-      t = Type.Number;
-      break;
-    case "AND": case "OR":
-      // Monomorphic boolean operators
-      assert (t == null || t == Type.Boolean);
-      t = Type.Boolean;
-      break;
-    case "EQ": case "NEQ":
-      // Polymorphic comparison operators
-      if (t == null) {
-        if (tl && tr && tl != tr)
-          throwBlockError("The left side of this comparison operator is a "+typeToString(tl)+
-              " but the right side is a "+typeToString(tr), b);
-        t = tl || tr;
-      }
-      break;
-  }
-
-  if (t == null)
-    throwBlockError("I cannot figure out if you're comparing booleans or numbers here", b);
-  if (tl != null && tl != t)
-    throwTypeError(tl, t, left);
-  if (tr != null && tr != t)
-    throwTypeError(tr, t, left);
-
-  tl = t;
-  tr = t;
-
-  var args = [compileExpression(e, left, t), compileExpression(e, right, t)];
+  var args = [compileExpression(e, left), compileExpression(e, right)];
+  var t = returnType(e, left).type;
 
   if (t == Type.String) {
     if (bOp == "EQ")
       return H.stringCall("equals", args);
     else if (bOp == "NEQ")
       return H.booleanCall("not", [H.stringCall("equals", args)]);
-    else
-      throw new Error("Internal inference error");
   } else if (t == Type.Boolean) {
     if (bOp == "EQ")
       return H.booleanCall("equals", args);
@@ -610,41 +792,33 @@ function compileArithmetic(e: Environment, b: B.Block, t: Type): J.JExpr {
       return H.booleanCall("not", [H.booleanCall("equals", args)]);
     else if (bOp == "AND" || bOp == "OR")
       return H.mkSimpleCall(opToTok[bOp], args);
-    else
-      throw new Error("Internal inference error");
-  } else if (t != Type.Number) {
-    // User can still compare images, we need to bail out here.
-    throwBlockError("Cannot compare things of type "+typeToString(t), b);
   }
 
   // Compilation of math operators.
-  if (bOp == "POWER")
+  if (bOp == "POWER") {
     return H.mathCall("pow", args);
-  else
+  } else {
+    assert(bOp in opToTok);
     return H.mkSimpleCall(opToTok[bOp], args);
+  }
 }
 
 function compileMathOp2(e: Environment, b: B.Block): J.JExpr {
   var op = b.getFieldValue("op");
-  var x = compileExpression(e, b.getInputTargetBlock("x"), Type.Number);
-  var y = compileExpression(e, b.getInputTargetBlock("y"), Type.Number);
+  var x = compileExpression(e, b.getInputTargetBlock("x"));
+  var y = compileExpression(e, b.getInputTargetBlock("y"));
   return H.mathCall(op, [x, y]);
 }
 
 function compileMathOp3(e: Environment, b: B.Block): J.JExpr {
-  var x = compileExpression(e, b.getInputTargetBlock("x"), Type.Number);
+  var x = compileExpression(e, b.getInputTargetBlock("x"));
   return H.mathCall("abs", [x]);
 }
 
-function compileVariableGet(e: Environment, b: B.Block, t: Type): J.JExpr {
+function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   var binding = lookup(e, name);
-  assert(binding != null);
-  if (binding.type == null)
-    binding.type = t;
-  if (t != binding.type)
-    throwBlockError("Variable "+name+" is used elsewhere as a "+typeToString(binding.type)+
-        ", but is used here as a "+typeToString(t), b);
+  assert(binding != null && binding.type != null);
   return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
 }
 
@@ -657,7 +831,7 @@ function compileBoolean(e: Environment, b: B.Block): J.JExpr {
 }
 
 function compileNot(e: Environment, b: B.Block): J.JExpr {
-  var expr = compileExpression(e, b.getInputTargetBlock("BOOL"), Type.Boolean);
+  var expr = compileExpression(e, b.getInputTargetBlock("BOOL"));
   return H.mkSimpleCall("not", [expr]);
 }
 
@@ -665,8 +839,13 @@ function compileRandom(e: Environment, b: B.Block): J.JExpr {
   return H.mathCall("random", [H.mkNumberLiteral(parseInt(b.getFieldValue("limit")))]);
 }
 
-function defaultValueForType(t: Type): J.JExpr {
-  switch (t) {
+function defaultValueForType(t: Point): J.JExpr {
+  if (t.type == null) {
+    union(t, ground(Type.Number));
+    t = find(t);
+  }
+
+  switch (t.type) {
     case Type.Boolean:
       return H.mkBooleanLiteral(false);
     case Type.Number:
@@ -681,20 +860,10 @@ function defaultValueForType(t: Type): J.JExpr {
 
 // [t] is the expected type; in case the block was actually not there (i.e.
 // [b == null]), we may be able to provide a default value.
-function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
-  // Happens if we couldn't infer the type for a variable.
-  if (t == null)
-    throwBlockError("I can't figure out the type of this block", b);
-
-  if (b == null || b.disabled)
-    return defaultValueForType(t);
-
-  var actualType = inferType(e, b);
-  // A variable is the only case where a null type is actually ok, it means that
-  // we haven't determined the type of the variable. It will be determined to be
-  // [t], now.
-  if (t != actualType && b.type != "variables_get")
-    throwBlockError("We need "+typeToString(t)+" here, but we got "+typeToString(actualType), b);
+function compileExpression(e: Environment, b: B.Block): J.JExpr {
+  assert(b != null);
+  if (b.disabled || b.type == "placeholder")
+    return defaultValueForType(returnType(e, b));
 
   switch (b.type) {
     case "math_number":
@@ -707,18 +876,14 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
       return compileRandom(e, b);
     case "math_arithmetic":
     case "logic_compare":
-      // The third argument for [compileArithmetic] is the expected type of the
-      // *operands*. Since "=" and "!=" are "polymorphic", we don't know ahead
-      // of time the type of the operands in this case.
-      return compileArithmetic(e, b, null);
     case "logic_operation":
-      return compileArithmetic(e, b, Type.Boolean);
+      return compileArithmetic(e, b);
     case "logic_boolean":
       return compileBoolean(e, b);
     case "logic_negate":
       return compileNot(e, b);
     case "variables_get":
-      return compileVariableGet(e, b, t);
+      return compileVariableGet(e, b);
     case "text":
       return compileText(e, b);
     case 'device_build_image':
@@ -730,7 +895,7 @@ function compileExpression(e: Environment, b: B.Block, t: Type): J.JExpr {
         return compileStdCall(e, b, stdCallTable[b.type]);
       else {
         console.error("Unable to compile expression: "+b.type);
-        return defaultValueForType(t);
+        return defaultValueForType(returnType(e, b));
       }
   }
 }
@@ -747,7 +912,7 @@ interface Environment {
 
 interface Binding {
   name: string;
-  type: Type;
+  type: Point;
   isForVariable?: boolean;
   incompatibleWithFor?: boolean;
 }
@@ -759,7 +924,7 @@ function isCompiledAsLocal(b: Binding) {
 function extend(e: Environment, x: string, t: Type): Environment {
   assert(lookup(e, x) == null);
   return {
-    bindings: [{ name: x, type: t }].concat(e.bindings)
+    bindings: [{ name: x, type: ground(t) }].concat(e.bindings)
   };
 }
 
@@ -790,7 +955,7 @@ function compileControlsIf(e: Environment, b: B.IfBlock): J.JStmt[] {
   var stmts: J.JIf[] = [];
   // Notice the <= (if there's no else-if, we still compile the primary if).
   for (var i = 0; i <= b.elseifCount_; ++i) {
-    var cond = compileExpression(e, b.getInputTargetBlock("IF"+i), Type.Boolean);
+    var cond = compileExpression(e, b.getInputTargetBlock("IF"+i));
     var thenBranch = compileStatements(e, b.getInputTargetBlock("DO"+i));
     stmts.push(H.mkSimpleIf(H.mkExprHolder([], cond), thenBranch));
     if (i > 0)
@@ -831,7 +996,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
       // FOR 0 <= VAR
       H.mkFor(bVar,
         // < TO + 1 DO
-        H.mkExprHolder([], H.mkSimpleCall("+", [compileExpression(e, bTo, Type.Number), H.mkNumberLiteral(1)])),
+        H.mkExprHolder([], H.mkSimpleCall("+", [compileExpression(e, bTo), H.mkNumberLiteral(1)])),
         compileStatements(e, bDo))
     ];
   else {
@@ -840,7 +1005,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
     var local = fresh(e, "bound");
     e = extend(e, local, Type.Number);
     var eLocal = H.mkLocalRef(local);
-    var eTo = compileExpression(e, bTo, Type.Number);
+    var eTo = compileExpression(e, bTo);
     var eVar = H.mkGlobalRef(bVar);
     var eBy = H.mkNumberLiteral(1);
     var eFrom = H.mkNumberLiteral(0);
@@ -869,7 +1034,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 }
 
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
-  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"), Type.Number);
+  var bound = compileExpression(e, b.getInputTargetBlock("TIMES"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
   var valid = (x: string) => !lookup(e, x) || !isCompiledAsLocal(lookup(e, x));
   var name = "i";
@@ -879,7 +1044,7 @@ function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
-  var cond = compileExpression(e, b.getInputTargetBlock("COND"), Type.Boolean);
+  var cond = compileExpression(e, b.getInputTargetBlock("COND"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
   return H.mkWhile(H.mkExprHolder([], cond), body);
 }
@@ -891,7 +1056,7 @@ function compileForever(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compilePrint(e: Environment, b: B.Block): J.JStmt {
-  var text = compileExpression(e, b.getInputTargetBlock("TEXT"), Type.String);
+  var text = compileExpression(e, b.getInputTargetBlock("TEXT"));
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall("post to wall", [text])));
 }
 
@@ -899,7 +1064,7 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
   var bVar = b.getFieldValue("VAR");
   var bExpr = b.getInputTargetBlock("VALUE");
   var binding = lookup(e, bVar);
-  var expr = compileExpression(e, bExpr, binding.type);
+  var expr = compileExpression(e, bExpr);
   var ref = isCompiledAsLocal(binding) ? H.mkLocalRef(bVar) : H.mkGlobalRef(bVar);
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, expr])));
 }
@@ -907,18 +1072,10 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
 function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
   var args = func.args.map((p: string) => {
     var f = b.getFieldValue(p);
-    if (f) {
+    if (f)
       return H.mkStringLiteral(f);
-    } else {
-      // Lookup the block's input, then its type check. This allows us to
-      // propagate the expected type downwards.
-      var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
-      // This will throw if someone modified blocks-custom.js and forgot to add
-      // [setCheck]s in the block definition. This is intentional and MUST be
-      // fixed, otherwise type-checking will fail elsewhere.
-      var t = toType(i.connection.check_[0]);
-      return compileExpression(e, b.getInputTargetBlock(p), t)
-    }
+    else
+      return compileExpression(e, b.getInputTargetBlock(p))
   });
   if (func.isExtensionMethod) {
     return H.extensionCall(func.f, args);
@@ -934,7 +1091,7 @@ function compileStdBlock(e: Environment, b: B.Block, f: StdFunc) {
 }
 
 function compileComment(e: Environment, b: B.Block): J.JStmt {
-  var arg = compileExpression(e, b.getInputTargetBlock("comment"), Type.String);
+  var arg = compileExpression(e, b.getInputTargetBlock("comment"));
   assert(arg.nodeType == "stringLiteral");
   return H.mkComment((<J.JStringLiteral> arg).value);
 }
@@ -1182,12 +1339,11 @@ function findParent(b: B.Block) {
   return isActualInput && candidate || null;
 }
 
-// This function does two things:
-// - it examines loop variable dereferences and assignments, to figure out
-//   whether uses of a for-loop index are compatible with the TouchDevelop
-//   for-loop model;
-// - it performs type inference for variables (see comments on our "type system"
-//   above).
+// This function creates an empty environment where type inference has NOT yet
+// been performed.
+// - All variables have been assigned an initial [Point] in the union-find.
+// - Variables have been marked to indicate if they are compatible with the
+//   TouchDevelop for-loop model.
 function mkEnv(w: B.Workspace): Environment {
   // The to-be-returned environment.
   var e = empty;
@@ -1207,8 +1363,6 @@ function mkEnv(w: B.Workspace): Environment {
     }
   });
 
-  // Auxiliary check: check that all references to a for-bound variable within
-  // the scope of the loop.
   var variableIsScoped = (b: B.Block, name: string): boolean => {
     if (!b)
       return false;
@@ -1219,69 +1373,47 @@ function mkEnv(w: B.Workspace): Environment {
       return variableIsScoped(findParent(b), name);
   };
 
-  // This is really a dumb way to do type-inference, but well, I don't expect
-  // users to write terribly complicated programs (famous last words?).
-  var notInferred = 0;
-  var oneRound = () => {
-    var notInferred = 0;
-    // Second pass: try to infer the type of each binding if we can. If a loop
-    // variable is assigned elsewhere, flag it, because it means we won't be
-    // able to compile it as a TouchDevelop for-loop.
-    w.getAllBlocks().forEach((b: B.Block) => {
-      if (b.type == "variables_set") {
-        var x = b.getFieldValue("VAR");
-        if (lookup(e, x) == null)
-          e = extend(e, x, null);
+  // Last series of checks to determine for-loop compatibility: for each get or
+  // set block, 1) make sure that the variable is bound, then 2) mark the
+  // variable if needed.
+  w.getAllBlocks().forEach((b: B.Block) => {
+    if (b.type == "variables_set") {
+      var x = b.getFieldValue("VAR");
+      if (lookup(e, x) == null)
+        e = extend(e, x, null);
 
-        // If this is something we won't know how to compile, don't bother. Error
-        // will be flagged later.
-        var t = inferType(e, b.getInputTargetBlock("VALUE"));
-        if (t == null) {
-          notInferred++;
-          return;
-        }
+      var binding = lookup(e, x);
+      if (binding.isForVariable)
+        // Second reason why we can't compile as a TouchDevelop for-loop: loop
+        // index is assigned to
+        binding.incompatibleWithFor = true;
+    } else if (b.type == "variables_get") {
+      var x = b.getFieldValue("VAR");
+      if (lookup(e, x) == null)
+        e = extend(e, x, null);
 
-        // Add a binding, if needed. The strategy is "first type we can infer
-        // wins". Again, errors will be flagged later when compiling an
-        // assignment.
-        var binding = lookup(e, x);
-        if (binding.type == null)
-          binding.type = t;
-        if (binding && binding.isForVariable)
-          // Second reason why we can't compile as a TouchDevelop for-loop: loop
-          // index is assigned to
-          binding.incompatibleWithFor = true;
-      } else if (b.type == "variables_get") {
-        var x = b.getFieldValue("VAR");
-        if (lookup(e, x) == null)
-          e = extend(e, x, null);
-
-        var binding = lookup(e, x);
-        if (binding.isForVariable && !variableIsScoped(b, x))
-          // Third reason why we can't compile to a TouchDevelop for-loop: loop
-          // index is read outside the loop.
-          binding.incompatibleWithFor = true;
-      }
-    });
-    return notInferred;
-  };
-
-  // Fixpoint computation.
-  while (notInferred != (notInferred = oneRound()));
+      var binding = lookup(e, x);
+      if (binding.isForVariable && !variableIsScoped(b, x))
+        // Third reason why we can't compile to a TouchDevelop for-loop: loop
+        // index is read outside the loop.
+        binding.incompatibleWithFor = true;
+    }
+  });
 
   return e;
 }
 
-function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
+function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
   var decls: J.JDecl[] = [];
-  var e = mkEnv(b);
+  var e = mkEnv(w);
+  infer(e, w);
 
   // [stmtsHandlers] contains calls to register event handlers. They must be
   // executed before the code that goes in the main function, as that latter
   // code may block, and prevent the event handler from being registered.
   var stmtsHandlers: J.JStmt[] = [];
   var stmtsMain: J.JStmt[] = [];
-  b.getTopBlocks(true).forEach((b: B.Block) => {
+  w.getTopBlocks(true).forEach((b: B.Block) => {
     if (isHandlerRegistration(b))
       append(stmtsHandlers, compileStatements(e, b));
     else
@@ -1290,21 +1422,13 @@ function compileWorkspace(b: B.Workspace, options: CompileOptions): J.JApp {
 
   decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
 
-  // Code generation is intertwined with type inference, so it may be the case
-  // that while generating code, we figured out the type of some variables, so
-  // generate variable declarations at the last minute. If there's still some
-  // variables whose type is unknown, that's an error, sorry. (Happens in rare
-  // cases where there's a lone "variables_get" block.)
-  var undetermined = e.bindings.filter((b: Binding) => b.type == null);
-  if (undetermined.length > 0)
-    throw new Error("I could not determine the type of variable "+undetermined[0].name+". "+
-        "This may cause further errors below. "+
-        "Please assign an initial value to "+undetermined[0].name+".");
   e.bindings.forEach((b: Binding) => {
     if (!isCompiledAsLocal(b)) {
-      decls.unshift(H.mkVarDecl(b.name, toTdType(b.type)));
+      decls.unshift(H.mkVarDecl(b.name, toTdType(find(b.type).type)));
     }
   });
+
+  removeAllPlaceholders(w);
 
   return H.mkApp(options.name, options.description, decls);
 }

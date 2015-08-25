@@ -98,16 +98,16 @@ module TDev
             calc.hideBottomScroller();
         }
 
-        public mkBox()
+        public mkBox(options?: DeclBoxOptions) : HTMLElement
         {
             var box:HTMLElement = null;
-            if (this.decl) box = DeclRender.mkBox(this.decl);
+            if (this.decl) box = DeclRender.mkBox(this.decl, options);
             else if (this.prop) {
                 if (!this.isAttachedTo) {
-                    box = DeclRender.mkPropBox(this.prop);
+                    box = DeclRender.mkPropBox(this.prop, options);
                 } else {
                     this.prop.useFullName = true;
-                    box = DeclRender.mkPropBox(this.prop);
+                    box = DeclRender.mkPropBox(this.prop, options);
                     this.prop.useFullName = false;
                 }
             }

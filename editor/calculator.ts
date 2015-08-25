@@ -1853,15 +1853,6 @@ module TDev
                 }
             });
 
-            /*
-            d = new DeclEntry("nothing; i'll do it myself");
-            d.color = "#E72A59";
-            d.description = "you will need to fix the code";
-            boxes.push(d.mkBox().withClick(() => {
-                finish([AST.mkPlaceholderByKind(k)])
-            }));
-            */
-
             m.choose(boxes, { header: "Bind to:" });
 
             if (this.currentInstruction) {
