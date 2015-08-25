@@ -10190,6 +10190,7 @@
                 var nm = u.name
                 var labs = u.labels.map(l => l.name).join(", ")
                 if (labs) nm += " (" + labs + ")"
+                numbers.setChildren(labs ? [div("sdNumber", " ★")] : [])
                 nameBlock.setChildren([ nm ])
                 author.setChildren([u.username]);
                 addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(u.time)]);
