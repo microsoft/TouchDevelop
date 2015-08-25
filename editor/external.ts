@@ -467,6 +467,13 @@ module TDev {
       pubId: string;
     };
 
+    window.addEventListener("resize", () => {
+      if (TheChannel)
+        TheChannel.post({
+          type: MessageType.Resized,
+        });
+    });
+
     // The [scriptVersionInCloud] name is the one that's used by [world.ts];
     // actually, it hasn't much to do, really, with the script version
     // that's in the cloud. It's more of an unused field (in the new "lite

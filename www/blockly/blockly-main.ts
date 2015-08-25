@@ -40,6 +40,8 @@ module TDev {
     receive(<External.Message>event.data);
   });
 
+  var onResize = () => {};
+
   function receive(message: External.Message) {
     console.log("[inner message]", message);
 
@@ -48,6 +50,10 @@ module TDev {
         setupEditor(<External.Message_Init> message);
         setupButtons((<External.Message_Init> message).fota);
         setupCurrentVersion(<External.Message_Init> message);
+        break;
+
+      case External.MessageType.Resized:
+        onResize();
         break;
 
       case External.MessageType.SaveAck:
@@ -325,7 +331,7 @@ module TDev {
         scaleSpeed: 1.1
       },
     });
-    var onResize = () => {
+    onResize = () => {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;
       var x = 0;

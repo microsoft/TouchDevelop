@@ -20,6 +20,7 @@ module TDev {
             Compile, CompileAck,
             Merge, Quit, // [Quit] has no attached data, so not defining a special interface
             Upgrade, Run,
+            Resized,
             NewBaseVersion
         };
 
