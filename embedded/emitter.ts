@@ -92,6 +92,23 @@ module TDev {
         return env.indent + this.visit(env, expr)+";";
       }
 
+      public visitInlineActions(env: EmitterEnv, expr: J.JExprHolder, actions: J.JInlineAction[]) {
+        var map = {};
+        expr.locals.forEach((l: J.JLocalDef) => { map[l.id] = l.name });
+        var lambdas = actions.map((a: J.JInlineAction) => {
+          var n = H.mangleUnique(env, map[a.reference.id], a.reference.id);
+          return (
+            env.indent + "auto "+n+"_ = "+
+              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
+            env.indent + "auto "+n+" = new std::function<"+
+                H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
+              ">("+n+"_);"
+          );
+        });
+        return (lambdas.join("\n")+"\n"+
+          env.indent + this.visit(env, expr.tree) + ";");
+      }
+
       public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
         var decls = locals.map(d => {
           var x = H.defaultValueForType(this.libraryMap, d.type);
@@ -387,7 +404,9 @@ module TDev {
         id: string,
         inParams: J.JLocalDef[],
         outParams: J.JLocalDef[],
-        body: J.JStmt[])
+        body: J.JStmt[],
+        isPrivate,
+        isLambda=false)
       {
         // This function is always called with H.willCompile == true, meaning
         // it's not a shim.
@@ -402,8 +421,8 @@ module TDev {
         ].filter(x => x != "").join("\n");
         // The name of a function is unique per library, so don't go through
         // [mangleUnique].
-        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams);
-        return env.indent + head + " {\n" + bodyText + "\n"+env.indent+"}";
+        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams, isLambda);
+        return (isLambda ? "" : env.indent) + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
       private compileImageLiterals(e: EmitterEnv) {

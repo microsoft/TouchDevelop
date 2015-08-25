@@ -405,6 +405,7 @@ module TDev.Browser {
                     hideMyScriptHeader: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
+                    tutorialGoToPreviousStep: true,
                 }
             },
         },
@@ -444,6 +445,7 @@ module TDev.Browser {
                     "break": true,
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
+                    tutorialGoToPreviousStep: true,
                 }
             },
         },
@@ -482,6 +484,7 @@ module TDev.Browser {
                     "break": true,
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
+                    tutorialGoToPreviousStep: true,
                     
                     // for docs
                     artSection: true,
@@ -551,6 +554,8 @@ module TDev.Browser {
                     scriptPropertiesManagement: true,
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
+                    tutorialGoToPreviousStep: true,
+                
                     //MORE
                     
                     // teacher specific

@@ -459,7 +459,7 @@ module TDev
                     }],
                     addOne: addEvent,
                 }, <ThingSection>{
-                    label: lf("vars"),
+                    label: lf("global vars"),
                     widget: "dataSection",
                     initiallyHidden: AST.blockMode,
                     things: vars.filter((v) => !v.isResource),

@@ -174,7 +174,7 @@
             this.rightPane.withClick(() => this.hideSidePane(), true);
             this.listHeaderHider.withClick(() => this.hideSidePane());
 
-            this.setBackButton();
+            this.setBackButton();            
             this.initMeAsync().done(() => { }, () => { });
 
             if (dbg) bugsEnabled = true;
@@ -229,7 +229,17 @@
                 } catch (e) {
                 }
         }
-
+        
+        private initCachedScripts(): Promise {            
+            var cached = Cloud.config.cachedScripts;
+            if (cached)
+                return Promise.join(cached.map(id =>
+                        External.pullLatestLibraryVersion(id)
+                        .then(scriptid => World.getAnyScriptAsync(scriptid))
+                    ));
+            return Promise.as();
+        }
+        
         public initMeAsync(): Promise {
             var id = Cloud.getUserId();
             if (!id) {
@@ -237,6 +247,7 @@
                 return Promise.as();
             }
             this.initBadgeTag();
+            this.initCachedScripts().done(() => { }, () => { });
             if (!Cloud.lite)
                 TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
                     (<any>window).userName = u.name;
@@ -1801,6 +1812,12 @@
                             this.syncView(false)
                         })]);
                     }
+                    
+                    if (!ncont && /^installed/.test(path) && this.topLocations.length == 0) {
+                        this.moreDiv.setChildren([div("sdLoadingMore",
+                            lf("no scripts yet, try a "), HTML.mkA('', '/tutorials', '', lf("tutorial")), lf(" to get started!"))]);    
+                    }
+                    
                 }, noCache, includeETags);
             }
 
