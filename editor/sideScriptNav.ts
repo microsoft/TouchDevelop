@@ -238,7 +238,7 @@ module TDev
             var debugMode = TheEditor.isDebuggerMode();
 
             var declIt = (decl:AST.Decl) => {
-                var d = DeclRender.mkBox(decl);
+                var d = DeclRender.mkBox(decl, { namespace: true, signature: true });
                 (<any> d).itemIndex = items.length;
                 Util.clickHandler(d, () => this.goToDecl(decl));
                 d.setAttribute("data-stablename", decl.getStableName());
@@ -352,19 +352,6 @@ module TDev
 
             if (!debugMode)
                 items.push(this.scriptButtons(Script, false, !!TheEditor.parentScript));
-
-
-            /*
-            var tp = TheEditor.clipMgr.pasteType();
-            if (tp == "tokens" || tp == "block" || tp == "decls") {
-                var it = new DeclEntry("paste");
-                it.description = tp == "block" ? "copied lines as a new function" : "copied declaration(s)";
-                it.makeIntoAddButton();
-                var ee = it.mkBox();
-                ee.withClick(() => { tick(Ticks.sidePaste); TheEditor.pasteNode() });
-                items.push(ee);
-            }
-            */
 
             var addNode = (t:Ticks, n:AST.Decl) =>
             {
@@ -545,7 +532,7 @@ module TDev
                         var d = ds.decl;
                         var dname = (d instanceof AST.RecordDef) ? (<AST.RecordDef> d).getCoreName() : d.getName();
                         d.setName(ds.displayName);
-                        var b = DeclRender.mkBox(d);
+                        var b = DeclRender.mkBox(d, { namespace: true });
                         boxes.push(b);
                         (<any>b).theDesc.setChildren(ds.description);
                         (<any>b).initiallyHidden = !!sect.initiallyHidden || !!(<any>ds).initiallyHidden;

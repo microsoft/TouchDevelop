@@ -19,12 +19,12 @@ module TDev
         public nodeType() { return this.decl.nodeType(); }
         public getName() { return this.decl.getName(); } // for sorting
 
-        public mkBox()
+        public mkBox(options?: DeclBoxOptions) : HTMLElement
         {
-            if (!this.stmt) return DeclRender.mkBox(this.decl);
+            if (!this.stmt) return DeclRender.mkBox(this.decl, options);
 
             var res = DeclRender.mkBoxEx(this.decl, this.isLibrary ? "codeLocationLib" :
-                                                      this.isCurrAction ? "codeLocationCurr" : "codeLocation");
+                                                      this.isCurrAction ? "codeLocationCurr" : "codeLocation", options);
             var descDiv = <HTMLElement> (<any>res).theDesc;
             Browser.setInnerHTML(descDiv, TheEditor.auxRenderer.dispatch(this.stmt));
 
