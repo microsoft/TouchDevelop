@@ -144,7 +144,7 @@
         private topTitle = "???";
         private lastSearchValue = "";
         private shownSomething = false;
-        public treatAsScript:any = {};
+        public treatAsScript: StringMap<boolean> = {};
 
         public clearMeAsync(logout: boolean): Promise {
             Browser.TheApiCacheMgr.invalidate("me");
