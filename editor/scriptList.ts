@@ -1812,6 +1812,12 @@
                             this.syncView(false)
                         })]);
                     }
+                    
+                    if (!ncont && /^installed/.test(path) && this.topLocations.length == 0) {
+                        this.moreDiv.setChildren([div("sdLoadingMore",
+                            lf("no scripts yet, try a "), HTML.mkA('', '/tutorials', '', lf("tutorial")), lf(" to get started!"))]);    
+                    }
+                    
                 }, noCache, includeETags);
             }
 
