@@ -2390,6 +2390,7 @@ module TDev.AST {
         public libNamespaceCache = new LibNamespaceCache(this);
         public blockExternalLinks:boolean = undefined;
         public entireShim = false;
+        public _forcedUpdate:string;
 
         public recompiler:Compiler;
         public recompiledScript:CompiledScript;

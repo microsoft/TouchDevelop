@@ -5477,7 +5477,7 @@ module TDev
         {
             var num = 0;
             Script.libraries().forEach((l) => {
-                if (l.isPublished())
+                if (l.isPublished() && !ScriptCache.forcedUpdate(l.getId()))
                     Browser.TheApiCacheMgr.getAnd(l.getId(), (j:JsonScript) => {
                         var upd = null;
                         if (j.updateid && j.updateid != j.id && j.updatetime > j.time) upd = j.updateid;
@@ -5885,8 +5885,16 @@ module TDev
 
             if (l.guid)
                 entry.loading = World.getInstalledScriptAsync(l.guid).then(getApp);
-            else
-                entry.loading = ScriptCache.getScriptAsync(l.pubid).then(getApp);
+            else {
+                var forced = ScriptCache.forcedUpdate(l.pubid)
+                if (forced) {
+                    var app = getApp(forced.text)
+                    app._forcedUpdate = forced.json.id
+                    entry.loading = Promise.as(app);
+                }
+                else
+                    entry.loading = ScriptCache.getScriptAsync(l.pubid).then(getApp);
+            }
             return entry.loading;
         }
 

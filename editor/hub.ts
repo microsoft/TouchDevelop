@@ -1476,13 +1476,15 @@ module TDev.Browser {
                     if (/^\w+$/.test(h[2])) {
                         ProgressOverlay.show(lf("loading template"), () => {
                             var scriptid = h[2];
+                            var forced = ScriptCache.forcedUpdate(scriptid);
+                            (forced ? Promise.as([forced.json, forced.text]) :
                             TheApiCacheMgr.getAsync(scriptid, true)
                                 .then((scr: JsonScript) => {
                                 if (scr && scr.updateid != scr.id) scriptid = scr.updateid;
                                 return Promise.join([
                                     TheApiCacheMgr.getAsync(scriptid),
                                     ScriptCache.getScriptAsync(scriptid)]);
-                            }).done(arr => {
+                            })).done(arr => {
                                 var scr: JsonScript = arr[0]
                                 var txt: string = arr[1]
                                 if (!scr || !txt) {
@@ -1500,7 +1502,7 @@ module TDev.Browser {
                                     section: "",
                                     editorMode: 0,
                                     editor: scr.editor || "touchdevelop",
-                                    baseId: h[1] == "device" ? scr.id : "",
+                                    baseId: h[1] == "derive" ? scr.id : "",
                                     baseUserId: scr.userid,
                                     updateLibraries: true
                                 }

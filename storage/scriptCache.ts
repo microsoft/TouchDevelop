@@ -34,11 +34,28 @@ module TDev {
                 .then((table:Storage.Table) => table.setItemsAsync(storage.scriptCache))
         }
 
+        export function forcedUpdate(id: string): { text: string; json: any; }
+        {
+            var libCache = (<any>TDev).shippedLibraryCache
+            if (!libCache) return null
+
+            if (libCache && libCache.updates.hasOwnProperty(id)) {
+                id = libCache.updates[id]
+                return { json: libCache.json[id], text: libCache.text[id] }
+            }
+
+            return null
+        }
+
         export function getScriptAsync(id: string) : Promise // of string
         {
             if (!Util.check(!!id)) return Promise.as("");
 
             if (shippedScripts.hasOwnProperty(id)) return Promise.as(shippedScripts[id]);
+
+            var libCache = (<any>TDev).shippedLibraryCache
+            if (libCache && libCache.text.hasOwnProperty(id))
+                return Promise.as(libCache.text[id])
 
             return getScriptCacheTableAsync()
                 .then((table) => table.getValueAsync("id-" + id))

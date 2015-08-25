@@ -105,6 +105,9 @@ module TDev {
     }
 
     export function pullLatestLibraryVersion(pubId: string): Promise { // of string
+      var forced = ScriptCache.forcedUpdate(pubId)
+      if (forced) return Promise.as(forced.text)
+
       return Browser.TheApiCacheMgr.getAsync(pubId, Cloud.isOffline())
         .then((script: JsonScript) => {
           if (script) {

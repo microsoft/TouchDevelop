@@ -230,16 +230,6 @@
                 }
         }
         
-        private initCachedScripts(): Promise {            
-            var cached = Cloud.config.cachedScripts;
-            if (cached)
-                return Promise.join(cached.map(id =>
-                        External.pullLatestLibraryVersion(id)
-                        .then(scriptid => World.getAnyScriptAsync(scriptid))
-                    ));
-            return Promise.as();
-        }
-        
         public initMeAsync(): Promise {
             var id = Cloud.getUserId();
             if (!id) {
@@ -247,7 +237,6 @@
                 return Promise.as();
             }
             this.initBadgeTag();
-            this.initCachedScripts().done(() => { }, () => { });
             if (!Cloud.lite)
                 TheApiCacheMgr.getAnd("me", (u: JsonUser) => {
                     (<any>window).userName = u.name;
