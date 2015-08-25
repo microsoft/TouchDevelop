@@ -1051,7 +1051,7 @@ module TDev
             if ((<any>prop)._extensionAction) prop = (<any>prop)._extensionAction;            
             var propi = <IPropertyWithNamespaces>prop;            
             var isExtension = propi.isExtensionAction && propi.isExtensionAction();            
-            var params = prop.getParameters();
+            var params = prop.getParameters().slice(0);
             var hd = "";            
             if (withKeyword)           
                 hd += this.kw("function ");
