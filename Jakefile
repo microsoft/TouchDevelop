@@ -118,7 +118,7 @@ function mkSimpleTask(production, dependencies, target) {
 // A series of compile-and-run rules that generate various files for the build
 // system.
 function runAndComplete(cmds, task) {
-    jake.exec(cmds, {}, function() {
+    jake.exec(cmds, { printStdout: true, printStderr: true }, function() {
         task.complete();
     });
 }
@@ -126,17 +126,13 @@ function runAndComplete(cmds, task) {
 mkSimpleTask('build/genmeta.js', [ 'editor', 'tools', 'generated/help.cache' ], "tools/genmeta.ts");
 file('build/api.js', expand([ "build/genmeta.js", "lib" ]), { async: true }, function () {
     console.log("[P] generating build/api.js, localization.json and topiclist.json");
-    runAndComplete([
-        "node build/genmeta.js",
-    ], this);
+    runAndComplete(["node build/genmeta.js"], this);
 });
 
 mkSimpleTask('build/addCssPrefixes.js', [ 'tools' ], "tools/addCssPrefixes.ts");
 task('css-prefixes', [ "build/addCssPrefixes.js" ], { async: true }, function () {
     console.log("[P] modifying in-place all css files");
-    runAndComplete([
-        "node build/addCssPrefixes.js"
-    ], this);
+    runAndComplete(["node build/addCssPrefixes.js"], this);
 });
 
 mkSimpleTask('build/shell.js', [ 'shell/shell.ts' ], "shell/shell.ts");
@@ -404,18 +400,14 @@ task('info', [], { async: true }, function () {
       assert(process.env.TD_UPLOAD_KEY, "missing touchdevelop upload key TD_UPLOAD_KEY");
   }
 
-  jake.exec([ 'tsc --version' ],
-    { printStdout: true, printStderr: true },
-    function() { task.complete(); });
+  runAndComplete(['tsc --version'], this);
 });
 
 desc('run local test suite')
 task('test', [ 'info', 'build/client.js', 'default' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
-  jake.exec([ 'node build/client.js buildtest' ],
-    { printStdout: true, printStderr: true },
-    function() { task.complete(); });
+  runAndComplete(['node build/client.js buildtest'], this);
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
@@ -431,9 +423,7 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
     }
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
-    jake.exec(procs,
-      { printStdout: true, printStderr: true },
-      function() { task.complete(); });
+    runAndComplete(procs, this);
   };
   if (!process.env.TRAVIS) {
     upload(process.env.TD_UPLOAD_USER || process.env.USERNAME);
@@ -463,11 +453,7 @@ task('local', [ 'default' ], { async: true }, function() {
   var node = "node"
   if (process.env.TD_SHELL_DEBUG)
     node = "node-debug"
-  jake.exec(
-    [ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. ' + (process.env.TD_SHELL_ARGS || "") ],
-    { printStdout: true, printStderr: true },
-    function() { task.complete(); }
-  );
+  runAndComplete([ node + ' tdserver.js --cli TD_ALLOW_EDITOR=true TD_LOCAL_EDITOR_PATH=../.. ' + (process.env.TD_SHELL_ARGS || "") ],  this);
 });
 
 task('nw', ['default', 'nw-npm'], { async: true }, function() {
@@ -476,12 +462,9 @@ task('nw', ['default', 'nw-npm'], { async: true }, function() {
 
 task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
   var task = this;
-  jake.exec(
+  runAndComplete(
     [ 'node build/client.js updatehelp',
-      'node build/client.js updatelang' ],
-    { printStdout: true, printStderr: true },
-    function() { task.complete(); }
-  );
+      'node build/client.js updatelang'], this);
 });
 
 
@@ -535,5 +518,9 @@ task('cordova', [ 'default' ], {}, function () {
    'www/default.css',
    'www/editor.css'].forEach(function (f) { jake.cpR(f, 'build/cordova/'); });
 });
+
+task('update-libs', ["build/client.js"], { async:true}, function () {
+  runAndComplete(['node build/client fetchlibraries'], this);  
+})
 
 // vim: ft=javascript
