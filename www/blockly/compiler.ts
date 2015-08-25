@@ -628,108 +628,115 @@ function unionParam(e: Environment, b: B.Block, n: string, p: Point) {
 
 function infer(e: Environment, w: B.Workspace) {
   w.getAllBlocks().forEach((b: B.Block) => {
-    switch (b.type) {
-      case "math_op2":
-        unionParam(e, b, "x", ground(Type.Number));
-        unionParam(e, b, "y", ground(Type.Number));
-        break;
+    try {
+      switch (b.type) {
+        case "math_op2":
+          unionParam(e, b, "x", ground(Type.Number));
+          unionParam(e, b, "y", ground(Type.Number));
+          break;
 
-      case "math_op3":
-        unionParam(e, b, "x", ground(Type.Number));
-        break;
+        case "math_op3":
+          unionParam(e, b, "x", ground(Type.Number));
+          break;
 
-      case "math_arithmetic":
-      case "logic_compare":
-        switch (b.getFieldValue("OP")) {
-          case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
-          case "LT": case "LTE": case "GT": case "GTE": case "POWER":
-            unionParam(e, b, "A", ground(Type.Number));
-            unionParam(e, b, "B", ground(Type.Number));
-            break;
-          case "AND": case "OR":
-            unionParam(e, b, "A", ground(Type.Boolean));
-            unionParam(e, b, "B", ground(Type.Boolean));
-            break;
-          case "EQ": case "NEQ":
-            attachPlaceholderIf(b, "A");
-            attachPlaceholderIf(b, "B");
-            var p1 = returnType(e, b.getInputTargetBlock("A"));
-            var p2 = returnType(e, b.getInputTargetBlock("B"));
-            try {
-              union(p1, p2);
-            } catch (e) {
-              throwBlockError("Comparing objects of different types", b);
-            }
-            var t = find(p1).type;
-            if (t != Type.String && t != Type.Boolean && t != Type.Number && t != null)
-              throwBlockError("I can only compare strings, booleans and numbers", b);
-            break;
-        }
-        break;
-
-      case "logic_operation":
-        unionParam(e, b, "A", ground(Type.Boolean));
-        unionParam(e, b, "B", ground(Type.Boolean));
-        break;
-
-      case "logic_negate":
-        unionParam(e, b, "BOOL", ground(Type.Boolean));
-        break;
-
-      case "controls_if":
-        for (var i = 0; i <= (<B.IfBlock> b).elseifCount_; ++i)
-          unionParam(e, b, "IF"+i, ground(Type.Boolean));
-        break;
-
-      case "controls_simple_for":
-        unionParam(e, b, "TO", ground(Type.Number));
-        break;
-
-      case "text_print":
-        unionParam(e, b, "TEXT", ground(Type.String));
-        break;
-
-      case "variables_set":
-        var x = b.getFieldValue("VAR");
-        var p1 = lookup(e, x).type;
-        attachPlaceholderIf(b, "VALUE");
-        var rhs = b.getInputTargetBlock("VALUE");
-        if (rhs) {
-          var tr = returnType(e, rhs);
-          try {
-            union(p1, tr);
-          } catch (e) {
-            throwBlockError("Assigning a value of the wrong type to variable "+x, b);
+        case "math_arithmetic":
+        case "logic_compare":
+          switch (b.getFieldValue("OP")) {
+            case "ADD": case "MINUS": case "MULTIPLY": case "DIVIDE":
+            case "LT": case "LTE": case "GT": case "GTE": case "POWER":
+              unionParam(e, b, "A", ground(Type.Number));
+              unionParam(e, b, "B", ground(Type.Number));
+              break;
+            case "AND": case "OR":
+              unionParam(e, b, "A", ground(Type.Boolean));
+              unionParam(e, b, "B", ground(Type.Boolean));
+              break;
+            case "EQ": case "NEQ":
+              attachPlaceholderIf(b, "A");
+              attachPlaceholderIf(b, "B");
+              var p1 = returnType(e, b.getInputTargetBlock("A"));
+              var p2 = returnType(e, b.getInputTargetBlock("B"));
+              try {
+                union(p1, p2);
+              } catch (e) {
+                throwBlockError("Comparing objects of different types", b);
+              }
+              var t = find(p1).type;
+              if (t != Type.String && t != Type.Boolean && t != Type.Number && t != null)
+                throwBlockError("I can only compare strings, booleans and numbers", b);
+              break;
           }
-        }
-        break;
+          break;
 
-      case "controls_comment":
-        unionParam(e, b, "comment", ground(Type.String));
-        break;
+        case "logic_operation":
+          unionParam(e, b, "A", ground(Type.Boolean));
+          unionParam(e, b, "B", ground(Type.Boolean));
+          break;
 
-      case "controls_repeat_ext":
-        unionParam(e, b, "TIMES", ground(Type.Number));
-        break;
+        case "logic_negate":
+          unionParam(e, b, "BOOL", ground(Type.Boolean));
+          break;
 
-      case "controls_while":
-        unionParam(e, b, "COND", ground(Type.Boolean));
-        break;
+        case "controls_if":
+          for (var i = 0; i <= (<B.IfBlock> b).elseifCount_; ++i)
+            unionParam(e, b, "IF"+i, ground(Type.Boolean));
+          break;
 
-      default:
-        if (b.type in stdCallTable) {
-          stdCallTable[b.type].args.forEach((p: string) => {
-            if (!b.getFieldValue(p)) {
-              var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
-              // This will throw if someone modified blocks-custom.js and forgot to add
-              // [setCheck]s in the block definition. This is intentional and MUST be
-              // fixed.
-              var t = toType(i.connection.check_[0]);
-              unionParam(e, b, p, ground(t));
+        case "controls_simple_for":
+          unionParam(e, b, "TO", ground(Type.Number));
+          break;
+
+        case "text_print":
+          unionParam(e, b, "TEXT", ground(Type.String));
+          break;
+
+        case "variables_set":
+          var x = b.getFieldValue("VAR");
+          var p1 = lookup(e, x).type;
+          attachPlaceholderIf(b, "VALUE");
+          var rhs = b.getInputTargetBlock("VALUE");
+          if (rhs) {
+            var tr = returnType(e, rhs);
+            try {
+              union(p1, tr);
+            } catch (e) {
+              throwBlockError("Assigning a value of the wrong type to variable "+x, b);
             }
-          });
-          return compileStdCall(e, b, stdCallTable[b.type]);
-        }
+          }
+          break;
+
+        case "controls_comment":
+          unionParam(e, b, "comment", ground(Type.String));
+          break;
+
+        case "controls_repeat_ext":
+          unionParam(e, b, "TIMES", ground(Type.Number));
+          break;
+
+        case "controls_while":
+          unionParam(e, b, "COND", ground(Type.Boolean));
+          break;
+
+        default:
+          if (b.type in stdCallTable) {
+            stdCallTable[b.type].args.forEach((p: string) => {
+              if (!b.getFieldValue(p)) {
+                var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
+                // This will throw if someone modified blocks-custom.js and forgot to add
+                // [setCheck]s in the block definition. This is intentional and MUST be
+                // fixed.
+                var t = toType(i.connection.check_[0]);
+                unionParam(e, b, p, ground(t));
+              }
+            });
+            return compileStdCall(e, b, stdCallTable[b.type]);
+          }
+      }
+    } catch (e) {
+      if ((<any> e).block)
+        Errors.report(e+"", (<any> e).block);
+      else
+        Errors.report(e+"", b);
     }
   });
 
@@ -1254,56 +1261,49 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
   var stmts: J.JStmt[] = [];
   while (b) {
     if (!b.disabled) {
-      try {
-        switch (b.type) {
-          case 'controls_if':
-            append(stmts, compileControlsIf(e, <B.IfBlock> b));
-            break;
+      switch (b.type) {
+        case 'controls_if':
+          append(stmts, compileControlsIf(e, <B.IfBlock> b));
+          break;
 
-          case 'controls_for':
-          case 'controls_simple_for':
-            append(stmts, compileControlsFor(e, b));
-            break;
+        case 'controls_for':
+        case 'controls_simple_for':
+          append(stmts, compileControlsFor(e, b));
+          break;
 
-          case 'text_print':
-            stmts.push(compilePrint(e, b));
-            break;
+        case 'text_print':
+          stmts.push(compilePrint(e, b));
+          break;
 
-          case 'variables_set':
-            stmts.push(compileSet(e, b));
-            break;
+        case 'variables_set':
+          stmts.push(compileSet(e, b));
+          break;
 
-          case 'device_comment':
-            stmts.push(compileComment(e, b));
-            break;
+        case 'device_comment':
+          stmts.push(compileComment(e, b));
+          break;
 
-          case 'device_forever':
-            stmts.push(compileForever(e, b));
-            break;
+        case 'device_forever':
+          stmts.push(compileForever(e, b));
+          break;
 
-          case 'controls_repeat_ext':
-            stmts.push(compileControlsRepeat(e, b));
-            break;
+        case 'controls_repeat_ext':
+          stmts.push(compileControlsRepeat(e, b));
+          break;
 
-          case 'device_while':
-            stmts.push(compileWhile(e, b));
-            break;
+        case 'device_while':
+          stmts.push(compileWhile(e, b));
+          break;
 
-          case 'device_button_event':
-            stmts.push(compileButtonEvent(e, b));
-            break;
+        case 'device_button_event':
+          stmts.push(compileButtonEvent(e, b));
+          break;
 
-          default:
-            if (b.type in stdCallTable)
-              stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
-            else
-              console.log("Not generating code for (not a statement / not supported): "+b.type);
-        }
-      } catch (e) {
-        if ((<any> e).block)
-          Errors.report(e+"", (<any> e).block);
-        else
-          Errors.report(e+"", b);
+        default:
+          if (b.type in stdCallTable)
+            stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
+          else
+            console.log("Not generating code for (not a statement / not supported): "+b.type);
       }
     }
     b = b.getNextBlock();

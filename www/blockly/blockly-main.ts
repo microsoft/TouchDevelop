@@ -278,10 +278,10 @@ module TDev {
   }
   function setupPopups() {
     /* Hide all popups when user clicks elsewhere. */
-    $(document).click(clearPopups);
-    /* Catch clicks on popups themselves to disable above handler. */
-    $(".popup").click((e: Event) => {
-      e.stopPropagation();
+    $(document).click((e: Event) => {
+      if ($(e.target).closest(".popup, .roundbutton").length)
+        return;
+      clearPopups();
     });
   }
 
