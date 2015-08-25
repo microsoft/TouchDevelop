@@ -1915,18 +1915,7 @@ module TDev.Browser {
                 this.chooseEditorAsync().done((editor) => {
                     if (!editor) return;
                     var p = Promise.as("");
-                    if (editor == "touchdevelop")
-                        p = External.pullLatestLibraryVersion(External.microbitScriptId)
-                            .then((pubId: string) => {
-                                var text = '// A #microbit script\n' +
-                                    'action main() {\n' +
-                                    '    skip;\n' +
-                                    '}\n' +
-                                    'meta import ' + AST.Lexer.quoteId("micro:bit") + ' {\n' +
-                                    '  pub "' + pubId + '"\n' +
-                                    '}\n';
-                                return text;
-                            });
+                    if (editor == "touchdevelop") p = ScriptCache.getScriptAsync('nmhibf') // ADJ script
                     p.then(src => {
                         var stub: World.ScriptStub = {
                             editorName: editor,
