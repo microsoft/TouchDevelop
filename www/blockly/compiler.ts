@@ -585,7 +585,7 @@ function unify(t1: Type, t2: Type) {
   else if (t1 == t2)
     return t1;
   else
-    throw new Error("Cannot mix "+typeToString(t1)+" with "+typeToString(t2));
+    throw new Error("cannot mix "+typeToString(t1)+" with "+typeToString(t2));
 }
 
 function mkPlaceholderBlock(): B.Block {
@@ -622,7 +622,7 @@ function unionParam(e: Environment, b: B.Block, n: string, p: Point) {
     attachPlaceholderIf(b, n);
     union(returnType(e, b.getInputTargetBlock(n)), p);
   } catch (e) {
-    throwBlockError("The parameter "+n+" of this block is of the wrong type", b);
+    throwBlockError("The parameter "+n+" of this block is of the wrong type. More precisely: "+e, b);
   }
 }
 
@@ -1404,31 +1404,33 @@ function mkEnv(w: B.Workspace): Environment {
 }
 
 function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
-  var decls: J.JDecl[] = [];
-  var e = mkEnv(w);
-  infer(e, w);
+  try {
+    var decls: J.JDecl[] = [];
+    var e = mkEnv(w);
+    infer(e, w);
 
-  // [stmtsHandlers] contains calls to register event handlers. They must be
-  // executed before the code that goes in the main function, as that latter
-  // code may block, and prevent the event handler from being registered.
-  var stmtsHandlers: J.JStmt[] = [];
-  var stmtsMain: J.JStmt[] = [];
-  w.getTopBlocks(true).forEach((b: B.Block) => {
-    if (isHandlerRegistration(b))
-      append(stmtsHandlers, compileStatements(e, b));
-    else
-      append(stmtsMain, compileStatements(e, b));
-  });
+    // [stmtsHandlers] contains calls to register event handlers. They must be
+    // executed before the code that goes in the main function, as that latter
+    // code may block, and prevent the event handler from being registered.
+    var stmtsHandlers: J.JStmt[] = [];
+    var stmtsMain: J.JStmt[] = [];
+    w.getTopBlocks(true).forEach((b: B.Block) => {
+      if (isHandlerRegistration(b))
+        append(stmtsHandlers, compileStatements(e, b));
+      else
+        append(stmtsMain, compileStatements(e, b));
+    });
 
-  decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
+    decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
 
-  e.bindings.forEach((b: Binding) => {
-    if (!isCompiledAsLocal(b)) {
-      decls.unshift(H.mkVarDecl(b.name, toTdType(find(b.type).type)));
-    }
-  });
-
-  removeAllPlaceholders(w);
+    e.bindings.forEach((b: Binding) => {
+      if (!isCompiledAsLocal(b)) {
+        decls.unshift(H.mkVarDecl(b.name, toTdType(find(b.type).type)));
+      }
+    });
+  } finally {
+    removeAllPlaceholders(w);
+  }
 
   return H.mkApp(options.name, options.description, decls);
 }
