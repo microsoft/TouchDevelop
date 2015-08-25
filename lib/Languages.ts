@@ -198,7 +198,7 @@ module TDev.RT {
             return navigator.userLanguage || <string>(<any>navigator).language || "en-US";
         }
 
-        //? Converts a sound to a text using Project Hawaii from Microsoft Research.
+        //? This API is no longer supported.
         //@ stub cap(hawaii) flow(SinkSafe)
         //@ [speech].readsMutable
         //@ [lang].defl("en") [speech].deflExpr('senses->record_microphone')
@@ -206,27 +206,14 @@ module TDev.RT {
         export function speech_to_text(lang:string, speech:Sound) : string
         { return undefined; }
 
-        //? Extracts text in the picture using Project Hawaii from Microsoft Research.
+        //? This API is no longer supported.
         //@ async cap(hawaii) flow(SinkSafe) returns(string)
         //@ [pic].readsMutable
         //@ [lang].defl("en")
+        //@ obsolete stub
         export function picture_to_text(lang: string, pic: Picture, r : ResumeCtx) // : string
         {
-            var url = 'runtime/languages/pictureToText';
-
-            var privateUrl = Cloud.getPrivateApiUrl(url);
-            var request = WebRequest.mk(privateUrl, undefined);
-            pic.initAsync().done(() => {
-                request.setContentAsPictureInternal(pic, 0.75);
-                request.set_method("POST");
-                r.progress('Analyzing picture...');
-                request
-                    .sendAsync()
-                    .done((response : WebResponse) => {
-                        var text = response.content();
-                        r.resumeVal(text)
-                    });
-            })
+            r.resumeVal("");
         }
 
         export function isSpeechSupported() : boolean {

@@ -94,7 +94,6 @@ module TDev {
             kind: string,
             query: string,
             loc: TDev.RT.Location_): Promise { return Promise.as([]); };
-        (<any>TDev.RT.Languages).picture_to_text = function picture_to_text(lang: string, pic: TDev.RT.Picture, r: ResumeCtx) { r.resumeVal(undefined); }
         if (!Browser.webRunner) {
             TDev.RT.Sound.patchLocalArtUrl = function (url: string): string {
                 if (/\.\/art\//.test(url) && !/\.(wav|m4a)\?a=/.test(url)) {
