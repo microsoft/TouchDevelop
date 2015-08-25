@@ -1748,6 +1748,8 @@ module TDev
 
         private runActionCore(a:AST.Decl, args:any[], debugMode: boolean = false)
         {
+            this.clearAnnotations("caller");
+
             var missing = this.currentRt.compiled.missingApis;
             if (!this.complainedAboutMissingAPIs && missing.length > 0) {
                 ProgressOverlay.hide();
@@ -3020,7 +3022,7 @@ module TDev
 
         public clearAnnotations(pluginRef:string)
         {
-            AST.visitNodes(Script, (s) => {
+            AST.visitStmts(Script, (s) => {
                 if (s.annotations) {
                     var ann = s.annotations.filter(a => a.pluginRef != pluginRef)
                     if (ann.length == 0)
@@ -3031,7 +3033,7 @@ module TDev
             })
         }
 
-        public injectAnnotations(annotations:RT.AstAnnotation[])
+        private buildStmtIdx():StringMap<AST.Stmt>
         {
             var idx:StringMap<AST.Stmt> = {}
             var lastStmt:AST.Stmt = null
@@ -3040,7 +3042,12 @@ module TDev
                     lastStmt = <AST.Stmt>s
                 idx[s.stableId] = lastStmt
             })
+            return idx
+        }
 
+        public injectAnnotations(annotations:RT.AstAnnotation[])
+        {
+            var idx = this.buildStmtIdx();
             annotations.forEach(a => {
                 if (idx.hasOwnProperty(a.id)) {
                     var s = idx[a.id]
@@ -3049,6 +3056,37 @@ module TDev
                     s.annotations.push(a)
                 }
             })
+        }
+
+        public injectCallerAnnotation(category:string, msg:string, frame:IStackFrame)
+        {
+            var idx:StringMap<AST.Stmt> = {}
+            AST.visitStmts(Script, (s) => {
+                idx[s.getStableName()] = s
+            })
+
+            frame = frame.previous // skip the current caller
+            while (frame && !idx.hasOwnProperty(frame.pc))
+                frame = frame.previous
+
+            if (frame) {
+                var s = idx[frame.pc]
+                if (!s.annotations)
+                    s.annotations = []
+                var callerA = s.annotations.filter(a => a.pluginRef == "caller")
+                if (callerA.length > 2)
+                    return
+                if (callerA.length == 2) msg = "..."
+                if (callerA.some(a => a.category == category && a.message == msg))
+                    return
+                s.annotations.push({
+                    id: frame.pc,
+                    category: category,
+                    message: msg,
+                    pluginRef: "caller",
+                })
+                this.refreshDecl()
+            }
         }
 
         private applyAnnotations(rtEditor:RT.Editor)
