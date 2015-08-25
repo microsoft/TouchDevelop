@@ -8132,7 +8132,9 @@
                     if (!s) return
 
                     var edit = (lbl:string, fld:string, maxLen = 100) => {
-                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
+                        var saved = false
+                        var saveIt = () => {
+                            saved = true
                             HTML.showProgressNotification("saving...");
                             var ss:any = {}
                             ss[fld] = nameInput.value
@@ -8143,6 +8145,19 @@
                                 TheApiCacheMgr.invalidate("me");
                                 refreshSettings()
                             }, e => Cloud.handlePostingError(e, lf("saving setting")));
+                        }
+                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
+                            if (Cloud.isRestricted() && fld == "nickname" && / [A-Z][a-z]/i.test(nameInput.value.trim())) {
+                                var m = ModalDialog.ask(
+                                    lf("Your nickname is displayed on public pages. Make sure you do not enter your last name there."),
+                                    lf("it's ok, save it!"),
+                                    saveIt, false, lf("Possible last name detected"))
+                                m.onDismiss = () => {
+                                    if (!saved) nameInput.value = s[fld]
+                                }
+                            }
+                            else saveIt()
+
                         });
                         nameInput.maxLength = maxLen;
                         nameInput.value = s[fld] || ""
@@ -8154,11 +8169,6 @@
 
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
-                    // From BBC:
-                    //   
-                    //  
-                    // it on to third parties.
-                        
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private; {0})", 
                             s.emailverified 
