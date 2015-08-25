@@ -2846,7 +2846,7 @@ module TDev.Browser {
                     Util.setHash('#topic:gettingstarted');
                 }, Ticks.hubBeginnersGettingStarted, true)),
                 ccgaEl = toTutBtn(this.smallBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateInWindow("http://aka.ms/CreativeCoding");
+                    Util.navigateInWindow("http://aka.ms/ccgaaboutcourse");
                 }, Ticks.hubCCGA, true)),
                 /*
                 apiEl = toTutBtn(this.smallBtn(lf("API Docs"), () => {
