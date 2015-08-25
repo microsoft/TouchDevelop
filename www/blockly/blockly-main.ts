@@ -249,19 +249,19 @@ module TDev {
   }
 
   function setDescription(x: string) {
-    $("#script-description").text(x);
+    $("#script-description").val(x);
   }
 
   function setName(x: string) {
-    $("#script-name").text(x);
+    $("#script-name").val(x);
   }
 
   function getDescription() {
-    return $("#script-description").text();
+    return $("#script-description").val();
   }
 
   function getName() {
-    return $("#script-name").text();
+    return $("#script-name").val();
   }
 
   var dirty = false;

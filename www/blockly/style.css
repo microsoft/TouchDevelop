@@ -71,6 +71,11 @@ body, input {
   font-size: 3rem;
 }
 
+#script-name, #script-description {
+  background-color: transparent;
+  border: 0;
+}
+
 #script-icons > *:not(:first-child) {
   display: inline-block;
   cursor: pointer;
