@@ -364,7 +364,7 @@ module TDev
             {
                 Util.assert(!debugMode);
                 var mkEvent = (a:AST.Action) => {
-                    var b = DeclRender.mkBox(a);
+                    var b = DeclRender.mkBox(a, { namespace: true });
                     (<any>b).initiallyHidden = a.eventInfo.type.lowPriority;
                     return b.withClick(() => { m.dismiss(); addNode(Ticks.sideAddEvent, a); });
                 }

@@ -267,8 +267,11 @@ module TDev
                     var namespaces: string[] = <string[]>decl.getNamespaces();
                     if (namespaces && namespaces[0]) ns = span("navSig", namespaces[0] + " → ");
                 }
-                if (!ns && decl.getNamespace) {
-                    ns = span("navSig symbol", decl.getNamespace());
+                var namespace: string;
+                if (!ns && decl.getNamespace && (namespace = decl.getNamespace())) {
+                    // special handling of data
+                    if (namespace[0] == AST.dataSymbol) namespace = "var " + namespace;
+                    ns = span("navSig symbol", namespace);                    
                 }
             } else {
                 var namespaces: string[];
