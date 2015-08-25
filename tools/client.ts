@@ -3773,6 +3773,7 @@ function fetchlibraries(args, cb) {
 
     var updates = {}
     var text = {}
+    var json = {}
     var togo = ids.length
 
     console.log("fetching latest versions of " + ids.join(", "))
@@ -3784,12 +3785,14 @@ function fetchlibraries(args, cb) {
             if (parsed.continuation) throw new Error("too many!? " + id)
             parsed.items.forEach(it => {
                 updates[it.id] = it.updateid
+                if (it.id == it.updateid)
+                    json[it.id] = it
             })
             tdevGet(liteUrl + "api/" + updates[id] + "/text?original=true" + key, t => {
                 text[updates[id]] = t
                 if (--togo == 0) {
                     var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
-                        JSON.stringify({ updates: updates, text: text }, null, 1) + "\n"
+                        JSON.stringify({ updates: updates, text: text, json: json }, null, 1) + "\n"
                     console.log("got latest versions of scripts; " + txt.length + " bytes")
                     fs.writeFileSync("build/libraries.js", txt)
                     if (cb) cb(null,txt)
