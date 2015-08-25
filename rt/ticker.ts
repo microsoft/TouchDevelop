@@ -373,6 +373,7 @@ module TDev {
         hubBasicEditorVideoVoice,
         hubBasicEditorVideoSubtitles,
         hubBeginnersGettingStarted,
+        hubCCGA,
         hubChatSearch,
         hubRateTouchdevelop,
         hubChooseSkill,

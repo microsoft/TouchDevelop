@@ -2821,7 +2821,7 @@ module TDev.Browser {
 
             var sellApps:HTMLElement;
             var docsEl: HTMLElement;
-            var apiEl: HTMLElement;
+            var ccgaEl: HTMLElement;
             var whatsNew: HTMLElement;
             var begginersEl : HTMLElement;
             //var advancedEl:HTMLElement;
@@ -2845,9 +2845,14 @@ module TDev.Browser {
                 begginersEl = toTutBtn(this.smallBtn(lf("Getting started"), () => {
                     Util.setHash('#topic:gettingstarted');
                 }, Ticks.hubBeginnersGettingStarted, true)),
+                ccgaEl = toTutBtn(this.smallBtn(lf("Teach Creative Coding!"), () => {
+                    Util.navigateInWindow("http://aka.ms/CreativeCoding");
+                }, Ticks.hubCCGA, true)),
+                /*
                 apiEl = toTutBtn(this.smallBtn(lf("API Docs"), () => {
                     Util.setHash('#topic:api')
                 }, Ticks.hubDocsApi, true)),
+                */
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
