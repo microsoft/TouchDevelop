@@ -15,6 +15,6 @@
         <Image Source="/Microsoft.MicroBit.Loader;component/micro-bit Logo stacked_Polar Colour Grad+Black BBC Logo_RGB.png" Width="200" Margin="67,-16,67,108" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" />
         <Image Source="/Microsoft.MicroBit.Loader;component/microsoftlogo.png" Margin="67,124,67,14" RenderOptions.BitmapScalingMode="HighQuality" Grid.ColumnSpan="2" />
         <Label Content="{Binding Path=Status}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="27,231,21,0" VerticalAlignment="Top" Width="286" Grid.ColumnSpan="2" Height="35" FontSize="16"/>
-        <CheckBox Content="delete .hex file after flashing" Margin="89,271,0,4" IsChecked="{Binding Path=DeleteOnFlash}" Grid.Column="1" />
+        <CheckBox Content="delete .hex file after loading" Margin="89,271,0,4" IsChecked="{Binding Path=DeleteOnFlash}" Grid.Column="1" />
     </Grid>
 </Window>
