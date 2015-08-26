@@ -5397,6 +5397,62 @@
             this.art = a;
         }
 
+        static artReview(cont = "", back = null)
+        {
+            var m = new ModalDialog();
+            m.fullWhite();
+            m.stretchWide();
+            m.setScroll();
+            m.show()
+
+            TDev.Cloud.getPrivateApiAsync("art?count=300&continuation=" + cont)
+            .done(resp => {
+                var entries = []
+                var ids = []
+                resp.items.forEach((ja:JsonArt) => {
+                    if (ja.arttype != "picture") return;
+                    var flag = div("art-link", 
+                        HTML.mkLinkButton("flag", () => {
+                            flag.setChildren("flagging...")
+                            Cloud.postPrivateApiAsync(ja.id + "/abusereports", { text: "#reviewFlag" })
+                            .done(
+                                () => {
+                                    flag.setChildren(HTML.mkLinkButton(lf("delete"),
+                                        () => {
+                                            flag.setChildren(lf("deleting..."))
+                                            Cloud.deletePrivateApiAsync(ja.id)
+                                                .done(() => e.setChildren([]),
+                                                    e => Cloud.handlePostingError(e, lf("delete")))
+                                        }))
+                                },
+                                e => Cloud.handlePostingError(e, lf("report abuse")))
+                        })
+                    )
+                    var info = div("art-info", Math.round((Date.now()/1000 - ja.time) / 3600 / 24) + "d, by " + ja.username)
+                    var e = div("art-review",
+                        HTML.mkImg(ja.mediumthumburl || ja.pictureurl),
+                        info, flag)
+                    entries.push(e)
+                    ids.push(ja.id)
+                })
+                var next = HTML.mkButton(lf("next page"), () => {
+                    ArtInfo.artReview(resp.continuation, () => ArtInfo.artReview(cont, back))
+                })
+                if (!resp.continuation)
+                    next = null
+                var prev = HTML.mkButton(lf("prev page"), () => back())
+                if (!back)
+                    prev = null
+                var del = HTML.mkLinkButton(lf("delete all"), 
+                        () => {
+                            Promise.join(ids.map(id => Cloud.deletePrivateApiAsync(id)))
+                            .then(() => back())
+                        })
+                m.add(div(null, prev, next))
+                m.add(div(null, entries))
+            })
+        }
+
         public loadFromWeb(id:string)
         {
             this.publicId = id;
@@ -6790,8 +6846,8 @@
             if (this.correspondingTopic) {
                 var tas = this.browser().treatAsScript 
                 if (!tas.hasOwnProperty(this.publicId))
-                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr") ? false : true
-                if (tas[this.publicId])
+                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr")
+                if (!tas[this.publicId])
                     return this.correspondingTopic;
             }
             return this;
