@@ -2264,7 +2264,7 @@ module TDev
 
                 var s: IProperty[] = k.primaryKind.listProperties().slice(0);
                 var t = this.expr.tokens[this.cursorPosition-1];
-                if (k.primaryKind == api.core.String && t && t instanceof AST.Literal && (<AST.Literal>t).enumVal) {
+                if (k.primaryKind == api.core.String && t && t instanceof AST.Literal && ((<AST.Expr>t).enumVal || (<AST.Expr>t).languageHint)) {
                     // don't allow string editing on enum values
                     s = [];
                 }
