@@ -1094,6 +1094,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numRequests: currentReqNo,
             numDeploys: tdstate.numDeploys,
             dmeta: tdstate.dmeta,
+            versionStamp: "v1",
         })
     },
 

@@ -229,6 +229,7 @@ module TDev
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
         if (/nohub/.test(url)) TDev.noHub = true;
         if (/lowMemory/.test(url)) Browser.lowMemory = true;
+        if (/usegcc=1/.test(url)) Cloud.useEmbeddedGcc = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;
