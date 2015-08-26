@@ -1112,14 +1112,5 @@ module TDev.RT {
         export function allow_other_events(s:IStackFrame) {
             s.rt.eventExecuting = false;
         }
-
-        //? Place a message on the first caller in the top-level script in the editor
-        //@ [category].deflStrings("warning", "info", "error")
-        //@ betaOnly
-        export function annotate_caller(category:string, message:string, s:IStackFrame) : void
-        {
-            var ed = (<any>TDev).TheEditor
-            if (ed) ed.injectCallerAnnotation(category, message, s)
-        }
     }
 }

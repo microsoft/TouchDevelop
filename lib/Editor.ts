@@ -54,6 +54,15 @@ module TDev.RT {
         {
             this.allAnnotations.push({ id: id, category: category, message: message })
         }
+        
+        //? Place a message on the first caller in the top-level script in the editor
+        //@ [category].deflStrings("warning", "info", "error")
+        //@ betaOnly
+        public annotate_caller(category:string, message:string, s:IStackFrame) : void
+        {            
+            var ed = (<any>TDev).TheEditor
+            if (ed) ed.injectCallerAnnotation(category, message, s)
+        }        
 
         //? The id of the script currently in the editor
         public current_script_id(s:IStackFrame) : string
