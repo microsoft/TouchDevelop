@@ -224,11 +224,8 @@ module TDev
         // was attached to begin with and it caught the exception
         if (/debuggerExceptions/.test(url)) debuggerExceptions = true;
         if (/withTracing/.test(url)) withTracing = true;
-        if (/dbg=[1t]/.test(url) || window.localStorage["dbg"]) dbg = true;
-        if (/nodbg/.test(url)) dbg = false;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
         if (/nohub/.test(url)) TDev.noHub = true;
-        if (/lowMemory/.test(url)) Browser.lowMemory = true;
         if (/usegcc=1/.test(url)) Cloud.useEmbeddedGcc = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
@@ -236,9 +233,6 @@ module TDev
         if (Browser.noStorage || /temporaryStorage/.test(url)) {
             Browser.supportMemoryTable(true);
             Storage.temporary = true;
-        }
-        if (/noAnim/.test(url)) {
-            Browser.noAnimations = true;
         }
 
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
@@ -263,20 +257,6 @@ module TDev
         }
 
         Revisions.parseUrlParameters(url);
-
-        if ((<any>window).betaFriendlyId || dbg || /localhost/.test(url))
-            isBeta = true;
-
-        if (/nobeta/.test(url))
-            isBeta = false;
-
-        if (isBeta) {
-            //Browser.compilerBlockChaining = true;
-            //Browser.compilerInlining = true;
-        } else {
-            // disable console
-            Browser.useConsoleLog = false;
-        }
 
         if (!Cloud.lite)
             Ticker.init()

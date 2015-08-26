@@ -1,4 +1,7 @@
 module TDev {
+    export var dbg = false;
+    export var isBeta = false;
+    
     export enum BrowserSoftware {
         unknown   ,
         ie10      ,
@@ -113,8 +116,16 @@ module TDev {
         }
 
         export function detect() {
+            var url = document ? document.URL : "";
+            if (/dbg=[1t]/.test(url) || (window && window.localStorage && window.localStorage["dbg"])) dbg = true;
+            if (/nodbg/.test(url)) dbg = false;           
+            if ((<any>window).betaFriendlyId || dbg || /localhost/.test(url) || /consolelog/.test(url))
+                isBeta = true;
+            if (/nobeta/.test(url)) isBeta = false;
+            Browser.useConsoleLog = isBeta && !!console && !!console.log;
+            
             startTimestamp = new Date().getTime(); // no Util here
-
+            
             if ((<any>window).touchDevelopExec || (<any>window).mcefQuery || (<any>window).cordova) {
                 isHosted = true;
                 Browser.screenshots = true;
@@ -249,6 +260,9 @@ module TDev {
                 directionAuto = false;
             }
 
+            if (/lowMemory/.test(url)) lowMemory = true;
+            if (/noAnim/.test(url)) noAnimations = true;
+
             isTouchDevice = isCellphone || isTablet;
             if (isMobile === undefined)
                 isMobile = isTouchDevice;
@@ -262,9 +276,6 @@ module TDev {
                 isWindows8plus = true;
             mobileWebkit = isWebkit && isMobile;
             if (!isMobile) assumeMouse = true;
-
-            if (!useConsoleLog && typeof console != "undefined" && typeof console.log == "function")
-                useConsoleLog = true;
 
             //builtinTouchToPan = (browser == BrowserSoftware.chrome || browser == BrowserSoftware.firefox || browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11);
             builtinTouchToPan = true;
