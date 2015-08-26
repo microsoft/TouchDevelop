@@ -26,6 +26,7 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
+            this.DeleteOnFlash = true;
             this.updateStatus("loading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
@@ -39,7 +40,7 @@ namespace WpfApplication1
             watcher.Created += (sender, e) => handleFileEvent(e);
             watcher.EnableRaisingEvents = true;
 
-            this.updateStatus("Ready to copy your .hex file to your BBC micro:bit.");
+            this.updateStatus("Waiting for .hex file...");
             this.handleActivation();
         }
 
@@ -76,6 +77,13 @@ namespace WpfApplication1
             set { SetValue(StatusProperty, value); }
         }
 
+        public static readonly DependencyProperty DeleteOnFlashProperty = DependencyProperty.Register("DeleteOnFlash", typeof(bool?), typeof(MainWindow));
+        public bool DeleteOnFlash
+        {
+            get { return (bool)GetValue(DeleteOnFlashProperty); }
+            set { SetValue(DeleteOnFlashProperty, value); }
+        }
+
         static string getVolumeLabel(DriveInfo di)
         {
             try { return di.VolumeLabel; }
@@ -106,7 +114,7 @@ namespace WpfApplication1
                 var drive = drives.FirstOrDefault(d => getVolumeLabel(d) == "MICROBIT");
                 if (drive == null)
                 {
-                    this.updateStatus("no BBC micro:bit detected, did you plug it?");
+                    this.updateStatus("no BBC micro:bit detected");
                     return;
                 }
 
@@ -114,8 +122,14 @@ namespace WpfApplication1
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);
+                this.updateStatus("flashing done");
 
-                this.updateStatus("flashed " + info.Name);
+                if (this.DeleteOnFlash)
+                {
+                    File.Delete(info.FullName);
+                    this.updateStatus("flashing and cleaning done");
+                }
+
                 return;
             }
             catch (IOException) { }
