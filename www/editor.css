@@ -6010,3 +6010,41 @@ table.dashboard tr td[data-completed^="yes"] {
 .portrait .powered-by {
   font-size: 1.1em;
 }
+
+.art-review {
+  width: 9em;
+  height: 8em;
+  display: inline-block;
+  margin: 0.5em;
+  margin-bottom: 1.5em;
+  position: relative;
+  background: #ddd;
+  vertical-align: top;
+}
+
+.art-review img {
+  max-width: 90%;
+  max-height: 90%;
+  display: block;
+  margin: 0.2em auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);                      /*CSSpref*/  -webkit-transform: translate(-50%, -50%);  -moz-transform: translate(-50%, -50%);  -ms-transform: translate(-50%, -50%);
+}
+
+.art-review .art-info,
+.art-review .art-link {
+  background: white;
+  position: absolute;
+  bottom: -1.5em;
+  font-size: 0.5em;
+}
+
+.art-review .art-info {
+  left: 0;
+}
+
+.art-review .art-link {
+  right: 0;
+}

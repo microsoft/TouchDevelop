@@ -718,6 +718,7 @@ module TDev.Browser {
                         HTML.mkButton(lf("pointers"), () => { Util.setHash("#list:pointers")}),
                         HTML.mkButton(lf("page map"), () => { Browser.TheHub.showPointers() }),
                         HTML.mkButton(lf("releases"), () => { Util.setHash("#list:releases" + (Cloud.config.relid ? ":release:" + Cloud.config.relid : "")) }),
+                        HTML.mkButton(lf("art review"), () => { Browser.ArtInfo.artReview() }),
                     ]))
                 }
                 if (Cloud.hasPermission("script-promo")) {
