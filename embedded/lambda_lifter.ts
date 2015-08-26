@@ -137,18 +137,24 @@ module TDev {
     // (a.k.a. [JInlineAction]'s) out into top-level function definitions
     // (a.k.a. [JAction]'s). It assumes that these closures contain no free
     // variables, i.e. that closure-conversion has been performed already.
-    export function lift(a: J.JApp) {
+    export function lift(e: H.Env, a: J.JApp) {
       var l = new Lifter();
       l.visit([], a);
       var lambdas = l.as.map((a: J.JInlineAction): J.JAction => {
-        var name = a.reference.name;
+        // Name of the lifted function in the global scope. No conflicts with
+        // existing names because we append the auto-generated, random id.
+        // XXX fix that by keeping the map of used names all the way to here,
+        // and using [H.freshName].
+        var name = a.reference.name + a.reference.id;
+        var id = a.reference.id;
+        if (e.libName)
+          e.globalNameMap.libraries[e.libName][name] = name;
+        else
+          e.globalNameMap.program[name] = name;
         return {
           nodeType: "action",
-          id: a.reference.id,
-          // The name needs to be unique, since it's going to be generated as a
-          // global (whose names are kept "as is"). So cram in the unique-id in
-          // there.
-          name: name+a.reference.id,
+          id: id,
+          name: name,
           inParameters: a.inParameters,
           outParameters: a.outParameters,
           isPrivate: false,

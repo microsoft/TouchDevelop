@@ -111,62 +111,70 @@ module TDev {
         "*": "times",
       };
 
+      export interface GlobalNameMap {
+        libraries: StringMap<StringMap<string>>;
+        program: StringMap<string>;
+      }
+
       // Our name environments. We have two behaviors for names:
-      // - global names must be left intact (i.e. function "f" is emitted as
-      //   function "f"), mostly because libraries are mutually recursive, and
-      //   doing a pre-computation of names would most likely be difficult
-      //   (also, it's more readable);
-      // - local names may be renamed to avoid conflicts with: another local
-      //   name, or a global.
+      // - global names (global variables, functions and types) are unique
+      //   within a TouchDevelop library; once mapped to C++ identifiers, they
+      //   may conflict; they are resolved using the pair (library, name).
+      // - local names are not unique; they are, however, assigned a unique
+      //   TouchDevelop id; they are thus resolved by their id.
       export interface Env {
-        // Maps a TouchDevelop id, or a global "left intact" name to the name of
-        // a corresponding, valid C++ identifier.
-        ident_of_id: { [id: string]: string };
         // Contains [true] if this C++ identifier has been used already.
-        id_of_ident: { [ident: string]: boolean };
+        // Populated at the beginning
+        usedNames: StringMap<boolean>;
+
+        // The names allocated to local variables in the current module.
+        localNames: StringMap<string>;
+
+        // Read-only. Used at the beginning to populate [usedNames] and to
+        // resolve global names.
+        globalNameMap: GlobalNameMap;
+
+        // The name of the current library. If provided, the names from the
+        // current module will be looked up in globalNameMap.libraries[l],
+        // otherwise, in globalNameMap.program.
+        libName: string;
+
+        indent: string;
       }
 
-      // Mark a name as being exported as a GLOBAL, and assert that there's no
-      // earlier name collision. If [id] is provided, name will also be
-      // registered for local-style, id-based lookup (this is useful for local
-      // actions which are lifted as globals but are still refered to with their
-      // local id).
-      export function reserveName(e: Env, name: string, id?: string) {
-        var mangledName = mangleName(name);
-        // This should not happen because all the names are reserved in a first
-        // pass (we run through function prototypes and global declarations
-        // first).
-        if (mangledName in e.id_of_ident)
-          throw new Error("Internal error: unexpected name collision");
-        // This name is no longer available.
-        e.id_of_ident[mangledName] = true;
-        e.ident_of_id[name] = mangledName;
-        if (id)
-          e.ident_of_id[id] = mangledName;
+      export function indent(e: Env): Env {
+        return {
+          usedNames: e.usedNames,
+          localNames: e.localNames,
+          globalNameMap: e.globalNameMap,
+          libName: e.libName,
+          indent: e.indent + "  ",
+        };
       }
 
-      // Compute a unique name for a LOCAL, based on a user-provided name and a
-      // TouchDevelop-generated unique id. This function does its best to keep
-      // the original name, but uses the id to make sure there's no collisions
-      // in the generated code.
-      export function mangleUnique(env: Env, name: string, id: string) {
-        if (id in env.ident_of_id)
-          return env.ident_of_id[id];
-        else {
-          var i = 0;
-          var suffix = <any> "";
-          while (mangleName(name+suffix) in env.id_of_ident)
-            suffix = i++;
-          env.id_of_ident[mangleName(name+suffix)] = true;
-          env.ident_of_id[id] = mangleName(name + suffix);
-          return mangleName(name + suffix);
-        }
+      export function emptyEnv(g: GlobalNameMap, libName: string): Env {
+        var usedNames: StringMap<boolean> = {};
+        var m = libName ? g.libraries[libName] : g.program;
+        Object.keys(m).forEach((tdIdent: string) => {
+          var cppIdent = g.program[tdIdent];
+          usedNames[cppIdent] = true;
+        });
+        return {
+          usedNames: usedNames,
+          localNames: {},
+          globalNameMap: g,
+          libName: libName,
+          indent: "",
+        };
       }
 
-      // There's an extra step, which is that we need to convert a name into a
-      // valid C++ identifier. You may call this function only when referring to
-      // a global whose name is meant to be left intact.
-      export function mangleName(name: string) {
+      export function currentMap(e: Env) {
+        return e.libName ? e.globalNameMap.libraries[e.libName] : e.globalNameMap.program;
+      }
+
+      // Converts a string into a valid C++ identifier. Unsafe unless you're
+      // positive there won't be conflicts.
+      export function mangle(name: string) {
         var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
         if (candidate in cppKeywords)
           candidate += "_";
@@ -175,19 +183,69 @@ module TDev {
         return candidate;
       }
 
-      // Convert a prefixed name into a valid C++ identifier. Same as above,
-      // only call this directly if you know that [n] is unique (i.e. is a
-      // global, whose name is unique).
-      export function manglePrefixedName(e: Env, ns: string[], t: string) {
-        return ns.concat([t]).map(mangleName).join("::");
+      export function freshName(usedNames: StringMap<boolean>, name: string) {
+        var i = 0;
+        var suffix = <any> "";
+        while (mangle(name+suffix) in usedNames)
+          suffix = i++;
+        return mangle(name+suffix);
       }
 
-      export function mangleDef(env: Env, d: J.JLocalDef) {
-        return mangleUnique(env, d.name, d.id);
+      // Return a unique name for a LOCAL, based on a user-provided, non-unique
+      // name and a TouchDevelop-generated, unique id. The name is guaranteed to
+      // be free of conflicts with other identifiers in the current library.
+      export function resolveLocal(env: Env, name: string, id: string) {
+        // Hack alert! When lifting local function handlers, we name them
+        // according to "name+id" at the global scope. However, we don't mutate
+        // the [JLocalRef]s into [JGlobalRef]s. So, let's first check if by any
+        // chance this is a reference to a globally-defined event handler...
+        var actionName = name + id;
+        if (actionName in currentMap(env))
+          return actionName;
+
+        if (id in env.localNames)
+          return env.localNames[id];
+
+        var n = freshName(env.usedNames, name);
+        env.usedNames[n] = true;
+        env.localNames[id] = n;
+        return n;
       }
 
-      export function mangleRef(env: Env, d: J.JLocalRef) {
-        return mangleUnique(env, d.name, <any> d.localId);
+      export function resolveLocalDef(env: Env, d: J.JLocalDef) {
+        return resolveLocal(env, d.name, d.id);
+      }
+
+      export function resolveLocalRef(env: Env, d: J.JLocalRef) {
+        return resolveLocal(env, d.name, <any> d.localId);
+      }
+
+      function resolveGlobalLN(env: Env, l: string, n: string) {
+        // If the name has not been
+        // pre-allocated, we assume it's a name of a pre-defined method that won't
+        // cause a conflict (e.g.  "collection::index_of").
+        if (n in env.globalNameMap.libraries[l])
+          return env.globalNameMap.libraries[l][n];
+        else
+          return mangle(n);
+      }
+
+      // Resolve a global name from a library.
+      export function resolveGlobalL(env: Env, l: string, n: string) {
+        return mangle(l)+"::"+resolveGlobalLN(env, l, n);
+      }
+
+      // Resolve a global name from the current scope.
+      export function resolveGlobal(e: Env, n: string) {
+        // Same as above: if it's not found, it's probably one of the built-in
+        // types which we don't track in our conflict resolution map because, as
+        // crazy as TouchDevelop is, it doesn't define yet the types "Number$"
+        // and "Number@".
+        var m = currentMap(e);
+        if (n in m)
+          return m[n];
+        else
+          return n;
       }
 
 
@@ -197,7 +255,8 @@ module TDev {
       export interface LibMap { [id: string]: string }
 
       export interface Type {
-        libs: string[];
+        lib: string;
+        user: boolean;
         type: string;
         args: Type[];
       }
@@ -206,7 +265,8 @@ module TDev {
         if (typeof t == "string") {
           // Simple, flat type, e.g. "Number"
           return {
-            libs: [],
+            lib: null,
+            user: false,
             type: t,
             args: []
           };
@@ -215,8 +275,8 @@ module TDev {
             throw new Error("Unsupported type reference");
           // Sophisticated type (prefixed by a library, or parameterized).
           return {
-            libs: (t.l ? [ libMap[t.l] ] : [])
-              .concat(t.o ? [ "user_types" ] : []),
+            lib: t.l ? libMap[t.l] : "",
+            user: !!t.o,
             type: t.o || t.g,
             args: t.a && t.a.length
               ? t.a.map((x: J.JTypeRef) => resolveStructuredTypeRef(libMap, x))
@@ -238,11 +298,11 @@ module TDev {
 
       export function defaultValueForType(libMap: LibMap, t1: J.JTypeRef) {
         var t = resolveTypeRef(libMap, t1);
-        if (!t.libs.length && t.type == "Number")
+        if (!t.lib && t.type == "Number")
           return "0";
-        else if (!t.libs.length && t.type == "Boolean")
+        else if (!t.lib && t.type == "Boolean")
           return "false";
-        else if (!t.libs.length && t.type == "Action")
+        else if (!t.lib && t.type == "Action")
           return "NULL";
         else
           return null;
@@ -250,7 +310,11 @@ module TDev {
 
       function toCppType (env: Env, t: Type): string {
         var args = t.args.map((t: Type) => toCppType(env, t));
-        var r = manglePrefixedName(env, t.libs, t.type) +
+        var n = t.lib ? resolveGlobalLN(env, t.lib, t.type) : resolveGlobal(env, t.type);
+        var r =
+          (t.lib ? mangle(t.lib) + "::" : "") +
+          (t.user ? "user_types::" : "") +
+          n +
           (args.length ? "<" + args.join(", ") + ">" : "");
         return r;
       }
@@ -260,7 +324,7 @@ module TDev {
       }
 
       export function mkParam(env: Env, libMap: LibMap, p: J.JLocalDef) {
-        return mkType(env, libMap, p.type)+" "+mangleDef(env, p);
+        return mkType(env, libMap, p.type)+" "+resolveLocalDef(env, p);
       }
 
       export function mkSignature(env: Env, libMap: LibMap, name: string, inParams: J.JLocalDef[], outParams: J.JLocalDef[], isLambda=false) {

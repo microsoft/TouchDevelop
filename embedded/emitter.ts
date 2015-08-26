@@ -7,28 +7,6 @@ module TDev {
     import J = AST.Json
     import H = Helpers
 
-    // --- Environments
-
-    export interface EmitterEnv extends H.Env {
-      indent: string;
-    }
-
-    export function emptyEnv(): EmitterEnv {
-      return {
-        indent: "",
-        ident_of_id: {},
-        id_of_ident: {},
-      };
-    }
-
-    export function indent(e: EmitterEnv) {
-      return {
-        indent: e.indent + "  ",
-        ident_of_id: e.ident_of_id,
-        id_of_ident: e.id_of_ident,
-      };
-    }
-
     function assert(x: boolean) {
       if (!x)
         throw new Error("Assert failure");
@@ -36,7 +14,7 @@ module TDev {
 
     // --- The code emitter.
 
-    export class Emitter extends JsonAstVisitor<EmitterEnv, string> {
+    export class Emitter extends JsonAstVisitor<H.Env, string> {
 
       // Output "parameters", written to at the end.
       public prototypes = "";
@@ -54,49 +32,48 @@ module TDev {
       // All the libraries needed to compile this [JApp].
       constructor(
         private libRef: J.JCall,
-        public libName: string,
         private libs: J.JApp[],
         private resolveMap: { [index:string]: string }
       ) {
         super();
       }
 
-      public visitMany(e: EmitterEnv, ss: J.JNode[]) {
+      public visitMany(e: H.Env, ss: J.JNode[]) {
         var code = [];
         ss.forEach((s: J.JNode) => { code.push(this.visit(e, s)) });
         return code.join("\n");
       }
 
-      public visitComment(env: EmitterEnv, c: string) {
+      public visitComment(env: H.Env, c: string) {
         return env.indent+"// "+c.replace("\n", "\n"+env.indent+"// ");
       }
 
-      public visitBreak(env: EmitterEnv) {
+      public visitBreak(env: H.Env) {
         return env.indent + "break;";
       }
 
-      public visitContinue(env: EmitterEnv) {
+      public visitContinue(env: H.Env) {
         return env.indent + "continue;";
       }
 
-      public visitShow(env: EmitterEnv, expr: J.JExpr) {
+      public visitShow(env: H.Env, expr: J.JExpr) {
         // TODO hook this up to "post to wall" handling if any
         return env.indent + "serial.print(" + this.visit(env, expr) + ");";
       }
 
-      public visitReturn(env: EmitterEnv, expr: J.JExpr) {
+      public visitReturn(env: H.Env, expr: J.JExpr) {
         return env.indent + H.mkReturn(this.visit(env, expr));
       }
 
-      public visitExprStmt(env: EmitterEnv, expr: J.JExpr) {
+      public visitExprStmt(env: H.Env, expr: J.JExpr) {
         return env.indent + this.visit(env, expr)+";";
       }
 
-      public visitInlineActions(env: EmitterEnv, expr: J.JExprHolder, actions: J.JInlineAction[]) {
+      public visitInlineActions(env: H.Env, expr: J.JExprHolder, actions: J.JInlineAction[]) {
         var map = {};
         expr.locals.forEach((l: J.JLocalDef) => { map[l.id] = l.name });
         var lambdas = actions.map((a: J.JInlineAction) => {
-          var n = H.mangleUnique(env, map[a.reference.id], a.reference.id);
+          var n = H.resolveGlobalL(env, map[a.reference.id], a.reference.id);
           return (
             env.indent + "auto "+n+"_ = "+
               this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
@@ -109,7 +86,7 @@ module TDev {
           env.indent + this.visit(env, expr.tree) + ";");
       }
 
-      public visitExprHolder(env: EmitterEnv, locals: J.JLocalDef[], expr: J.JExprHolder) {
+      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
         var decls = locals.map(d => {
           var x = H.defaultValueForType(this.libraryMap, d.type);
           return this.visit(env, d) + (x ? " = " + x : "") + ";";
@@ -119,23 +96,23 @@ module TDev {
           this.visit(env, expr);
       }
 
-      public visitLocalRef(env: EmitterEnv, name: string, id: string) {
+      public visitLocalRef(env: H.Env, name: string, id: string) {
         // In our translation, referring to a TouchDevelop identifier never
         // requires adding a reference operator (&). Things passed by reference
         // are either:
         // - function pointers (a.k.a. "handlers" in TouchDevelop lingo), for
         //   which C and C++ accept both "f" and "&f" (we hence use the former)
         // - arrays, strings, user-defined objects, which are in fact of type
-        //   "shared_ptr<T>", no "&" operator here.
-        return H.mangleUnique(env, name, id);
+        //   "ManagedType<T>", no "&" operator here.
+        return H.resolveLocal(env, name, id);
       }
 
-      public visitLocalDef(env: EmitterEnv, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(env, this.libraryMap, type)+" "+H.mangleUnique(env, name, id);
+      public visitLocalDef(env: H.Env, name: string, id: string, type: J.JTypeRef) {
+        return H.mkType(env, this.libraryMap, type)+" "+H.resolveLocal(env, name, id);
       }
 
       // Allows the target to redefine their own string type.
-      public visitStringLiteral(env: EmitterEnv, s: string) {
+      public visitStringLiteral(env: H.Env, s: string) {
         return 'touch_develop::mk_string("'+s.replace(/["\\\n\r]/g, c => {
           if (c == '"') return '\\"';
           if (c == '\\') return '\\\\';
@@ -144,25 +121,25 @@ module TDev {
         }) + '")';
       }
 
-      public visitNumberLiteral(env: EmitterEnv, n: number) {
+      public visitNumberLiteral(env: H.Env, n: number) {
         return n+"";
       }
 
-      public visitBooleanLiteral(env: EmitterEnv, b: boolean) {
+      public visitBooleanLiteral(env: H.Env, b: boolean) {
         return b+"";
       }
 
-      public visitWhile(env: EmitterEnv, cond: J.JExprHolder, body: J.JStmt[]) {
+      public visitWhile(env: H.Env, cond: J.JExprHolder, body: J.JStmt[]) {
         var condCode = this.visit(env, cond);
-        var bodyCode = this.visitMany(indent(env), body);
+        var bodyCode = this.visitMany(H.indent(env), body);
         return env.indent + "while ("+condCode+") {\n" + bodyCode + "\n" + env.indent + "}";
       }
 
-      public visitFor(env: EmitterEnv, index: J.JLocalDef, bound: J.JExprHolder, body: J.JStmt[]) {
+      public visitFor(env: H.Env, index: J.JLocalDef, bound: J.JExprHolder, body: J.JStmt[]) {
         var indexCode = this.visit(env, index) + " = 0";
-        var testCode = H.mangleDef(env, index) + " < " + this.visit(env, bound);
-        var incrCode = "++"+H.mangleDef(env, index);
-        var bodyCode = this.visitMany(indent(env), body);
+        var testCode = H.resolveLocalDef(env, index) + " < " + this.visit(env, bound);
+        var incrCode = "++"+H.resolveLocalDef(env, index);
+        var bodyCode = this.visitMany(H.indent(env), body);
         return (
           env.indent + "for ("+indexCode+"; "+testCode+"; "+incrCode+") {\n" +
             bodyCode + "\n" +
@@ -171,7 +148,7 @@ module TDev {
       }
 
       public visitIf(
-          env: EmitterEnv,
+          env: H.Env,
           cond: J.JExprHolder,
           thenBranch: J.JStmt[],
           elseBranch: J.JStmt[],
@@ -183,15 +160,15 @@ module TDev {
         // "if false" followed by an "else" is *not* understood to be a comment.
         return [
           env.indent, isElseIf ? "else " : "", "if (" + this.visit(env, cond) + "){\n",
-          isIfFalse ? "" : this.visitMany(indent(env), thenBranch) + "\n",
+          isIfFalse ? "" : this.visitMany(H.indent(env), thenBranch) + "\n",
           env.indent, "}",
           elseBranch ? " else {\n" : "",
-          elseBranch ? this.visitMany(indent(env), elseBranch) + "\n" : "",
+          elseBranch ? this.visitMany(H.indent(env), elseBranch) + "\n" : "",
           elseBranch ? env.indent + "}" : ""
         ].join("");
       }
 
-      private resolveCall(env: EmitterEnv, receiver: J.JExpr, name: string) {
+      private resolveCall(env: H.Env, receiver: J.JExpr, name: string) {
         if (!receiver)
           return null;
 
@@ -207,7 +184,7 @@ module TDev {
             return this.resolveCall(env, this.libRef, name);
           else
             // Call to a function from the current script.
-            return H.mangleName(name);
+            return H.resolveGlobal(env, name);
 
 
         // Is this a call to a library?
@@ -228,7 +205,7 @@ module TDev {
             return s;
           } else {
             // Actual call to a library function
-            return H.manglePrefixedName(env, [n], name);
+            return H.resolveGlobalL(env, n, name);
           }
         }
 
@@ -238,7 +215,7 @@ module TDev {
       // Some conversions cannot be expressed using the simple "enums" feature
       // (which maps a string literal to a constant). This function transforms
       // the arguments for some known specific C++ functions.
-      private specialTreatment(e: EmitterEnv, f: string, actualArgs: J.JExpr[]) {
+      private specialTreatment(e: H.Env, f: string, actualArgs: J.JExpr[]) {
         if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation" || f == "micro_bit::plotImage") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (x === "")
@@ -265,7 +242,7 @@ module TDev {
         );
       }
 
-      public visitCall(env: EmitterEnv,
+      public visitCall(env: H.Env,
         name: string,
         args: J.JExpr[],
         typeArgs: J.JTypeRef[],
@@ -319,7 +296,7 @@ module TDev {
           // Note: we cannot call new on type definitions from other libraries.
           // So the type we're looking for is always in the current scope's
           // "user_types" namespace.
-          var struct_name = H.manglePrefixedName(env, ["user_types"], <any> parent)+"_";
+          var struct_name = "user_types::"+H.resolveGlobal(env, <any> parent)+"_";
           return "ManagedType<"+struct_name+">(new "+struct_name+"())";
         }
 
@@ -335,22 +312,23 @@ module TDev {
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
-          return H.manglePrefixedName(env, ["globals"], name);
+          return "globals::"+H.resolveGlobal(env, name);
 
         // 4) Extension method, where p(x) is represented as x→ p. In case we're
         // actually referencing a function from a library, go through
         // [resolveCall] again, so that we find the shim if any.
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          var prefixedName = t.libs.length > 1
-            ? this.resolveCall(env, H.mkLibraryRef(t.libs[0]), name)
+          var prefixedName = t.lib
+            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
             : this.resolveCall(env, H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
 
         // 5) Field access for an object.
         else if (callType == "field")
-          return this.safeGet(this.visit(env, args[0]), H.mangleName(name));
+          // TODO handle collisions at the record-field level.
+          return this.safeGet(this.visit(env, args[0]), H.mangle(name));
 
         // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
         else if (args.length && H.isSingletonRef(args[0]) == "♻")
@@ -358,18 +336,20 @@ module TDev {
 
         // 6b) Reference to a built-in library method, e.g. Math→ max. The
         // first call to lowercase avoids a conflict between Number (the type)
-        // and Number (the namespace). The second call to lowercase avoids a
-        // conflict between Collection_of (the type) and Collection_of (the
+        // and number (the namespace). The second call to lowercase avoids a
+        // conflict between Collection_of (the type) and collection_of (the
         // function).
         else if (args.length && H.isSingletonRef(args[0]))
-          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangleName(name).toLowerCase(), true);
+          // Assuming no collisions in built-in library methods.
+          return H.isSingletonRef(args[0]).toLowerCase() + "::" + mkCall(H.mangle(name).toLowerCase(), true);
 
         // 7) Instance method (e.g. Number's > operator, for which the receiver
         // is the number itself). Lowercase so that "number" is the namespace
-        // that contains the functions that operate on typedef "Number".
+        // that contains the functions that operate on typedef'd "Number".
         else {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          return t.type.toLowerCase()+"::"+mkCall(H.mangleName(name), false);
+          // Same thing, assuming no collisions for built-in operators.
+          return t.type.toLowerCase()+"::"+mkCall(H.mangle(name), false);
         }
       }
 
@@ -382,9 +362,7 @@ module TDev {
           return "";
       }
 
-      public visitGlobalDef(e: EmitterEnv, name: string, t: J.JTypeRef, comment: string) {
-        H.reserveName(e, name);
-
+      public visitGlobalDef(e: H.Env, name: string, t: J.JTypeRef, comment: string) {
         // TODO: we skip definitions marked as shims, but we do not do anything
         // meaningful when we *refer* to them.
         var s = H.isShim(comment);
@@ -392,14 +370,12 @@ module TDev {
           return null;
 
         var x = H.defaultValueForType(this.libraryMap, t);
-        // A reference to a global is already unique (i.e. un-ambiguous).
-        // [mkType] calls [mangleName] (NOT [mangleUnique], and so should we).
-        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.mangleName(name) +
+        return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.resolveGlobal(e, name) +
           (x ? " = " + x : "") + ";"
       }
 
       public visitAction(
-        env: EmitterEnv,
+        env: H.Env,
         name: string,
         id: string,
         inParams: J.JLocalDef[],
@@ -413,19 +389,17 @@ module TDev {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
 
-        var env2 = indent(env);
+        var env2 = H.indent(env);
         var bodyText = [
           outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
           this.visitMany(env2, body),
-          outParams.length ? env2.indent + H.mkReturn(H.mangleDef(env, outParams[0])) : "",
+          outParams.length ? env2.indent + H.mkReturn(H.resolveLocalDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
-        // The name of a function is unique per library, so don't go through
-        // [mangleUnique].
-        var head = H.mkSignature(env, this.libraryMap, H.mangleName(name), inParams, outParams, isLambda);
+        var head = H.mkSignature(env, this.libraryMap, H.resolveGlobal(env, name), inParams, outParams, isLambda);
         return (isLambda ? "" : env.indent) + head + " {\n" + bodyText + "\n"+env.indent+"}";
       }
 
-      private compileImageLiterals(e: EmitterEnv) {
+      private compileImageLiterals(e: H.Env) {
         if (!this.imageLiterals.length)
           return "";
 
@@ -467,22 +441,15 @@ module TDev {
         e.indent + "}\n\n";
       }
 
-      private typeDecl(e: EmitterEnv, r: J.JRecord) {
-        // Comments on record definitions can't be set via the TouchDevelop UI.
-        // Instead, fire up the console, and do something like:
-        //
-        //     TDev.Script.things.filter(function (x) {
-        //       return x instanceof TDev.AST.RecordDef
-        //     })[0].description = "{shim:}"
-        //
+      private typeDecl(e: H.Env, r: J.JRecord) {
         var s = H.isShim(r.comment);
         if (s !== null)
           return null;
 
-        var n = H.mangleName(r.name);
+        var n = H.resolveGlobal(e, r.name);
         var fields = r.fields.map((f: J.JRecordField) => {
           var t = H.mkType(e, this.libraryMap, f.type);
-          return e.indent + "  " + t + " " + H.mangleName(f.name) + ";";
+          return e.indent + "  " + t + " " + H.mangle(f.name) + ";";
         }).join("\n");
         return [
           e.indent + "struct " + n + "_ {",
@@ -491,22 +458,22 @@ module TDev {
         ].join("\n");
       }
 
-      private typeStub(e: EmitterEnv, r: J.JRecord) {
+      private typeStub(e: H.Env, r: J.JRecord) {
         var s = H.isShim(r.comment);
         if (s !== null)
           return null;
 
-        var n = H.mangleName(r.name);
+        var n = H.resolveGlobal(e, r.name);
         return [
           e.indent + "struct " + n + "_;",
           e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
         ].join("\n");
       }
 
-      private wrapNamespaceIf(s: string) {
-        if (this.libName != null)
+      private wrapNamespaceIf(e: H.Env, s: string) {
+        if (e.libName != null)
           return (s.length
-            ? "  namespace "+this.libName+" {\n"+
+            ? "  namespace "+H.mangle(e.libName)+" {\n"+
                 s +
               "\n  }"
             : "");
@@ -514,7 +481,7 @@ module TDev {
           return s;
       }
 
-      private wrapNamespaceDecls(e: EmitterEnv, n: string, s: string[]) {
+      private wrapNamespaceDecls(e: H.Env, n: string, s: string[]) {
         return (s.length
           ? e.indent + "namespace "+n+" {\n"+
               s.join("\n") + "\n" +
@@ -524,10 +491,10 @@ module TDev {
 
       // This function runs over all declarations. After execution, the three
       // member fields [prelude], [prototypes] and [code] are filled accordingly.
-      public visitApp(e: EmitterEnv, decls: J.JDecl[]) {
-        e = indent(e);
-        if (this.libName)
-          e = indent(e);
+      public visitApp(e: H.Env, decls: J.JDecl[]) {
+        e = H.indent(e);
+        if (e.libName)
+          e = H.indent(e);
 
         // Some parts of the emitter need to lookup library names by their id
         decls.forEach((x: J.JDecl) => {
@@ -543,7 +510,7 @@ module TDev {
         //     struct Thing_;
         //     typedef ManagedType<Thing_> Thing;
         var typeStubs = decls.map((f: J.JDecl) => {
-          var e1 = indent(e)
+          var e1 = H.indent(e)
           if (f.nodeType == "record")
             return this.typeStub(e1, <J.JRecord> f);
           else
@@ -554,7 +521,7 @@ module TDev {
         // Then, we can emit the definition of the structs (Thing_) because they
         // refer to TouchDevelop types (Thing).
         var typeDefs = decls.map((f: J.JDecl) => {
-          var e1 = indent(e)
+          var e1 = H.indent(e)
           if (f.nodeType == "record")
             return this.typeDecl(e1, <J.JRecord> f);
           else
@@ -565,7 +532,7 @@ module TDev {
         // Globals are in their own namespace (otherwise they would collide with
         // "math", "number", etc.).
         var globals = decls.map((f: J.JDecl) => {
-          var e1 = indent(e)
+          var e1 = H.indent(e)
           if (f.nodeType == "data")
             return this.visit(e1, f);
           else
@@ -577,8 +544,7 @@ module TDev {
         // by default, mutually recursive in TouchDevelop).
         var forwardDeclarations = decls.map((f: J.JDecl) => {
           if (f.nodeType == "action" && H.willCompile(<J.JAction> f)) {
-            H.reserveName(e, f.name, f.id);
-            return e.indent + H.mkSignature(e, this.libraryMap, H.mangleName(f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
+            return e.indent + H.mkSignature(e, this.libraryMap, H.resolveGlobal(e, f.name), (<J.JAction> f).inParameters, (<J.JAction> f).outParameters)+";";
           } else {
             return null;
           }
@@ -602,10 +568,10 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = this.wrapNamespaceIf(globalsCode + forwardDeclarations.join("\n"));
-        this.code = this.wrapNamespaceIf(this.compileImageLiterals(e) + userFunctions.join("\n"));
-        this.tPrototypes = this.wrapNamespaceIf(typeStubsCode);
-        this.tCode = this.wrapNamespaceIf(typeDefsCode);
+        this.prototypes = this.wrapNamespaceIf(e, globalsCode + forwardDeclarations.join("\n"));
+        this.code = this.wrapNamespaceIf(e, this.compileImageLiterals(e) + userFunctions.join("\n"));
+        this.tPrototypes = this.wrapNamespaceIf(e, typeStubsCode);
+        this.tCode = this.wrapNamespaceIf(e, typeDefsCode);
 
         // [embedded.ts] now reads the three member fields separately and
         // ignores this return value.
