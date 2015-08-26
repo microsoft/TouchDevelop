@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Microsoft.Microbit
+namespace Microsoft.MicroBit
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -106,7 +106,7 @@ namespace Microsoft.Microbit
             try
             {
                 var info = new System.IO.FileInfo(fullPath);
-                if (info.Extension != ".hex")
+                if (info.Extension != ".hex" || !info.Name.StartsWith("microbit-", StringComparison.OrdinalIgnoreCase))
                     return;
 
                 this.updateStatus("detected " + info.Name);
@@ -124,7 +124,8 @@ namespace Microsoft.Microbit
                 File.Copy(info.FullName, trg, true);
                 this.updateStatus("loading done");
 
-                if (this.DeleteOnFlash)
+                var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnFlash));
+                if (del)
                 {
                     File.Delete(info.FullName);
                     this.updateStatus("loading and cleaning done");
