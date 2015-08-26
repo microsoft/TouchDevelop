@@ -1762,7 +1762,8 @@ module TDev {
 
         public _kind:Kind;
         public parentProperty:IProperty;
-        public languageHint:string;
+        public languageHint: string;
+        public enumMap: StringMap<string>;
         private _stringValues: string[];
         private _stringValueArtIds: StringMap<string>;
         public _flags:ParameterFlags = 0;

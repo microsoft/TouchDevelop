@@ -1686,7 +1686,7 @@ module TDev.AST {
         hints?:string[];
         enumMap?:StringMap<string>;
         pichints?:StringMap<string>;
-        langugage?:string;
+        language?:string;
     }
 
     export class Action
@@ -2078,7 +2078,7 @@ module TDev.AST {
                 return ""
             })
             descr.replace(/\{language:([^:{}]*):([^{}]*)/g,(mtch, arg, vals: string) => {
-                this.getParameterAnnotation(arg).langugage = vals
+                this.getParameterAnnotation(arg).language = vals
                 return ""
             })
         }
@@ -2097,7 +2097,8 @@ module TDev.AST {
             var annot = this.getParameterAnnotation(name)
             if (annot.hints) r.setDeflStrings(annot.hints)
             if (annot.pichints) r.setDeflStringArtIds(annot.pichints);
-            if (annot.langugage) r.languageHint = annot.langugage
+            if (annot.language) r.languageHint = annot.language;
+            if (annot.enumMap) r.enumMap = annot.enumMap;
             return r
         }
     }

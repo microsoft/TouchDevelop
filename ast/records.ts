@@ -395,7 +395,7 @@ module TDev.AST {
 
         private propertyDeflStrings:string[];
         static trueFalse = ["true", "false"]
-        public bogusPropertyParameter()
+        public bogusPropertyParameter() : PropertyParameter
         {
             if (this.propertyDeflStrings === undefined) {
                 var m = /\{hints:([^{}]*)/.exec(this.getDescription())

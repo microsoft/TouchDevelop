@@ -3580,7 +3580,7 @@ module TDev
             return elt
         }
 
-        private getParameterStringValuesAtCursor()
+        private getParameterStringValuesAtCursor() : PropertyParameter
         {
             if (this.stmt instanceof AST.OptionalParameter &&
                 this.expr.tokens.slice(0, this.cursorPosition).every(t => t.getLiteral() || t.isDigit()))
@@ -3604,12 +3604,13 @@ module TDev
             if (!pp) return
             var stringValues = pp.getStringValues()
             if (!stringValues || stringValues.length <= 1) return
+            var isEnum = !!pp.enumMap;
             var picStringValues = Browser.lowMemory ? {} : (pp.getStringValueArtIds() || {});
             stringValues.forEach((s, i) => {
                 var e = this.mkIntelliItem(1e8 - i, Ticks.calcInsertStringParamterValue);
                 var isNum = pp.getKind() == api.core.Number
 
-                e.nameOverride = isNum ? s + "" : Util.fmt('"{0}"', s);
+                e.nameOverride = isNum ? s + "" : isEnum ? s : Util.fmt('"{0}"', s);
                 e.descOverride = "insert";
                 e.iconOverride = "svg:NumberedList,white";
                 e.colorOverride = "rgb(0, 204, 153)";
