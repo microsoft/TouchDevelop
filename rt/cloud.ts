@@ -4,6 +4,8 @@ module TDev.Cloud {
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
 
+    export var useEmbeddedGcc = false;
+
     export interface EditorWidgets {
         // edit
         addNewButton?: boolean;
@@ -818,7 +820,7 @@ module TDev.Cloud {
         }
 
         var config = isFota() ? "ws-fota" : "ws";
-        if (document.location.href.match(/usegcc=1/))
+        if (useEmbeddedGcc)
             config += "-gcc";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
