@@ -6846,8 +6846,8 @@
             if (this.correspondingTopic) {
                 var tas = this.browser().treatAsScript 
                 if (!tas.hasOwnProperty(this.publicId))
-                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr") ? false : true
-                if (tas[this.publicId])
+                    tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr")
+                if (!tas[this.publicId])
                     return this.correspondingTopic;
             }
             return this;
