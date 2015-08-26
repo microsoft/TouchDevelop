@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfApplication1
+namespace Microsoft.Microbit
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -118,16 +118,16 @@ namespace WpfApplication1
                     return;
                 }
 
-                this.updateStatus("flashing " + info.Name);
+                this.updateStatus("loading...");
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);
-                this.updateStatus("flashing done");
+                this.updateStatus("loading done");
 
                 if (this.DeleteOnFlash)
                 {
                     File.Delete(info.FullName);
-                    this.updateStatus("flashing and cleaning done");
+                    this.updateStatus("loading and cleaning done");
                 }
 
                 return;

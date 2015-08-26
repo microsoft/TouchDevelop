@@ -1,8 +1,8 @@
-﻿<Window x:Class="WpfApplication1.MainWindow"
+﻿<Window x:Class="Microsoft.Microbit.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        ResizeMode="NoResize"
-        Title="BBC micro:bit Flasher" Height="320" Width="340" Background="White"
+        ResizeMode="CanMinimize"
+        Title="micro:bit loader" Height="320" Width="340" Background="White"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -10,10 +10,10 @@
             <ColumnDefinition Width="245*"/>
         </Grid.ColumnDefinitions>
         <Grid.Background>
-            <ImageBrush Stretch="UniformToFill" ImageSource="/BBC.MicroBit.Flasher;component/bg-section-alt.png"/>
+            <ImageBrush Stretch="UniformToFill" ImageSource="/Microsoft.MicroBit.Loader;component/bg-section-alt.png"/>
         </Grid.Background>
-        <Image Source="/BBC.MicroBit.Flasher;component/micro-bit_primary_colour_master.png" Width="200" Margin="57,0,56.6,92.4" Grid.ColumnSpan="2" />
-        <Image Source="/BBC.MicroBit.Flasher;component/microsoftlogo.png" Margin="1,123,70,8" Grid.Column="1" />
+        <Image Source="/Microsoft.MicroBit.Loader;component/micro-bit_primary_colour_master.png" Width="200" Margin="57,0,56.6,92.4" Grid.ColumnSpan="2" />
+        <Image Source="/Microsoft.MicroBit.Loader;component/microsoftlogo.png" Margin="1,123,70,8" Grid.Column="1" />
         <Label Content="{Binding Path=Status}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="27,231,21,0" VerticalAlignment="Top" Width="286" Grid.ColumnSpan="2" Height="35" FontSize="16"/>
         <CheckBox Content="delete .hex file after flashing" Margin="89,271,0,4" IsChecked="{Binding Path=DeleteOnFlash}" Grid.Column="1" />
     </Grid>

@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace WpfApplication1
+namespace MicrosoftMicrobit
 {
     /// <summary>
     /// Interaction logic for App.xaml

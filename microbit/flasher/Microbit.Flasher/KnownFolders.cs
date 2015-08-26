@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Management;
 using System.Runtime.InteropServices;
-using WpfApplication1;
+using MicrosoftMicrobit;
 
-namespace WpfApplication1
+namespace Microsoft.Microbit
 {
     /// <summary>
     /// Class containing methods to retrieve specific file system paths.

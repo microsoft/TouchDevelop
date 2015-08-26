@@ -7,15 +7,15 @@
     <ProjectGuid>{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BBC.MicroBit.Flasher</RootNamespace>
-    <AssemblyName>BBC.MicroBit.Flasher</AssemblyName>
+    <RootNamespace>Microsoft.MicroBit.Loader</RootNamespace>
+    <AssemblyName>Microsoft.MicroBit.Loader</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <PublishUrl>\\research\root\web\external\en-us\UM\redmond\projects\touchdevelop\microbitflasher\</PublishUrl>
+    <PublishUrl>\\research\root\web\external\en-us\UM\redmond\projects\touchdevelop\microbitloader\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -23,13 +23,15 @@
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
+    <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ProductName>BBC.MicroBit.Flasher</ProductName>
+    <UpdateUrl>http://research.microsoft.com/en-us/UM/redmond/projects/touchdevelop/microbitloader/</UpdateUrl>
+    <ProductName>Microsoft.micro_bit.loader</ProductName>
     <PublisherName>Microsoft</PublisherName>
+    <MinimumRequiredVersion>1.0.0.26</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>20</ApplicationRevision>
+    <ApplicationRevision>26</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -180,8 +182,8 @@
   <ItemGroup>
     <FileAssociation Include=".hex">
       <Visible>False</Visible>
-      <Description>BBC micro:bit compiled script</Description>
-      <Progid>BBC.microbit</Progid>
+      <Description>micro:bit compiled script</Description>
+      <Progid>Microsoft.microbit.hex</Progid>
       <DefaultIcon>micro-bit_favicon.ico</DefaultIcon>
     </FileAssociation>
   </ItemGroup>
