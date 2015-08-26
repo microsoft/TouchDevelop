@@ -224,6 +224,10 @@ module TDev
             return result;
         }
 
+        public renderEnumVal(v: string): string {
+            return Renderer.tspan("stringLiteral", Renderer.quoteString(TDev.RT.String_.trim_overflow(v, this.stringLimit)));            
+        }
+        
         public renderString(v:string, lim = this.stringLimit) : string
         {
             return Renderer.tspan("stringLiteral", "\"" + Renderer.quoteString(TDev.RT.String_.trim_overflow(v, lim)) + "\"");
@@ -252,6 +256,7 @@ module TDev
                 break;
             case "string":
                 if (/^bitmatrix|bitframe$/i.test(n.languageHint)) div = this.renderBitmatrix(v);
+                else if (n.enumVal) div = this.renderEnumVal(v);
                 else div = this.renderString(v);
                 break;
             default:
