@@ -17,6 +17,7 @@ module TDev
         }
 
         private recordName = HTML.mkTextInputWithOk("text", lf("Enter a name"));
+        private description = HTML.mkTextArea("description");        
         private recordnamediv:HTMLElement;
         private formRoot = div("varProps");
         private recordType = div(null);
@@ -35,6 +36,7 @@ module TDev
         {
             super.init(e);
             this.recordName.id = "renameBox2";
+            this.description.className = "variableDesc";
             this.exported = HTML.mkTickCheckBox(
                 Ticks.recordExported,
                 lf("exported from this library"),
@@ -54,6 +56,7 @@ module TDev
         {
             this.theRecord.fixupFields(origtype);
             this.recordName.value = this.theRecord.getCoreName();
+            this.description.value = this.theRecord.description;
 
             if (tc) {
                 AST.TypeChecker.tcApp(Script);
@@ -301,6 +304,8 @@ module TDev
                                   this.mkKey,
                                   this.mkVal,
                                   this.mkAct,
+                                  div("varLabel", lf("description")),
+                                  this.description,
                                   ]);
 
             this.editor.displayLeft([this.formRoot]);
@@ -322,6 +327,7 @@ module TDev
             if (this.theRecord.getCoreName() != this.recordName.value)
                 this.theRecord.setName(Script.freshName(this.recordName.value));
             this.theRecord._isExported = HTML.getCheckboxValue(this.exported);
+            this.theRecord.description = this.description.value;
             Script.notifyChangeAll();
             TheEditor.queueNavRefresh();
         }
