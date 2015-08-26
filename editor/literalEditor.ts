@@ -60,52 +60,62 @@ module TDev
         private animCells: HTMLElement[];
         private dialog: ModalDialog;
 
-        constructor(public calculator: Calculator, public literal: AST.Literal) {
+        constructor(public calculator: Calculator, public literal: AST.Literal, private animation: boolean) {
             super(calculator, literal);
 
-            this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add frame"), Ticks.noEvent,() => {
-                var v = this.serialize(this.frames + 1);
-                this.updateTable(v);
-                if (this.frames > 1) {
-                    // clone cells
-                    for (var i = 0; i < 5; ++i)
-                        for (var j = 0; j < 5; ++j) {
-                            var k = this.cellIndex(i, (this.frames - 2) * this.rows + j);
-                            var kf = this.cellIndex(i, (this.frames - 1) * this.rows + j);
-                            this.bitCells[kf].setFlag('on', this.bitCells[k].getFlag('on'));
-                        }
-                }
-            });
-            this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove frame"), Ticks.noEvent,() => {
-                if (this.frames > 1) {
-                    var v = this.serialize(this.frames - 1);
-                    this.updateTable(v);
-                }
-            });
             this.okBtn = HTML.mkRoundButton("svg:check,black", lf("ok"), Ticks.noEvent, () => {
                 if (this.dialog) this.dialog.dismiss();
             })
             this.okBtn.style.position = "absolute";
             this.okBtn.style.bottom = "0em";
             this.okBtn.style.right = "0em";
+
             this.table = div('bitmatrices');
-            this.animTable = <HTMLTableElement>document.createElement("table");
-            this.animTable.className = 'bitmatrix bitpreview';
-            this.animCells = [];
-            Util.range(0, 5).forEach(i => {
-                var row = HTML.tr(this.animTable, 'bitrow');
-                HTML.td(row, 'index');
-                for (var j = 0; j < 5; ++j) {
-                    this.animCells[i * 5 + j] = HTML.td(row, 'bit');
-                    this.animCells[i * 5 + j].appendChild(div(''));
-                }
-            });
+            
+            if (this.animation) {
+                this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add frame"), Ticks.noEvent, () => {
+                    var v = this.serialize(this.frames + 1);
+                    this.updateTable(v);
+                    if (this.frames > 1) {
+                        // clone cells
+                        for (var i = 0; i < 5; ++i)
+                            for (var j = 0; j < 5; ++j) {
+                                var k = this.cellIndex(i, (this.frames - 2) * this.rows + j);
+                                var kf = this.cellIndex(i, (this.frames - 1) * this.rows + j);
+                                this.bitCells[kf].setFlag('on', this.bitCells[k].getFlag('on'));
+                            }
+                    }
+                });
+                this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove frame"), Ticks.noEvent, () => {
+                    if (this.frames > 1) {
+                        var v = this.serialize(this.frames - 1);
+                        this.updateTable(v);
+                    }
+                });
+                this.animTable = <HTMLTableElement>document.createElement("table");
+                this.animTable.className = 'bitmatrix bitpreview';
+                this.animCells = [];
+                Util.range(0, 5).forEach(i => {
+                    var row = HTML.tr(this.animTable, 'bitrow');
+                    HTML.td(row, 'index');
+                    for (var j = 0; j < 5; ++j) {
+                        this.animCells[i * 5 + j] = HTML.td(row, 'bit');
+                        this.animCells[i * 5 + j].appendChild(div(''));
+                    }
+                });
+            }
+            
             this.root = div('bitmatrix',
                 div('btns', this.animTable, this.plusBtn, this.minusBtn),
                 this.table,
                 this.okBtn);
-            
+
             this.updateTable(literal.data);
+            
+            if (!this.animation && this.frames > 1) {
+                var v = this.serialize(1);
+                this.updateTable(v);
+            }
         }
 
         public dismissed() {
@@ -180,6 +190,7 @@ module TDev
         }
 
         private animate() {
+            if (!this.animation) return;
             var af = 0;
             this.animToken = window.setInterval(() => {
                 for (var i = 0; i < 5; ++i) {

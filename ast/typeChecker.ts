@@ -2079,7 +2079,7 @@ module TDev.AST
                         }                        
                     }
 
-                    if (/^bitmatrix$/.test(args[i].languageHint)) {
+                    if (/^bitmatrix|bitframe$/i.test(args[i].languageHint)) {
                         var lit = args[i].getLiteral();
                         if (!(typeof lit == "string")) {
                             this.markError(args[i], lf("TD179: we need a string here"));

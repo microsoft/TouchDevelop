@@ -190,7 +190,7 @@ module TDev
                 return !!x;
             }));
 
-            var maxCols = 45;            
+            var maxCols = 45;
             var f = 50; var f2 = f / 2;
             var r1 = "";
             var r0 = "";
@@ -251,7 +251,7 @@ module TDev
                 div = Renderer.tspan("kw", v ? "true" : "false");
                 break;
             case "string":
-                if (/^bitmatrix$/.test(n.languageHint)) div = this.renderBitmatrix(v);
+                if (/^bitmatrix|bitframe$/i.test(n.languageHint)) div = this.renderBitmatrix(v);
                 else div = this.renderString(v);
                 break;
             default:
