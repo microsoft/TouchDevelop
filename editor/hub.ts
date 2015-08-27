@@ -1916,7 +1916,8 @@ module TDev.Browser {
                 this.chooseEditorAsync().done((editor) => {
                     if (!editor) return;
                     var p = Promise.as("");
-                    if (editor == "touchdevelop") p = ScriptCache.getScriptAsync('nmhibf') // ADJ script
+                    if (editor == "touchdevelop")
+                        p = Promise.as(ScriptCache.forcedUpdate('nmhibf').text);
                     p.then(src => {
                         var stub: World.ScriptStub = {
                             editorName: editor,
