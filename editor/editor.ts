@@ -5999,8 +5999,11 @@ module TDev
                         hs = ["hub", "creategroup"];
                         break;
                     case "pub":
-                        hs = ["list", "installed-scripts", "pub", hs[1] ];
-                        break;
+                        Browser.TheApiCacheMgr.getAsync(hs[1], true).done((d: JsonEtag) => {
+                            if (d) Util.setHash("list:installed-scripts:" + d.kind + ":" + d.id, true);
+                            else Util.setHash(TDev.hubHash, true);
+                        });
+                        return;
                     case "follow":
                         hs = ["hub", "follow", hs[1], hs[2]];
                         break;
