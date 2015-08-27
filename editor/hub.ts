@@ -1460,18 +1460,9 @@ module TDev.Browser {
                         });
                     }
                     break;
-                case "pub":
-                    var id = h[2];
-                    if (/^[a-z]{4,}/.test(id)) {
-                        HistoryMgr.instance.setHash(this.screenId() + ":pub:" + h[2], null)
-                        TheApiCacheMgr.getAsync(id, true)
-                            .done((d) => {
-                            var details = this.browser().getAnyInfoByEtag(d);
-                            if (details)
-                                this.browser().loadDetails(details);
-                        });
-                    }
-                    break;
+                case "pub": // redirect to list
+                    Util.setHash("#list:installed-scripts:pub:" + h[2], true);    
+                    return;
                 case "create":
                 case "derive":
                     if (/^\w+$/.test(h[2])) {

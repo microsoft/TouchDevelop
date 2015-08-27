@@ -5999,7 +5999,7 @@ module TDev
                         hs = ["hub", "creategroup"];
                         break;
                     case "pub":
-                        hs = ["hub", "pub", hs[1] ];
+                        hs = ["list", "installed-scripts", "pub", hs[1] ];
                         break;
                     case "follow":
                         hs = ["hub", "follow", hs[1], hs[2]];
