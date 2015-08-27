@@ -5951,7 +5951,7 @@ module TDev
 
         public reload(h:string)
         {
-            if (h == "#") h = "#hub"
+            if (h == "#") h = "#" + TDev.hubHash;
 
             var i = h.indexOf("#access_token=");
             if (i != -1) {

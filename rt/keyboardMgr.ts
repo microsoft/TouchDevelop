@@ -47,7 +47,7 @@ module TDev {
             if (i > 0 && i < url.length - 1)
                 return url.slice(i);
             else
-                return "#hub";
+                return "#" + TDev.hubHash;
         }
 
         static windowHash() {
@@ -80,7 +80,7 @@ module TDev {
 
             if (!/^#/.test(h)) h = "#" + h;
 
-            if (h == "#hub") h = "#"
+            if (h == "#" + TDev.hubHash) h = "#"
 
             this.clearModalSuffix();
 
