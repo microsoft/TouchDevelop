@@ -28,7 +28,7 @@
                 var menuItems = [
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
                         if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
-                            TheHub.createScript();
+                            TemplateManager.createScript();
                         else     
                             Util.navigateInWindow("/create-code");
                     } },
@@ -1603,10 +1603,47 @@
                 } else if (h[1] == "ldscr") {
                     this.show();
                     TheEditor.historyMgr.setHash("list:ldscr:" + h[2], "Script parse test");
-                    AST.loadScriptAsync(World.getAnyScriptAsync, h[2]).done((res:AST.LoadScriptResult) => {
+                    AST.loadScriptAsync(World.getAnyScriptAsync, h[2]).done((res: AST.LoadScriptResult) => {
                         ModalDialog.showText(res.status)
                     });
                     return;
+                } else if (/^create|derive/i.test(h[1]) && /^\w+$/.test(h[2])) {
+                    ProgressOverlay.show(lf("loading template"), () => {
+                        var scriptid = h[2];
+                        var forced = ScriptCache.forcedUpdate(scriptid);
+                        (forced ? Promise.as([forced.json, forced.text]) :
+                            TheApiCacheMgr.getAsync(scriptid, true)
+                                .then((scr: JsonScript) => {
+                                    if (scr && scr.updateid != scr.id) scriptid = scr.updateid;
+                                    return Promise.join([
+                                        TheApiCacheMgr.getAsync(scriptid),
+                                        ScriptCache.getScriptAsync(scriptid)]);
+                                })).done(arr => {
+                                    var scr: JsonScript = arr[0]
+                                    var txt: string = arr[1]
+                                    if (!scr || !txt) {
+                                        ProgressOverlay.hide();
+                                        return;
+                                    }
+                                    var t: ScriptTemplate = {
+                                        title: lf("Create a {0}", scr.name.replace(/ADJ/, "")),
+                                        id: "derive",
+                                        scriptid: scr.id,
+                                        icon: "",
+                                        description: "",
+                                        name: /ADJ/.test(scr.name) ? scr.name : lf("ADJ script"),
+                                        source: txt,
+                                        section: "",
+                                        editorMode: 0,
+                                        editor: scr.editor || "touchdevelop",
+                                        baseId: h[1] == "derive" ? scr.id : "",
+                                        baseUserId: scr.userid,
+                                        updateLibraries: true
+                                    }
+                                    ProgressOverlay.hide();
+                                    TemplateManager.createScriptFromTemplate(t);
+                                });
+                    });
                 } else {
                     var etag = <JsonEtag> { kind: h[2], id: h[3], ETag: "" }
                     if (etag.kind == "script" && !etag.id) {

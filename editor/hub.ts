@@ -652,7 +652,7 @@ module TDev.Browser {
                 m.add(div("wall-dialog-body", [
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
-                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { Browser.TheHub.createScript() }) : null),
+                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { TemplateManager.createScript() }) : null),
                     (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
@@ -1166,6 +1166,197 @@ module TDev.Browser {
             }
         }
     }
+    
+    export module TemplateManager {        
+        export function chooseEditorAsync() : Promise { // of ScriptTemplate
+            return new Promise((onSuccess, onError, onProgress) => {
+                var m = new ModalDialog();
+                m.onDismiss = () => onSuccess(undefined);
+
+                var editors = [{
+                    company: "Microsoft",
+                    name: "Touch Develop",
+                    description: lf("A beginner friendly editor"),
+                    id: "touchdevelop",
+                    origin: "",
+                    path: "",
+                }].concat(getExternalEditors());
+                
+                var elts = [];
+                editors.forEach(k => {
+                    var icon = div("sdIcon");
+                    var ic = ScriptInfo.editorIcons[k.id].split(',');
+                    icon.style.backgroundColor = ic[1]
+                    icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
+
+                    var nameBlock = div("sdName", k.name);
+                    var hd = div("sdNameBlock", nameBlock);
+                    var author = div("sdAuthorInner", k.company);                    
+                    var addInfo = div("sdAddInfoInner", k.description);
+                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
+
+                    res.withClick(() => {
+                        m.onDismiss = undefined;
+                        m.dismiss();
+                        onSuccess(k.id);
+                    });
+                    elts.push(res)
+                })
+                m.choose(elts, { header: lf("create code with...") });
+            });
+        }
+        
+        export function createScript() {
+            var gotoTemplate = () => {
+                chooseScriptFromTemplateAsync()
+                    .done(template => {
+                        if (template) {
+                            var stub: World.ScriptStub = {
+                                editorName: "touchdevelop",
+                                scriptName: template.name,
+                                scriptText: template.source
+                            };
+                            TheHost.openNewScriptAsync(stub).done();
+                        }
+                    });
+            };
+            if (Cloud.isRestricted())
+                chooseEditorAsync().done((editor) => {
+                    if (!editor) return;
+                    var p = Promise.as("");
+                    if (editor == "touchdevelop")
+                        p = Promise.as(ScriptCache.forcedUpdate('nmhibf').text);
+                    p.then(src => {
+                        var stub: World.ScriptStub = {
+                            editorName: editor,
+                            scriptName: lf("{0} script", TopicInfo.getAwesomeAdj()),
+                            scriptText: src,
+                        };
+                        return TheHost.openNewScriptAsync(stub);
+                    });
+                    p.done();
+                })
+            else
+                gotoTemplate();
+        }
+        
+        export function chooseScriptFromTemplateAsync() : Promise { // of ScriptTemplate
+            TipManager.setTip(null)
+
+            return new Promise((onSuccess, onError, onProgress) => {
+                var m = new ModalDialog();
+                var templates = getAvailableTemplates();
+                var sections = Util.unique(templates, t => t.section).map(t => t.section);
+                var bySection = Util.groupBy(templates, t => t.section);
+                m.onDismiss = () => onSuccess(undefined);
+                var elts = []
+                sections.forEach(k => {
+                    if (k != "templates")
+                        elts.push(div("modalSearchHeader section", lf_static(k, true)))
+                    bySection[k].forEach((template: ScriptTemplate) => {
+                        var icon = div("sdIcon");
+                        icon.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
+                        // missing icons
+                        // icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
+
+                        var nameBlock = div("sdName", lf_static(template.title, true));
+                        var hd = div("sdNameBlock", nameBlock);
+                        var addInfo = div("sdAddInfoInner", lf_static(template.description, true));
+                        var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo))));
+
+                        res.withClick(() => {
+                            m.onDismiss = undefined;
+                            m.dismiss();
+                                renameScriptFromTemplateAsync(template)
+                                .done((temp : ScriptTemplate) => onSuccess(temp), e => onSuccess(undefined));
+                        });
+                        elts.push(res)
+                    })
+                })
+                m.choose(elts, { searchHint: lf("search templates"), header: lf("pick a script template...") });
+            });
+        }
+        
+        export function createScriptFromTemplate(template: ScriptTemplate) {
+            renameScriptFromTemplateAsync(template)
+                .then((temp : ScriptTemplate) => {
+                if (temp)
+                    return TheHost.openNewScriptAsync(<World.ScriptStub>{
+                        editorName: temp.editor || "touchdevelop",
+                        scriptText: temp.source,
+                        scriptName: temp.name
+                    }, temp);
+                    else
+                        return Promise.as();
+                })
+                .done();
+        }
+        
+        function expandTemplaceName(name: string): string {
+            if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
+            return name;            
+        }
+
+        function renameScriptFromTemplateAsync(template:ScriptTemplate)  : Promise // of ScriptTemplate
+        {
+            if (!Cloud.getUserId() && template.requiresLogin) {
+                Hub.loginToCreate(template.title, "create:" + template.id)
+                return Promise.as(undefined);
+            }
+
+            Ticker.rawTick('scriptTemplate_' + template.id);
+
+            template = JSON.parse(JSON.stringify(template)); // clone template
+            var name = expandTemplaceName(template.name);
+            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
+
+            return TheHost.updateInstalledHeaderCacheAsync()
+                .then(() => new Promise((onSuccess, onError, onProgress) => {
+                    nameBox.value = TheHost.newScriptName(name)
+                    var m = new ModalDialog();
+                    m.onDismiss = () => onSuccess(undefined);
+                    var create = () => {
+                        m.onDismiss = undefined;
+                        m.dismiss();
+                        template.name = nameBox.value;
+                        TheHost.clearAsync(false)
+                            .done(() => onSuccess(template), e => onSuccess(undefined))
+                    }
+                    // no cancel when using #derive:... route
+                    if (template.id == "derive")
+                        m.onDismiss = create;
+                    m.add([
+                        div("wall-dialog-header", lf_static(template.title, true)),
+                        div("wall-dialog-body", lf_static(template.description, true)),
+                        div("wall-dialog-line-textbox", nameBox),
+                        //div("wall-dialog-body", lf("Tip: pick a good name for your script.")),
+                        div("wall-dialog-buttons", HTML.mkButton(lf("create"), create))
+                    ]);
+                    m.show();
+                }));
+        }
+
+        var _templates: ScriptTemplate[];       
+        function getAvailableTemplates():ScriptTemplate[]
+        {
+            if (!_templates) {
+                _templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
+                _templates.forEach((t) => { t.source = HelpTopic.shippedScripts[t.scriptid] })                
+            }
+            // filter by editor mode
+            var currentCap = PlatformCapabilityManager.current();
+            var theme = EditorSettings.currentTheme;
+            return _templates
+                .filter(template => {
+                    if (theme && theme.scriptTemplates && theme.scriptTemplates.indexOf(template.id) < 0) return false;
+                    if (!template.caps) return true;
+                    else {
+                        var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
+                        return (plat & currentCap) == plat;
+                    }
+                })
+        }        
+    }
 
     export class Hub
         extends Screen {
@@ -1174,10 +1365,6 @@ module TDev.Browser {
             this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
             this.topBox = div(null, this.topContainer);
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
-            this.templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
-            this.templates.forEach((t) => {
-                t.source = HelpTopic.shippedScripts[t.scriptid]
-            })
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
@@ -1264,7 +1451,7 @@ module TDev.Browser {
         }
 
         private browser(): Host { return TheHost; }
-
+        
         static legacyTemplateIds: StringMap<string> = {
             turtle: "firststepswithturtle",
             bouncingmonster: "monsterslicertutorial",
@@ -1292,25 +1479,7 @@ module TDev.Browser {
             esploralevel: "esploraleveltutorial",
             small: "insanelyshorttutorial",
         }
-
-        private newScriptHash(id: string, tutorialMode: string) {
-            Util.log("newScriptHash: " + id + " tut:" + tutorialMode)
-
-            if (Hub.legacyTemplateIds.hasOwnProperty(id))
-                id = Hub.legacyTemplateIds[id]
-
-            var t = this.templates.filter((s) => s.id == id)[0];
-            var top = HelpTopic.findById(id)
-
-            if (!top && !t) {
-                Util.setHash("#")
-                return
-            }
-
-            if (t) this.createScriptFromTemplate(t);
-            else this.followOrContinueTutorial(top, tutorialMode);
-        }
-
+     
         private followOrContinueTutorial(top: HelpTopic, tutorialMode?: string) {
             this.tutorialsByUpdateIdAsync()
                 .done(tutorials => {
@@ -1346,8 +1515,10 @@ module TDev.Browser {
             }
 
             if (h[1] == 'new') {
-                HistoryMgr.instance.setHash(this.screenId() + ":" + h[1] + ":" + h[2], null)
-                this.newScriptHash(h[2], h[3]);
+                var id = h[2];                
+                if (Hub.legacyTemplateIds.hasOwnProperty(id))
+                    id = Hub.legacyTemplateIds[id]
+                Util.setHash("follow:" + id, true)                
                 return
             }
 
@@ -1465,49 +1636,11 @@ module TDev.Browser {
                     return;
                 case "create":
                 case "derive":
-                    if (/^\w+$/.test(h[2])) {
-                        ProgressOverlay.show(lf("loading template"), () => {
-                            var scriptid = h[2];
-                            var forced = ScriptCache.forcedUpdate(scriptid);
-                            (forced ? Promise.as([forced.json, forced.text]) :
-                            TheApiCacheMgr.getAsync(scriptid, true)
-                                .then((scr: JsonScript) => {
-                                if (scr && scr.updateid != scr.id) scriptid = scr.updateid;
-                                return Promise.join([
-                                    TheApiCacheMgr.getAsync(scriptid),
-                                    ScriptCache.getScriptAsync(scriptid)]);
-                            })).done(arr => {
-                                var scr: JsonScript = arr[0]
-                                var txt: string = arr[1]
-                                if (!scr || !txt) {
-                                    ProgressOverlay.hide();
-                                    return;
-                                }
-                                var t: ScriptTemplate = {
-                                    title: lf("Create a {0}", scr.name.replace(/ADJ/, "")),
-                                    id: "derive",
-                                    scriptid: scr.id,
-                                    icon: "",
-                                    description: "",
-                                    name: /ADJ/.test(scr.name) ? scr.name : lf("ADJ script"),
-                                    source: txt,
-                                    section: "",
-                                    editorMode: 0,
-                                    editor: scr.editor || "touchdevelop",
-                                    baseId: h[1] == "derive" ? scr.id : "",
-                                    baseUserId: scr.userid,
-                                    updateLibraries: true
-                                }
-                                ProgressOverlay.hide();
-                                this.createScriptFromTemplate(t);
-                            });
-                        });
-                    }
-                    break;
-
+                    Util.setHash("#list:installed-scripts:create:" + h[2], true);
+                    return;    
                 default:
-                    if (Cloud.isRestricted())
-                        this.browser().loadHash(["list", "installed-scripts"]);
+                    if (TDev.noHub)
+                        Util.setHash("#" + TDev.hubHash, true);    
                     break;
             }
             
@@ -1579,13 +1712,6 @@ module TDev.Browser {
             return elt;
         }
 
-        public tutorialScriptText =
-        "meta version 'v2.2';\n" +
-        "meta name 'SCRIPTNAME';\n" +
-        "action main { }";
-
-        private templates: ScriptTemplate[];
-
         private joinGroup(code: string = null) {
             this.browser().joinGroup(code);
         }
@@ -1609,83 +1735,6 @@ module TDev.Browser {
                     Login.show(hash);
                 })));
             m.show();
-        }
-
-        public createScriptFromTemplate(template: ScriptTemplate) {
-            this.renameScriptFromTemplateAsync(template)
-                .then((temp : ScriptTemplate) => {
-                if (temp)
-                    return this.browser().openNewScriptAsync(<World.ScriptStub>{
-                        editorName: temp.editor || "touchdevelop",
-                        scriptText: temp.source,
-                        scriptName: temp.name
-                    }, temp);
-                    else
-                        return Promise.as();
-                })
-                .done();
-        }
-        
-        static expandTemplaceName(name: string): string {
-            if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
-            return name;            
-        }
-
-        private renameScriptFromTemplateAsync(template:ScriptTemplate)  : Promise // of ScriptTemplate
-        {
-            if (!Cloud.getUserId() && template.requiresLogin) {
-                Hub.loginToCreate(template.title, "hub:new:" + template.id)
-                return Promise.as(undefined);
-            }
-
-            Ticker.rawTick('scriptTemplate_' + template.id);
-
-            template = JSON.parse(JSON.stringify(template)); // clone template
-            var name = Hub.expandTemplaceName(template.name);
-            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
-
-            return this.browser()
-                .updateInstalledHeaderCacheAsync()
-                .then(() => new Promise((onSuccess, onError, onProgress) => {
-                    nameBox.value = this.browser().newScriptName(name)
-                    var m = new ModalDialog();
-                    m.onDismiss = () => onSuccess(undefined);
-                    var create = () => {
-                        m.onDismiss = undefined;
-                        m.dismiss();
-                        template.name = nameBox.value;
-                        this.browser()
-                            .clearAsync(false)
-                            .done(() => onSuccess(template), e => onSuccess(undefined))
-                    }
-                    // no cancel when using #derive:... route
-                    if (template.id == "derive")
-                        m.onDismiss = create;
-                    m.add([
-                        div("wall-dialog-header", lf_static(template.title, true)),
-                        div("wall-dialog-body", lf_static(template.description, true)),
-                        div("wall-dialog-line-textbox", nameBox),
-                        //div("wall-dialog-body", lf("Tip: pick a good name for your script.")),
-                        div("wall-dialog-buttons", HTML.mkButton(lf("create"), create))
-                    ]);
-                    m.show();
-                }));
-        }
-
-        private getAvailableTemplates():ScriptTemplate[]
-        {
-            // filter by editor mode
-            var currentCap = PlatformCapabilityManager.current();
-            var theme = EditorSettings.currentTheme;
-            return this.templates
-                .filter(template => {
-                    if (theme && theme.scriptTemplates && theme.scriptTemplates.indexOf(template.id) < 0) return false;
-                    if (!template.caps) return true;
-                    else {
-                        var plat = AST.App.fromCapabilityList(template.caps.split(/,/))
-                        return (plat & currentCap) == plat;
-                    }
-                })
         }
 
         public tutorialsByUpdateIdAsync(): Promise // StringMap<AST.HeaderWithState>
@@ -1889,115 +1938,6 @@ module TDev.Browser {
             return tileOuter
         }
 
-        public createScript() {
-            var gotoTemplate = () => {
-                this.chooseScriptFromTemplateAsync()
-                    .done(template => {
-                        if (template) {
-                            var stub: World.ScriptStub = {
-                                editorName: "touchdevelop",
-                                scriptName: template.name,
-                                scriptText: template.source
-                            };
-                            this.browser().openNewScriptAsync(stub).done();
-                        }
-                    });
-            };
-            if (Cloud.isRestricted())
-                this.chooseEditorAsync().done((editor) => {
-                    if (!editor) return;
-                    var p = Promise.as("");
-                    if (editor == "touchdevelop")
-                        p = Promise.as(ScriptCache.forcedUpdate('nmhibf').text);
-                    p.then(src => {
-                        var stub: World.ScriptStub = {
-                            editorName: editor,
-                            scriptName: lf("{0} script", TopicInfo.getAwesomeAdj()),
-                            scriptText: src,
-                        };
-                        return this.browser().openNewScriptAsync(stub);
-                    });
-                    p.done();
-                })
-            else
-                gotoTemplate();
-        }
-
-        public chooseEditorAsync() : Promise { // of ScriptTemplate
-            return new Promise((onSuccess, onError, onProgress) => {
-                var m = new ModalDialog();
-                m.onDismiss = () => onSuccess(undefined);
-
-                var editors = [{
-                    company: "Microsoft",
-                    name: "Touch Develop",
-                    description: lf("A beginner friendly editor"),
-                    id: "touchdevelop",
-                    origin: "",
-                    path: "",
-                }].concat(getExternalEditors());
-                
-                var elts = [];
-                editors.forEach(k => {
-                    var icon = div("sdIcon");
-                    var ic = ScriptInfo.editorIcons[k.id].split(',');
-                    icon.style.backgroundColor = ic[1]
-                    icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
-
-                    var nameBlock = div("sdName", k.name);
-                    var hd = div("sdNameBlock", nameBlock);
-                    var author = div("sdAuthorInner", k.company);                    
-                    var addInfo = div("sdAddInfoInner", k.description);
-                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
-
-                    res.withClick(() => {
-                        m.onDismiss = undefined;
-                        m.dismiss();
-                        onSuccess(k.id);
-                    });
-                    elts.push(res)
-                })
-                m.choose(elts, { header: lf("create code with...") });
-            });
-        }
-
-        public chooseScriptFromTemplateAsync() : Promise { // of ScriptTemplate
-            TipManager.setTip(null)
-
-            return new Promise((onSuccess, onError, onProgress) => {
-                var m = new ModalDialog();
-                var templates = this.getAvailableTemplates();
-                var sections = Util.unique(templates, t => t.section).map(t => t.section);
-                var bySection = Util.groupBy(templates, t => t.section);
-                m.onDismiss = () => onSuccess(undefined);
-                var elts = []
-                sections.forEach(k => {
-                    if (k != "templates")
-                        elts.push(div("modalSearchHeader section", lf_static(k, true)))
-                    bySection[k].forEach((template: ScriptTemplate) => {
-                        var icon = div("sdIcon");
-                        icon.style.backgroundColor = ScriptIcons.stableColorFromName(template.title);
-                        // missing icons
-                        // icon.setChildren([HTML.mkImg("svg:" + template.icon + ",white")]);
-
-                        var nameBlock = div("sdName", lf_static(template.title, true));
-                        var hd = div("sdNameBlock", nameBlock);
-                        var addInfo = div("sdAddInfoInner", lf_static(template.description, true));
-                        var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo))));
-
-                        res.withClick(() => {
-                            m.onDismiss = undefined;
-                            m.dismiss();
-                            this.renameScriptFromTemplateAsync(template)
-                                .done((temp : ScriptTemplate) => onSuccess(temp), e => onSuccess(undefined));
-                        });
-                        elts.push(res)
-                    })
-                })
-                m.choose(elts, { searchHint: lf("search templates"), header: lf("pick a script template...") });
-            });
-        }
-
         private startTutorialButton(t:Ticks)
         {
             var elt = this.mkFnBtn(lf("Tutorials"),() => {
@@ -2144,7 +2084,7 @@ module TDev.Browser {
                 addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
                     () => { this.hide(); this.browser().showList("installed-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-                addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { this.createScript(); }, true);
+                addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { TemplateManager.createScript(); }, true);
                 if (Cloud.isRestricted())
                     addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null); }, true);
 
