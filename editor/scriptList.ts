@@ -365,9 +365,12 @@
             d.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("agree"), () => {
                     tick(Ticks.legalNoticeAgree);
-                    if (Cloud.lite)
-                        document.cookie = "ckns_accept=111; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT"
-                    else
+                    Runtime.legalNotice = null;
+                    if (Cloud.lite) {
+                        if (!/ckns_policy=.0./.test(document.cookie))
+                            document.cookie = "ckns_accept=111; path=/; expires=" + 
+                                new Date(Date.now()+365*3600*24*1000).toUTCString();
+                    } else
                         localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
                     d.dismiss();
