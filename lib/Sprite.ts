@@ -51,6 +51,7 @@ module TDev.RT {
         public _hidden : boolean = false;
         private _opacity : number = 1;
         private _clip: number[] = undefined;
+        private _gradient = true;
 
         public spriteType : SpriteType;
         public fontSize : number;
@@ -286,6 +287,14 @@ module TDev.RT {
         //@ writesMutable
         public set_opacity(opacity:number) : void { this._opacity = Math.min(1,Math.max(0,opacity)); this.contentChanged(); }
 
+        //? Gets the property that enables or disables gradients
+        //@ readsMutable
+        public gradient() : boolean { return this._gradient; }
+        
+        //? Sets gradient on or off
+        //@ writesMutable
+        public set_gradient(value : boolean) { this._gradient = !!value; }
+        
         //? Gets the associated sprite sheet
         public sheet() : SpriteSheet { return this._sheet; }
 
@@ -520,7 +529,7 @@ module TDev.RT {
                 if (!this._hidden) {
                     ctx.beginPath();
                     ctx.arc(scaledHeight/2, scaledHeight/2, scaledHeight/2, 0, 2*Math.PI);
-                    if (Browser.brokenGradient) {
+                    if (Browser.brokenGradient || !this._gradient) {
                         ctx.fillStyle = fcolor;
                     }
                     else {
