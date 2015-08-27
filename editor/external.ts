@@ -366,7 +366,7 @@ module TDev {
             break;
 
           case MessageType.Compile:
-            if (Cloud.anonMode(lf("Native compilation"))) {
+            if (Cloud.anonMode(lf("C++ compilation"))) {
               this.post(<Message_CompileAck>{
                 type: MessageType.CompileAck,
                 status: Status.Error,
