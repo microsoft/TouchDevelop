@@ -4809,13 +4809,22 @@ module TDev.AST {
         }
 
         getText(currentId).done((text) => {
-            if (!text) return;
+            if (!text) rp.error(new Error("cannot get script text: " + currentId));
 
             var app = Parser.parseScript(text, res.parseErrs);
             var byId:any = {}
             app.libraries().forEach((lib) => {
                 var id = lib.getId();
-                if (id) byId[id] = getText(id);
+                if (id) 
+                    byId[id] = getText(id)
+                        .then(r => {
+                            if (!r) throw new Error("empty script text: " + id)
+                            return r
+                        })
+                        .then(r => r, e => {
+                            problem("cannot fetch library: " + id + "; " + e.toString())
+                            return "";
+                        })
             })
             Promise.join(byId).then((byId) => {
                 res.prevScript = Script;

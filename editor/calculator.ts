@@ -4327,8 +4327,13 @@ module TDev
                     label = lf("need a different name here")
                     setF = TipManager.setTip;
                 } else if (ins.editString) {
-                    intelliFilter = c => c.nameOverride == lf("edit");
-                    label = lf("need a different string here")
+                    if (ins.isEnumVal) {
+                        intelliFilter = c => c.nameOverride == ins.editString;
+                        label = lf("we need {0} here", ins.editString)
+                    } else {
+                        intelliFilter = c => c.nameOverride == lf("edit");
+                        label = lf("need a different string here")
+                    }
                     setF = TipManager.setTip;
                 } else if (th != null) {
                     intelliFilter = c => declMatch(th.getName(), c.decl)
