@@ -2150,7 +2150,10 @@ module TDev
                 var compileBtn: HTMLElement;
                 var str = Cloud.isFota() ? lf("flash") : lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M",
-                    (e: Event) => this.compile(compileBtn, (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href)))
+                    (e: Event) => {
+                        this.runMainAction();
+                        this.compile(compileBtn, (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href));
+                    })
                     );
             }
 
