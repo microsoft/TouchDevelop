@@ -240,7 +240,7 @@ module TDev
         private findInlineEditStringTokenIndex(start: number) : number {
             if (this.canInlineEditString(this.expr.tokens[start])) return start;
             if (start > 0 && this.canInlineEditString(this.expr.tokens[start - 1])) return start - 1;
-            if (start + 1 < this.expr.tokens.length && this.canInlineEditString(this.expr.tokens[start + 1])) return start + 1;
+            //if (start + 1 < this.expr.tokens.length && this.canInlineEditString(this.expr.tokens[start + 1])) return start + 1;
             return -1;
         }
 
