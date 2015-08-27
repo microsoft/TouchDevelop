@@ -1607,9 +1607,9 @@
                         ModalDialog.showText(res.status)
                     });
                     return;
-                } else if (/^create|derive/i.test(h[1]) && /^\w+$/.test(h[2])) {
+                } else if (/^create|derive$/i.test(h[2]) && /^\w+$/.test(h[3])) {
                     ProgressOverlay.show(lf("loading template"), () => {
-                        var scriptid = h[2];
+                        var scriptid = h[3];
                         var forced = ScriptCache.forcedUpdate(scriptid);
                         (forced ? Promise.as([forced.json, forced.text]) :
                             TheApiCacheMgr.getAsync(scriptid, true)
