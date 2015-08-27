@@ -447,7 +447,7 @@ module TDev {
             syncCount++;
 
             if (Cloud.isOffline()) {
-                var message = "cannot sync - you appear to be offline";
+                var message = lf("cannot sync - you appear to be offline");
                 HTML.showProgressNotification(v ? undefined : message);
                 return Promise.as(message);
             }
@@ -469,10 +469,10 @@ module TDev {
                 pendingUploads += deltaUploads;
                 pendingPublishs += deltaPublishs;
                 var a = []
-                if (pendingDownloads) a.push(pendingDownloads + " down");
-                if (pendingUploads) a.push(pendingUploads + " up");
-                if (pendingPublishs) a.push(pendingPublishs + " publish");
-                var s = "syncing...";
+                if (pendingDownloads) a.push(lf("{0} down", pendingDownloads));
+                if (pendingUploads) a.push(lf("{0} up", pendingUploads));
+                if (pendingPublishs) a.push(lf("{0} publish", pendingPublishs));
+                var s = lf("syncing...");
                 if (a.length > 0) {
                     s += " (" + a.join(", ") + ")";
                     HTML.showProgressNotification(s, false);
@@ -660,7 +660,7 @@ module TDev {
                 data.tobepublished = Promise.thenEach(tobepublished, (header) => publishInstalledAsync(data.indexTable, data.scriptsTable, header).then(result => {
                     progress(0, 0, -1);
                     if (!result)
-                        ModalDialog.info("publishing failed", "There was a versioning mismatch between your local state and the cloud. Please check the content of the script you want to publish and then try again.");
+                        ModalDialog.info(lf("publishing failed"), lf("There was a versioning mismatch between your local state and the cloud. Please check the content of the script you want to publish and then try again."));
                 }));
                 data.progress = Cloud.postPendingProgressAsync();
                 return Promise.join(data);

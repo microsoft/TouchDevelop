@@ -7508,7 +7508,7 @@
                 World.getScriptRestoreAsync(id)
                 .then(r => restoreAsync = r)
                 .then(() => World.uninstallAsync(id))
-                .then(() => World.syncAsync())
+                // don't aggressively sync here
                 .then(() => {
                     var hash = HistoryMgr.windowHash()
 
