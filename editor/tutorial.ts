@@ -18,6 +18,7 @@ module TDev
         public isOpStmt:boolean;
         public localName:string;
         public editString:string;
+        public isEnumVal:boolean;
         public showTokens:AST.Token[];
         public stmtToInsert:AST.Stmt;
         public toInlineActions:boolean;
@@ -450,8 +451,10 @@ module TDev
                                     var lv = d[i + 3].getLiteral()
                                     if (d[i] instanceof AST.FieldName)
                                         op.localName = lv
-                                    else
+                                    else {
                                         op.editString = lv
+                                        op.isEnumVal = (<AST.Expr>d[i + 3]).enumVal != null
+                                    }
                                     op.addToken = d[i + 3]
                                 } else if (d[i].getThing() instanceof AST.PlaceholderDef && !d[i + 2]) {
                                     // the next token will delete the placeholder def
@@ -477,6 +480,7 @@ module TDev
                                     op.editString = d[i + 1].getLiteral()
                                     op.addToken = d[i + 1]
                                     op.addAfter = d[i + 2]
+                                    op.isEnumVal = (<AST.Expr>d[i + 1]).enumVal != null
                                 } else {
                                     if (placeholderKind &&
                                         placeholderKind.getRoot() == api.core.Ref &&
