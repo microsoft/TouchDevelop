@@ -1632,11 +1632,11 @@ module TDev.Browser {
                     }
                     break;
                 case "pub": // redirect to list
-                    Util.setHash("#pub:" + h[2], true);    
+                    Util.setHash("#list:installed-scripts:pub:" + h[2], true);    
                     return;
                 case "create":
                 case "derive":
-                    Util.setHash("#create:" + h[2], true);
+                    Util.setHash("#list:installed-scripts:create:" + h[2], true);
                     return;    
                 default:
                     if (TDev.noHub)
