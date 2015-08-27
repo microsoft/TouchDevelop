@@ -3450,7 +3450,7 @@ module TDev
 
         // A wrapper for the DOM Notifications we use
         private webNotification(body: string, tag: string, icon="") {
-            HTML.showWebNotification("TouchDevelop", {
+            HTML.showWebNotification("Touch Develop", {
                 body: body,
                 tag: tag,
                 icon: icon,

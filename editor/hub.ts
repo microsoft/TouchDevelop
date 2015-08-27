@@ -1831,7 +1831,7 @@ module TDev.Browser {
                 var descText = top.json.description.replace(/ #(docs|tutorials|stepbystep)\b/ig, " ")
                 descText = descText.replace(/\s+\.$/, "")
 
-                var author = top.fromJson && top.fromJson.userid != "jeiv" ? top.fromJson.username : "TouchDevelop";
+                var author = top.fromJson && top.fromJson.userid != "jeiv" ? top.fromJson.username : "Touch Develop";
                 var titleDiv;
                 tileOuter.appendChildren([
                     div("tutDesc",
@@ -1938,7 +1938,7 @@ module TDev.Browser {
 
                 var editors = [{
                     company: "Microsoft",
-                    name: "TouchDevelop",
+                    name: "Touch Develop",
                     description: lf("A beginner friendly editor"),
                     id: "touchdevelop",
                     origin: "",

@@ -401,7 +401,7 @@ module TDev {
             problemHTML: string;
             fixHTML: string;
         }
-        function unsupportedMessage(what = "TouchDevelop", path = "")
+        function unsupportedMessage(what = "Touch Develop", path = "")
         {
             /*
             var recommendedBrowser = "";
