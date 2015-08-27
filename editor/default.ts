@@ -225,7 +225,7 @@ module TDev
         if (/debuggerExceptions/.test(url)) debuggerExceptions = true;
         if (/withTracing/.test(url)) withTracing = true;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
-        if (/nohub/.test(url)) TDev.noHub = true;
+        if (/nohub/.test(url)) { TDev.noHub = true; TDev.hubHash = "list:installed-scripts"; }
         if (/usegcc=1/.test(url)) Cloud.useEmbeddedGcc = true;
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;

@@ -1398,13 +1398,13 @@ module TDev.Browser {
                                     this.followOrContinueTutorial(HelpTopic.fromJsonScript(j));
                                 } else {
                                     Util.log('followed script not found');
-                                    Util.setHash("hub");
+                                    Util.setHash(TDev.hubHash);
                                 }
                             },
                                 e => {
                                     ProgressOverlay.hide();
                                     Util.log('follow route error: {0}, {1}' + h[2], e.message);
-                                    Util.setHash("hub");
+                                    Util.setHash(TDev.hubHash);
                                 });
                         });
                     }

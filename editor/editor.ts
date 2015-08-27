@@ -327,7 +327,7 @@ module TDev
                     this.currentRt.runningPluginOn &&
                     TheEditor.forceReload) {
                     TheEditor.forceReload = false;
-                    TheEditor.reloadScriptAsync(this.currentRt.runningPluginOn, () => Util.setHash("hub", true))
+                    TheEditor.reloadScriptAsync(this.currentRt.runningPluginOn, () => Util.setHash(TDev.hubHash, true))
                     .done(() => TheEditor.pluginCompleted())
                 }
                 this.inLiveMode = false;
@@ -4121,7 +4121,7 @@ module TDev
             if (prevGuid)
                 hash = "list:" + path + ":script:" + prevGuid + ":" + tab;
             else
-                hash = "hub";
+                hash = TDev.hubHash;
 
             return this.onExitAsync().then(() => {
                 this.goToHub(hash);
@@ -6105,7 +6105,7 @@ module TDev
                 // and then run it
                 Util.setHash("run:" + this.guid)
             } else {
-                Util.setHash("hub", true);
+                Util.setHash(TDev.hubHash, true);
             }
         }
     }

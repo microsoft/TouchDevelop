@@ -294,7 +294,7 @@ module TDev {
                 else
                     Util.setHash(scr, true)
             } else {
-                Util.setHash("hub", true)
+                Util.setHash(TDev.hubHash, true)
             }
         }
 

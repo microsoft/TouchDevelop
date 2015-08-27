@@ -1607,7 +1607,7 @@
                 } else {
                     var etag = <JsonEtag> { kind: h[2], id: h[3], ETag: "" }
                     if (etag.kind == "script" && !etag.id) {
-                        Util.setHash("hub")
+                        Util.setHash(TDev.hubHash)
                         return
                     }
                     pg = this.getAnyInfoByEtag(etag);

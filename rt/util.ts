@@ -7,6 +7,7 @@ module TDev {
     export var asyncEnabled = true;
     export var isWebWorker = false;
     export var noHub = false;
+    export var hubHash = "hub";
 
     export interface StringMap<T>
     {
