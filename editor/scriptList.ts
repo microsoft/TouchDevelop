@@ -3990,10 +3990,11 @@
                 if (Cloud.lite)
                     // the call to /family is there to prefetch typical parents
                     TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
-                    .done((prefetch) => {
-                        prefetch.items.forEach((e, i) => {
-                            TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
-                        })
+                        .done((prefetch) => {
+                        if (prefetch)
+                            prefetch.items.forEach((e, i) => {
+                                TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
+                            })
 
                         if (this.parent.publicId) {
                             Util.assert(!!js.id)
