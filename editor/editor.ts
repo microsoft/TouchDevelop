@@ -5907,6 +5907,8 @@ module TDev
         {
             return this.loadLibCoreAsync(l).then((app:AST.App) => {
                 l.resolved = app;
+                if (app && app._forcedUpdate)
+                    l.pubid = app._forcedUpdate;
                 if (!app && l.getId())
                     l.setError("TD141: cannot load target library");
             });
