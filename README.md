@@ -1,4 +1,5 @@
 ![](https://az31353.vo.msecnd.net/c04/gttu.png)
+
 Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
