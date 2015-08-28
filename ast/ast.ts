@@ -3218,6 +3218,7 @@ module TDev.AST {
         public loc:StackOp;
         public languageHint:string;
         public enumVal:string;
+        public hintArtId: string;
 
         constructor() {
             super()

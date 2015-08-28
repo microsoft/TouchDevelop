@@ -1299,6 +1299,11 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
  color: #A31515 ;
 }
 
+.picLiteral {
+  height:1em;
+  vertical-align: bottom;
+}
+
 .block
 {
     padding-left: 1em;
