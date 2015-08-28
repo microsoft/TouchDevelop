@@ -5964,8 +5964,12 @@ module TDev
                     ))
                     return;
                 window.localStorage["everLoggedIn"] = "yes";
-                Browser.TheHost.initMeAsync().done()
                 h = h.substr(0, i);
+                Browser.TheHost.initMeAsync().done(() => {
+                    var hs = decodeURIComponent(h.replace("#", "")).split(":")
+                    if (hs[0] == "redirect")
+                        Util.navigateInWindow("/" + hs[1].replace(/^\/+/, ""))
+                })
             }
 
             h = LocalProxy.updateDeploymentKey(h)
@@ -6026,12 +6030,14 @@ module TDev
                         break;
                     case "signin":
                     case "login":
-                        hs = ["hub", "signin"]
+                        hs = ["hub", "signin", hs[1]]
                         break;
                     case "signout":
                     case "logout":
                         hs = ["hub", "signout"]
                         break;
+                    case "redirect":
+                        return;
                 }
 
                 if (hs[0] == "list" && hs[1] == "help") inEditor = true;
