@@ -6577,9 +6577,10 @@
                         cont.push(div("sdNumber",
                             HTML.mkLinkButton("★ " + (hasOne ? lf("edit promo") : lf("add promo")),
                             () => this.editPromo())))
-                    else if (hasOne)
+                    else if (hasOne) {
                         cont.push(div("sdNumber", " ★"))
-
+                        nameBlock.setChildren([promo.name])
+                    }
                 }
 
                 numbers.setChildren(cont);
@@ -6901,6 +6902,7 @@
             // var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
 
             var descDiv = div(null);
+            var preDescDiv = div(null);
             var metaDiv = div(null);
             var wontWork = div(null);
             var runBtns = div(null);
@@ -6911,6 +6913,7 @@
             this.tabContent.setChildren([
                 authorDiv,
                 runBtns,
+                preDescDiv,
                 descDiv,
                 metaDiv,
                 docsButtonDiv,
@@ -6927,6 +6930,14 @@
                 if (!this.jsonScript) return;
 
                 this.buildTopic();
+
+                if (this.publicId && Cloud.hasPermission("script-promo") && 
+                    this.jsonScript.promo)
+                {
+                    preDescDiv.setChildren([ 
+                        div("kw", this.jsonScript.promo.name),
+                        div(null, this.jsonScript.promo.description) ])
+                }
 
                 if (this.jsonScript.description) {
                     descDiv.classList.add('sdDesc');
@@ -7788,6 +7799,10 @@
             .done(arr => {
                 var cfg = arr[0]
                 var promo = arr[1]
+                if (json.ishidden && (!promo.tags || promo.tags.length == 0)) {
+                    ModalDialog.info(lf("script is hidden"), lf("Cannot add promo on a hidden script."))
+                    return
+                }
                 var fields = cfg.fields || {}
                 var alltags = cfg.tags || ["all"]
                 var autotags = cfg.autotags || ["all"]
@@ -7851,7 +7866,12 @@
                         wrong.forEach(HTML.wrong)
                     } else {
                         Cloud.postPrivateApiAsync(id + "/promo", data)
-                        .done(r => m.dismiss(), e => Cloud.handlePostingError(e, "promo"))
+                        .done(r => {
+                            m.dismiss()
+                            TheApiCacheMgr.invalidate(id)
+                            TheApiCacheMgr.invalidate("promo-scripts/")
+                            TheEditor.historyMgr.reload(HistoryMgr.windowHash());
+                        }, e => Cloud.handlePostingError(e, "promo"))
                     }
                 }, "", [
                     //HTML.mkButton(lf("remove promo"), () => m.dismiss()),

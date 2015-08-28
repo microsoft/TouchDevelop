@@ -1510,7 +1510,7 @@ module TDev.Browser {
             }
 
             if (h[1] == "signin") {
-                Login.show("list:installed-scripts")
+                Login.show(h[2] || "list:installed-scripts")
                 return
             }
 

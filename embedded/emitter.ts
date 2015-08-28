@@ -73,7 +73,7 @@ module TDev {
         var map = {};
         expr.locals.forEach((l: J.JLocalDef) => { map[l.id] = l.name });
         var lambdas = actions.map((a: J.JInlineAction) => {
-          var n = H.resolveGlobalL(env, map[a.reference.id], a.reference.id);
+          var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
             env.indent + "auto "+n+"_ = "+
               this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +

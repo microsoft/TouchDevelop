@@ -24,8 +24,11 @@ module TDev.Login
         var hereUrl = window.location.href;
         if (/^x-wmapp/.test(hereUrl)) hereUrl = "https://www.touchdevelop.com/app/current.error#wp8login";
         hereUrl = hereUrl.replace(/#modal.*/, "");
-        if (hash)
+        if (hash) {
+            if (/^\//.test(hash))
+                hash = "redirect:" + encodeURIComponent(hash);
             hereUrl = hereUrl.replace(/#.*/, "") + "#" + hash
+        }
         var url = Cloud.getServiceUrl() + "/oauth/dialog?response_type=token&client_id=" +
             encodeURIComponent(Cloud.lite ? "webapp2" : "webapp") +
             "&redirect_uri=" + encodeURIComponent(hereUrl) +

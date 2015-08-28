@@ -1,7 +1,6 @@
-![](https://az31353.vo.msecnd.net/c04/uxoj.png)
-# TouchDevelop
+![](https://az31353.vo.msecnd.net/c04/gttu.png)
 
-TouchDevelop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
+Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
 [![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
@@ -15,7 +14,7 @@ TouchDevelop is a touch-friendly, cross-platform, mobile-first app creation envi
 
 
 **This repo contains the source code of the TouchDevelop editor.** If you are
-intending to write TouchDevelop scripts, you want to go to
+intending to write Touch Develop scripts, you want to go to
 `touchdevelop.com`:
 * **stable:** https://www.touchdevelop.com/app/
 * **beta:** https://www.touchdevelop.com/app/beta

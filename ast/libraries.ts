@@ -869,7 +869,7 @@ module TDev.AST {
             tw.keyword("meta").id("import").id(this.getName());
             tw.beginBlock();
                 if (this.pubid)
-                    tw.id("pub").string(this.resolved && this.resolved._forcedUpdate ? this.resolved._forcedUpdate : this.pubid).nl();
+                    tw.id("pub").string(this.pubid).nl();
                 else
                     tw.id("guid").string(this.guid).nl();
                 tw.id("usage");
