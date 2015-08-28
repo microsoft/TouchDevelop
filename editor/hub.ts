@@ -1298,7 +1298,7 @@ module TDev.Browser {
                 .done();
         }
         
-        function expandTemplaceName(name: string): string {
+        export function expandTemplateName(name: string): string {
             if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
             return name;            
         }
@@ -1313,7 +1313,7 @@ module TDev.Browser {
             Ticker.rawTick('scriptTemplate_' + template.id);
 
             template = JSON.parse(JSON.stringify(template)); // clone template
-            var name = expandTemplaceName(template.name);
+            var name = expandTemplateName(template.name);
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
 
             return TheHost.updateInstalledHeaderCacheAsync()
