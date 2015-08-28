@@ -278,6 +278,12 @@ module TDev.Browser {
             description: lf("All options turned on"),
             editorMode: editorModes['pro']
         },
+        'azure': {
+            name: lf("Azure"),
+            description: lf("Azure web development"),
+            scriptTemplates: ['blank', 'blankwebapi', 'blankazurewebapi', 'blankazureeventhubs', 'blanknodelibrary'],
+            editorMode: editorModes['pro']
+        },
         'minecraft': {
             name: "Minecraft",
             description: lf("Learn to code with Minecraft"),
