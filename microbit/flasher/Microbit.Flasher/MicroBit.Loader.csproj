@@ -173,7 +173,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="micro-bit Logo stacked_Polar Colour Grad+Black BBC Logo_RGB.png" />
+    <Resource Include="micro-bit Logo stacked_Lantern Colour Grad+Black BBC Logo_RGB.jpg" />
     <Content Include="micro-bit_favicon.ico" />
   </ItemGroup>
   <ItemGroup>
