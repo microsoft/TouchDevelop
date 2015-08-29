@@ -19,6 +19,10 @@ module TDev {
 
       public as: J.JInlineAction[] = [];
 
+      constructor(private env: H.Env) {
+        super();
+      }
+
       public visitMany(e, ss: J.JNode[]) {
         ss.forEach((x) => this.visit(e, x));
       }
@@ -33,6 +37,8 @@ module TDev {
               this.visit([], a);
               this.as.push(a);
               lifted.push(a.reference.id);
+              var newName = H.resolveLocal(this.env, a.reference.name, a.reference.id);
+              a.reference.name = newName;
             } catch (e) {
               // Can't lift because it captures variables.
             }
@@ -138,19 +144,11 @@ module TDev {
     // (a.k.a. [JAction]'s). It assumes that these closures contain no free
     // variables, i.e. that closure-conversion has been performed already.
     export function lift(e: H.Env, a: J.JApp) {
-      var l = new Lifter();
+      var l = new Lifter(e);
       l.visit([], a);
       var lambdas = l.as.map((a: J.JInlineAction): J.JAction => {
-        // Name of the lifted function in the global scope. No conflicts with
-        // existing names because we append the auto-generated, random id.
-        // XXX fix that by keeping the map of used names all the way to here,
-        // and using [H.freshName].
-        var name = a.reference.name + a.reference.id;
+        var name = a.reference.name;
         var id = a.reference.id;
-        if (e.libName)
-          e.globalNameMap.libraries[e.libName][name] = name;
-        else
-          e.globalNameMap.program[name] = name;
         return {
           nodeType: "action",
           id: id,

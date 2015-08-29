@@ -31,7 +31,7 @@
     <MinimumRequiredVersion>1.0.0.26</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>31</ApplicationRevision>
+    <ApplicationRevision>33</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -145,9 +145,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="bg-section-alt.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="micro-bit_primary_colour_master.png" />
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +170,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="micro-bit Logo stacked_Polar Colour Grad+Black BBC Logo_RGB.png" />
+    <Resource Include="micro-bit Logo stacked_Lantern Colour Grad+Black BBC Logo_RGB.jpg" />
     <Content Include="micro-bit_favicon.ico" />
   </ItemGroup>
   <ItemGroup>

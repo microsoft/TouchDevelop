@@ -195,14 +195,6 @@ module TDev {
       // name and a TouchDevelop-generated, unique id. The name is guaranteed to
       // be free of conflicts with other identifiers in the current library.
       export function resolveLocal(env: Env, name: string, id: string) {
-        // Hack alert! When lifting local function handlers, we name them
-        // according to "name+id" at the global scope. However, we don't mutate
-        // the [JLocalRef]s into [JGlobalRef]s. So, let's first check if by any
-        // chance this is a reference to a globally-defined event handler...
-        var actionName = name + id;
-        if (actionName in currentMap(env))
-          return actionName;
-
         if (id in env.localNames)
           return env.localNames[id];
 

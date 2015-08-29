@@ -182,6 +182,10 @@ module TDev
             this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
+            this.scriptName.onchange = () => {
+                this.scriptName.value = this.scriptName.value.replace(/\s*$/, "");
+                if (!this.scriptName.value) this.scriptName.value = Browser.TemplateManager.expandTemplateName(lf("ADJ script"));
+            };
             this.formRoot.setChildren([div("varLabel", lf("script properties")),
                 div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
                 div("groupLine"), // filled in later on

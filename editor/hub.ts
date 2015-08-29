@@ -279,13 +279,19 @@ module TDev.Browser {
             description: lf("All options turned on"),
             editorMode: editorModes['pro']
         },
+        'azure': {
+            name: lf("Azure"),
+            description: lf("Azure web development"),
+            scriptTemplates: ['blank', 'blankwebapi', 'blankazurewebapi', 'blankazureeventhubs', 'blanknodelibrary'],
+            editorMode: editorModes['pro']
+        },
         'minecraft': {
             name: "Minecraft",
             description: lf("Learn to code with Minecraft"),
             logoArtId: 'eopyzwpm',
-            tutorialsTopic: 'minecraftpitutorials',
+            tutorialsTopic: 'minecrafttutorials',
             scriptSearch: '#minecraft',
-            scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+            scriptTemplates: ['blankminecraft', 'blankcreeper'],
             noAnimations: true,
             editorMode: {
                 id: 'minecraft',
@@ -344,7 +350,7 @@ module TDev.Browser {
             description: lf("Learn to code with Raspberry Pi"),
             logoArtId: 'eopyzwpm',
             tutorialsTopic: 'minecraftpitutorials',
-            scriptTemplates: ['blankminecraftpi', 'blankcreeper'],
+            scriptTemplates: ['blankminecraftpi'],
             noAnimations: true,
             lowMemory: true,
             editorMode: editorModes['block'],
@@ -1296,7 +1302,7 @@ module TDev.Browser {
                 .done();
         }
         
-        function expandTemplaceName(name: string): string {
+        export function expandTemplateName(name: string): string {
             if (name) name = name.replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
             return name;            
         }
@@ -1311,7 +1317,7 @@ module TDev.Browser {
             Ticker.rawTick('scriptTemplate_' + template.id);
 
             template = JSON.parse(JSON.stringify(template)); // clone template
-            var name = expandTemplaceName(template.name);
+            var name = expandTemplateName(template.name);
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
 
             return TheHost.updateInstalledHeaderCacheAsync()
