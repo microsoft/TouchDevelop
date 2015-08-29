@@ -7809,8 +7809,9 @@
                 fields["priority"] = { desc: lf("Publication time-shift (in hours); promos sorted by publication time plus time shift"), type: "number" }
                 fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
                 var inputs = {}
+                var nowPrio = () => (((Date.now()/1000) - json.time) / 3600).toFixed(3)
                 if (!promo.priority && promo.tags && promo.tags.length == 0) {
-                    promo.priority = parseFloat((((Date.now()/1000) - json.time) / 3600).toFixed(3))
+                    promo.priority = parseFloat(nowPrio())
                 }
                 Object.keys(fields).forEach(fn => {
                     var meta = fields[fn]
@@ -7826,7 +7827,12 @@
                     var dsc = meta.desc || fn
                     if (meta.override)
                         dsc += lf(" [override]")
-                    m.add(div("wall-dialog-body", dsc, inp))
+                    var btn = null
+                    if (fn == "priority")
+                        btn = HTML.mkLinkButton(lf("make current"), () => {
+                            inp.value = nowPrio()
+                        })
+                    m.add(div("wall-dialog-body", dsc, btn, inp))
                 })
                 inputs["tags"].value = (promo["tags"] || []).filter(t => alltags.indexOf(t) >= 0).join(", ")
 
