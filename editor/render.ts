@@ -251,7 +251,7 @@ module TDev
         {
             var res = super.renderExprHolder(e, tokens)
 
-            if (e.isAwait && AST.proMode)
+            if (e.isAwait && TheEditor.widgetEnabled("awaitClock"))
                 res = "<div class='codeAwait'>" + SVG.getIconSVGCore("clock2,black,clip=40") + "</div>" + res;
 
             return res

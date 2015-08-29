@@ -239,6 +239,7 @@ module TDev.Browser {
                 scriptPropertiesPropertyAllowExport: true,
                 stringEditFullScreen: true,
                 persistanceRadio: true,
+                awaitClock: true,
                 // language
                 async: true,
                 testAction: true,
@@ -445,6 +446,7 @@ module TDev.Browser {
                     "break": true,
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
+                    awaitClock: true,
                     tutorialGoToPreviousStep: true,
                 }
             },
@@ -485,6 +487,7 @@ module TDev.Browser {
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
                     tutorialGoToPreviousStep: true,
+                    awaitClock: true,
                     
                     // for docs
                     artSection: true,
@@ -555,6 +558,7 @@ module TDev.Browser {
                     hideMyScriptHeader: true,
                     scriptHistoryTab: true,
                     tutorialGoToPreviousStep: true,
+                    awaitClock: true,
                 
                     //MORE
                     

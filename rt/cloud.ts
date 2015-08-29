@@ -146,6 +146,7 @@ module TDev.Cloud {
         wallHeart?: boolean;
         wallStop?: boolean;
         nextTutorialsList?: boolean;
+        awaitClock?: boolean;
 
         editorRunOnLoad?: boolean;
 
