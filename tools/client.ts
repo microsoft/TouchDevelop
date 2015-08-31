@@ -4015,6 +4015,15 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'gexxa',
     editorMode: 3,
 }, {
+    title: lf("blank mysql web app"),
+    id: 'blankmysqlwebapi',
+    icon: 'Stacks',
+    name: 'ADJ api',
+    description: lf("A web app using MySql, Azure Web Node.js Apps and Restify."),
+    section: sectAzure,
+    scriptid: 'oxkba',
+    editorMode: 3,
+}, {
     title: lf("blank azure event hubs app"),
     id: 'blankazureeventhubs',
     icon: 'Stacks',
