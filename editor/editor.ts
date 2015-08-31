@@ -193,6 +193,8 @@ module TDev
                         else if (/\.(xml|svg)$/i.test(name)) editor.getSession().setMode("ace/mode/xml");
                         else if (/\.css$/i.test(name)) editor.getSession().setMode("ace/mode/css");
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
+                        else if (/\.sql/i.test(name)) editor.getSession().setMode("ace/mode/sql");
+                        else if (/\.mysql/i.test(name)) editor.getSession().setMode("ace/mode/mysql");
                         else if (/\.(h(pp)?|c(pp)?|cxx)/i.test(name)) editor.getSession().setMode("ace/mode/c_cpp");
                         editor.setValue(value);
                         editor.clearSelection();
