@@ -272,10 +272,10 @@ module TDev
             }, {
                 name: "fully replicated",
                 tick: Ticks.recordPersCloud
-            }, {
+            } /*, {
                 name: "partially replicated",
                 tick: Ticks.recordPersPartial
-            }];
+            } */];
         static cloudlibraryVarPersistenceLabels = [{
             name: "temporary",
             tick: Ticks.recordPersTemporary
