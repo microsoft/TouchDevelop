@@ -282,7 +282,7 @@ module TDev.Browser {
         'azure': {
             name: lf("Azure"),
             description: lf("Azure web development"),
-            scriptTemplates: ['blank', 'blankwebapi', 'blankazurewebapi', 'blankmysqlwebapi' , 'blankazureeventhubs', 'blanknodelibrary'],
+            scriptTemplates: ['blank', 'game', 'pages', 'blankwebapi', 'blankazurewebapi', 'blankmysqlwebapi' , 'blankazureeventhubs', 'blanknodelibrary'],
             editorMode: editorModes['pro']
         },
         'minecraft': {
