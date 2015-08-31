@@ -966,7 +966,7 @@ module TDev {
                 macro == 'box' || macro == "code" || macro == "widgets" || macro == "templatename" ||
                 macro == "hints" || macro == "pichints" || macro == "enum" || macro == "language" || macro == "weight" || macro == "namespace" ||
                 macro == "parenttopic" || macro == "docflags" || macro == "stprecise" || macro == "flags" || macro == "action" ||
-                macro == "topic" ||
+                macro == "topic" || macro == "breadcrumbtitle" ||
                 macro == "stvalidator" || macro == "stnoprofile" || macro == "stauto" || macro == "sthints" ||
                 macro == "stcode" || macro == "storder" || macro == "stdelete" || macro == "stcheckpoint" || macro == "sthashtags" ||
                 macro == "stnocheers" || macro == "steditormode" || macro == "stnexttutorials" || macro == "stmoretutorials" ||
