@@ -158,6 +158,12 @@ module TDev.AST.Json
             })
         }
 
+        public visitInlineAction(n:InlineAction)
+        {
+            n.name.stableId = n.getStableName() + "$inlan"
+            super.visitInlineAction(n)
+        }
+
         public visitAstNode(n:AstNode)
         {
             n.stableId = this.makeId();
