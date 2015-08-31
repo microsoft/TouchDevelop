@@ -337,7 +337,7 @@ module TDev.AppExport
     {
         var m = new ModalDialog();
         m.add(div('wall-dialog-header', lf("azure management certificate")));
-        m.addHTML(lf("<p>If you do not have an Azure subscription, go to <a href='https://account.windowsazure.com/Subscriptions' target='_blank'>Azure subscriptions</a> to get one.</p>"));
+        m.addHTML(lf("<p>If you do not have an Azure subscription, go to <a href='https://account.windowsazure.com/Subscriptions' target='_blank'>Azure subscriptions</a> to get one. <strong>Students:</strong> to access Azure services at no cost, go to <a href='https://www.dreamspark.com/Product/Product.aspx?productid=99' target='_blank'>DreamSpark for Azure</a>.</p>"));
         m.addHTML("<ol>" +
             "<li>" + lf("<a href='http://go.microsoft.com/fwlink/?LinkId=254432' target='_blank'>generate the certificate</a>.") + "</li>" +
             "<li>" + lf("paste the content of the certificate into the textbox and press import") + "</li>" +
@@ -376,7 +376,7 @@ module TDev.AppExport
                         })
                     }
                 })
-                if (subs.length > 1)
+                if (subs.length > 1) 
                     err.setChildren("there is more than one subscription; delete entries for the ones you don't want")
                 else if (subs.length == 0)
                     err.setChildren("no <Subscription> elements found")
