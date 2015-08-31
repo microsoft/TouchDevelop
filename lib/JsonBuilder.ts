@@ -96,12 +96,33 @@ module TDev.RT {
         public set_field_null(name: string): void {
             this.set_field(name, null);
         }
+        
+        private ensureArray() {
+            if (!Array.isArray(this.item)) this.item = [];            
+        }
 
         //? Adds a value to the array.
         public add(value: JsonObject): void {
-            if (!Array.isArray(this.item))
-                this.item = [];
+            this.ensureArray();
             this.item.push(this.toValue(value));
+        }
+        
+        //? Adds a number to the array.
+        public add_number(value: number): void {
+            this.ensureArray();
+            this.item.push(value);
+        }
+        
+        //? Adds a string to the array.
+        public add_string(value: string): void {
+            this.ensureArray();
+            this.item.push(value);
+        }
+        
+        //? Adds a boolean to the array.
+        public add_boolean(value: boolean): void {
+            this.ensureArray();
+            this.item.push(value);
         }
 
         //? Copy all fields from given JSON object
