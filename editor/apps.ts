@@ -336,11 +336,11 @@ module TDev.AppExport
     function askManagementCerificateAsync() : Promise
     {
         var m = new ModalDialog();
-        m.add(div('wall-dialog-header', lf("azure management certificate")));
-        m.addHTML(lf("<p>If you do not have an Azure subscription, go to <a href='https://account.windowsazure.com/Subscriptions' target='_blank'>Azure subscriptions</a> to get one. <strong>Students:</strong> to access Azure services at no cost, go to <a href='https://www.dreamspark.com/Product/Product.aspx?productid=99' target='_blank'>DreamSpark for Azure</a>.</p>"));
+        m.add(div('wall-dialog-header', lf("Azure management certificate")));
+        m.addHTML(lf("<p>If you do not have an Azure subscription, go to <a href='https://account.windowsazure.com/Subscriptions' target='_blank'>Azure subscriptions</a> to get one.</p>"));
         m.addHTML("<ol>" +
             "<li>" + lf("<a href='http://go.microsoft.com/fwlink/?LinkId=254432' target='_blank'>generate the certificate</a>.") + "</li>" +
-            "<li>" + lf("paste the content of the certificate into the textbox and press import") + "</li>" +
+            "<li>" + lf("paste the content of the management certificate into the textbox and press import") + "</li>" +
             "</ol>");
         var save = true
         m.add(div("wall-dialog-body", HTML.mkCheckBox(lf("save certificate in the browser"), (v) => {
@@ -450,11 +450,11 @@ module TDev.AppExport
     }
 
     function manualPublishProfileImportAsync() : Promise
-    {
+    {               
         var m = new ModalDialog();
-        m.add(div('wall-dialog-header', lf("azure publish profile import")));
+        m.add(div('wall-dialog-header', lf("Azure publish profile")));
         m.addHTML(
-            lf("Paste your .PublishSettings file here. You can get it by first creating an Azure Web App and then clicking on 'Download the publish profile' in 'quick glance' section on the right of the DASHBOARD tab.")
+            lf("Paste your .PublishSettings file for your Azure web app. You can download this file from the <a href='https://portal.azure.com/' target='_blank'>Azure Portal</a>.")
         )
         var err = div(null)
         m.add(err)
@@ -462,8 +462,9 @@ module TDev.AppExport
         var res = new PromiseInv();
 
         var elt = HTML.mkTextArea("scriptText");
-        m.add(elt)
-        m.addOk("import", () => {
+        elt.placeholder = lf("Paste or drag your .PublishSettings file here.");
+        
+        var importFn = () => {
             try {
                 var wa = importPublishXML(null, elt.value)
                 if (!wa) throw new Error(lf("no publish profile info found"))
@@ -473,7 +474,22 @@ module TDev.AppExport
             } catch (e) {
                 err.setChildren(lf("error parsing xml: {0}", e.message));
             }
-        })
+        };
+
+
+        HTML.setupDragAndDrop(elt,(files) => {
+            var file = files[0];
+            var reader = new FileReader();
+            reader.onerror = (ev) => ModalDialog.info(lf("could not read the file"), lf("Oops, we could not read that file. Please try copying the content manually."));
+            reader.onload = (ev) => {
+                elt.value = reader.result;
+                importFn();
+            };
+            reader.readAsText(file);            
+        });
+        
+        m.add(elt)
+        m.addOk("import", importFn);
         m.show();
 
         return res;
@@ -739,7 +755,8 @@ module TDev.AppExport
     function websiteBox(wa:Azure.WebsiteAuth)
     {
         if (!wa)
-            return div(null, "<none>")
+            return mkNavBtn("fa-download,#aaa", "white", lf("tap to setup"),
+                lf("Create or import a web app."));
 
         return mkNavBtn(wa.webspace == "custom" ? "fa-laptop,white" : "fa-cloud,white", "#08f", wa.website, wa.destinationAppUrl);
     }
@@ -810,8 +827,8 @@ module TDev.AppExport
         }
 
 
-        boxes.push(mkNavBtn("fa-download,#aaa", "white", lf("import .PublishSettings"),
-                                lf("find 'Download the publish profile' in Azure portal"))
+        boxes.push(mkNavBtn("fa-download,#aaa", "white", lf("existing web app"),
+                                lf("import .PublishSettings from Azure portal"))
                     .withClick(() => {
                                     m.dismiss()
                                     r.success(manualPublishProfileImportAsync())
@@ -1056,27 +1073,10 @@ module TDev.AppExport
         var sub = getManagementCerificate()
         var m = new ModalDialog()
 
-        m.add(div('wall-dialog-header', "export to node.js+azure web app"));
+        m.add(div('wall-dialog-header', "export to Azure web app"));
         m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web apps</a> let you deploy and scale modern websites and web apps in seconds."));
         var err = div(null)
         m.add(err)
-
-        if (sub) {
-            m.add(div("wall-dialog-body", "active subscription: " + sub.subscriptionName + " ",
-                            HTML.mkButton(lf("forget"), () => {
-                                m.dismiss()
-                                clearManagementCertificate()
-                                setupAzure()
-                            })))
-
-        } else
-            m.add(div("wall-dialog-body", "no active subscription ",
-                            HTML.mkButton(lf("setup"), () => {
-                                m.dismiss()
-                                askManagementCerificateAsync().done(() => {
-                                    setupAzure()
-                                })
-                            })))
 
         var wa = Azure.getWebsiteAuthForApp(Script)
 
@@ -1089,11 +1089,7 @@ module TDev.AppExport
                 })
         }
 
-        var btn = HTML.mkButton(lf("change"), changeWebsite)
-        btn.style.cssFloat = "right"
-
-        m.add(div("wall-dialog-body",
-                "current website: ", btn, div("whiteField", websiteBox(wa).withClick(changeWebsite))))
+        m.add(div("wall-dialog-body", div("whiteField", websiteBox(wa).withClick(changeWebsite))))
 
                 /*
                 !wa ? null : HTML.mkButton(lf("validate"), () => {
@@ -1105,8 +1101,14 @@ module TDev.AppExport
                 */
 
         if (wa) {
-            m.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("proxy"), () => proxySetup(wa)),
+            m.add(div("wall-dialog-buttons", [
+                HTML.mkButton(lf("deploy"), () => {
+                    m.dismiss()
+                    deployLocalWebappAsync(Script, wa)
+                        .done(y => AppExport.showStatus(wa),
+                            err => setDeploymentWebsiteAsync(wa).then(y => AppExport.showStatus(wa), err => isDeployError(err))
+                            );
+                }),
                 HTML.mkButton(lf("environment"), () => envSetup(wa)),
                 HTML.mkButton(lf("shell"), () => {
                     HTML.showProgressNotification(lf("loading shell logs"), true);
@@ -1133,22 +1135,25 @@ module TDev.AppExport
                             showCrashes(crashes)
                         });
                 }),
-                []))
+                HTML.mkButton(lf("proxy"), () => proxySetup(wa))
+            ]))
         }
-
-        m.add(div("wall-dialog-buttons",
-            !wa ? null : HTML.mkButton(lf("deploy"), () => {
-                m.dismiss()
-                deployLocalWebappAsync(Script, wa)
-                    .done(y => AppExport.showStatus(wa),
-                        err => setDeploymentWebsiteAsync(wa).then(y => AppExport.showStatus(wa), err => isDeployError(err))
-                    );
-            }),
-
-            HTML.mkButton(lf("dismiss"), () => {
-                m.dismiss()
-            })))
-
+        
+        if (sub) {
+            m.add(div("wall-dialog-body", sub.subcriptionName, HTML.mkLinkButton(lf("forget"),
+                () => {
+                    m.dismiss()
+                    clearManagementCertificate()
+                    setupAzure()
+                })))
+        } else
+            m.add(div("wall-dialog-subtle", lf("no management certificate"), HTML.mkLinkButton(lf("setup"),
+                () => {
+                    m.dismiss()
+                    askManagementCerificateAsync().done(() => {
+                        setupAzure()
+                    })
+                })))        
         m.show()
     }
 

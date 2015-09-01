@@ -219,6 +219,10 @@ input.logSearchInput {
     margin:1em;
 }
 
+.wall-dialog-subtle {
+  font-size:70%;
+}
+
 .wall-dialog-line-textbox {
   position: relative;
   text-align: center;
