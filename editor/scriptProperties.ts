@@ -883,6 +883,7 @@ module TDev
             var d = div(null);
             var docs = ScriptProperties.renderLibraryDocs(app, libname, showCopy, false);
             if (docs) {
+                Browser.setInnerHTML(d, docs);
                 HTML.fixWp8Links(d);
                 Browser.TopicInfo.attachCopyHandlers(d);
             }
