@@ -400,10 +400,10 @@ module TDev
             }
 
             var text: string;
-            if (s.isLibrary) {
+            if (s.isLibrary)
                 text = ScriptProperties.renderLibraryDocs(s, s.getName(), false, true);
-            }
-            else {
+                
+            if (!text) {
                 var r = new CopyRenderer();
                 text = r.dispatch(s);
             }
