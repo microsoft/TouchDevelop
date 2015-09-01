@@ -1389,7 +1389,7 @@ module TDev.AppExport
         if (Cloud.anonMode(lf("export to cordova app"))) return;
 
         if (!/^http:/.test(baseUrl)) {
-            var info = ModalDialog.info(lf("need local editor"),
+            var info = ModalDialog.info(lf("Cordova: need local editor"),
                 lf("To export and build Cordova apps you need to run TouchDevelop from your machine."), "")
             addRunLocalInstructions(info);
             info.addOk("ok", null, "", [
@@ -1399,7 +1399,7 @@ module TDev.AppExport
         }
 
         if (!LocalShell.mgmtUrl("")) {
-            var info = ModalDialog.info(lf("deployment key missing"),
+            var info = ModalDialog.info(lf("Cordova: deployment key missing"),
                 lf("We don't know the key to talk to local TouchDevelop server. Did you paste the link correctly?"))
             info.add(Editor.mkHelpLink("export to Cordova"))
             addRunLocalInstructions(info);
