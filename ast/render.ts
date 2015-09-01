@@ -1151,7 +1151,7 @@ module TDev
                       "@media print { a.md-external-link:link:after, a.md-external-link:visited:after { content: ' (' attr(href) ') '; font-size: 80%; } }\n"+
                       "svg.video-play { width: calc(100% - 1em); background-size:cover; background-repeat:no-repeat;}\n"+
                       ".nopara .md-para { margin:0; }\n"+
-                      '.symbol { font-family: "TD Symbol", inherit; }\n' +
+                      '.symbol { font-family: "TD Symbols", inherit; }\n' +
                       ".placeholder { font-size: 0.7em; padding: 0.2em; border: 1px dotted gray; }\n" +
                       ".md-comment, .md-comment h1, .md-comment h2, .md-comment h3, .md-comment h4 { display: inline-block; margin:0; }\n" +
                       "code { font-size: 1.0em; font-family: Calibri, \"Helvetica Neue\", HelveticaNeue, Helvetica, Arial, sans-serif; border: 1px dotted #bbb; padding: 0em 0.2em 0.1em 0.2em; white-space:nowrap; }\n" +
