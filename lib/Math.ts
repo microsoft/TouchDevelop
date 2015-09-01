@@ -2,7 +2,7 @@
 ///<reference path='refs.ts'/>
 
 module TDev.RT {
-    //? Mathematical operators, cos, sin, ...
+    //? Math goodness, abs, max, ...
     //@ robust
     export module Math_
     {
