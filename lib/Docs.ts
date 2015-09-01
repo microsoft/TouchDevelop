@@ -6,7 +6,7 @@ module TDev.RT {
     {
         //? Renders a bitmatrix
         //@ docsOnly [bits].lang("bitmatrix")
-        export function bitmatrix(bits: string, caption:string) {
+        export function bitmatrix(bits: string) {
             // used when rendering docs
         }
     }

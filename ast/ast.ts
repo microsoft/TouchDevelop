@@ -942,7 +942,23 @@ module TDev.AST {
         public docText():string
         {
             var prop = this.expr.parsed ? this.expr.parsed.getCalledProperty() : null
-            if (!prop || prop.getName() != "docs render") return null
+            if (!prop) return null;
+            
+            if (prop.getName() == "docs render") return this.docsRender();            
+            else if (prop.parentKind == api.getKind("Docs") && prop.getName() == "bitmatrix") return this.bitmatrixRender();
+            
+            return null;
+        }
+        
+        private bitmatrixRender(): string {
+            var c = <Call>this.expr.parsed
+            if (c.args.length != 2) return null;
+            
+            var bits = c.args[1].getStringLiteral() || ""
+            return "```` bitmatrix\n" + bits + "\n````" 
+        } 
+        
+        private docsRender(): string {
             var c = <Call>this.expr.parsed
             var arg0 = <GlobalDef>c.args[0].getCalledProperty()
             if (arg0 instanceof GlobalDef) {
@@ -960,7 +976,7 @@ module TDev.AST {
                 return "[" + cap + "] (" + url + ")"
             }
 
-            return null
+            return null            
         }
     }
 
