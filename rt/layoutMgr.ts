@@ -839,7 +839,7 @@ module TDev {
 
 
         render(host: RuntimeHost, popCount: number = 0) {
-            Contract.Requires(popCount >= 0);
+            Util.assertCode(popCount >= 0);
 
             var rootElt = this.getElement();
 

@@ -1011,10 +1011,10 @@ module TDev.RT {
 
         private cropInternal(left:number, top:number, cwidth:number, cheight:number) : void
         {
-            TDev.Contract.Requires(left >= 0 && left < this.widthSync());
-            TDev.Contract.Requires(top >= 0 && top < this.heightSync());
-            TDev.Contract.Requires(cwidth >= 0 && left + cwidth <= this.widthSync());
-            TDev.Contract.Requires(cheight >= 0 && top + cheight <= this.heightSync());
+            Util.assertCode(left >= 0 && left < this.widthSync());
+            Util.assertCode(top >= 0 && top < this.heightSync());
+            Util.assertCode(cwidth >= 0 && left + cwidth <= this.widthSync());
+            Util.assertCode(cheight >= 0 && top + cheight <= this.heightSync());
 
             this.changed();
             var imageData: ImageData = undefined;

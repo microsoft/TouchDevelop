@@ -984,7 +984,7 @@ module TDev.RT {
         /// </summary>
         public update(dT:number):void
         {
-            TDev.Contract.Requires(dT >= 0);
+            Util.assertCode(dT >= 0);
 
             if (!this._parent) return;
             var yip1 = this.RungaKutta(dT);

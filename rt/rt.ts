@@ -929,7 +929,7 @@ module TDev
         }
 
         public render(popCount: number = 0): void {
-            Contract.Requires(popCount >= 0);
+            Util.assertCode(popCount >= 0);
             this.getCurrentPage().render(this.host, popCount);
         }
 

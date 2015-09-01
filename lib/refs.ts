@@ -14,11 +14,11 @@
 ///<reference path='Color.ts'/>
 ///<reference path='Colors.ts'/>
 ///<reference path='Contact.ts'/>
-///<reference path='Contracts.ts'/>
 ///<reference path='DateTime.ts'/>
 ///<reference path='Device.ts'/>
 ///<reference path='DeviceMotion.ts'/>
 ///<reference path='DeviceOrientation.ts'/>
+///<reference path='Docs.ts'/>
 ///<reference path='Enumerator.ts'/>
 ///<reference path='GeoLocation.ts'/>
 ///<reference path='Home.ts'/>
