@@ -1842,9 +1842,9 @@
                         })]);
                     }
                     
-                    if (!ncont && /^installed/.test(path) && this.topLocations.length == 0) {
+                    if (Cloud.isRestricted() && !ncont && /^installed/.test(path) && this.topLocations.length == 0) {
                         this.moreDiv.setChildren([div("sdLoadingMore",
-                            lf("no scripts yet, try a "), HTML.mkA('', '/tutorials', '', lf("tutorial")), lf(" to get started!"))]);    
+                            lf("no scripts yet, "), HTML.mkA('', '/create-code', '', lf("create code")), lf(" to get started!"))]);    
                     }
                     
                 }, noCache, includeETags);
