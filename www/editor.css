@@ -4386,13 +4386,6 @@ width: 50%;
   cursor: pointer;
 }
 
-.phone .hubLogo {
-  right: 0.4em;
-  top: 0.8em;
-  width: 11em;
-  height: 2.38em;
-}
-
 .hubMe {
   position: absolute;
   left: 4em;
@@ -4445,7 +4438,16 @@ width: 50%;
 }
 
 .portrait .hubLogo {
+  margin-right: -8em;  
   right: 0.2em;
+}
+
+.phone .hubLogo {
+  margin-right: -7em;  
+  right: 0.4em;
+  top: 0.8em;
+  width: 11em;
+  height: 2.38em;
 }
 
 .introThumb {
