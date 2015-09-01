@@ -2350,12 +2350,13 @@ module TDev {
         {
             try {
                 var w = window.open("about:blank", "tdTopic" + Util.guidGen());
-                w.document.write("<!DOCTYPE html><html><head>" + CopyRenderer.css
+                var html = "<!DOCTYPE html><html><head>" + CopyRenderer.css
                                  + "<title>" + Util.htmlEscape(title) + "</title>"
                                  + "<meta name='microsoft' content='notranslateclasses stmt keyword'/>"
                                  + "</head><body onload='try { window.print(); } catch(ex) {}'>"
                                  + text
-                                 + "</body></html>");
+                                 + "</body></html>";
+                w.document.write(html);
                 w.document.close();
             } catch(e) {
                 ModalDialog.info(":( can't print from here", "Your browser might have blocked the print page or try to print from another device...");
