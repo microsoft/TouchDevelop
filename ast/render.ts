@@ -1154,7 +1154,7 @@ module TDev
                       '.symbol { font-family: "TD Symbols", inherit; }\n' +
                       ".placeholder { font-size: 0.7em; padding: 0.2em; border: 1px dotted gray; }\n" +
                       ".md-comment, .md-comment h1, .md-comment h2, .md-comment h3, .md-comment h4 { display: inline-block; margin:0; }\n" +
-                      "code { font-size: 1.0em; font-family: Calibri, \"Helvetica Neue\", HelveticaNeue, Helvetica, Arial, sans-serif; border: 1px dotted #bbb; padding: 0em 0.2em 0.1em 0.2em; white-space:nowrap; }\n" +
+                      'code { font-size: 1.0em; font-family: Calibri, \"Helvetica Neue\", HelveticaNeue, Helvetica, Arial, "TD Symbols", sans-serif; border: 1px dotted #bbb; padding: 0em 0.2em 0.1em 0.2em; white-space:nowrap; }\n' +
                       "code.md-ui { border: 2px solid #777; padding-left:0.2em; padding-right:0.2em; white-space:nowrap; }\n" +
                       ".block { margin-left: 1em; }\n" +
                       ".stmt { border-left: 0.2em solid #aaa; margin-top: 0.2em; }\n" +
@@ -1165,7 +1165,7 @@ module TDev
                       ".print-big { font-size: 1.5em; }\n" +
                       "a.md-bigbutton {}\n" +
                       "@media print { #MicrosoftTranslatorWidget { display: none; } .body, .inner, .primary-content__inner, .md-tutorial { margin:0; padding:0; } }\n" +
-                      'body { font-family: Calibri, "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }\n' +
+                      'body { font-family: Calibri, "Helvetica Neue", HelveticaNeue, Helvetica, Arial, "TD Symbols", sans-serif; }\n' +
                       "@page { size: auto; margin: 1cm 1cm 1cm 1cm; }" +
                       "</style>";
 
