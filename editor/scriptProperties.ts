@@ -207,9 +207,11 @@ module TDev
                     ),
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
-                    btn("cordova", lf("Cordova app")),
-                    btn("azure", lf("Node.js Azure web app")),
+                    btn("azure", lf("Azure web app")),
+                    btn("cordova", lf("Cordova mobile app"))
+                    /*
                     btn("html5", "HTML5 client")
+                    */
                     ),
                 this.dataSection = divId("dataManagement", "formLine",
                     div("varLabel", lf("manage data")),
