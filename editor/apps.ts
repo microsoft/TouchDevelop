@@ -1367,8 +1367,7 @@ module TDev.AppExport
                     TheEditor.parentScript = Script
                     Script = res.prevScript
                 })
-
-        if (app.usesCloudLibs()) {
+        else if (app.usesCloudLibs()) {
             recompile
                 .then(() => AppExport.deployLocalWebappAsync(app, wa))
                 .done(
