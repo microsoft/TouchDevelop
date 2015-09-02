@@ -1292,7 +1292,7 @@ module TDev.Browser {
                         res.withClick(() => {
                             m.onDismiss = undefined;
                             m.dismiss();
-                                renameScriptFromTemplateAsync(template)
+                                renameScriptFromTemplateAsync(template, false)
                                 .done((temp : ScriptTemplate) => onSuccess(temp), e => onSuccess(undefined));
                         });
                         elts.push(res)
@@ -1303,7 +1303,7 @@ module TDev.Browser {
         }
         
         export function createScriptFromTemplate(template: ScriptTemplate) {
-            renameScriptFromTemplateAsync(template)
+            renameScriptFromTemplateAsync(template, true)
                 .then((temp : ScriptTemplate) => {
                 if (temp)
                     return TheHost.openNewScriptAsync(<World.ScriptStub>{
@@ -1322,7 +1322,7 @@ module TDev.Browser {
             return name;            
         }
 
-        function renameScriptFromTemplateAsync(template:ScriptTemplate)  : Promise // of ScriptTemplate
+        function renameScriptFromTemplateAsync(template:ScriptTemplate, headless : boolean)  : Promise // of ScriptTemplate
         {
             if (!Cloud.getUserId() && template.requiresLogin) {
                 Hub.loginToCreate(template.title, "create:" + template.id)
@@ -1332,12 +1332,17 @@ module TDev.Browser {
             Ticker.rawTick('scriptTemplate_' + template.id);
 
             template = JSON.parse(JSON.stringify(template)); // clone template
-            var name = expandTemplateName(template.name);
-            var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
+            template.name = expandTemplateName(template.name);
 
             return TheHost.updateInstalledHeaderCacheAsync()
                 .then(() => new Promise((onSuccess, onError, onProgress) => {
-                    nameBox.value = TheHost.newScriptName(name)
+                    template.name = TheHost.newScriptName(name);
+                    if (headless) {
+                        onSuccess(template);
+                        return;
+                    }
+                    var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
+                    nameBox.value = TheHost.newScriptName(template.name)
                     var m = new ModalDialog();
                     m.onDismiss = () => onSuccess(undefined);
                     var create = () => {
