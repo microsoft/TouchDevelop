@@ -733,7 +733,22 @@ module TDev.Browser {
                 }
                 if (Cloud.hasPermission("script-promo")) {
                     m.add(div("wall-dialog-header", lf("manage promos")));
-                    var promoDiv = div("wall-dialog-body")
+                    var promoDiv = div("wall-dialog-body", HTML.mkButton(lf("NEW"), () => {
+                        ModalDialog.info(lf("creating..."), "")
+                        var app = new AST.App(null)
+                        app.setName("promo holder " + (Random.uint32() % 10000))
+                        app.comment = "#promoholder"
+                        Cloud.postPrivateApiAsync("scripts", {
+                            text: app.serialize(),
+                            name: app.getName(),
+                            description: app.comment
+                        })
+                        .then(resp => {
+                            TheApiCacheMgr.store(resp.id, resp)
+                            TheHost.getScriptInfoById(resp.id).editPromo()
+                        })
+                        .done()
+                    }))
                     m.add(promoDiv)
                     Cloud.getPrivateApiAsync("config/promo")
                         .then(resp => {
