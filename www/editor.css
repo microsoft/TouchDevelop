@@ -1335,19 +1335,12 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
   height: 7em;
   margin: 0.5em 0.5em 0em 0.5em;
 }
-
 .docs svg > path.biton {
   stroke:black;
 }
 .docs svg > path.bitoff {
   stroke:black;
-  fill:#ddd;
-}
-
-@media print {
-  .docs svg > path.bitoff {
-    fill:transparent;
-  }
+  fill:transparent;
 }
 
 .st
@@ -5024,7 +5017,7 @@ height: 2.2em;
   background: #567FFF;
   margin-left: -0.8em;
   margin-right: -0.5em;
-  margin-bottom: -0.3em;
+  margin-bottom: 0.2em;
   font-size: 1.2em;
   padding: 0.2em 0.75em;
 }
