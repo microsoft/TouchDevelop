@@ -64,6 +64,7 @@ module TDev
 
         constructor() {
             super()
+            this.mdComments = new MdComments(this, null)
         }
 
         static tdiv(cl: string, s: string) { return "<div class='" + cl + "'>" + s + "</div>"; }
@@ -87,7 +88,7 @@ module TDev
         public shortNameHeuristics = false;
         public stringLimit = 30;
         public codeReplacement:string;
-        public mdComments = new MdComments(null, null);
+        public mdComments : MdComments;
         public renderingSnippet = false;
         public highlightLevel = 0;
         public showDiff = false;
