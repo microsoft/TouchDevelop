@@ -7651,8 +7651,15 @@
         public diffToId(id:string)
         {
             ScriptProperties.showDiff(
-                Promise.join([id ? ScriptCache.getScriptAsync(id) : this.getScriptTextAsync(), this.getScriptTextAsync()]).then(scrs => {
-                    if (!scrs[0] || !scrs[1]) return;
+                Promise.join([id ? ScriptCache.getScriptAsync(id)
+                    : this.getScriptTextAsync(),
+                    this.getScriptTextAsync()]).then(scrs => {
+                    if (!scrs[0] || !scrs[1]) {
+                        if (Cloud.isOffline()) {
+                            Cloud.showModalOnlineInfo(lf("comparing cancelled"));
+                        }
+                        return;
+                    }
                     function prep(s:string)
                     {
                         var app = AST.Parser.parseScript(s, [])
@@ -7678,7 +7685,8 @@
             else if (this.jsonScript && this.jsonScript.id == this.jsonScript.rootid)
                 this.diffToId(null);
             else if (this.publicId)
-                TheApiCacheMgr.getAsync(this.publicId + "/base", true).done(scr => this.diffToId(scr ? scr.id : null))
+                TheApiCacheMgr.getAsync(this.publicId + "/base", true)
+                    .done(scr => this.diffToId(scr ? scr.id : null))
             else
                 this.diffToId(null);
         }
