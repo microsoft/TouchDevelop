@@ -17,6 +17,8 @@ temp/
 www/mbit.*
 microbit/flasher/Microbit.Flasher/bin
 microbit/flasher/Microbit.Flasher/obj
+microbit/loader/Microbit.Flasher/bin
+microbit/loader/Microbit.Flasher/obj
 
 # visual studio
 *.suo
