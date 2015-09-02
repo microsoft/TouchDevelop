@@ -513,9 +513,9 @@ module TDev
             if (options.header) {
                 this.add(div("modalSearchHeader", options.header));
             }
-
+            
             if (options.includeSearch !== undefined)
-                needKbd = options.includeSearch;
+                needKbd = !!options.includeSearch;
             else
                 needKbd = (!!options.queryAsync || boxes.length > 5)
 
@@ -534,7 +534,7 @@ module TDev
             this.show();
 
             // this has to happen after show() - show() saves the keyboard state so later this handler is removed
-            if (needKbd) {
+            // always capture keyboard in modal dialog
                 KeyboardMgr.instance.register("Down", e => {
                     var selected = selectedItem();
                     if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
@@ -572,7 +572,6 @@ module TDev
                     }
                     return false;
                 });
-            }
 
             if (!options.dontStretchDown)
                 this.stretchDown(list, 2.8);
