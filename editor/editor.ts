@@ -5977,9 +5977,10 @@ module TDev
                 h = h.substr(0, i);
                 Browser.TheHost.initMeAsync().done(() => {
                     var hs = decodeURIComponent(h.replace("#", "")).split(":")
+                    if (!hs) hs = hubHash.split(':');
                     if (hs[0] == "redirect")
                         Util.navigateInWindow("/" + hs[1].replace(/^\/+/, ""))
-                    else Util.setHash(hubHash, true);
+                    else Util.setHash(hs.join(':'), true);
                 })
                 return;
             }
