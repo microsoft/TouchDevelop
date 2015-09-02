@@ -1325,7 +1325,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
   margin-left: 0.2em;
 }
 .kbm svg > path.biton {
-  fill:#f00;  
+  fill:#f00;
 }
 
 .kbm svg > path.bitoff {

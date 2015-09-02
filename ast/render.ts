@@ -184,7 +184,7 @@ module TDev
             return this.renderString(v, 200);
         }
         
-        public renderBitmatrix(v: string, options?: { cls?: string; maxCols?: number; }): string {
+        public renderBitmatrix(v: string, options?: { cls?: string; maxCols?: number; height?: number; }): string {
             options = options || {};
             
             var bits: boolean[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => {
@@ -193,6 +193,7 @@ module TDev
             }));
 
             var maxCols = options.maxCols || 45;
+            var height = options.height || 1;
             var f = 50; var f2 = f / 2;
             var r1 = "";
             var r0 = "";
@@ -221,7 +222,7 @@ module TDev
             var svg = Util.fmt("<path class='biton' d='{0}'/><path class='bitoff' d='{1}'/>", r1, r0);
             var result = Util.fmt("<span class='kbm {0}' style='width:{1}em'>{2}</span>",
                 options.cls || "",
-                w / h + 0.1,
+                w / h * height + 0.1,
                 SVG.svgBoilerPlate(viewPort, svg));
             if (ellipse) result += Renderer.tspan("stringLiteral", "...");
             return result;

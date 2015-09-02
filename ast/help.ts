@@ -1470,7 +1470,7 @@ module TDev {
                         i++;
                     } else if ((m = /^```` bitmatrix((.|\n)*)````$/.exec(cmt)) != null) {
                         var bits = m[1];
-                        output += "<div>" + this.renderer.renderBitmatrix(bits, { cls: 'docs' }) + "</div>";
+                        output += "<div class='md-para'>" + this.renderer.renderBitmatrix(bits, { cls: 'docs', height:7 }) + "</div>";
                         i++;
                     } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt)) != null) {
                         var j = i + 1;
