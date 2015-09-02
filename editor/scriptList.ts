@@ -6378,6 +6378,9 @@
             else if (this.jsonScript)
                 editor = this.jsonScript.editor
 
+            if (this.jsonScript && this.jsonScript.islibrary)
+                editor = "library"
+
             if (!editor) editor = "touchdevelop"
             return editor
         }
@@ -6387,6 +6390,7 @@
             "codekingdoms": "codekingdoms,#ffffff",
             "python": "python,#ffffff",
             "touchdevelop": "touchdevelop,#0095ff",
+            "library": "recycle,#48A300",
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
