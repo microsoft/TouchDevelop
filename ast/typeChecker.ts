@@ -495,8 +495,7 @@ module TDev.AST
                             lf("now you can select a property of {0}; it doesn't do anything by itself", k)
                     else
                         expr.hint =
-                            lf("we have {0:a} here; it doesn't do anything by itself{1}", k,
-                                k == api.core.String || k == api.core.Number ? "; use 'post to wall' to display it" : "")
+                            lf("we have {0:a} here; did you want to do something with it?", k)
                 }
             }
 
