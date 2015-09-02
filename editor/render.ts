@@ -354,16 +354,24 @@ module TDev
             r.addEventListener('dragleave', e => this.handleDragLeave(e), false);
             r.addEventListener('drop', (e) => {
                 Util.log('drag drop: ' + r.id);
-                if (this.sourceElement && this.targetElement) {
-                    this.sourceElement.classList.remove('node-dragged');
-                    this.targetElement.classList.remove('node-drop-bottom');
-                    var targetNode = (<any>this.targetElement).node;
+                var srcEl = this.sourceElement;
+                var srcStm = this.sourceStmt;
+                var trgEl = this.targetElement;                
+                if (srcEl && trgEl) {
+                    srcEl.classList.remove('node-dragged');
+                    trgEl.classList.remove('node-drop-bottom');
+                    var targetNode = (<any>trgEl).node;
                     if (targetNode) {
                         if (e.stopPropagation) e.stopPropagation();
-                        if (this.sourceStmt && targetNode && this.sourceStmt != targetNode) {
+                        if (srcStm && targetNode && srcStm != targetNode) {
+                            var block: AST.Block = undefined;
+                            var pos: number = 0;
+                            // if dropping in inline action, extract body first
+                            if (targetNode instanceof AST.InlineActionBlock)
+                                targetNode = (<AST.InlineAction>(<AST.InlineActionBlock>targetNode).stmts[0]).body;
                             if (targetNode instanceof AST.Block) {
-                                var block = <AST.Block>targetNode;
-                                var pos = 0
+                                block = <AST.Block>targetNode;
+                                pos = 0
                             } else if (targetNode instanceof AST.Stmt) {
                                 block = (<AST.Stmt>targetNode).parentBlock()
                                 if (block)
@@ -372,14 +380,14 @@ module TDev
 
                             var isSelfParent = false
                             for (var pp:AST.Stmt = block; pp; pp = pp.parent)
-                                if (pp == this.sourceStmt)
+                                if (pp == srcStm)
                                     isSelfParent = true
 
-                            if (!isSelfParent && this.sourceStmt.parentBlock() && block && block.allowAdding() && block.allowAddOf(this.sourceStmt)) {
+                            if (!isSelfParent && srcStm.parentBlock() && block && block.allowAdding() && block.allowAddOf(srcStm)) {
                                 TheEditor.undoMgr.clearCalc();
                                 TheEditor.undoMgr.pushMainUndoState();
-                                var oldBlock = this.sourceStmt.parentBlock()
-                                var idx = oldBlock.stmts.indexOf(this.sourceStmt)
+                                var oldBlock = srcStm.parentBlock()
+                                var idx = oldBlock.stmts.indexOf(srcStm)
                                 if (idx >= 0) {
                                     oldBlock.stmts.splice(idx, 1)
                                     if (block == oldBlock && idx < pos)
@@ -393,10 +401,10 @@ module TDev
 
                                 var prev = block.stmts[pos - 1]
                                 if (prev && prev.isPlaceholder())
-                                    block.stmts[pos - 1] = this.sourceStmt
+                                    block.stmts[pos - 1] = srcStm;
                                 else
-                                    block.stmts.splice(pos, 0, this.sourceStmt)
-                                block.newChild(this.sourceStmt)
+                                    block.stmts.splice(pos, 0, srcStm)
+                                block.newChild(srcStm)
                                 block.notifyChange()
 
                                 TheEditor.dismissSidePane()
