@@ -4851,7 +4851,7 @@ div.bitmatrixhint {
 div.bitmatrixhint .kbm svg {
   padding: 0.5em 0em 0em 0.5em;
   height: 4em;
-  background-color: rgba(0,30,240,1);  
+  background-color: rgba(0,30,240,1);
 }
 
 div.bitmatrixhint .kbm svg > path.bitoff {

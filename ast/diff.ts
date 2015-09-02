@@ -911,7 +911,7 @@ module TDev.AST.Diff {
                 var db = b.getLiteral()
                 var isName = b instanceof FieldName
                 if (!isName && typeof da === "string" && typeof db === "string") {
-                    if ((<Expr>b).enumVal != null || (opts.preciseStrings && opts.preciseStrings[db]))
+                    if ((<Expr>b).enumVal != null || (/^bitmatrix|bitframe$/.test((<Expr>b).languageHint)) || (opts.preciseStrings && opts.preciseStrings[db]))
                         return (da == db) ? 0 : 3;
                     if (da == "" && db == "") return 0;
                     if (da != "" && db != "") {
