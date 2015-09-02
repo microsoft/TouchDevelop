@@ -1326,6 +1326,8 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 }
 .kbm svg > path.biton {
   fill:#f00;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 .kbm svg > path.bitoff {
@@ -1341,6 +1343,10 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .docs svg > path.bitoff {
   stroke:black;
   fill:transparent;
+}
+
+.calcTemplate .kbm svg > path.bitoff {
+    fill: white;
 }
 
 .st
@@ -4695,7 +4701,7 @@ span.videoCaption
 
 .calcTemplate
 {
-  font-size: 0.8em;
+  font-size: 0.9em;
   position: relative;
   margin: 0.2em 0 0.2em 0;
   background: rgba(0, 245, 255, 0.16);
