@@ -5979,7 +5979,9 @@ module TDev
                     var hs = decodeURIComponent(h.replace("#", "")).split(":")
                     if (hs[0] == "redirect")
                         Util.navigateInWindow("/" + hs[1].replace(/^\/+/, ""))
+                    else Util.setHash(hubHash, true);
                 })
+                return;
             }
 
             h = LocalProxy.updateDeploymentKey(h)
