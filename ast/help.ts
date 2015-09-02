@@ -891,8 +891,11 @@ module TDev {
                         return MdComments.error(lf("invalid picture id"));
                 }
             } else if (macro == "pici") {
-                var artId = MdComments.findArtId(arg);
-                var r = Util.fmt("<img class='md-img-inline' src='{0}' alt='picture' />", Cloud.artUrl(artId));
+                var args = arg.split(/:/)
+                var artId = MdComments.findArtId(args[0]);
+                var width = args[1] ? parseFloat(args[1]) : 0
+                if (!width) width = 2
+                var r = Util.fmt("<img class='md-img-inline' src='{0}' style='width:{1}em' alt='picture' />", Cloud.artUrl(artId), width);
                 return r;
             } else if (macro == "decl" || macro == "decl*") {
                 var decl = !Script ? null : !arg ? Script : Script.things.filter((t) => t.getName() == arg)[0];
@@ -1274,9 +1277,9 @@ module TDev {
                         else
                             return MdComments.error("invalid link '" + href + "'");
                         if (this.allowLinks)
-                            return "<a class=\"" + acls + "\" href=\"" + quote(href) + "\"" + additions + ">" + quote(name) + "</a>";
+                            return "<a class=\"" + acls + "\" href=\"" + quote(href) + "\"" + additions + ">" + this.expandInline(name) + "</a>";
                         else
-                            return quote(name);
+                            return this.expandInline(name);
                     }) ||
                     false))
                     continue;
