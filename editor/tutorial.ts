@@ -18,7 +18,8 @@ module TDev
         public isOpStmt:boolean;
         public localName:string;
         public editString:string;
-        public isEnumVal:boolean;
+        public isEnumVal: boolean;
+        public languageHint: string;
         public showTokens:AST.Token[];
         public stmtToInsert:AST.Stmt;
         public toInlineActions:boolean;
@@ -454,6 +455,7 @@ module TDev
                                     else {
                                         op.editString = lv
                                         op.isEnumVal = (<AST.Expr>d[i + 3]).enumVal != null
+                                        op.languageHint = (<AST.Expr>d[i + 3]).languageHint;
                                     }
                                     op.addToken = d[i + 3]
                                 } else if (d[i].getThing() instanceof AST.PlaceholderDef && !d[i + 2]) {

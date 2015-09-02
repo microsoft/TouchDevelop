@@ -4332,7 +4332,9 @@ module TDev
                         label = lf("we need {0} here", ins.editString)
                     } else {
                         intelliFilter = c => c.nameOverride == lf("edit");
-                        label = lf("need a different string here")
+                        if (/bitmatrix|bitframe/.test(ins.languageHint))
+                            label = lf("need a different image here")   
+                        else label = lf("need a different string here")
                     }
                     setF = TipManager.setTip;
                 } else if (th != null) {
