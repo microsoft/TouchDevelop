@@ -3031,8 +3031,10 @@ module TDev
 
         public clearAnnotations(pluginRef:string)
         {
+            var needsRefresh = false;
             AST.visitStmts(Script, (s) => {
                 if (s.annotations) {
+                    needsRefresh = true;
                     var ann = s.annotations.filter(a => a.pluginRef != pluginRef)
                     if (ann.length == 0)
                         delete s.annotations
@@ -3040,6 +3042,7 @@ module TDev
                         s.annotations = ann
                 }
             })
+            if (needsRefresh) this.refreshDecl();
         }
 
         private buildStmtIdx():StringMap<AST.Stmt>
