@@ -184,7 +184,7 @@ module TDev
             return this.renderString(v, 200);
         }
         
-        public renderBitmatrix(v: string): string {
+        public renderBitmatrix(v: string, cls? : string): string {
             var bits: boolean[][] = (v || "").trim().split("\n").map(row => row.split(/[\s\r\n]+/).map(s => {
                 var x = parseInt(s); if (isNaN(x)) x = 0;
                 return !!x;
@@ -217,9 +217,10 @@ module TDev
             }
             var viewPort = Util.fmt("0 0 {0} {1}", w, h);
             var svg = Util.fmt("<path class='biton' d='{0}'/><path class='bitoff' d='{1}'/>", r1, r0);
-            var result = Util.fmt("<span class='kbm' style='width:{0}em'>{1}</span>",
-                            w / h + 0.1,
-                            SVG.svgBoilerPlate(viewPort, svg));
+            var result = Util.fmt("<span class='kbm {0}' style='width:{1}em'>{2}</span>",
+                cls || "",
+                w / h + 0.1,
+                SVG.svgBoilerPlate(viewPort, svg));
             if (ellipse) result += Renderer.tspan("stringLiteral", "...");
             return result;
         }

@@ -1325,11 +1325,29 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
   margin-left: 0.2em;
 }
 .kbm svg > path.biton {
-  fill:#f00;
+  fill:#f00;  
 }
 
 .kbm svg > path.bitoff {
   fill:#ccc;
+}
+.docs svg {
+  height: 7em;
+  margin: 0.5em 0.5em 0em 0.5em;
+}
+
+.docs svg > path.biton {
+  stroke:black;
+}
+.docs svg > path.bitoff {
+  stroke:black;
+  fill:#ddd;
+}
+
+@media print {
+  .docs svg > path.bitoff {
+    fill:transparent;
+  }
 }
 
 .st

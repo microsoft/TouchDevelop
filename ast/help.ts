@@ -1468,6 +1468,10 @@ module TDev {
                         i = j;
                     } else if (i == 0 && cmt == '{var:apihelp}') {
                         i++;
+                    } else if ((m = /^```` bitmatrix((.|\n)*)````$/.exec(cmt)) != null) {
+                        var bits = m[1];
+                        output += this.renderer.renderBitmatrix(bits, 'docs');
+                        i++;
                     } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt)) != null) {
                         var j = i + 1;
                         var seenStmt = false;
