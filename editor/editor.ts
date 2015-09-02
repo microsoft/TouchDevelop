@@ -320,6 +320,7 @@ module TDev
         public notifyStopAsync() : Promise
         {
             TheEditor.stopPlayTime();
+            this.currentRt.editorObj = undefined;
             if (ScriptEditorWorldInfo &&
                 ScriptEditorWorldInfo.status !== "published")
                 this.takeScreenshotMaybe();
