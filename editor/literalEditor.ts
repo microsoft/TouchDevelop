@@ -59,10 +59,17 @@ module TDev
         private animToken: number;
         private animCells: HTMLElement[];
         private dialog: ModalDialog;
+        private hintDiv: HTMLElement;
 
-        constructor(public calculator: Calculator, public literal: AST.Literal, private animation: boolean) {
+        constructor(public calculator: Calculator, public literal: AST.Literal, private animation: boolean, hint: string) {
             super(calculator, literal);
 
+            // hint is provided by the tutorial engine...
+            if (hint) {
+                this.hintDiv = div("bitmatrixhint");
+                Browser.setInnerHTML(this.hintDiv, "<span>goal:</span>" + new Renderer().renderBitmatrix(hint, { height: 4 }));                
+            }
+            
             this.okBtn = HTML.mkRoundButton("svg:check,black", lf("ok"), Ticks.noEvent, () => {
                 if (this.dialog) this.dialog.dismiss();
             })
@@ -108,6 +115,7 @@ module TDev
             this.root = div('bitmatrix',
                 div('btns', this.animTable, this.plusBtn, this.minusBtn),
                 this.table,
+                this.hintDiv,
                 this.okBtn);
 
             this.updateTable(literal.data);

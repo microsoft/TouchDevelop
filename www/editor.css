@@ -4841,6 +4841,24 @@ table.bitmatrix {
   table-layout:fixed;
 }
 
+div.bitmatrixhint {
+  background: rgba(0, 245, 255, 0.16);
+  color:rgba(0,30,240,1);
+  padding: 0.5em 1em 0.5em 0.5em;
+  display:inline-block;
+}
+
+div.bitmatrixhint .kbm svg {
+  padding: 0.5em 0em 0em 0.5em;
+  height: 4em;
+  background-color: rgba(0,30,240,1);  
+}
+
+div.bitmatrixhint .kbm svg > path.bitoff {
+  fill:white;
+}
+
+
 table.bitpreview {
     margin-left:0.5em;
     display:block;

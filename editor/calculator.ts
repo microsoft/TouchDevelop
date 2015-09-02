@@ -1275,9 +1275,13 @@ module TDev
         }
 
         private inlineLiteralEditor(l: AST.Literal) {
+            var hint = "";
+            if (this.currentInstruction && this.currentInstruction.languageHint == l.languageHint && this.currentInstruction.editString)
+                hint = this.currentInstruction.editString;    
+            
             var literalEditor: LiteralEditor;
-            if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true);
-            else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false);
+            if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true, hint);
+            else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false, hint);
             else literalEditor = new TextLiteralEditor(this, l);
             return literalEditor;
         }
