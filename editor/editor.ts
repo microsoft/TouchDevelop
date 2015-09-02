@@ -1695,6 +1695,9 @@ module TDev
                         if (this.currentRt.eventQ != null)
                             this.currentRt.eventQ.profiling = opts.profiling;
 
+                        if (!this.currentRt.editorObj)
+                            Plugins.setupEditorObject(null, false);    
+                        
                         this.runActionCore(a, args, !!opts.debugging);
                     })
                     .done(() => {}, 

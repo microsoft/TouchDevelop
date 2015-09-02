@@ -114,35 +114,15 @@ module TDev.RT {
                 .done(token => r.resumeVal(token));
         }
 
-        //? Uploads a payload to a temporary blob and retreives the url. While the URL will remain unchanged, the data will eventually be wiped out.
-        //@ async returns(string) cap(editoronly)
-        public upload_json(payload: JsonBuilder, r: ResumeCtx) { // string
-            if (Cloud.anonMode(lf("upload plugin data"))) {
-                r.resumeVal("");
-                return;
-            }
-
-            var pluginid = r.rt.currentScriptId || "__unpublished__";
-            EditorServices
-                .getTokenAsync("TouchDevelop Bin")
-                .then(token => {
-                    if (!token) {
-                        r.resumeVal("");
-                        return;
-                    }
-                    return Util.httpPostRealJsonAsync("https://touchdevelopbin.azurewebsites.net/api/upload",
-                        { token: token, pluginid: pluginid, payload: payload.value() });
-                }).done(resp => {
-                    if (resp) r.resumeVal(resp["url"] || "");
-                    else r.resumeVal("");
-                }, e => { r.resumeVal(""); })
-        }
-
         //? Compiles and packages the current script.
         //@ async returns(JsonObject) cap(editoronly) dbgOnly
-        public package_current_script(options : JsonObject, r : ResumeCtx) {
-            HTML.showProgressNotification(lf("packaging script..."), true);
+        public package_current_script(options: JsonObject, r: ResumeCtx) {
             var id = this.current_script_id(r.stackframe);
+            if (!id) {
+                r.resumeVal(undefined);
+                return;
+            }
+            HTML.showProgressNotification(lf("packaging script..."), true);
             r.rt.host.packageScriptAsync(id, options.value())
                 .done(
                     instr => r.resumeVal(JsonObject.wrap(instr)),
