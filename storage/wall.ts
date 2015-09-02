@@ -418,7 +418,7 @@ module TDev {
             this.scriptTitleDiv.setChildren([this.currentRt.compiled.scriptTitle]);
 
 
-            this.cloudContainer = div("inlineBlock", this.cloudSymbol, this.cloudStatus);
+            this.cloudContainer = div("inlineBlock hidden", this.cloudSymbol, this.cloudStatus);
             this.cloudContainer.withClick(() => {
                 if (this.cs_hasCloudState)
                     TDev.RT.CloudData.sessionInfoAsync(this.currentRt);
@@ -607,6 +607,8 @@ module TDev {
                 }
                 this.cs_hasCloudState = hasCloudState;
                 this.cs_type = type;
+                if (this.cs_hasCloudState) this.cloudContainer.classList.remove("hidden");
+                else this.cloudContainer.classList.add("hidden");
             }
             if (status !== this.cs_status)
             {
