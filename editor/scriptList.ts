@@ -4851,6 +4851,29 @@
         }
     }
 
+    export class UserAbusesTab
+        extends AllAbuseReportsTab
+    {
+        constructor(par:BrowserPage) {
+            super(par)
+        }
+        public getUrl() { return this.parent.getPublicationId() + "/abuses"; }
+
+        public getName() { return lf("abuse reports"); }
+
+        public bgIcon() { return "svg:fa-flag"; }
+        public noneText() { return lf("no abuse reports!"); }
+        public hideOnEmpty() { return true }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            var c = <JsonAbuseReport>cc;
+            return div(null,
+                ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
+                ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
+        }
+    }
+
     export class ScriptHeartsTab
         extends ListTab
     {
@@ -5017,11 +5040,7 @@
                         .done(d => {
                             nums.setChildren([
                                 d ? lf("approved") :
-                                HTML.mkAsyncButton(lf("approve"), 
-                                    () => Cloud.postPrivateApiAsync(joinid, {})
-                                          .then(r => {
-                                              nums.setChildren([lf("approved")])
-                                          }, e => Cloud.handlePostingError(e, lf("approve"))))
+                                HTML.mkButton(lf("approvals"), () => (<GroupInfo>pub).approvals())
                             ])
                         })
                     return div(null, lab(lf("wants to join"), grpuser),
@@ -8215,6 +8234,7 @@
                 tabs.push(new UserPrivateTab(this));
             if (Cloud.hasPermission("me-only"))
                 tabs.push(new NotificationsTab(this));
+            tabs.push(new UserAbusesTab(this))
             return tabs;
         }
 
@@ -9035,6 +9055,8 @@
                                 }));
                                 ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
                                 ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
+                                if (u.isclass)
+                                    ad.appendChild(HTML.mkButton(lf("approvals"), () => { this.approvals(); }));
                             });
                     } else {
                         hd.appendChild(div('', lf("This group is open.")));
@@ -9189,6 +9211,55 @@
             }
             var s = lowerName + " " + this.publicId + " " + json.description;
             return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
+        }
+
+        public approvals()
+        {
+            var json: JsonGroup = TheApiCacheMgr.getCached(this.publicId);
+            if (!json) return
+
+            var m = new ModalDialog()
+            var id = this.publicId
+            m.add(div("wall-dialog-header", lf("User approvals for {0}", json.name)))
+            m.show()
+
+            Cloud.getPrivateApiAsync(id + "/approvals")
+            .then(lst => Promise.join(lst.map(e => TheApiCacheMgr.getAsync(e))))
+            .then(users => {
+                m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
+                users.forEach(e => {
+                    var inp = HTML.mkTextInput("text", "")
+                    inp.value = e.name;
+                    inp.style.width = "10em";
+                    var chgNick = 
+                        HTML.mkAsyncButton(lf("save nickname"), () => 
+                                    Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
+                                    .then(r => r, Cloud.errorCallback()))
+                    chgNick.style.display = "none";
+                    var approved = false
+
+                    var btn = HTML.mkAsyncButton(lf("approve"), () =>
+                        Cloud.postPrivateApiAsync(e.id + "/groups/" + id, {})
+                        .then(r => {
+                            approved = true
+                            if (inp.value != e.name)
+                                return Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
+                            else
+                                return Promise.as()
+                        }, Cloud.errorCallback())
+                        .then(() => {
+                            btn.removeSelf();
+                            d.appendChildren([lf("approved")])
+                        }))
+                    inp.onkeyup = function() {
+                        if (approved) chgNick.style.display = null;
+                    }
+                    var d = div("wall-dialog-body", inp, btn, chgNick)
+                    m.add(d)
+                })
+                m.addOk(lf("dismiss"))
+            }, Cloud.errorCallback())
+            .done()
         }
     }
 
