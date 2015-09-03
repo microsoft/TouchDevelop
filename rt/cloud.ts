@@ -840,6 +840,10 @@ module TDev.Cloud {
         return r
     }
 
+    export function errorCallback(action: string = lf("do this")) {
+        return e => handlePostingError(e, action)
+    }
+
     export function handlePostingError(e: any, action: string, modal = true) {
         if (e) {
             if (e.status == 502) {
