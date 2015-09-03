@@ -200,10 +200,12 @@ module TDev
             return res;
         }
 
-        public declDiv(d:AST.Decl):HTMLElement
+        public declDiv(d:AST.Decl, appSig = false):HTMLElement
         {
             var r = div('decl');
-            Browser.setInnerHTML(r, this.dispatch(d));
+            var html = appSig ? this.renderAppHeader(d.parent) : "";
+            html += this.dispatch(d);
+            Browser.setInnerHTML(r, html);
             return r;
         }
 

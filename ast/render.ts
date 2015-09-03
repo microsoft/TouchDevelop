@@ -820,6 +820,15 @@ module TDev
             return "function";
         }
 
+        public renderAppHeader(app: AST.App) {
+            var hd = "";
+
+            if (app.isLibrary) hd += this.kw("library ");
+            hd += this.kw("script ");
+            hd += this.id(app.getName());
+            return this.tline(hd);
+        }
+        
         private renderActionHeader(n:AST.ActionHeader)
         {
             var inParms = "";
