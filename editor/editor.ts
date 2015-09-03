@@ -2183,7 +2183,7 @@ module TDev
             return !this.searchBox.value && this.sidePaneVisibleNow() && !this.currentStmtEditor && this.currentSideTab == this.scriptNav;
         }
 
-        private searchPressed()
+        public searchPressed()
         {
             if (this.searchBox.value != "") {
                 this.searchBox.value = ""

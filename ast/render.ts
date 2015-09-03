@@ -826,7 +826,7 @@ module TDev
             if (app.isLibrary) hd += this.kw("library ");
             hd += this.kw("script ");
             hd += this.id(app.getName());
-            return this.tline(hd);
+            return Util.fmt("<div id='stmt-script' class='stmt stmt-appHeader'>{0}</div>", this.tline(hd));
         }
         
         private renderActionHeader(n:AST.ActionHeader)

@@ -114,6 +114,9 @@ module TDev
 
         public attachHandlers()
         {
+            var se = elt('stmt-script');
+            if (se) se.withClick(() => TheEditor.searchPressed());
+            
             if (!this.stmts) return;
 
             var id = 1;
