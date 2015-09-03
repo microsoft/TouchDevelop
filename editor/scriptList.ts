@@ -4851,6 +4851,29 @@
         }
     }
 
+    export class UserAbusesTab
+        extends AllAbuseReportsTab
+    {
+        constructor(par:BrowserPage) {
+            super(par)
+        }
+        public getUrl() { return this.parent.getPublicationId() + "/abuses"; }
+
+        public getName() { return lf("abuse reports"); }
+
+        public bgIcon() { return "svg:fa-flag"; }
+        public noneText() { return lf("no abuse reports!"); }
+        public hideOnEmpty() { return true }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            var c = <JsonAbuseReport>cc;
+            return div(null,
+                ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
+                ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
+        }
+    }
+
     export class ScriptHeartsTab
         extends ListTab
     {
@@ -8211,6 +8234,7 @@
                 tabs.push(new UserPrivateTab(this));
             if (Cloud.hasPermission("me-only"))
                 tabs.push(new NotificationsTab(this));
+            tabs.push(new UserAbusesTab(this))
             return tabs;
         }
 
@@ -9031,6 +9055,8 @@
                                 }));
                                 ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
                                 ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
+                                if (u.isclass)
+                                    ad.appendChild(HTML.mkButton(lf("approvals"), () => { this.approvals(); }));
                             });
                     } else {
                         hd.appendChild(div('', lf("This group is open.")));
@@ -9195,12 +9221,12 @@
             var m = new ModalDialog()
             var id = this.publicId
             m.add(div("wall-dialog-header", lf("User approvals for {0}", json.name)))
-            m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
             m.show()
 
             Cloud.getPrivateApiAsync(id + "/approvals")
             .then(lst => Promise.join(lst.map(e => TheApiCacheMgr.getAsync(e))))
             .then(users => {
+                m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
                 users.forEach(e => {
                     var inp = HTML.mkTextInput("text", "")
                     inp.value = e.name;
