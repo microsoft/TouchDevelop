@@ -2149,7 +2149,7 @@ module TDev
             if (this.currentRt && this.currentRt.canResume())
                 children = [ Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution()) ];
             else
-                children = [ Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
+                children = [ Editor.mkTopMenuItem("svg:play,black", lf("run main"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
 
             if (Cloud.isRestricted()) {
                 var compileBtn: HTMLElement;
