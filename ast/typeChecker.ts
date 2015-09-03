@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD209:
+// Next available error: TD211:
 
 module TDev.AST
 {
@@ -1404,7 +1404,16 @@ module TDev.AST
                 }
                 l._kind = mkKind();
             } else switch (typeof l.data) {
-                case "number": l._kind = this.core.Number; break;
+                case "number": 
+                    if (Cloud.isRestricted() && !this.inShim) {
+                        if (Util.between(-0x80000000, l.data, 0x7fffffff) != l.data) {
+                            this.markError(l, lf("TD209: the number is outside of the allowed range (between {0} and {1})", -0x80000000, 0x7fffffff));
+                        } else if (Math.round(l.data) != l.data) {
+                            this.markError(l, lf("TD210: fractional numbers not allowed"));
+                        }
+                    }
+                    l._kind = this.core.Number;
+                    break;
                 case "string": l._kind = this.core.String; break;
                 case "boolean": l._kind = this.core.Boolean; break;
                 default: Util.die();
