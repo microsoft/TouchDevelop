@@ -74,6 +74,7 @@ body, input {
 #script-name, #script-description {
   background-color: transparent;
   border: 0;
+  width: 25rem;
 }
 
 #script-icons > *:not(:first-child) {
@@ -194,7 +195,6 @@ body, input {
 }
 
 .graduate-wrapper {
-  height: calc(4.2rem + 4px);
   width: 6rem;
   padding: .2rem;
 }
@@ -228,6 +228,11 @@ a.command:hover {
 @media (max-width: 1024px) {
   .roundbutton {
     display: inline;
+  }
+
+  .graduate-wrapper {
+    width: 3rem;
+    vertical-align: middle;
   }
 
   .roundsymbol {
