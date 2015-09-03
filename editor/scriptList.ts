@@ -6295,7 +6295,7 @@
 
         public twitterMessage()
         {
-            return (this.app ? this.app.getName() + " - " : "") + lf("Cool script!") + " " + Cloud.config.hashtag;
+            return (this.app ? this.app.getName() + " - " : "") + Cloud.config.hashtag;
         }
 
         public loadLocalHeader(v:Cloud.Header)
