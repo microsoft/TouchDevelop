@@ -3675,7 +3675,7 @@
             var s = this.script()
             var guid = s.getGuid()
             var scrid = it.scriptstatus == "published" ? it.scriptid : null
-            var icon = div("sdIcon", HTML.mkImg("svg:" + (scrid ? "Upload" : "Clock") + ",white"))
+            var icon = div("sdIcon", HTML.mkImg("svg:" + (scrid ? "fa-upload" : "clock2") + ",white"))
             icon.style.background = scrid ? "#40B619" : "#007FFF";
             var box =
                 div("sdHeaderOuter",
@@ -3687,7 +3687,7 @@
                                 div("sdAddInfoInner",
                                     Util.timeSince(it.time)
                                         + (scrid ? " :: /" + scrid : "")
-                                        + (it.scriptsize ? lf(", size: {0}", it.scriptsize) : ""))),
+                                        + (it.scriptsize ? lf(", size: {0} characters", it.scriptsize) : ""))),
                             div("sdAuthor", div("sdAuthorInner showWhenSelected", lf("current"))))))
             box.setFlag("selected", it.isactive)
 
