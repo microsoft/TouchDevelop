@@ -361,7 +361,7 @@
                 d.addHTML(notice);
 
             d.add(div("wall-dialog-buttons",
-                HTML.mkButton(lf("agree"), () => {
+                HTML.mkButton(lf_static(Runtime.legalButton || "agree", true), () => {
                     tick(Ticks.legalNoticeAgree);
                     Runtime.legalNotice = null;
                     if (Cloud.lite) {
