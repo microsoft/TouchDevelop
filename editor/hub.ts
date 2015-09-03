@@ -1336,7 +1336,7 @@ module TDev.Browser {
 
             return TheHost.updateInstalledHeaderCacheAsync()
                 .then(() => new Promise((onSuccess, onError, onProgress) => {
-                    template.name = TheHost.newScriptName(name);
+                    template.name = TheHost.newScriptName(template.name);
                     if (headless) {
                         onSuccess(template);
                         return;
