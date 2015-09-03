@@ -456,6 +456,7 @@ module TDev
         static refreshNotifications: (enable: boolean) => void;
         static offerNotifications() { return !!Runtime.refreshNotifications || !!localStorage["gcm"]; }
         static legalNotice: string = "";
+        static legalButton: string;
         static legalNoticeHeader: string;
         static companyCopyright = "Microsoft";
         static appName = "TouchDevelop";
