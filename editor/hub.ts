@@ -1100,9 +1100,10 @@ module TDev.Browser {
             // should we load anything?
             if (!currentTheme || !currentTheme.intelliProfileId) return Promise.as(undefined);
             // try loading profile data
-            return TheApiCacheMgr.getAsync(currentTheme.intelliProfileId, true)
-                .then((script : JsonScript) => ScriptCache.getScriptAsync(script.updateid))
-                .then((text: string) => {
+            var update = ScriptCache.forcedUpdate(currentTheme.intelliProfileId);
+            var p = update ? Promise.as(update.text) : ScriptCache.getScriptAsync(currentTheme.intelliProfileId);
+            
+            return p.then((text: string) => {
                     if (!text) {
                         Util.log('failed to load intelliprofile script');
                         return undefined;
