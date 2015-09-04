@@ -69,6 +69,7 @@ body, input {
 
 #script-name {
   font-size: 3rem;
+  line-height: 1.8rem;
 }
 
 #script-name, #script-description {
@@ -196,6 +197,7 @@ body, input {
 
 .graduate-wrapper {
   width: 6rem;
+  height: calc(4.2rem + 4px);
   padding: .2rem;
 }
 
@@ -231,7 +233,8 @@ a.command:hover {
   }
 
   .graduate-wrapper {
-    width: 3rem;
+    width: 2.8rem;
+    height: 3rem;
     vertical-align: middle;
   }
 
