@@ -825,7 +825,7 @@ module TDev
 
             if (app.isLibrary) hd += this.kw("library ");
             hd += this.kw("script ");
-            hd += this.id(app.getName());
+            hd += this.id(TDev.RT.String_.trim_overflow(app.getName(), 64));
             return Util.fmt("<div id='stmt-script' class='stmt stmt-appHeader'>{0}</div>", this.tline(hd));
         }
         

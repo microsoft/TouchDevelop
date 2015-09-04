@@ -86,6 +86,7 @@ module TDev.Cloud {
         socialNetworkart?: boolean;
         
         // hub
+        scriptEmail?: boolean;
         scriptAddToChannel?: boolean;
         scriptConvertToDocs?: boolean;
         scriptPrintScript?: boolean;

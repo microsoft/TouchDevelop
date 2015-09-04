@@ -309,8 +309,7 @@ module TDev {
             var wp = this.currentRt.getCurrentPage();
             var element = this.fullScreenContainer.firstChild;
             var isStopped = this.currentRt.isStopped();
-            this.titleContainer.style.display =
-                (!wp.chromeVisible || element) && !isStopped ? "none" : "block";
+            this.titleContainer.style.display = (!wp.chromeVisible || element || SizeMgr.splitScreen) ? "none" : "block";
             this.backBtnDiv.style.display = this.showBackButton() ? "block" : "none";
             if (wp.chromeVisible) this.wallContainer.classList.remove('no-bar');
             else this.wallContainer.classList.add('no-bar');

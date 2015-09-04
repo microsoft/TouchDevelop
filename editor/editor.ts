@@ -5789,7 +5789,7 @@ module TDev
 
             var render = () => {
                 Util.time("render-action", () => {
-                    var node = this.renderer.declDiv(action, SizeMgr.splitScreen);
+                    var node = this.renderer.declDiv(action, true);
                     node.appendChild(div("declBottomSpacer").withClick(() => {
                         TheEditor.belowDeclTap();
                     }));

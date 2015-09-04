@@ -137,6 +137,7 @@ input.logSearchInput {
   height: 10em;
   color: black;
   position: relative;
+  padding-bottom: 14em; /* allow to scroll past soft keyboard */
 }
 
 .modalOverlay

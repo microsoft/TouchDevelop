@@ -3318,7 +3318,8 @@
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
 
-            btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
+            if (EditorSettings.widgets().scriptEmail)         
+                btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
 
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["twitter", "facebook"].map(network =>
@@ -6295,7 +6296,7 @@
 
         public twitterMessage()
         {
-            return (this.app ? this.app.getName() + " - " : "") + lf("Cool script!") + " " + Cloud.config.hashtag;
+            return (this.app ? this.app.getName() : "") + Cloud.config.hashtag;
         }
 
         public loadLocalHeader(v:Cloud.Header)

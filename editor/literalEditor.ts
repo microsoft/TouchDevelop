@@ -80,7 +80,7 @@ module TDev
             this.table = div('bitmatrices');
             
             if (this.animation) {
-                this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add frame"), Ticks.noEvent, () => {
+                this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add"), Ticks.noEvent, () => {
                     var v = this.serialize(this.frames + 1);
                     this.updateTable(v);
                     if (this.frames > 1) {
@@ -93,7 +93,7 @@ module TDev
                             }
                     }
                 });
-                this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove frame"), Ticks.noEvent, () => {
+                this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove"), Ticks.noEvent, () => {
                     if (this.frames > 1) {
                         var v = this.serialize(this.frames - 1);
                         this.updateTable(v);
