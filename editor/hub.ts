@@ -54,6 +54,7 @@ module TDev.Browser {
                 ifConditionDefault: "true",
 
                 scriptSocialLinks: Cloud.lite,
+                scriptEmail: true,
             }
         },
         'classic': {
@@ -137,6 +138,7 @@ module TDev.Browser {
                 scriptSocialLinks: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
+                scriptEmail: true,
             }
         },
         'pro': {
@@ -269,6 +271,7 @@ module TDev.Browser {
                 scriptSocialLinks: Cloud.lite,
                 scriptPrintScript: true,
                 scriptPrintTopic: true,
+                scriptEmail: true,
             }
         }
     }
@@ -516,6 +519,7 @@ module TDev.Browser {
                     editLibraryButton: true,                    
                     scriptPrintScript: true,
                     scriptPrintTopic: true,                    
+                    scriptEmail: true,
                     publicationComments: true,
                 }
             },
@@ -585,8 +589,9 @@ module TDev.Browser {
                     editLibraryButton: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
+                    scriptEmail: true,
                     publicationComments: true,
-
+                
                     // editor specific                  
                     publishDescription: true,
                     sendPullRequest: true,
