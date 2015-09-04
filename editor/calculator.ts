@@ -1310,11 +1310,14 @@ module TDev
         {
             var inp = HTML.mkTextInput("text", lf("rename"));
             inp.id = "nameLocal";
-            inp.style.width = ((l.getName().length + 5) * 0.45) + "em";
+            inp.style.width = Math.min(17, ((l.getName().length + 2) * 0.45)) + "em";
             inp.value = l.getName();
             (<any>inp).focusEditor = () => {
                 Util.setKeyboardFocus(inp);
             };
+            inp.onkeydown = () => {
+                inp.style.width = Math.min(17, ((inp.value.length + 2) * 0.45)) + "em";
+            }
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
