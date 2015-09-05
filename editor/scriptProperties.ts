@@ -35,8 +35,8 @@ module TDev
         static allPlatforms = {
             "HTML5": PlatformCapability.AnyWeb,
             "App Studio": PlatformCapability.AppStudio,
-            "Cordova App": PlatformCapability.CordovaApp,
-            "Node.js Azure Web App": PlatformCapability.AzureWebSite,
+            "Cordova mobile app": PlatformCapability.CordovaApp,
+            "Azure Web app": PlatformCapability.AzureWebSite,
         }
 
         static shortPlatforms = {
@@ -92,11 +92,11 @@ module TDev
                     platforms = PlatformCapability.AppStudio;
                     m.dismiss()
                 }),
-                HTML.mkButton(lf("Cordova App"), () => {
+                HTML.mkButton(lf("Cordova mobile app"), () => {
                     platforms = PlatformCapability.CordovaApp;
                     m.dismiss()
                 }),
-                HTML.mkButton(lf("Node.js Azure Web App"), () => {
+                HTML.mkButton(lf("Azure web app"), () => {
                     platforms = PlatformCapability.AzureWebSite;
                     m.dismiss()
                 }),
@@ -208,10 +208,8 @@ module TDev
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
                     btn("azure", lf("Azure web app")),
-                    btn("cordova", lf("Cordova mobile app"))
-                    /*
-                    btn("html5", "HTML5 client")
-                    */
+                    btn("cordova", lf("Cordova mobile app")),
+                    btn("html5", "HTML5 app")
                     ),
                 this.dataSection = divId("dataManagement", "formLine",
                     div("varLabel", lf("manage data")),
