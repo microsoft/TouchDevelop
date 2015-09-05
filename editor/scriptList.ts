@@ -8801,37 +8801,37 @@
                                          lf("Please reload the page to see it.")),
                                   e => Cloud.handlePostingError(e, "make owner"))
                         }))
-
-                    user.appendChild(HTML.mkButton(lf("reset password"), () => {
-                        if (Cloud.isOffline()) {
-                            Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
-                            return;            
-                        }
-                        Cloud.getPrivateApiAsync(c.id + "/resetpassword")
-                        .done(resp => {
-                            var boxes = resp.passwords.map(p => {
-                                var d = new DeclEntry(p)
-                                d.icon = "svg:lock,white"
-                                return d.mkBox().withClick(() => {
-                                    m.dismiss()
-                                    Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
-                                        .done(() => {
-                                            var m = new ModalDialog();
-                                            m.add(div('wall-dialog-header', lf("password is reset")));
-                                            m.add(div('wall-dialog-body', lf("new password:")));
-                                            var inp = HTML.mkTextInput("text", "")
-                                            inp.value = p
-                                            inp.readOnly = true;
-                                            m.add(div(null, inp))
-                                            m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
-                                            m.show();
-                                        }, e => Cloud.handlePostingError(e, lf("reset password")));
+                    else
+                        user.appendChild(HTML.mkButton(lf("reset password"), () => {
+                            if (Cloud.isOffline()) {
+                                Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
+                                return;            
+                            }
+                            Cloud.getPrivateApiAsync(c.id + "/resetpassword")
+                            .done(resp => {
+                                var boxes = resp.passwords.map(p => {
+                                    var d = new DeclEntry(p)
+                                    d.icon = "svg:lock,white"
+                                    return d.mkBox().withClick(() => {
+                                        m.dismiss()
+                                        Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
+                                            .done(() => {
+                                                var m = new ModalDialog();
+                                                m.add(div('wall-dialog-header', lf("password is reset")));
+                                                m.add(div('wall-dialog-body', lf("new password:")));
+                                                var inp = HTML.mkTextInput("text", "")
+                                                inp.value = p
+                                                inp.readOnly = true;
+                                                m.add(div(null, inp))
+                                                m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
+                                                m.show();
+                                            }, e => Cloud.handlePostingError(e, lf("reset password")));
+                                    })
                                 })
+                                var m = new ModalDialog()
+                                m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
                             })
-                            var m = new ModalDialog()
-                            m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
-                        })
-                    }));
+                        }));
                 }
             }
             return user;
