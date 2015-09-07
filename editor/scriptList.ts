@@ -1634,7 +1634,8 @@
                                         section: "",
                                         editorMode: 0,
                                         editor: scr.editor || "touchdevelop",
-                                        baseId: h[1] == "derive" ? scr.id : "",
+                                        baseId: forced ? "" : scr.id,
+                                        // h[1] == "derive" ? scr.id : "",
                                         baseUserId: scr.userid,
                                         updateLibraries: true
                                     }
