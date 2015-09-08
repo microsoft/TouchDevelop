@@ -6466,12 +6466,20 @@
                 res.className += " sdBigHeader";
 
             var setLocal = () => {
-                var deleted = (<any>this.jsonScript) === false
+                var deleted = (<any>this.jsonScript) === false;
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
 
+                // scripts are uninstalled when deleted
+                // however, another client might still be synching those changes
+                // so we uninstall again here
+                if (deleted) {
+                    this.uninstall(false);
+                    return;
+                }
+                                
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
                 if (!time && this.cloudHeader && this.cloudHeader.scriptVersion) time = this.cloudHeader.scriptVersion.time;
@@ -7595,7 +7603,7 @@
 
                     this.cloudHeader = null;
                     // always reload script list after uninstalling script
-                    // for better experience with delted scripts
+                    // for better experience with deleted scripts
                     this.browser().skipOneSync = true;                    
                     Util.setHash("list:installed-scripts");
                 }).done()
