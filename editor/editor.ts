@@ -5416,7 +5416,9 @@ module TDev
                 else Util.setHash("#help")
             } else {
                 var topic = HelpTopic.contextTopics[0];
-                if (Cloud.lite && topic.json && topic.json.helpPath) Util.navigateInWindow("/" + topic.json.helpPath);
+                if (Cloud.lite) {
+                    if (topic.json && topic.json.helpPath) Util.navigateInWindow("/" + topic.json.helpPath);
+                }    
                 else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }
         }
