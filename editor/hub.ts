@@ -684,7 +684,7 @@ module TDev.Browser {
                         var groups = HTML.mkTextInput("text", "")
                         var desc = HTML.mkTextInput("text", "")
                         var numuses = HTML.mkTextInput("text", "")
-                        perm.value = "educator"
+                        perm.value = "preview"
                         count.value = "1"
                         credit.value = "100"
                         numuses.value = "1"
