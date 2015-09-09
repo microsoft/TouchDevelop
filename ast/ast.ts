@@ -3261,6 +3261,7 @@ module TDev.AST {
     {
         public data:any;
         public stringForm:string; // set for number literals
+        public possiblyNegative:boolean;
         constructor() {
             super()
         }

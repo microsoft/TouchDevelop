@@ -1406,7 +1406,7 @@ module TDev.AST
             } else switch (typeof l.data) {
                 case "number": 
                     if (Cloud.isRestricted() && !this.inShim) {
-                        if (Util.between(-0x80000000, l.data, 0x7fffffff) != l.data) {
+                        if (Util.between(-0x80000000, l.data, l.possiblyNegative ? 0x80000000 : 0x7fffffff) != l.data) {
                             this.markError(l, lf("TD209: the number is outside of the allowed range (between {0} and {1})", -0x80000000, 0x7fffffff));
                         } else if (Math.round(l.data) != l.data) {
                             this.markError(l, lf("TD210: fractional numbers not allowed"));

@@ -235,6 +235,9 @@ module TDev.AST.ExprParser
                             op.markError(lf("TD145: there seem to be an operator (like '+', '(' or ',') missing here"));
                             stack.push(mkComma(op));
                         }
+                        if (prev != null && prev.prioOverride == 98 && op.expr instanceof Literal) {
+                            (<Literal>op.expr).possiblyNegative = true
+                        }
                         stack.push(op);
                     } else if (op.prio() > 0) {
                         if (prevExpr === null && op.op === "-") {
