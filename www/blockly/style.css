@@ -94,6 +94,7 @@ body, input {
   border: 5px solid #666;
   position: relative;
   background-color: white;
+  z-index: 1;
 }
 
 .popup::after {
@@ -145,7 +146,6 @@ body, input {
 
 #log {
   overflow: auto;
-  width: 500px;
   max-height: 500px;
 }
 
