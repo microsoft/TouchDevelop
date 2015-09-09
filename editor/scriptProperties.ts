@@ -185,6 +185,8 @@ module TDev
             this.scriptName.onchange = () => {
                 this.scriptName.value = this.scriptName.value.replace(/\s*$/, "");
                 if (!this.scriptName.value) this.scriptName.value = Browser.TemplateManager.expandTemplateName(lf("ADJ script"));
+                if (this.scriptName.value.length > 52)
+                    this.scriptName.value = this.scriptName.value.substr(0, 52);
             };
             this.formRoot.setChildren([div("varLabel", lf("script properties")),
                 div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
