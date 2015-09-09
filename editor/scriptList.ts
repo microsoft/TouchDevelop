@@ -8161,7 +8161,8 @@
             var me = this.isMe();
             var res = div("sdHeaderOuter", div("sdHeader", icon,
                 div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big, true, () => {
-                    if (me) TheEditor.logoutAsync(true).done(); 
+                    if (me) TheEditor.logoutAsync(true).done();
+                    else Util.setHash(TDev.hubHash);
                 }))));
 
             if (big)
