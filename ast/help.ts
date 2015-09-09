@@ -2396,6 +2396,9 @@ module TDev {
         static topicByScriptId:any;
         static findById(id:string):HelpTopic
         {
+            // deprecated in lite
+            if (Cloud.lite) return null;
+            
             // make sure things are initialized
             HelpTopic.getAll();
             if (id)
