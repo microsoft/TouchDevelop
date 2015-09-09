@@ -5412,12 +5412,12 @@ module TDev
         {
             tick(Ticks.calcHelp);
             if (HelpTopic.contextTopics.length == 0) {
-                if (Cloud.lite) Util.navigateInWindow(Cloud.config.helpPath);
+                if (Cloud.lite) Util.navigateNewWindow(Cloud.config.helpPath);
                 else Util.setHash("#help")
             } else {
                 var topic = HelpTopic.contextTopics[0];
                 if (Cloud.lite) {
-                    if (topic.json && topic.json.helpPath) Util.navigateInWindow("/" + topic.json.helpPath);
+                    if (topic.json && topic.json.helpPath) Util.navigateNewWindow("/" + topic.json.helpPath);
                 }    
                 else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }

@@ -2668,6 +2668,11 @@ module TDev{
         navigatingAway = true;
     }
 
+    export function navigateNewWindow(url:string)
+    {
+        RT.Web.browseAsync(url).done()
+    }
+
     export function isError(err: any, f: (any) => boolean) {
         return err && (f(err) || (typeof err == "object" && Object.keys(err).some(k => err[k] && f(err[k]))));
     }
