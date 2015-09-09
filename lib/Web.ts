@@ -302,21 +302,26 @@ module TDev.RT {
 
         export var browseAsync = (url: string) =>
         {
-            window.open(url, "_blank");
-            // popup blocked the url
-            return new Promise((onSuccess, onError, onProgress) => {
-                var d = new ModalDialog();
-                d.onDismiss = () => onSuccess(undefined);
-                d.add(div("wall-dialog-header", lf("web browsing...")));
-                d.add(div("wall-dialog-body", "We tried to open the following web page: " + url + "."))
-                d.add(div("wall-dialog-body", lf("If the page did not open, tap the 'open' button below, otherwise tap 'done'.")))
-                d.add(div("wall-dialog-buttons",
-                        HTML.mkA("button wall-button", url, "_blank", "open"),
-                        HTML.mkButton(lf("done"), () => {
-                            d.dismiss();
-                        })))
-                d.show();
-            });
+            var win = window.open(url, "_blank");
+            try {
+                win.focus()
+                return Promise.as()
+            } catch (e) {
+                // popup blocked the url
+                return new Promise((onSuccess, onError, onProgress) => {
+                    var d = new ModalDialog();
+                    d.onDismiss = () => onSuccess(undefined);
+                    d.add(div("wall-dialog-header", lf("web browsing...")));
+                    d.add(div("wall-dialog-body", "We tried to open the following web page: " + url + "."))
+                    d.add(div("wall-dialog-body", lf("If the page did not open, tap the 'open' button below, otherwise tap 'done'.")))
+                    d.add(div("wall-dialog-buttons",
+                            HTML.mkA("button wall-button", url, "_blank", "open"),
+                            HTML.mkButton(lf("done"), () => {
+                                d.dismiss();
+                            })))
+                    d.show();
+                });
+            }
         }
 
         //? Plays an internet audio/video in full screen
