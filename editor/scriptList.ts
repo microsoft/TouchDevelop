@@ -6451,7 +6451,9 @@
             var addInfo = div("sdAddInfoInner", this.publicId);
             var abuseDiv = big ? div(null, this.reportAbuse(true, false, () => {
                 // upon deleting uninstall as well.
-                this.uninstall(false);
+                this.uninstallAsync(false)
+                // force a sync
+                .done(() => World.syncAsync());
             })) : null;
             var facebook = div("sdShare");
             //var pubId = div("sdPubId", !!publicId ? "/" + publicId : null);
@@ -6476,7 +6478,7 @@
                 // however, another client might still be synching those changes
                 // so we uninstall again here
                 if (deleted) {
-                    this.uninstall(false);
+                    this.uninstallAsync(false).done();
                     return;
                 }
                                 
@@ -7565,50 +7567,45 @@
                     .done()
             })
         }
+        
+        private uninstall() {
+            this.uninstallAsync().done();
+        }
 
-        private uninstall(allowUndo = true)
-        {
+        private uninstallAsync(allowUndo = true): Promise {
             tick(Ticks.browseUninstall);
-            Editor.updateEditorStateAsync(this.getGuid(),(st) => {
+            var id = this.getGuid();
+            var restoreAsync : Promise = null
+            return Editor.updateEditorStateAsync(id, (st) => {
+                TipManager.setTip(null);
 
                 var isownedgroupscript = st
                     && st.collabSessionId
                     && Collab.getSessionOwner(st.collabSessionId) == Cloud.getUserId();
-
                 if (isownedgroupscript) {
                     ModalDialog.info(lf("owned group script"), lf("you are the owner of this group script. To uninstall, you must first remove it from the group scripts."));
-                    return;
+                    return Promise.as();
                 }
 
-                TipManager.setTip(null);
-
-                var id = this.getGuid();
-                var restoreAsync = null
-
-                World.getScriptRestoreAsync(id)
-                .then(r => restoreAsync = r)
-                .then(() => World.uninstallAsync(id))
-                // don't aggressively sync here
-                .then(() => {
-                    var hash = HistoryMgr.windowHash()
-
-                    if (allowUndo) {
-                        HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
-                            restoreAsync()
-                                .then(() => this.browser().updateInstalledHeaderCacheAsync())
-                                .then(() => TheEditor.historyMgr.reload(hash))
-                                .done()
-                        });
-                    }    
-
-                    this.cloudHeader = null;
-                    // always reload script list after uninstalling script
-                    // for better experience with deleted scripts
-                    this.browser().skipOneSync = true;                    
-                    Util.setHash("list:installed-scripts");
-                }).done()
-
-            }).done();
+                if (allowUndo) restoreAsync = World.getScriptRestoreAsync(id);
+                return World.uninstallAsync(id)
+                    .then(() => {
+                        var hash = HistoryMgr.windowHash()
+                        if (allowUndo && restoreAsync) {
+                            HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                                restoreAsync.then((restore) => restore())
+                                    .then(() => this.browser().updateInstalledHeaderCacheAsync())
+                                    .then(() => TheEditor.historyMgr.reload(hash))
+                                    .done()
+                            });
+                        }
+                        this.cloudHeader = null;
+                        // always reload script list after uninstalling script
+                        // for better experience with deleted scripts
+                        this.browser().skipOneSync = true;
+                        Util.setHash("list:installed-scripts");
+                    })
+            });
         }
 
         private killData() {

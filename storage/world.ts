@@ -972,7 +972,7 @@ module TDev {
             );
         }
 
-        export function getScriptRestoreAsync(guid:string)
+        export function getScriptRestoreAsync(guid:string) : Promise
         {
             var d = null
 
