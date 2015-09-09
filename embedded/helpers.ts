@@ -156,7 +156,7 @@ module TDev {
         var usedNames: StringMap<boolean> = {};
         var m = libName ? g.libraries[libName] : g.program;
         Object.keys(m).forEach((tdIdent: string) => {
-          var cppIdent = g.program[tdIdent];
+          var cppIdent = m[tdIdent];
           usedNames[cppIdent] = true;
         });
         return {
