@@ -239,10 +239,17 @@ module TDev
 
             var g = lib.guid
             if (g) guidPromise = Promise.as(g)
-            else if (lib.pubid)
-                guidPromise = Browser.TheApiCacheMgr.getAsync(lib.pubid, true)
+            else if (lib.pubid) {
+                var pre = Promise.as()
+                if (ScriptCache.forcedUpdate(lib.pubid))
+                    pre = ModalDialog.askAsync(
+                       lf("If you edit one of the system libraries, they will not be auto-updated and your script might not work correctly in future."), 
+                       lf("edit anyway"), false, lf("danger zone"))
+                guidPromise = 
+                    pre.then(() => Browser.TheApiCacheMgr.getAsync(lib.pubid, true))
                     .then((info: JsonScript) => World.installPublishedAsync(lib.pubid, info.userid))
                     .then((hd: Cloud.Header) => hd.guid);
+            }
             else {
                 HTML.showErrorNotification("You need to bind the library first.")
                 return;

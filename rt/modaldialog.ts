@@ -221,6 +221,14 @@ module TDev
             return m;
         }
 
+        static askAsync(msg: string, confirmation: string, critical = false, header: string = null)
+            // the promise never finishes when not confirmed
+        {
+            var ret = new PromiseInv()
+            var m = ModalDialog.ask(msg, confirmation, () => { ret.success(null) }, critical, header)
+            return ret
+        }
+
         static askMany(header:string, msg:string, options:any)
         {
             var m = new ModalDialog();
