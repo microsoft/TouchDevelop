@@ -4526,6 +4526,9 @@ module TDev
                         this.host.wallVisible = true;
                         this.host.hideWallAsync()
                     }).done()
+                } else {
+                    if (save && Browser.EditorSettings.widgets().editorRunOnLoad)
+                        this.runMainAction();    
                 }
             }
         }
