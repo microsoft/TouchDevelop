@@ -182,9 +182,10 @@ body, input {
 }
 
 .roundsymbol {
+  vertical-align: middle;
   width: 4rem;
   height: 4rem;
-  border: 2px solid black;
+  border: .2rem solid black;
   border-radius: 50%;
   margin: .2rem;
   margin-bottom: 0;
@@ -195,10 +196,10 @@ body, input {
   font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
 }
 
-.graduate-wrapper {
-  width: 6rem;
-  height: calc(4.2rem + 4px);
-  padding: .2rem;
+.graduate-wrapper svg {
+  width: auto;
+  height: 5rem; /* total height of a regular roundsymbol */
+  display: block;
 }
 
 .roundlabel {
@@ -226,6 +227,18 @@ a.command:hover {
   text-decoration: underline;
 }
 
+@media (max-height: 800px) {
+  #script-box {
+    display: none;
+  }
+}
+
+@media (max-height: 600px) {
+  .roundsymbol, #script-box, .graduate-wrapper {
+    display: none !important;
+  }
+}
+
 /* Some overrides for narrow displays */
 @media (max-width: 1024px) {
   .roundbutton {
@@ -233,9 +246,11 @@ a.command:hover {
   }
 
   .graduate-wrapper {
-    width: 2.8rem;
-    height: 3rem;
     vertical-align: middle;
+  }
+
+  .graduate-wrapper svg {
+    height: 2.8rem;
   }
 
   .roundsymbol {
