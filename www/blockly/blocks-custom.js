@@ -84,23 +84,6 @@ Blockly.Blocks['device_show_number'] = {
   }
 };
 
-//https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
-Blockly.Blocks['device_show_letter'] = {
-  init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("show letter");
-    this.appendValueInput("letter")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('Shows the specified letter, without scrolling.');
-  }
-};
-
 Blockly.Blocks['device_button_event'] = {
   init: function() {
     this.setHelpUrl('https://live.microbit.co.uk/functions/on-button-pressed');
@@ -175,7 +158,7 @@ Blockly.Blocks['device_get_analog_pin'] = {
             .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('Read an analog value on a pin (between 0x0000 and 0xFFFF).');
+        this.setTooltip('Read an analog value on a pin (between 0 and 1024).');
     }
 };
 
@@ -193,7 +176,7 @@ Blockly.Blocks['device_set_analog_pin'] = {
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('Set an analog value on a pin (between 0x0000 and 0xFFFF).');
+        this.setTooltip('Set an analog value on a pin (between 0 and 1024).');
     }
 };
 
@@ -337,6 +320,7 @@ Blockly.Blocks['device_build_image'] = {
         this.appendDummyInput().appendField("4").appendField(new Blockly.FieldCheckbox("FALSE"), "LED04").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED14").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED24").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED34").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED44");
         this.setOutput(true, 'sprite');
         this.setTooltip('An image that fits on the LED array.');
+        this.setHelpUrl("https://live.microbit.co.uk/functions/create-image");
     }
 };
 
@@ -365,6 +349,7 @@ Blockly.Blocks['device_build_big_image'] = {
 
         this.setOutput(true, 'sprite');
         this.setTooltip("A larger image that will be scrolled across the LED display.");
+        this.setHelpUrl("https://live.microbit.co.uk/functions/create-image");
     }
 };
 
@@ -410,21 +395,6 @@ Blockly.Blocks['device_scroll_image'] = {
   }
 };
 
-
-Blockly.Blocks['device_make_StringImage'] = {
-  init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/create-image');
-    this.setColour(160);
-    this.appendDummyInput()
-        .appendField("create image from");
-    this.appendValueInput("NAME")
-        .setCheck("String")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.setOutput(true, "sprite");
-    this.setTooltip('Turn a string of characters into the corresponding image.');
-    this.setInputsInline(true);
-  }
-};
 
 Blockly.Blocks['device_pause'] = {
   init: function() {
@@ -503,7 +473,7 @@ Blockly.Blocks['math_op3'] = {
 
 Blockly.Blocks['device_while'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
+    this.setHelpUrl('https://live.microbit.co.uk/td/while');
     this.setColour(120);
     this.appendValueInput("COND")
         .setCheck("Boolean")
@@ -535,7 +505,7 @@ Blockly.Blocks['controls_simple_for'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl(Blockly.Msg.CONTROLS_FOR_HELPURL);
+    this.setHelpUrl("https://live.microbit.co.uk/td/for");
     this.setColour(Blockly.Blocks.loops.HUE);
     this.appendDummyInput()
         .appendField("for")
@@ -599,3 +569,26 @@ Blockly.Blocks['controls_simple_for'] = {
 };
 
 Blockly.pathToMedia = "./media/";
+
+// Here's a helper to override the help URL for a block that's *already defined
+// by Blockly*. For blocks that we define ourselves, just change the call to
+// setHelpUrl in the corresponding definition above.
+function monkeyPatchBlock(name, url) {
+    var old = Blockly.Blocks[name].init;
+    Blockly.Blocks[name].init = function () {
+        // The magic of dynamic this-binding.
+        old.call(this);
+        this.setHelpUrl(url);
+    };
+}
+
+monkeyPatchBlock("controls_if", "https://live.microbit.co.uk/td/if");
+// monkeyPatchBlock("controls_repeat_ext", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("variables_set", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("variables_get", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("math_number", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_compare", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_operation", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_negate", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_boolean", "https://live.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_arithmetic", "https://live.microbit.co.uk/blocks/contents");
