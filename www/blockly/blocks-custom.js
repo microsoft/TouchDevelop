@@ -514,8 +514,6 @@ Blockly.Blocks['controls_simple_for'] = {
     this.appendValueInput("TO")
         .setCheck("Number")
         .setAlign(Blockly.ALIGN_RIGHT);
-    this.appendDummyInput()
-        .appendField("do");
     this.appendStatementInput('DO')
         .appendField(Blockly.Msg.CONTROLS_FOR_INPUT_DO);
     this.setPreviousStatement(true);
