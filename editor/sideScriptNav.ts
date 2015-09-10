@@ -461,14 +461,14 @@ module TDev
                 }, <ThingSection>{
                     label: lf("objects"),
                     widget: "objectsSection",
-                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Object || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Decorator),
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Object),
                     createOne: () => [
                         { decl: this.editor.freshObject(), displayName: 'object type', initiallyHidden: AST.blockMode, tick: Ticks.sideAddObject, description: lf("A structure of user-data") },
                     ],
                 }, <ThingSection>{
                     label: lf("decorators"),
                     widget: "decoratorsSection",
-                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Object || (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Decorator),
+                    things: things.filter((t) => t instanceof AST.RecordDef && !(<AST.RecordDef>t).isModel && (<AST.RecordDef>t).recordType == TDev.AST.RecordType.Decorator),
                     createOne: () => [
                         { decl: this.editor.freshDecorator(), displayName: 'decorator', initiallyHidden: AST.blockMode || AST.legacyMode, tick: Ticks.sideAddDecorator, description: lf("Attach data to other objects") },
                     ],
