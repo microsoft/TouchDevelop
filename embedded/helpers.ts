@@ -323,8 +323,6 @@ module TDev {
         if (outParams.length > 1)
           throw new Error("Not supported (multiple return parameters)");
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
-        if (name == "main")
-          name = "app_main";
         var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
         if (isLambda)
           return "[=] "+args+" -> "+retType;

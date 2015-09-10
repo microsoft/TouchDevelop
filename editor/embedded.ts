@@ -56,6 +56,19 @@ module TDev {
       });
     }
 
+    // When assigning names to function definitions, we must make sure they
+    // don't clash with any of the existing symbols. This is not an issue for
+    // local variables.
+    var reservedNames = [
+      // Namespaces from microbit-touchdevelop/MicroBitTouchDevelop.h
+      "user_types", "globals", "create", "collection", "touch_develop", "ref",
+      "ds1307", "string", "action", "math", "number", "boolean", "bits",
+
+      // Types
+      "Number", "Boolean", "String", "ManagedString", "Collection",
+      "Collection_of", "Ref",
+    ];
+
     // Compile an entire program, including its libraries.
     export function compile(a: J.JApp): Promise { // of string
       // We need the library text for all the libraries referenced by this
@@ -78,7 +91,7 @@ module TDev {
         // TouchDevelop allows any name; thus, both "Thing$" and "Thing@" sanitize
         // to "Thing_". We need to disambuigate them. Because there may be
         // references across library to these names, we need to agree on a final
-        // name before translation the various libraries.
+        // name before translating the various libraries.
         var globalNameMap: H.GlobalNameMap = {
           libraries: {},
           program: null,
@@ -86,6 +99,9 @@ module TDev {
         everything.forEach((a: J.JApp) => {
           var tdToCpp: StringMap<string> = {};
           var cppToTd: StringMap<boolean> = {};
+          // Avoid conflicts by pre-marking reserved names.
+          everything.map((a: J.JApp) => H.mangle(a.name)).concat(reservedNames)
+            .forEach((x: string) => cppToTd[x] = true);
           a.decls.forEach((d: J.JDecl) => {
             // This is over-conservative, since technically speaking, types and
             // globals are each in their own namespace. Here, we
@@ -120,7 +136,7 @@ module TDev {
               "  uBit.display.scroll(\"Error: trying to run a library\");\n"+
               "}\n"
             : "\nvoid app_main() {\n"+
-              "  touch_develop::app_main();\n"+
+              "  touch_develop::main();\n"+
               "}\n")
         );
       });
