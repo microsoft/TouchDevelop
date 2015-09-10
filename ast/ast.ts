@@ -5094,14 +5094,17 @@ module TDev.AST {
         public visitRecordDef(t: RecordDef)
         {
             this.incr("addNewButton");
-            this.incr("persistanceRadio");
             this.incrKind(t.getKind());
             switch (t.recordType) {
                 case RecordType.Decorator:
+                    this.incr("decoratorSection");
+                    break;
                 case RecordType.Object:
-                    this.incr("recordsSection"); break;
+                    this.incr("objectSection");
+                    break;
                 case RecordType.Index:
                 case RecordType.Table:
+                    this.incr("persistanceRadio");
                     this.incr("databaseSection"); break;
             }
             super.visitRecordDef(t);

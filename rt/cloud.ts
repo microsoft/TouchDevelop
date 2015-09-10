@@ -62,7 +62,8 @@ module TDev.Cloud {
         testsSection?: boolean;
         actionTypesSection?: boolean;
         pagesSection?: boolean;
-        recordsSection?: boolean;
+        objectsSection?: boolean;
+        decoratorsSection?: boolean;
 
         // language
         comment?: boolean;
