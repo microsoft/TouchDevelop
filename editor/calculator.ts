@@ -2185,38 +2185,38 @@ module TDev
 
         private addGoTo(defn:AST.Decl)
         {
-            if (!TheEditor.widgetEnabled('gotoNavigation')) return;
+            if (TheEditor.widgetEnabled('gotoNavigation')) {
+                var name = lf("go to");
+                if (this.currentIntelliItems.some((i: IntelliItem) => i.nameOverride == name)) return;
 
-            var name = lf("go to");
-            if (this.currentIntelliItems.some((i:IntelliItem) => i.nameOverride == name)) return;
+                if (defn instanceof AST.LibExtensionAction)
+                    defn = (<AST.LibExtensionAction>defn).shortcutTo
 
-            if (defn instanceof AST.LibExtensionAction)
-                defn = (<AST.LibExtensionAction>defn).shortcutTo
+                var e = this.mkIntelliItem(0.9 * this.promoteMult(), Ticks.calcGoToDef);
+                e.nameOverride = name;
+                e.descOverride = defn.getName();
+                e.cbOverride = () => {
+                    if (defn instanceof AST.LibraryRefAction) {
+                        TheEditor.dismissSidePane()
+                        LibraryRefProperties.editLibrary((<AST.LibraryRefAction>defn).parentLibrary(), () => { }, defn.getStableName())
+                    } else {
+                        TheEditor.renderDecl(defn);
+                    }
+                };
+            }    
 
-            var e = this.mkIntelliItem(0.9 * this.promoteMult(), Ticks.calcGoToDef);
-            e.nameOverride = name;
-            e.descOverride = defn.getName();
-            e.cbOverride = () => {
-                if (defn instanceof AST.LibraryRefAction) {
-                    TheEditor.dismissSidePane()
-                    LibraryRefProperties.editLibrary((<AST.LibraryRefAction>defn).parentLibrary(), () => {}, defn.getStableName())
-                } else {
-                    TheEditor.renderDecl(defn);
-                }
-            };
-
-            if (defn instanceof AST.LibraryRefAction)
-                return // find refs doesn't work yet for lib actions
-
-            name = lf("find references");
-            if (this.currentIntelliItems.some((i:IntelliItem) => i.nameOverride == name)) return;
-
-            e = this.mkIntelliItem(0.899 * this.promoteMult(), Ticks.calcFindRefs);
-            e.nameOverride = name;
-            e.descOverride = defn.getName();
-            e.cbOverride = () => {
-                TheEditor.findRefs(defn)
-            };
+            // find refs doesn't work yet for lib actions
+            if (TheEditor.widgetEnabled("findReferences")
+                && !(defn instanceof AST.LibraryRefAction)
+                && !(this.currentIntelliItems.some((i: IntelliItem) => i.nameOverride == name))) {
+                var name = lf("find references");
+                e = this.mkIntelliItem(0.899 * this.promoteMult(), Ticks.calcFindRefs);
+                e.nameOverride = name;
+                e.descOverride = defn.getName();
+                e.cbOverride = () => {
+                    TheEditor.findRefs(defn)
+                };
+            }    
         }
 
         private launchPlaceholderPicker(tok:AST.Token)
