@@ -3577,6 +3577,8 @@ div.sdTabTileLabel {
 .sdExpandableText {
   color: #555;
   font-size: 0.7em;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .sdSmallerTextBox {
