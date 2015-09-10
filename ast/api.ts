@@ -216,11 +216,11 @@ module TDev {
 
         public initFrom()
         {
-            new ThingSetKind("code", lf("Lists functions defined in the current script"), () => !TDev.Script ? [] : TDev.Script.actions(), "\u25b7");
-            new ThingSetKind("data", lf("Lists global variables defined in the current script"), () => !TDev.Script ? [] : TDev.Script.variables(), "\u25f3");
-            new ThingSetKind("art", lf("Lists pictures, sounds, etc. defined in the current script"), () => !TDev.Script ? [] : TDev.Script.resources(), "\u273f");
-            new ThingSetKind(AST.libSymbol, lf("Lists libraries referenced by the current script"), () => !TDev.Script ? [] : TDev.Script.libraries(), AST.libSymbol);
-            new ThingSetKind("records", lf("Lists objects, tables and indexes defined in the current script"), () => !TDev.Script ? [] : TDev.Script.records(), AST.recordSymbol);
+            new ThingSetKind("code", lf("Functions in the current script"), () => !TDev.Script ? [] : TDev.Script.actions(), "\u25b7");
+            new ThingSetKind("data", lf("Global variablesin the current script"), () => !TDev.Script ? [] : TDev.Script.variables(), "\u25f3");
+            new ThingSetKind("art", lf("Pictures, sounds, etc. in the current script"), () => !TDev.Script ? [] : TDev.Script.resources(), "\u273f");
+            new ThingSetKind(AST.libSymbol, lf("Libraries referenced by the current script"), () => !TDev.Script ? [] : TDev.Script.libraries(), AST.libSymbol);
+            new ThingSetKind("records", lf("Objects, tables and indexes in the current script"), () => !TDev.Script ? [] : TDev.Script.records(), AST.recordSymbol);
 
             (<any>TDev).md_initApis();
 
