@@ -2239,7 +2239,7 @@ module TDev
 
             if (snapView) return;
 
-            var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true)) : null;
+            var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true, true)) : null;
             if (splitBtn) splitBtn.className += " portrait-hidden split-visible";
             var top = div("topButtons",
                 this.backBtnDiv = div("inlineBlock topMenu-button-container search-back"),
@@ -3352,7 +3352,7 @@ module TDev
                     if (!Script)
                         return;
                     if (runPlugin) return;
-                    if (shouldRun || (TheEditor.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode && SizeMgr.splitScreen)) {
+                    if (shouldRun || (this.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode && SizeMgr.splitScreen)) {
                         this.runAction(Script.mainAction(), null)
                     }
             }, (e) => {
@@ -4510,7 +4510,7 @@ module TDev
             }
         }
 
-        public setSplitScreen(split:boolean, save = false)
+        public setSplitScreen(split:boolean, save = false, run = false)
         {
             if (Cloud.isRestricted() && !Browser.EditorSettings.widgets().splitScreen)
                 split = true; // always split in cloud restricted mode
@@ -4527,7 +4527,7 @@ module TDev
                         this.host.hideWallAsync()
                     }).done()
                 } else {
-                    if (save && Browser.EditorSettings.widgets().editorRunOnLoad)
+                    if (run && this.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode)
                         this.runMainAction();    
                 }
             }
