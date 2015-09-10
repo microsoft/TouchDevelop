@@ -705,7 +705,7 @@ function infer(e: Environment, w: B.Workspace) {
           }
           break;
 
-        case "controls_comment":
+        case "device_comment":
           unionParam(e, b, "comment", ground(Type.String));
           break;
 
@@ -713,7 +713,7 @@ function infer(e: Environment, w: B.Workspace) {
           unionParam(e, b, "TIMES", ground(Type.Number));
           break;
 
-        case "controls_while":
+        case "device_while":
           unionParam(e, b, "COND", ground(Type.Boolean));
           break;
 
@@ -865,8 +865,9 @@ function defaultValueForType(t: Point): J.JExpr {
   throw new Error("No default value for type");
 }
 
-// [t] is the expected type; in case the block was actually not there (i.e.
-// [b == null]), we may be able to provide a default value.
+// [t] is the expected type; we assume that we never null block children
+// (because placeholder blocks have been inserted by the type-checking phase
+// whenever a block was actually missing).
 function compileExpression(e: Environment, b: B.Block): J.JExpr {
   assert(b != null);
   if (b.disabled || b.type == "placeholder")
