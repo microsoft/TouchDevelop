@@ -756,7 +756,13 @@ function infer(e: Environment, w: B.Workspace) {
 ///////////////////////////////////////////////////////////////////////////////
 
 function extractNumber(b: B.Block) {
-  return parseInt(b.getFieldValue("NUM"));
+  var v = b.getFieldValue("NUM");
+  if (!v.match(/\d+/)) {
+    Errors.report(v+" is not a valid numeric value", b);
+    return 0;
+  } else {
+    return parseInt(v);
+  }
 }
 
 function compileNumber(e: Environment, b: B.Block): J.JExpr {
