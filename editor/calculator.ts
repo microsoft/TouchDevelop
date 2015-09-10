@@ -2378,10 +2378,9 @@ module TDev
                 // bump down code singleton
                 if (codeSingl) codeSingl.score *= 1e-2;
 
-                var libs = Script.libraries().filter(l => l.isBrowsable()).map(l => {
+                // if the library contains namespace actions, don't show
+                var libs = Script.libraries().filter(l => l.isBrowsable() && !l.getPublicActions().some(p => !!p.getNamespaces()[0])).map(l => {
                     var sc = l.getUsage().count() + 50;
-                    if (l.getPublicActions().some(p => !!p.getNamespaces()[0]))
-                        sc *= 1.-10;   
                     var e = this.mkIntelliItem(sc, Ticks.calcIntelliLibrary)
                     this.currentIntelliItems.pop()
                     if (sc > maxScore) maxScore = sc;
