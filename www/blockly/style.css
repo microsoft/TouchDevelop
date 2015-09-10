@@ -199,6 +199,7 @@ body, input {
 .graduate-wrapper svg {
   width: auto;
   height: 5rem; /* total height of a regular roundsymbol */
+  width: 6rem; /* stupid IE */
   display: block;
 }
 
@@ -251,6 +252,7 @@ a.command:hover {
 
   .graduate-wrapper svg {
     height: 2.8rem;
+    width: 4rem; /* stupid IE */
   }
 
   .roundsymbol {
