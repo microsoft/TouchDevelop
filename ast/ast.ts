@@ -5097,15 +5097,16 @@ module TDev.AST {
             this.incrKind(t.getKind());
             switch (t.recordType) {
                 case RecordType.Decorator:
-                    this.incr("decoratorSection");
+                    this.incr("decoratorsSection");
                     break;
                 case RecordType.Object:
-                    this.incr("objectSection");
+                    this.incr("objectsSection");
                     break;
                 case RecordType.Index:
                 case RecordType.Table:
                     this.incr("persistanceRadio");
-                    this.incr("databaseSection"); break;
+                    this.incr("databaseSection");
+                    break;
             }
             super.visitRecordDef(t);
         }
