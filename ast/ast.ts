@@ -5200,7 +5200,10 @@ module TDev.AST {
         public hasProperty(p:IProperty)
         {
             if (!this.properties) return true;
-            return this.hasTokenUsage(p) || this.hasKey(p.usageKey()) || (this.allowAllLibraries && p instanceof LibraryRefAction);
+            return this.hasTokenUsage(p)
+                || this.hasKey(p.usageKey())
+                || (this.allowAllLibraries && p instanceof LibraryRefAction)
+                || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)
         }
 
         public hasFlag(flg:string)
