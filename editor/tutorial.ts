@@ -1419,7 +1419,7 @@ module TDev
                 }
             }
 
-            var maxStars = 16
+            var maxStars = numStars > 32 ? 24 : 16;
             var rows = Math.ceil(numStars / maxStars);
             var starSize = Math.min(3, 21 / 0.8 / numStars)
             if (rows == 1) {
