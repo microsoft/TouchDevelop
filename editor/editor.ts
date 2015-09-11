@@ -2153,7 +2153,7 @@ module TDev
 
             if (Cloud.isRestricted()) {
                 var compileBtn: HTMLElement;
-                var str = Cloud.isFota() ? lf("flash") : lf("compile");
+                var str = lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M",
                     (e: Event) => {
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
