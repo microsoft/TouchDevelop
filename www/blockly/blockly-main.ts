@@ -482,6 +482,7 @@ module TDev {
     var ast = compileOrError(msgSel);
     if (!ast)
       return;
+    doSave();
     post(<External.Message_Upgrade> {
       type: External.MessageType.Upgrade,
       ast: ast,
