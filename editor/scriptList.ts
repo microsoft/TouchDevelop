@@ -3694,7 +3694,9 @@
             box.setFlag("selected", it.isactive)
 
             box.withClick(() => {
+                var currentHeader = (<ScriptInfo> this.parent).cloudHeader;
                 var scrProm = new PromiseInv();
+                // The script text for the old item in the history.
                 var htext = "";
                 var m:ModalDialog = ScriptProperties.showDiff(scrProm, {
                     "restore": () => {
@@ -3704,13 +3706,18 @@
                         m.add(prog)
                         m.addHTML("restoring...")
                         if (Cloud.lite) {
-                            if (!htext) return
-                            var app0 = AST.Parser.parseScript(htext)
-                            World.getInstalledHeaderAsync(guid)
-                            .then((hd) => {
-                                hd.name = app0.getName()
-                                return World.updateInstalledScriptAsync(hd, htext, null)
-                            })
+                            if (!htext)
+                                return;
+                            var hMeta = JSON.parse(it.meta);
+                            // [it.meta.name] should work in both cases? XXX
+                            currentHeader.name = currentHeader.editor
+                                ? hMeta.name
+                                : AST.Parser.parseScript(htext).getName();
+                            // In case the script is a touchdevelop one, the call to [updateInstalled...]
+                            // below rebuilds the metadata from [htext].  In case the script belongs
+                            // to an external editor, the metadata set below is used.
+                            currentHeader.meta = hMeta;
+                            World.updateInstalledScriptAsync(currentHeader, htext, null)
                             .then(() => {
                                 prog.stop()
                                 m.dismiss()
@@ -3735,17 +3742,23 @@
                                 })
                         }
                     }
-                }, false, (<ScriptInfo> this.parent).cloudHeader)
+                }, false, currentHeader)
 
                 Promise.join([HistoryTab.historicalTextAsync(Cloud.getUserId(), this.script().getGuid(), it),
                               s.getScriptTextAsync()]).done(texts => {
                     if (!texts[0] || !texts[1])
                         return;
-                    var app0 = AST.Parser.parseScript(texts[0]);
                     htext = texts[0]
-                    var app1 = AST.Parser.parseScript(texts[1]);
-                    AST.Diff.diffApps(app0, app1)
-                    scrProm.success(app1)
+                    if (!currentHeader.editor) {
+                        var app0 = AST.Parser.parseScript(texts[0]);
+                        var app1 = AST.Parser.parseScript(texts[1]);
+                        AST.Diff.diffApps(app0, app1)
+                        scrProm.success(app1)
+                    } else {
+                        // no-op if there's an external editor (because the call
+                        // [showDiff] above returns immediately and doesn't wait on
+                        // [scrProm] to complete)
+                    }
                 })
             })
             return box

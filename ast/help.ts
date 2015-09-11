@@ -212,6 +212,7 @@ module TDev {
        scriptid: string; // publication id if scriptstatus==”published”
        scriptsize?: number;
        isactive: boolean; // whether this history item is the currently active backup
+       meta: any;
 
        entryNo?: number; // assigned when the thing is displayed
     }
