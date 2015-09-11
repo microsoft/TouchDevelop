@@ -170,6 +170,11 @@ module TDev {
             if (ch)
                 Util.setTransform(ch, trans, origin, perspective);
         }
+        
+        public fullScreenElement(): HTMLElement {
+            if (this.isFullScreen()) return <HTMLElement>this.fullScreenContainer.firstElementChild;
+            return undefined;
+        }
 
         public setFullScreenElement(element: HTMLElement) {
             this.fullScreenContainer.setChildren(element);

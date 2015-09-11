@@ -188,6 +188,7 @@ module TDev
         applyPageAttributes(wp: WallPage): void;
         isFullScreen(): boolean;
         setFullScreenElement(elmt: HTMLElement): void;
+        fullScreenElement(): HTMLElement;
         setTransform3d(trans: string, origin: string, perspective: string): void;
         attachProfilingInfo(profile: any): void;
         attachCoverageInfo(coverage: any, showCoverage: boolean): void;

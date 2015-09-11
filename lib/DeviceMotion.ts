@@ -165,18 +165,29 @@ module TDev.RT {
         function mouseReading(ev: MouseEvent)
         {
             var x = 0;
-            if (SizeMgr.splitScreen)
-                x = (ev.pageX - SizeMgr.editorWindowWidth - SizeMgr.wallWindowWidth / 2) / SizeMgr.wallWindowWidth;
-            else
-                x = (ev.pageX - SizeMgr.wallWindowWidth / 2) / SizeMgr.wallWindowWidth;
-            var y = (ev.pageY - SizeMgr.windowHeight / 2) / SizeMgr.windowHeight;
-            x *= 2;
-            y *= 2;
-            x = Math_.clamp(-1.2, 1.2, x);
-            y = Math_.clamp(-1.2, 1.2, y);
-            var z = -Math.sqrt(Math.max(0, 1 - x * x - y * y));
+            var y = 0;
+            var z = -1;
+            var el : HTMLElement
+            if (_runtime && _runtime.host && (el = _runtime.host.fullScreenElement())) {
+                var top = el.offsetTop;
+                var left = el.offsetLeft;
+                var parent = <HTMLElement>el.offsetParent;
+                while (parent) {
+                    if (parent.id == 'root') break;
+                    if ((<any>parent).scrollEnabled) break;
+                    top += parent.offsetTop;
+                    left += parent.offsetLeft;
+                    parent = <HTMLElement>parent.offsetParent;
+                }
+                                
+                x = (ev.pageX - left - el.clientWidth / 2) / el.clientWidth;
+                y = (ev.pageY - top - el.clientHeight / 2) / el.clientHeight;
+                x *= 2;
+                y *= 2;
+                x = Math_.clamp(-1.2, 1.2, x);
+                y = Math_.clamp(-1.2, 1.2, y);
+                z = -Math.sqrt(Math.max(0, 1 - x * x - y * y));
 
-            if (_runtime) {
                 _runtime.host.setTransform3d(Util.fmt("perspective(30em) rotateX({0}deg) rotateY({1}deg)", -y * Runtime.accelerometerTiltBooster, x * Runtime.accelerometerTiltBooster), "50% 50% 50%", "30em")
             }
 

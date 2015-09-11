@@ -98,6 +98,7 @@ module TDev {
         public applyPageAttributes(wp:TDev.WallPage) { }
         public setTransform3d(trans:string, origin:string, perspective:string) { }
         public setFullScreenElement(element: HTMLElement) { }
+        public fullScreenElement(): HTMLElement { return undefined; }
         public isFullScreen() : boolean { return false; }
         public applyWallStyle() { }
 
