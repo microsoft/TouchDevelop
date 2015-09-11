@@ -593,7 +593,9 @@ module TDev
             return {
                 stack: () => {
                     this.hideWallAsync().then(() => {
-                        TheEditor.showStackTrace()
+                        TheEditor.showStackTrace();
+                        if (!TheEditor.isDebuggerMode())
+                            TheEditor.searchFor("");
                     }).done();
                 },
 
