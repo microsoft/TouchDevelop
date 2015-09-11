@@ -3706,11 +3706,17 @@
                         m.add(prog)
                         m.addHTML("restoring...")
                         if (Cloud.lite) {
-                            if (!htext) return
-                            var app0 = AST.Parser.parseScript(htext)
-                            // Here, we rely on the meta-data that's in htext to
-                            // rebuild the description and the rest.
-                            currentHeader.name = app0.getName()
+                            if (!htext)
+                                return;
+                            var hMeta = JSON.parse(it.meta);
+                            // [it.meta.name] should work in both cases? XXX
+                            currentHeader.name = currentHeader.editor
+                                ? hMeta.name
+                                : AST.Parser.parseScript(htext).getName();
+                            // In case the script is a touchdevelop one, the call to [updateInstalled...]
+                            // below rebuilds the metadata from [htext].  In case the script belongs
+                            // to an external editor, the metadata set below is used.
+                            currentHeader.meta = hMeta;
                             World.updateInstalledScriptAsync(currentHeader, htext, null)
                             .then(() => {
                                 prog.stop()
