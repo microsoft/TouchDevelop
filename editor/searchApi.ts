@@ -232,7 +232,7 @@ module TDev
                         TheEditor.resumeExecution();
                     })]);
                 else
-                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,black", lf("run"), Ticks.calcSearchRun, "Ctrl-P", () => {
+                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,black", lf("run main"), Ticks.calcSearchRun, "Ctrl-P", () => {
                         TheEditor.dismissSidePane();
                         TheEditor.runMainAction();
                     })]);
