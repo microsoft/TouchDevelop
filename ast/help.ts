@@ -2100,7 +2100,7 @@ module TDev {
             })
         }
 
-        public initAsync()
+        public initAsync() : Promise // of app
         {
             if (!this.json.text && !this.json.id)
                 return Promise.as(this.app);

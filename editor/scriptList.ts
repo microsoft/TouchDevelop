@@ -10145,7 +10145,7 @@
         static followTopic(topic:HelpTopic, tutorialMode = "")
         {
             topic.initAsync()
-                .done((topicApp) => {
+                .done((topicApp : AST.App) => {
                     if (!Cloud.getUserId() && topicApp.usesCloud()) {
                         Hub.loginToCreate(topicApp.getName(), "follow:" + topic.json.id)
                         return
