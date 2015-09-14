@@ -10147,7 +10147,7 @@
             topic.initAsync()
                 .done((topicApp) => {
                     if (!Cloud.getUserId() && topicApp.usesCloud()) {
-                        Hub.loginToCreate(topicApp.getName(), "hub:follow:" + topic.json.id)
+                        Hub.loginToCreate(topicApp.getName(), "follow:" + topic.json.id)
                         return
                     }
 
