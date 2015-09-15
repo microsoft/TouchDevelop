@@ -823,8 +823,6 @@ module TDev.Cloud {
         }
 
         var config = isFota() ? "ws-fota" : "ws";
-        if (useEmbeddedGcc)
-            config += "-gcc";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,
