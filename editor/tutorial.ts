@@ -1170,14 +1170,10 @@ module TDev
 
             this.disableUpdate = true;
             TipManager.setTip(null);
-            var nameTextbox = null;
             var m = new ModalDialog();
             var start = Util.now()
 
             m.onDismiss = () => {
-                Script.setName(nameTextbox.value || lf("my app"))
-                Script.notifyChange()
-
                 this.disableUpdate = false;
                 this.modalTime(start)
                 r.success(this.stepStartedAsync());
@@ -1190,12 +1186,9 @@ module TDev
                 StepTutorial.addTranslatedDocs(m, initialDiv, !!this.translatedTutorial.manual, this.translatedTutorial.startDocs);
 
             m.fullWhite();
-            nameTextbox = HTML.mkTextInput("text", lf("enter a script name"));
-            nameTextbox.value = Script.getName();
             m.add(div('wall-dialog-buttons',
                 Util.delayButton(HTML.mkButton(lf("let's get started!"), () => m.dismiss()), 1000)
                 ));
-            m.add(div('wall-dialog-body', lf("name your app:"), nameTextbox));
             // add tracking pixel to dialog + notice
             if (this.hourOfCode) {
                 m.addHTML("<div class='hoc-notice'>The 'Hour of Code™' is a nationwide initiative by Computer Science Education Week and Code.org to introduce millions of students to one hour of computer science and computer programming.</div>");
