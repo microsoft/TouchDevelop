@@ -372,7 +372,7 @@ module TDev
             this.runMap.push(id);
         }
         public resetRunMap() { this.runMap.clear(); }
-
+        
         private breakpoints: Hashtable;
         public initBreakpoints(h: Hashtable) { this.breakpoints = h; this.updateScriptBreakpoints(); }
         private hitBreakpoint(id: string) {
@@ -3173,6 +3173,11 @@ module TDev
                 checkAndThrow(err);
                 (<any>s).localResume()
             })
+        }
+        
+        export function warn(msg : string, s: IStackFrame) {
+            var ed = s.rt.editorObj;
+            if (ed) ed.annotate_caller("warning", msg, s);
         }
     }
 }
