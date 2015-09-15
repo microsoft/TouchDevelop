@@ -1,7 +1,6 @@
 ///<reference path='refs.ts'/>
 module TDev.RT {
     //? Doc rendering helpers
-    //@ skill(3)
     export module Docs
     {
         //? Renders a bitmatrix

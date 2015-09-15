@@ -1333,14 +1333,14 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .kbm svg > path.bitoff {
   fill:#ccc;
 }
-.docs svg {
+.kbm.docs svg {
   height: 7em;
   margin: 0.5em 0.5em 0em 0.5em;
 }
-.docs svg > path.biton {
+.kbm.docs svg > path.biton {
   stroke:black;
 }
-.docs svg > path.bitoff {
+.kbm.docs svg > path.bitoff {
   stroke:black;
   fill:transparent;
 }
