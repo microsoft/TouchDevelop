@@ -17,7 +17,7 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            elt("root").appendChild(EditorSettings.mkBetaNote());
+            elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
             this.populateSiteHeader(false);
         }

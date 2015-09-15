@@ -922,13 +922,13 @@ module TDev.Browser {
             })
         }
 
-        export function mkBetaNote(): HTMLElement {
+        export function mkCopyrightNote(): HTMLElement {
             var beta = div("beta-note");
-            var betaFriendlyId = (<any>window).betaFriendlyId;
-            var betaNote = (<any>window).betaFriendlyId ? ("<b>" + betaFriendlyId + "</b> ") : "";
+            var versionId = (<any>window).betaFriendlyId || Cloud.config.tdVersion;
+            var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";
             
             var copyrights = "<div class='beta-legal'>" + 
-                betaNote +
+                versionNote +
                 "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
                 Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;")
                 "</div>";
