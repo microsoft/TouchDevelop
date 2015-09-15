@@ -2153,7 +2153,10 @@ module TDev
             else
                 children = [ Editor.mkTopMenuItem("svg:play,black", lf("run main"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
 
-            if (Cloud.isRestricted()) {
+            var canCompile =
+                Cloud.isRestricted() &&
+                (Cloud.isFota() || Browser.isDesktop || Browser.isTablet);
+            if (canCompile) {
                 var compileBtn: HTMLElement;
                 var str = lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M",
