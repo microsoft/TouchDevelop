@@ -1243,6 +1243,7 @@ module TDev {
         HideIntelliButton = 0x20000,
         IgnoreReturnValue = 0x40000,
         DocsOnly = 0x80000,
+        LibsOnly = 0x100000,
 
         NonBrowsable = PropertyFlags.IsObsolete | PropertyFlags.IsHidden | PropertyFlags.IsPrivate,
     }
@@ -1628,6 +1629,7 @@ module TDev {
             return ((this.flags & PropertyFlags.NonBrowsable) == 0 &&
                     (!this.parentKind.isPrivate) &&
                     ((this.flags & PropertyFlags.DocsOnly) == 0 || !Script || Script.isDocsTopic()) &&
+                    ((this.flags & PropertyFlags.LibsOnly) == 0 || !Script || Script.isLibrary) &&                        
                     (dbg || !(this.flags & PropertyFlags.IsDebugOnly)) &&
                     (isBeta || !(this.flags & PropertyFlags.IsBetaOnly)));
         }

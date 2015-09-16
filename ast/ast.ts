@@ -1781,8 +1781,18 @@ module TDev.AST {
                 for (var i = 0; i < this.body.stmts.length; ++i) {
                     var s = this.body.stmts[i].docText()
                     if (s != null) {
-                        if (/{action:ignoreReturn}/i.test(s)) {
-                            flags |= PropertyFlags.IgnoreReturnValue
+                        var m = /{action:([^\}]+)}/i.exec(s);
+                        if (m) {
+                            m[1].split(',').forEach(fl => {
+                                switch (fl.toLowerCase()) {
+                                    case "ignorereturn":
+                                        flags |= PropertyFlags.IgnoreReturnValue; break;
+                                    case "libsonly":
+                                        flags |= PropertyFlags.LibsOnly; break;
+                                    default:
+                                        this.setError(lf("unknown flag")); break; 
+                                }
+                            })
                         }
                     } else {
                         break;
@@ -5057,7 +5067,7 @@ module TDev.AST {
 
         public visitExpr(expr: Expr) {
             this.incrKind(expr.getKind());
-           super.visitExpr(expr);
+            super.visitExpr(expr);
         }
 
         public visitCall(c:Call)
