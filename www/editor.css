@@ -1843,7 +1843,9 @@ span.errorSq .kw
 }
 
 #externalEditorSide .wallFullScreenContainer {
-    margin: 0 1em;
+    /* The run-time code in lib/Board.ts is not compatible with containers that
+     * have margins... */
+    margin: 0;
     display: -ms-flexbox;
     display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
     flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
@@ -1878,28 +1880,23 @@ span.errorSq .kw
         display: none;
     }
 
-    #externalEditorSide .wallFullScreenContainer {
-        margin: 5%;
-        height: auto !important;
-        display: flex !important;
-    }
-
-    #externalEditorSide .wallFullScreenLogo {
-        padding: .5em;
-    }
-
     #externalEditorSide .wallFullScreenLogo img {
         background-color: white;
-        padding: .5em;
+        padding: 1em;
         border: .2em solid black;
     }
 
     #externalEditorSide .boardCanvas {
-        width: inherit !important;
-        height: inherit !important;
+        /* Don't put padding / border here, as lib/Board.ts does some "clever"
+         * run-time size computations which completely prevent us from doing
+         * anything here. */
+        width: auto !important;
+        height: auto !important;
         background-color: white;
-        padding: 1em;
-        border: .2em solid black;
+    }
+
+    .wall-fullscreen {
+        height: auto !important;
     }
 }
 

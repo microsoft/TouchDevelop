@@ -204,6 +204,10 @@ module TDev {
       public fullWallHeight() {
         return (<HTMLElement> document.querySelector(".wallFullScreenContainer")).offsetHeight;
       }
+
+      public setFullScreenElement(element) {
+        (<any> this).fullScreenContainer.setChildren(element);
+      }
     }
 
     function typeCheckAndRun(text: string, mainName = "main") {
