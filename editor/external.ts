@@ -84,8 +84,6 @@ module TDev {
     // We need that to setup the simulator.
     export var microbitScriptId = "lwhfye";
 
-    var bbcLogoUrl = "https://az742082.vo.msecnd.net/files/images/logo.png";
-
     import J = AST.Json;
 
     export function makeOutMbedErrorMsg(json: any) {
@@ -193,7 +191,7 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "100%";
         w.style.display = "";
-        var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(bbcLogoUrl));
+        var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl));
         var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
 
         elt("externalEditorSide").setChildren([bbcLogo, w, logo]);
