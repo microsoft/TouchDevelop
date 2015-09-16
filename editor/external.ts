@@ -189,12 +189,14 @@ module TDev {
         super.showWall();
         document.getElementById("wallOverlay").style.display = "none";
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
-        w.style.height = "100%";
+        w.style.height = "auto";
         w.style.display = "";
         var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl));
         var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
+        var wrapper = div("wallFullScreenWrapper");
+        wrapper.setChildren([w]);
 
-        elt("externalEditorSide").setChildren([bbcLogo, w, logo]);
+        elt("externalEditorSide").setChildren([bbcLogo, wrapper, logo]);
       }
 
       public fullWallWidth() {

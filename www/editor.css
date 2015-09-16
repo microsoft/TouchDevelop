@@ -1843,9 +1843,16 @@ span.errorSq .kw
 }
 
 #externalEditorSide .wallFullScreenContainer {
-    /* The run-time code in lib/Board.ts is not compatible with containers that
-     * have margins... */
     margin: 0;
+    display: -ms-flexbox;
+    display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
+    flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
+}
+
+/* The run-time code in lib/Board.ts is not compatible with containers that
+ * have margins... So we use a wrapper div. */
+#externalEditorSide .wallFullScreenWrapper {
+    margin: 0 1em;
     display: -ms-flexbox;
     display: flex;                      /*CSSpref*/  display: -webkit-flex;  display: -moz-flex;  display: -ms-flex;
     flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
@@ -1863,6 +1870,10 @@ span.errorSq .kw
 }
 
 @media (max-width: 1400px) {
+    #externalEditorSide .wallFullScreenWrapper {
+        margin: 0 .4em;
+    }
+
     #externalEditorPanes {
         position: relative;
     }
