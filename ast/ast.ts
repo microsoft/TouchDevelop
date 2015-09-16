@@ -2157,7 +2157,8 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitLocalDef(this); }
         public getDescription():string { return ": " + this.getKind().toString() + " -- a local variable"; }
         public rename(nn:string) { this.setName(nn); }
-        public setKind(k:Kind) { this._kind = k }
+        public setKind(k: Kind) { this._kind = k }
+        public usageKey() { return this.getName(); }
         public lastUsedAt = 0;
         public lambdaNameStatus:number;
         public isRegular:boolean;
@@ -5233,7 +5234,6 @@ module TDev.AST {
             if (p.getName() == AST.libSymbol)
                 // needs explicit #allow:libSingleton
                 return this.hasKey("libSingleton");
-            if (p instanceof SingletonDef && p.isExtension) return true;
             return this.hasTokenUsage(p) || this.hasKey(p.usageKey());
         }
 
