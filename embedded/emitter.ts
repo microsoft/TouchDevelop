@@ -238,7 +238,7 @@ module TDev {
         return (
           "("+x+".operator->() != NULL "+
           "? "+x+"->"+f+" "+
-          ": (uBit.panic(MICROBIT_INVALID_VALUE), "+x+"->"+f+"))"
+          ": (uBit.panic(TD_UNINITIALIZED_OBJECT_TYPE), "+x+"->"+f+"))"
         );
       }
 
