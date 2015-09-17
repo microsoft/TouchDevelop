@@ -1750,7 +1750,13 @@ module TDev
                 }
 
                 TheEditor.calculator.applyInstruction(null)
-                switch (step.data.command) {
+                
+                // when the user is not signed in, we don't want to ask them to sign in to compile
+                var cmd = step.data.command;
+                if (Cloud.isRestricted() && cmd == "compile" && !Cloud.getUserId())
+                    cmd = "run";
+
+                switch (cmd) {
                     case "delay":
                         this.waitingFor = "delay";
                         TipManager.setTip(null);
@@ -1780,7 +1786,7 @@ module TDev
                             return
                         }
                         if (!hasDeclList()) return;
-                        this.waitingFor = step.data.command;
+                        this.waitingFor = cmd;
                         TipManager.setTip({
                             tick: Ticks.sidePublish,
                             title: lf("tap there"),
@@ -1825,7 +1831,7 @@ module TDev
                         }
                         return;
                     default:
-                        HTML.showErrorNotification(lf("unknown tutorial step: {0}", step.data.command))
+                        HTML.showErrorNotification(lf("unknown tutorial step: {0}", cmd))
                         this.stepCompleted()
                         return;
                 }
