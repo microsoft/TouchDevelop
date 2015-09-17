@@ -223,6 +223,14 @@ module TDev {
         if (j.updateid && j.updateid == j.id) return j.cumulativepositivereviews;
         else return j.positivereviews || 0;
     }
+    
+    // in-memory patch of cached script information which will be overriden on the next sync
+    export function patchScriptHeartCount(j: JsonScript, d : number)
+    {
+        if (!j) return -1;
+        if (j.updateid && j.updateid == j.id) j.cumulativepositivereviews = d;
+        else j.positivereviews = d;        
+    }
 
     export interface JsonPubOnPub extends JsonPublication
     {

@@ -7641,7 +7641,8 @@
             function addHeart() {
                 if (Cloud.anonMode(lf("adding hearts"), addHeart)) return;
 
-                var ha = getScriptHeartCount(TheApiCacheMgr.getCached(id));
+                var jscript = TheApiCacheMgr.getCached(id);                
+                var ha = getScriptHeartCount(jscript);
                 setBtn(-1, ha < 0 ? "0" : ha.toString(), () => {});
                 Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id + "/reviews"), { kind: "review", userplatform: Browser.platformCaps })
                 .done((resp: JsonReview) => {
@@ -7649,7 +7650,8 @@
                         localStorage["rateTouchDevelop"] = 1;
                     }
                     TheApiCacheMgr.storeHeart(id, resp.id);
-                    load(3, Math.max(ha,0)+1);
+                    patchScriptHeartCount(jscript, Math.max(ha,0)+1);
+                    load(3, getScriptHeartCount(jscript));
                     Browser.Hub.askToEnableNotifications();
                 }, (e: any) => {
                     Cloud.handlePostingError(e, "add hearts");
@@ -7659,13 +7661,15 @@
             function delHeart() {
                 if (Cloud.anonMode(lf("removing hearts"), delHeart)) return;
 
-                var hd = getScriptHeartCount(TheApiCacheMgr.getCached(id));
+                var jscript = TheApiCacheMgr.getCached(id);                
+                var hd = getScriptHeartCount(jscript);
                 setBtn(1, hd < 0 ? "0" : hd.toString(), () => {});
                 var reviewId = TheApiCacheMgr.getHeart(id, null);
                 Util.httpRequestAsync(Cloud.getPrivateApiUrl(reviewId), "DELETE", undefined)
                 .done(() => {
                     TheApiCacheMgr.storeHeart(id, "");
-                    load(3, Math.max(hd, 1)-1);
+                    patchScriptHeartCount(jscript, Math.max(hd, 1)-1);
+                    load(3, getScriptHeartCount(jscript));
                 }, (e: any) => {
                     Cloud.handlePostingError(e, "remove hearts");
                 });
