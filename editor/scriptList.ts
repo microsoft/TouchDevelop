@@ -8986,7 +8986,7 @@
                 new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
                 new GroupUsersTab(this),
                 this.collaborations = Cloud.isRestricted() ? null : new CollaborationsTab(this),
-                new GroupUserProgressTab(this),
+                Cloud.isRestricted() ? null : new GroupUserProgressTab(this),
                 this
             ];
             if (Cloud.lite)
