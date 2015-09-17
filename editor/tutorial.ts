@@ -1067,6 +1067,7 @@ module TDev
                 }
             }
 
+            var challenges = this.topic.challengesTopic();            
             if (this.finalHTML) {
                 var finalDiv = m.addHTML(this.finalHTML);
                 MdComments.attachVideoHandlers(finalDiv, true);
@@ -1074,14 +1075,20 @@ module TDev
             } else {
                 m.add(this.createStars());
                 m.add(div('wall-dialog-header', lf("Well done!")));
-                m.add(div('wall-dialog-body', lf("You just created an awesome app! You can keep customizing it as much as you want or even share it with your friends.")));
-            }
+                m.add(div('wall-dialog-body',
+                    challenges ? lf("Open the challenges to keep improving your code. ") : null,
+                    lf("You can keep customizing your app as much as you want. Have fun!")));
+            }            
 
-
-            m.add(div('wall-dialog-buttons', HTML.mkButton(lf("keep editing"),() => {
-                willNowPublish = true;
-                m.dismiss();
-            })));
+            m.add(div('wall-dialog-buttons',
+                challenges ? HTML.mkButton(lf("open challenges"), () => {
+                    Util.navigateNewWindow(challenges);
+                }) : null,
+                HTML.mkButton(lf("keep editing"), () => {
+                    willNowPublish = true;
+                    m.dismiss();
+                })
+            ));
             if (this.hourOfCode)
                 m.add(div('wall-dialog-body hoc-notice',
                     span('hoc-link', lf("get my Hour of Code™ certificate")).withClick(() => {
