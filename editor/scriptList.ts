@@ -5993,7 +5993,7 @@
 
                     if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
                         (Cloud.hasPermission("post-script-meta") &&
-                          (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt")))) {
+                          (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt") || Cloud.hasPermission("script-promo")))) {
                         socialNetworks(EditorSettings.widgets()).forEach(sn => {
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
