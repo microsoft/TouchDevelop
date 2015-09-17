@@ -3769,6 +3769,7 @@ function fetchlibraries(args, cb) {
     , 'lyusma' // micro:bit profile
     , 'xczaux' // blocks new
     , 'dceiba' // blocks blink
+    , 'fjbcfv' // bouncy image tutorial pointed by "follow tutorial"
     ]
 
     var updates = {}
