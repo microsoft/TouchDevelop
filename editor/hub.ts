@@ -710,6 +710,21 @@ module TDev.Browser {
                                     groups: groups.value.replace(/[,\s]+/g, ","),
                                     description: desc.value,
                                 }
+                                var items = []
+                                var getsome = count => {
+                                    if (count == 0) {
+                                        ModalDialog.showText(items.join("\n"), lf("your codes"))
+                                        return
+                                    }
+                                    data.count = Math.min(count, 100)
+                                    count -= data.count
+                                    TDev.Cloud.postPrivateApiAsync("generatecodes", data)
+                                        .then(r => {
+                                            HTML.showProgressNotification(lf("generating, {0} to go", count))
+                                            items.pushRange(r.items)
+                                            getsome(count)
+                                        }, e => Cloud.handlePostingError(e, lf("generate codes")))
+                                }
                                 if (!data.count) HTML.wrong(count)
                                 else if (!data.singlecredit) HTML.wrong(credit)
                                 else if (!data.credit) HTML.wrong(numuses)
@@ -719,11 +734,7 @@ module TDev.Browser {
                                     ModalDialog.ask(
                                         lf("Creating this code will let up to {0} users into the system.", data.count * data.credit),
                                         lf("create codes"),
-                                        () =>
-                                            TDev.Cloud.postPrivateApiAsync("generatecodes", data)
-                                                .then(r => {
-                                                    ModalDialog.showText(r.items.join("\n"), lf("your codes"))
-                                                }, e => Cloud.handlePostingError(e, lf("generate codes"))))
+                                        () => getsome(data.count))
 
                                 return Promise.as()
                             })))
