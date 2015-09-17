@@ -2132,9 +2132,11 @@ module TDev
         }
 
         private currentScriptCompiling: string;
-        private compile(btn : HTMLElement, debug: boolean) {
-            if (Cloud.anonMode(lf("C++ compilation")))
+        private compile(btn: HTMLElement, debug: boolean) {                
+            if (Cloud.anonMode(lf("C++ compilation"))) {
+                if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
+            }
 
             if (AST.TypeChecker.tcApp(Script) > 0) {
                 ModalDialog.info(lf("Your script has errors!"), lf("Fix your errors and try again."));
