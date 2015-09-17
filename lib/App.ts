@@ -784,10 +784,18 @@ module TDev.RT {
         //? Restarts the app and pops a restart dialog
         export function restart(message: string, r: ResumeCtx): void {
             var rt = r.rt;
+            
+            if (Cloud.isRestricted()) {
+                rt.stopAsync()
+                  .then(() => rt.rerunAsync())
+                  .done();
+                return;
+            }
+            
             var score = Bazaar.cachedScore(rt);
             var scriptId = rt.currentScriptId;
 
-            rt.stopAsync().done(() => {
+            rt.stopAsync().done(() => {                               
                 var m = new ModalDialog();
                 m.add(div('wall-dialog-huge wall-dialog-text-center', message || lf("try again!")));
                 if (score > 0)
