@@ -7172,7 +7172,7 @@
 
             if (EditorSettings.widgets().computingAtSchool) {
                 m.add(div("wall-dialog-buttons text-left",
-                    HTML.mkButton(lf("publish at ComputingAtSchool.org.uk"), () => {
+                    HTML.mkButton(lf("publish as CAS resource"), () => {
                         var descr = this.app.getDescription();
                         var d = descr + '\n\n' +
                             '**Url:** [' + url + '](' + url + ')\n\n' +
@@ -7184,7 +7184,7 @@
                             + '&revision[short_description]=' + encodeURIComponent(descr)
                             + '&revision[description]=' + encodeURIComponent(d)
                             + '&category=139';
-                        window.location.href = casUrl;
+                        Util.navigateNewWindow(casUrl);
                     })));
             }
 
