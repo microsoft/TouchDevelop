@@ -117,7 +117,9 @@ module TDev.AST {
         }
         
         public isBrowsable() :boolean {
-            return !(this._flags & PropertyFlags.NonBrowsable) && !this.isLibInit();
+            return !(this._flags & PropertyFlags.NonBrowsable)
+                && ((this._flags & PropertyFlags.LibsOnly) == 0 || !Script || Script.isLibrary)                       
+                && !this.isLibInit();
         }
 
         public toString()
