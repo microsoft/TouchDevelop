@@ -483,6 +483,7 @@ module TDev
                                     op.addToken = d[i + 1]
                                     op.addAfter = d[i + 2]
                                     op.isEnumVal = (<AST.Expr>d[i + 1]).enumVal != null
+                                    op.languageHint = (<AST.Expr>d[i + 1]).languageHint;
                                 } else {
                                     if (placeholderKind &&
                                         placeholderKind.getRoot() == api.core.Ref &&
