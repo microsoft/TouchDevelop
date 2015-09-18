@@ -3645,7 +3645,10 @@ function tdupload(args:string[])
     var uploadFiles = () => args.forEach(p => {
         if (!fs.existsSync(p))
             return;
-        fs.readFile(p, (err, data) => {
+        var fileToRead = p.replace(/^www\//, "microbit/overrideupload/")
+        if (!liteId || fileToRead == p || !fs.existsSync(fileToRead))
+            fileToRead = p;
+        fs.readFile(fileToRead, (err, data) => {
             if (err) {
                 console.log(err)
                 return

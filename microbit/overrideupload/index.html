@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html data-manifest="" lang="en-GB">
+<head>
+    <meta charset="utf-8" />
+    <title>BBC micro:bit</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_57x57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_72x72.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_114x114.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_144x144.png" />
+    <link rel="apple-touch-icon" sizes="200x200" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_200x200.png" />
+    <meta name="Description" content="BBC micro:bit"/>
+    <meta name="application-name" content="BBC micro:bit"/>
+    <meta name="msapplication-tap-highlight" content="no"/>
+    <meta name="msapplication-tooltip" content="BBC micro:bit"/>
+    <meta name="msapplication-starturl" content="https://live.microbit.co.uk/"/>
+    <meta name="msapplication-TileColor" content="#008B00"/>
+    <meta name="msapplication-TileImage" content="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_310x310.png"/>
+    <meta property="og:title" content="BBC micro:bit"/>
+    <meta property="og:site_name" content="BBC micro:bit"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="BBC micro:bit" />
+    <meta property="og:image" content="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_200x200.png" />
+    <meta property="og:url" content="" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="google" content="notranslate" />
+    <link rel="shortcut icon" sizes="196x196" href="https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_196x196.png" />
+</head>
+<body id="realRoot">
+  <!--
+    <meta name="msapplication-task" content="name=Hub;action-uri=/app/;icon-uri=/favicon.ico" />
+    <meta name="msapplication-task" content="name=My Scripts;action-uri=/app/#list:installed-scripts;icon-uri=/favicon.ico" />
+    <meta name="msapplication-task" content="name=Forum;action-uri=/app/#list:installed-scripts:script:bttt:comments;icon-uri=/favicon.ico" />
+    <meta name="msapplication-task" content="name=Notifications;action-uri=/app/#list:installed-scripts:notifications:ajlk:notifications;icon-uri=/favicon.ico" />
+    <meta property="fb:app_id" content="239441802766379" />
+    <meta name="msapplication-badge" content="frequency=30; polling-uri=https://www.touchdevelop.com/api/me/badge"/>    
+    -->
+  
+		<!--/ Site Header -->    
+<style>
+#leftBtnRow, .apiTopDiv {
+  background: #44ddfe url(https://az742082.vo.msecnd.net/files/images/bg-site-header-mobile.png) center top no-repeat !important;
+  background-size: cover !important;  
+}
+
+/* menu bar */
+.site-header {
+  background: #44ddfe url(https://az742082.vo.msecnd.net/files/images/bg-site-header.png) center top no-repeat;
+  background-size: cover;
+  border-bottom: 1px solid #fff;
+  color: #333;
+  height: 2.5em;
+  font-size: 0.7em;
+  padding-top: 1em;
+  text-align: left; 
+}
+
+.landscape .slRoot, .portrait .slRoot {
+  height: calc(100% - 4em);
+}
+
+.phone .site-header {
+  height:4em;
+}
+
+.phone .slRoot {
+  height: calc(100% - 4em);
+}
+
+.phone .site-header {
+  background-image: url(https://az742082.vo.msecnd.net/files/images/bg-site-header-mobile.png);
+}
+
+#root[data-is-editor="yes"] #siteHeader {
+  display:none;
+}
+
+.lt-ie9 .site-header {
+    background-image: url(https://az742082.vo.msecnd.net/files/images/bg-site-header.png);
+    text-align: left; 
+}
+.site-logo {
+  background: transparent url(https://az742082.vo.msecnd.net/files/images/microbit-beta-logo-black.svg) 0 0 no-repeat;
+  background-size: contain;
+  display: block;
+  float: left;
+  max-width: 100%;
+  width: 12em;
+  margin-top:  0em;
+  margin-left: 1em; 
+  cursor: pointer;
+  height: 2em;
+}
+
+.site-logo:hover {
+      background-color: rgba(255, 255, 255, 0.25); }
+.site-logo:focus {
+    background-color: rgba(255, 255, 255, 0.25); }    
+    
+.phone .site-logo {
+  width:14em;
+  margin-top:0.5em;
+}
+    
+/* Nav */
+.site-nav {
+  clear: both;
+      float: right;
+      margin-top: 21px;
+      padding-top: 0;
+         }
+  .lt-ie9 .site-nav {
+    clear: none;
+    float: right;
+    margin-top: 21px;
+    padding-top: 0; }
+
+  .site-nav .nav-list__item--last {
+    margin-right: 0;
+    padding-right: 0; }
+
+.nav-list {
+  margin: 0;
+  margin-right:1em;
+  padding: 0; }
+  .nav-list__item {
+    cursor:pointer;
+    border-right: 1px solid #666;
+    display: inline-block;
+    margin: 0 9px 5px 0;
+    padding: 0 12px 0 0; }
+  .nav-list__item--last,
+  .nav-list li:last-child {
+    border-right: none; }
+  .nav-list__item--selected {
+    text-decoration: underline; }    
+/**
+ * Layout helper classes
+ * Image replacement classes / show/hide classes
+ */
+
+/**
+ * Image replacement classes / show/hide classes
+ */
+.ir {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: 0;
+  direction: ltr;
+  display: block;
+  overflow: hidden;
+  text-align: left;
+  text-indent: -999em;
+  *line-height: 0; }
+
+.ir br {
+  display: none; }
+
+/* Hide content - soemtimes based upon JS being available or not */
+.hidden,
+.js .js-hidden,
+.no-js .no-js-hidden {
+  display: none;
+  visibility: hidden; }
+
+.no-js .js-only,
+.js .no-js-only {
+  display: none;
+  visibility: hidden; }
+
+/* Hidden but visible to screenreaders */
+.visuallyhidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px; }
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  width: auto; }
+
+.invisible {
+  visibility: hidden; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0; }
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto; }
+  
+/* Links
+   ========================================================================== */
+/* Default */
+.site-header a {
+  background-color: transparent;
+  color: inherit;
+  color: currentColor;
+  text-decoration: none;
+  	/**
+     * Improve readability of focused elements when they are also in an
+     * active/hover state.
+     */ }
+.site-header .lt-ie9 a:hover {
+    text-decoration: underline; }
+.site-header a:focus {
+    text-decoration: underline; }
+.site-header a:active {
+    text-decoration: none; }
+.site-header a:active, .site-header a:hover {
+    outline: 0; }
+         
+.site-container {
+  background: #fff;
+  color: #000;
+  font-family: "Helvetica Neue Bold", "Helvetica Neue", sans-serif;
+  font-size: 0.875em;
+  font-weight: 400;
+  line-height: 1.2;  
+}         
+
+/* hide back button in script list */
+.landscape .slBackContainer, .portrait .slBackContainer {
+  display:none;
+}
+.portrait .slSlideContainer {
+  display:none;
+}
+.landscape .slListHeader {
+  padding-left:0.5em;
+}
+.landscape .slList {
+  top:2.5em;
+}
+.landscape .slListHeader input { 
+  width:calc(100% - 0.7em);
+}
+.portrait .slListHeader input {
+  left:0.5em !important;
+  width: calc(100% - 1em) !important;
+}
+
+div.notificationBox {
+  left:14em !important;
+  top:0.5em !important;
+}
+
+.phone div.notificationBox {
+  left:16em !important;
+  top:1.3em !important;
+}
+
+.site-menu-btn{
+  background: #333;
+  color: #fff;
+  position: absolute;
+  right:1em;
+  top:1em;
+  letter-spacing: -.025em;
+  padding: 0.5em 1em 0.6em 0.5em;
+  cursor:pointer;
+  font-weight: bold;
+  font-size:0.8em;
+}
+
+.phone .site-menu-btn {
+  top:0.75em;
+  font-size:1.25em;
+}
+
+.site-menu-btn svg {
+  width:2em;
+  height:2em;
+  vertical-align: middle;
+  margin:-0.6em 0em -0.5em 0em;
+}
+
+.site-user-btn {
+  position: absolute;
+  right: 6em;
+  top:0.3em;
+  cursor: pointer;  
+}
+
+.site-user-btn svg {
+  width:3em;
+  height:3em;
+  vertical-align: middle;
+}
+
+.portrait #siteMenu {
+  display:none;
+}
+.landscape #siteMore, .landscape #siteUser {
+  display:none;
+}
+
+div.siteMenuBtn {
+  margin-bottom: 0.5em;
+  font-size: 1.5em;
+  background: #444;
+  width: 100%;
+  color: white;
+  padding: 0.5em;
+  cursor:pointer;
+}
+
+#slRoot, #externalEditorContainer {
+  /* 100% pxzagvwf 
+     75% psopafpj
+     50% xszvmobf
+     */
+  background: #fff url(https://az742082.vo.msecnd.net/pub/psopafpj) 0 0 repeat !important;
+}
+
+/*
+.modalOverlay {
+  background: #000 url(https://az742082.vo.msecnd.net/pub/pxzagvwf) 0 0 repeat !important;
+}*/
+
+.beta-note {
+  background:#333 !important;
+}
+.beta-legal {
+  color:#fff !important;
+}
+#siteLogo { cursor:pointer;}
+/*
+.kbm.docs {
+  background-image: url(https://microbit0.blob.core.windows.net/pub/pcslkqeo);
+  
+}*/
+
+</style>    
+<div id="root">
+	<div id="siteHeader" class="site-header hidden">  	
+				<ul id="siteMenu" class="nav-list site-nav" role="navigation" aria-label="Primary">
+				</ul>
+				<div id="siteLogo" class="ir site-logo">BBC micro:bit</div>
+        <div id="siteNotifications" class="notificationBox"></div>
+        <!-- <div id="siteUser" class="site-user-btn"></div> -->
+        <div id="siteMore" class="site-menu-btn">More</div>
+  </div>
+<div id="loading" style="width: 40%; margin-left: 30%; margin-top: 10%;text-align: center; color: #81e774; font-family: sans-serif; ">
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="100%" viewBox="220 150 150 100" enable-background="new 0 0 595.28 419.53" xml:space="preserve">
+<path d="M302.736,166.265h11.19v10.53h-11.19V166.265z M309.785,167.73c-0.05-0.012-0.101-0.019-0.151-0.026l-0.061-0.008
+	c-0.086-0.012-0.172-0.021-0.26-0.029c-0.058-0.009-0.119-0.012-0.178-0.014c-0.107-0.006-0.211-0.01-0.311-0.01
+	c-0.048,0-0.073,0.001-0.12,0.001c-0.082,0.003-0.165,0.007-0.248,0.011c-0.044,0.003-0.09,0.007-0.133,0.012
+	c-0.068,0.006-0.135,0.013-0.199,0.02l-0.056,0.009l-0.059,0.007l-0.074,0.013c-0.031,0.002-0.064,0.01-0.096,0.016
+	c-0.045,0.01-0.088,0.016-0.132,0.027c-0.264,0.058-0.51,0.132-0.738,0.219c-0.116,0.044-0.229,0.093-0.335,0.146
+	c-0.089,0.044-0.176,0.088-0.258,0.137c-0.079,0.046-0.156,0.09-0.229,0.142c-0.045,0.027-0.083,0.057-0.125,0.086
+	c-0.034,0.024-0.07,0.05-0.102,0.074c-0.073,0.058-0.141,0.112-0.203,0.169c-0.062,0.053-0.12,0.106-0.175,0.161
+	c-0.044,0.05-0.093,0.096-0.136,0.143c-0.044,0.052-0.09,0.102-0.132,0.155c-0.049,0.057-0.093,0.116-0.139,0.177
+	c-0.031,0.044-0.062,0.09-0.093,0.136c-0.021,0.031-0.04,0.066-0.062,0.097c-0.116,0.192-0.219,0.395-0.304,0.612
+	c-0.104,0.272-0.179,0.564-0.222,0.873c-0.013,0.1-0.022,0.2-0.027,0.302c-0.006,0.079-0.007,0.158-0.007,0.235
+	c0,0.062,0,0.12,0.003,0.179c0.004,0.062,0.009,0.122,0.016,0.182l0.006,0.042c0.009,0.07,0.019,0.142,0.031,0.209
+	c0.008,0.027,0.012,0.056,0.019,0.082c0.011,0.058,0.024,0.113,0.039,0.17c0.02,0.073,0.041,0.143,0.062,0.212
+	c0.03,0.086,0.062,0.17,0.095,0.252c0.055,0.128,0.114,0.251,0.178,0.368c0.037,0.07,0.075,0.136,0.115,0.2
+	c0.032,0.05,0.064,0.099,0.098,0.147c0.044,0.063,0.09,0.125,0.135,0.182c0.046,0.062,0.096,0.117,0.145,0.173
+	c0.059,0.068,0.118,0.13,0.177,0.19l0.03,0.029c0.049,0.047,0.102,0.097,0.16,0.149c0.042,0.033,0.083,0.073,0.131,0.106
+	c0.044,0.033,0.087,0.07,0.134,0.104c0.058,0.037,0.116,0.08,0.18,0.12c0.065,0.043,0.137,0.086,0.211,0.129
+	c0.147,0.082,0.312,0.162,0.489,0.233c0.067,0.027,0.137,0.053,0.209,0.079c0.07,0.023,0.145,0.046,0.22,0.067
+	c0.128,0.037,0.265,0.07,0.406,0.098c0.114,0.022,0.233,0.04,0.356,0.056c0.124,0.013,0.25,0.026,0.38,0.033
+	c0.064,0.001,0.131,0.007,0.195,0.007c0.028,0.001,0.059,0.001,0.092,0.001c0.234,0,0.452-0.009,0.653-0.029l0.04-0.001
+	c0.08-0.007,0.157-0.017,0.232-0.025c0.117-0.015,0.225-0.03,0.331-0.049c0.064-0.013,0.128-0.026,0.19-0.039
+	c0.099-0.02,0.189-0.043,0.275-0.064c0.067-0.02,0.127-0.037,0.188-0.055c0.071-0.021,0.142-0.044,0.207-0.067l0.064-0.023
+	c0.03-0.012,0.074-0.027,0.125-0.046c0.068-0.026,0.148-0.06,0.241-0.099c0.056-0.023,0.113-0.05,0.176-0.077
+	c0.055-0.026,0.113-0.055,0.171-0.082c0.024-0.012,0.047-0.023,0.072-0.036v-1.435l-0.051,0.03l-0.098,0.061
+	c-0.099,0.059-0.191,0.116-0.289,0.167c-0.104,0.055-0.206,0.107-0.306,0.156c-0.18,0.082-0.349,0.154-0.513,0.215
+	c-0.313,0.11-0.601,0.182-0.855,0.227c-0.028,0.003-0.058,0.01-0.088,0.015c-0.071,0.011-0.136,0.02-0.201,0.027
+	c-0.101,0.009-0.192,0.015-0.276,0.02c-0.055,0-0.106,0.003-0.151,0.003c-0.104,0-0.208-0.003-0.315-0.011
+	c-0.124-0.007-0.252-0.021-0.381-0.043c-0.207-0.036-0.414-0.089-0.619-0.162c-0.03-0.013-0.061-0.023-0.09-0.035
+	c-0.021-0.007-0.04-0.016-0.061-0.025c-0.033-0.013-0.064-0.029-0.097-0.043c-0.07-0.033-0.143-0.069-0.208-0.106
+	c-0.034-0.023-0.068-0.042-0.104-0.062c-0.032-0.023-0.066-0.046-0.102-0.069c-0.041-0.027-0.084-0.057-0.124-0.09
+	c-0.039-0.03-0.079-0.064-0.11-0.093l-0.049-0.042l-0.024-0.023l-0.014-0.011l-0.016-0.019c-0.066-0.064-0.125-0.127-0.18-0.193
+	c-0.028-0.037-0.057-0.074-0.084-0.109c-0.027-0.036-0.05-0.073-0.074-0.108c-0.022-0.033-0.043-0.067-0.062-0.101
+	c-0.03-0.05-0.058-0.102-0.082-0.151c-0.024-0.043-0.043-0.086-0.059-0.127c-0.031-0.072-0.057-0.145-0.08-0.216
+	c-0.017-0.053-0.031-0.107-0.044-0.159c-0.04-0.15-0.059-0.288-0.069-0.403c-0.004-0.043-0.007-0.087-0.008-0.123
+	c-0.005-0.059-0.005-0.109-0.005-0.149c0-0.026,0-0.056,0.003-0.09c0.003-0.083,0.01-0.186,0.026-0.306
+	c0.01-0.071,0.025-0.147,0.044-0.228c0.013-0.054,0.028-0.11,0.046-0.166c0.016-0.05,0.033-0.1,0.053-0.156
+	c0.015-0.034,0.03-0.069,0.044-0.106c0.021-0.047,0.046-0.097,0.072-0.145c0.017-0.039,0.038-0.076,0.059-0.112
+	c0.049-0.084,0.102-0.163,0.163-0.243c0.021-0.03,0.044-0.059,0.067-0.087c0.03-0.036,0.062-0.074,0.096-0.11
+	c0.018-0.019,0.033-0.038,0.052-0.056c0.263-0.262,0.56-0.459,0.865-0.599c0.048-0.021,0.096-0.042,0.145-0.061
+	c0.049-0.019,0.098-0.036,0.145-0.055c0.056-0.016,0.109-0.031,0.163-0.047c0.049-0.016,0.101-0.025,0.15-0.039
+	c0.052-0.01,0.102-0.021,0.151-0.03c0.057-0.01,0.11-0.02,0.166-0.026c0.057-0.01,0.11-0.014,0.166-0.02
+	c0.104-0.01,0.206-0.014,0.307-0.014c0.034,0,0.067,0,0.099,0.001c0.076,0.002,0.15,0.002,0.218,0.008
+	c0.05,0.004,0.099,0.006,0.147,0.011c0.089,0.009,0.176,0.022,0.259,0.033c0.074,0.011,0.146,0.023,0.213,0.04
+	c0.104,0.019,0.197,0.042,0.282,0.063c0.055,0.013,0.104,0.029,0.151,0.043c0.07,0.02,0.129,0.039,0.175,0.054
+	c0.08,0.027,0.124,0.043,0.124,0.043c0.069,0.026,0.14,0.053,0.208,0.082c0.09,0.037,0.178,0.076,0.261,0.113
+	c0.068,0.031,0.137,0.064,0.197,0.094c0.052,0.024,0.102,0.049,0.146,0.073c0.079,0.042,0.145,0.079,0.199,0.107l0.146,0.081v-1.411
+	c0,0-0.088-0.033-0.238-0.093c-0.07-0.026-0.149-0.056-0.237-0.086c-0.051-0.019-0.104-0.039-0.159-0.059
+	c-0.045-0.012-0.09-0.03-0.139-0.046c-0.054-0.016-0.109-0.036-0.168-0.053c-0.038-0.011-0.083-0.024-0.126-0.036l-0.041-0.011
+	c-0.039-0.013-0.082-0.024-0.125-0.036c-0.051-0.014-0.102-0.025-0.157-0.04c-0.031-0.008-0.065-0.016-0.102-0.026
+	c-0.055-0.011-0.11-0.024-0.169-0.037C309.904,167.751,309.846,167.74,309.785,167.73"/>
+<path d="M295.437,172.072c0.047,0,0.096,0.001,0.142,0.002c0.053,0.001,0.104,0.009,0.156,0.013c0.08,0.007,0.162,0.017,0.239,0.031
+	c0.147,0.029,0.282,0.069,0.403,0.12c0.092,0.039,0.175,0.087,0.248,0.142c0.042,0.033,0.084,0.065,0.122,0.103
+	c0.02,0.019,0.036,0.037,0.051,0.059c0.084,0.103,0.132,0.217,0.156,0.316c0.021,0.083,0.027,0.161,0.028,0.201v0.053
+	c0,0,0,0.023-0.004,0.063c-0.004,0.096-0.03,0.266-0.136,0.432c-0.033,0.049-0.073,0.1-0.12,0.149
+	c-0.126,0.125-0.291,0.21-0.459,0.266c-0.186,0.064-0.378,0.09-0.523,0.104c-0.078,0.006-0.142,0.008-0.186,0.011
+	c-0.044,0-0.072,0.001-0.072,0.001h-1.344v-2.067H295.437z M294.138,168.924v1.963h0.651c0,0,0.044,0,0.1-0.003
+	c0.046-0.001,0.1-0.004,0.147-0.009c0.133-0.009,0.319-0.027,0.505-0.079c0.034-0.012,0.07-0.023,0.107-0.033
+	c0.143-0.053,0.283-0.131,0.391-0.236c0.087-0.083,0.143-0.178,0.18-0.269c0.049-0.112,0.063-0.219,0.07-0.296
+	c0.006-0.067,0.006-0.111,0.006-0.111s0-0.032-0.001-0.083c-0.004-0.087-0.024-0.223-0.089-0.358
+	c-0.034-0.064-0.077-0.126-0.137-0.186c-0.075-0.073-0.163-0.126-0.259-0.17c-0.183-0.08-0.391-0.111-0.568-0.123
+	c-0.077-0.007-0.147-0.007-0.208-0.007H294.138z M289.845,176.795h11.188v-10.53h-11.188V176.795z M295.241,167.741
+	c1.325,0,1.91,0.692,1.91,0.692s0.537,0.464,0.537,1.267c0,0.798-0.363,1.13-0.466,1.229c-0.219,0.221-0.504,0.352-0.504,0.352
+	s0.631,0.135,1.125,0.628c0.578,0.577,0.533,1.333,0.533,1.333s0.045,0.724-0.581,1.351c-0.769,0.767-2.161,0.728-2.161,0.728
+	h-2.854v-7.581H295.241z"/>
+<path d="M282.546,172.072c0.046,0,0.095,0.001,0.142,0.002c0.053,0.001,0.104,0.009,0.155,0.013
+	c0.083,0.007,0.162,0.017,0.239,0.031c0.15,0.029,0.284,0.069,0.404,0.12c0.091,0.039,0.176,0.087,0.249,0.142
+	c0.044,0.033,0.084,0.065,0.12,0.103c0.019,0.019,0.039,0.037,0.053,0.059c0.084,0.103,0.132,0.217,0.158,0.316
+	c0.02,0.083,0.025,0.161,0.025,0.201c0.001,0.031,0,0.053,0,0.053s0,0.023-0.001,0.063c-0.005,0.096-0.031,0.266-0.139,0.432
+	c-0.033,0.049-0.071,0.1-0.12,0.149c-0.126,0.125-0.288,0.21-0.459,0.266c-0.185,0.064-0.376,0.09-0.523,0.104
+	c-0.076,0.006-0.141,0.008-0.185,0.011c-0.044,0-0.072,0.001-0.072,0.001h-1.344v-2.067H282.546z M281.247,168.924v1.963h0.65
+	c0,0,0.043,0,0.1-0.003c0.046-0.001,0.1-0.004,0.147-0.009c0.134-0.009,0.319-0.027,0.503-0.079
+	c0.037-0.012,0.073-0.023,0.109-0.033c0.145-0.053,0.284-0.131,0.394-0.236c0.086-0.083,0.142-0.178,0.179-0.269
+	c0.047-0.112,0.062-0.219,0.07-0.296c0.006-0.067,0.004-0.111,0.004-0.111s0.001-0.032-0.001-0.083
+	c-0.004-0.087-0.021-0.223-0.089-0.358c-0.031-0.064-0.077-0.126-0.137-0.186c-0.073-0.073-0.162-0.126-0.259-0.17
+	c-0.182-0.08-0.392-0.111-0.568-0.123c-0.076-0.007-0.147-0.007-0.205-0.007H281.247z M276.954,176.795h11.188v-10.53h-11.188
+	V176.795z M282.349,167.741c1.325,0,1.912,0.692,1.912,0.692s0.535,0.464,0.535,1.267c0,0.798-0.365,1.13-0.465,1.229
+	c-0.22,0.221-0.505,0.352-0.505,0.352s0.631,0.135,1.123,0.628c0.578,0.577,0.535,1.333,0.535,1.333s0.043,0.724-0.58,1.351
+	c-0.77,0.767-2.162,0.728-2.162,0.728h-2.853v-7.581H282.349z"/>
+<g>
+	<g>
+		<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="335.3223" y1="197.3843" x2="300.6557" y2="245.7174">
+			<stop  offset="0" style="stop-color:#02EC00"/>
+			<stop  offset="1" style="stop-color:#3EDCFD"/>
+		</linearGradient>
+		<path fill="url(#SVGID_1_)" d="M315.546,227.25c-1.263,0-2.29-1.041-2.29-2.32c0-1.262,1.027-2.289,2.29-2.289
+			c1.278,0,2.319,1.027,2.319,2.289C317.865,226.209,316.824,227.25,315.546,227.25z"/>
+	</g>
+	<g>
+		<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="315.6377" y1="183.2651" x2="280.9692" y2="231.6009">
+			<stop  offset="0" style="stop-color:#02EC00"/>
+			<stop  offset="1" style="stop-color:#3EDCFD"/>
+		</linearGradient>
+		<path fill="url(#SVGID_2_)" d="M305.47,200.207c1.529,0,2.765-1.24,2.765-2.766s-1.235-2.765-2.765-2.765
+			c-1.526,0-2.765,1.239-2.765,2.765S303.943,200.207,305.47,200.207"/>
+		<linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="302.2285" y1="173.6484" x2="267.5618" y2="221.9817">
+			<stop  offset="0" style="stop-color:#02EC00"/>
+			<stop  offset="1" style="stop-color:#3EDCFD"/>
+		</linearGradient>
+		<path fill="url(#SVGID_3_)" d="M285.163,194.676c-1.527,0-2.766,1.239-2.766,2.765c0,1.526,1.239,2.766,2.766,2.766
+			c1.526,0,2.764-1.24,2.764-2.766C287.927,195.915,286.688,194.676,285.163,194.676"/>
+		<linearGradient id="SVGID_4_" gradientUnits="userSpaceOnUse" x1="309.0098" y1="178.5132" x2="274.3431" y2="226.8464">
+			<stop  offset="0" style="stop-color:#02EC00"/>
+			<stop  offset="1" style="stop-color:#3EDCFD"/>
+		</linearGradient>
+		<path fill="url(#SVGID_4_)" d="M285.162,189.223c-4.531,0-8.218,3.686-8.218,8.218c0,4.531,3.687,8.218,8.218,8.218h20.544
+			c4.531,0,8.217-3.687,8.217-8.218c0-4.532-3.686-8.218-8.217-8.218H285.162 M305.706,211.137h-20.544
+			c-7.552,0-13.696-6.144-13.696-13.696c0-7.552,6.144-13.696,13.696-13.696h20.544c7.552,0,13.696,6.144,13.696,13.696
+			C319.402,204.993,313.258,211.137,305.706,211.137"/>
+	</g>
+	<g>
+		<g>
+			<linearGradient id="SVGID_5_" gradientUnits="userSpaceOnUse" x1="295.2314" y1="168.6294" x2="260.5644" y2="216.9632">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_5_)" d="M259.797,238.765h-3.315v-9.256c0-2.066-1.176-3.566-2.796-3.566
+				c-1.665,0-2.827,1.467-2.827,3.566v9.256h-3.347v-9.256c0-2.342-1.422-3.566-2.827-3.566c-1.665,0-2.827,1.467-2.827,3.566v9.256
+				h-3.314v-9.102c0-4.143,2.525-7.036,6.142-7.036c1.717,0,3.183,0.705,4.46,2.149c1.223-1.409,2.778-2.149,4.541-2.149
+				c3.598,0,6.111,2.894,6.111,7.036V238.765z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_6_" gradientUnits="userSpaceOnUse" x1="302.834" y1="174.0815" x2="268.1667" y2="222.4156">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_6_)" d="M265.844,238.765h-3.346v-15.736h3.346V238.765z M264.171,220.738
+				c-1.198,0-2.136-0.952-2.136-2.167c0-1.217,0.918-2.135,2.136-2.135c1.214,0,2.166,0.938,2.166,2.135
+				C266.337,219.766,265.366,220.738,264.171,220.738z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_7_" gradientUnits="userSpaceOnUse" x1="312.3691" y1="180.9229" x2="277.7027" y2="229.2558">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_7_)" d="M276.458,239.166c-2.169,0-4.21-0.866-5.748-2.438c-1.505-1.504-2.336-3.577-2.336-5.83
+				c0-2.254,0.832-4.327,2.341-5.837c1.511-1.544,3.606-2.433,5.743-2.433c2.353,0,4.318,0.789,5.841,2.346l0.428,0.438
+				l-2.389,2.437l-0.445-0.4c-1.132-1.019-2.192-1.473-3.436-1.473c-2.663,0-4.83,2.208-4.83,4.923c0,2.731,2.167,4.954,4.83,4.954
+				c1.254,0,2.344-0.467,3.43-1.468l0.428-0.396l2.459,2.312l-0.502,0.454C280.505,238.354,278.549,239.166,276.458,239.166z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_8_" gradientUnits="userSpaceOnUse" x1="320.2295" y1="186.5586" x2="285.562" y2="234.893">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_8_)" d="M288.575,238.765h-3.53v-7.868c0-5.047,2.183-7.473,7.078-7.866l0.675-0.055v3.302l-0.556,0.062
+				c-2.673,0.298-3.667,1.482-3.667,4.372V238.765z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_9_" gradientUnits="userSpaceOnUse" x1="329.1748" y1="192.9761" x2="294.5082" y2="241.3092">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_9_)" d="M301.988,239.166c-2.169,0-4.21-0.866-5.749-2.438c-1.526-1.56-2.367-3.63-2.367-5.831
+				s0.84-4.271,2.367-5.832c1.54-1.571,3.581-2.438,5.749-2.438c2.147,0,4.178,0.866,5.718,2.438
+				c1.524,1.524,2.366,3.598,2.366,5.832c0,2.233-0.842,4.307-2.371,5.836C306.168,238.299,304.137,239.166,301.988,239.166z
+				 M301.957,225.943c-2.562,0-4.646,2.223-4.646,4.954c0,2.715,2.084,4.923,4.646,4.923c2.623,0,4.677-2.162,4.677-4.923
+				C306.634,228.166,304.536,225.943,301.957,225.943z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_10_" gradientUnits="userSpaceOnUse" x1="340.7803" y1="201.3013" x2="306.115" y2="249.6326">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_10_)" d="M315.546,238.765c-1.263,0-2.29-1.027-2.29-2.289c0-1.279,1.027-2.32,2.29-2.32
+				c1.278,0,2.319,1.041,2.319,2.32C317.865,237.738,316.824,238.765,315.546,238.765z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_11_" gradientUnits="userSpaceOnUse" x1="344.0957" y1="203.6792" x2="309.4302" y2="252.0108">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_11_)" d="M329.108,239.166c-4.777,0-8.114-3.717-8.114-9.039c0-0.326,0.001-0.684,0.033-1.042
+				l-0.003-13.546h3.315v8.64c1.431-1.021,3.002-1.52,4.769-1.52c2.169,0,4.199,0.854,5.718,2.406
+				c1.526,1.561,2.366,3.631,2.366,5.832c0,2.233-0.842,4.307-2.371,5.836C333.289,238.299,331.259,239.166,329.108,239.166z
+				 M329.108,225.974c-2.663,0-4.83,2.222-4.83,4.953c0,2.761,2.122,4.924,4.83,4.924c2.664,0,4.831-2.209,4.831-4.924
+				C333.939,228.196,331.772,225.974,329.108,225.974z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_12_" gradientUnits="userSpaceOnUse" x1="354.0469" y1="210.8149" x2="319.3796" y2="259.149">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_12_)" d="M343.403,238.765h-3.346v-15.736h3.346V238.765z M341.73,220.738
+				c-1.197,0-2.136-0.952-2.136-2.167c0-1.217,0.918-2.135,2.136-2.135c1.215,0,2.166,0.938,2.166,2.135
+				C343.896,219.766,342.925,220.738,341.73,220.738z"/>
+		</g>
+		<g>
+			<linearGradient id="SVGID_13_" gradientUnits="userSpaceOnUse" x1="361.6562" y1="216.2729" x2="326.9895" y2="264.6063">
+				<stop  offset="0" style="stop-color:#02EC00"/>
+				<stop  offset="1" style="stop-color:#3EDCFD"/>
+			</linearGradient>
+			<path fill="url(#SVGID_13_)" d="M355.923,239.237l-0.743-0.145c-4.932-0.954-6.765-3.317-6.765-8.72v-3.937h-1.448v-3.191h1.448
+				v-3.483h3.377v3.483h4.131v3.191h-4.131v4.461c0,2.947,1.108,4.42,3.595,4.774l0.536,0.077V239.237z"/>
+		</g>
+	</g>
+</g>
+</svg>
+  
+<div id="loadingDot" style="font-size: 18px;margin-top:-10px"><a style="color:inherit;cursor:pointer;" href="/faq">we need JavaScript and cookies enabled</a></div>
+<div id='progressContainer' style='margin-top:20px;height:3px;width:100%; background:#eee;'>
+<div id='progressBar' style='height:3px; width:0px; background:#81e774'></div>
+</div>
+<div style="margin-top: 1em; font-size:12px;" id="statusMsg"></div>
+</div>
+<div id='scriptHolder'></div>
+<script type="text/javascript">
+// these are used in the included JS files
+var browsersUrl = "browsers.html";
+var errorUrl = "error.html";
+var mainJsName = "./main.js";
+var betaFriendlyId = "";
+var localProxy = "";
+var rootUrl = "https://www.touchdevelop.com";
+var TDev;
+
+if (window.localStorage &&
+    window.localStorage.always_beta === "yes" &&
+    !betaFriendlyId &&
+    window.location.pathname === "/app/")
+{
+  window.location.pathname = "/app/beta";
+}  
+
+(function() {
+  var e = document.getElementById("loadingDot");
+  if (e) {
+    e.innerHTML = 'just a moment';
+  }
+}());
+(function() {
+  var ratio = 0.97
+  var curr = 100 / (1 / (1 - ratio))
+  var sum = 0
+  function updatePbar() {
+    var pbar = document.getElementById("progressBar");
+    if (!pbar) return;
+    sum += curr
+    curr *= ratio
+    pbar.style.width = sum + "%"
+    setTimeout(updatePbar, 200)
+  }
+  updatePbar();
+}());
+function statusMsg(m) {
+  if (/debugMsg/.test(document.URL)) {
+    var e = document.getElementById("statusMsg");
+    if (e) e.innerHTML = m;
+  }
+}
+var TDev;
+statusMsg("js initialized");
+
+</script>
+<style type="text/css">
+    @import url("./default.css");
+    @import url("./editor.css");
+</style>
+<script type="text/javascript"> statusMsg("css imported"); </script>
+<script src="./browser.js" type="text/javascript"></script>
+<script type="text/javascript">
+statusMsg("browser detector loaded");
+TDev.Browser.check(true);
+statusMsg("browser detector finished");
+</script>
+<script id='mainScript' src="./main.js" type="text/javascript"></script>
+<script src="./libraries.js" type="text/javascript"></script>
+<script>
+  TDev.Runtime.companyCopyright = "BBC micro:bit";
+  TDev.Runtime.appName = "BBC micro:bit";
+  TDev.Runtime.notificationIcon = "https://az742082.vo.msecnd.net/files/icons/micro-bit_primary_colour_114x114.png";
+  TDev.Runtime.accelerometerTiltBooster = 5;
+  TDev.Runtime.legalNoticeHeader = 		
+  '<img src="https://az742082.vo.msecnd.net/files/images/microbit-beta-logo-black.svg" style="margin-left:auto;margin-right:auto;display:block;" alt="BBC micro:bit logo" />'+
+  '<h4>Cookies on this website</h4>';
+  TDev.Runtime.legalButton = "continue";
+  TDev.Runtime.legalNotice = 
+  "<div style='font-size:0.7em'>We use technologies that collect information from your computer on your use of " +
+  "the BBC micro:bit website called ‘cookies’ to ensure that we give you the best " +
+  "experience on our website.<br/><br/>" +
+  "When you start programming in an editor, we will store your programs on your  " +
+  "computer so that you can continue to work on them offline.<br/><br/>" +
+  "If you continue without changing your settings, we'll assume that you are happy " +
+  "to receive all cookies on this website. However, if you would like to, you  " +
+  "<a href='/cookies/manage'>can change your cookie settings</a> " +
+  "at any time.</div>\n";
+
+  //"</br><a href='http://policy.pilots.bbcconnectedstudio.co.uk/cookies.html'>find out more...</a>";
+  
+  TDev.Cloud.config.tutorialAvatarArtId = 'lqakekjj';
+  TDev.Cloud.config.hashtag = '#microbit';
+  TDev.Cloud.config.printHeaderHtml = "<div><img src='https://az742082.vo.msecnd.net/files/images/microbit-beta-logo-black.svg' alt='BBC micro:bit'></div>";  
+  TDev.Cloud.config.companyLogoHorizontalUrl = 'data:image/png;base64,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';
+  TDev.Cloud.config.touchDevelopLogoUrl = "https://az742082.vo.msecnd.net/pub/rntqmpqu";
+  TDev.Cloud.config.helpPath = "/td/contents";
+  TDev.Cloud.config.topicPath = "/td/";
+  TDev.Cloud.config.localTopicPath = "/td/";
+  TDev.Cloud.config.legalButtons = [ 
+    { name: "Terms of use", url: "/terms-of-use" },
+    { name: "Privacy policy", url: "/privacy"}
+  ];
+</script>
+</div>
+</body>
+</html>

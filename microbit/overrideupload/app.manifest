@@ -1,0 +1,33 @@
+CACHE MANIFEST
+
+CACHE:
+./main.js
+./libraries.js
+./browser.js
+./default.css
+./editor.css
+./blockly-main.js
+./blockly/editor.html
+./blockly/blockly_compressed.js
+./blockly/blocks_compressed.js
+./blockly/en.js
+./blockly/blocks-custom.js
+./blockly/style.css
+./blockly/media/sprites.png
+./blockly/media/handopen.cur
+./blockly/media/click.mp3
+./blockly/media/delete.mp3
+./jquery-2.1.4.min.js
+./font-awesome.min.css
+../../../files/images/bg-site-header.png
+../../../files/images/bg-site-header-mobile.png
+../../../files/icons/micro-bit_primary_colour_196x196.png
+../../../files/images/logo.png
+../../../pub/vrvndwmo
+../../../pub/prcwhomc
+
+NETWORK:
+*
+
+# Check 'files.txt' for instructions on adding files here.
+# WP8-App-Version 1 1
