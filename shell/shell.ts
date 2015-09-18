@@ -2061,10 +2061,15 @@ function proxyEditor(cmds:string[], req, resp)
         var mime = getMime(file)
         var enc = /^text\//.test(mime) ? "utf8" : null
 
-        if (fs.existsSync(localPath + "/www/" + file))
+        if (file == "mbit.html") {
+            file = "index.html"
+            localPath += "/microbit/overrideupload"
+        }
+        else if (fs.existsSync(localPath + "/www/" + file))
             localPath += "/www"
         else if (fs.existsSync(localPath + "/build/" + file))
             localPath += "/build"
+
 
         fs.readFile(localPath + "/" + file, enc, (err, data:any) => {
             if (err) {
