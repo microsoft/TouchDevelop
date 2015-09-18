@@ -4255,6 +4255,7 @@ module TDev
 
             World.cancelSync();
             Cloud.setAccessToken(undefined);
+            Util.navigatingAway = true; // prevent oneTab error
             return this.resetWorldAsync().then(() => {
                 // don't stop progress; keep animation running until we actually navigate away
                 window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
