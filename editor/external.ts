@@ -127,25 +127,52 @@ module TDev {
 
     // This function modifies its argument by adding an extra [J.JLibrary]
     // to its [decls] field that references the device's library.
-    function addLibrary(name: string, pubId: string, app: J.JApp) {
-      var lib = <AST.LibraryRef> AST.Parser.parseDecl(
-        'meta import ' + AST.Lexer.quoteId(name) + ' {' +
-        '  pub "' + pubId + '"'+
-        '}'
-      );
+    function addLibrary(libMap: { [name: string]: LibEntry }, name: string, app: J.JApp): J.JLibrary {
+      var resolves = libMap[name].depends.map((d: string) => {
+        var quoted = AST.Lexer.quoteId(d);
+        return "  usage { } resolve "+quoted+" = ♻ "+quoted+" with { }\n";
+      });
+      var txt =
+        'meta import ' + AST.Lexer.quoteId(name) + ' {\n' +
+        '  pub "' + libMap[name].pubId + '"\n'+
+        resolves +
+        '}';
+      // Apparently, parsing a "meta import" declaration with "resolves" clauses
+      // generates several LibraryRef's. The first one is the one we want.
+      var lib = <AST.LibraryRef> AST.Parser.parseDecls(txt)[0];
       var jLib = <J.JLibrary> J.addIdsAndDumpNode(lib);
       jLib.id = name;
       app.decls.push(jLib);
+      return jLib;
     }
 
-    function addLibraries(app: J.JApp, libs: { [i: string]: string }): Promise {
-      var keys = Object.keys(libs);
-      var latestVersions = keys.map((name: string) => {
-        return pullLatestLibraryVersion(libs[name]);
+    function addResolves(idMap: { [name: string]: string }, lib: J.JLibrary) {
+      lib.resolveClauses.forEach((c: J.JResolveClause) => {
+        c.defaultLibId = <any> idMap[c.name];
+      });
+    }
+
+    function addLibraries(app: J.JApp, libMap: { [i: string]: LibEntry }): Promise {
+      var libNames = Object.keys(libMap);
+      var latestVersions = libNames.map((name: string) => {
+        return pullLatestLibraryVersion(libMap[name].pubId);
       });
       return Promise.join(latestVersions).then((latestVersions: string[]) => {
+        // Update in-place the [libMap] argument with the latest [pubId]'s.
         latestVersions.map((pubId: string, i: number) => {
-          addLibrary(keys[i], pubId, app);
+          libMap[libNames[i]].pubId = pubId;
+        });
+        // This allows us to add proper [JLibrary] declarations to the main
+        // [JApp].
+        var libs = libNames.map((libName: string) => addLibrary(libMap, libName, app));
+        // A map from a library name to its JSON-id.
+        var idMap: { [name: string]: string } = {};
+        libs.forEach((l: J.JLibrary) => {
+          idMap[l.name] = l.id;
+        });
+        // Which we need to perform a little bit of fix-up.
+        libs.forEach((l: J.JLibrary) => {
+          addResolves(idMap, l);
         });
       });
     }
@@ -166,9 +193,17 @@ module TDev {
       });
     }
 
+    // For compatibility with the old format
+    function fixupLibs(libs: { [i: string]: any }) {
+      Object.keys(libs).forEach((k: string) => {
+        if (typeof libs[k] == "string")
+          libs[k] = { pubId: libs[k], depends: [] };
+      });
+    }
+
     // Takes a [JApp] and runs its through various hoops to make sure
     // everything is type-checked and resolved properly.
-    function roundtrip(a: J.JApp, libs: { [i: string]: string }): Promise { // of J.JApp
+    function roundtrip(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of J.JApp
       return addLibraries(a, libs).then(() => {
         var text = J.serialize(a);
         return parseScript(text).then((a: AST.App) => {
@@ -386,6 +421,7 @@ module TDev {
                 cpp = Promise.as(message1.text);
                 break;
               case Language.TouchDevelop:
+                fixupLibs(message1.libs);
                 cpp = roundtrip(message1.text, message1.libs).then((a: J.JApp) => {
                   return Embedded.compile(a);
                 });
@@ -425,6 +461,7 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             var ast: AST.Json.JApp = message2.ast;
+            fixupLibs(message2.libs);
             addLibraries(ast, message2.libs).then(() => {;
               console.log("Attempting to serialize", ast);
               var text = J.serialize(ast);
@@ -446,6 +483,7 @@ module TDev {
             // So that key events such as escape are caught by the editor, not
             // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
+            fixupLibs(message3.libs);
             addLibraries(ast, message3.libs).then(() => {
               var text = J.serialize(ast);
               typeCheckAndRun(text);

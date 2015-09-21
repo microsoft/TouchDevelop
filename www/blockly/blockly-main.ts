@@ -474,8 +474,11 @@ module TDev {
     return ast;
   }
 
-  var libs: { [index: string]: string } = {
-    "micro:bit": "lwhfye"
+  var libs: { [index: string]: External.LibEntry } = {
+    "micro:bit": {
+      pubId: "lwhfye",
+      depends: []
+    }
   };
 
   function doGraduate(msgSel?: string) {
