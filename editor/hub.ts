@@ -383,7 +383,7 @@ module TDev.Browser {
             editorMode: editorModes['classic'],
         },
         'microbit': {
-            name:'Micro Bit',
+            name:'BBC micro:bit',
             description: ' ',
             scriptSearch: '#microbit',
             scriptTemplates: ['blankmicrobit'],

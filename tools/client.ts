@@ -4073,15 +4073,6 @@ var templates: ScriptTemplate[] = [{
     scriptid: 'zqbpa',
     editorMode: 2,
 }, {
-    title: lf("blank Micro Bit"),
-    id: 'blankmicrobit',
-    icon: 'Controller',
-    name: 'ADJ scritpt',
-    description: lf("An empty Micro Bit script."),
-    section: sectMakers,
-    scriptid: 'geok',
-    editorMode: 2
-}, {
     title: lf("blank docs"),
     id: 'blankdocs',
     icon: 'Controller',
