@@ -1299,8 +1299,10 @@ module TDev
                     this.switchToNormalKeypad();
                 this.display();
                 editor.selector.positionButtonRows();
-                if (this.stmt instanceof AST.DeclNameHolder)
+                if (this.stmt instanceof AST.DeclNameHolder) {
                     editor.dismissSidePane();
+                    editor.queueNavRefresh();
+                }
             };
 
             return literalEditor.editor();
