@@ -1252,6 +1252,7 @@ module TDev
             if (!fromCloud)
                 this.dismissModalPane();
             this.loadLocation(loc, useAnim);
+            this.updateBackButton();
             this.searchTab.saveLocation();
             try {
                 this.refreshParticipants(true);
@@ -2022,37 +2023,20 @@ module TDev
             this.searchFor(r);
         }
 
-        private backBtn()
+        private backToMain()
         {
-            /* if (!dbg && this.stepTutorial && this.stepTutorial.isActive()) {
-                var m = new ModalDialog();
-                m.add([
-                    div("wall-dialog-header", 'take a break?'),
-                    div("wall-dialog-body", 'Are you sure you want to stop editing? You can come back at any time and continue where you left off.'),
-                    div("wall-dialog-buttons",
-                        HTML.mkButton('cancel', () => m.dismiss()),
-                        HTML.mkButton('take a break', () => {
-                            m.dismiss();
-                            this.goToHubAsync().done();
-                        }))
-                ]);
-                m.show();
-            } else */
-            {
+            var main = Script.mainAction();
+            if (main)
+                this.renderDecl(main);    
+            
+        }        
+        
+        private backToHub()
+        {
                 this.goToHubAsync().done();
-            }
         }
-
-        /*
-        public isNonTopPage()
-        {
-            var act = this.currentAction();
-            return this.liveViewSupported() && act && act.isPage() && this.currentRt.getCurrentPage().pageName != act.stableName;
-        }
-        */
 
         private currentCompilationModalDialog;
-
         // Does the right thing™ with the UI and handles: retries (user tries to
         // compile the script while we're still waiting), errors, debug
         // information. Returns a promise with the JSON returned from the cloud
@@ -2230,11 +2214,14 @@ module TDev
 
         private updateBackButton()
         {
+            var main: AST.Action;
             this.backBtnDiv.setChildren([
-                this.hasModalPane() ?
-                    Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
-            ])
+                this.hasModalPane()
+                    ? Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane())
+                    : Script && (main = Script.mainAction()) && this.currentAction() != main
+                      ? Editor.mkTopMenuItem("svg:back,black", lf("main"), Ticks.codeHub, "Ctrl-I", () => this.backToMain())
+                      : Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backToHub())
+            ]);
         }
 
         private setupExternalButtons() {
