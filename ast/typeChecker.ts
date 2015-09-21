@@ -6,6 +6,8 @@
 
 module TDev.AST
 {
+    var innerAsyncWarning = true;
+
     export class TypeResolver
         extends NodeVisitor
     {
@@ -93,6 +95,7 @@ module TDev.AST
         extends NodeVisitor
     {
         private typeResolver:TypeResolver;
+        private isTopExpr = false;
 
         static lastStoreLocalsAt:ExprHolder;
 
@@ -352,6 +355,7 @@ module TDev.AST
             this.saveFixes = expr == this.storeLocalsAt ? 1 : 0;
 
             if (!parseErr) {
+                this.isTopExpr = (whoExpects == "void");
                 this.dispatch(parsed);
                 expr.hasFix = this.saveFixes > 1
             } else {
@@ -1556,6 +1560,7 @@ module TDev.AST
             var lhs = args[0].flatten(this.core.TupleProp);
             var rhs = args[1];
 
+            this.isTopExpr = true;
             this.typeCheckExpr(rhs);
 
             var info = new AssignmentInfo();
@@ -1775,6 +1780,8 @@ module TDev.AST
         {
             var args = t.args;
             var prop = t.prop();
+            var wasTopExpr = this.isTopExpr
+            this.isTopExpr = false
 
             if (this.inShim)
                 t.isShim = this.inShim;
@@ -1937,6 +1944,9 @@ module TDev.AST
                     }
                 }
                 this.seenAwait = true;
+                if (!wasTopExpr && innerAsyncWarning) {
+                    this.hintsToFlush.push(lf("async call not on top-level"));
+                }
             }
 
             if (!prop.isImplementedAnywhere()) {

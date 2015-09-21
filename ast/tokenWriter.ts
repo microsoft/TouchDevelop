@@ -80,11 +80,14 @@ module TDev { export module AST {
             this.indentLevel++;
         }
 
-        public endBlock()
+        public endBlock(add = "")
         {
             this.lastBlockEnd = this.buf.length;
             this.indentLevel--;
-            this.op0("}").nl();
+            this.op0("}");
+            if (add)
+                this.write(add);
+            this.nl();
             this.lastAfterBlockEnd = this.buf.length;
         }
 

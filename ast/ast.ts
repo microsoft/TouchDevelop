@@ -134,6 +134,7 @@ module TDev.AST {
         public _hint:string;
         public _compilerBreakLabel:any;
         public _compilerContinueLabel:any;
+        public _converterAwait:boolean;
 
         constructor() {
             super()

@@ -19,9 +19,16 @@ module TDev.AST {
     {
         private globalCtx = new TsQuotingCtx();
 
-        public globalId(id:string)
+        public globalId(d:Decl)
         {
-            return this.jsid(this.globalCtx.quote(id, 0))
+            var n = d.getName()
+            if (d instanceof Action) {
+                var a = <Action>d;
+                if (!a.isAtomic)
+                    n += "Async"
+
+            }
+            return this.jsid(this.globalCtx.quote(n, d.nodeId))
         }
 
         public sep():TokenWriter
@@ -39,6 +46,30 @@ module TDev.AST {
         public kw(k:string) { return this.keyword(k) }
     }
 
+    class ConverterPrep
+        extends NodeVisitor
+    {
+        private numAwaits = 0;
+
+        visitAstNode(n:AstNode)
+        {
+            this.visitChildren(n);
+        }
+
+        visitStmt(s:Stmt)
+        {
+            var pre = this.numAwaits;
+            super.visitStmt(s)
+            s._converterAwait = pre < this.numAwaits
+        }
+
+        visitExprHolder(eh:ExprHolder)
+        {
+            if (eh.isAwait)
+                this.numAwaits++
+        }
+    }
+
     export class Converter 
         extends NodeVisitor 
     {
@@ -52,6 +83,7 @@ module TDev.AST {
 
         public run()
         {
+            new ConverterPrep().dispatch(this.app)
             this.dispatch(this.app)
             return this.tw.finalize()
         }
@@ -63,8 +95,15 @@ module TDev.AST {
 
         private type(t:Kind)
         {
-            //TODO
-            this.tw.kind(this.app, t)
+            if (/^(String|Number|Boolean)$/.test(t.toString()))
+                this.tw.id(t.toString().toLowerCase())
+            else if (t.getRoot() == api.core.Collection) {
+                this.type(t.getParameter(0))
+                this.tw.op0("[]")
+            } else {
+                //TODO
+                this.tw.kind(this.app, t)
+            }
             return this.tw
         }
 
@@ -137,11 +176,11 @@ module TDev.AST {
                 }
 
             } else if (e.referencedData()) {
-                this.tw.globalId(e.referencedData().getName())
+                this.tw.globalId(e.referencedData())
             } else if (e.calledAction()) {
-                this.tw.globalId(e.calledAction().getName())
+                this.tw.globalId(e.calledAction())
                 params(e.args.slice(1))
-            } else if (pn == "App->javascript" || pn == "App->javascript async") {
+            } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
             } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
@@ -163,7 +202,7 @@ module TDev.AST {
                 this.tw.op0("(<")
                 this.type(e.getKind())
                 this.tw.op0(">[])")
-            } else if (/^(Json|Collection).*->count$/.test(pn)) {
+            } else if (/->count$/.test(pn)) {
                 this.tightExpr(e.args[0])
                 this.tw.op0(".length")
             } else if (/^(Json|Collection).*->add$/.test(pn)) {
@@ -262,27 +301,33 @@ module TDev.AST {
                 this.simpleId(d.getName())
         }
 
-        visitExprStmt(es:ExprStmt)
-        {
-            if (es.isVarDef())
-                this.tw.kw("var")
-            this.dispatch(es.expr)
-            this.tw.op0(";").nl()
-        }
-
         visitAnyIf(i:If)
         {
             var tw = this.tw
-            if (i.isElseIf)
-                tw.keyword("else")
-            tw.keyword("if").sep().op0("(")
-            this.dispatch(i.rawCondition)
-            tw.op0(")")
-            this.dispatch(i.rawThenBody)
-            if (!i.rawElseBody.isBlockPlaceholder()) {
-                tw.keyword("else")
-                this.dispatch(i.rawElseBody)
+            if (i.isTopCommentedOut()) {
+                tw.op0("/*").nl()
+                this.dispatch(i.rawThenBody)
+                tw.op0("*/").nl()
+                return
             }
+
+            if (!i.branches) return
+
+            i.branches.forEach((b, k) => {
+                if (!b.condition) {
+                    if (!b.body.isBlockPlaceholder()) {
+                        tw.keyword("else")
+                        this.dispatch(b.body)
+                    }
+                } else {
+                    if (k > 0)
+                        tw.keyword("else")
+                    tw.keyword("if").sep().op0("(")
+                    this.dispatch(b.condition)
+                    tw.op0(")")
+                    this.dispatch(b.body)
+                }
+            })
         }
 
         visitWhile(n:While)
@@ -294,10 +339,72 @@ module TDev.AST {
             this.dispatch(n.body)
         }
 
+        visitExprStmt(es:ExprStmt)
+        {
+            if (es.isVarDef())
+                this.tw.kw("var")
+            this.dispatch(es.expr)
+            this.tw.op0(";").nl()
+        }
+
+        codeBlockInner(b:CodeBlock)
+        {
+            var inThen = false
+            b.stmts.forEach((s, i) => {
+                if (!s._converterAwait) {
+                    this.dispatch(s)
+                    return
+                }
+
+                if (s instanceof ExprStmt) {
+                    this.tw.write("return ")
+                    var es = <ExprStmt>s
+                    if (es.expr.parsed.calledProp() == api.core.AssignmentProp) {
+                        var c = <Call>es.expr.parsed
+                        this.dispatch(c.args[1])
+                        this.tw.nl()
+                        if (inThen) this.tw.endBlock(")")
+                        if (i == b.stmts.length - 1) {
+                            this.tw.write(".then(_ => ")
+                            this.dispatch(c.args[0])
+                            this.tw.write(" = _)").nl()
+                            inThen = false
+                        } else {
+                            this.tw.write(".then(_ => ").beginBlock()
+                            this.dispatch(c.args[0])
+                            this.tw.write(" = _;").nl()
+                            inThen = true
+                        }
+                        return
+                    } else {
+                        this.dispatch(es.expr)
+                        this.tw.op0(";").nl()
+                        if (inThen) this.tw.endBlock(")")
+                    }
+                } else if (inThen) {
+                    this.dispatch(s)
+                    this.tw.endBlock(")")
+                } else {
+                    this.tw.write("return Promise.as()").nl()
+                    this.tw.write(".then(() => ").beginBlock()
+                    this.dispatch(s)
+                    this.tw.endBlock(")")
+                }
+
+                if (i == b.stmts.length - 1)
+                    inThen = false
+                else {
+                    this.tw.write(".then(() => ").beginBlock()
+                    inThen = true
+                }
+            })
+            if (inThen) this.tw.endBlock(")")
+        }
+
         visitCodeBlock(b:CodeBlock)
         {
             this.tw.beginBlock()
-            b.stmts.forEach(s => this.dispatch(s))
+            this.codeBlockInner(b)
             this.tw.endBlock()
         }
 
@@ -305,7 +412,7 @@ module TDev.AST {
         {
             this.localCtx = new TsQuotingCtx()
             this.tw.kw("export function")
-            this.tw.globalId(a.getName()).op0("(");
+            this.tw.globalId(a).op0("(");
             a.getInParameters().forEach((p, i) => {
                 if (i > 0) this.tw.op0(",")
                 this.localDef(p.local)
@@ -335,7 +442,7 @@ module TDev.AST {
                 this.tw.op0(";").nl()
             })
 
-            a.body.stmts.forEach(s => this.dispatch(s))
+            this.codeBlockInner(a.body)
 
             if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
