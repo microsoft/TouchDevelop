@@ -6,7 +6,7 @@
 
 module TDev.AST
 {
-    var innerAsyncWarning = true;
+    var innerAsyncWarning = false;
 
     export class TypeResolver
         extends NodeVisitor

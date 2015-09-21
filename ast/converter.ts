@@ -46,6 +46,20 @@ module TDev.AST {
         public kw(k:string) { return this.keyword(k) }
     }
 
+    class AsyncFinder
+        extends ExprVisitor
+    {
+        public lastAsync:Call;
+
+        visitCall(c:Call)
+        {
+            if (c.awaits())
+                this.lastAsync = c;
+            super.visitCall(c)
+        }
+
+    }
+
     class ConverterPrep
         extends NodeVisitor
     {
@@ -65,7 +79,7 @@ module TDev.AST {
 
         visitExprHolder(eh:ExprHolder)
         {
-            if (eh.isAwait)
+            if (eh.isAwait) 
                 this.numAwaits++
         }
     }
@@ -75,6 +89,7 @@ module TDev.AST {
     {
         private tw = new TsTokenWriter();
         private localCtx = new TsQuotingCtx();
+        private currAsync:Call;
 
         constructor(private app:App)
         {
@@ -96,7 +111,7 @@ module TDev.AST {
         private type(t:Kind)
         {
             if (/^(String|Number|Boolean)$/.test(t.toString()))
-                this.tw.id(t.toString().toLowerCase())
+                this.tw.jsid(t.toString().toLowerCase())
             else if (t.getRoot() == api.core.Collection) {
                 this.type(t.getParameter(0))
                 this.tw.op0("[]")
@@ -133,6 +148,20 @@ module TDev.AST {
         }
 
         visitCall(e:Call)
+        {
+            if (e == this.currAsync) {
+                this.tw.jsid("_")
+                return
+            }
+
+            if (e.awaits()) {
+                this.tw.write(" /* ASYNC */ ")
+            }
+
+            this.visitCallInner(e)
+        }
+
+        visitCallInner(e:Call)
         {
             var p = e.getCalledProperty()
             var infixPri = this.infixPri(e)
@@ -180,6 +209,9 @@ module TDev.AST {
             } else if (e.calledAction()) {
                 this.tw.globalId(e.calledAction())
                 params(e.args.slice(1))
+                // TODO library calls
+                // TODO extension methods
+                // TODO record fields
             } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
@@ -279,7 +311,7 @@ module TDev.AST {
         {
             if (l.data === undefined) return
             if (typeof l.data == "number")
-                this.tw.write(l.stringForm)
+                this.tw.write(l.stringForm || l.data.toString())
             else if (typeof l.data == "string")
                 this.tw.write(JSON.stringify(l.data))
             else if (typeof l.data == "boolean")
@@ -299,6 +331,7 @@ module TDev.AST {
             }
             else
                 this.simpleId(d.getName())
+            // TODO placeholder for options
         }
 
         visitAnyIf(i:If)
@@ -330,6 +363,9 @@ module TDev.AST {
             })
         }
 
+        // TODO for
+        // TODO foreach
+
         visitWhile(n:While)
         {
             var tw = this.tw
@@ -358,29 +394,32 @@ module TDev.AST {
 
                 if (s instanceof ExprStmt) {
                     this.tw.write("return ")
-                    var es = <ExprStmt>s
-                    if (es.expr.parsed.calledProp() == api.core.AssignmentProp) {
-                        var c = <Call>es.expr.parsed
-                        this.dispatch(c.args[1])
-                        this.tw.nl()
-                        if (inThen) this.tw.endBlock(")")
-                        if (i == b.stmts.length - 1) {
+                    var expr = (<ExprStmt>s).expr.parsed
+                    var af = new AsyncFinder()
+                    af.dispatch(expr)
+                    this.visitCallInner(af.lastAsync)
+                    this.tw.nl()
+                    if (inThen) this.tw.endBlock(")")
+
+                    this.currAsync = af.lastAsync
+                    if (i == b.stmts.length - 1) {
+                        if (expr != af.lastAsync) {
                             this.tw.write(".then(_ => ")
-                            this.dispatch(c.args[0])
-                            this.tw.write(" = _)").nl()
-                            inThen = false
-                        } else {
-                            this.tw.write(".then(_ => ").beginBlock()
-                            this.dispatch(c.args[0])
-                            this.tw.write(" = _;").nl()
-                            inThen = true
+                            this.dispatch(expr)
+                            this.tw.write(")").nl()
                         }
-                        return
+                        inThen = false
                     } else {
-                        this.dispatch(es.expr)
-                        this.tw.op0(";").nl()
-                        if (inThen) this.tw.endBlock(")")
+                        this.tw.write(".then(_ => ").beginBlock()
+                        if (expr != af.lastAsync) {
+                            this.dispatch(expr)
+                            this.tw.op0(";").nl();
+                        }
+                        inThen = true
                     }
+                    this.currAsync = null
+
+                    return
                 } else if (inThen) {
                     this.dispatch(s)
                     this.tw.endBlock(")")
