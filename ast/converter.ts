@@ -24,6 +24,12 @@ module TDev.AST {
             return this.jsid(this.globalCtx.quote(id, 0))
         }
 
+        public sep():TokenWriter
+        {
+            if (" ([.".indexOf(this.lastChar) >= 0) return this;
+            return super.sep();
+        }
+
         public jsid(id:string) {
             if (!/^[a-zA-Z_]\w*$/.test(id))
                 Util.oops("bad id: " + id)
@@ -64,7 +70,7 @@ module TDev.AST {
 
         private localDef(l:LocalDef)
         {
-            this.localName(l).op(":")
+            this.localName(l).op0(":")
             return this.type(l.getKind())
         }
 
@@ -77,6 +83,13 @@ module TDev.AST {
         {
             var p = e.getCalledProperty()
             if (!p) return 0
+            if (p.parentKind == api.core.String) {
+                if (p.getName() == "equals")
+                    return 5
+                // + in JS
+                if (p == api.core.StringConcatProp)
+                    return 10
+            }
             return p.getInfixPriority() || 0
         }
 
@@ -117,7 +130,9 @@ module TDev.AST {
                     doParen(e.args[0])
                 } else {
                     doParen(e.args[0])
-                    this.printOp(p.getName())
+                    var nn = p.getName()
+                    if (nn == "equals") nn = "=="
+                    this.printOp(nn)
                     doParen(e.args[1])
                 }
 
@@ -129,17 +144,59 @@ module TDev.AST {
             } else if (pn == "App->javascript" || pn == "App->javascript async") {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
-            } else {
-                if (e.args[0] instanceof Call && !e.args[0].referencedData()) {
-                    this.tw.op0("(")
-                    this.dispatch(e.args[0])
-                    this.tw.op0(")")
-                } else {
-                    this.dispatch(e.args[0])
+            } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
+                       /->set at$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.op0("[")
+                this.dispatch(e.args[1])
+                this.tw.op0("] = ").sep()
+                this.dispatch(e.args[2])
+            } else if (/^Json (Builder|Object)->(string|number|boolean|field)$/.test(pn) ||
+                       /->at$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.op0("[")
+                this.dispatch(e.args[1])
+                this.tw.op0("]")
+            } else if (pn == "Web->create json builder") {
+                this.tw.op0("{}")
+            } else if (pn == "Create->collection of" || /^Collections->.* collection$/.test(pn)) {
+                this.tw.op0("(<")
+                this.type(e.getKind())
+                this.tw.op0(">[])")
+            } else if (/^(Json|Collection).*->count$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.op0(".length")
+            } else if (/^(Json|Collection).*->add$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.op0(".push(")
+                this.dispatch(e.args[1])
+                this.tw.op0(")")
+            } else if (pn == "Web->json") {
+                if (e.args[1].getLiteral())
+                    this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
+                else {
+                    this.tw.write("JSON.parse(")
+                    this.dispatch(e.args[1])
+                    this.tw.write(")")
                 }
+            } else {
+                this.tightExpr(e.args[0])
                 this.tw.op0(".")
                 this.simpleId(p.getName())
                 params(e.args.slice(1))
+            }
+        }
+
+        tightExpr(e:Expr)
+        {
+            if (e instanceof ThingRef ||
+                (e instanceof Call && this.infixPri(e) == 0) ||
+                e instanceof Literal) {
+                this.dispatch(e)
+            } else {
+                this.tw.op0("(")
+                this.dispatch(e)
+                this.tw.op0(")")
             }
         }
 
@@ -182,7 +239,14 @@ module TDev.AST {
         visitLiteral(l:Literal)
         {
             if (l.data === undefined) return
-            l.writeTo(this.tw)
+            if (typeof l.data == "number")
+                this.tw.write(l.stringForm)
+            else if (typeof l.data == "string")
+                this.tw.write(JSON.stringify(l.data))
+            else if (typeof l.data == "boolean")
+                this.tw.kw(l.data ? "true" : "false")
+            else
+                l.writeTo(this.tw)
         }
 
         visitThingRef(t:ThingRef)
@@ -190,14 +254,20 @@ module TDev.AST {
             var d = t.def
             if (d instanceof LocalDef)
                 this.localName(<LocalDef>d)
+            else if (d instanceof SingletonDef) {
+                this.tw.write("TD.")
+                this.simpleId(d.getName())
+            }
             else
                 this.simpleId(d.getName())
         }
 
         visitExprStmt(es:ExprStmt)
         {
+            if (es.isVarDef())
+                this.tw.kw("var")
             this.dispatch(es.expr)
-            this.tw.op(";").nl()
+            this.tw.op0(";").nl()
         }
 
         visitAnyIf(i:If)
@@ -205,14 +275,23 @@ module TDev.AST {
             var tw = this.tw
             if (i.isElseIf)
                 tw.keyword("else")
-            tw.keyword("if").op("(")
+            tw.keyword("if").sep().op0("(")
             this.dispatch(i.rawCondition)
-            tw.op(")")
+            tw.op0(")")
             this.dispatch(i.rawThenBody)
             if (!i.rawElseBody.isBlockPlaceholder()) {
                 tw.keyword("else")
                 this.dispatch(i.rawElseBody)
             }
+        }
+
+        visitWhile(n:While)
+        {
+            var tw = this.tw
+            tw.keyword("while").sep().op0("(")
+            this.dispatch(n.condition)
+            tw.op0(")")
+            this.dispatch(n.body)
         }
 
         visitCodeBlock(b:CodeBlock)
@@ -228,7 +307,7 @@ module TDev.AST {
             this.tw.kw("export function")
             this.tw.globalId(a.getName()).op0("(");
             a.getInParameters().forEach((p, i) => {
-                if (i > 0) this.tw.op(",")
+                if (i > 0) this.tw.op0(",")
                 this.localDef(p.local)
             })
             this.tw.op0(")").op(":");
@@ -239,7 +318,7 @@ module TDev.AST {
                 else {
                     this.tw.op("{")
                     outp.forEach(p => {
-                        this.localDef(p.local).op(";")
+                        this.localDef(p.local).op0(";")
                     })
                     this.tw.op("}")
                 }
@@ -248,7 +327,22 @@ module TDev.AST {
             }
 
             this.tw.nl()
-            this.dispatch(a.body)
+            this.tw.beginBlock()
+
+            a.getOutParameters().forEach(p => {
+                this.tw.kw("var")
+                this.localDef(p.local)
+                this.tw.op0(";").nl()
+            })
+
+            a.body.stmts.forEach(s => this.dispatch(s))
+
+            if (a.getOutParameters().length == 1) {
+                this.tw.kw("return")
+                this.localName(a.getOutParameters()[0].local).op0(";").nl()
+            }
+
+            this.tw.endBlock()
         }
     }
 }
