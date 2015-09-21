@@ -6486,14 +6486,6 @@
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
-
-                // scripts are uninstalled when deleted
-                // however, another client might still be synching those changes
-                // so we uninstall again here
-                if (deleted) {
-                    this.uninstallAsync(false).done();
-                    return;
-                }
                                 
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
