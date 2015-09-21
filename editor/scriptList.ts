@@ -8987,7 +8987,7 @@
 
         public mkTabsCore(): BrowserTab[] {
             var tabs: BrowserTab[] = [
-                new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
+                Cloud.isRestricted() ? null : new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
                 new GroupUsersTab(this),
                 this.collaborations = Cloud.isRestricted() ? null : new CollaborationsTab(this),
                 Cloud.isRestricted() ? null : new GroupUserProgressTab(this),
