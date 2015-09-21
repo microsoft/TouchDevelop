@@ -852,7 +852,10 @@ module TDev
             if (n.action.isActionTypeDef())
                 hd += this.kw(" type")
 
-            hd += this.stmt(n.action.nameHolder, this.tline(this.id(n.getName())));
+            if (n.getName() == "main")            
+                hd += this.id(n.getName());
+            else
+                hd += this.stmt(n.action.nameHolder, this.tline(this.id(n.getName())));
 
             if (n.action.hasInParameters()) {
                 hd += this.op(" (");
