@@ -28,7 +28,7 @@ module TDev.AST {
                     n += "Async"
 
             }
-            return this.jsid(this.globalCtx.quote(n, d.nodeId))
+            return this.jsid(this.globalCtx.quote(n, 0))
         }
 
         public sep():TokenWriter
@@ -68,6 +68,14 @@ module TDev.AST {
         visitAstNode(n:AstNode)
         {
             this.visitChildren(n);
+        }
+
+        visitInlineActions(s:InlineActions)
+        {
+            var pre = this.numAwaits;
+            this.dispatch(s.expr);
+            s._converterAwait = pre < this.numAwaits
+            super.visitStmt(s)
         }
 
         visitStmt(s:Stmt)
@@ -206,12 +214,21 @@ module TDev.AST {
 
             } else if (e.referencedData()) {
                 this.tw.globalId(e.referencedData())
+            } else if (e.referencedLibrary()) {
+                this.tw.globalId(e.referencedLibrary())
+            } else if (e.referencedRecord()) {
+                this.tw.globalId(e.referencedRecord())
+            } else if (e.referencedRecordField()) {
+                this.tightExpr(e.args[0])
+                this.tw.op0(".");
+                this.simpleId(e.referencedRecordField().getName())
             } else if (e.calledAction()) {
+                if (!(e.args[0].getKind() instanceof ThingSetKind)) {
+                    this.tightExpr(e.args[0])
+                    this.tw.op0(".")
+                }
                 this.tw.globalId(e.calledAction())
                 params(e.args.slice(1))
-                // TODO library calls
-                // TODO extension methods
-                // TODO record fields
             } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
@@ -387,6 +404,11 @@ module TDev.AST {
         {
             var inThen = false
             b.stmts.forEach((s, i) => {
+                if (s.isPlaceholder()) {
+                    if (i > 0)
+                        this.tw.nl()
+                    return
+                }
                 if (!s._converterAwait) {
                     this.dispatch(s)
                     return
