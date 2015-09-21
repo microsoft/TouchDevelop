@@ -170,7 +170,7 @@ module TDev
                 if (toRename) {
                     op.decl = toRename
                     op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header :
-                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).recordNameHolder :
+                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).nameHolder :
                               toRename instanceof AST.GlobalDef ? (<AST.GlobalDef>toRename) : null
                     op.targetName = this.data.declName()
                 } else {

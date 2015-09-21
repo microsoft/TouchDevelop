@@ -243,7 +243,7 @@ module TDev
             return Renderer.tspan("stringLiteral", "\"" + Renderer.quoteString(TDev.RT.String_.trim_overflow(v, lim)) + "\"");
         }
 
-        public visitRecordName(n: AST.RecordName) {
+        public visitDeclName(n: AST.DeclName) {
             return this.id(n.data);
         }
 
@@ -935,7 +935,7 @@ module TDev
                 ? "&nbsp;"
                 : "";
             var kw2 = this.stmt(n.recordKind, this.tline(this.kw(n.getDefTerminology())));
-            var kw3 = this.stmt(n.recordNameHolder, this.tline(this.id(n.getCoreName())));
+            var kw3 = this.stmt(n.nameHolder, this.tline(this.id(n.getCoreName())));
             var header = this.diffLine(n, n.diffAltDecl, n => [kw1, spacer, kw2, "&nbsp;", kw3])
             return this.stmt(n, this.possibleError(n) + header + keys + values);
         }

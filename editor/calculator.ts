@@ -875,7 +875,7 @@ module TDev
                 this.editOptional(optionsParm)
 
             // Edit the record name right away, that's all we can do anyhow.
-            if (s instanceof AST.RecordNameHolder) {
+            if (s instanceof AST.DeclNameHolder) {
                 this.inlineEdit(this.expr.tokens[0]);
             }
 
@@ -920,7 +920,7 @@ module TDev
         private backspace(isDel = false)
         {
             tick(Ticks.calcBackspace);
-            if (this.stmt instanceof AST.RecordNameHolder)
+            if (this.stmt instanceof AST.DeclNameHolder)
                 return;
 
             var now = Util.now();
@@ -1299,7 +1299,7 @@ module TDev
                     this.switchToNormalKeypad();
                 this.display();
                 editor.selector.positionButtonRows();
-                if (this.stmt instanceof AST.RecordNameHolder)
+                if (this.stmt instanceof AST.DeclNameHolder)
                     editor.dismissSidePane();
             };
 
@@ -2033,7 +2033,7 @@ module TDev
         {
             if (typeof l.data == "string" && !l.enumVal) {
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
-                if (l instanceof AST.FieldName || l instanceof AST.RecordName)
+                if (l instanceof AST.FieldName || l instanceof AST.DeclName)
                     e.nameOverride = lf("rename");
                 else e.nameOverride = lf("edit");
                 e.descOverride = lf("change contents");
@@ -2127,7 +2127,7 @@ module TDev
 
         private intelliNew(off:number, q:number)
         {
-            if (this.stmt instanceof AST.RecordNameHolder)
+            if (this.stmt instanceof AST.DeclNameHolder)
                 return;
 
             var e = this.mkIntelliItem(q, Ticks.calcNewLine);
@@ -2249,7 +2249,7 @@ module TDev
             // Approximate test for determining whether we should show
             // suggestions.
             if ((this.stmt instanceof AST.RecordField || this.stmt instanceof AST.ActionParameter) &&
-                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.RecordNameHolder)
+                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.DeclNameHolder)
             {
                 return;
             }
