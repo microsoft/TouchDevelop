@@ -2414,6 +2414,12 @@ module TDev
 
         public cutDecl(decl:AST.Decl, dontCopy = false)
         {
+            if (decl.nodeType() == "action" && decl.getName() == "main" && !Script.isLibrary) {
+                // not allowed to delete "main" in non-library scripts
+                Util.log("cancelled main cut");
+                return;
+            }
+            
             if (decl == Script) {
                 ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
                     lf("uninstall"),
