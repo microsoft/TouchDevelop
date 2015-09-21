@@ -47,7 +47,7 @@ module TDev.AST
         private nameMapping: any = {};
         private usedNames:any = {};
 
-        private unUnicode(s:string)
+        public unUnicode(s:string)
         {
             s = s.replace(/[^a-zA-Z0-9]+/g, "_");
             if (s == "" || /^[0-9]/.test(s)) s = "_" + s;

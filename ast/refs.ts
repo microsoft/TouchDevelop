@@ -24,3 +24,4 @@
 ///<reference path='merge.ts'/>
 ///<reference path='apps.ts'/>
 ///<reference path='fixer.ts'/>
+///<reference path='converter.ts'/>
