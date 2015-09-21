@@ -1274,7 +1274,7 @@ module TDev
             return wrapper;
         }
 
-        private inlineLiteralEditor(l: AST.Literal) {
+        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean) {
             var hint = "";
             if (this.currentInstruction && this.currentInstruction.languageHint == l.languageHint && this.currentInstruction.editString)
                 hint = this.currentInstruction.editString;    
@@ -1282,14 +1282,15 @@ module TDev
             var literalEditor: LiteralEditor;
             if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true, hint);
             else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false, hint);
-            else literalEditor = new TextLiteralEditor(this, l);
+            else literalEditor = new TextLiteralEditor(this, l, fullScreen);
             return literalEditor;
         }
 
         private inlineEditString(l:AST.Literal)
         {
             var editor = TheEditor;
-            var literalEditor = this.inlineLiteralEditor(l);
+            var renaming = this.stmt instanceof AST.DeclNameHolder;
+            var literalEditor = this.inlineLiteralEditor(l, !renaming);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
@@ -1299,7 +1300,7 @@ module TDev
                     this.switchToNormalKeypad();
                 this.display();
                 editor.selector.positionButtonRows();
-                if (this.stmt instanceof AST.DeclNameHolder) {
+                if (renaming) {
                     editor.dismissSidePane();
                     editor.queueNavRefresh();
                 }
