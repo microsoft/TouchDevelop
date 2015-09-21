@@ -495,8 +495,17 @@ module TDev {
   }
 
   function doCompile(msgSel?: string) {
-    var msg = JSON.parse('{ "type": 9, "ast": { "nodeType": "app", "id": null, "textVersion": "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex", "jsonVersion": "v0.1,resolved", "name": "miraculous script", "comment": "MicrobitComment", "description": "Action converted from the Code Kingdoms editor.", "autoIcon": "", "autoColor": "", "platform": "current", "isLibrary": false, "allowExport": true, "showAd": false, "hasIds": false, "rootId": "TODO", "decls": [ { "nodeType": "action", "id": null, "name": "main", "body": [ { "nodeType": "while", "condition": { "nodeType": "exprHolder", "id": null, "locals": [], "tokens": null, "tree": { "nodeType": "booleanLiteral", "id": null, "value": true } }, "body": [ { "nodeType": "exprStmt", "id": null, "expr": { "nodeType": "exprHolder", "id": null, "tokens": null, "tree": { "nodeType": "call", "id": null, "name": "fadeTo", "parent": "CK", "args": [ { "args": [ { "nodeType": "singletonRef", "id": null, "name": "♻", "type": "♻" } ], "name": "CK", "id": null, "nodeType": "call", "parent": "♻" }, { "nodeType": "numberLiteral", "id": null, "value": 120 }, { "nodeType": "numberLiteral", "id": null, "value": 1000 } ] }, "locals": [] } }, { "nodeType": "exprStmt", "id": null, "expr": { "nodeType": "exprHolder", "id": null, "tokens": null, "tree": { "nodeType": "call", "id": null, "name": "show string", "parent": "micro:bit", "args": [ { "args": [ { "nodeType": "singletonRef", "id": null, "name": "♻", "type": "♻" } ], "name": "micro:bit", "id": null, "nodeType": "call", "parent": "♻" }, { "nodeType": "stringLiteral", "id": null, "value": "Hello" }, { "nodeType": "numberLiteral", "id": null, "value": 150 } ] }, "locals": [] } }, { "nodeType": "exprStmt", "id": null, "expr": { "nodeType": "exprHolder", "id": null, "tokens": null, "tree": { "nodeType": "call", "id": null, "name": "pause", "parent": "micro:bit", "args": [ { "nodeType": "call", "id": null, "name": "micro:bit", "parent": "♻", "args": [ { "nodeType": "singletonRef", "id": null, "name": "♻", "type": "♻" } ] }, { "nodeType": "numberLiteral", "id": null, "value": 0 } ] }, "locals": [] } } ] } ], "inParameters": [], "outParameters": [], "isPrivate": false, "isOffline": false, "isQuery": false, "isTest": false, "isAsync": true, "description": "Action converted from CK JavaScript" } ], "deletedDecls": [] }, "libs": { "micro:bit": "lwhfye", "CK": { "pubId": "xnkohp", "depends": [ "micro:bit" ] } } }');
-    post(<any> msg);
+    var ast = compileOrError(msgSel);
+    if (!ast)
+      return;
+    $("#command-compile > .roundsymbol").addClass("compiling");
+    post(<External.Message_Compile> {
+      type: External.MessageType.Compile,
+      text: ast,
+      language: External.Language.TouchDevelop,
+      name: getName(),
+      libs: libs,
+    });
   }
 
   function setupButtons(fota: boolean) {
