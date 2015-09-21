@@ -327,6 +327,7 @@ module TDev.Browser {
                     stringConcatProperty: true,
                     show: true,                
                     "return": true,
+                    gotoNavigation: true,
                     // sections
                     dataSection: true,
                     // artSection: true,
