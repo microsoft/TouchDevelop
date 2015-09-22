@@ -68,8 +68,9 @@ body, input {
 }
 
 #script-name {
-  font-size: 2.6rem;
-  line-height: normal !important;
+  font-size: 2.4rem;
+  line-height: 3rem !important;
+  height: 3rem !important;
 }
 
 #script-name, #script-description {
