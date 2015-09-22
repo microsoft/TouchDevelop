@@ -546,7 +546,7 @@ module TDev
                 KeyboardMgr.instance.register("Down", e => {
                     var selected = selectedItem();
                     if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
-                    else if(selected.nextElementSibling) {
+                    else if(selected && selected.nextElementSibling) {
                         selected.setFlag("current", false);
                         selected.nextElementSibling.setFlag("current", true);
                         (<HTMLElement>selected.nextElementSibling).scrollIntoView(false);
@@ -554,9 +554,9 @@ module TDev
                     return true;
                 });
                 KeyboardMgr.instance.register("Up", e => {
-                    var selected = selectedItem();
+                    var selected = selectedItem();                    
                     if (!selected && list.lastElementChild) list.lastElementChild.setFlag("current", true);
-                    else if(selected.previousElementSibling) {
+                    else if(selected && selected.previousElementSibling) {
                         selected.setFlag("current", false);
                         selected.previousElementSibling.setFlag("current", true);
                         (<HTMLElement>selected.previousElementSibling).scrollIntoView(false);
