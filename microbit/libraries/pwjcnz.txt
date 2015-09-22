@@ -1,0 +1,154 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "flashing heart tutorial";
+meta rootId "xJRCBH3YIz4bMjLLSt5QrX5U";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// control images with variables. #microbit #docs #tutorials #stepByStep
+#xkPpDa5IUqmg0Bd4
+action \u00230_main() {
+  #xMZvXjdlMZuY7Gh2 // {box:avatar:avatar}
+  #TXbKj0n88SBT3ZHf // Let's begin by creating a forever loop so that the heart can continuously flash.
+  #CBojua4OheEvSsyS // {stcode}
+  #ZV0rfKH4IuiF3zOj // {/box}
+  #iZkyEfHTeHpYToEd basic[lib micro\u003abit] →forever;
+  #hb1ScsYK7CtQY9OP where `implicit` \_body\_() {
+    #EzH5zRoLqL44TUmF // {box:avatar:avatar}
+    #jyAdrhhmtT4QzZZo // Now let's plot and display a heart image on the BBC micro:bit.
+    #xTUlIt18NLalsjIr // {stcode}
+    #K4vgzySzJftYLZpC // {/box}
+    #y4ytMLcGIthzjN1o basic[lib micro\u003abit] →plot_image("0 1 0 1 0\n1 1 1 1 1\n1 1 1 1 1\n0 1 1 1 0\n0 0 1 0 0");
+    #at2Say7Gx8U2BYGv // {stcmd:run}
+    #MlJGHtZzGZjhJihV // {box:avatar:avatar}
+    #xP8t2A5p1B2evsLe // We need to pause for a little bit before clearing the screen or else the heart disappears immediately.
+    #yKM2h4ak62gaL9pC // {stcode}
+    #ZmWcEfydvWI4hGyG // {/box}
+    #zXZvzZp0XgYYaFrD basic[lib micro\u003abit] →pause(500);
+    #XUfrbYD8sr3fKWw1 // {box:avatar:avatar}
+    #qco45OxAC5HxnC4v // Now we can clear the screen.
+    #h2ebe2tRVqF4neZS // {stcode}
+    #bObnG5tr7OOOOatS // {/box}
+    #x5Ki4UC3eCnl7l2C basic[lib micro\u003abit] →clear_screen;
+    #IDViNSdGTOnRj9j7 // {box:avatar:avatar}
+    #z3WVR7UxQH8jY1TK // Again, we need to pause, this time before showing the image again.
+    #LN2StgzgB42hq3kR // {stcode}
+    #TCEAlSxTntoHyJEP // {/box}
+    #bg0wqIA3xh2krx02 basic[lib micro\u003abit] →pause(500);
+  }
+  #sL2YLOSW5pT00Ai6 // {stcmd:compile}
+}
+#T6l6bj8oRmkmUB2v meta import micro\u003abit {
+  pub "zmisat"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `async` add_button(text: String, @action: Action)
+  }
+}
+#x4334a31V1ZL6vj2
+action main() {
+  #BmrvZRXOS4UrAj3l // {topic:td/lessons/flashing-heart/tutorial}
+  #xNXZYjYB26M2UR9a // {template:empty}
+  #xCHA3gKFfilgUMTF // {templatename:ADJ script}
+  #DPm4qTiKKiAoe50f // {widgets:}
+  #wUr6BCeteY5gewoV // {box:avatar:boothing}
+  #xVT2NZpWJlOxhD2j // {videoptr:td/videos/flashing-heart-0}
+  #xP342IFDvLzjwRal // Welcome! This tutorial will teach how to control images with variables. Let's get started!
+  #xgIGusXyGCBXRcP4 // {/box}
+}
+#xofTBUKer21CfPXD
+var boothing : Picture {
+  is\_resource = true;
+  url = "https://microbit0.blob.core.windows.net/pub/vflboela";
+  transient = true;
+}
+#Aftcl64H2g55Hyhu
+var avatar : Picture {
+  is\_resource = true;
+  url = "https://microbit0.blob.core.windows.net/pub/lqakekjj";
+  transient = true;
+}
+#xeaHV4Ipb2u4xIcD meta import micro\u003abit_game {
+  pub "rdnlgg"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` test_countdown()
+    action `async` start_stopwatch()
+    action `async` test_countdown_current_time()
+    action `async` test_current_time()
+  }
+  #nA4ZgKJNCBmjHKlq resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#x6osd3CtcNu5Eegx meta import micro\u003abit_senses {
+  pub "rqusix"
+  usage {
+    action `async` on_screen_up(body: Action)
+    action `async` on_screen_down(body: Action)
+    action `async` on_shake(body: Action)
+    action `async` on_logo_up(body: Action)
+    action `async` on_logo_down(body: Action)
+  }
+  #CoaZi46RdY8kqGj6 resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#ach18H4dH9oQqWWo meta import micro\u003abit_screen {
+  pub "nzngii"
+  usage {
+    action `async` toggle(x: Number, y: Number)
+    action `async` plot_all()
+    action `async` toggle_all()
+    action `async` fade_in(ms: Number)
+    action `async` fade_out(ms: Number)
+    action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
+  }
+  #mhP3mRKX8ShrxcEq resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}

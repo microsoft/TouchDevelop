@@ -1,0 +1,40 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="device_forever" id="1" x="22" y="16">
+    <statement name="HANDLER">
+      <block type="device_plot" id="2" inline="true">
+        <value name="x">
+          <block type="math_number" id="3">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+        <value name="y">
+          <block type="math_number" id="4">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+        <next>
+          <block type="device_pause" id="5" inline="true">
+            <value name="pause">
+              <block type="math_number" id="6">
+                <field name="NUM">200</field>
+              </block>
+            </value>
+            <next>
+              <block type="device_clear_display" id="7">
+                <next>
+                  <block type="device_pause" id="8" inline="true">
+                    <value name="pause">
+                      <block type="math_number" id="9">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

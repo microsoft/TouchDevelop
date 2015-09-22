@@ -1,0 +1,2005 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit";
+meta icon "Command";
+meta color "#ff008000";
+meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// The BBC micro:bit device api. #microbit
+#init
+action \_libinit() {
+  #oCEOjqaW4CH7lS4r // Initialize the library
+  #aCYMP4THhnQkBd4N // {shim:}
+  #x3z5eK4ybVcTCWJh if data→board→is_invalid then {
+    #JjsD2sJPrJ6vUU5w data→counters := web→create_json_builder;
+    #dSJI8h1ZUeMsbz21 data→compass_heading_value := invalid→number;
+    #BamJivB3cALMYQoQ data→start_time := time→now;
+    #pJfHUw7KRZ5r6xTq data→board := media→create_portrait_board(612, 498 + 100);
+    #tGJciuV0e2iZndkr wall→set_background(colors→transparent);
+    #xHZJdg4oIJlrN7cX $picture := art→microbit_schema→clone;
+    #mes9Z70SlnN52zQT $padding := 27;
+    #q8k7EFimR0fMv4GZ $left := 205;
+    #xjbIl53FS2hhHDRL $@top := 156;
+    #xunTJ84HrUYQtyK7 $picture→fill_rect($left - $padding, $@top, 205 + $padding + 4, 200 + $padding + 4, 0, colors→black);
+    #aAHm3HC4MpRUsZ4n $picture→fill_rect(274, 74, 63, 16, 0, colors→black);
+    #xHQWCYdhMT39OHlO data→bkg := data→board→create_picture($picture);
+    #tduKnQa7ilnDwAR8 data→bkg→width := data→board→width;
+    #Y4hGkvffxjBnxeqh data→bkg→left := 0;
+    #biiwiRxx6lfA2TSm data→bkg→@top := 0;
+    #xYFT5Uzzo7KE5Kr1 code→create_buttons;
+    #CT4ZDKfwZOw9wE2M data→finger := data→board→create_ellipse(20, 20);
+    #JoeW2bsnEkDyWSyt data→finger→set_opacity(0);
+    #NAj8gc9TnnnW95KJ data→led_on_color := "#ff4f4f" →to_color;
+    #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
+    #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
+    #mEta1VHYHeLZUHiH data→back_leds := data→board→create_sprite_set;
+    #xWKGWdrq4hPuEt6s data→leds := data→board→create_sprite_set;
+    #PDctHCuC00kxArHt $back_led_color := "#202020" →to_color;
+    #SfZi0Q4PST9W8C6f $led_opacity := 127 / 255;
+    #md36WuHm2WM6OUim $led_w := 10;
+    #wL4ZbsjEBlcHVdT4 $led_offset := 48;
+    #czF5GDH9tIShJiHQ $led_h := 20;
+    #eOl4yTJgCvJGnDPC for 0 ≤ i < 5 do {
+      #xu2j46v9YsXKI68O $led_top := $i * $led_offset + $@top;
+      #VtKgwueOnr9ToKNo for 0 ≤ j < 5 do {
+        #xbwb4ptsRLHB8U2X $led_left := $j * $led_offset + $left;
+        #pjVTyTlf5kQ4qA6G $back_led := data→board→create_rectangle($led_w, $led_h);
+        #g3hU6N2QIM8jrYG2 $back_led→set_color($back_led_color);
+        #cuWZqw3O5y2yXQb5 $led := data→board→create_rectangle($led_w + 8, $led_h + 8);
+        #m96ZgbF29ABbEmoL $back_led→left := $led_left;
+        #xGiwGuU71Tu9FgU5 $back_led→@top := $led_top;
+        #QjqcjX5p0pAvotrx $led→x := $back_led→x;
+        #avXCJDNsL2TCMLfU $led→y := $back_led→y;
+        #GCX2ykJxlYVUyoYt $led→set_opacity($led_opacity);
+        #CHZZokuNOWAxkrC2 $led→set_color(data→led_off_color);
+        #g49uDAC8FfRzMF9O $led→set_shadow(10, colors→red, 0, 0);
+        #LZwZ7CQdOe5bMLP7 code→led_index_anim($back_led, $j, $i);
+        #N1DKQdDMWiPq5R3f data→back_leds→add($back_led);
+        #IwDQ2EgCXYvDIWQD data→leds→add($led);
+      }
+    }
+    #QIjvtSonf6Bx38tP code→init_eyes;
+    #auzjzpClkNJY94I3 code→init_axis;
+    #BlWLf7LrHMucdyNB code→init_pins;
+    #xVIOjGStCgdLjic6 code→update_axis;
+    #ByFADaJmirytJ02b code→background_animation;
+    #pNdJy7kyaeqKZhfS data→board→on_every_frame;
+    #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
+      #WF6Md7jUVLVAe3m4 code→update_board;
+    }
+    #MYgk7IsTxvU17LkN data→board→post_to_wall;
+  }
+  meta sync;
+}
+#example
+action example() {
+  #unS88qlSD4KUIFo3 // {topic:td/micro-bit-api}
+  #Nn25gD1f1VnaefC5 // {shim:}
+  #WtyCgbH9W8rsFzbE // This library lets you control your **BBC micro:bit**. [read more...](/td/contents).
+  meta private;
+}
+#board
+var board : Board {
+  // {shim:}
+  transient = true;
+}
+#starttime
+var start_time : DateTime {
+  // {shim:}
+  transient = true;
+}
+#pTYFKJ2dSVmrISHGn2Cvx1ak
+var leds : Sprite_Set {
+  // {shim:}
+  transient = true;
+}
+#delay
+action pause(#s4T6Z7saqVl4e7GI ms: Number) {
+  #xw0ceQXmgnW2YLkd // Pause for the specified time in milliseconds
+  #tkri0MjL1YpQLUMc // {help:functions/pause}
+  #aY6hM3Nf9YqDfRgi // {namespace:basic}
+  #oug4zW7u9u8tBZ1B // {weight:88}
+  #AEJQ04Cx4VKx2Rpc // {hints:ms:100,200,500,1000,2000}
+  #IwA49hY0PNZDrAK9 // {shim:micro_bit::pause}
+  #u4DOIK9VQzUgYTrN $ms := math→round($ms);
+  #tRxpGJplhnETomzN if $ms < 0 then {
+    #YNPa4d34bFB8by52 `return` ;
+  }
+  #GQyW248xhuAJWQPB if `not` data→before_pause→is_invalid then {
+    #oTDD8uv0Dx2hvZqB data→before_pause→run;
+  }
+  #xgfVUH6efvOMy24z app→allow_other_events;
+  #R9tJwE1rZG7RwmLw time→sleep(math→max(1, $ms) / 1000);
+}
+#v8iiJ26rxKIMp44uFEIBfxCW
+action set_led_state(#AfRF8uNgO84DQCu3 x: Number, #MRql0kRW2QFozyIw y: Number, #k48W7K4Qx24WBKJY state: Number) {
+  #xztCKIZ3qGbn4IBK // Sets the LED color
+  #iv3jy8xz84h7sofY // {shim:}
+  #atk33Oey3ER4dzFQ // {hints:state:1,0}
+  #anevNAi4IdyNVhyu $x := math→round($x);
+  #x0qMudFm7xUQCgA4 $y := math→round($y);
+  #iKK4wzIlvShFIBMi if $x < 0 `or` $x > 4 `or` $y < 0 `or` $y > 4 then {
+    #FzOSbWV86Hb54wRm `return` ;
+  }
+  #w44RwY4hgpRIgpHZ $led := data→leds→at(code→index($x, $y));
+  #oj4yNDnGGTQFvFOa code→set_led_color($state, $led);
+  #JtzjlP7mB1bd2Ogn code→update_board;
+  meta private;
+  meta sync;
+}
+#AVn5dHoZz4zk1U2cqDlwGBFI
+action test_board() {
+  #lxgHqHNb4A6nnQOR // {shim:}
+  #z60YvOdiDDDJUrSK code→\_libinit;
+  #xggqn1uH0YmirAs0 data→board→set_debug_mode(true);
+  #xbs7leriwIgIYW84 code→set_led_state(0, 0, 1);
+  #H2rlrr32Nr1cTRzG contract→assert(code→led_state(0, 0) = 1, "");
+  #pE0Lk2GcSwtMu6vO code→set_led_state(1, 1, 1);
+  #HRSkXl2cW0BeOvz4 contract→assert(code→led_state(1, 1) = 1, "");
+  #UuPVu5lhnJc26H43 code→set_led_state(2, 3, 1);
+  #q47JRBjbG423RGP7 contract→assert(code→led_state(2, 3) = 1, "");
+  meta private;
+  meta test;
+}
+#xbFe3E4xlaPVKqyQgLDbw44R
+action create_A_button() {
+  #xb4n7opYqhj4K5RQ // {shim:}
+  #fsNdOyLEOVKbaNzO data→button_a_inner := code→create_circle(45, 229);
+  #i0mbEct0JsGmR2IX data→button_a_inner→set_color(colors→black);
+  #x0bngB2zwD5YNqhc data→button_a := code→create_circle(data→button_a_inner→x, data→button_a_inner→y);
+  #xeJ9fLqaRwHysI6H data→button_a→opacity := 0;
+  #QUMDCVZwMje402BB data→button_a→width := 112;
+  #xgxl4xE59t5HUcsH data→button_a→height := 112;
+  #Dvbapa4O529H2fs1 data→button_a→x := data→button_a_inner→x;
+  #jI0c4WdUI8QVWBHC data→button_a→y := data→button_a_inner→y;
+  #byJDE43aA5Kg6F5t data→button_a→on_touch_down($touch_down);
+  #xRnGBKk3PwrPrVq7 where touch_down(x: Number, y: Number) {
+    #Etn5CjWrVyWerIAv data→button_a_inner→set_color(colors→orange);
+  }
+  #spYCmKzaeQetcXJf data→button_a→on_touch_up($touch_up);
+  #hBkQn82nWTIgqurc where touch_up(x: Number, y: Number) {
+    #w8V7Xy22Sy1uDnD0 data→button_a_inner→set_color(colors→black);
+  }
+  meta private;
+  meta sync;
+}
+#rIjgEVDnXyYKKGW2z0G19vjb
+action create_circle(#dY8pewFJbnj6hliB left: Number, #NzrnBsCre4NFCIwk @top: Number) returns(#dyBo2jl2fIsGiYIo sp: Sprite) {
+  #Yba134pj3lkXWPx4 // {shim:}
+  #iBBRg3iUUQVTsPKF $sp := data→board→create_ellipse(42, 42);
+  #xLLim4SK6XqTBI1W $sp→left := $left;
+  #A4vAaBWwpyS1U0Xm $sp→@top := $@top;
+  #mPWpygJUPRH61jT2 $sp→set_color(colors→transparent);
+  #x4n4AmYHSf7bLueZ $sp→friction := 1;
+  meta private;
+  meta sync;
+}
+#sa4Hw2IQQ6yKVRcp
+var led_on_color : Color {
+  // {shim:}
+  transient = true;
+}
+#sQ4pRVTHKnMu9DYy
+var button_a : Sprite {
+  // {shim:}
+  transient = true;
+}
+#oUAhsVC3wJ704APn
+var button_b : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xcaCrKgyeje9xop6
+var led_off_color : Color {
+  // {shim:}
+  transient = true;
+}
+#eJrkaFqwHMniAE60
+action clear_screen() {
+  #m6PiKdvQQQ7NBgLu // Turn off all LEDs
+  #ZG9A5FPHHkO4uHN5 // {help:functions/clear-screen}
+  #Lc4GU4SQEeDXJcAp // {namespace:basic}
+  #WwZ9Imwcdzf4H2Db // {weight:79}
+  #IsinvyLebNu1rsu9 // {shim:micro_bit::clearScreen}
+  #oucBbE834sepGmyq data→current_animation := data→current_animation + 1;
+  #yVSc2bJhsH0utE1x foreach led in data→leds
+  do {
+    #Tgb6koDUxsIrk8ua $led→set_color(data→led_off_color);
+  }
+  #e4hu5CQWn3R63uYt code→update_board;
+  meta sync;
+}
+#xdRC0FfCUbSXMbmh
+action update_board() {
+  #j4oi2p366aTw6QKa // {shim:}
+  #BoBb0C4wRa7gItQD data→board→evolve;
+  #MROJQrS4v1wSkgL7 code→update_compass;
+  #dEb8PV520FV1duTv code→update_acceleration;
+  #Qs6wzz1w9RgDe3yH data→board→update_on_wall;
+  meta private;
+  meta sync;
+}
+#rVt0ZcmX6UHbaXhI
+var finger : Sprite {
+  // {shim:}
+  transient = true;
+}
+#T8E8znSXqQ2mBFaZ
+action set_led_color(#By9YA6QxMYHWVuPB state: Number, #w3io4YAswOq422Cs led: Sprite) {
+  #WNlyDe90AUFRSu16 // {shim:}
+  #xUaGp05mSO8ORKZ4 if $state = 0 then {
+    #w00c6FcHfazKsYrb $led→set_color(data→led_off_color);
+  }
+  else {
+    #TJGybBt6wykGbktJ $led→set_color(data→led_on_color);
+  }
+  meta private;
+  meta sync;
+}
+#BJ2LCyxTdQTyJIp4
+action led_state(#N5nd2zYg8ab9fj4E x: Number, #DrKMD4313XKAT7bj y: Number) returns(#zaJYN2jOBvU1HSRr state: Number) {
+  #xw3iEm0w54TEtrgm // Gets the state of a LED
+  #x823TnD4vMJUBvzI // {shim:}
+  #OJ67jtmj97vZUbUW $x := math→round($x);
+  #yMqGU0KTaz37h4lD $y := math→round($y);
+  #SfwxZMt3e1spdnyl if $x < 0 `or` $x > 4 `or` $y < 0 `or` $y > 4 then {
+    #Yo4kTbxtCKFQ54JD `return` 0;
+  }
+  #Rs4DiTpY2Z4oV7sm $sprite := data→leds→at(code→index($x, $y));
+  #GrRbVE3LBFdiTxiy if `not` $sprite→is_invalid `and` $sprite→color→equals(data→led_on_color) then {
+    #z54A0XeDMLRIfIif `return` 1;
+  }
+  else {
+    #xNajv7Lgj9sPexQ4 `return` 0;
+  }
+  meta private;
+  meta sync;
+}
+#XJovYmLSOmKdCJPA
+action require_range(#pmedvcwuHbLnWC7W x: Number) returns(#xjG1JKjh2SbYBHt1 x2: Number) {
+  #Q1hQnkMVTzFmkD7E // {shim:}
+  #vF5Zkqpoz3eLR6Fs $x := math→floor($x);
+  #uaSKzCviakcz2Hgh contract→requires($x ≥ 0 `and` $x < 5, "``x`` must be between 0 and 4 included");
+  #xUUHEmAdLLlWhbNc $x2 := $x;
+  meta private;
+  meta sync;
+}
+#xVWGu871324FOHjb
+action bit(#qNb6K0K0Rv5gyH5O state: Number, #lJdGRw37BIcyWKtc x: Number) returns(#xI3h98FdRMqtr7rx state_i: Number) {
+  #EUfj2oPVG1MdKp8J // {shim:}
+  #xT7rsPKc3oufTSE8 $state_i := bits→and_uint32($state, bits→shift_left_uint32(1, $x));
+  #xLlmHK36SxZRh1xe if $state_i ≠ 0 then {
+    #ncgTXBzRhH2qcGob $state_i := 1;
+  }
+  meta private;
+  meta sync;
+}
+#BdGhpbmca
+table Image {
+  // {shim:}
+  type = "Object";
+  persistent = false;
+  fields {
+    #yczPr24geBgMxLbS leds : Matrix
+  }
+}
+#IGYgeBIpT62o9thr
+action sprite_from(#xSkDv46XVEoGCGdp x: Number, #A4TskwCTJk6qsg62 y: Number, #DgwwO2tgSkt14x23 width: Number, #xNwk4F0E4PVfaaQv height: Number) returns(#e7LIwNU1P7sj5r4t sprite: * Image) {
+  #xTkMUmuLHn6rCvcN // Extracts a new sprite from the current LED state.
+  #lEJq90PR2XwX4LWH // {shim:}
+  #GIZkJPyuoHVyLQvL $x := code→require_range($x);
+  #LJ7RyTPUzHmKq7qg $y := code→require_range($y);
+  #Px1qblV2PJdaSpFP $width := math→floor($width);
+  #IkJaTkTmG91scVxN contract→requires($x + $width < 5, "too many columns");
+  #UX437qD2aXfAs2K2 $height := math→floor($height);
+  #VugnBMqCdmloPdUn contract→requires($y + $height < 5, "too many rows");
+  #dIVCKXtu2IlpAMVY $sprite := code→create_sprite($width, $height);
+  #x2875Vxpg3Bp2PqA for 0 ≤ i < $width do {
+    #KrB4HHn2Lv0THbbV $xi := $x + $i;
+    #Jbzw3CsmimDDyrg8 for 0 ≤ j < $height do {
+      #PIqy1dJJsLGtH4vv $yj := $y + $j;
+      #AZUiEPzXmo0wB0mK $sprite→leds→set_at(code→index($xi, $yj), code→led_state($xi, $yj));
+    }
+  }
+  meta private;
+}
+#UfF7JOuScQfe5nnQ
+action index(#yuxV96yMNc6bUq72 x: Number, #UeWExLbJKOvZm7Lo y: Number) returns(#WZy6fjZAdBtmlvO9 index: Number) {
+  #F7qzqMCjZAg84ncU // {shim:}
+  #jHDElY6pSQg45hPr $index := $x + 5 * $y;
+  meta private;
+  meta sync;
+}
+#xrG3VA1cfC2J48fe
+action create_image_from_string(#WpbiG7M8pO8744cQ text: String) returns(#h937aDHP8dI2uUxT sprite: * Image) {
+  #btZDtCFCtf5qJCze // Create an image from the given text
+  #wW4iJXbwjNxZIFU6 // {shim:}
+  #rFXxMBc9LkwafeIX // {hints:text:hello}
+  #WPj3cOy0MJ59WIY5 code→init_font;
+  #xtzzE0XUUIsjAUc8 $sprite := code→create_sprite(6 * $text→count - 1, 5);
+  #P1KIVstMFDXRwF3I $k := 0;
+  #ocKg9CThqYfc08nJ for 0 ≤ i < $text→count do {
+    #x6Yzz0Oxk4szoFpC $char_code := $text→at($i)→to_unicode;
+    #xrcZN3qkfpggQLbu $char_start := ($char_code - 32) * 5;
+    #scugRD8oRG3wf9PP $w := data→font→width;
+    #w24as3aqIizfCySm if $char_start < 0 `or` $char_start + 5 > data→font→width then {
+      #je2HGup30lVVeYSw $char_code := " " →to_unicode;
+      #vOjWWAPcpHUFOaZ7 $char_start := ($char_code - 32) * 5;
+    }
+    #tckFmsMLGvfO2Wt2 data→font→copy($char_start, 5, $sprite, $k);
+    #htKxdnjIIL6Dj32s $k := $k + 5;
+    #rSWCxQVjgak3yHrl if $i < $text→count - 1 then {
+      #xNb8Xf2rGMryC3t4 $k := $k + 1;
+    }
+  }
+  meta private;
+  meta sync;
+}
+#A1geJUVrAOpqBzMO
+action create_sprite(#NXMvo2FCreUM57C8 width: Number, #T4IqbKqxeaWzGfu2 height: Number) returns(#gJCl5tgT9aZygOzM sprite: * Image) {
+  #SetwMqs402272zX2 // {shim:}
+  #dICN6N9VCIvsD3kb contract→requires($width > 0 `and` $height > 0, "sprite must be at least 1x1");
+  #SavRXQCZKe8RHaT5 $sprite := records→Image→create;
+  #OS3K5fEIA4Rny0hF $sprite→leds := math→create_matrix($width, $height);
+  meta private;
+  meta sync;
+}
+#EgRqP2ucVXW1es2k
+var chars\u002ejson : Json_Object {
+  is\_resource = true;
+  url = "data:text/plain;base64,eyIwIjpbNiwxMSwxNSwxMyw2XSwiMSI6WzIsNiwyLDIsMl0sIjIiOlsxNCwxLDYsOCwxNV0sIjMiOlsxNCwxLDYsMSwxNF0sIjQiOlsyLDYsMTAsMTUsMl0sIjUiOlsxNSw4LDE0LDEsMTRdLCI2IjpbNiw4LDE0LDksNl0sIjciOlsxNSwxLDIsNCw4XSwiOCI6WzYsOSw2LDksNl0sIjkiOls2LDksMTUsMSw2XSwiICI6WzAsMCwwLDAsMF0sIiEiOls0LDQsNCwwLDRdLCJcIiI6WzEsMiwwLDAsMF0sIiMiOls2LDE1LDYsMTUsNl0sIiQiOls3LDEwLDYsNSwxNF0sIiUiOls3LDE0LDQsNywxNF0sIiYiOlsyLDUsNiwxMCw1XSwiJyI6WzAsMTAsMCwwLDBdLCIoIjpbNCw4LDgsOCw0XSwiKSI6WzQsMiwyLDIsNF0sIioiOlswLDYsMTUsNiwwXSwiKyI6WzAsMiw3LDIsMF0sIiwiOlswLDAsMCwyLDRdLCItIjpbMCwwLDAsMTUsMF0sIi4iOlswLDAsMCwwLDRdLCIvIjpbMSwxLDIsNCw4XSwiOiI6WzAsNCwwLDQsMF0sIjsiOlswLDQsMCw0LDhdLCI8IjpbMiw0LDgsNCwyXSwiPSI6WzAsMTUsMCwxNSwwXSwiPiI6WzQsMiwxLDIsNF0sIj8iOls2LDksMiwwLDJdLCJAIjpbNiwxMywxMSw4LDZdLCJBIjpbNCwxMCwxNCwxMCwxMF0sIkIiOlsxNCw5LDE0LDksMTRdLCJDIjpbNiw5LDgsOSw2XSwiRCI6WzE0LDksOSw5LDE0XSwiRSI6WzE1LDgsMTQsOCwxNV0sIkYiOlsxNSw4LDE0LDgsOF0sIkciOls2LDgsMTEsOSw2XSwiSCI6WzksOSwxNSw5LDldLCJJIjpbMTQsNCw0LDQsMTRdLCJKIjpbMSwxLDEsOSw2XSwiSyI6WzksMTAsMTIsMTAsOV0sIkwiOls4LDgsOCw4LDE1XSwiTSI6WzksMTUsMTUsOSw5XSwiTiI6WzksMTMsMTUsMTEsOV0sIk8iOls2LDksOSw5LDZdLCJQIjpbMTQsOSwxNCw4LDhdLCJRIjpbNiw5LDksMTEsN10sIlIiOlsxNCw5LDE0LDEwLDldLCJTIjpbNyw4LDYsMSwxNF0sIlQiOlsxNCw0LDQsNCw0XSwiVSI6WzksOSw5LDksNl0sIlYiOls5LDksOSw2LDZdLCJXIjpbOSw5LDE1LDE1LDldLCJYIjpbOSw5LDYsOSw5XSwiWSI6WzksNSwyLDIsMl0sIloiOlsxNSwyLDQsOCwxNV0sIlsiOlsxNCw4LDgsOCwxNF0sIlxcIjpbOCw4LDQsMiwxXSwiXSI6WzcsMSwxLDEsN10sIl4iOls0LDEwLDAsMCwwXSwiXyI6WzAsMCwwLDAsMTVdLCJgIjpbNCwyLDAsMCwwXSwiYSI6WzAsNSwxMSwxMSw1XSwiYiI6WzgsOCwxNCw5LDE0XSwiYyI6WzAsNyw4LDgsN10sImQiOlsxLDEsNyw5LDddLCJlIjpbMCw2LDE1LDgsN10sImYiOlszLDQsMTQsNCw0XSwiZyI6WzcsOSw3LDEsN10sImgiOls4LDgsMTQsOSw5XSwiaSI6WzAsMiwwLDIsMl0sImoiOlsxLDAsMSwxLDZdLCJrIjpbOCwxMCwxMiwxMCw5XSwibCI6WzEyLDQsNCw0LDE0XSwibSI6WzAsOSwxNSwxNSw5XSwibiI6WzAsMTQsOSw5LDldLCJvIjpbMCw2LDksOSw2XSwicCI6WzAsMTQsOSwxNCw4XSwicSI6WzAsNiw5LDcsMV0sInIiOlswLDExLDEyLDgsOF0sInMiOlswLDcsNCwyLDE0XSwidCI6WzQsMTQsNCw0LDNdLCJ1IjpbMCw5LDksOSw2XSwidiI6WzAsOSw5LDYsNl0sInciOlswLDksMTUsMTUsNl0sIngiOlswLDksNiw2LDldLCJ5IjpbMCw5LDcsMSw2XSwieiI6WzAsMTUsMiw0LDE1XSwieyI6WzYsNCwxMiw0LDZdLCJ8IjpbNCw0LDAsNCw0XSwifSI6WzEyLDQsNiw0LDEyXSwifiI6WzAsMCw1LDEwLDBdfQ==";
+  transient = true;
+}
+#FBCYO1ysYzVS3rEJ
+action test_scroll_string() {
+  #vY9MA7hWCXU1Ra23 // {shim:}
+  #eho3QrBxWsMAix4R code→\_libinit;
+  #xSaLaPGzEk8WaSd1 code→show_string("", 100);
+  #mPN9ztLMk7UbME0e code→pause(1000);
+  #PYmqDeoYaFBfJT8x code→show_string("A", 100);
+  #gb29N4yYNoQOfoaW code→pause(1000);
+  #a4p4CD0Rz14TmzwM code→show_string("0123", 100);
+  #xGyJN7Jgvwq9ZB4s code→pause(1000);
+  #xSjakVYLu7gd1QHM $sprite := code→create_image_from_string("Hello");
+  #VKpTa6fxINbbXVz5 $sprite→scroll_image( - 5, 200);
+  #eyb8bNW9ffSO6O2G $sprite→scroll_image(5, 200);
+  #bwM4Tq2dxt2mOHIW $sprite→scroll_image(1, 200);
+  #ZYxNc8AOTZbdOJ1n $sprite→scroll_image( - 1, 200);
+  meta private;
+  meta test;
+}
+#Zm96IqdgVrI2iCjB
+action width(#mNqXeR0Venxmv0uf @this: * Image) returns(#xY2xXA2sFDmKE4PQ w: Number) {
+  #DPngUzxZ3HlrXHyv // Gets the width in columns
+  #ulYlLiq3yUhayh1l // {help:functions/width}
+  #gFXMVYYVHx5aY7Ts // {namespace:image}
+  #x2eHyTJVIamAaq45 // {shim:micro_bit::getImageWidth}
+  #z66k2w22K7InEnyV $w := $@this→leds→row_count;
+  meta sync;
+}
+#rZT5E9pMud033e54
+action height(#lwwRe2IKIaJ2btEs @this: * Image) returns(#oV9jdReQ85HMKiON h: Number) {
+  #gL2f9kgRHinswu2z // Gets the height in rows
+  #x6JI6jqwN4h4M2jY // {shim:}
+  #HWsux5YjWGEpumtE $h := $@this→leds→column_count;
+  meta private;
+  meta sync;
+}
+#D944KGlI2CeHG0gq
+var board_color : Color {
+  // {shim:}
+  transient = true;
+}
+#H1uQDGTSbSLoJlFF
+action scroll_image(#dVF1wUlpKx2pPtHa @this: * Image, #Fr2rDLarbEiIzfHm x_offset_per_step: Number, #gPjfa2RSvx3dAN3H interval: Number) {
+  #xGQ520j5fXArwqWl // Scrolls sprite through the screen. If sprite has width <= 5, does not scroll, otherwise, shifts the image by one column every ``interval`` milliseconds.
+  #iT7MH9Kd29dafjMN // {help:functions/scroll-image}
+  #GkJdERhnRveIvkAV // {namespace:image}
+  #u06IOFGf80LHWg3W // {weight:68}
+  #xtyyk9lLDfqJLWpL // {hints:x offset per step:5,1}
+  #kK2O5fLxOlBFvjHG // {hints:interval:400,100}
+  #UrNHQ26Tc7HxFp1p // {shim:micro_bit::scrollImage}
+  #xtlglkDAp2Q1OJUh $anim_id := data→current_animation + 1;
+  #T4QhXCtmkTUbQtWp data→current_animation := $anim_id;
+  #Jysm4Pd4lszqgxXV $x_offset_per_step := math→round($x_offset_per_step);
+  #xluG50TZnkrViJjL if $x_offset_per_step > 0 then {
+    #xMcTw7gf2Fz9FwZ8 $x_offset_per_step := math→max(1, $x_offset_per_step);
+    #CXEE00t44mfWLUIC $x := 0;
+    #GwuUOeH3zqRBqEQ1 while $x + 4 < $@this→width do {
+      #x5vjJ5zSuf1rqKnV $@this→render_image($x);
+      #OwLsXGKEmYf3u4Gj code→pause($interval);
+      #PHeDA80GctvZmtme if data→current_animation ≠ $anim_id then {
+        #ietA2urgnfVpp2ss `return` ;
+      }
+      #wDxlPdR9HkBH4PHv $x := $x + $x_offset_per_step;
+    }
+  }
+  else {
+    #xQMEmAD35uksb3qz $x_offset_per_step := math→min( - 1, $x_offset_per_step);
+    #JkulbmMt5UmnsSIB $x := $@this→width - 5;
+    #ujNFlLWKwHnNk5rJ while $x ≥ 0 do {
+      #Gp42FT0fV8jwrcE4 $@this→render_image($x);
+      #d4IJlY2NIltFZZiE code→pause($interval);
+      #uLdovnfNVFKKXuXO if data→current_animation ≠ $anim_id then {
+        #yJCgIFUX2A0x3Os4 `return` ;
+      }
+      #xgrTFzGv8MLnnysv $x := $x + $x_offset_per_step;
+    }
+  }
+}
+#j6How14prTjVLiKJ
+action button_is_pressed(#dwrDe5YG33oG3MHB name: String) returns(#RdtB26hD1lA5OO8J pressed: Boolean) {
+  #xDfRt2S0C1CkPSHd // Get the button state (pressed or not)
+  #dmv7pPfdUX3Nii67 // {help:functions/button-is-pressed}
+  #RVFWVBfCjLPg2uRU // {namespace:input}
+  #yTzqdrDfKTub5zSp // {weight:59}
+  #xROirQwDWqY9ZgYL // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B,A+B=MICROBIT_ID_BUTTON_AB}
+  #QFNxD51gqBGenDQ6 // {shim:micro_bit::isButtonPressed}
+  #ntxF2QNxLArWB2V5 $name := $name→trim(" \t")→to_lower_case;
+  #nA1Wp5PR401L45J9 if data→board→touched then {
+    #Tg9Z2s4GUdfgvcf8 $target := code→button_from_id($name);
+    #YTVfEiLMEHSyTaYY $p := data→board→touch_current;
+    #tq26Gcbvm0zenWR0 data→finger→set_pos($p→x, $p→y);
+    #PhXWkNR6epuZNkBa if data→finger→overlaps_with($target) then {
+      #IKV9abE47o0mPXbn `return` true;
+    }
+    else { #ygZVwXLOFLFiif92 if $name→equals("a") `or` $name→equals("b") then {
+      #xs22kr2OiamSiMnW `return` code→button_is_pressed("A+B");
+    }
+    else { } } 
+  }
+  #rujS852B1Sx8Gh1f if $name→equals("a") `and` (senses→is_key_pressed("a") `or` senses→is_key_pressed("left")) then {
+    #eNt8xKqeXVB6CgMS `return` true;
+  }
+  else { #en3kBi1aD9t9e4lG if $name→equals("b") `and` (senses→is_key_pressed("b") `or` senses→is_key_pressed("d") `or` senses→is_key_pressed("right")) then {
+    #FclRZcdq6c4gnFaI `return` true;
+  }
+  else { } } 
+  #o4B6c8hDkCKfcqbP `return` false;
+  meta sync;
+}
+#YKkpIRxYCYj6luNy
+action plot(#xr21JhTVxIw6N8eD x: Number, #mr8Hkd8kLjqzu8IZ y: Number) {
+  #C4ZSSnemxpZWIiOE // Turn on the specified LED using ``x``, ``y`` coordinates (``x`` is horizontal, ``y`` is vertical)
+  #oO7LJ2kRt1FlICbW // {help:functions/plot}
+  #PTHzXQhcnHkdu9e2 // {namespace:led}
+  #oVRf0YOvIGx9J1i9 // {weight:78}
+  #Oko244Xjtl3XaFOw // {hints:x:0,1,2,3,4}
+  #xEIQtXe6fw4kg5FH // {hints:y:0,1,2,3,4}
+  #tPQEuS6Gmqc7l6oB // {shim:micro_bit::plot}
+  #r35AgHxwXK1n29pb code→set_led_state($x, $y, 1);
+  meta sync;
+}
+#f02nNkUzv6b6aPHB
+action point(#PGRW6DJGVEVi5wFW x: Number, #JS5Z305cxyrTyxH2 y: Number) returns(#u0fXIVDG4WzrfN7B on: Boolean) {
+  #WPM6kMiDO4MFbj6F // Get the on/off state of the specified LED using ``x, y`` coordinates.
+  #cYimilnL8Y3meMHz // {help:functions/point}
+  #uLmwV8jgK3a2Fequ // {namespace:led}
+  #hferw4vyJzoT524J // {weight:76}
+  #fc2JgYLVULK0v7iN // {hints:x:0,1,2,3,4}
+  #MF2t9k2UiqFfh4Cm // {hints:y:0,1,2,3,4}
+  #ugAQOqPTl7WVJCXs // {shim:micro_bit::point}
+  #rJpqUyeFN9Z27674 `return` code→led_state($x, $y) > 0;
+  meta sync;
+}
+#xX8BI6pQozHWIVZF
+action show_string(#EEchsFBax4g4Pk4y text: String, #xhQbPcu59cxTmgPb interval: Number) {
+  #TC2ipxc1vXR9hICR // Display text on the display, one character at a time, and shift by one column each ``interval`` milliseconds. If the string fits on the screen (i.e. is one letter), does not scroll.
+  #IFE4Aw9tdA4X617h // {help:functions/show-string}
+  #lO7UShx1xNCN5Zk3 // {namespace:basic}
+  #bAlRv4X18pWxONAI // {weight:87}
+  #Scfwz74tte2bvoT1 // {hints:interval:150,100,200,-100}
+  #kf4HddkY4wQUaUAU // {shim:micro_bit::scrollString}
+  #DMmxTOrCif13ztvx $interval := math→round($interval);
+  #N4KPZT9PpUDTn9R1 if $text→is_empty then {
+    #YB68tFgWoN2PlJYA code→clear_screen;
+    #YvZOGJUcPcBXex8I code→pause($interval * 5);
+  }
+  else { #Qv7UTtB9F3o4pkvl if $text→count = 1 then {
+    #jQ3KH7NUrCa547Rj $sprite := code→create_image_from_string($text);
+    #y26xiE0eE4lGwFIH $sprite→show_image(0);
+    #TxqzE2nAu66dxqXK code→pause($interval * 5);
+  }
+  else {
+    #yCPOXhiQN5kj94eK if `not` $text→starts_with(" ") then {
+      #ijFFFXMfycO3t4zT $text := " " →concat($text);
+    }
+    #mq4ZR5VqItlUQ6Ky if `not` $text→ends_with(" ") then {
+      #flvuXQ4pm95KpIM4 $text := $text→concat(" ");
+    }
+    #VED492aakcpq3QUQ $sprite := code→create_image_from_string($text);
+    #D4qMsHOTTZizH0aw $sprite→scroll_image(1, $interval);
+  }
+  } 
+}
+#VQSvphGIva2j2eg4
+action unplot(#O7M8Vy1IbaXhzvLo x: Number, #GhmbCx46is3dXy3V y: Number) {
+  #x5dqUP1tUHNDDO3f // Turn off the specified LED using x, y coordinates (x is horizontal, y is vertical)
+  #xHyH4CKLbyg4Z46P // {help:functions/unplot}
+  #xFBaTe43eGHuX7jq // {namespace:led}
+  #OI57h7faeHyfUDJb // {weight:77}
+  #qbCl2JQDXjhkn4EY // {hints:x:0,1,2,3,4}
+  #bSncxBMLCswRbQ32 // {hints:y:0,1,2,3,4}
+  #ogXFG41ygqbXVmwT // {shim:micro_bit::unPlot}
+  #x742H6HoaE2M3kHZ code→set_led_state($x, $y, 0);
+  meta sync;
+}
+#O675B3CiRNXztplX
+action on_button_pressed(#M03fUuuX2m9eRu7n name: String, #LzMsXwEMSCmDzfWI body: Action) {
+  #K1FqW47X5j2qSM4S // Do something when a button (``A``, ``B`` or both ``A+B``) is pressed
+  #qpJP52P9EiGj7TmZ // {help:functions/on-button-pressed}
+  #LlzvO4Vhe7GjhJdh // {namespace:input}
+  #bb2jhwAjjludGu2o // {weight:58}
+  #fm3i5OlTIzr9FGuU // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B,A+B=MICROBIT_ID_BUTTON_AB}
+  #KwFDbs7Kr12Y7FTP // {shim:micro_bit::onButtonPressed}
+  #FMX7Dy8may7mfc7j code→notify_event_registration("on button pressed " ∥ $name);
+  #h2x2L30VBbMGVNED $btn := code→button_from_id($name);
+  #xOIGjOLy2Zmt99MW code→clear_button_handler($name);
+  #F5Y2ciTtYo87uZSG $ev := $btn→on_touch_down($touch_up);
+  #j0K6jsuWQ4V0EcaI where touch_up(x: Number, y: Number) {
+    #UZ7doRhNRnR5s62g `async` $body→run;
+  }
+  #hijH5eY42toXLOFF code→store_button_handler($name, $ev);
+  meta sync;
+}
+#Xf05xdIQbCZ19OFL
+action show_image(#x4Os5UgJK1k1DyDo @this: * Image, #WCEICn0SBZ7AnvYq x_offset: Number) {
+  #ZRFi6tDU9uTL4BAg // Shows an frame from the image at offset ``x offset``.
+  #CSX0am9r0KxyCfal // {help:functions/show-image}
+  #xo16JkWN0uUFScS2 // {namespace:image}
+  #ffde8HnYsd4thcGC // {namespace:led}
+  #s0MpoKh2adnhmM8z // {weight:69}
+  #RfVXECzwY1YjIfSF // {hints:x offset:0,5,10}
+  #UN2qrX2ZL1nyHdhU // {shim:micro_bit::showImage}
+  #HdrqajmjHl4dPdlr $anim_id := data→current_animation + 1;
+  #xs4eu6OT8oa4dXAd data→current_animation := $anim_id;
+  #AqfPdUQhQ8tq2B7e code→render_image($@this, $x_offset);
+}
+#gszRC4JNYzCIA8xJ
+action compass_heading() returns(#zcZKxlXZbsmdRJqQ degrees: Number) {
+  #xWohtN6AzrOdY6So // Get the current compass compass heading in degrees.
+  #ncq2Y4nDXRMWihmD // {help:functions/compass-heading}
+  #xELObR81CTxHPD2w // {namespace:input}
+  #m4jqzA8etiVBViTO // {weight:56}
+  #x2ui0y5T5xOVIJqE // {shim:micro_bit::compassHeading}
+  #r5T8xUyjlMatcURv if data→compass_arrow→is_invalid then {
+    #znZ4XizKuZgheSQa code→create_compass;
+  }
+  #xPo09mCqoceFQEYn $h := data→compass_heading_value;
+  #x8XQ4UchqvBIyyls if $h→is_invalid then {
+    #wRS57ygpIbvVyPSm $h := senses→heading;
+    #qErFwnuTtYjZ4nLa if $h→is_invalid then {
+      #hHLRZosDB3Q2AvMU $h := 0;
+    }
+  }
+  #T884bHCaSqLpYr2s `return` math→round($h);
+  meta sync;
+}
+#W2sYA4QxOtQbam5R
+action acceleration(#xFFtxqCX93owGiup dimension: String) returns(#x6aaLDiJe51GV4oq millig: Number) {
+  #sgNx1oCFIRqwLC6n // Get the acceleration value in milli-gravitys (when the board is laying flat with the screen up, x=0, y=0 and z=-1024)
+  #DoP0wrdqmS24eYbg // {help:functions/acceleration}
+  #lYmOu5jwgh9COs0W // {namespace:input}
+  #lmLkxkGRFp62YJly // {weight:57}
+  #LydMcPZr1SYTRbIt // {enum:dimension:x=0,y=1,z=2}
+  #x2JSA5b4r4dcAO9P // {shim:micro_bit::getAcceleration}
+  #T4Ks27Pca5wQIBTz if data→acc_title→is_invalid then {
+    #a5RQGCAqswXV6Eiq data→acc_title := data→board→create_text(100, 40, 20, "acceleration:");
+    #xhS5Chpszr4Peq29 data→acc_title→fit_text;
+    #OO8NswAECGRtUDCO data→acc_title→color := colors→black;
+    #gV3Nm9rI8rv9WFSB data→acc_title→y := data→board→height - 80;
+    #ugQ4877rJLld9R1t data→acc_title→left := 200;
+    #xWsWgWWKrNZ8rzNs data→acceleration_x_text := data→board→create_text(100, 40, 20, "x: -000");
+    #q95IkSqEY2H4xCc6 data→acceleration_x_text→fit_text;
+    #xtbi4k3NDjlGfYi4 data→acceleration_x_text→text := "";
+    #zudWOEtdnOldj5Vt data→acceleration_x_text→y := data→board→height - 58;
+    #YaOi4wx0w2L2bRrd data→acceleration_x_text→left := 200;
+    #ydbSLoThXq28afSs data→acceleration_y_text := data→board→create_text(100, 40, 20, "y: -000");
+    #mm44LAERXjEwcw45 data→acceleration_y_text→fit_text;
+    #BMozg2TG88gKqWS5 data→acceleration_y_text→text := "";
+    #lVXLNglfbI6mlkMj data→acceleration_y_text→y := data→board→height - 36;
+    #GKJFyWtx7U9Bwkih data→acceleration_y_text→left := 200;
+    #Ij8VSPlCh9cUHLtL data→acceleration_z_text := data→board→create_text(100, 40, 20, "z: -000");
+    #xW6jBmKGvurjowgm data→acceleration_z_text→fit_text;
+    #uRhNDZQxzf60QioK data→acceleration_z_text→text := "";
+    #RaMet5qas3S6DyL2 data→acceleration_z_text→y := data→board→height - 14;
+    #xADu072x9Zk92VEH data→acceleration_z_text→left := 200;
+  }
+  #HQMGQT9aJ2NkNqVV $p := senses→acceleration_quick;
+  #x51K0wrwuxa2aoXN if $dimension→equals("x") then {
+    #nEUa5R0jRvgiO3B5 data→acceleration_x_text→color := colors→black;
+    #R6D1BOSBvoJOofLE $millig := math→round($p→x * 1024);
+  }
+  else { #hpsliRC29yxAgj7q if $dimension→equals("y") then {
+    #SYSYbYCqENPZIto2 data→acceleration_y_text→color := colors→black;
+    #o4OHeiSP0U04H5Oi $millig := math→round($p→y * 1024);
+  }
+  else {
+    #V2j2C7I62xgo9cWz data→acceleration_z_text→color := colors→black;
+    #opsthjH4KZ60PzoB $millig := math→round($p→z * 1024);
+  }
+  } 
+  meta sync;
+}
+#itddg6di2mtKdWUA
+action digital_write_pin(#kihCn9i6hirgp2CN name: String, #SKnQ2VHVowJuQj03 value: Number) {
+  #fqLCfHZvhkkbdEsl // Set a pin or connector value to either 0 or 1.
+  #x8IX3LaoPHuSPP1k // {help:functions/digital-write-pin}
+  #QvcKHCKm4bLp2av4 // {namespace:pins}
+  #p48bRe3Fk04cqci0 // {weight:48}
+  #hf52W4GpWNOvCu3I // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P8=uBit.io.P8,P12=uBit.io.P12,P16=uBit.io.P16}
+  #xm4nD5CwJqCSj9nK // {shim:micro_bit::digitalWritePin}
+  meta sync;
+}
+#xqTDv45uY4g5Elo4
+action digital_read_pin(#w0yR0K9R0Vc1fl1w name: String) returns(#YJovAyKaUYf7fdeN value: Number) {
+  #bZe0bFUC7DkD6n1D // Read the specified pin or connector as either 0 or 1
+  #dmS3OiTqd3Gl4lDI // {help:functions/digital-read-pin}
+  #BnyFEXR5wKKdhtR5 // {namespace:pins}
+  #h1y7ij55abn1ywo2 // {weight:49}
+  #vVkiLisfPoFGrb43 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P8=uBit.io.P8,P12=uBit.io.P12,P16=uBit.io.P16}
+  #KeelVlaOy290uC3r // {shim:micro_bit::digitalReadPin}
+  #YQtrwltmovQDIOC4 $pin := code→pin_by_name($name);
+  #Ko563vnmhZrsGquz if $pin→mass - 1 > 0 then {
+    #xMThD47Dxan2pEwh `return` 1;
+  }
+  else {
+    #JIo9xOYMSEWhMsDF `return` 0;
+  }
+  meta sync;
+}
+#IMZk4sIic3bl2IqV
+action analog_read_pin(#MbbuFwADdbqnJ4Vx name: String) returns(#NMqOBEeeGloyin4x value: Number) {
+  #xbV7xMVLeyDT0M4e // Read the connector value as analog, that is, as a value comprised between 0 and 1024
+  #xah2vLBRZf3FqQzb // {help:functions/analog-read-pin}
+  #xsg9Er2mxpPh27XU // {namespace:pins}
+  #n6fzrbe7G44K3Hb9 // {weight:47}
+  #cZ6kmydl2t7Q2yKy // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #KbSL0ZGyQSVvXAE4 // {shim:micro_bit::analogReadPin}
+  #xYp4xr8kW2d84h5C $p := code→pin_by_name($name);
+  #x4ki5CnUbrxJQS5O `return` $p→mass - 1;
+  meta sync;
+}
+#HV4Q7fi2POmCkKXI
+action analog_write_pin(#Ij91JuDakdZUgyo4 name: String, #CeWgWOcwgRe0D5op value: Number) {
+  #eDN1oz2oyUfdvk48 // Set the connector value as analog. Value must be comprised between 0 and 1024.
+  #kTJK4kSvEWdiaeOC // {help:functions/analog-write-pin}
+  #b4oneIlT9h82g7S4 // {namespace:pins}
+  #M12kgf6X8FWgiE4P // {weight:46}
+  #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #AY2QBjk4JghxAoSU // {shim:micro_bit::analogWritePin}
+  meta sync;
+}
+#FOUJKwAjjQYg4Z01
+action create_image(#xkJvjGlZhyZHdmXg leds: String) returns(#d56UY1ORndlIMO5Z img: * Image) {
+  #xubRNFj0V14GVLwA // Create an image from a string of 0s and 1s
+  #lnGJt7NO5XSCYPCy // {help:functions/create-image}
+  #L3GzUd2cQeVret60 // {namespace:image}
+  #M8Rx5C74XOlneYTn // {weight:67}
+  #jwMX2SPoQ4OZPjFE // {language:leds:bitmatrix}
+  #uCb1uN0qGPIcavMf // {shim:micro_bit::createImage}
+  #ssLFHuIGAuT7O22r $img := code→parse_image($leds);
+  meta sync;
+}
+#xyrtyZ1z9MfBqH74
+action test_scroll_frames() {
+  #VgklC7f31Qls4an6 // {shim:}
+  #gyNJ4o0Keyf2wQO7 $sprite := code→create_image("1 1 1 1 1 1 0 0 0 0\n0 0 0 0 0 1 0 1 0 0\n0 1 1 1 0 1 0 1 0 1\n0 0 0 0 0 1 0 1 0 0\n0 0 1 0 0 1 0 0 0 0");
+  #Nnmh4QLzVUWiEDS4 $sprite→scroll_image(5, 1000);
+  meta private;
+  meta test;
+}
+#x6MHp7ZQosljXBmh
+action button_from_id(#eWMyP2eed08EGj4i name: String) returns(#zZfqvpXF2TdNNjHB btn: Sprite) {
+  #zYsdQ2fdRAyiMMz6 // {shim:}
+  #xWip9UlKCrWerh1O $btn := invalid→sprite;
+  #HaglGnKeAYSISmWn $name := $name→trim(" \t")→to_lower_case;
+  #IqwO4RKwUHTnlHCE if $name→equals("a") then {
+    #ym1Bm5lxgGWMsD13 `return` data→button_a;
+  }
+  else { #dbL1RrfP7iYQnrPS if $name→equals("b") then {
+    #jIZBLoeBLvpv87DZ `return` data→button_b;
+  }
+  else {
+    #K8Hk416DRp2f8rBC `return` data→button_a\u002bb;
+  }
+  } 
+  meta private;
+  meta sync;
+}
+#j57JbuVLhpRqJgbE
+action brightness() returns(#BZntGnCXsZYfxF2X brightness: Number) {
+  #xThf61EiGzXmaQVh // Get the screen brightness from 0 (off) to 255 (full bright).
+  #VrdakCnATFjtHjF2 // {help:functions/brightness}
+  #QNhPnnSYegd96QKN // {namespace:led}
+  #xQl2lvnN0kK3Npk0 // {weight:75}
+  #ffmCdknGe2J5ReU5 // {shim:micro_bit::getBrightness}
+  #Y872aj2BcDz0OMq2 $sprite := data→leds→at(0);
+  #xw0Ia9fgB02ZhIYE $x := $sprite→opacity;
+  #x3An1b9z2xip0Gn9 `return` math→floor($x * 255);
+  meta sync;
+}
+#Twa3ce2bugWhfW5Y
+action set_brightness(#kQeLgaV0YyWLTlCU value: Number) {
+  #j2osE1iAluAsBgjv // Set the screen brightness from 0 (off) to 255 (full bright).
+  #x1oLl7Js4DF5vUEd // {help:functions/set-brightness}
+  #r0hfweCAmAfJleDQ // {namespace:led}
+  #GTVh8j2PgD5ThcRO // {weight:74}
+  #f7pgqybG2Xda88Bm // {hints:value:255,50,30,10,0}
+  #xqY7TLQ2N0x8G9Yv // {shim:micro_bit::setBrightness}
+  #Vw0rhEfqksjuLmTz $value := math→round($value);
+  #j4S5fdOn2dZJ1v9c if $value < 0 `or` $value > 255 then {
+    #lVvkWmOH3yaOkd6P `return` ;
+  }
+  #w1r41Dx8m1rxeJey $opacity := $value / 255;
+  #MB3OiAEWMZ7wvrZH foreach sprite in data→leds
+  do {
+    #u4R2mHlwhMSXKBTj $sprite→set_opacity($opacity);
+  }
+  meta sync;
+}
+#Et2Tdn7Nn4t5nKoV
+var microbit_schema : Picture {
+  is\_resource = true;
+  url = "https://microbit0.blob.core.windows.net/pub/pcslkqeo";
+  transient = true;
+}
+#amts8p71bcrUxkz1
+action test_main() {
+  #xyiiPHS90ToCvNsw // {shim:}
+  #xWzTyxr4F353Sjnb for 0 ≤ i < 5 do {
+    #xfa5QOwui5DgOLIp for 0 ≤ j < 5 do {
+      #CIb4JiIp4VnOBWLz code→plot($i, $j);
+    }
+  }
+  #ap6UE2At48Euv4sK code→set_brightness(0);
+  #ZOaTPEpAJrW2mnS7 code→pause(1000);
+  #xXe1OlzRTbkfj9Nm code→set_brightness(100);
+  #xUMgLebswWRJzs1J code→pause(1000);
+  #jNQcDqEmnENrFh42 code→set_brightness(50);
+  #HiVvh4TiFo0Epu2m code→pause(1000);
+  #gP2D5I1dvKO6fP23 while true do {
+    #Xt41f42aNzuj5nuU code→show_animation("0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 1 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0\n1 0 0 0 1 0 1 0 1 0 0 0 1 0 0 0 1 0 1 0\n0 1 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0\n0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", 400);
+  }
+  meta private;
+  meta test;
+}
+#SqFERoUjMO52Yumn
+action show_animation(#LyDDqLjSvn1Mm4Xg leds: String, #C8902m9EtYbNj0u2 interval: Number) {
+  #i6Ya8Ok0jXfIWDwx // Shows a sequence of LED screens as an animation with an ``interval`` delay between each frame
+  #IMLoWk7aPkY2iqZ1 // {help:functions/show-animation}
+  #n2TGAB2Ool7dvNeM // {namespace:basic}
+  #x9issdCQmgXJGFgm // {language:leds:bitmatrix}
+  #xGPHI0rWxwi7n4s6 // {hints:interval:400,300,500,600}
+  #PnCSsOeThMMBAVXy // {shim:micro_bit::showAnimation}
+  #Ruz1jL2FF4H8oDpB $interval := math→round($interval);
+  #acZvOWOMmtBi8EK8 $img := code→parse_image($leds);
+  #vveYnNG2g6NXdP5g $img→scroll_image(5, $interval);
+}
+#SNaX2qGs1EJq6FCk
+var led_indexes : Sprite_Set {
+  // {shim:}
+  transient = true;
+}
+#YEEItevulMc5K8Y2
+action update_axis() {
+  #xPVzjwLZvZBJ1x54 // {shim:}
+  #dkkLIU2fisYJPDgs for 0 ≤ i < 5 do {
+    #L6R7REP2RTV1ScG3 $sprite := data→led_indexes→at($i);
+    #x05FmmbOP9lsYovE $sprite→x := 211 + $i * 48;
+    #UkRsH3J4KCopUW6L $sprite→@bottom := 146;
+  }
+  #x9NcX2IPJTEr0YWB for 0 ≤ j < 5 do {
+    #GkDVBnIsjWst55Xl $sprite := data→led_indexes→at(5 + $j);
+    #xscN82XsBQ0HyOK0 $sprite→right := 190;
+    #ARG4f5kv6L542Vrc $sprite→y := 165 + $j * 48;
+  }
+  #XTCqT7R96r4UdteD data→led_x_index_legend→@bottom := 120;
+  #xDJRmybQdn3KETdh data→led_x_index_legend→left := 398;
+  #SjZ8WZmGZlQWutzs data→led_y_index_legend→left := 157;
+  #s2Hk7HlUFJH93vtY data→led_y_index_legend→@top := 347;
+  meta private;
+  meta sync;
+}
+#xaPlYNe5tmsCPc2x
+action running_time() returns(#gweptbT46k6jE8Lw now: Number) {
+  #jT8dmGMOR5HrvMA2 // Gets the number of milliseconds elapsed since power on.
+  #wgPDaZahSf78v2p8 // {help:functions/running-time}
+  #aSsocNV70Kl3gcq5 // {namespace:input}
+  #Tu7WFLYb2Qoht2MC // {shim:micro_bit::getCurrentTime}
+  #z2i5g6cse2ex2Lcf $seconds := time→now→subtract(data→start_time);
+  #VRUr0JWDsoqvcfjD $ms := math→round($seconds * 1000.0);
+  #h4YOt8m3rm6vNTWU `return` $ms;
+  meta sync;
+}
+#xOO43E2NIkwrkXxd
+action show_number(#arqB8R393DWmG4yx value: Number, #xwSeYvwN5k4Kt277 interval: Number) {
+  #f4ANMXr8KMpT2G8n // Scroll a number on the screen and shift by one column every ``interval`` milliseconds. If the number fits on the screen (i.e. is a single digit), does not scroll.
+  #carGbAdhyB3bdddY // {help:functions/show-number}
+  #xMbTyq6JVNUTdcS9 // {namespace:basic}
+  #BXU1lVjllXSyR2ie // {weight:89}
+  #OuyYvK30y62ROGkM // {hints:interval:150,100,200,-100}
+  #dxD9lszdBNwzGAUk // {shim:micro_bit::scrollNumber}
+  #x5tg98AeJkbUQbiv $value := math→round($value);
+  #C3O0Rmqfj0wV31Uh $interval := math→round($interval);
+  #Vu43lGOjfn56mgm4 $s := $value→to_string;
+  #oIZAtpmgCfqgmA3B code→show_string($s, $interval);
+}
+#QY3E6cU6eBZ2OJSF
+var prelude\u002ecpp : String {
+  is\_resource = true;
+  url = "data:text/plain;base64,I2luY2x1ZGUgIk1pY3JvQml0VG91Y2hEZXZlbG9wLmgi";
+  transient = true;
+}
+#G1Hz2h0zbwEBMp8r
+action parse_image(#x0HNlskTjdSJeH7D leds: String) returns(#xysJj47ftGjOcxII img: * Image) {
+  #QCBfLADs0uy227pF // {shim:}
+  #ThhId49geuiERw0b if $leds→is_empty then {
+    #zMq8tYbUScrWhnVh `return` code→create_sprite(5, 5);
+  }
+  #oob6dV9UWsHDaLfX $coll := $leds→replace("\n", " ")→split(" ");
+  #Mtf8A3quiblg1vce $rows := $leds→split("\n")→count;
+  #jXV4K5hN3HnyKe4H if $rows ≠ 5 then {
+    #zt8c282yV7aLQUxE // create empty image
+    #ciffAzoM4UqzmFDZ `return` code→create_sprite(5, 5);
+  }
+  #tcARpGMvK8xwXtqj contract→assert($rows = 5, "");
+  #YKBULFF4pHgepPU0 $frames := $coll→count / ($rows * $rows);
+  #vQR4hrlzcnNZSZ4W $img := code→create_sprite($rows * $frames, $rows);
+  #HLRmLq08LpAB4okw $k := 0;
+  #Y31WIkDlikmi6Enb for 0 ≤ i < $rows do {
+    #xuoRzFEt1jKUNb07 for 0 ≤ j < $frames * $rows do {
+      #qS2DEgnlZI2rzI6E $bit := $coll→at($k);
+      #BF25h8Q5DS7t75Ol $img→leds→set_item($j, $i, $bit→to_number);
+      #aH1dE2Wf26cTcJPy $k := $k + 1;
+    }
+  }
+  meta private;
+  meta sync;
+}
+#UtnSCSPxXT40kUae
+action create_buttons() {
+  #NhHdk2ZIg12mfIYm // {shim:}
+  #HPSfi8YXpzMd424M code→create_A_button();
+  #h5cYiVMZiqGPQpHd code→create_B_button();
+  #qATt6iPL4iFDhhLM code→create_A\u002bB_button();
+  meta private;
+  meta sync;
+}
+#ykpAyylV4sU5Im4Z
+action test_print_text() {
+  #xNfHTwPX2YSGu0Ec // {shim:}
+  #XYfFtFoX41cu3orG code→\_libinit;
+  #U38gBCeZHv0VcHP2 code→show_string("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 120);
+  #wh2snLHufOKmIF0L code→show_string("abcdefghijklmnopqrstuvwxyz", 120);
+  #LCp56xZb2hT4h2LC code→show_string("£", 100);
+  #xs64irnHsnCW82vb code→show_string("£££", 100);
+  #sEboYWEAbegqYbMZ code→show_string("0123456789", 100);
+  meta private;
+  meta test;
+}
+#GNCSnnlE2fFVnKGK
+action test_buttons() {
+  #W2mFTHLBePxLBlHZ // {shim:}
+  #E5YEE67bsbTys0jb code→\_libinit;
+  #xm6Flc2jfLQMGfFQ code→on_button_pressed("A");
+  #gS4N82WpF6tkuelR where `implicit` \_body\_() {
+    #ON7phOtrAHh9Jejz code→show_string("A", 100);
+  }
+  #gmr7aY7MXcYsbncb code→on_button_pressed("B");
+  #Rp8qiY1vzviZ2kWq where `implicit` \_body\_() {
+    #Wf7Z3Bn5plHJ78I1 code→show_string("B", 100);
+  }
+  meta private;
+  meta test;
+}
+#xoBb197IePtkqyhM
+var count : Number {
+  // {shim:}
+  transient = true;
+}
+#VHsIMy7uJfZzPoMX
+action set_pixel(#P0GQI7mqQZLddWdU @this: * Image, #E5qctGDlXgeNbS9G x: Number, #reArL0ANylbd8RZg y: Number, #cjLlFOO9xgu09YmX value: Boolean) {
+  #xOswNPjjGMm1sUfm // Set a pixel state at position ``(x,y)``
+  #InGkIRcHpl4IXVQK // {help:functions/set-pixel}
+  #zIS2o2dBpWF9RDx8 // {namespace:image}
+  #xpZ7UZvq2Tr4fPY8 // {shim:micro_bit::setImagePixel}
+  #Ttlwr2BQ8yIw6IcW $x := math→round($x);
+  #BNwkMfmgM6AGCtZ3 $y := math→round($y);
+  #OngCBzQF57AwLMon if 0 ≤ $x `and` $x < $@this→leds→row_count `and` 0 ≤ $y `and` $y < $@this→leds→column_count then {
+    #nOHzYIkw7kzK81UX $@this→leds→set_item($x, $y, $value→to_number);
+  }
+  meta sync;
+}
+#xNKMIAKQZ2XYQAqe
+action pixel(#TVxswFwyZs0INV5W @this: * Image, #QLIezAtdKSgv2ohr x: Number, #yMN5fgUMFfzObabg y: Number) returns(#BGQ1D2Ag9wHaQCLC state: Boolean) {
+  #rJhKHlNK4kKD4ezD // Get the pixel state at position ``(x,y)``
+  #JuPT9jZBFV6JJwj8 // {help:functions/pixel}
+  #xwxPjJYSo2B5Vkkq // {namespace:image}
+  #JTtgaUATi8Oo7he4 // {hints:x:0,1,2,3,4}
+  #Itieq6wpbGiz7w6r // {hints:y:0,1,2,3,4}
+  #BxesDHsvnmMZkenI // {shim:micro_bit::getImagePixel}
+  #fg2Mv5bXgzcqjXUU $x := math→round($x);
+  #xagn2bFXho7BIPi7 $y := math→round($y);
+  #xwIqRIbN3fimHfbf if 0 ≤ $x `and` $x < $@this→leds→row_count `and` 0 ≤ $y `and` $y < $@this→leds→column_count then {
+    #xvb9SDkT0J0NZqMf `return` $@this→leds→item($x, $y) ≠ 0;
+  }
+  #ltOvXiFTu4hs4A6d `return` false;
+  meta sync;
+}
+#aqdR2AyKfGIWjWKX
+action clear(#TcdNAKsIbu986dqh img: * Image) {
+  #HyVQr9pzr4lAWRAX // Clears all the pixels in the image
+  #Vo18UEQT4sDp4o21 // {help:functions/clear}
+  #cupoiXR5e4GmsVYr // {namespace:image}
+  #xW1Iq3aG39sLTugT // {shim:micro_bit::clearImage}
+  #K4ZFXN4ytxFTfH2s for 0 ≤ i < $img→leds→count do {
+    #kA4W7IWpYB4o2624 $img→leds→set_at($i, 0);
+  }
+}
+#xq3rVK5p1wAVqxhU
+var button_a\u002bb : Sprite {
+  // {shim:}
+  transient = true;
+}
+#Ms9O2l7vxlDJVrtZ
+var compass_arrow : Sprite {
+  // {shim:}
+  transient = true;
+}
+#dv4l34Vyg1pMFJgt
+action create_compass() {
+  #ZZtsSd44QAQ2UWxn // {shim:}
+  #xAlkfPeoWDvYa4Ix data→compass_text := data→board→create_text(100, 40, 20, "359°");
+  #VQG2dir1qpnkppWG data→compass_text→fit_text;
+  #qsbHlfR2wqbqLObO data→compass_text→y := data→board→height - 80;
+  #TXLyGWO4oXkQ202f data→compass_text→left := 30;
+  #uksFN3lypHUnVGUv data→compass_text→color := colors→black;
+  #UrsppZ77d3E3glgs $pic := media→create_picture(100, 100);
+  #BfAgyhEWuRzF042T $pic→fill_ellipse(0, 0, 100, 100, 0, "#989898" →to_color);
+  #pFWjh4kboAdRfglW $pic→fill_path(0, 0, 0, colors→white, "M 50 0 L 60 70 L 50 65 L 40 70 Z");
+  #xQl6MSp9TWUBTMEl data→compass_arrow := data→board→create_picture($pic);
+  #Slbh4hBK115AyrsX data→compass_arrow→width := 80;
+  #JMHYz83jCwfR2BiG data→compass_arrow→left := 60;
+  #ea8auwV1sLWF3At4 data→compass_arrow→y := data→board→height - 48;
+  #TLghe1aK8X4Y0P2L data→compass_heading_value := invalid→number;
+  #xP4D15cRYTcP3EEq data→compass_arrow→on_touch_down($touch_down);
+  #PGl4eapBlwlN5FSH where touch_down(x: Number, y: Number) {
+    #i4clvVN4ppe22bFC code→read_compass_arrow($y, $x);
+  }
+  #zO37ABILHahWBLkf data→compass_arrow→on_drag($dragged);
+  #qt3STQH7aH6YY1w8 where dragged(x: Number, y: Number, delta_x: Number, delta_y: Number) {
+    #ZHM1jr4hFYuNOCEN code→read_compass_arrow($y, $x);
+  }
+  meta private;
+  meta sync;
+}
+#JiZO327G3fL0SZGF
+var compass_text : Sprite {
+  // {shim:}
+  transient = true;
+}
+#z8UAvCstrXYppXV7
+var compass_heading_value : Number {
+  // {shim:}
+  transient = true;
+}
+#Hv7ujfF0nVCz8sx5
+action read_compass_arrow(#OHGqICBfnbz4QhvP y: Number, #xRbEEfKhc3Yxm43U x: Number) {
+  #ZD0GSuKo2Clfn6zQ // {shim:}
+  #g22ewR3VZal24Vqg $angle := math→rad_to_deg(math→atan2($y - data→compass_arrow→y, $x - data→compass_arrow→x) + math→\u03c0 / 2);
+  #xnty57tqtklkEP8u if $angle < 0 then {
+    #SGb40PfCmS1yrV7d $angle := $angle + 360;
+  }
+  #pvXAKVWysSrTMdcR data→compass_heading_value := $angle;
+  meta private;
+  meta sync;
+}
+#FLON3QSP0fwDIZC4
+action test_compass() {
+  #MW4yaiY9wynUWlMR // {shim:}
+  #PPW482lSAJyUQ9ri code→\_libinit;
+  #xAE8v7KmRMicbljm code→calibrate;
+  #FsMBbmufaJix02xe $degrees := code→compass_heading;
+  #xse7eRxbWddqX6nL $millig := code→acceleration("x");
+  #tlXXCrB6Djt9HGiJ data→board→set_debug_mode(true);
+  meta private;
+  meta test;
+}
+#xzhTBaRFA7w2suUl
+action test_button_a\u002bb() {
+  #b4aW2uElgK2cbabi // {shim:}
+  #VozcHml4ANVDRCzV code→\_libinit;
+  #ntNRRFZ3bcxc6HtO code→on_button_pressed("A+B");
+  #I444JVhpwg64uUp3 where `implicit` \_body\_() {
+    #ayHPmOCSVMv8QTqa code→show_string("good", 100);
+  }
+  meta private;
+  meta test;
+}
+#trpRg6yTXKX8M8cY
+var acceleration_x_text : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xj4QxpGx2XVt6SIa
+var acceleration_y_text : Sprite {
+  // {shim:}
+  transient = true;
+}
+#PM0d2btuj5TMrQKD
+var acceleration_z_text : Sprite {
+  // {shim:}
+  transient = true;
+}
+#D7945sGiSVeFOiz0
+action mg_to_string(#xVpQut6zF7b3yH2y g: Number) returns(#Wac7i7TRPpbskC9b mg2: String) {
+  #xrwjNX0PVUwch4D3 // {shim:}
+  #GB9LrYmhIg6CxRoh $mg := math→round($g * 1000)→to_string;
+  #Hd2xoPM6C0l4kyj2 `return` $mg;
+  meta private;
+  meta sync;
+}
+#I0wd2ww0cWi61IbW
+action test_accelerometer() {
+  #tdPH2SckDQFP0AHb // {shim:}
+  #c0W2EHJjeOCb9SP7 code→\_libinit;
+  #j7MfPADEGw5Pi5im while true do {
+    #xnxjKVT2qERsVvmc $x := code→acceleration("x");
+    #A5yEcY6mbAfb6TPA $y := code→acceleration("y");
+    #xxSBeHns1qEX4s5O $z := code→acceleration("z");
+    #B3OVJ2E408AL9uqx code→pause(100);
+  }
+  meta private;
+  meta test;
+}
+#db4usuIXbJkUwwL3
+var bkg : Sprite {
+  // {shim:}
+  transient = true;
+}
+#UxZtwFWDOl2eBWHS
+var acc_title : Sprite {
+  // {shim:}
+  transient = true;
+}
+#NB71vR2acuoxOzhF
+action update_compass() {
+  #GUKjAqnGheX4V0Fo // {shim:}
+  #ngsZsBasKScY4T5V if `not` data→compass_arrow→is_invalid then {
+    #zZbyXaPFEJrI4vnn $degrees := code→compass_heading;
+    #fP6woTbM4WvDhu5z if data→compass_heading_value→is_invalid then {
+      #SVWo2h2OTKLTN9Zu data→compass_arrow→angle := - $degrees;
+    }
+    else {
+      #jtGD4e2BPt7sPQ2f data→compass_arrow→angle := $degrees;
+    }
+    #xmqom9DO2N4UCxUo data→compass_text→text := $degrees ∥ "°";
+    #xye0othn81opwsR6 data→compass_text→fit_text;
+    #BoQ8NUUvE6oK18RC data→compass_text→left := 30;
+  }
+  meta private;
+  meta sync;
+}
+#Duo2QkiHEzLUwbPP
+action update_acceleration() {
+  #xYTnumJe8pmdMnOj // {shim:}
+  #T5H4jq33oZ2P97M2 if `not` data→acceleration_x_text→is_invalid `or` `not` data→acceleration_y_text→is_invalid `or` `not` data→acceleration_z_text→is_invalid then {
+    #Y4gIGmGYXPYUSSnc $p := senses→acceleration_quick;
+    #oonnY6sWxw0tq6ag if `not` data→acceleration_x_text→is_invalid then {
+      #xld1RvlF3fr7fUpj data→acceleration_x_text→text := "x: " ∥ code→mg_to_string($p→x);
+      #bLiTgPxiTV1D6D73 data→acceleration_x_text→fit_text;
+      #cob34YxVwT4lSg5N data→acceleration_x_text→left := 200;
+    }
+    #xE54GZuni6hnc2LU if `not` data→acceleration_y_text→is_invalid then {
+      #CK4RRChJoo5LTaD4 data→acceleration_y_text→text := "y: " ∥ code→mg_to_string($p→y);
+      #xtH0Dr43TgaKViYo data→acceleration_y_text→fit_text;
+      #x6204VDd8dJKb7bj data→acceleration_y_text→left := 200;
+    }
+    #xgm4X9sFTILN4PkS if `not` data→acceleration_z_text→is_invalid then {
+      #rKo1iSU2MLyJrjiu data→acceleration_z_text→text := "z: " ∥ code→mg_to_string($p→z);
+      #xdR4vtWBQlLAqFj8 data→acceleration_z_text→fit_text;
+      #X477zJbexlWyCpOd data→acceleration_z_text→left := 200;
+    }
+  }
+  meta private;
+  meta sync;
+}
+#eVKtTh73RfddrPbU
+action in_background(#x67Zj4FKKV2jt3w9 body: Action) {
+  #JS61XiP3XLxBGcSJ // Schedules code that run in the background.
+  #xOGy2Csz0dMRNvwY // {help:functions/in-background}
+  #xeIeSmXBocppJ249 // {namespace:control}
+  #tpcIQODlauXc4x94 // {shim:micro_bit::runInBackground}
+  #H9LSVq6QNak6kS1E if $body→is_invalid then {
+    #DcDY2ImNUd2qaRhd `return` ;
+  }
+  #M0p9EJ9u34sADrAp app→allow_other_events;
+  #xK0Ei4Ey5Aa6ktal `async` $body→run;
+  meta sync;
+}
+#z6mgAgBseIwhSA9q
+var pins : Sprite_Set {
+  // {shim:}
+  transient = true;
+}
+#S4AaF6H9Bir1YG2B
+action init_pins() {
+  #xvHUpiQyRqSw08j4 // {shim:}
+  #x48sTDN6eBa0xXyy if data→pins→is_invalid then {
+    #xVyNflPdb6lsKBCK data→pins := data→board→create_sprite_set;
+    #FNXCkGWZPHZHdFMp $color := colors→blue;
+    #bEGdJ995axSAPUnk $coll := create→Collection_of→Number;
+    #OBYzjLeMGZGSwlRp $coll→add(25);
+    #PJgCYPHIzLXbTs1X $coll→add(145);
+    #XUScfAJ414uNtG3o $coll→add(280);
+    #FLd4X2wW20GtInS2 for 0 ≤ i < $coll→count do {
+      #bCVbJpfp40lEL102 $left := $coll→at($i);
+      #Afqsons4pseBNxj0 $pin := code→create_pin($color, $left);
+      #xIgLaDCrGz1xSf4r data→pins→add($pin);
+    }
+  }
+  meta private;
+  meta sync;
+}
+#A9xZmVQH2nPrrN8o
+action pin_by_name(#pznPOV8prsiYdNhL name: String) returns(#QC9UtfUA0ZQiyxvN sprite2: Sprite) {
+  #YLwrAONQnaRmH9mk // {shim:}
+  #ololoiFjuAzCfyDe $index := $name→trim("pP\t")→to_number;
+  #j0yR5tWcQjVZyB1T $sprite := data→pins→at($index);
+  #xGr49fRupLhPmlEq $sprite→show;
+  #aZHYIJGu0HFUl4SU `return` $sprite;
+  meta private;
+  meta sync;
+}
+#RtVnuDAS2Tqp1LSg
+action update_pin(#xLFmUabqhUFi0ZiP sprite: Sprite) {
+  #OLMKJMgxATEpHRHu // {shim:}
+  #oa5bznMuZaSILcw4 if $sprite→mass - 1 ≤ 0 then {
+    #xzLXU96Zk9wUo7bD $sprite→set_color(colors→transparent);
+  }
+  else {
+    #ZMq4rk7QkaT2NOsD $sprite→set_color(colors→green);
+  }
+  #v6NNVvhZ2YzYJw2D data→board→update_on_wall;
+  meta private;
+  meta sync;
+}
+#hEU77nyoMCRSSAqa
+action test_pins() {
+  #xynDU3S3kjEYy18D // {shim:}
+  #rK2IutWay0PFVvqq code→\_libinit;
+  #t829Xv42HzfA2nAG code→digital_write_pin("P0", 1);
+  #RU4iMpCdo1kUigzr code→analog_write_pin("P1", 1000);
+  #HbZSxLTByep2h4qZ code→pause(1000);
+  #hpOIzAtXk5fN5c5M while true do {
+    #IDR9JN8Q2N13Bumo code→digital_write_pin("P0", 0);
+    #xnKEa428MreHgCNq code→pause(1000);
+    #xKnTarBirfEP9bL5 code→digital_write_pin("P0", 1);
+    #ieC6KUFGlIGc2sCf code→pause(1000);
+  }
+  meta private;
+  meta test;
+}
+#x871W29FACCUQhgl
+action create_pin(#xwnvtwXoIoa22y4Z color: Color, #IVU23UfeIRgACC6Q left: Number) returns(#m3RyCzsn2DCgDD7W pin2: Sprite) {
+  #Aq6gfS2XnSqEO42R // {shim:}
+  #Px6ORF6xlL3ssrZ0 $pin := data→board→create_rectangle(50, 52);
+  #xUih2I3DqrfQGQC2 $pin→set_color($color);
+  #bVSo2lipkr25Ga2P $pin→@bottom := data→bkg→@bottom - 5;
+  #xDtMKVUu2fjw8gEH $pin→mass := 1;
+  #uOBdkNKC5tgxgMmu $pin→set_friction(1);
+  #qCCZl1zpt7Jc32cS $pin→hide;
+  #IRReqhZX8YsLhC44 $pin→left := $left;
+  #xgbiNSJLlb6Ct3Xf $pin→on_touch_down($touch_down);
+  #dnm1P3MFrEzgk7ZV where touch_down(x: Number, y: Number) {
+    #gQ2vyq2Jd7fOV7g6 $pin→mass := 1025;
+    #ELw1bdG72zYVtFzz code→update_pin($pin);
+  }
+  #x5e0KdFm44Im64AZ $pin→on_touch_up($touch_up);
+  #n0fTpU4XnqkfP4qT where touch_up(x: Number, y: Number) {
+    #hn3r2pa6wYAY4u8w $pin→mass := 1;
+    #nvk6QNLw1m6DrV9M code→update_pin($pin);
+  }
+  #zUDQyhCWpFFvbmjL code→update_pin($pin);
+  #wemNuUcwH4xjwwNw `return` $pin;
+  meta private;
+  meta sync;
+}
+#tYt6bUhy3Nm9mpAR
+action test_pins2() {
+  #xXot6id59vwJvRh2 // {shim:}
+  #xtZorNV3Gqgbg1S0 code→\_libinit;
+  #xQdOxnawNQbuLBIm for 0 ≤ k < 2 do {
+    #PihMnuz9A57aOBax for 0 ≤ i < 5 do {
+      #xY5ZW4seHSQm14te for 0 ≤ j < 5 do {
+        #xk8RVw6DDoorZhsL $b := code→point($i, $j);
+        #aBSVSfZkN77ha2X4 if $b then {
+          #lytsEo6NBz3VlT47 code→unplot($i, $j);
+        }
+        else {
+          #vGAQtJ9z5CBiW5U9 code→plot($i, $j);
+        }
+        #puQuMFzF3KMG1e4q code→pause(500);
+      }
+    }
+  }
+  meta private;
+  meta test;
+}
+#xCn8l4L2PfqCeiNR
+action calibrate() {
+  #a592ki5YrzeI6a2X // Asks the user to calibrate the compass by rotating the board.
+  #jvwA9fcOAMuHgvd3 // {help:functions/calibrate}
+  #K69mm2lCHD9ANu8u // {namespace:input}
+  #X1aQ0eg2hzWomqLI code→compass_calibrate_start;
+  #tRrZX9jRGFJOOkDW $img := code→create_image("0 0 0 1 0 0 1 1 0 0 0 0 0 1 0 0 1 0 0 0\n0 1 1 1 1 1 0 0 1 0 0 0 0 0 1 1 1 1 0 0\n1 0 0 1 0 0 0 0 1 0 0 1 0 0 1 0 1 0 0 0\n1 0 0 0 0 0 0 1 1 1 1 1 1 1 0 0 1 0 0 1\n0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 0");
+  #znFPRJAgWJsNorGK for 0 ≤ i < 10 do {
+    #CzjIvjckeXwXsiQl $img→scroll_image(5, 400);
+  }
+  #xsgHZCEycvcwFvpX code→compass_calibrate_end;
+}
+#z4SoTUi3P30D33zG
+action compass_calibrate_start() {
+  #xGkSLS3rBCWSox2b // starts the compass calibration
+  #PMF9CQOjT5lgVYN4 // {shim:uBit.compass.calibrateStart}
+  meta private;
+}
+#IaMVVHezFMwLNPY4
+action compass_calibrate_end() {
+  #tMN4sVe82cqdPk5h // ends the compass calibration
+  #xAtBynTCRvTf8vaM // {shim:uBit.compass.calibrateEnd}
+  meta private;
+}
+#OsMsC0czXS2YrjdU
+action forever(#xYRk46PsjFkdlEOm body: Action) {
+  #a1ZdSLsAwD6Rv0FM // Repeats the code forever in the background. On each iteration, allows other codes to run.
+  #Xa3HrwxE9W3Z3Erw // {help:functions/forever}
+  #Bo8g50yakYNCYSa1 // {namespace:basic}
+  #x4L41J1h0VUQZ1s2 // {weight:55}
+  #fJ2PtEUzMS9ydxsM // {shim:micro_bit::forever}
+  #Pj4YeL1fWpHS4Rqe code→in_background;
+  #DzqAW6AtT7qsGylm where `implicit` \_body\_() {
+    #VewPBkQpxjnPzsoN while true do {
+      #xxjM7mD3FQ3G0HYN $body→run;
+      #q2kJK2U1MbTh4d4L code→pause(20);
+    }
+  }
+  meta sync;
+}
+#x2UhK7IwofqmWDW2
+var background_scene : Picture {
+  is\_resource = true;
+  url = "https://microbit0.blob.core.windows.net/pub/prcwhomc";
+  transient = true;
+}
+#gqSUQusGllAt4X3R
+action init_axis() {
+  #QkvjQqSfn5L41Ph4 // {shim:}
+  #q7cMCQpYupmXc3oS data→led_indexes := data→board→create_sprite_set;
+  #x36Llp6v7tD4OgDD for 0 ≤ l < 2 do {
+    #xPsYPYIXtbJBJDDl for 0 ≤ k < 5 do {
+      #WVBiy4HYa9LPzM9f $index := data→board→create_text(100, 40, 20, $k→to_string);
+      #GP3ccJkbFZoGfIOo $index→fit_text;
+      #bZpgALZp1Y7Pqvwq $index→set_color(colors→white);
+      #rJHNHPvhK2CuW6K5 data→led_indexes→add($index);
+    }
+  }
+  #xZvCdCFHs2yBG1WD data→led_x_index_legend := data→board→create_text(100, 40, 20, "X");
+  #kWxcFIVT5naWzvWl data→led_x_index_legend→fit_text;
+  #xryAhH2rPFt7CGEu data→led_x_index_legend→set_color(colors→white);
+  #Swmd5OgE0kLUq6vI data→led_y_index_legend := data→board→create_text(100, 40, 20, "Y");
+  #toIFKA5P9IJU4fyF data→led_y_index_legend→fit_text;
+  #v88nKL6Mx0ObDSQb data→led_y_index_legend→set_color(colors→white);
+  meta private;
+  meta sync;
+}
+#gbl636zYs8BjKywu
+action background_animation() {
+  #cXcKTdQsmOf72PyZ // {shim:}
+  #sbOu1sddCBbbzLto $anim_style := math→random(2);
+  #zWd8PXsYN214PuSi if $anim_style = 0 then {
+    #xOUvhBkpwLPAJKQE for 0 ≤ x < 5 do {
+      #XztMutk0HQK5N4bE for 0 ≤ y < 5 do {
+        #V0LLzNL1lk6N8oiG code→rotate_pixel($x, $y, ($x + $y) / 11);
+      }
+    }
+  }
+  else { #N8Fm2yynpg44tcFN if $anim_style = 1 then {
+    #WFnJlsyfcMVWjUdA for 0 ≤ x < 5 do {
+      #O0vgqGWuikN0Igzt for 0 ≤ y < 5 do {
+        #oqHsWxXgwop5m3UQ code→rotate_pixel($y, $x, (8 - $x - $y) / 11);
+      }
+    }
+  }
+  else { } } 
+  #W55d2CMIzJ17AYTx time→run_after(20 + math→random(20));
+  #l3mxxkPpmOIFL0MI where `implicit` \_body\_() {
+    #hPG2SGmZ0v82ge2v code→background_animation;
+  }
+  meta private;
+  meta sync;
+}
+#xY4SKFl04lUKP0Tz
+var back_leds : Sprite_Set {
+  // {shim:}
+  transient = true;
+}
+#s4TpycEQnK9omxJE
+action rotate_pixel(#xQ6b7K01ABZHGoIM x: Number, #LByh34Z47Y1t7STj y: Number, #xXPwmL1c4yZhN70E delay: Number) {
+  #hDHLiXE2IoG2LAIC // {shim:}
+  #ZhRYM1cp26cnzoZ1 $index := code→index($x, $y);
+  #Z4jTOPX6Hf1TWJsy $back_led := data→back_leds→at($index);
+  #f9URVMJG14plLGON $led := data→leds→at($index);
+  #Axwwjnz8AnLRT1zD $anim := $led→create_animation;
+  #BXSGIclwP5UQZVWn $anim→sleep($delay);
+  #T1txW266DHqoj2VL $anim→turn_to(0.7, "expo", "inout", 360);
+  #JmbebaijvsuwQhiZ $anim := $back_led→create_animation;
+  #NqByltxb37T2IH33 $anim→sleep($delay);
+  #NwwgANo3MHaQnz5l $anim→turn_to(0.7, "expo", "inout", 360);
+  meta private;
+  meta sync;
+}
+#Y42hygGODxnJXaRw
+action led_index_anim(#QVFm7dBCUmhXNZ2d back_led: Sprite, #x2kGm9JYaUim4lt7 j: Number, #L5TjxqpH6tKGkOTd i: Number) {
+  #mZsj4T6J4M2uKZuV // {shim:}
+  #bU0sdnTBX02bATEy $back_led→on_tap($tapped);
+  #QGyzuuvKa9ITgnVd where tapped(x: Number, y: Number) {
+    #x4h4i0Xr2uWxRBvm $anim2 := $back_led→create_animation;
+    #xsMdEt8ccoRpbNYI $anim2→beat(0.3, 3, 1.2);
+    #s6iFPhs6n9jPEG7J $hint := data→board→create_text(100, 40, 22, "x=" ∥ $j ∥ ", y=" ∥ $i);
+    #D6b4Qvjr06KgKv45 $hint→fit_text;
+    #gJIdoRKO7jwnlbzz $hint→set_text_baseline("bottom");
+    #qx3Y9mRjHEwbnF6m $hint→@bottom := $back_led→y;
+    #zGixTQ9Kuk2m6Whe $hint→left := $back_led→x;
+    #FTPPf6p4gUiFcxxb $anim := $hint→create_animation;
+    #DyAb59RCz24FZLtG $anim→fade_in(0.5, "cubic");
+    #lOOqrViiBQ4e4jku $anim→sleep(.5);
+    #XJ5iEvyaoe36o2rc $anim→puff_out(0.5, "cubic", 1.5);
+    #DoyEH0iisHSMcqKe $anim→delete;
+  }
+  meta private;
+  meta sync;
+}
+#xB22l4bTEuykprY5
+var current_animation : Number {
+  // {shim:}
+  transient = true;
+}
+#IhVzhAZz2OeYSRgl
+action test_multi_scroll() {
+  #B6N0Ow6kWjo3o2k4 // {shim:}
+  #jwlm0IOR4ZnMvote code→\_libinit;
+  #vvz4qs78fnml39OQ code→on_button_pressed("A");
+  #LFV6TOZvYxsiDM0g where `implicit` \_body\_() {
+    #VEQJMbAIvN5XNwiw code→show_string("ABC", 100);
+  }
+  #dH24BpCdIjxC0udR code→on_button_pressed("B");
+  #xGRNMYqr5Oobo6Iv where `implicit` \_body\_() {
+    #xdthtZf2mEoAmQO3 code→plot_image("0 0 0 0 0\n0 1 1 1 0\n0 1 0 1 0\n0 1 1 1 0\n0 0 0 0 0");
+  }
+  meta private;
+  meta test;
+}
+#cEmz3y3ohmdp6AXY
+action init_eyes() {
+  #xufwLhiDE0bQWtRU // {shim:}
+  #bjkoPxbCzJ4pL2uK data→eye_y := 75;
+  #NkEaRwjz7rWxJKQK data→eye_left := 275;
+  #v783038Eh682f2OC data→eye_right := 323;
+  #eiAcEwONRspI5U37 data→left_eye := data→board→create_ellipse(13, 13);
+  #kvrBgQVgS7G0K2jA data→left_eye→color := colors→gray;
+  #Xl8q5Ud55nALw4Qz data→left_eye→left := data→eye_left;
+  #NEMjm8SQ7r0P45jG data→left_eye→@top := data→eye_y;
+  #pshgYorYc1f0W1RK data→left_eye→set_friction(1);
+  #R6QEKy3rQdbXOaX1 data→right_eye := data→board→create_ellipse(13, 13);
+  #cOqnG6djBmo9cbBW data→right_eye→color := colors→gray;
+  #GZdwztrKXD2QRxAJ data→right_eye→left := data→eye_right;
+  #k85veqcrDilOuwDt data→right_eye→@top := data→eye_y;
+  #HRun2WhRntsb626o data→right_eye→set_friction(1);
+  #xvDkOawcF4uscx4W time→run_after(5);
+  #fO2SW4IL13o44Bv6 where `implicit` \_body\_() {
+    #B3LDJWeGHtW8E4MP code→background_eye_animation;
+  }
+  meta private;
+  meta sync;
+}
+#O8kw8lSdWvW7wrc8
+var left_eye : Sprite {
+  // {shim:}
+  transient = true;
+}
+#PRwAVo3AkO2aHbCQ
+var right_eye : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xhHLX6h5QdTnhalv
+var eye_left : Number {
+  // {shim:}
+  transient = true;
+}
+#HWT93EnmgbqC9YKH
+var eye_y : Number {
+  // {shim:}
+  transient = true;
+}
+#x4DvJKIPIgQ0E92R
+var eye_right : Number {
+  // {shim:}
+  transient = true;
+}
+#qMsgTIJWIq1mQwZd
+action background_eye_animation() {
+  #H6xmVCztL24M7rH5 // {shim:}
+  #Yp9i79aYpUQDzMh3 $anim := data→right_eye→create_animation;
+  #yODxrazNsQmAFCaS $anim→turn_to(1, "cubic", "inout", - 360);
+  #cxDUduuWUiSMNJ7P $anim := data→left_eye→create_animation;
+  #bgGZqI1SAwMsPhxz $anim→turn_to(1, "cubic", "inout", - 360);
+  #WVY3japNIXYmFVbI time→run_after(20 + math→random(20));
+  #iOueH51c9marewEa where `implicit` \_body\_() {
+    #yItKPwNOdgar5Drt code→background_eye_animation;
+  }
+  meta private;
+  meta sync;
+}
+#kaq96iZh93dUdQ0Z
+action test_forever() {
+  #gIoxApIo64EHyPn8 // {shim:}
+  #ltm6kY4KiWLUR5jc code→\_libinit;
+  #ZdeN0qz5MQzjBkkP code→forever;
+  #xPjmmLzsEKaNVoWr where `implicit` \_body\_() {
+    #qNI9KS2fM6Fo1pP4 skip;
+  }
+  meta private;
+  meta test;
+}
+#WuJjn92QznNVUE3Z
+var font_chars : String {
+  is\_resource = true;
+  url = "data:text/plain;base64,ezB4MCwgMHgwLCAweDAsIDB4MCwgMHgwLCAweDgsIDB4OCwgMHg4LCAweDAsIDB4OCwgMHhhLCAweDRhLCAweDQwLCAweDAsIDB4MCwgMHhhLCAweDVmLCAweGVhLCAweDVmLCAweGVhLCAweGUsIDB4ZDksIDB4MmUsIDB4ZDMsIDB4NmUsIDB4MTksIDB4MzIsIDB4NDQsIDB4ODksIDB4MzMsIDB4YywgMHg5MiwgMHg0YywgMHg5MiwgMHg0ZCwgMHg4LCAweDgsIDB4MCwgMHgwLCAweDAsIDB4NCwgMHg4OCwgMHg4LCAweDgsIDB4NCwgMHg4LCAweDQsIDB4ODQsIDB4ODQsIDB4ODgsIDB4MCwgMHhhLCAweDQ0LCAweDhhLCAweDQwLCAweDAsIDB4NCwgMHg4ZSwgMHhjNCwgMHg4MCwgMHgwLCAweDAsIDB4MCwgMHg0LCAweDg4LCAweDAsIDB4MCwgMHhlLCAweGMwLCAweDAsIDB4MCwgMHgwLCAweDAsIDB4OCwgMHgwLCAweDEsIDB4MjIsIDB4NDQsIDB4ODgsIDB4MTAsIDB4YywgMHg5MiwgMHg1MiwgMHg1MiwgMHg0YywgMHg0LCAweDhjLCAweDg0LCAweDg0LCAweDhlLCAweDFjLCAweDgyLCAweDRjLCAweDkwLCAweDFlLCAweDFlLCAweGMyLCAweDQ0LCAweDkyLCAweDRjLCAweDYsIDB4Y2EsIDB4NTIsIDB4NWYsIDB4ZTIsIDB4MWYsIDB4ZjAsIDB4MWUsIDB4YzEsIDB4M2UsIDB4MiwgMHg0NCwgMHg4ZSwgMHhkMSwgMHgyZSwgMHgxZiwgMHhlMiwgMHg0NCwgMHg4OCwgMHgxMCwgMHhlLCAweGQxLCAweDJlLCAweGQxLCAweDJlLCAweGUsIDB4ZDEsIDB4MmUsIDB4YzQsIDB4ODgsIDB4MCwgMHg4LCAweDAsIDB4OCwgMHgwLCAweDAsIDB4NCwgMHg4MCwgMHg0LCAweDg4LCAweDIsIDB4NDQsIDB4ODgsIDB4NCwgMHg4MiwgMHgwLCAweGUsIDB4YzAsIDB4ZSwgMHhjMCwgMHg4LCAweDQsIDB4ODIsIDB4NDQsIDB4ODgsIDB4ZSwgMHhkMSwgMHgyNiwgMHhjMCwgMHg0LCAweGUsIDB4ZDEsIDB4MzUsIDB4YjMsIDB4NmMsIDB4YywgMHg5MiwgMHg1ZSwgMHhkMiwgMHg1MiwgMHgxYywgMHg5MiwgMHg1YywgMHg5MiwgMHg1YywgMHhlLCAweGQwLCAweDEwLCAweDEwLCAweGUsIDB4MWMsIDB4OTIsIDB4NTIsIDB4NTIsIDB4NWMsIDB4MWUsIDB4ZDAsIDB4MWMsIDB4OTAsIDB4MWUsIDB4MWUsIDB4ZDAsIDB4MWMsIDB4OTAsIDB4MTAsIDB4ZSwgMHhkMCwgMHgxMywgMHg3MSwgMHgyZSwgMHgxMiwgMHg1MiwgMHg1ZSwgMHhkMiwgMHg1MiwgMHgxYywgMHg4OCwgMHg4LCAweDgsIDB4MWMsIDB4MWYsIDB4ZTIsIDB4NDIsIDB4NTIsIDB4NGMsIDB4MTIsIDB4NTQsIDB4OTgsIDB4MTQsIDB4OTIsIDB4MTAsIDB4MTAsIDB4MTAsIDB4MTAsIDB4MWUsIDB4MTEsIDB4M2IsIDB4NzUsIDB4YjEsIDB4MzEsIDB4MTEsIDB4MzksIDB4MzUsIDB4YjMsIDB4NzEsIDB4YywgMHg5MiwgMHg1MiwgMHg1MiwgMHg0YywgMHgxYywgMHg5MiwgMHg1YywgMHg5MCwgMHgxMCwgMHhjLCAweDkyLCAweDUyLCAweDRjLCAweDg2LCAweDFjLCAweDkyLCAweDVjLCAweDkyLCAweDUxLCAweGUsIDB4ZDAsIDB4YywgMHg4MiwgMHg1YywgMHgxZiwgMHhlNCwgMHg4NCwgMHg4NCwgMHg4NCwgMHgxMiwgMHg1MiwgMHg1MiwgMHg1MiwgMHg0YywgMHgxMSwgMHgzMSwgMHgzMSwgMHgyYSwgMHg0NCwgMHgxMSwgMHgzMSwgMHgzNSwgMHhiYiwgMHg3MSwgMHgxMiwgMHg1MiwgMHg0YywgMHg5MiwgMHg1MiwgMHgxMSwgMHgyYSwgMHg0NCwgMHg4NCwgMHg4NCwgMHgxZSwgMHhjNCwgMHg4OCwgMHgxMCwgMHgxZSwgMHhlLCAweGM4LCAweDgsIDB4OCwgMHhlLCAweDEwLCAweDgsIDB4NCwgMHg4MiwgMHg0MSwgMHhlLCAweGMyLCAweDQyLCAweDQyLCAweDRlLCAweDQsIDB4OGEsIDB4NDAsIDB4MCwgMHgwLCAweDAsIDB4MCwgMHgwLCAweDAsIDB4MWYsIDB4OCwgMHg0LCAweDgwLCAweDAsIDB4MCwgMHgwLCAweGUsIDB4ZDIsIDB4NTIsIDB4NGYsIDB4MTAsIDB4MTAsIDB4MWMsIDB4OTIsIDB4NWMsIDB4MCwgMHhlLCAweGQwLCAweDEwLCAweGUsIDB4MiwgMHg0MiwgMHg0ZSwgMHhkMiwgMHg0ZSwgMHhjLCAweDkyLCAweDVjLCAweDkwLCAweGUsIDB4NiwgMHhjOCwgMHgxYywgMHg4OCwgMHg4LCAweGUsIDB4ZDIsIDB4NGUsIDB4YzIsIDB4NGMsIDB4MTAsIDB4MTAsIDB4MWMsIDB4OTIsIDB4NTIsIDB4OCwgMHgwLCAweDgsIDB4OCwgMHg4LCAweDIsIDB4NDAsIDB4MiwgMHg0MiwgMHg0YywgMHgxMCwgMHgxNCwgMHg5OCwgMHgxNCwgMHg5MiwgMHg4LCAweDgsIDB4OCwgMHg4LCAweDYsIDB4MCwgMHgxYiwgMHg3NSwgMHhiMSwgMHgzMSwgMHgwLCAweDFjLCAweDkyLCAweDUyLCAweDUyLCAweDAsIDB4YywgMHg5MiwgMHg1MiwgMHg0YywgMHgwLCAweDFjLCAweDkyLCAweDVjLCAweDkwLCAweDAsIDB4ZSwgMHhkMiwgMHg0ZSwgMHhjMiwgMHgwLCAweGUsIDB4ZDAsIDB4MTAsIDB4MTAsIDB4MCwgMHg2LCAweGM4LCAweDQsIDB4OTgsIDB4OCwgMHg4LCAweGUsIDB4YzgsIDB4NywgMHgwLCAweDEyLCAweDUyLCAweDUyLCAweDRmLCAweDAsIDB4MTEsIDB4MzEsIDB4MmEsIDB4NDQsIDB4MCwgMHgxMSwgMHgzMSwgMHgzNSwgMHhiYiwgMHgwLCAweDEyLCAweDRjLCAweDhjLCAweDkyLCAweDAsIDB4MTEsIDB4MmEsIDB4NDQsIDB4OTgsIDB4MCwgMHgxZSwgMHhjNCwgMHg4OCwgMHgxZSwgMHg2LCAweGM0LCAweDhjLCAweDg0LCAweDg2LCAweDgsIDB4OCwgMHg4LCAweDgsIDB4OCwgMHgxOCwgMHg4LCAweGMsIDB4ODgsIDB4MTgsIDB4MCwgMHgwLCAweGMsIDB4ODMsIDB4NjB9";
+  transient = true;
+}
+#PMFLUE1q1CuJ4ghz
+action init_font() {
+  #b0vtErRVv2lKiwyD // {shim:}
+  #so2fife4MqLt1Dln if data→font→is_invalid then {
+    #hRTF6gnQkpgcVI0F $font_rows := art→font_chars→trim("{}")→split(",")→map_to→Number($converter);
+    #gnhl2igarTz8w2X1 where converter(elt: String) returns (result: Number) {
+      #NZd95tR0pei7srD9 $x := $elt→to_number;
+      #bjwdIjRW58xl4ZgI contract→assert( `not` $x→is_invalid, $elt);
+      #VE234B61ItgkKgVL `return` $x;
+    }
+    #GXwn4PKhSZinH5Jl $nb := $font_rows→count;
+    #bcE3hNwJudeu449H contract→assert(math→mod($nb, 5) = 0, "invalid font data");
+    #ws1lTcfPCXYdibgp $n := $nb / 5;
+    #FNuWAd8Sjya04cTv data→font := code→create_sprite($nb, 5);
+    #xvsY0LHtmGPgd3TL for 0 ≤ c < $n do {
+      #NHblt5yTsRCX4KY1 for 0 ≤ row < 5 do {
+        #Krg7mRods3Dl3k2y $char := $font_rows→at($c * 5 + $row);
+        #PWFqQxwKPwt6h2Wd for 0 ≤ col < 5 do {
+          #NOwv6OryF0clX7lo if bits→and_uint32($char, bits→shift_left_uint32(1, $col)) ≠ 0 then {
+            #Cx4707D9Ly7f7wl3 data→font→leds→set_item($c * 5 + 4 - $col, $row, 1);
+          }
+        }
+      }
+    }
+  }
+  meta private;
+  meta sync;
+}
+#lXqPrHVzWaoZMhQU
+var font : * Image {
+  // {shim:}
+  transient = true;
+}
+#kn3pxm1GvYlNa2FM
+action copy(#xDSPvIZLimSE2MgA src: * Image, #x3OdCZm4sg12zaMQ x_src_index: Number, #W2oZZTGMGJa7NNyS length: Number, #we1A4KgB1twL5dAS target: * Image, #SMzdIeBXlWN3rk9Z x_target_index: Number) {
+  #xVS27yM2iLbckrF4 // {shim:}
+  #itHlEE9vAYKoLLwH contract→requires($x_target_index ≥ 0 `and` $x_target_index + $length ≤ $target→leds→row_count, "");
+  #xSw5Z2RjNt6KkO1O contract→requires($x_src_index ≥ 0 `and` $x_src_index + $length ≤ $src→leds→row_count, "");
+  #YLi1rzwGdt51yvgW for 0 ≤ x < $length do {
+    #wOepVxKUEXepB4JQ for 0 ≤ y < 5 do {
+      #byEw4wKZ8D34CjTA $value := $src→leds→item($x_src_index + $x, $y);
+      #xgoui2MU0NwSX63I $target→leds→set_item($x_target_index + $x, $y, $value);
+    }
+  }
+  meta private;
+  meta sync;
+}
+#GBVlNX6jjV0ZeEsK
+action test_show_image() {
+  #vT52tges4o3Y4sKH // {shim:}
+  #tJWkRScB87ES2vh5 code→\_libinit;
+  #B3ht5L7s2p9R2mUJ code→create_image("");
+  #xaDxNVhBCfNUzkgF $img := code→create_image("1 0 0 0 0\n0 1 0 0 0\n0 0 1 0 0\n0 0 0 1 0\n0 0 0 0 1");
+  #QVb2KOULf0Nlfuhv $img→show_image(0);
+  #UVUpjEQQ4dp7wzHj $img→show_image( - 2);
+  #F9pi4aSzEu9kjmyZ $img→show_image(2);
+  meta private;
+  meta test;
+}
+#Clf38zxkZIrobSlk
+action on_before_pause(#xk8GIyGNr2wlsynF body: Action) {
+  #tzjretiGNHu9Jbzz // **Simulator only!** Registers an event to run before pause.
+  #nAL0A4jjuTPWjd0J // {shim:}
+  #xjnRGo2GMH2Qy3Fi // {weight:0}
+  #xbU8a1LTxptE5w5M data→before_pause := $body;
+  meta private;
+  meta sync;
+}
+#lPJG6os6F3M65GjY
+var before_pause : Action {
+  // {shim:}
+  transient = true;
+}
+#CCgTYpjWRTwnp9VZ
+var doc : Document {
+  is\_resource = true;
+  transient = true;
+}
+#xuFJQyZVR24l4lZD
+action pin_is_pressed(#PqStokDT5lOf1jxR name: String) returns(#tEhrD6EfDVOcSbFI pressed: Boolean) {
+  #azmYPGjkodVTzZEW // Get the pin state (pressed or not). Requires to hold the ground to close the circuit.
+  #vBhRQqSJZf4WYIle // {help:functions/pin-is-pressed}
+  #yiahMKDpg9PMqNVd // {namespace:input}
+  #x8XLiwKMO5Evc4TB // {weight:58}
+  #HNt4QiENW2fWc4fU // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #QRFOhtCMkFfrBa2r // {shim:micro_bit::isPinTouched}
+  #SShWUIP3VYby3fRd code→init_pins;
+  #WsVEccEOZ0aG95J8 $name := $name→trim(" \t")→to_lower_case;
+  #Ta2Yaf4GHnPo1g9S if data→board→touched then {
+    #xo2G8eJDCmsq4gT4 $target := code→pin_by_name($name);
+    #GtVffND0qQpD2Uky $p := data→board→touch_current;
+    #x3Gr77Zk0mZawflE data→finger→set_pos($p→x, $p→y);
+    #xB28uqAlbJAhYFzu if data→finger→overlaps_with($target) then {
+      #Ws3G9qMFZIAcnvDZ `return` true;
+    }
+  }
+  #adGG0ohDxSfXMItY if $name→equals("p0") `and` senses→is_key_pressed("0") then {
+    #b741DDwiWIafJlj6 `return` true;
+  }
+  else { #xN11da8I4Uh5uCI0 if $name→equals("p1") `and` senses→is_key_pressed("1") then {
+    #MwC8h4HyPUYqG0xK `return` true;
+  }
+  else { #KyslP3kLRnPWaw2f if $name→equals("p2") `and` senses→is_key_pressed("2") then {
+    #HvlIx1YVevH1jKxa `return` true;
+  }
+  else { } } } 
+  #rE7lIBNdOOjEf4VE `return` false;
+  meta sync;
+}
+#J3NOIEutRnzUY4bD
+action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Action) {
+  #kReLjZqoQYm1X75l // Do something when a pin(``P0``, ``P1`` or both ``P2``) is pressed.
+  #jHDQ6E4HWmRlwyxo // {help:functions/on-pin-pressed}
+  #yj4K6E3sCCK1V32N // {namespace:input}
+  #UZIoGA4CKSwhMxlf // {weight:57}
+  #OgqWJNwCulcyJT7l // {enum:name:P0=MICROBIT_ID_IO_P0,P1=MICROBIT_ID_IO_P1,P2=MICROBIT_ID_IO_P2}
+  #xZ0ArWZwbu4SBuBn // {shim:micro_bit::onPinPressed}
+  #nPpJQoCs8nAIigcE code→notify_event_registration("on pin pressed " ∥ $name);
+  #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
+  #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
+  #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
+    #xs5qVip6FU1jDpOm `async` $body→run;
+  }
+  meta sync;
+}
+#pqc71fRJDE9AyREy
+var led_x_index_legend : Sprite {
+  // {shim:}
+  transient = true;
+}
+#VTpQmE9c2z7zHZvZ
+var led_y_index_legend : Sprite {
+  // {shim:}
+  transient = true;
+}
+#x6wCsmeEKLVxXaL2
+action test_pin_pressed() {
+  #YbjZ28PiH7cboofJ // {shim:}
+  #xrTaGQCG4tQ7BuaQ code→\_libinit;
+  #uk4llAEL60uunwoN code→on_pin_pressed("P0");
+  #xOX7XEk48KmshvAM where `implicit` \_body\_() {
+    #K9SewNiqXXHAAr9I code→show_number(0, 150);
+  }
+  #vMbUCvZwCzUVIPCj code→on_pin_pressed("P1");
+  #ZNMMtevlmkH4UeG4 where `implicit` \_body\_() {
+    #xd8cEg1eTi89m63q code→show_number(1, 150);
+  }
+  #M792rT11iDEw20Qp code→on_pin_pressed("P2");
+  #V3NF8Cc4SsoAbwjt where `implicit` \_body\_() {
+    #SkiHZpgB4MGkk3M6 code→show_number(2, 150);
+  }
+  meta private;
+  meta test;
+}
+#rkug3fCgxwEKcECZ
+action remote_control(#YHC4x4CkZEExgxbM @event: String) {
+  #x1PrhNFlEq2OGzf4 // Sends a ``remote control`` command to the parent device.
+  #rbUtYPflzpn05UMQ // {namespace:events}
+  #gYfUlslCDE6vhjL6 // {weight:20}
+  #vahTcTSxkwyaQDVT // {help:functions/events}
+  #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
+  #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
+}
+#xfEzD2r0WjZppPTL
+action test_events() {
+  #xM2V2HK64vD5CCP6 // {shim:}
+  #SF8Y7AzLVf79J9Hv code→\_libinit;
+  #xYsvR3f5jJsVfu8P code→remote_control("play");
+  #VHKRZyj11yrItaeA code→remote_control("pause");
+  #NFjU8XLb5qH4qi0s code→remote_control("stop");
+  #x6tXtLrOjbyLj71J code→remote_control("next track");
+  #x9ptNjJbOEhQzr2G code→remote_control("previous track");
+  #m2qkS2n4QlIgr8rU code→remote_control("forward");
+  #YC9iNYuSkosLnOiS code→remote_control("rewind");
+  #S4fvdbVeCn1mU7N5 code→remote_control("volume up");
+  #c6mF6g3EZsN9kyMH code→remote_control("volume down");
+  #yb0esPi6Iy51trEl code→camera("launch photo mode");
+  #hCY4GTQ592HR6MDS code→camera("launch video mode");
+  #q7dc4Ems5bX8bUjw code→camera("start video capture");
+  #Ig5RtNNeoA2RR4Vp code→camera("stop video capture");
+  #xbMlLP406gUHPHdg code→camera("stop photo mode");
+  #mji2VTG8pklTAlZT code→camera("stop video mode");
+  meta private;
+  meta test;
+}
+#FsXN4qs00Niar2I3
+action camera(#p3kEX3EqeufdJmG1 @event: String) {
+  #wY3y0ASAfRrgGtG2 // Sends a ``camera`` command to the parent device.
+  #T9jxpLbgaFQwkQy8 // {namespace:events}
+  #w2wLNoci3MafdcN6 // {weight:19}
+  #eeF0Fl9hopb7V9WB // {help:functions/events}
+  #Iqur1M60Xd5273Xa // {shim:micro_bit::events::camera}
+  #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
+}
+#CjI3CHq22D9YwGsN
+action audio_recorder(#WUexw2vVrC2OMEa2 @event: String) {
+  #xC6rDXBdCS9ZzGrs // Sends an ``audio recorder`` command to the parent device.
+  #M5eNr22OwVuxNpiN // {namespace:events}
+  #Iq35kOhdrf12OXdN // {weight:18}
+  #YWbPzKlWzlZ7fXwv // {help:functions/events}
+  #gf80RSjq2euipiOS // {shim:micro_bit::events::audio_recorder}
+  #QKzBOXeC241gkrof // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
+}
+#CzqRWuR2SyiUNdAg
+action alert(#pHqCn0ZWIdyNQSVu @event: String) {
+  #vUmqTLUCj4fjFygl // Sends an ``alert`` command to the parent device.
+  #etLJqyeZ8q3eRTtj // {namespace:events}
+  #gv2Lztj0odNeIJvt // {weight:18}
+  #ZCcDnTF7ZiSNaNNA // {help:functions/events}
+  #oq6L8Lgvq4qKxsZb // {shim:micro_bit::events::alert}
+  #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,alarm 1=MES_ALERT_EVT_ALARM1,alarm 2=MES_ALERT_EVT_ALARM2,alarm 3=MES_ALERT_EVT_ALARM3,alarm 4=MES_ALERT_EVT_ALARM4,alarm 5=MES_ALERT_EVT_ALARM5,alarm 6=MES_ALERT_EVT_ALARM6}
+}
+#DFpXK66KYosuH2qD
+action create_A\u002bB_button() {
+  #oqndQEOZsX7D7VuV // {shim:}
+  #Q7HJhFDhF31D1CyH data→button_a\u002bb_inner := code→create_circle(525, 532);
+  #AezoGLweK6YLo95L // {help:functions/on-logo-up}
+  #jOo9NfJ7oRgpQ8Y4 data→button_a\u002bb_inner→set_color(colors→black);
+  #Z8fAqSYlCuXG6dtB data→button_a\u002bb := code→create_circle(data→button_a\u002bb_inner→x, data→button_a\u002bb_inner→y);
+  #qL8vzC4Ua3ivvgm6 data→button_a\u002bb→opacity := 0;
+  #pgsgfJbTVcGs9ULn data→button_a\u002bb→width := 84;
+  #QWB0KqvVxcoyhy7H data→button_a\u002bb→height := 84;
+  #Ktr2xDEXBGgQzQ6q data→button_a\u002bb→x := data→button_a\u002bb_inner→x;
+  #jMQz8inx0Hu43J4J data→button_a\u002bb→y := data→button_a\u002bb_inner→y;
+  #zS6N4kaRn2wel37F data→button_a\u002bb→on_touch_down($touch_down);
+  #PJA6VUPCxlzWw0Nv where touch_down(x: Number, y: Number) {
+    #a2abvjq67X2J8yEU data→button_a\u002bb_inner→set_color(colors→orange);
+    #R67xt5S6i2Tg17ti data→button_a_inner→set_color(colors→orange);
+    #tPC2aVNQVkohUc32 data→button_b_inner→set_color(colors→orange);
+  }
+  #HPkfFmXxktWAAMgq data→button_a\u002bb→on_touch_up($touch_up);
+  #xWF6IyOF9X9GA09M where touch_up(x: Number, y: Number) {
+    #x3diqaUUBItAgH4p data→button_a\u002bb_inner→set_color(colors→black);
+    #VWrTjWQVsOX82B1C data→button_a_inner→set_color(colors→black);
+    #mbfRvtByD8SP9Ard data→button_b_inner→set_color(colors→black);
+  }
+  #xrF43zP5h8mPVPIH $a\u002bb_text := data→board→create_text(100, 40, 20, "A+B");
+  #OjSlLvcGgdRux2nI $a\u002bb_text→set_color(colors→black);
+  #zds87sWwxUvSi4Kc $a\u002bb_text→fit_text;
+  #MQQ53MhcsvV8Y81c $a\u002bb_text→x := data→button_a\u002bb→x;
+  #bs4gmywDvvLuEtqt $a\u002bb_text→@bottom := data→button_a\u002bb→@top + 10;
+  meta private;
+  meta sync;
+}
+#w7xLLit7W5biNqRL
+action create_B_button() {
+  #CDDoGfAZ7oqJpEWi // {shim:}
+  #Hxnhl22NTBAKVXpI data→button_b_inner := code→create_circle(525, 229);
+  #OJJgFsj90lBLVD6Y data→button_b_inner→set_color(colors→black);
+  #xPpbA1GFc7ufOgwp data→button_b := code→create_circle(data→button_b_inner→x, data→button_b_inner→y);
+  #xVcUpX8PlDVShy0U data→button_b→opacity := 0;
+  #myD38vc5KVYqxJjy data→button_b→width := 112;
+  #nk4Ah7b8Pz5Fxyaa data→button_b→height := 112;
+  #dnWpTTRMAGH5LR7K data→button_b→x := data→button_b_inner→x;
+  #xJ8biFwM65yBGrz4 data→button_b→y := data→button_b_inner→y;
+  #W8ipqb8qzv6DDJ9Z data→button_b→on_touch_down($touch_down);
+  #bZFBsmfIhtPST9HV where touch_down(x: Number, y: Number) {
+    #YiPXtiy40dPPjGdZ data→button_b_inner→set_color(colors→orange);
+  }
+  #Qrm9tjgmXuwskqsV data→button_b→on_touch_up($touch_up);
+  #IsiFhvitsyr3BwTC where touch_up(x: Number, y: Number) {
+    #kecNwKPdnS1ycmCt data→button_b_inner→set_color(colors→black);
+  }
+  meta private;
+  meta sync;
+}
+#h2y3t2CTwSZ5po2P
+var button_b_inner : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xBES128hctdLOPWp
+var button_a_inner : Sprite {
+  // {shim:}
+  transient = true;
+}
+#Bv2s8Hio3iAdQCss
+var button_a\u002bb_inner : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xrHM168gvIqFDWL4
+action on_event(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callback: Action1[Number]) {
+  #x3KDXHT4kdAt87Pj // Registers code to run when an event occurs in the parent device.
+  #e13mHRXUDt9X8SUj // {shim:micro_bit::on_event}
+  #mc3m4mu0EMkFqfIo // {namespace:events}
+  #x4sPBtRE9IMDXiSl // {enum:id:signal strength=MES_SIGNAL_STRENGTH_ID,play controller=MES_PLAY_CONTROLLER_ID,device info=MES_DEVICE_INFO_ID}
+  #Bux3nIa98lMeKv4u code→notify_event_registration("on event " ∥ $id);
+  meta private;
+}
+#onoJvm2kWsEKngil
+action plot_image(#ernyV6gPgL4qDGoq leds: String) {
+  #rBvxZoWlXqe4OGJu // Shows an image on the LED screen.
+  #tDblt41VcVbCsUSo // {help:functions/plot-image}
+  #s8YV3gi5HVFr3xIo // {weight:95}
+  #xEmIyabRwSkr6RM8 // {namespace:basic}
+  #x4ytGwZranX41qtX // {language:leds:bitframe}
+  #xrkeEg0XKHn2gsPg // {shim:micro_bit::plotImage}
+  #QG4WQ2IObQEhJUPA $img := code→parse_image($leds);
+  #aaZfrvHpxRFkAzhI code→show_image($img, 0);
+}
+#xPty4Z96gEpPmXcC
+var counters : Json_Builder {
+  // {shim:}
+  transient = true;
+}
+#uEOBEDRjLlEAJaV2
+action tick(#j2GGfLeDOHbsXZjl evid: String) returns(#xpE0YoFiEwnltNko c2: Number) {
+  #MeueTVmAKDsL2X3a // {shim:}
+  #nYuZwihGP24HOD9e $c := data→counters→number($evid);
+  #xCTFs2GTH5YoqiBt if $c→is_invalid then {
+    #YkiKdcxa0RNOk1Dd $c := 0;
+  }
+  #EKI3rwRF5c4S12YH $c := $c + 1;
+  #XDi6TARievQiaslS data→counters→set_number($evid, $c);
+  #M4BkiNLAQCyBMo2M `return` $c;
+  meta private;
+  meta sync;
+}
+#Mv24F812mJ3GfnmU
+action notify_event_registration(#g02jGBBa2sA62OQi evid: String) {
+  #HgJ7hFDs0h0KhMo0 // Used by library authors to notify an event.
+  #p4kX3FVGjvu2Bf44 // {shim:TD_NOOP}
+  #WV4LEgRBjvrM2NyD // {weight:0}
+  #xK4U2ElyXeq4kVxN // {namespace:simulator}
+  #JDNtwbXSOeQxOX3c // {action:libsonly}
+  #U3QSq4Bys0HpYoiD $c := code→tick($evid);
+  #CSLMchaNHEeAo9ZX if $c > 10 then {
+    #ukJpRgVrsYCsFdrj $editor := app→editor;
+    #gwhUA7MFzDe9jIUB if `not` $editor→is_invalid then {
+      #xyn4eh9QnXz4pLxl $editor→annotate_caller("warning", "you register this event a lot. Move it out of the loop maybe?");
+    }
+  }
+  meta sync;
+}
+#iyYckFFAkzncX0z5
+action test_image_partial_paste() {
+  #gGEVbkFZvwn26omq // {shim:}
+  #qNYSv82a9bufwSar code→\_libinit;
+  #rUN44T7OGT1zz25f code→create_image("0 0 0 0 1\n0 0 0 1 0\n0 0 1 0 0\n0 1 0 0 0\n1 0 0 0 0")→show_image(0);
+  #Z32wXINdisyPQwFl code→create_image("0 0 0 0 0\n0 0 1 0 0\n0 0 1 0 0\n0 0 0 0 0\n0 0 0 0 0")→show_image(2);
+  meta private;
+  meta test;
+}
+#pbQ4mX9LsuvB6479
+action test_detect_event_over_registration() {
+  #XmLqRuU4B4mC44vY // {shim:}
+  #RP24GvJESSabTi3j code→\_libinit;
+  #x8Rtk54oilx28eN2 code→forever;
+  #SDv3nIkUp4301pPy where `implicit` \_body\_() {
+    #wXqb2VYzBamFs9y0 code→on_button_pressed("A");
+    #AFrJ39ft1kIpgu4T where `implicit` \_body\_() {
+      #iNCIkVU2vCCUxYqg skip;
+    }
+  }
+  meta private;
+  meta test;
+}
+#glHgGKBHAxnk24z2
+action render_image(#KkzO6pqnOT2H4Nbl @this: * Image, #WFXxzfGSmEcaecgL x_offset: Number) {
+  #wJjDZaded1juM16b // {shim:}
+  #xoCK7Hf5VvJd2IIu $cols := math→min(5, $@this→width - $x_offset);
+  #xIjtuyBD6lHvitS8 for 0 ≤ x < $cols do {
+    #cBTue49vRLx322bI for 0 ≤ y < 5 do {
+      #i4GeKthAALnRpGP4 $led := data→leds→at(code→index($x, $y));
+      #P2v15gj3plesHPMl $xi := $x + $x_offset;
+      #JwjqylYbr2MC3BU4 $state := 0;
+      #Xfykmd4KAfBDk2zI if $xi ≥ 0 `and` $xi < $@this→width then {
+        #pWDKJ02kXicPr2an $state := $@this→leds→item($xi, $y);
+      }
+      #zqePS9acv24oQAAv code→set_led_color($state, $led);
+    }
+  }
+  #Fk0NFFrO2Dmk9ebf code→update_board;
+  meta private;
+  meta sync;
+}
+#bjedWwYaJ5lL7RnB
+var button_a_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#IJL62FT2o6Z3qp0h
+var button_b_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#qHCHrugZxRO2nVNu
+var button_a\u002bb_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#V5epTckafYYQBUwI
+action clear_button_handler(#AP7KUiO86hEZMr3q name: String) {
+  #gVuKg3MqAoiA4KVd // {shim:}
+  #NducJY2YsouJ1sB4 $name := $name→trim(" \t")→to_lower_case;
+  #ixzLqm9v9QnFaHCh if $name→equals("a") `and` `not` data→button_a_handler→is_invalid then {
+    #n6oYNxkCTIM5W6gF data→button_a_handler→delete;
+    #xTH6y6KQyzUnfRMR data→button_a_handler→\u25c8clear;
+  }
+  else { #dRbB4VOJ1mMUXJDY if $name→equals("b") `and` `not` data→button_b_handler→is_invalid then {
+    #HGRHgdbJG1cj4P92 data→button_b_handler→delete;
+    #uJC4FJWjigU8QwyP data→button_b_handler→\u25c8clear;
+  }
+  else { #DzKJuB7YBFPZWdo2 if $name→equals("a+b") `and` `not` data→button_a\u002bb_handler→is_invalid then {
+    #U99rMPfGl8rRBhMO data→button_a\u002bb_handler→delete;
+    #NNQICBa0FzI7RLML data→button_a\u002bb_handler→\u25c8clear;
+  }
+  else { } } } 
+  meta private;
+  meta sync;
+}
+#xIuuGWOiw4U0Z9E6
+action store_button_handler(#g5uKm1gGabuH7KEZ name: String, #xJnSEX7WxPHkhSK9 ev: Event_Binding) {
+  #ASAbZc9j0bH7hBmb // {shim:}
+  #Ccq6Wak9K4PcvMqn $name := $name→trim(" \t")→to_lower_case;
+  #Z1idpGSDuTaD2SSS if $name→equals("a") then {
+    #J2yZk3X9x4MJfzt2 data→button_a_handler := $ev;
+  }
+  else { #lFO5umVrdo8N5w8X if $name→equals("b") then {
+    #fnPL4RqMQzhCa7MH data→button_b_handler := $ev;
+  }
+  else {
+    #bLLkTrQExLjukL2V data→button_a\u002bb_handler := $ev;
+  }
+  } 
+  meta private;
+  meta sync;
+}
+#w9lZwJwDJADMNaZY
+action test_forever_register() {
+  #AmcV6THL0zdDxQzd // {shim:}
+  #Dm8UnLZUSyFqCxQX code→\_libinit;
+  #SJAOh2GVk4zGZC44 code→forever;
+  #xqAh9AiRPBjVq6zh where `implicit` \_body\_() {
+    #GCK4VF02k25NXDM1 code→on_button_pressed("A");
+    #twPwQi6XciXsdKjV where `implicit` \_body\_() {
+      #xGqyp2mdNkIqsTei code→show_number(math→random(10), 150);
+      #Gjbrkpxz5Tx3vyYN code→pause(1000);
+    }
+  }
+  meta private;
+  meta test;
+}
+#M0RCMbzlj2nj2BI7
+action test_pixel() {
+  #BLv6aL7UZr2cqEfT // {shim:}
+  #chGi9E55itfMAUs2 code→\_libinit;
+  #SGt5eFaUBCizckCO $img := code→create_image("0 1 0 0 0 1 1 1 1 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1");
+  #rsIi4z5FSvXfEUbY $img→set_pixel(8, 0, false);
+  #T5DS5wjBwJlWRDyx $img→scroll_image(1, 400);
+  meta private;
+  meta test;
+}
+#dZXKhO253wRyy8ss
+action test_font() {
+  #x20Hxqj4AQlvhYrW // {shim:}
+  #RBMl9hru9FSnsMFJ code→\_libinit;
+  #a4OniIrwDB2fZ6dL $s := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  #tNdflz42yjWVg2UE code→show_string($s, 150);
+  meta private;
+  meta test;
+}
+#XbUu3qU1GclXjcRC
+action add_button(#xbqiUfNdjVfd4IMd text: String, #xJ3n1woMhZjnYNMw @action: Action) {
+  #USGmD7z2Nxm3G1td // Adds a button to the simulator.
+  #xReX55Ndxhgd8Uwr // {shim:TD_NOOP}
+  #gzUEASG6jJjnjORe // {weight:0}
+  #sz5shPxAJMrHPGcv // {namespace:simulator}
+  #jurR2bpFoTez7gQd // {action:libsonly}
+  #Q7KxeKWW1ylQ4sof if data→button_extra→is_invalid then {
+    #xWU42PbYiXq0h2cU code→create_extra_button($text→to_upper_case, $@action);
+  }
+}
+#QofbsqCZ4V5hSSrX
+action create_extra_button(#mncq4kd55AAXrAl3 text: String, #xGKSnvw1vCIbFYyj @action: Action) {
+  #jiT2zrVOmtzOZRYr // {shim:}
+  #HqdXAvEWpftML4hA data→button_extra_inner := code→create_circle(412, 532);
+  #gPk3T8UBTWjSz8zn data→button_extra_inner→set_color(colors→black);
+  #JGtXNV2yHEji6Ayn data→button_extra := code→create_circle(data→button_extra_inner→x, data→button_extra_inner→y);
+  #b4DhmqP47SNxK8OP data→button_extra→opacity := 0;
+  #SCO4V6exNc28sn95 data→button_extra→width := 84;
+  #LxUwVuZCSl3qrgQ3 data→button_extra→height := 84;
+  #xqljf58UOeHk2y2P data→button_extra→x := data→button_extra_inner→x;
+  #xzo2t6FZjFtPhcKY data→button_extra→y := data→button_extra_inner→y;
+  #pH0k8Ne3XCu2mscE data→button_extra→on_touch_down($touch_down);
+  #ePOpGNP0Ap24XGBk where touch_down(x: Number, y: Number) {
+    #gNN8eW7NKIACfyvx data→button_extra_inner→set_color(colors→orange);
+    #xWdiZFKt6469IQNI $@action→run;
+  }
+  #mFclEPh38W3L4nnR data→button_extra→on_touch_up($touch_up);
+  #xKbGq1XMVS7PZIF9 where touch_up(x: Number, y: Number) {
+    #BMGWQpXAUNqygWVm data→button_extra_inner→set_color(colors→black);
+  }
+  #cYszk5cTaxeH5lMn $btn_text := data→board→create_text(100, 40, 20, $text);
+  #pkRVEwItpfnOPHpL $btn_text→set_color(colors→black);
+  #xhVuttTeTSZXMEca $btn_text→fit_text;
+  #KuRLFeiYpX8ibIt4 $btn_text→x := data→button_extra→x;
+  #zIBuDWJcjBM32Yp4 $btn_text→@bottom := data→button_extra→@top + 10;
+  meta private;
+  meta sync;
+}
+#jKmZy7vMlzUPALmn
+var button_extra_inner : Sprite {
+  // {shim:}
+  transient = true;
+}
+#cXnqrj241SpxUMwF
+var button_extra : Sprite {
+  // {shim:}
+  transient = true;
+}
+#VIbUURZHhKQK2SyZ
+action reset() {
+  #xvUvNkHFq7GZFMhL // Resets the BBC micro:bit.
+  #lHHGwpOT14CKYow4 // {weight:1}
+  #bcD9ZyddSMemVKZU // {namespace:control}
+  #O4TGFHEORPMYt8Sp // {shim:uBit.reset}
+  #InYaIalKOaSAg5nh // {help:functions/reset}
+  #bn3n2t5DLBeqS63D app→restart("");
+}
+#YEzwn1KNBHbFPNUs
+action test_reset() {
+  #S2osQorpwX0Xn5kn // {shim:}
+  #GSnZiIZY6ZZfqTYY code→\_libinit;
+  #IPnXPhzZKv8j2H2j code→show_string("A", 150);
+  #ZFn2kKadUEmlY4Wk code→reset;
+  meta private;
+  meta test;
+}
+#TpQcQgKdAFw5Pqho
+action test_show_number() {
+  #lkVsRQg2Y57CbEHt // {shim:}
+  #xlVV048e6Gv5qT80 code→\_libinit;
+  #pJFrIdojNwmiVXeG code→show_number(0, 150);
+  #sOilRBUMeGHbS5iq code→show_number(1, 150);
+  #XiW64jN2AhkgUI8q code→show_number(2, 150);
+  meta private;
+  meta test;
+}

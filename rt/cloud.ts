@@ -826,6 +826,7 @@ module TDev.Cloud {
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,
+            repohash: "foobar",
             meta: meta
         })
         .done(resp => {

@@ -1,0 +1,167 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit screen";
+meta rootId "V5599nbmoYZQw1w33khHVtMh";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// Specialized functions to control the screen #microbit
+#OGCKfvX9V4gziHxf meta import micro\u003abit {
+  pub "lfuzog"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+  }
+}
+#ljbL9TDyViQp60st
+action toggle(#VUPjYYFrhOWw74RY x: Number, #nnwwBs7Gvq4QOFhz y: Number) {
+  #xv1X4QIgYlNaMo2l // Toggles a particular pixel
+  #QLttuQ85laW9BGaZ // {namespace:led}
+  #x2e61yB2AlBJwsM5 // {help:functions/toggle}
+  #FgmFzMhIDa7kfWlW if @\u267b→micro\u003abit→point($x, $y) then {
+    #JI1NCFlqtrqCyEod @\u267b→micro\u003abit→unplot($x, $y);
+  }
+  else {
+    #fr9fcMhf84RFYCe9 @\u267b→micro\u003abit→plot($x, $y);
+  }
+}
+#x3aHYXZCFqQM4N5z
+action plot_all() {
+  #Kf7bsANqYZRuDX8A // Turns all LEDS on
+  #xfEAxWsrYpI8LsrE // {namespace:led}
+  #xeNqHFR4dPLWb9Gl // {help:functions/plot-all}
+  #RQ3QvXSxNBWw7kQW $img := @\u267b→micro\u003abit→create_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+  #xIAiTtckArbe5wC2 $img→show_image(0);
+}
+#vsHySw7q1f2qmubh
+action example() {
+  #xQ2zrKasHUhouu4h // Some useful helpers to handle the LED screen.
+  #ZZJhlbcH7znOhAib // * turn all LEDs on
+  #B8zVHF1W2Sz9jAsZ code→plot_all;
+  #CtYl9BDypiKy5hQs // * toggle a single LED between on and off
+  #QrOum9fjNAqZjxX8 code→toggle(2, 2);
+  #ngqrfSW76Fhky21E // * toggle all LEDs
+  #LbtP7hux3nW9luVA code→toggle_all;
+  #WIwRCmmTlBUKGl2i // * gradually increase the screen brightness. Specify the fade speed in milliseconds.
+  #siAOajVVpMbTJLyo code→fade_in(700);
+  #elhSqMzjVDxDWbio // * gradually decrease the screen brightness until the image on the screen fades away. Specify the fade speed in milliiseconds.
+  #pmAWvpWldWehf5A1 code→fade_out(1000);
+  #mJfbEenJUZfuettI // * take a screenshot of the screen into an image
+  #xcctRndFzYcJkXwd $img := code→screenshot;
+  meta private;
+}
+#jwEvxEXkWvhLQCaf
+action toggle_all() {
+  #VYZ0MOonSM7SZ4SO // Inverts the current LED display
+  #g0PQAlQ9DWRcDJT2 // {namespace:led}
+  #XteinmSV9nf35axp // {help:functions/toggle-all}
+  #LOVe1FvXIuQSpOdt for 0 ≤ i < 5 do {
+    #AYxwUImNsW2NTTew for 0 ≤ j < 5 do {
+      #xy1D6qKToA7LgBRZ code→toggle($i, $j);
+    }
+  }
+}
+#gFU1OsaYQ427Dy3x
+action fade_in(#NkDJQP4M8hf8ByOK ms: Number) {
+  #sbtvSbGxGQsyil0Z // Fades in the screen display.
+  #YZm7yA5dpchXMk25 // {namespace:led}
+  #pWluOjC4UFxfEwYh // {hints:ms:700,2000}
+  #xCnB7Oisl6i2Ej4M // {help:functions/fade-in}
+  #wjhIzkepLWuKwtcO if $ms < 20 then {
+    #xobsfoi3mQdcjO4f @\u267b→micro\u003abit→set_brightness(255);
+    #dyWd0Vf8y8oZY3rB `return` ;
+  }
+  #YqgDyN4nF1eYtrSV $dt := 50;
+  #a920O1mg2GuXQTdD $brightness := @\u267b→micro\u003abit→brightness;
+  #Q3yIM4g0fv6TytSC $start := @\u267b→micro\u003abit→running_time;
+  #Ru1viKxwftkHaSoQ $elapsed := 0;
+  #CLECm1gEDweUCejD while $elapsed < $ms do {
+    #bFUPUsryN4Z6mxac @\u267b→micro\u003abit→set_brightness($brightness + (255 - $brightness) * $elapsed / $ms);
+    #xm08jhWovN4w1CmZ @\u267b→micro\u003abit→pause($dt);
+    #evfXW0XSgZavco0w $elapsed := @\u267b→micro\u003abit→running_time - $start;
+  }
+  #xKQmhSBAvZrHDYSB @\u267b→micro\u003abit→set_brightness(255);
+}
+#x7QNRVcyyxuTqIfa
+action fade_out(#xx2JQS02XjfYMxJH ms: Number) {
+  #WHFGHq4tuyIIqh45 // Fades out the screen brightness.
+  #VQyMxftJmAQHvQRZ // {namespace:led}
+  #nzAVXXGFATNIDOmL // {hints:ms:700,2000}
+  #OcEhk39lQe4D6COp // {help:functions/fade-out}
+  #sK5afunPQhe58NjZ if $ms < 20 then {
+    #x1qzvgufpPMfMBeo @\u267b→micro\u003abit→set_brightness(0);
+    #OioXNl3u7319hz8B `return` ;
+  }
+  #x71hff5Cad3PEqM5 $brightness := @\u267b→micro\u003abit→brightness;
+  #OjIQYJFPlSls9mPg $dt := 50;
+  #pwHkHlg81w7LJQdF $start := @\u267b→micro\u003abit→running_time;
+  #Zkzghv82gIfqZg8A $elapsed := 0;
+  #JjDiXM24mWUDhxDI while $elapsed < $ms do {
+    #yQM8M8NLZgZujKEu @\u267b→micro\u003abit→set_brightness($brightness - $brightness * $elapsed / $ms);
+    #cmBIrPftfbuXykXz @\u267b→micro\u003abit→pause($dt);
+    #xU5b9vdOhBdVPfZX $elapsed := @\u267b→micro\u003abit→running_time - $start;
+  }
+  #Ff2KRjXjWXdADj8r @\u267b→micro\u003abit→set_brightness(0);
+}
+#ruZ2GUlDTR5PTZhd
+action test_fade() {
+  #mHo56GPjrBIBbrXn // {shim:}
+  #xuX2QaesZ3fv68zC @\u267b→micro\u003abit→plot(2, 2);
+  #UGqmIER3apEDwBvY while true do {
+    #kkkohXu3WnU1V4lc code→fade_out(700);
+    #UD2rxEyf4vHJh1nV code→fade_in(700);
+  }
+  meta private;
+  meta test;
+}
+#JzsKhABDnEUitS2i
+action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image) {
+  #F9xzUugwJ3pSz2Jl // Takes a screenshot of the LED screen and returns an image
+  #y2Nlin4tWBVdqYY1 // {namespace:led}
+  #Hzg49aPDJ5V4z35P // {shim:uBit.display.screenShot}
+  #XTef15xe4sxw76s2 // {help:functions/screenshot}
+  #ku7MF9fWJoUuVkyq $img := image[lib micro\u003abit] →create_image("");
+  #oUq2AzKEBn6NX5zt for 0 ≤ i < 5 do {
+    #xv5N8Sypi9Neisg7 for 0 ≤ j < 5 do {
+      #xb55AcpSLBkazRcr if led[lib micro\u003abit] →point($i, $j) then {
+        #xBwclcbBPNTlPuR4 $img→set_pixel($i, $j, true);
+      }
+    }
+  }
+}

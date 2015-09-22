@@ -1,0 +1,339 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit game";
+meta rootId "Ba3NfsJb7QfMsuiMUrQ4HLjN";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta splitScreen "yes";
+meta platform "current";
+meta parentIds "";
+// A #microbit game library.
+#jGGkLeHRzfIhtf30 meta import micro\u003abit {
+  pub "vmqhsx"
+  usage {
+    type Image
+
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `async` add_button(text: String, @action: Action)
+    action `async` reset()
+  }
+}
+#GSTBzUmgzKqh572M
+var \_score : Number {
+  transient = true;
+}
+#dBVZeGqsEXhS7NAa
+var \_life : Number {
+  transient = true;
+}
+#BAJJhCO4wcEnkvZS
+action score() returns(#ZdGkas4VGdp7KpAk score: Number) {
+  #JKrysLLsVXnU2lZd // Gets the current score
+  #bagjbfBxWixI920m // {namespace:game}
+  #b4OrVIn3auNNVlZc // {weight:10}
+  #gQUXqxZiVTUJH10u // {help:td/games-library}
+  #fLeWes41L5KcTL21 code→init;
+  #dZpwDtBRDC0AuC6K `return` data→\_score;
+  meta sync;
+}
+#lJ7P9FLSUXiK1qfR
+action set_score(#Oj3vV76xynFUnJ6u value: Number) {
+  #VyQVy7NKpR21Y6op // Sets the current score value
+  #xAB4O7rLX45TrPs0 // {namespace:game}
+  #CpMhV2T2818lBBP4 // {weight:10}
+  #Hb1inJ8c2GnMbVTi // {help:td/games-library}
+  #QG6TE4UiTqrXI4uR code→init;
+  #sjsRgFn54B4GS3gW data→\_score := math→max(0, value);
+  meta sync;
+}
+#ct21RxcGord4ZUHK
+action life() returns(#xwvNDXyE5xUJo2w4 life: Number) {
+  #IyJ0579xbWjJurUv // Gets the current life
+  #xaYElyBY73cVSzfc // {namespace:game}
+  #qOfD7vEMcAwTXJCF // {weight:10}
+  #WThSysHUIV4s2PBM // {help:td/games-library}
+  #YWqh1YEfgdNxl82n code→init;
+  #S2tbXAXUHi1iQN22 `return` data→\_life;
+  meta sync;
+}
+#yQOnar7sIXqp6pis
+action set_life(#A4tOr2LyOrUR2M3f value: Number) {
+  #bQC50q5J4Nv6DxLr // Sets the current life value
+  #xZpUVw9ridjn2EO4 // {hints:value:1,3}
+  #xwe4HAi2BtgQsN0O // {namespace:game}
+  #yMug18SrGqhAT3Bn // {weight:10}
+  #x9P3dC6Iwu2mm5gt // {help:td/games-library}
+  #ynbh4KZHrAcYV2DF code→init;
+  #vQP7JOwXyUTcrKDe data→\_life := math→max(0, value);
+  #az2zGYGvRNAVlCiN if data→\_life ≤ 0 then {
+    #xXtO1gUMmxwZYolc code→game_over;
+  }
+}
+#sCf9vmLsvG8WaSm3
+action init() {
+  #w0iiw6oWxgjcSpvJ if `not` data→\_init then {
+    #OEkjPQmmhwrJW0Oh data→\_score := 0;
+    #xiVPvMphLY51NRS8 data→\_life := 3;
+    #bwqxqjuqihyb94gx data→\_level := 1;
+    #Lf6evmVl2EvvT5p2 data→\_init := true;
+  }
+  meta private;
+  meta sync;
+}
+#phR5OQxcOdM4coX9
+action add_score(#upNGyw2apMaUcvQC points: Number) {
+  #tL87Dx4B01r4P1Jc // Adds points to the current score
+  #qxWdMPrkQWGmHqQp // {hints:points:1}
+  #mwAslp0sFgo3kxVy // {namespace:game}
+  #CjU5W9YaAbTDuPXe // {weight:10}
+  #zuiUmYhuZxbAIleZ // {help:td/games-library}
+  #x7PPOGU8dlENtc4w code→init;
+  #kQUTLhhhFULjGZ4O code→set_score(data→\_score + points);
+  meta sync;
+}
+#ROPTygCiIFymgxcF
+action add_life(#Idxc4r0G1Vbjq8Ax lives: Number) {
+  #NDQv2bhltDPIfVSi // Adds life points to the current life
+  #gZW4aOWlH3lkAdJ2 // {hints:lives:1}
+  #piZkQFwDxd24sMMZ // {namespace:game}
+  #uTWomM4YiSXvjNFc // {weight:10}
+  #gMxH43bPNY6lkYOk // {help:td/games-library}
+  #XZF4u0yOUgyUQRl2 code→init;
+  #UCNjMauTD6c4fyeX code→set_life(data→\_life + lives);
+}
+#eHS28n1RPy4vJt9h
+action start_countdown(#k15bqhzwFzH4Y3yU ms: Number) {
+  #BCtRANWiE67zR26q // Starts a game countdown timer
+  #AZiqP23JFfbITIOx // {hints:ms:10000,30000}
+  #C2ARUWzUgFTvOtlU // {namespace:game}
+  #xOEHlgzZy2hhHBBs // {weight:11}
+  #XhFLKLF40CAqHQDO // {help:td/games-library}
+  #sx4X6t87BpsDX2Rt code→init;
+  #aKdshGPo1iqAXgyG if code→check_start then {
+    #A7XSXMDEmg5AdGAY data→\_countdown_pause := math→max(500, ms);
+    #FnAKYESYclPZ0cIR data→\_start_time := - 1;
+    #v7EAWZzZFfFzIfTV data→\_end_time := input[lib micro\u003abit] →running_time + data→\_countdown_pause;
+    #j1x6jSbo8PWqhcAB control[lib micro\u003abit] →in_background;
+    #PfU9olXIFgS5aAwm where `implicit` \_body\_() {
+      #lvm9ZUpGlRoNoJSm basic[lib micro\u003abit] →pause(data→\_countdown_pause);
+      #Asl8YY54VpNM20l7 code→game_over;
+    }
+  }
+}
+#Zo54Nk7IINBtKKmo
+var \_start_time : Number {
+  transient = true;
+}
+#xlqvNMlD5yvfwaqU
+var \_end_time : Number {
+  transient = true;
+}
+#qsSRH3fC1L812M5G
+action game_over() {
+  #zL9SS6wzl1a4SmPu // Displays a game over animation if the life is over or countdown is expired.
+  #Kx2cMn3rxMJadRgc if `not` data→\_is_game_over then {
+    #xNEpLy8Dw9bOe19L data→\_is_game_over := true;
+    #PHqtjWicyXXr3VHk code→unplug_events;
+    #cpPtkWuZoRAKW9xJ resetable := false;
+    #XkFnkf3J2op1RUmQ led[lib micro\u003abit] →set_brightness(255);
+    #DQ2Ufby7NHShBjEc while true do {
+      #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
+        #qN0fKrhol7iI1zpn basic[lib micro\u003abit] →clear_screen;
+        #puFgaW4Ecm7oLMUb basic[lib micro\u003abit] →pause(150);
+        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →plot_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+        #hEC9RO8x3BjNU7ZD basic[lib micro\u003abit] →pause(150);
+      }
+      #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);
+      #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string("GAME OVER", 100);
+      #LRSaxuwOwx5Pikaa basic[lib micro\u003abit] →pause(700);
+      #tb12845VmRSlsYUc basic[lib micro\u003abit] →show_number(data→\_score, 100);
+      #x4rEDnGkUJtAWTaO basic[lib micro\u003abit] →pause(1200);
+      #yLXE2y2NZSOZ4hkU if `not` resetable then {
+        #dnWQBAxjz4gBfilO resetable := true;
+        #JpUpYdS8VxtUCBhc input[lib micro\u003abit] →on_button_pressed("A+B");
+        #vKAd2LoMcHflYCrz where `implicit` \_body\_() {
+          #xtgCqbDV0YAeMKyS control[lib micro\u003abit] →reset;
+        }
+        #dnNXBzVzYDagXXZk basic[lib micro\u003abit] →show_string("PRESS A+B TO RESET", 100);
+      }
+    }
+  }
+  meta private;
+}
+#PdPR9cpJ2YKm2EYO
+action current_time() returns(#fsGwyKm0OLECbz4I ms: Number) {
+  #t5loUEw8UND4YmVQ // Gets the remaining time or current time in milliseconds.
+  #HeGc1Wr68Owk4cqu // {namespace:game}
+  #ioUuv9a7O60p0za8 // {weight:10}
+  #xgITZAJSJ1TVmJ9V // {help:td/games-library}
+  #aBET7rQnCPNQDPF4 code→init;
+  #q3rk2BW2LPvS91gF if data→\_end_time > 0 then {
+    #eRrmAEc5C7Xt9JLP `return` math→max(0, data→\_end_time - @\u267b→micro\u003abit→running_time);
+  }
+  else { #J48nE8sf4BpAn1Kp if data→\_start_time > 0 then {
+    #dVJIN2dJFI6DfRF7 `return` input[lib micro\u003abit] →running_time - data→\_start_time;
+  }
+  else {
+    #DpGPRzvOwu9Kvq7P `return` 2147483647;
+  }
+  } 
+}
+#zklIHAKeSYRvJ7r5
+action remove_life(#wSxIkWFhDMvo9sOL life: Number) {
+  #zrsjRb9maA6M2BdC // Removes some life
+  #yWb3H15TlF1klDBI // {hints:life:1}
+  #x8aXtKa8b6T5VVww // {namespace:game}
+  #V6pwIi2V2K411YlU // {weight:10}
+  #j6t4SWxNJyZalsQ6 // {help:td/games-library}
+  #DokzagqHlchXTHmB code→set_life(data→\_life - life);
+}
+#xsC75ma2TcxelNNG
+var \_is_game_over : Boolean {
+  transient = true;
+}
+#WoKtgesh2cZNfH2O
+action example() {
+  #QZZ2q1Vwz31xKT2A // This library makes it easy to create games with the  **BBC micro:bit**. [read more...](/td/game-library)
+  #xR3atML1XGN9lD1x // {topic:td/game}
+  #PYH5iWxI1IpjTa14 // {shim:}
+  meta private;
+}
+#vskFru7NgUXuZQaD
+var \_init : Boolean {
+  transient = true;
+}
+#i94uG229AdaGNx9C
+var \_countdown_pause : Number {
+  transient = true;
+}
+#gvgfanokCXXEpdXq
+var \_level : Number {
+  transient = true;
+}
+#xXS4d4K3tOHj4Jz7
+action level_up() {
+  #mlrJjFz25TdU2Qh2 // Increments the level and display a message.
+  #er18r7cjQCAzM1D2 // {namespace:game}
+  #ypIUOtUf7Dz1Ieng // {weight:10}
+  #wA1EjK6AQ9iPKEOh // {help:td/games-library}
+  #D4nHKjh53QC7yfsA data→\_level := data→\_level + 1;
+  #X6J8Jattms0PGdqt basic[lib micro\u003abit] →show_string("level:", 150);
+  #bmP28eYirxu2XvYe basic[lib micro\u003abit] →show_number(data→\_level, 150);
+}
+#XWIbW8F1TScZL6cH
+action level() returns(#BC2jHGgo22ON4Kdh lv: Number) {
+  #xgA22Q228ASNJkyl // Gets the current level
+  #FFqz0ecwtCtHQz1L // {namespace:game}
+  #M7Srh1TOB67gbJyC // {weight:10}
+  #v4vjzUaWjGBt98Tk // {help:td/games-library}
+  #YNymvto12wVZjj7j `return` data→\_level;
+  #nzwjE2h6sYGbOoES // {help:td/games-library}
+}
+#xHLzsLHCUz2swJ7b
+action test_countdown() {
+  #HAVtIrGlPwag4rAe // {shim:}
+  #kCedIlBZ3zmvWtbH code→start_countdown(10000);
+  #dQ94gDwnV0JrWJ2x code→start_countdown(10000);
+  #L8tu7FS9v4O757r0 code→start_stopwatch;
+  meta test;
+}
+#xtK4SuOp3S4NKf12
+action start_stopwatch() {
+  #UZaRv27LnL4oW8iD // Starts a stopwatch timer. ``current timer`` will return the elapsed time.
+  #Ju4jzjvapc9RBIj2 // {namespace:game}
+  #icJgELixmfxl4ba3 // {weight:10}
+  #hva2wqo5aSnLcGoN // {help:td/games-library}
+  #FKbJxgbol0zH7hgT code→init;
+  #dzKJ2uvW3hBTkCmc if code→check_start then {
+    #YHJWhIU4xlM5la8E data→\_start_time := input[lib micro\u003abit] →running_time;
+    #BpI9FVu4sEUXkm6r data→\_end_time := - 1;
+  }
+}
+#xbKGS6NntocOrXMR
+action check_start() returns(#XlAMLwecZHyukwDA ok: Boolean) {
+  #cR2pNxoFmQT2z3Ar // returns false if game can't start
+  #fzxbNRsp2d4270rr if data→\_countdown_pause > 0 `or` data→\_start_time > 0 then {
+    #b76aTH8FMfHSvLzv `return` false;
+  }
+  else {
+    #ncC4pDPrtHFuFAZB `return` true;
+  }
+  meta private;
+}
+#ft2hIFocJsyLl7tl
+action test_countdown_current_time() {
+  #xUlb4fRTV5vy3fkr // {shim:}
+  #xHQD2251jM3XG2fp code→start_countdown(10000);
+  #xcxMHQHk2BykUG5q basic[lib micro\u003abit] →pause(2000);
+  #znGGGrzotJyKqdWr basic[lib micro\u003abit] →show_number(code→current_time, 150);
+  meta test;
+}
+#YlRO2i8CApxNgUmT
+action test_current_time() {
+  #rSxmAE8htbXr8tPx // {shim:}
+  #nccSpY6Jx5nZuWLN code→start_stopwatch;
+  #JfguRXzmxjTW32v8 basic[lib micro\u003abit] →pause(2000);
+  #x7knzGldoCwiQPaI basic[lib micro\u003abit] →show_number(code→current_time, 150);
+  meta test;
+}
+#pdSjcArPD4cvm6e6
+action test_gameover() {
+  #V3yLiuoWmbtsJ9Vx // {shim:}
+  #IaOdIeGxJPutmQwh code→set_score(100);
+  #JdKoXbfP2JAMokMf code→game_over;
+  meta private;
+  meta test;
+}
+#HFDx8tOEHyqGnvB4
+action unplug_events() {
+  #DqyMp24hlCKZ1iIU input[lib micro\u003abit] →on_button_pressed("A");
+  #xWJ2aInU0Y3DkXlw where `implicit` \_body\_() {
+    #Ty4DROMeSR45jk3H skip;
+  }
+  #x4WFXrH3DNTNwBkP input[lib micro\u003abit] →on_button_pressed("B");
+  #PfVz8A4RssRinAOM where `implicit` \_body\_() {
+    #oF6jBmYja3JxvnuC skip;
+  }
+  #E22Y5LHsxIs0Wnu5 input[lib micro\u003abit] →on_button_pressed("A+B");
+  #kV4iKdgWcqEmvTpi where `implicit` \_body\_() {
+    #wV0IUBnCRTmnKjvY skip;
+  }
+  meta private;
+  meta sync;
+}

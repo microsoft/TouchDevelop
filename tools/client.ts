@@ -3631,6 +3631,7 @@ function tdupload(args:string[])
             "build/noderunner.js",
             "build/noderuntime.js",
             "build/buildinfo.json",
+            "build/libraries.js",
             "webapp/webapp.html",
             "www",
             "build/touchdevelop.tgz",
@@ -3707,17 +3708,6 @@ function tdupload(args:string[])
                         tdevGet(liteUrl + "api/" + liteId + "/label" + key, resp => {
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
-
-                    fetchlibraries([], function(err,txt) {
-                        tdevGet(liteUrl + "api/" + liteId + "/files" + key, resp => {
-                            console.log("libraries.js: " + resp)
-                        }, 1, {
-                            encoding: "utf8",
-                            filename: "libraries.js",
-                            contentType: "application/javascript",
-                            content: txt,
-                        })
-                    })
                     uploadFiles()
                 }
             }, 1, {
@@ -3750,7 +3740,7 @@ function setlabel(args:string[])
     }, 1, { name: channel })
 }
 
-function fetchlibraries(args, cb) {
+function fetchlibraries(args) {
     var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
     if (!mm) {
         console.log("invalid or missing $TD_UPLOAD_KEY")
@@ -3795,14 +3785,26 @@ function fetchlibraries(args, cb) {
             tdevGet(liteUrl + "api/" + updates[id] + "/text?original=true" + key, t => {
                 text[updates[id]] = t
                 if (--togo == 0) {
-                    var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
-                        JSON.stringify({ updates: updates, text: text, json: json }, null, 1) + "\n"
-                    console.log("got latest versions of scripts; " + txt.length + " bytes")
-                    fs.writeFileSync("build/libraries.js", txt)
-                    if (cb) cb(null,txt)
+                    fs.writeFileSync("microbit/libraries/meta.json", 
+                        JSON.stringify({ updates: updates, ids: ids, json: json }, null, 1))
+                    ids.forEach(id =>
+                        fs.writeFileSync("microbit/libraries/" + id + ".txt", text[updates[id]]))
+                    concatlibs()
                 }
             })
         }))
+}
+
+function concatlibs() {
+    var meta = JSON.parse(fs.readFileSync("microbit/libraries/meta.json", "utf8"))
+    meta.text = {}
+    meta.ids.forEach(id =>
+        meta.text[meta.updates[id]] = fs.readFileSync("microbit/libraries/" + id + ".txt", "utf8"))
+
+    var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
+        JSON.stringify(meta, null, 1) + "\n"
+    console.log("create library cache file; " + txt.length + " bytes")
+    fs.writeFileSync("build/libraries.js", txt)
 }
 
 var cmds = {
@@ -3854,6 +3856,7 @@ var cmds = {
     "injectstats": { f:injectstats, a:'', h:'query detailed stats'},
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
     "fetchlibraries": { f:fetchlibraries, a:'', h:'get latest versions of libraries'},
+    "concatlibs": { f:concatlibs, a:'', h:'generate build/libraries.js'},
     "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
     "uploadwf": { f:uploadwf, a:'PATH FILE [LABEL]', h:'upload a webfile'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},

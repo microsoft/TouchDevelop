@@ -1,0 +1,213 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit profile";
+meta rootId "jNYxMIKZwmM1Tt2iLWl9Hvzs";
+meta allowExport "yes";
+meta hasIds "yes";
+meta splitScreen "yes";
+meta platform "current";
+meta parentIds "";
+// The list of #microbit supported APIs.
+#Lfh62trBUHiPyt65
+action main() {
+  #ia5OhbXZnpECRsED // booleans
+  #IPjPGMDLDgCFYFQv $b := true;
+  #q2bFfxkeThFXBFk0 $b := false;
+  #xYMADcXfW3PqDTYO $b := $b `and` `not` $b `or` $b;
+  #y1h3f5k4zS2ow98i // numbers
+  #xuOJjbFpvOVe734G $x := 0;
+  #vRUKtRasZ3LLaLDi $x := $x + 1 - 1 * 1 / 1;
+  #qw2442wniqeMcATr $s2 := $x→to_character;
+  #GNVgb4Rv3z5MGD9M // convert to string
+  #AVZpO4XznZddsl4x $xs := $x→to_string;
+  #Ml4FF82JwXfw4oXh skip;
+  #iMtrXvO0vVbnrSif // math ops
+  #xN6L0k61CSKHhTpv $b2 := $x > $x `and` $x ≥ $x `and` $x < $x `and` $x ≤ $x `and` $x = $x `and` $x ≠ $x;
+  #xLpMe46s4AjhANFf // math functions
+  #ArcdgH4N2HCRJjQO $x := math→min(0, 0);
+  #xrAT2doldLWgGTnF $x := math→max(0, 0);
+  #F4V5YLK9ABuOOLG4 $x := math→abs(0);
+  #hdoPGaOZxi28TjVi $x := math→pow(0, 0);
+  #pjD21RoeFLPeOdEh $x := math→random(2);
+  #rMg0HgI1Y6mkhv2j $x := math→clamp(0, 2, 0);
+  #xlsQ3acfdGfr6ggj $x := math→mod(0, 0);
+  #q2P2GRUN1jiY15yW $x := math→sign(0);
+  #xS4hZqehw24D7Sog // bit operators
+  #RJOMUzeBx8e5vo2b bits→or_uint32(0, 0);
+  #oswTMG9LvJf67wT4 bits→and_uint32(0, 0);
+  #r4thhhgbQDaxi5NI bits→xor_uint32(0, 0);
+  #xRhlQ45wNJee42FE bits→shift_left_uint32(0, 0);
+  #xW2Iwc06EUjqWuXg bits→shift_right_uint32(0, 0);
+  #xR78521qrK4Itxq1 bits→rotate_right_uint32(0, 0);
+  #xmjdteXTzTUSF2JG bits→rotate_left_uint32(0, 0);
+  #wKD5XdCaANiSDZS7 // objects
+  #UQtoYBY1CERVcw9K $thing := records→Thing→create;
+  #LeDrah2RsZKT1pB7 $s4 := $thing→f;
+  #yatKuQljTswa4YV1 $thing→f := $s4;
+  #dwjKGUdJ0JXzBEr2 // collections
+  #x2fBIBqppWPrRtwg $coll := create→Collection_of→Number;
+  #V1jUmLAnDR9hfTzZ $coll→add(0);
+  #xpdMBA8WUOeoGVhf $coll→count;
+  #xUi2uGW4ugoFPgaw $coll→at(0);
+  #x3WYxOTBUpSyFXSF $coll→remove_at(0);
+  #y3yaErW59Cfbjc5a $coll→set_at(0, 0);
+  #UF5AYoLREb5jnAMW $coll→index_of(0, 0);
+  #IJSRaF7fXjhBwNMN $coll→remove(0);
+  #rdrL8PN4Uw9v26OU // strings
+  #mRe27YLotG80DdYr $s := "test";
+  #xRlJY4QhO4Fq4hJ8 $x2 := $s→to_character_code;
+  #SUvyxQSIw3TY3vW2 $s := $s→concat($s);
+  #WimJjEuFBoOizCqp $s := $s→substring(0, 0);
+  #fm7Y4HNaSi7jG2v3 $b := $s→equals("other");
+  #xuAIL5NdAZ1KtF5N $sc := $s→count;
+  #gTeb4Xd82bliP9Gm $s3 := $s→at(0);
+  #LOpKfIPlDMsVUP2W $x3 := $s→to_number;
+  #sFNR99MXq2qcNn6A // actions: see run actions: see run actions: see run
+  #GItB3zzQlGKLva8E // language
+  #xWOrqmm28D1CwUqw if false then {
+    #umPuRv6PUVDM7goa skip;
+  }
+  else { #xIklxic0fgwN21vq if false then {
+    #XvFU71wc3Jdh9ooK `return` ;
+  }
+  else { } } 
+  #QUxDFwGdBho6So46 while true do {
+    #xqbiIUoiP2fqU19Z skip;
+  }
+  #xTXiWXDOypaCgzx2 for 0 ≤ i < 10 do {
+    #V7R2z1u1veJzGB88 `break` ;
+  }
+  #xZ1ELRun4mad1PW7 // function calls
+  #x3bFUlCOYCfYKcWI if $x < 0 then {
+    #ZjV6o09yGjKJeC5l code→main;
+  }
+  #k4PTDaIFHqcXFso3 data→x := 0;
+  #FBCl2AsiYBT2BkKd // microbit apis
+  #lY4IxiRSVHUv1prz data→img := @\u267b→micro\u003abit→create_image("");
+  #xPTTNHFnhdSz2dhl input;
+  #y6kj0BBUYlWuwy6W led;
+  #lYPvYSUJurXkntc3 basic;
+  #FbxqDG6K9icP69Mq control;
+  #jpHdDKNpGylh7PAD image;
+  #SNTTZp3SXz6JkWWX pins;
+  #cxm5ZRGniZuabbsH events;
+  #w9qtFNmNqcWH4xF9 game;
+}
+#usICLRI0RLgsWatF meta import micro\u003abit {
+  pub "zbbqsq"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+  }
+}
+#Wc1pO4N99lJnJtZj
+var x : Number {
+  transient = true;
+}
+#NdBhY6y4JCp6AVvX
+action do_stuff(#xoRhpqBWrHKQ1wbj p: Number) returns(#uPnKPMlUDYKjtTpH r: Number) {
+  #R3v0NLKiT3NZzVqb `return` 1;
+}
+#Ebw62Hb2wL0dFNZw
+action run(#X6GWR42GD1IO8W95 p: Action) {
+  #tvk7682eRC1Qgml0 $b := $p→is_invalid;
+  #xJH443yIol2Lq8Ex $p→run;
+}
+#x0V58dtFBOlyU9Fk
+var @action : Action {
+  transient = true;
+}
+#QGy8p7ggwOnDXD4z
+var img : ♻ micro\u003abit → Image {
+  transient = true;
+}
+#xvqxk1q4qCZk22MO meta import micro\u003abit_screen {
+  pub "nzngii"
+  usage {
+    action `async` toggle(x: Number, y: Number)
+    action `async` plot_all()
+    action `async` toggle_all()
+    action `async` fade_in(ms: Number)
+    action `async` fade_out(ms: Number)
+    action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
+  }
+  #OE9022wXGJBOumFg resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#P952wWx2TsBNbUPl meta import micro\u003abit_senses {
+  pub "dlxfsa"
+  usage {
+    action `async` on_screen_up(body: Action)
+    action `async` on_screen_down(body: Action)
+    action `async` on_shake(body: Action)
+    action `async` on_logo_up(body: Action)
+    action `async` on_logo_down(body: Action)
+  }
+  #xtFHv49Gg2zXwu3M resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#ctgp5VB0k69XVFAX meta import micro\u003abit_game {
+  pub "vqneem"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` test_countdown()
+    action `async` start_stopwatch()
+    action `async` test_countdown_current_time()
+    action `async` test_current_time()
+  }
+  #SCM2ihMv5V1HeY6m resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#BVGhpbmca
+table Thing {
+  type = "Object";
+  persistent = false;
+  fields {
+    #G6G2a0flquLAXiyj f : String
+  }
+}
