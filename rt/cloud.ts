@@ -3,6 +3,7 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
+    var microbitGitTag = "v1";
 
     export var useEmbeddedGcc = false;
 
@@ -826,8 +827,8 @@ module TDev.Cloud {
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,
-            repohash: "foobar",
-            meta: meta
+            meta: meta,
+            repohash: microbitGitTag,
         })
         .done(resp => {
                 // HTML.showProgressNotification(lf("program accepted, compiling"));
