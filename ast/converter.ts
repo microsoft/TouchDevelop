@@ -75,6 +75,7 @@ module TDev.AST {
             var pre = this.numAwaits;
             this.dispatch(s.expr);
             s._converterAwait = pre < this.numAwaits
+            s.normalActions().forEach(a => a.name._converterAction = a)
             super.visitStmt(s)
         }
 
@@ -337,12 +338,29 @@ module TDev.AST {
                 l.writeTo(this.tw)
         }
 
+        inlineAction(a:InlineAction)
+        {
+            this.tw.op0("(");
+            a.inParameters.forEach((p, i) => {
+                if (i > 0) this.tw.op0(",")
+                this.localDef(p)
+            })
+            this.tw.op0(") => ").beginBlock();
+            this.codeBlockInner(a.body)
+            this.tw.endBlock()
+        }
+
         visitThingRef(t:ThingRef)
         {
             var d = t.def
-            if (d instanceof LocalDef)
-                this.localName(<LocalDef>d)
-            else if (d instanceof SingletonDef) {
+            if (d instanceof LocalDef) {
+                var a = (<LocalDef>d)._converterAction
+                if (a) {
+                    this.inlineAction(a)
+                } else {
+                    this.localName(<LocalDef>d)
+                }
+            } else if (d instanceof SingletonDef) {
                 this.tw.write("TD.")
                 this.simpleId(d.getName())
             }
@@ -390,6 +408,11 @@ module TDev.AST {
             this.dispatch(n.condition)
             tw.op0(")")
             this.dispatch(n.body)
+        }
+
+        visitInlineActions(i:InlineActions)
+        {
+            this.visitExprStmt(i)
         }
 
         visitExprStmt(es:ExprStmt)

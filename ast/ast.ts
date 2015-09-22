@@ -2167,6 +2167,7 @@ module TDev.AST {
         public isHiddenOut:boolean;
         public isOut:boolean;
         public _lastWriteLocation:Stmt;
+        public _converterAction:InlineAction;
 
         public writeWithType(app:App, tw:TokenWriter)
         {
