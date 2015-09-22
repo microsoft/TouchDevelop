@@ -5158,7 +5158,7 @@ module TDev
             case "Up":
             case "Down":
                 if (!e.fromTextArea) {
-                    if (this.currentSideTab.isModal())
+                    if (this.currentSideTab && this.currentSideTab.isModal())
                         this.dismissSidePane();
                     TheEditor.selector.moveCarret(e.keyName == "Up" ? -1 : +1);
                     return true;
