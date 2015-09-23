@@ -5,7 +5,6 @@ meta hasIds "yes";
 meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
-// A #game script.
 #sCBCojzbqNfj6sRA
 action main() {
   #JCogU1cIYi3LMekj input[lib micro\u003abit] →on_button_pressed("A");
@@ -16,7 +15,7 @@ action main() {
   #P6Uz0KKkoyGt0J2s basic[lib micro\u003abit] →show_string("PRESS A", 150);
 }
 #m5PQUjHG4rwusEZ8 meta import micro\u003abit {
-  pub "hetgnc"
+  pub "vmqhsx"
   usage {
     type Image
     action `sync` \_libinit()
@@ -56,10 +55,13 @@ action main() {
     action `async` audio_recorder(@event: String)
     action `async` alert(@event: String)
     action `async` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `async` add_button(text: String, @action: Action)
+    action `async` reset()
   }
 }
 #u8IqNGjTNuBQw3gc meta import micro\u003abit_senses {
-  pub "dlxfsa"
+  pub "rqusix"
   usage {
     action `async` on_screen_up(body: Action)
     action `async` on_screen_down(body: Action)
@@ -84,7 +86,7 @@ action main() {
   }
 }
 #GwYjHckHkjFq6Xfj meta import micro\u003abit_game {
-  pub "rdnlgg"
+  pub "ddbdlp"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
