@@ -77,7 +77,7 @@ module TDev { export module AST {
 
         public beginBlock()
         {
-            this.space().op0("{").nl();
+            this.sep().op0("{").nl();
             this.indentLevel++;
         }
 
@@ -156,6 +156,8 @@ module TDev { export module AST {
 
         public op0(op:string)
         {
+            if (op == ")" && this.lastAfterBlockEnd == this.buf.length)
+                this.newlinesPending = 0;
             if (!this.unicodeOps)
                 op = Lexer.asciiOperator(op);
             if (Lexer.quotedOp(op)) op = "`" + op + "`";

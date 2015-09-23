@@ -653,6 +653,47 @@ module TDev.AST {
             }
 
             this.tw.endBlock()
+            this.tw.nl()
+        }
+
+        defaultValue(k:Kind)
+        {
+            if (k == api.core.String) return '""'
+            else if (k == api.core.Number) return '0'
+            else if (k == api.core.Boolean) return 'false'
+            else return null
+        }
+
+        visitGlobalDef(g:GlobalDef)
+        {
+            this.tw.kw("var");
+            this.tw.globalId(g).op0(": ");
+            this.type(g.getKind())
+            var d = this.defaultValue(g.getKind())
+            if (g.isResource)
+                d = JSON.stringify(g.stringResourceValue() || g.url)
+            if (d != null)
+                this.tw.op("=").write(d)
+            this.tw.op0(";").nl();
+        }
+
+        visitLibraryRef(l:LibraryRef)
+        {
+            var modName = JSON.stringify("./" + l.getName().replace(/\s/g, "-"))
+            this.tw.kw("import * as ");
+            this.tw.globalId(l).keyword("from").sep().write(modName).nl();
+        }
+
+        visitApp(a:App)
+        {
+            var dump = (lst:Decl[]) => lst.forEach(t => this.dispatch(t))
+            dump(a.libraries())
+            this.tw.nl()
+            dump(a.variables())
+            this.tw.nl()
+            dump(a.resources())
+            this.tw.nl()
+            dump(a.allActions())
         }
     }
 }
