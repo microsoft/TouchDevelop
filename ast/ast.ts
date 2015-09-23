@@ -341,7 +341,8 @@ module TDev.AST {
     export class DeclNameHolder
         extends InlineStmt
     {
-
+        public maxLength = -1; // used by the UI/typechecker
+        public defaultTemplate: string; // use to example when user deletes all characters
         private exprHolder = new AST.ExprHolder();
 
         constructor() {
@@ -372,9 +373,9 @@ module TDev.AST {
         }
 
         public setName(v: string) {
-            super.setName(v);
+            super.setName(v);                       
             var toks = this.exprHolder.tokens;
-            if (toks[0] && toks[0] instanceof DeclName)
+            if (toks[0] && toks[0] instanceof DeclName) 
                 (<DeclName>toks[0]).data = v;
         }
     }   
@@ -2450,6 +2451,15 @@ module TDev.AST {
             return "error"
         }
     }
+    
+    // Meta statement used to make the script signature clickable
+    export class AppHeaderStmt
+        extends InlineStmt
+    {
+        constructor(public parentDef: App) {
+            super();
+        }
+    }
 
     export class App
         extends Decl
@@ -2463,11 +2473,15 @@ module TDev.AST {
             this.thisLibRef = LibraryRef.topScriptLibrary(this);
             this.setName("no name");
             this.version = App.currentVersion;
+            this.headerStmt = new AppHeaderStmt(this);
+            this.nameHolder.maxLength = 52;
+            this.nameHolder.defaultTemplate = lf("ADJ script");
         }
 
         // split screen is used as a hit when loaded in the editor, serialized when publishing
         static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen" ];
 
+        public headerStmt: AppHeaderStmt;
         public nodeType() { return "app"; }
         public things:Decl[] = [];
         public getDescription() { return this.comment; }

@@ -823,8 +823,11 @@ module TDev
         public renderAppHeader(app: AST.App) {
             var hd = "";
 
-            if (app.isLibrary) hd += this.kw("library ");
-            hd += this.kw("script ");
+            var sig = this.kw("script");            
+            if (app.isLibrary) sig = this.kw("library") + " " + sig;
+            
+            hd += this.stmt(app.headerStmt, this.tline(sig));
+            hd += " ";
             hd += this.stmt(
                 app.nameHolder,
                 this.tline(this.id(TDev.RT.String_.trim_overflow(app.getName(), 64)))

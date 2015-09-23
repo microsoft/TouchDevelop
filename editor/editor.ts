@@ -956,6 +956,7 @@ module TDev
         public debuggerNonEditor = new ScriptDebuggerNonEditor();
         public selector = new Selector();
         private actionProperties = new ActionProperties();
+        private scriptProperties = new ScriptProperties();
         private typeCheckPending = false;
         private onRestore = () => {};
         private lastEditHash = "";
@@ -967,7 +968,6 @@ module TDev
         private currentSideTab: SideTab;
         private currentStmtEditor: StmtEditor;
 
-        private scriptProperties = new ScriptProperties();
         public variableProperties = new VariableProperties();
         private librefProperties = new LibraryRefProperties();
         private recordProperties = new RecordDefProperties();
@@ -4594,7 +4594,7 @@ module TDev
             if (/monospace=1/.test(document.URL))
                 this.codeInner.className += " monospace"
 
-            this.sideTabs = [<SideTab> this.scriptNav, this.searchTab, this.selector, this.actionProperties, this.inlineActionEditor, this.debuggerNonEditor, this.recordEditor];
+            this.sideTabs = [<SideTab> this.scriptNav, this.searchTab, this.selector, this.actionProperties, this.scriptProperties, this.inlineActionEditor, this.debuggerNonEditor, this.recordEditor];
             this.stmtEditors = [<StmtEditor> this.calculator, <StmtEditor> this.debuggerEditor, this.commentEditor, this.debuggerControl, this.selectorEditor]
             this.stmtEditors.forEach((t) => {
                 t.init(this);
@@ -4605,7 +4605,7 @@ module TDev
                 t.init(this);
             });
 
-            this.codeViews = [<CodeView> this.actionView, this.scriptProperties, this.variableProperties, this.librefProperties, this.recordProperties, this.debuggerCodeView];
+            this.codeViews = [<CodeView> this.actionView, this.variableProperties, this.librefProperties, this.recordProperties, this.debuggerCodeView];
             this.codeViews.forEach((c:CodeView) => {
                 c.init(this);
             });
@@ -4940,6 +4940,8 @@ module TDev
                 editor = this.inlineActionEditor;
             else if (s instanceof AST.ActionHeader)
                 editor = this.actionProperties;
+            else if (s instanceof AST.AppHeaderStmt)
+                editor = this.scriptProperties;    
             else if (s instanceof AST.RecordKind || s instanceof AST.RecordPersistenceKind)
                 editor = this.recordEditor;
             else if (s instanceof AST.RecordDef || s instanceof AST.LibraryRef || s instanceof AST.GlobalDef) {
