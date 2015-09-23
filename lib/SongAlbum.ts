@@ -122,7 +122,7 @@ module TDev.RT {
                 }
                 if (this._genre)
                     dc.appendChild(div("item-subtle", this._genre));
-                d.appendChild(div('item-buttons', HTML.mkRoundButton("svg:play,black", lf("play"), Ticks.songAlbumPlay, () => this.playAsync().done())));
+                d.appendChild(div('item-buttons', HTML.mkRoundButton("svg:play,currentColor", lf("play"), Ticks.songAlbumPlay, () => this.playAsync().done())));
             })
             return d;
         }

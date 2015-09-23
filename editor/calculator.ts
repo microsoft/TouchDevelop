@@ -1618,8 +1618,8 @@ module TDev
             }
 
             var editBtns = this.keyBlock(ph ? 4 : pm ? 6 : 12, 1);
-            editBtns[0].setImage("svg:backspace,black,clip=80", lf("backspace"), Ticks.calcBtnBackspace, () => { this.backspace() });
-            editBtns[1].setImage("svg:undo,black", lf("undo"), Ticks.calcBtnUndo, () => this.undo());
+            editBtns[0].setImage("svg:backspace,currentColor,clip=80", lf("backspace"), Ticks.calcBtnBackspace, () => { this.backspace() });
+            editBtns[1].setImage("svg:undo,currentColor", lf("undo"), Ticks.calcBtnUndo, () => this.undo());
 
             if (ph) {
                 editBtns = this.keyBlock(0, 5, 2, 1);
@@ -1645,8 +1645,8 @@ module TDev
             }
 
             var cursorKeys = this.keyBlock(ph ? 3 : pm ? 5 : 11, 2, 2, 1);
-            cursorKeys[0].setImage("svg:cursorLeft,black", lf("move cursor"), Ticks.calcMoveCursorLeft, () => this.moveCursor(-1));
-            cursorKeys[1].setImage("svg:cursorRight,black", lf("move cursor"), Ticks.calcMoveCursorRight, () => this.moveCursor(+1));
+            cursorKeys[0].setImage("svg:cursorLeft,currentColor", lf("move cursor"), Ticks.calcMoveCursorLeft, () => this.moveCursor(-1));
+            cursorKeys[1].setImage("svg:cursorRight,currentColor", lf("move cursor"), Ticks.calcMoveCursorRight, () => this.moveCursor(+1));
 
             this.restoreLeftKeypad(false);
         }

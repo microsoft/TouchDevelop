@@ -53,7 +53,7 @@
                 var siteUser = elt("siteUser");
                 if (siteUser) {
                     if (Cloud.getUserId()) {
-                        siteUser.setChildren([HTML.mkImg("svg:fa-user,black")])
+                        siteUser.setChildren([HTML.mkImg("svg:fa-user,currentColor")])
                         siteUser.withClick(() => {
                             this.loadDetails(this.getUserInfoById("me", "me"));
                         });
@@ -204,7 +204,7 @@
 
         private setBackButton()
         {
-            var icon = "svg:back,black";
+            var icon = "svg:back,currentColor";
             var btn: HTMLElement;
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething)
                 btn = ScriptInfo.mkBtn(icon, lf("dismiss"), () => this.showHub());
@@ -1781,7 +1781,7 @@
             this.topTitleHidden = hideHeader;
             this.topTitle = header;
 
-            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
+            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,currentColor", header, null, Ticks.editBtnSideSearch, () => {
                 if (!this.sidePaneVisibleNow()) this.showSidePane();
             })]);
 
@@ -5591,7 +5591,7 @@
                     picDiv.style.backgroundPosition = 'center';
                     picDiv.style.backgroundSize = picMode;
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5605,7 +5605,7 @@
                     });
                     img = playBtn;
                 } else if (a.bloburl) {
-                    img = HTML.mkImg("svg:document,black");
+                    img = HTML.mkImg("svg:document,currentColor");
                 }
 
                 d.setChildren([img,
@@ -5650,7 +5650,7 @@
                     img = HTML.mkImg(a.thumburl);
                     img.className += " checker";
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5664,9 +5664,9 @@
                     });
                     img = div('checker', playBtn);
                 } else if (a.arttype == "video") {
-                    img = HTML.mkImg("svg:videoptr,black");
+                    img = HTML.mkImg("svg:videoptr,currentColor");
                 } else if (a.bloburl) {
-                    img = HTML.mkImg("svg:document,black");
+                    img = HTML.mkImg("svg:document,currentColor");
                 }
                 icon.setChildren([img]);
 
@@ -6904,7 +6904,7 @@
                 restoreNormal();
                 f();
             })
-            var btn1:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",black", desc, () => {
+            var btn1:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",currentColor", desc, () => {
                 btn1.style.display = "none";
                 btn2.style.display = "inline-block";
                 Util.setTimeout(3000, restoreNormal);

@@ -13,7 +13,7 @@ module TDev
             super()
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
         }
-        public icon() { return "svg:search,black"; }
+        public icon() { return "svg:search,currentColor"; }
         public name() { return "results"; }
         public keyShortcut() { return "Ctrl-F"; }
         public isModal() { return true; }
@@ -139,7 +139,7 @@ module TDev
             this.searchDiv.withClick(() => {});
             if (TheEditor.autoHide()) {
                 this.searchDiv.appendChild(
-                    TheEditor.mkTabMenuItem("svg:search,black", "all APIs", null, Ticks.calcBtnApiSearch, () => {
+                    TheEditor.mkTabMenuItem("svg:search,currentColor", "all APIs", null, Ticks.calcBtnApiSearch, () => {
                         if (TheEditor.sidePaneVisible())
                             this.cancel();
                         else
@@ -227,12 +227,12 @@ module TDev
         public updateRunButton() {
             if (this.runBtn) {
                 if (TheEditor.currentRt && TheEditor.currentRt.canResume())
-                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.calcSearchRun, "Ctrl-P", () => {
+                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.calcSearchRun, "Ctrl-P", () => {
                         TheEditor.dismissSidePane();
                         TheEditor.resumeExecution();
                     })]);
                 else
-                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,black", lf("run main"), Ticks.calcSearchRun, "Ctrl-P", () => {
+                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.calcSearchRun, "Ctrl-P", () => {
                         TheEditor.dismissSidePane();
                         TheEditor.runMainAction();
                     })]);
@@ -253,11 +253,11 @@ module TDev
             this.setVR();
 
             this.toCodeBtn =
-                Editor.mkTopMenuItem("svg:back,black", lf("to code"), Ticks.calcSearchBack, "Esc", () => {
+                Editor.mkTopMenuItem("svg:back,currentColor", lf("to code"), Ticks.calcSearchBack, "Esc", () => {
                     this.cancel();
                 });
             this.dismissBtn =
-                Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, "", () => {
+                Editor.mkTopMenuItem("svg:back,currentColor", lf("dismiss"), Ticks.calcSearchBack, "", () => {
                     TheEditor.dismissSidePane()
                 });
             this.runBtn = div("");

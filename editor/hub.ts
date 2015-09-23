@@ -1427,7 +1427,7 @@ module TDev.Browser {
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
-        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,black"));
+        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor"));
         // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
@@ -1949,7 +1949,7 @@ module TDev.Browser {
                 var cap = AST.App.fromCapabilityList(top.json.platforms || [])
                 if (cap & ~api.core.currentPlatform) {
                     tileOuter.appendChildren([
-                        div("tutWarning", HTML.mkImg("svg:Warning,black"))
+                        div("tutWarning", HTML.mkImg("svg:Warning,currentColor"))
                     ])
                 }
 

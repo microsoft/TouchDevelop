@@ -981,11 +981,11 @@ module TDev.HTML {
         if (options.showDismiss || options.editFullScreenAsync) {
             btns = div('close-round-buttons');
             if (options.showDismiss)
-                btns.appendChild(dismiss = div('',HTML.mkImg("svg:check,black")).withClick(() => {
+                btns.appendChild(dismiss = div('',HTML.mkImg("svg:check,currentColor")).withClick(() => {
                     if (r.onDismiss) r.onDismiss();
                 }));
             if (options.editFullScreenAsync)
-                btns.appendChild(fullScreen = div('',HTML.mkImg('svg:expand,black')).withClick(() => {
+                btns.appendChild(fullScreen = div('',HTML.mkImg('svg:expand,currentColor')).withClick(() => {
                     options.editFullScreenAsync(ta.value).done(value => {
                         ta.value = value;
                         if (r.onDismiss) r.onDismiss();

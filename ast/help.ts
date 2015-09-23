@@ -1380,7 +1380,7 @@ module TDev {
             if (!this.useSVG)
                 r += "copy";
             else
-                r += Util.fmt('<div class="code-button-frame">{0}</div>', SVG.getIconSVGCore("copy,black"));
+                r += Util.fmt('<div class="code-button-frame">{0}</div>', SVG.getIconSVGCore("copy,currentColor"));
 
             r += "</button>";
             return r;

@@ -745,7 +745,7 @@ module TDev
             var m = new ModalDialog();
             var mkIcon = (path:string) : HTMLElement =>
             {
-                var img = HTML.mkImg("svg:" + path +",black")
+                var img = HTML.mkImg("svg:" + path +",currentColor")
                 var name = div("md-caption", path)
                 name.style.fontSize = "0.5em";
                 var d = div("selectableIcon", img, name).withClick(() => {
