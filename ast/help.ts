@@ -1509,7 +1509,7 @@ module TDev {
                         var boxCss = "md-box";
                         switch (boxClass) {
                             case "card":
-                                boxHd = "<div class='md-box-header'>" + Util.htmlEscape(parts.slice(1).join(':')) + "</div>";
+                                boxHd = "<div class='md-box-header'>" + this.expandInline(parts.slice(1).join(':'), true, false) + "</div>";
                                 break;
                             case "hint":
                                 boxHd = "<div class='md-box-header'>" + lf("hint") + "</div>";
