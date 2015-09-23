@@ -184,6 +184,8 @@ module TDev.AST {
                         return 5 // '!= ""'
                     return 50
                 }
+            } else if (e instanceof Call && e.awaits()) {
+                return 40
             }
 
             return p.getInfixPriority() || 0
@@ -197,7 +199,7 @@ module TDev.AST {
             }
 
             if (e.awaits()) {
-                this.tw.write(" /* ASYNC */ ")
+                this.tw.write("await").sep()
             }
 
             this.visitCallInner(e)
@@ -208,6 +210,7 @@ module TDev.AST {
             var p = e.getCalledProperty()
             var infixPri = this.infixPri(e)
             var pn = p.parentKind.toString() + "->" + p.getName()
+            if (infixPri == 40) infixPri = 0; // await only for inner
             
             var params = (pp:Expr[]) => {
                 this.tw.op0("(")
@@ -371,6 +374,9 @@ module TDev.AST {
             "\u2225": "+",
             "=": "==",
             ":=": "=",
+            "\u2260": "!=",
+            "\u2264": "<=",
+            "\u2265": ">=",
         }
 
         printOp(s:string)
@@ -407,6 +413,7 @@ module TDev.AST {
 
         inlineAction(a:InlineAction)
         {
+            // TODO 'async'
             this.tw.op0("(");
             a.inParameters.forEach((p, i) => {
                 if (i > 0) this.tw.op0(",")
@@ -492,64 +499,14 @@ module TDev.AST {
 
         codeBlockInner(b:CodeBlock)
         {
-            var inThen = false
             b.stmts.forEach((s, i) => {
                 if (s.isPlaceholder()) {
                     if (i > 0)
                         this.tw.nl()
-                    return
-                }
-                if (!s._converterAwait) {
-                    this.dispatch(s)
-                    return
-                }
-
-                if (s instanceof ExprStmt) {
-                    this.tw.write("return ")
-                    var expr = (<ExprStmt>s).expr.parsed
-                    var af = new AsyncFinder()
-                    af.dispatch(expr)
-                    this.visitCallInner(af.lastAsync)
-                    this.tw.nl()
-                    if (inThen) this.tw.endBlock(")")
-
-                    this.currAsync = af.lastAsync
-                    if (i == b.stmts.length - 1) {
-                        if (expr != af.lastAsync) {
-                            this.tw.write(".then(_ => ")
-                            this.dispatch(expr)
-                            this.tw.write(")").nl()
-                        }
-                        inThen = false
-                    } else {
-                        this.tw.write(".then(_ => ").beginBlock()
-                        if (expr != af.lastAsync) {
-                            this.dispatch(expr)
-                            this.tw.op0(";").nl();
-                        }
-                        inThen = true
-                    }
-                    this.currAsync = null
-
-                    return
-                } else if (inThen) {
-                    this.dispatch(s)
-                    this.tw.endBlock(")")
                 } else {
-                    this.tw.write("return Promise.as()").nl()
-                    this.tw.write(".then(() => ").beginBlock()
                     this.dispatch(s)
-                    this.tw.endBlock(")")
-                }
-
-                if (i == b.stmts.length - 1)
-                    inThen = false
-                else {
-                    this.tw.write(".then(() => ").beginBlock()
-                    inThen = true
                 }
             })
-            if (inThen) this.tw.endBlock(")")
         }
 
         visitCodeBlock(b:CodeBlock)
@@ -562,14 +519,19 @@ module TDev.AST {
         visitAction(a:Action)
         {
             this.localCtx = new TsQuotingCtx()
-            this.tw.kw("export function")
+            this.tw.kw("export")
+            if (!a.isAtomic)
+                this.tw.kw("async")
+            this.tw.kw("function")
             this.tw.globalId(a).op0("(");
             a.getInParameters().forEach((p, i) => {
                 if (i > 0) this.tw.op0(",")
                 this.localDef(p.local)
             })
             this.tw.op0(")").op(":");
-            if (a.isAtomic) {
+
+            if (!a.isAtomic) this.tw.kw("Promise<")
+
                 var outp = a.getOutParameters()
                 if (outp.length == 0) this.tw.kw("void")
                 else if (outp.length == 1) this.type(outp[0].getKind())
@@ -580,9 +542,8 @@ module TDev.AST {
                     })
                     this.tw.op("}")
                 }
-            } else {
-                this.tw.kw("Promise")
-            }
+
+            if (!a.isAtomic) this.tw.kw(">")
 
             this.tw.nl()
             this.tw.beginBlock()

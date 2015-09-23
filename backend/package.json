@@ -1,6 +1,6 @@
 {
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
+    "mz": "^2.0.0"
   }
 }
