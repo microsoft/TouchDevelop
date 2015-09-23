@@ -188,7 +188,7 @@ module TDev.AST {
                     var a0 = (<Call>e).args[0].getCalledProperty()
                     if (a0 && a0.getName() == "is invalid")
                         return 5 // '!= null'
-                    if (a0 && a0.parentKind == api.core.String && a0.getName() == "is empty")
+                    if (a0 && a0.parentKind == api.core.String && (a0.getName() == "is empty" || a0.getName() == "equals"))
                         return 5 // '!= ""'
                     return 50
                 }
@@ -221,9 +221,9 @@ module TDev.AST {
             if (infixPri == 40) infixPri = 0; // await only for inner
             
             var params = (pp:Expr[]) => {
-                this.tw.op0("(")
-                this.commaSep(pp, p => this.dispatch(p))
-                this.tw.op0(")")
+                if (pp.peek() && pp.peek().isEscapeDef() && (<PlaceholderDef>(<ThingRef>pp.peek()).def).escapeDef.isEmpty)
+                    pp.pop()
+                this.pcommaSep(pp, p => this.dispatch(p))
             }
 
             if (p.parentKind == api.core.Unknown && /^(return|break|continue)$/.test(p.getName())) {
@@ -246,9 +246,7 @@ module TDev.AST {
                     if (e.funAction.inParameters.length == 1) {
                         this.localName(e.funAction.inParameters[0])
                     } else {
-                        this.tw.op0("(")
-                        this.commaSep(e.funAction.inParameters, p => this.localName(p))
-                        this.tw.op0(")")
+                        this.pcommaSep(e.funAction.inParameters, p => this.localName(p))
                     }
                     this.tw.op("=>")
                     this.dispatch(e.args[1])
@@ -285,11 +283,20 @@ module TDev.AST {
                     switch (e.args[0].getCalledProperty().getName()) {
                     case "is invalid": this.tw.sep().write("!= null"); break;
                     case "is empty": this.tw.sep().write("!= \"\""); break;
+                    case "equals":
+                        this.tw.op("!=");
+                        doParen((<Call>e.args[0]).args[1]);
+                        break;
                     default: Util.die()
                     }
                 } else if (e.args.length == 1) {
                     this.printOp(p.getName())
                     doParen(e.args[0])
+                } else if (e._assignmentInfo && e._assignmentInfo.targets && e._assignmentInfo.targets.length > 1) {
+                    this.tw.op0("[")
+                    this.commaSep(e._assignmentInfo.targets, p => this.dispatch(p))
+                    this.tw.op0("] =").sep()
+                    this.dispatch(e.args[1])
                 } else {
                     doParen(e.args[0])
                     var nn = p.getName()
@@ -452,9 +459,8 @@ module TDev.AST {
         inlineAction(a:InlineAction)
         {
             // TODO 'async'
-            this.tw.op0("(");
-            this.commaSep(a.inParameters, p => this.localDef(p))
-            this.tw.op0(") => ").beginBlock();
+            this.pcommaSep(a.inParameters, p => this.localDef(p))
+            this.tw.op("=>").beginBlock();
             this.codeBlockInner(a.body)
             this.tw.endBlock()
         }
@@ -472,6 +478,26 @@ module TDev.AST {
             } else if (d instanceof SingletonDef) {
                 this.tw.write("TD.")
                 this.simpleId(d.getName())
+            } else if (t.isEscapeDef()) {
+                var e = (<PlaceholderDef>d).escapeDef
+                if (e.isEmpty) {
+                    this.tw.op0("{}")
+                    return
+                }
+
+                this.tw.beginBlock()
+                    var vals = e.optionalConstructor.optionalParameters()
+                    vals.forEach((p : InlineActionBase, i:number) => {
+                        this.simpleId(p.recordField.getName()).op0(":").sep()
+                        if (p instanceof OptionalParameter)
+                            this.dispatch(p.expr)
+                        else
+                            this.inlineAction(<InlineAction>p)
+                        if (i < vals.length - 1)
+                            this.tw.op0(",")
+                        this.tw.nl()
+                    })
+                this.tw.endBlock()
             }
             else
                 this.simpleId(d.getName())
@@ -569,6 +595,12 @@ module TDev.AST {
             this.tw.endBlock()
         }
 
+        pcommaSep<T>(l:T[], f:(v:T)=>void) {
+            this.tw.op0("(")
+            this.commaSep(l, f)
+            this.tw.op0(")")
+        }
+
         commaSep<T>(l:T[], f:(v:T)=>void) {
             l.forEach((p, i) => {
                 if (i > 0) this.tw.op0(",").sep()
@@ -583,9 +615,9 @@ module TDev.AST {
             if (!a.isAtomic)
                 this.tw.kw("async")
             this.tw.kw("function")
-            this.tw.globalId(a).op0("(");
-            this.commaSep(a.getInParameters(), p => this.localDef(p.local))
-            this.tw.op0(")").op(":");
+            this.tw.globalId(a)
+            this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
+            this.tw.op(":");
 
             if (!a.isAtomic) this.tw.kw("Promise<")
 

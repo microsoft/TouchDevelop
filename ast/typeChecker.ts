@@ -1997,7 +1997,8 @@ module TDev.AST
                 maker._kind = lk
                 maker.escapeDef = {
                     objectToMake: lk,
-                    optionalConstructor: topInline
+                    optionalConstructor: topInline,
+                    isEmpty: true
                 }
                 var t = mkThing("_libobj_");
                 (<ThingRef>t).def = maker
@@ -2015,6 +2016,7 @@ module TDev.AST
                         used[opt.getName()] = true
                         var rf = <AST.RecordField>stmt
                         opt.recordField = rf
+                        maker.escapeDef.isEmpty = false
                     } else if (!opt.getName()) {
                         this.setNodeError(opt, lf("TD193: we need a name for optional parameter of '{0}' (from type '{1}')",
                                     prop, lk))
