@@ -26,13 +26,13 @@
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems = [
+                    { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
                         if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
                             TemplateManager.createScript();
                         else     
                             Util.navigateInWindow("/create-code");
                     } },
-                    { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
                 ];
