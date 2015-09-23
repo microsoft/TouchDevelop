@@ -4938,8 +4938,17 @@ module TDev
                 stmtEditor = this.commentEditor;
             else if (s instanceof AST.InlineAction)
                 editor = this.inlineActionEditor;
-            else if (s instanceof AST.ActionHeader)
+            else if (s instanceof AST.ActionHeader) {
+                var ah = <AST.ActionHeader>s;
                 editor = this.actionProperties;
+                // if not allowed to edit the 'main' signature,
+                // don't show editor
+                if (this.widgetEnabled("forceMainAsAction") &&
+                    !Script.isLibrary &&
+                    Script.mainAction() == ah.action &&
+                    ah.getName() == "main")
+                    editor = null;    
+            }
             else if (s instanceof AST.AppHeaderStmt)
                 editor = this.scriptProperties;    
             else if (s instanceof AST.RecordKind || s instanceof AST.RecordPersistenceKind)
