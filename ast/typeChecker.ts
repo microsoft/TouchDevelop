@@ -1251,7 +1251,8 @@ module TDev.AST
             inl.actions.forEach((iab:InlineActionBase) => {
                 if (iab instanceof OptionalParameter) {
                     var op = <OptionalParameter>iab
-                    this.expect(op.expr, op.recordField ? op.recordField.dataKind : null, "optional")
+                    var knd = op.recordField ? op.recordField.dataKind : null
+                    this.expect(op.expr, knd, "optional")
                     return
                 }
 
@@ -1282,6 +1283,7 @@ module TDev.AST
 
                 if (ia.isOptional && ia.recordField) {
                     var ak = <ActionKind>ia.recordField.dataKind
+                    ia.name.setKind(ak)
                     if (ak.isAction) {
                         coerce(ia.inParameters, ak.getInParameters())
                         coerce(ia.outParameters, ak.getOutParameters())

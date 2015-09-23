@@ -4,14 +4,55 @@ module TDev.AST {
     class TsQuotingCtx
         extends QuotingCtx
     {
+        static keywords:StringMap<number> = {
+            "break":1,
+            "case":1,
+            "class":1,
+            "catch":1,
+            "const":1,
+            "continue":1,
+            "debugger":1,
+            "default":1,
+            "delete":1,
+            "do":1,
+            "else":1,
+            "export":1,
+            "extends":1,
+            "finally":1,
+            "for":1,
+            "function":1,
+            "if":1,
+            "import":1,
+            "in":1,
+            "instanceof":1,
+            "let":1,
+            "new":1,
+            "return":1,
+            "super":1,
+            "switch":1,
+            "this":1,
+            "throw":1,
+            "try":1,
+            "typeof":1,
+            "var":1,
+            "void":1,
+            "while":1,
+            "with":1,
+            "yield":1,
+            "enum":1,
+            "await":1,
+            "implements":1,
+            "package":1,
+            "protected":1,
+        }
+        
         public unUnicode(s:string)
         {
-            s = s.replace(/\s+([a-z])/g, (v,l) => l.toUpperCase())
+            s = s.replace(/\s+([A-Za-z])/g, (v,l) => l.toUpperCase())
             s = s.replace(/[^a-zA-Z0-9]+/g, "_");
-            if (s == "" || /^[0-9]/.test(s)) s = "_" + s;
+            if (s == "" || /^[0-9]/.test(s) || TsQuotingCtx.keywords.hasOwnProperty(s)) s = "_" + s;
             return s;
         }
-
     }
 
     class TsTokenWriter
@@ -133,13 +174,23 @@ module TDev.AST {
             return this.tw.jsid(this.localCtx.quote(l.getName(), l.nodeId))
         }
 
+        static kindMap:StringMap<string> = {
+            "String": "string",
+            "Number": "number",
+            "Boolean": "boolean",
+            "Nothing": "void",
+            "DateTime": "Date",
+        }
+
         private type(t:Kind)
         {
-            if (/^(String|Number|Boolean)$/.test(t.toString()))
-                this.tw.jsid(t.toString().toLowerCase())
-            else if (t.getRoot() == api.core.Collection) {
+            if (t.getRoot() == api.core.Collection) {
                 this.type(t.getParameter(0))
                 this.tw.op0("[]")
+            } else if (t.getRoot() == api.core.Task) {
+                this.tw.write("Promise<")
+                this.type(t.getParameter(0))
+                this.tw.write(">")
             } else if (t.getRecord()) {
                 var parL = t.getRecord().parentLibrary()
                 if (parL && !parL.isThis())
@@ -151,9 +202,16 @@ module TDev.AST {
                 var n = t.getName()
                 n = n[0].toUpperCase() + n.slice(1)
                 this.tw.jsid(this.tw.globalCtx.quote(n, 0))
+            } else if (Converter.kindMap.hasOwnProperty(t.toString())) {
+                this.tw.kw(Converter.kindMap[t.toString()])
             } else {
-                //TODO
-                this.tw.kind(this.app, t)
+                this.tw.id(this.localCtx.unUnicode(t.getRoot().toString()))
+                var len = t.getParameterCount()
+                if (len > 0) {
+                    this.tw.write("<")
+                    this.type(t.getParameter(0))
+                    this.tw.write(">")
+                }
             }
             return this.tw
         }
@@ -479,7 +537,8 @@ module TDev.AST {
 
         inlineAction(a:InlineAction)
         {
-            // TODO 'async'
+            if (!(<ActionKind>a.name.getKind()).isAtomic())
+                this.tw.kw("async")
             this.pcommaSep(a.inParameters, p => this.localDef(p))
             this.tw.op("=>").beginBlock();
             this.codeBlockInner(a.body)
@@ -528,7 +587,8 @@ module TDev.AST {
         visitAnyIf(i:If)
         {
             var tw = this.tw
-            if (i.isTopCommentedOut()) {
+
+            if (false && i.isTopCommentedOut()) {
                 tw.op0("/*").nl()
                 this.codeBlockInner(i.rawThenBody)
                 tw.op0("*/").nl()

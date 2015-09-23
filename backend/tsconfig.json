@@ -1,14 +1,13 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "outDir": "built",
         "rootDir": ".",
         "experimentalAsyncFunctions": true,
         "newLine": "LF",
         "emitDecoratorMetadata": true,
         "experimentalDecorators":true,
-        "module": "commonjs",
         "sourceMap": true
     },
     "files": [
