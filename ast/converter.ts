@@ -175,6 +175,8 @@ module TDev.AST {
             if (!p) return 0
             if (p.getName() == "is invalid")
                 return 5 // '== null'
+            if (e instanceof Call && e.funAction)
+                return 0.1 // => function
             if (p.parentKind == api.core.String) {
                 if (p.getName() == "equals" || p.getName() == "is empty")
                     return 5
@@ -220,10 +222,7 @@ module TDev.AST {
             
             var params = (pp:Expr[]) => {
                 this.tw.op0("(")
-                pp.forEach((p, i) => {
-                    if (i > 0) this.tw.op(",")
-                    this.dispatch(p)
-                })
+                this.commaSep(pp, p => this.dispatch(p))
                 this.tw.op0(")")
             }
 
@@ -243,6 +242,19 @@ module TDev.AST {
                     return
                 }
 
+                if (e.funAction) {
+                    if (e.funAction.inParameters.length == 1) {
+                        this.localName(e.funAction.inParameters[0])
+                    } else {
+                        this.tw.op0("(")
+                        this.commaSep(e.funAction.inParameters, p => this.localName(p))
+                        this.tw.op0(")")
+                    }
+                    this.tw.op("=>")
+                    this.dispatch(e.args[1])
+                    return
+                }
+
                 var doParen = e => {
                     if (this.infixPri(e) && this.infixPri(e) <= infixPri 
                         && e.getCalledProperty().getName() != p.getName())
@@ -256,6 +268,9 @@ module TDev.AST {
                 if (p.getName() == "is invalid") {
                     doParen(e.args[0])
                     this.tw.sep().write("== null")
+                } else if (p.getName() == "async") {
+                    this.tw.write("/* async */ ")
+                    this.dispatch(e.args[1])
                 } else if (p.getName() == "is empty") {
                     var inner0 = e.args[0].getCalledProperty()
                     if (inner0 && inner0.getName() == "or empty") {
@@ -318,7 +333,9 @@ module TDev.AST {
                 this.tw.op0("]")
             } else if (pn == "Web->create json builder") {
                 this.tw.op0("{}")
-            } else if (pn == "Create->collection of" || /^Collections->.* collection$/.test(pn)) {
+            } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
+                        e.args[0].getCalledProperty().getName() == "Collection of")
+                       || /^Collections->.* collection$/.test(pn)) {
                 this.tw.op0("(<")
                 this.type(e.getKind())
                 this.tw.op0(">[])")
@@ -330,6 +347,12 @@ module TDev.AST {
                 this.tw.op0(".push(")
                 this.dispatch(e.args[1])
                 this.tw.op0(")")
+            } else if (pn == "String->match") {
+                this.tw.op0("(")
+                this.toRegex(e.args[1])
+                this.tw.write(".match(")
+                this.dispatch(e.args[0])
+                this.tw.op0(") || [])")
             } else if (pn == "String->is match regex") {
                 this.toRegex(e.args[1])
                 this.tw.write(".test(")
@@ -430,10 +453,7 @@ module TDev.AST {
         {
             // TODO 'async'
             this.tw.op0("(");
-            a.inParameters.forEach((p, i) => {
-                if (i > 0) this.tw.op0(",")
-                this.localDef(p)
-            })
+            this.commaSep(a.inParameters, p => this.localDef(p))
             this.tw.op0(") => ").beginBlock();
             this.codeBlockInner(a.body)
             this.tw.endBlock()
@@ -463,7 +483,7 @@ module TDev.AST {
             var tw = this.tw
             if (i.isTopCommentedOut()) {
                 tw.op0("/*").nl()
-                this.dispatch(i.rawThenBody)
+                this.codeBlockInner(i.rawThenBody)
                 tw.op0("*/").nl()
                 return
             }
@@ -549,6 +569,13 @@ module TDev.AST {
             this.tw.endBlock()
         }
 
+        commaSep<T>(l:T[], f:(v:T)=>void) {
+            l.forEach((p, i) => {
+                if (i > 0) this.tw.op0(",").sep()
+                f(p)
+            })
+        }
+
         visitAction(a:Action)
         {
             this.localCtx = new TsQuotingCtx()
@@ -557,10 +584,7 @@ module TDev.AST {
                 this.tw.kw("async")
             this.tw.kw("function")
             this.tw.globalId(a).op0("(");
-            a.getInParameters().forEach((p, i) => {
-                if (i > 0) this.tw.op0(",")
-                this.localDef(p.local)
-            })
+            this.commaSep(a.getInParameters(), p => this.localDef(p.local))
             this.tw.op0(")").op(":");
 
             if (!a.isAtomic) this.tw.kw("Promise<")
@@ -569,11 +593,9 @@ module TDev.AST {
                 if (outp.length == 0) this.tw.kw("void")
                 else if (outp.length == 1) this.type(outp[0].getKind())
                 else {
-                    this.tw.op("{")
-                    outp.forEach(p => {
-                        this.localDef(p.local).op0(";")
-                    })
-                    this.tw.op("}")
+                    this.tw.op0("[")
+                    this.commaSep(outp, p => this.type(p.local.getKind()))
+                    this.tw.op0("]")
                 }
 
             if (!a.isAtomic) this.tw.kw(">")
@@ -592,6 +614,10 @@ module TDev.AST {
             if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
                 this.localName(a.getOutParameters()[0].local).op0(";").nl()
+            } else if (a.getOutParameters().length > 1) {
+                this.tw.kw("return ").op0("[");
+                this.commaSep(a.getOutParameters(), p => this.localName(p.local))
+                this.tw.op0("]").nl()
             }
 
             this.tw.endBlock()
