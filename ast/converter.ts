@@ -142,6 +142,8 @@ module TDev.AST {
             this.visitChildren(n);
         }
 
+        private toRegex(s:string) { return "/" + s.replace(/\//g, "\\/") + "/" }
+
         private infixPri(e:Expr)
         {
             var p = e.getCalledProperty()
@@ -290,6 +292,15 @@ module TDev.AST {
                 this.tightExpr(e.args[0])
                 this.tw.op0(".push(")
                 this.dispatch(e.args[1])
+                this.tw.op0(")")
+            } else if (pn == "String->is match regex") {
+                this.tw.write(this.toRegex(e.args[1].getLiteral()) + ".test(")
+                this.dispatch(e.args[0])
+                this.tw.op0(")")
+            } else if (pn == "String->replace regex") {
+                this.tightExpr(e.args[0])
+                this.tw.write(".replace(" + this.toRegex(e.args[1].getLiteral()) + "g,").sep()
+                this.dispatch(e.args[2])
                 this.tw.op0(")")
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
