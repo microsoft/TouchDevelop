@@ -25,6 +25,8 @@ module TDev {
       var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
       var origin = match[1];
       var path = match[2];
+      var isTest = /^https:\/\/test\.|localhost/i.test(origin);
+      var isStage = /^https:\/\/stage\./i.test(origin);      
       externalEditorsCache = [ /* {
         name: "C++ Editor",
         description: "Directly write C++ code using Ace (OUTDATED)",
@@ -41,16 +43,15 @@ module TDev {
           origin: origin,
           path: path + "blockly/editor.html",
           logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo"
-        }];
-
-      if (TDev.isBeta) {
-        externalEditorsCache.push({
+        }, {
           company: "Code Kingdoms",
           name: "CK JavaScript",
           description: "Code JavaScript with the CK editor",
           id: 'codekingdoms',
 
-          origin: 'https://microbit-staging.codekingdoms.com',
+          origin: isTest ? 'https://microbit-development.codekingdoms.com'
+            : isStage ? 'https://microbit-staging.codekingdoms.com'
+              : 'https://microbit.codekingdoms.com',
           path: '/',
 
           // Local testing
@@ -58,7 +59,10 @@ module TDev {
           // path: '/ck-client/game/',
 
           logoUrl: origin + path + 'img/codekingdoms-microbit.png'
-        },
+        }];
+
+      if (TDev.isBeta) {
+        externalEditorsCache.push(
         {
           company: "The Python Software Foundation",
           name: "MicroPython",
