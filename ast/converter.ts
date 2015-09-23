@@ -32,7 +32,8 @@ module TDev.AST {
                 var a = <Action>d;
                 if (!a.isAtomic)
                     n += "Async"
-
+            } else if (d instanceof RecordDef) {
+                n = n[0].toUpperCase() + n.slice(1)
             }
             return this.jsid(this.globalCtx.quote(n, 0))
         }
@@ -92,10 +93,19 @@ module TDev.AST {
             s._converterAwait = pre < this.numAwaits
         }
 
+        visitCall(c:Call)
+        {
+            var a = c.calledExtensionAction()
+            if (a) a._converterExtensionAction = 1;
+
+            super.visitCall(c)
+        }
+
         visitExprHolder(eh:ExprHolder)
         {
             if (eh.isAwait) 
                 this.numAwaits++
+            this.dispatch(eh.parsed)
         }
     }
 
@@ -293,7 +303,7 @@ module TDev.AST {
                     this.printOp(p.getName())
                     doParen(e.args[0])
                 } else if (e._assignmentInfo && e._assignmentInfo.targets && e._assignmentInfo.targets.length > 1) {
-                    this.tw.op0("[")
+                    this.tw.sep().op0("[")
                     this.commaSep(e._assignmentInfo.targets, p => this.dispatch(p))
                     this.tw.op0("] =").sep()
                     this.dispatch(e.args[1])
@@ -610,13 +620,28 @@ module TDev.AST {
 
         visitAction(a:Action)
         {
+            if (a._converterExtensionAction == 3)
+                return
+            if (a._converterExtensionAction)
+                a._converterExtensionAction = 3;
+
             this.localCtx = new TsQuotingCtx()
-            this.tw.kw("export")
-            if (!a.isAtomic)
-                this.tw.kw("async")
-            this.tw.kw("function")
-            this.tw.globalId(a)
-            this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
+
+            if (a._converterExtensionAction) {
+                this.tw.kw("public")
+                if (!a.isAtomic)
+                    this.tw.kw("async")
+                this.tw.globalId(a)
+                this.pcommaSep(a.getInParameters().slice(1), p => this.localDef(p.local))
+            } else {
+                this.tw.kw("export")
+                if (!a.isAtomic)
+                    this.tw.kw("async")
+                this.tw.kw("function")
+                this.tw.globalId(a)
+                this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
+            }
+
             this.tw.op(":");
 
             if (!a.isAtomic) this.tw.kw("Promise<")
@@ -634,6 +659,13 @@ module TDev.AST {
 
             this.tw.nl()
             this.tw.beginBlock()
+
+            if (a._converterExtensionAction) {
+                var th = a.getInParameters()[0]
+                this.tw.kw("let")
+                this.localDef(th.local)
+                this.tw.write(" = this;").nl()
+            }
 
             a.getOutParameters().forEach(p => {
                 this.tw.kw("let")
@@ -684,6 +716,29 @@ module TDev.AST {
             this.tw.globalId(l).keyword("from").sep().write(modName).nl();
         }
 
+        visitRecordDef(r:RecordDef)
+        {
+            this.tw.kw("export class").sep()
+            this.tw.globalId(r).nl()
+            this.tw.kw("    extends JsonRecord").nl().beginBlock()
+            r.getFields().forEach(f => {
+                this.tw.kw("@json public").sep()
+                this.simpleId(f.getName())
+                this.tw.op0(":").sep()
+                this.type(f.dataKind)
+                this.tw.op0(";").nl()
+            })
+
+            var exts = this.app.actions().filter(a => a._converterExtensionAction && a.getInParameters()[0].local.getKind().equals(r.entryKind))
+            exts.forEach(e => {
+                e._converterExtensionAction = 2;
+                this.visitAction(e)
+            })
+
+            this.tw.endBlock()
+            this.tw.nl()
+        }
+
         visitApp(a:App)
         {
             var dump = (lst:Decl[]) => lst.forEach(t => this.dispatch(t))
@@ -692,6 +747,8 @@ module TDev.AST {
             dump(a.variables())
             this.tw.nl()
             dump(a.resources())
+            this.tw.nl()
+            dump(a.records())
             this.tw.nl()
             dump(a.allActions())
         }
