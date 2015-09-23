@@ -99,6 +99,7 @@ module TDev.AST {
         private tw = new TsTokenWriter();
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
+        private apis:StringMap<number> = {};
 
         constructor(private app:App)
         {
@@ -109,7 +110,14 @@ module TDev.AST {
         {
             new ConverterPrep().dispatch(this.app)
             this.dispatch(this.app)
-            return this.tw.finalize()
+            var keys = Object.keys(this.apis)
+            keys.sort((a, b) => this.apis[a] - this.apis[b])
+            var newApis = {}
+            keys.forEach(k => newApis[k] = this.apis[k])
+            return {
+                text: this.tw.finalize(),
+                apis: newApis,
+            }
         }
 
         private localName(l:LocalDef)
@@ -142,7 +150,18 @@ module TDev.AST {
             this.visitChildren(n);
         }
 
-        private toRegex(s:string) { return "/" + s.replace(/\//g, "\\/") + "/" }
+        private toRegex(e:Expr, flags = "") {
+            var l = e.getLiteral()
+            if (l)
+                this.tw.write("/" + l.replace(/\//g, "\\/") + "/" + flags)
+            else {
+                this.tw.write("new RegExp(")
+                this.dispatch(e)
+                if (flags)
+                    this.tw.write(", " + JSON.stringify(flags))
+                this.tw.write(")")
+            }
+        }
 
         private infixPri(e:Expr)
         {
@@ -294,12 +313,15 @@ module TDev.AST {
                 this.dispatch(e.args[1])
                 this.tw.op0(")")
             } else if (pn == "String->is match regex") {
-                this.tw.write(this.toRegex(e.args[1].getLiteral()) + ".test(")
+                this.toRegex(e.args[1])
+                this.tw.write(".test(")
                 this.dispatch(e.args[0])
                 this.tw.op0(")")
             } else if (pn == "String->replace regex") {
                 this.tightExpr(e.args[0])
-                this.tw.write(".replace(" + this.toRegex(e.args[1].getLiteral()) + "g,").sep()
+                this.tw.write(".replace(")
+                this.toRegex(e.args[1], "g")
+                this.tw.op0(",").sep()
                 this.dispatch(e.args[2])
                 this.tw.op0(")")
             } else if (pn == "Web->json") {
@@ -311,6 +333,9 @@ module TDev.AST {
                     this.tw.write(")")
                 }
             } else {
+                if (!this.apis.hasOwnProperty(pn))
+                    this.apis[pn] = 0
+                this.apis[pn]++
                 this.tightExpr(e.args[0])
                 this.tw.op0(".")
                 this.simpleId(p.getName())
