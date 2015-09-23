@@ -443,11 +443,11 @@ module TDev.HTML {
             validate: function (): string {
                 var f = input.files[0];
                 if (!f)
-                    return 'Oops, you need to select a file...';
-                if (maxMb > 0 && f.size > maxMb * 1000000)
-                    return 'Sorry, the file is too big. The sound must be less than ' + maxMb + 'Mb...';
+                    return lf("Oops, you need to select a file...");
+                if (maxMb > 0 && f.size > maxMb * 1024*1024)
+                    return lf("Sorry, the file is too big. It must be less than {0}Mb...", maxMb);
                 if (input.accept.indexOf(f.type) < 0)
-                    return 'Sorry, this document format is not supported...';
+                    return lf("Sorry, this document format is not supported...");
                 return null;
             },
             readAsync: () => fileReadAsDataURLAsync(input.files[0])
