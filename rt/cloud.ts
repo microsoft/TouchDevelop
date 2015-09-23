@@ -59,6 +59,7 @@ module TDev.Cloud {
         eventsSection?: boolean;
         artSection?: boolean;
         librariesSection?: boolean;
+        scriptProperties?: boolean;
         scriptPropertiesSettings?: boolean;
         testsSection?: boolean;
         actionTypesSection?: boolean;

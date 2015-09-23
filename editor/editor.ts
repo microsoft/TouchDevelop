@@ -4949,8 +4949,14 @@ module TDev
                     ah.getName() == "main")
                     editor = null;    
             }
-            else if (s instanceof AST.AppHeaderStmt)
-                editor = this.scriptProperties;    
+            else if (s instanceof AST.AppHeaderStmt) {
+                editor = this.scriptProperties;
+                // don't show the script properties dialog at all for beginner
+                // they can rename from the editor
+                if (!this.widgetEnabled("scriptProperties")) {
+                    editor = null;
+                }
+            }
             else if (s instanceof AST.RecordKind || s instanceof AST.RecordPersistenceKind)
                 editor = this.recordEditor;
             else if (s instanceof AST.RecordDef || s instanceof AST.LibraryRef || s instanceof AST.GlobalDef) {
