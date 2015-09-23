@@ -1082,7 +1082,7 @@ module TDev
 
             m.add(div('wall-dialog-buttons',
                 challenges ? HTML.mkButton(lf("open challenges"), () => {
-                    Util.navigateNewWindow(challenges);
+                    Util.navigateNewWindow("/" + challenges);
                 }) : null,
                 HTML.mkButton(lf("keep editing"), () => {
                     willNowPublish = true;
