@@ -11,6 +11,9 @@
         "module": "commonjs",
         "sourceMap": true
     },
+    "files": [
+        "tdlite.ts"
+    ],
     "exclude": [
         "typings",
         "node_modules"

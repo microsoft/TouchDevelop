@@ -1726,7 +1726,6 @@ module TDev.AST {
         public isOffline: boolean;
         public isLambda:boolean;
         public numUnsupported = 0;
-        public _converterExtensionAction:number;
         private isShareTarget:boolean;
         private definedKind:UserActionKind;
         public body:CodeBlock;

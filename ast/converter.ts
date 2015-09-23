@@ -17,7 +17,7 @@ module TDev.AST {
     class TsTokenWriter
         extends TokenWriter
     {
-        private globalCtx = new TsQuotingCtx();
+        public globalCtx = new TsQuotingCtx();
 
         constructor()
         {
@@ -93,19 +93,10 @@ module TDev.AST {
             s._converterAwait = pre < this.numAwaits
         }
 
-        visitCall(c:Call)
-        {
-            var a = c.calledExtensionAction()
-            if (a) a._converterExtensionAction = 1;
-
-            super.visitCall(c)
-        }
-
         visitExprHolder(eh:ExprHolder)
         {
             if (eh.isAwait) 
                 this.numAwaits++
-            this.dispatch(eh.parsed)
         }
     }
 
@@ -116,6 +107,7 @@ module TDev.AST {
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
         private apis:StringMap<number> = {};
+        public useExtensions = false;
 
         constructor(private app:App)
         {
@@ -148,6 +140,17 @@ module TDev.AST {
             else if (t.getRoot() == api.core.Collection) {
                 this.type(t.getParameter(0))
                 this.tw.op0("[]")
+            } else if (t.getRecord()) {
+                var parL = t.getRecord().parentLibrary()
+                if (parL && !parL.isThis())
+                    this.tw.globalId(parL).op0(".");
+                this.tw.globalId(t.getRecord())
+            } else if (t.parentLibrary()) {
+                if (!t.parentLibrary().isThis())
+                    this.tw.globalId(t.parentLibrary()).op0(".");
+                var n = t.getName()
+                n = n[0].toUpperCase() + n.slice(1)
+                this.tw.jsid(this.tw.globalCtx.quote(n, 0))
             } else {
                 //TODO
                 this.tw.kind(this.app, t)
@@ -325,13 +328,21 @@ module TDev.AST {
                 this.tightExpr(e.args[0])
                 this.tw.op0(".");
                 this.simpleId(e.referencedRecordField().getName())
-            } else if (e.calledAction()) {
-                if (!(e.args[0].getKind() instanceof ThingSetKind)) {
-                    this.tightExpr(e.args[0])
+            } else if (e.calledAction() || e.calledExtensionAction()) {
+                var aa = e.calledExtensionAction() || e.calledAction()
+                var args = e.args.slice(0)
+                if (args[0].getKind() instanceof ThingSetKind) {
+                    args.shift()
+                }
+
+                if (this.isExtension(aa) || aa.parent != this.app) {
+                    this.tightExpr(args[0])
+                    args.shift()
                     this.tw.op0(".")
                 }
-                this.tw.globalId(e.calledAction())
-                params(e.args.slice(1))
+
+                this.tw.globalId(aa)
+                params(args)
             } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
@@ -618,16 +629,45 @@ module TDev.AST {
             })
         }
 
+        isOwnExtension(a:Action)
+        {
+            if (!this.useExtensions) return false
+            var r = this.getFirstRecord(a)
+            return (r && r.parent == this.app)
+        }
+
+        isExtension(a:Action)
+        {
+            if (!this.useExtensions && a.parent == this.app)
+                return false
+
+            var r = this.getFirstRecord(a)
+            if (!r) {
+                var p0 = a.getInParameters()[0]
+                if (p0 && p0.local.getKind().parentLibrary() == a.parentLibrary())
+                    return true
+                return false
+            }
+            if (r.parent != a.parent)
+                return false
+
+            return true
+        }
+
+        getFirstRecord(a:Action):RecordDef
+        {
+            var p0 = a.getInParameters()[0]
+            if (!p0) return null
+            return p0.local.getKind().getRecord()
+        }
+
         visitAction(a:Action)
         {
-            if (a._converterExtensionAction == 3)
-                return
-            if (a._converterExtensionAction)
-                a._converterExtensionAction = 3;
+            var isExtension = this.isOwnExtension(a)
 
             this.localCtx = new TsQuotingCtx()
 
-            if (a._converterExtensionAction) {
+            if (isExtension) {
                 this.tw.kw("public")
                 if (!a.isAtomic)
                     this.tw.kw("async")
@@ -660,7 +700,7 @@ module TDev.AST {
             this.tw.nl()
             this.tw.beginBlock()
 
-            if (a._converterExtensionAction) {
+            if (isExtension) {
                 var th = a.getInParameters()[0]
                 this.tw.kw("let")
                 this.localDef(th.local)
@@ -729,11 +769,8 @@ module TDev.AST {
                 this.tw.op0(";").nl()
             })
 
-            var exts = this.app.actions().filter(a => a._converterExtensionAction && a.getInParameters()[0].local.getKind().equals(r.entryKind))
-            exts.forEach(e => {
-                e._converterExtensionAction = 2;
-                this.visitAction(e)
-            })
+            var exts = this.app.actions().filter(a => this.useExtensions && this.getFirstRecord(a) == r)
+            exts.forEach(e => this.visitAction(e))
 
             this.tw.endBlock()
             this.tw.nl()
@@ -750,7 +787,7 @@ module TDev.AST {
             this.tw.nl()
             dump(a.records())
             this.tw.nl()
-            dump(a.allActions())
+            dump(a.allActions().filter(a => !this.isOwnExtension(a)))
         }
     }
 }
