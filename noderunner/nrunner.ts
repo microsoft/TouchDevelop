@@ -1790,6 +1790,16 @@ function mergetest(args:string[])
     })
 }
 
+function ts(files:string[])
+{
+    var t = fs.readFileSync(files[0], "utf8")
+    TDev.AST.reset();
+    TDev.AST.loadScriptAsync((s) => TDev.Promise.as(s == "" ? t : null));
+    var txt = new TDev.AST.Converter(TDev.Script).run()
+    fs.writeFileSync("out.ts", txt)
+    console.log("out.ts written")
+}
+
 function featureize(dirs:string[])
 {
     libroots = JSON.parse(fs.readFileSync("libroots.json", "utf-8"))
@@ -2044,6 +2054,8 @@ export function globalInit()
         addIds(process.argv.slice(3))
     } else if (process.argv[2] == "mergetest") {
         mergetest(process.argv.slice(3))
+    } else if (process.argv[2] == "ts") {
+        ts(process.argv.slice(3))
     } else {
         console.log("invalid usage")
     }
