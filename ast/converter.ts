@@ -146,13 +146,25 @@ module TDev.AST {
         {
             var p = e.getCalledProperty()
             if (!p) return 0
+            if (p.getName() == "is invalid")
+                return 5 // '== null'
             if (p.parentKind == api.core.String) {
-                if (p.getName() == "equals")
+                if (p.getName() == "equals" || p.getName() == "is empty")
                     return 5
                 // + in JS
                 if (p == api.core.StringConcatProp)
                     return 10
+            } else if (p.parentKind == api.core.Boolean) {
+                if (p.getName() == "not") {
+                    var a0 = (<Call>e).args[0].getCalledProperty()
+                    if (a0 && a0.getName() == "is invalid")
+                        return 5 // '!= null'
+                    if (a0 && a0.parentKind == api.core.String && a0.getName() == "is empty")
+                        return 5 // '!= ""'
+                    return 50
+                }
             }
+
             return p.getInfixPriority() || 0
         }
 
@@ -202,7 +214,26 @@ module TDev.AST {
                     } else this.dispatch(e)
                 }
 
-                if (e.args.length == 1) {
+                if (p.getName() == "is invalid") {
+                    doParen(e.args[0])
+                    this.tw.sep().write("== null")
+                } else if (p.getName() == "is empty") {
+                    var inner0 = e.args[0].getCalledProperty()
+                    if (inner0 && inner0.getName() == "or empty") {
+                        this.tw.op0("!")
+                        this.tightExpr((<Call>e.args[0]).args[1])
+                    } else {
+                        doParen(e.args[0])
+                        this.tw.sep().write("== \"\"")
+                    }
+                } else if (infixPri == 5 && p.getName() == "not") {
+                    doParen((<Call>e.args[0]).args[0])
+                    switch (e.args[0].getCalledProperty().getName()) {
+                    case "is invalid": this.tw.sep().write("!= null"); break;
+                    case "is empty": this.tw.sep().write("!= \"\""); break;
+                    default: Util.die()
+                    }
+                } else if (e.args.length == 1) {
                     this.printOp(p.getName())
                     doParen(e.args[0])
                 } else {
