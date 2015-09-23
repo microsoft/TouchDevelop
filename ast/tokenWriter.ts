@@ -11,6 +11,7 @@ module TDev { export module AST {
         private lastBlockEnd = -1;
         private lastAfterBlockEnd = -1;
         public skipActionBodies = false;
+        public indentString = "  ";
 
         public unicodeOps = true;
         public unicodeStrings = true;
@@ -41,7 +42,7 @@ module TDev { export module AST {
                 }
 
                 for (var i = 0; i < this.indentLevel; ++i)
-                    this.buf += "  ";
+                    this.buf += this.indentString;
 
                 this.lastChar = ' ';
             }

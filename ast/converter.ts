@@ -19,6 +19,12 @@ module TDev.AST {
     {
         private globalCtx = new TsQuotingCtx();
 
+        constructor()
+        {
+            super()
+            this.indentString = "    ";
+        }
+
         public globalId(d:Decl)
         {
             var n = d.getName()
@@ -219,6 +225,15 @@ module TDev.AST {
                     this.dispatch(p)
                 })
                 this.tw.op0(")")
+            }
+
+            if (p.parentKind == api.core.Unknown && /^(return|break|continue)$/.test(p.getName())) {
+                this.tw.kw(p.getName())
+                if (!e.args[0].isPlaceholder()) {
+                    this.tw.sep()
+                    this.dispatch(e.args[0])
+                }
+                return
             }
 
             if (infixPri) {
@@ -472,8 +487,26 @@ module TDev.AST {
             })
         }
 
-        // TODO for
-        // TODO foreach
+        visitFor(f:For)
+        {
+            this.tw.kw("for (let").sep();
+            this.localName(f.boundLocal).write(" = 0;").sep();
+            this.localName(f.boundLocal).op("<");
+            this.dispatch(f.upperBound);
+            this.tw.op0(";").sep();
+            this.localName(f.boundLocal).op0("++)");
+            this.dispatch(f.body)
+        }
+
+        visitForeach(f:Foreach)
+        {
+            this.tw.kw("for (let").sep();
+            this.localName(f.boundLocal).write(" of").sep();
+            this.dispatch(f.collection);
+            this.tw.op0(")");
+            Util.assert(f.conditions.stmts.length == 0);
+            this.dispatch(f.body)
+        }
 
         visitWhile(n:While)
         {
@@ -492,7 +525,7 @@ module TDev.AST {
         visitExprStmt(es:ExprStmt)
         {
             if (es.isVarDef())
-                this.tw.kw("var")
+                this.tw.kw("let")
             this.dispatch(es.expr)
             this.tw.op0(";").nl()
         }
@@ -549,7 +582,7 @@ module TDev.AST {
             this.tw.beginBlock()
 
             a.getOutParameters().forEach(p => {
-                this.tw.kw("var")
+                this.tw.kw("let")
                 this.localDef(p.local)
                 this.tw.op0(";").nl()
             })
