@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "noImplicitAny": true,
+        "outDir": "built",
+        "rootDir": ".",
+        "experimentalAsyncFunctions": true,
+        "newLine": "LF",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators":true,
+        "module": "commonjs",
+        "sourceMap": true
+    },
+    "exclude": [
+        "typings",
+        "node_modules"
+    ]
+}
