@@ -3,6 +3,7 @@
     "typescript": "^1.6.2"
   },
   "dependencies": {
+    "azure-table-node": "^1.4.1",
     "mz": "^2.0.0",
     "reflect-metadata": "^0.1.2"
   }

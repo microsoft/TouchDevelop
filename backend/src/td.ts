@@ -6,6 +6,8 @@
 require('reflect-metadata');
 
 import * as crypto from 'crypto';
+import * as http from 'http';
+import * as https from 'https';
 
 export type JsonObject = {};
 export type JsonBuilder = {};
@@ -149,6 +151,25 @@ export function randomRange(min: number, max: number): number {
     var r = randomInt(max - min + 1);
     if (r == undefined) return undefined;
     return min + r;
+}
+
+export function checkAndLog(err:any, meta?: any):boolean
+{
+    if (!err) return true
+    //TODO
+    //logError(err, meta);
+    return false
+}
+
+export function mkAgent(proto:string):http.Agent
+{
+    var Agent = http.Agent
+    var AgentSSL = https.Agent
+    var maxSock = 15
+    if (proto == "https:")
+        return <any>new AgentSSL(<any>{ maxSockets: maxSock, keepAlive: true })
+    else
+        return new Agent({ maxSockets: maxSock, keepAlive: true })
 }
 
 export var TD:any = {};
@@ -345,5 +366,10 @@ export class AppLogger {
         //TODO s.loggerContext = ctx
     }
 
+}
+
+export function createLogger(n:string)
+{
+    return new AppLogger(n);
 }
 

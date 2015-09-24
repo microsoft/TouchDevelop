@@ -81,7 +81,7 @@ module TDev.AST {
 
         public sep():TokenWriter
         {
-            if (" ([.".indexOf(this.lastChar) >= 0) return this;
+            if (" ([<.".indexOf(this.lastChar) >= 0) return this;
             return super.sep();
         }
 
@@ -232,7 +232,7 @@ module TDev.AST {
         private toRegex(e:Expr, flags = "") {
             var l = e.getLiteral()
             if (l)
-                this.tw.write("/" + l.replace(/\//g, "\\/") + "/" + flags)
+                this.tw.write("/" + l.replace(/\\?\//g, "\\/") + "/" + flags)
             else {
                 this.tw.write("new RegExp(")
                 this.dispatch(e)
@@ -280,7 +280,7 @@ module TDev.AST {
             }
 
             if (e.awaits()) {
-                this.tw.write("await").sep()
+                this.tw.write("await").space()
             }
 
             this.visitCallInner(e)
@@ -459,9 +459,10 @@ module TDev.AST {
             } else if (pn == "App->javascript") {
                 this.dumpJs(e.args[2].getLiteral())
             } else if (pn == "App->javascript async") {
-                this.tw.write("new Promise(resume => {").nl()
+                this.tw.write("new Promise(resume =>").beginBlock();
                 this.dumpJs(e.args[2].getLiteral())
-                this.tw.write("});").nl()
+                this.tw.endBlock();
+                this.tw.op0(")")
             } else if (p.parentKind instanceof RecordDefKind && p.getName() == "create") {
                 this.tw.write("new ");
                 this.type(e.getKind())
@@ -657,7 +658,7 @@ module TDev.AST {
         inlineAction(a:InlineAction)
         {
             if (!(<ActionKind>a.name.getKind()).isAtomic())
-                this.tw.kw("async")
+                this.tw.kw("async").space()
             this.pcommaSep(a.inParameters, p => this.localDef(p))
             this.tw.op("=>").beginBlock();
 
@@ -823,7 +824,7 @@ module TDev.AST {
 
         isOwnExtension(a:Action)
         {
-            if (!this.useExtensions) return false
+            if (!this.useExtensions || !this.isExtension(a)) return false
             var r = this.getFirstRecord(a)
             return (r && r.parent == this.app)
         }
@@ -833,9 +834,12 @@ module TDev.AST {
             if (!this.useExtensions && a.parent == this.app)
                 return false
 
+            var p0 = a.getInParameters()[0]
+            if (p0 && /\?$/.test(p0.getName()))
+                return false
+
             var r = this.getFirstRecord(a)
             if (!r) {
-                var p0 = a.getInParameters()[0]
                 if (p0 && p0.local.getKind().parentLibrary() == a.parentLibrary())
                     return true
                 return false
@@ -881,7 +885,10 @@ module TDev.AST {
             }
 
             if (isExtension) {
-                this.tw.kw("public")
+                if (a.isPrivate)
+                    this.tw.kw("private")
+                else
+                    this.tw.kw("public")
                 if (!a.isAtomic)
                     this.tw.kw("async")
                 this.tw.globalId(a)
@@ -909,7 +916,7 @@ module TDev.AST {
                     this.tw.op0("]")
                 }
 
-            if (!a.isAtomic) this.tw.kw(">")
+            if (!a.isAtomic) this.tw.op0(">")
 
             this.tw.nl()
             this.tw.beginBlock()
@@ -999,7 +1006,7 @@ module TDev.AST {
             this.tw.write("static createFromJson(o:JsonObject) { let r = new ")
             this.tw.globalId(r).write("(); r.fromJson(o); return r; }").nl()
 
-            var exts = this.app.actions().filter(a => this.useExtensions && this.getFirstRecord(a) == r)
+            var exts = this.app.actions().filter(a => this.isOwnExtension(a) && this.getFirstRecord(a) == r)
             exts.forEach(e => this.visitAction(e))
 
             this.tw.endBlock()
