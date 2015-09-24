@@ -348,6 +348,7 @@ module TDev {
       blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
     };
     window.addEventListener('resize', onresize, false);
+    window.addEventListener('orientationchange', onresize, false);
     onResize();
 
     loadBlockly(message.script.scriptText);
