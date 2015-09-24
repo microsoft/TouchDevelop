@@ -25,8 +25,8 @@ module TDev {
       var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
       var origin = match[1];
       var path = match[2];
-      var isTest = /^https:\/\/test\.|localhost/i.test(origin);
-      var isStage = /^https:\/\/stage\./i.test(origin);      
+      var isTest = /^https:\/\/test\.|localhost/i.test(document.location.href);
+      var isStage = /^https:\/\/stage\./i.test(document.location.href);      
       externalEditorsCache = [ /* {
         name: "C++ Editor",
         description: "Directly write C++ code using Ace (OUTDATED)",
