@@ -6,6 +6,7 @@ meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta allowExport "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -149,6 +150,7 @@ action create_A_button() {
   #xb4n7opYqhj4K5RQ // {shim:}
   #fsNdOyLEOVKbaNzO data→button_a_inner := code→create_circle(45, 229);
   #i0mbEct0JsGmR2IX data→button_a_inner→set_color(colors→black);
+  #hxuBSjFJoTGcKkyF data→button_a_inner→set_gradient(false);
   #x0bngB2zwD5YNqhc data→button_a := code→create_circle(data→button_a_inner→x, data→button_a_inner→y);
   #xeJ9fLqaRwHysI6H data→button_a→opacity := 0;
   #QUMDCVZwMje402BB data→button_a→width := 112;
@@ -1681,6 +1683,7 @@ action create_A\u002bB_button() {
   #Q7HJhFDhF31D1CyH data→button_a\u002bb_inner := code→create_circle(525, 532);
   #AezoGLweK6YLo95L // {help:functions/on-logo-up}
   #jOo9NfJ7oRgpQ8Y4 data→button_a\u002bb_inner→set_color(colors→black);
+  #nyeqaqfbg2o1utr4 data→button_a\u002bb_inner→set_gradient(false);
   #Z8fAqSYlCuXG6dtB data→button_a\u002bb := code→create_circle(data→button_a\u002bb_inner→x, data→button_a\u002bb_inner→y);
   #qL8vzC4Ua3ivvgm6 data→button_a\u002bb→opacity := 0;
   #pgsgfJbTVcGs9ULn data→button_a\u002bb→width := 84;
@@ -1712,6 +1715,7 @@ action create_B_button() {
   #CDDoGfAZ7oqJpEWi // {shim:}
   #Hxnhl22NTBAKVXpI data→button_b_inner := code→create_circle(525, 229);
   #OJJgFsj90lBLVD6Y data→button_b_inner→set_color(colors→black);
+  #gtC6KmnU2Z5hTgIN data→button_b_inner→set_gradient(false);
   #xPpbA1GFc7ufOgwp data→button_b := code→create_circle(data→button_b_inner→x, data→button_b_inner→y);
   #xVcUpX8PlDVShy0U data→button_b→opacity := 0;
   #myD38vc5KVYqxJjy data→button_b→width := 112;
