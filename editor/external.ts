@@ -25,8 +25,27 @@ module TDev {
       var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
       var origin = match[1];
       var path = match[2];
-      var isTest = /^https:\/\/test\.|localhost/i.test(document.location.href);
-      var isStage = /^https:\/\/stage\./i.test(document.location.href);      
+
+      var isLocal = /^https?:\/\/localhost/i.test(document.location.href);
+      var isTest = /^https:\/\/test\./i.test(document.location.href);
+      var isStage = /^https:\/\/stage\./i.test(document.location.href);
+
+      var CK_ORIGINS = {
+        LOCAL: 'http://localhost:8888',
+        TEST: 'https://microbit-development.codekingdoms.com',
+        STAGE: 'https://microbit-staging.codekingdoms.com',
+        LIVE: 'https://microbit.codekingdoms.com'
+      };
+
+      var ckOrigin;
+
+      if (isLocal) ckOrigin = CK_ORIGINS.LOCAL;
+      else if (isTest) ckOrigin = CK_ORIGINS.TEST;
+      else if (isStage) ckOrigin = CK_ORIGINS.STAGE;
+      else ckOrigin = CK_ORIGINS.LIVE;
+
+      var ckPath = isLocal ? '/microbit/sequencer/bin/' : '/';
+
       externalEditorsCache = [ /* {
         name: "C++ Editor",
         description: "Directly write C++ code using Ace (OUTDATED)",
@@ -48,17 +67,9 @@ module TDev {
           name: "CK JavaScript",
           description: "Code JavaScript with the CK editor",
           id: 'codekingdoms',
-
-          origin: isTest ? 'https://microbit-development.codekingdoms.com'
-            : isStage ? 'https://microbit-staging.codekingdoms.com'
-              : 'https://microbit.codekingdoms.com',
-          path: '/',
-
-          // Local testing
-          // origin: 'http://localhost:8888',
-          // path: '/ck-client/game/',
-
-          logoUrl: origin + path + 'img/codekingdoms-microbit.png'
+          origin: ckOrigin,
+          path: ckPath,
+          logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png'
         }];
 
       if (TDev.isBeta) {
