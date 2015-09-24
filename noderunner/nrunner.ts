@@ -2038,6 +2038,9 @@ export function globalInit()
 
     authKey = process.env['TDC_AUTH_KEY'] || ""
 
+    // make sure we show *something* for crashes
+    TDev.RT.App.startLogger();
+
     if (serverPort) {
         startServer(serverPort)
     } else if (process.argv[2] == "compress") {
