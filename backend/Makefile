@@ -1,4 +1,4 @@
-N=parallel
+N=word-password
 
 all:
 	node node_modules/typescript/bin/tsc

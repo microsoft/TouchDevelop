@@ -5,6 +5,8 @@
 
 require('reflect-metadata');
 
+import * as crypto from 'crypto';
+
 export type JsonObject = {};
 export type JsonBuilder = {};
 export type Action1<T> = (v:T) => Promise<void>;
