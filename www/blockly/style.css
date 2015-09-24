@@ -229,20 +229,19 @@ a.command:hover {
   text-decoration: underline;
 }
 
-@media (max-height: 800px) {
-  #script-box {
-    display: none;
-  }
-}
-
+/* Very low-height displays: hide the icons */
 @media (max-height: 600px) {
   .roundsymbol, #script-box, .graduate-wrapper {
     display: none !important;
   }
 }
 
-/* Some overrides for narrow displays */
-@media (max-width: 1024px) {
+/* Low-height displays: hide the status icons; icons inline; smaller script name */
+@media (max-height: 800px) {
+  #script-icons {
+    display: none;
+  }
+
   .roundbutton {
     display: inline;
   }
@@ -272,15 +271,23 @@ a.command:hover {
     display: inline-block;
   }
 
-  #toolbox {
-    flex-direction: column;
-    -ms-flex-direction: column;
-  }
-
   #script-name {
-    font-size: 2rem;
+    font-size: 1.2rem;
+    line-height: 1.4rem !important;
+    height: 1.4rem !important;
+    font-weight: bold;
   }
+}
 
+/* Very narrow displays: get rid of the script name and description */
+@media (max-width: 800px) {
+  #script-box {
+    display: none;
+  }
+}
+
+/* Narrow displays: shrink the toolbox */
+@media (max-width: 1024px) {
   .blocklyTreeRow {
     padding-right: .3em !important;
   }
