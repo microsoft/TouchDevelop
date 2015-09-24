@@ -466,6 +466,7 @@ export function createClient(options?: IInitOptions) : Client
         instanceId = createRandomId(6);
         logger.info("initialized");
     }
+    if (!options) options = {};
     if (!options.storageAccount) {
         options.storageAccount = td.serverSetting("AZURE_STORAGE_ACCOUNT", false);
     }

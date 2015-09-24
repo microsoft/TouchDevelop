@@ -1,4 +1,4 @@
-N=azure-table
+N=azure-blob-storage
 
 all:
 	node node_modules/typescript/bin/tsc

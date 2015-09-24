@@ -8,6 +8,8 @@ require('reflect-metadata');
 import * as crypto from 'crypto';
 import * as http from 'http';
 import * as https from 'https';
+import * as url from 'url';
+import * as zlib from 'zlib';
 
 export type JsonObject = {};
 export type JsonBuilder = {};
@@ -373,3 +375,53 @@ export function createLogger(n:string)
     return new AppLogger(n);
 }
 
+export function httpRequestStreamAsync(url_:string, method:string = "GET", body:string = undefined, contentType:any = null) : Promise<http.IncomingMessage>
+{
+    var parsed:any = url.parse(url_)
+    parsed.method = method.toUpperCase()
+
+    var req;
+    if (parsed.protocol == "http:") {
+        req = http.request(parsed)
+    } else if (parsed.protocol == "https:") {
+        req = https.request(parsed)
+    } else {
+        throw new Error("unknown node.js protocol " + parsed.protocol + " in " + url_)
+    }
+
+    var headers = contentType || {}
+
+    if (typeof headers == "string")
+        headers = { "Content-Type": headers }
+
+    Object.keys(headers).forEach(k => req.setHeader(k, headers[k]))
+
+    return new Promise((success, error) => {
+        req.on("error", err => {
+            err.socketUrl = url_;
+            error(err)
+        })
+
+        req.on("response", (res) => {
+            if (res.statusCode == 200) {
+                if (/gzip/.test((<any>res).headers['content-encoding'])) {
+                    var g = zlib.createUnzip(undefined);
+                    (<any>res).pipe(g);
+                    (<any>g).headers = res.headers;
+                } else {
+                    g = res;
+                }
+
+                success(g)
+
+            } else {
+                error(new Error("bad status code " + res.statusCode + " for " + url_))
+            }
+        })
+
+        if (body !== undefined)
+            req.end(body, "utf8")
+        else
+            req.end()
+    })
+}
