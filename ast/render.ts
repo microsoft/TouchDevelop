@@ -566,7 +566,7 @@ module TDev
                 if (AST.proMode)
                     return this.tline("<span class='greyed'>&nbsp;;</span>");
                 else
-                    return this.tline("<span class='greyed'>do nothing</span>");
+                    return this.tline("<span class='greyed'>" + Cloud.config.doNothingText + "</span>");
             } else {
                 var toks = this.renderExprHolder(n.expr, n.expr.tokens)
                 toks += suffix
@@ -789,7 +789,7 @@ module TDev
                         this.stmt(n.rawElseBody.stmts[0] || n,
                         AST.proMode ?
                             this.tline(this.st("}") + this.kw("else") + this.st("{ }")) :
-                            this.tline(this.kw("else") + Renderer.tspan("greyed", "do nothing") + this.kw(" end ") + this.greyKw("if")),
+                            this.tline(this.kw("else") + Renderer.tspan("greyed", Cloud.config.doNothingText) + this.kw(" end ") + this.greyKw("if")),
                                      (e:HTMLElement) => e.setFlag("elseDoNothing", true), n);
                 } else {
                     if (AST.proMode)
