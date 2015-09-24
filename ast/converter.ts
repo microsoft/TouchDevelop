@@ -284,11 +284,18 @@ module TDev.AST {
             this.visitCallInner(e)
         }
 
+        propName(e:Expr)
+        {
+            var p = e.getCalledProperty()
+            if (!p) return null
+            return p.parentKind.toString() + "->" + p.getName()
+        }
+
         visitCallInner(e:Call)
         {
             var p = e.getCalledProperty()
             var infixPri = this.infixPri(e)
-            var pn = p.parentKind.toString() + "->" + p.getName()
+            var pn = this.propName(e)
             if (infixPri == 40) infixPri = 0; // await only for inner
             
             var params = (pp:Expr[]) => {
@@ -417,6 +424,13 @@ module TDev.AST {
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
                 this.tw.op0("]")
+            } else if (/^Json (Builder|Object)->(to json|clone|to json builder)$/.test(pn)) {
+                if (this.propName(e.args[0]) == "Web->json") {
+                    this.dispatch(e.args[0])
+                } else {
+                    this.tw.write("clone")
+                    params([e.args[0]])
+                }
             } else if (pn == "Web->create json builder") {
                 this.tw.op0("{}")
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
