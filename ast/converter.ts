@@ -288,7 +288,7 @@ module TDev.AST {
         {
             var p = e.getCalledProperty()
             if (!p) return null
-            return p.parentKind.toString() + "->" + p.getName()
+            return p.parentKind.getRoot().toString() + "->" + p.getName()
         }
 
         static prefixGlue:StringMap<string> = {
@@ -303,7 +303,26 @@ module TDev.AST {
               "Time->sleep": "sleepAsync",
               "DateTime->milliseconds since epoch": "Date.now",
               "String->to number": "parseFloat",
-              "Json Builder->copyFrom": "jsonCopyFrom",
+              "Json Builder->copy from": "jsonCopyFrom",
+              "String->contains": "stringContains",
+              "Collection->to json": "arrayToJson",
+              "Web->encode uri component": "encodeURIComponent",
+              "Json Object->to collection": "asArray",
+              "Json Builder->to collection": "asArray",
+        }
+
+        static methodRepl:StringMap<string> = {
+          "Buffer->concat": "concat",
+          "Buffer->to string": "toString",
+          "String->split": "split",
+          "String->substring": "substr",
+          "String->to upper case": "toUpperCase",
+          "String->to lower case": "toLowerCase",
+          "Json Builder->add": "push",
+          "Json Builder->contains key": "hasOwnProperty",
+          "Json Object->contains key": "hasOwnProperty",
+          "Collection->add": "push",
+          "Collection->where": "filter",
         }
 
         visitCallInner(e:Call)
@@ -430,6 +449,10 @@ module TDev.AST {
                 this.tw.write("new ");
                 this.type(e.getKind())
                 params([])
+            } else if (/^Invalid->/.test(pn) || (p.parentKind instanceof RecordDefKind && p.getName() == "invalid")) {
+                this.tw.write("(<");
+                this.type(e.getKind())
+                this.tw.write(">null)");
             } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
                        /->set at$/.test(pn)) {
                 this.tightExpr(e.args[0])
@@ -437,8 +460,10 @@ module TDev.AST {
                 this.dispatch(e.args[1])
                 this.tw.op0("] = ").sep()
                 this.dispatch(e.args[2])
-            } else if (/^Json (Builder|Object)->(string|number|boolean|field)$/.test(pn) ||
+            } else if (/^Json (Builder|Object)->(string|number|boolean|field|remove field)$/.test(pn) ||
                        /->at$/.test(pn)) {
+                if (/remove/.test(pn))
+                    this.tw.kw("delete")
                 this.tightExpr(e.args[0])
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
@@ -446,10 +471,12 @@ module TDev.AST {
             } else if (/^Json (Builder|Object)->serialize$/.test(pn)) {
                 this.tw.write("JSON.stringify")
                 params([e.args[0]])
-            } else if (/^Json (Builder|Object)->contains key$/.test(pn)) {
-                this.tightExpr(e.args[0])
-                this.tw.write(".hasOwnProperty")
-                params([e.args[1]])
+            } else if (/^Json (Builder|Object)->format$/.test(pn)) {
+                this.tw.write("JSON.stringify(")
+                this.dispatch(e.args[0])
+                this.tw.write(", null,").sep()
+                this.dispatch(e.args[1])
+                this.tw.write(")")
             } else if (/^Json (Builder|Object)->(to json|clone|to json builder)$/.test(pn)) {
                 if (this.propName(e.args[0]) == "Web->json") {
                     this.dispatch(e.args[0])
@@ -465,14 +492,16 @@ module TDev.AST {
                 this.tw.op0("(<")
                 this.type(e.getKind())
                 this.tw.op0(">[])")
+            } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
+                        e.args[0].getCalledProperty().getName() == "map to")) {
+                this.tightExpr((<Call>e.args[0]).args[0])
+                this.tw.op0(".map<")
+                this.type(e.getKind().getParameter(0))
+                this.tw.op0(">")
+                params([e.args[1]])
             } else if (/->count$/.test(pn)) {
                 this.tightExpr(e.args[0])
                 this.tw.op0(".length")
-            } else if (/^(Json|Collection).*->add$/.test(pn)) {
-                this.tightExpr(e.args[0])
-                this.tw.op0(".push(")
-                this.dispatch(e.args[1])
-                this.tw.op0(")")
             } else if (pn == "String->match") {
                 this.tw.op0("(")
                 this.toRegex(e.args[1])
@@ -493,7 +522,14 @@ module TDev.AST {
                 this.tw.op0(")")
             } else if (Converter.prefixGlue.hasOwnProperty(pn)) {
                 this.tw.write(Converter.prefixGlue[pn])
-                params(e.args)
+                var tmpargs = e.args.slice(0)
+                if (tmpargs[0] && tmpargs[0].getThing() instanceof SingletonDef)
+                    tmpargs.shift()
+                params(tmpargs)
+            } else if (Converter.methodRepl.hasOwnProperty(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.write("." + Converter.methodRepl[pn])
+                params(e.args.slice(1))
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
                     this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
@@ -503,9 +539,11 @@ module TDev.AST {
                     this.tw.write(")")
                 }
             } else {
-                if (!this.apis.hasOwnProperty(pn))
-                    this.apis[pn] = 0
-                this.apis[pn]++
+                if (!/^App Logger->/.test(pn)) {
+                    if (!this.apis.hasOwnProperty(pn))
+                        this.apis[pn] = 0
+                    this.apis[pn]++
+                }
                 this.tightExpr(e.args[0])
                 this.tw.op0(".")
                 this.simpleId(p.getName())
@@ -584,7 +622,20 @@ module TDev.AST {
                 this.tw.kw("async")
             this.pcommaSep(a.inParameters, p => this.localDef(p))
             this.tw.op("=>").beginBlock();
+
+            a.outParameters.forEach(p => {
+                this.tw.kw("let")
+                this.localDef(p)
+                this.tw.op0(";").nl()
+            })
+
             this.codeBlockInner(a.body)
+
+            if (a.outParameters.length >= 1) {
+                this.tw.kw("return")
+                this.localName(a.outParameters[0]).op0(";").nl()
+            }
+
             this.tw.endBlock()
         }
 
