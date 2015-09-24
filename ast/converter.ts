@@ -292,20 +292,20 @@ module TDev.AST {
         }
 
         static prefixGlue:StringMap<string> = {
-              "String->replace": "replaceAll",
-              "String->starts with": "startsWith",
-              "App->server setting": "serverSetting",
+              "String->replace": "td.replaceAll",
+              "String->starts with": "td.startsWith",
+              "App->server setting": "td.serverSetting",
               "Time->now": "new Date",
               "Json Builder->keys": "Object.keys",
               "Json Object->keys": "Object.keys",
               "Contract->assert": "assert",
               "Bits->string to buffer": "new Buffer",
-              "Time->sleep": "sleepAsync",
+              "Time->sleep": "td.sleepAsync",
               "DateTime->milliseconds since epoch": "Date.now",
               "String->to number": "parseFloat",
-              "Json Builder->copy from": "jsonCopyFrom",
-              "String->contains": "stringContains",
-              "Collection->to json": "arrayToJson",
+              "Json Builder->copy from": "td.jsonCopyFrom",
+              "String->contains": "td.stringContains",
+              "Collection->to json": "td.arrayToJson",
               "Web->encode uri component": "encodeURIComponent",
               "Json Object->to collection": "asArray",
               "Json Builder->to collection": "asArray",
@@ -502,6 +502,14 @@ module TDev.AST {
             } else if (/->count$/.test(pn)) {
                 this.tightExpr(e.args[0])
                 this.tw.op0(".length")
+            } else if (pn == "String->replace regex with converter") {
+                this.tw.write("td.replaceFn(")
+                this.dispatch(e.args[0])
+                this.tw.op0(",").sep()
+                this.toRegex(e.args[1])
+                this.tw.op0(",").sep()
+                this.dispatch(e.args[2])
+                this.tw.op0(")")
             } else if (pn == "String->match") {
                 this.tw.op0("(")
                 this.toRegex(e.args[1])
@@ -935,7 +943,7 @@ module TDev.AST {
         {
             this.tw.kw("export class").sep()
             this.tw.globalId(r).nl()
-            this.tw.kw("    extends JsonRecord").nl().beginBlock()
+            this.tw.kw("    extends td.JsonRecord").nl().beginBlock()
             r.getFields().forEach(f => {
                 this.tw.kw("@json public").sep()
                 this.simpleId(f.getName())

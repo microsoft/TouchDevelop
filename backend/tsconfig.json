@@ -11,6 +11,7 @@
         "sourceMap": true
     },
     "files": [
+        "td.ts",
         "tdlite.ts"
     ],
     "exclude": [
