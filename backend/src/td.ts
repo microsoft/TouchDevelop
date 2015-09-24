@@ -10,6 +10,7 @@ export type JsonBuilder = {};
 export type Action1<T> = (v:T) => Promise<void>;
 export type Action = () => Promise<void>;
 export type NumberAction = Action1<number>;
+export type JsonAction = Action1<JsonObject>;
 
 export namespace App {
     export var ERROR = 3;

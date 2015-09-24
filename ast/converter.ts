@@ -536,6 +536,13 @@ module TDev.AST {
                 this.tw.op0(",").sep()
                 this.dispatch(e.args[2])
                 this.tw.op0(")")
+            } else if (p.getName() == "\u25C8add") {
+                this.dispatch(e.args[0])
+                this.tw.op("+=")
+                this.dispatch(e.args[1])
+            } else if (p.parentKind.isAction && p.getName() == "run") {
+                this.tightExpr(e.args[0])
+                params(e.args.slice(1))
             } else if (Converter.prefixGlue.hasOwnProperty(pn)) {
                 this.tw.write(Converter.prefixGlue[pn])
                 var tmpargs = e.args.slice(0)
@@ -645,7 +652,7 @@ module TDev.AST {
                 this.tw.op0(";").nl()
             })
 
-            this.codeBlockInner(a.body)
+            this.codeBlockInner(a.body.stmts)
 
             if (a.outParameters.length >= 1) {
                 this.tw.kw("return")
@@ -700,7 +707,7 @@ module TDev.AST {
 
             if (false && i.isTopCommentedOut()) {
                 tw.op0("/*").nl()
-                this.codeBlockInner(i.rawThenBody)
+                this.codeBlockInner(i.rawThenBody.stmts)
                 tw.op0("*/").nl()
                 return
             }
@@ -767,9 +774,9 @@ module TDev.AST {
             this.tw.op0(";").nl()
         }
 
-        codeBlockInner(b:CodeBlock)
+        codeBlockInner(stmts:Stmt[])
         {
-            b.stmts.forEach((s, i) => {
+            stmts.forEach((s, i) => {
                 if (s.isPlaceholder()) {
                     if (i > 0)
                         this.tw.nl()
@@ -782,7 +789,7 @@ module TDev.AST {
         visitCodeBlock(b:CodeBlock)
         {
             this.tw.beginBlock()
-            this.codeBlockInner(b)
+            this.codeBlockInner(b.stmts)
             this.tw.endBlock()
         }
 
@@ -848,6 +855,16 @@ module TDev.AST {
                 } else this.localDef(p.local)
             }
 
+            var stmts = a.body.stmts.slice(0)
+            if (stmts[0] instanceof Comment) {
+                this.tw.write("/**").nl()
+                while (stmts[0] instanceof Comment) {
+                    this.tw.write(" * " + (<Comment>stmts[0]).text).nl()
+                    stmts.shift();
+                }
+                this.tw.write(" */").nl()
+            }
+
             if (isExtension) {
                 this.tw.kw("public")
                 if (!a.isAtomic)
@@ -905,7 +922,7 @@ module TDev.AST {
                 this.tw.op0(";").nl()
             })
 
-            this.codeBlockInner(a.body)
+            this.codeBlockInner(stmts)
 
             if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
@@ -999,6 +1016,17 @@ module TDev.AST {
             dump(a.records())
             this.tw.nl()
             dump(a.allActions().filter(a => !this.isOwnExtension(a)))
+        }
+
+        visitComment(c:Comment)
+        {
+            this.tw.write("// " + c.text).nl()
+        }
+
+        visitStmt(s:Stmt)
+        {
+            console.log("unhandled stmt: " + s.nodeType())
+            super.visitStmt(s)
         }
     }
 }
