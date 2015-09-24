@@ -77,6 +77,11 @@ export class JsonRecord
     {
         return this === other;
     }
+
+    load(o:any):void
+    {
+        //TODO
+    }
 }
 
 function json(className : any, fieldName : string) {

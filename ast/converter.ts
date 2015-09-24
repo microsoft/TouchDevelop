@@ -66,7 +66,7 @@ module TDev.AST {
             this.indentString = "    ";
         }
 
-        public globalId(d:Decl)
+        public globalId(d:Decl, pref = "")
         {
             var n = d.getName()
             if (d instanceof Action) {
@@ -76,7 +76,7 @@ module TDev.AST {
             } else if (d instanceof RecordDef) {
                 n = n[0].toUpperCase() + n.slice(1)
             }
-            return this.jsid(this.globalCtx.quote(n, 0))
+            return this.jsid(this.globalCtx.quote(pref + n, 0))
         }
 
         public sep():TokenWriter
@@ -769,20 +769,31 @@ module TDev.AST {
             var isExtension = this.isOwnExtension(a)
 
             this.localCtx = new TsQuotingCtx()
+            var optsName = ""
+            var optsLocal:LocalDef = null
+
+            var printP = p => {
+                if (/\?$/.test(p.getName())) {
+                    optsLocal = p.local
+                    optsName = this.localCtx.unUnicode(p.getName() + "0")
+                    this.tw.jsid(optsName).write("?: ")
+                    this.tw.globalId(p.local.getKind().getRecord(), "I")
+                } else this.localDef(p.local)
+            }
 
             if (isExtension) {
                 this.tw.kw("public")
                 if (!a.isAtomic)
                     this.tw.kw("async")
                 this.tw.globalId(a)
-                this.pcommaSep(a.getInParameters().slice(1), p => this.localDef(p.local))
+                this.pcommaSep(a.getInParameters().slice(1), printP)
             } else {
                 this.tw.kw("export")
                 if (!a.isAtomic)
                     this.tw.kw("async")
                 this.tw.kw("function")
                 this.tw.globalId(a)
-                this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
+                this.pcommaSep(a.getInParameters(), printP)
             }
 
             this.tw.op(":");
@@ -808,6 +819,16 @@ module TDev.AST {
                 this.tw.kw("let")
                 this.localDef(th.local)
                 this.tw.write(" = this;").nl()
+            }
+
+            if (optsLocal) {
+                this.tw.kw("let").sep()
+                this.localName(optsLocal)
+                this.tw.write(" = new").sep()
+                this.type(optsLocal.getKind())
+                this.tw.write("(); ")
+                this.localName(optsLocal).write(".load(")
+                this.tw.jsid(optsName).op0(");").nl()
             }
 
             a.getOutParameters().forEach(p => {
@@ -882,6 +903,19 @@ module TDev.AST {
             exts.forEach(e => this.visitAction(e))
 
             this.tw.endBlock()
+            this.tw.nl()
+
+            this.tw.kw("export interface").sep()
+            this.tw.globalId(r, "I")
+            this.tw.beginBlock()
+            r.getFields().forEach(f => {
+                this.simpleId(f.getName())
+                this.tw.op0("?:").sep()
+                this.type(f.dataKind)
+                this.tw.op0(";").nl()
+            })
+            this.tw.endBlock()
+
             this.tw.nl()
         }
 
