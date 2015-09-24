@@ -10,6 +10,44 @@ export class Queue
     public numRunning: number = 0;
     public maxRunning: number = 0;
     public toRun: td.Action[] = [];
+
+    /**
+     * Add a new task to the queue. The task will run when queue has spare capacity.
+     */
+    public schedule(task:td.Action) : void
+    {
+        this.toRun.push(task);
+        this.pokeRunQueue();
+    }
+
+    private pokeRunQueue() : void
+    {
+        let q: Queue = this;
+        while (q.toRun.length > 0 && q.numRunning < q.maxRunning) {
+            let action2 = q.toRun[0];
+            q.toRun.splice(0, 1);
+            q.numRunning += 1;
+            process.nextTick(() => q.runAndPokeAsync(action2));
+        }
+    }
+
+    private async runAndPokeAsync(action:td.Action) : Promise< void >
+    {
+        let q: Queue = this;
+        await action();
+        q.numRunning -= 1;
+        q.pokeRunQueue();
+    }
+
+    /**
+     * Waits until there are no more tasks running in the queue.
+     */
+    public async waitForEmptyAsync() : Promise< void >
+    {
+        while (this.numRunning > 0) {
+            await td.sleepAsync(0.1);
+        }
+    }
 }
 
 /**
@@ -78,25 +116,6 @@ export async function forBatchedAsync(count: number, batchCount: number, itemAct
 }
 
 /**
- * Add a new task to the queue. The task will run when queue has spare capacity.
- */
-export function schedule(q: Queue, task:td.Action) : void
-{
-    q.toRun.push(task);
-    pokeRunQueue(q);
-}
-
-function pokeRunQueue(q: Queue) : void
-{
-    while (q.toRun.length > 0 && q.numRunning < q.maxRunning) {
-        let action2 = q.toRun[0];
-        q.toRun.shift();
-        q.numRunning += 1;
-        setTimeout(() => runAndPokeAsync(q, action2), 0)
-    }
-}
-
-/**
  * Construct a new queue that can run up to `max running` tasks at a time.
  * {hints:max running:5}
  */
@@ -105,23 +124,6 @@ export function createQueue(maxRunning: number) : Queue
     let queue = new Queue();
     queue.maxRunning = maxRunning;
     return queue;
-}
-
-async function runAndPokeAsync(q: Queue, action:td.Action) : Promise< void >
-{
-    await action();
-    q.numRunning--;
-    pokeRunQueue(q);
-}
-
-/**
- * Waits until there are no more tasks running in the queue.
- */
-export async function waitForEmptyAsync(q: Queue) : Promise< void >
-{
-    while (q.numRunning > 0) {
-        await td.sleepAsync(0.1);
-    }
 }
 
 /**

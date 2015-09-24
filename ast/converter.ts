@@ -148,7 +148,7 @@ module TDev.AST {
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
         private apis:StringMap<number> = {};
-        public useExtensions = false;
+        public useExtensions = true;
 
         constructor(private app:App)
         {
