@@ -361,6 +361,11 @@ module TDev {
         markLocalChanges();
       });
     }, 1);
+    $("#script-name").on("blur", () => {
+      if (getName().trim() == "")
+        setName("staggering program");
+      markLocalChanges();
+    });
     $("#script-name").on("input keyup blur", () => {
       markLocalChanges();
     });

@@ -229,7 +229,7 @@ a.command:hover {
   text-decoration: underline;
 }
 
-/* Very low-height displays: hide the icons */
+/* Very low-height displays: hide the icons. */
 @media (max-height: 600px) {
   .roundsymbol, #script-box, .graduate-wrapper {
     display: none !important;
