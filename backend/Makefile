@@ -1,4 +1,4 @@
-N=tdlite
+N=azure-table
 
 all:
 	node node_modules/typescript/bin/tsc
@@ -6,7 +6,7 @@ all:
 conv:
 	cd .. && jake
 	rm -f out.ts
-	node ../build/noderunner.js ts td/$(N).td
+	node ../build/noderunner.js ts td/$(N)-0.td
 	cat prelude.ts out.ts > src/$(N).ts
 	rm -f out.ts
 	$(MAKE) all

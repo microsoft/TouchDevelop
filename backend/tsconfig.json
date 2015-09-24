@@ -13,6 +13,7 @@
     "files": [
         "src/td.ts",
         "src/word-password.ts",
+        "src/azure-table.ts",
         "src/parallel.ts"
     ],
     "exclude": [

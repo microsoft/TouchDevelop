@@ -330,6 +330,15 @@ module TDev.AST {
           "DateTime->milliseconds since epoch": "getTime",
         }
 
+        dumpJs(s:string)
+        {
+            this.tw.write("/*JS*/").nl()
+            s.split("\n").forEach(l => {
+                l = l.replace(/TDev\.Util\.userError\(/g, "throw new Error(")
+                this.tw.write(l).nl()
+            })
+        }
+
         visitCallInner(e:Call)
         {
             var p = e.getCalledProperty()
@@ -447,9 +456,12 @@ module TDev.AST {
 
                 this.tw.globalId(aa)
                 params(args)
-            } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
-                // TODO
-                this.tw.write(e.args[2].getLiteral()).nl()
+            } else if (pn == "App->javascript") {
+                this.dumpJs(e.args[2].getLiteral())
+            } else if (pn == "App->javascript async") {
+                this.tw.write("new Promise(resume => {").nl()
+                this.dumpJs(e.args[2].getLiteral())
+                this.tw.write("});").nl()
             } else if (p.parentKind instanceof RecordDefKind && p.getName() == "create") {
                 this.tw.write("new ");
                 this.type(e.getKind())
