@@ -291,6 +291,21 @@ module TDev.AST {
             return p.parentKind.toString() + "->" + p.getName()
         }
 
+        static prefixGlue:StringMap<string> = {
+              "String->replace": "replaceAll",
+              "String->starts with": "startsWith",
+              "App->server setting": "serverSetting",
+              "Time->now": "new Date",
+              "Json Builder->keys": "Object.keys",
+              "Json Object->keys": "Object.keys",
+              "Contract->assert": "assert",
+              "Bits->string to buffer": "new Buffer",
+              "Time->sleep": "sleepAsync",
+              "DateTime->milliseconds since epoch": "Date.now",
+              "String->to number": "parseFloat",
+              "Json Builder->copyFrom": "jsonCopyFrom",
+        }
+
         visitCallInner(e:Call)
         {
             var p = e.getCalledProperty()
@@ -411,6 +426,10 @@ module TDev.AST {
             } else if (false && (pn == "App->javascript" || pn == "App->javascript async")) {
                 // TODO
                 this.tw.write(e.args[2].getLiteral()).nl()
+            } else if (p.parentKind instanceof RecordDefKind && p.getName() == "create") {
+                this.tw.write("new ");
+                this.type(e.getKind())
+                params([])
             } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
                        /->set at$/.test(pn)) {
                 this.tightExpr(e.args[0])
@@ -424,6 +443,13 @@ module TDev.AST {
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
                 this.tw.op0("]")
+            } else if (/^Json (Builder|Object)->serialize$/.test(pn)) {
+                this.tw.write("JSON.stringify")
+                params([e.args[0]])
+            } else if (/^Json (Builder|Object)->contains key$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.write(".hasOwnProperty")
+                params([e.args[1]])
             } else if (/^Json (Builder|Object)->(to json|clone|to json builder)$/.test(pn)) {
                 if (this.propName(e.args[0]) == "Web->json") {
                     this.dispatch(e.args[0])
@@ -450,7 +476,7 @@ module TDev.AST {
             } else if (pn == "String->match") {
                 this.tw.op0("(")
                 this.toRegex(e.args[1])
-                this.tw.write(".match(")
+                this.tw.write(".exec(")
                 this.dispatch(e.args[0])
                 this.tw.op0(") || [])")
             } else if (pn == "String->is match regex") {
@@ -465,6 +491,9 @@ module TDev.AST {
                 this.tw.op0(",").sep()
                 this.dispatch(e.args[2])
                 this.tw.op0(")")
+            } else if (Converter.prefixGlue.hasOwnProperty(pn)) {
+                this.tw.write(Converter.prefixGlue[pn])
+                params(e.args)
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
                     this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
@@ -840,8 +869,14 @@ module TDev.AST {
                 this.simpleId(f.getName())
                 this.tw.op0(":").sep()
                 this.type(f.dataKind)
+                var d = this.defaultValue(f.dataKind)
+                if (d != null)
+                    this.tw.write(" = " + d)
                 this.tw.op0(";").nl()
             })
+
+            this.tw.write("static createFromJson(o:JsonObject) { let r = new ")
+            this.tw.globalId(r).write("(); r.fromJson(o); return r; }").nl()
 
             var exts = this.app.actions().filter(a => this.useExtensions && this.getFirstRecord(a) == r)
             exts.forEach(e => this.visitAction(e))

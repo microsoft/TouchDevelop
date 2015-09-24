@@ -3,6 +3,9 @@
 
 'use strict';
 
+require('reflect-metadata');
+var assert = require('assert');
+
 type JsonObject = {};
 type JsonBuilder = {};
 
@@ -23,6 +26,70 @@ function perfNow() {
     var t = process.hrtime();
     return t[0] * 1e3 + t[1] * 1e-6;
 }
+
+function sleepAsync(seconds:number)
+{
+    return new Promise((r) => {
+        setTimeout(() => r(), seconds*1000)
+    })
+}
+
+function startsWith(s:string, pref:string)
+{
+    return s.indexOf(pref) == 0
+}
+
+function serverSetting(sett:string, optional:boolean)
+{
+    if (process.env.hasOwnProperty(sett))
+        return process.env[sett]
+    if (optional) return null
+    throw new Error('missing environment variable ' + sett)
+}
+
+function replaceAll(self: string, old: string, new_: string): string {
+    if (!old) return self;
+    return self.split(old).join(new_);
+}
+
+function jsonCopyFrom(trg:JsonBuilder, src:JsonObject)
+{
+    var v = clone(src)
+    Object.keys(src).forEach(k => {
+        trg[k] = v[k]
+    })
+}
+
+export class JsonRecord
+{
+    toJson():JsonObject
+    {
+        //TODO
+        return {}
+    }
+
+    fromJson(o:JsonObject):void
+    {
+        //TODO
+    }
+
+    equals(other:JsonRecord)
+    {
+        return this === other;
+    }
+}
+
+function json(className : any, fieldName : string) {
+    var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
+    // t.name
+}
+
+function clone(e:JsonObject):JsonObject
+{
+    return JSON.parse(JSON.stringify(e))
+}
+
+var TD:any;
 
 export class AppLogger {
     public created: number;
@@ -218,24 +285,3 @@ export class AppLogger {
 
 }
 
-export class JsonRecord
-{
-    toJson():JsonObject
-    {
-        return {}
-    }
-}
-
-function json(className : any, fieldName : string) {
-    var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
-    // t.name
-}
-
-function clone(e:JsonObject):JsonObject
-{
-    return JSON.parse(JSON.stringify(e))
-}
-
-var TD:any;
-
-require('reflect-metadata');
