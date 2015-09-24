@@ -123,6 +123,34 @@ export function clone(e:JsonObject):JsonObject
     return JSON.parse(JSON.stringify(e))
 }
 
+export function randomUint32():number
+{
+    var b = crypto.randomBytes(4)
+    return (b[0] | (b[1]<<8) | (b[2]<<16) | ((b[3]<<24) >>> 0)) >>> 0
+}
+
+var m32 = 1 / 0x100000000;
+var m64 = 1 / 0x10000000000000000;
+
+export function randomNormalized()
+{
+    return randomUint32() * m32 + randomUint32() * m64;
+}
+
+export function randomInt(limit: number): number {
+    var max = Math.round(limit);
+    if (max == 0) return 0;
+    var r = max;
+    while (r == max) r = randomNormalized() * (max); // supposedly can happen because of floating-point behavior
+    return Math.floor(r);
+}
+
+export function randomRange(min: number, max: number): number {
+    var r = randomInt(max - min + 1);
+    if (r == undefined) return undefined;
+    return min + r;
+}
+
 export var TD:any = {};
 
 export class AppLogger {

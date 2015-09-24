@@ -12,6 +12,7 @@
     },
     "files": [
         "src/td.ts",
+        "src/word-password.ts",
         "src/parallel.ts"
     ],
     "exclude": [

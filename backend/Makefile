@@ -1,4 +1,4 @@
-N=word-password
+N=tdlite
 
 all:
 	node node_modules/typescript/bin/tsc

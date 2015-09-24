@@ -310,6 +310,9 @@ module TDev.AST {
               "Web->encode uri component": "encodeURIComponent",
               "Json Object->to collection": "asArray",
               "Json Builder->to collection": "asArray",
+              "Math->random": "td.randomInt",
+              "Math->random range": "td.randomRange",
+              "Math->random normalized": "td.randomNormalized",
         }
 
         static methodRepl:StringMap<string> = {

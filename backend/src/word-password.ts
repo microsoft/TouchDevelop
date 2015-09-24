@@ -3,16 +3,6 @@
 'use strict';
 
 import * as td from 'td';
-import * as assert from 'assert';
-
-var TD = td.TD;
-type JsonObject = td.JsonObject;
-type JsonBuilder = td.JsonBuilder;
-
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
-
 
 var adj2: string[];
 
@@ -346,7 +336,6 @@ var verb = ["abandon", "accept", "accompany", "accomplish", "achieve",
 
 export function generate() : string
 {
-    let pass: string;
     if (adj2 == null) {
         adj2 = adj.concat(noun).concat(verb);
     }
@@ -355,10 +344,9 @@ export function generate() : string
         if (j > 0) {
             s = s + " ";
         }
-        s = s + adj2.random();
+        s = s + adj2[td.randomInt(adj2.length)];
     }
-    pass = s;
-    return pass;
+    return s;
 }
 
 
