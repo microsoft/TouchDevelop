@@ -1,5 +1,5 @@
-/// <reference path='typings/node/node.d.ts' />
-/// <reference path='node_modules/reflect-metadata/reflect-metadata.d.ts' />
+/// <reference path='../typings/node/node.d.ts' />
+/// <reference path='../node_modules/reflect-metadata/reflect-metadata.d.ts' />
 
 'use strict';
 
@@ -8,6 +8,8 @@ require('reflect-metadata');
 export type JsonObject = {};
 export type JsonBuilder = {};
 export type Action1<T> = (v:T) => Promise<void>;
+export type Action = () => Promise<void>;
+export type NumberAction = Action1<number>;
 
 export namespace App {
     export var ERROR = 3;

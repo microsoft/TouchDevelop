@@ -180,6 +180,8 @@ module TDev.AST {
             "Boolean": "boolean",
             "Nothing": "void",
             "DateTime": "Date",
+            "Json Object": "JsonObject",
+            "Json Builder": "JsonBuilder",
         }
 
         private type(t:Kind)
@@ -205,7 +207,7 @@ module TDev.AST {
             } else if (Converter.kindMap.hasOwnProperty(t.toString())) {
                 this.tw.kw(Converter.kindMap[t.toString()])
             } else {
-                this.tw.id(this.localCtx.unUnicode(t.getRoot().toString()))
+                this.tw.write("td.").id(this.localCtx.unUnicode(t.getRoot().toString()))
                 var len = t.getParameterCount()
                 if (len > 0) {
                     this.tw.write("<")
@@ -301,7 +303,6 @@ module TDev.AST {
               "Contract->assert": "assert",
               "Bits->string to buffer": "new Buffer",
               "Time->sleep": "td.sleepAsync",
-              "DateTime->milliseconds since epoch": "Date.now",
               "String->to number": "parseFloat",
               "Json Builder->copy from": "td.jsonCopyFrom",
               "String->contains": "td.stringContains",
@@ -323,6 +324,7 @@ module TDev.AST {
           "Json Object->contains key": "hasOwnProperty",
           "Collection->add": "push",
           "Collection->where": "filter",
+          "DateTime->milliseconds since epoch": "getTime",
         }
 
         visitCallInner(e:Call)
@@ -477,6 +479,11 @@ module TDev.AST {
                 this.tw.write(", null,").sep()
                 this.dispatch(e.args[1])
                 this.tw.write(")")
+            } else if (/^Collection->remove at$/.test(pn)) {
+                this.tightExpr(e.args[0])
+                this.tw.write(".splice(")
+                this.dispatch(e.args[1])
+                this.tw.write(", 1)")
             } else if (/^Json (Builder|Object)->(to json|clone|to json builder)$/.test(pn)) {
                 if (this.propName(e.args[0]) == "Web->json") {
                     this.dispatch(e.args[0])
@@ -488,6 +495,7 @@ module TDev.AST {
                 this.tw.op0("{}")
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")
+                       || /->create collection$/.test(pn)
                        || /^Collections->.* collection$/.test(pn)) {
                 this.tw.op0("(<")
                 this.type(e.getKind())
@@ -507,7 +515,7 @@ module TDev.AST {
                 this.dispatch(e.args[0])
                 this.tw.op0(",").sep()
                 this.toRegex(e.args[1])
-                this.tw.op0(",").sep()
+                this.tw.write("g,").sep()
                 this.dispatch(e.args[2])
                 this.tw.op0(")")
             } else if (pn == "String->match") {
@@ -847,7 +855,8 @@ module TDev.AST {
                 this.tw.globalId(a)
                 this.pcommaSep(a.getInParameters().slice(1), printP)
             } else {
-                this.tw.kw("export")
+                if (!a.isPrivate)
+                    this.tw.kw("export")
                 if (!a.isAtomic)
                     this.tw.kw("async")
                 this.tw.kw("function")
