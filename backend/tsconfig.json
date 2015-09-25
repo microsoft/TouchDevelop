@@ -22,6 +22,7 @@
         "src/kraken.ts",
         "src/microsoft-translator.ts",
         "src/acs.ts",
+        "src/azure-search.ts",
         "src/parallel.ts"
     ],
     "exclude": [

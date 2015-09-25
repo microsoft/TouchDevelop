@@ -1,4 +1,4 @@
-N=acs
+N=azure-search
 
 all:
 	node node_modules/typescript/bin/tsc

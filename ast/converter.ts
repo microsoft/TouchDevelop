@@ -983,7 +983,14 @@ module TDev.AST {
                 this.tw.kw("return")
                 this.localName(a.getOutParameters()[0].local).op0(";").nl()
             } else if (a.getOutParameters().length > 1) {
-                this.tw.kw("return ").op0("[");
+                this.tw.kw("return ");
+                if (!a.isAtomic) {
+                    // TS 1.6 requires this cast
+                    this.tw.op0("<[")
+                    this.commaSep(a.getOutParameters(), p => this.type(p.local.getKind()))
+                    this.tw.op0("]>")
+                }
+                this.tw.op0("[");
                 this.commaSep(a.getOutParameters(), p => this.localName(p.local))
                 this.tw.op0("]").nl()
             }
