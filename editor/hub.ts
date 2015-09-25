@@ -872,9 +872,11 @@ module TDev.Browser {
 
         function mbedintUpdate()
         {
-            ModalDialog.editText(lf("Target"), "gcc", perms =>
-                Cloud.postPrivateApiAsync("admin/mbedint/" + perms, { 
+            ModalDialog.editText(lf("Target:tag"), "gcc:v2", perms => {
+                var args = perms.split(/:/)
+                return Cloud.postPrivateApiAsync("admin/mbedint/" + args[0], { 
                      op: "update", 
+                     args: ["git checkout " + args[1] + ";"]
                 })
                 .then(r => {
                     var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
@@ -882,18 +884,18 @@ module TDev.Browser {
                         HTML.mkButton("full", () => {
                             ModalDialog.showText(full)
                         }),
-                        HTML.mkAsyncButton("update " + perms, () =>
-                            Cloud.getPrivateApiAsync("config/compile")
-                            .then(res => {
-                                res[perms].repourl = r.imageid
-                                return Cloud.postPrivateApiAsync("config/compile", res)
-                            })
+                        HTML.mkAsyncButton("save tag " + args[1], () => {
+                            var opts = {}
+                            opts[args[0] + "-" + args[1]] = r.imageid
+                            opts[args[1]] = r.imageid
+                            return Cloud.postPrivateApiAsync("config/compiletag", opts)
                             .then(r => r, e => Cloud.handlePostingError(e, ""))
-                        ),
+                        }),
                         HTML.mkButton("cancel", () => {
                             m.dismiss()
                     })))
-                }, e => Cloud.handlePostingError(e, "")))
+                }, e => Cloud.handlePostingError(e, ""))
+            })
         }
 
         function permissionReview()
