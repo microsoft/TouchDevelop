@@ -18,6 +18,7 @@
         "src/redis.ts",
         "src/cached-store.ts",
         "src/indexed-store.ts",
+        "src/mbedworkshop-compiler.ts",
         "src/parallel.ts"
     ],
     "exclude": [

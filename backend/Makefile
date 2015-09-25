@@ -1,4 +1,4 @@
-N=indexed-store
+N=mbedworkshop-compiler
 
 all:
 	node node_modules/typescript/bin/tsc

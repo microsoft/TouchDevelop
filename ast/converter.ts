@@ -345,6 +345,7 @@ module TDev.AST {
           "Collection->add": "push",
           "Collection->where": "filter",
           "DateTime->milliseconds since epoch": "getTime",
+          "Web Request->send": "sendAsync",
           "String->to json": "",
           "Number->to json": "",
           "Task->await": "",

@@ -690,6 +690,7 @@ export function createRequest(url: string): WebRequest
 export async function downloadJsonAsync(url: string): Promise<JsonObject>
 {
     var r = createRequest(url)
+    r.setAccept('application/json');
     return (await r.sendAsync()).contentAsJson()
 }
 
