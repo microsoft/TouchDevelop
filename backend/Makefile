@@ -1,4 +1,4 @@
-N=microsoft-translator
+N=acs
 
 all:
 	node node_modules/typescript/bin/tsc

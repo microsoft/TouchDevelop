@@ -14,6 +14,7 @@ import * as assert from 'assert';
 
 export type JsonObject = {};
 export type JsonBuilder = {};
+export type StringMap = {};
 export type Action1<T> = (v:T) => Promise<void>;
 export type Action = () => Promise<void>;
 export type NumberAction = Action1<number>;
