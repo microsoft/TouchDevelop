@@ -326,6 +326,9 @@ module TDev.AST {
               "Json Builder->to number": "td.toNumber",
               "Json Object->to number": "td.toNumber",
               "App->create logger": "td.createLogger",
+              "Web->create request": "td.createRequest",
+              "Web->download json": "td.downloadJsonAsync",
+              "Web->download": "td.downloadTextAsync",
         }
 
         static methodRepl:StringMap<string> = {

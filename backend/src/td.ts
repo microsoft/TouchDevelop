@@ -10,6 +10,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as url from 'url';
 import * as zlib from 'zlib';
+import * as assert from 'assert';
 
 export type JsonObject = {};
 export type JsonBuilder = {};
@@ -200,6 +201,9 @@ export function mkAgent(proto:string):http.Agent
     else
         return new Agent({ maxSockets: maxSock, keepAlive: true })
 }
+
+var httpAgent = http.globalAgent = mkAgent("http:")
+var httpsAgent = https.globalAgent = mkAgent("https:")
 
 export var TD:any = {};
 
@@ -451,4 +455,246 @@ export function httpRequestStreamAsync(url_:string, method:string = "GET", body:
         else
             req.end()
     })
+}
+    
+export class WebRequest
+{
+    private _method: string;
+    private _url: string;
+    private _headers: JsonObject = {};
+    private _content: any;
+    private _credentialsName: string;
+    private _credentialsPassword: string;
+
+    static mk(url: string): WebRequest {
+        var wr = new WebRequest();
+        wr._url = url;
+        wr._method = "GET";
+        return wr;
+    }
+
+    //? Gets whether it was a 'get' or a 'post'.
+    public method(): string { return this._method; }
+
+    //? Sets the method. Default value is 'get'.
+    //@ [method].deflStrings("post", "put", "get", "delete")
+    public setMethod(method: string): void { this._method = method; }
+
+    //? Gets the url of the request
+    public url(): string { return this._url; }
+
+    //? Sets the url of the request. Must be a valid internet address.
+    public setUrl(url: string): void { this._url = url; }
+
+    //? Gets the value of a given header
+    //@ readsMutable
+    public header(name: string): string { return this._headers[name.toLowerCase()]; }
+
+    //? Sets an HTML header value. Empty string clears the value
+    public setHeader(name: string, value: string): void {
+        if (!value)
+            delete this._headers[name]
+        else
+            this._headers[name] = value
+    }
+
+    public toString(): string {
+        return this.method() + " " + this.url();
+    }
+
+    //? Sets the Accept header type ('text/xml' for xml, 'application/json' for json).
+    //@ [type].deflStrings('application/json', 'text/xml')
+    public setAccept(type: string) {
+        this.setHeader("Accept", type);
+    }
+
+    public setContentType(type: string) {
+        this.setHeader("Content-Type", type);
+    }
+
+    public sendAsync(): Promise<WebResponse>
+    {
+        var r = this;
+        var parsed:any = url.parse(r.url())
+        parsed.method = r.method().toUpperCase()
+        parsed.headers = clone(this._headers)
+
+        if (this._credentialsName || this._credentialsPassword) {
+            parsed.auth = this._credentialsName + ":" + this._credentialsPassword;
+        }
+
+        var data;
+
+        if (typeof this._content == "string") {
+            data = new Buffer(this._content, "utf8")
+        } else {
+            assert(Buffer.isBuffer(this._content))
+            data = this._content
+        }
+
+        if (data.length > 0)
+            parsed.headers['content-length'] = data.length
+
+        if (!parsed.headers['connection'])
+            parsed.headers['connection'] = 'keep-alive';
+
+        var req;
+        if (parsed.protocol == "http:") {
+            parsed.agent = httpAgent
+            req = http.request(parsed)
+        } else if (parsed.protocol == "https:") {
+            parsed.agent = httpsAgent
+            req = https.request(parsed)
+        } else {
+            throw new Error("unknown request protocol " + parsed.protocol + " in " + r.url())
+        }
+
+        return new Promise<WebResponse>((success, error) => {
+            req.on("error", err => {
+                //console.log(err)
+                log("Web request error: " + err + " for " + r.url())
+                err.socketUrl = r.url()
+                error(err)
+            })
+
+            req.on("response", (res) => {
+                var stream = res
+
+                var encoding = (res.headers['content-encoding'] || "").toLowerCase()
+                if (encoding == "gzip")
+                    stream = stream.pipe(zlib.createGunzip())
+                else if (encoding == "deflate")
+                    stream = stream.pipe(zlib.createInflate())
+
+                var buffers = []
+                stream.on('data', b => {
+                    buffers.push(b)
+                })
+                stream.on('end', () => {
+                    var buf = Buffer.concat(buffers)
+                    var wresp = WebResponse.mkProxy(r, {
+                        code: res.statusCode,
+                        headers: Object.keys(res.headers).map(h => { return { name: h, value: res.headers[h] } }),
+                        binaryContent: buf
+                    })
+                    success(wresp)
+                })
+            })
+
+            if (data.length == 0)
+                req.end()
+            else
+                req.end(data)
+        })
+    }
+
+
+    //? Sets the content of a 'post' request
+    public setContent(content: string): void {
+        this._content = content;
+        this.setContentType("text/plain; charset=utf-8");
+    }
+
+    //? Sets the content of a 'post' request as the JSON tree
+    public setContentAsJson(json: JsonObject): void {
+        this.setContent(JSON.stringify(json));
+        this.setContentType("application/json; charset=utf-8");
+    }
+
+    //? Sets the content of a 'post' request as a binary buffer
+    public setContentAsBuffer(bytes: Buffer): void {
+        this._content = bytes;
+        this.setContentType("application/octet-stream");
+    }
+
+    //? Sets the name and password for basic authentication. Requires an HTTPS URL, empty string clears.
+    public setCredentials(name: string, password: string): void {
+        if (!this.url().match(/^https:\/\//i))
+            throw new Error("Web Request->set credentials requires a secure HTTP url (https)");
+        this._credentialsName = name;
+        this._credentialsPassword = password;
+    }
+
+    //? Gets the names of the headers
+    public headerNames(): string[] {
+        return Object.keys(this._headers);
+    }
+}
+
+export class WebResponse
+{
+    private _request: WebRequest;
+    private _content: string;
+    private _statusCode: number;
+    private _binaryContent: Buffer;
+
+    private _headers: JsonBuilder = {};
+
+    static mkProxy(request: WebRequest, proxyResponse: any) : WebResponse
+    {
+        var r = new WebResponse();
+        r._request = request;
+        r._statusCode = proxyResponse.code;
+        var headers = proxyResponse.headers;
+        if (headers)
+            headers.forEach(h => r._headers[h.name.toLowerCase()] = h.value);
+        r._binaryContent = proxyResponse.binaryContent
+        return r;
+    }
+
+    //? Gets the request associated to this response
+    public request(): WebRequest { return this._request; }
+
+    //? Gets the HTTP Status code of the request if any
+    public statusCode(): number { return this._statusCode; }
+
+    //? Reads the response body as a string
+    public content(): string {
+        if (this._content == null)
+            this._content = this._binaryContent.toString("utf8");
+        return this._content;
+    }
+
+    //? Reads the response body as a Buffer.
+    public contentAsBuffer(): Buffer {
+        return this._binaryContent;
+    }
+
+    //? Reads the response body as a JSON tree
+    public contentAsJson(): JsonObject
+    {
+        if (this.content())
+            try {
+                return JSON.parse(this.content())
+            } catch (e) { return null }
+
+        return null;
+    }
+
+    public toString(): string {
+        return this.statusCode() + " --> " + this.request().toString();
+    }
+
+    //? Gets the value of a given header
+    public header(name: string): string { return this._headers[name.toLowerCase()]; }
+
+    //? Gets the names of the headers
+    public headerNames(): string[] { return Object.keys(this._headers); }
+}
+
+export function createRequest(url: string): WebRequest
+{
+    return WebRequest.mk(url);
+}
+
+export async function downloadJsonAsync(url: string): Promise<JsonObject>
+{
+    var r = createRequest(url)
+    return (await r.sendAsync()).contentAsJson()
+}
+
+export async function downloadTextAsync(url: string): Promise<JsonObject>
+{
+    var r = createRequest(url)
+    return (await r.sendAsync()).content()
 }
