@@ -1,4 +1,4 @@
-N=azure-search
+N=loggly
 
 all:
 	node node_modules/typescript/bin/tsc

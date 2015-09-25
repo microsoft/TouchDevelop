@@ -20,6 +20,8 @@ export type Action = () => Promise<void>;
 export type NumberAction = Action1<number>;
 export type JsonAction = Action1<JsonObject>;
 
+export type SMap<T> = { [s:string]: T; };
+
 export namespace App {
     export var ERROR = 3;
     export var WARNING = 4;
@@ -29,8 +31,27 @@ export namespace App {
     export function logTick(category: string, id: string, meta:any) {
     }
 
+    export function logException(err: any, meta? : any): void {
+    }
+
     export function logMeasure(category:string, id: string, value: number, meta: any) {
     }
+
+    export interface AppLogTransport {
+        log? : (level : number, category : string, msg: string, meta?: any) => void;
+        logException?: (err: any, meta?: any) => void;
+        logTick?: (category: string, id: string, meta: any) => void;
+        logMeasure?: (category: string, id: string, value: number, meta: any) => void;
+
+        id?: string;
+        domain?: any;
+    }
+
+    export var transports: AppLogTransport[] = [];
+    export function addTransport(transport: AppLogTransport) {
+        //TODO
+    }
+
 }
 
 export function perfNow() {
