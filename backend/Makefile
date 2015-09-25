@@ -1,4 +1,4 @@
-N=redis
+N=cached-store
 
 all:
 	node node_modules/typescript/bin/tsc

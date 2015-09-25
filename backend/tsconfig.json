@@ -16,6 +16,7 @@
         "src/azure-table.ts",
         "src/azure-blob-storage.ts",
         "src/redis.ts",
+        "src/cached-store.ts",
         "src/parallel.ts"
     ],
     "exclude": [

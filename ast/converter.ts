@@ -313,6 +313,10 @@ module TDev.AST {
               "Web->encode uri component": "encodeURIComponent",
               "Json Object->to collection": "asArray",
               "Json Builder->to collection": "asArray",
+              "Math->min": "Math.min",
+              "Math->max": "Math.max",
+              "Math->round": "Math.round",
+              "Math->floor": "Math.floor",
               "Math->random": "td.randomInt",
               "Math->random range": "td.randomRange",
               "Math->random normalized": "td.randomNormalized",
@@ -326,6 +330,7 @@ module TDev.AST {
         static methodRepl:StringMap<string> = {
           "Buffer->concat": "concat",
           "Buffer->to string": "toString",
+          "Number->to string": "toString",
           "String->split": "split",
           "String->substring": "substr",
           "String->to upper case": "toUpperCase",
@@ -338,6 +343,7 @@ module TDev.AST {
           "DateTime->milliseconds since epoch": "getTime",
           "String->to json": "",
           "Number->to json": "",
+          "Task->await": "",
         }
 
         dumpJs(s:string)

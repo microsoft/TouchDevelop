@@ -609,8 +609,9 @@ function invalidToEmpty(etag: string) : string
     return etag2;
 }
 
-function prepOptions(options?: ICreateOptions) : ICreateOptions
+function prepOptions(options: ICreateOptions) : ICreateOptions
 {
+    if (!options) options = {}
     if (!options.timeoutIntervalInMs)
         delete options.timeoutIntervalInMs
     let opts = clone(options)
@@ -626,8 +627,9 @@ function prepOptions(options?: ICreateOptions) : ICreateOptions
     return opts;
 }
 
-function prepGetOptions(options?: IGetOptions) : IGetOptions
+function prepGetOptions(options: IGetOptions) : IGetOptions
 {
+    if (!options) options = {}
     if (!options.timeoutIntervalInMs)
         delete options.timeoutIntervalInMs
     let opts = clone(options);
