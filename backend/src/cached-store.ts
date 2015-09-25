@@ -528,17 +528,7 @@ function isBadWord(s: string) : boolean
     return bad;
 }
 
-function orEmpty(s: string) : string
-{
-    let r: string;
-    if (s == null) {
-        r = "";
-    }
-    else {
-        r = td.toString(s);
-    }
-    return r;
-}
+var orEmpty = td.orEmpty;
 
 export async function nowAsync() : Promise<number>
 {

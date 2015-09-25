@@ -313,6 +313,7 @@ module TDev.AST {
               "Web->encode uri component": "encodeURIComponent",
               "Json Object->to collection": "asArray",
               "Json Builder->to collection": "asArray",
+              "Math->clamp": "td.clamp",
               "Math->min": "Math.min",
               "Math->max": "Math.max",
               "Math->round": "Math.round",

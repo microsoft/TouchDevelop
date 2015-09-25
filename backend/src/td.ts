@@ -102,6 +102,14 @@ export function toString(v:any) : string
     return v + "";
 }
 
+export function orEmpty(s: any) : string
+{
+    if (s == null) return "";
+    return toString(s);
+}
+export function clamp(min : number, max : number, value : number) : number { return value < min ? min : value > max ? max : value; }
+
+
 export function asArray(o:JsonObject) : JsonObject[]
 {
     return <any>o;

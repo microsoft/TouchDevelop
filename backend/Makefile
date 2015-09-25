@@ -1,4 +1,4 @@
-N=cached-store
+N=indexed-store
 
 all:
 	node node_modules/typescript/bin/tsc

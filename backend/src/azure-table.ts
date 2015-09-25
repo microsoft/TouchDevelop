@@ -409,7 +409,7 @@ export class TableQuery
 export class QueryResult
     extends td.JsonRecord
 {
-    @json public items: JsonObject;
+    @json public items: JsonObject[];
     @json public continuation: string = "";
     static createFromJson(o:JsonObject) { let r = new QueryResult(); r.fromJson(o); return r; }
 }
