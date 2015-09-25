@@ -382,12 +382,13 @@ module TDev.RT {
             }    
         }
 
-        //? Displays a text bubble attached to the sprite and then fades it out        
-        public say(text: string) {
+        //? Displays a text bubble attached to the sprite and returns the bubble sprite.
+        //@ ignoreReturnValue
+        public say(text: string) : Sprite {
             this.changed();
             if (!text) {
                 this._bubble = undefined;
-                return;
+                return undefined;
             }
 
             var b = this._parent.create_text(10, 10, 16, text);
@@ -397,12 +398,13 @@ module TDev.RT {
             b.set_friction(1); // don't participate in physics
             b.set_opacity(0);
             var anim = b.create_animation();
-            anim.fade_in(0.7, "linear");
+            anim.fade_in(0.5, "linear");
             anim.sleep(text.length * 0.4);
-            anim.fade_out(0.7, "linear");
+            anim.fade_out(0.5, "linear");
             anim.delete_();
             
             this.set_bubble(b);
+            return b;
         }
 
         //? Gets the mass
