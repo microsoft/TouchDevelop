@@ -329,6 +329,7 @@ module TDev.AST {
               "Web->create request": "td.createRequest",
               "Web->download json": "td.downloadJsonAsync",
               "Web->download": "td.downloadTextAsync",
+              "Contract->requires": "assert",
         }
 
         static methodRepl:StringMap<string> = {
@@ -905,7 +906,7 @@ module TDev.AST {
             }
 
             var stmts = a.body.stmts.slice(0)
-            if (stmts[0] instanceof Comment) {
+            if (!/^example/.test(a.getName()) && stmts[0] instanceof Comment) {
                 this.tw.write("/**").nl()
                 while (stmts[0] instanceof Comment) {
                     this.tw.write(" * " + (<Comment>stmts[0]).text).nl()
