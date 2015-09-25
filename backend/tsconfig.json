@@ -19,6 +19,7 @@
         "src/cached-store.ts",
         "src/indexed-store.ts",
         "src/mbedworkshop-compiler.ts",
+        "src/kraken.ts",
         "src/parallel.ts"
     ],
     "exclude": [

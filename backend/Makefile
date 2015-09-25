@@ -1,4 +1,4 @@
-N=mbedworkshop-compiler
+N=kraken
 
 all:
 	node node_modules/typescript/bin/tsc
