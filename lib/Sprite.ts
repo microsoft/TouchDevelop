@@ -46,7 +46,8 @@ module TDev.RT {
         private _mass : number = Number.NaN;
 
         public _position : Vector2 = Vector2.mk(0,0);
-        private _color : Color = Colors.light_gray();
+        private _color: Color = Colors.light_gray();
+        private _background: Color = undefined;
         private _text : string = undefined;
         private _textBaseline : string = undefined;
         public _hidden : boolean = false;
@@ -367,6 +368,18 @@ module TDev.RT {
             }
         }
         
+        //? Gets the background color
+        //@ readsMutable
+        public background(): Color {
+            return this._background ? Colors.transparent() : this._background;
+        }
+        
+        //? Sets the background color
+        //@ writesMutable
+        public set_background(c: Color) {
+            this._background = c;
+        }
+        
         //? Gets the bubble sprite if any
         //@ writesMutable
         public bubble(): Sprite {
@@ -393,7 +406,10 @@ module TDev.RT {
 
             var b = this._parent.create_text(10, 10, 16, text);
             b.fit_text();
+            b.set_width(b.width() + 8);
+            b.set_height(b.height() + 8);
             b.set_color(Colors.black());
+            b.set_background(Colors.white());
             b.set_pos(b.width() / 2, -b.height() / 2);
             b.set_friction(1); // don't participate in physics
             b.set_opacity(0);
@@ -537,6 +553,15 @@ module TDev.RT {
                 ctx.shadowColor = this._shadowColor.toHtml();
                 ctx.shadowOffsetX = this._shadowOffsetX;
                 ctx.shadowOffsetY = this._shadowOffsetY;
+            }
+            
+            if (this._background && !this._hidden && this._opacity > 0) {
+                ctx.save();
+                ctx.translate(-scaledWidth/2, -scaledHeight/2);
+                ctx.fillStyle = this._background.toHtml();
+                ctx.globalAlpha = this._opacity;
+                ctx.fillRect(0, 0, scaledWidth, scaledHeight);
+                ctx.restore();
             }
 
             switch (this.spriteType) {
