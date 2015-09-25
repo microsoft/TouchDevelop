@@ -1,4 +1,4 @@
-N=kraken
+N=microsoft-translator
 
 all:
 	node node_modules/typescript/bin/tsc

@@ -311,6 +311,7 @@ module TDev.AST {
               "String->contains": "td.stringContains",
               "Collection->to json": "td.arrayToJson",
               "Web->encode uri component": "encodeURIComponent",
+              "Web->encode url": "encodeURIComponent",
               "Json Object->to collection": "asArray",
               "Json Builder->to collection": "asArray",
               "Math->clamp": "td.clamp",

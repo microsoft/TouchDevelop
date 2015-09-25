@@ -20,6 +20,7 @@
         "src/indexed-store.ts",
         "src/mbedworkshop-compiler.ts",
         "src/kraken.ts",
+        "src/microsoft-translator.ts",
         "src/parallel.ts"
     ],
     "exclude": [
