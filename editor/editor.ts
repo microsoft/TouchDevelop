@@ -5142,6 +5142,15 @@ module TDev
             if (!this.visible) return false;
             if (this.host.wallVisible) return false;
 
+            if (External.TheChannel && e.keyName != "Esc") {
+                // External editor doing its stuff. Bail.
+                // XXX: this should be fixed if one day the simulator for
+                // external editors requires keyboard input.
+                // XXX: we can't re-focus the iframe and dispatch the event
+                // because of cross-origin restrictions.
+                return;
+            }
+
             if (e.srcElement == this.searchBox || (<any>e).originalTarget == this.searchBox) {
                 if (this.currentSideTab != this.searchTab) {
                     this.focusSideTab(this.searchTab);
