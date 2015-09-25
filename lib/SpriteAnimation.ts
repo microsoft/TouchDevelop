@@ -6,7 +6,8 @@ module TDev.RT {
         duration : number;
         repeat : number;
         yoyo:boolean;
-        reversed : boolean;
+        reversed: boolean;
+        init?: (sprite: Sprite) => void;
     }
 
     //? A animation to animate sprite properties.
@@ -100,12 +101,18 @@ module TDev.RT {
             var oldy = this._sprite.y();
             var dx = x - oldx;
             var dy = y - oldy;
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt,sprite,k) {
                     sprite.set_pos(oldx + k * dx, oldy + k * dy);
                 },
                 SpriteAnimation.resolveEasing(easing,shape),
                 duration);
+            tw.init = function(sp) { 
+                oldx = this._sprite.x();
+                oldy = this._sprite.y();
+                dx = x - oldx;
+                dy = y - oldy;                
+            }
         }
 
         //? Changes the text of the sprite.
@@ -149,13 +156,14 @@ module TDev.RT {
         //@ [shape].deflStrings('inout', 'out', 'in')
         public color(duration : number, easing : string, shape : string, c : Color) {
             var old = this._sprite.color();
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt,sprite,k) {
                     var onek = 1 - k;
                     sprite.set_color(Color.fromArgb(old.a * k + c.a * onek, old.r * k + c.r * onek, old.g * k + c.g * onek, old.b * k + c.b * onek));
                 },
                 SpriteAnimation.resolveEasing(easing,shape),
                 duration);
+            tw.init = function(sprite) { old = sprite.color(); } 
         }
 
         //? Creating a beating animation
@@ -299,13 +307,14 @@ module TDev.RT {
         public fade_in(duration : number, easing : string)
         {
             var old = this._sprite.opacity();
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt, sprite, value) {
                     sprite.set_opacity(old * (1-value) + value);
                 },
                 SpriteAnimation.resolveEasing(easing, 'in'),
                 duration
-            );
+                );
+            tw.init = function(sprite) { old = sprite.opacity() };
         }
 
         //? Fades out to transparent
@@ -314,13 +323,14 @@ module TDev.RT {
         public fade_out(duration : number, easing : string)
         {
             var old = this._sprite.opacity();
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt, sprite, value) {
                     sprite.set_opacity(old*(1-value));
                 },
                 SpriteAnimation.resolveEasing(easing, 'out'),
                 duration
             );
+            tw.init = function(sprite) { old = sprite.opacity() };
         }
 
          //? Changes the opacity of the sprite
@@ -328,15 +338,16 @@ module TDev.RT {
          //@ [easing].deflStrings('cubic', 'linear', 'quadratic', 'expo', 'sine')
          //@ [shape].deflStrings('inout', 'out', 'in')
          public fade(duration: number, easing: string, shape: string, opacity : number) {
-             var old = this._sprite.opacity();
+            var old = this._sprite.opacity();
              opacity = Math_.normalize(opacity);
-             this.pushTween(
+             var tw = this.pushTween(
                  function (rt, sprite, value) {
                      sprite.set_opacity(old * (1 - value) + opacity * value);
                  },
                  SpriteAnimation.resolveEasing(easing, shape),
                  duration
                  );
+            tw.init = function(sprite) { old = sprite.opacity() };
          }
 
         //? Scales up and fades out an object
@@ -346,14 +357,18 @@ module TDev.RT {
         {
             var oldop = this._sprite.opacity();
             var oldscale = this._sprite.scale();
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt, sprite, value) {
                     sprite.set_opacity(oldop*(1-value));
                     sprite.set_scale(oldscale * (1-value) + value * scale);
                 },
                 SpriteAnimation.resolveEasing(easing, 'out'),
                 duration
-            );
+                );
+            tw.init = function(sprite) {
+                oldop = this._sprite.opacity();
+                oldscale = this._sprite.scale();
+            };            
         }
 
         //? Hides the sprite
@@ -434,11 +449,12 @@ module TDev.RT {
         //@ [shape].deflStrings('in', 'out', 'inout')
         public turn_to(duration : number, easing : string, shape : string, angle : number) {
             var old = this._sprite.angle();
-            this.pushTween(
+            var tw = this.pushTween(
                 function(rt, sprite, value) { sprite.set_angle(old * value + (1-value) * angle); },
                 SpriteAnimation.resolveEasing(easing,shape),
                 duration
-            );
+                );
+            tw.init = function(sp) { old = sp.angle() };    
         }
 
         //? Calls a user handler during the animation. ``handler`` receives a number from 0 to 1 during the tweeining.
@@ -456,16 +472,24 @@ module TDev.RT {
                 duration
             );
         }
+        
+        private initTween(tween: SpriteAnimationData) {
+            if (tween && tween.init) {
+                tween.init(this._sprite);
+                delete tween.init;
+            }
+        }
 
         // returns false if finished
         public evolve(rt : Runtime, dT : number) : boolean {
             if (!this.isActive) return false;
             if (this._t < 0 && this._onStart && this._onStart.handlers) rt.queueLocalEvent(this._onStart, [], false);
             var tween = this._tweens[this._tweenIndex];
-            this._t = this._t < 0 ? 0 :  this._t + dT * this._timeScale;
+            this._t = this._t < 0 ? 0 : this._t + dT * this._timeScale;
             // advance to the next tween if needed
             while(tween && this._t > tween.duration) {
                 // make sure to call tween.apply at least once
+                this.initTween(tween);
                 tween.apply(rt, this._sprite, tween.reversed ? 0 : 1);
                 // increment timer...
                 this._t = tween.duration < 0 ? 0 : this._t - tween.duration;
@@ -480,6 +504,7 @@ module TDev.RT {
             if (tween) {
                 // interpolated current tween.
                 var x =  tween.easing(this._t / tween.duration);
+                this.initTween(tween);
                 tween.apply(rt,this._sprite, tween.reversed ? 1 - x : x);
                 return true;
             } else {
