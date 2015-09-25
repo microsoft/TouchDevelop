@@ -122,6 +122,9 @@ module TDev
             } else {
                 this.editor.dismissSidePane();
                 this.editor.renderDecl(decl);
+                if (decl instanceof AST.App) {
+                    this.editor.editNode(decl.headerStmt);
+                }
             }
         }
 
