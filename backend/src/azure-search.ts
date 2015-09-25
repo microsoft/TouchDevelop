@@ -5,11 +5,9 @@
 import * as td from 'td';
 import * as assert from 'assert';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
@@ -18,17 +16,16 @@ var apiKey: string = "";
 var apiVersion: string = "";
 var serviceUrl: string = "";
 var logger: td.AppLogger;
-var globalOptions: Options;
+var globalOptions: IOptions;
 
 
 export class BatchUpdate
-    extends td.JsonRecord
 {
-    @json public indexName: string = "";
-    @json public keyFieldName: string = "";
-    @json public root: JsonBuilder;
-    @json public value: JsonBuilder[];
-    static createFromJson(o:JsonObject) { let r = new BatchUpdate(); r.fromJson(o); return r; }
+    public indexName: string = "";
+    public keyFieldName: string = "";
+    public root: JsonBuilder;
+    public value: JsonBuilder[];
+
     /**
      * An upload command is similar to an "upsert" where the document will be inserted if it is new and updated/replaced if it exists. Note that all fields are replaced in the update case.
      */
@@ -141,21 +138,13 @@ export class BatchUpdate
 
 }
 
-export interface IBatchUpdate {
-    indexName?: string;
-    keyFieldName?: string;
-    root?: JsonBuilder;
-    value?: JsonBuilder;
-}
-
 export class IndexDefinition
-    extends td.JsonRecord
 {
-    @json public value: JsonBuilder;
-    @json public indexName: string = "";
-    @json public keyFieldName: string = "";
-    @json public _key: FieldDefinition;
-    static createFromJson(o:JsonObject) { let r = new IndexDefinition(); r.fromJson(o); return r; }
+    public value: JsonBuilder;
+    public indexName: string = "";
+    public keyFieldName: string = "";
+    public _key: FieldDefinition;
+
     /**
      * Creates a new index. If it already exists, it is updated to the new definition.
      */
@@ -274,18 +263,9 @@ export class IndexDefinition
 
 }
 
-export interface IIndexDefinition {
-    value?: JsonBuilder;
-    indexName?: string;
-    keyFieldName?: string;
-    _key?: FieldDefinition;
-}
-
 export class FieldDefinition
-    extends td.JsonRecord
 {
-    @json public value: JsonBuilder;
-    static createFromJson(o:JsonObject) { let r = new FieldDefinition(); r.fromJson(o); return r; }
+    public value: JsonBuilder;
     /**
      * Marks the field as full-text search-able. This means it will undergo analysis such as word-breaking during indexing. If you set a searchable field to a value like ``"sunny day"``, internally it will be split into the individual tokens ``"sunny"`` and ``"day"``. This enables full-text searches for these terms. Fields of type ``Edm.String`` or ``Collection(Edm.String)`` are searchable by default. Fields of other types cannot be searchable.
      * {box:hint}
@@ -350,15 +330,9 @@ export class FieldDefinition
 
 }
 
-export interface IFieldDefinition {
-    value?: JsonBuilder;
-}
-
 export class ScoringProfile
-    extends td.JsonRecord
 {
-    @json public value: JsonBuilder;
-    static createFromJson(o:JsonObject) { let r = new ScoringProfile(); r.fromJson(o); return r; }
+    public value: JsonBuilder;
     /**
      * Sets the scoring weight of a **searchable** field. The weight is a relative positive # of instance.
      */
@@ -419,16 +393,11 @@ export class ScoringProfile
 
 }
 
-export interface IScoringProfile {
-    value?: JsonBuilder;
-}
-
 export class Index
-    extends td.JsonRecord
 {
-    @json public name: string = "";
-    @json public keyFieldName: string = "";
-    static createFromJson(o:JsonObject) { let r = new Index(); r.fromJson(o); return r; }
+    public name: string = "";
+    public keyFieldName: string = "";
+
     /**
      * Creates an object that allows to add or update multiple documents at once. A single batch may not have more than 1000 actions.
      */
@@ -473,7 +442,7 @@ export class Index
             documentCount = -1;
             storageSize = -1;
         }
-        log(this + "stats: " + documentCount + " docs, " + TD.math.roundWithPrecision(storageSize / 1000000, 3) + " Mb");
+        log(this + "stats: " + documentCount + " docs, " + (storageSize / 1000000).toFixed(3) + " Mb");
         return <[number, number]>[documentCount, storageSize]
     }
 
@@ -497,21 +466,6 @@ export class Index
         return name;
     }
 
-}
-
-export interface IIndex {
-    name?: string;
-    keyFieldName?: string;
-}
-
-export class Options
-    extends td.JsonRecord
-{
-    @json public serviceName: string = "";
-    @json public apiKey: string = "";
-    @json public version: string = "";
-    @json public allow_409: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new Options(); r.fromJson(o); return r; }
 }
 
 export interface IOptions {
@@ -558,18 +512,17 @@ async function exampleAsync() : Promise<void>
 /**
  * Initializes the service with a ``service name`` and an ``api key``. If empty, reads the ``AZURE_SEARCH_SERVICE_NAME`` and the ``AZURE_SEARCH_API_KEY`` environment variables to initialize the search service.
  */
-export function init(options_0?: IOptions) : void
+export function init(options_: IOptions = {}) : void
 {
-    let options_ = new Options(); options_.load(options_0);
     logger = td.createLogger("azuresearch");
     log("init");
-    if (options_.serviceName == "") {
+    if (!options_.serviceName) {
         options_.serviceName = td.serverSetting("AZURE_SEARCH_SERVICE_NAME", false);
     }
-    if (options_.apiKey == "") {
+    if (!options_.apiKey) {
         options_.apiKey = td.serverSetting("AZURE_SEARCH_API_KEY", false);
     }
-    if (options_.version == "") {
+    if (!options_.version) {
         options_.version = "2014-07-31-Preview";
     }
     globalOptions = options_;
