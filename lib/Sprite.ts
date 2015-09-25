@@ -24,7 +24,8 @@ module TDev.RT {
         extends RTValue
     {
         public _parent : Board = undefined;
-        public _sheet : SpriteSheet = undefined;
+        public _sheet: SpriteSheet = undefined;
+        public _bubble: Sprite = undefined;
         private _friction : number = Number.NaN;
         private _angular_speed : number = 0;
         public _height : number = undefined;
@@ -35,7 +36,7 @@ module TDev.RT {
         public _shadowBlur: number;
         public _shadowColor: Color;
         public _shadowOffsetX: number;
-        public _shadowOffsetY: number;
+        public _shadowOffsetY: number;        
         constructor() {
             super()
         }
@@ -365,6 +366,44 @@ module TDev.RT {
                 this._text = text; this.contentChanged();
             }
         }
+        
+        //? Gets the bubble sprite if any
+        //@ writesMutable
+        public bubble(): Sprite {
+            return this._bubble;
+        }
+        
+        //? Sets the bubble sprite
+        //@ readsMutable
+        public set_bubble(sprite: Sprite) {
+            if (this._bubble != sprite) {
+                this._bubble = sprite;
+                this.changed();
+            }    
+        }
+
+        //? Displays a text bubble attached to the sprite and then fades it out        
+        public say(text: string) {
+            this.changed();
+            if (!text) {
+                this._bubble = undefined;
+                return;
+            }
+
+            var b = this._parent.create_text(10, 10, 16, text);
+            b.fit_text();
+            b.set_color(Colors.black());
+            b.set_pos(b.width() / 2, -b.height() / 2);
+            b.set_friction(1); // don't participate in physics
+            b.set_opacity(0);
+            var anim = b.create_animation();
+            anim.fade_in(0.7, "linear");
+            anim.sleep(text.length * 0.4);
+            anim.fade_out(0.7, "linear");
+            anim.delete_();
+            
+            this.set_bubble(b);
+        }
 
         //? Gets the mass
         //@ readsMutable
@@ -622,6 +661,7 @@ module TDev.RT {
                 }
                 break;
             }
+                        
             if (debug) {
                 ctx.restore();
                 ctx.save();
@@ -664,6 +704,15 @@ module TDev.RT {
                 ctx.stroke();
             }
             ctx.restore();
+            
+            if (this._bubble && this._bubble.is_deleted())
+                this._bubble = null;
+            if (this._bubble && this._bubble.is_visible() && this._bubble.opacity() > 0) {
+                ctx.save();
+                ctx.translate(this.x() + this.width() / 2, this.y() - this.height() / 2);
+                this._bubble.redraw(ctx, debug);
+                ctx.restore();
+            }
         }
 
 
