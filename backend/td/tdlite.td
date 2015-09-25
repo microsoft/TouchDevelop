@@ -75,8 +75,6 @@ action \_init() {
   #WjpK0dL5A4ivyDKb if code→has_setting("KRAKEN_API_SECRET") then {
     #MiH4Eru1Z5o9FXe8 @\u267b→kraken→init("", "", "won\'t give you", "my azure account", "nope");
   }
-  #SEX8MtjmBeaXYXJS @\u267b→mbed_compiler→init;
-  #WaOGVI5R2deCoBtD @\u267b→mbed_compiler→set_verbosity("info");
   #dqM2cA45IDmbwxnn @\u267b→mbedworkshop_compiler→init;
   #UgoElPKx2oz2PUP4 @\u267b→mbedworkshop_compiler→set_verbosity("debug");
   #FEWRZqEOLH8RGsr3 skip;
@@ -92,7 +90,7 @@ action \_init() {
   #l8owNgPQ6VI44KRf @\u267b→touchdevelop_cloud→set_options;
   #AfeKdia1SLY4aNQs where service_root := app→server_setting("SELF", false);
   #aUsBzLJcn5Xf845A where access_token := app→server_setting("TDC_ACCESS_TOKEN", false)→replace_regex(".*=", "");
-  #xqh8TI9SyZTDSiqo @\u267b→tdlite\u002esearch→init;
+  #xqh8TI9SyZTDSiqo @\u267b→tdlite_search→init;
   #N2X7gp2DQRUJX0jg if code→has_setting("MICROSOFT_TRANSLATOR_CLIENT_SECRET") then {
     #DKHWpMfEvtHVq3at @\u267b→microsoft_translator→init("", "");
   }
@@ -242,7 +240,7 @@ action \_init() {
   }
 }
 #B6MMXIDaeSKH37qL meta import azure_table {
-  pub "wvife"
+  pub "ywyie"
   usage {
     #Gg8Zzqp0ug2p1UoC
     table query_result {
@@ -270,7 +268,7 @@ action \_init() {
     type @table
     type table_query
 
-    action `async` create_client(options\u003f: ♻ azure_table → Init_Options) returns(client: ♻ azure_table → client)
+    action `sync` create_client(options\u003f: ♻ azure_table → Init_Options) returns(client: ♻ azure_table → client)
     action `async` create_table_if_not_exists(client: ♻ azure_table → client, name: String) returns(@table: ♻ azure_table → @table)
     action `async` insert_entity(@table: ♻ azure_table → @table, entity: Json_Object, when_present: String)
     action `async` update_entity(@table: ♻ azure_table → @table, entity: Json_Object, mode: String)
@@ -293,7 +291,7 @@ action \_init() {
     action `sync` with_etags(query: ♻ azure_table → table_query) returns(res_query: ♻ azure_table → table_query)
     action `async` fetch_page(query: ♻ azure_table → table_query) returns(entities: ♻ azure_table → query_result)
     action `async` try_insert_entity(@table: ♻ azure_table → @table, entity: Json_Object) returns(ok: Boolean)
-    action `async` assume_tables_exists()
+    action `sync` assume_tables_exists()
     action `sync` create_reverse_log_id() returns(id: String)
     action `async` try_delete_entity(@table: ♻ azure_table → @table, entity: Json_Object) returns(ok: Boolean)
     action `async` try_insert_entity_ext(@table: ♻ azure_table → @table, entity: Json_Object, when_present: String) returns(ok: Boolean)
@@ -304,7 +302,7 @@ var install_slots_table : ♻ azure_table → @table {
   transient = true;
 }
 #dk9yaRn3HwGEXct9 meta import azure_blob_storage {
-  pub "oppr"
+  guid "b2e64606-ce9b-4667-e4d5-a0d2e3a4f23d"
   usage {
     #eQ9ksqF8mc5ykZ0k
     table Create_Options {
@@ -394,7 +392,7 @@ action fetch_query(#SDvT4lwMTQGeDLVs query: ♻ azure_table → table_query, #jB
   meta private;
 }
 #xU4JDtiYvWJMNZME meta import parallel {
-  guid "4a539b22-f070-4001-7650-e0770a6adbf0"
+  pub "fncvb"
   usage {
     type queue
 
@@ -2510,7 +2508,7 @@ action add_thumb_container(#bsBknTl4UVZm4q8A size: Number, #bfzBazOWPCHcs9Fi nam
   meta private;
 }
 #xbfCA39eSwczuvRI meta import restify {
-  pub "sfzpe"
+  guid "d3f590eb-fe8e-4c2d-e893-87a4b46e5830"
   usage {
 
     action `async` `type` Request_Handler(req: ♻ restify → Request, res: ♻ restify → Response)
@@ -5816,13 +5814,13 @@ action serve_pointer(#CPOvj7oIo4QZiwjr req: ♻ restify → Request, #Sk1MR0q9JN
           #OmhWvSJhOYiL4hbe $templ_text := $text;
         }
       }
-      #CNgFSSXxCt8r6Z6Y $v→set_string("text", @\u267b→tdlite\u002edocs→format($templ_text, $pubdata));
+      #CNgFSSXxCt8r6Z6Y $v→set_string("text", @\u267b→tdlite_docs→format($templ_text, $pubdata));
     }
   }
   meta private;
 }
 #hGqoW4XmcDTnba0n meta import server_auth {
-  pub "wqtee"
+  guid "7aebe9fd-4bd2-4d43-b27e-1ef3a2496fb8"
   usage {
 
     action `async` `type` make_url_callback(req: ♻ restify → Request, p: ♻ server_auth → oauth_request) returns(url: String)
@@ -5922,20 +5920,20 @@ action serve_pointer(#CPOvj7oIo4QZiwjr req: ♻ restify → Request, #Sk1MR0q9JN
       }
     }
 
-    action `async` init(options\u003f: ♻ server_auth → Init_Options)
+    action `sync` init(options\u003f: ♻ server_auth → Init_Options)
     action `sync` to_query_string(params: Json_Object) returns(query: String)
-    action `async` add_azure_ad_client_only(options\u003f: ♻ server_auth → Provider_Options)
-    action `async` add_live_id(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` add_azure_ad_client_only(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` add_live_id(options\u003f: ♻ server_auth → Provider_Options)
     action `sync` decode_token(token: String) returns(tok: Json_Object)
-    action `async` add_facebook(options\u003f: ♻ server_auth → Provider_Options)
-    action `async` add_google(options\u003f: ♻ server_auth → Provider_Options)
-    action `async` add_edmodo(options\u003f: ♻ server_auth → Provider_Options)
-    action `async` add_azure_ad(options\u003f: ♻ server_auth → Provider_Options)
-    action `async` validate_oauth_parameters(req: ♻ restify → Request, res: ♻ restify → Response)
+    action `sync` add_facebook(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` add_google(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` add_edmodo(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` add_azure_ad(options\u003f: ♻ server_auth → Provider_Options)
+    action `sync` validate_oauth_parameters(req: ♻ restify → Request, res: ♻ restify → Response)
     action `sync` options() returns(auth_options: ♻ server_auth → Init_Options)
     action `async` user_info_by_state(state: String) returns(info: ♻ server_auth → User_Info)
-    action `async` setup_restify_server()
-    action `async` provider_links(query: Json_Object) returns(links2: Json_Builder)
+    action `sync` setup_restify_server()
+    action `sync` provider_links(query: Json_Object) returns(links2: Json_Builder)
   }
   #WvxJ23dNjLwKrJW5 resolve restify = ♻ restify with {
   }
@@ -5943,7 +5941,7 @@ action serve_pointer(#CPOvj7oIo4QZiwjr req: ♻ restify → Request, #Sk1MR0q9JN
   }
 }
 #xMkR7ZFaVazTySF6 meta import node_jwt_simple {
-  pub "kujk"
+  guid "4d60d629-04a8-4f8e-f17b-5766ab38c0a9"
   usage {
 
     action `sync` encode(payload: Json_Object, secret: String, algorithm: String) returns(jwt: String)
@@ -6159,7 +6157,7 @@ table login_session {
   }
 }
 #xtM2Mqa3QQb0jn44 meta import word_password {
-  guid "20027641-9bd2-438c-695d-63e7e80a2e5b"
+  pub "adnog"
   usage {
 
     action `async` example()
@@ -6881,78 +6879,6 @@ action normalize_permissions(#IuFmxZLK6AFvIxLv perm: String) returns(#xcqosTe92l
   meta private;
   meta sync;
 }
-#k9IdOMeyB8Ixecfu meta import mbed_compiler {
-  pub "ukmdc"
-  usage {
-    #BVGhpbmca
-    table Options {
-      type = "Object";
-      exported = true;
-      persistent = false;
-      fields {
-        // Use name associated to the account
-        #CSd1SJidULe4imQq user : String
-        // Password associated to the account
-        #KexhiZxwlTQViwU6 password : String
-        // Service end point
-        #BXsSiATo8zQvXQqK api : String
-      }
-    }
-    #ds5iqVcSJP5lnc6z
-    table Compilation_Request {
-      type = "Object";
-      exported = true;
-      persistent = false;
-      fields {
-        #vsyQAt0B3YXPSrxp clean : Boolean
-        #Xe661SqIEx2Pzq28 repo : String
-        #HSH1TrC6niIJ40OP platform : String
-        #XZU5rQ0y2hqCumLs extra_symbols : String_Map
-        #xqy5qMxEx7Hwffjr replace_files : String_Map
-        #qK9RGw0OE5PoyAPz task_id : String
-        #x7Fa4OAxJCsAUyyl task_payload : Json_Object
-        #tHNF6ph6jP4Jbt5B messages : Collection[Json_Object]
-      }
-    }
-    #xxf5ydBoZL54ErUR
-    table Compilation_Result {
-      type = "Object";
-      exported = true;
-      persistent = false;
-      fields {
-        #O06YzGQCoPao4Mox payload : Json_Object
-        #l46XBq6wXQg5aaek completed : Boolean
-        #OKsKosOpROPiX5Sc success : Boolean
-        #Dcp2JXz6eQFeVFsb messages : Collection[ ♻ mbed_compiler → Compilation_Message]
-        #AtvW5MkEH5EsLE4W program : String
-        #sovutSJGRvMrrxl4 binary : String
-        #Jzz4eUpYHD2n6t3u time_taken : Number
-      }
-    }
-    #Uxff2yczUSw9NToS
-    table Compilation_Message {
-      type = "Object";
-      exported = true;
-      persistent = false;
-      fields {
-        #PvlBren4LMgYkakb type : String
-        #FonyUqJS4lhxThvH text : String
-        #xfGFtD6UMJnrpU5V @action : String
-        #XlRUhW3OAK0nUovd file : String
-        #F2jxd8cplF79OeHS percent : Number
-      }
-    }
-
-    action `async` create_compilation(platform: String, repo: String) returns(request: ♻ mbed_compiler → Compilation_Request)
-    action `sync` init(options\u003f: ♻ mbed_compiler → Options)
-    action `async` start(request: ♻ mbed_compiler → Compilation_Request) returns(success: Boolean)
-    action `async` download(task: ♻ mbed_compiler → Compilation_Result, request2: ♻ mbed_compiler → Compilation_Request) returns(bytes: Buffer)
-    action `async` example()
-    action `async` status(compilation: ♻ mbed_compiler → Compilation_Request) returns(result: ♻ mbed_compiler → Compilation_Result)
-    action `async` cancel(compilation: ♻ mbed_compiler → Compilation_Request) returns(status_code: Number)
-    action `sync` set_verbosity(level: String)
-  }
-}
 #prkXU64oCqKu6ZxE
 action mbed_compile(#hB6uU4tIvnHumcBS req: * api_request) {
   #tw5ZRue5v6oy2JTx $compile_req := records→compile_req→create_from_json($req→body);
@@ -7007,27 +6933,53 @@ action mbed_compile(#hB6uU4tIvnHumcBS req: * api_request) {
     }
     #DxVelQyByhH1ykac code→throttle($req, "compile", 20);
     #f9gE7lpjVWz7sqMh if $req→status = 200 then {
+      #xrZYl4BEOy2sMu5Y $is_fota := false;
+      #xQg2NCvFYE06Yn8Q if $compile_req→config→ends_with("-fota") then {
+        #VN2X7BrisxbTHnPJ $is_fota := true;
+        #GSzEaRiORzX7nQ3p $compile_req→config := $compile_req→config→replace_regex("-fota$", "");
+      }
       #xbJJcOPHYNdZqueM $json := $cfg→field($compile_req→config);
       #yM6S9rV4W7bz3xbN if $json→is_invalid then {
         #IIRCL20OWluVkzjZ $req→status := @\u267b→restify→http→@404_Not_Found;
         #rGHbK4hGniZQEo5Q `return` ;
       }
       #xtdSNLqy2RH6RuWo $ccfg := records→compiler_config→create_from_json($json);
+      #xC5DLPc3KGKAyJxX if $is_fota then {
+        #cyjlg2bXynR1Wl2o $ccfg→target\_binary := code→or_empty($ccfg→target\_binary)→replace("-combined", "");
+      }
       #PjL1qhkxh8NjQIWg if code→or_empty($ccfg→repourl)→is_empty then {
         #xpooV72ZmHpsx2ns $req→status := @\u267b→restify→http→@404_Not_Found;
         #xwVtP4uSC3F7rrHx `return` ;
       }
-      #GOb2HGISnqqh51gd if code→or_empty($compile_req→repohash)→is_match_regex("^[\\w.\\-]+$") then {
-        #av9VJDClKnTfLrWx if $ccfg→repourl→is_match_regex("^[a-f0-9]+$") then {
-          #ReBgbizSyqFuce3k $ccfg→repourl := $compile_req→repohash;
-        }
-        else {
-          #zX0N8v0yMl6sRbt8 $ccfg→repourl := $ccfg→repourl→replace_regex("#.*", "#" ∥ $compile_req→repohash);
-        }
-      }
-      #rrERCnwg09VPZxJ6 data→logger→debug("compile at " ∥ $ccfg→repourl);
       #UoPzuUX6M2VctrQR $ccfg→hexfilename := $ccfg→hexfilename→replace("SCRIPT", $name);
       #b0BB6X1NGEpw0mA3 if `not` code→or_empty($ccfg→internalUrl)→is_empty then {
+        #GOb2HGISnqqh51gd if code→or_empty($compile_req→repohash)→is_match_regex("^[\\w.\\-]+$") `and` $compile_req→repohash→count < 60 then {
+          #ReBgbizSyqFuce3k $ccfg→repourl := $compile_req→repohash;
+        }
+        #NcWY06tPzSqRtQ0q if $ccfg→repourl→is_match_regex("^[a-f0-9]+$") `and` $ccfg→repourl→count = 64 then {
+          #jawYmWtP0O4iKuhK // OK, looks like image ID
+        }
+        else {
+          #xjqYgqKq443BuDZO $tags := data→settings_container→get("compiletag");
+          #cYBzEX90iY4RR5RT if $tags→is_invalid then {
+            #lChzj9mpAFaLzWw7 $tags := web→json("{}");
+          }
+          #faXbwG4MhVNSkg52 $imgcfg := $tags→field($compile_req→config ∥ "-" ∥ $ccfg→repourl);
+          #oWcDhkUn12B40mCz if $imgcfg→is_invalid then {
+            #wMLx4LkJjUDDCSQf $imgcfg := $tags→field($ccfg→repourl);
+          }
+          #mxkszKaVEGlmL8jz if $imgcfg→is_invalid then {
+            #PBU99aiCApPG8Sx7 $imgcfg := "" →to_json;
+          }
+          #x7kDg6ZjJ42mRnG2 $imgid := code→or_empty($imgcfg→to_string);
+          #PkC66zm2lL5Fm2UB if $imgid→is_empty then {
+            #qbijkTYsxWv6Ehxc data→logger→info("cannot find repo: " ∥ $ccfg→repourl);
+            #d2YzRmciBdDJXKI0 $req→status := @\u267b→restify→http→@404_Not_Found;
+            #xrkEOA0o3bbgfI2z `return` ;
+          }
+          #w6t4Asuw48HStSB5 data→logger→debug("found image: " ∥ $ccfg→repourl ∥ " -> " ∥ $imgid);
+          #j2boXcL3OUD4pb4i $ccfg→repourl := $imgid;
+        }
         #f6XQMccuR2l4tXlF $jsb := web→create_json_builder;
         #BPzFgWnoRXTzKlsU $jsb→set_string("maincpp", $src);
         #xpgrsquJZN2a4dR2 $jsb→set_string("op", "build");
@@ -7036,33 +6988,18 @@ action mbed_compile(#hB6uU4tIvnHumcBS req: * api_request) {
         #om1mq2pQOhZUpkDF $req→response := $compile_resp→to_json;
       }
       else { #fSNjTV6sOxrori1x if code→or_empty($ccfg→target\_binary)→is_empty then {
-        #yzh668PbTTAbUZeU $compile := @\u267b→mbed_compiler→create_compilation($ccfg→platform, $ccfg→repourl);
-        #Jw4KMw64qvIUaiy1 $compile→replace_files→set_at("main.cpp", $src);
-        #x5qT6Qwh3ZUZbnDp $started := false;
-        #kKAoWJWwm9SH2sxf // MBED compiler likes to crash
-        #Kdq7IiBCzaBkOe0V for 0 ≤ i < 5 do {
-          #pszxbfbz7qE12lE4 if `not` $started then {
-            #TURHT3IBw84XOz1K $started := $compile→start;
-            #pDWS7NAIIgvuRQpv if `not` $started then {
-              #mW22rLnOyq42BLFI data→logger→tick("MbedCompileStartFailed");
-            }
-          }
-        }
-        #OKOvswGH1YiULX1U if `not` $started then {
-          #xioKYFP8k2WXsG4v $req→status := @\u267b→restify→http→@424_Failed_Dependency;
-        }
-        else {
-          #xiUwD4gNLjuKOR2Q `async` code→mbed_download($sha, $compile, $ccfg);
-          #xfNnDx7tIxvpR1e2 $req→response := $compile_resp→to_json;
-        }
+        #YHbkAheRBwHBcJ9d $req→status := @\u267b→restify→http→@404_Not_Found;
       }
       else {
+        #E9GRZHVAhVo5kgGk if code→or_empty($compile_req→repohash)→is_match_regex("^[\\w.\\-]+$") then {
+          #zq9GI0ikVHU92Nha $ccfg→repourl := $ccfg→repourl→replace_regex("#.*", "#" ∥ $compile_req→repohash);
+        }
+        #rrERCnwg09VPZxJ6 data→logger→debug("compile at " ∥ $ccfg→repourl);
         #VphfehnnMnad84Rf $compile := @\u267b→mbedworkshop_compiler→create_compilation($ccfg→platform, $ccfg→repourl, $ccfg→target\_binary);
         #TOSGk8OvBR8quO1s $compile→replace_files→set_at("/source/main.cpp", $src);
         #XU06FjdFJH0BhUlh $started := $compile→start;
         #j2QDqpEwJuKJnTq3 if `not` $started then {
           #rBpKcwjouAKge3Mx data→logger→tick("MbedWsCompileStartFailed");
-          #cmBt5qKaN4HmPWwu skip;
           #mSPUBqjnp9c6k9XV $req→status := @\u267b→restify→http→@424_Failed_Dependency;
         }
         else {
@@ -7098,38 +7035,6 @@ action sha256(#ddWz2f3buZ9KBRfx hash_data: String) returns(#oF2gyfqoPVfpOlbT sha
 #ghUgIN1i4jyNBplH
 var compile_container : ♻ azure_blob_storage → Container {
   transient = true;
-}
-#oG4zbPvomA250rGp
-action mbed_download(#agqZaxegY665347M sha: String, #GBHi00ApEP5PuGxC compile: ♻ mbed_compiler → Compilation_Request, #Tljg6PXnbfS0WGGt ccfg: * compiler_config) {
-  #ZupHUhp28dpBRbX4 data→logger→new_context;
-  #QQm3ypJ8MBm5c8AM $task := $compile→status;
-  #pNyW2BG84XNXt1nP while `not` $task→completed do {
-    #eiYJvJM99EkjrxEg time→sleep(1);
-    #xQKLh8UPZxoTwC1H $task := $compile→status;
-  }
-  #zuBjnymB4hp4tFvf $st := records→compile_status→create;
-  #xtm7y6AS9E7hcBEe data→logger→measure("MbedCompileTime", data→logger→context_duration);
-  #sEajQ2OlPO4RpAjG $st→success := $task→success;
-  #aVgFlE6aGlmj74CN $st→mbedresponse := $task→payload→to_json_builder;
-  #rHwVuOHdI87FoVvL $st→mbedresponse→field("result")→field("data")→remove_field("new_messages");
-  #xrDPYAduqZyxdHty $st→messages := $compile→messages;
-  #xx2grsvP2qPaS777 if $task→success then {
-    #AX4tWqBJ5MQtLSg2 time→sleep(2);
-    #CNo77YlCgUThQR2i $bytes := $task→download($compile);
-    #aoPseQS1yPHwSbbK if $bytes→count = 0 then {
-      #KBwO4aeuYqxLScW2 $st→success := false;
-      #NAUeGm3quvI8FkCa data→logger→tick("MbedEmptyDownload");
-    }
-    else {
-      #vaZ5BcWVkpzFxiyY $st→hexurl := data→compile_container→url ∥ "/" ∥ $sha ∥ "/" ∥ $ccfg→hexfilename;
-      #x0VnSRQZv6jwpaQC $result := data→compile_container→create_block_blob_from_buffer($sha ∥ "/" ∥ $ccfg→hexfilename, $bytes);
-      #ZfT4lZoxAvlTbZcr where contentType := $ccfg→hexcontenttype;
-      #DOxpXDU3ixdhle4w data→logger→tick("MbedHexCreated");
-    }
-  }
-  #aws89YJiDmpiyQ7U $result2 := data→compile_container→create_block_blob_from_text($sha ∥ ".json", $st→to_json→serialize);
-  #XGV7li02ev2mni8R where contentType := "application/json; charset=utf-8";
-  meta private;
 }
 #xGdrCTiGP4Wa2bzC
 table compile_resp {
@@ -7366,7 +7271,7 @@ action handle_socket_request(#ndc4940coQq3WHAK js: Json_Object, #R2T6mCs5jQ8sVzM
   meta private;
 }
 #CEFahVfFak1FNT2s meta import raygun {
-  pub "sxkx"
+  guid "47f30244-e280-4515-ccce-b25f2c33aae1"
   usage {
     #BVGhpbmca
     table Options {
@@ -7385,7 +7290,7 @@ action handle_socket_request(#ndc4940coQq3WHAK js: Json_Object, #R2T6mCs5jQ8sVzM
   }
 }
 #QDqOJ3P9Fxi2xLbQ meta import loggly {
-  pub "aidug"
+  guid "416bb265-788b-471a-1278-ac7c3a1ed894"
   usage {
     #BdGhpbmca
     table Options {
@@ -7708,7 +7613,7 @@ action deploy_compile_service(#UAx5fSo1kM9N7HO9 rel: * pub_release, #hDubu2xlzXZ
   #x6DVZglchiQo4rAW if false then {
     #uZtaigcRFafwFgfE time→sleep(60);
     #EglpWaEp065tNkGi code→import_doctopics($req);
-    #aJ24vmgq8Bi94vnc @\u267b→tdlite\u002esearch→index_docs;
+    #aJ24vmgq8Bi94vnc @\u267b→tdlite_search→index_docs;
     #xkIol40tmwUNtmus data→logger→info("docs reindexed");
   }
   meta private;
@@ -7943,7 +7848,7 @@ action channel_op(#nuquyUzUWHZusjcc req: * api_request) returns(#xCaCFRJDLzuviZW
   meta private;
 }
 #szVeYIYLnejeqBxw meta import librato_node {
-  pub "myzvg"
+  guid "696c22cb-34a3-4c77-cf67-e9d2fcc2ca8b"
   usage {
     #BVGhpbmca
     table Options {
@@ -8088,8 +7993,8 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
   }
   meta private;
 }
-#XDIDml7fsHiaYsdp meta import tdlite\u002esearch {
-  pub "smlva"
+#XDIDml7fsHiaYsdp meta import tdlite_search {
+  guid "6e73be78-b4c0-4573-77cd-7a739a2396b2"
   usage {
     #BVGhpbmca
     table Art_Entry {
@@ -8153,19 +8058,19 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
 
     action `async` init()
     action `sync` create_art_update() returns(batch: ♻ azure_search → Batch_Update)
-    action `sync` create_art_entry(id: String, options\u003f: ♻ tdlite\u002esearch → Art_Entry) returns(entry: ♻ tdlite\u002esearch → Art_Entry)
+    action `sync` create_art_entry(id: String, options\u003f: ♻ tdlite_search → Art_Entry) returns(entry: ♻ tdlite_search → Art_Entry)
     action `async` index_docs()
-    action `sync` upsert_art(@this: ♻ tdlite\u002esearch → Art_Entry, batch: ♻ azure_search → Batch_Update)
-    action `sync` create_pub_entry(id: String, options\u003f: ♻ tdlite\u002esearch → Pub_Entry) returns(entry: ♻ tdlite\u002esearch → Pub_Entry)
-    action `sync` upsert_pub(@this: ♻ tdlite\u002esearch → Pub_Entry, batch: ♻ azure_search → Batch_Update)
+    action `sync` upsert_art(@this: ♻ tdlite_search → Art_Entry, batch: ♻ azure_search → Batch_Update)
+    action `sync` create_pub_entry(id: String, options\u003f: ♻ tdlite_search → Pub_Entry) returns(entry: ♻ tdlite_search → Pub_Entry)
+    action `sync` upsert_pub(@this: ♻ tdlite_search → Pub_Entry, batch: ♻ azure_search → Batch_Update)
     action `sync` create_pubs_update() returns(batch: ♻ azure_search → Batch_Update)
     action `async` statistics() returns(res: Json_Object)
-    action `sync` to_pub_entry(pub: Json_Object, body: String, features: Collection[String], score: Number) returns(r: ♻ tdlite\u002esearch → Pub_Entry)
-    action `sync` to_pub_query(index: String, kind: String, text: String) returns(query: ♻ tdlite\u002esearch → Pub_Query)
-    action `sync` to_search(@this: ♻ tdlite\u002esearch → Pub_Query) returns(search: String)
-    action `sync` to_filter(@this: ♻ tdlite\u002esearch → Pub_Query) returns(filter: String)
-    action `sync` to_url(@this: ♻ tdlite\u002esearch → Pub_Query) returns(url: String)
-    action `sync` is_empty(@this: ♻ tdlite\u002esearch → Pub_Query) returns(empty: Boolean)
+    action `sync` to_pub_entry(pub: Json_Object, body: String, features: Collection[String], score: Number) returns(r: ♻ tdlite_search → Pub_Entry)
+    action `sync` to_pub_query(index: String, kind: String, text: String) returns(query: ♻ tdlite_search → Pub_Query)
+    action `sync` to_search(@this: ♻ tdlite_search → Pub_Query) returns(search: String)
+    action `sync` to_filter(@this: ♻ tdlite_search → Pub_Query) returns(filter: String)
+    action `sync` to_url(@this: ♻ tdlite_search → Pub_Query) returns(url: String)
+    action `sync` is_empty(@this: ♻ tdlite_search → Pub_Query) returns(empty: Boolean)
   }
   #xL425yv7wLzTP1cb resolve azure_search = ♻ azure_search with {
   }
@@ -8175,7 +8080,7 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
   }
 }
 #xBixa2RQuRVlDYnd meta import azure_search {
-  pub "auwke"
+  pub "ilcvc"
   usage {
     #BVGhpbmca
     table Options {
@@ -8201,7 +8106,7 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
     action `sync` merge(update: ♻ azure_search → Batch_Update, key: String) returns(doc: Json_Builder)
     action `sync` delete(update: ♻ azure_search → Batch_Update, key: String)
     action `async` send(update: ♻ azure_search → Batch_Update) returns(status_code: Number)
-    action `async` init(options\u003f: ♻ azure_search → Options)
+    action `sync` init(options\u003f: ♻ azure_search → Options)
     action `async` delete_index(index: ♻ azure_search → Index) returns(deleted: Boolean)
     action `sync` create_request(path: String) returns(request: Web_Request)
     action `async` statistics(index: ♻ azure_search → Index) returns(document_count: Number, storage_size: Number)
@@ -8231,7 +8136,7 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
   }
 }
 #cJioj69JoQlHxyts meta import touchdevelop_cloud {
-  pub "ivppc"
+  guid "2962bb8e-5324-4fdd-446c-956698cf688f"
   usage {
     #BVGhpbmca
     table Batch_Request {
@@ -8294,13 +8199,13 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
 
     action `async` get(path: String, options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(res: Web_Response)
     action `async` post(path: String, body: Json_Object, options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(res: Web_Response)
-    action `async` create_batch(options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(batch: ♻ touchdevelop_cloud → Batch)
+    action `sync` create_batch(options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(batch: ♻ touchdevelop_cloud → Batch)
     action `sync` add_request(batch: ♻ touchdevelop_cloud → Batch, path: String, etag: String, options\u003f: ♻ touchdevelop_cloud → Api_Options)
     action `sync` create_url(path: String, options: ♻ touchdevelop_cloud → Api_Options) returns(url: String)
     action `async` test()
     action `sync` create_path(path: String, options: ♻ touchdevelop_cloud → Api_Options) returns(url: String)
     action `async` send(batch: ♻ touchdevelop_cloud → Batch) returns(responses: Collection[ ♻ touchdevelop_cloud → Batch_Response])
-    action `async` list(path: String, options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(list: ♻ touchdevelop_cloud → Item_List)
+    action `sync` list(path: String, options\u003f: ♻ touchdevelop_cloud → Api_Options) returns(list: ♻ touchdevelop_cloud → Item_List)
     action `async` next(list: ♻ touchdevelop_cloud → Item_List) returns(items: Json_Object)
     action `async` all(list: ♻ touchdevelop_cloud → Item_List) returns(items: Json_Object)
     action `sync` set_options(options\u003f: ♻ touchdevelop_cloud → Options)
@@ -8308,7 +8213,7 @@ action import_user_scripts(#NiF5zfBrpylAPL5M resp: * rec_import_response, #xMg3K
   }
 }
 #spRAAgNSIkD32HsQ
-action search_index_art(#DO3UScJ4G8fCzhwB pub: * pub_art) returns(#xiqdj4eOu8aorXg1 entry: ♻ tdlite\u002esearch → Art_Entry) {
+action search_index_art(#DO3UScJ4G8fCzhwB pub: * pub_art) returns(#xiqdj4eOu8aorXg1 entry: ♻ tdlite_search → Art_Entry) {
   #DyENaock6ne3J2eU $tp := "picture";
   #GHT1Rl9AnotUJ7Uz if code→or_empty($pub→pictureurl)→is_empty then {
     #KU4AM4i5cqBOG9Yi $tp := "sound";
@@ -8317,7 +8222,7 @@ action search_index_art(#DO3UScJ4G8fCzhwB pub: * pub_art) returns(#xiqdj4eOu8aor
   #be8Dp2BS2xfqSch4 if `not` $pub→flags→is_invalid then {
     #PtGUHiguuUBSAH58 $spr := $pub→flags→contains("transparent");
   }
-  #xIZ9SNlqoXkOcyhl $entry := @\u267b→tdlite\u002esearch→create_art_entry($pub→id);
+  #xIZ9SNlqoXkOcyhl $entry := @\u267b→tdlite_search→create_art_entry($pub→id);
   #k1mUW8S3blJHY20N where name := $pub→name;
   #UgYMHTLpz8A3lUzn where description := $pub→description;
   #toGCO3sUEyIoBYx9 where type := $tp;
@@ -8357,7 +8262,7 @@ action upsert_art(#o0A0d9b4tp12KovN obj: Json_Builder) {
   #xsv2KxV2YxqVaOoI if data→disable_search then {
     #dWQBNBAhewSS9Jkj `return` ;
   }
-  #enUZSjAFRU4PcdvB $batch := @\u267b→tdlite\u002esearch→create_art_update;
+  #enUZSjAFRU4PcdvB $batch := @\u267b→tdlite_search→create_art_update;
   #ieb5LOK1piKkZCAp $coll2 := code→add_username_etc_core(data→arts→single_fetch_result($obj→to_json)→items);
   #pUmalHoF8q6qjG2M $pub := records→pub_art→create_from_json($coll2→at(0)→field("pub")→to_json);
   #mre5zES5kJmvN24d code→search_index_art($pub)→upsert_art($batch);
@@ -8406,7 +8311,7 @@ action \_init_search() {
   #I56RxPU92jjpA2W3 where handler3(req: * api_request) {
     #xjUWCMIMChU6eZLl code→check_permission($req, "operator");
     #xwkDlTke3XUehvJF if $req→status = 200 then {
-      #ljvismXtUUjG5sdm `async` @\u267b→tdlite\u002esearch→index_docs;
+      #ljvismXtUUjG5sdm `async` @\u267b→tdlite_search→index_docs;
       #AL5gy2ZF9HupbWpK $req→response := web→json("{}");
     }
   }
@@ -8416,7 +8321,7 @@ action \_init_search() {
     #szzuyyJrqv4DnSIe if $req→status = 200 then {
       #es9bOKongQgWXewf `async` data→arts→get_index("all")→for_all_batched("all", 100, $process);
       #dL2l7f2XrrxpL44J where process(json: Json_Object) {
-        #GVD2J2uPaBNchykm $batch := @\u267b→tdlite\u002esearch→create_art_update;
+        #GVD2J2uPaBNchykm $batch := @\u267b→tdlite_search→create_art_update;
         #tog7pyFI5uHBVlTc foreach js in code→add_username_etc_core($json)
         do {
           #zC3wkAFywWFKo8Tz $pub := records→pub_art→create_from_json($js→field("pub")→to_json);
@@ -8449,7 +8354,7 @@ action \_init_search() {
 action reindex_store(#iOeAJ90eIH5oRkcq store: ♻ indexed_store → store, #x5nIc7oA48VqgHyt req: * api_request) {
   #UwnDNRbf2n9DcF9Y $store→get_index("all")→for_all_batched("all", 100, $process);
   #nHF95f1wMTKP92Af where process(json: Json_Object) {
-    #VvwAFE2hUfVaGjan $batch := @\u267b→tdlite\u002esearch→create_pubs_update;
+    #VvwAFE2hUfVaGjan $batch := @\u267b→tdlite_search→create_pubs_update;
     #eXwgBwYKhd8Me4hi $fetch_result := $store→single_fetch_result($json);
     #xr8JjMVHHdp2b04X $fetch_result→items := $json;
     #kh2qXBomeTWbcCZI records→store_decorator→at($store)→resolve→run($fetch_result, data→admin_request);
@@ -8472,7 +8377,7 @@ action reindex_store(#iOeAJ90eIH5oRkcq store: ♻ indexed_store → store, #x5nI
       do {
         #xvA2j6v5jb4Ix0vd if `not` $pub→boolean("ishidden") then {
           #guGTahxBQgIpYrki $body := code→or_empty($bodies→string(code→or_empty($pub→string($fieldname))));
-          #iaG6nZSzR4H2uE6Y $entry := @\u267b→tdlite\u002esearch→to_pub_entry($pub, $body, code→pub_features($pub), 0);
+          #iaG6nZSzR4H2uE6Y $entry := @\u267b→tdlite_search→to_pub_entry($pub, $body, code→pub_features($pub), 0);
           #rS4u4xhxEfkiFc7f $entry→upsert_pub($batch);
         }
       }
@@ -8480,7 +8385,7 @@ action reindex_store(#iOeAJ90eIH5oRkcq store: ♻ indexed_store → store, #x5nI
     else {
       #JIgs7Pah5f8Q2qlu foreach pub in $fetch_result→items
       do {
-        #IEW727K8nZvdwnOA $entry2 := @\u267b→tdlite\u002esearch→to_pub_entry($pub, code→with_default($pub→string("text"), ""), code→pub_features($pub), 0);
+        #IEW727K8nZvdwnOA $entry2 := @\u267b→tdlite_search→to_pub_entry($pub, code→with_default($pub→string("text"), ""), code→pub_features($pub), 0);
         #SE7UYlWLduW2S0qF $entry2→upsert_pub($batch);
       }
     }
@@ -8733,7 +8638,7 @@ action \_init_pointers() {
   #Z7R0IqTHx2yp4bPx where handler(req: * api_request) {
     #PycXysaug6oqMafE code→update_pointer($req);
   }
-  #UB2I2HiGe4i1kDGQ @\u267b→tdlite\u002edocs→init($expand_info);
+  #UB2I2HiGe4i1kDGQ @\u267b→tdlite_docs→init($expand_info);
   #qGwFadUu1X8P8SR4 where expand_info(v: Json_Builder) {
     #bnz9gIH4tITtRzUf $wp := code→or_empty($v→string("webpath"));
     #DsWt4O9K8x4N97nF if `not` $wp→is_empty then {
@@ -9164,7 +9069,7 @@ action \_init_config() {
   #YAd4JrLvMSYXOgcI code→add_route("POST", "config", "*", $handler2);
   #y4HoL5xXMKDeLyTZ where handler2(req: * api_request) {
     #xu2EL4DwylIi0pxP code→check_permission($req, "root");
-    #NlFbfeJzMYHldGIC if $req→status = 200 `and` `not` $req→verb→is_match_regex("^(compile|settings|promo)$") then {
+    #NlFbfeJzMYHldGIC if $req→status = 200 `and` `not` $req→verb→is_match_regex("^(compile|settings|promo|compiletag)$") then {
       #xnjE02wwjwnad8wi $req→status := @\u267b→restify→http→@404_Not_Found;
     }
     #yAIJ4nqvARYSFZB0 if $req→status = 200 then {
@@ -9198,7 +9103,7 @@ table compiler_config {
 }
 #hemzbmnNe6Vs2oO4
 action execute_search(#Wu7cDHbSVzNT4KPR kind: String, #A3tUiPhzv4X92K4f q: String, #ew1ISDW2E4yhmzzb req: * api_request) {
-  #x2MX7fgLLuYfGBAl $query := @\u267b→tdlite\u002esearch→to_pub_query("pubs1", $kind, $q);
+  #x2MX7fgLLuYfGBAl $query := @\u267b→tdlite_search→to_pub_query("pubs1", $kind, $q);
   #ZqxLnAp6biguZISR $request := @\u267b→azure_search→create_request($query→to_url);
   #FilE7YGcExpnXEo3 $response := $request→send;
   #hVL3ld5oEEE01plr $js := $response→content_as_json;
@@ -9624,7 +9529,7 @@ action \_init_admin() {
           #vcdcm2TIFawydvv6 $jsb→set_string($s, code→or_empty(app→server_setting($s, true)));
         }
       }
-      #mRglAOGVTAtXCFTZ $jsb→set_field("search", @\u267b→tdlite\u002esearch→statistics);
+      #mRglAOGVTAtXCFTZ $jsb→set_field("search", @\u267b→tdlite_search→statistics);
       #x33n1v4ijMlwNWGb $jsb→set_field("dmeta", data→deployment_meta);
       #d44pdKEY5tCqyad0 $jsb→set_number("load", code→cpu_load);
       #CqIP4Xz2aG59oNGc $redis := data→redis_client→info;
@@ -9975,8 +9880,8 @@ action scan_and_search(#Ce2vbmq9keKLqpai obj: Json_Builder, #xoNy1TLACiUUT1RV op
   }
   #sVeVtZ0yf49QH7OC // ## search
   #VAMT7Ik6vNnZX4ef if `not` $options\u003f→skip_search then {
-    #x0OQkvlFhx9wZn44 $batch := @\u267b→tdlite\u002esearch→create_pubs_update;
-    #x9rx7irr1OPA2ceL $entry := @\u267b→tdlite\u002esearch→to_pub_entry($pub, $body, code→pub_features($pub), 0);
+    #x0OQkvlFhx9wZn44 $batch := @\u267b→tdlite_search→create_pubs_update;
+    #x9rx7irr1OPA2ceL $entry := @\u267b→tdlite_search→to_pub_entry($pub, $body, code→pub_features($pub), 0);
     #x4jfe2zLeoFLsASL $entry→upsert_pub($batch);
     #jAh6YvhTy2uV2IvN `async` $batch→send;
   }
@@ -10062,12 +9967,12 @@ action \_init_ticks() {
   meta private;
   meta sync;
 }
-#N6pAszgf7hv5NN5p meta import tdlite\u002edocs {
-  pub "umdsc"
+#N6pAszgf7hv5NN5p meta import tdlite_docs {
+  guid "7835a8d7-083a-44ef-c30e-d9ab6779c868"
   usage {
 
     action `async` format(templ: String, pubdata: Json_Builder) returns(expanded2: String)
-    action `async` init(expand_info: Action1[Json_Builder])
+    action `sync` init(expand_info: Action1[Json_Builder])
   }
 }
 #xkagyG3HVDvz6UL2
@@ -10235,7 +10140,7 @@ action send_permission_notification(#mpyr7zh5KU4O13qR req: * api_request, #xzRWV
   meta private;
 }
 #crv3tnIqnW3jZRxI meta import sendgrid {
-  pub "gqbp"
+  guid "602342ea-179e-4079-c3ca-bdc300713796"
   usage {
     #BdGhpbmca
     table Send_Options {
@@ -10684,7 +10589,7 @@ action send_notification(#GcK4pDVxAkgZTqv4 about: Json_Object, #KvQRqdxDU2TM7eIq
   meta private;
 }
 #cIh6SO2Fz7nF9lps meta import nodemailer {
-  pub "othdc"
+  guid "3e71b12e-1fc2-45d2-7f70-c91c245ad389"
   usage {
     #BdGhpbmca
     table Send_Options {
@@ -10704,7 +10609,7 @@ action send_notification(#GcK4pDVxAkgZTqv4 about: Json_Object, #KvQRqdxDU2TM7eIq
   }
 }
 #ICDicGsdQ8ZcRuQb meta import mbedworkshop_compiler {
-  pub "qxcxe"
+  pub "skhza"
   usage {
     #BVGhpbmca
     table Options {
@@ -10747,7 +10652,7 @@ action send_notification(#GcK4pDVxAkgZTqv4 about: Json_Object, #KvQRqdxDU2TM7eIq
       }
     }
 
-    action `async` create_compilation(target: String, repo: String, target_binary: String) returns(request: ♻ mbedworkshop_compiler → Compilation_Request)
+    action `sync` create_compilation(target: String, repo: String, target_binary: String) returns(request: ♻ mbedworkshop_compiler → Compilation_Request)
     action `sync` init(options\u003f: ♻ mbedworkshop_compiler → Options)
     action `async` start(request: ♻ mbedworkshop_compiler → Compilation_Request) returns(success: Boolean)
     action `async` download(task: ♻ mbedworkshop_compiler → Compilation_Result, request2: ♻ mbedworkshop_compiler → Compilation_Request) returns(bytes: Buffer)
@@ -11371,7 +11276,7 @@ var last_search_report : DateTime {
 }
 #AaEVQFRssbOeik8S
 action check_search() {
-  #xEkmL2KzhfXbLfC4 $res := @\u267b→tdlite\u002esearch→statistics;
+  #xEkmL2KzhfXbLfC4 $res := @\u267b→tdlite_search→statistics;
   #WmhQxSSxcyifNXia data→last_search_report := time→now;
   meta private;
 }
