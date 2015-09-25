@@ -6,6 +6,7 @@
     "azure-storage": "^0.6.0",
     "azure-table-node": "^1.4.1",
     "mz": "^2.0.0",
+    "redis": "https://microbit0.blob.core.windows.net/files/npm0/redis-0.12.1-tls.tgz",
     "reflect-metadata": "^0.1.2"
   }
 }

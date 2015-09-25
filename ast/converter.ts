@@ -171,6 +171,8 @@ module TDev.AST {
 
         private localName(l:LocalDef)
         {
+            if (l == this.thisLocal)
+                return this.tw.kw("this")
             return this.tw.jsid(this.localCtx.quote(l.getName(), l.nodeId))
         }
 
@@ -182,6 +184,7 @@ module TDev.AST {
             "DateTime": "Date",
             "Json Object": "JsonObject",
             "Json Builder": "JsonBuilder",
+            "Buffer": "Buffer",
         }
 
         private type(t:Kind)
@@ -313,6 +316,11 @@ module TDev.AST {
               "Math->random": "td.randomInt",
               "Math->random range": "td.randomRange",
               "Math->random normalized": "td.randomNormalized",
+              "Json Builder->to string": "td.toString",
+              "Json Object->to string": "td.toString",
+              "Json Builder->to number": "td.toNumber",
+              "Json Object->to number": "td.toNumber",
+              "App->create logger": "td.createLogger",
         }
 
         static methodRepl:StringMap<string> = {
@@ -328,13 +336,15 @@ module TDev.AST {
           "Collection->add": "push",
           "Collection->where": "filter",
           "DateTime->milliseconds since epoch": "getTime",
+          "String->to json": "",
+          "Number->to json": "",
         }
 
         dumpJs(s:string)
         {
             this.tw.write("/*JS*/").nl()
             s.split("\n").forEach(l => {
-                l = l.replace(/TDev\.Util\.userError\(/g, "throw new Error(")
+                l = l.replace(/(TDev\.Util|lib)\.userError\(/g, "throw new Error(")
                 this.tw.write(l).nl()
             })
         }
@@ -486,6 +496,10 @@ module TDev.AST {
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
                 this.tw.op0("]")
+            } else if (/^Web->json array$/.test(pn)) {
+                this.tw.write("[]")
+            } else if (/^Web->json object$/.test(pn)) {
+                this.tw.write("{}")
             } else if (/^Json (Builder|Object)->serialize$/.test(pn)) {
                 this.tw.write("JSON.stringify")
                 params([e.args[0]])
@@ -501,7 +515,7 @@ module TDev.AST {
                 this.dispatch(e.args[1])
                 this.tw.write(", 1)")
             } else if (/^Json (Builder|Object)->(to json|clone|to json builder)$/.test(pn)) {
-                if (this.propName(e.args[0]) == "Web->json") {
+                if (/^Web->json(| array| object)$/.test(this.propName(e.args[0]))) {
                     this.dispatch(e.args[0])
                 } else {
                     this.tw.write("clone")
@@ -567,8 +581,10 @@ module TDev.AST {
                 params(tmpargs)
             } else if (Converter.methodRepl.hasOwnProperty(pn)) {
                 this.tightExpr(e.args[0])
-                this.tw.write("." + Converter.methodRepl[pn])
-                params(e.args.slice(1))
+                if (Converter.methodRepl[pn] != "") {
+                    this.tw.write("." + Converter.methodRepl[pn])
+                    params(e.args.slice(1))
+                }
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
                     this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
@@ -857,11 +873,14 @@ module TDev.AST {
             return p0.local.getKind().getRecord()
         }
 
+        thisLocal:LocalDef;
+
         visitAction(a:Action)
         {
             var isExtension = this.isOwnExtension(a)
 
             this.localCtx = new TsQuotingCtx()
+            this.thisLocal = null;
             var optsName = ""
             var optsLocal:LocalDef = null
 
@@ -922,10 +941,7 @@ module TDev.AST {
             this.tw.beginBlock()
 
             if (isExtension) {
-                var th = a.getInParameters()[0]
-                this.tw.kw("let")
-                this.localDef(th.local)
-                this.tw.write(" = this;").nl()
+                this.thisLocal = a.getInParameters()[0].local
             }
 
             if (optsLocal) {

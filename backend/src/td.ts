@@ -88,6 +88,20 @@ export function jsonCopyFrom(trg:JsonBuilder, src:JsonObject)
     })
 }
 
+export function toNumber(v:any) : number
+{
+    if (v == null) return null
+
+    if (typeof v == "number") return v
+    return parseFloat(v)
+}
+
+export function toString(v:any) : string
+{
+    if (v == null) return null
+    return v + "";
+}
+
 export function asArray(o:JsonObject) : JsonObject[]
 {
     return <any>o;
@@ -161,6 +175,11 @@ export function checkAndLog(err:any, meta?: any):boolean
     //TODO
     //logError(err, meta);
     return false
+}
+
+export function log(msg:string)
+{
+    //TODO
 }
 
 export function mkAgent(proto:string):http.Agent

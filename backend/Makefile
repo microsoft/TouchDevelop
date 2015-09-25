@@ -1,4 +1,4 @@
-N=azure-blob-storage
+N=redis
 
 all:
 	node node_modules/typescript/bin/tsc

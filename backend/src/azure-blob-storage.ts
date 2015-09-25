@@ -7,15 +7,13 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as zlib from 'zlib';
+import * as crypto from 'crypto';
 
 var azure_storage = require("azure-storage");
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
 var clone = td.clone;
 
 
@@ -503,18 +501,15 @@ export function init() : void
  */
 export function createRandomId(size: number) : string
 {
-    let id: string;
-    let buf = TD.bits.createBuffer(size * 2);
-    buf.fillRandom();
+    let buf = crypto.randomBytes(size * 2)
     let s = buf.toString("base64").replace(/[^a-zA-Z]/g, "");
     if (s.length < size) {
         // this is very unlikely
-        id = createRandomId(size);
+        return createRandomId(size);
     }
     else {
-        id = s.substr(0, size);
+        return s.substr(0, size);
     }
-    return id;
 }
 
 /**

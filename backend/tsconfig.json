@@ -15,6 +15,7 @@
         "src/word-password.ts",
         "src/azure-table.ts",
         "src/azure-blob-storage.ts",
+        "src/redis.ts",
         "src/parallel.ts"
     ],
     "exclude": [
