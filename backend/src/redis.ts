@@ -5,7 +5,6 @@
 import * as td from 'td';
 import * as assert from 'assert';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
@@ -121,7 +120,7 @@ export class Client
     public async execAsync() : Promise<JsonObject>
     {
         let js: JsonObject;
-        js = await this.sendCommandAsync("exec", TD.web.jsonObject());
+        js = await this.sendCommandAsync("exec", []);
         return js;
     }
 

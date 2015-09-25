@@ -6,7 +6,6 @@ import * as td from 'td';
 import * as assert from 'assert';
 import * as crypto from 'crypto';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
@@ -176,11 +175,11 @@ export class Store
     public async deleteAsync(delid: string) : Promise<boolean>
     {
         let delok: boolean;
-        let delentry = TD.create.RefOf().JsonBuilder();
+        let delentry = null;
         await this.container.updateAsync(delid, async (entry: JsonBuilder) => {
             let kind = entry["kind"];
             if (kind != "reserved") {
-                delentry._set(clone(entry));
+                delentry = clone(entry);
                 if (hardDelete) {
                     for (let fld of Object.keys(entry)) {
                         if (fld == "indexId" || fld == "id") {
@@ -201,10 +200,10 @@ export class Store
                 entry["deletetime"] = await cachedStore.nowSecondsAsync();
             }
             else {
-                delentry._set({});
+                delentry = {};
             }
         });
-        let bld = delentry._get();
+        let bld = delentry;
         if (bld != null && bld.hasOwnProperty("kind")) {
             let id2 = bld["indexId"];
             await parallel.forAsync(this.indices.length, async (x: number) => {
@@ -244,19 +243,19 @@ export class Store
 
     public async reindexAsync(pubid: string, update:td.Action1<JsonBuilder>) : Promise<void>
     {
-        let before = TD.create.RefOf().JsonBuilder();
-        let after = TD.create.RefOf().JsonBuilder();
+        let before = null;
+        let after = null;
         await this.container.updateAsync(pubid, async (entry: JsonBuilder) => {
-            before._set(clone(entry));
+            before = clone(entry);
             await update(entry);
-            after._set(clone(entry));
+            after = clone(entry);
         });
-        let id2 = before._get()["indexId"];
-        assert(after._get()["indexId"] == id2, "");
+        let id2 = before["indexId"];
+        assert(after["indexId"] == id2, "");
         await parallel.forAsync(this.indices.length, async (x: number) => {
             let index = this.indices[x];
-            let beforeKey = orEmpty(index.key(before._get()));
-            let afterKey = orEmpty(index.key(after._get()));
+            let beforeKey = orEmpty(index.key(before));
+            let afterKey = orEmpty(index.key(after));
             if (beforeKey != afterKey) {
                 if (beforeKey != "") {
                     let entity = azureTable.createEntity(beforeKey, id2);
@@ -265,7 +264,7 @@ export class Store
                 if (afterKey != null) {
                     let entity1 = azureTable.createEntity(afterKey, id2);
                     entity1["pub"] = pubid;
-                    await index.table.insertEntityAsync(clone(entity1), "or replace");
+                    await index.table.insertEntityAsync(entity1, "or replace");
                 }
             }
         });
