@@ -1,4 +1,4 @@
-N=restify
+N=server-auth
 
 all:
 	node node_modules/typescript/bin/tsc

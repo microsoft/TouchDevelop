@@ -29,6 +29,8 @@
         "src/nodemailer.ts",
         "src/raygun.ts",
         "src/restify.ts",
+        "src/sendgrid.ts",
+        "src/server-auth.ts",
         "src/parallel.ts"
     ],
     "exclude": [
