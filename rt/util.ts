@@ -2708,9 +2708,13 @@ module TDev{
             willReload = false;
 
         if (isError(err, e => e.isNetworkError)) {
-            HTML.showProgressNotification(lf("we're having network connectivity problems..."));
             willReload = false;
-            return;
+            if (err && err.status === 424)
+                HTML.showProgressNotification(lf("we're having problems, try again later..."));
+            else {
+                HTML.showProgressNotification(lf("we're having network problems..."));
+                return;
+            }
         }
 
         var hashBug = Ticker.bugReportForHash(bug);
@@ -2748,19 +2752,6 @@ module TDev{
                 window.location.reload() 
             })
             return
-
-            /*
-            try {
-                var msg = bug.exceptionMessage;
-                if (!msg) msg = "OOPS";
-                window.localStorage["lastExceptionMessage"] = msg;
-                window.localStorage["lastBugReload"] = now();
-                window.location.reload();
-                return;
-            } catch (e) {
-                debugger;
-            }
-            */
         }
 
         try {
