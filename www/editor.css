@@ -5942,12 +5942,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 }
 
 .stmt-inlineStmt .expandingTextAreaContainer {
-    width: 10em !important;
-}
-
-.stmt-appHeader .expandingTextAreaContainer,
-.stmt-actionHeader .expandingTextAreaContainer {
-    width: 21em !important;
+    width: 17em !important;
 }
 
 .stmt-inlineStmt .expandingTextAreaContainer,
