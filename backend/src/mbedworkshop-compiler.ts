@@ -159,7 +159,7 @@ export function createCompilation(target: string, repo: string, targetBinary: st
 /**
  * Initializes the library
  */
-export function init(options_?: IOptions) : void
+export function init(options_: IOptions = {}) : void
 {
     logger = td.createLogger("mbed");
     options = options_;

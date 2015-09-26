@@ -26,6 +26,9 @@
         "src/node-jwt-simple.ts",
         "src/librato-node.ts",
         "src/loggly.ts",
+        "src/nodemailer.ts",
+        "src/raygun.ts",
+        "src/restify.ts",
         "src/parallel.ts"
     ],
     "exclude": [

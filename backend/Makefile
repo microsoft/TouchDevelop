@@ -1,4 +1,4 @@
-N=loggly
+N=restify
 
 all:
 	node node_modules/typescript/bin/tsc

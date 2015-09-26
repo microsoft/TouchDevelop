@@ -747,7 +747,6 @@ module TDev.AST {
             }
             else
                 this.simpleId(d.getName())
-            // TODO placeholder for options
         }
 
         visitAnyIf(i:If)
@@ -905,8 +904,9 @@ module TDev.AST {
                 if (/\?$/.test(p.getName())) {
                     optsLocal = p.local
                     optsName = this.localCtx.unUnicode(p.getName() + "0")
-                    this.tw.jsid(optsName).write("?: ")
+                    this.tw.jsid(optsName).write(": ")
                     this.tw.globalId(p.local.getKind().getRecord(), "I")
+                    this.tw.write(" = {}")
                 } else this.localDef(p.local)
             }
 

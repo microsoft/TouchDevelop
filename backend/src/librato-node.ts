@@ -42,7 +42,7 @@ class State {
 
 var commState = new State();
 
-export async function initAsync(options_?: IOptions) : Promise<void>
+export async function initAsync(options_: IOptions = {}) : Promise<void>
 {
     logger = td.createLogger("librato");
     if (!options_.email) {

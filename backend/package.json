@@ -6,7 +6,10 @@
     "azure-storage": "^0.6.0",
     "azure-table-node": "^1.4.1",
     "jwt-simple": "^0.3.1",
+    "loggly": "^1.0.8",
     "mz": "^2.0.0",
+    "nodemailer": "^1.5.0",
+    "raygun": "^0.7.1",
     "redis": "https://microbit0.blob.core.windows.net/files/npm0/redis-0.12.1-tls.tgz",
     "reflect-metadata": "^0.1.2"
   }

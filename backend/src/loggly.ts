@@ -28,7 +28,7 @@ var loggly = require('loggly');
 /**
  * Initializes loggly with the account information. If ``token`` is not provided, the ``LOGGLY_TOKEN`` server setting is used. If ``sub domain`` is not provided, ``LOGGLY_SUB_DOMAIN`` is provided.
  */
-export async function initAsync(options_?: IOptions) : Promise<void>
+export async function initAsync(options_: IOptions = {}) : Promise<void>
 {
     assert(logger == null, "multiple initialization");
     if (!options_.token) {
