@@ -1951,6 +1951,7 @@ action create_extra_button(#mncq4kd55AAXrAl3 text: String, #xGKSnvw1vCIbFYyj @ac
   #jiT2zrVOmtzOZRYr // {shim:}
   #HqdXAvEWpftML4hA data→button_extra_inner := code→create_circle(412, 532);
   #gPk3T8UBTWjSz8zn data→button_extra_inner→set_color(colors→black);
+  #nxreVM8UIUMg1VXW data→button_extra_inner→set_gradient(false);
   #JGtXNV2yHEji6Ayn data→button_extra := code→create_circle(data→button_extra_inner→x, data→button_extra_inner→y);
   #b4DhmqP47SNxK8OP data→button_extra→opacity := 0;
   #SCO4V6exNc28sn95 data→button_extra→width := 84;
