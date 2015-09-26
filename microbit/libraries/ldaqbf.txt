@@ -7,8 +7,8 @@ meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // A #microbit game library.
-#jGGkLeHRzfIhtf30 meta import micro\u003abit {
-  pub "vmqhsx"
+#jQ4IQuvOFlO30X8o meta import micro\u003abit {
+  pub "xqypse"
   usage {
     type Image
     action `sync` \_libinit()
@@ -43,14 +43,14 @@ meta parentIds "";
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
     action `async` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
-    action `async` add_button(text: String, @action: Action)
-    action `async` reset()
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
   }
 }
 #GSTBzUmgzKqh572M
@@ -334,4 +334,13 @@ action unplug_events() {
 #sqTPeilZldQhVOCC
 var \_game_id : Number {
   transient = true;
+}
+#pd6yzHOHLSOW4g1S
+action is_running() returns(#cw0Wu3beI6dUUnNH running: Boolean) {
+  #JT3Ts6q2D3ITZ3su // Gets a value indicating if the game is still running. Returns `false` if game over.
+  #hn1FvwLqvB0pL70n // {namespace:game}
+  #WVIg0Y2jJTD8Dj20 // {weight:10}
+  #HCRfiRSgAkdGdCW0 // {help:td/game-library}
+  #D70pd8XtiL4KQjAN `return` `not` data→\_is_game_over;
+  meta sync;
 }

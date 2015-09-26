@@ -14,9 +14,10 @@ action on_screen_up(#Zm23L35zAoZ5xaUM body: Action) {
   #E4B0WT3YTg0B26mq simulator[lib micro\u003abit] →notify_event_registration("on screen up");
   #yb4F8TjWZB4lGJFg data→screen_up := $body;
   #Y83at3q2DuxfruwD code→init;
+  meta sync;
 }
-#vUJ4zd2jxlhJ8zGD meta import micro\u003abit {
-  pub "zmisat"
+#qxBAjy823BHO24mb meta import micro\u003abit {
+  pub "xqypse"
   usage {
     type Image
     action `sync` \_libinit()
@@ -51,13 +52,14 @@ action on_screen_up(#Zm23L35zAoZ5xaUM body: Action) {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
     action `async` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
-    action `async` add_button(text: String, @action: Action)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
   }
 }
 #cW5Eaba6g2xa58TR
@@ -68,6 +70,7 @@ action on_screen_down(#KMHPPFLh79ILxEsC body: Action) {
   #xdc4HMUwupE74u9V simulator[lib micro\u003abit] →notify_event_registration("on screen down");
   #xTg7g7WPbHijTQqB data→screen_down := $body;
   #Yc1eBaxVszGtkaPn code→init;
+  meta sync;
 }
 #t6BUCc8WlaifMQw2
 var screen_state : Number {
@@ -101,15 +104,16 @@ action example() {
 action init() {
   #xHJIJAFfGrSx2zlD if `not` data→\_init then {
     #hA5Iq3c70pT8TcD5 data→\_init := true;
-    #xyqvAivXibKxY0RO @\u267b→micro\u003abit→in_background;
+    #xyqvAivXibKxY0RO control[lib micro\u003abit] →in_background;
     #MoqZci0II5zqP364 where `implicit` \_body\_() {
-      #xbWJI6pgYPHpwWiw while true do {
+      #xbWJI6pgYPHpwWiw while game[lib micro\u003abit_game] →is_running do {
         #xwonR7KDZ1XgHpL9 code→detect;
-        #UAhoHSTIEevYn5rp @\u267b→micro\u003abit→pause(100);
+        #UAhoHSTIEevYn5rp basic[lib micro\u003abit] →pause(80);
       }
     }
   }
   meta private;
+  meta sync;
 }
 #xdoNy11ziwtWZlCo
 action on_shake(#iQzuA2ozltGMgcTU body: Action) {
@@ -121,6 +125,7 @@ action on_shake(#iQzuA2ozltGMgcTU body: Action) {
   #kZT3dnZQyxuZq166 data→last_shake := input[lib micro\u003abit] →running_time;
   #xbZpVSJVwAeD6GRE data→shake := $body;
   #x7QP0YR4O6RXtmXl code→init;
+  meta sync;
 }
 #chN4AnXG7yhK2AXu
 var shake : Action {
@@ -138,6 +143,7 @@ action on_logo_up(#V7xeUvewokw5LxJn body: Action) {
   #EdHSaeQmax51CBmq simulator[lib micro\u003abit] →notify_event_registration("on logo up");
   #MaBgsJCEaDfkBf64 data→logo_up := $body;
   #fwMBTN84PCeAj72Q code→init;
+  meta sync;
 }
 #S2o2JJdwYJhisAXp
 var logo_up : Action {
@@ -206,6 +212,7 @@ action on_logo_down(#JBP7dSSZZ5CW05l5 body: Action) {
   #Y0VL8QH6mDTxdO2h simulator[lib micro\u003abit] →notify_event_registration("on logo down");
   #xU60Xk2Bqg5VlOWx data→logo_down := $body;
   #f27pU1IPNnF4rxZK code→init;
+  meta sync;
 }
 #x4S5FO3oacwG7q6C
 var logo_down : Action {
@@ -217,4 +224,27 @@ action run(#AiTi5d6ioX2KIbLl f: Action) {
     #fZONblMHRCsaFKLv $f→run;
   }
   meta private;
+}
+#C7c1EpqCXKbRbpxn meta import micro\u003abit_game {
+  pub "lwagkt"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` test_countdown()
+    action `async` start_stopwatch()
+    action `async` test_countdown_current_time()
+    action `async` test_current_time()
+    action `sync` is_running() returns(running: Boolean)
+  }
+  #fmeYX07nxwCHpiiO resolve micro\u003abit = ♻ micro\u003abit with {
+  }
 }

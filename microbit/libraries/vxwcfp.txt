@@ -1627,6 +1627,7 @@ action remote_control(#YHC4x4CkZEExgxbM @event: String) {
   #vahTcTSxkwyaQDVT // {help:functions/events}
   #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
   #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
+  meta sync;
 }
 #xfEzD2r0WjZppPTL
 action test_events() {
@@ -1658,6 +1659,7 @@ action camera(#p3kEX3EqeufdJmG1 @event: String) {
   #eeF0Fl9hopb7V9WB // {help:functions/events}
   #Iqur1M60Xd5273Xa // {shim:micro_bit::events::camera}
   #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
+  meta sync;
 }
 #CjI3CHq22D9YwGsN
 action audio_recorder(#WUexw2vVrC2OMEa2 @event: String) {
@@ -1667,6 +1669,7 @@ action audio_recorder(#WUexw2vVrC2OMEa2 @event: String) {
   #YWbPzKlWzlZ7fXwv // {help:functions/events}
   #gf80RSjq2euipiOS // {shim:micro_bit::events::audio_recorder}
   #QKzBOXeC241gkrof // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
+  meta sync;
 }
 #CzqRWuR2SyiUNdAg
 action alert(#pHqCn0ZWIdyNQSVu @event: String) {
@@ -1676,6 +1679,7 @@ action alert(#pHqCn0ZWIdyNQSVu @event: String) {
   #ZCcDnTF7ZiSNaNNA // {help:functions/events}
   #oq6L8Lgvq4qKxsZb // {shim:micro_bit::events::alert}
   #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,alarm 1=MES_ALERT_EVT_ALARM1,alarm 2=MES_ALERT_EVT_ALARM2,alarm 3=MES_ALERT_EVT_ALARM3,alarm 4=MES_ALERT_EVT_ALARM4,alarm 5=MES_ALERT_EVT_ALARM5,alarm 6=MES_ALERT_EVT_ALARM6}
+  meta sync;
 }
 #DFpXK66KYosuH2qD
 action create_A\u002bB_button() {
@@ -1940,6 +1944,7 @@ action add_button(#xbqiUfNdjVfd4IMd text: String, #xJ3n1woMhZjnYNMw @action: Act
   #Q7KxeKWW1ylQ4sof if data→button_extra→is_invalid then {
     #xWU42PbYiXq0h2cU code→create_extra_button($text→to_upper_case, $@action);
   }
+  meta sync;
 }
 #QofbsqCZ4V5hSSrX
 action create_extra_button(#mncq4kd55AAXrAl3 text: String, #xGKSnvw1vCIbFYyj @action: Action) {
@@ -1987,6 +1992,7 @@ action reset() {
   #O4TGFHEORPMYt8Sp // {shim:uBit.reset}
   #InYaIalKOaSAg5nh // {help:functions/reset}
   #bn3n2t5DLBeqS63D app→restart("");
+  meta sync;
 }
 #YEzwn1KNBHbFPNUs
 action test_reset() {
