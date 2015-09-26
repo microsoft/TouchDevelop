@@ -2135,9 +2135,9 @@ module TDev
         {
             var children : HTMLElement[] = [];
             if (this.currentRt && this.currentRt.canResume())
-                children = [ Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution()) ];
+                children = [ Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.codeResume, "Ctrl-M", () => this.resumeExecution()) ];
             else
-                children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
+                children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-M", () => this.runMainAction()) ];
 
             var canCompile =
                 Cloud.isRestricted() &&
@@ -2249,7 +2249,7 @@ module TDev
 
             var debuggerExitButton = Editor.mkTopMenuItem("svg:back,currentColor", lf("exit"), Ticks.debuggerExit, "Ctrl-I", () => this.leaveDebuggerMode());
             this.debuggerModeButtons = [
-                Editor.mkDisablingTopMenuItem("svg:play,currentColor", lf("continue"), Ticks.debuggerContinue, "Ctrl-P", () => this.debuggerContinue()),
+                Editor.mkDisablingTopMenuItem("svg:play,currentColor", lf("continue"), Ticks.debuggerContinue, "Ctrl-M", () => this.debuggerContinue()),
                 Editor.mkDisablingTopMenuItem("svg:stepIn,currentColor", lf("step in"), Ticks.debuggerStepIn, "Right", () => this.debuggerStepIn()),
                 Editor.mkDisablingTopMenuItem("svg:stepOver,currentColor", lf("step over"), Ticks.debuggerStepOver, "Down", () => this.debuggerStepOver()),
                 Editor.mkDisablingTopMenuItem("svg:stepOut,currentColor", lf("step out"), Ticks.debuggerStepOut, "Up", () => this.debuggerStepOut()),

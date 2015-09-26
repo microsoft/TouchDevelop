@@ -227,12 +227,12 @@ module TDev
         public updateRunButton() {
             if (this.runBtn) {
                 if (TheEditor.currentRt && TheEditor.currentRt.canResume())
-                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.calcSearchRun, "Ctrl-P", () => {
+                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.calcSearchRun, "Ctrl-M", () => {
                         TheEditor.dismissSidePane();
                         TheEditor.resumeExecution();
                     })]);
                 else
-                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.calcSearchRun, "Ctrl-P", () => {
+                    this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.calcSearchRun, "Ctrl-M", () => {
                         TheEditor.dismissSidePane();
                         TheEditor.runMainAction();
                     })]);

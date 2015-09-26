@@ -121,7 +121,7 @@ module TDev
               cp ? ActionProperties.functionBox(lf("cut"), "Ctrl-X, Shift-Del", Ticks.sideCut, () => TheEditor.cutDecl(decl)) : undefined,
               cp ? ActionProperties.functionBox(lf("copy"), "Ctrl-C, Ctrl-Ins", Ticks.sideCopy, () => TheEditor.copyDecl(decl)) : undefined,
               ActionProperties.functionBox(lf("delete"), "Del", Ticks.sideDelete, () => TheEditor.cutDecl(decl, true)),
-              TheEditor.widgetEnabled("moveToLibrary") ? ActionProperties.functionBox(lf("move to library"), "Ctrl-M", Ticks.sideMoveToLibrary, () => TheEditor.moveDeclToLibrary(decl)) : undefined,
+              TheEditor.widgetEnabled("moveToLibrary") ? ActionProperties.functionBox(lf("move to library"), undefined, Ticks.sideMoveToLibrary, () => TheEditor.moveDeclToLibrary(decl)) : undefined,
               TheEditor.widgetEnabled("findReferences") ? ActionProperties.functionBox(lf("find references"), "Ctrl-G", Ticks.sideFindRefs, () => TheEditor.findRefs(decl)) : undefined,
               dbg ? ActionProperties.functionBox(lf("see text (dbg)"), "", Ticks.noEvent, () => ModalDialog.showText(decl.serialize())) : undefined
             );

@@ -866,7 +866,7 @@ module TDev
 
                 this.breakpointBtn = null
                 if (stmt.isExecutableStmt() && TheEditor.debugSupported())
-                    this.breakpointBtn = mkBtn("svg:breakpoint,red,clip=-150", lf("breakpoint"), "Ctrl+B", Ticks.btnBreakpoint, this.toggleBreakpointHandler());
+                    this.breakpointBtn = mkBtn("svg:breakpoint,red,clip=-150", lf("breakpoint"), undefined, Ticks.btnBreakpoint, this.toggleBreakpointHandler());
                 var noAdd = TheEditor.widgetEnabled("singleReturnValue")
                     && stmt.parent instanceof AST.ParameterBlock
                     && stmt.parent == (<AST.ActionHeader>(<AST.ParameterBlock>stmt.parent).parent).outParameters
