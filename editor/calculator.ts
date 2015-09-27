@@ -123,7 +123,7 @@ module TDev
             this.setupKeys();
 
             this.templateLine.withClick(() => {
-                if (TheEditor.stepTutorial)
+                if (TheEditor.stepTutorial && Cloud.config.hintLevel == "full")
                     TheEditor.stepTutorial.needHelp();
             })
         }

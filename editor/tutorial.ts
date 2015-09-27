@@ -1271,7 +1271,7 @@ module TDev
                 this.disableUpdate = true;
                 var tip = <Tip>{
                     title: lf("enter this code"),
-                    description: lf("if you are stuck, tap the goal line"),
+                    description: Cloud.config.hintLevel == "full" ? lf("if you are stuck, tap the goal line") : undefined,
                     el: goal,
                     forceBottom: true
                 };
