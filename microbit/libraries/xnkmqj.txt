@@ -225,26 +225,3 @@ action run(#AiTi5d6ioX2KIbLl f: Action) {
   }
   meta private;
 }
-#XGv4hyw3daKCnbJA meta import micro\u003abit_game {
-  pub "lwagkt"
-  usage {
-    action `sync` score() returns(score: Number)
-    action `sync` set_score(value: Number)
-    action `sync` life() returns(life: Number)
-    action `async` set_life(value: Number)
-    action `sync` add_score(points: Number)
-    action `async` add_life(lives: Number)
-    action `async` start_countdown(ms: Number)
-    action `async` current_time() returns(ms: Number)
-    action `async` remove_life(life: Number)
-    action `async` level_up()
-    action `async` level() returns(lv: Number)
-    action `async` test_countdown()
-    action `async` start_stopwatch()
-    action `async` test_countdown_current_time()
-    action `async` test_current_time()
-    action `sync` is_running() returns(running: Boolean)
-  }
-  #CiDrtzoyI3EZetbU resolve micro\u003abit = ♻ micro\u003abit with {
-  }
-}
