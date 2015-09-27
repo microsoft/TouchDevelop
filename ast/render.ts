@@ -789,7 +789,7 @@ module TDev
                         this.stmt(n.rawElseBody.stmts[0] || n,
                         AST.proMode ?
                             this.tline(this.st("}") + this.kw("else") + this.st("{ }")) :
-                            this.tline(this.kw("else") + Renderer.tspan("greyed", Cloud.config.doNothingText) + this.kw(" end ") + this.greyKw("if")),
+                            this.tline(this.kw("else") + Renderer.tspanRaw("greyed", Cloud.config.doNothingText) + this.kw(" end ") + this.greyKw("if")),
                                      (e:HTMLElement) => e.setFlag("elseDoNothing", true), n);
                 } else {
                     if (AST.proMode)

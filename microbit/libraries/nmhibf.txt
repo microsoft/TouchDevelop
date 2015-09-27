@@ -55,8 +55,8 @@ action main() {
     action `sync` reset()
   }
 }
-#dGYUfVNvEKcboVdE meta import micro\u003abit_senses {
-  pub "lyhgks"
+#Lx89xzN1V1IeDgS7 meta import micro\u003abit_senses {
+  pub "lpyqwl"
   usage {
     action `sync` on_screen_up(body: Action)
     action `sync` on_screen_down(body: Action)
@@ -64,9 +64,9 @@ action main() {
     action `sync` on_logo_up(body: Action)
     action `sync` on_logo_down(body: Action)
   }
-  #YE8aQFnlCHHmv8aJ resolve micro\u003abit = ♻ micro\u003abit with {
+  #yPSMudTNs4CwSdA4 resolve micro\u003abit = ♻ micro\u003abit with {
   }
-  #hlkA81TVjfW8Ii1i resolve micro\u003abit_game = ♻ micro\u003abit_game with {
+  #IMxRTGGbJkBKGIQd resolve micro\u003abit_game = ♻ micro\u003abit_game with {
   }
 }
 #Jrz91ONIPGlGzbjD meta import micro\u003abit_screen {

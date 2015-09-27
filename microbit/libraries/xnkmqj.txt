@@ -106,7 +106,7 @@ action init() {
     #hA5Iq3c70pT8TcD5 data→\_init := true;
     #xyqvAivXibKxY0RO control[lib micro\u003abit] →in_background;
     #MoqZci0II5zqP364 where `implicit` \_body\_() {
-      #xbWJI6pgYPHpwWiw while game[lib micro\u003abit_game] →is_running do {
+      #xbWJI6pgYPHpwWiw while true do {
         #xwonR7KDZ1XgHpL9 code→detect;
         #UAhoHSTIEevYn5rp basic[lib micro\u003abit] →pause(80);
       }
