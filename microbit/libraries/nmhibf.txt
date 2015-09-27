@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #qOyZtZHkHxHx1XM4 skip;
+  #v2A0ZQUZoMAv4lJ2 skip;
 }
 #JeiaWFlfaL90VsKy meta import micro\u003abit {
-  pub "vmqhsx"
+  pub "fgvarw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -45,26 +45,28 @@ action main() {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
     action `async` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
-    action `async` add_button(text: String, @action: Action)
-    action `async` reset()
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
   }
 }
-#YLNImQ6JQlDGGUOS meta import micro\u003abit_senses {
-  pub "rqusix"
+#xM0bjlueqOisYxkd meta import micro\u003abit_senses {
+  pub "lhnrxc"
   usage {
-    action `async` on_screen_up(body: Action)
-    action `async` on_screen_down(body: Action)
-    action `async` on_shake(body: Action)
-    action `async` on_logo_up(body: Action)
-    action `async` on_logo_down(body: Action)
+    action `sync` on_screen_up(body: Action)
+    action `sync` on_screen_down(body: Action)
+    action `sync` on_shake(body: Action)
+    action `sync` on_logo_up(body: Action)
+    action `sync` on_logo_down(body: Action)
   }
-  #oywUS0NcKG3m1NMj resolve micro\u003abit = ♻ micro\u003abit with {
+  #xL3oxPuaaUDoNptz resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+  #xlmALNIRyaXIvnmJ resolve micro\u003abit_game = ♻ micro\u003abit_game with {
   }
 }
 #Jrz91ONIPGlGzbjD meta import micro\u003abit_screen {
@@ -80,8 +82,8 @@ action main() {
   #xuTVVXf3060AzaCQ resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#SxK2QEmK2ph5oXS1 meta import micro\u003abit_game {
-  pub "ddbdlp"
+#xbUy6HNrWHIAqXM5 meta import micro\u003abit_game {
+  pub "lwagkt"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -98,7 +100,8 @@ action main() {
     action `async` start_stopwatch()
     action `async` test_countdown_current_time()
     action `async` test_current_time()
+    action `sync` is_running() returns(running: Boolean)
   }
-  #UqJCScp9qvl7DOZj resolve micro\u003abit = ♻ micro\u003abit with {
+  #TlDrXOyQdgc8xnbY resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
