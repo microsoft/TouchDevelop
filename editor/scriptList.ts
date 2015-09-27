@@ -28,10 +28,9 @@
                 var menuItems = [
                     { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
-                        if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
-                            TemplateManager.createScript();
-                        else     
-                            Util.navigateInWindow("/create-code");
+                        // we cannot detect reliably that we are offline,
+                        // always use in-app menu selection
+                        TemplateManager.createScript();
                     } },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
