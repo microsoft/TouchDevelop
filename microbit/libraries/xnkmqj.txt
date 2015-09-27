@@ -17,7 +17,7 @@ action on_screen_up(#Zm23L35zAoZ5xaUM body: Action) {
   meta sync;
 }
 #qxBAjy823BHO24mb meta import micro\u003abit {
-  pub "xqypse"
+  pub "fgvarw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -225,7 +225,7 @@ action run(#AiTi5d6ioX2KIbLl f: Action) {
   }
   meta private;
 }
-#C7c1EpqCXKbRbpxn meta import micro\u003abit_game {
+#XGv4hyw3daKCnbJA meta import micro\u003abit_game {
   pub "lwagkt"
   usage {
     action `sync` score() returns(score: Number)
@@ -245,6 +245,6 @@ action run(#AiTi5d6ioX2KIbLl f: Action) {
     action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
   }
-  #fmeYX07nxwCHpiiO resolve micro\u003abit = ♻ micro\u003abit with {
+  #CiDrtzoyI3EZetbU resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }

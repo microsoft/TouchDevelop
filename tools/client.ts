@@ -3752,8 +3752,6 @@ function fetchlibraries(args) {
 
     var ids = [
       'nmhibf' // adj script
-    , 'pvrktr' // adj widget
-    , 'jousad' // adj game
     , 'vxwcfp' // micro:bit
     , 'ldaqbf' // micro:bit game
     , 'fdbsiw' // micro:bit serial
