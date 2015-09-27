@@ -108,8 +108,8 @@ module TDev.RT {
                 SpriteAnimation.resolveEasing(easing,shape),
                 duration);
             tw.init = function(sp) { 
-                oldx = this._sprite.x();
-                oldy = this._sprite.y();
+                oldx = sp.x();
+                oldy = sp.y();
                 dx = x - oldx;
                 dy = y - oldy;                
             }
@@ -366,8 +366,8 @@ module TDev.RT {
                 duration
                 );
             tw.init = function(sprite) {
-                oldop = this._sprite.opacity();
-                oldscale = this._sprite.scale();
+                oldop = sprite.opacity();
+                oldscale = sprite.scale();
             };            
         }
 
