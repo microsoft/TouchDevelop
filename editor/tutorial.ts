@@ -1270,7 +1270,7 @@ module TDev
                 this.seenDoItYourself = true;
                 this.disableUpdate = true;
                 var tip = <Tip>{
-                    title: lf("no more hints!"),
+                    title: lf("enter this code"),
                     description: lf("if you are stuck, tap the goal line"),
                     el: goal,
                     forceBottom: true

@@ -206,6 +206,7 @@ module TDev.Cloud {
         localTopicPath: string;
         legalButtons: { name: string; url: string; }[];
         doNothingText: string;
+        hintLevel: string;
 
         tdVersion?: string;
         releaseid?: string;
@@ -241,6 +242,7 @@ module TDev.Cloud {
             { name: "privacy and cookies", url: "/privacy"}
         ],
         doNothingText: "do nothing",
+        hintLevel: "full",
     }
 
     export function isArtUrl(url : string) : boolean {
