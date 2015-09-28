@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #v2A0ZQUZoMAv4lJ2 skip;
+  #znysWg6zmbHVNSNs skip;
 }
-#JeiaWFlfaL90VsKy meta import micro\u003abit {
-  pub "fgvarw"
+#iZRtY4qxGxX0HSBB meta import micro\u003abit {
+  pub "beusln"
   usage {
     type Image
     action `sync` \_libinit()
@@ -49,10 +49,11 @@ action main() {
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `async` plot_image(leds: String)
+    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
+    action `sync` warning(message: String)
   }
 }
 #Jrz91ONIPGlGzbjD meta import micro\u003abit_screen {
