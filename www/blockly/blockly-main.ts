@@ -484,6 +484,21 @@ module TDev {
     "micro:bit": {
       pubId: "lwhfye",
       depends: []
+    },
+
+    "micro:bit game": {
+      pubId: "lwagkt",
+      depends: [ "micro:bit" ]
+    },
+
+    "micro:bit screen": {
+      pubId: "nzngii",
+      depends: [ "micro:bit" ]
+    },
+
+    "micro:bit senses": {
+      pubId: "vkmzfe",
+      depends: [ "micro:bit" ]
     }
   };
 
