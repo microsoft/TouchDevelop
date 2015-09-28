@@ -508,7 +508,11 @@ module TDev
             if (singleton && singleton.getName() == AST.libSymbol)
                 verbOverride = "l"
 
-            var autoOnlineSearch = (!isSpecificKind || verbOverride) && terms.length > 0 && allTerms.length > 1 && items.length < 15;
+            var autoOnlineSearch = !Cloud.isRestricted()
+                && (!isSpecificKind || verbOverride)
+                && terms.length > 0
+                && allTerms.length > 1
+                && items.length < 15;
 
             if (verb || autoOnlineSearch) {
                 this.autoUpdate.lastValue = "";
