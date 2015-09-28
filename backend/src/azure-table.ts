@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 import * as util from 'util';
 import * as crypto from 'crypto';

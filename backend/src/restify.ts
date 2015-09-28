@@ -2,11 +2,10 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 import * as httpMod from 'http';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 

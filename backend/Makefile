@@ -1,7 +1,9 @@
-N=tdlite-search
+N=tdlite
 
 all:
-	node node_modules/typescript/bin/tsc
+	#node node_modules/typescript/bin/tsc
+	#node node_modules/yortus-typescript/bin/tsc
+	node c:/dev/typescript/built/local/tsc
 
 conv:
 	cd .. && jake

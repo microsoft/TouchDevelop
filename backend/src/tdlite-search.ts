@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 
 type JsonObject = td.JsonObject;
@@ -603,17 +603,8 @@ function hashes(description: string) : string[]
     return (description.match(/#[a-zA-Z0-9]+/g) || []).map<string>(elt1 => elt1.replace(/#/g, ""));
 }
 
-function orEmpty(s: string) : string
-{
-    let r: string;
-    if (s == null) {
-        r = "";
-    }
-    else {
-        r = s;
-    }
-    return r;
-}
+
+var orEmpty = td.orEmpty;
 
 /**
  * Parses the search text and returns a structured search query.

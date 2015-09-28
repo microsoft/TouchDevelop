@@ -22,20 +22,93 @@ export type JsonAction = Action1<JsonObject>;
 
 export type SMap<T> = { [s:string]: T; };
 
+export interface LogMessage {
+    timestamp: number;
+    elapsed?: string;
+    level: number;
+    category: string;
+    msg: string;
+    meta?: any; // custom data associated to event
+}
+
+
 export namespace App {
     export var ERROR = 3;
     export var WARNING = 4;
     export var INFO = 6;
     export var DEBUG = 7;
 
-    export function logTick(category: string, id: string, meta:any) {
+    export function createInfoMessage(s: string) : LogMessage {
+        return createLogMessage(App.INFO, "", s, undefined);
+    }
+    export function createLogMessage(level : number, category : string, s:string, meta: any) : LogMessage
+    {
+        var m = <LogMessage>{
+            timestamp: Date.now(),
+            level: level,
+            category: category,
+            msg: s,
+            meta: meta
+        }
+        return m;
     }
 
-    export function logException(err: any, meta? : any): void {
+    class Logger {
+        logIdx = -1;
+        logMsgs:LogMessage[] = [];
+        logSz = 2000;
+
+        addMsg(level : number, category : string, s:string, meta: any = null)
+        {
+            var m = createLogMessage(level, category, s, meta);
+            if (this.logIdx >= 0) {
+                this.logMsgs[this.logIdx++] = m;
+                if (this.logIdx >= this.logSz) this.logIdx = 0;
+            } else {
+                this.logMsgs.push(m);
+                if (this.logMsgs.length >= this.logSz)
+                    this.logIdx = 0;
+            }
+
+            console.log(category, ": ", s);
+        }
+
+        log(msg:string)
+        {
+            this.addMsg(INFO, "TD", msg)
+        }
+
+        getMsgs():LogMessage[]
+        {
+            var i = this.logIdx;
+            var res = [];
+            var wrapped = false;
+            if (i < 0) i = 0;
+            var n = Date.now()
+            while (i < this.logMsgs.length) {
+                var m = this.logMsgs[i]
+                var diff = ("00000000" + (n - m.timestamp)).slice(-7).replace(/(\d\d\d)$/, (k) => "." + k);
+                res.push(<LogMessage>{
+                    level: m.level,
+                    category: m.category,
+                    msg: m.msg,
+                    elapsed: diff,
+                    meta: m.meta,
+                    timestamp: m.timestamp
+                });
+                if (++i == this.logMsgs.length && !wrapped) {
+                    wrapped = true;
+                    i = 0;
+                }
+                if (wrapped && i >= this.logIdx) break;
+            }
+            res.reverse()
+            return res;
+        }
     }
 
-    export function logMeasure(category:string, id: string, value: number, meta: any) {
-    }
+    var logger = new Logger();
+
 
     export interface AppLogTransport {
         log? : (level : number, category : string, msg: string, meta?: any) => void;
@@ -49,9 +122,76 @@ export namespace App {
 
     export var transports: AppLogTransport[] = [];
     export function addTransport(transport: AppLogTransport) {
-        //TODO
+        transports.push(transport)
     }
 
+    export function transportFailed(t:AppLogTransport, tp:string, err:any) {
+        if (t.id) tp = " (" + t.id + ")"
+        logger.log(tp + ": transport failed. " + (err.stack || err.message || err))
+    }
+
+    export var runTransports = (id:string, run:(t:AppLogTransport) => void) =>
+    {
+        transports.forEach(transport => {
+            try {
+                run(transport)
+            } catch (err) {
+                transportFailed(transport, id, err)
+            }
+        });
+    }
+
+    export function logException(err: any, meta? : any): void {
+        if (err.tdSkipReporting) {
+            logEvent(DEBUG, "skipped-crash", err.message || err + "", null)
+            return
+        }
+
+        if (err.tdIsSecondary) {
+            logEvent(DEBUG, "secondary-crash", err.message || err + "", null)
+            return
+        }
+
+        if (err.tdMeta) {
+            if (meta)
+                Object.keys(meta).forEach(k => {
+                    err.tdMeta[k] = meta[k]
+                })
+            meta = err.tdMeta
+        }
+
+        runTransports("logException", t => t.logException && t.logException(err, meta))
+
+        var msg = err.stack
+        if (!msg) {
+            msg = err.message || (err + "")
+        }
+        logEvent(ERROR, "crash", msg, meta);
+    }
+
+    export function logEvent(level: number, category: string, message: string, meta: any): void {
+        level = Math.max(0, Math.floor(level));
+        category = category || "";
+        message = message || "";
+
+        logger.addMsg(level, category, message, meta)
+        runTransports("logEvent", t => t.log && t.log(level, category, message, meta))
+    }
+
+    export function logTick(category: string, id: string, meta:any) {
+        runTransports("logTick", t => t.logTick && t.logTick(category, id, meta))
+        if (!meta || !meta.skipLog)
+            App.logEvent(App.INFO, category, id, meta);
+    }
+
+    export function logMeasure(category:string, id: string, value: number, meta: any) {
+        var lmeta:any = clone(meta) || {};
+        lmeta.measureId = id
+        lmeta.measureValue = value
+        runTransports("logMeasure", t => t.logMeasure && t.logMeasure(category, id, value, meta))
+        if (!meta || !meta.skipLog)
+            App.logEvent(App.INFO, category, id + ": " + value, lmeta);
+    }
 }
 
 export function perfNow() {
@@ -125,12 +265,22 @@ export function toString(v:any) : string
     return v + "";
 }
 
+export function toBoolean(v:any) : boolean
+{
+    if (typeof v == "string") return (v.toLowerCase() == "true")
+    return !!v;
+}
+
 export function orEmpty(s: any) : string
 {
     if (s == null) return "";
     return toString(s);
 }
-export function clamp(min : number, max : number, value : number) : number { return value < min ? min : value > max ? max : value; }
+
+export function clamp(min : number, max : number, value : number) : number
+{
+    return value < min ? min : value > max ? max : value; 
+}
 
 
 export function asArray(o:JsonObject) : JsonObject[]
@@ -138,17 +288,63 @@ export function asArray(o:JsonObject) : JsonObject[]
     return <any>o;
 }
 
+export function json(className : any, fieldName : string) {
+    var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
+    if (!className.__fields)
+        className.__fields = []
+    var e:any = { name: fieldName }
+    switch (t.name) {
+    case "String":
+        e.toJson = v => toString(v);
+        e.fromJson = v => toString(v);
+        break;
+    case "Number":
+        e.toJson = v => toNumber(v);
+        e.fromJson = v => toNumber(v);
+        break;
+    case "Boolean":
+        e.toJson = v => toBoolean(v);
+        e.fromJson = v => toBoolean(v);
+        break;
+    default:
+        console.log("BAD TYPE", t)
+    }
+
+    className.__fields.push(e)
+
+    //className.foobar = 42;
+    //className.constructor.baz = 412;
+    //console.log(className.createFromJson)
+    //console.log(className)
+    //console.log(fieldName)
+    //console.log(t)
+    //console.log(t.name)
+    // t.name
+}
+
 export class JsonRecord
 {
     toJson():JsonObject
     {
-        //TODO
-        return {}
+        var r = {}
+        for (let f of (<any>this).__fields || []) {
+            if (!this.hasOwnProperty(f.name)) continue;
+            var v = this[f.name]
+            if (v == null) continue;
+            r[f.name] = f.toJson(v);
+        }
+        return r
     }
 
     fromJson(o:JsonObject):void
     {
-        //TODO
+        for (let f of (<any>this).__fields || []) {
+            delete this[f.name];
+            if (!o.hasOwnProperty(f.name)) continue;
+            var v = o[f.name]
+            if (v == null) continue;
+            this[f.name] = f.fromJson(v);
+        }
     }
 
     equals(other:JsonRecord)
@@ -158,7 +354,10 @@ export class JsonRecord
 
     load(o:any):void
     {
-        //TODO
+        for (let f of (<any>this).__fields || []) {
+            if (!o.hasOwnProperty(f.name)) continue;
+            this[f.name] = f.fromJson(o[f.name]);
+        }
     }
 }
 
@@ -174,11 +373,6 @@ export function createRandomId(size: number) : string
     else {
         return s.substr(0, size);
     }
-}
-
-export function json(className : any, fieldName : string) {
-    var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
-    // t.name
 }
 
 export function clone(e:JsonObject):JsonObject
@@ -231,14 +425,13 @@ export function randomRange(min: number, max: number): number {
 export function checkAndLog(err:any, meta?: any):boolean
 {
     if (!err) return true
-    //TODO
-    //logError(err, meta);
+    App.logException(err, meta)
     return false
 }
 
 export function log(msg:string)
 {
-    //TODO
+    App.logEvent(App.INFO, "APP", msg, {});
 }
 
 export function mkAgent(proto:string):http.Agent
@@ -285,8 +478,8 @@ export class AppLogger {
     public log(level: string, message: string, meta: JsonObject) {
         var ilevel = this.stringToLevel(level);
         if (ilevel > this.minLevel) return
-        console.log(this.category + ": " + message)
-        // App.logEvent(ilevel, this.category, message, this.augmentMeta(meta ? meta.value() : undefined, s));
+        // console.log(this.category + ": " + message)
+        App.logEvent(ilevel, this.category, message, this.augmentMeta(meta));
     }
 
     // Set minimum logging level for this logger (defaults to "debug").

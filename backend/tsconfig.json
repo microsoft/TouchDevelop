@@ -8,6 +8,7 @@
         "newLine": "LF",
         "emitDecoratorMetadata": true,
         "experimentalDecorators":true,
+        "module": "commonjs",
         "sourceMap": true
     },
     "files": [
@@ -33,6 +34,7 @@
         "src/server-auth.ts",
         "src/tdlite-docs.ts",
         "src/tdlite-search.ts",
+        "src/t0.ts",
         "src/parallel.ts"
     ],
     "exclude": [

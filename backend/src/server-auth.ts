@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 import * as querystring from 'querystring';
 
@@ -380,17 +380,7 @@ function initRestify() : void
     }
 }
 
-function orEmpty(s: string) : string
-{
-    let r: string;
-    if (s == null) {
-        r = "";
-    }
-    else {
-        r = s;
-    }
-    return r;
-}
+var orEmpty = td.orEmpty;
 
 /**
  * Setup Azure Active Directory (Office 365 or Corporate) authentication provider. Requires ``AZURE_AD_CLIENT_ID`` env.

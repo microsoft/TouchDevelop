@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 
 export class Queue
     extends td.JsonRecord

@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 
 var adj2: string[];
 

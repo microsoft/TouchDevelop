@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 
 type JsonObject = td.JsonObject;

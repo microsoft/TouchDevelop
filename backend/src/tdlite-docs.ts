@@ -2,7 +2,7 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
 
 type JsonObject = td.JsonObject;
@@ -122,17 +122,7 @@ export async function formatAsync(templ: string, pubdata: JsonBuilder) : Promise
     return expanded1;
 }
 
-function orEmpty(s: string) : string
-{
-    let r: string;
-    if (s == null) {
-        r = "";
-    }
-    else {
-        r = s;
-    }
-    return r;
-}
+var orEmpty = td.orEmpty;
 
 function htmlQuote(tdUsername: string) : string
 {
