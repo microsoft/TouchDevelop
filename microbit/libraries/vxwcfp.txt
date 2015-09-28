@@ -1770,7 +1770,10 @@ action plot_image(#ernyV6gPgL4qDGoq leds: String) {
   #x4ytGwZranX41qtX // {language:leds:bitframe}
   #xrkeEg0XKHn2gsPg // {shim:micro_bit::plotImage}
   #QG4WQ2IObQEhJUPA $img := code→parse_image($leds);
-  #aaZfrvHpxRFkAzhI code→show_image($img, 0);
+  #ojT1o4w2BY2UWgbC $anim_id := data→current_animation + 1;
+  #xUoVRkjvbkwKlNdl data→current_animation := $anim_id;
+  #fhaDUozS8M02z1k0 code→render_image($img, 0);
+  meta sync;
 }
 #xPty4Z96gEpPmXcC
 var counters : Json_Builder {
@@ -2011,6 +2014,14 @@ action test_show_number() {
   #pJFrIdojNwmiVXeG code→show_number(0, 150);
   #sOilRBUMeGHbS5iq code→show_number(1, 150);
   #XiW64jN2AhkgUI8q code→show_number(2, 150);
+  meta private;
+  meta test;
+}
+#jFmD5xkFyWwpGTFt
+action test_plot_image() {
+  #uv2qjBz92QKG6jb4 // {shim:}
+  #xWC0vpIb0g6zkauY code→\_libinit;
+  #HAPp3WJOXLG3Hd5l code→plot_image("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
   meta private;
   meta test;
 }
