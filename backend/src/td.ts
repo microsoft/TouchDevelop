@@ -178,6 +178,20 @@ export function randomUint32():number
     return (b[0] | (b[1]<<8) | (b[2]<<16) | ((b[3]<<24) >>> 0)) >>> 0
 }
 
+export function sha256(b:Buffer):string
+{
+    let h = crypto.createHash('sha256')
+    h.update(b)
+    return h.digest('hex').toLowerCase()
+}
+
+export function orderedBy<T>(arr:T[], key:(e:T)=>number)
+{
+    arr = arr.slice(0)
+    arr.sort((x, y) => key(x) - key(y))
+    return arr
+}
+
 var m32 = 1 / 0x100000000;
 var m64 = 1 / 0x10000000000000000;
 

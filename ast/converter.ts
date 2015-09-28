@@ -69,13 +69,15 @@ module TDev.AST {
         public globalId(d:Decl, pref = "")
         {
             var n = d.getName()
-            if (d instanceof Action) {
+            
+            if (d instanceof RecordDef || (d instanceof Action && (<Action>d).isActionTypeDef())) {
+                n = n[0].toUpperCase() + n.slice(1)
+            } else  if (d instanceof Action) {
                 var a = <Action>d;
                 if (!a.isAtomic)
                     n += "Async"
-            } else if (d instanceof RecordDef) {
-                n = n[0].toUpperCase() + n.slice(1)
             }
+
             return this.jsid(this.globalCtx.quote(pref + n, 0))
         }
 
@@ -312,6 +314,7 @@ module TDev.AST {
               "Json Builder->copy from": "td.jsonCopyFrom",
               "String->contains": "td.stringContains",
               "Collection->to json": "td.arrayToJson",
+              "Collection->ordered by": "td.orderedBy",
               "Web->decode url": "decodeURIComponent",
               "Web->decode uri component": "decodeURIComponent",
               "Web->encode uri component": "encodeURIComponent",
@@ -335,6 +338,7 @@ module TDev.AST {
               "Web->download json": "td.downloadJsonAsync",
               "Web->download": "td.downloadTextAsync",
               "Contract->requires": "assert",
+              "Buffer->sha256": "td.sha256",
         }
 
         static methodRepl:StringMap<string> = {
@@ -586,6 +590,10 @@ module TDev.AST {
             } else if (p.getName() == "\u25C8add") {
                 this.dispatch(e.args[0])
                 this.tw.op("+=")
+                this.dispatch(e.args[1])
+            } else if (p.getName() == "\u25C8set") {
+                this.dispatch(e.args[0])
+                this.tw.op("=")
                 this.dispatch(e.args[1])
             } else if (p.parentKind.isAction && p.getName() == "run") {
                 this.tightExpr(e.args[0])
@@ -866,6 +874,9 @@ module TDev.AST {
             if (!this.useExtensions && a.parent == this.app)
                 return false
 
+            if (a.isActionTypeDef())
+                return false
+
             var p0 = a.getInParameters()[0]
             if (p0 && /\?$/.test(p0.getName()))
                 return false
@@ -891,8 +902,39 @@ module TDev.AST {
 
         thisLocal:LocalDef;
 
+        actionReturn(a:Action)
+        {
+            if (!a.isAtomic) this.tw.kw("Promise<")
+
+                var outp = a.getOutParameters()
+                if (outp.length == 0) this.tw.kw("void")
+                else if (outp.length == 1) this.type(outp[0].getKind())
+                else {
+                    this.tw.op0("[")
+                    this.commaSep(outp, p => this.type(p.local.getKind()))
+                    this.tw.op0("]")
+                }
+
+            if (!a.isAtomic) this.tw.op0(">")
+        }
+
+        printActionTypeDef(a:Action)
+        {
+            this.tw.kw("export type")
+            this.tw.globalId(a).op("=")
+            this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
+            this.tw.op("=>");
+            this.actionReturn(a)
+            this.tw.op0(";").nl();
+        }
+
         visitAction(a:Action)
         {
+            if (a.isActionTypeDef()) {
+                this.printActionTypeDef(a)
+                return
+            }
+
             var isExtension = this.isOwnExtension(a)
 
             this.localCtx = new TsQuotingCtx()
@@ -941,18 +983,7 @@ module TDev.AST {
 
             this.tw.op(":");
 
-            if (!a.isAtomic) this.tw.kw("Promise<")
-
-                var outp = a.getOutParameters()
-                if (outp.length == 0) this.tw.kw("void")
-                else if (outp.length == 1) this.type(outp[0].getKind())
-                else {
-                    this.tw.op0("[")
-                    this.commaSep(outp, p => this.type(p.local.getKind()))
-                    this.tw.op0("]")
-                }
-
-            if (!a.isAtomic) this.tw.op0(">")
+            this.actionReturn(a);
 
             this.tw.nl()
             this.tw.beginBlock()
@@ -1071,13 +1102,15 @@ module TDev.AST {
             var dump = (lst:Decl[]) => lst.forEach(t => this.dispatch(t))
             dump(a.libraries())
             this.tw.nl()
+            dump(a.allActions().filter(a => a.isActionTypeDef()))
+            this.tw.nl()
             dump(a.variables())
             this.tw.nl()
             dump(a.resources())
             this.tw.nl()
             dump(a.records())
             this.tw.nl()
-            dump(a.allActions().filter(a => !this.isOwnExtension(a)))
+            dump(a.allActions().filter(a => !this.isOwnExtension(a) && !a.isActionTypeDef()))
         }
 
         visitComment(c:Comment)
