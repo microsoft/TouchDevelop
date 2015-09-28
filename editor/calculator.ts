@@ -4456,6 +4456,8 @@ module TDev
 
             if (endPoint == cursorPosition)
                 this.setKind(e.getKind());
+            else if (!!e.loc && e.loc.beg == cursorPosition + 1) // between the property name and the (
+                this.setKind(api.core.Nothing);
         }
 
         public run()
@@ -4485,11 +4487,8 @@ module TDev
                     }
                 }
 
-                if (!!pp.prop && pp.prop.getParameters().length == 1) {
-                    this.setKind(pp.prop.getResult().getKind());
-                } else {
-                    return;
-                }
+                if (!!pp.prop && pp.prop.getParameters().length == 1)
+                  this.setKind(pp.prop.getResult().getKind());
                 break;
 
             case "operator":
