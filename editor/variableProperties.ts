@@ -864,7 +864,7 @@ module TDev
                 var name = HTML.mkTextInput("text", lf("document name"));
                 name.value = initialName || "";
                 var description = HTML.mkTextInput("text", lf("description"));
-                var file = input || HTML.mkDocumentInput(1);
+                var file = input || HTML.mkDocumentInput(8);
                 var errorDiv = div('validation-error');
                 var progressDiv = div('');
                 var progressBar = HTML.mkProgressBar();

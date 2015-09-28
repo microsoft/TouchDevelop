@@ -579,7 +579,7 @@ module TDev.AST
             var maxCount = 4;
             if (!res.every(s => s.hintLevel === undefined)) maxCount = 1e10;
 
-            var currLevel = "full"
+            var currLevel = Cloud.config.hintLevel;
             res.forEach(s => {
                 if (s.hintLevel) {
                     currLevel = s.hintLevel;

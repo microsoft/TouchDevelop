@@ -11,11 +11,12 @@ module TDev
 
     export class TextLiteralEditor extends LiteralEditor {
         private res: HTML.AutoExpandingTextArea;
-        constructor(public calculator: Calculator, public literal: AST.Literal) {
+        constructor(public calculator: Calculator, public literal: AST.Literal, fullScreen : boolean) {
             super(calculator, literal);
 
+            fullScreen = fullScreen && Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen");
             var opts: HTML.AutoExpandingTextAreaOptions = { showDismiss: true };
-            if (Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen"))
+            if (fullScreen)
                 opts.editFullScreenAsync = (t) => EditorHost.editFullScreenAsync(
                     literal.languageHint ? 'inline.' + literal.languageHint : '', t);
             this.res = HTML.mkAutoExpandingTextArea(opts)
@@ -70,7 +71,7 @@ module TDev
                 Browser.setInnerHTML(this.hintDiv, "<span>goal:</span>" + new Renderer().renderBitmatrix(hint, { height: 4 }));                
             }
             
-            this.okBtn = HTML.mkRoundButton("svg:check,black", lf("ok"), Ticks.noEvent, () => {
+            this.okBtn = HTML.mkRoundButton("svg:check,currentColor", lf("ok"), Ticks.noEvent, () => {
                 if (this.dialog) this.dialog.dismiss();
             })
             this.okBtn.style.position = "absolute";
@@ -80,7 +81,7 @@ module TDev
             this.table = div('bitmatrices');
             
             if (this.animation) {
-                this.plusBtn = HTML.mkRoundButton("svg:add,black", lf("add"), Ticks.noEvent, () => {
+                this.plusBtn = HTML.mkRoundButton("svg:add,currentColor", lf("add"), Ticks.noEvent, () => {
                     var v = this.serialize(this.frames + 1);
                     this.updateTable(v);
                     if (this.frames > 1) {
@@ -93,7 +94,7 @@ module TDev
                             }
                     }
                 });
-                this.minusBtn = HTML.mkRoundButton("svg:minus,black", lf("remove"), Ticks.noEvent, () => {
+                this.minusBtn = HTML.mkRoundButton("svg:minus,currentColor", lf("remove"), Ticks.noEvent, () => {
                     if (this.frames > 1) {
                         var v = this.serialize(this.frames - 1);
                         this.updateTable(v);

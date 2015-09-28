@@ -267,7 +267,7 @@ module TDev.Plugins {
         plugins.forEach(p => {
             var box = p.scriptInfo.mkSmallBoxNoClick()
             box.className += " pluginHeader";
-            var stopbtn = HTML.mkRoundButton("svg:cancel,black", lf("stop"), Ticks.pluginStop, () => {
+            var stopbtn = HTML.mkRoundButton("svg:cancel,currentColor", lf("stop"), Ticks.pluginStop, () => {
                 var ids = Script.editorState.buttonPlugins
                 if (p.buttonGuid && ids) delete ids[p.buttonGuid]
                 p.uninstall()
@@ -304,7 +304,7 @@ module TDev.Plugins {
             p.operations.forEach(op => {
                 if (op.buttonScope == scope) {
                     var pluginid = Util.htmlEscape(op.header.replace(/\s/, '').toLowerCase());
-                    var b = HTML.mkRoundButton("svg:" + op.icon + ",black", op.header, Ticks.sideButtonPlugin, () => {
+                    var b = HTML.mkRoundButton("svg:" + op.icon + ",currentColor", op.header, Ticks.sideButtonPlugin, () => {
                         TheEditor.notifyTutorial("plugin:" + pluginid);
                         p.runOperationAsync(op).done();
                     })

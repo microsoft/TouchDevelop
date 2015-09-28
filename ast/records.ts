@@ -5,23 +5,6 @@ module TDev.AST {
     export var oldModelSymbol = "\u229E";
     export var modelSymbol = "\u2756";
 
-    // A special variety of statement that is displayed inline. Useful for
-    // making parts of the record definition clickable.
-    export class InlineStmt
-        extends AST.Stmt
-    {
-
-        constructor() {
-            super();
-        }
-
-        public accept(v:NodeVisitor) { v.visitInlineStmt(this); }
-
-        public nodeType() {
-            return "inlineStmt";
-        }
-    }
-
     // First use-case: to make the record kind clickable.
     export class RecordKind
         extends InlineStmt
@@ -38,64 +21,6 @@ module TDev.AST {
         constructor(public parentDef: RecordDef) {
             super();
         }
-    }
-
-    // Second use-case: to hold a single token that holds the record name. That
-    // allows the calculator to switch into editing mode, which is convenient.
-    // The [getName] and [setName] functions from the [RecordNameHolder] reflect
-    // the value of the (supposedly) single [RecordName] token that's in there.
-    export class RecordNameHolder
-        extends InlineStmt
-    {
-
-        private exprHolder = new AST.ExprHolder();
-
-        constructor() {
-            super();
-
-            this.exprHolder.tokens = [ new RecordName() ]
-            this.exprHolder.parsed = new AST.Literal(); // placeholder
-            this.exprHolder.locals = [];
-        }
-
-        public children() {
-            return this.exprHolder.tokens;
-        }
-
-        public calcNode(): ExprHolder {
-            return this.exprHolder;
-        }
-
-        public notifyChange() {
-            var toks = this.exprHolder.tokens;
-            if (toks[0] && toks[0] instanceof RecordName) {
-                var newName = (<RecordName>toks[0]).data;
-                if (newName.length)
-                    super.setName(newName);
-                else
-                    (<RecordName>toks[0]).data = this.getName();
-            }
-        }
-
-        public setName(v: string) {
-            super.setName(v);
-            var toks = this.exprHolder.tokens;
-            if (toks[0] && toks[0] instanceof RecordName)
-                (<RecordName>toks[0]).data = v;
-        }
-    }
-
-    // The token that stands for the record name itself. While, strictly
-    // speaking, it is a literal, having a subclass allows the renderer to
-    // render it without quotes.
-    export class RecordName
-        extends AST.Literal
-    {
-        constructor() {
-            super();
-        }
-
-        public accept(v:AST.NodeVisitor) { return v.visitRecordName(this); }
     }
 
     // Same deal here.
@@ -783,7 +708,6 @@ module TDev.AST {
 
         public recordKind = new RecordKind(this);
         public recordPersistence = new RecordPersistenceKind(this);
-        public recordNameHolder = new RecordNameHolder();
 
         public cloudEnabled = false;
         public cloudPartiallyEnabled = false;
@@ -807,10 +731,6 @@ module TDev.AST {
             this._kind = this.tableKind;
         }
 
-        public setName(n: string) {
-            this.recordNameHolder.setName(n);
-        }
-
         public parentLibrary() : AST.LibraryRef { return null }
 
         public locallypersisted() { return this.persistent && !(this.cloudEnabled || this.cloudPartiallyEnabled); }
@@ -826,7 +746,6 @@ module TDev.AST {
 
         public thingSetKindName() { return "records"; }
 
-        public getCoreName() { return this.recordNameHolder.getName(); }
         public getDefinedKind() { return this.entryKind }
 
         public isExported() { return this._isExported && this.recordType == RecordType.Object }

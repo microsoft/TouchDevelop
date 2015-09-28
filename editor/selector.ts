@@ -819,17 +819,17 @@ module TDev
                 var calc = TheEditor.calculator;
                 if (this.canCopyPaste()) {
                     this.topButtonRow.setChildren([
-                        mkBtn("svg:paste,black", lf("paste"), "Ctrl-V, Shift-Ins", Ticks.btnPaste, () => {
+                        mkBtn("svg:paste,currentColor", lf("paste"), "Ctrl-V, Shift-Ins", Ticks.btnPaste, () => {
                             this.pasteCode()
                         }),
-                        mkBtn("svg:copy,black", lf("copy"), "Ctrl-C, Ctrl-Ins", Ticks.btnCopy, () => {
+                        mkBtn("svg:copy,currentColor", lf("copy"), "Ctrl-C, Ctrl-Ins", Ticks.btnCopy, () => {
                             if (calc.inSelectionMode()) {
                                 calc.copyHandler()
                             } else {
                                 this.copyCode();
                             }
                         }),
-                        mkBtn("svg:cut,black", lf("cut"), "Ctrl-X, Shift-Del", Ticks.btnCut, () => {
+                        mkBtn("svg:cut,currentColor", lf("cut"), "Ctrl-X, Shift-Del", Ticks.btnCut, () => {
                             if (calc.inSelectionMode()) {
                                 calc.cutHandler()
                             } else {
@@ -839,7 +839,7 @@ module TDev
                     ]);
                 } else {
                     this.topButtonRow.setChildren([
-                        mkBtn("svg:trash,black", lf("delete"), "Ctrl-X, Shift-Del", Ticks.btnCut, () => {
+                        mkBtn("svg:trash,currentColor", lf("delete"), "Ctrl-X, Shift-Del", Ticks.btnCut, () => {
                             this.cutCode();
                         })
                     ]);
@@ -856,7 +856,7 @@ module TDev
                     else if (stmt.parent.parent instanceof AST.InlineAction) {}
                     else if (TheEditor.stepTutorial) {}
                     else {
-                        moveLeft = mkBtnDown("svg:ArrowDownL,black", lf("move left"), "Ctrl-L", Ticks.btnMoveLeft, () => {
+                        moveLeft = mkBtnDown("svg:ArrowDownL,currentColor", lf("move left"), "Ctrl-L", Ticks.btnMoveLeft, () => {
                                             tick(Ticks.codeMoveLeft);
                                             this.moveOut()
                                     });
@@ -866,18 +866,18 @@ module TDev
 
                 this.breakpointBtn = null
                 if (stmt.isExecutableStmt() && TheEditor.debugSupported())
-                    this.breakpointBtn = mkBtn("svg:breakpoint,red,clip=-150", lf("breakpoint"), "Ctrl+B", Ticks.btnBreakpoint, this.toggleBreakpointHandler());
+                    this.breakpointBtn = mkBtn("svg:breakpoint,red,clip=-150", lf("breakpoint"), undefined, Ticks.btnBreakpoint, this.toggleBreakpointHandler());
                 var noAdd = TheEditor.widgetEnabled("singleReturnValue")
                     && stmt.parent instanceof AST.ParameterBlock
                     && stmt.parent == (<AST.ActionHeader>(<AST.ParameterBlock>stmt.parent).parent).outParameters
                     && stmt.parentAction().hasOutParameters();
 
                 this.topLeftButtonRow.setChildren([
-                    noAdd ? null : mkBtn("svg:add,black", lf("add"), "Ctrl-Enter", Ticks.btnAddUp, this.addCallback(-1, null, Ticks.codeAddAbove)),
+                    noAdd ? null : mkBtn("svg:add,currentColor", lf("add"), "Ctrl-Enter", Ticks.btnAddUp, this.addCallback(-1, null, Ticks.codeAddAbove)),
                     this.breakpointBtn
                 ]);
                 this.bottomLeftButtonRow.setChildren([moveLeft,
-                    noAdd? null : mkBtnDown("svg:add,black", lf("add"), "-Enter", Ticks.btnAddDown, this.addCallback(1, null, Ticks.codeAddBelow))
+                    noAdd? null : mkBtnDown("svg:add,currentColor", lf("add"), "-Enter", Ticks.btnAddDown, this.addCallback(1, null, Ticks.codeAddBelow))
                 ]);
 
                 var t = HelpTopic.findById(this.selectedStmt.helpTopic())
@@ -891,7 +891,7 @@ module TDev
                 this.bottomButtonRow.setChildren([
                     wrenchDiv,
                     this.canCopyPaste() && TheEditor.widgetEnabled("selectStatements") ?
-                        mkBtnDown("svg:select,black", lf("select"), " Shift-Up, Down", Ticks.btnSelect, () => {
+                        mkBtnDown("svg:select,currentColor", lf("select"), " Shift-Up, Down", Ticks.btnSelect, () => {
                             this.startSelection();
                         }) : null
                 ]);

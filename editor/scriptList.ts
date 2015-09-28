@@ -26,13 +26,12 @@
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
                 var menuItems = [
+                    { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
-                        if (Cloud.isOffline() || /http:\/\/localhost/i.test(document.URL))
-                            TemplateManager.createScript();
-                        else     
-                            Util.navigateInWindow("/create-code");
+                        // we cannot detect reliably that we are offline,
+                        // always use in-app menu selection
+                        TemplateManager.createScript();
                     } },
-                    { id: "gettingstarted", name: lf("Getting Started"), tick: Ticks.siteMenuGettingStarted, handler: () => Util.navigateInWindow("/getting-started") },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
                 ];
@@ -53,7 +52,7 @@
                 var siteUser = elt("siteUser");
                 if (siteUser) {
                     if (Cloud.getUserId()) {
-                        siteUser.setChildren([HTML.mkImg("svg:fa-user,black")])
+                        siteUser.setChildren([HTML.mkImg("svg:fa-user,currentColor")])
                         siteUser.withClick(() => {
                             this.loadDetails(this.getUserInfoById("me", "me"));
                         });
@@ -204,7 +203,7 @@
 
         private setBackButton()
         {
-            var icon = "svg:back,black";
+            var icon = "svg:back,currentColor";
             var btn: HTMLElement;
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething)
                 btn = ScriptInfo.mkBtn(icon, lf("dismiss"), () => this.showHub());
@@ -1781,7 +1780,7 @@
             this.topTitleHidden = hideHeader;
             this.topTitle = header;
 
-            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,black", header, null, Ticks.editBtnSideSearch, () => {
+            this.slideButton.setChildren([TheEditor.mkTabMenuItem("svg:fa-list-ul,currentColor", header, null, Ticks.editBtnSideSearch, () => {
                 if (!this.sidePaneVisibleNow()) this.showSidePane();
             })]);
 
@@ -1843,7 +1842,7 @@
                     
                     if (Cloud.isRestricted() && !ncont && /^installed/.test(path) && this.topLocations.length == 0) {
                         this.moreDiv.setChildren([div("sdLoadingMore",
-                            lf("no scripts yet, "), HTML.mkA('', '/create-code', '', lf("create code")), lf(" to get started!"))]);    
+                            lf("no scripts yet, "), HTML.mkLinkButton(lf("create code"), () => { TemplateManager.createScript() }), lf(" to get started!"))]);    
                     }
                     
                 }, noCache, includeETags);
@@ -5591,7 +5590,7 @@
                     picDiv.style.backgroundPosition = 'center';
                     picDiv.style.backgroundSize = picMode;
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5605,7 +5604,7 @@
                     });
                     img = playBtn;
                 } else if (a.bloburl) {
-                    img = HTML.mkImg("svg:document,black");
+                    img = HTML.mkImg("svg:document,currentColor");
                 }
 
                 d.setChildren([img,
@@ -5650,7 +5649,7 @@
                     img = HTML.mkImg(a.thumburl);
                     img.className += " checker";
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,black", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5664,9 +5663,9 @@
                     });
                     img = div('checker', playBtn);
                 } else if (a.arttype == "video") {
-                    img = HTML.mkImg("svg:videoptr,black");
+                    img = HTML.mkImg("svg:videoptr,currentColor");
                 } else if (a.bloburl) {
-                    img = HTML.mkImg("svg:document,black");
+                    img = HTML.mkImg("svg:document,currentColor");
                 }
                 icon.setChildren([img]);
 
@@ -6486,14 +6485,6 @@
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
-
-                // scripts are uninstalled when deleted
-                // however, another client might still be synching those changes
-                // so we uninstall again here
-                if (deleted) {
-                    this.uninstallAsync(false).done();
-                    return;
-                }
                                 
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
@@ -6912,7 +6903,7 @@
                 restoreNormal();
                 f();
             })
-            var btn1:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",black", desc, () => {
+            var btn1:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",currentColor", desc, () => {
                 btn1.style.display = "none";
                 btn2.style.display = "inline-block";
                 Util.setTimeout(3000, restoreNormal);
@@ -8987,7 +8978,7 @@
 
         public mkTabsCore(): BrowserTab[] {
             var tabs: BrowserTab[] = [
-                new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
+                Cloud.isRestricted() ? null : new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
                 new GroupUsersTab(this),
                 this.collaborations = Cloud.isRestricted() ? null : new CollaborationsTab(this),
                 Cloud.isRestricted() ? null : new GroupUserProgressTab(this),

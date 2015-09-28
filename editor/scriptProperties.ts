@@ -4,20 +4,19 @@
 module TDev
 {
     export class ScriptProperties
-        extends CodeView
+        extends SideTab
     {
         private theScript:AST.App;
         constructor() {
             super()
         }
-        private scriptName = HTML.mkTextInput("text", lf("script name"));
         private colorContainer = div("scriptPropContainer");
         private iconArtIdContainer = div("scriptPropContainer");
         private splashArtIdContainer = div("scriptPropContainer");
         private isLibrary:HTMLElement;
         private allowExport: HTMLElement;
         private isCloud: HTMLElement;
-        private formRoot = div("varProps");
+        private formRoot = div(null);
         private mdRoot = div(null);
         private description = HTML.mkTextArea("description");
         private revertButton:HTMLElement;
@@ -47,6 +46,12 @@ module TDev
         }
 
         public nodeType() { return "app"; }
+        
+        public edit(s: AST.Stmt)
+        {
+            var h = <AST.AppHeaderStmt>s;
+            this.load(h.parentDef);
+        }
 
         private editCaps()
         {
@@ -182,16 +187,9 @@ module TDev
             this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
-            this.scriptName.onchange = () => {
-                this.scriptName.value = this.scriptName.value.replace(/\s*$/, "");
-                if (!this.scriptName.value) this.scriptName.value = Browser.TemplateManager.expandTemplateName(lf("ADJ script"));
-                if (this.scriptName.value.length > 52)
-                    this.scriptName.value = this.scriptName.value.substr(0, 52);
-            };
-            this.formRoot.setChildren([div("varLabel", lf("script properties")),
-                div("formLine", lf("name"), this.scriptName, Editor.mkHelpLink("script updates", lf("about names & updates"))),
-                div("groupLine"), // filled in later on
+            this.formRoot.setChildren([div("varLabel", lf("script")),
                 div("formLine", lf("description"), this.description),
+                div("groupLine"), // filled in later on
                 this.iconsSection = div('',
                     this.colorContainer,
                     this.iconArtIdContainer,
@@ -217,7 +215,6 @@ module TDev
                     div("varLabel", lf("manage data")),
                     HTML.mkButton(lf("delete local data and permissions"), () => this.deleteData()),
                     HTML.mkButton(lf("cloud sessions"), () => this.manageSessions())
-                // HTML.mkButton(lf("view permissions"), () => this.managePermissions())
                     ),
                 this.instrumentationSection = div("formLine",
                     div("varLabel", lf("run with instrumentation")),
@@ -749,7 +746,7 @@ module TDev
             var m = new ModalDialog();
             var mkIcon = (path:string) : HTMLElement =>
             {
-                var img = HTML.mkImg("svg:" + path +",black")
+                var img = HTML.mkImg("svg:" + path +",currentColor")
                 var name = div("md-caption", path)
                 name.style.fontSize = "0.5em";
                 var d = div("selectableIcon", img, name).withClick(() => {
@@ -810,7 +807,6 @@ module TDev
 
         private syncAll()
         {
-            this.scriptName.value = this.theScript.getName();
             this.description.value = this.theScript.comment;
             this.updatePlatformDiv();
 
@@ -895,8 +891,6 @@ module TDev
 
         private load(a:AST.App) :void
         {
-            TheEditor.dismissSidePane();
-
             if (Collab.AstSession && a.editorState.groupId && !TDev.noHub) {
                 var sessionId = Collab.AstSession.servername;
                 var groupId = a.editorState.groupId;
@@ -925,8 +919,8 @@ module TDev
 
             Util.assert(a instanceof AST.App);
             this.theScript = a;
-            this.editor.displayLeft([this.formRoot]);
-            this.scriptName.blur(); // prevent keyboard popup on iOS
+            this.setChildren([this.formRoot]);
+            this.description.blur(); // prevent keyboard popup on iOS
             this.syncAll();
 
             if (TheEditor.blinkElement) {
@@ -945,29 +939,6 @@ module TDev
                 () => {
                     TheEditor.uninstallCurrentScriptAsync().done();
                 });
-        }
-
-        private managePermissions()
-        {
-            /*
-            TheEditor.currentRt.permissionsAsync().done(a => {
-                var allowed = Object.keys(a).filter((p) => a[p]);
-                var denied = Object.keys(a).filter((p) => !a[p]);
-
-                var msg = ""
-                if (allowed.length + denied.length == 0)
-                    msg = "This script did not request any permissions yet.";
-                else {
-                    if (allowed.length)
-                        msg += "This script can access: " + allowed.join(", ") + ". ";
-                    if (denied.length)
-                        msg += "This script is not allowed to access: " + denied.join(", ") + ". ";
-                    msg += "To clear permissions use the [delete script data] button.";
-                }
-
-                ModalDialog.info("permissions", msg);
-            });
-            */
         }
 
         private deleteData() {
@@ -989,11 +960,14 @@ module TDev
             }
         }
 
+        public bye() {
+            this.commit();
+        }        
+
         public commit()
         {
             if (!this.theScript) return;
 
-            this.theScript.setName(this.scriptName.value);
             this.theScript.comment = this.description.value;
             this.theScript.notifyChange();
             TheEditor.queueNavRefresh();

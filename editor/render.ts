@@ -113,15 +113,12 @@ module TDev
         }
 
         public attachHandlers()
-        {
-            var se = elt('stmt-script');
-            if (se) se.withClick(() => TheEditor.searchPressed());
-            
+        {            
             if (!this.stmts) return;
 
             var id = 1;
 
-            var dod = Browser.dragAndDrop ? new DragAndDropContext() : undefined;
+            var dod = Browser.dragAndDrop ? new DragAndDropContext() : undefined;            
             this.stmts.forEach((s) => {
                 var e = <HTMLElement> document.getElementById(s.renderedAsId);
                 (<any>e).node = s;

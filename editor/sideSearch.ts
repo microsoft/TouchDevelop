@@ -8,7 +8,7 @@ module TDev
         constructor() {
             super()
         }
-        public icon() { return "svg:search,black"; }
+        public icon() { return "svg:search,currentColor"; }
         public name() { return "results"; }
         public keyShortcut() { return "Ctrl-F"; }
         private lastSearchValue = "";

@@ -317,7 +317,70 @@ module TDev.AST {
 
         public docText():string { return null }
     }
+    
+    // A special variety of statement that is displayed inline. Useful for
+    // making parts of the record definition clickable.
+    export class InlineStmt
+        extends Stmt
+    {
 
+        constructor() {
+            super();
+        }
+
+        public accept(v:NodeVisitor) { v.visitInlineStmt(this); }
+
+        public nodeType() {
+            return "inlineStmt";
+        }
+    }
+    
+    // To hold a single token that holds the decl name. That
+    // allows the calculator to switch into editing mode, which is convenient.
+    // The [getName] and [setName] functions from the [DeclNameHolder] reflect
+    // the value of the (supposedly) single [DeclName] token that's in there.
+    export class DeclNameHolder
+        extends InlineStmt
+    {
+        public maxLength = -1; // used by the UI/typechecker
+        public defaultTemplate: string; // use to example when user deletes all characters
+        private exprHolder = new AST.ExprHolder();
+
+        constructor() {
+            super();
+
+            this.exprHolder.tokens = [ new DeclName() ]
+            this.exprHolder.parsed = new Literal(); // placeholder
+            this.exprHolder.locals = [];
+        }
+
+        public children() {
+            return this.exprHolder.tokens;
+        }
+
+        public calcNode(): ExprHolder {
+            return this.exprHolder;
+        }
+
+        public notifyChange() {
+            var toks = this.exprHolder.tokens;
+            if (toks[0] && toks[0] instanceof DeclName) {
+                var newName = (<DeclName>toks[0]).data;
+                if (newName.length)
+                    super.setName(newName);
+                else
+                    (<DeclName>toks[0]).data = this.getName();
+            }
+        }
+
+        public setName(v: string) {
+            super.setName(v);                       
+            var toks = this.exprHolder.tokens;
+            if (toks[0] && toks[0] instanceof DeclName) 
+                (<DeclName>toks[0]).data = v;
+        }
+    }   
+    
     export class Comment
         extends Stmt
     {
@@ -1406,7 +1469,7 @@ module TDev.AST {
     export class Decl
         extends Stmt
     {
-
+        
         public _wasTypechecked = false;
         public deleted:boolean;
         public parent:App;
@@ -1414,12 +1477,16 @@ module TDev.AST {
         public visitorState:any;
         public diffStatus:number;
         public diffAltDecl:Decl;
-        public isExternal:boolean;
+        public isExternal: boolean;
+        public nameHolder = new DeclNameHolder();
+        
         constructor() {
             super()
         }
 
-        public getCoreName() { return this.getName(); }
+        public getCoreName() { return this.nameHolder.getName(); }
+        public getName() { return this.nameHolder.getName(); }
+        public setName(name: string) { this.nameHolder.setName(name);}
         public getIconArtId(): string { return null; }
         public hasErrors() { return !!this.getError(); }
         public hasWarnings() { return false }
@@ -2386,6 +2453,15 @@ module TDev.AST {
             return "error"
         }
     }
+    
+    // Meta statement used to make the script signature clickable
+    export class AppHeaderStmt
+        extends InlineStmt
+    {
+        constructor(public parentDef: App) {
+            super();
+        }
+    }
 
     export class App
         extends Decl
@@ -2399,11 +2475,15 @@ module TDev.AST {
             this.thisLibRef = LibraryRef.topScriptLibrary(this);
             this.setName("no name");
             this.version = App.currentVersion;
+            this.headerStmt = new AppHeaderStmt(this);
+            this.nameHolder.maxLength = 52;
+            this.nameHolder.defaultTemplate = lf("ADJ script");
         }
 
         // split screen is used as a hit when loaded in the editor, serialized when publishing
         static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen" ];
 
+        public headerStmt: AppHeaderStmt;
         public nodeType() { return "app"; }
         public things:Decl[] = [];
         public getDescription() { return this.comment; }
@@ -3318,6 +3398,19 @@ module TDev.AST {
             }
         }
     }
+    
+    // The token that stands for the decl name itself. While, strictly
+    // speaking, it is a literal, having a subclass allows the renderer to
+    // render it without quotes.
+    export class DeclName
+        extends Literal
+    {
+        constructor() {
+            super();
+        }
+
+        public accept(v:AST.NodeVisitor) { return v.visitDeclName(this); }
+    }    
 
     export class Operator
         extends Token
@@ -3900,7 +3993,7 @@ module TDev.AST {
 
         public visitRecordField(n:RecordField) { return this.visitStmt(n); }
         public visitFieldName(n: AST.FieldName) { return this.visitLiteral(n); }
-        public visitRecordName(n: AST.RecordName) { return this.visitLiteral(n); }
+        public visitDeclName(n: AST.DeclName) { return this.visitLiteral(n); }
         public visitInlineStmt(n: AST.InlineStmt) { return this.visitStmt(n); }
 
         public dispatch(n:AstNode) { return n.accept(this); }

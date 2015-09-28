@@ -1,0 +1,109 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "ADJ game";
+meta rootId "om6XYqUcsjDK0npYjNyzn3BW";
+meta hasIds "yes";
+meta splitScreen "yes";
+meta platform "current";
+meta parentIds "";
+#sCBCojzbqNfj6sRA
+action main() {
+  #JCogU1cIYi3LMekj input[lib micro\u003abit] →on_button_pressed("A");
+  #g2So8djJI61jgBdV where `implicit` \_body\_() {
+    #g8mlYJblKOijn954 game[lib micro\u003abit_game] →add_score(1);
+  }
+  #fUDi3RmOEg2277bT game[lib micro\u003abit_game] →start_countdown(10000);
+  #P6Uz0KKkoyGt0J2s basic[lib micro\u003abit] →show_string("PRESS A", 150);
+}
+#m5PQUjHG4rwusEZ8 meta import micro\u003abit {
+  pub "vmqhsx"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `async` add_button(text: String, @action: Action)
+    action `async` reset()
+  }
+}
+#u8IqNGjTNuBQw3gc meta import micro\u003abit_senses {
+  pub "rqusix"
+  usage {
+    action `async` on_screen_up(body: Action)
+    action `async` on_screen_down(body: Action)
+    action `async` on_shake(body: Action)
+    action `async` on_logo_up(body: Action)
+    action `async` on_logo_down(body: Action)
+  }
+  #TcjDs5Ty8gKmbQMw resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#iyd2D7Hh6B2QNiFL meta import micro\u003abit_screen {
+  pub "nzngii"
+  usage {
+    action `async` toggle(x: Number, y: Number)
+    action `async` plot_all()
+    action `async` toggle_all()
+    action `async` fade_in(ms: Number)
+    action `async` fade_out(ms: Number)
+    action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
+  }
+  #EVNVl4F7huSDMz0J resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#GwYjHckHkjFq6Xfj meta import micro\u003abit_game {
+  pub "ddbdlp"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` test_countdown()
+    action `async` start_stopwatch()
+    action `async` test_countdown_current_time()
+    action `async` test_current_time()
+  }
+  #Nu7zPsMQpn7jmlOy resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}

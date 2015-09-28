@@ -255,7 +255,7 @@ module TDev {
         }
 
         public showBoxMenu(cb: () =>void ) {
-            var editButton = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.wallEdit, () => {
+            var editButton = HTML.mkRoundButton("svg:edit,currentColor", lf("edit"), Ticks.wallEdit, () => {
                 if (cb) cb();
             });
             this.boxMenu = div("wall-selected", [editButton]);

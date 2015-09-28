@@ -170,7 +170,7 @@ module TDev
                 if (toRename) {
                     op.decl = toRename
                     op.stmt = toRename instanceof AST.Action ? (<AST.Action>toRename).header :
-                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).recordNameHolder :
+                              toRename instanceof AST.RecordDef ? (<AST.RecordDef>toRename).nameHolder :
                               toRename instanceof AST.GlobalDef ? (<AST.GlobalDef>toRename) : null
                     op.targetName = this.data.declName()
                 } else {
@@ -1082,7 +1082,7 @@ module TDev
 
             m.add(div('wall-dialog-buttons',
                 challenges ? HTML.mkButton(lf("open challenges"), () => {
-                    Util.navigateNewWindow(challenges);
+                    Util.navigateNewWindow("/" + challenges);
                 }) : null,
                 HTML.mkButton(lf("keep editing"), () => {
                     willNowPublish = true;
@@ -1270,8 +1270,8 @@ module TDev
                 this.seenDoItYourself = true;
                 this.disableUpdate = true;
                 var tip = <Tip>{
-                    title: lf("no more hints!"),
-                    description: lf("if you are stuck, tap the goal line"),
+                    title: lf("enter this code"),
+                    description: Cloud.config.hintLevel == "full" ? lf("if you are stuck, tap the goal line") : undefined,
                     el: goal,
                     forceBottom: true
                 };

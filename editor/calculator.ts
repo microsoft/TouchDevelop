@@ -123,7 +123,7 @@ module TDev
             this.setupKeys();
 
             this.templateLine.withClick(() => {
-                if (TheEditor.stepTutorial)
+                if (TheEditor.stepTutorial && Cloud.config.hintLevel == "full")
                     TheEditor.stepTutorial.needHelp();
             })
         }
@@ -875,7 +875,7 @@ module TDev
                 this.editOptional(optionsParm)
 
             // Edit the record name right away, that's all we can do anyhow.
-            if (s instanceof AST.RecordNameHolder) {
+            if (s instanceof AST.DeclNameHolder) {
                 this.inlineEdit(this.expr.tokens[0]);
             }
 
@@ -920,7 +920,7 @@ module TDev
         private backspace(isDel = false)
         {
             tick(Ticks.calcBackspace);
-            if (this.stmt instanceof AST.RecordNameHolder)
+            if (this.stmt instanceof AST.DeclNameHolder)
                 return;
 
             var now = Util.now();
@@ -1274,7 +1274,7 @@ module TDev
             return wrapper;
         }
 
-        private inlineLiteralEditor(l: AST.Literal) {
+        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean) {
             var hint = "";
             if (this.currentInstruction && this.currentInstruction.languageHint == l.languageHint && this.currentInstruction.editString)
                 hint = this.currentInstruction.editString;    
@@ -1282,14 +1282,15 @@ module TDev
             var literalEditor: LiteralEditor;
             if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true, hint);
             else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false, hint);
-            else literalEditor = new TextLiteralEditor(this, l);
+            else literalEditor = new TextLiteralEditor(this, l, fullScreen);
             return literalEditor;
         }
 
         private inlineEditString(l:AST.Literal)
         {
             var editor = TheEditor;
-            var literalEditor = this.inlineLiteralEditor(l);
+            var renaming = this.stmt instanceof AST.DeclNameHolder;
+            var literalEditor = this.inlineLiteralEditor(l, !renaming);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
@@ -1299,8 +1300,11 @@ module TDev
                     this.switchToNormalKeypad();
                 this.display();
                 editor.selector.positionButtonRows();
-                if (this.stmt instanceof AST.RecordNameHolder)
+                if (renaming) {
+                    Script.notifyChange();
                     editor.dismissSidePane();
+                    editor.queueNavRefresh();
+                }
             };
 
             return literalEditor.editor();
@@ -1614,8 +1618,8 @@ module TDev
             }
 
             var editBtns = this.keyBlock(ph ? 4 : pm ? 6 : 12, 1);
-            editBtns[0].setImage("svg:backspace,black,clip=80", lf("backspace"), Ticks.calcBtnBackspace, () => { this.backspace() });
-            editBtns[1].setImage("svg:undo,black", lf("undo"), Ticks.calcBtnUndo, () => this.undo());
+            editBtns[0].setImage("svg:backspace,currentColor,clip=80", lf("backspace"), Ticks.calcBtnBackspace, () => { this.backspace() });
+            editBtns[1].setImage("svg:undo,currentColor", lf("undo"), Ticks.calcBtnUndo, () => this.undo());
 
             if (ph) {
                 editBtns = this.keyBlock(0, 5, 2, 1);
@@ -1641,8 +1645,8 @@ module TDev
             }
 
             var cursorKeys = this.keyBlock(ph ? 3 : pm ? 5 : 11, 2, 2, 1);
-            cursorKeys[0].setImage("svg:cursorLeft,black", lf("move cursor"), Ticks.calcMoveCursorLeft, () => this.moveCursor(-1));
-            cursorKeys[1].setImage("svg:cursorRight,black", lf("move cursor"), Ticks.calcMoveCursorRight, () => this.moveCursor(+1));
+            cursorKeys[0].setImage("svg:cursorLeft,currentColor", lf("move cursor"), Ticks.calcMoveCursorLeft, () => this.moveCursor(-1));
+            cursorKeys[1].setImage("svg:cursorRight,currentColor", lf("move cursor"), Ticks.calcMoveCursorRight, () => this.moveCursor(+1));
 
             this.restoreLeftKeypad(false);
         }
@@ -2033,7 +2037,7 @@ module TDev
         {
             if (typeof l.data == "string" && !l.enumVal) {
                 var e = this.mkIntelliItem(1.01e20, Ticks.calcEditString);
-                if (l instanceof AST.FieldName || l instanceof AST.RecordName)
+                if (l instanceof AST.FieldName || l instanceof AST.DeclName)
                     e.nameOverride = lf("rename");
                 else e.nameOverride = lf("edit");
                 e.descOverride = lf("change contents");
@@ -2127,7 +2131,7 @@ module TDev
 
         private intelliNew(off:number, q:number)
         {
-            if (this.stmt instanceof AST.RecordNameHolder)
+            if (this.stmt instanceof AST.DeclNameHolder)
                 return;
 
             var e = this.mkIntelliItem(q, Ticks.calcNewLine);
@@ -2192,6 +2196,9 @@ module TDev
                 if (defn instanceof AST.LibExtensionAction)
                     defn = (<AST.LibExtensionAction>defn).shortcutTo
 
+                if (defn instanceof AST.LibraryRefAction && !TheEditor.widgetEnabled("editLibraryButton"))
+                    return;    
+                
                 var e = this.mkIntelliItem(0.9 * this.promoteMult(), Ticks.calcGoToDef);
                 e.nameOverride = name;
                 e.descOverride = defn.getName();
@@ -2249,7 +2256,7 @@ module TDev
             // Approximate test for determining whether we should show
             // suggestions.
             if ((this.stmt instanceof AST.RecordField || this.stmt instanceof AST.ActionParameter) &&
-                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.RecordNameHolder)
+                !(k.primaryKind instanceof MultiplexKind) || this.stmt instanceof AST.DeclNameHolder)
             {
                 return;
             }
@@ -4452,6 +4459,8 @@ module TDev
 
             if (endPoint == cursorPosition)
                 this.setKind(e.getKind());
+            else if (!!e.loc && e.loc.beg == cursorPosition + 1) // between the property name and the (
+                this.setKind(api.core.Nothing);
         }
 
         public run()
@@ -4481,11 +4490,8 @@ module TDev
                     }
                 }
 
-                if (!!pp.prop && pp.prop.getParameters().length == 1) {
-                    this.setKind(pp.prop.getResult().getKind());
-                } else {
-                    return;
-                }
+                if (!!pp.prop && pp.prop.getParameters().length == 1)
+                  this.setKind(pp.prop.getResult().getKind());
                 break;
 
             case "operator":

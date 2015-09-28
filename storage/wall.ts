@@ -399,7 +399,7 @@ module TDev {
         public showWall() {
             Ticker.dbg("showWall");
 
-            var back = HTML.mkRoundButton("svg:back,black", lf("back"), Ticks.wallBack, () => this.backBtnHandler());
+            var back = HTML.mkRoundButton("svg:back,currentColor", lf("back"), Ticks.wallBack, () => this.backBtnHandler());
 
             this.keyboard = new TDev.RT.RuntimeKeyboard(this.currentRt)
 

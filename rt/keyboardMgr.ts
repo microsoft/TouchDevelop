@@ -433,6 +433,8 @@ module TDev {
 
         public btnShortcut(e:HTMLElement, key:string)
         {
+            if (!key) return;
+            
             var handle = () => {
                 if (KeyboardMgr.elementVisible(e)) {
                     KeyboardMgr.triggerClick(e);
@@ -440,8 +442,6 @@ module TDev {
                 }
                 return false;
             }
-
-            if (!key) return;
 
             (<any>handle).isBtnShortcut = true;
 

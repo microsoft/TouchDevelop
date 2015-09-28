@@ -378,6 +378,7 @@ task('default', [
   'build/officemix.d.ts',
   'build/ace-main.js',
   'build/blockly-main.js',
+  'concat-libs',
   'log'
 ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
@@ -521,6 +522,10 @@ task('cordova', [ 'default' ], {}, function () {
 
 task('update-libs', ["build/client.js"], { async:true}, function () {
   runAndComplete(['node build/client fetchlibraries'], this);  
+})
+
+task('concat-libs', ["build/client.js"], { async:true}, function () {
+  runAndComplete(['node build/client concatlibs'], this);  
 })
 
 // vim: ft=javascript

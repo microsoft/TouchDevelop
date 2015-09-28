@@ -264,7 +264,7 @@ export module SVG {
         var r = ""
 
         getIconNames().forEach(i => {
-            var s = getIconSVGCore(i + ",black")
+            var s = getIconSVGCore(i + ",currentColor")
             s = s.replace(/^<svg /, "<svg style='width:100%;height:100%' ")
             s = "<div style='margin:1em;display:inline-block;width:3em;height:3em;'>" + s + "<div style='font-size:0.6em;text-align:center'>" + i + "</div></div>"
             r += s

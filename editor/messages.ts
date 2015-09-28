@@ -54,6 +54,11 @@ module TDev {
             merge: PendingMerge;
         }
 
+        export interface LibEntry {
+          pubId: string;
+          depends: string[];
+        }
+
         // The [libs] field is a map from library name (e.g. "micro:bit") to the
         // corresponding publication id. The receiver of the message takes care
         // of fetching the latest version of the library, and gluing it to the
@@ -63,7 +68,7 @@ module TDev {
             type: MessageType; // == MessageType.Compile
             text: any; // string if language == CPlusPlus, TDev.AST.Json.JApp if language == TouchDevelop
             language: Language;
-            libs: { [libName: string]: string };
+            libs: { [libName: string]: LibEntry };
             name?: string; // Name of the script
         }
 
@@ -78,13 +83,13 @@ module TDev {
             type: MessageType; // == MessageType.Message_Upgrade
             name: string;
             ast: any; // AST.Json.JApp
-            libs: { [libName: string]: string };
+            libs: { [libName: string]: LibEntry };
         }
 
         export interface Message_Run extends Message {
             type: MessageType; // == MessageType.Message_Run
             ast: any; // AST.Json.JApp
-            libs: { [libName: string]: string };
+            libs: { [libName: string]: LibEntry };
             onlyIfSplit?: boolean; // Run the program only if in "split mode".
         }
 
@@ -145,3 +150,5 @@ module TDev {
         }
     }
 }
+
+// vim: set ts=4 sw=4 sts=4:

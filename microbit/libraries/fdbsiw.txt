@@ -1,0 +1,121 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit serial";
+meta rootId "J14qS9W69xfJRs1Wg6l4bL8j";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// A #microbit library to print messages to the serial port.
+#Jb2ciAJpCpybcXGj
+action write_line(#viL9JhCNnO3GFckc text: String) {
+  #qd8bnGggS2t7YSVF // Prints a line of text to the serial
+  #Ht90vVwzb9x642mt // {namespace:serial}
+  #R4f2PuqLYHK2Gtcr code→write_string($text);
+  #giwZfV8Lt049ksV2 code→write_string("\r\n");
+}
+#KayLKTp6ax4o8wIi meta import micro\u003abit {
+  pub "hwpbmu"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `async` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `async` on_pin_pressed(name: String, body: Action)
+    action `async` remote_control(@event: String)
+    action `async` camera(@event: String)
+    action `async` audio_recorder(@event: String)
+    action `async` alert(@event: String)
+    action `async` plot_image(leds: String)
+    action `async` test_image_partial_paste()
+  }
+}
+#AABkMop1Z4RJQfcY
+action example() {
+  #vIxCYZlAfMloWGOR // This library provides functionalities to read and write data to the serial port.
+  #obJL2omLuN5vNWGX // * print a line of text (the new line character is added automatially)
+  #xfS6oh3qhUuVm3ee code→write_line("hello");
+  #USJSQxggyA9b7Xk5 // * print a piece of text
+  #DJAddA2AQVd3x44R code→write_string("world");
+  #ZGvSLSTMY2eH7BGS // * print a number formatted as ``x: value``.
+  #CPTexj2njchbeTaq code→write_number("x", 5);
+  #gnakx4J3bNeA6l5y // * read a line of text from Serial
+  #xMVREMMWm4TP690d $msg := code→read_string;
+  meta private;
+}
+#pvd0wLlxZ7vuecCJ
+action write_number(#xRu2iG9IAA5YJC38 name: String, #k2kI6XM6EpaLIU35 value: Number) {
+  #UPZWaaK4FPhqLQv5 // Prints a numeric value to the serial
+  #ABpnPKKwPATyuC4K // {namespace:serial}
+  #xe5wAf6XYmtUOf8x code→write_string($name);
+  #lLAHmgIoRRAXTKXl code→write_string(": ");
+  #xyMeH7KZaUtgWna4 code→write_string($value→to_string);
+}
+#hGNQralaeJZymMYt
+action read_string() returns(#mR5YbOZ9oVeKJhbt msg: String) {
+  #Of7tDy94qf27pF8n // Reads a line of text from the serial port.
+  #xjcz6ZTqNS4rrHiN // {namespace:serial}
+  #rndC9WsJA7TzRqJw // {shim:uBit.serial.readString}
+  #xUvA7hlR41fO4O3S $msg := "";
+}
+#RihJksfYn4XsFVvo
+action write_string(#xCSsMIN55sl47uJy text: String) {
+  #gQl2sBm102NFdm2r // Sends a piece of text through Serial connection.
+  #xaRZMDD1PnoAssMk // {namespace:serial}
+  #E2GfoM3vov7PqeyA // {shim:uBit.serial.sendString}
+  #NWy4p0e48SZLl4YH app→log("serial: " ∥ $text);
+}
+#ofbblREfGQlVQeKu
+action write_image(#gyH7VhnFqZTOycIl img: ♻ micro\u003abit → Image) {
+  #xO6AG2n8p2M0iRM9 // Sends an image through Serial connection in CSV format.
+  #i9igu656RRwxytVx // {namespace:serial}
+  #sx5zVhpQfuMHxxmC // {shim:uBit.serial.sendImage}
+  #kRfyWkxOQTq4BtkZ app→log("serial: sent image");
+}
+#x4YEGlXH9CPn24qF
+action write_screen() {
+  #W6GWMYLuhTKpZfVd // Sends the current pixel values, byte-per-pixel, over serial.
+  #MaKPhWXTpJB2NNWZ // {namespace:serial}
+  #ejsGWhn5BXXX8fl4 // {shim:uBit.serial.sendDisplayState}
+}
+#x6Hp3T5XixrKOXp4
+action read_screen() {
+  #xkl7dNT5Lc785ZVZ // Reads the screen from serial.
+  #ApoeWPHDMVNc7MjB // {namespace:serial}
+  #tZxNxHtIuaSuvjo0 // {shim:uBit.serial.readDisplayState}
+}
+#xBHnPm4TuXZ1XJba
+action read_image() returns(#i9cIYIjnk4B1camX img: ♻ micro\u003abit → Image) {
+  #HKBSShuS3IHZZKK3 // Reads a 5x5 image from the serial port.
+  #xvg6N07oMKfwiZHk // {namespace:serial}
+  #xKaSva7IbKCilyF8 // {hints:columns:5,10,15}
+  #t3L7RQAYTB4ch4Fj // {shim:uBit.serial.readImage}
+  #xbuEE8By6wuVCMZn $img := image[lib micro\u003abit] →create_image("");
+}

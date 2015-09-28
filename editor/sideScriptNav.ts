@@ -8,7 +8,7 @@ module TDev
         constructor() {
             super()
         }
-        public icon() { return "svg:script,black"; }
+        public icon() { return "svg:script,currentColor"; }
         public name() { return "script"; }
         public keyShortcut() { return "Ctrl-S"; }
         public getTick() { return Ticks.sideScript; }
@@ -122,6 +122,9 @@ module TDev
             } else {
                 this.editor.dismissSidePane();
                 this.editor.renderDecl(decl);
+                if (decl instanceof AST.App) {
+                    this.editor.editNode(decl.headerStmt);
+                }
             }
         }
 
@@ -137,7 +140,7 @@ module TDev
                 r.appendChild(d);
             }
             if (!isParent && app.isDocsTopic())
-                addBtn(HTML.mkRoundButton("svg:film,black", lf("preview"), Ticks.sidePreview, () => {
+                addBtn(HTML.mkRoundButton("svg:film,currentColor", lf("preview"), Ticks.sidePreview, () => {
                     var topic = HelpTopic.fromScript(app)
                     var d =
                     elt('leftPaneContent').setChildren([
@@ -189,36 +192,36 @@ module TDev
 
             if (!isParent && this.editor.widgetEnabled("updateButton") &&
                 (TheEditor.scriptUpdateId || TheEditor.librariesNeedUpdate()))
-                addBtn(HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdate, () => {
+                addBtn(HTML.mkRoundButton("svg:fa-refresh,currentColor", lf("update"), Ticks.sideUpdate, () => {
                     this.editor.updateScript();
                 }));
             if (onlyParent && this.editor.widgetEnabled("logsButton"))
-                addBtn(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.sideLogs,() => {
+                addBtn(HTML.mkRoundButton("svg:CommandLine,currentColor", lf("logs"), Ticks.sideLogs,() => {
                     this.editor.showAppLog(app);
                 }));
             if (!isParent && this.editor.widgetEnabled("errorsButton"))
-                addBtn(HTML.mkRoundButton("svg:SmilieSad,black", lf("errors"), Ticks.sideErrors,() => {
+                addBtn(HTML.mkRoundButton("svg:SmilieSad,currentColor", lf("errors"), Ticks.sideErrors,() => {
                     this.editor.typeCheckNow();
                     this.editor.searchFor(":m");
                 }));
 
             if (onlyParent && this.editor.widgetEnabled("deployButton")) {
-                addBtn(HTML.mkRoundButton("svg:cloudupload,black", lf("export"), Ticks.sideDeployWebSite, () => {
+                addBtn(HTML.mkRoundButton("svg:cloudupload,currentColor", lf("export"), Ticks.sideDeployWebSite, () => {
                     AppExport.exportBtn(app)
                 }));
             }
 
             if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
-                addBtn(HTML.mkRoundButton("svg:plug,black", lf("plugins"), Ticks.sidePlugins, () => {
+                addBtn(HTML.mkRoundButton("svg:plug,currentColor", lf("plugins"), Ticks.sidePlugins, () => {
                     Plugins.runPlugin();
                 }));
             if (!isParent && app.hasTests() && TheEditor.widgetEnabled("runTestsButton"))
-                addBtn(HTML.mkRoundButton("svg:experiment,black", lf("run tests"), Ticks.sideAllTests, () => {
+                addBtn(HTML.mkRoundButton("svg:experiment,currentColor", lf("run tests"), Ticks.sideAllTests, () => {
                     TestMgr.testCurrentScript()
                 }));
 
             if (!isParent && TheEditor.debugSupported())
-                addBtn(HTML.mkRoundButton("svg:bug,black", lf("debug"), Ticks.sideDebug, () => { TheEditor.runMainAction(true) }))
+                addBtn(HTML.mkRoundButton("svg:bug,currentColor", lf("debug"), Ticks.sideDebug, () => { TheEditor.runMainAction(true) }))
 
             r.appendChildren(Plugins.getPluginButtons("script"))
 
@@ -247,10 +250,10 @@ module TDev
                     if (decl == mainAction || decl instanceof AST.Action) {
                         var a = <AST.Action>decl;
                         if (a.isTest()) {
-                            var runbtn = HTML.mkRoundButton("svg:experiment,black", lf("test"), Ticks.sideTestOne,() => { TheEditor.runAction(decl, null, { debugging: true }) });
+                            var runbtn = HTML.mkRoundButton("svg:experiment,currentColor", lf("test"), Ticks.sideTestOne,() => { TheEditor.runAction(decl, null, { debugging: true }) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (a.isRunnable() && TheEditor.widgetEnabled("sideRunButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:play,black", lf("run"), Ticks.sideRun,() => { TheEditor.runAction(decl) });
+                            var runbtn = HTML.mkRoundButton("svg:play,currentColor", lf("run"), Ticks.sideRun,() => { TheEditor.runAction(decl) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         }
                         var participants = div("stmtParticipants", div("stmtParticipantsOverfloxBox"));
@@ -259,11 +262,11 @@ module TDev
                     } else if (decl instanceof AST.LibraryRef) {
                         var lib = <AST.LibraryRef>decl;
                         if (lib.needsUpdate && this.editor.widgetEnabled("updateButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:fa-refresh,black", lf("update"), Ticks.sideUpdateOne,
+                            var runbtn = HTML.mkRoundButton("svg:fa-refresh,currentColor", lf("update"), Ticks.sideUpdateOne,
                                 () => { TheEditor.updateLibraries([lib]) });
                             d = ScriptNav.addSideButton(d, runbtn);
                         } else if (this.editor.widgetEnabled("editLibraryButton")) {
-                            var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditLibrary,
+                            var runbtn = HTML.mkRoundButton("svg:edit,currentColor", lf("edit"), Ticks.sideEditLibrary,
                                 () => {
                                     LibraryRefProperties.editLibrary(lib,() => { })
                                 });
@@ -272,7 +275,7 @@ module TDev
                     } else if (decl instanceof AST.GlobalDef) {
                         var glob = <AST.GlobalDef>decl;
                         if (glob.isResource && (glob.getKind() == api.core.String || glob.getKind() == api.core.JsonObject)) {
-                            var runbtn = HTML.mkRoundButton("svg:edit,black", lf("edit"), Ticks.sideEditString,
+                            var runbtn = HTML.mkRoundButton("svg:edit,currentColor", lf("edit"), Ticks.sideEditString,
                                 () => {
                                     TheEditor.renderDecl(glob);
                                     TheEditor.variableProperties.editFullScreen()
@@ -318,7 +321,7 @@ module TDev
             if (TheEditor.parentScript) {
                 var parDiv = declIt(TheEditor.parentScript)
 
-                var sharebtn = HTML.mkRoundButton("svg:cancel,black", lf("disconnect"), Ticks.sideDisconnect,
+                var sharebtn = HTML.mkRoundButton("svg:cancel,currentColor", lf("disconnect"), Ticks.sideDisconnect,
                     () => {
                         TheEditor.disconnectParent()
                         TheEditor.queueNavRefresh();
@@ -340,11 +343,11 @@ module TDev
 
             if (ScriptEditorWorldInfo.status === "published") {
                 (<any>progDiv).theDesc.appendChildren( ", /" + ScriptEditorWorldInfo.baseId);
-                var sharebtn = HTML.mkRoundButton("svg:Package,black", lf("share"), Ticks.sideShare, () => { ScriptNav.shareScript() });
+                var sharebtn = HTML.mkRoundButton("svg:Package,currentColor", lf("share"), Ticks.sideShare, () => { ScriptNav.shareScript() });
                 progDiv = ScriptNav.addSideButton(progDiv, sharebtn);
                 items[items.length - 1] = progDiv;
             } else if(!debugMode) {
-                var pubbtn = HTML.mkRoundButton("svg:Upload,black", lf("publish"), Ticks.sidePublish, () => { ScriptNav.publishScript() });
+                var pubbtn = HTML.mkRoundButton("svg:Upload,currentColor", lf("publish"), Ticks.sidePublish, () => { ScriptNav.publishScript() });
                 TheEditor.keyMgr.btnShortcut(pubbtn, "Ctrl-S")
                 progDiv = ScriptNav.addSideButton(progDiv, pubbtn);
                 items[items.length - 1] = progDiv;

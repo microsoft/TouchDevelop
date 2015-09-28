@@ -348,6 +348,7 @@ module TDev {
       blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
     };
     window.addEventListener('resize', onresize, false);
+    window.addEventListener('orientationchange', onresize, false);
     onResize();
 
     loadBlockly(message.script.scriptText);
@@ -360,6 +361,11 @@ module TDev {
         markLocalChanges();
       });
     }, 1);
+    $("#script-name").on("blur", () => {
+      if (getName().trim() == "")
+        setName("staggering program");
+      markLocalChanges();
+    });
     $("#script-name").on("input keyup blur", () => {
       markLocalChanges();
     });
@@ -474,8 +480,26 @@ module TDev {
     return ast;
   }
 
-  var libs: { [index: string]: string } = {
-    "micro:bit": "lwhfye"
+  var libs: { [index: string]: External.LibEntry } = {
+    "micro:bit": {
+      pubId: "lwhfye",
+      depends: []
+    },
+
+    "micro:bit game": {
+      pubId: "lwagkt",
+      depends: [ "micro:bit" ]
+    },
+
+    "micro:bit screen": {
+      pubId: "nzngii",
+      depends: [ "micro:bit" ]
+    },
+
+    "micro:bit senses": {
+      pubId: "vkmzfe",
+      depends: [ "micro:bit" ]
+    }
   };
 
   function doGraduate(msgSel?: string) {

@@ -3,6 +3,7 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
+    var microbitGitTag = "v2";
 
     export var useEmbeddedGcc = false;
 
@@ -58,6 +59,7 @@ module TDev.Cloud {
         eventsSection?: boolean;
         artSection?: boolean;
         librariesSection?: boolean;
+        scriptProperties?: boolean;
         scriptPropertiesSettings?: boolean;
         testsSection?: boolean;
         actionTypesSection?: boolean;
@@ -203,6 +205,8 @@ module TDev.Cloud {
         topicPath: string;
         localTopicPath: string;
         legalButtons: { name: string; url: string; }[];
+        doNothingText: string;
+        hintLevel: string;
 
         tdVersion?: string;
         releaseid?: string;
@@ -236,7 +240,9 @@ module TDev.Cloud {
         legalButtons: [
             { name: "terms of use", url: "/terms-of-use" },
             { name: "privacy and cookies", url: "/privacy"}
-        ]
+        ],
+        doNothingText: "do nothing",
+        hintLevel: "full",
     }
 
     export function isArtUrl(url : string) : boolean {
@@ -826,7 +832,8 @@ module TDev.Cloud {
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
             config: config,
             source: cppSource,
-            meta: meta
+            meta: meta,
+            repohash: microbitGitTag,
         })
         .done(resp => {
                 // HTML.showProgressNotification(lf("program accepted, compiling"));

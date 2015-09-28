@@ -1,0 +1,227 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit senses";
+meta rootId "zm342lGQufsImTJsY2Mjd6OL";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// A #microbit library that exposes orientation and movement events.
+#xwOq4wuI8tUXxrHj
+action on_screen_up(#Zm23L35zAoZ5xaUM body: Action) {
+  #MpPu5BNli80ud2U6 // Attaches code to run when the screen is facing up.
+  #xhao1j41emG2VOxP // {namespace:input}
+  #WdKqPeQdt8TOCgKu // {help:functions/on-screen-up}
+  #E4B0WT3YTg0B26mq simulator[lib micro\u003abit] →notify_event_registration("on screen up");
+  #yb4F8TjWZB4lGJFg data→screen_up := $body;
+  #Y83at3q2DuxfruwD code→init;
+  meta sync;
+}
+#qxBAjy823BHO24mb meta import micro\u003abit {
+  pub "fgvarw"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
+    action `async` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+  }
+}
+#cW5Eaba6g2xa58TR
+action on_screen_down(#KMHPPFLh79ILxEsC body: Action) {
+  #AMcAx2XgzUwf2TMM // Attaches code to run when the screen is facing down.
+  #jQPXP4X2PHIs9Muo // {namespace:input}
+  #ZdcCAkOLyBzyIBOy // {help:functions/on-screen-down}
+  #xdc4HMUwupE74u9V simulator[lib micro\u003abit] →notify_event_registration("on screen down");
+  #xTg7g7WPbHijTQqB data→screen_down := $body;
+  #Yc1eBaxVszGtkaPn code→init;
+  meta sync;
+}
+#t6BUCc8WlaifMQw2
+var screen_state : Number {
+  transient = true;
+}
+#Yasq36DXnLkbHctP
+action detect() {
+  #SGGUvEQILsE9YGty // Detects if the orientation has changed and raises events if available.
+  #xB6p3z7B2SjlkiiU $accx := @\u267b→micro\u003abit→acceleration("x");
+  #mS3ZTk4J0zBlNh4V $accy := @\u267b→micro\u003abit→acceleration("y");
+  #tFPDfT34L7ESBdo0 $accz := @\u267b→micro\u003abit→acceleration("z");
+  #iX3VlP2YLy1uy2XF // screen state: 0 = unknown, 1 = down, 2 = up, 3 = logo up, 4 = logo down
+  #E4BWU7aQLnOxMhWf code→detect_screen($accx, $accy, $accz);
+  #xrAqAGomTzw8jL2g code→detect_shake($accx, $accy, $accz);
+  meta private;
+}
+#bMJX2o4cp6UbgrWH
+var screen_up : Action {
+  transient = true;
+}
+#aJTalpc0eYQrv7QQ
+var screen_down : Action {
+  transient = true;
+}
+#eVHP6bRFyulckN6X
+action example() {
+  #aW2IRmUTax7OLDG2 // A library that exposes orientation and movement events. [read more...](/td/contents).
+  meta private;
+}
+#lhwojBx1CnMGhLPB
+action init() {
+  #xHJIJAFfGrSx2zlD if `not` data→\_init then {
+    #hA5Iq3c70pT8TcD5 data→\_init := true;
+    #xyqvAivXibKxY0RO control[lib micro\u003abit] →in_background;
+    #MoqZci0II5zqP364 where `implicit` \_body\_() {
+      #xbWJI6pgYPHpwWiw while true do {
+        #xwonR7KDZ1XgHpL9 code→detect;
+        #UAhoHSTIEevYn5rp basic[lib micro\u003abit] →pause(80);
+      }
+    }
+  }
+  meta private;
+  meta sync;
+}
+#xdoNy11ziwtWZlCo
+action on_shake(#iQzuA2ozltGMgcTU body: Action) {
+  #JTf89RIRRrxO9SnG // Attaches code to run when the device is shaken.
+  #x4x2vPoD9qOIvh7q // {namespace:input}
+  #KmZcvSqByA57L44B // {help:functions/on-shake}
+  #KExN3jsE0DMuPqLE simulator[lib micro\u003abit] →notify_event_registration("on shake");
+  #YUaLdMsVvnyHMnXG simulator[lib micro\u003abit] →add_button("shake", $body);
+  #kZT3dnZQyxuZq166 data→last_shake := input[lib micro\u003abit] →running_time;
+  #xbZpVSJVwAeD6GRE data→shake := $body;
+  #x7QP0YR4O6RXtmXl code→init;
+  meta sync;
+}
+#chN4AnXG7yhK2AXu
+var shake : Action {
+  transient = true;
+}
+#l5nnEGrJBtPBD6uu
+var last_shake : Number {
+  transient = true;
+}
+#q3bSEBO2AnZaW4dr
+action on_logo_up(#V7xeUvewokw5LxJn body: Action) {
+  #xDMX0HWkSWDtE0Tq // Attaches code to run when the logo is oriented upwards and the board is vertical.
+  #zUK2prvTnaAoT7md // {namespace:input}
+  #Gyr2W2ZXOCkfIMXd // {help:functions/on-logo-up}
+  #EdHSaeQmax51CBmq simulator[lib micro\u003abit] →notify_event_registration("on logo up");
+  #MaBgsJCEaDfkBf64 data→logo_up := $body;
+  #fwMBTN84PCeAj72Q code→init;
+  meta sync;
+}
+#S2o2JJdwYJhisAXp
+var logo_up : Action {
+  transient = true;
+}
+#xUVten7m0vVmyA4R
+var \_init : Boolean {
+  transient = true;
+}
+#joy4eey9DDzC8HR2
+action detect_shake(#tHRDEldGJ4ue8ool accx: Number, #JLClk08tfyKwJmGH accy: Number, #CLOKXkFToen6qwJ9 accz: Number) {
+  #xtI6yHh4BtZCqR3Q if `not` data→shake→is_invalid then {
+    #HtnSKlCS2Xu9pWz1 $now := @\u267b→micro\u003abit→running_time;
+    #BthNMTUVySeX0Nyo $ming := 180 * 180;
+    #T4iDX31OZHOlEJd8 $debunk := 1500;
+    #xSGwMi25c0coQQts if $now - data→last_shake > $debunk then {
+      #fnMxF6aP4yeF6GUy $\u007c\u007ca\u007c\u007c\u005e2 := $accx / 10 * $accx / 10 + $accy / 10 * $accy / 10 + $accz / 10 * $accz / 10;
+      #x2pNcYJa9kVrZzQ2 if $\u007c\u007ca\u007c\u007c\u005e2 > $ming then {
+        #IIwfoyiSwpLzFvvP data→last_shake := $now;
+        #xPHE9AGXfXGi4lrD data→shake→run;
+      }
+    }
+  }
+  meta private;
+}
+#GVBYI3VMRbqoNfnB
+action detect_screen(#HjxZTbKfdDrNgiSW accx: Number, #ryLNBYcAXIyw99pb accy: Number, #Wk0emOygMMselU76 accz: Number) {
+  #OnPPZzfv2DrkD51t $is_flat := math→abs($accx) + math→abs($accy) < 500;
+  #KTztF0grpXNSfDmp $is_vertical := math→abs($accx) + math→abs($accz) < 500;
+  #x4JdPKoQnVxk29jj if $accz > 500 `and` $is_flat then {
+    #UkMmR3drUtXAuLxj if data→screen_state ≠ 1 then {
+      #Cj9au3agUL3VTXpO data→screen_state := 1;
+      #dBOsHPiFM8ZsQIT7 code→run(data→screen_down);
+    }
+  }
+  else { #ONuoM34BWCyrmusn if $accz < - 500 `and` $is_flat then {
+    #P8bC9epU8M9PMthm if data→screen_state ≠ 2 then {
+      #LAkfBQP2OPSE9wG4 data→screen_state := 2;
+      #YFtNJxzp3xOetkxg code→run(data→screen_up);
+    }
+  }
+  else { #NQ8roiFE5R3evNyA if $accy > 500 `and` $is_vertical then {
+    #wKAufKYGbc4Bf4f2 if data→screen_state ≠ 3 then {
+      #PTYU9inhX4ypWy4k data→screen_state := 3;
+      #zHl0rsD21pWm0B2V code→run(data→logo_up);
+    }
+  }
+  else { #xqOU4XCzSA95y1lP if $accy < - 500 `and` $is_vertical then {
+    #HQn4YeL20sul4fRk if data→screen_state ≠ 4 then {
+      #dzddbU1SCv7f9Iip data→screen_state := 4;
+      #Tdpys1iOeS6bIp4E code→run(data→logo_down);
+    }
+  }
+  else {
+    #W8JvPbZlWjgyyW8c // // other state, reset state engine
+    #ow9eps4LUTwKFv2O data→screen_state := 0;
+  }
+  } } } 
+  meta private;
+}
+#q6oYfrMSlJuMnKCb
+action on_logo_down(#JBP7dSSZZ5CW05l5 body: Action) {
+  #xzt2NAugK2mmviuz // Attaches code to run when the logo is oriented downwards and the board is vertical.
+  #AafRbGbssZIrx4wW // {namespace:input}
+  #x7OLuFYYKkdCQ2fL // {help:functions/on-logo-down}
+  #Y0VL8QH6mDTxdO2h simulator[lib micro\u003abit] →notify_event_registration("on logo down");
+  #xU60Xk2Bqg5VlOWx data→logo_down := $body;
+  #f27pU1IPNnF4rxZK code→init;
+  meta sync;
+}
+#x4S5FO3oacwG7q6C
+var logo_down : Action {
+  transient = true;
+}
+#xKtZXebPhpGkz5MM
+action run(#AiTi5d6ioX2KIbLl f: Action) {
+  #ghdujUmazcH7hXMr if `not` $f→is_invalid then {
+    #fZONblMHRCsaFKLv $f→run;
+  }
+  meta private;
+}

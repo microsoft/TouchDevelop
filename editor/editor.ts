@@ -73,7 +73,7 @@ module TDev
         public showWall() {
             super.showWall();
             this.backBtn = <HTMLElement>this.backBtnDiv.firstChild;
-            this.scriptBtn = HTML.mkRoundButton("svg:script,black", lf("back"), Ticks.wallBack, () => this.scriptBtnHandler());
+            this.scriptBtn = HTML.mkRoundButton("svg:script,currentColor", lf("back"), Ticks.wallBack, () => this.scriptBtnHandler());
             this.justShowTheWall();
         }
 
@@ -225,14 +225,14 @@ module TDev
 
             var btns = [this.pauseBtnDiv];
             if (ScriptEditorWorldInfo.status != "published" && TDev.Browser.EditorSettings.widgets().wallLogsButton)
-                btns.push(HTML.mkRoundButton("svg:CommandLine,black", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
+                btns.push(HTML.mkRoundButton("svg:CommandLine,currentColor", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
             return btns;
         }
 
         public additionalFullScreenButtons(): HTMLElement[] {
             var btns = [];
             if (ScriptEditorWorldInfo.status == "published" && TheEditor.widgetEnabled("wallScreenshot"))
-                btns.push(HTML.mkRoundButton("svg:camera,black", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
+                btns.push(HTML.mkRoundButton("svg:camera,currentColor", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
             return btns;
         }
         
@@ -429,22 +429,22 @@ module TDev
             if (TheEditor.widgetEnabled("wallStop")) {
                 if (TheEditor.isDebuggerMode()) {
                     if (this.currentRt.isStopped()) {
-                        pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
+                        pause = HTML.mkRoundButton("svg:play,currentColor", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
                     } else if (this.currentRt.debuggerStopped()) {
-                        pause = HTML.mkRoundButton("svg:play,black", lf("continue"), Ticks.debuggerContinue, () => this.debuggerContinueBtnHandler())
+                        pause = HTML.mkRoundButton("svg:play,currentColor", lf("continue"), Ticks.debuggerContinue, () => this.debuggerContinueBtnHandler())
                     } else {
-                        pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.debuggerPauseWall, () => this.debuggerPauseBtnHandler())
+                        pause = HTML.mkRoundButton("svg:pauseSq,currentColor", lf("pause"), Ticks.debuggerPauseWall, () => this.debuggerPauseBtnHandler())
                     }
                 } else if (this.currentRt.isStopped()) {
                     if (this.currentRt.canResume())
-                        pause = HTML.mkRoundButton("svg:resume,black", lf("resume"), Ticks.wallResume, () => this.resumeBtnHandler())
+                        pause = HTML.mkRoundButton("svg:resume,currentColor", lf("resume"), Ticks.wallResume, () => this.resumeBtnHandler())
                     else
-                        pause = HTML.mkRoundButton("svg:play,black", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
+                        pause = HTML.mkRoundButton("svg:play,currentColor", lf("re-run"), Ticks.wallRun, () => this.runBtnHandler())
                 } else {
                     if (!TheEditor.stepTutorial && this.currentRt.canPause())
-                        pause = HTML.mkRoundButton("svg:pauseSq,black", lf("pause"), Ticks.wallPause, () => this.pauseBtnHandler())
+                        pause = HTML.mkRoundButton("svg:pauseSq,currentColor", lf("pause"), Ticks.wallPause, () => this.pauseBtnHandler())
                     else
-                        pause = HTML.mkRoundButton("svg:stop,black", lf("stop"), Ticks.wallStop, () => this.stopBtnHandler())
+                        pause = HTML.mkRoundButton("svg:stop,currentColor", lf("stop"), Ticks.wallStop, () => this.stopBtnHandler())
                 }
             }    
             if (TheEditor.widgetEnabled("wallHeart") && !TheEditor.isDebuggerMode() && this.currentRt.currentScriptId) {
@@ -453,9 +453,9 @@ module TDev
                 TDev.Browser.ScriptInfo.setupLike(this.currentRt.currentScriptId, (s, h, f) => {
                     var btn: HTMLElement;
                     if (s < 0)
-                        btn = HTML.mkRoundButton("svg:wholeheart,black", h, Ticks.wallAddHeart, f);
+                        btn = HTML.mkRoundButton("svg:wholeheart,currentColor", h, Ticks.wallAddHeart, f);
                     else
-                        btn = HTML.mkRoundButton("svg:brokenheart,black", h, Ticks.wallRemoveHeart, f);
+                        btn = HTML.mkRoundButton("svg:brokenheart,currentColor", h, Ticks.wallRemoveHeart, f);
                     if (Math.abs(s) < 2) btn.setFlag("working", true);
                     heart.setChildren([btn]);
                 });
@@ -468,7 +468,7 @@ module TDev
 
         private pauseBtnHandler()
         {
-            var pause = HTML.mkRoundButton("svg:stop,black", lf("stop"), Ticks.wallStopForce, () => this.stopBtnHandler())
+            var pause = HTML.mkRoundButton("svg:stop,currentColor", lf("stop"), Ticks.wallStopForce, () => this.stopBtnHandler())
             pause.setFlag("working", true);
             this.pauseBtnDiv.setChildren([pause]);
             this.currentRt.pauseExecution();
@@ -956,6 +956,7 @@ module TDev
         public debuggerNonEditor = new ScriptDebuggerNonEditor();
         public selector = new Selector();
         private actionProperties = new ActionProperties();
+        private scriptProperties = new ScriptProperties();
         private typeCheckPending = false;
         private onRestore = () => {};
         private lastEditHash = "";
@@ -967,7 +968,6 @@ module TDev
         private currentSideTab: SideTab;
         private currentStmtEditor: StmtEditor;
 
-        private scriptProperties = new ScriptProperties();
         public variableProperties = new VariableProperties();
         private librefProperties = new LibraryRefProperties();
         private recordProperties = new RecordDefProperties();
@@ -1252,6 +1252,7 @@ module TDev
             if (!fromCloud)
                 this.dismissModalPane();
             this.loadLocation(loc, useAnim);
+            this.updateBackButton();
             this.searchTab.saveLocation();
             try {
                 this.refreshParticipants(true);
@@ -1285,7 +1286,7 @@ module TDev
         public displayLeft(nodes: any) {
             this.codeInner.setChildren(nodes);
             if (this.widgetEnabled("calcHelpOverlay")) {
-                elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,black', lf("help"), Ticks.calcHelpOverlay, () => {
+                elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
                     m.add(div('wall-dialog-header', lf("got a question?")));
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
@@ -2022,37 +2023,20 @@ module TDev
             this.searchFor(r);
         }
 
-        private backBtn()
+        private backToMain()
         {
-            /* if (!dbg && this.stepTutorial && this.stepTutorial.isActive()) {
-                var m = new ModalDialog();
-                m.add([
-                    div("wall-dialog-header", 'take a break?'),
-                    div("wall-dialog-body", 'Are you sure you want to stop editing? You can come back at any time and continue where you left off.'),
-                    div("wall-dialog-buttons",
-                        HTML.mkButton('cancel', () => m.dismiss()),
-                        HTML.mkButton('take a break', () => {
-                            m.dismiss();
-                            this.goToHubAsync().done();
-                        }))
-                ]);
-                m.show();
-            } else */
-            {
+            var main = Script.mainAction();
+            if (main)
+                this.renderDecl(main);    
+            
+        }        
+        
+        private backToHub()
+        {
                 this.goToHubAsync().done();
-            }
         }
-
-        /*
-        public isNonTopPage()
-        {
-            var act = this.currentAction();
-            return this.liveViewSupported() && act && act.isPage() && this.currentRt.getCurrentPage().pageName != act.stableName;
-        }
-        */
 
         private currentCompilationModalDialog;
-
         // Does the right thing™ with the UI and handles: retries (user tries to
         // compile the script while we're still waiting), errors, debug
         // information. Returns a promise with the JSON returned from the cloud
@@ -2151,9 +2135,9 @@ module TDev
         {
             var children : HTMLElement[] = [];
             if (this.currentRt && this.currentRt.canResume())
-                children = [ Editor.mkTopMenuItem("svg:resume,black", lf("resume"), Ticks.codeResume, "Ctrl-P", () => this.resumeExecution()) ];
+                children = [ Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.codeResume, "Ctrl-M", () => this.resumeExecution()) ];
             else
-                children = [ Editor.mkTopMenuItem("svg:play,black", lf("run main"), Ticks.codeRun, "Ctrl-P", () => this.runMainAction()) ];
+                children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-M", () => this.runMainAction()) ];
 
             var canCompile =
                 Cloud.isRestricted() &&
@@ -2161,7 +2145,7 @@ module TDev
             if (canCompile) {
                 var compileBtn: HTMLElement;
                 var str = lf("compile");
-                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,black", str, Ticks.codeCompile, "Ctrl-M",
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-M",
                     (e: Event) => {
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)
@@ -2180,9 +2164,9 @@ module TDev
         {
             var tab:HTMLElement;
             if (this.searchBox.value)
-                tab = this.mkTabMenuItem("svg:cancel,black", lf("clear"), null, Ticks.editBtnSideSearch, () => this.searchPressed())
+                tab = this.mkTabMenuItem("svg:cancel,currentColor", lf("clear"), null, Ticks.editBtnSideSearch, () => this.searchPressed())
             else if (this.autoHide() || this.currentSideTab != this.scriptNav)
-                tab = this.mkTabMenuItem("svg:script,black", lf("script"), null, Ticks.editBtnSideSearch, () => this.searchPressed())
+                tab = this.mkTabMenuItem("svg:script,currentColor", lf("script"), null, Ticks.editBtnSideSearch, () => this.searchPressed())
             else tab = null;
             this.searchButtonContainer.setChildren([tab])
         }
@@ -2230,11 +2214,14 @@ module TDev
 
         private updateBackButton()
         {
+            var main: AST.Action;
             this.backBtnDiv.setChildren([
-                this.hasModalPane() ?
-                    Editor.mkTopMenuItem("svg:back,black", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane()) :
-                    Editor.mkTopMenuItem("svg:back,black", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backBtn())
-            ])
+                this.hasModalPane()
+                    ? Editor.mkTopMenuItem("svg:back,currentColor", lf("dismiss"), Ticks.calcSearchBack, " Esc", () => this.dismissModalPane())
+                    : Script && (main = Script.mainAction()) && this.currentAction() != main
+                      ? Editor.mkTopMenuItem("svg:back,currentColor", lf("main"), Ticks.codeHub, "Ctrl-I", () => this.backToMain())
+                      : Editor.mkTopMenuItem("svg:back,currentColor", lf("my scripts"), Ticks.codeHub, "Ctrl-I", () => this.backToHub())
+            ]);
         }
 
         private setupExternalButtons() {
@@ -2248,24 +2235,24 @@ module TDev
 
             if (snapView) return;
 
-            var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,black", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true, true)) : null;
+            var splitBtn: HTMLElement = this.widgetEnabled("splitScreen") ? Editor.mkTopMenuItem("svg:split,currentColor", lf("split"), Ticks.codeSplit, "",() => TheEditor.setSplitScreen(!SizeMgr.splitScreenRequested, true, true)) : null;
             if (splitBtn) splitBtn.className += " portrait-hidden split-visible";
             var top = div("topButtons",
                 this.backBtnDiv = div("inlineBlock topMenu-button-container search-back"),
                 this.playBtnDiv = div("inlineBlock topMenu-button-container"),
-                this.widgetEnabled("undoButton") ? Editor.mkTopMenuItem("svg:undo,black", lf("undo"), Ticks.codeUndo, "Ctrl-Z",() => this.topUndo()) : null,
+                this.widgetEnabled("undoButton") ? Editor.mkTopMenuItem("svg:undo,currentColor", lf("undo"), Ticks.codeUndo, "Ctrl-Z",() => this.topUndo()) : null,
                 splitBtn,
                 this.portraitSearchContainer
                 );
             this.updateBackButton();
             this.setupPlayButton();
 
-            var debuggerExitButton = Editor.mkTopMenuItem("svg:back,black", lf("exit"), Ticks.debuggerExit, "Ctrl-I", () => this.leaveDebuggerMode());
+            var debuggerExitButton = Editor.mkTopMenuItem("svg:back,currentColor", lf("exit"), Ticks.debuggerExit, "Ctrl-I", () => this.leaveDebuggerMode());
             this.debuggerModeButtons = [
-                Editor.mkDisablingTopMenuItem("svg:play,black", lf("continue"), Ticks.debuggerContinue, "Ctrl-P", () => this.debuggerContinue()),
-                Editor.mkDisablingTopMenuItem("svg:stepIn,black", lf("step in"), Ticks.debuggerStepIn, "Right", () => this.debuggerStepIn()),
-                Editor.mkDisablingTopMenuItem("svg:stepOver,black", lf("step over"), Ticks.debuggerStepOver, "Down", () => this.debuggerStepOver()),
-                Editor.mkDisablingTopMenuItem("svg:stepOut,black", lf("step out"), Ticks.debuggerStepOut, "Up", () => this.debuggerStepOut()),
+                Editor.mkDisablingTopMenuItem("svg:play,currentColor", lf("continue"), Ticks.debuggerContinue, "Ctrl-M", () => this.debuggerContinue()),
+                Editor.mkDisablingTopMenuItem("svg:stepIn,currentColor", lf("step in"), Ticks.debuggerStepIn, "Right", () => this.debuggerStepIn()),
+                Editor.mkDisablingTopMenuItem("svg:stepOver,currentColor", lf("step over"), Ticks.debuggerStepOver, "Down", () => this.debuggerStepOver()),
+                Editor.mkDisablingTopMenuItem("svg:stepOut,currentColor", lf("step out"), Ticks.debuggerStepOut, "Up", () => this.debuggerStepOut()),
             ];
 
             debuggerExitButton.className += " debuggerTopButton";
@@ -2427,6 +2414,12 @@ module TDev
 
         public cutDecl(decl:AST.Decl, dontCopy = false)
         {
+            if (decl.nodeType() == "action" && decl.getName() == "main" && !Script.isLibrary) {
+                // not allowed to delete "main" in non-library scripts
+                Util.log("cancelled main cut");
+                return;
+            }
+            
             if (decl == Script) {
                 ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
                     lf("uninstall"),
@@ -4601,7 +4594,7 @@ module TDev
             if (/monospace=1/.test(document.URL))
                 this.codeInner.className += " monospace"
 
-            this.sideTabs = [<SideTab> this.scriptNav, this.searchTab, this.selector, this.actionProperties, this.inlineActionEditor, this.debuggerNonEditor, this.recordEditor];
+            this.sideTabs = [<SideTab> this.scriptNav, this.searchTab, this.selector, this.actionProperties, this.scriptProperties, this.inlineActionEditor, this.debuggerNonEditor, this.recordEditor];
             this.stmtEditors = [<StmtEditor> this.calculator, <StmtEditor> this.debuggerEditor, this.commentEditor, this.debuggerControl, this.selectorEditor]
             this.stmtEditors.forEach((t) => {
                 t.init(this);
@@ -4612,7 +4605,7 @@ module TDev
                 t.init(this);
             });
 
-            this.codeViews = [<CodeView> this.actionView, this.scriptProperties, this.variableProperties, this.librefProperties, this.recordProperties, this.debuggerCodeView];
+            this.codeViews = [<CodeView> this.actionView, this.variableProperties, this.librefProperties, this.recordProperties, this.debuggerCodeView];
             this.codeViews.forEach((c:CodeView) => {
                 c.init(this);
             });
@@ -4945,8 +4938,25 @@ module TDev
                 stmtEditor = this.commentEditor;
             else if (s instanceof AST.InlineAction)
                 editor = this.inlineActionEditor;
-            else if (s instanceof AST.ActionHeader)
+            else if (s instanceof AST.ActionHeader) {
+                var ah = <AST.ActionHeader>s;
                 editor = this.actionProperties;
+                // if not allowed to edit the 'main' signature,
+                // don't show editor
+                if (this.widgetEnabled("forceMainAsAction") &&
+                    !Script.isLibrary &&
+                    Script.mainAction() == ah.action &&
+                    ah.getName() == "main")
+                    editor = null;    
+            }
+            else if (s instanceof AST.AppHeaderStmt) {
+                editor = this.scriptProperties;
+                // don't show the script properties dialog at all for beginner
+                // they can rename from the editor
+                if (!this.widgetEnabled("scriptProperties")) {
+                    editor = null;
+                }
+            }
             else if (s instanceof AST.RecordKind || s instanceof AST.RecordPersistenceKind)
                 editor = this.recordEditor;
             else if (s instanceof AST.RecordDef || s instanceof AST.LibraryRef || s instanceof AST.GlobalDef) {
@@ -5132,6 +5142,15 @@ module TDev
             if (!this.visible) return false;
             if (this.host.wallVisible) return false;
 
+            if (External.TheChannel && e.keyName != "Esc") {
+                // External editor doing its stuff. Bail.
+                // XXX: this should be fixed if one day the simulator for
+                // external editors requires keyboard input.
+                // XXX: we can't re-focus the iframe and dispatch the event
+                // because of cross-origin restrictions.
+                return;
+            }
+
             if (e.srcElement == this.searchBox || (<any>e).originalTarget == this.searchBox) {
                 if (this.currentSideTab != this.searchTab) {
                     this.focusSideTab(this.searchTab);
@@ -5165,7 +5184,7 @@ module TDev
             case "Up":
             case "Down":
                 if (!e.fromTextArea) {
-                    if (this.currentSideTab.isModal())
+                    if (this.currentSideTab && this.currentSideTab.isModal())
                         this.dismissSidePane();
                     TheEditor.selector.moveCarret(e.keyName == "Up" ? -1 : +1);
                     return true;
@@ -5280,7 +5299,7 @@ module TDev
 
         static sideDocBtn(icon:string)
         {
-            return HTML.mkButtonElt("code-button", div("code-button-frame", HTML.mkImg("svg:" + icon + ",black")));
+            return HTML.mkButtonElt("code-button", div("code-button-frame", HTML.mkImg("svg:" + icon + ",currentColor")));
         }
 
         public setStepHint(e:HTMLElement)

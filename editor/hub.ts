@@ -105,6 +105,7 @@ module TDev.Browser {
                 pagesSection: true,
                 artSection: true,
                 librariesSection: true,
+                scriptProperties: true,
                 objectsSection: true,
                 decoratorsSection: true,
                 scriptPropertiesIcons: true,
@@ -189,6 +190,7 @@ module TDev.Browser {
                 eventsSection: true,
                 artSection: true,
                 librariesSection: true,
+                scriptProperties: true,
                 scriptPropertiesSettings: true,
                 scriptPropertiesPropertyAtomic: true,
                 databaseSection: true,
@@ -320,6 +322,7 @@ module TDev.Browser {
                     shareScriptToGroup: true,
                     // searchArtRefactoring: true,
                     // calcSearchArt: true,
+                    scriptProperties: true,
                     scriptPropertiesIcons: true,
                     // statements
                     copyPaste: true,
@@ -491,6 +494,7 @@ module TDev.Browser {
                     integerNumbers: true,
                     codeSearch: true,
                     librariesSection: true,
+                    scriptProperties: true,
                     scriptPropertiesSettings: true,                    
                     editorRunOnLoad: true,
                     calcApiHelp: true,
@@ -553,6 +557,7 @@ module TDev.Browser {
                     integerNumbers: true,
                     codeSearch: true,
                     librariesSection: true,
+                    scriptProperties: true,
                     scriptPropertiesSettings: true,
                     scriptPropertiesPropertyAtomic: true,
                     editorRunOnLoad: true,
@@ -867,9 +872,11 @@ module TDev.Browser {
 
         function mbedintUpdate()
         {
-            ModalDialog.editText(lf("Target"), "gcc", perms =>
-                Cloud.postPrivateApiAsync("admin/mbedint/" + perms, { 
+            ModalDialog.editText(lf("Target:tag"), "gcc:v2", perms => {
+                var args = perms.split(/:/)
+                return Cloud.postPrivateApiAsync("admin/mbedint/" + args[0], { 
                      op: "update", 
+                     args: ["git checkout " + args[1] + ";"]
                 })
                 .then(r => {
                     var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
@@ -877,18 +884,18 @@ module TDev.Browser {
                         HTML.mkButton("full", () => {
                             ModalDialog.showText(full)
                         }),
-                        HTML.mkAsyncButton("update " + perms, () =>
-                            Cloud.getPrivateApiAsync("config/compile")
-                            .then(res => {
-                                res[perms].repourl = r.imageid
-                                return Cloud.postPrivateApiAsync("config/compile", res)
-                            })
+                        HTML.mkAsyncButton("save tag " + args[1], () => {
+                            var opts = {}
+                            opts[args[0] + "-" + args[1]] = r.imageid
+                            opts[args[1]] = r.imageid
+                            return Cloud.postPrivateApiAsync("config/compiletag", opts)
                             .then(r => r, e => Cloud.handlePostingError(e, ""))
-                        ),
+                        }),
                         HTML.mkButton("cancel", () => {
                             m.dismiss()
                     })))
-                }, e => Cloud.handlePostingError(e, "")))
+                }, e => Cloud.handlePostingError(e, ""))
+            })
         }
 
         function permissionReview()
@@ -1422,7 +1429,7 @@ module TDev.Browser {
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
-        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,black"));
+        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor"));
         // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
@@ -1944,7 +1951,7 @@ module TDev.Browser {
                 var cap = AST.App.fromCapabilityList(top.json.platforms || [])
                 if (cap & ~api.core.currentPlatform) {
                     tileOuter.appendChildren([
-                        div("tutWarning", HTML.mkImg("svg:Warning,black"))
+                        div("tutWarning", HTML.mkImg("svg:Warning,currentColor"))
                     ])
                 }
 

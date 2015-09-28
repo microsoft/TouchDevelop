@@ -1905,7 +1905,7 @@ module TDev.AST
                 wrProto(mkTable, "cloudtype", this.stringLiteral(r.getCloudType()));
                 wrProto(mkTable, "key_cloudtypes", "[" + r.keys.fields().map((f) => this.stringLiteral(f.getCloudType())).join(", ") + "]");
                 wrProto(mkTable, "value_cloudtypes", "[" + r.values.fields().map((f) => this.stringLiteral(f.getCloudType())).join(", ") + "]");
-                if (r.locallypersisted() && !this.options.azureSite) {
+                if (r.locallypersisted() && !this.options.cloud) {
                     wrProto(mkTable, "localsession", "true");
                 } else {
                     this.cloudstateJsonExport = this.cloudstateJsonExport + "  json[" + this.stringLiteral(r.getName())

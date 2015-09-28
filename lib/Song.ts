@@ -166,7 +166,7 @@ module TDev.RT {
                     dc.appendChild(div("item-subtitle", this._artist));
                 if (this._album)
                     dc.appendChild(div("item-subtle", this._album.name()));
-                d.appendChild(div('item-buttons', HTML.mkRoundButton("svg:play,black", lf("play"), Ticks.songPlay, () => this.play())));
+                d.appendChild(div('item-buttons', HTML.mkRoundButton("svg:play,currentColor", lf("play"), Ticks.songPlay, () => this.play())));
             });
             return d;
         }

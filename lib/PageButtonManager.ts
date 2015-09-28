@@ -39,7 +39,7 @@ module TDev.RT {
             if (!symbol)
                 return span('', name.slice(0, 1));
             else
-                return HTML.mkImg('svg:' + symbol + ",black")
+                return HTML.mkImg('svg:' + symbol + ",currentColor")
         }
     }
 }

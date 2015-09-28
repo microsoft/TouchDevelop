@@ -31,7 +31,7 @@ module TDev
 
         public makeIntoAddButton()
         {
-            this.icon = "svg:circlePlus,black";
+            this.icon = "svg:circlePlus,currentColor";
             this.color = "transparent";
             this.classAdd += " navRound";
         }
