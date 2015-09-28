@@ -420,7 +420,10 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
     var procs = [];
     if (process.env.TD_UPLOAD_LITE_KEY) {
         console.log("[I] uploading to lite")
-        procs.push('node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion + ' latest');
+	var cmd = 'node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion;
+        if (process.env.TRAVIS_BRANCH == "master")
+	  cmd += ' latest';
+        procs.push(cmd);
     }
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
