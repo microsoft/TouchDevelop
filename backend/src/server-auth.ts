@@ -6,11 +6,9 @@ import * as td from 'td';
 import * as assert from 'assert';
 import * as querystring from 'querystring';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
@@ -308,7 +306,7 @@ export function init(options_: IInitOptions = {}) : void
     logger = td.createLogger("serverauth");
     if (globalOptions.getData == null) {
         logger.info("using in-memory (single instance) storage");
-        let d = TD.collections.createStringMap();
+        let d = {}
         globalOptions.getData = key => d[key];
         globalOptions.setData = async (key1: string, value: string) => {
             d[key1] = value;
@@ -409,7 +407,7 @@ export function addAzureAdClientOnly(options_: IProviderOptions = {}) : void
         p.client_id = clientId;
         p.response_type = "id_token";
         p.scope = "openid";
-        p.nonce = createRandomId(12);
+        p.nonce = td.createRandomId(12);
         p.response_mode = "form_post";
         url = "https://login.windows.net/common/oauth2/authorize?" + toQueryString(p.toJson());
         return url;
@@ -512,7 +510,7 @@ async function handleResponseAsync(state: string, req: restify.Request, res: res
                     }
                     else {
                         setIfEmpty(jsb, "iss", globalOptions.self);
-                        setIfEmpty(jsb, "jti", createRandomId(10));
+                        setIfEmpty(jsb, "jti", td.createRandomId(10));
                         if (jsb["iat"] == null) {
                             jsb["iat"] = now();
                         }
@@ -767,7 +765,7 @@ export function addAzureAd(options_: IProviderOptions = {}) : void
         p.client_id = clientId;
         p.scope = "openid";
         p.response_type = "code";
-        p.nonce = createRandomId(12);
+        p.nonce = td.createRandomId(12);
         url = "https://login.windows.net/common/oauth2/authorize?" + toQueryString(p.toJson());
         return url;
     }
@@ -789,25 +787,6 @@ export function addAzureAd(options_: IProviderOptions = {}) : void
         info.email = profile1["unique_name"];
         return info;
     });
-}
-
-/**
- * creates a random id
- */
-function createRandomId(size: number) : string
-{
-    let id: string;
-    let buf = TD.bits.createBuffer(size * 2);
-    buf.fillRandom();
-    let s = buf.toString("base64").replace(/[^a-zA-Z]/g, "");
-    if (s.length < size) {
-        // this is very unlikely
-        id = createRandomId(size);
-    }
-    else {
-        id = s.substr(0, size);
-    }
-    return id;
 }
 
 async function oauthLoginAsync(req: restify.Request, res: restify.Response) : Promise<void>
@@ -849,7 +828,7 @@ async function oauthLoginAsync(req: restify.Request, res: restify.Response) : Pr
         }
         if (provider.makeLoginUrl != null) {
             let p = new OauthRequest();
-            let state = createRandomId(12);
+            let state = td.createRandomId(12);
             let redir = globalOptions.self + "/oauth/callback";
             p.state = state;
             p.redirect_uri = redir;

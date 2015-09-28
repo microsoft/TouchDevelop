@@ -162,6 +162,20 @@ export class JsonRecord
     }
 }
 
+
+export function createRandomId(size: number) : string
+{
+    let buf = crypto.randomBytes(size * 2)
+    let s = buf.toString("base64").replace(/[^a-zA-Z]/g, "");
+    if (s.length < size) {
+        // this is very unlikely
+        return createRandomId(size);
+    }
+    else {
+        return s.substr(0, size);
+    }
+}
+
 export function json(className : any, fieldName : string) {
     var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
     // t.name

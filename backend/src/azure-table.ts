@@ -554,18 +554,7 @@ export function createLogId() : string
 /**
  * creates a random id
  */
-export function createRandomId(size: number) : string
-{
-    let buf = crypto.randomBytes(size * 2)
-    let s = buf.toString("base64").replace(/[^a-zA-Z]/g, "");
-    if (s.length < size) {
-        // this is very unlikely
-        return createRandomId(size);
-    }
-    else {
-        return s.substr(0, size);
-    }
-}
+export var createRandomId = td.createRandomId;
 
 async function exampleAsync() : Promise<void>
 {

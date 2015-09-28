@@ -1,4 +1,4 @@
-N=server-auth
+N=tdlite-docs
 
 all:
 	node node_modules/typescript/bin/tsc

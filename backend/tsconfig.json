@@ -31,6 +31,7 @@
         "src/restify.ts",
         "src/sendgrid.ts",
         "src/server-auth.ts",
+        "src/tdlite-docs.ts",
         "src/parallel.ts"
     ],
     "exclude": [
