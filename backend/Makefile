@@ -1,4 +1,4 @@
-N=tdlite-docs
+N=tdlite-search
 
 all:
 	node node_modules/typescript/bin/tsc
