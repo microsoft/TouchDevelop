@@ -114,18 +114,18 @@ export interface IPubEntry {
 export class PubQuery
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public body: string = "";
-    @json public users: td.StringMap;
-    @json public features: td.StringMap;
-    @json public hashes: td.StringMap;
-    @json public index: string = "";
-    @json public orderby: string = "";
-    @json public select: string = "";
-    @json public scoringProfile: string = "";
-    @json public skip: number = 0;
-    @json public top: number = 0;
-    static createFromJson(o:JsonObject) { let r = new PubQuery(); r.fromJson(o); return r; }
+    public kind: string = "";
+    public body: string = "";
+    public users: td.StringMap;
+    public features: td.StringMap;
+    public hashes: td.StringMap;
+    public index: string = "";
+    public orderby: string = "";
+    public select: string = "";
+    public scoringProfile: string = "";
+    public skip: number = 0;
+    public top: number = 0;
+
     /**
      * Creates the OData search request
      */

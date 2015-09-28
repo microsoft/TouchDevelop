@@ -16,6 +16,7 @@ export class ArtEntry
     @json public id: number = 0;
     @json public name: string = "";
     @json public description: string = "";
+    @json public blah: string[];
 
     static createFromJson(o:JsonObject) { let r = new ArtEntry(); r.fromJson(o); return r; }
 }
