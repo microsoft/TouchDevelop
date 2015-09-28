@@ -2196,6 +2196,9 @@ module TDev
                 if (defn instanceof AST.LibExtensionAction)
                     defn = (<AST.LibExtensionAction>defn).shortcutTo
 
+                if (defn instanceof AST.LibraryRefAction && !TheEditor.widgetEnabled("editLibraryButton"))
+                    return;    
+                
                 var e = this.mkIntelliItem(0.9 * this.promoteMult(), Ticks.calcGoToDef);
                 e.nameOverride = name;
                 e.descOverride = defn.getName();
