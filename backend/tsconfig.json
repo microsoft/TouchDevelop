@@ -36,6 +36,7 @@
         "src/tdlite-search.ts",
         "src/t0.ts",
         "src/test-service.ts",
+        "src/tdlite.ts",
         "src/parallel.ts"
     ],
     "exclude": [
