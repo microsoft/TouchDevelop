@@ -108,14 +108,17 @@ async function initRoutesAsync() : Promise<void>
         res7.send(td.serverSetting("PORT", false));
     });
     server.get("/crash2", async (req8: restify.Request, res8: restify.Response) => {
-        let ref = TD.create.RefOf().TaskOf().Nothing();
+        let ref = null;
+        logd("a");
         await parallel.forAsync(3, async (x: number) => {
+        logd("b");
             await td.sleepAsync(0.1);
+        logd("c");
             if (x == 2) {
                 ref = /* async */ crashJsAsync();
             }
         });
-        await ref._get();
+        await ref;
         res8.send(td.serverSetting("PORT", false));
     });
     server.get("/crash3", async (req9: restify.Request, res9: restify.Response) => {
@@ -160,13 +163,11 @@ async function someMoreInitAsync() : Promise<void>
 async function doStuff2Async() : Promise<void>
 {
     await someMoreInitAsync();
-    12;
 }
 
 async function crashJsAsync() : Promise<void>
 {
     await new Promise(resume => {
-        /*JS*/
           setTimeout(function() { throw new Error("blah") }, 100)
     });
 }
@@ -189,5 +190,10 @@ async function dieAfterAMinuteAsync() : Promise<void>
     }
 }
 
+
+function logd(m) {
+    if ((<any>process).domain) console.log(m, "domain")
+    else console.log(m, "nope")
+}
 
 _initAsync();

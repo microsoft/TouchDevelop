@@ -18,6 +18,7 @@ var logger: td.AppLogger;
 var httpStatus: IHTTPStatusCodes;
 
 var restify = require('restify');
+var domain = require('domain');
 
 
 export class Server
@@ -650,7 +651,7 @@ export function handleRequest(req, res)
     return rootRestifyApp.handle._handle(req, res);
 }
 
-function restifyErrorResponse(e, req:Request, res:Response, route) {
+function restifyErrorResponse(e, req, res, route) {
     if (!e.tdMeta) e.tdMeta = {}
     e.body = { 
         message: e.message, 
@@ -661,32 +662,46 @@ function restifyErrorResponse(e, req:Request, res:Response, route) {
     if (route && route.name)
       e.tdMeta.routeName = route.name
     if (req) {
-      e.tdMeta.reqUrl = req.method() + " " + (req.url() || "???").replace(/access_token=.*/, "[secure]")
+      e.tdMeta.reqUrl = req.method + " " + (req.url || "???").replace(/access_token=.*/, "[secure]")
       e.tdNodeRequest = req.handle
     }
     e.tdMeta.interesting = true
 }
 
-function restifyHandlerFactory(then:RequestHandler) {
+function restifyHandlerFactory(handler:RequestHandler) {
     return (req, res, next) => {
       res.__next = next;
       var treq = new Request();
       treq.handle = req;
       var tres = new Response();
       tres.handle = res;
-      then(treq, tres)
+
+      var d = domain.create()
+      d.on("error", e => {
+        restifyErrorResponse(e, req, res, null)
+        td.App.logException(e)
+        if (!res.finished && !res.tdFinished) {
+           res.send(500, e)
+        }
+      })
+
+      d.add(req)
+      d.add(res)
+
+      d.enter()
+      handler(treq, tres)
       .then(
         () => {
            var n = res.__next; delete res.__next
            if (n) n();
         },
         err => {
-           console.log("ERROR", err)
-           restifyErrorResponse(err, treq, tres, null)
+           restifyErrorResponse(err, req, res, null)
            td.App.logException(err)
            var n = res.__next; delete res.__next
            if (n) n(err);
         })
+      d.exit()
     }
 }
 
@@ -703,7 +718,7 @@ function initProxy(logger:td.AppLogger) : void
     
     server.on("uncaughtException", (req, res, route, e) => {
         restifyErrorResponse(e, req, res, route)
-        // TODO s.rt.handleException(e, null)
+        td.App.logException(e)
         if (!res.finished && !res.tdFinished) {
            res.send(500, e)
         }

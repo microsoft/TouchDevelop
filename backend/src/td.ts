@@ -4,6 +4,9 @@
 'use strict';
 
 require('reflect-metadata');
+var bb = require('bluebird');
+Promise = bb;
+bb.longStackTraces();
 
 import * as crypto from 'crypto';
 import * as http from 'http';
@@ -159,8 +162,6 @@ export namespace App {
                 })
             meta = err.tdMeta
         }
-
-        console.log("LOGEXN", err)
 
         runTransports("logException", t => t.logException && t.logException(err, meta))
 
@@ -944,3 +945,13 @@ export async function downloadTextAsync(url: string): Promise<JsonObject>
     var r = createRequest(url)
     return (await r.sendAsync()).content()
 }
+
+
+function initTd()
+{
+    process.on('uncaughtException', err => {
+        App.logException(err);
+    })
+}
+
+initTd();

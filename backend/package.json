@@ -7,6 +7,7 @@
     "azure-storage": "^0.6.0",
     "azure-table-node": "^1.4.1",
     "babel": "^5.8.23",
+    "bluebird": "^2.10.1",
     "jwt-simple": "^0.3.1",
     "loggly": "^1.0.8",
     "nodemailer": "^1.5.0",

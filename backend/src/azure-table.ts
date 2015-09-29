@@ -457,7 +457,7 @@ export class Client
 /**
  * Create a client for Azure table service. The account options default to environment variables ``AZURE_STORAGE_ACCOUNT`` and ``AZURE_STORAGE_ACCESS_KEY``.
  */
-export function createClient(options?: IInitOptions) : Client
+export function createClient(options: IInitOptions = {}) : Client
 {
     let client: Client;
     if (logger == null) {

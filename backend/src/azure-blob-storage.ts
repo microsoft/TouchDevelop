@@ -512,7 +512,7 @@ function log(message: string) : void
 /**
  * Creates a 'BlobService,' an object that lets you work with containers and blobs.
  */
-export function createBlobService(options?: ICreateServiceOptions) : BlobService
+export function createBlobService(options: ICreateServiceOptions = {}) : BlobService
 {
     let blobService = new BlobService();
     var opt = options;
