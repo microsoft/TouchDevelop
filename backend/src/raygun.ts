@@ -14,7 +14,7 @@ var clone = td.clone;
 
 
 var logger: td.AppLogger;
-var pendingReports: JsonBuilder[];
+var pendingReports: BugReport[];
 
 
 export interface IOptions {
@@ -25,6 +25,111 @@ export interface IOptions {
 }
 
 var raygun = require("raygun");
+
+export function mkReportId()
+{
+    return "BuG" + (20000000000000 - Date.now()) + td.createRandomId(12)
+}
+
+export interface BugReport {
+    exceptionConstructor: string;
+    exceptionMessage: string;
+    context: string;
+    currentUrl: string;
+    jsUrl: string;
+    scriptId: string;
+    stackTrace: string;
+    sourceURL: string;
+    line: number;
+    eventTrace: string;
+    userAgent: string;
+    resolution: string;
+    timestamp: number;
+    platform: string[];
+    worldId: string;
+    kind: string;
+    attachments: string[];
+    tdVersion?: string;
+    logMessages?: td.LogMessage[];
+    
+    reportId:string;
+}
+
+
+export function mkBugReport(err:any, ctx = "")
+{
+    var r:BugReport = {
+        exceptionConstructor: "(unknown)",
+        exceptionMessage: "(unknown)",
+        context: ctx,
+        currentUrl: "standalone",
+        worldId: "",
+        kind: "",
+        scriptId: "",
+        stackTrace: "",
+        sourceURL: "",
+        line: -1,
+        eventTrace: "",
+        userAgent: "node.js " + process.version,
+        resolution: "",
+        jsUrl: "",
+        timestamp: Date.now(),
+        platform: [],
+        attachments: [],
+        tdVersion: "",
+        reportId: mkReportId(),
+    }
+
+    if (Array.isArray(err.bugAttachments))
+        td.pushRange(r.attachments, err.bugAttachments)
+
+    var meta = err.tdMeta
+    if (meta) {
+        if (meta.reportId) r.reportId = meta.reportId
+    }
+
+    try {
+        r.kind = "";
+        if (!err) r.exceptionMessage = "(null)";
+        else if (err.message) {
+            r.exceptionMessage = err.message + "";
+            if (err.stack)
+                r.stackTrace = err.stack + "";
+        } else if (Array.isArray(err)) {
+            r.exceptionMessage = err.join("\n");
+        } else {
+            r.exceptionMessage = err + "";
+        }
+
+        if (err && err.name && err.name != "Error")
+            r.exceptionConstructor = err.name;
+        else
+            r.exceptionConstructor = r.exceptionMessage.substr(0, 40);
+
+        if (err.line)
+            r.line = err.line;
+    } catch (e) {
+        console.log("ERROR in determining exception type", e)
+    }
+
+    try {
+        r.logMessages = td.App.getMsgs();
+        var maxSize = 100000
+        var maxIter = 20
+        while (JSON.stringify(r.logMessages).length > maxSize) {
+            r.logMessages = r.logMessages.slice(0, Math.floor(r.logMessages.length / 2))
+            if (maxIter-- < 0) {
+                r.logMessages = []
+                break
+            }
+        }
+        r.eventTrace = ""
+    } catch (e) {
+        console.log("ERROR getting stack trace", e)
+    }
+
+    return r;
+}
 
 
 /**
@@ -59,13 +164,10 @@ export async function initAsync(options_: IOptions = {}) : Promise<void>
         logger.debug("sending crash: " + err.message);
         var req = err.tdNodeRequest
         if (pendingReports) {
-            // TODO
-            /*
-            var js = TDev.Ticker.mkBugReport(err, "custom")
-            pendingReports.item.push(js)
+            var js = mkBugReport(err, "custom")
+            pendingReports.push(js)
             if (!meta) meta = {}
             meta.reportId = js.reportId
-            */
         }
         if (opt.private) {
             raygunClient.user = function() { return "anon" };

@@ -52,6 +52,8 @@ export async function initAsync(options_: IOptions = {}) : Promise<void>
         options_.token = td.serverSetting("LIBRATO_TOKEN", false);
     }
     if (!options_.period) options_.period = 60000;
+    if (!options_.source) options_.source = "";
+    if (!options_.prefix) options_.prefix = "";
     options = options_;
     var everReported = {};
     var opts = options;
@@ -180,9 +182,7 @@ async function oneReportAsync() : Promise<void>
     let request = createReq("");
     request.setMethod("post");
     let json = jsb2;
-    if (false) {
-        logger.debug("POST: " + JSON.stringify(json, null, 1));
-    }
+    // logger.debug("POST: " + JSON.stringify(json, null, 1));
     request.setContentAsJson(json);
     let response = await request.sendAsync();
     if (response.statusCode() != 200) {

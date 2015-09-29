@@ -663,7 +663,7 @@ function restifyErrorResponse(e, req, res, route) {
       e.tdMeta.routeName = route.name
     if (req) {
       e.tdMeta.reqUrl = req.method + " " + (req.url || "???").replace(/access_token=.*/, "[secure]")
-      e.tdNodeRequest = req.handle
+      e.tdNodeRequest = req
     }
     e.tdMeta.interesting = true
 }

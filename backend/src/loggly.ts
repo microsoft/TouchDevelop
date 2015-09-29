@@ -64,7 +64,6 @@ async function exampleAsync() : Promise<void>
 
 function initProxy(token: string, subDomain: string, globalTags: string, seconds: number) : void
 {
-    /*JS*/
     let logglyClient = loggly.createClient({
         token: token,
         subdomain: subDomain,
@@ -91,6 +90,7 @@ function initProxy(token: string, subDomain: string, globalTags: string, seconds
         var lgs = logglyLogs;
         logglyLogs = [];
         var retry = 10;
+        console.log("sending to loggly, #msgs: ", lgs.length)
         var send = function() {
            logglyClient.log(lgs, function (err, result) {
                   if(err) {

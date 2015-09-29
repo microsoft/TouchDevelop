@@ -8,6 +8,7 @@ var bb = require('bluebird');
 Promise = bb;
 bb.longStackTraces();
 
+
 import * as crypto from 'crypto';
 import * as http from 'http';
 import * as https from 'https';
@@ -73,7 +74,7 @@ export namespace App {
                     this.logIdx = 0;
             }
 
-            console.log(category, ": ", s);
+            console.log(category + ": " + s);
         }
 
         log(msg:string)
@@ -111,6 +112,11 @@ export namespace App {
     }
 
     var logger = new Logger();
+
+    export function getMsgs():LogMessage[]
+    {
+        return logger.getMsgs()
+    }
 
 
     export interface AppLogTransport {
@@ -244,6 +250,12 @@ export function replaceFn(self:string, regexp:RegExp, f:(m:string[]) => string)
 export function arrayToJson(arr:any[]):JsonObject
 {
     return arr.map(e => e.toJson ? e.toJson() : e)
+}
+
+export function pushRange<T>(trg:T[], src:T[])
+{
+    for (let e of src)
+        trg.push(e)
 }
 
 export function jsonCopyFrom(trg:JsonBuilder, src:JsonObject)
@@ -950,6 +962,9 @@ export async function downloadTextAsync(url: string): Promise<JsonObject>
 function initTd()
 {
     process.on('uncaughtException', err => {
+        App.logException(err);
+    })
+    process.on('unhandledRejection', err => {
         App.logException(err);
     })
 }

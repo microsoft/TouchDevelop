@@ -4,8 +4,8 @@
 
 import * as td from './td';
 import * as assert from 'assert';
+import * as crypto from 'crypto';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
@@ -16,6 +16,7 @@ var clone = td.clone;
 import * as parallel from "./parallel"
 import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
+import * as libratoNode from "./librato-node"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as redis from "./redis"
 import * as raygun from "./raygun"
@@ -29,24 +30,26 @@ var logger: td.AppLogger;
 export async function _initAsync() : Promise<void>
 {
     logger = td.createLogger("myweb");
-    if (false) {
+
         await raygun.initAsync({
             saveReport: async (json: JsonObject) => {
                 let jsb = clone(json);
                 delete jsb["logMessages"];
-                td.log("SAVE: " + JSON.stringify(clone(jsb), null, 2));
+                // td.log("SAVE: " + JSON.stringify(clone(jsb), null, 2));
                 await td.sleepAsync(0.1);
             }
 
         });
-    }
-    if (false) {
-        TD._.applicationInsights().init();
-        await loggly.initAsync({
-            globalTags: "ticktest"
-        });
-    }
+
+    await loggly.initAsync({
+        globalTags: "ticktest"
+    });
+
     await initRestifyAsync();
+
+    await libratoNode.initAsync({
+        period: 5000
+    });
 
     await restify.startAsync();
 
@@ -174,11 +177,7 @@ async function crashJsAsync() : Promise<void>
 
 function doStuff3(j: number) : Buffer
 {
-    let buf2: Buffer;
-    let buf = TD.bits.createBuffer(j);
-    buf.fillRandom();
-    return buf;
-    return buf2;
+    return crypto.randomBytes(j);
 }
 
 async function dieAfterAMinuteAsync() : Promise<void>
