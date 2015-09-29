@@ -987,15 +987,19 @@ module TDev
             if (e.fromTextBox) return false;
 
             switch (e.keyName) {
+            case "Ctrl-Left":
             case "Left":
                 this.moveCursor(-1);
                 break;
+            case "Ctrl-Right":
             case "Right":
                 this.moveCursor(+1);
                 break;
+            case "Shift-Home":
             case "Home":
                 this.moveCursor(-1000);
                 break;
+            case "Shift-End":
             case "End":
                 this.moveCursor(+1000);
                 break;
