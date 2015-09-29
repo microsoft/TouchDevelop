@@ -310,7 +310,7 @@ export class TableQuery
     /**
      * Fetch all (or `->top`) results of the query.
      */
-    public async fetchAllAsync() : Promise<JsonObject>
+    public async fetchAllAsync() : Promise<JsonObject[]>
     {
         let query: TableQuery = this;
         let coll = [];

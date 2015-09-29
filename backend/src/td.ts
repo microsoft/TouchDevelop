@@ -259,9 +259,14 @@ export function replaceFn(self:string, regexp:RegExp, f:(m:string[]) => string)
     })
 }
 
-export function arrayToJson(arr:any[]):JsonObject
+export function arrayToJson(arr:any[]):JsonObject[]
 {
     return arr.map(e => e.toJson ? e.toJson() : e)
+}
+
+export function awaitAtMostAsync<T>(p:Promise<T>, s:number):Promise<T>
+{
+    return (<any>p).timeout(s*1000).then(v => v, e => null)
 }
 
 export function pushRange<T>(trg:T[], src:T[])
@@ -278,6 +283,15 @@ export function jsonCopyFrom(trg:JsonBuilder, src:JsonObject)
     })
 }
 
+//? Return numbers between `start` and `start + length - 1` inclusively
+export function range(start:number, length:number) : number[]
+{
+    var r = []
+    for (var i = 0; i < length; ++i)
+        r.push(start + i)
+    return r
+}
+
 export function toNumber(v:any) : number
 {
     if (v == null) return null
@@ -290,6 +304,13 @@ export function toString(v:any) : string
 {
     if (v == null) return null
     return v + "";
+}
+
+export function toStringArray(v:any) : string[]
+{
+    if (Array.isArray(v))
+        return v.map(e => toString(e))
+    return null
 }
 
 export function toBoolean(v:any) : boolean
@@ -964,7 +985,7 @@ export async function downloadJsonAsync(url: string): Promise<JsonObject>
     return (await r.sendAsync()).contentAsJson()
 }
 
-export async function downloadTextAsync(url: string): Promise<JsonObject>
+export async function downloadTextAsync(url: string): Promise<string>
 {
     var r = createRequest(url)
     return (await r.sendAsync()).content()

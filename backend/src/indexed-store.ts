@@ -292,9 +292,8 @@ export class Index
         return fetchResult;
     }
 
-    public async fetchAllAsync(key: string) : Promise<JsonObject>
+    public async fetchAllAsync(key: string) : Promise<JsonObject[]>
     {
-        let items: JsonObject;
         let opts = ({ "count": 1000 });
         let fetchResult = await this.fetchAsync(key, clone(opts));
         if (fetchResult.continuation != "") {
@@ -313,11 +312,10 @@ export class Index
             }
             fetchResult.items = jsb;
         }
-        items = fetchResult.items;
-        return items;
+        return fetchResult.items;
     }
 
-    public async forAllBatchedAsync(key: string, batch: number, process:td.JsonAction) : Promise<void>
+    public async forAllBatchedAsync(key: string, batch: number, process:td.Action1<JsonObject[]>) : Promise<void>
     {
         let opts = ({ "count": 200 });
         if (batch > 0) {

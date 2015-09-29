@@ -2,8 +2,11 @@
 
 'use strict';
 
-import * as td from 'td';
+import * as td from './td';
 import * as assert from 'assert';
+import * as crypto from 'crypto';
+import * as querystring from 'querystring';
+import * as child_process from 'child_process';
 
 var TD = td.TD;
 type JsonObject = td.JsonObject;
@@ -16,7 +19,6 @@ var clone = td.clone;
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
-import * as nodeCrypto from "./node-crypto"
 import * as cachedStore from "./cached-store"
 import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
@@ -25,13 +27,11 @@ import * as restify from "./restify"
 import * as serverAuth from "./server-auth"
 import * as nodeJwtSimple from "./node-jwt-simple"
 import * as wordPassword from "./word-password"
-import * as websocketServer from "./websocket-server"
 import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 import * as libratoNode from "./librato-node"
 import * as tdliteSearch from "./tdlite-search"
 import * as azureSearch from "./azure-search"
-import * as touchdevelopCloud from "./touchdevelop-cloud"
 import * as acs from "./acs"
 import * as tdliteDocs from "./tdlite-docs"
 import * as sendgrid from "./sendgrid"
@@ -673,12 +673,9 @@ export interface IPubReview {
     ispositive?: boolean;
 }
 
-export class StoreDecorator
-    extends td.JsonRecord
+export interface DecoratedStore
 {
-    @json public target: indexedStore.Store;
-    @json public resolve: ResolutionCallback;
-    static createFromJson(o:JsonObject) { let r = new StoreDecorator(); r.fromJson(o); return r; }
+    myResolve: ResolutionCallback;
 }
 
 export interface IStoreDecorator {
@@ -1662,7 +1659,7 @@ export async function _initAsync() : Promise<void>
         azureTable.assumeTablesExists();
     }
     if (hasSetting("KRAKEN_API_SECRET")) {
-        kraken.init("", "", "won't give you", "my azure account", "nope");
+        kraken.init("", "");
     }
     mbedworkshopCompiler.init();
     mbedworkshopCompiler.setVerbosity("debug");
@@ -1677,10 +1674,6 @@ export async function _initAsync() : Promise<void>
     azureSearch.init({
         allow_409: true
     });
-    touchdevelopCloud.setOptions({
-        serviceRoot: td.serverSetting("SELF", false),
-        accessToken: td.serverSetting("TDC_ACCESS_TOKEN", false).replace(/.*=/g, "")
-    });
     await tdliteSearch.initAsync();
     if (hasSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET")) {
         await microsoftTranslator.initAsync("", "");
@@ -1694,7 +1687,7 @@ export async function _initAsync() : Promise<void>
     tokenSecret = td.serverSetting("TOKEN_SECRET", false);
     await cachedStore.initAsync();
     indexedStore.init(tableClient);
-    cachedStore.logger_().setVerbosity("info");
+    cachedStore.getLogger().setVerbosity("info");
 
     await _init_0Async();
 
@@ -1793,35 +1786,6 @@ export async function _initAsync() : Promise<void>
         }
     });
     logger.debug("librato email: " + td.serverSetting("LIBRATO_EMAIL", false));
-    if (false) {
-        await websocketServer.listenAsync("/api/socket", async (request: websocketServer.Request) => {
-            let apiRequest = buildApiRequest(request.path());
-            await validateTokenAsync(apiRequest);
-            if (apiRequest.status == 200) {
-                let socket = request.accept();
-                while (socket.readyState() == "open") {
-                    let msg = await socket.receive();
-                    if (msg.isError()) {
-                        socket.close();
-                    }
-                    else {
-                        let js = msg.json();
-                        if (js == null) {
-                            logger.debug("closing socket from " + apiRequest.userid);
-                            socket.close();
-                        }
-                        else {
-                            logger.debug("handling sock " + js["reqid"]);
-                            /* async */ handleSocketRequestAsync(js, apiRequest, socket);
-                        }
-                    }
-                }
-            }
-            else {
-                request.reject();
-            }
-        });
-    }
 }
 
 async function fetchQueryAsync(query: azureTable.TableQuery, req: restify.Request) : Promise<JsonObject>
@@ -2143,7 +2107,7 @@ function hashPassword(salt: string, pass: string) : string
 {
     let hashed: string;
     if (salt == "") {
-        salt = nodeCrypto.randomBytes(8).toString("hex");
+        salt = crypto.randomBytes(8).toString("hex");
     }
     else {
         salt = salt.replace(/\$.*/g, "");
@@ -2311,7 +2275,7 @@ function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify
                 res.setHeader(hd, apiRequest.headers[hd]);
             }
         }
-        if (apiRequest.response.kind() == "string") {
+        if (typeof apiRequest.response == "string") {
             res.setHeader("X-Content-Type-Options", "nosniff");
             res.sendText(td.toString(apiRequest.response), withDefault(apiRequest.responseContentType, "text/plain"));
         }
@@ -2345,16 +2309,14 @@ function parseUrl(url: string) : [string, JsonObject]
 {
     let path: string;
     let query: JsonObject;
-    TD.app._import("npm", "querystring", "");
-    /*JS*/
+
     var m = /^([^?]*)\?(.*)/.exec(url)
     if (m) {
         path = m[1]
         query = querystring.parse(m[2])
     } else { path = url; query = {} }
     path = path.replace(/^\//, "")
-    query = lib.JsonObject.wrap(query) 
-    ;
+
     return [path, query]
 }
 
@@ -2398,7 +2360,7 @@ async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: ApiR
     if (applyUpdates) {
         let updates = TD.collections.createStringMap();
         updates[""] = "1";
-        entities.items = td.arrayToJson(asArray(entities.items).filter((elt: JsonObject) => {
+        entities.items = asArray(entities.items).filter((elt: JsonObject) => {
             let result: boolean;
             if ( ! elt["pub"]["ishidden"]) {
                 let key = orEmpty(elt["updateKey"]);
@@ -2409,7 +2371,7 @@ async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: ApiR
             }
             return false;
             return result;
-        }));
+        });
     }
     else if (entities.items.length == 1) {
         singleResult = req.rootId == entities.items[0]["id"];
@@ -2426,7 +2388,8 @@ async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: ApiR
         if (forSearch) {
             includeAbuse = callerHasPermission(req, "global-list");
         }
-        entities.items = td.arrayToJson((await pubsContainer.getManyAsync(coll2)).filter(elt3 => isGoodPub(elt3, "script") && (includeAbuse || isAbuseSafe(elt3))));
+        entities.items = (await pubsContainer.getManyAsync(coll2))
+            .filter(elt3 => isGoodPub(elt3, "script") && (includeAbuse || isAbuseSafe(elt3)));
         if (forSearch) {
             srcitems.reverse();
             for (let js2 of srcitems) {
@@ -2685,7 +2648,7 @@ async function getInstalledAsync(req: ApiRequest, long: boolean) : Promise<void>
             let res = new PubHeaders();
             res.blobcontainer = (await workspaceForUser(req.userid).blobContainerAsync()).url() + "/";
             res.time = await nowSecondsAsync();
-            res.random = nodeCrypto.randomBytes(16).toString("base64");
+            res.random = crypto.randomBytes(16).toString("base64");
             res.headers = (<PubHeader[]>[]);
             res.newNotifications = orZero(req.rootPub["notifications"]);
             res.notifications = res.newNotifications > 0;
@@ -2990,9 +2953,9 @@ function increment(entry: JsonBuilder, counter: string, delta: number) : void
 function computeEtagOfJson(resp: JsonObject) : string
 {
     let etag: string;
-    let hash = nodeCrypto.createHash("md5");
-    hash.updateHashString(JSON.stringify(resp));
-    etag = hash.digestHash().toString("base64");
+    let hash = crypto.createHash("md5");
+    hash.update(JSON.stringify(resp), "utf8");
+    etag = hash.digest().toString("base64");
     return etag;
 }
 
@@ -3002,11 +2965,10 @@ async function setResolveAsync(store: indexedStore.Store, resolutionCallback: Re
     if (options_.anonList) {
         options_.anonSearch = true;
     }
-    let storeAdditions = StoreDecorator[store];
-    storeAdditions.resolve = resolutionCallback;
+    (<DecoratedStore><any>store).myResolve = resolutionCallback;
     addRoute("GET", "*" + store.kind, "", async (req: ApiRequest) => {
         let fetchResult = store.singleFetchResult(req.rootPub);
-        await storeAdditions.resolve(fetchResult, req);
+        await (<DecoratedStore><any>store).myResolve(fetchResult, req);
         req.response = fetchResult.items[0];
         if (req.response == null) {
             req.status = restify.http()._402PaymentRequired;
@@ -3112,7 +3074,7 @@ async function fetchAndResolveAsync(store: indexedStore.Store, req: ApiRequest, 
 {
     let entities: indexedStore.FetchResult;
     entities = await store.getIndex(idxName).fetchAsync(key, req.queryOptions);
-    await StoreDecorator[store].resolve(entities, req);
+    await (<DecoratedStore><any>store).myResolve(entities, req);
     return entities;
 }
 
@@ -3393,9 +3355,9 @@ function fixArtProps(contentType: string, jsb: JsonBuilder) : void
     jsb["pub"]["arttype"] = arttype;
 }
 
-async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptText: string, isImport: boolean) : Promise<void>
+async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptText_: string, isImport: boolean) : Promise<void>
 {
-    pubScript.scripthash = sha256(scriptText).substr(0, 32);
+    pubScript.scripthash = sha256(scriptText_).substr(0, 32);
     jsb["pub"] = pubScript.toJson();
     // 
     let updateKey = sha256(pubScript.userid + ":" + pubScript.rootid + ":" + pubScript.name);
@@ -3409,7 +3371,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
     updateEntry.RowKey = jsb["indexId"];
     // 
     let bodyBuilder = clone(pubScript.toJson());
-    bodyBuilder["text"] = scriptText;
+    bodyBuilder["text"] = scriptText_;
     progress("publish - about to just insert");
     await scriptText.justInsertAsync(pubScript.id, bodyBuilder);
     // 
@@ -3424,7 +3386,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
         progress("publish - about to update");
         await updateSlots.insertAsync(jsb2);
     }
-    jsb["text"] = scriptText;
+    jsb["text"] = scriptText_;
     if ( ! pubScript.ishidden) {
         progress("publish - about to update insert");
         await updateSlotTable.insertEntityAsync(updateEntry.toJson(), "or merge");
@@ -3502,9 +3464,6 @@ async function copyUrlToBlobAsync(Container: azureBlobStorage.Container, id: str
 {
     let result3: azureBlobStorage.BlobInfo;
     url = td.replaceAll(url, "az31353.vo.msecnd.net", "touchdevelop.blob.core.windows.net");
-    /*JS*/
-    
-    ;
     let dlFailure = false;
     for (let i = 0; i < 3; i++) {
         if (result3 == null && ! dlFailure) {
@@ -3513,7 +3472,7 @@ async function copyUrlToBlobAsync(Container: azureBlobStorage.Container, id: str
                 request.setHeader("Connection", "close");
             }
             let task = /* async */ request.sendAsync();
-            let response = await task.awaitAtMost(15);
+            let response = await td.awaitAtMostAsync(task, 15);
             if (response == null) {
                 logger.info("timeout downloading " + url);
             }
@@ -3690,7 +3649,7 @@ async function _initScriptsAsync() : Promise<void>
             scr.userid = req3.userid;
             scr.mergeids = (<string[]>[]);
             if (req3.body.hasOwnProperty("mergeids")) {
-                scr.mergeids.fromJson(req3.body["mergeids"]);
+                scr.mergeids = td.toStringArray(req3.body["mergeids"]);
             }
             scr.name = withDefault(req3.body["name"], "unnamed");
             scr.description = orEmpty(req3.body["description"]);
@@ -3795,16 +3754,13 @@ async function _initScriptsAsync() : Promise<void>
     });
 
     addRoute("GET", "showcase-scripts", "", async (req9: ApiRequest) => {
-        if (new Date().subtract(lastShowcaseDl) > 20) {
+        if (Date.now() - lastShowcaseDl.getTime() > 20000) {
             let js = await td.downloadJsonAsync("https://tdshowcase.blob.core.windows.net/export/current.json");
-            showcaseIds = (<string[]>[]);
-            if (js != null) {
-                showcaseIds.fromJson(js["ids"]);
-            }
+            showcaseIds = td.toStringArray(js["ids"]) || [];
             lastShowcaseDl = new Date();
         }
         let entities = await scripts.fetchFromIdListAsync(showcaseIds, req9.queryOptions);
-        await StoreDecorator[scripts].resolve(entities, req9);
+        await (<DecoratedStore><any>scripts).myResolve(entities, req9);
         buildListResponse(entities, req9);
     });
     aliasRoute("GET", "featured-scripts", "showcase-scripts");
@@ -4145,7 +4101,7 @@ async function _initGroupsAsync() : Promise<void>
         }
         let pubs = await followPubIdsAsync(fetchResult1.items, field, store.kind);
         fetchResult1.items = td.arrayToJson(pubs);
-        await StoreDecorator[store].resolve(fetchResult1, apiRequest1);
+        await (<DecoratedStore><any>store).myResolve(fetchResult1, apiRequest1);
     });
     await groupMemberships.createIndexAsync("userid", entry6 => entry6["pub"]["userid"]);
     addRoute("POST", "admin", "reindexgroups", async (req8: ApiRequest) => {
@@ -4602,7 +4558,7 @@ async function _initUsersAsync() : Promise<void>
         await checkFacilitatorPermissionAsync(req9, req9.rootId);
         if (req9.status == 200) {
             let jsb2 = {};
-            let coll2 = TD.math.range(0, 10).map<string>(elt => wordPassword.generate());
+            let coll2 = td.range(0, 10).map<string>(elt => wordPassword.generate());
             jsb2["passwords"] = td.arrayToJson(coll2);
             req9.response = clone(jsb2);
         }
@@ -4924,9 +4880,7 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
             req.status = restify.http()._413RequestEntityTooLarge;
         }
         else {
-            let hash = nodeCrypto.createHash("sha256");
-            hash.updateHash(buf);
-            let sha = hash.digestHash().toString("hex").toLowerCase().substr(0, 32);
+            let sha = td.sha256(buf).substr(0, 32);
             jsb["pub"]["filehash"] = sha;
             if (orEmpty(jsb["kind"]) == "art" && ! orFalse(req.body["forcenew"])) {
                 let fetchResult = await arts.getIndex("filehash").fetchAsync(sha, ({}));
@@ -5192,9 +5146,6 @@ async function getInstalledHistoryAsync(req: ApiRequest) : Promise<void>
     let scriptGuid = req.rootId + "." + req.argument;
     let resQuery = historyTable.createQuery().partitionKeyIs(scriptGuid);
     let entities2 = await indexedStore.executeTableQueryAsync(resQuery, req.queryOptions);
-    let coll = (<PubInstalledHistory[]>[]);
-    coll.fromJson(entities2.items);
-    entities2.items = td.arrayToJson(coll);
     req.response = entities2.toJson();
 }
 
@@ -6301,7 +6252,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
     }
     else {
         logger.tick("Login@federated");
-        let uidOverride = withDefault(oauthReq._client_oauth.u(), jsb["id"]);
+        let uidOverride = withDefault(oauthReq._client_oauth.u, jsb["id"]);
         if (uidOverride != jsb["id"]) {
             logger.info("login with override: " + jsb["id"] + "->" + uidOverride);
             if (hasPermission(clone(jsb), "signin-" + uidOverride)) {
@@ -6314,7 +6265,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
     }
     let user = jsb["id"];
-    let [token, cookie] = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id());
+    let [token, cookie] = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
 
     let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(token)) + "&id=" + user;
     if (cookie != "") {
@@ -6446,7 +6397,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                     }
                     else {
                         session.groupid = groupJson["id"];
-                        session.passwords = TD.math.range(0, 10).map<string>(elt => wordPassword.generate());
+                        session.passwords = td.range(0, 10).map<string>(elt => wordPassword.generate());
                         await serverAuth.options().setData(session.state, JSON.stringify(session.toJson()));
                     }
                 }
@@ -6721,7 +6672,7 @@ async function checkFacilitatorPermissionAsync(req: ApiRequest, subjectUserid: s
     }
 }
 
-async function followPubIdsAsync(fetchResult: JsonObject, field: string, kind: string) : Promise<JsonObject[]>
+async function followPubIdsAsync(fetchResult: JsonObject[], field: string, kind: string) : Promise<JsonObject[]>
 {
     let pubs: JsonObject[];
     let ids = (<string[]>[]);
@@ -6961,9 +6912,9 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
 function sha256(hashData: string) : string
 {
     let sha: string;
-    let hash = nodeCrypto.createHash("sha256");
-    hash.updateHashString(hashData);
-    sha = hash.digestHash().toString("hex").toLowerCase();
+    let hash = crypto.createHash("sha256");
+    hash.update(hashData, "utf8");
+    sha = hash.digest().toString("hex").toLowerCase();
     return sha;
 }
 
@@ -7101,9 +7052,6 @@ async function getNotificationsAsync(req: ApiRequest, long: boolean) : Promise<v
     if (req.status == 200) {
         let resQuery = notificationsTable.createQuery().partitionKeyIs(req.rootId);
         let entities = await indexedStore.executeTableQueryAsync(resQuery, req.queryOptions);
-        let coll = (<PubNotification[]>[]);
-        coll.fromJson(entities.items);
-        entities.items = td.arrayToJson(coll);
         entities.v = v;
         req.response = entities.toJson();
     }
@@ -7145,14 +7093,6 @@ async function longPollAsync(ch: string, long: boolean, req: ApiRequest) : Promi
     }
 
     return v;
-}
-
-async function handleSocketRequestAsync(js: JsonObject, apiRequest: ApiRequest, socket:td.WebSocket) : Promise<void>
-{
-    let id = js["reqid"];
-    let resp = await performBatchedRequestAsync(clone(js), apiRequest, true);
-    resp["reqid"] = id;
-    socket.sendJson(clone(resp));
 }
 
 async function throttleCoreAsync(throttleKey: string, tokenCost_s_: number) : Promise<boolean>
@@ -7289,9 +7229,7 @@ function _initBugs() : void
         let report = BugReport.createFromJson(req1.body);
         let jsb = ({ "details": { "client": { }, "error": { "stackTrace": [] }, "environment": { }, "request": { "headers": {} }, "user": { }, "context": { } } });
         let timestamp = report.timestamp;
-        /*JS*/
-        jsb.item["occurredOn"] = new Date(timestamp);
-        ;
+        jsb["occurredOn"] = new Date(timestamp);
         let det = jsb["details"];
         det["machineName"] = orEmpty(report.worldId);
         det["version"] = orEmpty(report.tdVersion);
@@ -7431,7 +7369,7 @@ async function deployCompileServiceAsync(rel: PubRelease, req: ApiRequest) : Pro
     if (false) {
         await td.sleepAsync(60);
         await importDoctopicsAsync(req);
-        await tdliteSearch.indexDocsAsync();
+        // await tdliteSearch.indexDocsAsync();
         logger.info("docs reindexed");
     }
 }
@@ -7504,11 +7442,9 @@ async function _initChannelsAsync() : Promise<void>
             fetchResult1.items = td.arrayToJson(await followIdsAsync(td.arrayToJson(pubs), "scriptId", "script"));
             let opts = apiRequest1.queryOptions;
             // ?applyupdates=true no longer needed - already applied - perf opt
-            /*JS*/
-            delete opts.value()['applyupdates']
-            ;
+            delete opts['applyupdates']
         }
-        await StoreDecorator[store].resolve(fetchResult1, apiRequest1);
+        await (<DecoratedStore><any>store).myResolve(fetchResult1, apiRequest1);
     });
     await channelMemberships.createIndexAsync("channelid", entry1 => entry1["pub"]["channelid"]);
     await channelMemberships.createIndexAsync("updatekey", entry2 => orEmpty(entry2["updateKey"]));
@@ -7599,7 +7535,7 @@ function checkChannelPermission(req: ApiRequest, listJs: JsonObject) : void
     }
 }
 
-async function followIdsAsync(fetchResult: JsonObject, field: string, kind: string) : Promise<JsonObject[]>
+async function followIdsAsync(fetchResult: JsonObject[], field: string, kind: string) : Promise<JsonObject[]>
 {
     let pubs: JsonObject[];
     let ids = (<string[]>[]);
@@ -7741,7 +7677,7 @@ function searchIndexArt(pub: PubArt) : tdliteSearch.ArtEntry
     }
     let spr = false;
     if (pub.flags != null) {
-        spr = pub.flags.contains("transparent");
+        spr = pub.flags.indexOf("transparent") >= 0;
     }
     entry = tdliteSearch.createArtEntry(pub.id, {
         name: pub.name,
@@ -7754,7 +7690,7 @@ function searchIndexArt(pub: PubArt) : tdliteSearch.ArtEntry
     return entry;
 }
 
-async function addUsernameEtcCoreAsync(entities: JsonObject) : Promise<JsonBuilder[]>
+async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<JsonBuilder[]>
 {
     let coll2: JsonBuilder[];
     let users = await followPubIdsAsync(entities, "userid", "");
@@ -7831,14 +7767,14 @@ function _initSearch() : void
     addRoute("POST", "search", "reindexdocs", async (req1: ApiRequest) => {
         checkPermission(req1, "operator");
         if (req1.status == 200) {
-            /* async */ tdliteSearch.indexDocsAsync();
+            // /* async */ tdliteSearch.indexDocsAsync();
             req1.response = ({});
         }
     });
     addRoute("POST", "art", "reindex", async (req2: ApiRequest) => {
         checkPermission(req2, "operator");
         if (req2.status == 200) {
-            /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject) => {
+            /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
                 let batch = tdliteSearch.createArtUpdate();
                 for (let js of await addUsernameEtcCoreAsync(json)) {
                     let pub = PubArt.createFromJson(clone(js["pub"]));
@@ -7867,11 +7803,11 @@ function _initSearch() : void
 
 async function reindexStoreAsync(store: indexedStore.Store, req: ApiRequest) : Promise<void>
 {
-    await store.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject) => {
+    await store.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
         let batch = tdliteSearch.createPubsUpdate();
         let fetchResult = store.singleFetchResult(json);
         fetchResult.items = json;
-        await StoreDecorator[store].resolve(fetchResult, adminRequest);
+        await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
         let fieldname = "id";
         let isPtr = store.kind == "pointer";
         if (isPtr) {
@@ -7969,7 +7905,7 @@ async function cacheCloudCompilerDataAsync(ver: string) : Promise<void>
         let resp2 = /* async */ queryCloudCompilerAsync("css");
         doctopics = (await queryCloudCompilerAsync("doctopics"))["topicsExt"];
         let jsb = {};
-        for (let js of doctopics) {
+        for (let js of asArray(doctopics)) {
             jsb[js["id"]] = js;
         }
         doctopicsByTopicid = clone(jsb);
@@ -8543,7 +8479,7 @@ async function executeSearchAsync(kind: string, q: string, req: ApiRequest) : Pr
     }
     let byid = {};
     for (let knd of Object.keys(bykind)) {
-        fetchResult2.items = clone(bykind[knd]);
+        fetchResult2.items = bykind[knd];
         let store = indexedStore.storeByKind(knd);
         let fld = "id";
         if (knd == "script") {
@@ -8551,7 +8487,7 @@ async function executeSearchAsync(kind: string, q: string, req: ApiRequest) : Pr
             fld = "sourceid";
         }
         else {
-            await StoreDecorator[store].resolve(fetchResult2, req);
+            await (<DecoratedStore><any>store).myResolve(fetchResult2, req);
         }
         for (let s of fetchResult2.items) {
             byid[s[fld]] = s;
@@ -8612,7 +8548,7 @@ function progress(message: string) : void
 function workspaceForUser(userid: string) : cachedStore.Container
 {
     let container: cachedStore.Container;
-    container = workspaceContainer[TD.math.mod(userid[userid.length - 1].toUnicode(), workspaceContainer.length)];
+    container = workspaceContainer[TD.math.mod(userid[userid.length - 1].charCodeAt(0), workspaceContainer.length)];
     return container;
 }
 
@@ -8620,11 +8556,10 @@ async function cpuLoadAsync() : Promise<number>
 {
     let load: number;
     await new Promise(resume => {
-        /*JS*/
-        require("child_process").execFile("wmic", ["cpu", "get", "loadpercentage"], function (err, res) {
+        child_process.execFile("wmic", ["cpu", "get", "loadpercentage"], function (err, res:string) {
           var arr = [];
           if (res)
-            res.replace(/\d+/g, function(m) { arr.push(parseFloat(m)) });
+            res.replace(/\d+/g, m => { arr.push(parseFloat(m)); return "" });
           load = 0;
           arr.forEach(function(n) { load += n });
           load = load / arr.length;
@@ -9052,12 +8987,6 @@ function acsValidatePub(jsb: JsonBuilder) : void
     if (acsCallbackUrl == "") {
         return;
     }
-    if (false) {
-        // We get the jobid back in callback anyways; no point storing it.
-        await pubsContainer.updateAsync(jsb, async (entry: JsonBuilder) => {
-            entry["acsJobId"] = jobId;
-        });
-    }
 }
 
 async function simplePointerCacheAsync(urlPath: string, lang: string) : Promise<string>
@@ -9142,7 +9071,7 @@ async function scanAndSearchAsync(obj: JsonBuilder, options_0: IScanAndSearchOpt
 
     let store = indexedStore.storeByKind(obj["kind"]);
     let fetchResult = store.singleFetchResult(clone(obj));
-    await StoreDecorator[store].resolve(fetchResult, adminRequest);
+    await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
     let pub = fetchResult.items[0];
     let body = orEmpty(withDefault(pub["text"], obj["text"]));
     if (body == "" && store.kind == "script") {
@@ -9282,8 +9211,7 @@ async function getCardInfoAsync(req: ApiRequest, pubJson: JsonObject) : Promise<
     }
     jsb["timems"] = scr.time * 1000;
     jsb["realid"] = scr.id;
-    let dt = jsb.time("timems");
-    jsb["humantime"] = dt.year() + "-" + twoDigits(dt.month()) + "-" + twoDigits(dt.day()) + " " + twoDigits(dt.hour()) + ":" + twoDigits(dt.minute());
+    jsb["humantime"] = tdliteDocs.humanTime(new Date(jsb["timems"]))
     return jsb;
     return jsb2;
 }
@@ -9303,32 +9231,28 @@ function encrypt(val: string, keyid: string) : string
             return val;
         }
     }
-    let iv = nodeCrypto.randomBytes(16);
-    let ivCipher = nodeCrypto.createCipherIv("aes256", key2, iv);
-    let enciphered = ivCipher.updateCipher(new Buffer(val, "utf8"));
+    let iv = crypto.randomBytes(16);
+    let ivCipher = crypto.createCipheriv("aes256", key2, iv);
+    let enciphered = ivCipher.update(new Buffer(val, "utf8"));
     let cipherFinal = ivCipher.final();
-    let s = enciphered.concat(cipherFinal).toString("base64");
+    let s = Buffer.concat([enciphered, cipherFinal]).toString("base64");
     return "EnC$" + keyid + "$" + iv.toString("base64") + "$" + s;
     return s2;
 }
 
 function prepEncryptionKey(keyid: string) : Buffer
 {
-    let key3: Buffer;
     let key = orEmpty(td.serverSetting("ENCKEY_" + keyid, true));
     if (key == "") {
-        return key3;
+        return null;
     }
-    let hash = nodeCrypto.createHash("sha256");
-    hash.updateHashString(key);
-    let key2 = hash.digestHash();
-    return key2;
-    return key3;
+    let hash = crypto.createHash("sha256");
+    hash.update(key);
+    return hash.digest();
 }
 
 function decrypt(val: string) : string
 {
-    let s2: string;
     if (! val) {
         return "";
     }
@@ -9339,18 +9263,15 @@ function decrypt(val: string) : string
             return val;
         }
         let iv = new Buffer(coll[2], "base64");
-        let ivDecipher = nodeCrypto.createDecipherIv("aes256", key2, iv);
-        let deciphered = ivDecipher.updateDecipher(new Buffer(coll[3], "base64"));
-        let decipherFinal = ivDecipher.final_();
-        let buf = deciphered.concat(decipherFinal);
-        /*JS*/
-        s2 = buf.toNodeBuffer().toString("utf8")
-        ;
+        let ivDecipher = crypto.createDecipheriv("aes256", key2, iv);
+        let deciphered = ivDecipher.update(new Buffer(coll[3], "base64"));
+        let decipherFinal = ivDecipher.final();
+        let buf = Buffer.concat([deciphered, decipherFinal]);
+        return buf.toString("utf8")
     }
     else {
         return val;
     }
-    return s2;
 }
 
 async function copyDeploymentAsync(req: ApiRequest, target: string) : Promise<void>
@@ -9452,17 +9373,15 @@ function isAlarming(perm: string) : boolean
 
 function encryptId(val: string, keyid: string) : string
 {
-    let s2: string;
     let key2 = prepEncryptionKey(keyid);
     if (key2 == null || ! val) {
         return val;
     }
-    let cipher = nodeCrypto.createCipher("aes256", key2);
-    let enciphered = cipher.updateCipher(new Buffer(val, "utf8"));
+    let cipher = crypto.createCipher("aes256", key2);
+    let enciphered = cipher.update(new Buffer(val, "utf8"));
     let cipherFinal = cipher.final();
-    let s = enciphered.concat(cipherFinal).toString("hex");
+    let s = Buffer.concat([enciphered, cipherFinal]).toString("hex");
     return keyid + "-" + s;
-    return s2;
 }
 
 function accessTokenRedirect(res: restify.Response, url2: string) : void
@@ -9501,7 +9420,7 @@ async function resolveOnePubAsync(store: indexedStore.Store, obj: JsonObject, ap
 {
     let js: JsonObject;
     let fetchResult = store.singleFetchResult(obj);
-    await StoreDecorator[store].resolve(fetchResult, apiRequest);
+    await (<DecoratedStore><any>store).myResolve(fetchResult, apiRequest);
     js = fetchResult.items[0];
     return js;
 }
@@ -9584,12 +9503,7 @@ function callerSharesGroupWith(req: ApiRequest, subjectJson: JsonObject) : boole
 
 function unsafeToJson(jsb: JsonBuilder) : JsonObject
 {
-    let js: JsonObject;
-    /*JS*/
-    if (jsb)
-      js = lib.JsonObject.wrap(jsb.value())
-    ;
-    return js;
+    return jsb;
 }
 
 function isAbuseSafe(elt: JsonObject) : boolean
@@ -9650,7 +9564,7 @@ async function _initAuditAsync() : Promise<void>
         tableClient: auditTableClient
     });
     let store = auditStore;
-    StoreDecorator[store].resolve = async (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => {
+    (<DecoratedStore><any>store).myResolve = async (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => {
         checkPermission(apiRequest, "audit");
         if (apiRequest.status == 200) {
             let coll = (<PubAuditLog[]>[]);
@@ -10066,30 +9980,27 @@ function setMbedresponse(st: CompileStatus, msg: string) : void
 
 async function mbedintRequestAsync(ccfg: CompilerConfig, jsb2: JsonBuilder) : Promise<td.WebResponse>
 {
-    let response2:td.WebResponse;
     jsb2["requestId"] = azureTable.createRandomId(128);
     let request = td.createRequest(ccfg.internalUrl);
-    let iv = nodeCrypto.randomBytes(16);
+    let iv = crypto.randomBytes(16);
     let key = new Buffer(td.serverSetting("MBEDINT_KEY", false), "hex");
-    let cipher = nodeCrypto.createCipherIv("aes256", key, iv);
+    let cipher = crypto.createCipheriv("aes256", key, iv);
     request.setHeader("x-iv", iv.toString("hex"));
-    let enciphered = cipher.updateCipher(new Buffer(JSON.stringify(jsb2), "utf8"));
+    let enciphered = cipher.update(new Buffer(JSON.stringify(jsb2), "utf8"));
     let cipherFinal = cipher.final();
-    request.setContentAsBuffer(enciphered.concat(cipherFinal));
+    request.setContentAsBuffer(Buffer.concat([enciphered, cipherFinal]));
     request.setMethod("post");
     let response = await request.sendAsync();
     let buf = response.contentAsBuffer();
     let inpiv = response.header("x-iv");
     if (response.statusCode() == 200) {
-        /*JS*/
-        var ciph = require('crypto').createDecipheriv("AES256", key.toNodeBuffer(), new Buffer(inpiv, "hex"));
-        var dat = ciph.update(buf.toNodeBuffer(), null, "utf8") + ciph.final("utf8");
-        response._content = dat;
-        
-        ;
+        var ciph = crypto.createDecipheriv("AES256", key, new Buffer(inpiv, "hex"));
+        var b0 = ciph.update(buf)
+        var b1 = ciph.final()
+        var dat = Buffer.concat([b0, b1]).toString("utf8");
+        (<any>response)._content = dat;
     }
     return response;
-    return response2;
 }
 
 async function _initPromoAsync() : Promise<void>
@@ -10316,19 +10227,17 @@ async function getPromoAsync(req: ApiRequest) : Promise<JsonObject>
 
 function jsonArrayIndexOf(js: JsonObject, id: string) : number
 {
-    let idx: number;
-    if (js == null || js.kind() != "array") {
+    if (!Array.isArray(js)) {
         return -1;
     }
     let x = 0;
-    for (let js2 of js) {
+    for (let js2 of asArray(js)) {
         if (td.toString(js2) == id) {
             return x;
         }
         x = x + 1;
     }
     return -1;
-    return idx;
 }
 
 async function addGroupApprovalAsync(groupJson: JsonObject, userJson: JsonObject) : Promise<void>
@@ -10373,7 +10282,7 @@ async function checkSearchAsync() : Promise<void>
 
 async function doFailureChecksAsync(container: azureBlobStorage.Container, table: azureTable.Table) : Promise<void>
 {
-    if (new Date().subtract(lastSearchReport) > 100) {
+    if (Date.now() - lastSearchReport.getTime() > 100000) {
         logger.tick("Failure@search");
     }
     if (await redisClient.isStatusLateAsync()) {

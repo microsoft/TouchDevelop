@@ -167,7 +167,7 @@ function twoDigit(p: number) : string
     return s2.substr(s2.length - 2, 2);
 }
 
-function humanTime(p: Date) : string
+export function humanTime(p: Date) : string
 {
     return p.getFullYear() + "-" + twoDigit(p.getMonth() + 1) + "-" + twoDigit(p.getDate()) + 
         " " + twoDigit(p.getHours()) + ":" + twoDigit(p.getMinutes());
