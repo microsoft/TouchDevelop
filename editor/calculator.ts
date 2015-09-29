@@ -1930,6 +1930,7 @@ module TDev
                 if (implicitAction)
                     len--;
 
+                var immediateEdit = false;                
                 if (len > 1 && (!tok0 || tok0.getOperator() != "(" && parms.length > 1)) {
                     toks.push(AST.mkOp("("));
                     this.lastOpenBracePos = this.cursorPosition + toks.length;
@@ -1949,6 +1950,8 @@ module TDev
                             toks.pushRange(this.findDefault(parms[i]));
                             if (newCursorPos < 0 && (k == api.core.String || k == api.core.Number)) {
                                 newCursorPos = this.cursorPosition + toks.length;
+                                if (k == api.core.String && !parms[i].enumMap && !parms[i].getStringValues())   
+                                    immediateEdit = true;    
                             }
                         }
                     }
@@ -1969,6 +1972,10 @@ module TDev
                 this.turnIntoInlineActions(lambdaIds, implicitAction);
 
                 this.display();
+                
+                // automatically edit string literals.
+                if (immediateEdit && this.expr.tokens[this.cursorPosition - 1])
+                    this.inlineEdit(this.expr.tokens[this.cursorPosition - 1])    
             }
         }
 
