@@ -1563,10 +1563,8 @@ div.md-video-link > svg {
     max-width:60%;
 }
 
-.greyed
-{
-    color: #6c6c6c;
-}
+.greyed { color: #6c6c6c; }
+.greyer { color: #999;}
 
 .code-highlight {
   background: #Ff8;
