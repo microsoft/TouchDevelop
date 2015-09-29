@@ -5324,6 +5324,7 @@ module TDev.AST {
         public hasDecl(p:Decl)
         {
             if (!this.properties) return true;
+            if (p instanceof LocalDef) return true;
             if (p.getName() == AST.libSymbol)
                 // needs explicit #allow:libSingleton
                 return this.hasKey("libSingleton");
