@@ -166,7 +166,7 @@ export class Client
     public async cachedTimeAsync() : Promise<number>
     {
         let millis: number;
-        let now = new Date().getTime();
+        let now = Date.now();
         if (now - this.lastTimeSync > 5000) {
             let millis2 = await this.serverTimeAsync();
             this.timeDelta = millis2 - now;

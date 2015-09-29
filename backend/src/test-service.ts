@@ -24,7 +24,7 @@ import * as loggly from "./loggly"
 
 
 var logger: td.AppLogger;
-
+var testts: cachedStore.Container;
 
 
 export async function _initAsync() : Promise<void>
@@ -45,13 +45,19 @@ export async function _initAsync() : Promise<void>
         globalTags: "ticktest"
     });
 
-    await initRestifyAsync();
-
     await libratoNode.initAsync({
         period: 5000
     });
 
     await restify.startAsync();
+
+    await cachedStore.initAsync();
+
+    testts = await cachedStore.createContainerAsync("testts", {
+        inMemoryCacheSeconds: 5
+    })
+
+    await initRestifyAsync();
 
     logger.info("started...");
 }
@@ -78,6 +84,23 @@ async function initRoutesAsync() : Promise<void>
     });
     server.get("/id", async (req1: restify.Request, res1: restify.Response) => {
         res1.send(td.serverSetting("TD_WORKER_ID", false));
+    });
+    server.get("/store", async (req1: restify.Request, res1: restify.Response) => {
+        let id = td.createRandomId(5)
+        var r:any = { val: id }
+        r.ok = await testts.tryInsertAsync("slot0", { val: id })
+        res1.json(r)
+    });
+    server.get("/update", async (req1: restify.Request, res1: restify.Response) => {
+        let id = td.createRandomId(5)
+        await testts.updateAsync("slot0", async (js:JsonBuilder) => {
+            js["val"] = id
+        })
+        var r:any = { val: id }
+        res1.json(r)
+    });
+    server.get("/get", async (req1: restify.Request, res1: restify.Response) => {
+        res1.json(await testts.getAsync("slot0"))
     });
     server.get("/meta", async (req2: restify.Request, res2: restify.Response) => {
         res2.json(JSON.parse(td.serverSetting("TD_DEPLOYMENT_META", false)));

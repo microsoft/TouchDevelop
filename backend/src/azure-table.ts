@@ -545,7 +545,7 @@ export function createEntity(PartitionKey: string, RowKey: string) : JsonBuilder
 export function createLogId() : string
 {
     let id: string;
-    let x = 20000000000000 - new Date().getTime();
+    let x = 20000000000000 - Date.now();
     logSeqNo += 1;
     id = x + "." + logSeqNo + "." + instanceId;
     return id;
@@ -615,7 +615,7 @@ export function assumeTablesExists() : void
  */
 export function createReverseLogId() : string
 {
-    let x = new Date().getTime();
+    let x = Date.now();
     logSeqNo += 1;
     return x + "." + logSeqNo + "." + instanceId;
 }

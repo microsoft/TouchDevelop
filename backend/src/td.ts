@@ -14,6 +14,8 @@ import * as http from 'http';
 import * as https from 'https';
 import * as url from 'url';
 import * as zlib from 'zlib';
+import * as net from 'net';
+import * as domain from 'domain';
 import * as assert from 'assert';
 
 export type JsonObject = {};
@@ -139,15 +141,25 @@ export namespace App {
         logger.log(tp + ": transport failed. " + (err.stack || err.message || err))
     }
 
-    export var runTransports = (id:string, run:(t:AppLogTransport) => void) =>
+    function runTransports(id:string, run:(t:AppLogTransport) => void)
     {
         transports.forEach(transport => {
+            var d = transport.domain
+            if (!d) {
+                transport.domain = d = domain.create()
+                d.on("error", err => {
+                    transportFailed(transport, id, err)
+                })
+            }
+
+            d.enter()
             try {
                 run(transport)
             } catch (err) {
                 transportFailed(transport, id, err)
             }
-        });
+            d.exit()
+        })
     }
 
     export function logException(err: any, meta? : any): void {
@@ -240,7 +252,7 @@ export function replaceAll(self: string, old: string, new_: string): string {
 
 export function replaceFn(self:string, regexp:RegExp, f:(m:string[]) => string)
 {
-    return self.replace(regexp, () => {
+    return self.replace(regexp, function () {
         var arr = []
         for (var i = 0; i < arguments.length; ++i) arr.push(arguments[i])
         return f(arr)
@@ -958,6 +970,42 @@ export async function downloadTextAsync(url: string): Promise<JsonObject>
     return (await r.sendAsync()).content()
 }
 
+function fixupSockets()
+{
+    var origConnect = net.Socket.prototype.connect
+    net.Socket.prototype.connect = function (options) {
+        if (options && typeof options.host == "string")
+            this.tdHost = options.host
+        return origConnect.apply(this, arguments)
+    }
+
+    var origDestroy = net.Socket.prototype._destroy
+    net.Socket.prototype._destroy = function (exn) {
+        if (typeof exn == "object" && (this.tdHost || this.tdUnrefed)) {
+            if (!exn.tdMeta) exn.tdMeta = {}
+            exn.tdMeta.socketHost = this.tdHost
+            exn.tdMeta.unrefed = this.tdUnrefed
+
+            if (this.tdUnrefed && exn.code == 'ECONNRESET') {
+                log("ignoring ECONNRESET on " + this.tdHost)
+                exn.rtProtectHandled = true;
+                exn.tdSkipReporting = true;
+            }
+        }
+        return origDestroy.apply(this, arguments)
+    }
+
+    var origRef = net.Socket.prototype.ref
+    net.Socket.prototype.ref = function () {
+        this.tdUnrefed = false
+        return origRef.apply(this, arguments)
+    }
+    var origUnref = net.Socket.prototype.unref
+    net.Socket.prototype.unref = function () {
+        this.tdUnrefed = true
+        return origUnref.apply(this, arguments)
+    }
+}
 
 function initTd()
 {
@@ -967,6 +1015,8 @@ function initTd()
     process.on('unhandledRejection', err => {
         App.logException(err);
     })
+
+    fixupSockets();
 }
 
 initTd();

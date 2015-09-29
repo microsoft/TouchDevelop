@@ -268,7 +268,7 @@ export class Container
         let text: string;
         text = (<string>null);
         if (this.memCacheValidity > 0) {
-            let now = new Date().getTime();
+            let now = Date.now();
             swapMemCaches(now, this);
             let v = this.memCache[name];
             if (v == null || now - v > this.memCacheValidity) {
@@ -416,7 +416,7 @@ export class Container
     private saveMemCache(name: string, val: string) : void
     {
         if (this.memCacheValidity > 0) {
-            let now = new Date().getTime();
+            let now = Date.now();
             swapMemCaches(now, this);
             this.memCache[name] = now;
             this.memCache[name + ":data"] = val;
@@ -468,7 +468,7 @@ export async function createContainerAsync(name: string, options: ICreateOptions
         container.memCacheValidity = options.inMemoryCacheSeconds * 1000;
         container.memCache = {};
         container.memCacheSecondary = {};
-        container.lastMemSwap = new Date().getTime();
+        container.lastMemSwap = Date.now();
     }
     return container;
 }
@@ -476,6 +476,7 @@ export async function createContainerAsync(name: string, options: ICreateOptions
 export async function initAsync() : Promise<void>
 {
     if (blobService == null) {
+        azureBlobStorage.init();
         blobService = azureBlobStorage.createBlobService();
         if (false) {
             blobService.setLogLevel("debug");
