@@ -670,14 +670,19 @@ function restifyErrorResponse(e, req:Request, res:Response, route) {
 function restifyHandlerFactory(then:RequestHandler) {
     return (req, res, next) => {
       res.__next = next;
-      then(req, res)
+      var treq = new Request();
+      treq.handle = req;
+      var tres = new Response();
+      tres.handle = res;
+      then(treq, tres)
       .then(
         () => {
            var n = res.__next; delete res.__next
            if (n) n();
         },
         err => {
-           restifyErrorResponse(err, req, res, null)
+           console.log("ERROR", err)
+           restifyErrorResponse(err, treq, tres, null)
            td.App.logException(err)
            var n = res.__next; delete res.__next
            if (n) n(err);
@@ -824,6 +829,7 @@ export function http() : IHTTPStatusCodes
 function setupHandler(method: string, path: string, then: RequestHandler) : RequestHandler
 {
     return async (req: Request, res: Response) => {
+
         logger.newContext();
         let url = req.url().replace(/access_token=.*/g, "[secure]");
         let id = method + " " + path;
@@ -846,4 +852,12 @@ function setupHandler(method: string, path: string, then: RequestHandler) : Requ
 export function disableTicks() : void
 {
     logger.customTick = function() {}
+}
+
+export async function startAsync() : Promise<void>
+{
+    init();
+    await new Promise(resume => {
+        server().handle.listen(process.env['PORT'] || 8080, resume)
+    })
 }

@@ -1,4 +1,5 @@
 {
+  "private": true,
   "devDependencies": {
     "typescript": "^1.7.0-dev.20150928"
   },
@@ -12,6 +13,7 @@
     "raygun": "^0.7.1",
     "redis": "https://microbit0.blob.core.windows.net/files/npm0/redis-0.12.1-tls.tgz",
     "reflect-metadata": "^0.1.2",
+    "restify": "^4.0.3",
     "sendgrid": "^1.9.2"
   }
 }

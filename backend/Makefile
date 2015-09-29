@@ -1,4 +1,4 @@
-N=tdlite
+N=test-service
 
 all:
 	#node node_modules/typescript/bin/tsc

@@ -160,6 +160,8 @@ export namespace App {
             meta = err.tdMeta
         }
 
+        console.log("LOGEXN", err)
+
         runTransports("logException", t => t.logException && t.logException(err, meta))
 
         var msg = err.stack
