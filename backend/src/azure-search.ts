@@ -389,6 +389,11 @@ export class ScoringProfile
 
 }
 
+export interface IStatistics {
+    documentCount: number;
+    storageSize: number;
+}
+
 export class Index
 {
     public name: string = "";
@@ -419,11 +424,11 @@ export class Index
         deleted = response.statusCode() == 204;
         return deleted;
     }
-
+    
     /**
      * Gets from Azure Search a document count for the current index plus storage usage. **requires an admin api key**
      */
-    public async statisticsAsync() : Promise<[number, number]>
+    public async statisticsAsync() : Promise<IStatistics>
     {
         let documentCount: number;
         let storageSize: number;
@@ -439,7 +444,10 @@ export class Index
             storageSize = -1;
         }
         log(this + "stats: " + documentCount + " docs, " + (storageSize / 1000000).toFixed(3) + " Mb");
-        return <[number, number]>[documentCount, storageSize]
+        return {
+            documentCount: documentCount,
+            storageSize: storageSize
+        }
     }
 
     /**

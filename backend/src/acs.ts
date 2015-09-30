@@ -139,9 +139,9 @@ export async function detailsAsync(jobId: string) : Promise<[number, td.StringMa
     else if (response.statusCode() == 401) {
         logger.debug("token expired, refreshing");
         _token = "";
-        let [t0, t1] = await detailsAsync(jobId);
-        statusCode = t0;
-        res = t1;
+        let t = await detailsAsync(jobId);
+        statusCode = t[0];
+        res = t[1];
     }
     return <[number, td.StringMap]>[statusCode, res]
 }

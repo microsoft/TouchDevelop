@@ -506,11 +506,7 @@ export async function statisticsAsync() : Promise<JsonObject>
     let jsres = {};
     await parallel.forAsync(coll.length, async (x: number) => {
         let index = coll[x];
-        let [documentCount, storageSize] = await index.statisticsAsync();
-        let jsb2 = {};
-        jsb2["docs"] = documentCount;
-        jsb2["storage"] = storageSize;
-        jsres[index.indexName()] = jsb2;
+        jsres[index.indexName()] = await index.statisticsAsync();
     });
     res = clone(jsres);
     return res;
@@ -623,7 +619,9 @@ export function toPubQuery(index: string, kind: string, text: string) : PubQuery
     // parse text...
     let body = (<string[]>[]);
     for (let word of text.split(" ").filter(elt => elt != "")) {
-        let [key, val] = parseProperty(word);
+        let rr = parseProperty(word);
+        let key = rr[0];
+        let val = rr[1];
         if (key == "userid") {
             query.users[val] = "true";
         }

@@ -1979,10 +1979,8 @@ function hashPassword(salt: string, pass: string) : string
     return hashed;
 }
 
-async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<[string, string]>
+async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<IRedirectAndCookie>
 {
-    let customToken: string;
-    let tdCookie: string;
     let token = new Token();
     token.PartitionKey = user;
     token.RowKey = azureBlobStorage.createRandomId(32);
@@ -1996,9 +1994,10 @@ async function generateTokenAsync(user: string, reason: string, client_id: strin
         entry["lastlogin"] = await nowSecondsAsync();
     });
     await tokensTable.insertEntityAsync(token.toJson(), "or merge");
-    customToken = tokenString(token);
-    tdCookie = token.cookie;
-    return <[string, string]>[customToken, tdCookie]
+    return {
+        url: tokenString(token),
+        cookie: token.cookie
+    }
 }
 
 async function nowSecondsAsync() : Promise<number>
@@ -2165,21 +2164,6 @@ async function performBatchAsync(req: ApiRequest) : Promise<void>
         jsb["array"] = td.arrayToJson(resps);
         req.response = clone(jsb);
     }
-}
-
-function parseUrl(url: string) : [string, JsonObject]
-{
-    let path: string;
-    let query: JsonObject;
-
-    var m = /^([^?]*)\?(.*)/.exec(url)
-    if (m) {
-        path = m[1]
-        query = querystring.parse(m[2])
-    } else { path = url; query = {} }
-    path = path.replace(/^\//, "")
-
-    return [path, query]
 }
 
 async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, allowPost: boolean) : Promise<JsonBuilder>
@@ -2599,7 +2583,17 @@ function buildApiRequest(url: string) : ApiRequest
     let apiReq: ApiRequest;
     apiReq = new ApiRequest();
     apiReq.origUrl = url;
-    let [path, query] = parseUrl(url);
+    
+    let m = /^([^?]*)\?(.*)/.exec(url)
+    let path = url;
+    let query = {};
+    
+    if (m) {
+        path = m[1]
+        query = querystring.parse(m[2])
+    }
+    path = path.replace(/^\//, "")
+        
     let strings = path.split("/");
     if (strings.length > 0 && strings[0] == "api") {
         strings.splice(0, 1);
@@ -4377,20 +4371,20 @@ async function _initUsersAsync() : Promise<void>
         checkPermission(req7, "signin-" + req7.rootId);
         if (req7.status == 200) {
             let resp = {};
-            let [customToken, cookie] = await generateTokenAsync(req7.rootId, "admin", "webapp2");
-            if (cookie != "") {
+            let tok = await generateTokenAsync(req7.rootId, "admin", "webapp2");
+            if (tok.cookie) {
                 if (req7.headers == null) {
                     req7.headers = {};
                 }
-                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(cookie);
+                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(tok.cookie);
             }
             else {
                 assert(false, "no cookie in token");
             }
             await auditLogAsync(req7, "signin-as", {
-                data: sha256(customToken).substr(0, 10)
+                data: sha256(tok.url).substr(0, 10)
             });
-            resp["token"] = customToken;
+            resp["token"] = tok.url;
             req7.response = clone(resp);
         }
     });
@@ -5700,8 +5694,7 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
     id = id + lang;
 
     await rewriteAndCachePointerAsync(id, res, async (v: JsonBuilder) => {
-        let pubdata = {};
-        let templatename = "templates/official-s";
+        let pubdata = {};        
         let msg = "";
         v["redirect"] = "";
         v["text"] = "";
@@ -5738,8 +5731,9 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
             }
             else if (td.startsWith(fn, "preview/")) {
                 let docid1 = fn.replace(/^preview\//g, "");
-                let [done, templatename, msg] = await renderScriptAsync(docid1, v, pubdata);
-                if (done) {
+                await renderScriptAsync(docid1, v, pubdata);
+                msg = pubdata["msg"];
+                if (pubdata["done"]) {
                     return;
                 }
             }
@@ -5762,8 +5756,9 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
             if (! ptr.redirect) {
                 if (! ptr.artid) {
                     let scriptid = ptr.scriptid;
-                    let [done1, templatename, msg] = await renderScriptAsync(ptr.scriptid, v, pubdata);
-                    if (done1) {
+                    await renderScriptAsync(ptr.scriptid, v, pubdata);
+                    msg = pubdata["msg"];
+                    if (pubdata["done"]) {
                         return;
                     }
                     let path = ptr.parentpath;
@@ -5800,9 +5795,9 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
         pubdata["css"] = doctopicsCss;
         pubdata["rootUrl"] = currClientConfig.rootUrl;
         if (msg != "") {
-            templatename = "templates/official-s";
+            pubdata["templatename"] = "templates/official-s";
         }
-        let templText = await getTemplateTextAsync(templatename + templateSuffix, lang);
+        let templText = await getTemplateTextAsync(pubdata["templatename"] + templateSuffix, lang);
         if (msg == "" && templText.length < 100) {
             msg = templText;
         }
@@ -5831,6 +5826,7 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
                     templText = text;
                 }
             }
+            console.log(pubdata)
             v["text"] = await tdliteDocs.formatAsync(templText, pubdata);
         }
     });
@@ -5850,30 +5846,25 @@ async function _initLoginAsync() : Promise<void>
     loginHtml = clone(jsb);
 
     serverAuth.init({
-        makeJwt: async (profile: serverAuth.UserInfo, oauthReq: serverAuth.OauthRequest) => {
-            let jwt: JsonBuilder;
+        makeJwt: async (profile: serverAuth.UserInfo, oauthReq: serverAuth.OauthRequest) => {            
             let url2 = await loginFederatedAsync(profile, oauthReq);
-            let [url3, cook] = stripCookie(url2);
+            let stripped = stripCookie(url2);
             let jsb2 = ({ "headers": {} });
-            if (cook != "") {
-                jsb2["headers"]["Set-Cookie"] = cook;
+            if (stripped.cookie) {
+                jsb2["headers"]["Set-Cookie"] = stripped.cookie;
             }
-            jsb2["http redirect"] = url3;
-            return jsb2;
-            return jwt;
-        }
-        ,
+            jsb2["http redirect"] = stripped.url;
+            return jsb2;            
+        },
         getData: async (key: string) => {
             let value: string;
             value = await redisClient.getAsync("authsess:" + key);
             return value;
-        }
-        ,
+        },
         setData: async (key1: string, value1: string) => {
             let minutes = 30;
             await redisClient.setpxAsync("authsess:" + key1, value1, minutes * 60 * 1000);
-        }
-        ,
+        },
         federationMaster: orEmpty(td.serverSetting("AUTH_FEDERATION_MASTER", true)),
         federationTargets: orEmpty(td.serverSetting("AUTH_FEDERATION_TARGETS", true)),
         self: td.serverSetting("SELF", false).replace(/\/$/g, ""),
@@ -5957,12 +5948,12 @@ async function _initLoginAsync() : Promise<void>
             }
             checkPermission(req5, "root");
             if (req5.status == 200) {
-                let [customToken, cookie] = await generateTokenAsync(req5.rootId, "admin", "no-cookie");
-                assert(cookie == "", "no cookie expected");
+                let tok = await generateTokenAsync(req5.rootId, "admin", "no-cookie");
+                assert(tok.cookie == "", "no cookie expected");
                 await auditLogAsync(req5, "rawtoken", {
-                    data: sha256(customToken).substr(0, 10)
+                    data: sha256(tok.url).substr(0, 10)
                 });
-                req5.response = (self + "?access_token=" + customToken);
+                req5.response = (self + "?access_token=" + tok.url);
             }
         });
     }
@@ -6039,12 +6030,12 @@ async function getRedirectUrlAsync(user2: string, req: restify.Request) : Promis
 {
     let url: string;
     let jsb = {};
-    let [customToken, cookie] = await generateTokenAsync(user2, "code", req.query()["client_id"]);
-    jsb["access_token"] = customToken;
+    let tok = await generateTokenAsync(user2, "code", req.query()["client_id"]);
+    jsb["access_token"] = tok.url;
     jsb["state"] = req.query()["state"];
     jsb["id"] = user2;
-    if (cookie != "") {
-        jsb["td_cookie"] = cookie;
+    if (tok.cookie != "") {
+        jsb["td_cookie"] = tok.cookie;
     }
     url = req.query()["redirect_uri"] + "#" + serverAuth.toQueryString(clone(jsb));
     return url;
@@ -6131,11 +6122,11 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
     }
     let user = jsb["id"];
-    let [token, cookie] = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
+    let tok = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
 
-    let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(token)) + "&id=" + user;
-    if (cookie != "") {
-        redirectUrl = redirectUrl + "&td_cookie=" + cookie;
+    let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(tok.url)) + "&id=" + user;
+    if (tok.cookie != "") {
+        redirectUrl = redirectUrl + "&td_cookie=" + tok.cookie;
     }
     await refreshSettingsAsync();
     let session = new LoginSession();
@@ -6186,12 +6177,12 @@ async function loginCreateUserAsync(req: restify.Request, session: LoginSession,
             session.redirectUri = await getRedirectUrlAsync(user2, req);
             await serverAuth.options().setData(session.state, JSON.stringify(session.toJson()));
         }
-        let [url, cook] = stripCookie(session.redirectUri);
-        if (cook != "") {
-            res.setHeader("Set-Cookie", cook);
+        let tok = stripCookie(session.redirectUri);
+        if (tok.cookie != "") {
+            res.setHeader("Set-Cookie", tok.cookie);
         }
         let lang = await handleLanguageAsync(req, res, false);
-        let html = td.replaceAll(await getLoginHtmlAsync("usercreated", lang), "@URL@", url);
+        let html = td.replaceAll(await getLoginHtmlAsync("usercreated", lang), "@URL@", tok.url);
         html = td.replaceAll(html, "@USERID@", session.userid);
         html = td.replaceAll(html, "@PASSWORD@", session.pass);
         html = td.replaceAll(html, "@NAME@", htmlQuote(tdUsername));
@@ -7347,7 +7338,9 @@ async function _initChannelsAsync() : Promise<void>
         }
     });
     addRoute("POST", "*script", "channels", async (req4: ApiRequest) => {
-        let [memid, listJs] = await channelOpAsync(req4);
+        let tmp = await channelOpAsync(req4);
+        let memid = tmp[0];
+        let listJs = tmp[1];         
         if (memid != "") {
             let memJson = await getPubAsync(memid, "channelmembership");
             if (memJson == null) {
@@ -7364,7 +7357,9 @@ async function _initChannelsAsync() : Promise<void>
         }
     });
     addRoute("DELETE", "*script", "channels", async (req5: ApiRequest) => {
-        let [memid1, listJs1] = await channelOpAsync(req5);
+        let tmp = await channelOpAsync(req5);
+        let memid1 = tmp[0];
+        let listJs1 = tmp[1];         
         if (memid1 != "") {
             let memJson1 = await getPubAsync(memid1, "channelmembership");
             if (memJson1 == null) {
@@ -8194,14 +8189,12 @@ async function clearPtrCacheAsync(id: string) : Promise<void>
     }
 }
 
-async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: JsonBuilder) : Promise<[boolean, string, string]>
+async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: JsonBuilder) : Promise<void>
 {
-    let done: boolean;
-    let templatename: string;
-    let msg: string;
-    done = false;
-    msg = "";
-    templatename = "";
+    pubdata["done"] = false;
+    pubdata["templatename"] = "";
+    pubdata["msg"] = "";
+    
     let scriptjs = await getPubAsync(scriptid, "script");
     if (scriptjs != null) {
         let editor = orEmpty(scriptjs["pub"]["editor"]);
@@ -8210,7 +8203,7 @@ async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: Json
         if (raw == "html") {
             let entry = await scriptText.getAsync(scriptjs["id"]);
             v["text"] = entry["text"];
-            done = true;
+            pubdata["done"] = true;
         }
         else if (editor == "") {
             td.jsonCopyFrom(pubdata, scriptjs["pub"]);
@@ -8248,28 +8241,27 @@ async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: Json
                 if (official) {
                     let s = orEmpty((/#(page\w*)/.exec(desc) || [])[1]).toLowerCase();
                     if (s == "") {
-                        templatename = "templates/official-s";
+                        pubdata["templatename"] = "templates/official-s";
                     }
                     else {
-                        templatename = "templates/" + s + "-s";
+                        pubdata["templatename"] = "templates/" + s + "-s";
                     }
                 }
                 else {
-                    templatename = "templates/users-s";
+                    pubdata["templatename"] = "templates/users-s";
                 }
             }
             else {
-                msg = "Rendering failed";
+                pubdata["msg"] = "Rendering failed";
             }
         }
         else {
-            msg = "Unsupported doc script editor";
+            pubdata["msg"] = "Unsupported doc script editor";
         }
     }
     else {
-        msg = "Pointed script not found";
-    }
-    return <[boolean, string, string]>[done, templatename, msg]
+        pubdata["msg"] = "Pointed script not found";
+    }        
 }
 
 function _initConfig() : void
@@ -9251,11 +9243,11 @@ function encryptId(val: string, keyid: string) : string
 
 function accessTokenRedirect(res: restify.Response, url2: string) : void
 {
-    let [url3, cook] = stripCookie(url2);
-    if (cook != "") {
-        res.setHeader("Set-Cookie", cook);
+    let tok = stripCookie(url2);
+    if (tok.cookie != "") {
+        res.setHeader("Set-Cookie", tok.cookie);
     }
-    res.redirect(303, url3);
+    res.redirect(303, tok.url);
 }
 
 function wrapAccessTokenCookie(cookie: string): string 
@@ -9270,9 +9262,14 @@ function wrapAccessTokenCookie(cookie: string): string
     return value;
 }
 
-function stripCookie(url2: string) : [string, string]
+export interface IRedirectAndCookie
 {
-    let url: string;
+    url:string;
+    cookie:string;
+}
+
+function stripCookie(url2: string) : IRedirectAndCookie
+{
     let cook: string;
     let coll = (/&td_cookie=([\w.]+)$/.exec(url2) || []);
     let cookie = coll[1];
@@ -9281,8 +9278,10 @@ function stripCookie(url2: string) : [string, string]
         url2 = url2.substr(0, url2.length - coll[0].length);
         cook = wrapAccessTokenCookie(cookie);
     }
-    url = url2;
-    return [url, cook]
+    return {
+        url: url2,
+        cookie: cook
+    }
 }
 
 async function resolveOnePubAsync(store: indexedStore.Store, obj: JsonObject, apiRequest: ApiRequest) : Promise<JsonObject>

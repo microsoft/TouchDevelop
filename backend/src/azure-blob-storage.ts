@@ -118,7 +118,7 @@ export class BlobService
         }
         corsRule["MaxAgeInSeconds"] = maxAgeInSeconds;
         logger.debug("setting cors");
-        let [result, response] = await this.setServicePropertiesAsync(clone(props));
+        let result = await this.setServicePropertiesAsync(clone(props));
         success = result["isSuccessful"];
         return success;
     }
@@ -126,7 +126,7 @@ export class BlobService
     /**
      * Specifies the service properties. See http://msdn.microsoft.com/en-us/library/azure/hh452235.aspx
      */
-    public async servicePropertiesAsync() : Promise<[JsonObject, JsonObject]>
+    public async servicePropertiesAsync() : Promise<JsonObject>
     {
         let result: JsonObject;
         let response: JsonObject;
@@ -139,7 +139,7 @@ export class BlobService
                 resume();
             });
         });
-        return <[{},{}]>[result, response]
+        return result;
     }
 
     /**

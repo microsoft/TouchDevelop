@@ -316,12 +316,13 @@ export class TableQuery
         let coll = [];
         let hasMore = true;
         while (hasMore) {
-            let [entities2, token] = await query.fetchCoreAsync();
+            let entities2 = await query.fetchCoreAsync();
             for (let js of entities2) {
                 if (coll.length < query.onlyTop) {
                     coll.push(js);
                 }
             }
+            let token = (<any>entities2).token;
             if (token == "" || coll.length >= query.onlyTop) {
                 hasMore = false;
             }
@@ -364,7 +365,7 @@ export class TableQuery
         return this;
     }
 
-    private async fetchCoreAsync() : Promise<[JsonObject[], string]>
+    private async fetchCoreAsync() : Promise<JsonObject[]>
     {
         let entities: JsonObject[];
         let token: string;
@@ -375,12 +376,12 @@ export class TableQuery
               if (err)
                 throw new Error("error executing query on azure table " + table.name + ": " + err);
               entities = res;
-              token = cont ? cont.join("/") : ""
+              res.token = cont ? cont.join("/") : ""
               resume();
             });
         });
         table.timeOpCore(start, "read");
-        return <[JsonObject[], string]>[entities, token]
+        return entities
     }
 
     /**
@@ -397,10 +398,10 @@ export class TableQuery
      */
     public async fetchPageAsync() : Promise<QueryResult>
     {
-        let [items, token] = await this.fetchCoreAsync();
+        let items = await this.fetchCoreAsync();
         let entities = new QueryResult();
         entities.items = items;
-        entities.continuation = token;
+        entities.continuation = (<any>items).token;
         return entities;
     }
 
