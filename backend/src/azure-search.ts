@@ -443,7 +443,7 @@ export class Index
             documentCount = -1;
             storageSize = -1;
         }
-        log(this + "stats: " + documentCount + " docs, " + (storageSize / 1000000).toFixed(3) + " Mb");
+        log(this.name + " stats: " + documentCount + " docs, " + (storageSize / 1000000).toFixed(3) + " Mb");
         return {
             documentCount: documentCount,
             storageSize: storageSize

@@ -1955,14 +1955,7 @@ function aliasRoute(method: string, copy: string, src: string) : void
 
 function withDefault(s: string, defl: string) : string
 {
-    let r: string;
-    if (s == null || s == "") {
-        r = defl;
-    }
-    else {
-        r = s;
-    }
-    return r;
+    return td.toString(s) || defl;    
 }
 
 function hashPassword(salt: string, pass: string) : string
@@ -2201,7 +2194,7 @@ async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, 
 
 async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: ApiRequest, forSearch: boolean) : Promise<void>
 {
-    let applyUpdates = req.queryOptions["applyupdates"];
+    let applyUpdates = orFalse(req.queryOptions["applyupdates"]);
     let singleResult = false;
     if (applyUpdates) {
         let updates = {};
@@ -2395,7 +2388,7 @@ function _initWorkspaces() : void
         if (req4.status == 200) {
             let bld = await updateAndUpsertAsync(pubsContainer, req4, async (entry: JsonBuilder) => {
                 let sett = await buildSettingsAsync(clone(entry));
-                let newEmail = req4.body["email"];
+                let newEmail = td.toString(req4.body["email"]);
                 if (newEmail != null) {
                     if (updateOwn) {
                         if (sett.emailverified) {
@@ -2676,7 +2669,7 @@ async function publishScriptAsync(req: ApiRequest) : Promise<void>
     if (req.status == 200) {
         let pubScript = new PubScript();
         pubScript.userid = req.userid;
-        pubScript.ishidden = req.queryOptions["hidden"];
+        pubScript.ishidden = orFalse(req.queryOptions["hidden"]);
         pubScript.unmoderated = ! callerHasPermission(req, "adult");
         let mergeids = req.queryOptions["mergeids"];
         if (mergeids != null) {
@@ -2708,9 +2701,11 @@ async function publishScriptAsync(req: ApiRequest) : Promise<void>
         pubScript.capabilities = (<string[]>[]);
         pubScript.flows = (<string[]>[]);
         pubScript.editor = orEmpty(slotJson["editor"]);
-        pubScript.iconArtId = req.body["iconArtId"];
-        pubScript.splashArtId = req.body["splashArtId"];
+        pubScript.iconArtId = td.toString(req.body["iconArtId"]);
+        pubScript.splashArtId = td.toString(req.body["splashArtId"]);
         pubScript.meta = req.body["meta"];
+        if (typeof pubScript.meta != "object" || Array.isArray(pubScript.meta))
+            pubScript.meta = {};
 
         let jsb = {};
         jsb["currentBlob"] = pubVersion.baseSnapshot;
@@ -2757,7 +2752,7 @@ async function postCommentAsync(req: ApiRequest) : Promise<void>
     }
     else {
         let comment = new PubComment();
-        comment.text = req.body["text"];
+        comment.text = orEmpty(req.body["text"]);
         comment.userplatform = getUserPlatforms(req);
         comment.userid = req.userid;
         comment.time = await nowSecondsAsync();
@@ -3075,7 +3070,7 @@ async function postArtAsync(req: ApiRequest) : Promise<void>
 function getArtExtension(contentType: string) : string
 {
     let ext: string;
-    ext = orEmpty(artContentTypes[contentType]);
+    ext = orEmpty(artContentTypes[orEmpty(contentType)]);
     return ext;
 }
 
@@ -3501,7 +3496,7 @@ async function _initScriptsAsync() : Promise<void>
 
         if (req3.status == 200) {
             let scr = new PubScript();
-            let entry3 = await getPubAsync(req3.body["baseid"], "script");
+            let entry3 = await getPubAsync(orEmpty(req3.body["baseid"]), "script");
             if (entry3 != null) {
                 scr.baseid = entry3["id"];
                 scr.rootid = entry3["pub"]["rootid"];
@@ -3521,8 +3516,10 @@ async function _initScriptsAsync() : Promise<void>
             scr.flows = (<string[]>[]);
             scr.editor = orEmpty(req3.body["editor"]);
             scr.meta = req3.body["meta"];
-            scr.iconArtId = req3.body["iconArtId"];
-            scr.splashArtId = req3.body["splashArtId"];
+            if (typeof scr.meta != "object" || Array.isArray(scr.meta))
+                scr.meta = {};
+            scr.iconArtId = orEmpty(req3.body["iconArtId"]);
+            scr.splashArtId = orEmpty(req3.body["splashArtId"]);
             scr.raw = rawSrc;
             scr.unmoderated = ! callerHasPermission(req3, "adult");
 
@@ -3530,7 +3527,7 @@ async function _initScriptsAsync() : Promise<void>
             if (forceid != "") {
                 jsb["id"] = forceid;
             }
-            await publishScriptCoreAsync(scr, jsb, req3.body["text"], req3);
+            await publishScriptCoreAsync(scr, jsb, td.toString(req3.body["text"]), req3);
             await returnOnePubAsync(scripts, clone(jsb), req3);
         }
     }
@@ -3538,7 +3535,7 @@ async function _initScriptsAsync() : Promise<void>
         sizeCheckExcludes: "text"
     });
     addRoute("POST", "*script", "", async (req4: ApiRequest) => {
-        let unmod = req4.body["unmoderated"];
+        let unmod = td.toBoolean(req4.body["unmoderated"])
         if (unmod != null) {
             await checkFacilitatorPermissionAsync(req4, req4.rootPub["pub"]["userid"]);
             if (req4.status == 200) {
@@ -4208,7 +4205,7 @@ async function _initUsersAsync() : Promise<void>
     addRoute("POST", "*user", "permissions", async (req1: ApiRequest) => {
         checkMgmtPermission(req1, "user-mgmt");
         if (req1.status == 200) {
-            let perm = req1.body["permissions"];
+            let perm = td.toString(req1.body["permissions"]);
             if (perm != null) {
                 perm = normalizePermissions(perm);
                 checkPermission(req1, "root");
@@ -4228,7 +4225,7 @@ async function _initUsersAsync() : Promise<void>
                     await sendPermissionNotificationAsync(req1, entry1);
                 });
             }
-            let credit = req1.body["credit"];
+            let credit = td.toNumber(req1.body["credit"]);
             if (credit != null) {
                 await auditLogAsync(req1, "set-credit", {
                     data: credit.toString()
@@ -4256,7 +4253,7 @@ async function _initUsersAsync() : Promise<void>
     });
     addRoute("POST", "logout", "", async (req3: ApiRequest) => {
         if (req3.userid != "") {
-            if (req3.body["everywhere"]) {
+            if (orFalse(req3.body["everywhere"])) {
                 let entities = await tokensTable.createQuery().partitionKeyIs(req3.userid).fetchAllAsync();
                 await parallel.forAsync(entities.length, async (x: number) => {
                     let json = entities[x];
@@ -4457,7 +4454,7 @@ async function _initUsersAsync() : Promise<void>
         req11.response = ({});
     });
     addRoute("POST", "generatecodes", "", async (req12: ApiRequest) => {
-        let perm1 = normalizePermissions(req12.body["permissions"]);
+        let perm1 = normalizePermissions(td.toString(req12.body["permissions"]));
         let grps = orEmpty(req12.body["groups"]);
         let addperm = "";
         if (grps != "") {
@@ -4469,14 +4466,14 @@ async function _initUsersAsync() : Promise<void>
         if (isAlarming(perm1)) {
             req12.status = restify.http()._402PaymentRequired;
         }
-        let numCodes = req12.body["count"];
+        let numCodes = td.toNumber(req12.body["count"]);
         if (numCodes > 1000) {
             req12.status = restify.http()._413RequestEntityTooLarge;
         }
         checkPermission(req12, "gen-code," + perm1 + addperm);
         if (req12.status == 200) {
             let coll = (<string[]>[]);
-            let credit1 = req12.body["credit"];
+            let credit1 = td.toNumber(req12.body["credit"]);
             await auditLogAsync(req12, "generatecodes", {
                 data: numCodes + "x" + credit1 + perm1,
                 newvalue: req12.body
@@ -4484,7 +4481,7 @@ async function _initUsersAsync() : Promise<void>
             await parallel.forAsync(numCodes, async (x2: number) => {
                 let id = cachedStore.freshShortId(12);
                 if (req12.body.hasOwnProperty("code")) {
-                    id = req12.body["code"];
+                    id = td.toString(req12.body["code"]);
                 }
                 let s3 = normalizeAndHash(id);
                 await passcodesContainer.updateAsync(s3, async (entry9: JsonBuilder) => {
@@ -4499,7 +4496,7 @@ async function _initUsersAsync() : Promise<void>
                     entry9["time"] = await nowSecondsAsync();
                     entry9["description"] = orEmpty(req12.body["description"]);
                     if (req12.body.hasOwnProperty("singlecredit")) {
-                        entry9["singlecredit"] = req12.body["singlecredit"];
+                        entry9["singlecredit"] = td.toNumber(req12.body["singlecredit"]);
                     }
                 });
                 coll.push(id);
@@ -4640,7 +4637,7 @@ function buildListResponse(entities: indexedStore.FetchResult, req: ApiRequest) 
 {
     let bld = clone(entities.toJson());
     bld["kind"] = "list";
-    let etags = req.queryOptions["etagsmode"];
+    let etags = td.toString(req.queryOptions["etagsmode"]);
     if (etags == null) {
     }
     else if (etags == "includeetags" || etags == "etagsonly") {
@@ -4713,7 +4710,7 @@ async function postScreenshotAsync(req: ApiRequest) : Promise<void>
 
 async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<void>
 {
-    let contentType = req.body["contentType"];
+    let contentType = orEmpty(req.body["contentType"]);
     fixArtProps(contentType, jsb);
     let ext = jsb["ext"];
     let enc = withDefault(req.body["contentEncoding"], "base64");
@@ -4724,7 +4721,7 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
         req.status = restify.http()._415UnsupportedMediaType;
     }
     else {
-        let buf = new Buffer(req.body["content"], enc);
+        let buf = new Buffer(orEmpty(req.body["content"]), enc);
         let sizeLimit = 1 * 1024 * 1024;
         let arttype = jsb["arttype"];
         if (arttype == "blob") {
@@ -5213,7 +5210,7 @@ async function _initReleasesAsync() : Promise<void>
             let rel1 = new PubRelease();
             rel1.userid = req1.userid;
             rel1.time = await nowSecondsAsync();
-            rel1.releaseid = req1.body["releaseid"];
+            rel1.releaseid = td.toString(req1.body["releaseid"]);
             rel1.commit = orEmpty(req1.body["commit"]);
             rel1.branch = orEmpty(req1.body["branch"]);
             rel1.buildnumber = orZero(req1.body["buildnumber"]);
@@ -5247,17 +5244,17 @@ async function _initReleasesAsync() : Promise<void>
         if (req2.status == 200) {
             let rel2 = PubRelease.createFromJson(req2.rootPub["pub"]);
             let body = req2.body;
-            let buf = new Buffer(body["content"], body["encoding"]);
-            let request = td.createRequest(filesContainer.url() + "/overrideupload/" + body["filename"]);
+            let buf = new Buffer(orEmpty(body["content"]), orEmpty(body["encoding"]));
+            let request = td.createRequest(filesContainer.url() + "/overrideupload/" + td.toString(body["filename"]));
             let response = await request.sendAsync();
             if (response.statusCode() == 200) {
                 buf = response.contentAsBuffer();
             }
-            let result = await appContainer.createBlockBlobFromBufferAsync(rel2.releaseid + "/" + body["filename"], buf, {
-                contentType: body["contentType"]
+            let result = await appContainer.createBlockBlobFromBufferAsync(rel2.releaseid + "/" + td.toString(body["filename"]), buf, {
+                contentType: td.toString(body["contentType"])
             });
-            result = await appContainer.createGzippedBlockBlobFromBufferAsync(rel2.releaseid + "/c/" + body["filename"], buf, {
-                contentType: body["contentType"],
+            result = await appContainer.createGzippedBlockBlobFromBufferAsync(rel2.releaseid + "/c/" + td.toString(body["filename"]), buf, {
+                contentType: td.toString(body["contentType"]),
                 cacheControl: "public, max-age=31556925",
                 smartGzip: true
             });
@@ -5310,8 +5307,8 @@ async function _initReleasesAsync() : Promise<void>
         }
         if (req4.status == 200) {
             let body1 = req4.body;
-            let buf1 = new Buffer(body1["content"], body1["encoding"]);
-            let result1 = await filesContainer.createGzippedBlockBlobFromBufferAsync(body1["filename"], buf1, {
+            let buf1 = new Buffer(orEmpty(body1["content"]), orEmpty(body1["encoding"]));
+            let result1 = await filesContainer.createGzippedBlockBlobFromBufferAsync(td.toString(body1["filename"]), buf1, {
                 contentType: body1["contentType"],
                 cacheControl: "public, max-age=3600",
                 smartGzip: true
@@ -5481,7 +5478,7 @@ async function validateTokenAsync(req: ApiRequest, rreq: restify.Request) : Prom
     if (req.isCached) {
         return;
     }
-    let token = withDefault(rreq.header("x-td-access-token"), req.queryOptions["access_token"]);
+    let token = withDefault(rreq.header("x-td-access-token"), td.toString(req.queryOptions["access_token"]));
     if (token != null && token != "null" && token != "undefined") {
         let tokenJs = (<JsonObject>null);
         if (td.startsWith(token, "0") && token.length < 100) {
@@ -5977,14 +5974,7 @@ function jsonAdd(entry: JsonBuilder, counter: string, delta: number) : void
 
 function orFalse(s: boolean) : boolean
 {
-    let r: boolean;
-    if (s == null) {
-        r = false;
-    }
-    else {
-        r = s;
-    }
-    return r;
+    return td.toBoolean(s) || false;
 }
 
 function checkGroupPermission(req: ApiRequest) : void
@@ -6440,7 +6430,7 @@ async function _initAbusereportsAsync() : Promise<void>
         let pub = req1.rootPub["pub"];
         await checkFacilitatorPermissionAsync(req1, pub["publicationuserid"]);
         if (req1.status == 200) {
-            let res = req1.body["resolution"];
+            let res = td.toString(req1.body["resolution"]);
             await pubsContainer.updateAsync(req1.rootId, async (entry1: JsonBuilder) => {
                 setFields(entry1["pub"], req1.body, "resolution");
             });
@@ -8884,7 +8874,7 @@ async function postAbusereportAsync(req: ApiRequest) : Promise<void>
     }
     else {
         let report = new PubAbusereport();
-        report.text = encrypt(req.body["text"], "ABUSE");
+        report.text = encrypt(orEmpty(req.body["text"]), "ABUSE");
         report.userplatform = getUserPlatforms(req);
         report.userid = req.userid;
         report.time = await nowSecondsAsync();

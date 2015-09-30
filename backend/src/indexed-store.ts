@@ -146,7 +146,7 @@ export class Store
     {
         let fetchResult: FetchResult;
         if (options != null) {
-            let start = options["continuation"];
+            let start = td.toNumber(options["continuation"]);
             if (start == null) {
                 start = 0;
             }
@@ -379,7 +379,7 @@ export function copyJson(js: JsonObject, jsb: JsonBuilder) : void
 function getCount(options: JsonObject) : number
 {
     let count: number;
-    count = options["count"];
+    count = td.toNumber(options["count"]);
     if (count == null) {
         count = 25;
     }
@@ -390,7 +390,7 @@ function getCount(options: JsonObject) : number
 export async function executeTableQueryAsync(tableQuery: azureTable.TableQuery, options: JsonObject) : Promise<FetchResult>
 {
     let entities: FetchResult;
-    let resQuery = tableQuery.continueAt(options["continuation"]);
+    let resQuery = tableQuery.continueAt(td.toString(options["continuation"]));
     resQuery = resQuery.pageSize(getCount(options));
     let entities2 = await resQuery.fetchPageAsync();
     entities = new FetchResult();
