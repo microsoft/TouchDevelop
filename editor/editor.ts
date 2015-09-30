@@ -1232,6 +1232,11 @@ module TDev
         // [fromCloud]: was this triggered by a collaboration pull?
         public renderDecl(decl: AST.Decl, transparent : boolean = false, fromCloud=false) {
             this.goToLocation(new CodeLocation(decl), !transparent, fromCloud);
+            if (decl instanceof AST.Action
+                && this.selector.selectedStmt
+                && !this.isDebuggerMode()
+                && !this.isReadOnly)
+                this.editNode(this.selector.selectedStmt);
         }
 
         public bindLibrary(lib: AST.LibraryRef, scr: Browser.ScriptInfo) {
@@ -3326,7 +3331,6 @@ module TDev
                     this.applyAnnotations(ed)
                     this.setupNavPane();
                     this.renderDefaultDecl();
-                    this.dismissSidePane();
                     this.undoMgr.pushMainUndoState();
                     this.loadTutorial(firstTime);
                 }
