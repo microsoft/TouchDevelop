@@ -148,8 +148,8 @@ async function handleAggregateAsync() : Promise<void>
         if (ftime.length > 0) {
             commState.firsttime = [];
             for (let elt of ftime) {
-                let name = "/" + encodeURIComponent(td.toString(elt));
-                let request2 = createReq(name);
+                let name0 = "/" + encodeURIComponent(td.toString(elt));
+                let request2 = createReq(name0);
                 let curr = (await request2.sendAsync()).contentAsJson();
                 let attr = curr["attributes"];
                 let b = attr["aggregate"];
@@ -158,7 +158,7 @@ async function handleAggregateAsync() : Promise<void>
                     attr["gap_detection"] = true;
                     attr["summarize_function"] = "average";
                     curr["period"] = Math.round(options.period / 1000);
-                    let request3 = createReq(name);
+                    let request3 = createReq(name0);
                     request3.setContentAsJson(clone(curr));
                     request3.setMethod("put");
                     let response2 = await request3.sendAsync();

@@ -5791,15 +5791,15 @@ async function rewriteAndCachePointerAsync(id: string, res: restify.Response, re
     }
     let redir = orEmpty(entry2["redirect"]);
     if (redir == "") {
-        let status = orZero(entry2["status"]);
-        if (status == 0) {
-            status = 200;
+        let status0 = orZero(entry2["status"]);
+        if (status0 == 0) {
+            status0 = 200;
         }
         if (false) {
             res.setHeader("X-TDlite-cache", event);
         }
         res.sendText(entry2["text"], entry2["contentType"], {
-            status: status
+            status: status0
         });
         if (orFalse(entry2["error"])) {
             cat = "error";
@@ -6837,12 +6837,12 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
                 isFota = true;
                 compileReq.config = compileReq.config.replace(/-fota$/g, "");
             }
-            let json = cfg[compileReq.config];
-            if (json == null) {
+            let json0 = cfg[compileReq.config];
+            if (json0 == null) {
                 req.status = restify.http()._404NotFound;
                 return;
             }
-            let ccfg = CompilerConfig.createFromJson(json);
+            let ccfg = CompilerConfig.createFromJson(json0);
             if (isFota) {
                 ccfg.target_binary = td.replaceAll(orEmpty(ccfg.target_binary), "-combined", "");
             }
@@ -8286,16 +8286,16 @@ async function getTemplateTextAsync(templatename: string, lang: string) : Promis
                     return "Extracting strings from template failed";
                 }
                 else {
-                    let arts = asArray(resp3);
+                    let arts1 = asArray(resp3);
                     let artid = templatename.replace(/^[^:]*:?/g, "");
                     if (artid != "") {
-                        arts = arts.filter(elt => elt["name"] == artid);
+                        arts1 = arts1.filter(elt => elt["name"] == artid);
                     }
-                    if (arts.length == 0) {
+                    if (arts1.length == 0) {
                         return "No art matching template name (if any)";
                     }
                     else {
-                        return arts[0]["value"];
+                        return arts1[0]["value"];
                     }
                 }
             }
@@ -8818,10 +8818,10 @@ function _initAdmin() : void
             jsb["search"] = await tdliteSearch.statisticsAsync();
             jsb["dmeta"] = deploymentMeta;
             jsb["load"] = await cpuLoadAsync();
-            let redis = await redisClient.infoAsync();
-            jsb["redis"] = redis;
+            let redis0 = await redisClient.infoAsync();
+            jsb["redis"] = redis0;
             if (orFalse(req1.queryOptions["text"])) {
-                let s2 = jsb["RoleInstanceID"] + ": load " + JSON.stringify(jsb["load"]) + " redis load: " + redis["used_cpu_avg_ms_per_sec"] / 10 + " req/s: " + redis["instantaneous_ops_per_sec"] + "\n";
+                let s2 = jsb["RoleInstanceID"] + ": load " + JSON.stringify(jsb["load"]) + " redis load: " + redis0["used_cpu_avg_ms_per_sec"] / 10 + " req/s: " + redis0["instantaneous_ops_per_sec"] + "\n";
                 req1.response = s2;
             }
             else {
@@ -9301,8 +9301,8 @@ async function sendPermissionNotificationAsync(req: ApiRequest, r: JsonBuilder) 
         if ( ! r.hasOwnProperty("settings")) {
             r["settings"] = ({});
         }
-        let name = withDefault(decrypt(r["settings"]["realname"]), r["pub"]["name"]);
-        let subj = "[TDLite] permissions for " + name + " set to " + r["permissions"];
+        let name_ = withDefault(decrypt(r["settings"]["realname"]), r["pub"]["name"]);
+        let subj = "[TDLite] permissions for " + name_ + " set to " + r["permissions"];
         let body = "By code.";
         if (req.userid != "") {
             let entry2 = req.userinfo.json;

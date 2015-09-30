@@ -334,14 +334,14 @@ export class Container
             let nameMap = {};
             let idxMap = (<number[]>[]);
             let namesUnique = (<string[]>[]);
-            for (let name of names) {
-                if (nameMap.hasOwnProperty(name)) {
-                    idxMap.push(nameMap[name]);
+            for (let name_ of names) {
+                if (nameMap.hasOwnProperty(name_)) {
+                    idxMap.push(nameMap[name_]);
                 }
                 else {
                     idxMap.push(namesUnique.length);
-                    nameMap[name] = namesUnique.length;
-                    namesUnique.push(name);
+                    nameMap[name_] = namesUnique.length;
+                    namesUnique.push(name_);
                 }
             }
             names = namesUnique;
