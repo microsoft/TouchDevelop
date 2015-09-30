@@ -686,7 +686,7 @@ export class AppLogger {
     {
         var prev = AppLogger.findContext()
         var ctx:any = { 
-            id: prev ? prev.id + "." + ++prev.numCh : createRandomId(6),
+            id: prev ? prev.id + "." + ++prev.numCh : createRandomId(8),
             prev: prev,
             created: perfNow(), 
             numCh: 0, 
