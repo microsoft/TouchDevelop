@@ -292,6 +292,13 @@ export function range(start:number, length:number) : number[]
     return r
 }
 
+
+export function toDictionary<T>(arr: T[], f: (t: T) => string): SMap<T> {
+    var r: SMap<T> = {}
+    arr.forEach(e => { r[f(e)] = e })
+    return r
+}
+
 export function toNumber(v:any) : number
 {
     if (v == null) return null

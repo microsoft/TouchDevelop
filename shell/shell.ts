@@ -203,7 +203,7 @@ class ApiRequest {
                 thisResp.body = err.message || (err + "")
                 oneUp()
             })
-            if (Object.keys(this.data))
+            if (Object.keys(this.data).length > 0)
                 creq.end(JSON.stringify(this.data))
             else creq.end()
         })

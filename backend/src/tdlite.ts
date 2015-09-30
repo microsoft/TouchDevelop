@@ -1581,6 +1581,9 @@ async function _initAsync() : Promise<void>
     });
     server.use(cors);
     restify.disableTicks();
+    restify.setupShellHooks();
+    await restify.startAsync();
+
     await _initAcsAsync();
 
     server.get("/api/ping", async (req: restify.Request, res: restify.Response) => {
@@ -7179,14 +7182,16 @@ async function deployCompileServiceAsync(rel: PubRelease, req: ApiRequest) : Pro
         jsSrc = jsSrc + "process.env." + k + " = " + JSON.stringify(cfg[k]) + ";\n";
     }
     jsSrc = jsSrc + "require(\"./noderunner.js\");\n";
-    let jsb = ({ "files": [ {
-  "path": "script/compiled.js"
-}, {
-  "path": "script/noderunner.js"
-}] });
-    let file = {};
-    jsb["files"][0]["content"] = jsSrc;
-    jsb["files"][1]["url"] = appContainer.url() + "/" + rel.releaseid + "/c/noderunner.js";
+    let jsb = {
+        "files": [ {
+            "path": "script/compiled.js",
+            "content": jsSrc
+        }, {
+            "path": "script/noderunner.js",
+            "url": appContainer.url() + "/" + rel.releaseid + "/c/noderunner.js"
+        }] 
+    };
+    let file = {};        
     if (false) {
         logger.debug("cloud JS: " + JSON.stringify(clone(jsb), null, 2));
     }
@@ -10170,7 +10175,7 @@ async function main()
         console.log("loaded cfg")
     }
     await _initAsync();
-    await restify.startAsync();
+    restify.finishStartup();
 }
 
 main();

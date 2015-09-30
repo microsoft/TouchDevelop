@@ -13,6 +13,7 @@
     },
     "files": [
         "src/td.ts",
+        "src/parallel.ts",
         "src/word-password.ts",
         "src/azure-table.ts",
         "src/azure-blob-storage.ts",
@@ -38,7 +39,7 @@
         "src/test-service.ts",
         "src/tdlite-data.ts",
         "src/tdlite.ts",
-        "src/parallel.ts"
+        "src/remote.ts"        
     ],
     "exclude": [
         "typings",

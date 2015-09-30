@@ -876,6 +876,43 @@ export function disableTicks() : void
     logger.customTick = function() {}
 }
 
+var isReady = false;
+export function finishStartup() : void
+{
+    isReady = true;
+}
+
+export function setupShellHooks() : void
+{
+    init();
+    
+    function wrong(req:Request, res:Response) {
+        var key = process.env['TD_DEPLOYMENT_KEY']
+        if (!key) {
+            res.sendError(500, "key not setup");
+        } else if (req.param("key") !== key) {
+            res.sendError(403, "wrong key");
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    server().get("/-tdevmgmt-/:key/ready", async(req, res) => {
+        if (wrong(req, res)) return;
+        res.json({ ready: isReady })
+    })
+
+    server().get("/-tdevmgmt-/:key/info/:which", async(req, res) => {
+        if (wrong(req, res)) return;
+        var needed = td.toDictionary(req.param("which").split(/,/), s => s)
+        res.json({
+            applog: needed["applog"] ? td.App.getMsgs() : undefined,
+            tdlog: needed["tdlog"] ? td.App.getMsgs() : undefined
+        })
+    })
+}
+
 export async function startAsync() : Promise<void>
 {
     init();
