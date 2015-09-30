@@ -155,7 +155,7 @@ export class Client
     {
         let millis: number;
         let result = await this.sendCommandAsync("time", [])
-        let x = result[0].toNumber() * 1000 + result[1].toNumber() * 0.001;
+        let x = td.toNumber(result[0]) * 1000 + td.toNumber(result[1]) * 0.001;
         millis = Math.round(x);
         return millis;
     }

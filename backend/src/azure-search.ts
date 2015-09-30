@@ -182,7 +182,7 @@ export class IndexDefinition
         let field: FieldDefinition;
         field = new FieldDefinition();
         field.value = {};
-        this.value["fields"].addBuilder(field.value);
+        this.value["fields"].push(field.value);
         type = type.trim();
         field.value["name"] = name;
         field.value["type"] = type;
@@ -227,15 +227,13 @@ export class IndexDefinition
         assert(name != "", "name required");
         let jsprofiles = this.value["scoringProfiles"];
         if (jsprofiles == null) {
-            jsprofiles = {};
-            jsprofiles.addNull();
-            jsprofiles.clear();
+            jsprofiles = [];
             this.value["scoringProfiles"] = jsprofiles;
         }
         profile = new ScoringProfile();
         profile.value = {};
         profile.value["name"] = name;
-        jsprofiles.addBuilder(profile.value);
+        jsprofiles.push(profile.value);
         return profile;
     }
 
@@ -368,13 +366,11 @@ export class ScoringProfile
         let jsfunction: JsonBuilder;
         let jsfunctions = this.value["functions"];
         if (jsfunctions == null) {
-            jsfunctions = {};
-            jsfunctions.addNull();
-            jsfunctions.clear();
+            jsfunctions = [];
             this.value["functions"] = jsfunctions;
         }
         jsfunction = {};
-        jsfunctions.addBuilder(jsfunction);
+        jsfunctions.push(jsfunction);
         jsfunction["type"] = name;
         jsfunction["boost"] = boost;
         jsfunction["fieldName"] = field.value["name"];

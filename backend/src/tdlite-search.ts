@@ -156,7 +156,7 @@ export class PubQuery
         }
         let includedUsers = (<string[]>[]);
         for (let user of Object.keys(this.users)) {
-            if (this.users[user].toBoolean()) {
+            if (td.toBoolean(this.users[user])) {
                 includedUsers.push(user);
             }
             else {
