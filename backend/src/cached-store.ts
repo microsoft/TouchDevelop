@@ -113,7 +113,13 @@ export class Container
             if (text == null && info.error() == "404") {
                 text = "{}";
             }
-            let jsb = JSON.parse(text);
+            let jsb = {};
+            try {
+                jsb = JSON.parse(text);
+            } catch (e) {
+                logger.info("failed to parse: " + text + " err: " + info.error())
+                console.log(info)
+            }
             let ver = jsb["__version"];
             await update(jsb);
             if (ver == null) {

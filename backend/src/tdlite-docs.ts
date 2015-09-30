@@ -131,9 +131,9 @@ function htmlQuote(tdUsername: string) : string
     return _new;
 }
 
-export function init(expandInfo:td.Action1<JsonBuilder>) : void
+export function init(expandInfo_:td.Action1<JsonBuilder>) : void
 {
-    expandInfo = expandInfo;
+    expandInfo = expandInfo_;
 }
 
 /**

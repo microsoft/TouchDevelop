@@ -427,10 +427,10 @@ export class PubVersion
 }
 
 export interface IPubVersion {
-    instanceId?: string;
-    baseSnapshot?: string;
-    time?: number;
-    version?: number;
+    instanceId: string;
+    baseSnapshot: string;
+    time: number;
+    version: number;
 }
 
 export class PubHeader
@@ -444,7 +444,7 @@ export class PubHeader
     @json public updateTime: number = 0;
     @json public userId: string = "";
     @json public status: string = "";
-    @json public scriptVersion: PubVersion;
+    @json public scriptVersion: IPubVersion;
     @json public hasErrors: string = "";
     @json public recentUse: number = 0;
     @json public editor: string = "";
@@ -453,62 +453,39 @@ export class PubHeader
 }
 
 export interface IPubHeader {
-    guid?: string;
-    name?: string;
-    scriptId?: string;
-    scriptTime?: number;
-    updateId?: string;
-    updateTime?: number;
-    userId?: string;
-    status?: string;
-    scriptVersion?: PubVersion;
-    hasErrors?: string;
-    recentUse?: number;
-    editor?: string;
-    meta?: JsonObject;
-}
-
-export class PubHeaders
-    extends td.JsonRecord
-{
-    @json public newNotifications: number = 0;
-    @json public notifications: boolean = false;
-    @json public email: boolean = false;
-    @json public emailNewsletter: boolean = false;
-    @json public emailNotifications: boolean = false;
-    @json public profileIndex: number = 0;
-    @json public profileCount: number = 0;
-    @json public time: number = 0;
-    @json public askBeta: boolean = false;
-    @json public askSomething: string = "";
-    @json public betaSettings: boolean = false;
-    @json public random: string = "";
-    @json public minimum: string = "";
-    @json public v: number = 0;
-    @json public user: PubUser;
-    @json public headers: PubHeader[];
-    @json public blobcontainer: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubHeaders(); r.fromJson(o); return r; }
+    guid: string;
+    name: string;
+    scriptId: string;
+    scriptTime: number;
+    updateId: string;
+    updateTime: number;
+    userId: string;
+    status: string;
+    scriptVersion: IPubVersion;
+    hasErrors: string;
+    recentUse: number;
+    editor: string;
+    meta: JsonObject;
 }
 
 export interface IPubHeaders {
-    newNotifications?: number;
-    notifications?: boolean;
-    email?: boolean;
-    emailNewsletter?: boolean;
-    emailNotifications?: boolean;
-    profileIndex?: number;
-    profileCount?: number;
-    time?: number;
-    askBeta?: boolean;
-    askSomething?: string;
-    betaSettings?: boolean;
-    random?: string;
-    minimum?: string;
-    v?: number;
-    user?: PubUser;
-    headers?: PubHeader[];
-    blobcontainer?: string;
+    newNotifications: number;
+    notifications: boolean;
+    email: boolean;
+    emailNewsletter: boolean;
+    emailNotifications: boolean;
+    profileIndex: number;
+    profileCount: number;
+    time: number;
+    askBeta: boolean;
+    askSomething: string;
+    betaSettings: boolean;
+    random: string;
+    minimum: string;
+    v: number;
+    user: PubUser;
+    headers: IPubHeader[];
+    blobcontainer: string;
 }
 
 export class PubBody
@@ -519,7 +496,7 @@ export class PubBody
     @json public scriptId: string = "";
     @json public userId: string = "";
     @json public status: string = "";
-    @json public scriptVersion: PubVersion;
+    @json public scriptVersion: IPubVersion;
     @json public recentUse: number = 0;
     @json public script: string = "";
     @json public editorState: string = "";
@@ -534,7 +511,7 @@ export interface IPubBody {
     scriptId?: string;
     userId?: string;
     status?: string;
-    scriptVersion?: PubVersion;
+    scriptVersion?: IPubVersion;
     recentUse?: number;
     script?: string;
     editorState?: string;
@@ -764,18 +741,10 @@ export interface IPubArt {
 }
 
 export class ThumbContainer
-    extends td.JsonRecord
 {
-    @json public name: string = "";
-    @json public container: azureBlobStorage.Container;
-    @json public size: number = 0;
-    static createFromJson(o:JsonObject) { let r = new ThumbContainer(); r.fromJson(o); return r; }
-}
-
-export interface IThumbContainer {
-    name?: string;
-    container?: azureBlobStorage.Container;
-    size?: number;
+    public name: string = "";
+    public container: azureBlobStorage.Container;
+    public size: number = 0;
 }
 
 export class PubTag
@@ -1008,7 +977,7 @@ export class PubRelease
     @json public username: string = "";
     @json public userscore: number = 0;
     @json public userhaspicture: boolean = false;
-    @json public labels: ReleaseLabel[];
+    @json public labels: IReleaseLabel[];
     @json public commit: string = "";
     @json public branch: string = "";
     @json public buildnumber: number = 0;
@@ -1026,7 +995,7 @@ export interface IPubRelease {
     username?: string;
     userscore?: number;
     userhaspicture?: boolean;
-    labels?: ReleaseLabel[];
+    labels?: IReleaseLabel[];
     commit?: string;
     branch?: string;
     buildnumber?: number;
@@ -1034,25 +1003,13 @@ export interface IPubRelease {
     name?: string;
 }
 
-export class ReleaseLabel
-    extends td.JsonRecord
-{
-    @json public name: string = "";
-    @json public userid: string = "";
-    @json public time: number = 0;
-    @json public releaseid: string = "";
-    @json public relid: string = "";
-    @json public numpokes: number = 0;
-    static createFromJson(o:JsonObject) { let r = new ReleaseLabel(); r.fromJson(o); return r; }
-}
-
 export interface IReleaseLabel {
-    name?: string;
-    userid?: string;
-    time?: number;
-    releaseid?: string;
-    relid?: string;
-    numpokes?: number;
+    name: string;
+    userid: string;
+    time: number;
+    releaseid: string;
+    relid: string;
+    numpokes: number;
 }
 
 export class Token
@@ -1529,20 +1486,11 @@ export interface IScanAndSearchOptions {
 export class ApireqUserInfo
     extends td.JsonRecord
 {
-    @json public id: string = "";
-    @json public token: Token;
-    @json public json: JsonObject;
-    @json public permissionCache: JsonBuilder;
-    @json public ip: string = "";
-    static createFromJson(o:JsonObject) { let r = new ApireqUserInfo(); r.fromJson(o); return r; }
-}
-
-export interface IApireqUserInfo {
-    id?: string;
-    token?: Token;
-    json?: JsonObject;
-    permissionCache?: JsonBuilder;
-    ip?: string;
+    public id: string = "";
+    public token: Token;
+    public json: JsonObject;
+    public permissionCache: JsonBuilder;
+    public ip: string = "";
 }
 
 export class ServiceSettings
@@ -1664,6 +1612,7 @@ async function _initAsync() : Promise<void>
     }
     else {
         azureTable.assumeTablesExists();
+        azureBlobStorage.assumeContainerExists();
     }
     if (hasSetting("KRAKEN_API_SECRET")) {
         kraken.init("", "");
@@ -1694,7 +1643,7 @@ async function _initAsync() : Promise<void>
     tokenSecret = td.serverSetting("TOKEN_SECRET", false);
     await cachedStore.initAsync();
     indexedStore.init(tableClient);
-    cachedStore.getLogger().setVerbosity("info");
+    // cachedStore.getLogger().setVerbosity("info");
 
     await _init_0Async();
 
@@ -1887,7 +1836,7 @@ async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObje
         jsb["RowKey"] = hist.historyid;
         await historyTable.insertEntityAsync(clone(jsb), "or merge");
         progress("save 5");
-        newSlot = headerFromSlot(updatedJson).toJson();
+        newSlot = headerFromSlot(updatedJson)
     }
     else {
         newSlot = ({"error":"out of date"});
@@ -2614,7 +2563,7 @@ function _initWorkspaces() : void
     });
 }
 
-function headerFromSlot(js: JsonObject) : PubHeader
+function headerFromSlot(js: JsonObject) : IPubHeader
 {
     let pubHeader: PubHeader;
     pubHeader = new PubHeader();
@@ -2628,13 +2577,14 @@ function headerFromSlot(js: JsonObject) : PubHeader
         pubHeader.fromJson(js);
         pubHeader.meta = JSON.parse(withDefault(js["meta"], "{}"));
     }
-    pubHeader.scriptVersion = new PubVersion();
-    pubHeader.scriptVersion.instanceId = "cloud";
-    pubHeader.scriptVersion.baseSnapshot = withDefault(js["currentBlob"], "18561817817178.deleted.foobar");
-    pubHeader.scriptVersion.version = 1;
     let ms = 20000000000000 - parseFloat(pubHeader.scriptVersion.baseSnapshot.replace(/\..*/g, ""));
-    pubHeader.scriptVersion.time = Math.round(ms / 1000);
-    return pubHeader;
+    pubHeader.scriptVersion = {
+        instanceId: "cloud",
+        baseSnapshot: withDefault(js["currentBlob"], "18561817817178.deleted.foobar"),
+        time: Math.round(ms / 1000),
+        version: 1
+    };
+    return <any>pubHeader.toJson();
 }
 
 async function getInstalledAsync(req: ApiRequest, long: boolean) : Promise<void>
@@ -2647,18 +2597,18 @@ async function getInstalledAsync(req: ApiRequest, long: boolean) : Promise<void>
                 req.rootPub = await getPubAsync(req.rootId, "user");
             }
             let entities = await installSlotsTable.createQuery().partitionKeyIs(req.rootId).fetchAllAsync();
-            let res = new PubHeaders();
+            let res:IPubHeaders = <any>{};
             res.blobcontainer = (await workspaceForUser(req.userid).blobContainerAsync()).url() + "/";
             res.time = await nowSecondsAsync();
             res.random = crypto.randomBytes(16).toString("base64");
-            res.headers = (<PubHeader[]>[]);
+            res.headers = [];
             res.newNotifications = orZero(req.rootPub["notifications"]);
             res.notifications = res.newNotifications > 0;
             res.v = v;
             for (let js of entities) {
                 res.headers.push(headerFromSlot(js));
             }
-            req.response = res.toJson();
+            req.response = res
         }
     }
     else {
@@ -2672,7 +2622,7 @@ async function getInstalledAsync(req: ApiRequest, long: boolean) : Promise<void>
                 req.status = 404;
             }
             else {
-                req.response = headerFromSlot(result).toJson();
+                req.response = headerFromSlot(result)
             }
         }
     }
@@ -2871,7 +2821,7 @@ async function publishScriptAsync(req: ApiRequest) : Promise<void>
         delete slotBuilder["__etag"];
         let newSlot = clone(slotBuilder);
         await installSlotsTable.updateEntityAsync(newSlot, "merge");
-        publishResult.bodies.push(headerFromSlot(newSlot).toJson());
+        publishResult.bodies.push(headerFromSlot(newSlot));
         req.response = publishResult.toJson();
     }
 }
@@ -5324,12 +5274,12 @@ async function _initReleasesAsync() : Promise<void>
     await setResolveAsync(releases, async (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => {
         await addUsernameEtcAsync(fetchResult);
         let coll = (<PubRelease[]>[]);
-        let labels = (<ReleaseLabel[]>[]);
+        let labels = <IReleaseLabel[]>[];
         let entry3 = await settingsContainer.getAsync("releases");
         if (entry3 != null && entry3["ids"] != null) {
             let js = entry3["ids"];
             for (let k of Object.keys(js)) {
-                labels.push(ReleaseLabel.createFromJson(js[k]));
+                labels.push(js[k]);
             }
         }
         for (let jsb of fetchResult.items) {
@@ -5419,7 +5369,7 @@ async function _initReleasesAsync() : Promise<void>
         }
         if (req3.status == 200) {
             let rel3 = PubRelease.createFromJson(req3.rootPub["pub"]);
-            let lab = new ReleaseLabel();
+            let lab:IReleaseLabel = <any>{};
             lab.name = name;
             lab.time = await nowSecondsAsync();
             lab.userid = req3.userid;
@@ -5433,7 +5383,7 @@ async function _initReleasesAsync() : Promise<void>
                     jsb2 = {};
                     entry2["ids"] = jsb2;
                 }
-                jsb2[lab.name] = lab.toJson();
+                jsb2[lab.name] = lab;
                 bareIncrement(entry2, "updatecount");
             });
             if (name == "cloud") {

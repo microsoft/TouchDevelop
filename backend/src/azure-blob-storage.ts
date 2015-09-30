@@ -57,6 +57,10 @@ export class BlobService
     {
         let blob_service = this.handle;
         let container: Container;
+        if (assumeExists) {
+           log("would create container, " + containerName);
+           return new Container(this, containerName, null)
+        }
         log("create container");
         await new Promise(resume => {
             var opts = {}
@@ -67,7 +71,7 @@ export class BlobService
             
             blob_service.createContainerIfNotExists(containerName, opts, (error,res,resp) => {
                this.tdError(error, "create container");
-               container = new Container(this, containerName,  res)
+               container = new Container(this, containerName, res)
                resume();
             });
         });
@@ -221,7 +225,7 @@ export class Container
             (error,txt,res,resp) => {
                 if (!opts.justTry) this.svc.tdError404(error, "get blob to buffer");
                 if(error){
-                    if (/does not exist/.test(error + "")) { 
+                    if (error.statusCode == 404) { 
                       info = new BlobInfo({ error: "404" })
                     }
                     else {
@@ -454,7 +458,7 @@ export class BlobInfo
      */
     public error() : string
     {
-        return this.inf.message
+        return this.inf.error
     }
 
 }
@@ -483,6 +487,7 @@ export interface ICreateServiceOptions {
 
 
 var agentSSL;
+var assumeExists = false;
 
 export function init() : void
 {
@@ -494,6 +499,11 @@ export function init() : void
 
     logSeqNo = 1000000;
     instanceId = createRandomId(6);
+}
+
+export function assumeContainerExists()
+{
+    assumeExists = true;
 }
 
 /**

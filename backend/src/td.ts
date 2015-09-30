@@ -355,7 +355,8 @@ export function json(className : any, fieldName : string) {
         e.fromJson = v => toBoolean(v);
         break;
     default:
-        console.log("BAD TYPE", t)
+        e.toJson = v => v;
+        e.fromJson = v => v;
     }
 
     className.__fields.push(e)
@@ -818,8 +819,13 @@ export class WebRequest
 
         if (typeof this._content == "string") {
             data = new Buffer(this._content, "utf8")
+        } else if (this._content == null) {
+            data = new Buffer(0);
         } else {
-            assert(Buffer.isBuffer(this._content))
+            if (!Buffer.isBuffer(this._content)) {
+                console.log("NON BUFFER", this._content)
+                assert(false)
+            }
             data = this._content
         }
 
