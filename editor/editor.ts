@@ -2358,7 +2358,8 @@ module TDev
             }
 
 
-            this.dismissSidePane();
+            // do not dismiss to avoid loosing cursor while running script
+            // this.dismissSidePane();
 
             if (this.isDebuggerMode()) this.leaveDebuggerMode();
 
