@@ -959,6 +959,7 @@ module TDev.HTML {
     export interface AutoExpandingTextAreaOptions {
         showDismiss?: boolean;
         editFullScreenAsync?: (text: string) => Promise; // string
+        singleLine?: boolean;
     }
 
     export interface AutoExpandingTextArea {
@@ -1008,6 +1009,15 @@ module TDev.HTML {
           onDismiss: () => { },
           fullScreen: fullScreen,
         }
+        if (options.singleLine) {
+            ta.onkeydown = (ev: KeyboardEvent): any => {
+                if ((ev.keyCode || ev.which) == 13) {
+                    ev.stopPropagation();
+                    if (r.onDismiss) r.onDismiss();
+                    return true;
+                }
+            }
+        }        
         return r;
     }
 

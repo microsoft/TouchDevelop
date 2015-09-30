@@ -1278,7 +1278,7 @@ module TDev
             return wrapper;
         }
 
-        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean) {
+        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean, singleLine: boolean) {
             var hint = "";
             if (this.currentInstruction && this.currentInstruction.languageHint == l.languageHint && this.currentInstruction.editString)
                 hint = this.currentInstruction.editString;    
@@ -1286,7 +1286,7 @@ module TDev
             var literalEditor: LiteralEditor;
             if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true, hint);
             else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false, hint);
-            else literalEditor = new TextLiteralEditor(this, l, fullScreen);
+            else literalEditor = new TextLiteralEditor(this, l, fullScreen, singleLine);
             return literalEditor;
         }
 
@@ -1294,7 +1294,7 @@ module TDev
         {
             var editor = TheEditor;
             var renaming = this.stmt instanceof AST.DeclNameHolder;
-            var literalEditor = this.inlineLiteralEditor(l, !renaming);
+            var literalEditor = this.inlineLiteralEditor(l, !renaming, renaming);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
