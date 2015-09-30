@@ -735,7 +735,7 @@ module TDev
             this.topButtonRow.style.width = "auto";
 
             var btnHeight = this.topButtonRow.offsetHeight;
-            var overlap = 0.2 * SizeMgr.topFontSize;
+            var overlap = -0.2 * SizeMgr.topFontSize;
             var h = this.buttonsAround.offsetHeight;
             var pp = Util.offsetIn(this.buttonsAround, this.codeView);
             this.topButtonRow.style.top = pp.y - btnHeight + overlap + "px";
