@@ -22,7 +22,6 @@ import * as parallel from "./parallel"
 var logger: td.AppLogger;
 var client: azureTable.Client;
 var hardDelete: boolean = false;
-var StoresByKindIndex:any = {};
 
 
 type ToKey = (e:JsonBuilder) => string;
@@ -351,6 +350,8 @@ export interface ICreateStoreOptions {
     tableClient?: azureTable.Client;
 }
 
+var indices:td.SMap<Store> = {};
+
 
 export async function createStoreAsync(container: cachedStore.Container, kind: string, options: ICreateStoreOptions = {}) : Promise<Store>
 {
@@ -364,7 +365,7 @@ export async function createStoreAsync(container: cachedStore.Container, kind: s
         store.client = client;
     }
     await store.createIndexAsync("*", entry => "all");
-    StoresByKindIndex[kind] = store;
+    indices[kind] = store;
     return store;
 }
 
@@ -400,8 +401,8 @@ export async function executeTableQueryAsync(tableQuery: azureTable.TableQuery, 
 
 export function storeByKind(kind: string) : Store
 {
-    if (StoresByKindIndex.hasOwnProperty(kind))
-        return StoresByKindIndex[kind]
+    if (indices.hasOwnProperty(kind))
+        return indices[kind]
     return null
 }
 

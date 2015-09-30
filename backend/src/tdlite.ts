@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import * as crypto from 'crypto';
 import * as querystring from 'querystring';
 import * as child_process from 'child_process';
+import * as fs from 'fs';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -142,34 +143,65 @@ var kidOrNot_html: string = "<script>\nfunction onkid() {\n  window.location = s
 var login_js: string = "function seturl(p) {\n  var url = window.location.href.replace(/#.*/, \"\").replace(/\\&td_(username|password|state)=[^?&]*/g, \"\")\n  window.location.href = url + p\n}\n\nfunction setstate(s) {\n    seturl(\"&td_state=\" + encodeURIComponent(s))\n}\n\nfunction checkready(f)\n{\n    var userid = \"@USERID@\";\n    var done = false;\n    if (userid && !/^@/.test(userid)) {\n        setInterval(function() {\n            if (done) return\n            $.get(\"/api/ready/\" + userid).then(function(r) {\n              if (r && r.ready) {\n                  done = true;\n                  f();\n              }\n            })\n        }, 2000)\n    } else {\n        f();\n    }\n}";
 var agree_html: string = "<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>Legal stuff</h1>\n<p>Agree to terms and conditions?</p>\n<a href=\"@AGREEURL@\" class=\"provider\">Agree</a><br/>\n</div>\n";
 
-export class ApiRequest
-    extends td.JsonRecord
+export class RouteIndex
 {
-    @json public method: string = "";
-    @json public root: string = "";
-    @json public rootPub: JsonObject;
-    @json public rootId: string = "";
-    @json public verb: string = "";
-    @json public queryOptions: JsonObject;
-    @json public body: JsonObject;
-    @json public userid: string = "";
-    @json public argument: string = "";
-    @json public subArgument: string = "";
-    @json public subSubArgument: string = "";
-    @json public status: number = 0;
-    @json public response: JsonObject;
-    @json public responseContentType: string = "";
-    @json public isUpgrade: boolean = false;
-    @json public upgradeTasks: Promise<void>[];
-    @json public origUrl: string = "";
-    @json public startTime: number = 0;
-    @json public throttleIp: string = "";
-    @json public route: RouteIndex;
-    @json public isTopLevel: boolean = false;
-    @json public headers: td.StringMap;
-    @json public userinfo: ApireqUserInfo;
-    @json public isCached: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new ApiRequest(); r.fromJson(o); return r; }
+    public method: string = "";
+    public root: string = "";
+    public verb: string = "";
+    public handler: ApiReqHandler;
+    public options: RouteOptions;
+
+    static _dict:td.SMap<RouteIndex> = {};
+    static has(m:string, r:string, v:string):boolean
+    {
+        if (/%/.test((m+r+v)))
+            return false
+        var h = m + "%" + r + "%" + v
+        return RouteIndex._dict.hasOwnProperty(h)
+    }
+
+    static at(m:string, r:string, v:string):RouteIndex
+    {
+        if (/%/.test((m+r+v)))
+            return null
+        var h = m + "%" + r + "%" + v
+        if (!RouteIndex._dict.hasOwnProperty(h)) {
+            var x = new RouteIndex()
+            x.method = m
+            x.root = r
+            x.verb = v
+            RouteIndex._dict[h] = x
+        }
+        return RouteIndex._dict[h]
+    }
+}
+
+export class ApiRequest
+{
+    public method: string = "";
+    public root: string = "";
+    public rootPub: JsonObject;
+    public rootId: string = "";
+    public verb: string = "";
+    public queryOptions: JsonObject;
+    public body: JsonObject;
+    public userid: string = "";
+    public argument: string = "";
+    public subArgument: string = "";
+    public subSubArgument: string = "";
+    public status: number = 0;
+    public response: JsonObject;
+    public responseContentType: string = "";
+    public isUpgrade: boolean = false;
+    public upgradeTasks: Promise<void>[];
+    public origUrl: string = "";
+    public startTime: number = 0;
+    public throttleIp: string = "";
+    public route: RouteIndex;
+    public isTopLevel: boolean = false;
+    public headers: td.StringMap;
+    public userinfo: ApireqUserInfo;
+    public isCached: boolean = false;
 }
 
 export interface IApiRequest {
@@ -197,25 +229,6 @@ export interface IApiRequest {
     headers?: td.StringMap;
     userinfo?: ApireqUserInfo;
     isCached?: boolean;
-}
-
-export class RouteIndex
-    extends td.JsonRecord
-{
-    @json public method: string = "";
-    @json public root: string = "";
-    @json public verb: string = "";
-    @json public handler: ApiReqHandler;
-    @json public options: RouteOptions;
-    static createFromJson(o:JsonObject) { let r = new RouteIndex(); r.fromJson(o); return r; }
-}
-
-export interface IRouteIndex {
-    method?: string;
-    root?: string;
-    verb?: string;
-    handler?: ApiReqHandler;
-    options?: RouteOptions;
 }
 
 export class PubScript
@@ -403,6 +416,23 @@ export interface IPubUser {
     isadult?: boolean;
 }
 
+export class PubVersion
+    extends td.JsonRecord
+{
+    @json public instanceId: string = "";
+    @json public baseSnapshot: string = "";
+    @json public time: number = 0;
+    @json public version: number = 0;
+    static createFromJson(o:JsonObject) { let r = new PubVersion(); r.fromJson(o); return r; }
+}
+
+export interface IPubVersion {
+    instanceId?: string;
+    baseSnapshot?: string;
+    time?: number;
+    version?: number;
+}
+
 export class PubHeader
     extends td.JsonRecord
 {
@@ -479,23 +509,6 @@ export interface IPubHeaders {
     user?: PubUser;
     headers?: PubHeader[];
     blobcontainer?: string;
-}
-
-export class PubVersion
-    extends td.JsonRecord
-{
-    @json public instanceId: string = "";
-    @json public baseSnapshot: string = "";
-    @json public time: number = 0;
-    @json public version: number = 0;
-    static createFromJson(o:JsonObject) { let r = new PubVersion(); r.fromJson(o); return r; }
-}
-
-export interface IPubVersion {
-    instanceId?: string;
-    baseSnapshot?: string;
-    time?: number;
-    version?: number;
 }
 
 export class PubBody
@@ -1589,7 +1602,7 @@ export interface IPubVideo {
 }
 
 
-export async function _initAsync() : Promise<void>
+async function _initAsync() : Promise<void>
 {
     rewriteVersion = 220;
     let reinit = true;
@@ -1983,7 +1996,7 @@ async function _init_0Async() : Promise<void>
 function addRoute(method: string, root: string, verb: string, handler: ApiReqHandler, options_0: IRouteOptions = {}) : void
 {
     let options_ = new RouteOptions(); options_.load(options_0);
-    let route = RouteIndex[method];
+    let route = RouteIndex.at(method, root, verb);
     route.options = options_;
     if (options_.noSizeCheck || method == "GET" || method == "DELETE") {
         route.handler = handler;
@@ -2029,9 +2042,6 @@ async function performRoutingAsync(req: restify.Request, res: restify.Response) 
     let apiRequest = buildApiRequest(req.url());
     apiRequest.method = req.method();
     apiRequest.body = req.bodyAsJson();
-    if (false) {
-        logger.debug("api req: " + JSON.stringify(apiRequest.toJson()));
-    }
     await validateTokenAsync(apiRequest, req);
     if (apiRequest.userid == "") {
         apiRequest.throttleIp = sha256(req.remoteIp());
@@ -2064,9 +2074,8 @@ async function performRoutingAsync(req: restify.Request, res: restify.Response) 
 function lookupRoute(apiRequest: ApiRequest, root: string, verb: string) : void
 {
     if (apiRequest.route == null) {
-        let route = RouteIndex[apiRequest.method];
-        if (route.handler != null) {
-            apiRequest.route = route;
+        if (RouteIndex.has(apiRequest.method, root, verb)) {
+            apiRequest.route = RouteIndex.at(apiRequest.method, root, verb)
         }
     }
 }
@@ -2079,8 +2088,8 @@ async function anyListAsync(store: indexedStore.Store, req: ApiRequest, idxName:
 
 function aliasRoute(method: string, copy: string, src: string) : void
 {
-    let dst = RouteIndex[method];
-    let route = RouteIndex[method];
+    let dst = RouteIndex.at(method, copy, "");
+    let route = RouteIndex.at(method, src, "");
     dst.handler = route.handler;
     dst.options = route.options;
 }
@@ -9443,7 +9452,7 @@ async function setReqUserIdAsync(req: ApiRequest, uid: string) : Promise<void>
 function callerIsFacilitatorOf(req: ApiRequest, subjectJson: JsonObject) : boolean
 {
     let isFacilitator: boolean;
-    if (req.equals(adminRequest)) {
+    if (req === adminRequest) {
         return true;
     }
     if (req.userid == "" || subjectJson == null) {
@@ -9469,7 +9478,7 @@ function callerIsFacilitatorOf(req: ApiRequest, subjectJson: JsonObject) : boole
 function callerSharesGroupWith(req: ApiRequest, subjectJson: JsonObject) : boolean
 {
     let isFacilitator: boolean;
-    if (req.equals(adminRequest)) {
+    if (req === adminRequest) {
         return true;
     }
     if (req.userid == "" || subjectJson == null) {
@@ -9505,7 +9514,7 @@ function isAbuseSafe(elt: JsonObject) : boolean
 function callerHasPermission(req: ApiRequest, perm: string) : boolean
 {
     let hasPerm: boolean;
-    if (req.equals(adminRequest)) {
+    if (req === adminRequest) {
         return true;
     }
     if (req.userid == "") {
@@ -10290,3 +10299,17 @@ async function doFailureChecksAsync(container: azureBlobStorage.Container, table
 }
 
 
+async function main()
+{
+    if (fs.existsSync(process.argv[2])) {
+        var cfg = JSON.parse(fs.readFileSync(process.argv[2], "utf8"))
+        Object.keys(cfg).forEach(k => {
+            process.env[k] = cfg[k]
+        })
+        console.log("loaded cfg")
+    }
+    await _initAsync();
+    await restify.startAsync();
+}
+
+main();

@@ -1040,4 +1040,4 @@ function initTd()
     fixupSockets();
 }
 
-initTd();
+//initTd();

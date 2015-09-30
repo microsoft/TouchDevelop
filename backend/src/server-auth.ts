@@ -70,6 +70,33 @@ a.provider {
 </html>`;
 
 
+export class ClientOauth
+    extends td.JsonRecord
+{
+    @json public state: string = "";
+    @json public client_id: string = "";
+    @json public redirect_uri: string = "";
+    @json public scope: string = "";
+    @json public response_type: string = "";
+    @json public display: string = "";
+    @json public provider: string = "";
+    @json public td_state: string = "";
+    @json public u: string = "";
+    static createFromJson(o:JsonObject) { let r = new ClientOauth(); r.fromJson(o); return r; }
+}
+
+export class UserInfo
+    extends td.JsonRecord
+{
+    @json public id: string = "";
+    @json public name: string = "";
+    @json public email: string = "";
+    @json public redirectPrefix: string = "";
+    @json public state: string = "";
+    @json public userData: string = "";
+    static createFromJson(o:JsonObject) { let r = new UserInfo(); r.fromJson(o); return r; }
+}
+
 export class OauthRequest
     extends td.JsonRecord
 {
@@ -219,21 +246,6 @@ export interface IProviderOptions {
     makeCustomToken?: MakeUserInfo;
 }
 
-export class ClientOauth
-    extends td.JsonRecord
-{
-    @json public state: string = "";
-    @json public client_id: string = "";
-    @json public redirect_uri: string = "";
-    @json public scope: string = "";
-    @json public response_type: string = "";
-    @json public display: string = "";
-    @json public provider: string = "";
-    @json public td_state: string = "";
-    @json public u: string = "";
-    static createFromJson(o:JsonObject) { let r = new ClientOauth(); r.fromJson(o); return r; }
-}
-
 export interface IClientOauth {
     state?: string;
     client_id?: string;
@@ -258,18 +270,6 @@ export interface IInitOptions {
     getProviderTemplate?: GetProviderTemplate;
     errorCallback?: ErrorCallback;
     redirectOnError?: string;
-}
-
-export class UserInfo
-    extends td.JsonRecord
-{
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public email: string = "";
-    @json public redirectPrefix: string = "";
-    @json public state: string = "";
-    @json public userData: string = "";
-    static createFromJson(o:JsonObject) { let r = new UserInfo(); r.fromJson(o); return r; }
 }
 
 export interface IUserInfo {
