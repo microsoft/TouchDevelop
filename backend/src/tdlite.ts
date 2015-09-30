@@ -258,53 +258,53 @@ export class PubScript
 }
 
 export interface IPubScript {
-    kind?: string;
-    time?: number;
-    id?: string;
-    baseid?: string;
-    url?: string;
-    name?: string;
-    description?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    icon?: string;
-    iconbackground?: string;
-    iconurl?: string;
-    positivereviews?: number;
-    cumulativepositivereviews?: number;
-    subscribers?: number;
-    comments?: number;
-    screenshots?: number;
-    platforms?: string[];
-    capabilities?: string[];
-    flows?: string[];
-    haserrors?: boolean;
-    rootid?: string;
-    updateid?: string;
-    updatetime?: number;
-    ishidden?: boolean;
-    islibrary?: boolean;
-    userplatform?: string[];
-    installations?: number;
-    runs?: number;
-    art?: number;
-    toptagids?: string[];
-    screenshotthumburl?: string;
-    screenshoturl?: string;
-    mergeids?: string[];
-    editor?: string;
-    meta?: JsonObject;
-    iconArtId?: string;
-    splashArtId?: string;
-    raw?: string;
-    scripthash?: string;
-    sourceid?: string;
-    updateroot?: string;
-    unmoderated?: boolean;
-    noexternallinks?: boolean;
-    promo?: JsonObject;
+    kind: string;
+    time: number;
+    id: string;
+    baseid: string;
+    url: string;
+    name: string;
+    description: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    icon: string;
+    iconbackground: string;
+    iconurl: string;
+    positivereviews: number;
+    cumulativepositivereviews: number;
+    subscribers: number;
+    comments: number;
+    screenshots: number;
+    platforms: string[];
+    capabilities: string[];
+    flows: string[];
+    haserrors: boolean;
+    rootid: string;
+    updateid: string;
+    updatetime: number;
+    ishidden: boolean;
+    islibrary: boolean;
+    userplatform: string[];
+    installations: number;
+    runs: number;
+    art: number;
+    toptagids: string[];
+    screenshotthumburl: string;
+    screenshoturl: string;
+    mergeids: string[];
+    editor: string;
+    meta: JsonObject;
+    iconArtId: string;
+    splashArtId: string;
+    raw: string;
+    scripthash: string;
+    sourceid: string;
+    updateroot: string;
+    unmoderated: boolean;
+    noexternallinks: boolean;
+    promo: JsonObject;
 }
 
 export class PubComment
@@ -333,25 +333,25 @@ export class PubComment
 }
 
 export interface IPubComment {
-    kind?: string;
-    time?: number;
-    id?: string;
-    url?: string;
-    text?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
-    nestinglevel?: number;
-    positivereviews?: number;
-    subscribers?: number;
-    comments?: number;
-    assignedtoid?: string;
-    resolved?: string;
+    kind: string;
+    time: number;
+    id: string;
+    url: string;
+    text: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
+    nestinglevel: number;
+    positivereviews: number;
+    subscribers: number;
+    comments: number;
+    assignedtoid: string;
+    resolved: string;
 }
 
 export class PubUser
@@ -374,19 +374,19 @@ export class PubUser
 }
 
 export interface IPubUser {
-    kind?: string;
-    id?: string;
-    url?: string;
-    name?: string;
-    haspicture?: boolean;
-    time?: number;
-    about?: string;
-    features?: number;
-    activedays?: number;
-    receivedpositivereviews?: number;
-    subscribers?: number;
-    score?: number;
-    isadult?: boolean;
+    kind: string;
+    id: string;
+    url: string;
+    name: string;
+    haspicture: boolean;
+    time: number;
+    about: string;
+    features: number;
+    activedays: number;
+    receivedpositivereviews: number;
+    subscribers: number;
+    score: number;
+    isadult: boolean;
 }
 
 export class PubVersion
@@ -479,17 +479,17 @@ export class PubBody
 }
 
 export interface IPubBody {
-    guid?: string;
-    name?: string;
-    scriptId?: string;
-    userId?: string;
-    status?: string;
-    scriptVersion?: IPubVersion;
-    recentUse?: number;
-    script?: string;
-    editorState?: string;
-    editor?: string;
-    meta?: JsonObject;
+    guid: string;
+    name: string;
+    scriptId: string;
+    userId: string;
+    status: string;
+    scriptVersion: IPubVersion;
+    recentUse: number;
+    script: string;
+    editorState: string;
+    editor: string;
+    meta: JsonObject;
 }
 
 export class InstalledResult
@@ -502,9 +502,9 @@ export class InstalledResult
 }
 
 export interface IInstalledResult {
-    delay?: number;
-    numErrors?: number;
-    headers?: JsonObject[];
+    delay: number;
+    numErrors: number;
+    headers: JsonObject[];
 }
 
 export class PubUserSettings
@@ -542,38 +542,38 @@ export class PubUserSettings
 }
 
 export interface IPubUserSettings {
-    nickname?: string;
-    aboutme?: string;
-    website?: string;
-    notifications?: boolean;
-    notifications2?: string;
-    picturelinkedtofacebook?: string;
-    picture?: string;
-    gender?: string;
-    realname?: string;
-    yearofbirth?: number;
-    location?: string;
-    culture?: string;
-    howfound?: string;
-    programmingknowledge?: string;
-    occupation?: string;
-    twitterhandle?: string;
-    email?: string;
-    emailverificationsent?: boolean;
-    emailverified?: boolean;
-    emailnewsletter2?: string;
-    emailfrequency?: string;
-    editorMode?: string;
-    school?: string;
-    wallpaper?: string;
-    permissions?: string;
-    credit?: number;
-    userid?: string;
-    previousemail?: string;
+    nickname: string;
+    aboutme: string;
+    website: string;
+    notifications: boolean;
+    notifications2: string;
+    picturelinkedtofacebook: string;
+    picture: string;
+    gender: string;
+    realname: string;
+    yearofbirth: number;
+    location: string;
+    culture: string;
+    howfound: string;
+    programmingknowledge: string;
+    occupation: string;
+    twitterhandle: string;
+    email: string;
+    emailverificationsent: boolean;
+    emailverified: boolean;
+    emailnewsletter2: string;
+    emailfrequency: string;
+    editorMode: string;
+    school: string;
+    wallpaper: string;
+    permissions: string;
+    credit: number;
+    userid: string;
+    previousemail: string;
 }
 
 export interface IPublishResult {
-    bodies?: JsonObject[];
+    bodies: JsonObject[];
 }
 
 export class UpdateEntry
@@ -587,10 +587,10 @@ export class UpdateEntry
 }
 
 export interface IUpdateEntry {
-    PartitionKey?: string;
-    RowKey?: string;
-    pub?: string;
-    time?: number;
+    PartitionKey: string;
+    RowKey: string;
+    pub: string;
+    time: number;
 }
 
 export class PubReview
@@ -613,19 +613,19 @@ export class PubReview
 }
 
 export interface IPubReview {
-    kind?: string;
-    time?: number;
-    id?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
-    publicationuserid?: string;
-    ispositive?: boolean;
+    kind: string;
+    time: number;
+    id: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
+    publicationuserid: string;
+    ispositive: boolean;
 }
 
 export interface DecoratedStore
@@ -634,8 +634,8 @@ export interface DecoratedStore
 }
 
 export interface IStoreDecorator {
-    target?: indexedStore.Store;
-    resolve?: ResolutionCallback;
+    target: indexedStore.Store;
+    resolve: ResolutionCallback;
 }
 
 export class PubArt
@@ -666,27 +666,27 @@ export class PubArt
 }
 
 export interface IPubArt {
-    kind?: string;
-    time?: number;
-    id?: string;
-    name?: string;
-    description?: string;
-    url?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    flags?: string[];
-    pictureurl?: string;
-    thumburl?: string;
-    mediumthumburl?: string;
-    wavurl?: string;
-    aacurl?: string;
-    contenttype?: string;
-    bloburl?: string;
-    arttype?: string;
-    filehash?: string;
+    kind: string;
+    time: number;
+    id: string;
+    name: string;
+    description: string;
+    url: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    flags: string[];
+    pictureurl: string;
+    thumburl: string;
+    mediumthumburl: string;
+    wavurl: string;
+    aacurl: string;
+    contenttype: string;
+    bloburl: string;
+    arttype: string;
+    filehash: string;
 }
 
 export class ThumbContainer
@@ -712,15 +712,15 @@ export class PubTag
 }
 
 export interface IPubTag {
-    kind?: string;
-    time?: number;
-    id?: string;
-    url?: string;
-    name?: string;
-    category?: string;
-    description?: string;
-    instances?: number;
-    topscreenshotids?: string[];
+    kind: string;
+    time: number;
+    id: string;
+    url: string;
+    name: string;
+    category: string;
+    description: string;
+    instances: number;
+    topscreenshotids: string[];
 }
 
 export class PubGroup
@@ -751,27 +751,27 @@ export class PubGroup
 }
 
 export interface IPubGroup {
-    kind?: string;
-    time?: number;
-    id?: string;
-    name?: string;
-    pictureid?: string;
-    allowexport?: boolean;
-    allowappstatistics?: boolean;
-    isrestricted?: boolean;
-    isclass?: boolean;
-    description?: string;
-    school?: string;
-    grade?: string;
-    url?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    positivereviews?: number;
-    subscribers?: number;
-    comments?: number;
+    kind: string;
+    time: number;
+    id: string;
+    name: string;
+    pictureid: string;
+    allowexport: boolean;
+    allowappstatistics: boolean;
+    isrestricted: boolean;
+    isclass: boolean;
+    description: string;
+    school: string;
+    grade: string;
+    url: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    positivereviews: number;
+    subscribers: number;
+    comments: number;
 }
 
 export class PubScreenshot
@@ -795,20 +795,20 @@ export class PubScreenshot
 }
 
 export interface IPubScreenshot {
-    kind?: string;
-    time?: number;
-    id?: string;
-    url?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
-    pictureurl?: string;
-    thumburl?: string;
+    kind: string;
+    time: number;
+    id: string;
+    url: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
+    pictureurl: string;
+    thumburl: string;
 }
 
 export class PubInstalledHistory
@@ -828,16 +828,16 @@ export class PubInstalledHistory
 }
 
 export interface IPubInstalledHistory {
-    kind?: string;
-    time?: number;
-    historyid?: string;
-    scriptstatus?: string;
-    scriptname?: string;
-    scriptdescription?: string;
-    scriptid?: string;
-    isactive?: boolean;
-    meta?: string;
-    scriptsize?: number;
+    kind: string;
+    time: number;
+    historyid: string;
+    scriptstatus: string;
+    scriptname: string;
+    scriptdescription: string;
+    scriptid: string;
+    isactive: boolean;
+    meta: string;
+    scriptsize: number;
 }
 
 export class PubSubscription
@@ -857,16 +857,16 @@ export class PubSubscription
 }
 
 export interface IPubSubscription {
-    kind?: string;
-    time?: number;
-    id?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
+    kind: string;
+    time: number;
+    id: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
 }
 
 export class PubNotification
@@ -887,17 +887,17 @@ export class PubNotification
 }
 
 export interface IPubNotification {
-    kind?: string;
-    time?: number;
-    id?: string;
-    notificationkind?: string;
-    userid?: string;
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
-    supplementalid?: string;
-    supplementalkind?: string;
-    supplementalname?: string;
+    kind: string;
+    time: number;
+    id: string;
+    notificationkind: string;
+    userid: string;
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
+    supplementalid: string;
+    supplementalkind: string;
+    supplementalname: string;
 }
 
 export class PubRelease
@@ -921,20 +921,20 @@ export class PubRelease
 }
 
 export interface IPubRelease {
-    kind?: string;
-    time?: number;
-    id?: string;
-    releaseid?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    labels?: IReleaseLabel[];
-    commit?: string;
-    branch?: string;
-    buildnumber?: number;
-    version?: string;
-    name?: string;
+    kind: string;
+    time: number;
+    id: string;
+    releaseid: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    labels: IReleaseLabel[];
+    commit: string;
+    branch: string;
+    buildnumber: number;
+    version: string;
+    name: string;
 }
 
 export interface IReleaseLabel {
@@ -959,12 +959,12 @@ export class Token
 }
 
 export interface IToken {
-    PartitionKey?: string;
-    RowKey?: string;
-    time?: number;
-    reason?: string;
-    cookie?: string;
-    version?: number;
+    PartitionKey: string;
+    RowKey: string;
+    time: number;
+    reason: string;
+    cookie: string;
+    version: number;
 }
 
 export class PubAuditLog
@@ -986,18 +986,18 @@ export class PubAuditLog
 }
 
 export interface IPubAuditLog {
-    kind?: string;
-    time?: number;
-    type?: string;
-    userid?: string;
-    subjectid?: string;
-    publicationid?: string;
-    publicationkind?: string;
-    data?: string;
-    oldvalue?: JsonObject;
-    newvalue?: JsonObject;
-    ip?: string;
-    tokenid?: string;
+    kind: string;
+    time: number;
+    type: string;
+    userid: string;
+    subjectid: string;
+    publicationid: string;
+    publicationkind: string;
+    data: string;
+    oldvalue: JsonObject;
+    newvalue: JsonObject;
+    ip: string;
+    tokenid: string;
 }
 
 export class PubWebfile
@@ -1019,18 +1019,18 @@ export class PubWebfile
 }
 
 export interface IPubWebfile {
-    kind?: string;
-    time?: number;
-    id?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    filename?: string;
-    contenttype?: string;
-    labels?: string[];
-    rawurl?: string;
+    kind: string;
+    time: number;
+    id: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    filename: string;
+    contenttype: string;
+    labels: string[];
+    rawurl: string;
 }
 
 export class LoginSession
@@ -1049,15 +1049,15 @@ export class LoginSession
 }
 
 export interface ILoginSession {
-    state?: string;
-    userid?: string;
-    redirectUri?: string;
-    groupid?: string;
-    passwords?: string[];
-    pass?: string;
-    ownerId?: string;
-    termsOk?: boolean;
-    codeOk?: boolean;
+    state: string;
+    userid: string;
+    redirectUri: string;
+    groupid: string;
+    passwords: string[];
+    pass: string;
+    ownerId: string;
+    termsOk: boolean;
+    codeOk: boolean;
 }
 
 export class PubGroupMembership
@@ -1075,14 +1075,14 @@ export class PubGroupMembership
 }
 
 export interface IPubGroupMembership {
-    kind?: string;
-    time?: number;
-    id?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    publicationid?: string;
+    kind: string;
+    time: number;
+    id: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    publicationid: string;
 }
 
 export class PubAbusereport
@@ -1106,20 +1106,20 @@ export class PubAbusereport
 }
 
 export interface IPubAbusereport {
-    kind?: string;
-    time?: number;
-    id?: string;
-    text?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    publicationid?: string;
-    publicationname?: string;
-    publicationkind?: string;
-    publicationuserid?: string;
-    resolution?: string;
+    kind: string;
+    time: number;
+    id: string;
+    text: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    publicationid: string;
+    publicationname: string;
+    publicationkind: string;
+    publicationuserid: string;
+    resolution: string;
 }
 
 export class CompileReq
@@ -1133,10 +1133,10 @@ export class CompileReq
 }
 
 export interface ICompileReq {
-    config?: string;
-    source?: string;
-    meta?: JsonObject;
-    repohash?: string;
+    config: string;
+    source: string;
+    meta: JsonObject;
+    repohash: string;
 }
 
 export class CompileResp
@@ -1147,7 +1147,7 @@ export class CompileResp
 }
 
 export interface ICompileResp {
-    statusurl?: string;
+    statusurl: string;
 }
 
 export class CompileStatus
@@ -1161,10 +1161,10 @@ export class CompileStatus
 }
 
 export interface ICompileStatus {
-    success?: boolean;
-    hexurl?: string;
-    mbedresponse?: JsonBuilder;
-    messages?: JsonObject[];
+    success: boolean;
+    hexurl: string;
+    mbedresponse: JsonBuilder;
+    messages: JsonObject[];
 }
 
 export class CandeleteResponse
@@ -1181,13 +1181,13 @@ export class CandeleteResponse
 }
 
 export interface ICandeleteResponse {
-    publicationkind?: string;
-    publicationname?: string;
-    publicationuserid?: string;
-    candeletekind?: boolean;
-    candelete?: boolean;
-    hasabusereports?: boolean;
-    canmanage?: boolean;
+    publicationkind: string;
+    publicationname: string;
+    publicationuserid: string;
+    candeletekind: boolean;
+    candelete: boolean;
+    hasabusereports: boolean;
+    canmanage: boolean;
 }
 
 export class BugReport
@@ -1217,26 +1217,26 @@ export class BugReport
 }
 
 export interface IBugReport {
-    exceptionConstructor?: string;
-    exceptionMessage?: string;
-    context?: string;
-    currentUrl?: string;
-    worldId?: string;
-    kind?: string;
-    scriptId?: string;
-    stackTrace?: string;
-    sourceURL?: string;
-    line?: number;
-    eventTrace?: string;
-    userAgent?: string;
-    resolution?: string;
-    jsUrl?: string;
-    timestamp?: number;
-    platform?: string[];
-    attachments?: string[];
-    tdVersion?: string;
-    logMessages?: JsonObject;
-    reportId?: string;
+    exceptionConstructor: string;
+    exceptionMessage: string;
+    context: string;
+    currentUrl: string;
+    worldId: string;
+    kind: string;
+    scriptId: string;
+    stackTrace: string;
+    sourceURL: string;
+    line: number;
+    eventTrace: string;
+    userAgent: string;
+    resolution: string;
+    jsUrl: string;
+    timestamp: number;
+    platform: string[];
+    attachments: string[];
+    tdVersion: string;
+    logMessages: JsonObject;
+    reportId: string;
 }
 
 export class PubChannel
@@ -1260,20 +1260,20 @@ export class PubChannel
 }
 
 export interface IPubChannel {
-    kind?: string;
-    time?: number;
-    id?: string;
-    name?: string;
-    pictureid?: string;
-    description?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    positivereviews?: number;
-    subscribers?: number;
-    comments?: number;
+    kind: string;
+    time: number;
+    id: string;
+    name: string;
+    pictureid: string;
+    description: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    positivereviews: number;
+    subscribers: number;
+    comments: number;
 }
 
 export class RecImportResponse
@@ -1290,13 +1290,13 @@ export class RecImportResponse
 }
 
 export interface IRecImportResponse {
-    problems?: number;
-    imported?: number;
-    present?: number;
-    attempts?: number;
-    ids?: JsonBuilder;
-    force?: boolean;
-    fulluser?: boolean;
+    problems: number;
+    imported: number;
+    present: number;
+    attempts: number;
+    ids: JsonBuilder;
+    force: boolean;
+    fulluser: boolean;
 }
 
 export class ClientConfig
@@ -1321,21 +1321,21 @@ export class ClientConfig
 }
 
 export interface IClientConfig {
-    workspaceUrl?: string;
-    searchUrl?: string;
-    searchApiKey?: string;
-    apiUrl?: string;
-    rootUrl?: string;
-    liteVersion?: string;
-    tdVersion?: string;
-    releaseid?: string;
-    relid?: string;
-    releaseLabel?: string;
-    shareUrl?: string;
-    cdnUrl?: string;
-    anonToken?: string;
-    primaryCdnUrl?: string;
-    altCdnUrls?: string[];
+    workspaceUrl: string;
+    searchUrl: string;
+    searchApiKey: string;
+    apiUrl: string;
+    rootUrl: string;
+    liteVersion: string;
+    tdVersion: string;
+    releaseid: string;
+    relid: string;
+    releaseLabel: string;
+    shareUrl: string;
+    cdnUrl: string;
+    anonToken: string;
+    primaryCdnUrl: string;
+    altCdnUrls: string[];
 }
 
 export class PubPointer
@@ -1363,24 +1363,24 @@ export class PubPointer
 }
 
 export interface IPubPointer {
-    kind?: string;
-    time?: number;
-    id?: string;
-    path?: string;
-    scriptid?: string;
-    artid?: string;
-    redirect?: string;
-    description?: string;
-    userid?: string;
-    username?: string;
-    userscore?: number;
-    userhaspicture?: boolean;
-    userplatform?: string[];
-    comments?: number;
-    artcontainer?: string;
-    parentpath?: string;
-    scriptname?: string;
-    breadcrumbtitle?: string;
+    kind: string;
+    time: number;
+    id: string;
+    path: string;
+    scriptid: string;
+    artid: string;
+    redirect: string;
+    description: string;
+    userid: string;
+    username: string;
+    userscore: number;
+    userhaspicture: boolean;
+    userplatform: string[];
+    comments: number;
+    artcontainer: string;
+    parentpath: string;
+    scriptname: string;
+    breadcrumbtitle: string;
 }
 
 export class CompilerConfig
@@ -1396,12 +1396,12 @@ export class CompilerConfig
 }
 
 export interface ICompilerConfig {
-    repourl?: string;
-    platform?: string;
-    hexfilename?: string;
-    hexcontenttype?: string;
-    target_binary?: string;
-    internalUrl?: string;
+    repourl: string;
+    platform: string;
+    hexfilename: string;
+    hexcontenttype: string;
+    target_binary: string;
+    internalUrl: string;
 }
 
 export class ApireqUserInfo
@@ -1431,16 +1431,16 @@ export class ServiceSettings
 }
 
 export interface IServiceSettings {
-    paths?: JsonObject;
-    emailFrom?: string;
-    accounts?: JsonObject;
-    alarmingEmails?: JsonObject;
-    termsversion?: string;
-    blockedNicknameRx?: string;
-    tokenExpiration?: number;
-    defaultLang?: string;
-    langs?: JsonObject;
-    envrewrite?: JsonObject;
+    paths: JsonObject;
+    emailFrom: string;
+    accounts: JsonObject;
+    alarmingEmails: JsonObject;
+    termsversion: string;
+    blockedNicknameRx: string;
+    tokenExpiration: number;
+    defaultLang: string;
+    langs: JsonObject;
+    envrewrite: JsonObject;
 }
 
 export class PubVideo
@@ -1459,15 +1459,15 @@ export class PubVideo
 }
 
 export interface IPubVideo {
-    kind?: string;
-    time?: number;
-    id?: string;
-    provider?: string;
-    providerid?: string;
-    blobid?: string;
-    sdvideourl?: string;
-    thumb512url?: string;
-    thumb128url?: string;
+    kind: string;
+    time: number;
+    id: string;
+    provider: string;
+    providerid: string;
+    blobid: string;
+    sdvideourl: string;
+    thumb512url: string;
+    thumb128url: string;
 }
 
 
