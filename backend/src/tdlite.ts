@@ -986,18 +986,18 @@ export class PubAuditLog
 }
 
 export interface IPubAuditLog {
-    kind: string;
-    time: number;
-    type: string;
-    userid: string;
-    subjectid: string;
-    publicationid: string;
-    publicationkind: string;
-    data: string;
-    oldvalue: JsonObject;
-    newvalue: JsonObject;
-    ip: string;
-    tokenid: string;
+    kind?: string;
+    time?: number;
+    type?: string;
+    userid?: string;
+    subjectid?: string;
+    publicationid?: string;
+    publicationkind?: string;
+    data?: string;
+    oldvalue?: JsonObject;
+    newvalue?: JsonObject;
+    ip?: string;
+    tokenid?: string;
 }
 
 export class PubWebfile
