@@ -8328,7 +8328,7 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (/,adult,/.test(s.permissions)) {
-                        edit(lf("email (private; {0})", 
+                        edit(lf("{0}", 
                             s.emailverified 
                               ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
