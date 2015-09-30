@@ -31,18 +31,12 @@ export interface IOptimizeOptions {
 /**
  * Initializes the library. If empty, the ``api key`` and ``api secret`` values are read from the server settings ``KRAKEN_API_KEY`` and ``KRAKEN_API_SECRET``. The library is also setup to store the files in an Azure Blob storage container for which you can provide the information through ``AZURE_STORAGE_ACCOUNT`` and ``AZURE_STORAGE_ACCESS_KEY``.
  */
-export function init(apiKey: string, apiSecret: string) : void
+export function init(apiKey_: string, apiSecret_: string) : void
 {
     assert(logger == null, "double initialization");
     logger = td.createLogger("kraken");
-    if (apiKey == "") {
-        apiKey = td.serverSetting("KRAKEN_API_KEY", false);
-    }
-    if (apiSecret == "") {
-        apiSecret = td.serverSetting("KRAKEN_API_SECRET", false);
-    }
-    apiKey = apiKey;
-    apiSecret = apiSecret;
+    apiKey = apiKey_ || td.serverSetting("KRAKEN_API_KEY", false);
+    apiSecret = apiSecret_ || td.serverSetting("KRAKEN_API_SECRET", false);  
 }
 
 async function sendRequestAsync(url: string, payload: JsonBuilder, retry: number) : Promise<JsonObject>
