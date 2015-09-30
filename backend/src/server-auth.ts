@@ -450,6 +450,9 @@ async function handleResponseAsync(state: string, req: restify.Request, res: res
         if (fedTargets.indexOf(stateWords[0]) >= 0) {
             res.redirect(307, "https://" + stateWords[0] + req.url().replace(/state=[^&]+/g, "state=" + encodeURIComponent(stateWords[1])));
         }
+        else if (td.startsWith(stateWords[0], "localhost:")) {
+            res.redirect(307, "http://" + stateWords[0] + req.url().replace(/state=[^&]+/g, "state=" + encodeURIComponent(stateWords[1])));
+        }
         else {
             res.sendError(403, "invalid fed target");
         }
