@@ -546,10 +546,10 @@ export class AppLogger {
         return "info";
     }
 
-    static findContext() : any
+    static findContext(): any 
     {
-        // TODO
-        return null
+        if ((<any>process).domain)
+            return (<any>process).domain.tdLogger;
     }
 
     public contextInfo() : any
@@ -679,8 +679,7 @@ export class AppLogger {
     {
         var prev = AppLogger.findContext()
         var ctx:any = { 
-            //TODO
-            //id: prev ? prev.id + "." + ++prev.numCh : Random.uniqueId(8),
+            id: prev ? prev.id + "." + ++prev.numCh : createRandomId(6),
             prev: prev,
             created: perfNow(), 
             numCh: 0, 
@@ -688,7 +687,8 @@ export class AppLogger {
         if (prev)
             ctx.root = prev.root
         else ctx.root = ctx
-        //TODO s.loggerContext = ctx
+        if ((<any>process).domain)
+            (<any>process).domain.tdLogger = ctx;
     }
 
 }
@@ -1046,4 +1046,4 @@ function initTd()
     fixupSockets();
 }
 
-//initTd();
+initTd();

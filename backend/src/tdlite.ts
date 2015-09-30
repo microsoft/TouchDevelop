@@ -1894,17 +1894,7 @@ function addRoute(method: string, root: string, verb: string, handler: ApiReqHan
     }
 }
 
-function orEmpty(s: string) : string
-{
-    let r: string;
-    if (s == null) {
-        r = "";
-    }
-    else {
-        r = s;
-    }
-    return r;
-}
+var orEmpty = td.orEmpty;
 
 async function performRoutingAsync(req: restify.Request, res: restify.Response) : Promise<void>
 {
@@ -2497,10 +2487,11 @@ function headerFromSlot(js: JsonObject) : IPubHeader
         pubHeader.fromJson(js);
         pubHeader.meta = JSON.parse(withDefault(js["meta"], "{}"));
     }
-    let ms = 20000000000000 - parseFloat(pubHeader.scriptVersion.baseSnapshot.replace(/\..*/g, ""));
+    let snap = withDefault(js["currentBlob"], "18561817817178.deleted.foobar")
+    let ms = 20000000000000 - parseFloat(snap.replace(/\..*/g, ""));
     pubHeader.scriptVersion = {
         instanceId: "cloud",
-        baseSnapshot: withDefault(js["currentBlob"], "18561817817178.deleted.foobar"),
+        baseSnapshot: snap,
         time: Math.round(ms / 1000),
         version: 1
     };
@@ -9267,12 +9258,16 @@ function accessTokenRedirect(res: restify.Response, url2: string) : void
     res.redirect(303, url3);
 }
 
-function wrapAccessTokenCookie(cookie: string) : string
+function wrapAccessTokenCookie(cookie: string): string 
 {
-    let value2: string;
-    let value = "TD_ACCESS_TOKEN2=" + cookie + "; Secure; HttpOnly; Path=/; " + "Domain=" + self.replace(/\/$/g, "").replace(/.*\//g, "") + "; Expires=Fri, 31 Dec 9999 23:59:59 GMT";
+    let value = "TD_ACCESS_TOKEN2=" + cookie + "; ";
+    if (hasHttps)
+        value += "Secure; "
+    value += "HttpOnly; Path=/; "
+    if (!/localhost:/.test(self))
+        value += "Domain=" + self.replace(/\/$/g, "").replace(/.*\//g, "").replace(/:\d+$/, "") + "; "
+    value += "Expires=Fri, 31 Dec 9999 23:59:59 GMT";
     return value;
-    return value2;
 }
 
 function stripCookie(url2: string) : [string, string]
