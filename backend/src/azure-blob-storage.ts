@@ -261,15 +261,16 @@ export class Container
     /**
      * Writes the blob contents to a file. The `result` will contain information about the blob, including ETag information.
      */
-    public async getBlobToBufferAsync(blobName: string, options?: IGetOptions) : Promise<[BlobInfo, Buffer]>
+    public async getBlobToBufferAsync(blobName: string, options?: IGetOptions) : Promise<BlobInfo>
     {
         let result: BlobInfo;
-        let buf:Buffer;
         let opts = prepGetOptions(options);
         await new Promise(resume => {
+            let buf:Buffer;
             var rs = this.svc.handle.createReadStream(this.name, blobName, opts, (error,res,resp) => {
                 if (!opts.justTry) this.svc.tdError404(error, "get blob to buffer");
                 if (td.checkAndLog(error)) {
+                    res.buffer = buf;
                    result = new BlobInfo(res);
                 } else {
                     result = new BlobInfo({ error: error + "" })
@@ -279,12 +280,12 @@ export class Container
             var bufs = []
             rs.on("data",d => { bufs.push(d); })
             rs.on("end", () => {
-              buf = Buffer.concat(bufs)
+              buf = Buffer.concat(bufs);                         
               resume()
             })
         });
         this.timeOp(opts, "get");
-        return <[BlobInfo, Buffer]>[result, buf]
+        return result
     }
 
 
@@ -454,6 +455,14 @@ export class BlobInfo
     }
 
     /**
+     * Get the buffer of a blob.
+     */
+    public buffer() : Buffer
+    {
+        return this.inf.buffer
+    }
+
+    /**
      * Get the error message if not `->succeded`
      */
     public error() : string
@@ -587,7 +596,7 @@ async function exampleAsync() : Promise<void>
     // Finally, to delete a blob, call `deleteBlob`. The above example deletes the blob named `blob`.
     let result4 = await container.createBlockBlobFromBufferAsync("buffer blob", new Buffer("Hello world!", "utf8"));
     // Creates a new block blob with contents equal to `buffer`.
-    let [result3, buf] = await container.getBlobToBufferAsync("buffer blob");
+    let result3 = await container.getBlobToBufferAsync("buffer blob");
     // Writes the blob contents to a file. The `result` will contain information about the blob, including ETag information.
 }
 

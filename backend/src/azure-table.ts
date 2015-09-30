@@ -46,9 +46,9 @@ export class Table
             //lib.App.log("table: start " + suff)
             
             if (withEtag && !ent["__etag"])
-              table.client[op](table.name, ent, {force:true}, cb)
+              table.client.handle[op](table.name, ent, {force:true}, cb)
             else
-              table.client[op](table.name, ent, cb)
+              table.client.handle[op](table.name, ent, cb)
         });
         table.timeOpCore(start, "write");
         return error;
@@ -155,7 +155,7 @@ export class Table
         let error: string;
         let start = logger.loggerDuration();
         await new Promise(resume => {
-            table.client[op](table.name, (err) => {
+            table.client.handle[op](table.name, (err) => {
               if (err) error = err + "";
               else error = "";
               resume()

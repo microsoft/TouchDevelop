@@ -262,12 +262,19 @@ export class Request
         return this.handle.url
     }
 
+    private _query:JsonObject;
     /**
      * This property is an object containing the parsed query-string (needs `use(query parser)`)
      */
     public query() : JsonObject
     {
-        return this.handle.query
+        if (!this._query) {
+            if (this.handle.query)
+                this._query = clone(this.handle.query);
+            else
+                this._query = {};            
+        }
+        return this._query;
     }
 
     /**

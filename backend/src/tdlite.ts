@@ -1641,7 +1641,8 @@ async function _initAsync() : Promise<void>
                 }
                 else if (td.startsWith(req4.url(), "/favicon.ico")) {
                     if (faviconIco == null) {
-                        let [result, faviconIco] = await filesContainer.getBlobToBufferAsync("favicon.ico");
+                        let res = await filesContainer.getBlobToBufferAsync("favicon.ico");
+                        faviconIco = res.buffer();
                     }
                     res4.sendBuffer(faviconIco, "image/x-icon");
                 }
