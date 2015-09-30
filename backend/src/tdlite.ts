@@ -8,7 +8,6 @@ import * as crypto from 'crypto';
 import * as querystring from 'querystring';
 import * as child_process from 'child_process';
 
-var TD = td.TD;
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
@@ -1621,11 +1620,6 @@ export async function _initAsync() : Promise<void>
 
         });
     }
-    if (false) {
-        if (hasSetting("APPINSIGHTS_INSTRUMENTATION_KEY")) {
-            TD._.applicationInsights().init();
-        }
-    }
     if (hasSetting("LIBRATO_TOKEN")) {
         let libSource = withDefault(td.serverSetting("RoleInstanceId", true), "local");
         await libratoNode.initAsync({
@@ -2358,7 +2352,7 @@ async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: ApiR
     let applyUpdates = req.queryOptions["applyupdates"];
     let singleResult = false;
     if (applyUpdates) {
-        let updates = TD.collections.createStringMap();
+        let updates = {};
         updates[""] = "1";
         entities.items = asArray(entities.items).filter((elt: JsonObject) => {
             let result: boolean;
@@ -4044,7 +4038,7 @@ async function _initGroupsAsync() : Promise<void>
             let numCode = "";
             for (let i = 0; i < 12; i++) {
                 if (false) {
-                    if (i > 0 && TD.math.mod(i, 4) == 0) {
+                    if (i > 0 && i % 4 == 0) {
                         numCode = numCode + " ";
                     }
                 }
@@ -4411,7 +4405,7 @@ async function _initUsersAsync() : Promise<void>
                 await redisClient.setpxAsync("tok:" + tokenString(req3.userinfo.token), "", 500);
             }
             req3.response = ({});
-            req3.headers = TD.collections.createStringMap();
+            req3.headers = {};
             let s4 = wrapAccessTokenCookie("logout").replace(/Dec 9999/g, "Dec 1971");
             req3.headers["Set-Cookie"] = s4;
         }
@@ -4514,7 +4508,7 @@ async function _initUsersAsync() : Promise<void>
             let [customToken, cookie] = await generateTokenAsync(req7.rootId, "admin", "webapp2");
             if (cookie != "") {
                 if (req7.headers == null) {
-                    req7.headers = TD.collections.createStringMap();
+                    req7.headers = {};
                 }
                 req7.headers["Set-Cookie"] = wrapAccessTokenCookie(cookie);
             }
@@ -4940,7 +4934,7 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
 function queueUpgradeTask(req: ApiRequest, task:Promise<void>) : void
 {
     if (req.upgradeTasks == null) {
-        req.upgradeTasks = TD.create.CollectionOf().TaskOf().Nothing();
+        req.upgradeTasks = [];
     }
     req.upgradeTasks.push(task);
 }
@@ -5026,8 +5020,7 @@ async function importFromPubloggerAsync(req: ApiRequest) : Promise<void>
     let resp = {};
     let coll2 = (<JsonObject[]>[]);
     let continuation = "&fake=blah";
-    let lastTime = TD.create.RefOf().Number();
-    lastTime = start;
+    let lastTime = start;
     while (continuation != "") {
         logger.info("download from publogger: " + start + " : " + continuation);
         let js2 = await td.downloadJsonAsync("http://tdpublogger.azurewebsites.net/syncpubs?count=30&start=" + start + continuation);
@@ -5049,7 +5042,7 @@ async function importFromPubloggerAsync(req: ApiRequest) : Promise<void>
     }
     await pubsContainer.updateAsync("cfg-lastsync", async (entry1: JsonBuilder) => {
         let r = orZero(entry1["start"]);
-        entry1["start"] = Math.max(r, lastTime._get());
+        entry1["start"] = Math.max(r, lastTime);
     });
     req.response = clone(resp);
 }
@@ -5224,7 +5217,7 @@ async function storeNotificationsAsync(req: ApiRequest, jsb: JsonBuilder, subkin
     if (pubkind == "abusereport") {
         userid = pub["publicationuserid"];
     }
-    let toNotify = TD.collections.createStringMap();
+    let toNotify = {}
     if (pubkind != "review") {
         for (let sub of await subscriptions.getIndex("publicationid").fetchAllAsync(userid)) {
             toNotify[sub["pub"]["userid"]] = "subscribed";
@@ -5261,7 +5254,7 @@ async function storeNotificationsAsync(req: ApiRequest, jsb: JsonBuilder, subkin
     }
     toNotify["all"] = "all";
 
-    if (toNotify.length > 0) {
+    if (Object.keys(toNotify).length > 0) {
         let notification = new PubNotification();
         notification.kind = "notification";
         notification.id = (await cachedStore.invSeqIdAsync()).toString();
@@ -6812,7 +6805,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
         if (compileReq.source.length > 200000) {
             req.status = restify.http()._413RequestEntityTooLarge;
         }
-        let numrepl = TD.create.RefOf().Number();
+        let numrepl = 0;
         let src = td.replaceFn(compileReq.source, /#(\s*include\s+[<"]([a-zA-Z0-9\/\.\-]+)[">]|if\s+|ifdef\s+|else\s+|elif\s+|line\s+)?/g, (elt: string[]) => {
             let result: string;
             let body = orEmpty(elt[1]);
@@ -6826,7 +6819,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
             return result;
         });
         src = td.replaceAll(src, "%:", "\\x25\\x3A");
-        if (numrepl._get() > 0) {
+        if (numrepl > 0) {
             logger.info("replaced some hashes, " + src.substr(0, 500));
         }
         await throttleAsync(req, "compile", 20);
@@ -7138,8 +7131,7 @@ function hasSpecialDelete(jsonpub: JsonObject) : boolean
 
 async function tryDeletePubPointerAsync(key: string) : Promise<boolean>
 {
-    let ok: boolean;
-    let ref = TD.create.RefOf().Boolean();
+    let ref = false;
     await pubsContainer.updateAsync(key, async (entry: JsonBuilder) => {
         if (orEmpty(entry["kind"]) == "pubpointer") {
             entry["kind"] = "reserved";
@@ -7149,14 +7141,12 @@ async function tryDeletePubPointerAsync(key: string) : Promise<boolean>
             ref = false;
         }
     });
-    ok = ref._get();
-    return ok;
+    return ref;
 }
 
 async function tryInsertPubPointerAsync(key: string, pointsTo: string) : Promise<boolean>
 {
-    let ok: boolean;
-    let ref = TD.create.RefOf().Boolean();
+    let ref = false;
     await pubsContainer.updateAsync(key, async (entry: JsonBuilder) => {
         if (withDefault(entry["kind"], "reserved") == "reserved") {
             entry["kind"] = "pubpointer";
@@ -7168,8 +7158,7 @@ async function tryInsertPubPointerAsync(key: string, pointsTo: string) : Promise
             ref = false;
         }
     });
-    ok = ref._get();
-    return ok;
+    return ref;
 }
 
 async function getPointedPubAsync(key: string, kind: string) : Promise<JsonObject>
@@ -7588,7 +7577,7 @@ async function importRecAsync(resp: RecImportResponse, id: string) : Promise<voi
                 resp.problems += 1;
             }
             else {
-                let coll = TD.create.CollectionOf().TaskOf().Nothing();
+                let coll = []
                 coll.push(/* async */ importRecAsync(resp, js["userid"]));
                 let kind = js["kind"];
                 if (kind == "script") {
@@ -7847,14 +7836,13 @@ async function reindexStoreAsync(store: indexedStore.Store, req: ApiRequest) : P
 async function updateAndUpsertAsync(container: cachedStore.Container, req: ApiRequest, update:td.Action1<JsonBuilder>) : Promise<JsonBuilder>
 {
     let bld: JsonBuilder;
-    let last = TD.create.RefOf().JsonBuilder();
+    let last = {}
     await container.updateAsync(req.rootId, async (entry: JsonBuilder) => {
         await update(entry);
         last = entry;
     });
-    await scanAndSearchAsync(last._get());
-    bld = last._get();
-    return bld;
+    await scanAndSearchAsync(last);
+    return last;
 }
 
 async function queryCloudCompilerAsync(api: string) : Promise<JsonObject>
@@ -8078,14 +8066,14 @@ async function _initPointersAsync() : Promise<void>
         if (req2.status == 200) {
             /* async */ pointers.getIndex("all").forAllBatchedAsync("all", 50, async (json: JsonObject) => {
                 await parallel.forJsonAsync(json, async (json1: JsonObject) => {
-                    let ref = TD.create.RefOf().JsonObject();
+                    let ref = {}
                     await pointers.container.updateAsync(json1["id"], async (entry1: JsonBuilder) => {
                         await setPointerPropsAsync(entry1, ({}));
                         ref = clone(entry1);
                     });
                     await auditLogAsync(req2, "reindex-ptr", {
                         oldvalue: json1,
-                        newvalue: ref._get()
+                        newvalue: ref
                     });
                 });
             });
@@ -8510,7 +8498,7 @@ async function setPasswordAsync(req: ApiRequest, pass: string, prevPass: string)
     if (! prevPass) {
         prevPass = pass;
     }
-    let ok = TD.create.RefOf().Boolean();
+    let ok = false;
     await passcodesContainer.updateAsync(pass, async (entry: JsonBuilder) => {
         let kind = orEmpty(entry["kind"]);
         if (kind == "" || kind == "reserved") {
@@ -8522,7 +8510,7 @@ async function setPasswordAsync(req: ApiRequest, pass: string, prevPass: string)
             ok = false;
         }
     });
-    if (ok._get()) {
+    if (ok) {
         await pubsContainer.updateAsync(req.rootId, async (entry1: JsonBuilder) => {
             entry1["login"] = pass;
         });
@@ -8548,7 +8536,7 @@ function progress(message: string) : void
 function workspaceForUser(userid: string) : cachedStore.Container
 {
     let container: cachedStore.Container;
-    container = workspaceContainer[TD.math.mod(userid[userid.length - 1].charCodeAt(0), workspaceContainer.length)];
+    container = workspaceContainer[userid[userid.length - 1].charCodeAt(0) % workspaceContainer.length];
     return container;
 }
 
@@ -10045,7 +10033,7 @@ async function _initPromoAsync() : Promise<void>
         let coll = (<string[]>[]);
         let newTags = jsb2["tags"];
         if (newTags.length > 0) {
-            let d = TD.collections.createStringMap();
+            let d = {};
             for (let jsb3 of newTags) {
                 d[td.toString(jsb3)] = "1";
             }
