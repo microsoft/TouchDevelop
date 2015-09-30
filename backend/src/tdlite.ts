@@ -149,7 +149,7 @@ export class RouteIndex
     public root: string = "";
     public verb: string = "";
     public handler: ApiReqHandler;
-    public options: RouteOptions;
+    public options: IRouteOptions;
 
     static _dict:td.SMap<RouteIndex> = {};
     static has(m:string, r:string, v:string):boolean
@@ -202,33 +202,6 @@ export class ApiRequest
     public headers: td.StringMap;
     public userinfo: ApireqUserInfo;
     public isCached: boolean = false;
-}
-
-export interface IApiRequest {
-    method?: string;
-    root?: string;
-    rootPub?: JsonObject;
-    rootId?: string;
-    verb?: string;
-    queryOptions?: JsonObject;
-    body?: JsonObject;
-    userid?: string;
-    argument?: string;
-    subArgument?: string;
-    subSubArgument?: string;
-    status?: number;
-    response?: JsonObject;
-    responseContentType?: string;
-    isUpgrade?: boolean;
-    upgradeTasks?: Promise<void>[];
-    origUrl?: string;
-    startTime?: number;
-    throttleIp?: string;
-    route?: RouteIndex;
-    isTopLevel?: boolean;
-    headers?: td.StringMap;
-    userinfo?: ApireqUserInfo;
-    isCached?: boolean;
 }
 
 export class PubScript
@@ -599,13 +572,6 @@ export interface IPubUserSettings {
     previousemail?: string;
 }
 
-export class PublishResult
-    extends td.JsonRecord
-{
-    @json public bodies: JsonObject[];
-    static createFromJson(o:JsonObject) { let r = new PublishResult(); r.fromJson(o); return r; }
-}
-
 export interface IPublishResult {
     bodies?: JsonObject[];
 }
@@ -670,23 +636,6 @@ export interface DecoratedStore
 export interface IStoreDecorator {
     target?: indexedStore.Store;
     resolve?: ResolutionCallback;
-}
-
-export class ResolveOptions
-    extends td.JsonRecord
-{
-    @json public byUserid: boolean = false;
-    @json public byPublicationid: boolean = false;
-    @json public anonList: boolean = false;
-    @json public anonSearch: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new ResolveOptions(); r.fromJson(o); return r; }
-}
-
-export interface IResolveOptions {
-    byUserid?: boolean;
-    byPublicationid?: boolean;
-    anonList?: boolean;
-    anonSearch?: boolean;
 }
 
 export class PubArt
@@ -860,21 +809,6 @@ export interface IPubScreenshot {
     publicationkind?: string;
     pictureurl?: string;
     thumburl?: string;
-}
-
-export class RouteOptions
-    extends td.JsonRecord
-{
-    @json public noSizeCheck: boolean = false;
-    @json public sizeCheckExcludes: string = "";
-    @json public cacheKey: string = "";
-    static createFromJson(o:JsonObject) { let r = new RouteOptions(); r.fromJson(o); return r; }
-}
-
-export interface IRouteOptions {
-    noSizeCheck?: boolean;
-    sizeCheckExcludes?: string;
-    cacheKey?: string;
 }
 
 export class PubInstalledHistory
@@ -1470,19 +1404,6 @@ export interface ICompilerConfig {
     internalUrl?: string;
 }
 
-export class ScanAndSearchOptions
-    extends td.JsonRecord
-{
-    @json public skipSearch: boolean = false;
-    @json public skipScan: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new ScanAndSearchOptions(); r.fromJson(o); return r; }
-}
-
-export interface IScanAndSearchOptions {
-    skipSearch?: boolean;
-    skipScan?: boolean;
-}
-
 export class ApireqUserInfo
     extends td.JsonRecord
 {
@@ -1939,14 +1860,20 @@ async function _init_0Async() : Promise<void>
     _initWorkspaces();
 }
 
+export interface IRouteOptions {
+    noSizeCheck?: boolean;
+    sizeCheckExcludes?: string;
+    cacheKey?: string;
+}
+
 /**
  * {hints:method:GET,POST,PUT,DELETE}
  */
-function addRoute(method: string, root: string, verb: string, handler: ApiReqHandler, options_0: IRouteOptions = {}) : void
+function addRoute(method: string, root: string, verb: string, handler: ApiReqHandler, options_: IRouteOptions = {}) : void
 {
-    let options_ = new RouteOptions(); options_.load(options_0);
     let route = RouteIndex.at(method, root, verb);
     route.options = options_;
+
     if (options_.noSizeCheck || method == "GET" || method == "DELETE") {
         route.handler = handler;
     }
@@ -1954,7 +1881,7 @@ function addRoute(method: string, root: string, verb: string, handler: ApiReqHan
         route.handler = async (req: ApiRequest) => {
             let size = 0;
             if (req.body != null) {
-                if (options_.sizeCheckExcludes != "") {
+                if (options_.sizeCheckExcludes) {
                     let jsb = clone(req.body);
                     delete jsb[options_.sizeCheckExcludes];
                     size = JSON.stringify(jsb).length;
@@ -2758,9 +2685,6 @@ function copyJson(js: JsonObject, jsb: JsonBuilder) : void
 async function publishScriptAsync(req: ApiRequest) : Promise<void>
 {
     progress("start publish, ");
-    let publishResult = new PublishResult();
-    publishResult.bodies = (<JsonObject[]>[]);
-
     let slotJson = await installSlotsTable.getEntityAsync(req.userid, req.argument);
     let pubVersion = new PubVersion();
     pubVersion.fromJson(JSON.parse(req.queryOptions["scriptversion"]));
@@ -2821,8 +2745,8 @@ async function publishScriptAsync(req: ApiRequest) : Promise<void>
         delete slotBuilder["__etag"];
         let newSlot = clone(slotBuilder);
         await installSlotsTable.updateEntityAsync(newSlot, "merge");
-        publishResult.bodies.push(headerFromSlot(newSlot));
-        req.response = publishResult.toJson();
+
+        req.response = <IPublishResult>{ bodies: [headerFromSlot(newSlot)] };
     }
 }
 
@@ -2911,9 +2835,15 @@ function computeEtagOfJson(resp: JsonObject) : string
     return etag;
 }
 
-async function setResolveAsync(store: indexedStore.Store, resolutionCallback: ResolutionCallback, options_0: IResolveOptions = {}) : Promise<void>
+export interface IResolveOptions {
+    byUserid?: boolean;
+    byPublicationid?: boolean;
+    anonList?: boolean;
+    anonSearch?: boolean;
+}
+
+async function setResolveAsync(store: indexedStore.Store, resolutionCallback: ResolutionCallback, options_: IResolveOptions = {}) : Promise<void>
 {
-    let options_ = new ResolveOptions(); options_.load(options_0);
     if (options_.anonList) {
         options_.anonSearch = true;
     }
@@ -9001,9 +8931,13 @@ async function postAbusereportAsync(req: ApiRequest) : Promise<void>
     }
 }
 
-async function scanAndSearchAsync(obj: JsonBuilder, options_0: IScanAndSearchOptions = {}) : Promise<void>
+export interface IScanAndSearchOptions {
+    skipSearch?: boolean;
+    skipScan?: boolean;
+}
+
+async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOptions = {}) : Promise<void>
 {
-    let options_ = new ScanAndSearchOptions(); options_.load(options_0);
     if (disableSearch) {
         options_.skipSearch = true;
     }
@@ -10088,7 +10022,7 @@ async function storeCacheAsync(apiRequest: ApiRequest) : Promise<void>
     await performSingleRequestAsync(apiRequest);
     // 
     let thekey = apiRequest.route.options.cacheKey;
-    if (thekey == "") {
+    if (!thekey) {
         apiRequest.status = restify.http()._404NotFound;
         return;
     }
