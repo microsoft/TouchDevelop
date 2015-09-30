@@ -39,6 +39,7 @@ import * as nodemailer from "./nodemailer"
 import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 import * as microsoftTranslator from "./microsoft-translator"
 import * as tdliteData from "./tdlite-data"
+import * as tdliteHtml from "./tdlite-html"
 
 export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
 export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => Promise<void>;
@@ -133,15 +134,6 @@ var lastSearchReport: Date;
 var initialApprovals: boolean = false;
 
 var settingsOptionsJson = tdliteData.settingsOptionsJson;
-var enterCode_html: string = "<script>\nfunction oncode() {\n  var inp = document.getElementById(\"code\")\n  seturl(\"&td_state=\" + encodeURIComponent(inp.value))\n}\nfunction onteacher() {\n  seturl(\"&td_state=teacher\")\n}\n\n(function() {\n  var m = /validated_code=([^?&]+)/.exec(url)\n  if (m) {\n    localStorage['validated_code'] = m[1]\n    window.location = window.location.href.replace(\"/oauth/dialog\", \"/oauth/login\")\n  }\n}())\n</script>\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>Enter code</h1>\n<div style='color:red; margin: 1em 0'>@MSG@</div>\n<input type=\"text\" id=\"code\" class=\"code\"/><br/>\n<a href=\"#\" class=\"provider\" onclick=\"oncode()\">Go</a><br/>\n<a href=\"#\" onclick=\"onteacher()\">I'm an adult</a><br/>\n</div>\n\n";
-var template_html: string = "<!DOCTYPE html>\n<html>\n<head>\n<meta name=\"viewport\" content=\"width=320.1\" />\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n<title>Sign in</title>\n<style>\ninput.code,\n.provider {\n   padding: 0.7em;\n   text-decoration: none;\n   width: 310px;\n   display: block;\n   margin: 0 auto;\n   font-size: 16px;\n   font-family: inherit;\n   box-sizing: border-box;\n}\n.provider {\n  color: white;\n  background: #2986E0;\n}\n</style>\n<body id='root' style='font-size:16px; font-family:sans-serif;'>\n<script>\n@JS@\n</script>\n\n@BODY@\n</body>\n</html>\n";
-var activate_html: string = "<script>\nfunction oncode() {\n  var inp = document.getElementById(\"code\")\n  seturl(\"&td_state=\" + encodeURIComponent(inp.value))\n}\n(function() {\n  var cd = localStorage['validated_code'];\n  if (cd) {\n     localStorage['validated_code'] = \"\";\n     seturl(\"&td_state=\" + encodeURIComponent(cd))\n  }\n}())\n</script>\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>We still need a code</h1>\n<div style='color:red; margin: 1em 0'>@MSG@</div>\n<input type=\"text\" id=\"code\" class=\"code\"/><br/>\n<a href=\"#\" class=\"provider\" onclick=\"oncode()\">Go</a><br/>\n<div style='color:#999;'>You are logged in, but you still need to provide an activation code.</div>\n</div>\n";
-var newuser_html: string = "<script>\nvar session = \"&td_session=@SESSION@\";\nfunction oncode() {\n    var inp = document.getElementById(\"code\")\n    seturl(\"&td_state=\" + encodeURIComponent(inp.value) + session)\n}\n\nfunction forgotcode() {\n  var f = document.getElementById('forgot')\n  f.style.fontSize = '1.5em';\n  f.innerHTML = 'Go ask your teacher to reset your code.';\n}\n\nfunction nocode() {\n  var f = document.getElementById('kidcode')\n  f.style.display = 'none';\n  f = document.getElementById('newuser')\n  f.style.display = 'block';\n}\n\nfunction passwordok(n) {\n  var inp = document.getElementById(\"firstname\")\n  if (!inp.value || inp.value.length < 3) {\n    inp.style.borderColor = \"red\"\n    return\n  }\n  seturl(\"&td_username=\" + encodeURIComponent(inp.value) + \"&td_password=\" + encodeURIComponent(n) + session)\n}\n\ndocument.onready = function() {\n}\n</script>\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n\n<div id='kidcode'>\n<h1 style='font-size:3em; font-weight:normal;'>Do you have kid code?</h1>\n<div style='color:red; margin: 1em 0'>@MSG@</div>\n<input type=\"text\" id=\"code\" class=\"code\"/><br/>\n<a href=\"#\" class=\"provider\" onclick=\"oncode()\">Here it goes!</a><br/>\n<div id='forgot'>\n<a href=\"#\" onclick=\"forgotcode()\">I forgot my kid code</a><br/>\n</div>\n<a href=\"#\" onclick=\"nocode()\">I never got a kid code</a><br/>\n</div>\n\n<div id='newuser' style='display:none'>\n<h1 style='font-size:3em; font-weight:normal;'>Tell us your first name</h1>\n<input type=\"text\" id=\"firstname\" placeholder='First Name' class=\"code\"/><br/>\n<div>\nAnd now pick a 4-word password you'll use in future.\n</div>\n<!-- TODO only show passwords once there is 3 letters in the firstname field -->\n<div id='passwords'>\n@PASSWORDS@\n</div>\n</div>\n\n</div>\n";
-var user_created_html: string = "<script>\n  setTimeout(function(){\n    document.getElementById(\"weredone\").style.display = \"block\";\n  }, 2000)\n</script>\n\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>Welcome, @NAME@</h1>\n<p>Your password is:</p>\n<p style='font-size:1.5em' class='password'>@PASSWORD@</p>\n<p>Remember it!</p>\n<p>\n<a style='display:none' id='weredone' href=\"@URL@\" class=\"provider\">Got it!</a>\n</p>\n</div>\n";
-var notFound_html: string = "<!DOCTYPE html>\n<html>\n<head>\n<meta name=\"viewport\" content=\"width=320.1\" />\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n<title>Not found</title>\n<body id='root' style='font-size:16px; font-family:sans-serif;'>\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>HTTP 404</h1>\n<p>The page you've requested cannot be found.</p>\n</div>\n</body>\n</html>\n";
-var kidOrNot_html: string = "<script>\nfunction onkid() {\n  window.location = seturl(\"&td_state=kid\")\n}\nfunction onteacher() {\n  window.location = seturl(\"&td_state=teacher\")\n}\n</script>\n<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>Who are we dealing with?</h1>\n<a href=\"#\" class=\"provider\" onclick=\"onkid()\">I'm a kid</a><br/>\n<a href=\"#\" class=\"provider\" onclick=\"onteacher()\">I'm an adult</a><br/>\n</div>\n";
-var login_js: string = "function seturl(p) {\n  var url = window.location.href.replace(/#.*/, \"\").replace(/\\&td_(username|password|state)=[^?&]*/g, \"\")\n  window.location.href = url + p\n}\n\nfunction setstate(s) {\n    seturl(\"&td_state=\" + encodeURIComponent(s))\n}\n\nfunction checkready(f)\n{\n    var userid = \"@USERID@\";\n    var done = false;\n    if (userid && !/^@/.test(userid)) {\n        setInterval(function() {\n            if (done) return\n            $.get(\"/api/ready/\" + userid).then(function(r) {\n              if (r && r.ready) {\n                  done = true;\n                  f();\n              }\n            })\n        }, 2000)\n    } else {\n        f();\n    }\n}";
-var agree_html: string = "<div style='margin: 0 auto; width: 310px;  text-align: center;'>\n<h1 style='font-size:3em; font-weight:normal;'>Legal stuff</h1>\n<p>Agree to terms and conditions?</p>\n<a href=\"@AGREEURL@\" class=\"provider\">Agree</a><br/>\n</div>\n";
 
 export class RouteIndex
 {
@@ -5855,12 +5847,13 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
 async function _initLoginAsync() : Promise<void>
 {
     let jsb = {};
-    jsb["activate"] = td.replaceAll(template_html, "@BODY@", activate_html);
-    jsb["kidcode"] = td.replaceAll(template_html, "@BODY@", enterCode_html);
-    jsb["kidornot"] = td.replaceAll(template_html, "@BODY@", kidOrNot_html);
-    jsb["newuser"] = td.replaceAll(template_html, "@BODY@", newuser_html);
-    jsb["agree"] = td.replaceAll(template_html, "@BODY@", agree_html);
-    jsb["usercreated"] = td.replaceAll(template_html, "@BODY@", user_created_html);
+    let template_html = tdliteHtml.template_html
+    jsb["activate"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.activate_html);
+    jsb["kidcode"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.enterCode_html);
+    jsb["kidornot"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.kidOrNot_html);
+    jsb["newuser"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.newuser_html);
+    jsb["agree"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.agree_html);
+    jsb["usercreated"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.user_created_html);
     jsb["providers"] = "";
     loginHtml = clone(jsb);
 
@@ -6408,7 +6401,7 @@ function handleBasicAuth(req: restify.Request, res: restify.Response) : void
     if (nonSelfRedirect != "" && ! res.finished()) {
         if (req.header("host").toLowerCase() != myHost) {
             if (nonSelfRedirect == "soon") {
-                res.html(notFound_html, {
+                res.html(tdliteHtml.notFound_html, {
                     status: 404
                 });
             }
@@ -8894,7 +8887,7 @@ async function getLoginHtmlAsync(inner: string, lang: string) : Promise<string>
     if (text.length < 100) {
         text = loginHtml[inner];
     }
-    text = td.replaceAll(text, "@JS@", login_js);
+    text = td.replaceAll(text, "@JS@", tdliteHtml.login_js);
     return text;
     return text2;
 }
