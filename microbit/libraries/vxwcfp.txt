@@ -6,7 +6,6 @@ meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta allowExport "yes";
 meta hasIds "yes";
-meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -107,6 +106,7 @@ action pause(#s4T6Z7saqVl4e7GI ms: Number) {
   #IwA49hY0PNZDrAK9 // {shim:micro_bit::pause}
   #u4DOIK9VQzUgYTrN $ms := math→round($ms);
   #tRxpGJplhnETomzN if $ms < 0 then {
+    #FsfEfBx8OfPv4xyo code→warning("ms should be a greater than or equal to 0");
     #YNPa4d34bFB8by52 `return` ;
   }
   #GQyW248xhuAJWQPB if `not` data→before_pause→is_invalid then {
@@ -2064,4 +2064,14 @@ action warning(#dJIbhLazNunQ2Pqc message: String) {
     #xyn4eh9QnXz4pLxl $editor→annotate_caller("warning", $message);
   }
   meta sync;
+}
+#tPLU5ZwYXNcXCDk3
+action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros: Number) {
+  #D3DLwyTrT2wKkoVN // Configures the PWM period of the analog output to the given value in **microseconds** or `1/1000` milliseconds.
+  #fUdLXCrX4rNeuilQ // If this pin is not configured as an analog output (using `analog write pin`), the operation has no effect.
+  #DbpdkxM4nUP2sVga // {shim:micro_bit::setAnalogPeriodUs}
+  #xyHbQm9j2k6iXq4P // {namespace:pins}
+  #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period-pin}
+  #PAYMs0BDD8RbLR3B // {weight:10}
+  #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
 }
