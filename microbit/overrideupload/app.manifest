@@ -23,8 +23,14 @@ CACHE:
 ../../../files/images/bg-site-header-mobile.png
 ../../../files/icons/micro-bit_primary_colour_196x196.png
 ../../../files/images/logo.png
+# Microsoft Block Editor logo
 ../../../pub/vrvndwmo
+# Microsoft TouchDevelop logo
+../../../pub/rntqmpqu
+# microbit-themed background image
 ../../../pub/prcwhomc
+# Simulator board
+../../../pub/pcslkqeo
 
 NETWORK:
 *
