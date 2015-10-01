@@ -13,7 +13,6 @@ var json = td.json;
 var clone = td.clone;
 
 import * as restify from "./restify"
-import * as nodeJwtSimple from "./node-jwt-simple"
 
 export type MakeUrlCallback = (req: restify.Request, p: OauthRequest) => Promise<string>;
 export type MakeUserInfo = (profile: JsonObject) => Promise<UserInfo>;
@@ -403,8 +402,8 @@ export function addAzureAdClientOnly(options_: IProviderOptions = {}) : void
         return url;
     }
     , async (req1: restify.Request, p1: OauthRequest) => {
-        let profile: JsonObject;
-        let payload = nodeJwtSimple.decode(req1.bodyAsJson()["id_token"], azureKey);
+        let profile: JsonObject;        
+        let payload = decodeJwtVerify(req1.bodyAsJson()["id_token"], azureKey);
         if (payload["nonce"] == p1.nonce) {
             profile = payload;
         }
@@ -507,7 +506,7 @@ async function handleResponseAsync(state: string, req: restify.Request, res: res
                         if (jsb["iat"] == null) {
                             jsb["iat"] = now();
                         }
-                        token = nodeJwtSimple.encode(clone(jsb), tokenSecret, "HS256");
+                        // TODO token = nodeJwtSimple.encode(clone(jsb), tokenSecret, "HS256");
                         res.redirect(303, oauthRequest.makeRedirectUrl(token));
                     }
                 }
@@ -570,14 +569,14 @@ export function addLiveId(options_: IProviderOptions = {}) : void
 /**
  * Decode JWT token
  */
-export function decodeToken(token: string) : JsonObject
+function decodeToken(token: string) : JsonObject
 {
     let tok: JsonObject;
     if (token == null || ! /.+\..+\./.test(token)) {
         tok = (<JsonObject>null);
     }
     else {
-        tok = nodeJwtSimple.decode(token, tokenSecret);
+        // TODO tok = nodeJwtSimple.decode(token, tokenSecret);
     }
     return tok;
 }
@@ -685,7 +684,7 @@ export function addGoogle(options_: IProviderOptions = {}) : void
         let response = await request.sendAsync();
         // The JWT token doesn't have user's name
         if (false) {
-            profile = nodeJwtSimple.decodeNoVerify(js["id_token"]);
+            // profile = nodeJwtSimple.decodeNoVerify(js["id_token"]);
         }
         profile = response.contentAsJson();
         return profile;
@@ -769,7 +768,7 @@ export function addAzureAd(options_: IProviderOptions = {}) : void
             return js;
         }
         logger.debug("resp: " + JSON.stringify(js));
-        profile = nodeJwtSimple.decodeNoVerify(js["id_token"]);
+        profile = decodeJwt(js["id_token"]);
         return profile;
     }
     , async (profile1: JsonObject) => {
@@ -781,6 +780,27 @@ export function addAzureAd(options_: IProviderOptions = {}) : void
         return info;
     });
 }
+
+function base64urlDecode(s: string): Buffer
+{
+    return new Buffer(s.replace(/-/g, '+').replace(/_/g, '/'), "base64");
+}
+
+function decodeJwt(jwt: string): JsonObject {
+    if (!jwt) return null;
+    let elts = jwt.split('.');
+    if (elts.length != 3) return null;
+    try {
+        return JSON.parse(base64urlDecode(elts[1]).toString("utf8")); 
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+}
+
+function decodeJwtVerify(jwt: string, key: string): JsonObject {
+    throw new Error("TODO: implement RSA checking")
+}    
 
 async function oauthLoginAsync(req: restify.Request, res: restify.Response) : Promise<void>
 {

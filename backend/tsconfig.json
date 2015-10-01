@@ -25,7 +25,6 @@
         "src/microsoft-translator.ts",
         "src/acs.ts",
         "src/azure-search.ts",
-        "src/node-jwt-simple.ts",
         "src/librato-node.ts",
         "src/loggly.ts",
         "src/nodemailer.ts",
