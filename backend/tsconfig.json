@@ -35,7 +35,6 @@
         "src/server-auth.ts",
         "src/tdlite-docs.ts",
         "src/tdlite-search.ts",
-        "src/t0.ts",
         "src/test-service.ts",
         "src/tdlite-data.ts",
         "src/tdlite.ts",

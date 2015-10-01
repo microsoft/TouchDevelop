@@ -5,6 +5,7 @@
 import * as td from './td';
 import * as assert from 'assert';
 import * as fs from 'fs';
+import * as zlib from 'zlib';
 import * as path from 'path';
 import * as child_process from 'child_process';
 
@@ -26,6 +27,13 @@ export interface DeploymentInstructions {
     error?: string;
 }
 
+
+function mkReq(path: string)
+{
+    var r = td.createRequest(target + path);
+    r.setHeader("accept-encoding", "gzip");
+    return r;
+}
 
 function buildInstructions(testopt = {}) {
     if (!testopt) throw new Error("bad compiler settings");
@@ -62,10 +70,14 @@ var target:string;
 async function deployAsync()
 {
     var ins = buildInstructions()
-    console.log("upload ", JSON.stringify(ins).length + " chars")
-    let r = td.createRequest(target + "/deploy")
+    var buf = new Buffer(JSON.stringify(ins), "utf8");
+    var gzipped:Buffer = zlib.gzipSync(buf);
+    console.log("upload " + buf.length + " bytes, compressed " + gzipped.length)
+    let r = mkReq("/deploy")
     r.setMethod("post");
-    r.setContentAsJson(ins);
+    r.setContentAsBuffer(gzipped);
+    r.setContentType("application/json;charset=utf8")    
+    r.setHeader("content-encoding", "gzip");    
     var resp = await r.sendAsync();
     console.log(resp.statusCode());
 }
@@ -103,19 +115,19 @@ function showLogs(msgs: td.LogMessage[], skipcat = "") {
 
 async function shellAsync()
 {
-    var resp = await td.createRequest(target + "/combinedlogs").sendAsync();
+    var resp = await mkReq("/combinedlogs").sendAsync();
     showLogs(resp.contentAsJson()["logs"], "shell");    
 }
 
 async function statsAsync()
 {
-    var resp = await td.createRequest(target + "/stats").sendAsync();
+    var resp = await mkReq("/stats").sendAsync();
     console.log(resp.contentAsJson());    
 }
 
 async function logAsync()
 {
-    var resp = await td.createRequest(target + "/info/applog").sendAsync();
+    var resp = await mkReq("/info/applog").sendAsync();
     for (let w of resp.contentAsJson()["workers"]) {
         console.log("---------", w.worker)
         if (w.body.applog)
