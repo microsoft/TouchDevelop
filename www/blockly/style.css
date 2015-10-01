@@ -76,7 +76,8 @@ body, input {
 #script-name, #script-description {
   background-color: transparent;
   border: 0;
-  width: 25rem;
+  width: 100%;
+  max-width: 25rem;
 }
 
 #script-icons > *:not(:first-child) {
@@ -284,7 +285,8 @@ a.command:hover {
   #script-name, #script-description {
     background-color: transparent;
     border: 0;
-    width: 15rem;
+    width: 100%;
+    max-width: 25rem;
   }
 }
 
