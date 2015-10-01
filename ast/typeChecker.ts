@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD211:
+// Next available error: TD212:
 
 module TDev.AST
 {
@@ -1944,6 +1944,10 @@ module TDev.AST
                     this.hintsToFlush.push(lf("'{0}' is obsolete and not implemented", prop.getName()));
                 else
                     this.hintsToFlush.push(lf("'{0}' is currently not implemented", prop.getName()));
+            } else if (Cloud.isRestricted() && prop.getCapability() && !
+                ((<Property>prop).allowInRestricted || 
+                 (Cloud.hasPermission("post-raw") && prop.getCapability() == PlatformCapability.Network))) {
+                this.markError(t, lf("TD211: this call is not supported in the restricted profile"))
             } else if (!Browser.isNodeJS && !this.topApp.canUseProperty(prop)) {
                 this.unsupportedCapability(prop.getName(), prop.getCapability());
             } else if (prop.getFlags() & PropertyFlags.IsObsolete) {
