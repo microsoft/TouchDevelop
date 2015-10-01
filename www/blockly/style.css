@@ -237,12 +237,26 @@ a.command:hover {
   }
 }
 
-/* Low-height displays: hide the status icons; icons inline; smaller script
+/* Low-height displays: verticalize the status icons; icons inline; smaller script
  * name. (750px is about the average content area height on a 900px high
  * display.) */
 @media (max-height: 750px) {
+  #script-box {
+    flex-direction: row;
+    -webkit-flex-direction: row;
+    margin-right: 0;
+  }
+
   #script-icons {
-    display: none;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+  }
+
+  #script-icons > * {
+    padding: 0 !important;
+    width: 1.4rem;
+    text-align: center;
+    font-size: 1.1rem;
   }
 
   .roundbutton {
@@ -282,11 +296,11 @@ a.command:hover {
   }
 
   /* To make sure the labels are not pushed below the icons. */
-  #script-name, #script-description {
+  #script-name, #script-description, #script-wrapper {
     background-color: transparent;
     border: 0;
     width: 100%;
-    max-width: 25rem;
+    max-width: 14rem;
   }
 }
 
