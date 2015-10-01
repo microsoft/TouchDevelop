@@ -135,6 +135,44 @@ async function logAsync()
     } 
 }
 
+async function getconfigAsync()
+{
+    var resp = await mkReq("/getconfig").sendAsync();
+    var x = {}
+    for (let s of resp.contentAsJson()["AppSettings"]) {
+        x[s.Name] = s.Value;
+    }
+    console.log(JSON.stringify(x, null, 2))
+}
+
+async function setconfigAsync(args:string[])
+{
+    if (!args[0]) {
+        console.log("need JSON filename")
+        return
+    }
+    
+    var js = JSON.parse(fs.readFileSync(args[0], "utf8"))        
+    var req = await mkReq("/setconfig");
+    var rr = { AppSettings: [] }
+    for (let k of Object.keys(js)) {
+        rr.AppSettings.push({ Name: k, Value: js[k] })
+    }
+    req.setContentAsJson(rr);
+    req.setMethod("post");
+    var r = await req.sendAsync();
+    console.log(r.statusCode())
+}
+
+async function restartAsync()
+{
+    var req = await mkReq("/setconfig");
+    req.setContentAsJson({});
+    req.setMethod("post");
+    var r = await req.sendAsync();
+    console.log(r.statusCode())
+}
+
 function main() {
     if ((<any>process.stdout).isTTY) {
         isConsole = true;
@@ -146,10 +184,13 @@ function main() {
     }
 
     var cmds: any = {
-        "deploy    deploy JS files": deployAsync,
-        "shell     see shell logs": shellAsync,
-        "log       see application logs": logAsync,
-        "stats     see various shell stats": statsAsync,
+        "deploy     deploy JS files": deployAsync,
+        "shell      see shell logs": shellAsync,
+        "log        see application logs": logAsync,
+        "stats      see various shell stats": statsAsync,
+        "getenv     fetch current environment config": getconfigAsync,
+        "setenv     fetch current environment config": setconfigAsync,
+        "restart    restart worker (poke the config)": restartAsync,
     }
 
     for (let n of Object.keys(cmds)) {
