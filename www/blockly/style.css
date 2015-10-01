@@ -236,8 +236,10 @@ a.command:hover {
   }
 }
 
-/* Low-height displays: hide the status icons; icons inline; smaller script name */
-@media (max-height: 800px) {
+/* Low-height displays: hide the status icons; icons inline; smaller script
+ * name. (750px is about the average content area height on a 900px high
+ * display.) */
+@media (max-height: 750px) {
   #script-icons {
     display: none;
   }
@@ -277,6 +279,13 @@ a.command:hover {
     height: 1.4rem !important;
     font-weight: bold;
   }
+
+  /* To make sure the labels are not pushed below the icons. */
+  #script-name, #script-description {
+    background-color: transparent;
+    border: 0;
+    width: 15rem;
+  }
 }
 
 /* Very narrow displays: get rid of the script name and description */
@@ -287,7 +296,7 @@ a.command:hover {
 }
 
 /* Narrow displays: shrink the toolbox */
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
   .blocklyTreeRow {
     padding-right: .3em !important;
   }

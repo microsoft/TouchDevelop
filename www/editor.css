@@ -1867,7 +1867,8 @@ span.errorSq .kw
     height: auto;
 }
 
-@media (max-width: 1400px) {
+/* Should be good enough for a 1280x800 display. */
+@media (max-width: 1250px) {
     #externalEditorSide .wallFullScreenWrapper {
         margin: 0 .4em;
     }
