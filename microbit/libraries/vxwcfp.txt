@@ -2071,7 +2071,29 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #fUdLXCrX4rNeuilQ // If this pin is not configured as an analog output (using `analog write pin`), the operation has no effect.
   #DbpdkxM4nUP2sVga // {shim:micro_bit::setAnalogPeriodUs}
   #xyHbQm9j2k6iXq4P // {namespace:pins}
-  #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period-pin}
+  #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period}
   #PAYMs0BDD8RbLR3B // {weight:10}
   #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #Xh232b04YquKwayo // {hints:micros:5000}
+  meta sync;
+}
+#AuigaLeUb4929mNA
+action analog_set_pitch_pin(#xpU1U000JWEY2Boq name: String) {
+  #xj4o22Omk1EIaC9O // Sets the pin used when using `pins->analog pitch`.
+  #p3pMqgSnQxlKKpTd // {shim:micro_bit::enablePitch}
+  #YOZY4h2Snemy2Ssv // {namespace:pins}
+  #ksrlzJbUsmtEkaBH // {help:functions/analog-set-pitch}
+  #xQhxWqWeqz22iboM // {weight:12}
+  #x7Gl6mIAeDddLD4A // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  meta sync;
+}
+#gEmhFkaGb62VAwjT
+action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o millis: Number) {
+  #xFJhXD0ijs00YMjd // Emits a PMW signal to the current pitch pin. Use `analog set pitch pin` to define the pitch pin.
+  #SuwCvUifdY38to4S // {shim:micro_bit::pitch}
+  #Mh0Oeb4E8cK3WWWW // {namespace:pins}
+  #xGfz4I04h2bsO91l // {help:functions/analog-pitch}
+  #xEGCJ6YyP3Gaw9ug // {weight:14}
+  #Nv7yTShmVzRRmckP // {hints:frequency:400}
+  #lyVvmxzXMSk4YDmd // {hints:millis:500}
 }
