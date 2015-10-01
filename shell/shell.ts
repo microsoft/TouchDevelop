@@ -277,9 +277,7 @@ class ApiRequest {
         var buf = new Buffer(JSON.stringify(r), "utf8")
         var hd:any = { 'Content-Type': 'application/json; encoding=utf-8' }
         if (/gzip/.test(this.req.headers['accept-encoding'])) {
-            console.log(buf.length)
             buf = (<any>zlib).gzipSync(buf);
-            console.log(buf.length)
             hd['Content-Encoding'] = 'gzip';
         }
         hd['Content-Length'] = buf.length;
