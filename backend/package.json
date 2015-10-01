@@ -1,7 +1,7 @@
 {
   "private": true,
   "devDependencies": {
-    "typescript": "^1.7.0-dev.20150928"
+    "typescript": "https://microbit0.blob.core.windows.net/files/npm0/typescript-1.7.0-node4.tgz"
   },
   "dependencies": {
     "azure-storage": "^0.6.0",

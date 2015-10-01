@@ -1,5 +1,5 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	// Specifies the folder path containing the tsserver and lib*.d.ts files to use.
-	"typescript.tsdk": "c:/dev/TypeScript/built/local"
+	"typescript.tsdk": "node_modules/typescript/lib"
 }
