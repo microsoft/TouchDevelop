@@ -111,10 +111,10 @@ namespace Microsoft.MicroBit
 
                 this.updateStatus("detected " + info.Name);
                 var drives = System.IO.DriveInfo.GetDrives();
-                var drive = drives.FirstOrDefault(d => getVolumeLabel(d) == "MICROBIT");
+                var drive = drives.FirstOrDefault(d => getVolumeLabel(d).StartsWith("MICROBIT", StringComparison.Ordinal));
                 if (drive == null)
                 {
-                    this.updateStatus("no BBC micro:bit detected");
+                    this.updateStatus("no MICROBIT driver detected");
                     return;
                 }
 
