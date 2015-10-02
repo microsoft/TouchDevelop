@@ -73,7 +73,7 @@ body, input {
   height: 3rem !important;
 }
 
-#script-name, #script-description {
+#script-name, #script-description, #script-wrapper, #script-icons {
   background-color: transparent;
   border: 0;
   width: 100%;
@@ -250,6 +250,8 @@ a.command:hover {
   #script-icons {
     flex-direction: column;
     -webkit-flex-direction: column;
+    width: auto;
+    max-width: auto;
   }
 
   #script-icons > * {
@@ -294,14 +296,6 @@ a.command:hover {
     height: 1.8rem !important;
     font-weight: bold;
   }
-
-  /* To make sure the labels are not pushed below the icons. */
-  #script-name, #script-description, #script-wrapper {
-    background-color: transparent;
-    border: 0;
-    width: 100%;
-    max-width: 14rem;
-  }
 }
 
 /* Very narrow displays: get rid of the script name and description */
@@ -313,6 +307,11 @@ a.command:hover {
 
 /* Narrow displays: shrink the toolbox */
 @media (max-width: 900px) {
+  /* To make sure the labels are not pushed below the icons. */
+  #script-name, #script-description, #script-wrapper {
+    max-width: 14rem;
+  }
+
   .blocklyTreeRow {
     padding-right: .3em !important;
   }
