@@ -5,6 +5,31 @@ module TDev.RT {
     //@ skill(2)
     export module Media
     {
+        export function rt_start(rt: Runtime): void
+        {}
+
+        export function rt_stop(rt: Runtime)
+        {
+            AudioContextManager.stop();
+        }
+        
+        //? Plays a monotone sine wave
+        export function tone(frequency: number, gain: number) {
+            AudioContextManager.tone(frequency, gain);
+        }
+        
+        //? Plays a monotone note
+        export function play_note(frequency: number, seconds: number, r: ResumeCtx) {    
+            if (seconds <= 0) return;
+            
+            AudioContextManager.tone(frequency, 1);
+            Util.setTimeout(seconds * 1000, () => {
+                AudioContextManager.tone(frequency, 0);
+                Util.setTimeout(40, () => {
+                    r.resume();                    
+                })
+            })
+        }
 
         //? Creates a new picture of the given size
         //@ [result].writesMutable
@@ -12,7 +37,7 @@ module TDev.RT {
         export function create_picture(width:number, height:number) : Picture { return Picture.mk(width, height); }
 
         //? Searches the Windows Phone Store (type in applications or music)
-        //@ stub flow(SinkSafe)
+        //@ stub flow(SinkSafe) obsolete
         //@ [type].defl("music")
         export function search_marketplace(terms:string, type:string) : void
         { }
