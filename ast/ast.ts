@@ -478,6 +478,13 @@ module TDev.AST {
             return this.stmts.length == 0 || (this.stmts.length == 1 && this.stmts[0].isPlaceholder());
         }
 
+        public replaceChild(s:Stmt, newOnes:Stmt[])
+        {
+            var idx = this.stmts.indexOf(s)
+            var newCh = (idx >= 0 ? this.stmts.slice(0, idx) : []).concat(newOnes).concat(this.stmts.slice(idx + 1))
+            this.setChildren(newCh)
+        }
+
         public forEach(f:(s:Stmt)=>void):void { this.stmts.forEach(f) }
         public map(f: (s: Stmt) => any): any[]{ return this.stmts.map(f); }
 

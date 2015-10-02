@@ -370,6 +370,24 @@ module TDev
             if (this.searchApi.visible)
                 this.searchApi.dismissing();
 
+            if (this.expr && this.expr.tokens.length == 0 && this.stmt instanceof AST.InlineActions) {
+                var bl = new AST.CodeBlock();
+                bl.stmts = [];
+                (<AST.InlineActions>this.stmt).actions.stmts.forEach((a:AST.InlineAction) => {
+                    if (!a.body) return
+                    a.body.stmts.forEach(s => {
+                        if (!s.isPlaceholder()) {
+                            bl.stmts.push(s)
+                        }
+                    })
+                })
+                if (bl.stmts.length == 0) {
+                    bl.stmts.push(bl.emptyStmt())
+                }
+                bl = <AST.CodeBlock>AST.Parser.parseStmt(bl.serialize(), Script);
+                (<AST.CodeBlock>this.stmt.parent).replaceChild(this.stmt, bl.stmts)
+            }
+
             this.checkNextDisplay();
             Util.log("about to resetstate");
             this.resetState();
