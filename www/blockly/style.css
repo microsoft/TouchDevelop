@@ -65,6 +65,8 @@ body, input {
 /* Script info box */
 #script-box {
   margin-right: 1rem;
+  margin-left: auto;
+  max-width: 35rem;
 }
 
 #script-name {
@@ -77,7 +79,6 @@ body, input {
   background-color: transparent;
   border: 0;
   width: 100%;
-  max-width: 25rem;
 }
 
 #script-icons > *:not(:first-child) {
@@ -209,6 +210,7 @@ body, input {
   padding-top: .6rem;
   font-size: 80%;
   text-align: center;
+  white-space: nowrap;
 }
 
 body:not(.hasFota) .fota {
@@ -307,11 +309,6 @@ a.command:hover {
 
 /* Narrow displays: shrink the toolbox */
 @media (max-width: 900px) {
-  /* To make sure the labels are not pushed below the icons. */
-  #script-name, #script-description, #script-wrapper {
-    max-width: 14rem;
-  }
-
   .blocklyTreeRow {
     padding-right: .3em !important;
   }
