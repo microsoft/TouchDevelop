@@ -28,7 +28,7 @@ namespace Microsoft.MicroBit
             InitializeComponent();
             this.DeleteOnFlash = true;
             this.VersionInfo = "v" + typeof(MainWindow).Assembly.GetName().Version.ToString();
-            this.updateStatus("loading...");
+            this.updateStatus("uploading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
@@ -126,17 +126,17 @@ namespace Microsoft.MicroBit
                     return;
                 }
 
-                this.updateStatus("loading...");
+                this.updateStatus("uploading...");
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);
-                this.updateStatus("loading done");
+                this.updateStatus("uploading done");
 
                 var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnFlash));
                 if (del)
                 {
                     File.Delete(info.FullName);
-                    this.updateStatus("loading and cleaning done");
+                    this.updateStatus("uploading and cleaning done");
                 }
 
                 return;
