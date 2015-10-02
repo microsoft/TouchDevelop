@@ -2122,7 +2122,7 @@ module TDev
         }
 
         private currentScriptCompiling: string;
-        private compile(btn: HTMLElement, debug: boolean) {                
+        public compile(btn: HTMLElement, debug: boolean) {                
             if (Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;

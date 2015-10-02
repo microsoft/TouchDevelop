@@ -1803,19 +1803,11 @@ module TDev
                         return;
                     case "compile":
                         TheEditor.intelliProfile.incr("codeCompile");
-                        if (TheEditor.hasModalPane()) {
-                            TipManager.setTip({
-                                tick: Ticks.calcSearchBack,
-                                title: lf("tap there"),
-                                description: lf("need to edit elsewhere")
-                            })
-                            TheEditor.calculator.applyInstruction(null);
-                            return false;   
-                        }
+                        TheEditor.intelliProfile.incr("calcSearchCompile");
                         this.waitingFor = "compile"
                         TipManager.setTip({
                             tick: Ticks.codeCompile,
-                            title: lf("tap there to compile your app"),
+                            title: lf("tap there to compile your script"),
                             description: this.currentCommandArg() || ""
                         })
                         return;                        
