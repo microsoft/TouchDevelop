@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroBit.Loader", "Microbit.Loader\MicroBit.Loader.csproj", "{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.MicroBit.Uploader", "Microbit.Loader\Microsoft.MicroBit.Uploader.csproj", "{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
