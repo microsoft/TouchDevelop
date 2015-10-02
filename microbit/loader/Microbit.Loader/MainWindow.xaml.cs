@@ -27,6 +27,7 @@ namespace Microsoft.MicroBit
         {
             InitializeComponent();
             this.DeleteOnFlash = true;
+            this.VersionInfo = "v" + typeof(MainWindow).Assembly.GetName().Version.ToString();
             this.updateStatus("loading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
@@ -68,6 +69,13 @@ namespace Microsoft.MicroBit
         private void updateStatus(string value) {
             Action a = () => { this.Status = value; };
             Application.Current.Dispatcher.Invoke(a);
+        }
+
+        public static readonly DependencyProperty VersionInfoProperty = DependencyProperty.Register("VersionInfo", typeof(string), typeof(MainWindow));
+        public string VersionInfo
+        {
+            get { return (string)GetValue(VersionInfoProperty); }
+            set { SetValue(VersionInfoProperty, value); }
         }
 
         public static readonly DependencyProperty StatusProperty = DependencyProperty.Register("Status", typeof(string), typeof(MainWindow));
