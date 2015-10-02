@@ -2145,13 +2145,10 @@ module TDev
             else
                 children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-M", () => this.runMainAction()) ];
 
-            var canCompile =
-                Cloud.isRestricted() &&
-                (Cloud.isFota() || Browser.isDesktop || Browser.isTablet);
-            if (canCompile) {
+            if (Cloud.canCompile()) {
                 var compileBtn: HTMLElement;
                 var str = lf("compile");
-                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-M",
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)

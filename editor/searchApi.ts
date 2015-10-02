@@ -260,14 +260,14 @@ module TDev
                     TheEditor.dismissSidePane()
                 });
             this.runBtn = div("");
-            this.compileBtn = Cloud.isRestricted() ? div("") : undefined;
+            this.compileBtn = Cloud.canCompile() ? div("") : undefined;
             this.updateRunButton();
             this.runBtn.style.zIndex = "1"; // above apiDismiss
             this.runBtn.style.position = "relative";
             if (this.compileBtn) {
                 this.compileBtn.style.zIndex = "1"; // above apiDismiss
                 this.compileBtn.style.position = "relative";
-                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:fa-download,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-M", (e:MouseEvent) => {
+                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:fa-download,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e:MouseEvent) => {
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)
                             TheEditor.runMainAction();

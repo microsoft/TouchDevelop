@@ -814,6 +814,11 @@ module TDev.Cloud {
     export function isFota() {
         return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
     }
+    
+    export function canCompile() {
+        return Cloud.isRestricted() &&
+            (Cloud.isFota() || Browser.isDesktop || Browser.isTablet);
+    }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
         var r = new PromiseInv()
