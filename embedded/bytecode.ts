@@ -45,7 +45,7 @@ module TDev.AST.Bytecode
     function lookupFunc(name:string)
     {
         if (/^uBit\./.test(name))
-            name = name.replace(/^uBit\./, "").replace(/\.(.)/g, (x, y) => y.toUpperCase())
+            name = name.replace(/^uBit\./, "micro_bit::").replace(/\.(.)/g, (x, y) => y.toUpperCase())
         return funcInfo[name]
     }
 
