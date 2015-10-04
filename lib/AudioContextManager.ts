@@ -4,12 +4,15 @@ declare class AudioBuffer {}
 
 module TDev.RT {
     export module AudioContextManager {
-        var _context : any;
-        function context() {
+        var _context : any; // AudioContext
+        var _vco : any; //OscillatorNode;
+        var _vca: any; // GainNode;
+        
+        function context() : any {
             if (!_context) _context = freshContext();
             return _context;
         }
-        function freshContext() {
+        function freshContext() : any {
             (<any>window).AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
             if ((<any>window).AudioContext) {
                 try {
@@ -20,6 +23,36 @@ module TDev.RT {
              }
             return undefined;
         }
+        
+        export function stop() {
+            if (_vca) _vca.gain.value = 0;
+        }
+        
+        export function tone(frequency: number, gain: number) { 
+            if (frequency <= 0) return;            
+            var ctx = context();
+            if (!ctx) return;
+            
+            gain = Math_.normalize(gain);            
+            if (!_vco) {
+                try {
+                    _vco = ctx.createOscillator();
+                    _vca = ctx.createGain();
+                    _vco.connect(_vca);
+                    _vca.connect(ctx.destination);
+                    _vca.gain.value = gain;
+                    _vco.start(0);
+                } catch(e) {
+                    _vco = undefined;
+                    _vca = undefined;
+                    return;
+                }
+            }
+            
+            _vco.frequency.value = frequency;
+            _vca.gain.value = gain;
+        }
+                
         export function isSupported() { return !!context(); }
         export function loadAsync(buffer : ArrayBuffer) : Promise { // AudioBuffer
             var ctx = context();

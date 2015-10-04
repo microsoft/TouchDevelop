@@ -2,12 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         ResizeMode="CanMinimize"
-        Title="micro:bit loader" Height="320" Width="340" Background="White"
+        Title="Microsoft micro:bit Uploader" Height="320" Width="340" Background="White"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
-        <Image Source="/Microsoft.MicroBit.Loader;component/micro-bit Logo stacked_Lantern Colour Grad+Black BBC Logo_RGB.jpg" Width="200" Margin="67,-16,67,108" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" />
-        <Image Source="/Microsoft.MicroBit.Loader;component/microsoftlogo.png" Margin="67,124,67,14" RenderOptions.BitmapScalingMode="HighQuality" Grid.ColumnSpan="2" />
+        <Image Source="/Microsoft.MicroBit.Uploader;component/micro-bit Logo stacked_Lantern Colour Grad+Black BBC Logo_RGB.jpg" Width="200" Margin="67,-16,67,108" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" />
+        <Image Source="/Microsoft.MicroBit.Uploader;component/microsoftlogo.png" Margin="67,124,67,14" RenderOptions.BitmapScalingMode="HighQuality" Grid.ColumnSpan="2" />
         <Label Content="{Binding Path=Status}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="27,231,21,0" VerticalAlignment="Top" Width="286" Grid.ColumnSpan="2" Height="35" FontSize="16"/>
-        <CheckBox Content="delete .hex file after loading" Margin="160,271,0,4" IsChecked="{Binding Path=DeleteOnFlash}" />
+        <Label Content="{Binding Path=VersionInfo}" Margin="10,265,188,0" VerticalAlignment="Top" Width="136"/>
+        <CheckBox Content="delete .hex file after uploading" Margin="151,271,0,4" IsChecked="{Binding Path=DeleteOnFlash}" />
     </Grid>
 </Window>

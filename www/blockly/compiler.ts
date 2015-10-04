@@ -761,6 +761,11 @@ function extractNumber(b: B.Block) {
     Errors.report(v+" is not a valid numeric value", b);
     return 0;
   } else {
+    var i = parseInt(v);
+    if (i >> 0 != i) {
+      Errors.report(v+" is either too big or too small", b);
+      return 0;
+    }
     return parseInt(v);
   }
 }

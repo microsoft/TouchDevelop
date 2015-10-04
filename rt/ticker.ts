@@ -111,6 +111,7 @@ module TDev {
         calcRenameProperty,
         calcSearchBack,
         calcSearchRun,
+        calcSearchCompile,
         calcSimplify,
         calcStrip,
         calcSpecialKey,

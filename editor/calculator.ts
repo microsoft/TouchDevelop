@@ -1968,7 +1968,7 @@ module TDev
                             toks.pushRange(this.findDefault(parms[i]));
                             if (newCursorPos < 0 && (k == api.core.String || k == api.core.Number)) {
                                 newCursorPos = this.cursorPosition + toks.length;
-                                if (k == api.core.String && !parms[i].enumMap && !parms[i].getStringValues())   
+                                if (!AST.proMode && k == api.core.String && !parms[i].enumMap && !parms[i].getStringValues())   
                                     immediateEdit = true;    
                             }
                         }
