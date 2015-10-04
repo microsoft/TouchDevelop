@@ -83,8 +83,8 @@ module TDev.AST.Bytecode
                 else this.info = "";
             }
 
-            if (this.info.length > 40)
-                this.info = this.info.slice(0, 40) + "..."
+            if (this.info.length > 60)
+                this.info = this.info.slice(0, 60) + "..."
 
             bin.comment("0x" + this.index.toString(16) + ": " + this.name + " " + this.darg + (this.info ? " " + this.info : ""));
 
@@ -555,11 +555,13 @@ module TDev.AST.Bytecode
                 }
             }
 
+            if (x > 0) h++; // non-terminated last line
+
+            this.emitInt(w);
+            this.emitInt(h);
             var op = this.proc.emit("LDPTR");
             op.arg0 = lit;
             this.binary.emitString(lit, false);
-            this.emitInt(w);
-            this.emitInt(h);
         }
 
         handleActionCall(e:Call)

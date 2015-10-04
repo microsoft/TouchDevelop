@@ -272,7 +272,7 @@ module TDev
 
             var link = <HTMLAnchorElement>window.document.createElement('a');
             link.href = res.dataurl;
-            (<any>link).download = Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
+            (<any>link).download = "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
             var click = document.createEvent("Event");
             click.initEvent("click", true, true);
             link.dispatchEvent(click);
