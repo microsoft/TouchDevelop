@@ -186,6 +186,11 @@ module TDev.AST.Bytecode
         args:Location[] = [];
         index:number;
 
+        lastop():Opcode
+        {
+            return this.body.peek()
+        }
+
         size(idx:number)
         {
             this.index = idx;
@@ -213,6 +218,9 @@ module TDev.AST.Bytecode
             if (inf.type == "F") opcode += "FUNC"
             else if (inf.type == "P") opcode += "PROC"
             else Util.oops("invalid call type " + inf.type)
+
+            if (!this.lastop() || this.lastop().name != "REFMASK")
+                opcode = "FLAT" + opcode
 
             var op = this.emit(opcode, inf.idx)
             op.info = name;
