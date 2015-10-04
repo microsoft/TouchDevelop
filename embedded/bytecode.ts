@@ -209,7 +209,7 @@ module TDev.AST.Bytecode
             return l
         }
 
-        emitCall(name:string)
+        emitCall(name:string, mask:number)
         {
             var inf = lookupFunc(name)
             Util.assert(!!inf, "unimplemented function: " + name)
@@ -219,10 +219,12 @@ module TDev.AST.Bytecode
             else if (inf.type == "P") opcode += "PROC"
             else Util.oops("invalid call type " + inf.type)
 
-            if (!this.lastop() || this.lastop().name != "REFMASK")
+            if (mask == 0)
                 opcode = "FLAT" + opcode
-
             var op = this.emit(opcode, inf.idx)
+            if (mask != 0)
+                op.arg0 = mask;
+
             op.info = name;
         }
 
@@ -510,7 +512,7 @@ module TDev.AST.Bytecode
             this.proc.emitJmp(r.topAffectedStmt._compilerBreakLabel)
         }
 
-        emitMask(args:Expr[])
+        getMask(args:Expr[])
         {
             Util.assert(args.length <= 8)
             var m = 0
@@ -518,9 +520,7 @@ module TDev.AST.Bytecode
                 if (isRefExpr(a))
                     m |= (1 << i)
             })
-            if (m != 0) {
-                this.proc.emit("REFMASK", m)
-            }
+            return m
         }
 
         emitAsString(e:Expr)
@@ -528,8 +528,8 @@ module TDev.AST.Bytecode
             this.dispatch(e)
             var kn = e.getKind().getName().toLowerCase()
             if (kn == "string") {}
-            else if (kn == "number" || kn == "string") {
-                this.proc.emitCall(kn + "::to_string")
+            else if (kn == "number" || kn == "boolean") {
+                this.proc.emitCall(kn + "::to_string", 0)
             } else {
                 Util.oops("don't know how to convert " + kn + " to string")
             }
@@ -606,7 +606,7 @@ module TDev.AST.Bytecode
                 args.forEach(a => this.dispatch(a))
             }
 
-            this.emitMask(args)
+            var mask = this.getMask(args)
 
             if (shm) {
                 var msg = "{shim:" + shm[1] + "} from " + a.getName()
@@ -625,10 +625,11 @@ module TDev.AST.Bytecode
                 }
                 Util.assert(args.length == inf.args, "argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
 
-                this.proc.emitCall(shm[1])
+                this.proc.emitCall(shm[1], mask)
             } else {
                 var op = this.proc.emit(hasret ? "UCALLFUNC" : "UCALLPROC", args.length)
                 op.arg0 = this.procIndex(a);
+                op.arg1 = mask;
                 op.info = a.getName()
                 Util.assert(!!op.arg0)
             }
@@ -645,8 +646,7 @@ module TDev.AST.Bytecode
 
             var emitCall = (name:string, args:Expr[]) => {
                 args.forEach(a => this.dispatch(a))
-                this.emitMask(args)
-                this.proc.emitCall(name);
+                this.proc.emitCall(name, this.getMask(args));
             }
 
             var pkn = p.parentKind.getRoot().getName()
@@ -667,7 +667,7 @@ module TDev.AST.Bytecode
                 if (p.getName() == "create") {
                     this.emitInt(rrec._compilerInfo.refsize);
                     this.emitInt(rrec._compilerInfo.size);
-                    this.proc.emitCall("record::mk");
+                    this.proc.emitCall("record::mk", 0);
                 } else if (p.getName() == "invalid") {
                     this.proc.emit("LDZERO")
                 } else {
@@ -689,12 +689,11 @@ module TDev.AST.Bytecode
                 this.proc.emit("LDZERO")
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")) {
-                this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk");
+                this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk", 0);
             } else if (p == api.core.StringConcatProp) {
                 this.emitAsString(e.args[0]);
                 this.emitAsString(e.args[1]);
-                this.proc.emit("REFMASK", 3)
-                this.proc.emitCall("string::concat_op");
+                this.proc.emitCall("string::concat_op", 3);
             } else {
                 var args = e.args.slice(0)
                 if (args[0].getThing() instanceof SingletonDef)
@@ -712,7 +711,7 @@ module TDev.AST.Bytecode
                     var op = this.proc.emit("LDPTR");
                     op.arg0 = args[1].getLiteral()
                     this.binary.emitString(op.arg0, false)
-                    this.proc.emitCall(nm)
+                    this.proc.emitCall(nm, 0)
                     return
                 }
 
@@ -780,12 +779,12 @@ module TDev.AST.Bytecode
                         if (inf.type == "E")
                             this.proc.emit("LDENUM", inf.idx)
                         else if (inf.type == "F" && inf.args == 0)
-                            this.proc.emitCall(l.enumVal)
+                            this.proc.emitCall(l.enumVal, 0)
                         else
                             Util.oops("not valid enum: " + l.enumVal)
                     }
                 } else if (l.data == "") {
-                    this.proc.emitCall("string::mkEmpty");
+                    this.proc.emitCall("string::mkEmpty", 0);
                 } else {
                     var id = this.binary.emitString(l.data)
                     var op = this.proc.emit("LDSTRREF", id);
@@ -817,7 +816,7 @@ module TDev.AST.Bytecode
             this.emitInt(caps.length)
             var op = this.proc.emit("LDCONST16")
             op.arg0 = inlproc
-            this.proc.emitCall("action::mk")
+            this.proc.emitCall("action::mk", 0)
 
             caps.forEach((l, i) => {
                 this.localIndex(l).emitLoad(this.proc)
@@ -926,7 +925,7 @@ module TDev.AST.Bytecode
             var brk = this.proc.mkLabel();
             idx.emitLoad(this.proc);
             upper.emitLoad(this.proc);
-            this.proc.emitCall("number::lt");
+            this.proc.emitCall("number::lt", 0);
             this.proc.emitJmp(brk, "JMPZ");
 
             var cont = this.proc.mkLabel();
@@ -937,7 +936,7 @@ module TDev.AST.Bytecode
             this.proc.emitOp(cont);
             idx.emitLoad(this.proc);
             this.proc.emit("LDCONST8", 1);
-            this.proc.emitCall("number::plus");
+            this.proc.emitCall("number::plus", 0);
             idx.emitStore(this.proc);
             Util.assert(this.proc.currStack == 0);
             this.proc.emitJmp(top);
