@@ -3801,6 +3801,8 @@ function concatlibs() {
 
     var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
         JSON.stringify(meta, null, 1) + "\n"
+    if (fs.existsSync("microbit/bytecode.js"))
+        txt += fs.readFileSync("microbit/bytecode.js", "utf8")
     console.log("create library cache file; " + txt.length + " bytes")
     fs.writeFileSync("build/libraries.js", txt)
 }

@@ -248,12 +248,25 @@ module TDev
                     HTML.mkButton(lf("rebuild session cache"), () => TheEditor.currentRt.sessions.resetCurrentSession()),
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
                     HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
-                    HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech())
-                    ) : undefined,
+                    HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech()),
+                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile())
+                ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
             this.description.className = "description";
+        }
+
+        static bytecodeCompile()
+        {
+            var c = new AST.Bytecode.Compiler(Script)
+            var src = ""
+            try {
+                src = c.csource()
+            } catch (e) {
+                src = e.stack
+            }
+            ModalDialog.showText(src)
         }
 
         static diffToBase()

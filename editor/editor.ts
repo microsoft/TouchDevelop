@@ -2152,6 +2152,10 @@ module TDev
                 var str = lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-M",
                     (e: Event) => {
+                        if (/vm=1/.test(document.location.href)) {
+                            ScriptProperties.bytecodeCompile()
+                            return
+                        }
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
