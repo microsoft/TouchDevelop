@@ -249,7 +249,7 @@ module TDev
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
                     HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech()),
-                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile())
+                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(true))
                 ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
@@ -257,19 +257,21 @@ module TDev
             this.description.className = "description";
         }
 
-        static bytecodeCompile()
+        static bytecodeCompile(showSource = false)
         {
             var c = new AST.Bytecode.Compiler(Script)
-            var src = ""
             try {
-                src = c.gethex()
+                var res = c.compile()
             } catch (e) {
                 ModalDialog.showText(e.stack)
                 return
             }
 
+            if (showSource)
+                ModalDialog.showText(res.csource)
+
             var link = <HTMLAnchorElement>window.document.createElement('a');
-            link.href = src;
+            link.href = res.dataurl;
             (<any>link).download = Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
             var click = document.createEvent("Event");
             click.initEvent("click", true, true);

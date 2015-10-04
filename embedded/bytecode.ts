@@ -27,6 +27,8 @@ module TDev.AST.Bytecode
 
     function isRefKind(k:Kind)
     {
+        Util.assert(k != null)
+        Util.assert(k != api.core.Unknown)
         var isSimple = k == api.core.Number || k == api.core.Boolean
         return !isSimple
     }
@@ -34,6 +36,8 @@ module TDev.AST.Bytecode
     function isRefExpr(e:Expr)
     {
         if (typeof e.getLiteral() == "string" && e.enumVal != null)
+            return false;
+        if (typeof e.getLiteral() == "number")
             return false;
         return isRefKind(e.getKind())
     }
@@ -71,6 +75,17 @@ module TDev.AST.Bytecode
 
         emitTo(bin:Binary)
         {
+            if (!this.info) {
+                if (typeof this.arg0 == "string")
+                    this.info = JSON.stringify(this.arg0)
+                else if (typeof this.arg0 == "number")
+                    this.info = this.arg0 + ""
+                else this.info = "";
+            }
+
+            if (this.info.length > 40)
+                this.info = this.info.slice(0, 40) + "..."
+
             bin.comment("0x" + this.index.toString(16) + ": " + this.name + " " + this.darg + (this.info ? " " + this.info : ""));
 
             if (this.name == "LABEL")
@@ -293,7 +308,7 @@ module TDev.AST.Bytecode
                 if (myhex[i] == null) Util.die();
                 var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
                 if (!m) { i++; continue; }
-                Util.assert(i == i0 || /^0+$/.test(m[3]))
+                Util.assert(/^0+$/.test(m[3]))
                 myhex[i] = "";
                 i++;
                 togo--;
@@ -425,24 +440,20 @@ module TDev.AST.Bytecode
             }
         }
 
-        public gethex()
+        public compile()
         {
             this.run()
             this.binary.serialize()
-            return "data:application/x-microbit-hex;base64," + Util.base64Encode(this.binary.patchHex().join("\r\n") + "\r\n")
-        }
-
-        public csource()
-        {
-            this.run()
-            this.binary.serialize()
+            var hex = this.binary.patchHex().join("\r\n") + "\r\n"
             var r = 
                 "#include \"BitVM.h\"\n" +
                 "namespace bitvm {\n" +
                 "const uint16_t bytecode[32000] __attribute__((aligned(0x20))) = {\n" + 
                 this.binary.csource + "\n}; }\n"
-            this.binary.patchHex()
-            return r
+            return {
+                dataurl: "data:application/x-microbit-hex;base64," + Util.base64Encode(hex),
+                csource: r
+            }
         }
 
         visitAstNode(n:AstNode)
@@ -516,6 +527,41 @@ module TDev.AST.Bytecode
             }
         }
 
+        emitImageLiteral(s:string)
+        {
+            if (!s)
+                s = "0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n";
+
+            var x = 0;
+            var w = 0;
+            var h = 0;
+            var lit = "";
+            for (var i = 0; i < s.length; ++i) {
+                switch (s[i]) {
+                case "0": lit += "\u0000"; x++; break;
+                case "1": lit += "\u0001"; x++; break;
+                case " ": break;
+                case "\n":
+                    if (w == 0)
+                        w = x;
+                    else if (x != w)
+                        // Sanity check
+                        throw new Error("Malformed string literal");
+                    x = 0;
+                    h++;
+                    break;
+                default:
+                    throw new Error("Malformed string literal");
+                }
+            }
+
+            var op = this.proc.emit("LDPTR");
+            op.arg0 = lit;
+            this.binary.emitString(lit, false);
+            this.emitInt(w);
+            this.emitInt(h);
+        }
+
         handleActionCall(e:Call)
         {
             var aa = e.calledExtensionAction() || e.calledAction()
@@ -539,11 +585,18 @@ module TDev.AST.Bytecode
                 return
             }
 
-            args.forEach(a => this.dispatch(a))
+            if (shm && /^micro_bit::(createImage|showAnimation|plotImage)$/.test(shm[1])) {
+                Util.assert(args[0].getLiteral() != null)
+                this.emitImageLiteral(args[0].getLiteral())
+                args.shift()
+                args.forEach(a => this.dispatch(a))
+                // fake it, so we don't get assert down below and mask is correct
+                args = [<Expr>mkLit(0), mkLit(0), mkLit(0)].concat(args)
+            } else {
+                args.forEach(a => this.dispatch(a))
+            }
 
             this.emitMask(args)
-
-
 
             if (shm) {
                 var msg = "{shim:" + shm[1] + "} from " + a.getName()
@@ -727,7 +780,6 @@ module TDev.AST.Bytecode
                     var id = this.binary.emitString(l.data)
                     var op = this.proc.emit("LDSTRREF", id);
                     op.arg0 = l.data
-                    op.info = JSON.stringify(l.data)
                 }
             }
             else if (typeof l.data == "boolean") {
