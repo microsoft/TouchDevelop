@@ -15,19 +15,19 @@ module TDev.AST.Bytecode
 
     var opcodeInfo:StringMap<OpcodeInfo>;
     var funcInfo:StringMap<FuncInfo>;
+    var hex:string[];
 
     function setup()
     {
         var inf = (<any>TDev).bytecodeInfo
         opcodeInfo = inf.opcodes;
         funcInfo = inf.functions;
+        hex = inf.hex;
     }
 
     function isRefKind(k:Kind)
     {
         var isSimple = k == api.core.Number || k == api.core.Boolean
-        //if (!isSimple)
-        //    console.log(k.toString())
         return !isSimple
     }
 
@@ -252,6 +252,56 @@ module TDev.AST.Bytecode
         nextStringId = 0;
         strings:StringMap<number> = {};
 
+        patchHex()
+        {
+            var myhex = hex.slice(0)
+            var i = 0;
+            for (; i < myhex.length; ++i) {
+                if (/^:10....000108010842424242010801083ED8E98D/.test(myhex[i]))
+                    break;
+            }
+
+            Util.assert(i < myhex.length)
+            var i0 = i;
+            var ptr = 0
+            var togo = 32000 / 8;
+            while (ptr < this.buf.length) {
+                if (myhex[i] == null) Util.die();
+                var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
+                if (!m) { i++; continue; }
+                Util.assert(i == i0 || /^0+$/.test(m[3]))
+
+
+                var bytes = [0x10, parseInt(m[1], 16), parseInt(m[2], 16), 0]
+                for (var j = 0; j < 8; ++j) {
+                    bytes.push((this.buf[ptr] || 0) & 0xff)
+                    bytes.push((this.buf[ptr] || 0) >>> 8)
+                    ptr++
+                }
+
+                var chk = 0
+                var r = ":"
+                bytes.forEach(b => chk += b)
+                bytes.push((-chk) & 0xff)
+                bytes.forEach(b => r += ("0" + b.toString(16)).slice(-2))
+                myhex[i] = r.toUpperCase();
+                i++;
+                togo--;
+            }
+
+            while (togo > 0) {
+                if (myhex[i] == null) Util.die();
+                var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
+                if (!m) { i++; continue; }
+                Util.assert(i == i0 || /^0+$/.test(m[3]))
+                myhex[i] = "";
+                i++;
+                togo--;
+            }
+
+            return myhex.filter(l => !!l);
+        }
+
         emitString(s:string, needsSeqId = true):number
         {
             this.strings[s] = 0;
@@ -375,11 +425,23 @@ module TDev.AST.Bytecode
             }
         }
 
+        public gethex()
+        {
+            this.run()
+            this.binary.serialize()
+            return "data:application/x-microbit-hex;base64," + Util.base64Encode(this.binary.patchHex().join("\r\n") + "\r\n")
+        }
+
         public csource()
         {
             this.run()
             this.binary.serialize()
-            var r = "#include \"BitVM.h\"\nnamespace bitvm { const uint16_t bytecode[] = {\n" + this.binary.csource + "\n}; }\n"
+            var r = 
+                "#include \"BitVM.h\"\n" +
+                "namespace bitvm {\n" +
+                "const uint16_t bytecode[32000] __attribute__((aligned(0x20))) = {\n" + 
+                this.binary.csource + "\n}; }\n"
+            this.binary.patchHex()
             return r
         }
 
@@ -700,9 +762,6 @@ module TDev.AST.Bytecode
                 this.proc.emit("STCLO", i)
             })
 
-            console.log(caps)
-            console.log(locs.allLocals)
-
             Util.assert(inl.inParameters.length == 0)
 
             this.finals.push(() => {
@@ -1015,8 +1074,7 @@ module TDev.AST.Bytecode
 
         visitStmt(s:Stmt)
         {
-            console.log("unhandled stmt: " + s.nodeType())
-            super.visitStmt(s)
+            Util.oops("unhandled stmt: " + s.nodeType())
         }
     }
 }

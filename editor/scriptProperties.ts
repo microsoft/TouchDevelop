@@ -262,11 +262,18 @@ module TDev
             var c = new AST.Bytecode.Compiler(Script)
             var src = ""
             try {
-                src = c.csource()
+                src = c.gethex()
             } catch (e) {
-                src = e.stack
+                ModalDialog.showText(e.stack)
+                return
             }
-            ModalDialog.showText(src)
+
+            var link = <HTMLAnchorElement>window.document.createElement('a');
+            link.href = src;
+            (<any>link).download = Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
+            var click = document.createEvent("Event");
+            click.initEvent("click", true, true);
+            link.dispatchEvent(click);
         }
 
         static diffToBase()
