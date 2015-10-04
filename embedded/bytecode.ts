@@ -119,9 +119,9 @@ module TDev.AST.Bytecode
         {
             if (this.name == "LABEL") return 0
 
-            if (this.name == "UCALLPROC")
+            if (this.name == "UCALLPROC" || this.name == "FLATUCALLPROC")
                 return -this.darg;
-            if (this.name == "UCALLFUNC")
+            if (this.name == "UCALLFUNC" || this.name == "FLATUCALLFUNC")
                 return -this.darg + 1;
 
             var inf = opcodeInfo[this.name]
@@ -627,9 +627,11 @@ module TDev.AST.Bytecode
 
                 this.proc.emitCall(shm[1], mask)
             } else {
-                var op = this.proc.emit(hasret ? "UCALLFUNC" : "UCALLPROC", args.length)
+                var pref = mask ? "" : "FLAT"
+                var op = this.proc.emit(hasret ? pref + "UCALLFUNC" : pref + "UCALLPROC", args.length)
                 op.arg0 = this.procIndex(a);
-                op.arg1 = mask;
+                if (mask)
+                    op.arg1 = mask;
                 op.info = a.getName()
                 Util.assert(!!op.arg0)
             }
