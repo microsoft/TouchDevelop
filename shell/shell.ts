@@ -180,7 +180,7 @@ class ApiRequest {
 
             var u = w.getUrl()
             u.method = this.req.method
-            u.headers = this.req.headers
+            u.headers = {} // no headers
             u.path = this.req.url
 
             numReqs++
@@ -1109,7 +1109,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numRequests: currentReqNo,
             numDeploys: tdstate.numDeploys,
             dmeta: tdstate.dmeta,
-            versionStamp: "v3",
+            versionStamp: "v4",
         })
     },
 
