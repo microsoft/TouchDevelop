@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #znysWg6zmbHVNSNs skip;
+  #D34u4ORZ4Owljhx8 skip;
 }
-#iZRtY4qxGxX0HSBB meta import micro\u003abit {
-  pub "beusln"
+#xmYa2ElhnnoT0BUj meta import micro\u003abit {
+  pub "jqldsq"
   usage {
     type Image
     action `sync` \_libinit()
@@ -54,9 +54,12 @@ action main() {
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
     action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, millis: Number)
   }
 }
-#Jrz91ONIPGlGzbjD meta import micro\u003abit_screen {
+#Tv1ilagXmK2nPDH1 meta import micro\u003abit_screen {
   pub "nzngii"
   usage {
     action `async` toggle(x: Number, y: Number)
@@ -66,10 +69,10 @@ action main() {
     action `async` fade_out(ms: Number)
     action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
   }
-  #xuTVVXf3060AzaCQ resolve micro\u003abit = ♻ micro\u003abit with {
+  #c62QJFX3B2ee8ray resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#xbUy6HNrWHIAqXM5 meta import micro\u003abit_game {
+#rotK466AGr3pvcUM meta import micro\u003abit_game {
   pub "lwagkt"
   usage {
     action `sync` score() returns(score: Number)
@@ -89,10 +92,10 @@ action main() {
     action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
   }
-  #TlDrXOyQdgc8xnbY resolve micro\u003abit = ♻ micro\u003abit with {
+  #xavDu9U7D9yIoTqX resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#L9qqNEy2JmMDeLHF meta import micro\u003abit_senses {
+#fsUcEJz94XxSURFH meta import micro\u003abit_senses {
   pub "vkmzfe"
   usage {
     action `sync` on_screen_up(body: Action)
@@ -101,6 +104,6 @@ action main() {
     action `sync` on_logo_up(body: Action)
     action `sync` on_logo_down(body: Action)
   }
-  #vfWe4T7vr4yo9554 resolve micro\u003abit = ♻ micro\u003abit with {
+  #xBvj82Zl7yYBTKwG resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
