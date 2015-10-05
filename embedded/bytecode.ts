@@ -277,9 +277,18 @@ module TDev.AST.Bytecode
         nextStringId = 0;
         strings:StringMap<number> = {};
 
-        patchHex()
+        isDataRecord(s:string)
+        {
+            if (!s) return false
+            var m = /^:......(..)/.exec(s)
+            Util.assert(!!m)
+            return m[1] == "00"
+        }
+
+        patchHex(shortForm:boolean)
         {
             var myhex = hex.slice(0)
+
             var i = 0;
             for (; i < myhex.length; ++i) {
                 if (/^:10....000108010842424242010801083ED8E98D/.test(myhex[i]))
@@ -314,14 +323,21 @@ module TDev.AST.Bytecode
                 togo--;
             }
 
-            while (togo > 0) {
-                if (myhex[i] == null) Util.die();
-                var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
-                if (!m) { i++; continue; }
-                Util.assert(/^0+$/.test(m[3]))
-                myhex[i] = "";
-                i++;
-                togo--;
+            if (shortForm) {
+                for (var j = 0; j < myhex.length; ++j) {
+                    if (!(i0 <= j && j <= i) && this.isDataRecord(myhex[j]))
+                        myhex[j] = "";
+                }
+            } else {
+                while (togo > 0) {
+                    if (myhex[i] == null) Util.die();
+                    var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
+                    if (!m) { i++; continue; }
+                    Util.assert(/^0+$/.test(m[3]))
+                    myhex[i] = "";
+                    i++;
+                    togo--;
+                }
             }
 
             return myhex.filter(l => !!l);
@@ -450,11 +466,13 @@ module TDev.AST.Bytecode
             }
         }
 
-        public compile()
+        public compile(shortForm:boolean)
         {
+            shortForm = false; // this doesn't work yet
+
             this.run()
             this.binary.serialize()
-            var hex = this.binary.patchHex().join("\r\n") + "\r\n"
+            var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n"
             var r = 
                 "#include \"BitVM.h\"\n" +
                 "namespace bitvm {\n" +

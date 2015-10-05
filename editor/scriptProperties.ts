@@ -257,11 +257,13 @@ module TDev
             this.description.className = "description";
         }
 
+        static firstTime = true;
         static bytecodeCompile(showSource = false)
         {
             var c = new AST.Bytecode.Compiler(Script)
             try {
-                var res = c.compile()
+                var res = c.compile(!ScriptProperties.firstTime)
+                ScriptProperties.firstTime = false
             } catch (e) {
                 ModalDialog.showText(e.stack)
                 return
