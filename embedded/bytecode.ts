@@ -162,6 +162,8 @@ module TDev.AST.Bytecode
                     this.info = this.arg0 + ""
                 else if (this.name == "data")
                     this.info = "0x" + this.code.toString(16)
+                else if (this.arg0 instanceof Location)
+                    this.info = this.arg0.toString()
                 else this.info = "";
             }
 
@@ -281,6 +283,15 @@ module TDev.AST.Bytecode
         {
         }
 
+        toString()
+        {
+            var n = ""
+            if (this.def) n += this.def.getName()
+            if (this.isarg) n = "ARG " + n
+            if (this.isRef()) n = "REF " + n
+            return "[" + n + "]"
+        }
+
         isRef()
         {
             return this.def && isRefKind(this.def.getKind())
@@ -295,11 +306,24 @@ module TDev.AST.Bytecode
                 proc.emitInt(this.index)
                 proc.emitCall("bitvm::stglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
             } else {
+                if (this.isRef()) {
+                    var op = proc.emit("LDR", 0x9800)
+                    op.arg0 = this
+                    op.arg1 = proc.currStack
+                    proc.emitCallRaw("bitvm::decr");
+                }
                 proc.emit("pop {r0}", 0xbc01);
                 var op = proc.emit("STR", 0x9000)
                 op.arg0 = this
                 op.arg1 = proc.currStack
             }
+        }
+
+        emitLoadCore(proc:Procedure)
+        {
+            var op = proc.emit("LDR", 0x9800)
+            op.arg0 = this
+            op.arg1 = proc.currStack
         }
 
         emitLoad(proc:Procedure)
@@ -312,9 +336,7 @@ module TDev.AST.Bytecode
                     Util.assert(0 <= this.index && this.index < 32)
                     proc.emit("ldr r0, [r5, #4*" + this.index + "]", 0x6828 | (this.index<<6))
                 } else {
-                    var op = proc.emit("LDR", 0x9800)
-                    op.arg0 = this
-                    op.arg1 = proc.currStack
+                    this.emitLoadCore(proc)
                 }
 
                 proc.emit("push {r0}", 0xb401);
@@ -550,6 +572,18 @@ module TDev.AST.Bytecode
             return op
         }
 
+        emitMov(v:number)
+        {
+            Util.assert(0 <= v && v <= 255)
+            this.emit("movs r0, #" + v, 0x2000 | v)
+        }
+
+        emitAdd(v:number)
+        {
+            Util.assert(0 <= v && v <= 255)
+            this.emit("adds r0, #" + v, 0x3000 | v)
+        }
+
         emitInt(v:number, keepInR0 = false)
         {
             Util.assert(v != null);
@@ -562,13 +596,19 @@ module TDev.AST.Bytecode
             }
 
             if (n <= 255) {
-                this.emit("movs r0, #" + n, 0x2000 | n)
+                this.emitMov(n)
+            } else if (n <= 0xffff) {
+                this.emitMov((n >> 8) & 0xff)
+                this.emit("lsls r0, #8", 0x0200)
+                this.emitAdd(n & 0xff)
             } else {
-                // TODO this is wrong
-                this.emit("ldr r0, [pc, #0]", 0x4800)
-                this.emit("b +2", 0xe001)
-                this.emit("data", (n & 0xffff))
-                this.emit("data", ((n>>16) & 0xffff))
+                this.emitMov((n >> 24) & 0xff)
+                this.emit("lsls r0, #8", 0x0200)
+                this.emitAdd((n >> 16) & 0xff)
+                this.emit("lsls r0, #8", 0x0200)
+                this.emitAdd((n >> 8) & 0xff)
+                this.emit("lsls r0, #8", 0x0200)
+                this.emitAdd((n >> 0) & 0xff)
             }
             if (isNeg) {
                 this.emit("neg r0, r0", 0x4240)
@@ -1170,7 +1210,7 @@ module TDev.AST.Bytecode
                 })
 
                 this.proc.emit("push {r5, lr}", 0xb520);
-                this.proc.emit("mov r5, r1", 0x1d0d);
+                this.proc.emit("adds r5, r1, #0", 0x1c0d);
                 this.proc.emit("LOCALS", 0);
 
                 var ret = this.proc.mkLabel()
@@ -1360,8 +1400,7 @@ module TDev.AST.Bytecode
             this.proc.emitClrs(retl ? retl.local : null, true);
 
             if (retl) {
-                this.localIndex(retl.local).emitLoad(this.proc)
-                this.proc.emit("pop {r0}", 0xbc01);
+                this.localIndex(retl.local).emitLoadCore(this.proc)
             }
 
             Util.assert(this.proc.currStack == 0)
