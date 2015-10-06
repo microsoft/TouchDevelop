@@ -86,6 +86,8 @@ module TDev.AST.Bytecode
             var inf = funcInfo[k]
             if (types.indexOf(inf.type) >= 0) {
                 inf.value = data[inf.idx]
+                if ("PF".indexOf(inf.type) >= 0)
+                    inf.value = inf.value & 0xfffffffe
                 Util.assert(inf.value != null)
             }
         })
@@ -188,9 +190,9 @@ module TDev.AST.Bytecode
             if (this.name == "BL") {
                 var off = null
                 if (this.arg0 instanceof Procedure)
-                    off = (<Procedure>this.arg0).index - (this.index + 2)
+                    off = (<Procedure>this.arg0).index - (this.index - 2)
                 else if (this.arg0.value)
-                    off = ((<number>this.arg0.value - hexStartAddr) / 2) - (this.index + 2)
+                    off = ((<number>this.arg0.value - hexStartAddr) / 2) - (this.index - 2)
                 Util.assert(off != null)
                 Util.assert((off|0) == off)
                 // we can actually support more but the board has 256k (128k instructions)
@@ -212,7 +214,7 @@ module TDev.AST.Bytecode
             if (this.name == "B") {
                 var off = null
                 if (this.arg0 instanceof Opcode)
-                    off = (<Opcode>this.arg0).index - (this.index + 2)
+                    off = (<Opcode>this.arg0).index - (this.index - 2)
                 Util.assert(off != null)
                 Util.assert((off|0) == off)
                 Util.assert((off & 0xfffff800) == 0 || (off & 0xfffff800) == 0xfffff800)
@@ -295,10 +297,15 @@ module TDev.AST.Bytecode
                 proc.emitInt(this.index)
                 proc.emitCall("bitvm::ldglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
             } else {
-                var op = proc.emit("LDR", 0x9800)
-                op.arg0 = this
-                op.arg1 = proc.currStack
-                proc.emit("push {r0}", 0xb401);
+                if (this.isarg && proc.argsInR5) {
+                    Util.assert(0 <= this.index && this.index < 32)
+                    proc.emit("ldr r0, [r5, #4*" + this.index + "]", 0x6828 | (this.index<<6))
+                } else {
+                    var op = proc.emit("LDR", 0x9800)
+                    op.arg0 = this
+                    op.arg1 = proc.currStack
+                    proc.emit("push {r0}", 0xb401);
+                }
                 if (this.isRef())
                     proc.emitCall("bitvm::incr", 0);
             }
@@ -324,6 +331,7 @@ module TDev.AST.Bytecode
         currStack = 0;
         maxStack = 0;
         action:Action;
+        argsInR5 = false;
 
         body:Opcode[] = [];
         locals:Location[] = [];
@@ -471,11 +479,8 @@ module TDev.AST.Bytecode
 
         emitTo(bin:Binary)
         {
-            //TODO
-            bin.comment("\n\n// 0x" + this.index.toString(16) + ": FUNC " + (this.action ? this.action.getName() : "(inline)"))
-            bin.push(0x4201);
-            bin.push(this.locals.length);
-            bin.push(this.maxStack);
+            bin.commentAt(this.index, "FUNC " + (this.action ? this.action.getName() : "(inline)"))
+            bin.comment(Util.fmt("{0} local(s), maxStack={1}", this.locals.length, this.maxStack))
             this.body.forEach(o => o.emitTo(bin))
         }
 
@@ -644,11 +649,10 @@ module TDev.AST.Bytecode
 
         serialize()
         {
-            // TODO
             Util.assert(this.csource == "");
 
             this.comment("start");
-            this.push(0x4202);
+            this.push(0x4203);
             this.push(this.globals.length);
             this.push(this.nextStringId);
             this.push(0); // future use
@@ -1092,9 +1096,9 @@ module TDev.AST.Bytecode
 
         emitInlineAction(inl:InlineAction)
         {
-            // TODO copy stuff from RefAction to the stack
             var locs = AST.Compiler.computeCapturedLocals(inl);
             var inlproc = new Procedure()
+            inlproc.argsInR5 = true
             this.binary.procs.push(inlproc);
 
             var refs  = locs.capturedLocals.filter(l => isRefKind(l.getKind()))
@@ -1134,7 +1138,8 @@ module TDev.AST.Bytecode
                         this.proc.mkLocal(l)
                 })
 
-                this.proc.emit("push {lr}", 0xb500);
+                this.proc.emit("push {r5, lr}", 0xb520);
+                this.proc.emit("mov r5, r1", 0x1d0d);
                 this.proc.emit("LOCALS", 0);
 
                 var ret = this.proc.mkLabel()
@@ -1144,8 +1149,8 @@ module TDev.AST.Bytecode
 
                 Util.assert(this.proc.currStack == 0)
 
-                this.proc.emit("POPLOCALS", 0xb000); // sp -= sizeof(locals) + numargs
-                this.proc.emit("pop {pc}", 0xbd00);
+                this.proc.emit("POPLOCALS", 0);
+                this.proc.emit("pop {r5, pc}", 0xbd20);
             })
         }
 
@@ -1330,7 +1335,7 @@ module TDev.AST.Bytecode
 
             Util.assert(this.proc.currStack == 0)
 
-            this.proc.emit("POPLOCALS", 0xb000); // sp -= sizeof(locals) + numargs
+            this.proc.emit("POPLOCALS", 0);
             this.proc.emit("pop {pc}", 0xbd00);
         }
 
