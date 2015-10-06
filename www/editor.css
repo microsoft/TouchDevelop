@@ -1573,7 +1573,8 @@ div.md-video-link > svg {
 
 .stmt
 {
-    border-left: 0.1em solid #ccc;
+    border-left: 0.2em solid #ccc;
+    border-radius: 0.2em;
     padding-left: 0.1em;
     margin-top: 0.1em;
     padding-left: 0px;
