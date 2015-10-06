@@ -232,17 +232,27 @@ a.command:hover {
   text-decoration: underline;
 }
 
-/* Very low-height displays: hide the icons. */
+/* Very low-height displays: hide the icons, just keep the text (e.g. "run").
+ * Hide script name, flatten icons. */
 @media (max-height: 600px) {
-  .roundsymbol, #script-box, .graduate-wrapper {
+  .roundsymbol, #script-description, .graduate-wrapper {
     display: none !important;
+  }
+
+  #script-icons {
+    flex-direction: row !important;
+    -webkit-flex-direction: row !important;
+  }
+
+  input#script-name {
+    font-size: inherit !important;
+    height: inherit !important;
+    line-height: inherit !important;
   }
 }
 
-/* Low-height displays: verticalize the status icons; icons inline; smaller script
- * name. (750px is about the average content area height on a 900px high
- * display.) */
-@media (max-height: 750px) {
+/* Low-height displays or narrow displays: verticalize the status icons. */
+@media (max-height: 750px), (max-width: 800px) {
   #script-box {
     flex-direction: row;
     -webkit-flex-direction: row;
@@ -260,6 +270,13 @@ a.command:hover {
     padding: 0 !important;
     width: 1.4rem;
     text-align: center;
+  }
+}
+
+/* Low-height displays: icons inline; smaller script name. (750px is about the
+ * average content area height on a 900px high display.) */
+@media (max-height: 750px) {
+  #script-icons > * {
     font-size: 1.1rem;
   }
 
@@ -302,7 +319,7 @@ a.command:hover {
 
 /* Very narrow displays: get rid of the script name and description */
 @media (max-width: 800px) {
-  #script-box {
+  #script-name, #script-description {
     display: none;
   }
 }
