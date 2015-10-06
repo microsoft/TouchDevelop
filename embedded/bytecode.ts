@@ -57,24 +57,30 @@ module TDev.AST.Bytecode
         index:number;
         info:string;
 
-        constructor(public name:string, public darg:number)
+        constructor(public name:string, public code:number)
         {
         }
 
         size()
         {
+            if (this.name == "BL")
+                return 2;
+
+            if (this.name == "LDPTR")
+                return 4;
+
             if (this.name == "LABEL")
                 return 0;
 
-            if (this.arg1 != null)
-                return 3;
-            else if (this.arg0 != null)
-                return 2;
-            return 1;
+            if (this.code)
+                return 1;
+
+            Util.oops("cannot compute size: " + this.name)
         }
 
         emitTo(bin:Binary)
         {
+            //TODO
             if (!this.info) {
                 if (typeof this.arg0 == "string")
                     this.info = JSON.stringify(this.arg0)
@@ -117,16 +123,12 @@ module TDev.AST.Bytecode
 
         stackOffset()
         {
-            if (this.name == "LABEL") return 0
+            if (/^pop\s*\{r[0-9]\}/.test(this.name))
+                return -1;
+            if (/^push\s*\{r[0-9]\}/.test(this.name))
+                return 1;
 
-            if (this.name == "UCALLPROC" || this.name == "FLATUCALLPROC")
-                return -this.darg;
-            if (this.name == "UCALLFUNC" || this.name == "FLATUCALLFUNC")
-                return -this.darg + 1;
-
-            var inf = opcodeInfo[this.name]
-            Util.assert(inf.stack != null)
-            return inf.stack
+            return 0;
         }
     }
 
@@ -148,28 +150,42 @@ module TDev.AST.Bytecode
             if (this.isarg)
                 Util.oops("store for arg")
 
-            var c = this.isRef() ? "STLOCREF" : "STLOC"
-            if (this.def instanceof GlobalDef)
-                c = c.replace(/LOC/, "GLB")
-            proc.emit(c, this.index)
+            if (this.def instanceof GlobalDef) {
+                proc.emitInt(this.index)
+                proc.emitCall("bitvm::stglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
+            } else {
+                proc.emit("pop {r0}", 0xbc01);
+                var op = proc.emit("STR", 0x9000)
+                op.arg0 = this
+                op.arg1 = proc.currStack
+            }
         }
 
         emitLoad(proc:Procedure)
         {
-            var c = this.isRef() ? "LDLOCREF" : "LDLOC"
-            if (this.def instanceof GlobalDef)
-                c = c.replace(/LOC/, "GLB")
-            else if (this.isarg)
-                c = c.replace(/LOC/, "ARG")
-            proc.emit(c, this.index)
+            if (this.def instanceof GlobalDef) {
+                proc.emitInt(this.index)
+                proc.emitCall("bitvm::ldglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
+            } else {
+                var op = proc.emit("LDR", 0x9800)
+                op.arg0 = this
+                op.arg1 = proc.currStack
+                proc.emit("push {r0}", 0xb401);
+                if (this.isRef())
+                    proc.emitCall("bitvm::incr", 0);
+            }
         }
 
         emitClrIfRef(proc:Procedure)
         {
-            Util.assert(!this.isarg)
+            // Util.assert(!this.isarg)
             Util.assert(!(this.def instanceof GlobalDef))
-            if (this.isRef())
-                proc.emit("CLRLOCREF", this.index)
+            if (this.isRef()) {
+                var op = proc.emit("LDR", 0x9800)
+                op.arg0 = this
+                op.arg1 = proc.currStack
+                proc.emitCall("bitvm::decr", 0);
+            }
         }
     }
 
@@ -186,13 +202,16 @@ module TDev.AST.Bytecode
         args:Location[] = [];
         index:number;
 
-        lastop():Opcode
+        mkLocal(def:LocalDef = null)
         {
-            return this.body.peek()
+            var l = new Location(this.locals.length, def)
+            this.locals.push(l)
+            return l
         }
 
         size(idx:number)
         {
+            this.expandOpcodes();
             this.index = idx;
             idx += 3;
             this.body.forEach(o => {
@@ -202,11 +221,38 @@ module TDev.AST.Bytecode
             return idx - this.index;
         }
 
-        mkLocal(def:LocalDef = null)
+        expandOpcodes()
         {
-            var l = new Location(this.locals.length, def)
-            this.locals.push(l)
-            return l
+            var res:Opcode[] = []
+            this.body.forEach(op => {
+                if (op.name == "LOCALS") {
+                    if (this.locals.length > 0) {
+                        res.push(new Opcode("movs r0, #0", 0x2000))
+                        this.locals.forEach(l => {
+                            res.push(new Opcode("push {r0}",  0xb401))
+                        })
+                    }
+                    return // don't copy
+                } else if (op.name == "LDR" || op.name == "STR") {
+                    Util.assert(!!op.code)
+                    var l:Location = op.arg0
+                    var idx = (l.isarg ? this.locals.length : 0) + l.index + op.arg1
+                    Util.assert(0 <= idx && idx < 255);
+                    op.name = op.name.toLowerCase() + " r0, [sp, #4*" + idx + "]"
+                    op.code |= idx
+                } else if (op.name == "B") {
+                } else if (op.name == "BL") {
+                } else if (op.name == "LDPTR") {
+                } else if (op.name == "LABEL") {
+                    // do nothing
+                } else if (/^[a-z]/.test(op.name)) {
+                    // expanded
+                } else {
+                    Util.oops("unknown opcode macro: " + op.name)
+                }
+                res.push(op)
+            })
+            this.body = res
         }
 
         emitCall(name:string, mask:number)
@@ -214,22 +260,67 @@ module TDev.AST.Bytecode
             var inf = lookupFunc(name)
             Util.assert(!!inf, "unimplemented function: " + name)
 
-            var opcode = "CALL" + inf.args
-            if (inf.type == "F") opcode += "FUNC"
-            else if (inf.type == "P") opcode += "PROC"
+            Util.assert(inf.args <= 4)
+
+            if (inf.args >= 4)
+                this.emit("pop {r3}",  0xbc08);
+            if (inf.args >= 3)
+                this.emit("pop {r2}",  0xbc04);
+            if (inf.args >= 2)
+                this.emit("pop {r1}",  0xbc02);
+            if (inf.args >= 1)
+                this.emit("pop {r0}",  0xbc01);
+
+            var numMask = 0
+
+            if (inf.type == "F" && mask != 0) {
+                // reserve space for return val
+                this.emit("push {r0}",  0xb401);
+            }
+
+            if (mask & (1 << 0)) {
+                numMask++
+                this.emit("push {r0}",  0xb401);
+            }
+            if (mask & (1 << 1)) {
+                numMask++
+                this.emit("push {r1}",  0xb402);
+            }
+            if (mask & (1 << 2)) {
+                numMask++
+                this.emit("push {r2}",  0xb404);
+            }
+            if (mask & (1 << 3)) {
+                numMask++
+                this.emit("push {r3}",  0xb408);
+            }
+
+            Util.assert((mask & ~0xf) == 0)
+
+            var op = this.emit("BL", 0)
+            op.info = name;
+            op.arg0 = inf;
+
+            if (inf.type == "F") {
+                if (mask == 0)
+                    this.emit("push {r0}",  0xb401);
+                else {
+                    this.emit("str r0, [sp, #4*" + numMask + "]", 0x9000 | numMask)
+                }
+            }
+            else if (inf.type == "P") {
+                // ok
+            }
             else Util.oops("invalid call type " + inf.type)
 
-            if (mask == 0)
-                opcode = "FLAT" + opcode
-            var op = this.emit(opcode, inf.idx)
-            if (mask != 0)
-                op.arg0 = mask;
-
-            op.info = name;
+            while (numMask-- > 0) {
+                this.emitCall("bitvm::decr", 0);
+            }
         }
 
         emitTo(bin:Binary)
         {
+            //TODO
             bin.comment("\n\n// 0x" + this.index.toString(16) + ": FUNC " + (this.action ? this.action.getName() : "(inline)"))
             bin.push(0x4201);
             bin.push(this.locals.length);
@@ -239,7 +330,15 @@ module TDev.AST.Bytecode
 
         emitJmp(trg:Opcode, name = "JMP"):Opcode
         {
-            var op = this.emit(name);
+            if (name == "JMPZ") {
+                this.emit("bne +2", 0xd100)
+            } else if (name == "JMP") {
+                // ok
+            } else {
+                Util.oops("bad jmp");
+            }
+
+            var op = this.emit("B", 0xe000); // 0b11100<op>
             op.arg0 = trg
             return op
         }
@@ -249,19 +348,20 @@ module TDev.AST.Bytecode
             return new Opcode("LABEL", 0)
         }
 
-        emitOp(op:Opcode)
+        emitLbl(op:Opcode)
         {
+            Util.assert(op.name == "LABEL")
             this.body.push(op)
         }
 
-        emit(name:string, darg = 0):Opcode
+        emit(name:string, code:number):Opcode
         {
-            var op = new Opcode(name, darg)
+            var op = new Opcode(name, code)
             this.currStack += op.stackOffset();
             Util.assert(this.currStack >= 0);
             if (this.currStack > this.maxStack)
                 this.maxStack = this.currStack;
-            this.emitOp(op)
+            this.body.push(op)
             return op
         }
     }
@@ -366,6 +466,7 @@ module TDev.AST.Bytecode
 
         serialize()
         {
+            // TODO
             Util.assert(this.csource == "");
 
             this.comment("start");
@@ -494,12 +595,13 @@ module TDev.AST.Bytecode
             Util.assert(e._assignmentInfo.targets.length == 1)
             var trg = e.args[0]
             var src = e.args[1]
-            var refSuff = isRefKind(e.args[1].getKind()) ? "REF" : ""
+            var refSuff = isRefKind(e.args[1].getKind()) ? "Ref" : ""
 
             if (trg.referencedRecordField()) {
                 this.dispatch((<Call>trg).args[0])
+                this.emitInt(this.fieldIndex(trg.referencedRecordField()))
                 this.dispatch(src)
-                this.proc.emit("STFLD" + refSuff, this.fieldIndex(trg.referencedRecordField()))
+                this.proc.emitCall("bitvm::stfld" + refSuff, 0); // it does the decr itself, no mask
             } else if (trg.referencedData()) {
                 this.dispatch(src);
                 this.globalIndex(trg.referencedData()).emitStore(this.proc);
@@ -587,6 +689,7 @@ module TDev.AST.Bytecode
             this.emitInt(h);
             var op = this.proc.emit("LDPTR");
             op.arg0 = lit;
+            this.proc.emit("push {r0}", 0xb401);
             this.binary.emitString(lit, false);
         }
 
@@ -624,9 +727,9 @@ module TDev.AST.Bytecode
                 args.forEach(a => this.dispatch(a))
             }
 
-            var mask = this.getMask(args)
 
             if (shm) {
+                var mask = this.getMask(args)
                 var msg = "{shim:" + shm[1] + "} from " + a.getName()
                 if (!shm[1])
                     Util.oops("called " + msg)
@@ -645,11 +748,8 @@ module TDev.AST.Bytecode
 
                 this.proc.emitCall(shm[1], mask)
             } else {
-                var pref = mask ? "" : "FLAT"
-                var op = this.proc.emit(hasret ? pref + "UCALLFUNC" : pref + "UCALLPROC", args.length)
+                var op = this.proc.emit("BL", 0)
                 op.arg0 = this.procIndex(a);
-                if (mask)
-                    op.arg1 = mask;
                 op.info = a.getName()
                 Util.assert(!!op.arg0)
             }
@@ -767,6 +867,7 @@ module TDev.AST.Bytecode
                 isNeg = true
                 n = -n
             }
+
             if (n == 0)
                 this.proc.emit("LDZERO")
             else if (n <= 255)
@@ -863,11 +964,11 @@ module TDev.AST.Bytecode
                 var ret = this.proc.mkLabel()
                 inl._compilerBreakLabel = ret;
                 this.dispatch(inl.body);
-                this.proc.emitOp(ret)
+                this.proc.emitLbl(ret)
 
                 Util.assert(this.proc.currStack == 0)
 
-                this.proc.locals.forEach(l => l.emitClrIfRef(this.proc))
+                this.proc.emitClrs(null)
                 this.proc.emit("RET0")
             })
         }
@@ -938,7 +1039,7 @@ module TDev.AST.Bytecode
             upper.emitStore(this.proc);
 
             var idx = this.localIndex(f.boundLocal);
-            this.proc.emit("LDZERO");
+            this.proc.emitInt(0);
             idx.emitStore(this.proc);
 
             var top = this.proc.emit("LABEL");
@@ -953,14 +1054,14 @@ module TDev.AST.Bytecode
             f._compilerContinueLabel = cont;
             this.dispatch(f.body)
 
-            this.proc.emitOp(cont);
+            this.proc.emitLbl(cont);
             idx.emitLoad(this.proc);
-            this.proc.emit("LDCONST8", 1);
+            this.emitInt(1);
             this.proc.emitCall("number::plus", 0);
             idx.emitStore(this.proc);
             Util.assert(this.proc.currStack == 0);
             this.proc.emitJmp(top);
-            this.proc.emitOp(brk);
+            this.proc.emitLbl(brk);
         }
 
         visitForeach(f:Foreach)
@@ -981,7 +1082,7 @@ module TDev.AST.Bytecode
             this.dispatch(n.body)
 
             this.proc.emitJmp(top);
-            this.proc.emitOp(brk);
+            this.proc.emitLbl(brk);
         }
 
         visitInlineActions(i:InlineActions)
@@ -1001,9 +1102,10 @@ module TDev.AST.Bytecode
             else {
                 Util.assert(this.proc.currStack == 1)
                 if (isRefKind(k))
-                    this.proc.emit("POPREF")
+                    // will pop
+                    this.proc.emitCall("bitvm::decr", 0);
                 else
-                    this.proc.emit("POP")
+                    this.proc.emit("pop {r0}", 0xbc01);
             }
         }
 
@@ -1022,7 +1124,7 @@ module TDev.AST.Bytecode
             var ret = this.proc.mkLabel()
             a._compilerBreakLabel = ret;
             this.dispatch(a.body)
-            this.proc.emitOp(ret)
+            this.proc.emitLbl(ret)
 
             Util.assert(this.proc.currStack == 0)
 
@@ -1039,14 +1141,18 @@ module TDev.AST.Bytecode
             */
 
             var retl = a.getOutParameters()[0]
+
+            this.proc.emitClrs(retl ? refl.local : null);
+
             if (retl) {
                 this.localIndex(retl.local).emitLoad(this.proc)
-                this.proc.locals.forEach(l => l.emitClrIfRef(this.proc))
-                this.proc.emit("RET1")
-            } else {
-                this.proc.locals.forEach(l => l.emitClrIfRef(this.proc))
-                this.proc.emit("RET0")
+                this.proc.emit("pop {r0}", 0xbc01);
             }
+
+            Util.assert(this.proc.currStack == 0)
+
+            this.proc.emit("POPLOCALS", 0); // sp -= sizeof(locals) + numargs
+            this.proc.emit("pop {pc}", 0xbd00);
         }
 
         visitGlobalDef(g:GlobalDef)
@@ -1087,6 +1193,20 @@ module TDev.AST.Bytecode
                 l.isarg = true
                 return l
             })
+
+            if (inparms.length == 0)
+                this.proc.emit("push {lr}", 0xb500);
+            else if (inparms.length == 1)
+                this.proc.emit("push {r0,lr}", 0xb501);
+            else if (inparms.length == 2)
+                this.proc.emit("push {r0,r1,lr}", 0xb503);
+            else if (inparms.length == 3)
+                this.proc.emit("push {r0,r1,r2,lr}", 0xb507);
+            else if (inparms.length == 4)
+                this.proc.emit("push {r0,r1,r2,r3,lr}", 0xb50f);
+            else Util.oops("only up to 4 args supported at the moment " + a.getName())
+
+            this.proc.emit("LOCALS", 0); // this is only resolved later when we know how many locals there are
 
             visitStmts(a.body, s => {
                 if (s instanceof ExprStmt) {
