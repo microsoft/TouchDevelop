@@ -2,25 +2,24 @@
 
 module TDev.AST.Bytecode
 {
+    /*
+    TODO Peep-hole optimizations:
+    push {rA} pop {rA} -> nothing
+    push {rA} pop {rB} -> mov rB, rA
+    */
+
     interface FuncInfo {
         type: string;
         args: number;
         idx: number;
     }
 
-    interface OpcodeInfo {
-        stack: number;
-        idx: number;
-    }
-
-    var opcodeInfo:StringMap<OpcodeInfo>;
     var funcInfo:StringMap<FuncInfo>;
     var hex:string[];
 
     function setup()
     {
         var inf = (<any>TDev).bytecodeInfo
-        opcodeInfo = inf.opcodes;
         funcInfo = inf.functions;
         hex = inf.hex;
     }
@@ -95,18 +94,16 @@ module TDev.AST.Bytecode
             if (this.info.length > 60)
                 this.info = this.info.slice(0, 60) + "..."
 
-            bin.comment("0x" + this.index.toString(16) + ": " + this.name + " " + this.darg + (this.info ? " " + this.info : ""));
+            bin.comment("0x" + this.index.toString(16) + ": " + this.name + " " + this.code + (this.info ? " " + this.info : ""));
 
             if (this.name == "LABEL")
                 return;
 
-            var inf = opcodeInfo[this.name]
-
-            Util.assert(0 <= this.darg && this.darg <= 255)
-
-            bin.push(inf.idx | ((this.darg & 0xff) << 8))
+            Util.assert(!!this.code);
+            bin.push(this.code);
 
             if (this.arg0 == null) return
+
             if (this.arg0 instanceof Opcode)
                 bin.push((<Opcode>this.arg0).index)
             else if (this.arg0 instanceof Procedure)
@@ -390,6 +387,33 @@ module TDev.AST.Bytecode
                 this.maxStack = this.currStack;
             this.body.push(op)
             return op
+        }
+
+        emitInt(v:number, keepInR0 = false)
+        {
+            Util.assert(v != null);
+
+            var n = Math.floor(v)
+            var isNeg = false
+            if (n < 0) {
+                isNeg = true
+                n = -n
+            }
+
+            if (n <= 255) {
+                this.emit("movs r0, #" + n, 0x2000 | n)
+            } else {
+                this.emit("ldr r0, [pc, #0]", 0x4800)
+                this.emit("b +2", 0xe001)
+                this.emit("data " + (n & 0xffff), (n & 0xffff))
+                this.emit("data " + ((n>>16) & 0xffff), ((n>>16) & 0xffff))
+            }
+            if (isNeg) {
+                this.emit("neg r0, r0", 0x4240)
+            }
+
+            if (!keepInR0)
+                this.emit("push {r0}", 0xb401);
         }
     }
 
@@ -893,29 +917,7 @@ module TDev.AST.Bytecode
 
         emitInt(v:number, keepInR0 = false)
         {
-            Util.assert(v != null);
-
-            var n = Math.floor(v)
-            var isNeg = false
-            if (n < 0) {
-                isNeg = true
-                n = -n
-            }
-
-            if (n <= 255)
-                this.proc.emit("movs r0, #" + n, 0x2000 | n)
-            } else {
-                this.proc.emit("ldr r0, [pc, #0]", 0x4800)
-                this.proc.emit("b +2", 0xe001)
-                this.proc.emit("data " + (n & 0xffff), (n & 0xffff))
-                this.proc.emit("data " + ((n>>16) & 0xffff), ((n>>16) & 0xffff))
-            }
-            if (isNeg) {
-                this.proc.emit("neg r0, r0", 0x4240)
-            }
-
-            if (!keepInR0)
-                this.proc.emit("push {r0}", 0xb401);
+            this.proc.emitInt(v, keepInR0)
         }
 
         visitLiteral(l:Literal)
@@ -944,8 +946,8 @@ module TDev.AST.Bytecode
                     var id = this.binary.emitString(l.data)
                     this.emitInt(id, true);
                     var op = this.proc.emit("LDPTR", 0);
-                    op.arg0 = lit;
-                    op = this.emit("BL", 0)
+                    op.arg0 = l.data;
+                    op = this.proc.emit("BL", 0)
                     op.info = "bitvm::stringLiteral"
                     op.arg0 = lookupFunc(op.info)
                     Util.assert(!!op.arg0)
@@ -963,6 +965,7 @@ module TDev.AST.Bytecode
 
         emitInlineAction(inl:InlineAction)
         {
+            // TODO copy stuff from RefAction to the stack
             var locs = AST.Compiler.computeCapturedLocals(inl);
             var inlproc = new Procedure()
             this.binary.procs.push(inlproc);
@@ -982,9 +985,9 @@ module TDev.AST.Bytecode
             caps.forEach((l, i) => {
                 this.emitInt(i)
                 this.localIndex(l).emitLoad(this.proc)
-                this.emitCall("bitvm::stclo")
-                op = this.emit("BL", 0)
-                proc.emit("push {r0}", 0xb401);
+                this.proc.emitCall("bitvm::stclo", 0)
+                op = this.proc.emit("BL", 0)
+                this.proc.emit("push {r0}", 0xb401);
             })
 
             Util.assert(inl.inParameters.length == 0)
@@ -1089,7 +1092,8 @@ module TDev.AST.Bytecode
             this.proc.emitInt(0);
             idx.emitStore(this.proc);
 
-            var top = this.proc.emit("LABEL");
+            var top = this.proc.mkLabel()
+            this.proc.emitLbl(top);
             var brk = this.proc.mkLabel();
             idx.emitLoad(this.proc);
             upper.emitLoad(this.proc);
@@ -1119,7 +1123,8 @@ module TDev.AST.Bytecode
 
         visitWhile(n:While)
         {
-            var top = this.proc.emit("LABEL");
+            var top = this.proc.mkLabel()
+            this.proc.emitLbl(top);
             var brk = this.proc.mkLabel()
             this.dispatch(n.condition)
             this.proc.emitJmp(brk, "JMPZ");
@@ -1189,7 +1194,7 @@ module TDev.AST.Bytecode
 
             var retl = a.getOutParameters()[0]
 
-            this.proc.emitClrs(retl ? refl.local : null, true);
+            this.proc.emitClrs(retl ? retl.local : null, true);
 
             if (retl) {
                 this.localIndex(retl.local).emitLoad(this.proc)
