@@ -151,7 +151,7 @@ module TDev
             if (n.getError() != null)
                 return "<span class='errorSq'>" + r + "</span>";
             else
-                return r;
+                return "<span class='calcToken'>" + r + "</span>";
         }
 
         public renderTokens(t:AST.Token[])
