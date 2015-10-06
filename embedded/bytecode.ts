@@ -2,6 +2,21 @@
 
 module TDev.AST.Bytecode
 {
+    /* Docs:
+     *
+     * Thumb 16-bit Instruction Set Quick Reference Card
+     *   http://infocenter.arm.com/help/topic/com.arm.doc.qrc0006e/QRC0006_UAL16.pdf 
+     *
+     * ARMv6-M Architecture Reference Manual (bit encoding of instructions)
+     *   http://ecee.colorado.edu/ecen3000/labs/lab3/files/DDI0419C_arm_architecture_v6m_reference_manual.pdf
+     *
+     * The ARM-THUMB Procedure Call Standard
+     *   http://www.cs.cornell.edu/courses/cs414/2001fa/armcallconvention.pdf
+     *
+     * Cortex-M0 Technical Reference Manual: 3.3. Instruction set summary (cycle counts)
+     *   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0432c/CHDCICDF.html
+     */
+
     /*
     TODO Peep-hole optimizations:
     push {rA} pop {rA} -> nothing
@@ -12,16 +27,91 @@ module TDev.AST.Bytecode
         type: string;
         args: number;
         idx: number;
+        value: number;
     }
 
     var funcInfo:StringMap<FuncInfo>;
     var hex:string[];
+    var hexStartAddr:number;
+    var hexStartIdx:number;
+
+    function swapBytes(str:string)
+    {
+        var r = ""
+        for (var i = 0; i < str.length; i += 2)
+            r = str[i] + str[i + 1] + r
+        Util.assert(i == str.length)
+        return r
+    }
+
+    function fillValue(types:string)
+    {
+        var num = 0
+        var pref = ""
+
+        Object.keys(funcInfo).forEach(k => {
+            var inf = funcInfo[k]
+            if (types.indexOf(inf.type) >= 0) {
+                num = Math.max(inf.idx + 1, num)
+                if (inf.idx < 2) {
+                    var m = /^0x([a-f0-9]{8})$/.exec(k)
+                    pref = pref + swapBytes(m[1]).toUpperCase()
+                }
+            }
+        })
+
+        var i = 0;
+        var j = -1;
+        var data = []
+        for (; i < hex.length; ++i) {
+            var m = /^:10(....)00(.{16})/.exec(hex[i])
+            if (m && m[2] == pref) {
+                j = 0;
+            }
+
+            if (j >= 0) {
+                var s = hex[i].slice(9)
+                while (s.length >= 8) {
+                    data.push(parseInt(swapBytes(s.slice(0, 8)), 16))
+                    s = s.slice(8)
+                }
+            }
+
+            if (data.length > num) break
+        }
+
+        Util.assert(data.length > num)
+
+        Object.keys(funcInfo).forEach(k => {
+            var inf = funcInfo[k]
+            if (types.indexOf(inf.type) >= 0) {
+                inf.value = data[inf.idx]
+                Util.assert(inf.value != null)
+            }
+        })
+    }
 
     function setup()
     {
         var inf = (<any>TDev).bytecodeInfo
         funcInfo = inf.functions;
         hex = inf.hex;
+
+        var i = 0;
+        var upperAddr = "0000"
+        for (; i < hex.length; ++i) {
+            var m = /:02000004(....)/.exec(hex[i])
+            if (m)
+                upperAddr = m[1]
+            m = /^:10(....)000108010842424242010801083ED8E98D/.exec(hex[i])
+            if (m) {
+                hexStartAddr = parseInt(upperAddr + m[1], 16)
+                hexStartIdx = i
+            }
+        }
+
+        fillValue("PFX")
+        fillValue("E")
     }
 
     function isRefKind(k:Kind)
@@ -67,9 +157,6 @@ module TDev.AST.Bytecode
 
             if (this.name == "LDPTR")
                 return 3;
-  //4c:   2164            movs    r1, #100        ; 0x64
-  //4e:   0209            lsls    r1, r1, #8
-  //50:   3164            adds    r1, #100        ; 0x64
 
             if (this.name == "LABEL")
                 return 0;
@@ -82,7 +169,6 @@ module TDev.AST.Bytecode
 
         emitTo(bin:Binary)
         {
-            //TODO
             if (!this.info) {
                 if (typeof this.arg0 == "string")
                     this.info = JSON.stringify(this.arg0)
@@ -94,31 +180,73 @@ module TDev.AST.Bytecode
             if (this.info.length > 60)
                 this.info = this.info.slice(0, 60) + "..."
 
-            bin.comment("0x" + this.index.toString(16) + ": " + this.name + " " + this.code + (this.info ? " " + this.info : ""));
+            bin.commentAt(this.index, this.name + (this.info ? " " + this.info : ""))
 
             if (this.name == "LABEL")
                 return;
 
+            if (this.name == "BL") {
+                var off = null
+                if (this.arg0 instanceof Procedure)
+                    off = (<Procedure>this.arg0).index - (this.index + 2)
+                else if (this.arg0.value)
+                    off = ((<number>this.arg0.value - hexStartAddr) / 2) - (this.index + 2)
+                Util.assert(off != null)
+                Util.assert((off|0) == off)
+                // we can actually support more but the board has 256k (128k instructions)
+                Util.assert(-128*1024 <= off && off <= 128*1024) 
+
+                // note that off is already in instructions, not bytes
+                var imm11 = off & 0x7ff
+                var imm10 = (off >> 11) & 0x3ff
+
+                if (off & 0xf0000000) {
+                    bin.push(0xf400 | imm10)
+                } else {
+                    bin.push(0xf000 | imm10)
+                }
+                bin.push(0xf800 | imm11)
+                return
+            }
+
+            if (this.name == "B") {
+                var off = null
+                if (this.arg0 instanceof Opcode)
+                    off = (<Opcode>this.arg0).index - (this.index + 2)
+                Util.assert(off != null)
+                Util.assert((off|0) == off)
+                Util.assert((off & 0xfffff800) == 0 || (off & 0xfffff800) == 0xfffff800)
+                var imm11 = off & 0x7ff
+                bin.push(0xe000 | imm11)
+                return
+            }
+
+            if (this.name == "LDPTR") {
+                var idx = null
+                if (this.arg0 instanceof Procedure)
+                    idx = (<Procedure>this.arg0).index
+                else if (typeof this.arg0 == "string")
+                    idx = bin.strings[this.arg0]
+                else Util.oops("bad arg0: " + this.arg0)
+                Util.assert(idx != null)
+                Util.assert((idx | 0) == idx)
+                Util.assert(0 <= idx && idx <= 0xffff)
+
+                bin.commentAt(this.index, "movs r1, #" + ((idx >> 8) & 0xff))
+                bin.push(0x2100 | ((idx >> 8) & 0xff))
+
+                bin.commentAt(this.index + 1, "lsls r1, r1, #8")
+                bin.push(0x0209)
+
+                bin.commentAt(this.index + 2, "adds r1, #" + (idx & 0xff))
+                bin.push(0x3100 | (idx & 0xff))
+                return
+            }
+
+            Util.assert(!this.arg0 || this.arg0 instanceof Location)
             Util.assert(!!this.code);
+
             bin.push(this.code);
-
-            if (this.arg0 == null) return
-
-            if (this.arg0 instanceof Opcode)
-                bin.push((<Opcode>this.arg0).index)
-            else if (this.arg0 instanceof Procedure)
-                bin.push((<Procedure>this.arg0).index)
-            else if (typeof this.arg0 == "number")
-                bin.push(this.arg0)
-            else if (typeof this.arg0 == "string") {
-                Util.assert(!!bin.strings[this.arg0])
-                bin.push(bin.strings[this.arg0])
-            } else Util.oops("bad arg0: " + this.arg0)
-
-            if (this.arg1 == null) return
-            if (typeof this.arg1 == "number")
-                bin.push(this.arg1)
-            else Util.oops("bad arg1: " + this.arg1)
         }
 
         stackOffset()
@@ -229,7 +357,7 @@ module TDev.AST.Bytecode
                     if (this.locals.length > 0) {
                         res.push(new Opcode("movs r0, #0", 0x2000))
                         this.locals.forEach(l => {
-                            res.push(new Opcode("push {r0}",  0xb401))
+                            res.push(new Opcode("push {r0}", 0xb401))
                         })
                     }
                     return // don't copy
@@ -280,43 +408,42 @@ module TDev.AST.Bytecode
 
         emitCall(name:string, mask:number)
         {
-            // TODO handle enums
             var inf = lookupFunc(name)
             Util.assert(!!inf, "unimplemented function: " + name)
 
             Util.assert(inf.args <= 4)
 
             if (inf.args >= 4)
-                this.emit("pop {r3}",  0xbc08);
+                this.emit("pop {r3}", 0xbc08);
             if (inf.args >= 3)
-                this.emit("pop {r2}",  0xbc04);
+                this.emit("pop {r2}", 0xbc04);
             if (inf.args >= 2)
-                this.emit("pop {r1}",  0xbc02);
+                this.emit("pop {r1}", 0xbc02);
             if (inf.args >= 1)
-                this.emit("pop {r0}",  0xbc01);
+                this.emit("pop {r0}", 0xbc01);
 
             var numMask = 0
 
             if (inf.type == "F" && mask != 0) {
                 // reserve space for return val
-                this.emit("push {r0}",  0xb401);
+                this.emit("push {r0}", 0xb401);
             }
 
             if (mask & (1 << 0)) {
                 numMask++
-                this.emit("push {r0}",  0xb401);
+                this.emit("push {r0}", 0xb401);
             }
             if (mask & (1 << 1)) {
                 numMask++
-                this.emit("push {r1}",  0xb402);
+                this.emit("push {r1}", 0xb402);
             }
             if (mask & (1 << 2)) {
                 numMask++
-                this.emit("push {r2}",  0xb404);
+                this.emit("push {r2}", 0xb404);
             }
             if (mask & (1 << 3)) {
                 numMask++
-                this.emit("push {r3}",  0xb408);
+                this.emit("push {r3}", 0xb408);
             }
 
             Util.assert((mask & ~0xf) == 0)
@@ -327,7 +454,7 @@ module TDev.AST.Bytecode
 
             if (inf.type == "F") {
                 if (mask == 0)
-                    this.emit("push {r0}",  0xb401);
+                    this.emit("push {r0}", 0xb401);
                 else {
                     this.emit("str r0, [sp, #4*" + numMask + "]", 0x9000 | numMask)
                 }
@@ -440,21 +567,14 @@ module TDev.AST.Bytecode
         {
             var myhex = hex.slice(0)
 
-            var i = 0;
-            for (; i < myhex.length; ++i) {
-                if (/^:10....000108010842424242010801083ED8E98D/.test(myhex[i]))
-                    break;
-            }
-
-            Util.assert(i < myhex.length)
-            var i0 = i;
+            var i = hexStartIdx;
             var ptr = 0
             var togo = 32000 / 8;
             while (ptr < this.buf.length) {
                 if (myhex[i] == null) Util.die();
                 var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
                 if (!m) { i++; continue; }
-                Util.assert(i == i0 || /^0+$/.test(m[3]))
+                Util.assert(i == hexStartIdx || /^0+$/.test(m[3]))
 
 
                 var bytes = [0x10, parseInt(m[1], 16), parseInt(m[2], 16), 0]
@@ -476,7 +596,7 @@ module TDev.AST.Bytecode
 
             if (shortForm) {
                 for (var j = 0; j < myhex.length; ++j) {
-                    if (!(i0 <= j && j <= i) && this.isDataRecord(myhex[j]))
+                    if (!(hexStartIdx <= j && j <= i) && this.isDataRecord(myhex[j]))
                         myhex[j] = "";
                 }
             } else {
@@ -504,9 +624,16 @@ module TDev.AST.Bytecode
             } else return -1;
         }
 
+        commentAt(idx:number, s:string)
+        {
+            this.comment("0x" + (2*idx).toString(16) + ": " + s)
+        }
+
         comment(s:string)
         {
-            this.csource += "\n// " + s + "\n"
+            if (!/\n$/.test(this.csource))
+                this.csource += "\n"
+            this.csource += "// " + s + "\n"
         }
 
         push(n:number)
@@ -838,7 +965,7 @@ module TDev.AST.Bytecode
             } else if (e.referencedData()) {
                 this.globalIndex(e.referencedData()).emitLoad(this.proc)
             } else if (e.referencedLibrary()) {
-                // TODO
+                // TODO just ignore?
             } else if (e.args[0] && e.args[0].referencedRecord()) {
                 var rrec = e.args[0].referencedRecord()
                 if (p.getName() == "create") {
@@ -888,7 +1015,7 @@ module TDev.AST.Bytecode
                     var op = this.proc.emit("LDPTR", 0);
                     op.arg0 = args[1].getLiteral()
                     this.binary.emitString(op.arg0, false)
-                    this.proc.emit("push {r1}",  0xb402);
+                    this.proc.emit("push {r1}", 0xb402);
                     this.proc.emitCall(nm, 0)
                     return
                 }
@@ -934,7 +1061,7 @@ module TDev.AST.Bytecode
                         if (!inf)
                             Util.oops("unhandled enum val: " + l.enumVal)
                         if (inf.type == "E")
-                            this.proc.emitCall(l.enumVal, 0)
+                            this.proc.emitInt(inf.value)
                         else if (inf.type == "F" && inf.args == 0)
                             this.proc.emitCall(l.enumVal, 0)
                         else
@@ -957,7 +1084,7 @@ module TDev.AST.Bytecode
                 this.emitInt(l.data ? 1 : 0)
             }
             else {
-                Util.oops("invalid literal emit " + l.data) // TODO
+                Util.oops("invalid literal emit " + l.data)
             }
         }
 
@@ -979,7 +1106,7 @@ module TDev.AST.Bytecode
             this.emitInt(caps.length)
             var op = this.proc.emit("LDPTR", 0)
             op.arg0 = inlproc
-            this.proc.emit("push {r1}",  0xb402);
+            this.proc.emit("push {r1}", 0xb402);
             this.proc.emitCall("action::mk", 0)
 
             caps.forEach((l, i) => {
