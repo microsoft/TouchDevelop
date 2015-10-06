@@ -971,7 +971,7 @@ module TDev
 
         public handleKey(e:KeyboardEvent) : boolean
         {
-            if (this.onNextDisplay && (e.keyName == "Esc" || (e.keyName == "Enter" && !e.fromTextArea))) {
+            if (this.onNextDisplay && (e.keyName == "Esc" || ((e.keyName == "Enter" || e.keyName == "Tab") && !e.fromTextArea))) {
                 this.display();
                 return true;
             }
