@@ -397,6 +397,30 @@ module TDev.AST.Bytecode
             return idx - this.index;
         }
 
+        peepHole()
+        {
+            var res = []
+            for (var i = 0; i < this.body.length; ++i) {
+                var op = this.body[i]
+                var op2 = this.body[i + 1]
+
+                if (op2) {
+                    if (op.name == "push {r0}" && op2.name == "pop {r0}") {
+                        i++;
+                        continue
+                    }
+
+                    if (op.name == "B" && op.arg0 == op2) {
+                        continue; // skip B to next instruction
+                    }
+                }
+
+                res.push(op)
+            }
+
+            this.body = res
+        }
+
         expandOpcodes()
         {
             var res:Opcode[] = []
@@ -441,6 +465,8 @@ module TDev.AST.Bytecode
                 res.push(op)
             })
             this.body = res
+
+            this.peepHole()
         }
 
         emitClrs(omit:LocalDef, inclArgs = false)
