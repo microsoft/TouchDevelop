@@ -2085,6 +2085,7 @@ action analog_set_pitch_pin(#xpU1U000JWEY2Boq name: String) {
   #ksrlzJbUsmtEkaBH // {help:functions/analog-set-pitch}
   #xQhxWqWeqz22iboM // {weight:12}
   #x7Gl6mIAeDddLD4A // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #WHQMX8TGwNk4rHSx data→pitch_pin := $name;
   meta sync;
 }
 #gEmhFkaGb62VAwjT
@@ -2096,4 +2097,18 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o milli
   #xEGCJ6YyP3Gaw9ug // {weight:14}
   #Nv7yTShmVzRRmckP // {hints:frequency:400}
   #lyVvmxzXMSk4YDmd // {hints:millis:500}
+  #fx1pQM2jYhWeMW8F if data→pitch_pin→is_invalid `or` data→pitch_pin→is_empty then {
+    #X9dWOHCIYzY5e4Eq code→warning("Pitch pin not set! Use `pins->set pitch pin` to setup which pin to use.");
+  }
+  #wunHmKjgrpZ9byII if $frequency < 0 then {
+    #Ml7QifWVhfftWKcq code→warning("frequency is too low");
+  }
+  #qvLwajJDb3fREXyj if $millis ≤ 0 then {
+    #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
+  }
+}
+#KgNK732SuRLWRKOO
+var pitch_pin : String {
+  // {shim:}
+  transient = true;
 }

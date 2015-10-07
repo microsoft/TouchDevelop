@@ -599,12 +599,14 @@ module TDev
 
             toks.forEach((e:HTMLElement, i:number) => {
                 if (e == inlineEditor) return;
-                e.className += " calcToken";
+                if (!/tokenPlaceholder/i.test(e.className))
+                    e.classList.add("calcToken");
                 var nxt = toks[i + 1];
                 var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
-                if (spc)
+                // not needed with token rendering
+                //if (spc)
                     // Add padding after this element if needed
-                    e.className += " calcSpaceAfter";
+                 //   e.classList.add("calcSpaceAfter");
             });
             if (toks.length == 1) {
                 var e = span("calcInvisible", ".");
@@ -971,7 +973,7 @@ module TDev
 
         public handleKey(e:KeyboardEvent) : boolean
         {
-            if (this.onNextDisplay && (e.keyName == "Esc" || (e.keyName == "Enter" && !e.fromTextArea))) {
+            if (this.onNextDisplay && (e.keyName == "Esc" || ((e.keyName == "Enter" || e.keyName == "Tab") && !e.fromTextArea))) {
                 this.display();
                 return true;
             }

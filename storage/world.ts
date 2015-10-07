@@ -544,7 +544,7 @@ module TDev {
                 if (!Cloud.lite && data.installedHeaders.time) {
                     var now = new Date().getTime();
                     var seconds = (now - data.installedHeaders.time * 1000) / 1000;
-                    if (Math.abs(seconds) > 120) {
+                    if (Math.abs(seconds) > 180) {
                         HTML.showProgressNotification(v ? undefined : "syncing canceled.");
                         syncVersion = undefined;
                         if (onBadTime) onBadTime(seconds);

@@ -3260,8 +3260,8 @@ module TDev{
         }
 
         var ln2 = ln.slice(0, 2)
-        //normalize ln
-        if (ln2 == "zh") ln = "zh-CHS"
+        // normalize ln
+        if (ln2 == "zh" && (ln != "zh-CHS" && ln != "zh-CHT")) ln = "zh-CHS";
 
         sForPlural = ln2 == "en" || ln2 == "es" || ln2 == "pt" || ln2 == "de" || ln2 == "fr";
 

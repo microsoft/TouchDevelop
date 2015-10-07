@@ -9069,7 +9069,8 @@
                                     HTML.showProgressNotification(lf("requesting new invitiation code..."));
                                     this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
                                 }));
-                                ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
+                                if (!Cloud.isRestricted())
+                                    ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
                                 ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
                                 if (u.isclass)
                                     ad.appendChild(HTML.mkButton(lf("approvals"), () => { this.approvals(); }));

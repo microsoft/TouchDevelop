@@ -109,6 +109,7 @@ module TDev
             case "End":
                 this.moveCarret(1000);
                 return true;
+            case "Tab":    
             case "Enter":
                 this.onEnter();
                 return true;
