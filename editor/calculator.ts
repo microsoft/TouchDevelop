@@ -1710,7 +1710,7 @@ module TDev
                 }
             })
 
-            var locs = this.expr.locals.concat(res)
+            var locs = this.expr.locals ? this.expr.locals.concat(res) : res;
             locs = locs.filter(loc => !loc.isSynthetic)
             return locs;
         }
