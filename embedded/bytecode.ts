@@ -140,6 +140,14 @@ module TDev.AST.Bytecode
         return funcInfo[name]
     }
 
+    function tohex(n:number)
+    {
+        if (n < 0 || n > 0xffff)
+            return ("0x" + n.toString(16)).toLowerCase()
+        else
+            return ("0x" + ("000" + n.toString(16)).slice(-4)).toLowerCase()
+    }
+
 
     export class Opcode
     {
@@ -164,6 +172,8 @@ module TDev.AST.Bytecode
                     this.info = "0x" + this.code.toString(16)
                 else if (this.arg0 instanceof Location)
                     this.info = this.arg0.toString()
+                else if (this.arg0 instanceof Opcode)
+                    this.info = "@" + tohex(this.arg0.index * 2)
                 else this.info = "";
             }
 
@@ -727,7 +737,7 @@ module TDev.AST.Bytecode
 
         commentAt(idx:number, s:string)
         {
-            this.comment("0x" + (2*idx).toString(16) + ": " + s)
+            this.comment(tohex(2*idx) + ": " + s)
         }
 
         comment(s:string)
@@ -740,7 +750,7 @@ module TDev.AST.Bytecode
         push(n:number)
         {
             this.buf.push(n)
-            this.csource += "0x" + ("000" + n.toString(16)).slice(-4) + ", "
+            this.csource += tohex(n) + ", "
         }
 
         serialize()
@@ -1069,6 +1079,8 @@ module TDev.AST.Bytecode
                 this.globalIndex(e.referencedData()).emitLoad(this.proc)
             } else if (e.referencedLibrary()) {
                 // TODO just ignore?
+            } else if (e.calledAction() || e.calledExtensionAction()) {
+                this.handleActionCall(e);
             } else if (e.args[0] && e.args[0].referencedRecord()) {
                 var rrec = e.args[0].referencedRecord()
                 if (p.getName() == "create") {
@@ -1090,8 +1102,6 @@ module TDev.AST.Bytecode
                 } else {
                     Util.oops("unhandled entry record operation: " + p.getName())
                 }
-            } else if (e.calledAction() || e.calledExtensionAction()) {
-                this.handleActionCall(e);
             } else if (pkn == "Invalid") {
                 this.emitInt(0);
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
@@ -1276,6 +1286,8 @@ module TDev.AST.Bytecode
             if (!i.branches)
                 return
 
+            var afterall = this.proc.mkLabel();
+
             i.branches.forEach((b, k) => {
                 if (!b.condition) {
                     this.dispatch(b.body)
@@ -1284,9 +1296,12 @@ module TDev.AST.Bytecode
                     var after = this.proc.mkLabel();
                     this.proc.emitJmp(after, "JMPZ");
                     this.dispatch(b.body)
+                    this.proc.emitJmp(afterall)
                     this.proc.emitLbl(after)
                 }
             })
+
+            this.proc.emitLbl(afterall)
         }
 
         globalIndex(l:GlobalDef):Location
