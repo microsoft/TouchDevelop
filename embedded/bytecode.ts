@@ -868,7 +868,7 @@ module TDev.AST.Bytecode
     {
         public binary = new Binary();
         private proc:Procedure;
-        private numStmts = 0;
+        private numStmts = 1;
 
         constructor(private app:App)
         {
@@ -883,6 +883,12 @@ module TDev.AST.Bytecode
         public run()
         {
             setup();
+
+            if (AST.TypeChecker.tcApp(Script) > 0) {
+                HTML.showProgressNotification(lf("Your script has errors! Just saving the source."))
+                return;
+            }
+
             var pre = new ReachabilityVisitor({});
             pre.run(this.app)
 
@@ -921,12 +927,19 @@ module TDev.AST.Bytecode
 
         public serialize(shortForm:boolean, metainfo:string, scripttext:string)
         {
-            this.binary.serialize()
-            var len0 = this.binary.buf.length * 2
+            shortForm = false; // this doesn't work yet
+            var len0 = 0
+
+            if (this.binary.procs.length == 0) {
+                shortForm = true // which is great in case there are errors in the program
+            } else {
+                this.binary.serialize()
+                len0 = this.binary.buf.length * 2
+            }
+
             this.binary.addSource(metainfo, scripttext)
             var len1 = this.binary.buf.length * 2 - len0
 
-            shortForm = false; // this doesn't work yet
             var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n"
             var r = 
                 "#include \"BitVM.h\"\n" +
@@ -1144,7 +1157,7 @@ module TDev.AST.Bytecode
             } else if (e.referencedData()) {
                 this.globalIndex(e.referencedData()).emitLoad(this.proc)
             } else if (e.referencedLibrary()) {
-                // TODO just ignore?
+                this.emitInt(0)
             } else if (e.calledAction() || e.calledExtensionAction()) {
                 this.handleActionCall(e);
             } else if (e.args[0] && e.args[0].referencedRecord()) {
@@ -1337,7 +1350,7 @@ module TDev.AST.Bytecode
                     this.localIndex(d).emitLoad(this.proc);
                 }
             } else if (d instanceof SingletonDef) {
-                // nothing
+                this.emitInt(0)
             }
             else {
                 Util.oops("invalid thing: " + d ? d.nodeType() : "(null)")
