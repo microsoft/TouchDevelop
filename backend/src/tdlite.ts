@@ -3743,6 +3743,7 @@ async function _initGroupsAsync() : Promise<void>
             let group = new PubGroup();
             group.name = withDefault(body["name"], "unnamed");
             group.isclass = orFalse(body["isclass"]);
+            if (!fullTD) group.isclass = true;
             setGroupProps(group, body);
             group.userid = req.userid;
             group.userplatform = getUserPlatforms(req);
@@ -4333,35 +4334,35 @@ async function _initUsersAsync() : Promise<void>
             }
         }
     });
-    addRoute("POST", "*user", "swapauth", async (req6: ApiRequest) => {
-        checkPermission(req6, "root");
-        if (req6.status != 200) {
+    addRoute("POST", "*user", "swapauth", async (req: ApiRequest) => {
+        checkPermission(req, "root");
+        if (req.status != 200) {
             return;
         }
-        if (req6.rootId == req6.argument) {
-            req6.status = httpCode._412PreconditionFailed;
+        if (req.rootId == req.argument) {
+            req.status = httpCode._412PreconditionFailed;
             return;
         }
-        let otherUser = await getPubAsync(req6.argument, "user");
+        let otherUser = await getPubAsync(req.argument, "user");
         if (otherUser == null) {
-            req6.status = httpCode._404NotFound;
+            req.status = httpCode._404NotFound;
             return;
         }
-        let rootPassId = req6.rootPub["login"];
+        let rootPassId = req.rootPub["login"];
         let rootPass = await passcodesContainer.getAsync(rootPassId);
         let otherPassId = otherUser["login"];
         let otherPass = await passcodesContainer.getAsync(otherPassId);
         if (rootPass == null || otherPass == null) {
-            req6.status = httpCode._424FailedDependency;
+            req.status = httpCode._424FailedDependency;
             return;
         }
         await passcodesContainer.updateAsync(rootPassId, async (entry4: JsonBuilder) => {
             entry4["userid"] = otherUser["id"];
         });
         await passcodesContainer.updateAsync(otherPassId, async (entry5: JsonBuilder) => {
-            entry5["userid"] = req6.rootId;
+            entry5["userid"] = req.rootId;
         });
-        await pubsContainer.updateAsync(req6.rootId, async (entry6: JsonBuilder) => {
+        await pubsContainer.updateAsync(req.rootId, async (entry6: JsonBuilder) => {
             entry6["login"] = otherPassId;
         });
         await pubsContainer.updateAsync(otherUser["id"], async (entry7: JsonBuilder) => {
@@ -4370,7 +4371,7 @@ async function _initUsersAsync() : Promise<void>
         let jsb4 = {};
         jsb4["oldrootpass"] = rootPass;
         jsb4["oldotherpass"] = otherPass;
-        req6.response = clone(jsb4);
+        req.response = clone(jsb4);
     });
     addRoute("POST", "*user", "token", async (req7: ApiRequest) => {
         checkPermission(req7, "signin-" + req7.rootId);
@@ -6336,7 +6337,10 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
 function setGroupProps(group: PubGroup, body: JsonObject) : void
 {
     let bld = clone(group.toJson());
-    setFields(bld, body, ["description", "school", "grade", "allowappstatistics", "allowexport", "isrestricted", "pictureid"]);
+    let fields = ["description", "pictureid"]
+    if (fullTD)
+        fields = fields.concat(["school", "grade", "allowappstatistics", "allowexport", "isrestricted"]);    
+    setFields(bld, body, fields);
     group.fromJson(clone(bld));
 }
 
