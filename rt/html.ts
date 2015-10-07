@@ -904,12 +904,18 @@ module TDev.HTML {
     }
     
     export function browserDownload(href: string, filename: string) {
+
+        document.location.href = href;
+        
+        /* Blocked in schools
+        
         var link = <HTMLAnchorElement>window.document.createElement('a');
         link.href = href;
         (<any>link).download = filename
         var click = document.createEvent("Event");
         click.initEvent("click", true, true);
         link.dispatchEvent(click);
+        */
     }
 
     export function showNotification(msg: HTMLElement) {
