@@ -2412,8 +2412,12 @@ function _initWorkspaces() : void
                     }
                 }
                 let settings = clone(sett.toJson());
-                setFields(settings, req4.body, "aboutme\nculture\neditorMode\nemailfrequency\nemailnewsletter2\ngender\nhowfound\nlocation\nnickname\nnotifications\nnotifications2\noccupation\npicture\npicturelinkedtofacebook\nprogrammingknowledge\nrealname\nschool\ntwitterhandle\nwallpaper\nwebsite\nyearofbirth");
-                for (let k of "culture\nemail\npreviousemail\ngender\nlocation\noccupation\nprogrammingknowledge\nrealname\nschool".split("\n")) {
+                setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
+                    "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
+                    "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
+                    "website", "yearofbirth"]);
+                for (let k of ["culture", "email", "previousemail", "gender", "location", "occupation", 
+                               "programmingknowledge", "realname", "school"]) {
                     let val = settings[k];
                     if (orEmpty(val) != "") {
                         settings[k] = encrypt(val, emailKeyid);
@@ -3759,32 +3763,32 @@ async function _initGroupsAsync() : Promise<void>
             await returnOnePubAsync(groups, clone(jsb1), req);
         }
     });
-    addRoute("POST", "*group", "", async (req1: ApiRequest) => {
-        checkGroupPermission(req1);
-        if (req1.status == 200) {
+    addRoute("POST", "*group", "", async (req: ApiRequest) => {
+        checkGroupPermission(req);
+        if (req.status == 200) {
             let needsReindex = false;
-            let user = orEmpty(req1.body["userid"]);
-            if (user == req1.rootPub["pub"]["userid"]) {
+            let user = orEmpty(req.body["userid"]);
+            if (user == req.rootPub["pub"]["userid"]) {
                 user = "";
             }
             if (user != "") {
                 let newOwner = await getPubAsync(user, "user");
-                if (newOwner == null || ! hasPermission(newOwner, "post-group") || ! newOwner["groups"].hasOwnProperty(req1.rootId)) {
-                    req1.status = restify.http()._412PreconditionFailed;
+                if (newOwner == null || ! hasPermission(newOwner, "post-group") || ! newOwner["groups"].hasOwnProperty(req.rootId)) {
+                    req.status = restify.http()._412PreconditionFailed;
                     return;
                 }
-                await groups.reindexAsync(req1.rootId, async (v: JsonBuilder) => {
+                await groups.reindexAsync(req.rootId, async (v: JsonBuilder) => {
                     v["pub"]["userid"] = user;
                 });
                 await reindexGroupsAsync(newOwner);
-                await reindexGroupsAsync(req1.userinfo.json);
+                await reindexGroupsAsync(req.userinfo.json);
             }
-            await updateAndUpsertAsync(pubsContainer, req1, async (entry: JsonBuilder) => {
+            await updateAndUpsertAsync(pubsContainer, req, async (entry: JsonBuilder) => {
                 let group1 = PubGroup.createFromJson(clone(entry["pub"]));
-                setGroupProps(group1, req1.body);
+                setGroupProps(group1, req.body);
                 entry["pub"] = group1.toJson();
             });
-            req1.response = ({});
+            req.response = ({});
         }
     });
     addRoute("GET", "*group", "code", async (req2: ApiRequest) => {
@@ -3922,21 +3926,21 @@ async function _initGroupsAsync() : Promise<void>
             req6.response = ({});
         }
     });
-    addRoute("DELETE", "*group", "code", async (req7: ApiRequest) => {
-        checkGroupPermission(req7);
-        if (req7.status == 200) {
-            let s1 = normalizeAndHash(req7.rootPub["code"]);
+    addRoute("DELETE", "*group", "code", async (req: ApiRequest) => {
+        checkGroupPermission(req);
+        if (req.status == 200) {
+            let s1 = normalizeAndHash(req.rootPub["code"]);
             if (s1 == "") {
-                req7.status = 404;
+                req.status = 404;
             }
             else {
                 await passcodesContainer.updateAsync(s1, async (entry4: JsonBuilder) => {
                     entry4["kind"] = "reserved";
                 });
-                await pubsContainer.updateAsync(req7.rootId, async (entry5: JsonBuilder) => {
+                await pubsContainer.updateAsync(req.rootId, async (entry5: JsonBuilder) => {
                     delete entry5["code"];
                 });
-                req7.response = ({});
+                req.response = ({});
             }
         }
     });
@@ -6330,7 +6334,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
 function setGroupProps(group: PubGroup, body: JsonObject) : void
 {
     let bld = clone(group.toJson());
-    setFields(bld, body, "description\nschool\ngrade\nallowappstatistics\nallowexport\nisrestricted\npictureid");
+    setFields(bld, body, ["description", "school", "grade", "allowappstatistics", "allowexport", "isrestricted", "pictureid"]);
     group.fromJson(clone(bld));
 }
 
@@ -6434,7 +6438,7 @@ async function _initAbusereportsAsync() : Promise<void>
         if (req1.status == 200) {
             let res = td.toString(req1.body["resolution"]);
             await pubsContainer.updateAsync(req1.rootId, async (entry1: JsonBuilder) => {
-                setFields(entry1["pub"], req1.body, "resolution");
+                setFields(entry1["pub"], req1.body, ["resolution"]);
             });
             await pubsContainer.updateAsync(pub["publicationid"], async (entry2: JsonBuilder) => {
                 entry2["abuseStatus"] = res;
@@ -6774,9 +6778,9 @@ function handleHttps(req: restify.Request, res: restify.Response) : void
     }
 }
 
-function setFields(bld: JsonBuilder, body: JsonObject, fields: string) : void
+function setFields(bld: JsonBuilder, body: JsonObject, fields: string[]) : void
 {
-    for (let fld of fields.split("\n")) {
+    for (let fld of fields) {
         if (body.hasOwnProperty(fld) && typeof body[fld] == typeof bld[fld]) {
             bld[fld] = body[fld];
         }
@@ -7373,7 +7377,7 @@ async function _initChannelsAsync() : Promise<void>
 function setChannelProps(lst: PubChannel, body: JsonObject) : void
 {
     let bld = clone(lst.toJson());
-    setFields(bld, body, "description\npictureid");
+    setFields(bld, body, ["description", "pictureid"]);
     lst.fromJson(clone(bld));
 }
 
@@ -7953,7 +7957,7 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
             pub[k] = empty[k];
         }
     }
-    setFields(pub, body, "description\nscriptid\nredirect\nartid\nartcontainer");
+    setFields(pub, body, ["description", "scriptid", "redirect", "artid", "artcontainer"]);
     pub["parentpath"] = "";
     pub["scriptname"] = "";
     let sid = await getPubAsync(pub["scriptid"], "script");
