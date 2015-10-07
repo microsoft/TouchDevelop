@@ -261,24 +261,39 @@ module TDev
         static firstTime = true;
         static bytecodeCompile(showSource = false)
         {
+            var guid = Script.localGuid
+            var st = TheEditor.saveStateAsync()
+            .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
+
             var c = new AST.Bytecode.Compiler(Script)
             try {
-                var res = c.compile(!ScriptProperties.firstTime)
-                ScriptProperties.firstTime = false
+                c.run()
             } catch (e) {
                 ModalDialog.showText(e.stack)
                 return
             }
 
-            if (showSource)
-                ModalDialog.showText(res.csource)
+            st.then(r => {
+                var hd:Cloud.Header = r[1]
+                var txt:string = r[0]
 
-            var link = <HTMLAnchorElement>window.document.createElement('a');
-            link.href = res.dataurl;
-            (<any>link).download = "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
-            var click = document.createEvent("Event");
-            click.initEvent("click", true, true);
-            link.dispatchEvent(click);
+                var res = c.serialize(!ScriptProperties.firstTime, JSON.stringify(hd), txt)
+                if (showSource)
+                    ModalDialog.showText(res.csource)
+
+                ScriptProperties.firstTime = false
+
+                var link = <HTMLAnchorElement>window.document.createElement('a');
+                link.href = res.dataurl;
+                (<any>link).download = "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
+                var click = document.createEvent("Event");
+                click.initEvent("click", true, true);
+                link.dispatchEvent(click);
+            })
+            .done(() => {},
+            e => {
+                ModalDialog.showText(e.stack)
+            })
         }
 
         static diffToBase()

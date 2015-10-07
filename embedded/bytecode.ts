@@ -19,8 +19,8 @@ module TDev.AST.Bytecode
 
     /*
     TODO Peep-hole optimizations:
-    push {rA} pop {rA} -> nothing
-    push {rA} pop {rB} -> mov rB, rA
+    push {rA} pop {rB} -> mov rB, rA ?
+    str X; ldr X -> str X
     */
 
     interface FuncInfo {
@@ -678,6 +678,8 @@ module TDev.AST.Bytecode
         {
             var myhex = hex.slice(0)
 
+            Util.assert(this.buf.length < 32000)
+
             var i = hexStartIdx;
             var ptr = 0
             var togo = 32000 / 8;
@@ -789,6 +791,65 @@ module TDev.AST.Bytecode
                 }
             })
         }
+
+        addSource(meta:string, text:string)
+        {
+            while (this.buf.length % 8 != 0)
+                this.buf.push(0)
+            
+            meta = Util.toUTF8(meta)
+            text = Util.toUTF8(text)
+
+            Util.assert(meta.length < 0xffff)
+            Util.assert(text.length < 0xffff)
+
+            this.buf.push(0x1441)
+            this.buf.push(0x2f0e)
+            this.buf.push(0x2fb8)
+            this.buf.push(0xbba2)
+            this.buf.push(meta.length)
+            this.buf.push(text.length)
+            this.buf.push(0)
+            this.buf.push(0)
+
+            meta += text
+            for (var i = 0; i < meta.length; i += 2) {
+                var c0 = meta.charCodeAt(i) || 0
+                var c1 = meta.charCodeAt(i+1) || 0
+                Util.assert(c0 <= 255)
+                Util.assert(c1 <= 255)
+                this.buf.push((c1 << 8) | c0)
+            }
+        }
+
+        static extractSource(hexfile:string)
+        {
+            var metaLen = 0
+            var textLen = 0
+            var toGo = 0
+            var buf = ""
+            hexfile.split(/\r?\n/).forEach(ln => {
+                var m = /^:10....0041140E2FB82FA2BB(....)(....)(....)(....)(..)/.exec(ln)
+                if (m) {
+                    metaLen = parseInt(swapBytes(m[1]), 16)
+                    textLen = parseInt(swapBytes(m[2]), 16)
+                    toGo = metaLen + textLen
+                } else if (toGo > 0) {
+                    m = /^:10....00(.*)(..)$/.exec(ln)
+                    var k = m[1]
+                    while (toGo > 0 && k.length > 0) {
+                        buf += String.fromCharCode(parseInt(k[0] + k[1], 16))
+                        k = k.slice(2)
+                        toGo--
+                    }
+                }
+            })
+            Util.assert(toGo == 0 && buf.length == metaLen + textLen)
+            return {
+                meta: Util.fromUTF8(buf.slice(0, metaLen)),
+                text: Util.fromUTF8(buf.slice(metaLen))
+            }
+        }
     }
 
     export class ReachabilityVisitor
@@ -807,6 +868,7 @@ module TDev.AST.Bytecode
     {
         public binary = new Binary();
         private proc:Procedure;
+        private numStmts = 0;
 
         constructor(private app:App)
         {
@@ -818,7 +880,7 @@ module TDev.AST.Bytecode
             return d.visitorState === true;
         }
 
-        private run()
+        public run()
         {
             setup();
             var pre = new ReachabilityVisitor({});
@@ -857,17 +919,21 @@ module TDev.AST.Bytecode
             }
         }
 
-        public compile(shortForm:boolean)
+        public serialize(shortForm:boolean, metainfo:string, scripttext:string)
         {
-            shortForm = false; // this doesn't work yet
-
-            this.run()
             this.binary.serialize()
+            var len0 = this.binary.buf.length * 2
+            this.binary.addSource(metainfo, scripttext)
+            var len1 = this.binary.buf.length * 2 - len0
+
+            shortForm = false; // this doesn't work yet
             var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n"
             var r = 
                 "#include \"BitVM.h\"\n" +
                 "namespace bitvm {\n" +
                 "const uint16_t bytecode[32000] __attribute__((aligned(0x20))) = {\n" + 
+                "// Stats: " + this.numStmts + " lines, output " + len0 + " bytes (+" + len1 + " src); " +
+                    (len0 / this.numStmts).toFixed(1) + " bytes/line\n" +
                 this.binary.csource + "\n}; }\n"
             return {
                 dataurl: "data:application/x-microbit-hex;base64," + Util.base64Encode(hex),
@@ -1407,7 +1473,10 @@ module TDev.AST.Bytecode
 
         visitCodeBlock(b:CodeBlock)
         {
+            Util.assert(this.proc.currStack == 0);
+
             b.stmts.forEach(s => {
+                this.numStmts++;
                 this.dispatch(s);
                 Util.assert(this.proc.currStack == 0);
             })
@@ -1415,6 +1484,8 @@ module TDev.AST.Bytecode
 
         visitAction(a:Action)
         {
+            this.numStmts++;
+
             this.proc = this.procIndex(a);
 
             var ret = this.proc.mkLabel()

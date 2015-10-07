@@ -717,9 +717,40 @@ module TDev
             d.style.backgroundImage = Cloud.artCssImg(id, true);
             return d;
         }
+
+        function handleHexFile(file: File)
+        {
+            var guid = ""
+
+            HTML.fileReadAsDataURLAsync(file)
+            .then((dat:string) => {
+                var str = RT.String_.valueFromArtUrl(dat)
+                var tmp = AST.Bytecode.Binary.extractSource(str)
+                if (!tmp.meta) {
+                    HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
+                    return
+                }
+                var hd:Cloud.Header = JSON.parse(tmp.meta)
+                hd.guid = Util.guidGen()
+                guid = hd.guid
+                // renaming is tricky - would need to rename the text as well ...
+                // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
+
+                return World.setInstalledScriptAsync(hd, tmp.text, null)
+                .then(() => Browser.TheHost.clearAsync(false))
+                .then(() => {
+                    Util.setHash("#list:installed-scripts:script:" + guid + ":overview")
+                })
+            })
+            .done()
+        }
         
         function uploadFile(file: File) {
             if (!file) return;
+                if (/\.hex$/.test(file.name)) {
+                    handleHexFile(file)
+                    return
+                }
                 if (Cloud.anonMode(lf("uploading art"))) return;
                 var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
                 var sizeLimit = 1
@@ -836,7 +867,8 @@ module TDev
                 }
             }, false);
             r.addEventListener('drop', (e) => {
-                var files = Util.toArray<File>(e.dataTransfer.files).filter((file: File) => HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
+                var files = Util.toArray<File>(e.dataTransfer.files)
+                    .filter((file: File) => /\.hex$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
                 if ((Cloud.hasPermission("batch-post-art")  || TDev.dbg) && files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
