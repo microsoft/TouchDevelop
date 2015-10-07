@@ -951,8 +951,7 @@ module TDev
                 this.deleteSelectedTokens();
                 this.display();
             } else {
-                if ((isDel && this.expr.tokens.length == this.cursorPosition) ||
-                    (!quick && this.expr.tokens.length == 0)) {
+                if (!quick && this.expr.tokens.length == 0) {
                     TheEditor.selector.deleteSelection();
                     TheEditor.dismissSidePane();
                     return;
