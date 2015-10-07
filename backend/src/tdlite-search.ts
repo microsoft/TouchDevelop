@@ -14,13 +14,23 @@ var clone = td.clone;
 import * as azureSearch from "./azure-search"
 import * as parallel from "./parallel"
 
-
 var logger: td.AppLogger;
 var artIndex: azureSearch.Index;
 var docsIndex: azureSearch.Index;
 var pubsIndex: azureSearch.Index;
 
-var documentMimetypes_json: string = "{ \n  \"image/jpeg\": \"jpg\",\n  \"image/png\": \"png\",\n  \"audio/wav\": \"wav\",\n  \"text/css\": \"css\",\n  \"application/javascript\": \"js\",\n  \"text/plain\": \"txt\",\n  \"application/pdf\": \"pdf\",\n  \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\": \"docx\",\n  \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\": \"xlsx\",\n  \"application/vnd.openxmlformats-officedocument.presentationml.presentation\": \"pptx\"\n}\n";
+var documentMimetypes: td.SMap<string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "audio/wav": "wav",
+    "text/css": "css",
+    "application/javascript": "js",
+    "text/plain": "txt",
+    "application/pdf": "pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
+};
 
 export class ArtEntry
     extends td.JsonRecord
@@ -231,15 +241,7 @@ export class PubQuery
 
 }
 
-export async function initAsync() : Promise<void>
-{
-    logger = td.createLogger("search");
-    await initArtSearchIndexAsync();
-    await initDocsSearchIndexAsync();
-    await initPubSearchIndexAsync();
-}
-
-async function initArtSearchIndexAsync() : Promise<void>
+async function initArtSearchIndexAsync(noCreate:boolean) : Promise<void>
 {
     let schema = azureSearch.createIndexDefinition("art1", "id");
     let name = schema.addField("name", "Edm.String");
@@ -263,11 +265,14 @@ async function initArtSearchIndexAsync() : Promise<void>
     profile.setWeight(imaggatags, 1);
     profile.addMagnitude(score, 5, "linear", 0, 10, true);
     schema.addCORSOrigin("*");
-    artIndex = await schema.createOrUpdateAsync();
+    if (noCreate)
+        artIndex = schema.get();
+    else
+        artIndex = await schema.createOrUpdateAsync();
     assert(artIndex != null, "");
 }
 
-async function initDocsSearchIndexAsync() : Promise<void>
+async function initDocsSearchIndexAsync(noCreate:boolean) : Promise<void>
 {
     let schema = azureSearch.createIndexDefinition("docs1", "id");
     schema.addCORSOrigin("*");
@@ -290,7 +295,10 @@ async function initDocsSearchIndexAsync() : Promise<void>
     profile.setWeight(description, 50);
     profile.setWeight(body, 10);
     profile.addMagnitude(priority, 2, "linear", 0, 0, false);
-    docsIndex = await schema.createOrUpdateAsync();
+    if (noCreate)
+        docsIndex = schema.get();
+    else
+        docsIndex = await schema.createOrUpdateAsync();
     assert(docsIndex != null, "");
 }
 
@@ -405,7 +413,7 @@ async function exampleAsync() : Promise<void>
     let search = query.toSearch();
 }
 
-async function initPubSearchIndexAsync() : Promise<void>
+async function initPubSearchIndexAsync(noCreate:boolean) : Promise<void>
 {
     let schema = azureSearch.createIndexDefinition("pubs1", "id");
     let kind = schema.addField("kind", "Edm.String");
@@ -459,7 +467,10 @@ async function initPubSearchIndexAsync() : Promise<void>
     profile.setWeight(hashes, 20);
     profile.setWeight(features, 20);
     schema.addCORSOrigin("*");
-    pubsIndex = await schema.createOrUpdateAsync();
+    if (noCreate)
+        pubsIndex = schema.get();
+    else
+        pubsIndex = await schema.createOrUpdateAsync();
     assert(pubsIndex != null, "");
 }
 
@@ -469,7 +480,6 @@ async function initPubSearchIndexAsync() : Promise<void>
 export function createPubEntry(id: string, options_0: IPubEntry = {}) : PubEntry
 {
     let options_ = new PubEntry(); options_.load(options_0);
-    let entry: PubEntry;
     assert(id != "", "missing art id");
     assert(options_.id == "", "id already specified");
     if (options_.hashes == null) {
@@ -480,7 +490,6 @@ export function createPubEntry(id: string, options_0: IPubEntry = {}) : PubEntry
     }
     options_.id = id;
     return options_;
-    return entry;
 }
 
 /**
@@ -515,30 +524,41 @@ export async function statisticsAsync() : Promise<JsonObject>
 /**
  * Removes unwanted characters, spurious whitespaces
  */
-function cleanCode(text: string) : string
-{
-    let out: string;
+function cleanCode(text: string, td: boolean): string {
     if (text == null || text == "") {
         return "";
     }
-    else {
-        // statement ids
-        text = text.replace(/#[a-zA-Z0-9]{12,}/g, "\n");
-        // string resources
-        text = text.replace(/"data:text\/plain;base64,[^"]+/g, "");
+    
+    // statement ids
+    if (td) {        
+        text = "\n" + text + "\n"
+        text = text.replace(/\n\s*#[a-zA-Z0-9]{12,}/g, "\n");
+        // note that . doesn't match \n
+        text = text.replace(/\n\s*(usage|resolve) .*\{[^\{\}]*\}/g, " ");
+        text = text.replace(/\n\s*meta import .*\{[^\{\}]*\}/g, " ");
+        text = text.replace(/\n\s*meta name/g, " "); // keep the name
+        text = text.replace(/\n\s*meta .*/g, " "); // remove all other metas
+        text = text.replace(/\[lib [\w\\]+\]/g, " "); // inline lib references
         // html tags
         text = text.replace(/<[^>]>/g, "");
-        text = text.replace(/[^a-zA-Z0-9-+*\/@_=\.,\s""':\\]/g, " ");
-        // spurious spaces
-        text = text.replace(/ {2,}/g, " ");
-        if (text.length > 16384) {
-            text = text.substr(0, 16384);
-        }
-        // make it all lower case
-        text = text.toLowerCase();
-        return text;
+        // un-escape unicode
+        text = text.replace(/\\u([a-fA-F0-9]{4})/g, (m, n) => String.fromCharCode(parseInt(n, 16)));
+    }    
+    // string resources
+    text = text.replace(/"data:text\/plain;base64,[^"]+/g, "");
+    
+    text = cloudSpecifcRepl(text);
+    
+    // non-searchable characters
+    text = text.replace(/[^a-zA-Z0-9-+*\/@_=\.,\s""':\\]/g, " ");
+    // spurious spaces
+    text = text.replace(/ {2,}/g, " ");
+    if (text.length > 16384) {
+        text = text.substr(0, 16384);
     }
-    return out;
+    // make it all lower case
+    text = text.toLowerCase();
+    return text;
 }
 
 /**
@@ -547,19 +567,37 @@ function cleanCode(text: string) : string
 export function toPubEntry(pub: JsonObject, body: string, features: string[], score: number) : PubEntry
 {
     let r: PubEntry;
+    let editor = orEmpty(pub["editor"]);
+    if (editor == "") editor = "touchdevelop";
     let entry = createPubEntry(pub["id"], {
         kind: pub["kind"],
         score: score,
         userid: orEmpty(pub["userid"]),
         username: orEmpty(pub["username"]).toLowerCase(),
-        body: cleanCode(body),
+        body: cleanCode(body, editor == "touchdevelop" || editor == "html"),
         features: features.map<string>(elt => elt.toLowerCase()),
         time: pub["time"]
     });
+    
+    //logger.debug("body: " + entry.body)
+    
     // if not specified, assign editor to touchdevelop
     // some pubs have a name or description
     entry.name = cleanQuery(pub["name"]);
     entry.description = cleanQuery(pub["description"]);
+    
+    if (entry.kind == "script") {
+        entry.editor = editor;
+        if (pub["updateroot"]) {
+            // we only index the latest version of the script
+            entry.id = pub["updateroot"];
+        }
+        if (editor == "html" ||
+            (editor == "touchdevelop" && /#docs/i.test(entry.description))) {
+            entry.kind = "docs";
+        }
+    }
+        
     // specific indexing
     if (entry.kind == "user") {
         entry.description = cleanQuery(pub["about"]);
@@ -579,12 +617,6 @@ export function toPubEntry(pub: JsonObject, body: string, features: string[], sc
         }
         else {
             entry.artkind = "document";
-        }
-    }
-    else if (entry.kind == "script") {
-        entry.editor = pub["editor"];
-        if (! entry.editor) {
-            entry.editor = "touchdevelop";
         }
     }
     entry.hashes = hashes(entry.description);
@@ -678,20 +710,27 @@ function parseProperty(text: string) : [string, string]
     return [key, value]
 }
 
+// TODO allow override
+function cloudSpecifcRepl(text: string)
+{
+    text = text.replace(/\bmicro:bit\b/ig, "microbit");
+    return text; 
+}
+
 /**
  * Removes unwanted characters, spurious whitespaces
  */
 function cleanQuery(text: string) : string
 {
-    let out: string;
     if (text == null || text == "") {
-        out = "";
+        return "";        
     }
     else {
-        out = text.replace(/[^a-zA-Z0-9#@*~ ]/g, "");
-        out = out.toLowerCase();
+        text = cloudSpecifcRepl(text);
+        text = text.replace(/[^a-zA-Z0-9#@*~ ]+/g, " ");
+        text = text.toLowerCase();
+        return text;
     }
-    return out;
 }
 
 function toPubQueryTest() : void
@@ -707,7 +746,22 @@ function toPubQueryTest() : void
         td.log(s + " -> " + url);
 
     }
-
 }
 
+export async function clearPubIndexAsync(): Promise<void> {
+    await pubsIndex.deleteIndexAsync();
+    await initPubSearchIndexAsync(false);
+}
 
+export async function clearArtIndexAsync(): Promise<void> {
+    await artIndex.deleteIndexAsync();
+    await initArtSearchIndexAsync(false);
+}
+
+export async function initAsync(noCreate = false) : Promise<void>
+{
+    logger = td.createLogger("search");
+    await initArtSearchIndexAsync(noCreate);
+    await initDocsSearchIndexAsync(noCreate);
+    await initPubSearchIndexAsync(noCreate);
+}

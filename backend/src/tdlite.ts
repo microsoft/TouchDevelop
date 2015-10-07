@@ -3652,6 +3652,8 @@ async function _initScriptsAsync() : Promise<void>
         let jsb1 = await getCardInfoAsync(req14, req14.rootPub);
         req14.response = clone(jsb1);
     });
+    
+    if (false)
     addRoute("POST", "admin", "reindexscripts", async (req15: ApiRequest) => {
         checkPermission(req15, "operator");
         if (req15.status == 200) {
@@ -4515,6 +4517,8 @@ async function _initUsersAsync() : Promise<void>
             req12.response = fetchResult1.toJson();
         }
     });
+    
+    if (false)
     addRoute("POST", "admin", "reindexusers", async (req13: ApiRequest) => {
         checkPermission(req13, "operator");
         if (req13.status == 200) {
@@ -7635,6 +7639,7 @@ function _initSearch() : void
     addRoute("POST", "art", "reindex", async (req2: ApiRequest) => {
         checkPermission(req2, "operator");
         if (req2.status == 200) {
+            await tdliteSearch.clearArtIndexAsync();
             /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
                 let batch = tdliteSearch.createArtUpdate();
                 for (let js of await addUsernameEtcCoreAsync(json)) {
@@ -7650,6 +7655,7 @@ function _initSearch() : void
     addRoute("POST", "pubs", "reindex", async (req3: ApiRequest) => {
         checkPermission(req3, "operator");
         if (req3.status == 200) {
+            await tdliteSearch.clearPubIndexAsync();
             /* async */ reindexStoreAsync(arts, req3);
             /* async */ reindexStoreAsync(comments, req3);
             /* async */ reindexStoreAsync(scripts, req3);
@@ -7684,11 +7690,17 @@ async function reindexStoreAsync(store: indexedStore.Store, req: ApiRequest) : P
                 }
             }
             for (let pub of fetchResult.items) {
-                if ( ! pub["ishidden"]) {
-                    let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
-                    let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
-                    entry.upsertPub(batch);
+                if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
+                    // only insert the latest version
+                    continue;
                 }
+                if (pub["ishidden"]) {
+                    continue; // always skip hidden scripts
+                }
+
+                let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
+                let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
+                entry.upsertPub(batch);
             }
         }
         else {
@@ -7697,8 +7709,10 @@ async function reindexStoreAsync(store: indexedStore.Store, req: ApiRequest) : P
                 entry2.upsertPub(batch);
             }
         }
-        let statusCode = await batch.sendAsync();
-        logger.debug("reindex pubs, status: " + statusCode);
+        if (batch.actionCount() > 0) {
+            let statusCode = await batch.sendAsync();
+            logger.debug("reindex pubs, status: " + statusCode);
+        }    
     });
 }
 
@@ -8584,17 +8598,16 @@ async function refreshSettingsAsync() : Promise<void>
 }
 
 function pubFeatures(pub: JsonObject) : string[]
-{
-    let features2: string[];
-    let features = (<string[]>[]);
+{    
+    let features = <string[]>[];
     if (pub["kind"] == "script") {
         if (pub["islibrary"]) {
             features.push("library");
         }
     }
     return features;
-    return features2;
 }
+ 
 
 async function _initEmbedThumbnailsAsync() : Promise<void>
 {
