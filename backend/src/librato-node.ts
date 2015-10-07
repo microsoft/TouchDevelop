@@ -64,7 +64,7 @@ export async function initAsync(options_: IOptions = {}) : Promise<void>
     var logMeasure = function(cat:string, id:string, val:number, meta:any) {
           if (val == null || isNaN(val)) val = 0;
           var st = commState;
-          id = opts.prefix + "ts" + cat + ":" + id;
+          id = opts.prefix + cat + ":" + id;
           st.count++;
           var repeat = meta && meta.repeat ? meta.repeat : 1;
           if (!st.measures.hasOwnProperty(id)) {
