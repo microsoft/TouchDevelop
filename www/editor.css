@@ -915,6 +915,10 @@ textarea.commentEdit {
   border:#f00 solid 2px;
 }
 
+.stmt[data-current="yes"] .kw {
+  border:none;
+}
+
 #scriptEditor[data-blockMode="yes"] .stmt[data-current="yes"] .calcToken {
   border-color:#fff;
 }

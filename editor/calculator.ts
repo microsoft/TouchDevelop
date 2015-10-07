@@ -500,30 +500,30 @@ module TDev
                 var iname = (<AST.For>this.stmt).boundLocal.getName()
                 //introE = span("", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " = 0; " + iname + " < ")])
                 if (AST.proMode) {
-                    introE = span("", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " < ")])
+                    introE = span("stmtPlaceHolder", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " < ")])
                     outroE = span("greyed", " ) {")
                 } else {
-                    introE = span("", [span("kw", "for "), span("", " 0 ≤ " + iname + " < ")])
+                    introE = span("stmtPlaceHolder", [span("kw", "for "), span("", " 0 ≤ " + iname + " < ")])
                     outroE = span("kw", " do")
                 }
             } else if (this.stmt instanceof AST.Foreach) {
                 if (AST.proMode) {
-                    introE = span("", <any[]>[span("kw", "for each "), span("greyed", "("), span("kw", "var "),
+                    introE = span("stmtPlaceHolder", <any[]>[span("kw", "for each "), span("greyed", "("), span("kw", "var "),
                                 span("greyed", (<AST.Foreach>this.stmt).boundLocal.getName()), span("kw", " in ")]);
                     outroE = span("greyed", " ) {")
                 } else {
-                    introE = span("", <any[]>[span("kw", "for each "),
-                                span("", (<AST.Foreach>this.stmt).boundLocal.getName()), span("kw", " in ")]);
+                    introE = span("stmtPlaceHolder", <any[]>[span("kw", "for each "),
+                                span("stmtPlaceHolder", (<AST.Foreach>this.stmt).boundLocal.getName()), span("kw", " in ")]);
                     outroE = span("kw", " do")
                 }
             } else if (this.stmt instanceof AST.Box) {
                 introE = span("kw", "boxed ")
                 outroE = st("{")
             } else if (this.stmt instanceof AST.While) {
-                introE = span("", [span("kw", "while "), st("( ")])
+                introE = span("stmtPlaceHolder", [span("kw", "while "), st("( ")])
                 outroE = st(" ) {", " do")
             } else if (this.stmt instanceof AST.Where) {
-                introE = span("", span("kw", "where "))
+                introE = span("stmtPlaceHolder", span("kw", "where "))
             } else if (this.stmt instanceof AST.ExprStmt) {
                 if ((<AST.ExprStmt>this.stmt).isVarDef())
                     introE = span("kw",  "var ")
@@ -534,12 +534,12 @@ module TDev
                     outroE = st(" {", " do")
             } else if (this.stmt instanceof AST.If) {
                 if ((<AST.If>this.stmt).isElseIf)
-                    introE = span("", [st("} "), span("kw", "else if "), st("( ")])
+                    introE = span("stmtPlaceHolder", [st("} "), span("kw", "else if "), st("( ")])
                 else
-                    introE = span("", [span("kw", "if "), st("( ")])
+                    introE = span("stmtPlaceHolder", [span("kw", "if "), st("( ")])
                 outroE = st(" ) {", " then")
             } else if (this.stmt instanceof AST.OptionalParameter) {
-                introE = span("", [span("kw", "with "), span("", (<AST.OptionalParameter>this.stmt).getName() + " = ")])
+                introE = span("stmtPlaceHolder", [span("kw", "with "), span("", (<AST.OptionalParameter>this.stmt).getName() + " = ")])
             } else if (this.stmt instanceof AST.ActionParameter) {
                 var ch = (<AST.ActionHeader> this.stmt.parent).children();
                 if (this.stmt == ch[ch.length - 1])
@@ -599,7 +599,7 @@ module TDev
 
             toks.forEach((e:HTMLElement, i:number) => {
                 if (e == inlineEditor) return;
-                if (!/tokenPlaceholder/i.test(e.className))
+                if (!/placeholder/i.test(e.className))
                     e.classList.add("calcToken");
                 var nxt = toks[i + 1];
                 var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
