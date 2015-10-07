@@ -151,7 +151,7 @@ module TDev
             if (n.getError() != null)
                 return "<span class='errorSq'>" + r + "</span>";
             else
-                return r;
+                return "<span class='calcToken'>" + r + "</span>";
         }
 
         public renderTokens(t:AST.Token[])
@@ -566,7 +566,7 @@ module TDev
                 if (AST.proMode)
                     return this.tline("<span class='greyed'>&nbsp;;</span>");
                 else
-                    return this.tline("<span class='greyed'>" + Cloud.config.doNothingText + "</span>");
+                    return this.tline("<span class='greyed greyer'>" + Cloud.config.doNothingText + "</span>");
             } else {
                 var toks = this.renderExprHolder(n.expr, n.expr.tokens)
                 toks += suffix
@@ -1142,7 +1142,7 @@ module TDev
                       ".kbm svg > path.biton { fill:#000; } .kbm svg > path.bitoff { fill:#ccc; }\n" +
                       ".code-highlight { border: 1px dashed gray; font-weight:bold; }\n" +
                       ".comment { color:#444; font-style:italic; }\n" +
-                      ".greyed { color:#444; }\n" +
+                      ".greyed { color:#444; } .greyer { color: #555; }\n" +
                       ".api-kind { border: 1px dotted #BBB; padding: 0.4em; clear: both; font-size: 1.2em; margin-bottom: 0.6em; }\n" +
                       ".md-snippet { border: 1px dotted #bbb; padding: 0.4em 0; clear: both; line-height: 1.3em; page-break-inside:avoid; }\n" +
                       ".md-snippet .signature { padding:0em 0.2em 0em 0.2em; }\n" + 

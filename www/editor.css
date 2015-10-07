@@ -885,6 +885,7 @@ textarea.commentEdit {
 
 .tokenPlaceholder {
     color: #bbb;
+    padding-left:0.3em;
 }
 
 .calcToken
@@ -901,6 +902,21 @@ textarea.commentEdit {
 .calcToken[data-selected^="yes"]
 {
   background: #B8E72A;
+}
+
+.stmt[data-current="yes"] .calcToken {
+  padding: 0 0.2em;
+  margin-left:0.1em;
+  border:#aaa solid 1px;
+  border-radius: 0.3em;
+}
+
+#scriptEditor[data-blockMode="yes"] .stmt[data-current="yes"] .calcToken {
+  border-color:#fff;
+}
+
+.tokenPlaceholder.calcToken {
+  border:none;
 }
 
 .calcInvisible {
@@ -1563,10 +1579,8 @@ div.md-video-link > svg {
     max-width:60%;
 }
 
-.greyed
-{
-    color: #6c6c6c;
-}
+.greyed { color: #6c6c6c; }
+.greyer { color: #999;}
 
 .code-highlight {
   background: #Ff8;
@@ -1575,7 +1589,8 @@ div.md-video-link > svg {
 
 .stmt
 {
-    border-left: 0.1em solid #ccc;
+    border-left: 0.2em solid #ccc;
+    border-radius: 0.4em;
     padding-left: 0.1em;
     margin-top: 0.1em;
     padding-left: 0px;
@@ -1869,7 +1884,8 @@ span.errorSq .kw
     height: auto;
 }
 
-@media (max-width: 1400px) {
+/* Should be good enough for a 1280x800 display. */
+@media (max-width: 1250px) {
     #externalEditorSide .wallFullScreenWrapper {
         margin: 0 .4em;
     }

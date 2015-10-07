@@ -11,11 +11,13 @@ module TDev
 
     export class TextLiteralEditor extends LiteralEditor {
         private res: HTML.AutoExpandingTextArea;
-        constructor(public calculator: Calculator, public literal: AST.Literal, fullScreen : boolean) {
+        constructor(public calculator: Calculator, public literal: AST.Literal, fullScreen : boolean, singleLine: boolean) {
             super(calculator, literal);
 
-            fullScreen = fullScreen && Browser.isDesktop && TheEditor.widgetEnabled("stringEditFullScreen");
-            var opts: HTML.AutoExpandingTextAreaOptions = { showDismiss: true };
+            fullScreen = fullScreen
+                && Browser.isDesktop
+                && TheEditor.widgetEnabled("stringEditFullScreen");
+            var opts: HTML.AutoExpandingTextAreaOptions = { showDismiss: true, singleLine: singleLine };
             if (fullScreen)
                 opts.editFullScreenAsync = (t) => EditorHost.editFullScreenAsync(
                     literal.languageHint ? 'inline.' + literal.languageHint : '', t);

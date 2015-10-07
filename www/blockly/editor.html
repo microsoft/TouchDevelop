@@ -43,11 +43,13 @@
             <div class="roundlabel">help</div>
           </a>
         </div>
-        <div id="merge-commands" class="vbox flex1">
+        <div id="merge-commands" class="vbox flex1 hidden">
         </div>
-        <div class="vbox" id="script-box">
-          <input type="text" maxlength="60" id="script-name" class="flex1" />
-          <input type="text" maxlength="200" id="script-description" />
+        <div class="vbox flex1" id="script-box">
+          <div id="script-wrapper" class="vbox flex1">
+            <input type="text" maxlength="60" id="script-name" class="" />
+            <input type="text" maxlength="200" id="script-description" />
+          </div>
           <div id="script-icons" class="hbox">
             <div id="cloud-status" class="flex1">
               <i class="fa fa-cloud-upload" title="Script loaded"></i>

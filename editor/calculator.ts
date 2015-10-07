@@ -370,6 +370,24 @@ module TDev
             if (this.searchApi.visible)
                 this.searchApi.dismissing();
 
+            if (this.expr && this.expr.tokens.length == 0 && this.stmt instanceof AST.InlineActions) {
+                var bl = new AST.CodeBlock();
+                bl.stmts = [];
+                (<AST.InlineActions>this.stmt).actions.stmts.forEach((a:AST.InlineAction) => {
+                    if (!a.body) return
+                    a.body.stmts.forEach(s => {
+                        if (!s.isPlaceholder()) {
+                            bl.stmts.push(s)
+                        }
+                    })
+                })
+                if (bl.stmts.length == 0) {
+                    bl.stmts.push(bl.emptyStmt())
+                }
+                bl = <AST.CodeBlock>AST.Parser.parseStmt(bl.serialize(), Script);
+                (<AST.CodeBlock>this.stmt.parent).replaceChild(this.stmt, bl.stmts)
+            }
+
             this.checkNextDisplay();
             Util.log("about to resetstate");
             this.resetState();
@@ -581,12 +599,14 @@ module TDev
 
             toks.forEach((e:HTMLElement, i:number) => {
                 if (e == inlineEditor) return;
-                e.className += " calcToken";
+                if (!/tokenPlaceholder/i.test(e.className))
+                    e.classList.add("calcToken");
                 var nxt = toks[i + 1];
                 var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
-                if (spc)
+                // not needed with token rendering
+                //if (spc)
                     // Add padding after this element if needed
-                    e.className += " calcSpaceAfter";
+                 //   e.classList.add("calcSpaceAfter");
             });
             if (toks.length == 1) {
                 var e = span("calcInvisible", ".");
@@ -953,7 +973,7 @@ module TDev
 
         public handleKey(e:KeyboardEvent) : boolean
         {
-            if (this.onNextDisplay && (e.keyName == "Esc" || (e.keyName == "Enter" && !e.fromTextArea))) {
+            if (this.onNextDisplay && (e.keyName == "Esc" || ((e.keyName == "Enter" || e.keyName == "Tab") && !e.fromTextArea))) {
                 this.display();
                 return true;
             }
@@ -987,15 +1007,19 @@ module TDev
             if (e.fromTextBox) return false;
 
             switch (e.keyName) {
+            case "Ctrl-Left":
             case "Left":
                 this.moveCursor(-1);
                 break;
+            case "Ctrl-Right":
             case "Right":
                 this.moveCursor(+1);
                 break;
+            case "Shift-Home":
             case "Home":
                 this.moveCursor(-1000);
                 break;
+            case "Shift-End":
             case "End":
                 this.moveCursor(+1000);
                 break;
@@ -1274,7 +1298,7 @@ module TDev
             return wrapper;
         }
 
-        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean) {
+        private inlineLiteralEditor(l: AST.Literal, fullScreen : boolean, singleLine: boolean) {
             var hint = "";
             if (this.currentInstruction && this.currentInstruction.languageHint == l.languageHint && this.currentInstruction.editString)
                 hint = this.currentInstruction.editString;    
@@ -1282,7 +1306,7 @@ module TDev
             var literalEditor: LiteralEditor;
             if (/^bitmatrix$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, true, hint);
             else if (/^bitframe$/i.test(l.languageHint)) literalEditor = new BitMatrixLiteralEditor(this, l, false, hint);
-            else literalEditor = new TextLiteralEditor(this, l, fullScreen);
+            else literalEditor = new TextLiteralEditor(this, l, fullScreen, singleLine);
             return literalEditor;
         }
 
@@ -1290,7 +1314,7 @@ module TDev
         {
             var editor = TheEditor;
             var renaming = this.stmt instanceof AST.DeclNameHolder;
-            var literalEditor = this.inlineLiteralEditor(l, !renaming);
+            var literalEditor = this.inlineLiteralEditor(l, !renaming, renaming);
 
             this.onNextDisplay = () => {
                 this.inlineEditToken = null;
@@ -1926,6 +1950,7 @@ module TDev
                 if (implicitAction)
                     len--;
 
+                var immediateEdit = false;                
                 if (len > 1 && (!tok0 || tok0.getOperator() != "(" && parms.length > 1)) {
                     toks.push(AST.mkOp("("));
                     this.lastOpenBracePos = this.cursorPosition + toks.length;
@@ -1945,6 +1970,8 @@ module TDev
                             toks.pushRange(this.findDefault(parms[i]));
                             if (newCursorPos < 0 && (k == api.core.String || k == api.core.Number)) {
                                 newCursorPos = this.cursorPosition + toks.length;
+                                if (!AST.proMode && k == api.core.String && !parms[i].enumMap && !parms[i].getStringValues())   
+                                    immediateEdit = true;    
                             }
                         }
                     }
@@ -1965,6 +1992,10 @@ module TDev
                 this.turnIntoInlineActions(lambdaIds, implicitAction);
 
                 this.display();
+                
+                // automatically edit string literals.
+                if (immediateEdit && this.expr.tokens[this.cursorPosition - 1])
+                    this.inlineEdit(this.expr.tokens[this.cursorPosition - 1])    
             }
         }
 

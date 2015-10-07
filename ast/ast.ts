@@ -132,9 +132,11 @@ module TDev.AST {
         public tutorialWarning: string;
         public isUnreachable:boolean;
         public _hint:string;
+
         public _compilerBreakLabel:any;
         public _compilerContinueLabel:any;
         public _converterAwait:boolean;
+        public _compilerInfo:any;
 
         constructor() {
             super()
@@ -477,6 +479,13 @@ module TDev.AST {
         public isBlockPlaceholder()
         {
             return this.stmts.length == 0 || (this.stmts.length == 1 && this.stmts[0].isPlaceholder());
+        }
+
+        public replaceChild(s:Stmt, newOnes:Stmt[])
+        {
+            var idx = this.stmts.indexOf(s)
+            var newCh = (idx >= 0 ? this.stmts.slice(0, idx) : []).concat(newOnes).concat(this.stmts.slice(idx + 1))
+            this.setChildren(newCh)
         }
 
         public forEach(f:(s:Stmt)=>void):void { this.stmts.forEach(f) }
@@ -3341,6 +3350,7 @@ module TDev.AST {
         public referencedRecord() : RecordDef { return null; }
         public referencedData() : GlobalDef { return null; }
         public referencedLibrary() : LibraryRef { return null; }
+        public referencedLocal():LocalDef { return null; }
         public getLiftedSetter() : IProperty { return null; }
         public calledProp() : IProperty { return null; }
         public assignmentInfo() : AssignmentInfo { return null; }
@@ -3529,6 +3539,13 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitThingRef(this); }
         public forceLocal = false;
         public getThing():Decl { return this.def; }
+
+        public referencedLocal():LocalDef
+        {
+            if (this.def instanceof LocalDef)
+                return <LocalDef>this.def
+            return null
+        }
 
         public isEscapeDef()
         {
@@ -4548,7 +4565,7 @@ module TDev.AST {
         {
         }
 
-        private useAction(a:Action)
+        useAction(a:Action)
         {
             if (!a) return;
             if (a.visitorState) return;
@@ -5326,6 +5343,7 @@ module TDev.AST {
         public hasDecl(p:Decl)
         {
             if (!this.properties) return true;
+            if (p instanceof LocalDef) return true;
             if (p.getName() == AST.libSymbol)
                 // needs explicit #allow:libSingleton
                 return this.hasKey("libSingleton");

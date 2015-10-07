@@ -1329,6 +1329,7 @@ module TDev {
         private _runtimeName:string;
         public deleted: boolean;
         private _imports: IImport[];
+        public allowInRestricted:boolean;
 
         constructor(public parentKind:Kind, name:string, public _help:string, parms:PropertyParameter[], retType:Kind)
         {
@@ -1470,6 +1471,7 @@ module TDev {
         }
         public md_inlineApply(n:string) { this._specialApply = n; }
         public md_flow(n: string) { }
+        public md_allowInRestricted() { this.allowInRestricted = true; }
 
         public md_writesMutable() { this._inParameters[0].md_writesMutable(); }
         public md_readsMutable() { this._inParameters[0].md_readsMutable(); }

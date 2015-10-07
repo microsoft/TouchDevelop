@@ -8328,7 +8328,7 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (/,adult,/.test(s.permissions)) {
-                        edit(lf("email (private; {0})", 
+                        edit(lf("{0}", 
                             s.emailverified 
                               ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
@@ -9069,7 +9069,8 @@
                                     HTML.showProgressNotification(lf("requesting new invitiation code..."));
                                     this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
                                 }));
-                                ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
+                                if (!Cloud.isRestricted())
+                                    ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
                                 ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
                                 if (u.isclass)
                                     ad.appendChild(HTML.mkButton(lf("approvals"), () => { this.approvals(); }));

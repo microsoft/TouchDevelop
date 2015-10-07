@@ -216,7 +216,7 @@ module TDev.RT {
 
         //? Gets filtered and temporally averaged accelerometer data using an arithmetic mean of the last 25 'optimally filtered' samples, so over 500ms at 50Hz on each axis, to virtually eliminate most sensor noise. This provides a very stable reading but it has also a very high latency and cannot be used for rapidly reacting UI.
         //@ cap(accelerometer) returns(Vector3) quickAsync
-        //@ tandre
+        //@ tandre 
         export function acceleration_stable(r: ResumeCtx) {
 
             DeviceMotion.accelerationStable(r);
@@ -233,6 +233,7 @@ module TDev.RT {
         //? Gets filtered accelerometer data using a combination of a low-pass and threshold triggered high-pass on each axis to eliminate the majority of the sensor low amplitude noise while trending very quickly to large offsets (not perfectly smooth signal in that case), providing a very low latency. This is ideal for quickly reacting UI updates.
         //@ cap(accelerometer) returns(Vector3) quickAsync
         //@ tandre
+        //@ allowInRestricted
         export function acceleration_quick(r: ResumeCtx) {
 
             DeviceMotion.accelerationQuick(r);
@@ -328,6 +329,7 @@ module TDev.RT {
         //? Gets the compass heading, in degrees, measured clockwise from the Earth’s geographic north.
         //@ cap(compass) returns(number) quickAsync
         //@ tandre
+        //@ allowInRestricted
         export function heading(r: ResumeCtx) {
 
             DeviceOrientation.heading(r);

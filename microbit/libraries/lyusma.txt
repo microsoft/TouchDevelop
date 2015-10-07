@@ -56,6 +56,7 @@ action main() {
   #mRe27YLotG80DdYr $s := "test";
   #xRlJY4QhO4Fq4hJ8 $x2 := $s→to_character_code;
   #SUvyxQSIw3TY3vW2 $s := $s→concat($s);
+  #xqD7p2y1I1qY6XLV $s := $s ∥ $s;
   #WimJjEuFBoOizCqp $s := $s→substring(0, 0);
   #fm7Y4HNaSi7jG2v3 $b := $s→equals("other");
   #xuAIL5NdAZ1KtF5N $sc := $s→count;
@@ -93,7 +94,7 @@ action main() {
   #w9qtFNmNqcWH4xF9 game;
 }
 #usICLRI0RLgsWatF meta import micro\u003abit {
-  pub "zbbqsq"
+  pub "jqldsq"
   usage {
     type Image
     action `sync` \_libinit()
@@ -128,11 +129,18 @@ action main() {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
-    action `async` plot_image(leds: String)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
+    action `sync` plot_image(leds: String)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, millis: Number)
   }
 }
 #Wc1pO4N99lJnJtZj
@@ -170,19 +178,19 @@ var img : ♻ micro\u003abit → Image {
   }
 }
 #P952wWx2TsBNbUPl meta import micro\u003abit_senses {
-  pub "dlxfsa"
+  pub "vkmzfe"
   usage {
-    action `async` on_screen_up(body: Action)
-    action `async` on_screen_down(body: Action)
-    action `async` on_shake(body: Action)
-    action `async` on_logo_up(body: Action)
-    action `async` on_logo_down(body: Action)
+    action `sync` on_screen_up(body: Action)
+    action `sync` on_screen_down(body: Action)
+    action `sync` on_shake(body: Action)
+    action `sync` on_logo_up(body: Action)
+    action `sync` on_logo_down(body: Action)
   }
   #xtFHv49Gg2zXwu3M resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #ctgp5VB0k69XVFAX meta import micro\u003abit_game {
-  pub "vqneem"
+  pub "lwagkt"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -199,6 +207,7 @@ var img : ♻ micro\u003abit → Image {
     action `async` start_stopwatch()
     action `async` test_countdown_current_time()
     action `async` test_current_time()
+    action `sync` is_running() returns(running: Boolean)
   }
   #SCM2ihMv5V1HeY6m resolve micro\u003abit = ♻ micro\u003abit with {
   }

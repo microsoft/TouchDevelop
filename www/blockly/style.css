@@ -65,6 +65,8 @@ body, input {
 /* Script info box */
 #script-box {
   margin-right: 1rem;
+  margin-left: auto;
+  max-width: 35rem;
 }
 
 #script-name {
@@ -73,10 +75,10 @@ body, input {
   height: 3rem !important;
 }
 
-#script-name, #script-description {
+#script-name, #script-description, #script-wrapper, #script-icons {
   background-color: transparent;
   border: 0;
-  width: 25rem;
+  width: 100%;
 }
 
 #script-icons > *:not(:first-child) {
@@ -208,6 +210,7 @@ body, input {
   padding-top: .6rem;
   font-size: 80%;
   text-align: center;
+  white-space: nowrap;
 }
 
 body:not(.hasFota) .fota {
@@ -229,17 +232,52 @@ a.command:hover {
   text-decoration: underline;
 }
 
-/* Very low-height displays: hide the icons. */
+/* Very low-height displays: hide the icons, just keep the text (e.g. "run").
+ * Hide script name, flatten icons. */
 @media (max-height: 600px) {
-  .roundsymbol, #script-box, .graduate-wrapper {
+  .roundsymbol, #script-description, .graduate-wrapper {
     display: none !important;
+  }
+
+  #script-icons {
+    flex-direction: row !important;
+    -webkit-flex-direction: row !important;
+  }
+
+  input#script-name {
+    font-size: inherit !important;
+    height: inherit !important;
+    line-height: inherit !important;
   }
 }
 
-/* Low-height displays: hide the status icons; icons inline; smaller script name */
-@media (max-height: 800px) {
+/* Low-height displays or narrow displays: verticalize the status icons. */
+@media (max-height: 750px), (max-width: 800px) {
+  #script-box {
+    flex-direction: row;
+    -webkit-flex-direction: row;
+    margin-right: 0;
+  }
+
   #script-icons {
-    display: none;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    width: auto;
+    max-width: auto;
+  }
+
+  #script-icons > * {
+    padding: 0 !important;
+    width: 1.4rem;
+    text-align: center;
+  }
+}
+
+/* Low-height displays: icons inline; smaller script name. (750px is about the
+ * average content area height on a 900px high display.) */
+@media (max-height: 750px) {
+  #script-icons > * {
+    font-size: 1.1rem;
   }
 
   .roundbutton {
@@ -273,21 +311,21 @@ a.command:hover {
 
   #script-name {
     font-size: 1.2rem;
-    line-height: 1.4rem !important;
-    height: 1.4rem !important;
+    line-height: 1.8rem !important;
+    height: 1.8rem !important;
     font-weight: bold;
   }
 }
 
 /* Very narrow displays: get rid of the script name and description */
 @media (max-width: 800px) {
-  #script-box {
+  #script-name, #script-description {
     display: none;
   }
 }
 
 /* Narrow displays: shrink the toolbox */
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
   .blocklyTreeRow {
     padding-right: .3em !important;
   }

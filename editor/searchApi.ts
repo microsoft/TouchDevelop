@@ -33,7 +33,8 @@ module TDev
         private snapshotId: Promise = null;
 
         private dismissBtn:HTMLElement;
-        private runBtn:HTMLElement;
+        private runBtn: HTMLElement;
+        private compileBtn: HTMLElement;
         private toCodeBtn:HTMLElement;
         public visible = false;
         public prepopulate: string;
@@ -228,12 +229,10 @@ module TDev
             if (this.runBtn) {
                 if (TheEditor.currentRt && TheEditor.currentRt.canResume())
                     this.runBtn.setChildren([Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.calcSearchRun, "Ctrl-M", () => {
-                        TheEditor.dismissSidePane();
                         TheEditor.resumeExecution();
                     })]);
                 else
                     this.runBtn.setChildren([Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.calcSearchRun, "Ctrl-M", () => {
-                        TheEditor.dismissSidePane();
                         TheEditor.runMainAction();
                     })]);
             }
@@ -261,14 +260,26 @@ module TDev
                     TheEditor.dismissSidePane()
                 });
             this.runBtn = div("");
+            this.compileBtn = Cloud.canCompile() ? div("") : undefined;
             this.updateRunButton();
             this.runBtn.style.zIndex = "1"; // above apiDismiss
             this.runBtn.style.position = "relative";
+            if (this.compileBtn) {
+                this.compileBtn.style.zIndex = "1"; // above apiDismiss
+                this.compileBtn.style.position = "relative";
+                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:fa-download,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e:MouseEvent) => {
+                        var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
+                        if (!debug && SizeMgr.splitScreen)
+                            TheEditor.runMainAction();
+                        TheEditor.compile(this.compileBtn, debug);
+                })]);
+            }    
 
             this.toCodeBtn.style.display = "none";
             this.backContainer.setChildren([
                 this.dismissBtn,
                 this.runBtn,
+                this.compileBtn,
                 this.toCodeBtn
             ]);
         }
@@ -297,10 +308,12 @@ module TDev
                 this.toCodeBtn.style.display = "inline-block";
                 this.dismissBtn.style.display = "none";
                 this.runBtn.style.display = "none";
+                if (this.compileBtn) this.compileBtn.style.display = "none";
             } else {
                 this.toCodeBtn.style.display = "none";
                 this.dismissBtn.style.display = "inline-block";
                 this.runBtn.style.display = "inline-block";
+                if (this.compileBtn) this.compileBtn.style.display = "inline-block";
             }
         }
 

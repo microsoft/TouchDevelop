@@ -27,7 +27,8 @@ namespace Microsoft.MicroBit
         {
             InitializeComponent();
             this.DeleteOnFlash = true;
-            this.updateStatus("loading...");
+            this.VersionInfo = "v" + typeof(MainWindow).Assembly.GetName().Version.ToString();
+            this.updateStatus("uploading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
@@ -70,6 +71,13 @@ namespace Microsoft.MicroBit
             Application.Current.Dispatcher.Invoke(a);
         }
 
+        public static readonly DependencyProperty VersionInfoProperty = DependencyProperty.Register("VersionInfo", typeof(string), typeof(MainWindow));
+        public string VersionInfo
+        {
+            get { return (string)GetValue(VersionInfoProperty); }
+            set { SetValue(VersionInfoProperty, value); }
+        }
+
         public static readonly DependencyProperty StatusProperty = DependencyProperty.Register("Status", typeof(string), typeof(MainWindow));
         public string Status
         {
@@ -105,30 +113,34 @@ namespace Microsoft.MicroBit
         {
             try
             {
+		// In case this is data-url download, at least Chrome will not rename file, but instead write to it
+	        // directly. This mean we may catch it in the act. Let's leave it some time to finish writing.
+                Thread.Sleep(500);
+
                 var info = new System.IO.FileInfo(fullPath);
                 if (info.Extension != ".hex" || !info.Name.StartsWith("microbit-", StringComparison.OrdinalIgnoreCase))
                     return;
 
                 this.updateStatus("detected " + info.Name);
                 var drives = System.IO.DriveInfo.GetDrives();
-                var drive = drives.FirstOrDefault(d => getVolumeLabel(d) == "MICROBIT");
+                var drive = drives.FirstOrDefault(d => getVolumeLabel(d).StartsWith("MICROBIT", StringComparison.Ordinal));
                 if (drive == null)
                 {
-                    this.updateStatus("no BBC micro:bit detected");
+                    this.updateStatus("no MICROBIT driver detected");
                     return;
                 }
 
-                this.updateStatus("loading...");
+                this.updateStatus("uploading " + info.Length + " bytes...");
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);
-                this.updateStatus("loading done");
+                this.updateStatus("uploading done");
 
                 var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnFlash));
                 if (del)
                 {
                     File.Delete(info.FullName);
-                    this.updateStatus("loading and cleaning done");
+                    this.updateStatus("uploading and cleaning done");
                 }
 
                 return;

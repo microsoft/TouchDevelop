@@ -8,11 +8,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("micro:bit loader")]
+[assembly: AssemblyTitle("Microsoft micro:bit Uploader")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("micro:bit loader")]
+[assembly: AssemblyProduct("Microsoft micro:bit Uploader")]
 [assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

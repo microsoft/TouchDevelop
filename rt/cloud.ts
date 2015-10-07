@@ -3,7 +3,7 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
-    var microbitGitTag = "v2";
+    var microbitGitTag = "v5";
 
     export var useEmbeddedGcc = false;
 
@@ -813,6 +813,11 @@ module TDev.Cloud {
 
     export function isFota() {
         return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
+    }
+    
+    export function canCompile() {
+        return Cloud.isRestricted() &&
+            (Cloud.isFota() || Browser.isDesktop || Browser.isTablet);
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
