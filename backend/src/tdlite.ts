@@ -3613,7 +3613,7 @@ async function _initScriptsAsync() : Promise<void>
     });
 
     addRoute("GET", "showcase-scripts", "", async (req9: ApiRequest) => {
-        if (Date.now() - lastShowcaseDl.getTime() > 20000) {
+        if (!lastShowcaseDl || Date.now() - lastShowcaseDl.getTime() > 20000) {
             let js = await td.downloadJsonAsync("https://tdshowcase.blob.core.windows.net/export/current.json");
             showcaseIds = td.toStringArray(js["ids"]) || [];
             lastShowcaseDl = new Date();
@@ -10128,6 +10128,7 @@ async function failureReportLoopAsync() : Promise<void>
 {
     let container = await blobService.createContainerIfNotExistsAsync("blobwritetest", "private");
     let table = await tableClient.createTableIfNotExistsAsync("tablewritetest");
+    lastSearchReport = new Date();
     while (true) {
         await td.sleepAsync(300 + td.randomRange(0, 100));
         /* async */ checkSearchAsync();
