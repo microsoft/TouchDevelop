@@ -896,6 +896,15 @@ module TDev.HTML {
         r.setChildren(elts)
         return r;
     }
+    
+    export function browserDownload(href: string, filename: string) {
+        var link = <HTMLAnchorElement>window.document.createElement('a');
+        link.href = href;
+        (<any>link).download = filename
+        var click = document.createEvent("Event");
+        click.initEvent("click", true, true);
+        link.dispatchEvent(click);
+    }
 
     export function showNotification(msg: HTMLElement) {
         elt("root").appendChild(msg);

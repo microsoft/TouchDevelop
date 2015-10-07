@@ -282,12 +282,7 @@ module TDev
 
                 ScriptProperties.firstTime = false
 
-                var link = <HTMLAnchorElement>window.document.createElement('a');
-                link.href = res.dataurl;
-                (<any>link).download = "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
-                var click = document.createEvent("Event");
-                click.initEvent("click", true, true);
-                link.dispatchEvent(click);
+                HTML.browserDownload(res.dataurl, "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
             })
             .done(() => {},
             e => {
