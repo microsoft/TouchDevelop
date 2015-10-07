@@ -578,7 +578,12 @@ module TDev.RT {
         //? Decodes a string that has been base64-encoded (assuming utf8 encoding)
         export function base64_decode(text: string): string
         {
-            return Util.fromUTF8(Util.base64Decode(text));
+            var decoded = Util.base64Decode(text)
+            try {
+                return Util.fromUTF8(decoded);
+            } catch (e) {
+                return decoded;
+            }
         }
 
         //? Converts a string into an base64-encoded string (with utf8 encoding)
