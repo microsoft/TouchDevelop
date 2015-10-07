@@ -47,7 +47,7 @@ module TDev.AST
         private nameMapping: any = {};
         private usedNames:any = {};
 
-        private unUnicode(s:string)
+        public unUnicode(s:string)
         {
             s = s.replace(/[^a-zA-Z0-9]+/g, "_");
             if (s == "" || /^[0-9]/.test(s)) s = "_" + s;
@@ -934,6 +934,25 @@ module TDev.AST
             return this.unit
         }
 
+        static computeCapturedLocals(inl:InlineAction)
+        {
+            var finder = new VariableFinder();
+            finder.traverse(inl.body);
+            var capturedLocals:LocalDef[] = [];
+            var writtenLocals = finder.writtenLocals.slice(0);
+            writtenLocals.pushRange(inl.inParameters)
+            writtenLocals.pushRange(inl.outParameters)
+            finder.readLocals.forEach((l) => {
+                if (writtenLocals.indexOf(l) < 0) capturedLocals.push(l);
+            });
+            var allLocals = finder.readLocals;
+            finder.writtenLocals.forEach((l) => {
+                if (allLocals.indexOf(l) < 0) allLocals.push(l);
+            });
+
+            return { allLocals: allLocals, capturedLocals: capturedLocals };
+        }
+
         private compileInlineAction(inl:InlineAction)
         {
             var a = new Action();
@@ -950,25 +969,13 @@ module TDev.AST
             inl.inParameters.forEach((p) => a.header.inParameters.push(new ActionParameter(p)))
             inl.outParameters.forEach((p) => a.header.outParameters.push(new ActionParameter(p)))
 
-            var finder = new VariableFinder();
-            finder.traverse(a.body);
-            var capturedLocals:LocalDef[] = [];
-            var writtenLocals = finder.writtenLocals.slice(0);
-            writtenLocals.pushRange(inl.inParameters)
-            writtenLocals.pushRange(inl.outParameters)
-            finder.readLocals.forEach((l) => {
-                if (writtenLocals.indexOf(l) < 0) capturedLocals.push(l);
-            });
-            a.allLocals = finder.readLocals;
-            finder.writtenLocals.forEach((l) => {
-                if (a.allLocals.indexOf(l) < 0) a.allLocals.push(l);
-            });
-
-            capturedLocals.forEach((p) => a.header.inParameters.push(new ActionParameter(p)));
+            var locs = Compiler.computeCapturedLocals(inl)
+            a.allLocals = locs.allLocals;
+            locs.capturedLocals.forEach((p) => a.header.inParameters.push(new ActionParameter(p)));
             this.innerActions.push(a);
 
             this.markLocation(inl);
-            var refs:JsExpr[] = capturedLocals.map((l) => this.newTmpVar("lmbv", this.localVarRef(l)));
+            var refs:JsExpr[] = locs.capturedLocals.map((l) => this.newTmpVar("lmbv", this.localVarRef(l)));
 
             // -1 for this
             // +2 for previous, returnAddr
@@ -3184,7 +3191,7 @@ module TDev.AST
 
     }
 
-    class PreCompiler
+    export class PreCompiler
         extends DeepVisitor
     {
         constructor(public options:CompilerOptions)

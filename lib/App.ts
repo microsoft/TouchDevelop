@@ -629,6 +629,12 @@ module TDev.RT {
             transports = [];        
         }
 
+        export function startLogger()
+        {
+            logger = new Logger();
+            transports = [];
+        }
+
         export function rt_start(rt: Runtime): void
         {
             if (rt.liveMode())

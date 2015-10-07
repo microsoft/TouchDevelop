@@ -11,6 +11,7 @@ module TDev { export module AST {
         private lastBlockEnd = -1;
         private lastAfterBlockEnd = -1;
         public skipActionBodies = false;
+        public indentString = "  ";
 
         public unicodeOps = true;
         public unicodeStrings = true;
@@ -41,7 +42,7 @@ module TDev { export module AST {
                 }
 
                 for (var i = 0; i < this.indentLevel; ++i)
-                    this.buf += "  ";
+                    this.buf += this.indentString;
 
                 this.lastChar = ' ';
             }
@@ -76,15 +77,18 @@ module TDev { export module AST {
 
         public beginBlock()
         {
-            this.space().op0("{").nl();
+            this.sep().op0("{").nl();
             this.indentLevel++;
         }
 
-        public endBlock()
+        public endBlock(add = "")
         {
             this.lastBlockEnd = this.buf.length;
             this.indentLevel--;
-            this.op0("}").nl();
+            this.op0("}");
+            if (add)
+                this.write(add);
+            this.nl();
             this.lastAfterBlockEnd = this.buf.length;
         }
 
@@ -152,6 +156,8 @@ module TDev { export module AST {
 
         public op0(op:string)
         {
+            if (op == ")" && this.lastAfterBlockEnd == this.buf.length)
+                this.newlinesPending = 0;
             if (!this.unicodeOps)
                 op = Lexer.asciiOperator(op);
             if (Lexer.quotedOp(op)) op = "`" + op + "`";

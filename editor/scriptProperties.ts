@@ -248,12 +248,37 @@ module TDev
                     HTML.mkButton(lf("rebuild session cache"), () => TheEditor.currentRt.sessions.resetCurrentSession()),
                     HTML.mkButton(lf("public -> test"), () => this.publicToTest()),
                     HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
-                    HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech())
-                    ) : undefined,
+                    HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech()),
+                    HTML.mkButton(lf("TypeScript"), () => ModalDialog.showText(new AST.Converter(TDev.Script).run().text)),
+                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(true))
+                ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
             ]);
             this.description.className = "description";
+        }
+
+        static firstTime = true;
+        static bytecodeCompile(showSource = false)
+        {
+            var c = new AST.Bytecode.Compiler(Script)
+            try {
+                var res = c.compile(!ScriptProperties.firstTime)
+                ScriptProperties.firstTime = false
+            } catch (e) {
+                ModalDialog.showText(e.stack)
+                return
+            }
+
+            if (showSource)
+                ModalDialog.showText(res.csource)
+
+            var link = <HTMLAnchorElement>window.document.createElement('a');
+            link.href = res.dataurl;
+            (<any>link).download = "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"
+            var click = document.createEvent("Event");
+            click.initEvent("click", true, true);
+            link.dispatchEvent(click);
         }
 
         static diffToBase()

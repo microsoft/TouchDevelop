@@ -113,6 +113,10 @@ namespace Microsoft.MicroBit
         {
             try
             {
+		// In case this is data-url download, at least Chrome will not rename file, but instead write to it
+	        // directly. This mean we may catch it in the act. Let's leave it some time to finish writing.
+                Thread.Sleep(500);
+
                 var info = new System.IO.FileInfo(fullPath);
                 if (info.Extension != ".hex" || !info.Name.StartsWith("microbit-", StringComparison.OrdinalIgnoreCase))
                     return;
@@ -126,7 +130,7 @@ namespace Microsoft.MicroBit
                     return;
                 }
 
-                this.updateStatus("uploading...");
+                this.updateStatus("uploading " + info.Length + " bytes...");
 
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);

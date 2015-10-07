@@ -1790,6 +1790,17 @@ function mergetest(args:string[])
     })
 }
 
+function ts(files:string[])
+{
+    var t = fs.readFileSync(files[0], "utf8")
+    TDev.AST.reset();
+    TDev.AST.loadScriptAsync((s) => TDev.Promise.as(s == "" ? t : null));
+    var r = new TDev.AST.Converter(TDev.Script).run()
+    fs.writeFileSync("out.ts", r.text)
+    fs.writeFileSync("apis.json", JSON.stringify(r.apis, null, 2))
+    console.log("out.ts and apis.json written")
+}
+
 function featureize(dirs:string[])
 {
     libroots = JSON.parse(fs.readFileSync("libroots.json", "utf-8"))
@@ -2027,6 +2038,9 @@ export function globalInit()
 
     authKey = process.env['TDC_AUTH_KEY'] || ""
 
+    // make sure we show *something* for crashes
+    TDev.RT.App.startLogger();
+
     if (serverPort) {
         startServer(serverPort)
     } else if (process.argv[2] == "compress") {
@@ -2044,6 +2058,8 @@ export function globalInit()
         addIds(process.argv.slice(3))
     } else if (process.argv[2] == "mergetest") {
         mergetest(process.argv.slice(3))
+    } else if (process.argv[2] == "ts") {
+        ts(process.argv.slice(3))
     } else {
         console.log("invalid usage")
     }

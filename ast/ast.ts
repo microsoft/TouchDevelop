@@ -132,8 +132,11 @@ module TDev.AST {
         public tutorialWarning: string;
         public isUnreachable:boolean;
         public _hint:string;
+
         public _compilerBreakLabel:any;
         public _compilerContinueLabel:any;
+        public _converterAwait:boolean;
+        public _compilerInfo:any;
 
         constructor() {
             super()
@@ -2240,6 +2243,7 @@ module TDev.AST {
         public isHiddenOut:boolean;
         public isOut:boolean;
         public _lastWriteLocation:Stmt;
+        public _converterAction:InlineAction;
 
         public writeWithType(app:App, tw:TokenWriter)
         {
@@ -3346,6 +3350,7 @@ module TDev.AST {
         public referencedRecord() : RecordDef { return null; }
         public referencedData() : GlobalDef { return null; }
         public referencedLibrary() : LibraryRef { return null; }
+        public referencedLocal():LocalDef { return null; }
         public getLiftedSetter() : IProperty { return null; }
         public calledProp() : IProperty { return null; }
         public assignmentInfo() : AssignmentInfo { return null; }
@@ -3534,6 +3539,13 @@ module TDev.AST {
         public accept(v:NodeVisitor) { return v.visitThingRef(this); }
         public forceLocal = false;
         public getThing():Decl { return this.def; }
+
+        public referencedLocal():LocalDef
+        {
+            if (this.def instanceof LocalDef)
+                return <LocalDef>this.def
+            return null
+        }
 
         public isEscapeDef()
         {
@@ -4553,7 +4565,7 @@ module TDev.AST {
         {
         }
 
-        private useAction(a:Action)
+        useAction(a:Action)
         {
             if (!a) return;
             if (a.visitorState) return;

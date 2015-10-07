@@ -180,7 +180,7 @@ class ApiRequest {
 
             var u = w.getUrl()
             u.method = this.req.method
-            u.headers = this.req.headers
+            u.headers = {} // no headers
             u.path = this.req.url
 
             numReqs++
@@ -203,7 +203,7 @@ class ApiRequest {
                 thisResp.body = err.message || (err + "")
                 oneUp()
             })
-            if (Object.keys(this.data))
+            if (Object.keys(this.data).length > 0)
                 creq.end(JSON.stringify(this.data))
             else creq.end()
         })
@@ -256,9 +256,17 @@ class ApiRequest {
 
         var req = this.req
         if (req.method == "POST" || req.method == "PUT") {
-            req.setEncoding('utf8');
-            req.on('data', (chunk) => { buf += chunk });
-            req.on('end', final);
+            if (/gzip/.test(req.headers['content-encoding'])) {
+                var g = zlib.createGunzip(undefined);
+                (<any>req).pipe(g);
+                g.setEncoding('utf8');
+                g.on('data', (chunk) => { buf += chunk });
+                g.on('end', final);
+            } else {
+                req.setEncoding('utf8');
+                req.on('data', (chunk) => { buf += chunk });
+                req.on('end', final);
+            }
         } else {
             final()
         }
@@ -266,8 +274,15 @@ class ApiRequest {
 
     ok(r:any)
     {
-        this.resp.writeHead(200, { 'Content-Type': 'application/json; encoding=utf-8' })
-        this.resp.write(JSON.stringify(r), "utf8")
+        var buf = new Buffer(JSON.stringify(r), "utf8")
+        var hd:any = { 'Content-Type': 'application/json; encoding=utf-8' }
+        if (/gzip/.test(this.req.headers['accept-encoding'])) {
+            buf = (<any>zlib).gzipSync(buf);
+            hd['Content-Encoding'] = 'gzip';
+        }
+        hd['Content-Length'] = buf.length;
+        this.resp.writeHead(200, hd)
+        this.resp.write(buf)
         this.resp.end()
     }
 
@@ -1094,7 +1109,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numRequests: currentReqNo,
             numDeploys: tdstate.numDeploys,
             dmeta: tdstate.dmeta,
-            versionStamp: "v1",
+            versionStamp: "v4",
         })
     },
 
