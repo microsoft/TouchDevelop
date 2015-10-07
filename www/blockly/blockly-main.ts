@@ -519,6 +519,7 @@ module TDev {
     var ast = compileOrError(msgSel);
     if (!ast)
       return;
+    doSave();
     $("#command-compile > .roundsymbol").addClass("compiling");
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
