@@ -39,6 +39,7 @@ var allowEditor = false;
 var numWorkers = 1;
 var blobChannel = "";
 var restartInterval = 0;
+var numResponses = 0;
 var defaultCiphers =
 "ECDHE-RSA-AES128-GCM-SHA256:" +
 "ECDHE-ECDSA-AES128-GCM-SHA256:" +
@@ -1106,10 +1107,11 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             uptime: process.uptime(),
             nodeVersion: process.version,
             argv: process.argv,
-            numRequests: currentReqNo,
+            numMgmtRequests: currentReqNo,
             numDeploys: tdstate.numDeploys,
+            numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
-            versionStamp: "v4",
+            versionStamp: "v5",
         })
     },
 
@@ -2256,6 +2258,7 @@ function handleReq(req, resp)
         u.path = req.url
 
         var creq = http.request(u, cres => {
+            numResponses++
             resp.writeHead(cres.statusCode, cres.headers)
             cres.pipe(resp);
         })
