@@ -3368,10 +3368,10 @@ function removeDerivedProperties(body: JsonObject) : JsonObject
 {
     let body2: JsonObject;
     let jsb2 = clone(body);
-    for (let fld of "username,url".split(",")) {
+    for (let fld of ["username", "url"]) {
         jsb2[fld] = "";
     }
-    for (let fld2 of "userscore,positivereviews,comments,subscribers".split(",")) {
+    for (let fld2 of ["userscore", "positivereviews", "comments", "subscribers"]) {
         jsb2[fld2] = 0;
     }
     body = clone(jsb2);
@@ -4251,10 +4251,10 @@ async function _initUsersAsync() : Promise<void>
         checkMgmtPermission(req2, "user-mgmt");
         if (req2.status == 200) {
             let jsb = {};
-            for (let s of "permissions,login".split(",")) {
+            for (let s of ["permissions", "login"]) {
                 jsb[s] = orEmpty(req2.rootPub[s]);
             }
-            for (let s1 of "credit,totalcredit,lastlogin".split(",")) {
+            for (let s1 of ["credit", "totalcredit", "lastlogin"]) {
                 jsb[s1] = orZero(req2.rootPub[s1]);
             }
             req2.response = clone(jsb);
@@ -8671,7 +8671,7 @@ function _initAdmin() : void
         checkPermission(req1, "operator");
         if (req1.status == 200) {
             let jsb = {};
-            for (let s of "RoleInstanceID\nTD_BLOB_DEPLOY_CHANNEL\nTD_WORKER_ID\nTD_DEPLOYMENT_ID".split("\n")) {
+            for (let s of ["RoleInstanceID", "TD_BLOB_DEPLOY_CHANNEL", "TD_WORKER_ID", "TD_DEPLOYMENT_ID"]) {
                 if (s != "") {
                     jsb[s] = orEmpty(td.serverSetting(s, true));
                 }
@@ -8960,7 +8960,7 @@ async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOpti
     // ## scan
     if ( ! options_.skipScan) {
         let text = body;
-        for (let fldname of "name\ndescription\nabout\ngrade\nschool".split("\n")) {
+        for (let fldname of ["name", "description", "about", "grade", "school"]) {
             text = text + " " + orEmpty(pub[fldname]);
         }
         /* async */ acs.validateTextAsync(pub["id"], text, acsCallbackUrl);
@@ -10056,10 +10056,9 @@ async function acquireCacheLockAsync(path: string) : Promise<string>
 {
     let b2: string;
     let timeout = 10;
-    let args = ("key,self,EX," + timeout + ",NX").split(",");
-    let item = "lock:" + path;
-    args[0] = item;
-    let s = td.toString(await redisClient.sendCommandAsync("set", td.arrayToJson(args)));
+    let item = "lock:" + path
+    let args = [item, "self", "EX", timeout.toString(), "NX"]
+    let s = td.toString(await redisClient.sendCommandAsync("set", args));
     if (orEmpty(s) == "OK") {
         logger.debug("got cache lock: " + item);
         return item;
