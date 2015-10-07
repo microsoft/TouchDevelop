@@ -6,8 +6,6 @@
 
 module TDev.AST
 {
-    var innerAsyncWarning = false;
-
     export class TypeResolver
         extends NodeVisitor
     {
@@ -1946,9 +1944,6 @@ module TDev.AST
                     }
                 }
                 this.seenAwait = true;
-                if (!wasTopExpr && innerAsyncWarning) {
-                    this.hintsToFlush.push(lf("async call not on top-level"));
-                }
             }
 
             if (!prop.isImplementedAnywhere()) {
