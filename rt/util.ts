@@ -3172,7 +3172,11 @@ module TDev{
     export function mkAbsoluteUrl(relativeUrl: string): string {
         return Ticker.mainJsName.replace(/main.js$/, "") + relativeUrl;
     }
-
+          
+    export function localStore(key: string, data : string) {
+        if (!data) window.localStorage.removeItem(key);
+        else window.localStorage.setItem(key, data);
+    }
 
     export var translationDebug = false
     export var translations:StringMap<string> = {

@@ -659,6 +659,12 @@ module TDev.HTML {
         return r;
     }
 
+    export function mkCheckBoxLocalStorage(key: string, msg: string): HTMLElement {
+        var val = !!window.localStorage.getItem(key);
+        var check = HTML.mkCheckBox(msg, v => Util.localStore(key, v ? "1" : undefined), val);
+        return check;
+    }
+
     export interface RadioGroup
     {
         buttons:HTMLElement[];

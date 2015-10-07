@@ -2044,8 +2044,15 @@ module TDev
 
         private currentCompilationModalDialog;
         
-        private showCompilationDialog() : ModalDialog {
+        private showCompilationDialog(hideOption: boolean) {
+            var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
+            if (hideOption && !!window.localStorage.getItem(hideKey)) {
+                if (this.currentCompilationModalDialog)
+                    this.currentCompilationModalDialog.dismiss();
+                this.currentCompilationModalDialog = undefined;
+                return;
+            }             
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
@@ -2056,16 +2063,17 @@ module TDev
                 : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
+            if (hideOption)
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
-            return this.currentCompilationModalDialog;            
         }
         
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {            
-            if (!showSource) this.showCompilationDialog();
+            if (!showSource) this.showCompilationDialog(true);
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
-                Util.setTimeout(5000, () => {
+                Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
                     if (this.stepTutorial) this.stepTutorial.notify("compile");
                 })    
@@ -2076,7 +2084,7 @@ module TDev
         // information. Returns a promise with the JSON returned from the cloud
         // (structure unknown).
         public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
-            this.showCompilationDialog();
+            this.showCompilationDialog(false);
             if (btn) {
                 btn.setFlag("working", true);
                 btn.classList.add("disabledItem");
