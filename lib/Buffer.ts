@@ -336,9 +336,7 @@ module TDev.RT {
             case "binary":
                 return Util.uint8ArrayToString(this.buffer);
             case "utf8":
-                Util.userError(lf("utf8 not implemented yet; sorry"));
-                // TODO
-                return undefined;
+                return Util.fromUTF8Bytes(<any>this.buffer);
             case "utf16le":
                 return utf16(this.buffer);
             default:

@@ -2818,6 +2818,44 @@ module TDev{
 
     }
 
+    export function fromUTF8Bytes(binstr:number[])
+    {
+        if (!binstr) return ""
+
+        // escape function is deprecated
+        var escaped = ""
+        for (var i = 0; i < binstr.length; ++i) {
+            var k = binstr[i] & 0xff
+            if (k == 37 || k > 0x7f) {
+                escaped += "%" + k.toString(16);
+            } else {
+                escaped += String.fromCharCode(k)
+            }
+        }
+
+        // decodeURIComponent does the actual UTF8 decoding
+        return decodeURIComponent(escaped)
+    }
+
+    export function fromUTF8(binstr:string)
+    {
+        if (!binstr) return ""
+
+        // escape function is deprecated
+        var escaped = ""
+        for (var i = 0; i < binstr.length; ++i) {
+            var k = binstr.charCodeAt(i) & 0xff
+            if (k == 37 || k > 0x7f) {
+                escaped += "%" + k.toString(16);
+            } else {
+                escaped += binstr.charAt(i)
+            }
+        }
+
+        // decodeURIComponent does the actual UTF8 decoding
+        return decodeURIComponent(escaped)
+    }
+
     export function toUTF8(str:string)
     {
         var res = "";

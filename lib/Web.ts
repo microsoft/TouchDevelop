@@ -575,16 +575,16 @@ module TDev.RT {
             }
         }
 
-        //? Decodes a string that has been base64-encoded
+        //? Decodes a string that has been base64-encoded (assuming utf8 encoding)
         export function base64_decode(text: string): string
         {
-            return Util.base64Decode(text);
+            return Util.fromUTF8(Util.base64Decode(text));
         }
 
-        //? Converts a string into an base64-encoded string
+        //? Converts a string into an base64-encoded string (with utf8 encoding)
         export function base64_encode(text: string): string
         {
-               return Util.base64Encode(text);
+               return Util.base64Encode(Util.toUTF8(text));
         }
 
         function htmlToPictureUrl(value: string) {
