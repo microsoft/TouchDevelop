@@ -1,6 +1,5 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	// Specifies the folder path containing the tsserver and lib*.d.ts files to use.
-	// c:/dev/touchdevelop/backend/
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "c:/dev/touchdevelop/backend/node_modules/typescript/lib"
 }
