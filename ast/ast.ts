@@ -214,14 +214,14 @@ module TDev.AST {
 
         public parent:Stmt;
         public parentBlock():AST.Block { return this.parent instanceof AST.Block ? <AST.Block> this.parent : null; }
-        public isLoneChild() { return this.parentBlock().stmts.length == 1; }
-        public isLastChild() { return this.parentBlock().stmts.peek() == this; }
-        public isFirstChild() { return this.parentBlock().stmts[0] == this; }
+        public isLoneChild() { var p = this.parentBlock(); return p && p.stmts.length == 1; }
+        public isLastChild() { var p = this.parentBlock(); return p && p.stmts.peek() == this; }
+        public isFirstChild() { var p = this.parentBlock(); return p && p.stmts[0] == this; }
         public allowSimplify() { return false }
         public onDelete() { }
 
-        public isFirstNonComment() { return this.parentBlock().firstNonComment() == this; }
-        public isLastNonComment() { return this.parentBlock().lastNonComment() == this; }
+        public isFirstNonComment() { var p = this.parentBlock(); return p && p.firstNonComment() == this; }
+        public isLastNonComment() { var p = this.parentBlock(); return p && p.lastNonComment() == this; }
 
         public getName(): string { return this._name; }
         public setName(s: string) {

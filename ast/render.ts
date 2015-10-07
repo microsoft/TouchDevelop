@@ -725,14 +725,14 @@ module TDev
         public visitFor(n:AST.For)
         {
             var idiff = this.diffTwoWords(n.boundLocal.getName(), n.diffAltStmt ? (<AST.For>n.diffAltStmt).boundLocal.getName() : null)
-            var i = this.id(n.boundLocal.getName())
+            var i = this.kw(n.boundLocal.getName())
             return this.stmt(n,
                 (AST.proMode ?
                       //this.tline(this.kw("for") + this.st("(") + this.kw0("var ") + idiff + Renderer.tspan("greyed", " = 0; " + i + " < ") +
                       //           this.expr(n.upperBound) + Renderer.tspan("greyed", "; " + i + " = " + i + " + 1") + this.st(") {")) :
                       this.tline(this.kw("for") + this.st("(") + this.kw0("var ") + idiff + this.st(" < ") +
                                  this.expr(n.upperBound) + this.st(") {")) :
-                      this.tline(this.kw("for") + this.id("0") + this.op("\u2264") + idiff + this.op("<") +
+                      this.tline(this.kw("for") + this.kw("0") + this.kw("\u2264") + idiff + this.kw("<") +
                                  this.expr(n.upperBound) + this.kw("do"))
                 ) +
               this.possibleError(n) +

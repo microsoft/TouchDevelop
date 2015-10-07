@@ -503,7 +503,7 @@ module TDev
                     introE = span("stmtPlaceHolder", [span("kw", "for "), span("greyed", "("), span("kw", "var "), span("greyed", iname + " < ")])
                     outroE = span("greyed", " ) {")
                 } else {
-                    introE = span("stmtPlaceHolder", [span("kw", "for "), span("", " 0 ≤ " + iname + " < ")])
+                    introE = span("stmtPlaceHolder", [span("kw", "for "), span("kw", " 0 ≤ "), span("greyed", iname), span("kw", " < ")])
                     outroE = span("kw", " do")
                 }
             } else if (this.stmt instanceof AST.Foreach) {
@@ -1710,7 +1710,7 @@ module TDev
                 }
             })
 
-            var locs = this.expr.locals.concat(res)
+            var locs = this.expr.locals ? this.expr.locals.concat(res) : res;
             locs = locs.filter(loc => !loc.isSynthetic)
             return locs;
         }
