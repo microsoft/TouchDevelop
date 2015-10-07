@@ -131,6 +131,7 @@ var cachedApiContainer: cachedStore.Container;
 var templateSuffix: string = "";
 var lastSearchReport: Date;
 var initialApprovals: boolean = false;
+var httpCode: restify.IHTTPStatusCodes;
 
 var settingsOptionsJson = tdliteData.settingsOptionsJson;
 
@@ -1570,6 +1571,7 @@ async function _initAsync() : Promise<void>
     myHost = (/^https?:\/\/([^\/]+)/.exec(self) || [])[1].toLowerCase();
     nonSelfRedirect = orEmpty(td.serverSetting("NON_SELF_REDIRECT", true));
 
+    httpCode = restify.http();    
     let server = restify.server();
     server.use(restify.bodyParser());
     server.use(restify.queryParser());
@@ -1595,17 +1597,17 @@ async function _initAsync() : Promise<void>
         handleHttps(req1, res1);
         let throttleKey = sha256(req1.remoteIp()) + ":ready";
         if (await throttleCoreAsync(throttleKey, 1)) {
-            res1.sendError(restify.http()._429TooManyRequests, "");
+            res1.sendError(httpCode._429TooManyRequests, "");
         }
         else {
             let uid = req1.param("userid");
             let entry2 = await getPubAsync(uid, "user");
             if (entry2 == null) {
                 if (await throttleCoreAsync(throttleKey, 100)) {
-                    res1.sendError(restify.http()._429TooManyRequests, "");
+                    res1.sendError(httpCode._429TooManyRequests, "");
                 }
                 else {
-                    res1.sendError(restify.http()._404NotFound, "Missing");
+                    res1.sendError(httpCode._404NotFound, "Missing");
                 }
             }
             else if (orFalse(entry2["awaiting"])) {
@@ -1635,7 +1637,7 @@ async function _initAsync() : Promise<void>
         else {
             handleBasicAuth(req4, res4);
             if ( ! res4.finished() && req4.method() != "GET") {
-                res4.sendError(restify.http()._405MethodNotAllowed, "");
+                res4.sendError(httpCode._405MethodNotAllowed, "");
             }
             if ( ! res4.finished()) {
                 if (td.startsWith(req4.url(), "/app/")) {
@@ -1886,7 +1888,7 @@ function addRoute(method: string, root: string, verb: string, handler: ApiReqHan
                 }
             }
             if (size > 20000) {
-                req.status = restify.http()._413RequestEntityTooLarge;
+                req.status = httpCode._413RequestEntityTooLarge;
             }
             else {
                 await handler(req);
@@ -2029,7 +2031,7 @@ async function performSingleRequestAsync(apiRequest: ApiRequest) : Promise<void>
     logger.newContext();
     if (apiRequest.status == 200 && apiRequest.root == "me") {
         if (apiRequest.userid == "") {
-            apiRequest.status = restify.http()._401Unauthorized;
+            apiRequest.status = httpCode._401Unauthorized;
         }
         else {
             apiRequest.root = apiRequest.userid;
@@ -2103,11 +2105,11 @@ async function performSingleRequestAsync(apiRequest: ApiRequest) : Promise<void>
 function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify.Response) : void
 {
     if (apiRequest.status != 200) {
-        if (apiRequest.status == restify.http()._401Unauthorized) {
-            res.sendError(restify.http()._403Forbidden, "Invalid or missing ?access_token=...");
+        if (apiRequest.status == httpCode._401Unauthorized) {
+            res.sendError(httpCode._403Forbidden, "Invalid or missing ?access_token=...");
         }
-        else if (apiRequest.status == restify.http()._402PaymentRequired) {
-            res.sendCustomError(restify.http()._402PaymentRequired, "Your account is not authorized to perform this operation.");
+        else if (apiRequest.status == httpCode._402PaymentRequired) {
+            res.sendCustomError(httpCode._402PaymentRequired, "Your account is not authorized to perform this operation.");
         }
         else {
             res.sendError(apiRequest.status, "");
@@ -2119,7 +2121,7 @@ function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify
     else {
         let etag = computeEtagOfJson(apiRequest.response);
         if (apiRequest.method == "GET" && orEmpty(req.header("If-None-Match")) == etag) {
-            res.sendError(restify.http()._304NotModified, "");
+            res.sendError(httpCode._304NotModified, "");
             return;
         }
         res.setHeader("ETag", etag);
@@ -2145,7 +2147,7 @@ async function performBatchAsync(req: ApiRequest) : Promise<void>
 {
     let reqArr = req.body["array"];
     if (reqArr == null || reqArr.length > 50 || ! req.isTopLevel) {
-        req.status = restify.http()._400BadRequest;
+        req.status = httpCode._400BadRequest;
     }
     else {
         let resps = asArray(clone(reqArr));
@@ -2172,7 +2174,7 @@ async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, 
     apiRequest.isUpgrade = req.isUpgrade;
     if ( ! allowPost) {
         if (apiRequest.method != "GET") {
-            apiRequest.status = restify.http()._405MethodNotAllowed;
+            apiRequest.status = httpCode._405MethodNotAllowed;
         }
     }
     if (apiRequest.status == 200) {
@@ -2184,7 +2186,7 @@ async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, 
         let etag = computeEtagOfJson(apiRequest.response);
         let s = inpReq["If-None-Match"];
         if (s != null && s == etag) {
-            resp["code"] = restify.http()._304NotModified;
+            resp["code"] = httpCode._304NotModified;
         }
         else {
             resp["ETag"] = etag;
@@ -2356,7 +2358,7 @@ function _initWorkspaces() : void
         if (req3.status == 200) {
             let result = await installSlotsTable.getEntityAsync(req3.rootId, req3.argument);
             if (result == null) {
-                req3.status = restify.http()._404NotFound;
+                req3.status = httpCode._404NotFound;
             }
             else {
                 await deleteHistoryAsync(req3, req3.argument);
@@ -2571,7 +2573,7 @@ async function postInstalledAsync(req: ApiRequest) : Promise<void>
             }
         }
         else {
-            req.status = restify.http()._400BadRequest;
+            req.status = httpCode._400BadRequest;
         }
     }
 
@@ -2666,10 +2668,10 @@ async function publishScriptAsync(req: ApiRequest) : Promise<void>
     let pubVersion = new PubVersion();
     pubVersion.fromJson(JSON.parse(req.queryOptions["scriptversion"]));
     if (slotJson == null) {
-        req.status = restify.http()._404NotFound;
+        req.status = httpCode._404NotFound;
     }
     else if (slotJson["currentBlob"] != pubVersion.baseSnapshot) {
-        req.status = restify.http()._409Conflict;
+        req.status = httpCode._409Conflict;
     }
 
     if (req.status == 200) {
@@ -2754,7 +2756,7 @@ async function postCommentAsync(req: ApiRequest) : Promise<void>
 {
     let baseKind = req.rootPub["kind"];
     if ( ! /^(comment|script|group|screenshot|channel)$/.test(baseKind)) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else {
         let comment = new PubComment();
@@ -2832,7 +2834,7 @@ async function setResolveAsync(store: indexedStore.Store, resolutionCallback: Re
         await (<DecoratedStore><any>store).myResolve(fetchResult, req);
         req.response = fetchResult.items[0];
         if (req.response == null) {
-            req.status = restify.http()._402PaymentRequired;
+            req.status = httpCode._402PaymentRequired;
         }
     });
     await store.createIndexAsync("all", entry => "all");
@@ -2883,7 +2885,7 @@ async function setResolveAsync(store: indexedStore.Store, resolutionCallback: Re
         addRoute("GET", "*pub", pluralPub, async (req3: ApiRequest) => {
             if (req3.rootPub["kind"] == "group" && req3.rootPub["pub"]["isclass"]) {
                 if (req3.userid == "") {
-                    req3.status = restify.http()._401Unauthorized;
+                    req3.status = httpCode._401Unauthorized;
                 }
                 else if ( ! req3.userinfo.json["groups"].hasOwnProperty(req3.rootPub["id"])) {
                     checkPermission(req3, "global-list");
@@ -2943,7 +2945,7 @@ async function postReviewAsync(req: ApiRequest) : Promise<void>
 {
     let baseKind = req.rootPub["kind"];
     if ( ! /^(comment|script|channel)$/.test(baseKind)) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else {
         let pubid = req.rootId;
@@ -2974,7 +2976,7 @@ async function returnOnePubAsync(store: indexedStore.Store, obj: JsonObject, api
 {
     apiRequest.response = await resolveOnePubAsync(store, obj, apiRequest);
     if (apiRequest.response == null) {
-        apiRequest.status = restify.http()._402PaymentRequired;
+        apiRequest.status = httpCode._402PaymentRequired;
     }
 }
 
@@ -3475,7 +3477,7 @@ async function _initScriptsAsync() : Promise<void>
     addRoute("GET", "*script", "*", async (req2: ApiRequest) => {
         let isTd = ! req2.rootPub["pub"]["editor"];
         if ( ! isTd) {
-            req2.status = restify.http()._405MethodNotAllowed;
+            req2.status = httpCode._405MethodNotAllowed;
         }
         else {
             await throttleAsync(req2, "tdcompile", 20);
@@ -3488,7 +3490,7 @@ async function _initScriptsAsync() : Promise<void>
     addRoute("POST", "scripts", "", async (req3: ApiRequest) => {
         await canPostAsync(req3, "direct-script");
         if (req3.status == 200 && orEmpty(req3.body["text"]).length > 100000) {
-            req3.status = restify.http()._413RequestEntityTooLarge;
+            req3.status = httpCode._413RequestEntityTooLarge;
         }
 
         let rawSrc = orEmpty(req3.body["raw"]);
@@ -3555,7 +3557,7 @@ async function _initScriptsAsync() : Promise<void>
             }
         }
         else {
-            req4.status = restify.http()._400BadRequest;
+            req4.status = httpCode._400BadRequest;
         }
     });
     addRoute("POST", "*script", "meta", async (req5: ApiRequest) => {
@@ -3579,7 +3581,7 @@ async function _initScriptsAsync() : Promise<void>
                     }
                 }
                 if (JSON.stringify(meta).length > 10000) {
-                    req5.status = restify.http()._413RequestEntityTooLarge;
+                    req5.status = httpCode._413RequestEntityTooLarge;
                 }
                 else {
                     v["pub"]["meta"] = meta;
@@ -3597,7 +3599,7 @@ async function _initScriptsAsync() : Promise<void>
             req6.response = entry2["text"];
         }
         else {
-            req6.status = restify.http()._402PaymentRequired;
+            req6.status = httpCode._402PaymentRequired;
         }
     });
     addRoute("GET", "*script", "canexportapp", async (req7: ApiRequest) => {
@@ -3733,7 +3735,7 @@ async function _initGroupsAsync() : Promise<void>
         if (req.status == 200) {
             let js2 = req.userinfo.json["settings"];
             if ( ! js2["emailverified"]) {
-                req.status = restify.http()._405MethodNotAllowed;
+                req.status = httpCode._405MethodNotAllowed;
             }
         }
         if (req.status == 200) {
@@ -3774,7 +3776,7 @@ async function _initGroupsAsync() : Promise<void>
             if (user != "") {
                 let newOwner = await getPubAsync(user, "user");
                 if (newOwner == null || ! hasPermission(newOwner, "post-group") || ! newOwner["groups"].hasOwnProperty(req.rootId)) {
-                    req.status = restify.http()._412PreconditionFailed;
+                    req.status = httpCode._412PreconditionFailed;
                     return;
                 }
                 await groups.reindexAsync(req.rootId, async (v: JsonBuilder) => {
@@ -3805,7 +3807,7 @@ async function _initGroupsAsync() : Promise<void>
         let passId = normalizeAndHash(req3.argument);
         let codeObj = await passcodesContainer.getAsync(passId);
         if (codeObj == null || codeObj["kind"] == "reserved") {
-            req3.status = restify.http()._404NotFound;
+            req3.status = httpCode._404NotFound;
         }
         else {
             let kind = codeObj["kind"];
@@ -3834,7 +3836,7 @@ async function _initGroupsAsync() : Promise<void>
                 req3.response = clone(jsb3);
             }
             else {
-                req3.status = restify.http()._404NotFound;
+                req3.status = httpCode._404NotFound;
             }
         }
     });
@@ -3865,14 +3867,14 @@ async function _initGroupsAsync() : Promise<void>
                 else if (kind1 == "activationcode") {
                     let crd1 = codeObj1["singlecredit"];
                     if (crd1 != null && codeObj1["orig_credit"] != crd1) {
-                        req5.status = restify.http()._409Conflict;
+                        req5.status = httpCode._409Conflict;
                     }
                     else if (codeObj1["credit"] > 0) {
                         await applyCodeAsync(req5.rootPub, codeObj1, passId1, req5);
                         req5.response = ({});
                     }
                     else {
-                        req5.status = restify.http()._409Conflict;
+                        req5.status = httpCode._409Conflict;
                     }
                 }
                 else if (kind1 == "groupinvitation") {
@@ -4050,7 +4052,7 @@ async function _initGroupsAsync() : Promise<void>
             meOnly(req11);
             if (req11.status == 200 && req11.rootId == entry23["pub"]["userid"]) {
                 // Cannot remove self from the group.
-                req11.status = restify.http()._412PreconditionFailed;
+                req11.status = httpCode._412PreconditionFailed;
             }
             if (req11.status == 200) {
                 let memid = "gm-" + req11.rootId + "-" + grid;
@@ -4189,7 +4191,7 @@ async function _initReviewsAsync() : Promise<void>
             req4.response = ({});
         }
         else {
-            req4.status = restify.http()._409Conflict;
+            req4.status = httpCode._409Conflict;
         }
     });
 }
@@ -4279,7 +4281,7 @@ async function _initUsersAsync() : Promise<void>
             req3.headers["Set-Cookie"] = s4;
         }
         else {
-            req3.status = restify.http()._401Unauthorized;
+            req3.status = httpCode._401Unauthorized;
         }
     });
     // This is for test users for load testing nd doe **system accounts**
@@ -4313,10 +4315,10 @@ async function _initUsersAsync() : Promise<void>
     addRoute("POST", "*user", "addauth", async (req5: ApiRequest) => {
         let tokenJs = req5.userinfo.token;
         if (orEmpty(req5.body["key"]) != tokenSecret) {
-            req5.status = restify.http()._403Forbidden;
+            req5.status = httpCode._403Forbidden;
         }
         else if (tokenJs == null) {
-            req5.status = restify.http()._404NotFound;
+            req5.status = httpCode._404NotFound;
         }
         else {
             let s2 = tokenJs.reason;
@@ -4327,7 +4329,7 @@ async function _initUsersAsync() : Promise<void>
                 req5.response = ({});
             }
             else {
-                req5.status = restify.http()._400BadRequest;
+                req5.status = httpCode._400BadRequest;
             }
         }
     });
@@ -4337,12 +4339,12 @@ async function _initUsersAsync() : Promise<void>
             return;
         }
         if (req6.rootId == req6.argument) {
-            req6.status = restify.http()._412PreconditionFailed;
+            req6.status = httpCode._412PreconditionFailed;
             return;
         }
         let otherUser = await getPubAsync(req6.argument, "user");
         if (otherUser == null) {
-            req6.status = restify.http()._404NotFound;
+            req6.status = httpCode._404NotFound;
             return;
         }
         let rootPassId = req6.rootPub["login"];
@@ -4350,7 +4352,7 @@ async function _initUsersAsync() : Promise<void>
         let otherPassId = otherUser["login"];
         let otherPass = await passcodesContainer.getAsync(otherPassId);
         if (rootPass == null || otherPass == null) {
-            req6.status = restify.http()._424FailedDependency;
+            req6.status = httpCode._424FailedDependency;
             return;
         }
         await passcodesContainer.updateAsync(rootPassId, async (entry4: JsonBuilder) => {
@@ -4395,7 +4397,7 @@ async function _initUsersAsync() : Promise<void>
         await checkDeletePermissionAsync(req8);
         // Level4 users cannot be deleted; you first have to downgrade their permissions.
         if (req8.status == 200 && hasPermission(req8.rootPub, "level4")) {
-            req8.status = restify.http()._402PaymentRequired;
+            req8.status = httpCode._402PaymentRequired;
         }
         if (req8.status == 200) {
             let resQuery = installSlotsTable.createQuery().partitionKeyIs(req8.rootId);
@@ -4432,10 +4434,10 @@ async function _initUsersAsync() : Promise<void>
             let pass = orEmpty(req10.body["password"]);
             let prevPass = orEmpty(req10.rootPub["login"]);
             if (pass.length < 10) {
-                req10.status = restify.http()._412PreconditionFailed;
+                req10.status = httpCode._412PreconditionFailed;
             }
             else if ( ! td.startsWith(prevPass, "code/")) {
-                req10.status = restify.http()._405MethodNotAllowed;
+                req10.status = httpCode._405MethodNotAllowed;
             }
             else {
                 await setPasswordAsync(req10, pass, prevPass);
@@ -4470,11 +4472,11 @@ async function _initUsersAsync() : Promise<void>
             perm1 = "educator";
         }
         if (isAlarming(perm1)) {
-            req12.status = restify.http()._402PaymentRequired;
+            req12.status = httpCode._402PaymentRequired;
         }
         let numCodes = td.toNumber(req12.body["count"]);
         if (numCodes > 1000) {
-            req12.status = restify.http()._413RequestEntityTooLarge;
+            req12.status = httpCode._413RequestEntityTooLarge;
         }
         checkPermission(req12, "gen-code," + perm1 + addperm);
         if (req12.status == 200) {
@@ -4537,14 +4539,14 @@ function _initImport() : void
             req1.response = s;
         }
         else {
-            req1.status = restify.http()._400BadRequest;
+            req1.status = httpCode._400BadRequest;
         }
     });
     addRoute("POST", "import", "", async (req2: ApiRequest) => {
         checkPermission(req2, "root");
         if (req2.status == 200) {
             if (importRunning) {
-                req2.status = restify.http()._503ServiceUnavailable;
+                req2.status = httpCode._503ServiceUnavailable;
             }
             else {
                 importRunning = true;
@@ -4557,7 +4559,7 @@ function _initImport() : void
         checkPermission(req3, "root");
         let id = req3.verb;
         if (req3.status == 200 && ! /^[a-z]+$/.test(id)) {
-            req3.status = restify.http()._412PreconditionFailed;
+            req3.status = httpCode._412PreconditionFailed;
         }
         if (req3.status == 200) {
             let resp = new RecImportResponse();
@@ -4578,7 +4580,7 @@ function _initImport() : void
         let key = req5.queryOptions["key"];
         if (key != null && key == td.serverSetting("LOGIN_SECRET", false)) {
             if (importRunning) {
-                req5.status = restify.http()._503ServiceUnavailable;
+                req5.status = httpCode._503ServiceUnavailable;
             }
             else {
                 importRunning = true;
@@ -4587,7 +4589,7 @@ function _initImport() : void
             }
         }
         else {
-            req5.status = restify.http()._402PaymentRequired;
+            req5.status = httpCode._402PaymentRequired;
         }
     });
 }
@@ -4691,7 +4693,7 @@ async function postScreenshotAsync(req: ApiRequest) : Promise<void>
 {
     let baseKind = req.rootPub["kind"];
     if ( ! /^(script)$/.test(baseKind)) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else {
         let screenshot = new PubScreenshot();
@@ -4721,10 +4723,10 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
     let ext = jsb["ext"];
     let enc = withDefault(req.body["contentEncoding"], "base64");
     if ( ! (enc == "base64" || enc == "utf8")) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else if (ext == "") {
-        req.status = restify.http()._415UnsupportedMediaType;
+        req.status = httpCode._415UnsupportedMediaType;
     }
     else {
         let buf = new Buffer(orEmpty(req.body["content"]), enc);
@@ -4737,10 +4739,10 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
             sizeLimit = 8 * 1024 * 1024;
         }
         if (buf == null) {
-            req.status = restify.http()._400BadRequest;
+            req.status = httpCode._400BadRequest;
         }
         else if (buf.length > sizeLimit) {
-            req.status = restify.http()._413RequestEntityTooLarge;
+            req.status = httpCode._413RequestEntityTooLarge;
         }
         else {
             let sha = td.sha256(buf).substr(0, 32);
@@ -4767,7 +4769,7 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
                 smartGzip: true
             });
             if ( ! result.succeded()) {
-                req.status = restify.http()._424FailedDependency;
+                req.status = httpCode._424FailedDependency;
             }
             else if (jsb["isImage"]) {
                 let url = artContainer.url() + "/" + filename;
@@ -4788,11 +4790,11 @@ async function postArt_likeAsync(req: ApiRequest, jsb: JsonBuilder) : Promise<vo
                             timeoutIntervalInMs: 3000
                         });
                         if ( ! result2.succeded()) {
-                            req.status = restify.http()._424FailedDependency;
+                            req.status = httpCode._424FailedDependency;
                         }
                     }
                     else {
-                        req.status = restify.http()._400BadRequest;
+                        req.status = httpCode._400BadRequest;
                     }
                 });
             }
@@ -4840,7 +4842,7 @@ async function importReviewAsync(req: ApiRequest, body: JsonObject) : Promise<vo
         let jsb = await updateReviewCountsAsync(review, pubid, req);
         if (req.status == 409) {
             await reviews.reserveIdAsync(review.id);
-            req.status = restify.http()._410Gone;
+            req.status = httpCode._410Gone;
         }
     }
     else {
@@ -4874,7 +4876,7 @@ async function updateReviewCountsAsync(review: PubReview, pubid: string, req: Ap
         });
     }
     else {
-        req.status = restify.http()._409Conflict;
+        req.status = httpCode._409Conflict;
     }
     return jsb;
 }
@@ -4949,12 +4951,12 @@ async function importOneAnythingAsync(js: JsonObject) : Promise<ApiRequest>
             await importScreenshotAsync(apiRequest, js);
         }
         else {
-            apiRequest.status = restify.http()._422UnprocessableEntity;
+            apiRequest.status = httpCode._422UnprocessableEntity;
         }
         logger.info("import " + kind + " /" + js["id"] + ": " + apiRequest.status);
     }
     else {
-        apiRequest.status = restify.http()._409Conflict;
+        apiRequest.status = httpCode._409Conflict;
     }
     return apiRequest;
 }
@@ -5241,7 +5243,7 @@ async function _initReleasesAsync() : Promise<void>
                 }
             }
             else {
-                req1.status = restify.http()._412PreconditionFailed;
+                req1.status = httpCode._412PreconditionFailed;
             }
         }
     });
@@ -5273,7 +5275,7 @@ async function _initReleasesAsync() : Promise<void>
     addRoute("POST", "*release", "label", async (req3: ApiRequest) => {
         let name = orEmpty(req3.body["name"]);
         if ( ! isKnownReleaseName(name)) {
-            req3.status = restify.http()._412PreconditionFailed;
+            req3.status = httpCode._412PreconditionFailed;
         }
         if (req3.status == 200) {
             checkPermission(req3, "lbl-" + name);
@@ -5331,10 +5333,10 @@ async function _initReleasesAsync() : Promise<void>
 function checkPermission(req: ApiRequest, perm: string) : void
 {
     if (req.userid == "") {
-        req.status = restify.http()._401Unauthorized;
+        req.status = httpCode._401Unauthorized;
     }
     else if ( ! hasPermission(req.userinfo.json, perm)) {
-        req.status = restify.http()._402PaymentRequired;
+        req.status = httpCode._402PaymentRequired;
     }
 }
 
@@ -5503,18 +5505,18 @@ async function validateTokenAsync(req: ApiRequest, rreq: restify.Request) : Prom
             }
         }
         if (tokenJs == null) {
-            req.status = restify.http()._401Unauthorized;
+            req.status = httpCode._401Unauthorized;
         }
         else {
             let token2 = Token.createFromJson(tokenJs);
             if (orZero(token2.version) < 2) {
-                req.status = restify.http()._401Unauthorized;
+                req.status = httpCode._401Unauthorized;
                 return;
             }
             if (orEmpty(token2.cookie) != "") {
                 let ok = td.stringContains(orEmpty(rreq.header("cookie")), "TD_ACCESS_TOKEN2=" + token2.cookie);
                 if ( ! ok) {
-                    req.status = restify.http()._401Unauthorized;
+                    req.status = httpCode._401Unauthorized;
                     logger.info("cookie missing, user=" + token2.PartitionKey);
                     return;
                 }
@@ -5522,21 +5524,21 @@ async function validateTokenAsync(req: ApiRequest, rreq: restify.Request) : Prom
                 if (td.startsWith(r, "http://localhost:") || td.startsWith(r, self + "app/")) {
                 }
                 else {
-                    req.status = restify.http()._401Unauthorized;
+                    req.status = httpCode._401Unauthorized;
                     logger.info("bad referer: " + r + ", user = " + token2.PartitionKey);
                     return;
                 }
                 // minimum token expiration - 5min
                 if (orEmpty(token2.reason) != "code" && orZero(theServiceSettings.tokenExpiration) > 300 && await nowSecondsAsync() - token2.time > theServiceSettings.tokenExpiration) {
                     // Token expired
-                    req.status = restify.http()._401Unauthorized;
+                    req.status = httpCode._401Unauthorized;
                     return;
                 }
             }
             let uid = token2.PartitionKey;
             await setReqUserIdAsync(req, uid);
             if (req.status == 200 && orFalse(req.userinfo.json["awaiting"])) {
-                req.status = restify.http()._418ImATeapot;
+                req.status = httpCode._418ImATeapot;
             }
             if (req.status == 200) {
                 req.userinfo.token = token2;
@@ -5602,7 +5604,7 @@ async function throttleAsync(req: ApiRequest, kind: string, tokenCost_s_: number
         }
         let drop = await throttleCoreAsync(withDefault(req.userid, req.throttleIp) + ":" + kind, tokenCost_s_);
         if (drop) {
-            req.status = restify.http()._429TooManyRequests;
+            req.status = httpCode._429TooManyRequests;
         }
     }
 }
@@ -5947,7 +5949,7 @@ async function _initLoginAsync() : Promise<void>
         addRoute("GET", "*user", "rawtoken", async (req5: ApiRequest) => {
             if (req5.userinfo.token.cookie != "") {
                 // Only cookie-less (service) tokens allowed here.
-                req5.status = restify.http()._418ImATeapot;
+                req5.status = httpCode._418ImATeapot;
             }
             checkPermission(req5, "root");
             if (req5.status == 200) {
@@ -6196,7 +6198,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
     else {
         if (await throttleCoreAsync(sha256(req.remoteIp()) + ":code", 10)) {
             // TODO this should be some nice page
-            res.sendError(restify.http()._429TooManyRequests, "Too many login attempts");
+            res.sendError(httpCode._429TooManyRequests, "Too many login attempts");
             return;
         }
         let codeObj = await passcodesContainer.getAsync(passId);
@@ -6385,10 +6387,10 @@ function handleBasicAuth(req: restify.Request, res: restify.Response) : void
                 });
             }
             else if (nonSelfRedirect == "self") {
-                res.redirect(restify.http()._301MovedPermanently, self.replace(/\/$/g, "") + req.url());
+                res.redirect(httpCode._301MovedPermanently, self.replace(/\/$/g, "") + req.url());
             }
             else {
-                res.redirect(restify.http()._302MovedTemporarily, nonSelfRedirect);
+                res.redirect(httpCode._302MovedTemporarily, nonSelfRedirect);
             }
         }
     }
@@ -6465,7 +6467,7 @@ async function _initAbusereportsAsync() : Promise<void>
             }
         }
         else {
-            req3.status = restify.http()._405MethodNotAllowed;
+            req3.status = httpCode._405MethodNotAllowed;
         }
     });
     addRoute("GET", "*pub", "candelete", async (req4: ApiRequest) => {
@@ -6507,7 +6509,7 @@ async function _initAbusereportsAsync() : Promise<void>
 async function checkFacilitatorPermissionAsync(req: ApiRequest, subjectUserid: string) : Promise<void>
 {
     if (req.userid == "") {
-        req.status = restify.http()._401Unauthorized;
+        req.status = httpCode._401Unauthorized;
     }
     if (req.status == 200) {
         let userjs = await getPubAsync(subjectUserid, "user");
@@ -6516,7 +6518,7 @@ async function checkFacilitatorPermissionAsync(req: ApiRequest, subjectUserid: s
             return;
         }
         if ( ! callerIsFacilitatorOf(req, userjs)) {
-            req.status = restify.http()._402PaymentRequired;
+            req.status = httpCode._402PaymentRequired;
         }
         else {
             // You need to have all of subject's permission to delete their stuff.
@@ -6659,11 +6661,11 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
         req.response = compileResp.toJson();
     }
     else if (cfg[compileReq.config] == null) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else {
         if (compileReq.source.length > 200000) {
-            req.status = restify.http()._413RequestEntityTooLarge;
+            req.status = httpCode._413RequestEntityTooLarge;
         }
         let numrepl = 0;
         let src = td.replaceFn(compileReq.source, /#(\s*include\s+[<"]([a-zA-Z0-9\/\.\-]+)[">]|if\s+|ifdef\s+|else\s+|elif\s+|line\s+)?/g, (elt: string[]) => {
@@ -6691,7 +6693,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
             }
             let json0 = cfg[compileReq.config];
             if (json0 == null) {
-                req.status = restify.http()._404NotFound;
+                req.status = httpCode._404NotFound;
                 return;
             }
             let ccfg = CompilerConfig.createFromJson(json0);
@@ -6699,7 +6701,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
                 ccfg.target_binary = td.replaceAll(orEmpty(ccfg.target_binary), "-combined", "");
             }
             if (! ccfg.repourl) {
-                req.status = restify.http()._404NotFound;
+                req.status = httpCode._404NotFound;
                 return;
             }
             ccfg.hexfilename = td.replaceAll(ccfg.hexfilename, "SCRIPT", name);
@@ -6725,7 +6727,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
                     let imgid = orEmpty(td.toString(imgcfg));
                     if (imgid == "") {
                         logger.info("cannot find repo: " + ccfg.repourl);
-                        req.status = restify.http()._404NotFound;
+                        req.status = httpCode._404NotFound;
                         return;
                     }
                     logger.debug("found image: " + ccfg.repourl + " -> " + imgid);
@@ -6739,7 +6741,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
                 req.response = compileResp.toJson();
             }
             else if (! ccfg.target_binary) {
-                req.status = restify.http()._404NotFound;
+                req.status = httpCode._404NotFound;
             }
             else {
                 if (/^[\w.\-]+$/.test(orEmpty(compileReq.repohash))) {
@@ -6751,7 +6753,7 @@ async function mbedCompileAsync(req: ApiRequest) : Promise<void>
                 let started = await compile.startAsync();
                 if ( ! started) {
                     logger.tick("MbedWsCompileStartFailed");
-                    req.status = restify.http()._424FailedDependency;
+                    req.status = httpCode._424FailedDependency;
                 }
                 else {
                     /* async */ mbedwsDownloadAsync(sha, compile, ccfg);
@@ -6828,7 +6830,7 @@ async function checkDeletePermissionAsync(req: ApiRequest) : Promise<void>
 async function canPostAsync(req: ApiRequest, kind: string) : Promise<void>
 {
     if (req.userid == "") {
-        req.status = restify.http()._401Unauthorized;
+        req.status = httpCode._401Unauthorized;
     }
     else {
         checkPermission(req, "post-" + kind);
@@ -7070,7 +7072,7 @@ function _initBugs() : void
                 req.response = js3;
             }
             else {
-                req.status = restify.http()._404NotFound;
+                req.status = httpCode._404NotFound;
             }
         }
     });
@@ -7229,7 +7231,7 @@ async function forwardToCloudCompilerAsync(req: ApiRequest, api: string) : Promi
 {
     let resp = await queryCloudCompilerAsync(api);
     if (resp == null) {
-        req.status = restify.http()._400BadRequest;
+        req.status = httpCode._400BadRequest;
     }
     else {
         req.response = resp;
@@ -7638,7 +7640,7 @@ function _initSearch() : void
                 let statusCode = await batch.sendAsync();
                 logger.debug("reindex art, status: " + statusCode);
             });
-            req2.status = restify.http()._201Created;
+            req2.status = httpCode._201Created;
         }
     });
     addRoute("POST", "pubs", "reindex", async (req3: ApiRequest) => {
@@ -7651,7 +7653,7 @@ function _initSearch() : void
             /* async */ reindexStoreAsync(channels, req3);
             /* async */ reindexStoreAsync(groups, req3);
             /* async */ reindexStoreAsync(pointers, req3);
-            req3.status = restify.http()._201Created;
+            req3.status = httpCode._201Created;
         }
     });
 }
@@ -7857,7 +7859,7 @@ async function _initPointersAsync() : Promise<void>
                 else {
                     checkPermission(req, "root-ptr");
                     if (req.status == 200 && ! hasPtrPermission(req, ptr1.id)) {
-                        req.status = restify.http()._402PaymentRequired;
+                        req.status = httpCode._402PaymentRequired;
                     }
                 }
             }
@@ -7868,7 +7870,7 @@ async function _initPointersAsync() : Promise<void>
                 }
             }
             if (req.status == 200 && ! /^[\w\/\-@]+$/.test(ptr1.path)) {
-                req.status = restify.http()._412PreconditionFailed;
+                req.status = httpCode._412PreconditionFailed;
             }
             if (req.status == 200) {
                 let existing = await getPubAsync(ptr1.id, "pointer");
@@ -8060,7 +8062,7 @@ async function updatePointerAsync(req: ApiRequest) : Promise<void>
     else {
         checkPermission(req, "root-ptr");
         if (req.status == 200 && ! hasPtrPermission(req, req.rootId)) {
-            req.status = restify.http()._402PaymentRequired;
+            req.status = httpCode._402PaymentRequired;
         }
     }
     if (req.status == 200) {
@@ -8284,7 +8286,7 @@ function _initConfig() : void
     addRoute("POST", "config", "*", async (req1: ApiRequest) => {
         checkPermission(req1, "root");
         if (req1.status == 200 && ! /^(compile|settings|promo|compiletag)$/.test(req1.verb)) {
-            req1.status = restify.http()._404NotFound;
+            req1.status = httpCode._404NotFound;
         }
         if (req1.status == 200) {
             await auditLogAsync(req1, "update-settings", {
@@ -8385,7 +8387,7 @@ async function setPasswordAsync(req: ApiRequest, pass: string, prevPass: string)
         req.response = ({});
     }
     else {
-        req.status = restify.http()._400BadRequest;
+        req.status = httpCode._400BadRequest;
     }
 }
 
@@ -8601,7 +8603,7 @@ async function _initEmbedThumbnailsAsync() : Promise<void>
             // ok, referer checked
         }
         else {
-            res.sendCustomError(restify.http()._402PaymentRequired, "Bad referer");
+            res.sendCustomError(httpCode._402PaymentRequired, "Bad referer");
             return;
         }
         let provider = req.param("provider");
@@ -8611,17 +8613,17 @@ async function _initEmbedThumbnailsAsync() : Promise<void>
         if (entry == null) {
             let drop = await throttleCoreAsync(sha256(req.remoteIp()) + ":thumb", 10);
             if (drop) {
-                res.sendError(restify.http()._429TooManyRequests, "Too many thumbnail reqs");
+                res.sendError(httpCode._429TooManyRequests, "Too many thumbnail reqs");
                 return;
             }
             if (provider == "vimeo") {
                 if ( ! /^[0-9]+$/.test(id)) {
-                    res.sendError(restify.http()._412PreconditionFailed, "Bad video id");
+                    res.sendError(httpCode._412PreconditionFailed, "Bad video id");
                     return;
                 }
                 let js = await td.downloadJsonAsync("https://vimeo.com/api/oembed.json?url=" + encodeURIComponent("https://vimeo.com/" + id));
                 if (js == null) {
-                    res.sendError(restify.http()._404NotFound, "");
+                    res.sendError(httpCode._404NotFound, "");
                     return;
                 }
                 let jsb = {};
@@ -8630,7 +8632,7 @@ async function _initEmbedThumbnailsAsync() : Promise<void>
                 entry = clone(jsb);
             }
             else {
-                res.sendError(restify.http()._405MethodNotAllowed, "invalid provider");
+                res.sendError(httpCode._405MethodNotAllowed, "invalid provider");
                 return;
             }
         }
@@ -8650,7 +8652,7 @@ async function _initEmbedThumbnailsAsync() : Promise<void>
             res1.html(s);
         }
         else {
-            res1.sendError(restify.http()._404NotFound, "Bad id");
+            res1.sendError(httpCode._404NotFound, "Bad id");
         }
     });
 }
@@ -8828,7 +8830,7 @@ async function _initAcsAsync() : Promise<void>
         }
         else {
             logger.debug("acs, wrong token: " + JSON.stringify(req.queryOptions));
-            req.status = restify.http()._402PaymentRequired;
+            req.status = httpCode._402PaymentRequired;
         }
     });
 }
@@ -8878,7 +8880,7 @@ async function postAbusereportAsync(req: ApiRequest) : Promise<void>
 {
     let baseKind = req.rootPub["kind"];
     if ( ! canHaveAbuseReport(baseKind)) {
-        req.status = restify.http()._412PreconditionFailed;
+        req.status = httpCode._412PreconditionFailed;
     }
     else {
         let report = new PubAbusereport();
@@ -9307,7 +9309,7 @@ async function setReqUserIdAsync(req: ApiRequest, uid: string) : Promise<void>
 {
     let userjs = await getPubAsync(uid, "user");
     if (userjs == null) {
-        req.status = restify.http()._401Unauthorized;
+        req.status = httpCode._401Unauthorized;
         logger.info("accessing token for deleted user, " + uid);
     }
     else {
@@ -9599,37 +9601,37 @@ async function _initVimeoAsync() : Promise<void>
             // ok, referer checked
         }
         else {
-            res.sendCustomError(restify.http()._402PaymentRequired, "Bad referer");
+            res.sendCustomError(httpCode._402PaymentRequired, "Bad referer");
             return;
         }
         let id = req1.param("id");
         if ( ! /^\d+$/.test(id)) {
-            res.sendError(restify.http()._400BadRequest, "Bad ID");
+            res.sendError(httpCode._400BadRequest, "Bad ID");
             return;
         }
         let endpoint = req1.param("endpoint");
         if ( ! /^(sd|thumb512|thumb128)$/.test(endpoint)) {
-            res.sendError(restify.http()._404NotFound, "Bad endpoint");
+            res.sendError(httpCode._404NotFound, "Bad endpoint");
             return;
         }
         let entry = await getPubAsync("vimeo-" + id, "video");
         if (entry == null) {
             let drop = await throttleCoreAsync(sha256(req1.remoteIp()) + ":video", 10);
             if (drop) {
-                res.sendError(restify.http()._429TooManyRequests, "Too many video reqs");
+                res.sendError(httpCode._429TooManyRequests, "Too many video reqs");
                 return;
             }
             let request = td.createRequest("https://api.vimeo.com/videos/" + encodeURIComponent(id));
             request.setHeader("Authorization", "Bearer " + td.serverSetting("VIMEO_API_TOKEN", false));
             let response = await request.sendAsync();
             if (response.statusCode() != 200) {
-                res.sendCustomError(restify.http()._424FailedDependency, "No such vimeo video?");
+                res.sendCustomError(httpCode._424FailedDependency, "No such vimeo video?");
                 logger.info("failed vimeo download: " + response + ": " + response.content());
                 return;
             }
             let vimeoPayload = response.contentAsJson();
             if (vimeoPayload["user"]["uri"] != "/users/" + td.serverSetting("VIMEO_USER", false)) {
-                res.sendError(restify.http()._402PaymentRequired, "Invalid video user");
+                res.sendError(httpCode._402PaymentRequired, "Invalid video user");
                 return;
             }
             let pubVideo = new PubVideo();
@@ -9642,7 +9644,7 @@ async function _initVimeoAsync() : Promise<void>
             let thumburl = vimeoPayload["pictures"]["sizes"][0]["link"];
             let sdDesc = asArray(vimeoPayload["download"]).filter(elt => elt["quality"] == "sd")[0];
             if (sdDesc["size"] > 4 * 1024 * 1024) {
-                res.sendError(restify.http()._413RequestEntityTooLarge, "Video too large");
+                res.sendError(httpCode._413RequestEntityTooLarge, "Video too large");
                 return;
             }
             let request2 = td.createRequest(sdDesc["link"]);
@@ -9664,7 +9666,7 @@ async function _initVimeoAsync() : Promise<void>
         }
         let blobid = entry["pub"]["blobid"];
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.redirect(restify.http()._302MovedTemporarily, currClientConfig.primaryCdnUrl + "/cachevideo/" + blobid + "-" + endpoint);
+        res.redirect(httpCode._302MovedTemporarily, currClientConfig.primaryCdnUrl + "/cachevideo/" + blobid + "-" + endpoint);
     });
 }
 
@@ -9705,7 +9707,7 @@ function _initRuntime() : void
         else {
             let translated = await microsoftTranslator.translateAsync(text, orEmpty(req.body["from"]), orEmpty(req.body["to"]), ishtml);
             if (translated == null) {
-                req.status = restify.http()._424FailedDependency;
+                req.status = httpCode._424FailedDependency;
             }
             else {
                 jsb["translated"] = translated;
@@ -9997,11 +9999,11 @@ async function handledByCacheAsync(apiRequest: ApiRequest) : Promise<boolean>
 async function storeCacheAsync(apiRequest: ApiRequest) : Promise<void>
 {
     if (apiRequest.method != "GET") {
-        apiRequest.status = restify.http()._405MethodNotAllowed;
+        apiRequest.status = httpCode._405MethodNotAllowed;
         return;
     }
     await throttleAsync(apiRequest, "apireq", 10);
-    if (apiRequest.status == restify.http()._429TooManyRequests) {
+    if (apiRequest.status == httpCode._429TooManyRequests) {
         return;
     }
     // 
@@ -10009,7 +10011,7 @@ async function storeCacheAsync(apiRequest: ApiRequest) : Promise<void>
     // 
     let thekey = apiRequest.route.options.cacheKey;
     if (!thekey) {
-        apiRequest.status = restify.http()._404NotFound;
+        apiRequest.status = httpCode._404NotFound;
         return;
     }
     let jsb = {};
