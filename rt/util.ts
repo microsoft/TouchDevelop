@@ -3298,8 +3298,11 @@ module TDev{
         }
 
         var ln2 = ln.slice(0, 2)
-        // normalize ln
-        if (ln2 == "zh" && (ln != "zh-CHS" && ln != "zh-CHT")) ln = "zh-CHS";
+        // normalize try to normalize zn
+        if (ln2 == "zh") {
+            if (ln == "zh-TW" || ln == "zh-HK") ln = "zh-CHT";
+            else ln = "zh-CHS";
+        }
 
         sForPlural = ln2 == "en" || ln2 == "es" || ln2 == "pt" || ln2 == "de" || ln2 == "fr";
 
