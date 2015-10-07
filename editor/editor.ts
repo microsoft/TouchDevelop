@@ -2043,11 +2043,8 @@ module TDev
         }
 
         private currentCompilationModalDialog;
-        // Does the right thing™ with the UI and handles: retries (user tries to
-        // compile the script while we're still waiting), errors, debug
-        // information. Returns a promise with the JSON returned from the cloud
-        // (structure unknown).
-        public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
+        
+        private showCompilationDialog() : ModalDialog {
             this.currentCompilationModalDialog = new ModalDialog();
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
@@ -2061,6 +2058,25 @@ module TDev
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
+            return this.currentCompilationModalDialog;            
+        }
+        
+        public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {            
+            if (!showSource) this.showCompilationDialog();
+            ScriptProperties.bytecodeCompile(app, showSource);
+            if (!showSource)
+                Util.setTimeout(5000, () => {
+                    if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
+                    if (this.stepTutorial) this.stepTutorial.notify("compile");
+                })    
+        }
+        
+        // Does the right thing™ with the UI and handles: retries (user tries to
+        // compile the script while we're still waiting), errors, debug
+        // information. Returns a promise with the JSON returned from the cloud
+        // (structure unknown).
+        public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
+            this.showCompilationDialog();
             if (btn) {
                 btn.setFlag("working", true);
                 btn.classList.add("disabledItem");
@@ -2123,7 +2139,8 @@ module TDev
 
         private currentScriptCompiling: string;
         public compile(btn: HTMLElement, debug: boolean) {                
-            if (Cloud.anonMode(lf("C++ compilation"))) {
+            var bitvm = /bitvm=1/.test(document.location.href);
+            if (!bitvm && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2133,8 +2150,10 @@ module TDev
                 return;
             }
 
-            Util.log("compiling script");
-            this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
+            if (bitvm)
+                this.bytecodeCompileWithUi(Script, debug)
+            else
+                this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
         }
 
         public setupPlayButton()
@@ -2155,11 +2174,7 @@ module TDev
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
 
-                        if (/bitvm=1/.test(document.location.href)) {
-                            ScriptProperties.bytecodeCompile(debug)
-                        } else {
-                            this.compile(compileBtn, debug);
-                        }
+                        this.compile(compileBtn, debug);
                     })
                     );
             }

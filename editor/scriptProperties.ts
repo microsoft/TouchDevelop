@@ -249,7 +249,7 @@ module TDev
                     HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech()),
                     HTML.mkButton(lf("TypeScript"), () => ModalDialog.showText(new AST.Converter(TDev.Script).run().text)),
-                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(true))
+                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(Script, true))
                 ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
@@ -258,13 +258,13 @@ module TDev
         }
 
         static firstTime = true;
-        static bytecodeCompile(showSource = false)
+        static bytecodeCompile(app : AST.App, showSource = false)
         {
-            var guid = Script.localGuid
+            var guid = app.localGuid
             var st = TheEditor.saveStateAsync()
-            .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
+                .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
 
-            var c = new AST.Bytecode.Compiler(Script)
+            var c = new AST.Bytecode.Compiler(app)
             try {
                 c.run()
             } catch (e) {
@@ -282,7 +282,7 @@ module TDev
 
                 ScriptProperties.firstTime = false
 
-                HTML.browserDownload(res.dataurl, "microbit-" + Script.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
+                HTML.browserDownload(res.dataurl, "microbit-" + app.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
             })
             .done(() => {},
             e => {
