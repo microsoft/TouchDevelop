@@ -4208,28 +4208,6 @@ module TDev
             return World.installUnpublishedAsync(t.baseId || "", t.baseUserId || "", stub);
         }
 
-        public cloneScriptAsync() : Promise
-        {
-            //var old = ScriptEditorWorldInfo.baseId;
-            Ticker.dbg("cloneScriptAsync");
-            var host = Browser.TheHost;
-            return this.prepareForLoadAsync("cloning script", () =>
-                    host.updateInstalledHeaderCacheAsync().then(() => {
-                        var scriptStub = {
-                            editorName: "touchdevelop",
-                            scriptText: this.serializeScript(),
-                            scriptName: Script.getName(),
-                        };
-                        World.installUnpublishedAsync(ScriptEditorWorldInfo.baseId, ScriptEditorWorldInfo.baseUserId, scriptStub)
-                            .then((header) => this.loadScriptAsync(header)
-                                .then(() => {
-                                    Script.setName(host.newScriptName(Script.getName()));
-                                    //Script.parentIds = [old];
-                                    Script.notifyChange();
-                                    this.queueNavRefresh();
-                                }))}));
-        }
-
         static showLog()
         {
             TDev.RT.App.showLog(Util.getLogMsgs());

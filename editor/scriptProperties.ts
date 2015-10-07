@@ -196,7 +196,6 @@ module TDev
                     this.splashArtIdContainer
                 ),
                 this.managementSection = div("formLine",
-                    HTML.mkButton(lf("clone script"), () => TheEditor.cloneScriptAsync().done()),
                     this.revertButton = HTML.mkButton(lf("revert to published version"), () => {
                         ModalDialog.ask(lf("Do you really want to revert this script to the latest published version?"), lf("revert"), () => { this.revert(); });
                     }),

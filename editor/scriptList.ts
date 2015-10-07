@@ -6803,6 +6803,8 @@
             } else {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
             }
+            
+            var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
 
             var uninstall:HTMLElement;
             var moderate:HTMLElement;
@@ -6838,7 +6840,7 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, clone, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -6930,6 +6932,29 @@
                     return this.correspondingTopic;
             }
             return this;
+        }
+        
+        public cloneAsync(): Promise {
+            var host = this.parent.parentBrowser;
+            var header: Cloud.Header;
+            return host.updateInstalledHeaderCacheAsync()
+                .then(() => this.getCloudHeader())
+                .then(() => this.getScriptTextAsync())
+                .then((scriptText: string) => {
+                    if (!scriptText || !this.cloudHeader) return;
+                    var scriptStub = {
+                        editorName: this.cloudHeader.editor || "touchdevelop",
+                        scriptText: scriptText,
+                        scriptName: this.cloudHeader.name,
+                    };
+                    return World.installUnpublishedAsync(this.cloudHeader.scriptId, this.cloudHeader.userId, scriptStub)
+                }).then((hd: Cloud.Header) => {
+                    header = hd;
+                    return host.updateInstalledHeaderCacheAsync();
+                }).then(() => {
+                    var si = host.getInstalledByGuid(header.guid);
+                    si.edit();
+                });
         }
 
         public initTab()

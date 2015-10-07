@@ -451,6 +451,7 @@ module TDev {
         browseAddScriptToList,
         browseUpdate,
         browseSendPullRequest,
+        browseClone,
         browsePublicationNotes,
         browseListPointers,
         browseListBugs,
