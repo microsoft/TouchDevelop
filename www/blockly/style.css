@@ -94,6 +94,7 @@ body, input {
 /* Popups */
 .popup {
   width: 500px;
+  max-width: 100%;
   border: 5px solid #666;
   position: relative;
   background-color: white;

@@ -302,7 +302,8 @@ module TDev {
     var w = link[0].clientWidth;
     var y = link[0].offsetTop;
     var h = link[0].clientHeight;
-    popup.css("left", Math.round(x - 500 + w/2 + 5 + 15)+"px");
+    var popupw = popup[0].clientWidth;
+    popup.css("left", Math.round(x - popupw + w/2 + 5 + 15)+"px");
     popup.css("top", Math.round(y + h + 10 + 5)+"px");
   }
 
