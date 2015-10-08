@@ -599,10 +599,14 @@ module TDev
 
             toks.forEach((e:HTMLElement, i:number) => {
                 if (e == inlineEditor) return;
-                if (!/placeholder/i.test(e.className))
+                if (!/placeholder/i.test(e.className)) {
                     e.classList.add("calcToken");
-                var nxt = toks[i + 1];
-                var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
+                    if (toks[i + 1] === this.tokenPlaceholder || toks[i - 1] === this.tokenPlaceholder)
+                        e.classList.add("tokenToken");
+                }
+                else e.classList.remove("calcToken");    
+                //var nxt = toks[i + 1];
+                //var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
                 // not needed with token rendering
                 //if (spc)
                     // Add padding after this element if needed

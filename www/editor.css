@@ -902,9 +902,11 @@ textarea.commentEdit {
 .calcToken[data-selected^="yes"]
 {
   background: #B8E72A;
+  border:#aaa solid 1px;
+  border-radius: 0.3em;
 }
 
-.stmt[data-current="yes"] .calcToken {
+.tokenToken {
   padding: 0 0.2em;
   margin-left:0.1em;
   border:#aaa solid 1px;
@@ -919,7 +921,7 @@ textarea.commentEdit {
   border:none;
 }
 
-#scriptEditor[data-blockMode="yes"] .stmt[data-current="yes"] .calcToken {
+#scriptEditor[data-blockMode="yes"] .tokenToken {
   border-color:#fff;
 }
 
