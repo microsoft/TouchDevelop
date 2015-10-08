@@ -421,7 +421,7 @@ Blockly.Blocks['device_forever'] = {
         .setCheck("null");
     this.setInputsInline(true);
     //this.setPreviousStatement(true, "null");
-    this.setTooltip('Power-efficient way of doing active polling.');
+    this.setTooltip('Run a sequence of operations repeatedly, in the background.');
   }
 };
 

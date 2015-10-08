@@ -2043,12 +2043,16 @@ module TDev
         }
 
         private currentCompilationModalDialog;
-        // Does the right thing™ with the UI and handles: retries (user tries to
-        // compile the script while we're still waiting), errors, debug
-        // information. Returns a promise with the JSON returned from the cloud
-        // (structure unknown).
-        public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
+        
+        private showCompilationDialog(hideOption: boolean) {
+            var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
+            if (hideOption && !!window.localStorage.getItem(hideKey)) {
+                if (this.currentCompilationModalDialog)
+                    this.currentCompilationModalDialog.dismiss();
+                this.currentCompilationModalDialog = undefined;
+                return;
+            }             
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
@@ -2059,8 +2063,28 @@ module TDev
                 : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
             this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
+            if (hideOption)
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
+        }
+        
+        public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {            
+            if (!showSource) this.showCompilationDialog(true);
+            ScriptProperties.bytecodeCompile(app, showSource);
+            if (!showSource)
+                Util.setTimeout(10000, () => {
+                    if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
+                    if (this.stepTutorial) this.stepTutorial.notify("compile");
+                })    
+        }
+        
+        // Does the right thing™ with the UI and handles: retries (user tries to
+        // compile the script while we're still waiting), errors, debug
+        // information. Returns a promise with the JSON returned from the cloud
+        // (structure unknown).
+        public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
+            this.showCompilationDialog(false);
             if (btn) {
                 btn.setFlag("working", true);
                 btn.classList.add("disabledItem");
@@ -2123,7 +2147,8 @@ module TDev
 
         private currentScriptCompiling: string;
         public compile(btn: HTMLElement, debug: boolean) {                
-            if (Cloud.anonMode(lf("C++ compilation"))) {
+            var bitvm = /bitvm=1/.test(document.location.href);
+            if (!bitvm && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2133,8 +2158,10 @@ module TDev
                 return;
             }
 
-            Util.log("compiling script");
-            this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
+            if (bitvm)
+                this.bytecodeCompileWithUi(Script, debug)
+            else
+                this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
         }
 
         public setupPlayButton()
@@ -2155,11 +2182,7 @@ module TDev
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
 
-                        if (/bitvm=1/.test(document.location.href)) {
-                            ScriptProperties.bytecodeCompile(debug)
-                        } else {
-                            this.compile(compileBtn, debug);
-                        }
+                        this.compile(compileBtn, debug);
                     })
                     );
             }

@@ -681,12 +681,7 @@ module TDev.RT {
                 }
                 else {
                     var url = this.canvas.toDataURL('image/png');
-                    var link = <HTMLAnchorElement>window.document.createElement('a');
-                    link.href = url;
-                    (<any>link).download = defaultName;
-                    var click = document.createEvent("Event");
-                    click.initEvent("click", true, true);
-                    link.dispatchEvent(click);
+                    HTML.browserDownload(url, defaultName);
                 }
                 return defaultName;
             });
