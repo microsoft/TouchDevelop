@@ -1124,11 +1124,13 @@ function mkCallWithCallback(e: Environment, n: string, f: string, args: J.JExpr[
       H.namespaceCall(n, f, args)));
 }
 
-function compileButtonEvent(e: Environment, b: B.Block): J.JStmt {
+function compileEvent(e: Environment, b: B.Block, event: string, args: string[]): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
-  var name = H.mkStringLiteral(b.getFieldValue("NAME"));
+  var compiledArgs = args.map((arg: string) => {
+    return H.mkStringLiteral(b.getFieldValue(arg));
+  });
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "input", "on button pressed", [name], body);
+  return mkCallWithCallback(e, "input", event, compiledArgs, body);
 }
 
 function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
@@ -1307,8 +1309,18 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileWhile(e, b));
           break;
 
+        // Special treatment for the event handlers (they require a specific
+        // compilation scheme with action-handlers).
         case 'device_button_event':
-          stmts.push(compileButtonEvent(e, b));
+          stmts.push(compileEvent(e, b, "on button pressed", [ "NAME" ]));
+          break;
+
+        case 'device_shake_event':
+          stmts.push(compileEvent(e, b, "on shake", []));
+          break;
+
+        case 'device_pin_event':
+          stmts.push(compileEvent(e, b, "on pin pressed", [ "NAME" ]));
           break;
 
         default:
