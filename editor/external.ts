@@ -497,6 +497,7 @@ module TDev {
               case Language.TouchDevelop:
                 code.then((ast: AST.App) => {
                   try {
+                    ast.localGuid = this.guid;
                     TheEditor.bytecodeCompileWithUi(ast, false);
                     this.post(<Message_CompileAck>{
                       type: MessageType.CompileAck,
