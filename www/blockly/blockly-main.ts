@@ -391,7 +391,12 @@ module TDev {
       }
     });
 
-    window.addEventListener("drop", (event) => {
+    document.addEventListener("dragover", (event) => {
+      // This is mandatory to allow dropping...
+      event.preventDefault();
+    });
+
+    document.addEventListener("drop", (event) => {
       event.preventDefault();
       for (var i = 0; i < event.dataTransfer.files.length; ++i) {
         var f = event.dataTransfer.files[i];
