@@ -497,11 +497,6 @@ module TDev {
               case Language.TouchDevelop:
                 code.then((ast: AST.App) => {
                   try {
-                    // This is a lie: even though [bytecodeCompile] pretends it
-                    // takes the AST as a parameter, it makes the assumption in
-                    // numerous places that the AST is stored in the [Script]
-                    // global, just like many other places in the code...
-                    Script = ast;
                     TheEditor.bytecodeCompileWithUi(ast, false);
                     this.post(<Message_CompileAck>{
                       type: MessageType.CompileAck,
@@ -513,8 +508,6 @@ module TDev {
                       status: Status.Error,
                       error: ""+e
                     });
-                  } finally {
-                    Script = null;
                   }
                 });
                 break;

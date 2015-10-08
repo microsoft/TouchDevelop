@@ -884,44 +884,50 @@ module TDev.AST.Bytecode
         {
             setup();
 
-            if (AST.TypeChecker.tcApp(Script) > 0) {
+            if (AST.TypeChecker.tcApp(this.app) > 0) {
                 HTML.showProgressNotification(lf("Your script has errors! Just saving the source."))
                 return;
             }
 
-            var pre = new ReachabilityVisitor({});
-            pre.run(this.app)
+            var prev = Script
+            try {
+                Script = this.app
+                var pre = new ReachabilityVisitor({});
+                pre.run(this.app)
 
-            this.app.librariesAndThis().forEach(l => {
-                if (l.isThis()) {
-                    l.resolved.libraries().forEach(lr => 
-                        lr.getPublicActions().forEach((la : LibraryRefAction) => {
-                            la._compilerInfo = la.template
-                        }))
-                } else {
-                    var ress = Util.toDictionary(<ResolveClause[]>l.resolveClauses.stmts, r => r.formalLib.getName())
-                    l.resolved.libraries().forEach(lr => {
-                        var acts = Util.toDictionary(<ActionBinding[]>ress[lr.getName()].actionBindings.stmts, a => a.formal.getName())
-                        lr.getPublicActions().forEach((la : LibraryRefAction) => {
-                            if (!acts[la.getName()]) return
-                            var act = acts[la.getName()].actual
-                            if (act instanceof LibraryRefAction && (<LibraryRefAction>act).template)
-                                la._compilerInfo = (<LibraryRefAction>act).template
-                            else
-                                la._compilerInfo = act
+                this.app.librariesAndThis().forEach(l => {
+                    if (l.isThis()) {
+                        l.resolved.libraries().forEach(lr => 
+                            lr.getPublicActions().forEach((la : LibraryRefAction) => {
+                                la._compilerInfo = la.template
+                            }))
+                    } else {
+                        var ress = Util.toDictionary(<ResolveClause[]>l.resolveClauses.stmts, r => r.formalLib.getName())
+                        l.resolved.libraries().forEach(lr => {
+                            var acts = Util.toDictionary(<ActionBinding[]>ress[lr.getName()].actionBindings.stmts, a => a.formal.getName())
+                            lr.getPublicActions().forEach((la : LibraryRefAction) => {
+                                if (!acts[la.getName()]) return
+                                var act = acts[la.getName()].actual
+                                if (act instanceof LibraryRefAction && (<LibraryRefAction>act).template)
+                                    la._compilerInfo = (<LibraryRefAction>act).template
+                                else
+                                    la._compilerInfo = act
+                            })
                         })
-                    })
+                    }
+                    this.prepApp(l.resolved)
+                })
+
+                this.app.librariesAndThis().forEach(l => {
+                    this.compileApp(l.resolved)
+                })
+
+                while (this.finals.length > 0) {
+                    var f = this.finals.shift()
+                    f()
                 }
-                this.prepApp(l.resolved)
-            })
-
-            this.app.librariesAndThis().forEach(l => {
-                this.compileApp(l.resolved)
-            })
-
-            while (this.finals.length > 0) {
-                var f = this.finals.shift()
-                f()
+            } finally {
+                Script = prev;
             }
         }
 
