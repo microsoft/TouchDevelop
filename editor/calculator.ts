@@ -601,16 +601,15 @@ module TDev
                 if (e == inlineEditor) return;
                 if (!/placeholder/i.test(e.className)) {
                     e.classList.add("calcToken");
-                    if (toks[i + 1] === this.tokenPlaceholder || toks[i - 1] === this.tokenPlaceholder)
+                    if (toks[i + 1] === this.tokenPlaceholder)
                         e.classList.add("tokenToken");
                 }
                 else e.classList.remove("calcToken");    
-                //var nxt = toks[i + 1];
-                //var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
-                // not needed with token rendering
-                //if (spc)
+                var nxt = toks[i + 1];
+                var spc = / $/.test(e.textContent) || (nxt && /^ /.test(nxt.textContent));
+                if (spc)
                     // Add padding after this element if needed
-                 //   e.classList.add("calcSpaceAfter");
+                    e.classList.add("calcSpaceAfter");
             });
             if (toks.length == 1) {
                 var e = span("calcInvisible", ".");
@@ -669,7 +668,7 @@ module TDev
             }
             if (!cursorAfter) return pos;
 
-            var withSpace = /calcSpaceAfter/.test(cursorAfter.className);
+            var withSpace = false; // /calcSpaceAfter/.test(cursorAfter.className);
 
             pos.y = cursorAfter.offsetTop;
 
