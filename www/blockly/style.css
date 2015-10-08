@@ -30,6 +30,12 @@
   -ms-flex: 3;
 }
 
+.flexmax {
+  flex: 99999;
+  -webkit-flex: 99999;
+  -ms-flex: 99999;
+}
+
 /* Whole page layout */
 body {
   margin: 0;
@@ -65,7 +71,6 @@ body, input {
 /* Script info box */
 #script-box {
   margin-right: 1rem;
-  margin-left: auto;
   max-width: 35rem;
 }
 
