@@ -7858,13 +7858,26 @@
                 var fields = cfg.fields || {}
                 var alltags = cfg.tags || ["all"]
                 var autotags = cfg.autotags || ["all"]
-                fields["priority"] = { desc: lf("Publication time-shift (in hours); promos sorted by publication time plus time shift"), type: "number" }
+                fields["order"] = { desc: lf("Ordering slot (1-99); if empty 100 is assumed"), type: "number", optional: 100 }
+                fields["priority"] = { desc: lf("Publication time-shift (in hours; -9999 to +9999)"), type: "number" }
                 fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
                 var inputs = {}
                 var nowPrio = () => (((Date.now()/1000) - json.time) / 3600).toFixed(3)
                 if (!promo.priority && promo.tags && promo.tags.length == 0) {
                     promo.priority = parseFloat(nowPrio())
                 }
+
+                if (typeof promo.priority == "string")
+                    promo.priority = parseFloat(promo.priority)
+
+                if (promo.priority >= 10000) {
+                    var ord = Math.floor(promo.priority / 10000)
+                    promo.order = 100 - ord
+                    promo.priority = promo.priority % 10000
+                } else {
+                    promo.order = ""
+                }
+                
                 Object.keys(fields).forEach(fn => {
                     var meta = fields[fn]
                     var inp = HTML.mkTextInput(meta.type || "text", "")
@@ -7913,16 +7926,36 @@
 
                         if (meta.type == "number") {
                             var v = parseFloat(val)
-                            if (isNaN(v)) wrong.push(inpt)
+                            if (isNaN(v)) {
+                                if (meta.optional != null)
+                                    data[fn] = meta.optional
+                                else
+                                    wrong.push(inpt)
+                            }
                             else data[fn] = v
                         } else {
                             data[fn] = val
                         }
                     })
 
+                    var order:number = data["order"]
+
+                    if (wrong.length == 0 && (Math.floor(order) != order || Util.between(1, order, 100) != order))
+                        wrong.push(inputs["order"])
+
+                    var priority:number = data["priority"]
+
+                    if (wrong.length == 0 && (Util.between(-9999, priority, 9999) != priority))
+                        wrong.push(inputs["priority"])
+
+
                     if (wrong.length > 0) {
                         wrong.forEach(HTML.wrong)
                     } else {
+                        priority += (100 - order) * 10000
+                        data["priority"] = priority
+                        delete data["order"]
+
                         Cloud.postPrivateApiAsync(id + "/promo", data)
                         .done(r => {
                             m.dismiss()
