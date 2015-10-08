@@ -19,6 +19,7 @@ microbit/flasher/Microbit.Flasher/bin
 microbit/flasher/Microbit.Flasher/obj
 microbit/loader/Microbit.Loader/bin
 microbit/loader/Microbit.Loader/obj
+backend/built
 
 # visual studio
 *.suo
@@ -29,3 +30,6 @@ tags
 
 # misc stuff
 temp/
+backend/remote-*.sh
+access_token.txt
+

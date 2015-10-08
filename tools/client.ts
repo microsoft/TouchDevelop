@@ -47,6 +47,8 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     var currReq = reqNo++;
     var isDone = false
 
+    console.log(uri)
+
     function finish(d:string) {
         if (!isDone) {
             isDone = true;
@@ -3740,15 +3742,18 @@ function setlabel(args:string[])
     }, 1, { name: channel })
 }
 
-function fetchlibraries(args) {
+function tdliteKey() {
     var mm = /^(http.*)(\?access_token=.*)/.exec(process.env['TD_UPLOAD_KEY'])
     if (!mm) {
         console.log("invalid or missing $TD_UPLOAD_KEY")
-        return
+        process.exit(1)
     }
 
-    var liteUrl = mm[1]
-    var key = "&" + mm[2].slice(1)
+    return {liteUrl: mm[1], key: "&" + mm[2].slice(1)}
+}
+
+function fetchlibraries(args) {
+    var k = tdliteKey()
 
     var ids = [
       'nmhibf' // adj script
@@ -3771,7 +3776,7 @@ function fetchlibraries(args) {
     console.log("fetching latest versions of " + ids.join(", "))
 
     ids.forEach(id =>
-        tdevGet(liteUrl + "api/" + id + "/updates?count=1000" + key, resp => {
+        tdevGet(k.liteUrl + "api/" + id + "/updates?count=1000" + k.key, resp => {
             var parsed = JSON.parse(resp)
             // TODO implement continuations
             if (parsed.continuation) throw new Error("too many!? " + id)
@@ -3780,7 +3785,7 @@ function fetchlibraries(args) {
                 if (it.id == it.updateid)
                     json[it.id] = it
             })
-            tdevGet(liteUrl + "api/" + updates[id] + "/text?original=true" + key, t => {
+            tdevGet(k.liteUrl + "api/" + updates[id] + "/text?original=true" + k.key, t => {
                 text[updates[id]] = t
                 if (--togo == 0) {
                     fs.writeFileSync("microbit/libraries/meta.json", 
@@ -3791,6 +3796,42 @@ function fetchlibraries(args) {
                 }
             })
         }))
+}
+
+function reindexone(store:string, cont = "")
+{
+    var k = tdliteKey()
+
+    var total = 0
+    var totalReindexed = 0
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/admin/reindex/" + store + "?count=100" + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+
+            totalReindexed += parsed.itemsReindexed
+            total += parsed.itemCount
+
+            console.log(store, 
+                "total:" + totalReindexed + "/" + total,
+                "this:" + parsed.itemsReindexed + "/" + parsed.itemCount,
+                "c:" + parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 1, {})
+
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
+function reindexsearch(args:string[])
+{
+    if (args.length == 0) {
+        ["script", "art", "comment", "user", "channel", "group", "pointer"].forEach(k => reindexone(k))
+    } else {
+        reindexone(args[0], args[1] || "")
+    }
 }
 
 function concatlibs() {
@@ -3863,6 +3904,7 @@ var cmds = {
     "setlabel": { f:setlabel, a:'KEY RELID LABEL', h:'set release label'},
     "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
     "uploadhtml": { f:uploadhtml, a:'FILENAME.html', h:'upload html file as script'},
+    "reindexsearch": { f:reindexsearch, a:'[store [conttok]]', h:'re-index search documents in lite cloud'},
 }
 
 export interface ScriptTemplate {

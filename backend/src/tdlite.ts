@@ -7652,68 +7652,79 @@ function _initSearch() : void
             req2.status = httpCode._201Created;
         }
     });
-    addRoute("POST", "pubs", "reindex", async (req3: ApiRequest) => {
-        checkPermission(req3, "operator");
-        if (req3.status == 200) {
+    
+    addRoute("DELETE", "admin", "searchindex", async (req: ApiRequest) => {
+        checkPermission(req, "operator");
+        if (req.status == 200) {
             await tdliteSearch.clearPubIndexAsync();
-            /* async */ reindexStoreAsync(arts, req3);
-            /* async */ reindexStoreAsync(comments, req3);
-            /* async */ reindexStoreAsync(scripts, req3);
-            /* async */ reindexStoreAsync(users, req3);
-            /* async */ reindexStoreAsync(channels, req3);
-            /* async */ reindexStoreAsync(groups, req3);
-            /* async */ reindexStoreAsync(pointers, req3);
-            req3.status = httpCode._201Created;
+            req.response = { msg: "Gone." }            
         }
+    });
+    
+    addRoute("POST", "admin", "reindex", async (req: ApiRequest) => {
+        checkPermission(req, "operator");
+        if (req.status != 200) return;
+        let store = indexedStore.storeByKind(req.argument);
+        if (!store) {
+            req.status = httpCode._404NotFound;
+            return;
+        }
+        
+        let lst = await store.getIndex("all").fetchAsync("all", req.queryOptions);
+        req.response = {
+            continuation: lst.continuation,
+            itemCount: lst.items.length,
+            itemsReindexed: 0
+        }           
+        await reindexEntriesAsync(store, lst.items, req);
     });
 }
 
-async function reindexStoreAsync(store: indexedStore.Store, req: ApiRequest) : Promise<void>
-{
-    await store.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
-        let batch = tdliteSearch.createPubsUpdate();
-        let fetchResult = store.singleFetchResult(json);
-        fetchResult.items = json;
-        await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
-        let fieldname = "id";
-        let isPtr = store.kind == "pointer";
-        if (isPtr) {
-            fieldname = "scriptid";
-        }
-        if (store.kind == "script" || isPtr) {
-            let coll = asArray(json).map<string>(elt => orEmpty(elt["pub"][fieldname])).filter(elt1 => elt1 != "");
-            let bodies = {};
-            let entries = await scriptText.getManyAsync(coll);
-            for (let js2 of entries) {
-                if (js2.hasOwnProperty("id")) {
-                    bodies[js2["id"]] = js2["text"];
-                }
+async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[], req: ApiRequest): Promise<void> {
+    let batch = tdliteSearch.createPubsUpdate();
+    let fetchResult = store.singleFetchResult(json);
+    fetchResult.items = json;
+    await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
+    let fieldname = "id";
+    let isPtr = store.kind == "pointer";
+    if (isPtr) {
+        fieldname = "scriptid";
+    }
+    if (store.kind == "script" || isPtr) {
+        let coll = asArray(json).map<string>(elt => orEmpty(elt["pub"][fieldname])).filter(elt1 => elt1 != "");
+        let bodies = {};
+        let entries = await scriptText.getManyAsync(coll);
+        for (let js2 of entries) {
+            if (js2.hasOwnProperty("id")) {
+                bodies[js2["id"]] = js2["text"];
             }
-            for (let pub of fetchResult.items) {
-                if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
-                    // only insert the latest version
-                    continue;
-                }
-                if (pub["ishidden"]) {
-                    continue; // always skip hidden scripts
-                }
+        }
+        for (let pub of fetchResult.items) {
+            if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
+                // only insert the latest version
+                continue;
+            }
+            if (pub["ishidden"]) {
+                continue; // always skip hidden scripts
+            }
 
-                let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
-                let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
-                entry.upsertPub(batch);
-            }
+            let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
+            let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
+            req.response["itemsReindexed"]++;
+            entry.upsertPub(batch);
         }
-        else {
-            for (let pub1 of fetchResult.items) {
-                let entry2 = tdliteSearch.toPubEntry(pub1, withDefault(pub1["text"], ""), pubFeatures(pub1), 0);
-                entry2.upsertPub(batch);
-            }
+    }
+    else {
+        for (let pub1 of fetchResult.items) {
+            let entry2 = tdliteSearch.toPubEntry(pub1, withDefault(pub1["text"], ""), pubFeatures(pub1), 0);
+            req.response["itemsReindexed"]++;
+            entry2.upsertPub(batch);
         }
-        if (batch.actionCount() > 0) {
-            let statusCode = await batch.sendAsync();
-            logger.debug("reindex pubs, status: " + statusCode);
-        }    
-    });
+    }
+    if (batch.actionCount() > 0) {
+        let statusCode = await batch.sendAsync();
+        logger.debug("reindex pubs, status: " + statusCode);
+    }
 }
 
 /**
