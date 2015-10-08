@@ -49,11 +49,11 @@ module TDev
         public otherwiseBack()
         {
         }
-        
+
         public canEditCode()
         {
             return this.canEdit;
-        }        
+        }
 
         public canDebugCode()
         {
@@ -235,7 +235,7 @@ module TDev
                 btns.push(HTML.mkRoundButton("svg:camera,currentColor", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
             return btns;
         }
-        
+
         public runByScriptId(scriptId: string) {
             var rt = this.currentRt;
             if (Script && rt && (!scriptId || rt.currentScriptId == scriptId)) {
@@ -446,7 +446,7 @@ module TDev
                     else
                         pause = HTML.mkRoundButton("svg:stop,currentColor", lf("stop"), Ticks.wallStop, () => this.stopBtnHandler())
                 }
-            }    
+            }
             if (TheEditor.widgetEnabled("wallHeart") && !TheEditor.isDebuggerMode() && this.currentRt.currentScriptId) {
                 heart = div('');
                 heart.style.display = 'inline-block';
@@ -488,7 +488,7 @@ module TDev
         private stopBtnHandler() {
             this.stopRun();
         }
-        
+
         public stopRun() {
             if(TheEditor.isDebuggerMode()) {
                 TheEditor.leaveDebuggerMode();
@@ -1304,7 +1304,7 @@ module TDev
                         ));
                     m.show();
                 })));
-            }    
+            }
         }
 
         public topScriptOp(f:()=>void)
@@ -1361,13 +1361,13 @@ module TDev
 
             this.sizeSplitScreen();
             this.dismissModalPane();
-            
+
             if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode || !SizeMgr.splitScreen)) {
                 this.host.justConcealTheWall();
             } if (this.currentRt && !this.currentRt.isStopped() && (SizeMgr.portraitMode && SizeMgr.splitScreen)) {
                 this.host.justShowTheWall();
             }
-            
+
             // Re-run the layouting algorithm.
             if (this.resumeAction) {
                 this.currentRt.forcePageRefresh()
@@ -1600,7 +1600,7 @@ module TDev
         {
             AST.TypeChecker.tcApp(app)
             var cs: CompiledScript;
-            
+
             Util.time("compile", () => {
                 var newOpts: AST.CompilerOptions = {
                     optimizeLoops: /optimizeLoops/.test(document.URL),
@@ -1658,10 +1658,10 @@ module TDev
         static runCount = 0;
         public onBack = () => {};
         public runAction(a: AST.Decl, args: any[] = null, opts: AST.CompilerOptions = {}) {
-            
+
             // display logo if needed
             opts.logoUrl = TDev.Cloud.config.touchDevelopLogoUrl;
-            
+
             if (Collab.AstSession && Collab.AstSession.loaded) {
                 var old = Collab.getAutomaticPullEnabled();
                 Collab.setAutomaticPullEnabled(false);
@@ -1706,11 +1706,11 @@ module TDev
                             this.currentRt.eventQ.profiling = opts.profiling;
 
                         if (!this.currentRt.editorObj)
-                            Plugins.setupEditorObject(null, false);    
-                        
+                            Plugins.setupEditorObject(null, false);
+
                         this.runActionCore(a, args, !!opts.debugging);
                     })
-                    .done(() => {}, 
+                    .done(() => {},
                     e => {
                         Util.reportError("script-run", e, false)
                         HTML.showErrorNotification(lf("we couldn't run your script; sorry"))
@@ -1757,7 +1757,7 @@ module TDev
                 return
             }
 
-            if (this.currentRt) this.currentRt.stopAsync().then(() => run());            
+            if (this.currentRt) this.currentRt.stopAsync().then(() => run());
             else run();
         }
 
@@ -2033,17 +2033,17 @@ module TDev
         {
             var main = Script.mainAction();
             if (main)
-                this.renderDecl(main);    
-            
-        }        
-        
+                this.renderDecl(main);
+
+        }
+
         private backToHub()
         {
                 this.goToHubAsync().done();
         }
 
         private currentCompilationModalDialog;
-        
+
         private showCompilationDialog(hideOption: boolean) {
             var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
@@ -2052,7 +2052,7 @@ module TDev
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
                 return;
-            }             
+            }
             var progress = HTML.mkProgressBar(); progress.start();
             this.currentCompilationModalDialog.add(progress);
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
@@ -2068,17 +2068,17 @@ module TDev
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
         }
-        
-        public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {            
+
+        public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
             if (!showSource) this.showCompilationDialog(true);
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
                     if (this.stepTutorial) this.stepTutorial.notify("compile");
-                })    
+                })
         }
-        
+
         // Does the right thing™ with the UI and handles: retries (user tries to
         // compile the script while we're still waiting), errors, debug
         // information. Returns a promise with the JSON returned from the cloud
@@ -2146,9 +2146,8 @@ module TDev
         }
 
         private currentScriptCompiling: string;
-        public compile(btn: HTMLElement, debug: boolean) {                
-            var bitvm = /bitvm=1/.test(document.location.href);
-            if (!bitvm && Cloud.anonMode(lf("C++ compilation"))) {
+        public compile(btn: HTMLElement, debug: boolean) {
+            if (!Cloud.bitvm && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2158,8 +2157,8 @@ module TDev
                 return;
             }
 
-            if (bitvm)
-                this.bytecodeCompileWithUi(Script, debug)
+            if (Cloud.bitvm)
+                this.bytecodeCompileWithUi(Script, debug);
             else
                 this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
         }
@@ -2177,7 +2176,7 @@ module TDev
                 var str = lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
-                        var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
+                        var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || /dbgcpp=1/i.test(document.location.href);
 
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
@@ -2452,7 +2451,7 @@ module TDev
                 Util.log("cancelled main cut");
                 return;
             }
-            
+
             if (decl == Script) {
                 ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
                     lf("uninstall"),
@@ -4059,7 +4058,7 @@ module TDev
                             }
 
                             var editorMode = ht.templateEditorMode();
-                            if (editorMode) {                                
+                            if (editorMode) {
                                 Util.log('tutorial requested editor mode ' + editorMode);
                                 Browser.EditorSettings.loadEditorMode(editorMode);
                             }
@@ -4322,14 +4321,14 @@ module TDev
                     m.add([
                         div("wall-dialog-header", div("", lf("sign out")), Editor.mkHelpLink("user accounts")),
                         div("wall-dialog-body", lf("Are you sure?\nAll your script data and any unsynchronized script changes will be lost.")),
-                        div("wall-dialog-buttons", HTML.mkButton(lf("sign out"), () => { 
-                                m.dismiss(); 
-                                TheEditor.logoutAsync(false).done() 
+                        div("wall-dialog-buttons", HTML.mkButton(lf("sign out"), () => {
+                                m.dismiss();
+                                TheEditor.logoutAsync(false).done()
                         })),
                         sm = div("wall-dialog-body", lf("If you suspect your account has been compromised, "),
                                 HTML.mkLinkButton(lf("sign out on all your devices"), () => {
-                                    m.dismiss(); 
-                                    TheEditor.logoutAsync(true).done() 
+                                    m.dismiss();
+                                    TheEditor.logoutAsync(true).done()
                                 }))
                     ]);
                     sm.style.marginTop = "2em"
@@ -4541,7 +4540,7 @@ module TDev
                     }).done()
                 } else {
                     if (run && this.widgetEnabled("editorRunOnLoad") && !SizeMgr.phoneMode)
-                        this.runMainAction();    
+                        this.runMainAction();
                 }
             }
         }
@@ -4957,7 +4956,7 @@ module TDev
                     !Script.isLibrary &&
                     Script.mainAction() == ah.action &&
                     ah.getName() == "main")
-                    editor = null;    
+                    editor = null;
             }
             else if (s instanceof AST.AppHeaderStmt) {
                 editor = this.scriptProperties;
@@ -5460,7 +5459,7 @@ module TDev
                 var topic = HelpTopic.contextTopics[0];
                 if (Cloud.lite) {
                     if (topic.json && topic.json.helpPath) Util.navigateNewWindow("/" + topic.json.helpPath);
-                }    
+                }
                 else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }
         }

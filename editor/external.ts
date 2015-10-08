@@ -216,9 +216,7 @@ module TDev {
       });
     }
 
-    // Takes a [JApp] and runs its through various hoops to make sure
-    // everything is type-checked and resolved properly.
-    function roundtrip(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of J.JApp
+    function roundtrip1(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of AST.App
       return addLibraries(a, libs).then(() => {
         var text = J.serialize(a);
         return parseScript(text).then((a: AST.App) => {
@@ -226,8 +224,16 @@ module TDev {
             throw new Error("We received a script with errors and cannot compile it. " +
                 "Try converting then fixing the errors manually.");
           }
-          return Promise.as(J.dump(a)); }
+          return Promise.as(a); }
         );
+      });
+    }
+
+    // Takes a [JApp] and runs its through various hoops to make sure
+    // everything is type-checked and resolved properly.
+    function roundtrip(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of J.JApp
+      return roundtrip1(a, libs).then((a: AST.App) => {
+        return Promise.as(J.dump(a));
       });
     }
 
@@ -430,47 +436,89 @@ module TDev {
             }
 
             var message1 = <Message_Compile> event.data;
-            var cpp;
+
+            // Let's abuse the [Language] enum. After the assignment, if
+            // [language == CPlusPlus], then this means we want to go the cloud
+            // compilation route. Otherwise, if [language == TouchDevelop], it
+            // means we want to got the "bitvm" route.
+            var compileLanguage, code;
             switch (message1.language) {
               case Language.CPlusPlus:
-                cpp = Promise.as(message1.text);
+                compileLanguage = Language.CPlusPlus;
+                code = Promise.as(message1.text);
                 break;
               case Language.TouchDevelop:
                 fixupLibs(message1.libs);
-                cpp = roundtrip(message1.text, message1.libs).then((a: J.JApp) => {
-                  return Embedded.compile(a);
+                if (Cloud.bitvm) {
+                  compileLanguage = Language.TouchDevelop;
+                  code = roundtrip1(message1.text, message1.libs);
+                } else {
+                  compileLanguage = Language.CPlusPlus;
+                  code = roundtrip(message1.text, message1.libs).then((a: J.JApp) => {
+                    return Embedded.compile(a);
+                  });
+                }
+                break;
+            }
+
+            switch (compileLanguage) {
+              case Language.CPlusPlus:
+                TheEditor.compileWithUi(this.guid, code, message1.name).then(json => {
+                  console.log(json);
+                  // Aborted because of a retry, perhaps.
+                  if (!json)
+                    return;
+
+                  if (json.success) {
+                    this.post(<Message_CompileAck>{
+                      type: MessageType.CompileAck,
+                      status: Status.Ok
+                    });
+                    document.location.href = json.hexurl;
+                  } else {
+                    var errorMsg = makeOutMbedErrorMsg(json);
+                    this.post(<Message_CompileAck>{
+                      type: MessageType.CompileAck,
+                      status: Status.Error,
+                      error: errorMsg
+                    });
+                  }
+                }, (json: string) => {
+                  // Failure
+                  console.log(json);
+                  this.post(<Message_CompileAck>{
+                    type: MessageType.CompileAck,
+                    status: Status.Error,
+                    error: "early error"
+                  });
+                });
+                break;
+
+              case Language.TouchDevelop:
+                code.then((ast: AST.App) => {
+                  try {
+                    // This is a lie: even though [bytecodeCompile] pretends it
+                    // takes the AST as a parameter, it makes the assumption in
+                    // numerous places that the AST is stored in the [Script]
+                    // global, just like many other places in the code...
+                    Script = ast;
+                    TheEditor.bytecodeCompileWithUi(ast, false);
+                    this.post(<Message_CompileAck>{
+                      type: MessageType.CompileAck,
+                      status: Status.Ok
+                    });
+                  } catch (e) {
+                    this.post(<Message_CompileAck>{
+                      type: MessageType.CompileAck,
+                      status: Status.Error,
+                      error: ""+e
+                    });
+                  } finally {
+                    Script = null;
+                  }
                 });
                 break;
             }
-            TheEditor.compileWithUi(this.guid, cpp, message1.name).then(json => {
-              console.log(json);
-              // Aborted because of a retry, perhaps.
-              if (!json)
-                return;
-
-              if (json.success) {
-                this.post(<Message_CompileAck>{
-                  type: MessageType.CompileAck,
-                  status: Status.Ok
-                });
-                document.location.href = json.hexurl;
-              } else {
-                var errorMsg = makeOutMbedErrorMsg(json);
-                this.post(<Message_CompileAck>{
-                  type: MessageType.CompileAck,
-                  status: Status.Error,
-                  error: errorMsg
-                });
-              }
-            }, (json: string) => {
-              // Failure
-              console.log(json);
-              this.post(<Message_CompileAck>{
-                type: MessageType.CompileAck,
-                status: Status.Error,
-                error: "early error"
-              });
-            });
             break;
 
           case MessageType.Upgrade:
