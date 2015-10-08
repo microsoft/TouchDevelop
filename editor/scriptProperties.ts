@@ -348,7 +348,7 @@ module TDev
             var btns: HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
 
             if (hd && hd.editor) {
-                m.add(div("", text(lf("We cannot show the difference between these two versions."))));
+                m.add(div("", text(lf("We can only show differences between two TouchDevelop scripts."))));
                 m.add(div("diffButtons", btns))
             } else {
                 var prog = HTML.mkProgressBar()
