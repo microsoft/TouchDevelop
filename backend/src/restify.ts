@@ -900,7 +900,10 @@ export function setupShellHooks() : void
 
     server().get("/-tdevmgmt-/:key/ready", async(req, res) => {
         if (wrong(req, res)) return;
-        res.json({ ready: isReady })
+        if (!isReady)
+            res.sendError(503, "Not yet ready")
+        else
+            res.json({ ready: isReady })
     })
 
     server().get("/-tdevmgmt-/:key/info/:which", async(req, res) => {
