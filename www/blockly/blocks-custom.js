@@ -459,7 +459,7 @@ Blockly.Blocks['device_forever'] = {
 
 Blockly.Blocks['device_comment'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
+    this.setHelpUrl('https://live.microbit.co.uk/td/comment');
     this.setColour(120);
     this.appendDummyInput()
         .appendField("comment");
