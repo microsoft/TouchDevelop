@@ -54,10 +54,12 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
         }
     }
 
-    // console.log("GET " + uri + " " + reqNo)
+    var safeuri = uri.replace(/access_token.*/, "[snip]")
+
+    // console.log("GET " + safeuri + " " + reqNo)
     var handle = (res:http.ClientResponse) => {
         if (res.statusCode != 200) {
-            console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, uri.replace(/access_token.*/, ""));
+            console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, safeuri);
             if (res.statusCode == 500 && /admin\/reindex/.test(uri) && numRetries > 0) {
                 tdevGet(uri, f, numRetries - 1, body, contentType)
                 return
@@ -98,11 +100,11 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
 
     req.on("error", (err) => {
         if (!isDone && numRetries > 0 && err.code == 'ECONNRESET') {
-            console.log(new Date() + ": conn reset, retry " + uri)
+            console.log(new Date() + ": conn reset, retry " + safeuri)
             isDone = true
             tdevGet(uri, f, numRetries - 1, body, contentType)
         } else {
-            console.error(new Date() + " req error " + uri + " " + util.inspect(err))
+            console.error(new Date() + " req error " + safeuri + " " + util.inspect(err))
             finish(null)
         }
     })
