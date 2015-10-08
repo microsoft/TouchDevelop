@@ -446,7 +446,7 @@ module TDev {
   function compileOrError(msgSel?: string) {
     var ast: TDev.AST.Json.JApp;
 
-    $(".blocklySelected, .blocklyError").attr("class", "");
+    $(".blocklySelected, .blocklyError").removeClass("blocklySelected blocklyError");
     clearPopups();
     $("#errorsGraduate").addClass("hidden");
     $("#errorsCompile").addClass("hidden");
