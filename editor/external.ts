@@ -526,10 +526,11 @@ module TDev {
                 editorName: "touchdevelop",
                 scriptName: message2.name,
                 scriptText: text
-              }).done();
-              // Release focus, kill the channel.
-              (<HTMLElement> document.activeElement).blur();
-              TheChannel = null;
+              }).done(() => {
+                // Release focus, kill the channel.
+                (<HTMLElement> document.activeElement).blur();
+                TheChannel = null;
+              });
             }).done();
             break;
 
