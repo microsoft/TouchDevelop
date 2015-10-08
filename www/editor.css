@@ -892,11 +892,7 @@ textarea.commentEdit {
 {
   display: inline-block;
   vertical-align: bottom;
-  white-space: nowrap;
-  /*
-  background: #f9f9f9;
-  margin-left: 1px;
-  */
+  white-space: pre;
 }
 
 .calcToken[data-selected^="yes"]
@@ -913,6 +909,7 @@ textarea.commentEdit {
 
 .stmt[data-current="yes"] .errorSq {
   border:#f00 solid 2px;
+  border-radius: 0.3em;
 }
 
 .stmt[data-current="yes"] .kw {
