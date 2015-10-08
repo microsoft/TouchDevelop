@@ -657,7 +657,7 @@ action digital_read_pin(#w0yR0K9R0Vc1fl1w name: String) returns(#YJovAyKaUYf7fde
   #vVkiLisfPoFGrb43 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P8=uBit.io.P8,P12=uBit.io.P12,P16=uBit.io.P16}
   #KeelVlaOy290uC3r // {shim:micro_bit::digitalReadPin}
   #YQtrwltmovQDIOC4 $pin := code→pin_by_name($name);
-  #Ko563vnmhZrsGquz if $pin→mass - 1 > 0 then {
+  #Ko563vnmhZrsGquz if `not` $pin→is_invalid `and` $pin→mass - 1 > 0 then {
     #xMThD47Dxan2pEwh `return` 1;
   }
   else {
@@ -667,7 +667,7 @@ action digital_read_pin(#w0yR0K9R0Vc1fl1w name: String) returns(#YJovAyKaUYf7fde
 }
 #IMZk4sIic3bl2IqV
 action analog_read_pin(#MbbuFwADdbqnJ4Vx name: String) returns(#NMqOBEeeGloyin4x value: Number) {
-  #xbV7xMVLeyDT0M4e // Read the connector value as analog, that is, as a value comprised between 0 and 1024
+  #xbV7xMVLeyDT0M4e // Read the connector value as analog, that is, as a value comprised between 0 and 1023.
   #xah2vLBRZf3FqQzb // {help:functions/analog-read-pin}
   #xsg9Er2mxpPh27XU // {namespace:pins}
   #n6fzrbe7G44K3Hb9 // {weight:47}
@@ -679,7 +679,7 @@ action analog_read_pin(#MbbuFwADdbqnJ4Vx name: String) returns(#NMqOBEeeGloyin4x
 }
 #HV4Q7fi2POmCkKXI
 action analog_write_pin(#Ij91JuDakdZUgyo4 name: String, #CeWgWOcwgRe0D5op value: Number) {
-  #eDN1oz2oyUfdvk48 // Set the connector value as analog. Value must be comprised between 0 and 1024.
+  #eDN1oz2oyUfdvk48 // Set the connector value as analog. Value must be comprised between 0 and 1023.
   #kTJK4kSvEWdiaeOC // {help:functions/analog-write-pin}
   #b4oneIlT9h82g7S4 // {namespace:pins}
   #M12kgf6X8FWgiE4P // {weight:46}
@@ -1182,7 +1182,9 @@ action pin_by_name(#pznPOV8prsiYdNhL name: String) returns(#QC9UtfUA0ZQiyxvN spr
   #YLwrAONQnaRmH9mk // {shim:}
   #ololoiFjuAzCfyDe $index := $name→trim("pP\t")→to_number;
   #j0yR5tWcQjVZyB1T $sprite := data→pins→at($index);
-  #xGr49fRupLhPmlEq $sprite→show;
+  #qz6N2BmKUFCpxz4N if `not` $sprite→is_invalid then {
+    #xGr49fRupLhPmlEq $sprite→show;
+  }
   #aZHYIJGu0HFUl4SU `return` $sprite;
   meta private;
   meta sync;
@@ -1205,6 +1207,17 @@ action test_pins() {
   #xynDU3S3kjEYy18D // {shim:}
   #rK2IutWay0PFVvqq code→\_libinit;
   #t829Xv42HzfA2nAG code→digital_write_pin("P0", 1);
+  #INTK9O6xrjxHkJ9g code→digital_write_pin("P1", 1);
+  #aeUtxvIe4YYta4Nz code→digital_write_pin("P2", 1);
+  #opMdOZDBv2MTyBXq code→digital_write_pin("P8", 1);
+  #TVwRJDzgrpIJuTZ2 code→digital_write_pin("P12", 1);
+  #s6YLWaYNLlbaI6bq code→digital_write_pin("P16", 1);
+  #IUhZptHB34mvrxW2 $value2 := code→digital_read_pin("P0");
+  #hPJl24rmbFWsf4a3 $value := code→digital_read_pin("P1");
+  #NVG04rX4uPRfEh2d $value3 := code→digital_read_pin("P2");
+  #MKOvVDJ6dfcQo0u1 $value4 := code→digital_read_pin("P8");
+  #xVOeb35l5ezwAQqx $value5 := code→digital_read_pin("P12");
+  #x6tsh2LJoLcSYHih $value6 := code→digital_read_pin("P16");
   #RU4iMpCdo1kUigzr code→analog_write_pin("P1", 1000);
   #HbZSxLTByep2h4qZ code→pause(1000);
   #hpOIzAtXk5fN5c5M while true do {
@@ -1242,7 +1255,7 @@ action create_pin(#xwnvtwXoIoa22y4Z color: Color, #IVU23UfeIRgACC6Q left: Number
   meta sync;
 }
 #tYt6bUhy3Nm9mpAR
-action test_pins2() {
+action test_plot_unplot() {
   #xXot6id59vwJvRh2 // {shim:}
   #xtZorNV3Gqgbg1S0 code→\_libinit;
   #xQdOxnawNQbuLBIm for 0 ≤ k < 2 do {
@@ -1293,6 +1306,10 @@ action forever(#xYRk46PsjFkdlEOm body: Action) {
   #Bo8g50yakYNCYSa1 // {namespace:basic}
   #x4L41J1h0VUQZ1s2 // {weight:55}
   #fJ2PtEUzMS9ydxsM // {shim:micro_bit::forever}
+  #xxnWmxDbWPRikigP $c := code→tick("forever");
+  #xCLA2qrMQhTjL6yy if $c > 10 then {
+    #XSOwmzMlmmLIQMlN code→warning("You are creating a lot of `forever` loops!");
+  }
   #Pj4YeL1fWpHS4Rqe code→in_background;
   #DzqAW6AtT7qsGylm where `implicit` \_body\_() {
     #VewPBkQpxjnPzsoN while true do {
@@ -2049,6 +2066,9 @@ action test_plot_image() {
   #uv2qjBz92QKG6jb4 // {shim:}
   #xWC0vpIb0g6zkauY code→\_libinit;
   #HAPp3WJOXLG3Hd5l code→plot_image("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
+  #kBUen1jy0k4wINSh code→pause(1000);
+  #xFXsetNa4Qhcgcja $img := code→create_image("0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 0 0 0 0\n0 1 1 1 0 0 0 1 0 0\n0 0 1 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0");
+  #x7RQ0L8v7jnJDs4P $img→plot_frame(1);
   meta private;
   meta test;
 }
@@ -2067,7 +2087,7 @@ action warning(#dJIbhLazNunQ2Pqc message: String) {
 }
 #tPLU5ZwYXNcXCDk3
 action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros: Number) {
-  #D3DLwyTrT2wKkoVN // Configures the PWM period of the analog output to the given value in **microseconds** or `1/1000` milliseconds.
+  #D3DLwyTrT2wKkoVN // Configures the Pulse-width modulation (PWM) of the analog output to the given value in **microseconds** or `1/1000` milliseconds.
   #fUdLXCrX4rNeuilQ // If this pin is not configured as an analog output (using `analog write pin`), the operation has no effect.
   #DbpdkxM4nUP2sVga // {shim:micro_bit::setAnalogPeriodUs}
   #xyHbQm9j2k6iXq4P // {namespace:pins}
@@ -2075,6 +2095,9 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #PAYMs0BDD8RbLR3B // {weight:10}
   #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
   #Xh232b04YquKwayo // {hints:micros:5000}
+  #eskzFxC3911B24dS if `not` data→pitch_pin→is_invalid `and` data→pitch_pin→equals($pin) then {
+    #iJ3KsCdT2LKFuhZU $p := code→pin_by_name($pin);
+  }
   meta sync;
 }
 #AuigaLeUb4929mNA
@@ -2089,26 +2112,54 @@ action analog_set_pitch_pin(#xpU1U000JWEY2Boq name: String) {
   meta sync;
 }
 #gEmhFkaGb62VAwjT
-action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o millis: Number) {
-  #xFJhXD0ijs00YMjd // Emits a PMW signal to the current pitch pin. Use `analog set pitch pin` to define the pitch pin.
+action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: Number) {
+  #xFJhXD0ijs00YMjd // Emits a Pulse-width modulation (PWM) signal to the current pitch pin. Use `analog set pitch pin` to define the pitch pin.
   #SuwCvUifdY38to4S // {shim:micro_bit::pitch}
   #Mh0Oeb4E8cK3WWWW // {namespace:pins}
   #xGfz4I04h2bsO91l // {help:functions/analog-pitch}
   #xEGCJ6YyP3Gaw9ug // {weight:14}
   #Nv7yTShmVzRRmckP // {hints:frequency:400}
-  #lyVvmxzXMSk4YDmd // {hints:millis:500}
+  #lyVvmxzXMSk4YDmd // {hints:ms:500}
   #fx1pQM2jYhWeMW8F if data→pitch_pin→is_invalid `or` data→pitch_pin→is_empty then {
     #X9dWOHCIYzY5e4Eq code→warning("Pitch pin not set! Use `pins->set pitch pin` to setup which pin to use.");
+    #xhsHV4U6nnbq4LYZ `return` ;
   }
   #wunHmKjgrpZ9byII if $frequency < 0 then {
     #Ml7QifWVhfftWKcq code→warning("frequency is too low");
+    #H9Y66i52F23oOeSD `return` ;
   }
-  #qvLwajJDb3fREXyj if $millis ≤ 0 then {
+  #qvLwajJDb3fREXyj if $ms ≤ 0 then {
     #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
+    #xk1nhHhK4p6I76aX `return` ;
   }
 }
 #KgNK732SuRLWRKOO
 var pitch_pin : String {
   // {shim:}
   transient = true;
+}
+#f01xEP7flwdYeYJq
+action test_pitch() {
+  #YTd12LqhKZ4TaZc2 // {shim:}
+  #seC2W2nEHKYskZWx code→\_libinit;
+  #ZIUeBcsS2CnLOyAX code→analog_set_pitch_pin("P0");
+  #HgqlbD1gvQviXx8z for 0 ≤ i < 5 do {
+    #U0MwRtD11cCn27TG code→analog_pitch(400 + $i * 100, 500);
+  }
+  #dDCdl0EzpaRtSQeM code→pause(1000);
+  #xFHA2N0ccuekrNB6 code→analog_write_pin("P0", 512);
+  #AgpJ3he45LX41vYs for 0 ≤ j < 5 do {
+    #VA5aDXkUjZHNPhD9 code→analog_set_period("P0", 5000 - $j * 100);
+    #zq5NuKyDLAFXhWKl code→pause(500);
+  }
+  meta private;
+  meta test;
+}
+#Homv4VKEXNUbTAb4
+action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Number) {
+  #fCfOCntjWE4DNymC // Plots the ``index``-th frame of the image on the screen.
+  #xasY934N29G7WBjg // {help:functions/plot-frame}
+  #wQpnycOYR16SMb15 // {namespace:image}
+  #OFsNMj5vqD4C4rm4 // {weight:65}
+  #uM7fnoqbHXxpqA12 $@this→show_image(5 * $index);
 }
