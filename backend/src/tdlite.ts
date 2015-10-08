@@ -6338,7 +6338,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
             if ( ! session.termsOk) {
                 inner = "agree";
             }
-            else if (!session.nickname) {
+            else if (!session.nickname && templateSuffix) {
                 inner = "newadult";
                 params["EXAMPLES"] = "";
                 params["SESSION"] = session.state;
