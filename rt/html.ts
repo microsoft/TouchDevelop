@@ -1361,4 +1361,29 @@ module TDev.HTML {
         else
             return false
     }
+
+    export function downloadFile(name:string, dataurl:string)
+    {
+        if ((<any>window).navigator.msSaveOrOpenBlob) {
+            try {
+                var m = /data:([^;]+);base64,/.exec(dataurl)
+                var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
+                var result = (<any>window).navigator.msSaveOrOpenBlob(b, name);
+            } catch(e) {
+                HTML.showProgressNotification(lf("saving file failed..."));
+            }
+        } else {
+            var link = <any>window.document.createElement('a');
+
+            link.href = dataurl;
+            if (typeof link.download == "string") {
+                link.download = name;
+                document.body.appendChild(link); // for FF
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                document.location.href = dataurl;
+            }
+        }
+    }
 }

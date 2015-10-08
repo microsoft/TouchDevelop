@@ -47,8 +47,6 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     var currReq = reqNo++;
     var isDone = false
 
-    console.log(uri)
-
     function finish(d:string) {
         if (!isDone) {
             isDone = true;
@@ -60,6 +58,10 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     var handle = (res:http.ClientResponse) => {
         if (res.statusCode != 200) {
             console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, uri.replace(/access_token.*/, ""));
+            if (res.statusCode == 500 && /admin\/reindex/.test(uri) && numRetries > 0) {
+                tdevGet(uri, f, numRetries - 1, body, contentType)
+                return
+            }
             numErrors++;
             finish(null);
         }
@@ -98,7 +100,7 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
         if (!isDone && numRetries > 0 && err.code == 'ECONNRESET') {
             console.log(new Date() + ": conn reset, retry " + uri)
             isDone = true
-            tdevGet(uri, f, numRetries - 1)
+            tdevGet(uri, f, numRetries - 1, body, contentType)
         } else {
             console.error(new Date() + " req error " + uri + " " + util.inspect(err))
             finish(null)
@@ -3819,7 +3821,7 @@ function reindexone(store:string, cont = "")
 
             if (parsed.continuation)
                 loop("&continuation=" + parsed.continuation)
-        }, 1, {})
+        }, 5, {})
 
     if (cont) cont = "&continuation=" + cont
     loop(cont)
