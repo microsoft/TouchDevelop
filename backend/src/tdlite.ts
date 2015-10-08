@@ -9960,7 +9960,7 @@ async function _initPromoAsync() : Promise<void>
             jsb2["tags"] = td.arrayToJson(Object.keys(d));
         }
         promo = clone(jsb2);
-        let offsetHours = Math.round(td.clamp(-200000, 200000, orZero(promo["priority"])));
+        let offsetHours = Math.round(td.clamp(-200000, 1000000, orZero(promo["priority"])));
         let newtime = Math.round(req3.rootPub["pub"]["time"] + offsetHours * 3600);
         let newId = (10000000000 - newtime) + "." + req3.rootId;
         await pubsContainer.updateAsync(req3.rootId, async (entry: JsonBuilder) => {
