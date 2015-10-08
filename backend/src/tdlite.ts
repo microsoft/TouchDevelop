@@ -7691,7 +7691,18 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
         fieldname = "scriptid";
     }
     if (store.kind == "script" || isPtr) {
-        let coll = asArray(json).map<string>(elt => orEmpty(elt["pub"][fieldname])).filter(elt1 => elt1 != "");
+        fetchResult.items = fetchResult.items.filter(pub => {
+            if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
+                // only insert the latest version
+                return false;
+            }
+            if (pub["ishidden"]) {
+                return false; // always skip hidden scripts
+            }
+            
+            return true;            
+        })
+        let coll = fetchResult.items.map<string>(elt => orEmpty(elt["pub"][fieldname])).filter(elt1 => elt1 != "");
         let bodies = {};
         let entries = await scriptText.getManyAsync(coll);
         for (let js2 of entries) {
@@ -7700,14 +7711,6 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
             }
         }
         for (let pub of fetchResult.items) {
-            if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
-                // only insert the latest version
-                continue;
-            }
-            if (pub["ishidden"]) {
-                continue; // always skip hidden scripts
-            }
-
             let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
             let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
             req.response["itemsReindexed"]++;
