@@ -1036,7 +1036,8 @@ export class LoginSession
     @json public pass: string = "";
     @json public ownerId: string = "";
     @json public termsOk: boolean = false;
-    @json public codeOk: boolean = false;
+    @json public codeOk: boolean = false;    
+    @json public nickname: string = "";
     static createFromJson(o:JsonObject) { let r = new LoginSession(); r.fromJson(o); return r; }
 }
 
@@ -5850,6 +5851,7 @@ async function _initLoginAsync() : Promise<void>
     jsb["kidcode"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.enterCode_html);
     jsb["kidornot"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.kidOrNot_html);
     jsb["newuser"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.newuser_html);
+    jsb["newadult"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.newadult_html);
     jsb["agree"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.agree_html);
     jsb["usercreated"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.user_created_html);
     jsb["providers"] = "";
@@ -5909,24 +5911,25 @@ async function _initLoginAsync() : Promise<void>
             res1.html(html);
         }
     });
-    restify.server().get("/oauth/dialog", async (req2: restify.Request, res2: restify.Response) => {
-        let sessionString = orEmpty(await serverAuth.options().getData(orEmpty(req2.query()["td_session"])));
+    restify.server().get("/oauth/dialog", async (req: restify.Request, res: restify.Response) => {
+        let sessionString = orEmpty(await serverAuth.options().getData(orEmpty(req.query()["td_session"])));
         let session = new LoginSession();
         session.state = cachedStore.freshShortId(16);
+        logger.debug("session string: " + sessionString);
         if (sessionString != "") {
             session = LoginSession.createFromJson(JSON.parse(sessionString));
         }
         if (session.userid == "") {
-            serverAuth.validateOauthParameters(req2, res2);
+            serverAuth.validateOauthParameters(req, res);
         }
-        handleBasicAuth(req2, res2);
-        await loginCreateUserAsync(req2, session, res2);
-        if ( ! res2.finished()) {
-            let accessCode = orEmpty(req2.query()["td_state"]);
+        handleBasicAuth(req, res);
+        await loginCreateUserAsync(req, session, res);
+        if ( ! res.finished()) {
+            let accessCode = orEmpty(req.query()["td_state"]);
             if (accessCode == "teacher") {
-                let query = req2.url().replace(/^[^\?]*/g, "");
-                let url = req2.serverUrl() + "/oauth/providers" + query;
-                res2.redirect(303, url);
+                let query = req.url().replace(/^[^\?]*/g, "");
+                let url = req.serverUrl() + "/oauth/providers" + query;
+                res.redirect(303, url);
             }
             else if (accessCode == tokenSecret && session.userid != "") {
                 // **this is to be used during initial setup of a new cloud deployment**
@@ -5935,10 +5938,10 @@ async function _initLoginAsync() : Promise<void>
                     jsonAdd(entry, "totalcredit", 1000);
                     entry["permissions"] = ",admin,";
                 });
-                accessTokenRedirect(res2, session.redirectUri);
+                accessTokenRedirect(res, session.redirectUri);
             }
             else {
-                await loginHandleCodeAsync(accessCode, res2, req2, session);
+                await loginHandleCodeAsync(accessCode, res, req, session);
             }
         }
     });
@@ -6270,6 +6273,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
 
     if ( ! res.finished()) {
         await refreshSettingsAsync();
+        let params = {};
         let inner = "kidornot";
         if (accessCode == "kid") {
             inner = "kidcode";
@@ -6294,8 +6298,8 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                     if (delEntry != null && ! delEntry["termsversion"] && ! delEntry["permissions"]) {
                         let delok = await deleteAsync(delEntry);
                         await pubsContainer.updateAsync(session.userid, async (entry: JsonBuilder) => {
-                            entry["settings"] = ({});
-                            entry["pub"] = ({});
+                            entry["settings"] = {};
+                            entry["pub"] = {};
                             entry["login"] = "";
                             entry["permissions"] = "";
                         });
@@ -6319,8 +6323,30 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                     newvalue: await getPubAsync(session.userid, "user")
                 });
             }
+            let username = orEmpty(req.query()["td_username"]).slice(0, 25);
+            if (!session.nickname && username) {
+                session.nickname = username;
+                await serverAuth.options().setData(session.state, JSON.stringify(session.toJson()));
+                let lastx = {};                
+                await pubsContainer.updateAsync(session.userid, async(entry1: JsonBuilder) => {
+                    entry1["settings"].nickname = username;
+                    entry1["pub"].name = username;                    
+                    lastx = entry1;
+                });                
+                await scanAndSearchAsync(lastx);
+            }
             if ( ! session.termsOk) {
                 inner = "agree";
+            }
+            else if (!session.nickname) {
+                inner = "newadult";
+                params["EXAMPLES"] = "";
+                params["SESSION"] = session.state;
+                let uentry = await getPubAsync(session.userid, "user");
+                if (uentry) {
+                    let nm = uentry["pub"].name
+                    params["EXAMPLES"] = ["Ms" + nm, "Mr" + nm, nm + td.randomRange(10, 99)].join(", ");
+                }
             }
             else if ( ! session.codeOk) {
                 inner = "activate";
@@ -6333,7 +6359,12 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
             let agreeurl = "/oauth/dialog?td_session=" + encodeURIComponent(session.state) + "&td_agree=" + encodeURIComponent(theServiceSettings.termsversion);
             let disagreeurl = "/oauth/dialog?td_session=" + encodeURIComponent(session.state) + "&td_agree=noway";
             let lang21 = await handleLanguageAsync(req, res, true);
-            res.html(td.replaceAll(td.replaceAll(td.replaceAll(await getLoginHtmlAsync(inner, lang21), "@MSG@", msg), "@AGREEURL@", agreeurl), "@DISAGREEURL@", disagreeurl));
+            params["MSG"] = msg;
+            params["AGREEURL"] = agreeurl;
+            params["DISAGREEURL"] = disagreeurl;
+            let ht = await getLoginHtmlAsync(inner, lang21)
+            ht = ht.replace(/@([A-Z]+)@/g, (m, n) => params.hasOwnProperty(n) ? params[n] : m)
+            res.html(ht);
         }
     }
 }

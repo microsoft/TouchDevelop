@@ -4,6 +4,37 @@
 
 import * as td from './td';
 
+
+export var login_js: string = 
+`function seturl(p) {
+  var url = window.location.href.replace(/#.*/, "").replace(/\\&td_(username|password|state)=[^?&]*/g, "")
+  window.location.href = url + p
+}
+
+function setstate(s) {
+    seturl("&td_state=" + encodeURIComponent(s))
+}
+
+function checkready(f)
+{
+    var userid = "@USERID@";
+    var done = false;
+    if (userid && !/^@/.test(userid)) {
+        setInterval(function() {
+            if (done) return
+            $.get("/api/ready/" + userid).then(function(r) {
+              if (r && r.ready) {
+                  done = true;
+                  f();
+              }
+            })
+        }, 2000)
+    } else {
+        f();
+    }
+}
+`;
+
 export var enterCode_html: string = 
 `<script>
 function oncode() {
@@ -199,36 +230,6 @@ function onteacher() {
 </div>
 `;
 
-export var login_js: string = 
-`function seturl(p) {
-  var url = window.location.href.replace(/#.*/, "").replace(/\\&td_(username|password|state)=[^?&]*/g, "")
-  window.location.href = url + p
-}
-
-function setstate(s) {
-    seturl("&td_state=" + encodeURIComponent(s))
-}
-
-function checkready(f)
-{
-    var userid = "@USERID@";
-    var done = false;
-    if (userid && !/^@/.test(userid)) {
-        setInterval(function() {
-            if (done) return
-            $.get("/api/ready/" + userid).then(function(r) {
-              if (r && r.ready) {
-                  done = true;
-                  f();
-              }
-            })
-        }, 2000)
-    } else {
-        f();
-    }
-}
-`;
-
 export var agree_html: string = 
 `<div style='margin: 0 auto; width: 310px;  text-align: center;'>
 <h1 style='font-size:3em; font-weight:normal;'>Legal stuff</h1>
@@ -237,3 +238,22 @@ export var agree_html: string =
 </div>
 `;
 
+export var newadult_html: string =
+`<script>
+var session = "&td_session=@SESSION@";
+function oncode() {
+  var inp = document.getElementById("firstname")
+  if (!inp.value || inp.value.length < 3) {
+    inp.style.borderColor = "red"
+    return false
+  }
+  seturl("&td_username=" + encodeURIComponent(inp.value) + session)
+}
+</script>
+<div style='margin: 0 auto; width: 310px;  text-align: center;'>
+<h1 style='font-size:3em; font-weight:normal;'>Your nickname</h1>
+<p>Examples: @EXAMPLES@</p>
+<input type="text" id="firstname" class="code"/><br/>
+<a href="#" class="provider" onclick="oncode()">Go</a><br/>
+</div>
+`;
