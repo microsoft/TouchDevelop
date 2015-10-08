@@ -2147,7 +2147,7 @@ module TDev
 
         private currentScriptCompiling: string;
         public compile(btn: HTMLElement, debug: boolean) {
-            if (!Cloud.bitvm && Cloud.anonMode(lf("C++ compilation"))) {
+            if (!Cloud.bitvm() && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2157,7 +2157,7 @@ module TDev
                 return;
             }
 
-            if (Cloud.bitvm)
+            if (Cloud.bitvm())
                 this.bytecodeCompileWithUi(Script, debug);
             else
                 this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
