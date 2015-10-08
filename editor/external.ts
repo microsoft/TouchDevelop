@@ -427,7 +427,6 @@ module TDev {
 
           case MessageType.Compile:
             if (!Cloud.bitvm() && Cloud.anonMode(lf("C++ compilation"))) {
-              
               this.post(<Message_CompileAck>{
                 type: MessageType.CompileAck,
                 status: Status.Error,
