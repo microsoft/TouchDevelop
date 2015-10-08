@@ -84,6 +84,38 @@ Blockly.Blocks['device_show_number'] = {
   }
 };
 
+Blockly.Blocks['device_shake_event'] = {
+  init: function() {
+    this.setHelpUrl('https://live.microbit.co.uk/functions/on-shake');
+    this.setColour(120);
+    this.appendDummyInput()
+        .appendField("on shake");
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
+    this.setInputsInline(true);
+    this.setTooltip('React to the device being shaken.');
+  }
+};
+
+Blockly.Blocks['device_pin_event'] = {
+  init: function() {
+    this.setHelpUrl('https://live.microbit.co.uk/functions/on-pin-pressed');
+    this.setColour(120);
+    this.appendDummyInput()
+        .appendField("on pin");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "NAME");
+    this.appendDummyInput()
+        .appendField("pressed");
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
+    this.setInputsInline(true);
+    this.setTooltip('React to a pin press.');
+  }
+};
+
 Blockly.Blocks['device_button_event'] = {
   init: function() {
     this.setHelpUrl('https://live.microbit.co.uk/functions/on-button-pressed');
