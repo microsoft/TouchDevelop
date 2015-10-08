@@ -449,7 +449,7 @@ module TDev {
                 break;
               case Language.TouchDevelop:
                 fixupLibs(message1.libs);
-                if (Cloud.bitvm) {
+                if (Cloud.bitvm()) {
                   compileLanguage = Language.TouchDevelop;
                   code = roundtrip1(message1.text, message1.libs);
                 } else {
