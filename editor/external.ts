@@ -550,6 +550,11 @@ module TDev {
             }).done();
             break;
 
+          case MessageType.Load:
+            var message4 = <Message_Load> event.data;
+            ArtUtil.handleHexFile(message4.file);
+            break;
+
           default:
             // Apparently the runtime loop of the simulator is implemented using
             // messages sent to all origins... see [rt/util.ts]. So just don't do

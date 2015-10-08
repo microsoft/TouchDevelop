@@ -718,7 +718,7 @@ module TDev
             return d;
         }
 
-        function handleHexFile(file: File)
+        export function handleHexFile(file: File)
         {
             var guid = ""
 

@@ -391,6 +391,18 @@ module TDev {
       }
     });
 
+    window.addEventListener("drop", (event) => {
+      event.preventDefault();
+      for (var i = 0; i < event.dataTransfer.files.length; ++i) {
+        var f = event.dataTransfer.files[i];
+        if (/\.hex$/.test(f.name))
+          post(<External.Message_Load> {
+            type: External.MessageType.Load,
+            file: f
+          });
+      }
+    });
+
     window.setInterval(() => {
       doSave();
     }, 5000);

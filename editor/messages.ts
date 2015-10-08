@@ -21,7 +21,8 @@ module TDev {
             Merge, Quit, // [Quit] has no attached data, so not defining a special interface
             Upgrade, Run,
             Resized,
-            NewBaseVersion
+            NewBaseVersion,
+            Load
         };
 
         export interface Message_Init extends Message {
@@ -102,6 +103,13 @@ module TDev {
         // that have an empty [baseSnapshot].
         export interface Message_NewBaseVersion extends Message {
             baseSnapshot: string;
+        }
+
+        // From the inner iframe to the outer one, when a .hex file was dropped
+        // on top of the inner iframe.
+        export interface Message_Load extends Message {
+            type: MessageType; // == MessageType.Load
+            file: File;
         }
 
         // A saved script has some text (this is what ends up published when the
