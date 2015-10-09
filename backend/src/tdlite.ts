@@ -75,7 +75,7 @@ var releases: indexedStore.Store;
 var appContainer: azureBlobStorage.Container;
 var settingsContainer: cachedStore.Container;
 var cacheRewritten: cachedStore.Container;
-var rewriteVersion: number = 0;
+var rewriteVersion: number = 221;
 var tokensTable: azureTable.Table;
 var redisClient: redis.Client;
 var filesContainer: azureBlobStorage.Container;
@@ -1466,7 +1466,6 @@ export interface IPubVideo {
 
 async function _initAsync() : Promise<void>
 {
-    rewriteVersion = 220;
     let reinit = false;
     logger = td.createLogger("tdlite");
     throttleDisabled = orEmpty(td.serverSetting("DISABLE_THROTTLE", true)) == "true";
@@ -8252,6 +8251,16 @@ async function clearPtrCacheAsync(id: string) : Promise<void>
     }
 }
 
+export function fixupTDHtml(html: string): string
+{
+    html = html
+        .replace(/^<h1>[^<>]+<\/h1>/g, "")
+        .replace(/<h2>/g, "<h2 class=\"beta\">")
+        .replace(/(<a class="[^"<>]*" href=")\//g, (f, p) => p + self)
+        .replace(/<h3>/g, "<h3 class=\"gamma\">");
+    return html; 
+}
+
 async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: JsonBuilder) : Promise<void>
 {
     pubdata["done"] = false;
@@ -8286,7 +8295,7 @@ async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: Json
                 }
                 pubdata["username"] = username;
                 pubdata["userid"] = userid;
-                pubdata["body"] = resp2["body"].replace(/^<h1>[^<>]+<\/h1>/g, "").replace(/<h2>/g, "<h2 class=\"beta\">").replace(/<h3>/g, "<h3 class=\"gamma\">");
+                pubdata["body"] = fixupTDHtml(resp2["body"]);
                 let desc = pubdata["description"];
                 pubdata["hashdescription"] = desc;
                 pubdata["description"] = desc.replace(/#\w+/g, "");
