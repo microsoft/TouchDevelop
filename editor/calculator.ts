@@ -1327,7 +1327,6 @@ module TDev
                 this.display();
                 editor.selector.positionButtonRows();
                 if (renaming) {
-                    Script.notifyChange();
                     editor.dismissSidePane();
                     editor.queueNavRefresh();
                 }

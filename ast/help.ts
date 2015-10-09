@@ -397,7 +397,7 @@ module TDev {
                 return links;
             },
             idToUrl: id => Cloud.config.cdnUrl + "/pub/" + id,
-            // idToHTMLAsync: id => Promise.as(HTML.mkYouTubePlayer(id))
+            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.cdnUrl + "/pub/" + id))
         }, {
             id: "youtube",
             name: "YouTube",

@@ -1314,19 +1314,18 @@
             var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
             HTML.setCheckboxValue(allowExport, false);
 
-            var div1, div2, cancelBtn;
+            var div1, cancelBtn;
             var m = new ModalDialog();
             var groupInfo : GroupInfo;
             m.add([
                 progressBar,
                 div("wall-dialog-header", lf("create new group")),
-                div("wall-dialog-body", lf("A group can be used to run a class or an event. Users can collaborate on the same scripts at the same time."), Editor.mkHelpLink("groups")),
+                div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("group name (minimum 4 characters)")), name),
                     div('', div('', lf("group description")), descr),
                     EditorSettings.widgets().groupAllowExportApp ? div('', allowExport) : undefined
                     ),
-                div2 = div('wall-dialog-body', lf("You cannot change these settings afterwards.")),
                 div("wall-dialog-buttons",
                     cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButtonOnce(lf("create"), () => {
@@ -1341,7 +1340,6 @@
                         progressBar.start();
                         cancelBtn.removeSelf();
                         div1.removeSelf();
-                        div2.removeSelf();
                         Cloud.postPrivateApiAsync("groups", request)
                             .then((r: Cloud.PostApiGroupsResponse) => {
                                 TheApiCacheMgr.invalidate("groups");

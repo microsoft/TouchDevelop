@@ -2042,28 +2042,37 @@ module TDev
                 this.goToHubAsync().done();
         }
 
-        private currentCompilationModalDialog;
+        private currentCompilationModalDialog: ModalDialog;
 
-        private showCompilationDialog(hideOption: boolean) {
+        private showCompilationDialog(inBrowser: boolean) {
             var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
-            if (hideOption && !!window.localStorage.getItem(hideKey)) {
-                if (this.currentCompilationModalDialog)
+            if (inBrowser && !!window.localStorage.getItem(hideKey)) {
+                if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
                 return;
             }
-            var progress = HTML.mkProgressBar(); progress.start();
-            this.currentCompilationModalDialog.add(progress);
+            if (!inBrowser) {
+                var progress = HTML.mkProgressBar(); progress.start();
+                this.currentCompilationModalDialog.add(progress);
+            } 
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
-            this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
-            var msg = Cloud.isFota()
-                ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
-                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
-            this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            if (inBrowser) {
+                var msg = Cloud.isFota()
+                    ? lf("Your .hex should be uploaded will be uploaded onto your BBC micro:bit soon.")
+                    : lf("Your .hex file is ready. Drag and drop it onto your BBC micro:bit device drive.")
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            } else {
+                this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
+                var msg = Cloud.isFota()
+                    ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be uploaded onto your BBC micro:bit.")
+                    : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            }    
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
-            if (hideOption)
+            if (inBrowser)
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
@@ -2074,7 +2083,9 @@ module TDev
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
-                    if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
+                    if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
+                            this.currentCompilationModalDialog.dismiss();
+                    this.currentCompilationModalDialog = undefined;
                     if (this.stepTutorial) this.stepTutorial.notify("compile");
                 })
         }
@@ -3356,9 +3367,9 @@ module TDev
                         this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
-                    this.renderDefaultDecl();
                     this.undoMgr.pushMainUndoState();
                     this.loadTutorial(firstTime);
+                    this.renderDefaultDecl();
                 }
 
                 this.setLibraryUpdateIds();
@@ -4322,17 +4333,20 @@ module TDev
                         div("wall-dialog-header", div("", lf("sign out")), Editor.mkHelpLink("user accounts")),
                         div("wall-dialog-body", lf("Are you sure?\nAll your script data and any unsynchronized script changes will be lost.")),
                         div("wall-dialog-buttons", HTML.mkButton(lf("sign out"), () => {
+                                m.onDismiss = undefined;
                                 m.dismiss();
                                 TheEditor.logoutAsync(false).done()
                         })),
                         sm = div("wall-dialog-body", lf("If you suspect your account has been compromised, "),
-                                HTML.mkLinkButton(lf("sign out on all your devices"), () => {
+                            HTML.mkLinkButton(lf("sign out on all your devices"), () => {
+                                    m.onDismiss = undefined;
                                     m.dismiss();
                                     TheEditor.logoutAsync(true).done()
                                 }))
                     ]);
                     sm.style.marginTop = "2em"
                     sm.style.fontSize = "0.6em"
+                    m.onDismiss = () => Util.setHash(TDev.hubHash, true);
                     m.show();
             })).done();
         }
