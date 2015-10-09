@@ -268,7 +268,10 @@ module TDev
             try {
                 c.run()
             } catch (e) {
-                ModalDialog.showText(e.stack)
+                e.bugAttachments = [app.serialize()]
+                Util.reportError("bitvm compile", e, false);
+                if (dbg)
+                    ModalDialog.showText(e.stack)
                 return
             }
 
@@ -286,7 +289,9 @@ module TDev
             })
             .done(() => {},
             e => {
-                ModalDialog.showText(e.stack)
+                Util.reportError("bitvm download", e, false);
+                if (dbg)
+                    ModalDialog.showText(e.stack)
             })
         }
 
