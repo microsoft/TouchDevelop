@@ -4333,17 +4333,20 @@ module TDev
                         div("wall-dialog-header", div("", lf("sign out")), Editor.mkHelpLink("user accounts")),
                         div("wall-dialog-body", lf("Are you sure?\nAll your script data and any unsynchronized script changes will be lost.")),
                         div("wall-dialog-buttons", HTML.mkButton(lf("sign out"), () => {
+                                m.onDismiss = undefined;
                                 m.dismiss();
                                 TheEditor.logoutAsync(false).done()
                         })),
                         sm = div("wall-dialog-body", lf("If you suspect your account has been compromised, "),
-                                HTML.mkLinkButton(lf("sign out on all your devices"), () => {
+                            HTML.mkLinkButton(lf("sign out on all your devices"), () => {
+                                    m.onDismiss = undefined;
                                     m.dismiss();
                                     TheEditor.logoutAsync(true).done()
                                 }))
                     ]);
                     sm.style.marginTop = "2em"
                     sm.style.fontSize = "0.6em"
+                    m.onDismiss = () => Util.setHash(TDev.hubHash, true);
                     m.show();
             })).done();
         }
