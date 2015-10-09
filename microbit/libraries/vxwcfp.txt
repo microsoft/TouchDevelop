@@ -32,7 +32,7 @@ action \_libinit() {
     #xYFT5Uzzo7KE5Kr1 code→create_buttons;
     #CT4ZDKfwZOw9wE2M data→finger := data→board→create_ellipse(20, 20);
     #JoeW2bsnEkDyWSyt data→finger→set_opacity(0);
-    #NAj8gc9TnnnW95KJ data→led_on_color := "#ff4f4f" →to_color;
+    #NAj8gc9TnnnW95KJ data→led_on_color := "#ff7f7f" →to_color;
     #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
     #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
     #mEta1VHYHeLZUHiH data→back_leds := data→board→create_sprite_set;
