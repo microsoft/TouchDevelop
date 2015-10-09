@@ -267,7 +267,7 @@ module TDev
             if (this.compileBtn) {
                 this.compileBtn.style.zIndex = "1"; // above apiDismiss
                 this.compileBtn.style.position = "relative";
-                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:fa-download,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e:MouseEvent) => {
+                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:bitcompile,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e:MouseEvent) => {
                         var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)
                             TheEditor.runMainAction();
