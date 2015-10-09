@@ -2044,26 +2044,35 @@ module TDev
 
         private currentCompilationModalDialog: ModalDialog;
 
-        private showCompilationDialog(hideOption: boolean) {
+        private showCompilationDialog(inBrowser: boolean) {
             var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
-            if (hideOption && !!window.localStorage.getItem(hideKey)) {
+            if (inBrowser && !!window.localStorage.getItem(hideKey)) {
                 if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
                 return;
             }
-            var progress = HTML.mkProgressBar(); progress.start();
-            this.currentCompilationModalDialog.add(progress);
+            if (!inBrowser) {
+                var progress = HTML.mkProgressBar(); progress.start();
+                this.currentCompilationModalDialog.add(progress);
+            } 
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
-            this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
-            var msg = Cloud.isFota()
-                ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be flashed onto your BBC micro:bit.")
-                : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
-            this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            if (inBrowser) {
+                var msg = Cloud.isFota()
+                    ? lf("Your .hex should be uploaded will be uploaded onto your BBC micro:bit soon.")
+                    : lf("Your .hex file is ready. Drag and drop it onto your BBC micro:bit device drive.")
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            } else {
+                this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
+                var msg = Cloud.isFota()
+                    ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be uploaded onto your BBC micro:bit.")
+                    : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
+                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
+            }    
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
-            if (hideOption)
+            if (inBrowser)
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
