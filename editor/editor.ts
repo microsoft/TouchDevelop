@@ -2174,7 +2174,7 @@ module TDev
             if (Cloud.canCompile()) {
                 var compileBtn: HTMLElement;
                 var str = lf("compile");
-                children.push(compileBtn = Editor.mkTopMenuItem("svg:fa-download,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
+                children.push(compileBtn = Editor.mkTopMenuItem("svg:bitcompile,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
                         var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || /dbgcpp=1/i.test(document.location.href);
 
