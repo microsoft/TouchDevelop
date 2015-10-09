@@ -84,8 +84,9 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
 
     var purl:any = /^http(s?):/.test(uri) ? url.parse(uri) : { hostname: 'www.touchdevelop.com', path: '/api/' + uri }
     purl.method = body ? 'PUT' : 'GET'
+    var bd = body
     if (body && !Buffer.isBuffer(body) && typeof body == "object") {
-        body = JSON.stringify(body)
+        bd = JSON.stringify(body)
         purl.method = "POST"
         purl.headers = { 'content-type': 'application/json; charset=utf8' }
     }
@@ -109,8 +110,8 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
         }
     })
 
-    if (body)
-        req.end(body);
+    if (bd)
+        req.end(bd);
     else
         req.end();
 }
