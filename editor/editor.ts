@@ -3367,9 +3367,9 @@ module TDev
                         this.setSplitScreen(true, true);
                     this.applyAnnotations(ed)
                     this.setupNavPane();
-                    this.renderDefaultDecl();
                     this.undoMgr.pushMainUndoState();
                     this.loadTutorial(firstTime);
+                    this.renderDefaultDecl();
                 }
 
                 this.setLibraryUpdateIds();
