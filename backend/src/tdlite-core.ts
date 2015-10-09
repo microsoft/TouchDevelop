@@ -31,7 +31,7 @@ export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequ
 export var validateTokenAsync : (req: ApiRequest, rreq: restify.Request) => Promise<void>;
 export var executeSearchAsync : (kind: string, q: string, req: ApiRequest) => Promise<void>;
 export var somePubStore: indexedStore.Store;
-export var logger: td.AppLogger;
+export var logger = td.createLogger("tdlite");
 
 export var adminRequest: ApiRequest;
 export var basicCreds: string = "";
@@ -1650,8 +1650,6 @@ export function resolveAsync(store: indexedStore.Store, entities: indexedStore.F
 
 export async function initAsync()
 {
-    logger = td.createLogger("tdlite");
-
     tokenSecret = td.serverSetting("TOKEN_SECRET", false);
     throttleDisabled = orEmpty(td.serverSetting("DISABLE_THROTTLE", true)) == "true";
     myChannel = withDefault(td.serverSetting("TD_BLOB_DEPLOY_CHANNEL", true), "local");
@@ -1735,5 +1733,17 @@ export async function addUsernameEtcAsync(entities: indexedStore.FetchResult) : 
 {
     let coll = await addUsernameEtcCoreAsync(entities.items);
     entities.items = td.arrayToJson(coll);
+}
+
+export async function specTableClientAsync(pref: string) : Promise<azureTable.Client>
+{
+    let tableClient: azureTable.Client;
+    tableClient = azureTable.createClient({
+        timeout: 10000,
+        retries: 10,
+        storageAccount: td.serverSetting(pref + "_ACCOUNT", false),
+        storageAccessKey: td.serverSetting(pref + "_KEY", false)
+    });
+    return tableClient;
 }
 

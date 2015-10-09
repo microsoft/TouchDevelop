@@ -38,6 +38,7 @@
         "src/tdlite-data.ts",
         "src/tdlite-core.ts",
         "src/tdlite-scripts.ts",
+        "src/tdlite-workspace.ts",
         "src/tdlite.ts",
         "src/remote.ts"        
     ],

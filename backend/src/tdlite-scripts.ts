@@ -14,14 +14,9 @@ var json = td.json;
 var clone = td.clone;
 
 import * as azureTable from "./azure-table"
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
 import * as cachedStore from "./cached-store"
-import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
-import * as restify from "./restify"
-import * as tdliteData from "./tdlite-data"
-import * as tdliteHtml from "./tdlite-html"
 import * as core from "./tdlite-core"
 
 import * as main from "./tdlite"
@@ -29,9 +24,8 @@ import * as main from "./tdlite"
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
-
-var logger: td.AppLogger;
-var httpCode = restify.http();
+var logger = core.logger;
+var httpCode = core.httpCode;
 
 var updateSlotTable: azureTable.Table;
 export var scripts: indexedStore.Store;
@@ -465,8 +459,6 @@ export async function importScriptAsync(req: core.ApiRequest, body: JsonObject) 
 
 export async function initAsync() : Promise<void>
 {
-    logger = core.logger;
-
     updateSlotTable = await core.tableClient.createTableIfNotExistsAsync("scriptupdates");
     scriptText = await cachedStore.createContainerAsync("scripttext", {
         access: "private"

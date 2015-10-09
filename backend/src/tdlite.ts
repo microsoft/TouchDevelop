@@ -39,8 +39,10 @@ import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 import * as microsoftTranslator from "./microsoft-translator"
 import * as tdliteData from "./tdlite-data"
 import * as tdliteHtml from "./tdlite-html"
-import * as tdliteScripts from "./tdlite-scripts"
+
 import * as core from "./tdlite-core"
+import * as tdliteScripts from "./tdlite-scripts"
+import * as tdliteWorkspace from "./tdlite-workspace"
 
 var orZero = core.orZero;
 var orFalse = core.orFalse;
@@ -52,10 +54,9 @@ export type StringTransformer = (text: string) => Promise<string>;
 var reinit = false;
 var rewriteVersion: number = 221;
 
-var logger: td.AppLogger;
+var logger = core.logger;
 var httpCode = restify.http();
-var installSlotsTable: azureTable.Table;
-var workspaceContainer: cachedStore.Container[];
+
 var comments: indexedStore.Store;
 var users: indexedStore.Store;
 var reviews: indexedStore.Store;
@@ -67,7 +68,6 @@ var groups: indexedStore.Store;
 var tags2: indexedStore.Store;
 var screenshots: indexedStore.Store;
 var importRunning: boolean = false;
-var historyTable: azureTable.Table;
 var subscriptions: indexedStore.Store;
 var notificationsTable: azureTable.Table;
 var releases: indexedStore.Store;
@@ -197,124 +197,6 @@ export interface IPubUser {
     subscribers: number;
     score: number;
     isadult: boolean;
-}
-
-export class PubVersion
-    extends td.JsonRecord
-{
-    @json public instanceId: string = "";
-    @json public baseSnapshot: string = "";
-    @json public time: number = 0;
-    @json public version: number = 0;
-    static createFromJson(o:JsonObject) { let r = new PubVersion(); r.fromJson(o); return r; }
-}
-
-export interface IPubVersion {
-    instanceId: string;
-    baseSnapshot: string;
-    time: number;
-    version: number;
-}
-
-export class PubHeader
-    extends td.JsonRecord
-{
-    @json public guid: string = "";
-    @json public name: string = "";
-    @json public scriptId: string = "";
-    @json public scriptTime: number = 0;
-    @json public updateId: string = "";
-    @json public updateTime: number = 0;
-    @json public userId: string = "";
-    @json public status: string = "";
-    @json public scriptVersion: IPubVersion;
-    @json public hasErrors: string = "";
-    @json public recentUse: number = 0;
-    @json public editor: string = "";
-    @json public meta: JsonObject;
-    static createFromJson(o:JsonObject) { let r = new PubHeader(); r.fromJson(o); return r; }
-}
-
-export interface IPubHeader {
-    guid: string;
-    name: string;
-    scriptId: string;
-    scriptTime: number;
-    updateId: string;
-    updateTime: number;
-    userId: string;
-    status: string;
-    scriptVersion: IPubVersion;
-    hasErrors: string;
-    recentUse: number;
-    editor: string;
-    meta: JsonObject;
-}
-
-export interface IPubHeaders {
-    newNotifications: number;
-    notifications: boolean;
-    email: boolean;
-    emailNewsletter: boolean;
-    emailNotifications: boolean;
-    profileIndex: number;
-    profileCount: number;
-    time: number;
-    askBeta: boolean;
-    askSomething: string;
-    betaSettings: boolean;
-    random: string;
-    minimum: string;
-    v: number;
-    user: PubUser;
-    headers: IPubHeader[];
-    blobcontainer: string;
-}
-
-export class PubBody
-    extends td.JsonRecord
-{
-    @json public guid: string = "";
-    @json public name: string = "";
-    @json public scriptId: string = "";
-    @json public userId: string = "";
-    @json public status: string = "";
-    @json public scriptVersion: IPubVersion;
-    @json public recentUse: number = 0;
-    @json public script: string = "";
-    @json public editorState: string = "";
-    @json public editor: string = "";
-    @json public meta: JsonObject;
-    static createFromJson(o:JsonObject) { let r = new PubBody(); r.fromJson(o); return r; }
-}
-
-export interface IPubBody {
-    guid: string;
-    name: string;
-    scriptId: string;
-    userId: string;
-    status: string;
-    scriptVersion: IPubVersion;
-    recentUse: number;
-    script: string;
-    editorState: string;
-    editor: string;
-    meta: JsonObject;
-}
-
-export class InstalledResult
-    extends td.JsonRecord
-{
-    @json public delay: number = 0;
-    @json public numErrors: number = 0;
-    @json public headers: JsonObject[];
-    static createFromJson(o:JsonObject) { let r = new InstalledResult(); r.fromJson(o); return r; }
-}
-
-export interface IInstalledResult {
-    delay: number;
-    numErrors: number;
-    headers: JsonObject[];
 }
 
 export class PubUserSettings
@@ -588,35 +470,6 @@ export interface IPubScreenshot {
     publicationkind: string;
     pictureurl: string;
     thumburl: string;
-}
-
-export class PubInstalledHistory
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public historyid: string = "";
-    @json public scriptstatus: string = "";
-    @json public scriptname: string = "";
-    @json public scriptdescription: string = "";
-    @json public scriptid: string = "";
-    @json public isactive: boolean = false;
-    @json public meta: string = "";
-    @json public scriptsize: number = 0;
-    static createFromJson(o:JsonObject) { let r = new PubInstalledHistory(); r.fromJson(o); return r; }
-}
-
-export interface IPubInstalledHistory {
-    kind: string;
-    time: number;
-    historyid: string;
-    scriptstatus: string;
-    scriptname: string;
-    scriptdescription: string;
-    scriptid: string;
-    isactive: boolean;
-    meta: string;
-    scriptsize: number;
 }
 
 export class PubSubscription
@@ -1224,7 +1077,6 @@ export interface IPubVideo {
 async function _initAsync() : Promise<void>
 {
     await core.initAsync();
-    logger = core.logger;
 
     disableSearch = orEmpty(td.serverSetting("DISABLE_SEARCH", true)) == "true";
 
@@ -1269,7 +1121,6 @@ async function _initAsync() : Promise<void>
 
     await core.lateInitAsync();
 
-    workspaceContainer = (<cachedStore.Container[]>[]);
     mainReleaseName = withDefault(td.serverSetting("MAIN_RELEASE_NAME", true), "current");
     if (reinit) {
         let success = await core.blobService.setCorsPropertiesAsync("*", "GET,HEAD,OPTIONS", "*", "ErrorMessage,x-ms-request-id,Server,x-ms-version,Content-Type,Cache-Control,Last-Modified,ETag,Content-MD5,x-ms-lease-status,x-ms-blob-type", 3600);
@@ -1407,102 +1258,9 @@ async function _initAsync() : Promise<void>
 }
 
 
-async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObject>
-{
-    let newSlot: JsonObject;
-    core.progress("save 0");
-    let bodyBuilder = clone(body.toJson());
-    body.script = (<string>null);
-    body.editorState = (<string>null);
-    let bodyJson = body.toJson();
-    assert(JSON.stringify(bodyJson).length < 10000, "too large header");
-    let slotJson = await installSlotsTable.getEntityAsync(userid, body.guid);
-    let updatedSlot = azureTable.createEntity(userid, body.guid);
-
-    core.progress("save 1");
-    let id2 = (20000000000000 - await core.redisClient.cachedTimeAsync()) + "." + userid + "." + azureTable.createRandomId(12);
-    let _new = false;
-    let prevBlob = "";
-    if (slotJson == null) {
-        _new = true;
-        let s2 = orEmpty(body.userId);
-        let source = "@fork";
-        if (s2 == "" || s2 == userid) {
-            source = "@fresh";
-        }
-        logger.tick("New_slot" + source);
-    }
-    else {
-        prevBlob = slotJson["currentBlob"];
-        updatedSlot = clone(slotJson);
-    }
-    logger.tick("SaveScript");
-    bodyBuilder["slotUserId"] = userid;
-    for (let s of Object.keys(bodyJson)) {
-        if (s != "scriptVersion") {
-            updatedSlot[s] = bodyJson[s];
-        }
-    }
-    if (bodyJson.hasOwnProperty("meta")) {
-        updatedSlot["meta"] = JSON.stringify(bodyJson["meta"]);
-    }
-    else {
-        updatedSlot["meta"] = "{}";
-    }
-    updatedSlot["currentBlob"] = id2;
-    let updatedJson = clone(updatedSlot);
-    let versionOK = body.status == "deleted" || prevBlob == body.scriptVersion.baseSnapshot || body.scriptVersion.baseSnapshot == "*";
-    if (versionOK) {
-        core.progress("save 2");
-        await workspaceForUser(userid).justInsertAsync(id2, bodyBuilder);
-        core.progress("save 3");
-        if (_new) {
-            versionOK = await installSlotsTable.tryInsertEntityAsync(updatedJson);
-        }
-        else {
-            versionOK = await installSlotsTable.tryUpdateEntityAsync(updatedJson, "merge");
-        }
-        if ( ! versionOK) {
-            let result = await installSlotsTable.getEntityAsync(userid, body.guid);
-            if (result != null && orEmpty(result["currentBlob"]) == id2) {
-                logger.debug("fixing up wrong result from azure table insert, " + userid + " " + body.guid + " " + id2);
-                versionOK = true;
-            }
-        }
-    }
-    if (versionOK) {
-        core.progress("save 4");
-        let hist = new PubInstalledHistory();
-        hist.historyid = id2;
-        hist.scriptstatus = body.status;
-        hist.scriptname = body.name;
-        hist.scriptdescription = "";
-        hist.kind = "installedscripthistory";
-        hist.isactive = false;
-        hist.time = body.scriptVersion.time;
-        hist.meta = updatedSlot["meta"];
-        hist.scriptsize = orEmpty(bodyBuilder["script"]).length;
-        let jsb = clone(hist.toJson());
-        jsb["PartitionKey"] = userid + "." + body.guid;
-        jsb["RowKey"] = hist.historyid;
-        await historyTable.insertEntityAsync(clone(jsb), "or merge");
-        core.progress("save 5");
-        newSlot = headerFromSlot(updatedJson)
-    }
-    else {
-        newSlot = ({"error":"out of date"});
-        logger.debug("collision on " + userid + "/" + body.guid + " " + prevBlob + " vs " + body.scriptVersion.baseSnapshot);
-    }
-    return newSlot;
-}
-
 async function _init_0Async() : Promise<void>
 {
-    let tableClientWs = await specTableClientAsync("WORKSPACE");
-    let tableClientHist = await specTableClientAsync("WORKSPACE_HIST");
-    let notTableClient = await specTableClientAsync("NOTIFICATIONS");
-    installSlotsTable = await tableClientWs.createTableIfNotExistsAsync("installslots");
-    historyTable = await tableClientHist.createTableIfNotExistsAsync("historyslots");
+    let notTableClient = await core.specTableClientAsync("NOTIFICATIONS");
     tokensTable = await core.tableClient.createTableIfNotExistsAsync("tokens");
     core.pubsContainer = await cachedStore.createContainerAsync("pubs");
     settingsContainer = await cachedStore.createContainerAsync("settings", {
@@ -1533,19 +1291,6 @@ async function _init_0Async() : Promise<void>
         redisCacheSeconds: 600,
         noBlobStorage: true
     });
-    for (let j = 0; j < 4; j++) {
-        let blobServiceWs = azureBlobStorage.createBlobService({
-            storageAccount: td.serverSetting("WORKSPACE_BLOB_ACCOUNT" + j, false),
-            storageAccessKey: td.serverSetting("WORKSPACE_BLOB_KEY" + j, false)
-        });
-        /* async */ blobServiceWs.setCorsPropertiesAsync("*", "GET,HEAD,OPTIONS", "*", "*", 3600);
-        let container = await cachedStore.createContainerAsync("workspace", {
-            noCache: true,
-            access: "hidden",
-            blobService: blobServiceWs
-        });
-        workspaceContainer.push(container);
-    }
     await _initAuditAsync();
     // ## General
     core.addRoute("POST", "", "", async (req: core.ApiRequest) => {
@@ -1580,7 +1325,7 @@ async function _init_0Async() : Promise<void>
     // ## and other stuff
     _initSearch();
     _initImport();
-    _initWorkspaces();
+    await tdliteWorkspace.initAsync();
 }
 
 async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<IRedirectAndCookie>
@@ -1622,255 +1367,6 @@ function resolveUsers(entities: indexedStore.FetchResult, req: core.ApiRequest) 
         user.isadult = core.hasPermission(jsb, "adult");
     }
     entities.items = td.arrayToJson(coll);
-}
-
-function _initWorkspaces() : void
-{
-    core.addRoute("GET", "*user", "installed", async (req: core.ApiRequest) => {
-        core.meOnly(req);
-        if (req.status == 200) {
-            await getInstalledAsync(req, false);
-        }
-    });
-    core.addRoute("GET", "*user", "installedlong", async (req1: core.ApiRequest) => {
-        core.meOnly(req1);
-        if (req1.status == 200) {
-            await getInstalledAsync(req1, true);
-        }
-    });
-    core.addRoute("POST", "*user", "installed", async (req2: core.ApiRequest) => {
-        core.meOnly(req2);
-        if (req2.status == 200) {
-            await postInstalledAsync(req2);
-        }
-    }
-    , {
-        noSizeCheck: true
-    });
-    core.addRoute("DELETE", "*user", "installed", async (req3: core.ApiRequest) => {
-        core.meOnly(req3);
-        if (req3.status == 200) {
-            let result = await installSlotsTable.getEntityAsync(req3.rootId, req3.argument);
-            if (result == null) {
-                req3.status = httpCode._404NotFound;
-            }
-            else {
-                await deleteHistoryAsync(req3, req3.argument);
-                await core.pokeSubChannelAsync("installed:" + req3.rootId);
-                req3.response = ({});
-            }
-        }
-    });
-    emailKeyid = "EMAIL";
-    core.addRoute("POST", "*user", "settings", async (req4: core.ApiRequest) => {
-        let logcat = "admin-settings";
-        let updateOwn = false;
-        if (req4.rootId == req4.userid) {
-            core.checkPermission(req4, "adult");
-            if (req4.status == 200) {
-                await core.throttleAsync(req4, "settings", 120);
-                logcat = "user-settings";
-                updateOwn = true;
-            }
-        }
-        else {
-            await core.checkFacilitatorPermissionAsync(req4, req4.rootId);
-        }
-        if (req4.status == 200) {
-            let nick = orEmpty(req4.body["nickname"]).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-            await refreshSettingsAsync();
-            if (new RegExp(theServiceSettings.blockedNicknameRx).test(nick)) {
-                core.checkPermission(req4, "official");
-            }
-        }
-        if (req4.status == 200) {
-            let bld = await updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
-                let sett = await buildSettingsAsync(clone(entry));
-                let newEmail = td.toString(req4.body["email"]);
-                if (newEmail != null) {
-                    if (updateOwn) {
-                        if (sett.emailverified) {
-                            sett.previousemail = sett.email;
-                        }
-                        sett.emailverified = false;
-                        sett.email = newEmail;
-                        let id = azureBlobStorage.createRandomId(16).toLowerCase();
-                        entry["emailcode"] = id;
-                        if (/^[^@]+@[^@]+$/.test(newEmail)) {
-                            /* async */ nodemailer.sendAsync(newEmail, theServiceSettings.emailFrom, "email verification on " + core.myHost, "Please follow the link below to verify your new email address on " + core.myHost + "\n\n      " + core.self + "verify/" + req4.rootId + "/" + id + "\n\nThanks!");
-                        }
-                    }
-                    else {
-                        sett.email = newEmail;
-                        sett.emailverified = true;
-                        sett.previousemail = "";
-                        entry["emailcode"] = "";
-                    }
-                }
-                let settings = clone(sett.toJson());
-                core.setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
-                    "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
-                    "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
-                    "website", "yearofbirth"]);
-                for (let k of ["culture", "email", "previousemail", "gender", "location", "occupation", 
-                               "programmingknowledge", "realname", "school"]) {
-                    let val = settings[k];
-                    if (orEmpty(val) != "") {
-                        settings[k] = core.encrypt(val, emailKeyid);
-                    }
-                }
-                let value = clone(settings);
-                entry["settings"] = value;
-                sett = PubUserSettings.createFromJson(value);
-                sett.nickname = sett.nickname.substr(0, 25);
-                entry["pub"]["name"] = sett.nickname;
-                entry["pub"]["about"] = sett.aboutme;
-                req4.response = clone(settings);
-            });
-            await auditLogAsync(req4, logcat, {
-                oldvalue: req4.rootPub,
-                newvalue: clone(bld)
-            });
-        }
-    });
-    core.addRoute("GET", "*user", "settings", async (req5: core.ApiRequest) => {
-        if (req5.rootId == req5.userid) {
-        }
-        else {
-            await core.checkFacilitatorPermissionAsync(req5, req5.rootId);
-        }
-        if (req5.status == 200) {
-            if (req5.userid != req5.rootId) {
-                await auditLogAsync(req5, "view-settings");
-            }
-            let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
-            if (orEmpty(req5.queryOptions["format"]) != "short") {
-                core.copyJson(settingsOptionsJson, jsb);
-            }
-            req5.response = clone(jsb);
-        }
-    });
-}
-
-function headerFromSlot(js: JsonObject) : IPubHeader
-{
-    let pubHeader: PubHeader;
-    pubHeader = new PubHeader();
-    let isDeleted = js["status"] == "deleted";
-    if (isDeleted) {
-        pubHeader.fromJson(({}));
-        pubHeader.status = js["status"];
-        pubHeader.guid = js["guid"];
-    }
-    else {
-        pubHeader.fromJson(js);
-        pubHeader.meta = JSON.parse(withDefault(js["meta"], "{}"));
-    }
-    let snap = withDefault(js["currentBlob"], "18561817817178.deleted.foobar")
-    let ms = 20000000000000 - parseFloat(snap.replace(/\..*/g, ""));
-    pubHeader.scriptVersion = {
-        instanceId: "cloud",
-        baseSnapshot: snap,
-        time: Math.round(ms / 1000),
-        version: 1
-    };
-    return <any>pubHeader.toJson();
-}
-
-async function getInstalledAsync(req: core.ApiRequest, long: boolean) : Promise<void>
-{
-    if (req.argument == "") {
-        let v = await core.longPollAsync("installed:" + req.rootId, long, req);
-        if (req.status == 200) {
-            if (long) {
-                // re-get for new notifiacation count if any
-                req.rootPub = await core.getPubAsync(req.rootId, "user");
-            }
-            let entities = await installSlotsTable.createQuery().partitionKeyIs(req.rootId).fetchAllAsync();
-            let res:IPubHeaders = <any>{};
-            res.blobcontainer = (await workspaceForUser(req.userid).blobContainerAsync()).url() + "/";
-            res.time = await core.nowSecondsAsync();
-            res.random = crypto.randomBytes(16).toString("base64");
-            res.headers = [];
-            res.newNotifications = orZero(req.rootPub["notifications"]);
-            res.notifications = res.newNotifications > 0;
-            res.v = v;
-            for (let js of entities) {
-                res.headers.push(headerFromSlot(js));
-            }
-            req.response = res
-        }
-    }
-    else {
-        // ### specific slot
-        if (req.subArgument == "history") {
-            await getInstalledHistoryAsync(req);
-        }
-        else {
-            let result = await installSlotsTable.getEntityAsync(req.rootId, req.argument);
-            if (result == null) {
-                req.status = 404;
-            }
-            else {
-                req.response = headerFromSlot(result)
-            }
-        }
-    }
-}
-
-async function postInstalledAsync(req: core.ApiRequest) : Promise<void>
-{
-    let installedResult = new InstalledResult();
-    installedResult.delay = 10;
-    installedResult.headers = (<JsonObject[]>[]);
-    if (req.argument == "") {
-        let bodies = req.body["bodies"];
-        if (bodies != null) {
-            for (let body of bodies) {
-                let pubBody = new PubBody();
-                pubBody.fromJson(body);
-                let item = await saveScriptAsync(req.rootId, pubBody);
-                if (item.hasOwnProperty("error")) {
-                    installedResult.numErrors += 1;
-                }
-                installedResult.headers.push(item);
-                req.verb = "installedbodies";
-            }
-        }
-        let uses = req.body["recentUses"];
-        if (uses != null) {
-            for (let use of uses) {
-                let entity = azureTable.createEntity(req.rootId, orEmpty(use["guid"]));
-                entity["recentUse"] = use["recentUse"];
-                let ok = await installSlotsTable.tryUpdateEntityAsync(clone(entity), "merge");
-                if ( ! ok) {
-                    installedResult.numErrors += 1;
-                }
-                req.verb = "installedrecent";
-            }
-        }
-        await core.pokeSubChannelAsync("installed:" + req.rootId);
-        req.response = installedResult.toJson();
-    }
-    else {
-        req.verb = req.subArgument;
-        if (req.subArgument == "compile") {
-            await mbedCompileAsync(req);
-        }
-        else if (req.subArgument == "publish") {
-            await core.canPostAsync(req, "script");
-            if (req.status == 200) {
-                let uid = req.rootId;
-                await publishScriptAsync(req);
-                core.progress("publish - poke");
-                await core.pokeSubChannelAsync("installed:" + uid);
-            }
-        }
-        else {
-            req.status = httpCode._400BadRequest;
-        }
-    }
-
 }
 
 
@@ -3077,10 +2573,7 @@ async function _initUsersAsync() : Promise<void>
             req8.status = httpCode._402PaymentRequired;
         }
         if (req8.status == 200) {
-            let resQuery = installSlotsTable.createQuery().partitionKeyIs(req8.rootId);
-            await parallel.forJsonAsync(await resQuery.fetchAllAsync(), async (json1: JsonObject) => {
-                await deleteHistoryAsync(req8, json1["RowKey"]);
-            });
+            await tdliteWorkspace.deleteAllHistoryAsync(req8.rootId, req8);
             await deleteAllByUserAsync(comments, req8.rootId, req8);
             await deleteAllByUserAsync(arts, req8.rootId, req8);
             await deleteAllByUserAsync(tdliteScripts.scripts, req8.rootId, req8);
@@ -3203,6 +2696,96 @@ async function _initUsersAsync() : Promise<void>
                 });
             });
             req13.response = ({});
+        }
+    });
+
+    emailKeyid = "EMAIL";
+    core.addRoute("POST", "*user", "settings", async (req4: core.ApiRequest) => {
+        let logcat = "admin-settings";
+        let updateOwn = false;
+        if (req4.rootId == req4.userid) {
+            core.checkPermission(req4, "adult");
+            if (req4.status == 200) {
+                await core.throttleAsync(req4, "settings", 120);
+                logcat = "user-settings";
+                updateOwn = true;
+            }
+        }
+        else {
+            await core.checkFacilitatorPermissionAsync(req4, req4.rootId);
+        }
+        if (req4.status == 200) {
+            let nick = orEmpty(req4.body["nickname"]).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+            await refreshSettingsAsync();
+            if (new RegExp(theServiceSettings.blockedNicknameRx).test(nick)) {
+                core.checkPermission(req4, "official");
+            }
+        }
+        if (req4.status == 200) {
+            let bld = await updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
+                let sett = await buildSettingsAsync(clone(entry));
+                let newEmail = td.toString(req4.body["email"]);
+                if (newEmail != null) {
+                    if (updateOwn) {
+                        if (sett.emailverified) {
+                            sett.previousemail = sett.email;
+                        }
+                        sett.emailverified = false;
+                        sett.email = newEmail;
+                        let id = azureBlobStorage.createRandomId(16).toLowerCase();
+                        entry["emailcode"] = id;
+                        if (/^[^@]+@[^@]+$/.test(newEmail)) {
+                            /* async */ nodemailer.sendAsync(newEmail, theServiceSettings.emailFrom, "email verification on " + core.myHost, "Please follow the link below to verify your new email address on " + core.myHost + "\n\n      " + core.self + "verify/" + req4.rootId + "/" + id + "\n\nThanks!");
+                        }
+                    }
+                    else {
+                        sett.email = newEmail;
+                        sett.emailverified = true;
+                        sett.previousemail = "";
+                        entry["emailcode"] = "";
+                    }
+                }
+                let settings = clone(sett.toJson());
+                core.setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
+                    "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
+                    "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
+                    "website", "yearofbirth"]);
+                for (let k of ["culture", "email", "previousemail", "gender", "location", "occupation", 
+                               "programmingknowledge", "realname", "school"]) {
+                    let val = settings[k];
+                    if (orEmpty(val) != "") {
+                        settings[k] = core.encrypt(val, emailKeyid);
+                    }
+                }
+                let value = clone(settings);
+                entry["settings"] = value;
+                sett = PubUserSettings.createFromJson(value);
+                sett.nickname = sett.nickname.substr(0, 25);
+                entry["pub"]["name"] = sett.nickname;
+                entry["pub"]["about"] = sett.aboutme;
+                req4.response = clone(settings);
+            });
+            await auditLogAsync(req4, logcat, {
+                oldvalue: req4.rootPub,
+                newvalue: clone(bld)
+            });
+        }
+    });
+    core.addRoute("GET", "*user", "settings", async (req5: core.ApiRequest) => {
+        if (req5.rootId == req5.userid) {
+        }
+        else {
+            await core.checkFacilitatorPermissionAsync(req5, req5.rootId);
+        }
+        if (req5.status == 200) {
+            if (req5.userid != req5.rootId) {
+                await auditLogAsync(req5, "view-settings");
+            }
+            let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
+            if (orEmpty(req5.queryOptions["format"]) != "short") {
+                core.copyJson(settingsOptionsJson, jsb);
+            }
+            req5.response = clone(jsb);
         }
     });
 }
@@ -3612,14 +3195,6 @@ async function importDownloadPublicationAsync(id: string, resp: JsonBuilder, col
 
 
 
-async function getInstalledHistoryAsync(req: core.ApiRequest) : Promise<void>
-{
-    let scriptGuid = req.rootId + "." + req.argument;
-    let resQuery = historyTable.createQuery().partitionKeyIs(scriptGuid);
-    let entities2 = await indexedStore.executeTableQueryAsync(resQuery, req.queryOptions);
-    req.response = entities2.toJson();
-}
-
 async function _initSubscriptionsAsync() : Promise<void>
 {
     subscriptions = await indexedStore.createStoreAsync(core.pubsContainer, "subscription");
@@ -3776,8 +3351,8 @@ async function _initReleasesAsync() : Promise<void>
     currClientConfig.searchUrl = "https://" + td.serverSetting("AZURE_SEARCH_SERVICE_NAME", false) + ".search.windows.net";
     currClientConfig.rootUrl = td.serverSetting("SELF", false).replace(/\/$/g, "");
     currClientConfig.apiUrl = currClientConfig.rootUrl + "/api";
-    // TODO client config: per user
-    currClientConfig.workspaceUrl = (await workspaceContainer[0].blobContainerAsync()).url() + "/";
+    // this is no longer set from here - it's blobcontainer in installedheaders response
+    // currClientConfig.workspaceUrl = (await workspaceContainer[0].blobContainerAsync()).url() + "/";
     currClientConfig.liteVersion = releaseVersionPrefix + ".r" + rewriteVersion;
     currClientConfig.shareUrl = currClientConfig.rootUrl;
     currClientConfig.cdnUrl = (await core.pubsContainer.blobContainerAsync()).url().replace(/\/pubs$/g, "");
@@ -5115,7 +4690,7 @@ async function deletePubRecAsync(delEntry: JsonObject) : Promise<void>
 
 
 
-async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
+export async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
 {
     let compileReq = CompileReq.createFromJson(req.body);
     let name = "my script";
@@ -6580,29 +6155,6 @@ async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: st
     }
 }
 
-
-function workspaceForUser(userid: string) : cachedStore.Container
-{
-    let container: cachedStore.Container;
-    container = workspaceContainer[userid[userid.length - 1].charCodeAt(0) % workspaceContainer.length];
-    return container;
-}
-
-
-
-async function specTableClientAsync(pref: string) : Promise<azureTable.Client>
-{
-    let tableClient: azureTable.Client;
-    tableClient = azureTable.createClient({
-        timeout: 10000,
-        retries: 10,
-        storageAccount: td.serverSetting(pref + "_ACCOUNT", false),
-        storageAccessKey: td.serverSetting(pref + "_KEY", false)
-    });
-    return tableClient;
-}
-
-
 async function deleteAllByUserAsync(store: indexedStore.Store, id: string, req: core.ApiRequest) : Promise<void>
 {
     let logDelete = store.kind != "review";
@@ -7352,7 +6904,7 @@ async function handleEmailVerificationAsync(req: restify.Request, res: restify.R
 
 async function _initAuditAsync() : Promise<void>
 {
-    let auditTableClient = await specTableClientAsync("AUDIT_BLOB");
+    let auditTableClient = await core.specTableClientAsync("AUDIT_BLOB");
     let auditBlobService = azureBlobStorage.createBlobService({
         storageAccount: td.serverSetting("AUDIT_BLOB_ACCOUNT", false),
         storageAccessKey: td.serverSetting("AUDIT_BLOB_KEY", false)
@@ -7425,26 +6977,6 @@ async function auditIndexAsync(field: string) : Promise<void>
         if (req.status == 200) {
             await core.anyListAsync(store, req, field, req.argument);
         }
-    });
-}
-
-async function deleteHistoryAsync(req: core.ApiRequest, guid: string) : Promise<void>
-{
-    let result = await installSlotsTable.getEntityAsync(req.rootId, guid);
-    if (result == null) {
-        return;
-    }
-    let entity = azureTable.createEntity(req.rootId, guid);
-    entity["guid"] = guid;
-    entity["status"] = "deleted";
-    await installSlotsTable.insertEntityAsync(clone(entity), "or replace");
-
-    let wsContainer = workspaceForUser(req.rootId);
-    let scriptGuid = req.rootId + "." + guid;
-    let resQuery = historyTable.createQuery().partitionKeyIs(scriptGuid);
-    await parallel.forJsonAsync(await resQuery.fetchAllAsync(), async (json: JsonObject) => {
-        await historyTable.deleteEntityAsync(json);
-        await (await wsContainer.blobContainerAsync()).deleteBlobAsync(json["historyid"]);
     });
 }
 
@@ -7905,76 +7437,6 @@ async function addGroupApprovalAsync(groupJson: JsonObject, userJson: JsonObject
     await sendNotificationAsync(groupJson, "groupapproval", userJson);
 }
 
-
-async function publishScriptAsync(req: core.ApiRequest) : Promise<void>
-{
-    core.progress("start publish, ");
-    let slotJson = await installSlotsTable.getEntityAsync(req.userid, req.argument);
-    let pubVersion = new PubVersion();
-    pubVersion.fromJson(JSON.parse(req.queryOptions["scriptversion"]));
-    if (slotJson == null) {
-        req.status = httpCode._404NotFound;
-    }
-    else if (slotJson["currentBlob"] != pubVersion.baseSnapshot) {
-        req.status = httpCode._409Conflict;
-    }
-
-    if (req.status == 200) {
-        let pubScript = new tdliteScripts.PubScript();
-        pubScript.userid = req.userid;
-        pubScript.ishidden = orFalse(req.queryOptions["hidden"]);
-        pubScript.unmoderated = ! core.callerHasPermission(req, "adult");
-        let mergeids = req.queryOptions["mergeids"];
-        if (mergeids != null) {
-            pubScript.mergeids = mergeids.split(",");
-        }
-        else {
-            pubScript.mergeids = (<string[]>[]);
-        }
-        let body = await workspaceForUser(req.userid).getAsync(pubVersion.baseSnapshot);
-        pubScript.baseid = orEmpty(body["scriptId"]);
-        req.rootPub = (<JsonObject>null);
-        req.rootId = "";
-        if (pubScript.baseid != "") {
-            let baseJson = await core.getPubAsync(pubScript.baseid, "script");
-            if (baseJson != null) {
-                req.rootPub = baseJson;
-                req.rootId = pubScript.baseid;
-                pubScript.rootid = withDefault(baseJson["pub"]["rootid"], pubScript.baseid);
-            }
-        }
-        pubScript.time = await core.nowSecondsAsync();
-        pubScript.name = withDefault(req.body["name"], "unnamed");
-        pubScript.description = orEmpty(req.body["comment"]);
-        pubScript.icon = orEmpty(req.body["icon"]);
-        pubScript.iconbackground = withDefault(req.body["color"], "#FF7518");
-        pubScript.platforms = orEmpty(req.body["platform"]).split(",");
-        pubScript.islibrary = orEmpty(req.body["isLibrary"]) == "yes";
-        pubScript.userplatform = core.getUserPlatforms(req);
-        pubScript.capabilities = (<string[]>[]);
-        pubScript.flows = (<string[]>[]);
-        pubScript.editor = orEmpty(slotJson["editor"]);
-        pubScript.iconArtId = td.toString(req.body["iconArtId"]);
-        pubScript.splashArtId = td.toString(req.body["splashArtId"]);
-        pubScript.meta = req.body["meta"];
-        if (typeof pubScript.meta != "object" || Array.isArray(pubScript.meta))
-            pubScript.meta = {};
-
-        let jsb = {};
-        jsb["currentBlob"] = pubVersion.baseSnapshot;
-        await tdliteScripts.publishScriptCoreAsync(pubScript, jsb, body["script"], req);
-        // 
-        let slotBuilder = clone(slotJson);
-        slotBuilder["status"] = "published";
-        slotBuilder["scriptId"] = pubScript.id;
-        slotBuilder["userId"] = pubScript.userid;
-        delete slotBuilder["__etag"];
-        let newSlot = clone(slotBuilder);
-        await installSlotsTable.updateEntityAsync(newSlot, "merge");
-
-        req.response = { bodies: [headerFromSlot(newSlot)] };
-    }
-}
 
 
 
