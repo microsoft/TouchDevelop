@@ -348,7 +348,7 @@ module TDev.AST {
         public defaultTemplate: string; // use to example when user deletes all characters
         private exprHolder = new AST.ExprHolder();
 
-        constructor() {
+        constructor(public parentDecl : Decl) {
             super();
 
             this.exprHolder.tokens = [ new DeclName() ]
@@ -373,6 +373,7 @@ module TDev.AST {
                 else
                     (<DeclName>toks[0]).data = this.getName();
             }
+            this.parentDecl.notifyChange();
         }
 
         public setName(v: string) {
@@ -1487,10 +1488,11 @@ module TDev.AST {
         public diffStatus:number;
         public diffAltDecl:Decl;
         public isExternal: boolean;
-        public nameHolder = new DeclNameHolder();
+        public nameHolder: DeclNameHolder;
         
         constructor() {
-            super()
+            super();
+            this.nameHolder = new DeclNameHolder(this);
         }
 
         public getCoreName() { return this.nameHolder.getName(); }
