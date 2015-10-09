@@ -15,7 +15,37 @@ var clone = td.clone;
 
 
 var logger: td.AppLogger;
-var httpStatus: IHTTPStatusCodes;
+var httpStatus = {
+    _200OK: 200,
+    _201Created: 201,
+    _300MultipleChoices: 300,
+    _301MovedPermanently: 301,
+    _302MovedTemporarily: 302,
+    _303SeeOther: 303,
+    _304NotModified: 304,
+    _307TemporaryRedirect: 307,
+    _400BadRequest: 400,
+    _401Unauthorized: 401,
+    _402PaymentRequired: 402,
+    _403Forbidden: 403,
+    _404NotFound: 404,
+    _405MethodNotAllowed: 405,
+    _408RequestTimeout: 408,
+    _409Conflict: 409,
+    _410Gone: 410,
+    _412PreconditionFailed: 412,
+    _413RequestEntityTooLarge: 413,
+    _415UnsupportedMediaType: 415,
+    _418ImATeapot: 418,
+    _422UnprocessableEntity: 422,
+    _423Locked: 423,
+    _424FailedDependency: 424,
+    _425UnorderedCollection: 425,
+    _429TooManyRequests: 429,
+    _500InternalServerError: 500,
+    _501NotImplemented: 501,
+    _503ServiceUnavailable: 503,
+};
 
 var restify = require('restify');
 var domain = require('domain');
@@ -549,38 +579,6 @@ export interface ISendOptions {
     status?: number;
 }
 
-export interface IHTTPStatusCodes {
-    _200OK?: number;
-    _201Created?: number;
-    _300MultipleChoices?: number;
-    _301MovedPermanently?: number;
-    _302MovedTemporarily?: number;
-    _303SeeOther?: number;
-    _304NotModified?: number;
-    _307TemporaryRedirect?: number;
-    _400BadRequest?: number;
-    _401Unauthorized?: number;
-    _402PaymentRequired?: number;
-    _403Forbidden?: number;
-    _404NotFound?: number;
-    _405MethodNotAllowed?: number;
-    _408RequestTimeout?: number;
-    _409Conflict?: number;
-    _410Gone?: number;
-    _412PreconditionFailed?: number;
-    _413RequestEntityTooLarge?: number;
-    _415UnsupportedMediaType?: number;
-    _418ImATeapot?: number;
-    _422UnprocessableEntity?: number;
-    _423Locked?: number;
-    _424FailedDependency?: number;
-    _425UnorderedCollection?: number;
-    _429TooManyRequests?: number;
-    _500InternalServerError?: number;
-    _501NotImplemented?: number;
-    _503ServiceUnavailable?: number;
-}
-
 
 function example() : void
 {
@@ -619,36 +617,6 @@ function init() : void
     if (logger == null) {
         logger = td.createLogger("restify");
         initProxy(logger);
-        httpStatus = {};
-        httpStatus._200OK = 200;
-        httpStatus._201Created = 201;
-        httpStatus._300MultipleChoices = 300;
-        httpStatus._301MovedPermanently = 301;
-        httpStatus._302MovedTemporarily = 302;
-        httpStatus._303SeeOther = 303;
-        httpStatus._304NotModified = 304;
-        httpStatus._307TemporaryRedirect = 307;
-        httpStatus._400BadRequest = 400;
-        httpStatus._401Unauthorized = 401;
-        httpStatus._402PaymentRequired = 402;
-        httpStatus._403Forbidden = 403;
-        httpStatus._404NotFound = 404;
-        httpStatus._405MethodNotAllowed = 405;
-        httpStatus._408RequestTimeout = 408;
-        httpStatus._409Conflict = 409;
-        httpStatus._410Gone = 410;
-        httpStatus._412PreconditionFailed = 412;
-        httpStatus._413RequestEntityTooLarge = 413;
-        httpStatus._415UnsupportedMediaType = 415;
-        httpStatus._418ImATeapot = 418;
-        httpStatus._422UnprocessableEntity = 422;
-        httpStatus._423Locked = 423;
-        httpStatus._424FailedDependency = 424;
-        httpStatus._425UnorderedCollection = 425;
-        httpStatus._429TooManyRequests = 429;
-        httpStatus._500InternalServerError = 500;
-        httpStatus._501NotImplemented = 501;
-        httpStatus._503ServiceUnavailable = 503;
     }
 }
 
@@ -842,9 +810,8 @@ export function sanitizePath() : Middleware
 /**
  * Interesting HTTP status codes.
  */
-export function http() : IHTTPStatusCodes
+export function http()
 {
-    init();
     return httpStatus;
 }
 

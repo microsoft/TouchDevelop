@@ -40,7 +40,7 @@ export var cachedApiContainer: cachedStore.Container;
 export var emptyRequest: ApiRequest;
 export var fullTD: boolean = false;
 export var hasHttps: boolean = false;
-export var httpCode: restify.IHTTPStatusCodes;
+export var httpCode = restify.http();
 export var lastSearchReport: Date;
 export var myChannel: string = "";
 export var myHost: string = "";
@@ -1687,6 +1687,5 @@ export async function initFinalAsync()
     self = td.serverSetting("SELF", false).toLowerCase();
     myHost = (/^https?:\/\/([^\/]+)/.exec(self) || [])[1].toLowerCase();
     nonSelfRedirect = orEmpty(td.serverSetting("NON_SELF_REDIRECT", true));
-    httpCode = restify.http();    
 }
 

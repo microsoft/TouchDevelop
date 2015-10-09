@@ -52,7 +52,7 @@ var reinit = false;
 var rewriteVersion: number = 221;
 
 var logger: td.AppLogger;
-var httpCode: restify.IHTTPStatusCodes;
+var httpCode = restify.http();
 var installSlotsTable: azureTable.Table;
 var workspaceContainer: cachedStore.Container[];
 var scripts: indexedStore.Store;
@@ -1448,7 +1448,6 @@ async function _initAsync() : Promise<void>
 
     core.somePubStore = scripts;
 
-    httpCode = restify.http();    
     let server = restify.server();
     server.use(restify.bodyParser());
     server.use(restify.queryParser());
