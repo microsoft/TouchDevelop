@@ -1689,3 +1689,18 @@ export async function initFinalAsync()
     nonSelfRedirect = orEmpty(td.serverSetting("NON_SELF_REDIRECT", true));
 }
 
+export function removeDerivedProperties(body: JsonObject) : JsonObject
+{
+    let body2: JsonObject;
+    let jsb2 = clone(body);
+    for (let fld of ["username", "url"]) {
+        jsb2[fld] = "";
+    }
+    for (let fld2 of ["userscore", "positivereviews", "comments", "subscribers"]) {
+        jsb2[fld2] = 0;
+    }
+    body = clone(jsb2);
+    body2 = body;
+    return body2;
+}
+
