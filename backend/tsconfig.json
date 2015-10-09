@@ -36,6 +36,7 @@
         "src/tdlite-search.ts",
         "src/test-service.ts",
         "src/tdlite-data.ts",
+        "src/tdlite-core.ts",
         "src/tdlite.ts",
         "src/remote.ts"        
     ],
