@@ -2042,13 +2042,13 @@ module TDev
                 this.goToHubAsync().done();
         }
 
-        private currentCompilationModalDialog;
+        private currentCompilationModalDialog: ModalDialog;
 
         private showCompilationDialog(hideOption: boolean) {
             var hideKey = "compileDialogHide";
             this.currentCompilationModalDialog = new ModalDialog();
             if (hideOption && !!window.localStorage.getItem(hideKey)) {
-                if (this.currentCompilationModalDialog)
+                if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
                 return;
@@ -2074,7 +2074,9 @@ module TDev
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
-                    if (this.currentCompilationModalDialog) this.currentCompilationModalDialog.dismiss();
+                    if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
+                            this.currentCompilationModalDialog.dismiss();
+                    this.currentCompilationModalDialog = undefined;
                     if (this.stepTutorial) this.stepTutorial.notify("compile");
                 })
         }
