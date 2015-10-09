@@ -7718,6 +7718,7 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
     let batch = tdliteSearch.createPubsUpdate();
     let fetchResult = store.singleFetchResult(json);
     fetchResult.items = json;
+     
     await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
     let fieldname = "id";
     let isPtr = store.kind == "pointer";
@@ -7735,8 +7736,8 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
             }
             
             return true;            
-        })
-        let coll = fetchResult.items.map<string>(elt => orEmpty(elt["pub"][fieldname])).filter(elt1 => elt1 != "");
+        })        
+        let coll = fetchResult.items.map<string>(elt => orEmpty(elt[fieldname])).filter(elt1 => elt1 != "");
         let bodies = {};
         let entries = await scriptText.getManyAsync(coll);
         for (let js2 of entries) {
@@ -7744,8 +7745,26 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
                 bodies[js2["id"]] = js2["text"];
             }
         }
+                
+        if (isPtr) {
+            let pointedScripts = {};        
+            let scrids = fetchResult.items.map<string>(elt => orEmpty(elt["scriptid"])).filter(elt1 => elt1 != "");
+            for (let js of await pubsContainer.getManyAsync(scrids)) {
+                pointedScripts[js["id"]] = js;
+            }
+            for (let ptr of fetchResult.items) {
+                let sid = ptr["scriptid"]
+                if (sid && pointedScripts.hasOwnProperty(sid)) {
+                    let scrpub = pointedScripts[sid];
+                    for (let fld of ["name", "description"]) {
+                        ptr[fld] = scrpub["pub"][fld];
+                    }
+                }
+            }
+        }    
+        
         for (let pub of fetchResult.items) {
-            let body = orEmpty(bodies[orEmpty(pub[fieldname])]);
+            let body = orEmpty(bodies[orEmpty(pub[fieldname])]);            
             let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
             req.response["itemsReindexed"]++;
             entry.upsertPub(batch);
@@ -9009,18 +9028,27 @@ async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOpti
     await (<DecoratedStore><any>store).myResolve(fetchResult, adminRequest);
     let pub = fetchResult.items[0];
     let body = orEmpty(withDefault(pub["text"], obj["text"]));
+    
     if (body == "" && store.kind == "script") {
         let entry2 = await scriptText.getAsync(pub["id"]);
         if (entry2 != null) {
             body = entry2["text"];
         }
     }
-    if (store.kind == "pointer") {
+    
+    if (store.kind == "pointer") {         
         let scrid = orEmpty(pub["scriptid"]);
-        if (scrid != "") {
+        if (scrid != "") {            
             let entry21 = await scriptText.getAsync(scrid);
             if (entry21 != null) {
                 body = entry21["text"];
+            }
+            // for script pointers, we use the data from script for search
+            let scrpub = await getPubAsync(scrid, "script"); 
+            if (scrpub) {
+                for (let fld of ["name", "description"]) {
+                    pub[fld] = scrpub["pub"][fld];     
+                }
             }
         }
     }
