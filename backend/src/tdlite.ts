@@ -1353,6 +1353,7 @@ export class PubPointer
     @json public artcontainer: string = "";
     @json public parentpath: string = "";
     @json public scriptname: string = "";
+    @json public scriptdescription: string = "";
     @json public breadcrumbtitle: string = "";
     static createFromJson(o:JsonObject) { let r = new PubPointer(); r.fromJson(o); return r; }
 }
@@ -7747,10 +7748,11 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
         }
                 
         if (isPtr) {
-            let pointedScripts = {};        
+            let pointedScripts = {};
             let scrids = fetchResult.items.map<string>(elt => orEmpty(elt["scriptid"])).filter(elt1 => elt1 != "");
             for (let js of await pubsContainer.getManyAsync(scrids)) {
-                pointedScripts[js["id"]] = js;
+                if (isGoodPub(js, "script"))
+                    pointedScripts[js["id"]] = js;
             }
             for (let ptr of fetchResult.items) {
                 let sid = ptr["scriptid"]
@@ -7760,8 +7762,9 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
                         ptr[fld] = scrpub["pub"][fld];
                     }
                 }
+                ptr["name"] = ptr["path"] + " " + ptr["name"]
             }
-        }    
+        }
         
         for (let pub of fetchResult.items) {
             let body = orEmpty(bodies[orEmpty(pub[fieldname])]);            
@@ -8048,12 +8051,14 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
     setFields(pub, body, ["description", "scriptid", "redirect", "artid", "artcontainer"]);
     pub["parentpath"] = "";
     pub["scriptname"] = "";
+    pub["scriptdescription"] = "";
     let sid = await getPubAsync(pub["scriptid"], "script");
     if (sid == null) {
         pub["scriptid"] = "";
     }
     else {
         pub["scriptname"] = sid["pub"]["name"];
+        pub["scriptdescription"] = sid["pub"]["description"];
         await pubsContainer.updateAsync(sid["id"], async (entry: JsonBuilder) => {
             entry["lastPointer"] = pub["id"];
         });
@@ -9048,8 +9053,9 @@ async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOpti
             if (scrpub) {
                 for (let fld of ["name", "description"]) {
                     pub[fld] = scrpub["pub"][fld];     
-                }
-            }
+                }                
+            }            
+            pub["name"] = pub["path"] + " " + pub["name"]
         }
     }
     // ## search
