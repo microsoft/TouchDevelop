@@ -698,3 +698,15 @@ export async function initAsync() : Promise<void>
     });
 }
 
+
+async function clearScriptCountsAsync(script: PubScript) : Promise<void>
+{
+    script.screenshots = 0;
+    script.comments = 0;
+    await core.pubsContainer.updateAsync(script.id, async (entry: JsonBuilder) => {
+        entry["pub"]["screenshots"] = 0;
+        entry["pub"]["comments"] = 0;
+    });
+}
+
+

@@ -117,111 +117,6 @@ var initialApprovals: boolean = false;
 
 var settingsOptionsJson = tdliteData.settingsOptionsJson;
 
-
-
-export class PubScript
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public baseid: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public icon: string = "";
-    @json public iconbackground: string = "";
-    @json public iconurl: string = "";
-    @json public positivereviews: number = 0;
-    @json public cumulativepositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
-    @json public screenshots: number = 0;
-    @json public platforms: string[];
-    @json public capabilities: string[];
-    @json public flows: string[];
-    @json public haserrors: boolean = false;
-    @json public rootid: string = "";
-    @json public updateid: string = "";
-    @json public updatetime: number = 0;
-    @json public ishidden: boolean = false;
-    @json public islibrary: boolean = false;
-    @json public userplatform: string[];
-    @json public installations: number = 0;
-    @json public runs: number = 0;
-    @json public art: number = 0;
-    @json public toptagids: string[];
-    @json public screenshotthumburl: string = "";
-    @json public screenshoturl: string = "";
-    @json public mergeids: string[];
-    @json public editor: string = "";
-    @json public meta: JsonObject;
-    @json public iconArtId: string = "";
-    @json public splashArtId: string = "";
-    @json public raw: string = "";
-    @json public scripthash: string = "";
-    @json public sourceid: string = "";
-    @json public updateroot: string = "";
-    @json public unmoderated: boolean = false;
-    @json public noexternallinks: boolean = false;
-    @json public promo: JsonObject;
-    static createFromJson(o:JsonObject) { let r = new PubScript(); r.fromJson(o); return r; }
-}
-
-export interface IPubScript {
-    kind: string;
-    time: number;
-    id: string;
-    baseid: string;
-    url: string;
-    name: string;
-    description: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    icon: string;
-    iconbackground: string;
-    iconurl: string;
-    positivereviews: number;
-    cumulativepositivereviews: number;
-    subscribers: number;
-    comments: number;
-    screenshots: number;
-    platforms: string[];
-    capabilities: string[];
-    flows: string[];
-    haserrors: boolean;
-    rootid: string;
-    updateid: string;
-    updatetime: number;
-    ishidden: boolean;
-    islibrary: boolean;
-    userplatform: string[];
-    installations: number;
-    runs: number;
-    art: number;
-    toptagids: string[];
-    screenshotthumburl: string;
-    screenshoturl: string;
-    mergeids: string[];
-    editor: string;
-    meta: JsonObject;
-    iconArtId: string;
-    splashArtId: string;
-    raw: string;
-    scripthash: string;
-    sourceid: string;
-    updateroot: string;
-    unmoderated: boolean;
-    noexternallinks: boolean;
-    promo: JsonObject;
-}
-
 export class PubComment
     extends td.JsonRecord
 {
@@ -2017,76 +1912,6 @@ async function buildSettingsAsync(userJson: JsonObject) : Promise<PubUserSetting
 }
 
 
-async function publishScriptAsync(req: core.ApiRequest) : Promise<void>
-{
-    core.progress("start publish, ");
-    let slotJson = await installSlotsTable.getEntityAsync(req.userid, req.argument);
-    let pubVersion = new PubVersion();
-    pubVersion.fromJson(JSON.parse(req.queryOptions["scriptversion"]));
-    if (slotJson == null) {
-        req.status = httpCode._404NotFound;
-    }
-    else if (slotJson["currentBlob"] != pubVersion.baseSnapshot) {
-        req.status = httpCode._409Conflict;
-    }
-
-    if (req.status == 200) {
-        let pubScript = new PubScript();
-        pubScript.userid = req.userid;
-        pubScript.ishidden = orFalse(req.queryOptions["hidden"]);
-        pubScript.unmoderated = ! core.callerHasPermission(req, "adult");
-        let mergeids = req.queryOptions["mergeids"];
-        if (mergeids != null) {
-            pubScript.mergeids = mergeids.split(",");
-        }
-        else {
-            pubScript.mergeids = (<string[]>[]);
-        }
-        let body = await workspaceForUser(req.userid).getAsync(pubVersion.baseSnapshot);
-        pubScript.baseid = orEmpty(body["scriptId"]);
-        req.rootPub = (<JsonObject>null);
-        req.rootId = "";
-        if (pubScript.baseid != "") {
-            let baseJson = await core.getPubAsync(pubScript.baseid, "script");
-            if (baseJson != null) {
-                req.rootPub = baseJson;
-                req.rootId = pubScript.baseid;
-                pubScript.rootid = withDefault(baseJson["pub"]["rootid"], pubScript.baseid);
-            }
-        }
-        pubScript.time = await core.nowSecondsAsync();
-        pubScript.name = withDefault(req.body["name"], "unnamed");
-        pubScript.description = orEmpty(req.body["comment"]);
-        pubScript.icon = orEmpty(req.body["icon"]);
-        pubScript.iconbackground = withDefault(req.body["color"], "#FF7518");
-        pubScript.platforms = orEmpty(req.body["platform"]).split(",");
-        pubScript.islibrary = orEmpty(req.body["isLibrary"]) == "yes";
-        pubScript.userplatform = core.getUserPlatforms(req);
-        pubScript.capabilities = (<string[]>[]);
-        pubScript.flows = (<string[]>[]);
-        pubScript.editor = orEmpty(slotJson["editor"]);
-        pubScript.iconArtId = td.toString(req.body["iconArtId"]);
-        pubScript.splashArtId = td.toString(req.body["splashArtId"]);
-        pubScript.meta = req.body["meta"];
-        if (typeof pubScript.meta != "object" || Array.isArray(pubScript.meta))
-            pubScript.meta = {};
-
-        let jsb = {};
-        jsb["currentBlob"] = pubVersion.baseSnapshot;
-        await tdliteScripts.publishScriptCoreAsync(pubScript, jsb, body["script"], req);
-        // 
-        let slotBuilder = clone(slotJson);
-        slotBuilder["status"] = "published";
-        slotBuilder["scriptId"] = pubScript.id;
-        slotBuilder["userId"] = pubScript.userid;
-        delete slotBuilder["__etag"];
-        let newSlot = clone(slotBuilder);
-        await installSlotsTable.updateEntityAsync(newSlot, "merge");
-
-        req.response = { bodies: [headerFromSlot(newSlot)] };
-    }
-}
-
 async function resolveCommentsAsync(entities: indexedStore.FetchResult) : Promise<void>
 {
     await core.addUsernameEtcAsync(entities);
@@ -3470,17 +3295,6 @@ async function updateScreenshotCountersAsync(screenshot: PubScreenshot) : Promis
 {
     await core.pubsContainer.updateAsync(screenshot.publicationid, async (entry: JsonBuilder) => {
         core.increment(entry, "screenshots", 1);
-    });
-}
-
-
-async function clearScriptCountsAsync(script: PubScript) : Promise<void>
-{
-    script.screenshots = 0;
-    script.comments = 0;
-    await core.pubsContainer.updateAsync(script.id, async (entry: JsonBuilder) => {
-        entry["pub"]["screenshots"] = 0;
-        entry["pub"]["comments"] = 0;
     });
 }
 
@@ -7314,7 +7128,7 @@ export async function getCardInfoAsync(req: core.ApiRequest, pubJson: JsonObject
     if (js3 == null) {
         return {};
     }
-    let scr = PubScript.createFromJson(js3);
+    let scr = tdliteScripts.PubScript.createFromJson(js3);
     let jsb = clone(js3);
     jsb["description"] = scr.description.replace(/#docs/g, "");
     let vimeo = scr.meta["vimeo"];
@@ -7996,7 +7810,7 @@ async function _initPromoAsync() : Promise<void>
             }
             d["all"] = "1";
             if (false) {
-                let pubScript = PubScript.createFromJson(req3.rootPub["pub"]);
+                let pubScript = tdliteScripts.PubScript.createFromJson(req3.rootPub["pub"]);
                 coll.push(pubScript.editor);
                 d[withDefault(pubScript.editor, "touchdevelop")] = "1";
                 if (td.stringContains(pubScript.description, "#docs")) {
@@ -8092,6 +7906,75 @@ async function addGroupApprovalAsync(groupJson: JsonObject, userJson: JsonObject
 }
 
 
+async function publishScriptAsync(req: core.ApiRequest) : Promise<void>
+{
+    core.progress("start publish, ");
+    let slotJson = await installSlotsTable.getEntityAsync(req.userid, req.argument);
+    let pubVersion = new PubVersion();
+    pubVersion.fromJson(JSON.parse(req.queryOptions["scriptversion"]));
+    if (slotJson == null) {
+        req.status = httpCode._404NotFound;
+    }
+    else if (slotJson["currentBlob"] != pubVersion.baseSnapshot) {
+        req.status = httpCode._409Conflict;
+    }
+
+    if (req.status == 200) {
+        let pubScript = new tdliteScripts.PubScript();
+        pubScript.userid = req.userid;
+        pubScript.ishidden = orFalse(req.queryOptions["hidden"]);
+        pubScript.unmoderated = ! core.callerHasPermission(req, "adult");
+        let mergeids = req.queryOptions["mergeids"];
+        if (mergeids != null) {
+            pubScript.mergeids = mergeids.split(",");
+        }
+        else {
+            pubScript.mergeids = (<string[]>[]);
+        }
+        let body = await workspaceForUser(req.userid).getAsync(pubVersion.baseSnapshot);
+        pubScript.baseid = orEmpty(body["scriptId"]);
+        req.rootPub = (<JsonObject>null);
+        req.rootId = "";
+        if (pubScript.baseid != "") {
+            let baseJson = await core.getPubAsync(pubScript.baseid, "script");
+            if (baseJson != null) {
+                req.rootPub = baseJson;
+                req.rootId = pubScript.baseid;
+                pubScript.rootid = withDefault(baseJson["pub"]["rootid"], pubScript.baseid);
+            }
+        }
+        pubScript.time = await core.nowSecondsAsync();
+        pubScript.name = withDefault(req.body["name"], "unnamed");
+        pubScript.description = orEmpty(req.body["comment"]);
+        pubScript.icon = orEmpty(req.body["icon"]);
+        pubScript.iconbackground = withDefault(req.body["color"], "#FF7518");
+        pubScript.platforms = orEmpty(req.body["platform"]).split(",");
+        pubScript.islibrary = orEmpty(req.body["isLibrary"]) == "yes";
+        pubScript.userplatform = core.getUserPlatforms(req);
+        pubScript.capabilities = (<string[]>[]);
+        pubScript.flows = (<string[]>[]);
+        pubScript.editor = orEmpty(slotJson["editor"]);
+        pubScript.iconArtId = td.toString(req.body["iconArtId"]);
+        pubScript.splashArtId = td.toString(req.body["splashArtId"]);
+        pubScript.meta = req.body["meta"];
+        if (typeof pubScript.meta != "object" || Array.isArray(pubScript.meta))
+            pubScript.meta = {};
+
+        let jsb = {};
+        jsb["currentBlob"] = pubVersion.baseSnapshot;
+        await tdliteScripts.publishScriptCoreAsync(pubScript, jsb, body["script"], req);
+        // 
+        let slotBuilder = clone(slotJson);
+        slotBuilder["status"] = "published";
+        slotBuilder["scriptId"] = pubScript.id;
+        slotBuilder["userId"] = pubScript.userid;
+        delete slotBuilder["__etag"];
+        let newSlot = clone(slotBuilder);
+        await installSlotsTable.updateEntityAsync(newSlot, "merge");
+
+        req.response = { bodies: [headerFromSlot(newSlot)] };
+    }
+}
 
 
 
