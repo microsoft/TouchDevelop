@@ -597,6 +597,11 @@ export function toPubEntry(pub: JsonObject, body: string, features: string[], sc
             entry.kind = "docs";
         }
     }
+    
+    if (entry.kind == "pointer") {
+        entry.name = pub["path"] + " " + pub["scriptname"]
+        entry.description = pub["scriptdescription"]
+    }
         
     // specific indexing
     if (entry.kind == "user") {

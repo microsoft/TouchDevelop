@@ -7747,25 +7747,6 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
             }
         }
                 
-        if (isPtr) {
-            let pointedScripts = {};
-            let scrids = fetchResult.items.map<string>(elt => orEmpty(elt["scriptid"])).filter(elt1 => elt1 != "");
-            for (let js of await pubsContainer.getManyAsync(scrids)) {
-                if (isGoodPub(js, "script"))
-                    pointedScripts[js["id"]] = js;
-            }
-            for (let ptr of fetchResult.items) {
-                let sid = ptr["scriptid"]
-                if (sid && pointedScripts.hasOwnProperty(sid)) {
-                    let scrpub = pointedScripts[sid];
-                    for (let fld of ["name", "description"]) {
-                        ptr[fld] = scrpub["pub"][fld];
-                    }
-                }
-                ptr["name"] = ptr["path"] + " " + ptr["name"]
-            }
-        }
-        
         for (let pub of fetchResult.items) {
             let body = orEmpty(bodies[orEmpty(pub[fieldname])]);            
             let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
@@ -9041,23 +9022,6 @@ async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOpti
         }
     }
     
-    if (store.kind == "pointer") {         
-        let scrid = orEmpty(pub["scriptid"]);
-        if (scrid != "") {            
-            let entry21 = await scriptText.getAsync(scrid);
-            if (entry21 != null) {
-                body = entry21["text"];
-            }
-            // for script pointers, we use the data from script for search
-            let scrpub = await getPubAsync(scrid, "script"); 
-            if (scrpub) {
-                for (let fld of ["name", "description"]) {
-                    pub[fld] = scrpub["pub"][fld];     
-                }                
-            }            
-            pub["name"] = pub["path"] + " " + pub["name"]
-        }
-    }
     // ## search
     if ( ! options_.skipSearch) {
         let batch = tdliteSearch.createPubsUpdate();
