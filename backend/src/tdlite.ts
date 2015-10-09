@@ -2089,7 +2089,7 @@ async function publishScriptAsync(req: core.ApiRequest) : Promise<void>
 
 async function resolveCommentsAsync(entities: indexedStore.FetchResult) : Promise<void>
 {
-    await addUsernameEtcAsync(entities);
+    await core.addUsernameEtcAsync(entities);
     let coll = (<PubComment[]>[]);
     for (let jsb of entities.items) {
         let comment = PubComment.createFromJson(jsb["pub"]);
@@ -2133,15 +2133,9 @@ async function postCommentAsync(req: core.ApiRequest) : Promise<void>
     }
 }
 
-export async function addUsernameEtcAsync(entities: indexedStore.FetchResult) : Promise<void>
-{
-    let coll = await addUsernameEtcCoreAsync(entities.items);
-    entities.items = td.arrayToJson(coll);
-}
-
 async function resolveReviewsAsync(entities: indexedStore.FetchResult) : Promise<void>
 {
-    await addUsernameEtcAsync(entities);
+    await core.addUsernameEtcAsync(entities);
     let coll = (<PubReview[]>[]);
     for (let jsb of entities.items) {
         let review = PubReview.createFromJson(jsb["pub"]);
@@ -2211,7 +2205,7 @@ async function postReviewAsync(req: core.ApiRequest) : Promise<void>
 
 async function resolveArtAsync(entities: indexedStore.FetchResult, req: core.ApiRequest) : Promise<void>
 {
-    await addUsernameEtcAsync(entities);
+    await core.addUsernameEtcAsync(entities);
     let coll = (<PubArt[]>[]);
 
     for (let jsb of entities.items) {
@@ -2570,7 +2564,7 @@ async function _initGroupsAsync() : Promise<void>
             fetchResult.items = ([]);
             return;
         }
-        await addUsernameEtcAsync(fetchResult);
+        await core.addUsernameEtcAsync(fetchResult);
         let coll = (<PubGroup[]>[]);
         let grps = apiRequest.userinfo.json["groups"];
         for (let jsb of fetchResult.items) {
@@ -3456,7 +3450,7 @@ function _initImport() : void
 
 async function resolveScreenshotAsync(entities: indexedStore.FetchResult, req: core.ApiRequest) : Promise<void>
 {
-    await addUsernameEtcAsync(entities);
+    await core.addUsernameEtcAsync(entities);
     let coll = (<PubScreenshot[]>[]);
     for (let js of entities.items) {
         let screenshot = PubScreenshot.createFromJson(js["pub"]);
@@ -3984,7 +3978,7 @@ async function _initReleasesAsync() : Promise<void>
 
     releases = await indexedStore.createStoreAsync(core.pubsContainer, "release");
     await core.setResolveAsync(releases, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        await addUsernameEtcAsync(fetchResult);
+        await core.addUsernameEtcAsync(fetchResult);
         let coll = (<PubRelease[]>[]);
         let labels = <IReleaseLabel[]>[];
         let entry3 = await settingsContainer.getAsync("releases");
@@ -5157,7 +5151,7 @@ async function _initAbusereportsAsync() : Promise<void>
     abuseReports = await indexedStore.createStoreAsync(core.pubsContainer, "abusereport");
     await core.setResolveAsync(abuseReports, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         let users = await core.followPubIdsAsync(fetchResult.items, "publicationuserid", "");
-        let withUsers = await addUsernameEtcCoreAsync(fetchResult.items);
+        let withUsers = await core.addUsernameEtcCoreAsync(fetchResult.items);
         let coll = (<PubAbusereport[]>[]);
         let x = 0;
         for (let jsb of withUsers) {
@@ -5725,7 +5719,7 @@ async function _initChannelsAsync() : Promise<void>
 {
     channels = await indexedStore.createStoreAsync(core.pubsContainer, "channel");
     await core.setResolveAsync(channels, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        await addUsernameEtcAsync(fetchResult);
+        await core.addUsernameEtcAsync(fetchResult);
         let coll = (<PubChannel[]>[]);
         for (let jsb of fetchResult.items) {
             let grp = PubChannel.createFromJson(jsb["pub"]);
@@ -6019,40 +6013,13 @@ function searchIndexArt(pub: PubArt) : tdliteSearch.ArtEntry
     return entry;
 }
 
-async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<JsonBuilder[]>
-{
-    let coll2: JsonBuilder[];
-    let users = await core.followPubIdsAsync(entities, "userid", "");
-    coll2 = (<JsonBuilder[]>[]);
-    for (let i = 0; i < entities.length; i++) {
-        let userJs = users[i];
-        let user = new PubUser();
-        let root = clone(entities[i]);
-        coll2.push(root);
-        if (userJs != null) {
-            user.fromJson(userJs["pub"]);
-            root["*userid"] = userJs;
-        }
-        let pub = root["pub"];
-        pub["id"] = root["id"];
-        pub["kind"] = root["kind"];
-        pub["userhaspicture"] = user.haspicture;
-        pub["username"] = user.name;
-        pub["userscore"] = user.score;
-        if ( ! core.fullTD) {
-            pub["userplatform"] = ([]);
-        }
-    }
-    return coll2;
-}
-
 async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
 {
     if (disableSearch) {
         return;
     }
     let batch = tdliteSearch.createArtUpdate();
-    let coll2 = await addUsernameEtcCoreAsync(arts.singleFetchResult(clone(obj)).items);
+    let coll2 = await core.addUsernameEtcCoreAsync(arts.singleFetchResult(clone(obj)).items);
     let pub = PubArt.createFromJson(clone(coll2[0]["pub"]));
     searchIndexArt(pub).upsertArt(batch);
     /* async */ batch.sendAsync();
@@ -6106,7 +6073,7 @@ function _initSearch() : void
             await tdliteSearch.clearArtIndexAsync();
             /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
                 let batch = tdliteSearch.createArtUpdate();
-                for (let js of await addUsernameEtcCoreAsync(json)) {
+                for (let js of await core.addUsernameEtcCoreAsync(json)) {
                     let pub = PubArt.createFromJson(clone(js["pub"]));
                     searchIndexArt(pub).upsertArt(batch);
                 }
@@ -6281,7 +6248,7 @@ async function _initPointersAsync() : Promise<void>
     // TODO cache compiler queries (with ex)
     pointers = await indexedStore.createStoreAsync(core.pubsContainer, "pointer");
     await core.setResolveAsync(pointers, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        await addUsernameEtcAsync(fetchResult);
+        await core.addUsernameEtcAsync(fetchResult);
         let coll = (<PubPointer[]>[]);
         for (let jsb of fetchResult.items) {
             let ptr = PubPointer.createFromJson(jsb["pub"]);

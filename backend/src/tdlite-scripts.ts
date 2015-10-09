@@ -209,7 +209,7 @@ export async function resolveScriptsAsync(entities: indexedStore.FetchResult, re
         }
     }
     // 
-    await main.addUsernameEtcAsync(entities);
+    await core.addUsernameEtcAsync(entities);
     // 
     let seeHidden = core.hasPermission(req.userinfo.json, "global-list");
     let coll = (<PubScript[]>[]);

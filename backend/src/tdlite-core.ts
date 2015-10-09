@@ -1704,3 +1704,36 @@ export function removeDerivedProperties(body: JsonObject) : JsonObject
     return body2;
 }
 
+export async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<JsonBuilder[]>
+{
+    let coll2: JsonBuilder[];
+    let users = await followPubIdsAsync(entities, "userid", "");
+    coll2 = (<JsonBuilder[]>[]);
+    for (let i = 0; i < entities.length; i++) {
+        let userJs:any = users[i];
+        let root = clone(entities[i]);
+        coll2.push(root);
+        if (userJs != null) {
+            root["*userid"] = userJs;
+        } else {
+            userJs = {};
+        }
+        let pub = root["pub"];
+        pub["id"] = root["id"];
+        pub["kind"] = root["kind"];
+        pub["userhaspicture"] = userJs.haspicture;
+        pub["username"] = userJs.name;
+        pub["userscore"] = userJs.score;
+        if ( ! fullTD) {
+            pub["userplatform"] = [];
+        }
+    }
+    return coll2;
+}
+
+export async function addUsernameEtcAsync(entities: indexedStore.FetchResult) : Promise<void>
+{
+    let coll = await addUsernameEtcCoreAsync(entities.items);
+    entities.items = td.arrayToJson(coll);
+}
+
