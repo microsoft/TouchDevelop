@@ -29,6 +29,12 @@ module TDev.RT {
         //? Perform bitwise or (`|` in C)
         export function or_uint32(x:number, y:number):number { return (x | y) >>> 0; }
 
+        //? Perform bitwise and (`&` in C) on signed integers
+        export function and_int32(x:number, y:number):number { return (x & y); }
+
+        //? Perform bitwise or (`|` in C) on signed integers
+        export function or_int32(x:number, y:number):number { return (x | y); }
+
         //? Perform bitwise exclusive or (`^` in C)
         export function xor_uint32(x:number, y:number):number { return (x ^ y) >>> 0; }
 

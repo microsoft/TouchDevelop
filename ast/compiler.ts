@@ -1141,7 +1141,7 @@ module TDev.AST
                     if (astref && astref.isSynthetic)
                         astref = null
                     var inner:JsExpr = new JsInfix(args[0], specApply, args[1])
-                    if (parName == "Number_" && Cloud.isRestricted() && astref && !astref.isShim) {
+                    if (Cloud.isRestricted() && parName == "Number_" && astref && !astref.isShim) {
                         var over = Compiler.restrictedIntOps[propName]
                         if (over) inner = JsCall.direct("lib." + over, [args[0], args[1]])
                     }
@@ -1172,6 +1172,8 @@ module TDev.AST
                     args.push(ctxArg);
                     if (astref && astref.compiledTypeArgs)
                         args.pushRange(astref.compiledTypeArgs)
+                    if (Cloud.isRestricted() && parName == "Bits" && /^(or|and)_uint32$/.test(propName))
+                        propName = propName.replace("uint32", "int32")
                     res = this.newTmpVarOrUnit(rk, "call", JsCall.mk(null, "lib." + parName + "." + propName, args));
                 } else {
                     var th = args.shift();
