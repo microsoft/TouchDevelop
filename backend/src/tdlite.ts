@@ -4029,10 +4029,10 @@ async function _initGroupsAsync() : Promise<void>
                     });
                 }
                 await pubsContainer.updateAsync(gr.id, async (entry8: JsonBuilder) => {
-                    let jsb4 = entry8["approvals"];
-                    let idx = jsonArrayIndexOf(clone(jsb4), req10.rootId);
+                    let approvals:string[] = entry8["approvals"];
+                    let idx = jsonArrayIndexOf(approvals, req10.rootId);
                     if (idx >= 0) {
-                        jsb4.removeAt(idx);
+                        approvals.splice(idx, 1);
                     }
                 });
                 await sendNotificationAsync(entry22, "groupapproved", req10.rootPub);
@@ -10198,7 +10198,7 @@ async function getPromoAsync(req: ApiRequest) : Promise<JsonObject>
     return js3;
 }
 
-function jsonArrayIndexOf(js: JsonObject, id: string) : number
+function jsonArrayIndexOf(js: JsonObject[], id: string) : number
 {
     if (!Array.isArray(js)) {
         return -1;
@@ -10218,17 +10218,17 @@ async function addGroupApprovalAsync(groupJson: JsonObject, userJson: JsonObject
     let grpid = groupJson["id"];
     let userid = userJson["id"];
     await pubsContainer.updateAsync(grpid, async (entry: JsonBuilder) => {
-        let appr = entry["approvals"];
+        let appr:string[] = entry["approvals"];
         if (appr == null) {
-            appr = ([]);
+            appr = [];
             entry["approvals"] = appr;
         }
-        let idx2 = jsonArrayIndexOf(clone(appr), userid);
+        let idx2 = jsonArrayIndexOf(appr, userid);        
         if (idx2 >= 0) {
-            appr.removeAt(idx2);
+            appr.splice(idx2, 1);
         }
         if (appr.length > 200) {
-            appr.removeAt(0);
+            appr.shift();            
         }
         appr.push(userid);
     });
