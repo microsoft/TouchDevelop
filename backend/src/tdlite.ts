@@ -44,6 +44,9 @@ export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
 export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => Promise<void>;
 export type StringTransformer = (text: string) => Promise<string>;
 
+var reinit = false;
+var rewriteVersion: number = 221;
+
 var installSlotsTable: azureTable.Table;
 var logger: td.AppLogger;
 var workspaceContainer: cachedStore.Container[];
@@ -75,7 +78,6 @@ var releases: indexedStore.Store;
 var appContainer: azureBlobStorage.Container;
 var settingsContainer: cachedStore.Container;
 var cacheRewritten: cachedStore.Container;
-var rewriteVersion: number = 221;
 var tokensTable: azureTable.Table;
 var redisClient: redis.Client;
 var filesContainer: azureBlobStorage.Container;
@@ -1463,14 +1465,16 @@ export interface IPubVideo {
     thumb128url: string;
 }
 
-
 async function _initAsync() : Promise<void>
 {
-    let reinit = false;
     logger = td.createLogger("tdlite");
     throttleDisabled = orEmpty(td.serverSetting("DISABLE_THROTTLE", true)) == "true";
     disableSearch = orEmpty(td.serverSetting("DISABLE_SEARCH", true)) == "true";
     myChannel = withDefault(td.serverSetting("TD_BLOB_DEPLOY_CHANNEL", true), "local");
+    if (myChannel == "live" || myChannel == "stage") {
+        // never re-init on production instances
+        reinit = false;
+    }
     deployChannels = withDefault(td.serverSetting("CHANNELS", false), myChannel).split(",");
     templateSuffix = orEmpty(td.serverSetting("TEMPLATE_SUFFIX", true));
     fullTD = false;
@@ -7902,9 +7906,10 @@ async function _initPointersAsync() : Promise<void>
             coll.push(ptr);
         }
         fetchResult.items = td.arrayToJson(coll);
-    }
-    , {
-        byUserid: true
+    },
+    {
+        byUserid: true,
+        anonSearch: true
     });
     addRoute("POST", "pointers", "", async (req: ApiRequest) => {
         await canPostAsync(req, "pointer");
@@ -8378,12 +8383,14 @@ function _initConfig() : void
 async function executeSearchAsync(kind: string, q: string, req: ApiRequest) : Promise<void>
 {
     let query = tdliteSearch.toPubQuery("pubs1", kind, q);
-    let request = azureSearch.createRequest(query.toUrl());
+    query.scoringProfile = "pubs";
+    let qurl = query.toUrl();
+    let request = azureSearch.createRequest(qurl);
     let response = await request.sendAsync();
     let js = response.contentAsJson();
     let ids = (<string[]>[]);
     if (js["value"] == null) {
-        logger.debug("js: " + JSON.stringify(js, null, 2));
+        logger.debug("js: " + qurl + " -> " + JSON.stringify(js, null, 2));
     }
     for (let js2 of js["value"]) {
         ids.push(js2["id"]);

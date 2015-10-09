@@ -461,7 +461,7 @@ async function initPubSearchIndexAsync(noCreate:boolean) : Promise<void>
     profile.setWeight(schema.keyField(), 10);
     profile.setWeight(userid, 10);
     profile.setWeight(username, 30);
-    profile.setWeight(name, 100);
+    profile.setWeight(name, 1000);
     profile.setWeight(description, 50);
     profile.setWeight(body, 5);
     profile.setWeight(hashes, 20);
@@ -643,7 +643,8 @@ export function toPubQuery(index: string, kind: string, text: string) : PubQuery
     query = new PubQuery();
     query.index = index;
     query.kind = kind;
-    query.orderby = "score desc, time desc";
+    // This doesn't seem to work, so no ordering on time
+    // query.orderby = "@search.score desc, time desc";
     query.select = "id,kind,name,score,time";
     query.users = {};
     query.features = {};
@@ -663,7 +664,8 @@ export function toPubQuery(index: string, kind: string, text: string) : PubQuery
         else if (key == "libraries") {
             query.features["libraries"] = (val.toLowerCase().trim() == "true").toString().toLowerCase();
         }
-        else if (key == "scoring") {
+        // don't allow user-override of this    
+        else if (false && key == "scoring") {
             query.scoringProfile = val;
         }
         else if (key == "kind") {
