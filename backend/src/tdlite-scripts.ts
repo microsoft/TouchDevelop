@@ -620,10 +620,6 @@ export async function initAsync() : Promise<void>
     core.addRoute("GET", "*script", "family", async (req13: core.ApiRequest) => {
         await core.anyListAsync(scripts, req13, "rootid", req13.rootPub["pub"]["rootid"]);
     });
-    core.addRoute("GET", "*script", "cardinfo", async (req14: core.ApiRequest) => {
-        let jsb1 = await main.getCardInfoAsync(req14, req14.rootPub);
-        req14.response = clone(jsb1);
-    });
     
     if (false)
     core.addRoute("POST", "admin", "reindexscripts", async (req15: core.ApiRequest) => {
