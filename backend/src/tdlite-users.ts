@@ -26,6 +26,7 @@ import * as nodemailer from "./nodemailer"
 import * as sendgrid from "./sendgrid"
 import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
+import * as search from "./tdlite-search"
 import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
@@ -186,7 +187,7 @@ export async function initAsync() : Promise<void>
                         data: perm
                     });
                 }
-                await main.updateAndUpsertAsync(core.pubsContainer, req1, async (entry1: JsonBuilder) => {
+                await search.updateAndUpsertAsync(core.pubsContainer, req1, async (entry1: JsonBuilder) => {
                     entry1["permissions"] = perm;
                     await sendPermissionNotificationAsync(req1, entry1);
                 });
@@ -196,7 +197,7 @@ export async function initAsync() : Promise<void>
                 await audit.logAsync(req1, "set-credit", {
                     data: credit.toString()
                 });
-                await main.updateAndUpsertAsync(core.pubsContainer, req1, async (entry2: JsonBuilder) => {
+                await search.updateAndUpsertAsync(core.pubsContainer, req1, async (entry2: JsonBuilder) => {
                     entry2["credit"] = credit;
                     entry2["totalcredit"] = credit;
                 });
@@ -495,7 +496,7 @@ export async function initAsync() : Promise<void>
             }
         }
         if (req4.status == 200) {
-            let bld = await main.updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
+            let bld = await search.updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
                 let sett = await buildSettingsAsync(clone(entry));
                 let newEmail = td.toString(req4.body["email"]);
                 if (newEmail != null) {
@@ -813,4 +814,5 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
         }
     }
 }
+
 

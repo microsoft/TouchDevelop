@@ -30,8 +30,6 @@ import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 import * as libratoNode from "./librato-node"
 import * as tdliteIndex from "./tdlite-index"
-import * as azureSearch from "./azure-search"
-import * as acs from "./acs"
 import * as tdliteDocs from "./tdlite-docs"
 import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 import * as microsoftTranslator from "./microsoft-translator"
@@ -40,6 +38,7 @@ import * as tdliteHtml from "./tdlite-html"
 
 import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
+import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteWorkspace from "./tdlite-workspace"
@@ -60,7 +59,7 @@ var httpCode = restify.http();
 
 var comments: indexedStore.Store;
 var reviews: indexedStore.Store;
-var arts: indexedStore.Store;
+export var arts: indexedStore.Store;
 var artContainer: azureBlobStorage.Container;
 var thumbContainers: ThumbContainer[];
 var aacContainer: azureBlobStorage.Container;
@@ -87,15 +86,12 @@ var doctopicsCss: string = "";
 var currClientConfig: ClientConfig;
 var pointers: indexedStore.Store;
 var artContentTypes: JsonObject;
-var disableSearch: boolean = false;
 var deploymentMeta: JsonObject;
 var tdDeployments: azureBlobStorage.Container;
 var mainReleaseName: string = "";
 var mbedCache: boolean = false;
 var faviconIco: Buffer;
 var embedThumbnails: cachedStore.Container;
-var acsCallbackToken: string = "";
-var acsCallbackUrl: string = "";
 var loginHtml: JsonObject;
 var deployChannels: string[];
 var videoContainer: azureBlobStorage.Container;
@@ -843,8 +839,6 @@ async function _initAsync() : Promise<void>
 {
     await core.initAsync();
 
-    disableSearch = orEmpty(td.serverSetting("DISABLE_SEARCH", true)) == "true";
-
     if (core.myChannel == "live" || core.myChannel == "stage") {
         // never re-init on production instances
         reinit = false;
@@ -900,9 +894,6 @@ async function _initAsync() : Promise<void>
     mbedworkshopCompiler.init();
     mbedworkshopCompiler.setVerbosity("debug");
 
-    azureSearch.init({
-        allow_409: true
-    });
     await tdliteIndex.initAsync();
     if (core.hasSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET")) {
         await microsoftTranslator.initAsync("", "");
@@ -918,7 +909,7 @@ async function _initAsync() : Promise<void>
     // cachedStore.getLogger().setVerbosity("info");
 
     core.validateTokenAsync = validateTokenAsync;
-    core.executeSearchAsync = executeSearchAsync;
+    core.executeSearchAsync = search.executeSearchAsync;
 
     await _init_0Async();
 
@@ -938,8 +929,6 @@ async function _initAsync() : Promise<void>
     restify.disableTicks();
     restify.setupShellHooks();
     await restify.startAsync();
-
-    await _initAcsAsync();
 
     server.get("/api/ping", async (req: restify.Request, res: restify.Response) => {
         core.handleHttps(req, res);
@@ -1076,7 +1065,7 @@ async function _init_0Async() : Promise<void>
     _initProgress();
     _initRuntime();
     // ## and other stuff
-    _initSearch();
+    await search.initAsync();
     _initImport();
     await tdliteWorkspace.initAsync();
 }
@@ -1122,7 +1111,7 @@ async function postCommentAsync(req: core.ApiRequest) : Promise<void>
         await comments.insertAsync(jsb);
         await updateCommentCountersAsync(comment);
         await notifications.storeAsync(req, jsb, "");
-        await scanAndSearchAsync(jsb);
+        await search.scanAndSearchAsync(jsb);
         // ### return comment back
         await core.returnOnePubAsync(comments, clone(jsb), req);
     }
@@ -1266,8 +1255,8 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
     if (req.status == 200) {
         await arts.insertAsync(jsb);
         await notifications.storeAsync(req, jsb, "");
-        await upsertArtAsync(jsb);
-        await scanAndSearchAsync(jsb, {
+        await search.upsertArtAsync(jsb);
+        await search.scanAndSearchAsync(jsb, {
             skipSearch: true
         });
         // ### return art back
@@ -1300,7 +1289,7 @@ async function importCommentAsync(req: core.ApiRequest, body: JsonObject) : Prom
     jsb["pub"] = comment.toJson();
     jsb["id"] = comment.id;
     await comments.insertAsync(jsb);
-    await scanAndSearchAsync(jsb, {
+    await search.scanAndSearchAsync(jsb, {
         skipScan: true
     });
     await updateCommentCountersAsync(comment);
@@ -1386,7 +1375,7 @@ async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<
         // 
         if (req.status == 200) {
             await arts.insertAsync(jsb);
-            await upsertArtAsync(jsb);
+            await search.upsertArtAsync(jsb);
             logger.debug("insert OK " + pubArt.id);
         }
     }
@@ -1439,7 +1428,7 @@ async function importGroupAsync(req: core.ApiRequest, body: JsonObject) : Promis
     jsb["pub"] = grp.toJson();
     jsb["id"] = grp.id;
     await groups.insertAsync(jsb);
-    await scanAndSearchAsync(jsb, {
+    await search.scanAndSearchAsync(jsb, {
         skipScan: true
     });
 }
@@ -1587,9 +1576,9 @@ async function _initGroupsAsync() : Promise<void>
             });
             await addUserToGroupAsync(group.userid, clone(jsb1), (<core.ApiRequest>null));
             await notifications.storeAsync(req, jsb1, "");
-            await scanAndSearchAsync(jsb1);
+            await search.scanAndSearchAsync(jsb1);
             // re-fetch user to include new permission
-            await setReqUserIdAsync(req, req.userid);
+            await core.setReqUserIdAsync(req, req.userid);
             await core.returnOnePubAsync(groups, clone(jsb1), req);
         }
     });
@@ -1613,7 +1602,7 @@ async function _initGroupsAsync() : Promise<void>
                 await reindexGroupsAsync(newOwner);
                 await reindexGroupsAsync(req.userinfo.json);
             }
-            await updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
+            await search.updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
                 let group1 = PubGroup.createFromJson(clone(entry["pub"]));
                 setGroupProps(group1, req.body);
                 entry["pub"] = group1.toJson();
@@ -2792,7 +2781,7 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
                 }
             }
             let uid = token2.PartitionKey;
-            await setReqUserIdAsync(req, uid);
+            await core.setReqUserIdAsync(req, uid);
             if (req.status == 200 && orFalse(req.userinfo.json["awaiting"])) {
                 req.status = httpCode._418ImATeapot;
             }
@@ -2801,7 +2790,7 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
                 req.userinfo.ip = rreq.remoteIp();
                 let uid2 = orEmpty(req.queryOptions["userid"]);
                 if (uid2 != "" && core.hasPermission(req.userinfo.json, "root")) {
-                    await setReqUserIdAsync(req, uid2);
+                    await core.setReqUserIdAsync(req, uid2);
                 }
             }
         }
@@ -3465,7 +3454,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                     entry1["pub"].name = username;                    
                     lastx = entry1;
                 });                
-                await scanAndSearchAsync(lastx);
+                await search.scanAndSearchAsync(lastx);
             }
             if ( ! session.termsOk) {
                 inner = "agree";
@@ -4055,14 +4044,14 @@ async function _initChannelsAsync() : Promise<void>
             await core.generateIdAsync(jsb1, 8);
             await channels.insertAsync(jsb1);
             await notifications.storeAsync(req, jsb1, "");
-            await scanAndSearchAsync(jsb1);
+            await search.scanAndSearchAsync(jsb1);
             await core.returnOnePubAsync(channels, clone(jsb1), req);
         }
     });
     core.addRoute("POST", "*channel", "", async (req1: core.ApiRequest) => {
         checkChannelPermission(req1, req1.rootPub);
         if (req1.status == 200) {
-            await updateAndUpsertAsync(core.pubsContainer, req1, async (entry: JsonBuilder) => {
+            await search.updateAndUpsertAsync(core.pubsContainer, req1, async (entry: JsonBuilder) => {
                 let lst1 = PubChannel.createFromJson(clone(entry["pub"]));
                 setChannelProps(lst1, req1.body);
                 entry["pub"] = lst1.toJson();
@@ -4301,44 +4290,6 @@ async function importUserScriptsAsync(resp: RecImportResponse, tdapi: string, id
     }
 }
 
-function searchIndexArt(pub: PubArt) : tdliteIndex.ArtEntry
-{
-    let entry: tdliteIndex.ArtEntry;
-    let tp = "picture";
-    if (! pub.pictureurl) {
-        tp = "sound";
-    }
-    let spr = false;
-    if (pub.flags != null) {
-        spr = pub.flags.indexOf("transparent") >= 0;
-    }
-    entry = tdliteIndex.createArtEntry(pub.id, {
-        name: pub.name,
-        description: pub.description,
-        type: tp,
-        userid: pub.userid,
-        username: pub.username,
-        sprite: spr
-    });
-    return entry;
-}
-
-async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
-{
-    if (disableSearch) {
-        return;
-    }
-    let batch = tdliteIndex.createArtUpdate();
-    let coll2 = await core.addUsernameEtcCoreAsync(arts.singleFetchResult(clone(obj)).items);
-    let pub = PubArt.createFromJson(clone(coll2[0]["pub"]));
-    searchIndexArt(pub).upsertArt(batch);
-    /* async */ batch.sendAsync();
-
-    await scanAndSearchAsync(obj, {
-        skipScan: true
-    });
-}
-
 async function importDoctopicsAsync(req: core.ApiRequest) : Promise<void>
 {
     await cacheCloudCompilerDataAsync(await getCloudRelidAsync(true));
@@ -4359,133 +4310,6 @@ async function importDoctopicsAsync(req: core.ApiRequest) : Promise<void>
         await importRecAsync(resp, ids[x]);
     });
     req.response = resp.toJson();
-}
-
-function _initSearch() : void
-{
-    core.addRoute("GET", "search", "", async (req: core.ApiRequest) => {
-        // this may be a bit too much to ask
-        core.checkPermission(req, "global-list");
-        if (req.status == 200) {
-            await executeSearchAsync("", orEmpty(req.queryOptions["q"]), req);
-        }
-    });
-    core.addRoute("POST", "search", "reindexdocs", async (req1: core.ApiRequest) => {
-        core.checkPermission(req1, "operator");
-        if (req1.status == 200) {
-            // /* async */ tdliteIndex.indexDocsAsync();
-            req1.response = ({});
-        }
-    });
-    core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
-        core.checkPermission(req2, "operator");
-        if (req2.status == 200) {
-            await tdliteIndex.clearArtIndexAsync();
-            /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
-                let batch = tdliteIndex.createArtUpdate();
-                for (let js of await core.addUsernameEtcCoreAsync(json)) {
-                    let pub = PubArt.createFromJson(clone(js["pub"]));
-                    searchIndexArt(pub).upsertArt(batch);
-                }
-                let statusCode = await batch.sendAsync();
-                logger.debug("reindex art, status: " + statusCode);
-            });
-            req2.status = httpCode._201Created;
-        }
-    });
-    
-    core.addRoute("DELETE", "admin", "searchindex", async (req: core.ApiRequest) => {
-        core.checkPermission(req, "operator");
-        if (req.status == 200) {
-            await tdliteIndex.clearPubIndexAsync();
-            req.response = { msg: "Gone." }            
-        }
-    });
-    
-    core.addRoute("POST", "admin", "reindex", async (req: core.ApiRequest) => {
-        core.checkPermission(req, "operator");
-        if (req.status != 200) return;
-        let store = indexedStore.storeByKind(req.argument);
-        if (!store) {
-            req.status = httpCode._404NotFound;
-            return;
-        }
-        
-        let lst = await store.getIndex("all").fetchAsync("all", req.queryOptions);
-        req.response = {
-            continuation: lst.continuation,
-            itemCount: lst.items.length,
-            itemsReindexed: 0
-        }           
-        await reindexEntriesAsync(store, lst.items, req);
-    });
-}
-
-async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[], req: core.ApiRequest): Promise<void> {
-    let batch = tdliteIndex.createPubsUpdate();
-    let fetchResult = store.singleFetchResult(json);
-    fetchResult.items = json;
-     
-    await core.resolveAsync(store, fetchResult, core.adminRequest);        
-    let fieldname = "id";
-    let isPtr = store.kind == "pointer";
-    if (isPtr) {
-        fieldname = "scriptid";
-    }
-    if (store.kind == "script" || isPtr) {
-        fetchResult.items = fetchResult.items.filter(pub => {
-            if (pub["updateroot"] && pub["updateid"] != pub["id"]) {
-                // only insert the latest version
-                return false;
-            }
-            if (pub["ishidden"]) {
-                return false; // always skip hidden scripts
-            }
-            
-            return true;            
-        })        
-        let coll = fetchResult.items.map<string>(elt => orEmpty(elt[fieldname])).filter(elt1 => elt1 != "");
-        let bodies = {};
-        let entries = await tdliteScripts.scriptText.getManyAsync(coll);
-        for (let js2 of entries) {
-            if (js2.hasOwnProperty("id")) {
-                bodies[js2["id"]] = js2["text"];
-            }
-        }
-                
-        for (let pub of fetchResult.items) {
-            let body = orEmpty(bodies[orEmpty(pub[fieldname])]);            
-            let entry = tdliteIndex.toPubEntry(pub, body, pubFeatures(pub), 0);
-            req.response["itemsReindexed"]++;
-            entry.upsertPub(batch);
-        }
-    }
-    else {
-        for (let pub1 of fetchResult.items) {
-            let entry2 = tdliteIndex.toPubEntry(pub1, withDefault(pub1["text"], ""), pubFeatures(pub1), 0);
-            req.response["itemsReindexed"]++;
-            entry2.upsertPub(batch);
-        }
-    }
-    if (batch.actionCount() > 0) {
-        let statusCode = await batch.sendAsync();
-        logger.debug("reindex pubs, status: " + statusCode);
-    }
-}
-
-/**
- * {action:ignoreReturn}
- */
-export async function updateAndUpsertAsync(container: cachedStore.Container, req: core.ApiRequest, update:td.Action1<JsonBuilder>) : Promise<JsonBuilder>
-{
-    let bld: JsonBuilder;
-    let last = {}
-    await container.updateAsync(req.rootId, async (entry: JsonBuilder) => {
-        await update(entry);
-        last = entry;
-    });
-    await scanAndSearchAsync(last);
-    return last;
 }
 
 async function cacheCloudCompilerDataAsync(ver: string) : Promise<void>
@@ -4614,7 +4438,7 @@ async function _initPointersAsync() : Promise<void>
                     await setPointerPropsAsync(jsb1, body);
                     await pointers.insertAsync(jsb1);
                     await notifications.storeAsync(req, jsb1, "");
-                    await scanAndSearchAsync(jsb1);
+                    await search.scanAndSearchAsync(jsb1);
                     await clearPtrCacheAsync(ptr1.id);
                     await audit.logAsync(req, "post-ptr", {
                         newvalue: clone(jsb1)
@@ -4754,7 +4578,7 @@ async function updatePointerAsync(req: core.ApiRequest) : Promise<void>
         }
     }
     if (req.status == 200) {
-        let bld = await updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
+        let bld = await search.updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
             await setPointerPropsAsync(entry, req.body);
         });
         await audit.logAsync(req, "update-ptr", {
@@ -4992,55 +4816,6 @@ function _initConfig() : void
     });
 }
 
-async function executeSearchAsync(kind: string, q: string, req: core.ApiRequest) : Promise<void>
-{
-    let query = tdliteIndex.toPubQuery("pubs1", kind, q);
-    query.scoringProfile = "pubs";
-    let qurl = query.toUrl();
-    let request = azureSearch.createRequest(qurl);
-    let response = await request.sendAsync();
-    let js = response.contentAsJson();
-    let ids = (<string[]>[]);
-    if (js["value"] == null) {
-        logger.debug("js: " + qurl + " -> " + JSON.stringify(js, null, 2));
-    }
-    for (let js2 of js["value"]) {
-        ids.push(js2["id"]);
-    }
-    let fetchResult2 = await tdliteScripts.scripts.fetchFromIdListAsync(ids, req.queryOptions);
-    let jsons = asArray(fetchResult2.items);
-    if ( ! core.callerHasPermission(req, "global-list")) {
-        jsons = jsons.filter(elt => core.isAbuseSafe(elt));
-    }
-    let bykind = {};
-    for (let ent of jsons) {
-        let lst = bykind[ent["kind"]];
-        if (lst == null) {
-            lst = ([]);
-            bykind[ent["kind"]] = lst;
-        }
-        lst.push(ent);
-    }
-    let byid = {};
-    for (let knd of Object.keys(bykind)) {
-        fetchResult2.items = bykind[knd];
-        let store = indexedStore.storeByKind(knd);
-        let fld = "id";
-        if (knd == "script") {
-            await tdliteScripts.resolveScriptsAsync(fetchResult2, req, true);
-            fld = "sourceid";
-        }
-        else {
-            await core.resolveAsync(store, fetchResult2, req);
-        }
-        for (let s of fetchResult2.items) {
-            byid[s[fld]] = s;
-        }
-    }
-    fetchResult2.items = td.arrayToJson(ids.map<JsonBuilder>(elt1 => byid[elt1]).filter(elt2 => elt2 != null));
-    core.buildListResponse(fetchResult2, req);
-}
-
 export async function deleteUserAsync(req8:core.ApiRequest)
 {
     await tdliteWorkspace.deleteAllHistoryAsync(req8.rootId, req8);
@@ -5097,18 +4872,6 @@ async function deleteReviewAsync(js: JsonObject) : Promise<boolean>
     return delok2;
 }
 
-
-function pubFeatures(pub: JsonObject) : string[]
-{    
-    let features = <string[]>[];
-    if (pub["kind"] == "script") {
-        if (pub["islibrary"]) {
-            features.push("library");
-        }
-    }
-    return features;
-}
- 
 
 async function _initEmbedThumbnailsAsync() : Promise<void>
 {
@@ -5299,66 +5062,6 @@ function _initProgress() : void
     });
 }
 
-async function _initAcsAsync() : Promise<void>
-{
-    if (false && core.hasSetting("ACS_PASSWORD")) {
-        acsCallbackToken = core.sha256(core.tokenSecret + ":acs");
-        acsCallbackUrl = core.self + "api/acscallback?token=" + acsCallbackToken + "&anon_token=" + encodeURIComponent(core.basicCreds);
-        await acs.initAsync();
-    }
-    core.addRoute("POST", "acscallback", "", async (req: core.ApiRequest) => {
-        if (withDefault(req.queryOptions["token"], "none") == acsCallbackToken) {
-            let jobid = orEmpty(req.body["JobId"]);
-            let results = req.body["Results"];
-            for (let stat of results) {
-                if (stat["Status"] == "3000") {
-                    let pubid = stat["Id"];
-                    if (stat["Safe"]) {
-                        logger.debug("acsok: " + JSON.stringify(stat, null, 2));
-                        await core.pubsContainer.updateAsync(pubid, async (entry: JsonBuilder) => {
-                            entry["acsJobId"] = jobid;
-                        });
-                    }
-                    else {
-                        logger.info("acsflag: " + JSON.stringify(stat, null, 2));
-                        await core.pubsContainer.updateAsync(pubid, async (entry1: JsonBuilder) => {
-                            entry1["acsFlag"] = stat;
-                            entry1["acsJobId"] = jobid;
-                        });
-                        await core.refreshSettingsAsync();
-                        let uid = orEmpty(core.serviceSettings.accounts["acsreport"]);
-                        if (uid != "") {
-                            await setReqUserIdAsync(req, uid);
-                            req.rootPub = await core.pubsContainer.getAsync(pubid);
-                            if (core.isGoodEntry(req.rootPub)) {
-                                let jsb = {};
-                                jsb["text"] = "ACS flagged, policy codes " + JSON.stringify(stat["PolicyCodes"]);
-                                req.body = clone(jsb);
-                                req.rootId = pubid;
-                                await postAbusereportAsync(req);
-                            }
-                        }
-                    }
-                }
-                else {
-                    logger.warning("bad results from ACS: " + JSON.stringify(req.body, null, 2));
-                }
-            }
-            req.response = ({});
-        }
-        else {
-            logger.debug("acs, wrong token: " + JSON.stringify(req.queryOptions));
-            req.status = httpCode._402PaymentRequired;
-        }
-    });
-}
-
-function acsValidatePub(jsb: JsonBuilder) : void
-{
-    if (acsCallbackUrl == "") {
-        return;
-    }
-}
 
 async function simplePointerCacheAsync(urlPath: string, lang: string) : Promise<string>
 {
@@ -5394,7 +5097,7 @@ async function getLoginHtmlAsync(inner: string, lang: string) : Promise<string>
     return text2;
 }
 
-async function postAbusereportAsync(req: core.ApiRequest) : Promise<void>
+export async function postAbusereportAsync(req: core.ApiRequest) : Promise<void>
 {
     let baseKind = req.rootPub["kind"];
     if ( ! canHaveAbuseReport(baseKind)) {
@@ -5426,58 +5129,6 @@ async function postAbusereportAsync(req: core.ApiRequest) : Promise<void>
     }
 }
 
-export interface IScanAndSearchOptions {
-    skipSearch?: boolean;
-    skipScan?: boolean;
-}
-
-export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOptions = {}) : Promise<void>
-{
-    if (disableSearch) {
-        options_.skipSearch = true;
-    }
-    if (acsCallbackUrl == "" || ! canHaveAbuseReport(obj["kind"])) {
-        options_.skipScan = true;
-    }
-    if (options_.skipScan && options_.skipSearch) {
-        return;
-    }
-    logger.debug("inserting pub into search: " + obj["id"]);
-
-    let store = indexedStore.storeByKind(obj["kind"]);
-    let fetchResult = store.singleFetchResult(clone(obj));
-    await core.resolveAsync(store, fetchResult, core.adminRequest);
-    let pub = fetchResult.items[0];
-    let body = orEmpty(withDefault(pub["text"], obj["text"]));
-    
-    if (body == "" && store.kind == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(pub["id"]);
-        if (entry2 != null) {
-            body = entry2["text"];
-        }
-    }
-    
-    // ## search
-    if ( ! options_.skipSearch) {
-        let batch = tdliteIndex.createPubsUpdate();
-        let entry = tdliteIndex.toPubEntry(pub, body, pubFeatures(pub), 0);
-        entry.upsertPub(batch);
-        /* async */ batch.sendAsync();
-    }
-    // ## scan
-    if ( ! options_.skipScan) {
-        let text = body;
-        for (let fldname of ["name", "description", "about", "grade", "school"]) {
-            text = text + " " + orEmpty(pub[fldname]);
-        }
-        /* async */ acs.validateTextAsync(pub["id"], text, acsCallbackUrl);
-        let picurl = orEmpty(pub["pictureurl"]);
-        if (picurl != "") {
-            /* async */ acs.validatePictureAsync(pub["id"], picurl, acsCallbackUrl);
-        }
-    }
-}
-
 function getAuthor(pub: JsonObject) : string
 {
     let author2: string;
@@ -5489,7 +5140,7 @@ function getAuthor(pub: JsonObject) : string
     return author2;
 }
 
-function canHaveAbuseReport(baseKind: string) : boolean
+export function canHaveAbuseReport(baseKind: string) : boolean
 {
     let canAbuse2: boolean;
     let canAbuse = /^(art|comment|script|screenshot|channel|group|user)$/.test(baseKind);
@@ -5613,28 +5264,6 @@ function stripCookie(url2: string) : tdliteUsers.IRedirectAndCookie
         cookie: cook
     }
 }
-
-
-
-async function setReqUserIdAsync(req: core.ApiRequest, uid: string) : Promise<void>
-{
-    let userjs = await core.getPubAsync(uid, "user");
-    if (userjs == null) {
-        req.status = httpCode._401Unauthorized;
-        logger.info("accessing token for deleted user, " + uid);
-    }
-    else {
-        req.userid = uid;
-        req.userinfo.id = uid;
-        req.userinfo.json = userjs;
-        logger.setContextUser(uid);
-    }
-}
-
-
-
-
-
 
 async function handleEmailVerificationAsync(req: restify.Request, res: restify.Response) : Promise<void>
 {

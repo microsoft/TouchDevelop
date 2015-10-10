@@ -22,7 +22,7 @@ import * as cachedStore from "./cached-store"
 import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
 import * as restify from "./restify"
-import * as tdliteSearch from "./tdlite-search"
+import * as tdliteIndex from "./tdlite-index"
 import * as tdliteHtml from "./tdlite-html"
 
 export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
@@ -1652,7 +1652,7 @@ export async function failureReportLoopAsync() : Promise<void>
 
 export async function checkSearchAsync() : Promise<void>
 {
-    let res = await tdliteSearch.statisticsAsync();
+    let res = await tdliteIndex.statisticsAsync();
     lastSearchReport = new Date();
 }
 
@@ -1857,3 +1857,17 @@ export async function deleteAsync(delEntry: JsonObject) : Promise<boolean>
     return delok;
 }
 
+export async function setReqUserIdAsync(req: ApiRequest, uid: string) : Promise<void>
+{
+    let userjs = await getPubAsync(uid, "user");
+    if (userjs == null) {
+        req.status = httpCode._401Unauthorized;
+        logger.info("accessing token for deleted user, " + uid);
+    }
+    else {
+        req.userid = uid;
+        req.userinfo.id = uid;
+        req.userinfo.json = userjs;
+        logger.setContextUser(uid);
+    }
+}

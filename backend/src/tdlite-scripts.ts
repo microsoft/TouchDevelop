@@ -19,6 +19,7 @@ import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
+import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 
 import * as main from "./tdlite"
@@ -428,7 +429,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
             entry["scriptTime"] = updateEntry.time;
         });
     }
-    await main.scanAndSearchAsync(jsb, {
+    await search.scanAndSearchAsync(jsb, {
         skipSearch: pubScript.ishidden,
         skipScan: isImport
     });
