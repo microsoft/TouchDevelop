@@ -1,4 +1,3 @@
-
 /// <reference path='../typings/node/node.d.ts' />
 
 'use strict';
@@ -26,8 +25,6 @@ import * as tdliteUsers from "./tdlite-users"
 
 import * as main from "./tdlite"
 
-var orFalse = core.orFalse;
-var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 var auditStore: indexedStore.Store;
 var auditContainer: cachedStore.Container;

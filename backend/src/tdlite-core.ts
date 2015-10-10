@@ -1841,3 +1841,19 @@ export async function refreshSettingsAsync() : Promise<void>
     }
 }
 
+export async function deleteAsync(delEntry: JsonObject) : Promise<boolean>
+{
+    let delok: boolean;
+    if (delEntry == null || delEntry["kind"] == "reserved") {
+        delok = false;
+    }
+    else {
+        let store = indexedStore.storeByKind(delEntry["kind"]);
+        if (store == null) {
+            store = somePubStore;
+        }
+        delok = await store.deleteAsync(delEntry["id"]);
+    }
+    return delok;
+}
+

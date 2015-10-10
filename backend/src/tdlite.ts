@@ -40,6 +40,7 @@ import * as tdliteHtml from "./tdlite-html"
 
 import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
+import * as notifications from "./tdlite-notifications"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteWorkspace from "./tdlite-workspace"
 import * as tdliteUsers from "./tdlite-users"
@@ -67,8 +68,6 @@ var groups: indexedStore.Store;
 var tags2: indexedStore.Store;
 var screenshots: indexedStore.Store;
 var importRunning: boolean = false;
-var subscriptions: indexedStore.Store;
-var notificationsTable: azureTable.Table;
 var releases: indexedStore.Store;
 var appContainer: azureBlobStorage.Container;
 var cacheRewritten: cachedStore.Container;
@@ -358,66 +357,6 @@ export interface IPubScreenshot {
     publicationkind: string;
     pictureurl: string;
     thumburl: string;
-}
-
-export class PubSubscription
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubSubscription(); r.fromJson(o); return r; }
-}
-
-export interface IPubSubscription {
-    kind: string;
-    time: number;
-    id: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-}
-
-export class PubNotification
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public notificationkind: string = "";
-    @json public userid: string = "";
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public supplementalid: string = "";
-    @json public supplementalkind: string = "";
-    @json public supplementalname: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubNotification(); r.fromJson(o); return r; }
-}
-
-export interface IPubNotification {
-    kind: string;
-    time: number;
-    id: string;
-    notificationkind: string;
-    userid: string;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    supplementalid: string;
-    supplementalkind: string;
-    supplementalname: string;
 }
 
 export class PubRelease
@@ -1080,7 +1019,6 @@ async function _initAsync() : Promise<void>
 
 async function _init_0Async() : Promise<void>
 {
-    let notTableClient = await core.specTableClientAsync("NOTIFICATIONS");
     core.pubsContainer = await cachedStore.createContainerAsync("pubs");
     core.settingsContainer = await cachedStore.createContainerAsync("settings", {
         inMemoryCacheSeconds: 5
@@ -1097,7 +1035,6 @@ async function _init_0Async() : Promise<void>
     await addThumbContainerAsync(128, "thumb");
     await addThumbContainerAsync(512, "thumb1");
     await addThumbContainerAsync(1024, "thumb2");
-    notificationsTable = await notTableClient.createTableIfNotExistsAsync("notifications2");
     appContainer = await core.blobService.createContainerIfNotExistsAsync("app", "hidden");
     filesContainer = await core.blobService.createContainerIfNotExistsAsync("files", "hidden");
     compileContainer = await core.blobService.createContainerIfNotExistsAsync("compile", "hidden");
@@ -1128,7 +1065,7 @@ async function _init_0Async() : Promise<void>
     await _initScreenshotsAsync();
     await _initReviewsAsync();
     await tdliteUsers.initAsync();
-    await _initSubscriptionsAsync();
+    await notifications.initAsync();
     await _initReleasesAsync();
     await _initAbusereportsAsync();
     await _initChannelsAsync();
@@ -1184,7 +1121,7 @@ async function postCommentAsync(req: core.ApiRequest) : Promise<void>
         await core.generateIdAsync(jsb, 10);
         await comments.insertAsync(jsb);
         await updateCommentCountersAsync(comment);
-        await storeNotificationsAsync(req, jsb, "");
+        await notifications.storeAsync(req, jsb, "");
         await scanAndSearchAsync(jsb);
         // ### return comment back
         await core.returnOnePubAsync(comments, clone(jsb), req);
@@ -1252,7 +1189,7 @@ async function postReviewAsync(req: core.ApiRequest) : Promise<void>
         let jsb = await updateReviewCountsAsync(review, pubid, req);
         if (req.status == 200) {
             // ### return heart back
-            await storeNotificationsAsync(req, jsb, "");
+            await notifications.storeAsync(req, jsb, "");
             await core.returnOnePubAsync(reviews, clone(jsb), req);
         }
     }
@@ -1328,7 +1265,7 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
     }
     if (req.status == 200) {
         await arts.insertAsync(jsb);
-        await storeNotificationsAsync(req, jsb, "");
+        await notifications.storeAsync(req, jsb, "");
         await upsertArtAsync(jsb);
         await scanAndSearchAsync(jsb, {
             skipSearch: true
@@ -1649,7 +1586,7 @@ async function _initGroupsAsync() : Promise<void>
                 newvalue: clone(jsb1)
             });
             await addUserToGroupAsync(group.userid, clone(jsb1), (<core.ApiRequest>null));
-            await storeNotificationsAsync(req, jsb1, "");
+            await notifications.storeAsync(req, jsb1, "");
             await scanAndSearchAsync(jsb1);
             // re-fetch user to include new permission
             await setReqUserIdAsync(req, req.userid);
@@ -1919,7 +1856,7 @@ async function _initGroupsAsync() : Promise<void>
                         approvals.splice(idx, 1);
                     }
                 });
-                await sendNotificationAsync(entry22, "groupapproved", req10.rootPub);
+                await notifications.sendAsync(entry22, "groupapproved", req10.rootPub);
             }
             else {
                 core.meOnly(req10);
@@ -1952,7 +1889,7 @@ async function _initGroupsAsync() : Promise<void>
                     req11.status = 404;
                 }
                 else {
-                    let delok = await deleteAsync(entry41);
+                    let delok = await core.deleteAsync(entry41);
                     await core.pubsContainer.updateAsync(req11.rootId, async (entry9: JsonBuilder) => {
                         delete core.setBuilderIfMissing(entry9, "groups")[grid];
                     });
@@ -2223,7 +2160,7 @@ async function postScreenshotAsync(req: core.ApiRequest) : Promise<void>
         if (req.status == 200) {
             await screenshots.insertAsync(jsb);
             await updateScreenshotCountersAsync(screenshot);
-            await storeNotificationsAsync(req, jsb, "");
+            await notifications.storeAsync(req, jsb, "");
             // ### return screenshot
             await core.returnOnePubAsync(screenshots, clone(jsb), req);
         }
@@ -2487,157 +2424,6 @@ async function importDownloadPublicationAsync(id: string, resp: JsonBuilder, col
         else {
             coll2.push(js);
         }
-    }
-}
-
-
-
-async function _initSubscriptionsAsync() : Promise<void>
-{
-    subscriptions = await indexedStore.createStoreAsync(core.pubsContainer, "subscription");
-    await core.setResolveAsync(subscriptions, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        let field = "userid";
-        if (apiRequest.verb == "subscriptions") {
-            field = "publicationid";
-        }
-        let users = await core.followPubIdsAsync(fetchResult.items, field, "user");
-        fetchResult.items = td.arrayToJson(users);
-        tdliteUsers.resolveUsers(fetchResult, apiRequest);
-    }
-    , {
-        byUserid: true,
-        byPublicationid: true
-    });
-    // Note that it logically should be ``subscribers``, but we use ``subscriptions`` for backward compat.
-    core.addRoute("POST", "*user", "subscriptions", async (req: core.ApiRequest) => {
-        await core.canPostAsync(req, "subscription");
-        if (req.status == 200) {
-            await addSubscriptionAsync(req.userid, req.rootId);
-            req.response = ({});
-        }
-    });
-    core.addRoute("DELETE", "*user", "subscriptions", async (req1: core.ApiRequest) => {
-        await core.canPostAsync(req1, "subscription");
-        if (req1.status == 200) {
-            await removeSubscriptionAsync(req1.userid, req1.rootId);
-            req1.response = ({});
-        }
-    });
-    core.addRoute("GET", "*pub", "notifications", async (req2: core.ApiRequest) => {
-        await getNotificationsAsync(req2, false);
-    });
-    core.addRoute("GET", "notifications", "", async (req3: core.ApiRequest) => {
-        req3.rootId = "all";
-        await getNotificationsAsync(req3, false);
-    });
-    core.addRoute("GET", "*pub", "notificationslong", async (req4: core.ApiRequest) => {
-        await getNotificationsAsync(req4, true);
-    });
-    core.addRoute("GET", "notificationslong", "", async (req5: core.ApiRequest) => {
-        req5.rootId = "all";
-        await getNotificationsAsync(req5, true);
-    });
-    core.addRoute("POST", "*user", "notifications", async (req6: core.ApiRequest) => {
-        core.meOnly(req6);
-        if (req6.status == 200) {
-            let resQuery2 = notificationsTable.createQuery().partitionKeyIs(req6.rootId).top(1);
-            let entities2 = await resQuery2.fetchPageAsync();
-            let js = entities2.items[0];
-            let topNot = "";
-            if (js != null) {
-                topNot = js["RowKey"];
-            }
-            let resp = {};
-            resp["lastNotificationId"] = orEmpty(req6.rootPub["lastNotificationId"]);
-            await core.pubsContainer.updateAsync(req6.rootId, async (entry: JsonBuilder) => {
-                entry["lastNotificationId"] = topNot;
-                entry["notifications"] = 0;
-            });
-            req6.response = clone(resp);
-        }
-    });
-}
-
-export async function storeNotificationsAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind: string) : Promise<void>
-{
-    let pub = jsb["pub"];
-    let userid = pub["userid"];
-    let pubkind = pub["kind"];
-    logger.tick("New_" + pubkind);
-    if (pubkind == "abusereport") {
-        userid = pub["publicationuserid"];
-    }
-    let toNotify = {}
-    if (pubkind != "review") {
-        for (let sub of await subscriptions.getIndex("publicationid").fetchAllAsync(userid)) {
-            toNotify[sub["pub"]["userid"]] = "subscribed";
-        }
-        for (let grJson of await getUser_sGroupsAsync(userid)) {
-            let gr = PubGroup.createFromJson(grJson["pub"]);
-            if (gr.isclass && gr.userid != userid) {
-                toNotify[gr.userid] = "class";
-            }
-            if (pubkind != "abusereport") {
-                toNotify[gr.id] = "group";
-            }
-        }
-    }
-    if (req.rootPub != null) {
-        let parentUserid = req.rootPub["pub"]["userid"];
-        let parentKind = req.rootPub["kind"];
-        if (parentUserid != userid) {
-            if (pubkind == "script") {
-                toNotify[parentUserid] = "fork";
-            }
-            else if (pubkind == "comment") {
-                if (parentKind == "comment") {
-                    toNotify[parentUserid] = "reply";
-                }
-                else {
-                    toNotify[parentUserid] = "onmine";
-                }
-            }
-            else {
-                toNotify[parentUserid] = "onmine";
-            }
-        }
-    }
-    toNotify["all"] = "all";
-
-    if (Object.keys(toNotify).length > 0) {
-        let notification = new PubNotification();
-        notification.kind = "notification";
-        notification.id = (await cachedStore.invSeqIdAsync()).toString();
-        notification.time = pub["time"];
-        notification.publicationid = pub["id"];
-        notification.publicationkind = pubkind;
-        notification.publicationname = orEmpty(pub["name"]);
-        if (req.rootPub != null) {
-            notification.supplementalid = req.rootPub["id"];
-            notification.supplementalkind = req.rootPub["kind"];
-            notification.supplementalname = orEmpty(req.rootPub["pub"]["name"]);
-        }
-        notification.userid = userid;
-
-        let jsb2 = clone(notification.toJson());
-        jsb2["RowKey"] = notification.id;
-
-        let ids = Object.keys(toNotify);
-        await parallel.forAsync(ids.length, async (x: number) => {
-            let id = ids[x];
-            let jsb3 = clone(jsb2);
-            jsb3["PartitionKey"] = id;
-            jsb3["notificationkind"] = toNotify[id];
-            await notificationsTable.insertEntityAsync(clone(jsb3), "or merge");
-            if (id != "all") {
-                await core.pubsContainer.updateAsync(id, async (entry: JsonBuilder) => {
-                    let num = orZero(entry["notifications"]);
-                    entry["notifications"] = num + 1;
-                });
-            }
-            await core.pokeSubChannelAsync("notifications:" + id);
-            await core.pokeSubChannelAsync("installed:" + id);
-        });
     }
 }
 
@@ -3642,7 +3428,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                 if (session.userid != "") {
                     let delEntry = await core.getPubAsync(session.userid, "user");
                     if (delEntry != null && ! delEntry["termsversion"] && ! delEntry["permissions"]) {
-                        let delok = await deleteAsync(delEntry);
+                        let delok = await core.deleteAsync(delEntry);
                         await core.pubsContainer.updateAsync(session.userid, async (entry: JsonBuilder) => {
                             entry["settings"] = {};
                             entry["pub"] = {};
@@ -3866,7 +3652,7 @@ async function deletePubRecAsync(delEntry: JsonObject) : Promise<void>
         let delok3 = await deleteReviewAsync(delEntry);
     }
     else {
-        let delok = await deleteAsync(delEntry);
+        let delok = await core.deleteAsync(delEntry);
         if (delok) {
             // TODO handle updateId stuff for scripts
             // TODO delete comments on this publication
@@ -3877,7 +3663,7 @@ async function deletePubRecAsync(delEntry: JsonObject) : Promise<void>
                 let memberships = await groupMemberships.getIndex("publicationid").fetchAllAsync(entryid);
                 await parallel.forJsonAsync(memberships, async (json: JsonObject) => {
                     let uid = json["pub"]["userid"];
-                    let delok2 = await deleteAsync(json);
+                    let delok2 = await core.deleteAsync(json);
                     await core.pubsContainer.updateAsync(uid, async (entry: JsonBuilder) => {
                         delete core.setBuilderIfMissing(entry, "groups")[entryid];
                         delete core.setBuilderIfMissing(entry, "owngroups")[entryid];
@@ -4049,99 +3835,15 @@ export async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
 
 
 
-async function addSubscriptionAsync(follower: string, celebrity: string) : Promise<void>
-{
-    let sub = new PubSubscription();
-    sub.id = "s-" + follower + "-" + celebrity;
-    if (follower != celebrity && await core.getPubAsync(sub.id, "subscription") == null) {
-        sub.userid = follower;
-        sub.time = await core.nowSecondsAsync();
-        sub.publicationid = celebrity;
-        sub.publicationkind = "user";
-        let jsb = {};
-        jsb["pub"] = sub.toJson();
-        jsb["id"] = sub.id;
-        await subscriptions.insertAsync(jsb);
-        await core.pubsContainer.updateAsync(sub.publicationid, async (entry: JsonBuilder) => {
-            core.increment(entry, "subscribers", 1);
-        });
-    }
-}
 
 
-
-
-async function getUser_sGroupsAsync(subjectUserid: string) : Promise<JsonObject[]>
+export async function getUser_sGroupsAsync(subjectUserid: string) : Promise<JsonObject[]>
 {
     let groups: JsonObject[];
     let fetchResult = await groupMemberships.getIndex("userid").fetchAllAsync(subjectUserid);
     groups = await core.followPubIdsAsync(fetchResult, "publicationid", "group");
     return groups;
 }
-
-async function removeSubscriptionAsync(follower: string, celebrity: string) : Promise<void>
-{
-    let subid = "s-" + follower + "-" + celebrity;
-    let entry2 = await core.getPubAsync(subid, "subscription");
-    if (entry2 != null) {
-        let delok = await deleteAsync(entry2);
-        if (delok) {
-            await core.pubsContainer.updateAsync(celebrity, async (entry: JsonBuilder) => {
-                core.increment(entry, "subscribers", -1);
-            });
-        }
-    }
-}
-
-async function deleteAsync(delEntry: JsonObject) : Promise<boolean>
-{
-    let delok: boolean;
-    if (delEntry == null || delEntry["kind"] == "reserved") {
-        delok = false;
-    }
-    else {
-        let store = indexedStore.storeByKind(delEntry["kind"]);
-        if (store == null) {
-            store = core.somePubStore;
-        }
-        delok = await store.deleteAsync(delEntry["id"]);
-    }
-    return delok;
-}
-
-async function getNotificationsAsync(req: core.ApiRequest, long: boolean) : Promise<void>
-{
-    if (req.rootId == "all") {
-        core.checkPermission(req, "global-list");
-    }
-    else if (req.rootPub["kind"] == "group") {
-        let pub = req.rootPub["pub"];
-        if (pub["isclass"]) {
-            let b = req.userinfo.json["groups"].hasOwnProperty(pub["id"]);
-            if ( ! b) {
-                core.checkPermission(req, "global-list");
-            }
-        }
-    }
-    else {
-        core.meOnly(req);
-    }
-    if (req.status != 200) {
-        return;
-    }
-    let v = await core.longPollAsync("notifications:" + req.rootId, long, req);
-    if (req.status == 200) {
-        let resQuery = notificationsTable.createQuery().partitionKeyIs(req.rootId);
-        let entities = await indexedStore.executeTableQueryAsync(resQuery, req.queryOptions);
-        entities.v = v;
-        req.response = entities.toJson();
-    }
-}
-
-
-
-
-
 
 async function tryDeletePubPointerAsync(key: string) : Promise<boolean>
 {
@@ -4157,10 +3859,6 @@ async function tryDeletePubPointerAsync(key: string) : Promise<boolean>
     });
     return ref;
 }
-
-
-
-
 
 function crashAndBurn() : void
 {
@@ -4356,7 +4054,7 @@ async function _initChannelsAsync() : Promise<void>
             jsb1["pub"] = lst.toJson();
             await core.generateIdAsync(jsb1, 8);
             await channels.insertAsync(jsb1);
-            await storeNotificationsAsync(req, jsb1, "");
+            await notifications.storeAsync(req, jsb1, "");
             await scanAndSearchAsync(jsb1);
             await core.returnOnePubAsync(channels, clone(jsb1), req);
         }
@@ -4455,7 +4153,7 @@ async function _initChannelsAsync() : Promise<void>
                 req5.status = 404;
             }
             else {
-                let delok = await deleteAsync(memJson1);
+                let delok = await core.deleteAsync(memJson1);
                 req5.response = ({});
             }
         }
@@ -4915,7 +4613,7 @@ async function _initPointersAsync() : Promise<void>
                     jsb1["pub"] = ptr1.toJson();
                     await setPointerPropsAsync(jsb1, body);
                     await pointers.insertAsync(jsb1);
-                    await storeNotificationsAsync(req, jsb1, "");
+                    await notifications.storeAsync(req, jsb1, "");
                     await scanAndSearchAsync(jsb1);
                     await clearPtrCacheAsync(ptr1.id);
                     await audit.logAsync(req, "post-ptr", {
@@ -5354,7 +5052,7 @@ export async function deleteUserAsync(req8:core.ApiRequest)
     await deleteAllByUserAsync(reviews, req8.rootId, req8);
     // TODO We leave groups alone - rethink.
     // Bugs, releases, etc just stay
-    let delok = await deleteAsync(req8.rootPub);
+    let delok = await core.deleteAsync(req8.rootPub);
     await audit.logAsync(req8, "delete", {
         oldvalue: req8.rootPub
     });
@@ -5384,7 +5082,7 @@ async function deleteReviewAsync(js: JsonObject) : Promise<boolean>
     assert(pubid != "", "");
     let ok2 = await tryDeletePubPointerAsync(js["ptrid"]);
     if (ok2) {
-        let delok = await deleteAsync(js);
+        let delok = await core.deleteAsync(js);
         if (delok) {
             await core.pubsContainer.updateAsync(pubid, async (entry: JsonBuilder) => {
                 core.increment(entry, "positivereviews", -1);
@@ -5723,7 +5421,7 @@ async function postAbusereportAsync(req: core.ApiRequest) : Promise<void>
             }
             entry["abuseStatusPosted"] = "active";
         });
-        await storeNotificationsAsync(req, jsb, "");
+        await notifications.storeAsync(req, jsb, "");
         await core.returnOnePubAsync(abuseReports, clone(jsb), req);
     }
 }
@@ -5962,38 +5660,6 @@ async function handleEmailVerificationAsync(req: restify.Request, res: restify.R
 }
 
 
-export async function sendNotificationAsync(about: JsonObject, notkind: string, suplemental: JsonObject) : Promise<void>
-{
-    let notification = new PubNotification();
-    notification.kind = "notification";
-    notification.id = (await cachedStore.invSeqIdAsync()).toString();
-    let pub = about["pub"];
-    notification.time = pub["time"];
-    notification.publicationid = pub["id"];
-    notification.publicationkind = pub["kind"];
-    notification.publicationname = orEmpty(pub["name"]);
-    notification.userid = pub["userid"];
-    if (notkind == "groupapproved") {
-        notification.userid = suplemental["id"];
-    }
-    notification.notificationkind = notkind;
-    if (suplemental != null) {
-        notification.supplementalid = suplemental["id"];
-        notification.supplementalkind = suplemental["kind"];
-        notification.supplementalname = suplemental["pub"]["name"];
-    }
-    let target = notification.userid;
-    let jsb2 = clone(notification.toJson());
-    jsb2["PartitionKey"] = target;
-    jsb2["RowKey"] = notification.id;
-    await notificationsTable.insertEntityAsync(clone(jsb2), "or merge");
-    await core.pubsContainer.updateAsync(target, async (entry: JsonBuilder) => {
-        core.jsonAdd(entry, "notifications", 1);
-    });
-    await core.pokeSubChannelAsync("notifications:" + target);
-    await core.pokeSubChannelAsync("installed:" + target);
-}
-
 async function _initVimeoAsync() : Promise<void>
 {
     videoStore = await indexedStore.createStoreAsync(core.pubsContainer, "video");
@@ -6011,7 +5677,7 @@ async function _initVimeoAsync() : Promise<void>
     core.addRoute("DELETE", "*video", "", async (req: core.ApiRequest) => {
         core.checkPermission(req, "root-ptr");
         if (req.status == 200) {
-            let delok = await deleteAsync(req.rootPub);
+            let delok = await core.deleteAsync(req.rootPub);
             req.response = ({});
         }
     });
@@ -6416,7 +6082,7 @@ async function addGroupApprovalAsync(groupJson: JsonObject, userJson: JsonObject
         }
         appr.push(userid);
     });
-    await sendNotificationAsync(groupJson, "groupapproval", userJson);
+    await notifications.sendAsync(groupJson, "groupapproval", userJson);
 }
 
 

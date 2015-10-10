@@ -19,6 +19,7 @@ import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
+import * as notifications from "./tdlite-notifications"
 
 import * as main from "./tdlite"
 
@@ -358,7 +359,7 @@ export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuil
         logger.tick("CreateHashDocsScript");
     }
     if ( ! pubScript.ishidden) {
-        await main.storeNotificationsAsync(req, jsb, "");
+        await notifications.storeAsync(req, jsb, "");
         core.progress("publish - notified");
     }
     else {
@@ -565,7 +566,7 @@ export async function initAsync() : Promise<void>
                     entry["pub"]["unmoderated"] = unmod;
                 });
                 if ( ! unmod) {
-                    await main.sendNotificationAsync(req4.rootPub, "moderated", (<JsonObject>null));
+                    await notifications.sendAsync(req4.rootPub, "moderated", (<JsonObject>null));
                 }
                 req4.response = ({});
             }
