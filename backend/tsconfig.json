@@ -46,6 +46,7 @@
         "src/tdlite-art.ts",
         "src/tdlite-vimeo.ts",
         "src/tdlite-groups.ts",
+        "src/tdlite-comments.ts",
         "src/tdlite.ts",
         "src/remote.ts"        
     ],

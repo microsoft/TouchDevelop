@@ -1961,4 +1961,6 @@ export function registerPubKind(desc:IPubKind)
     desc.kind = desc.store.kind;
     assert(!getPubKind(desc.kind))
     pubKinds.push(desc)
+    if (!somePubStore)
+        somePubStore = desc.store;
 }

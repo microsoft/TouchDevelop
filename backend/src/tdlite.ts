@@ -45,6 +45,7 @@ import * as tdliteArt from "./tdlite-art"
 import * as tdliteVimeo from "./tdlite-vimeo"
 import * as tdliteUsers from "./tdlite-users"
 import * as tdliteGroups from "./tdlite-groups"
+import * as tdliteComments from "./tdlite-comments"
 
 var orZero = core.orZero;
 var orFalse = core.orFalse;
@@ -58,7 +59,6 @@ var reinit = false;
 var logger = core.logger;
 var httpCode = restify.http();
 
-var comments: indexedStore.Store;
 var reviews: indexedStore.Store;
 var tags2: indexedStore.Store;
 var importRunning: boolean = false;
@@ -88,53 +88,6 @@ var deployChannels: string[];
 var promosTable: azureTable.Table;
 var templateSuffix: string = "";
 var initialApprovals: boolean = false;
-
-export class PubComment
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public text: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public nestinglevel: number = 0;
-    @json public positivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
-    @json public assignedtoid: string = "";
-    @json public resolved: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubComment(); r.fromJson(o); return r; }
-}
-
-export interface IPubComment {
-    kind: string;
-    time: number;
-    id: string;
-    url: string;
-    text: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    nestinglevel: number;
-    positivereviews: number;
-    subscribers: number;
-    comments: number;
-    assignedtoid: string;
-    resolved: string;
-}
 
 export class PubReview
     extends td.JsonRecord
@@ -663,8 +616,6 @@ async function _initAsync() : Promise<void>
 
     await core.initFinalAsync();
 
-    core.somePubStore = comments;
-
     let server = restify.server();
     server.use(restify.bodyParser());
     server.use(restify.queryParser());
@@ -788,7 +739,7 @@ async function _init_0Async() : Promise<void>
     _initAdmin();
     await tdliteScripts.initAsync();
     await _initPromoAsync();
-    await _initCommentsAsync();
+    await tdliteComments.initAsync()
     await tdliteGroups.initAsync();
     await _initTagsAsync();
     await tdliteArt.initAsync();
@@ -810,52 +761,6 @@ async function _init_0Async() : Promise<void>
     await tdliteWorkspace.initAsync();
 }
 
-
-async function resolveCommentsAsync(entities: indexedStore.FetchResult) : Promise<void>
-{
-    await core.addUsernameEtcAsync(entities);
-    let coll = (<PubComment[]>[]);
-    for (let jsb of entities.items) {
-        let comment = PubComment.createFromJson(jsb["pub"]);
-        coll.push(comment);
-    }
-    entities.items = td.arrayToJson(coll);
-}
-
-
-async function postCommentAsync(req: core.ApiRequest) : Promise<void>
-{
-    let baseKind = req.rootPub["kind"];
-    if ( ! /^(comment|script|group|screenshot|channel)$/.test(baseKind)) {
-        req.status = httpCode._412PreconditionFailed;
-    }
-    else {
-        let comment = new PubComment();
-        comment.text = orEmpty(req.body["text"]);
-        comment.userplatform = core.getUserPlatforms(req);
-        comment.userid = req.userid;
-        comment.time = await core.nowSecondsAsync();
-        comment.publicationid = req.rootId;
-        comment.publicationkind = baseKind;
-        if (baseKind == "comment") {
-            comment.nestinglevel = req.rootPub["pub"]["nestinglevel"] + 1;
-            comment.publicationname = req.rootPub["pub"]["publicationname"];
-        }
-        else {
-            comment.nestinglevel = 0;
-            comment.publicationname = orEmpty(req.rootPub["pub"]["name"]);
-        }
-        let jsb = {};
-        jsb["pub"] = comment.toJson();
-        await core.generateIdAsync(jsb, 10);
-        await comments.insertAsync(jsb);
-        await updateCommentCountersAsync(comment);
-        await notifications.storeAsync(req, jsb, "");
-        await search.scanAndSearchAsync(jsb);
-        // ### return comment back
-        await core.returnOnePubAsync(comments, clone(jsb), req);
-    }
-}
 
 async function resolveReviewsAsync(entities: indexedStore.FetchResult) : Promise<void>
 {
@@ -926,31 +831,6 @@ async function postReviewAsync(req: core.ApiRequest) : Promise<void>
 
 
 
-async function importCommentAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
-{
-    let comment = new PubComment();
-    comment.fromJson(core.removeDerivedProperties(body));
-
-    let jsb = {};
-    jsb["pub"] = comment.toJson();
-    jsb["id"] = comment.id;
-    await comments.insertAsync(jsb);
-    await search.scanAndSearchAsync(jsb, {
-        skipScan: true
-    });
-    await updateCommentCountersAsync(comment);
-}
-
-/**
- * ### update comment count
- */
-async function updateCommentCountersAsync(comment: PubComment) : Promise<void>
-{
-    await core.pubsContainer.updateAsync(comment.publicationid, async (entry: JsonBuilder) => {
-        core.increment(entry, "comments", 1);
-    });
-}
-
 async function importAnythingAsync(req: core.ApiRequest) : Promise<void>
 {
     let coll = asArray(req.body);
@@ -983,35 +863,6 @@ function resolveTags(entities: indexedStore.FetchResult) : void
         coll.push(tag);
     }
     entities.items = td.arrayToJson(coll);
-}
-
-async function _initCommentsAsync() : Promise<void>
-{
-    comments = await indexedStore.createStoreAsync(core.pubsContainer, "comment");
-    await core.setResolveAsync(comments, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        await resolveCommentsAsync(fetchResult);
-    }
-    , {
-        byUserid: true,
-        byPublicationid: true
-    });
-    core.addRoute("POST", "*pub", "comments", async (req: core.ApiRequest) => {
-        await core.canPostAsync(req, "comment");
-        if (req.status == 200) {
-            await postCommentAsync(req);
-        }
-    });
-    core.addRoute("GET", "*pub", "comments", async (req1: core.ApiRequest) => {
-        if (req1.status == 200) {
-            // optimize the no-comments case
-            if (orZero(req1.rootPub["pub"]["comments"]) == 0) {
-                req1.response = ({"continuation":"","items":[],"kind":"list"});
-            }
-            else {
-                await core.anyListAsync(comments, req1, "publicationid", req1.rootId);
-            }
-        }
-    });
 }
 
 async function _initTagsAsync() : Promise<void>
@@ -1236,9 +1087,6 @@ async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
 
         if (kind == "review") {
             await importReviewAsync(apiRequest, js);
-        }
-        else if (kind == "comment") {
-            await importCommentAsync(apiRequest, js);
         }
         else if (kind == "tag") {
             await importTagAsync(apiRequest, js);
@@ -3613,7 +3461,6 @@ export async function deleteUserAsync(req8:core.ApiRequest)
             await deleteAllByUserAsync(pk.store, req8.rootId, req8);
     }
 
-    await deleteAllByUserAsync(comments, req8.rootId, req8);
     await deleteAllByUserAsync(pointers, req8.rootId, req8);
     await deleteAllByUserAsync(reviews, req8.rootId, req8);
 
