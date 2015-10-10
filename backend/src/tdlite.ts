@@ -48,6 +48,7 @@ import * as tdliteReleases from "./tdlite-releases"
 import * as tdliteTdCompiler from "./tdlite-tdcompiler"
 import * as tdlitePointers from "./tdlite-pointers"
 import * as tdliteLogin from "./tdlite-login"
+import * as tdliteImport from "./tdlite-import"
 
 var orZero = core.orZero;
 var orFalse = core.orFalse;
@@ -60,7 +61,6 @@ var reinit = false;
 var logger = core.logger;
 var httpCode = restify.http();
 
-var importRunning: boolean = false;
 var abuseReports: indexedStore.Store;
 var compileContainer: azureBlobStorage.Container;
 var mbedVersion: number = 0;
@@ -471,161 +471,11 @@ async function _init_0Async() : Promise<void>
     _initRuntime();
     // ## and other stuff
     await search.initAsync();
-    _initImport();
+    await tdliteImport.initAsync();
     await tdliteWorkspace.initAsync();
 }
 
 
-
-async function importAnythingAsync(req: core.ApiRequest) : Promise<void>
-{
-    let coll = asArray(req.body);
-    await parallel.forAsync(coll.length, async (x: number) => {
-        let js = coll[x];
-        let apiRequest = await importOneAnythingAsync(js);
-        coll[x] = apiRequest.status;
-    });
-    req.response = td.arrayToJson(coll);
-}
-
-
-function _initImport() : void
-{
-    core.addRoute("GET", "logcrash", "", async (req: core.ApiRequest) => {
-        crashAndBurn();
-    });
-    core.addRoute("GET", "tdtext", "*", async (req1: core.ApiRequest) => {
-        if (/^[a-z]+$/.test(req1.verb)) {
-            let s = await td.downloadTextAsync("https://www.touchdevelop.com/api/" + req1.verb + "/text?original=true");
-            req1.response = s;
-        }
-        else {
-            req1.status = httpCode._400BadRequest;
-        }
-    });
-    core.addRoute("POST", "import", "", async (req2: core.ApiRequest) => {
-        core.checkPermission(req2, "root");
-        if (req2.status == 200) {
-            if (importRunning) {
-                req2.status = httpCode._503ServiceUnavailable;
-            }
-            else {
-                importRunning = true;
-                await importAnythingAsync(req2);
-                importRunning = false;
-            }
-        }
-    });
-    core.addRoute("GET", "importsync", "", async (req5: core.ApiRequest) => {
-        let key = req5.queryOptions["key"];
-        if (key != null && key == td.serverSetting("LOGIN_SECRET", false)) {
-            if (importRunning) {
-                req5.status = httpCode._503ServiceUnavailable;
-            }
-            else {
-                importRunning = true;
-                await importFromPubloggerAsync(req5);
-                importRunning = false;
-            }
-        }
-        else {
-            req5.status = httpCode._402PaymentRequired;
-        }
-    });
-}
-
-async function importFromPubloggerAsync(req: core.ApiRequest) : Promise<void>
-{
-    let entry = await core.pubsContainer.getAsync("cfg-lastsync");
-    let start = 0;
-    if (entry != null) {
-        start = entry["start"];
-    }
-    let resp = {};
-    let coll2 = (<JsonObject[]>[]);
-    let continuation = "&fake=blah";
-    let lastTime = start;
-    while (continuation != "") {
-        logger.info("download from publogger: " + start + " : " + continuation);
-        let js2 = await td.downloadJsonAsync("http://tdpublogger.azurewebsites.net/syncpubs?count=30&start=" + start + continuation);
-        await parallel.forJsonAsync(js2["items"], async (json: JsonObject) => {
-            lastTime = json["notificationtime"];
-            await importDownloadPublicationAsync(json["id"], resp, coll2);
-        });
-        let cont = orEmpty(js2["continuation"]);
-        if (coll2.length > 30 || cont == "") {
-            continuation = "";
-        }
-        else {
-            continuation = "&continuation=" + cont;
-        }
-    }
-    for (let js4 of coll2) {
-        let apiRequest = await importOneAnythingAsync(js4);
-        resp[js4["id"]] = apiRequest.status;
-    }
-    await core.pubsContainer.updateAsync("cfg-lastsync", async (entry1: JsonBuilder) => {
-        let r = orZero(entry1["start"]);
-        entry1["start"] = Math.max(r, lastTime);
-    });
-    req.response = clone(resp);
-}
-
-export async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
-{
-    let apiRequest: core.ApiRequest;
-    let entry = await core.pubsContainer.getAsync(js["id"]);
-    apiRequest = new core.ApiRequest();
-    apiRequest.status = 200;
-    if ( ! core.isGoodEntry(entry)) {
-        let kind = orEmpty(js["kind"])
-        let desc = core.getPubKind(kind)
-
-        if (!desc)
-            apiRequest.status = httpCode._422UnprocessableEntity;
-        else if (desc.importOne)
-            await desc.importOne(apiRequest, js)
-        else
-            apiRequest.status = httpCode._405MethodNotAllowed;
-
-
-        logger.info("import " + kind + " /" + js["id"] + ": " + apiRequest.status);
-    }
-    else {
-        apiRequest.status = httpCode._409Conflict;
-    }
-    return apiRequest;
-}
-
-async function importDownloadPublicationAsync(id: string, resp: JsonBuilder, coll2: JsonObject[]) : Promise<void>
-{
-    let existingEntry = await core.pubsContainer.getAsync(id);
-    if ( ! core.isGoodEntry(existingEntry)) {
-        let url = "https://www.touchdevelop.com/api/" + id;
-        let js = await td.downloadJsonAsync(url);
-        if (js == null) {
-            resp[id] = 404;
-        }
-        else if (js["kind"] == "script") {
-            let jsb = clone(js);
-            if (js["rootid"] != id) {
-                let js3 = await td.downloadJsonAsync(url + "/base");
-                jsb["baseid"] = js3["id"];
-            }
-            else {
-                jsb["baseid"] = "";
-            }
-            let s2 = await td.downloadTextAsync(url + "/text?original=true&ids=true");
-            jsb["text"] = s2;
-            coll2.push(clone(jsb));
-        }
-        else if (/^(runbucket|run|webapp)$/.test(js["kind"])) {
-        }
-        else {
-            coll2.push(js);
-        }
-    }
-}
 
 async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) : Promise<void>
 {
@@ -977,6 +827,9 @@ function crashAndBurn() : void
 
 function _initBugs() : void
 {
+    core.addRoute("GET", "logcrash", "", async (req: core.ApiRequest) => {
+        crashAndBurn();
+    });
     core.addRoute("GET", "bug", "*", async (req: core.ApiRequest) => {
         core.checkPermission(req, "view-bug");
         if (req.status == 200) {
@@ -1822,7 +1675,6 @@ async function _initPromoAsync() : Promise<void>
 
 async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
 {
-    let js3: JsonObject;
     let js2 = req.rootPub["promo"];
     if (js2 == null) {
         let jsb = ({ "tags": [], "priority": 0 });
@@ -1830,10 +1682,9 @@ async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
         if (lastPtr != null) {
             jsb["link"] = "/" + lastPtr["pub"]["path"];
         }
-        js2 = clone(jsb);
+        return jsb;
     }
     return js2;
-    return js3;
 }
 
 

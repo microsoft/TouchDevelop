@@ -26,6 +26,7 @@ import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 import * as tdliteReleases from "./tdlite-releases"
+import * as tdliteImport from "./tdlite-import"
 import * as main from "./tdlite"
 
 var withDefault = core.withDefault;
@@ -39,29 +40,6 @@ var doctopicsByTopicid: JsonObject;
 export var doctopicsCss: string = "";
 var cloudRelid: string = "";
 
-export class RecImportResponse
-    extends td.JsonRecord
-{
-    @json public problems: number = 0;
-    @json public imported: number = 0;
-    @json public present: number = 0;
-    @json public attempts: number = 0;
-    @json public ids: JsonBuilder;
-    @json public force: boolean = false;
-    @json public fulluser: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new RecImportResponse(); r.fromJson(o); return r; }
-}
-
-export interface IRecImportResponse {
-    problems: number;
-    imported: number;
-    present: number;
-    attempts: number;
-    ids: JsonBuilder;
-    force: boolean;
-    fulluser: boolean;
-}
-
 export async function initAsync()
 {
     cacheCompiler = await cachedStore.createContainerAsync("cachecompiler", {
@@ -71,21 +49,6 @@ export async function initAsync()
         core.checkPermission(req4, "root");
         if (req4.status == 200) {
             await importDoctopicsAsync(req4);
-        }
-    });
-    core.addRoute("POST", "recimport", "*", async (req3: core.ApiRequest) => {
-        core.checkPermission(req3, "root");
-        let id = req3.verb;
-        if (req3.status == 200 && ! /^[a-z]+$/.test(id)) {
-            req3.status = httpCode._412PreconditionFailed;
-        }
-        if (req3.status == 200) {
-            let resp = new RecImportResponse();
-            resp.ids = {};
-            resp.force = core.orFalse(req3.queryOptions["force"]);
-            resp.fulluser = core.orFalse(req3.queryOptions["fulluser"]);
-            await importRecAsync(resp, id);
-            req3.response = resp.toJson();
         }
     });
 }
@@ -201,28 +164,6 @@ export async function deployCompileServiceAsync(rel: tdliteReleases.PubRelease, 
     }
 }
 
-async function importDoctopicsAsync(req: core.ApiRequest) : Promise<void>
-{
-    await cacheCloudCompilerDataAsync(await core.getCloudRelidAsync(true));
-    let ids = asArray(doctopics).map<string>(elt => orEmpty(elt["scriptId"])).filter(elt1 => elt1 != "");
-    let fetchResult = await tdliteScripts.scripts.fetchFromIdListAsync(ids, (<JsonObject>null));
-    let jsb = {};
-    for (let s of ids) {
-        jsb[s] = true;
-    }
-    for (let js of fetchResult.items) {
-        delete jsb[js["id"]];
-    }
-
-    let resp = new RecImportResponse();
-    resp.ids = {};
-    ids = Object.keys(jsb);
-    await parallel.forAsync(ids.length, async (x: number) => {
-        await importRecAsync(resp, ids[x]);
-    });
-    req.response = resp.toJson();
-}
-
 export async function cacheCloudCompilerDataAsync(ver: string) : Promise<void>
 {
     if (cloudRelid != ver) {
@@ -236,6 +177,28 @@ export async function cacheCloudCompilerDataAsync(ver: string) : Promise<void>
         doctopicsCss = (await resp2)["css"];
         cloudRelid = ver;
     }
+}
+
+async function importDoctopicsAsync(req: core.ApiRequest) : Promise<void>
+{
+    await cacheCloudCompilerDataAsync(await core.getCloudRelidAsync(true));
+    let ids = asArray(doctopics).map<string>(elt => orEmpty(elt["scriptId"])).filter(elt1 => elt1 != "");
+    let fetchResult = await tdliteScripts.scripts.fetchFromIdListAsync(ids, (<JsonObject>null));
+    let jsb = {};
+    for (let s of ids) {
+        jsb[s] = true;
+    }
+    for (let js of fetchResult.items) {
+        delete jsb[js["id"]];
+    }
+
+    let resp = new tdliteImport.RecImportResponse();
+    resp.ids = {};
+    ids = Object.keys(jsb);
+    await parallel.forAsync(ids.length, async (x: number) => {
+        await tdliteImport.importRecAsync(resp, ids[x]);
+    });
+    req.response = resp.toJson();
 }
 
 function topicLink(doctopic: JsonObject) : string
@@ -275,107 +238,5 @@ function topicList(doctopic: JsonObject, childId: string, childRepl: string) : s
         html = topicList(doctopicsByTopicid[r], doctopic["id"], html);
     }
     return html;
-}
-
-export async function importRecAsync(resp: RecImportResponse, id: string) : Promise<void>
-{
-    resp.attempts += 1;
-    let full = resp.fulluser;
-    resp.fulluser = false;
-
-    if (! id || resp.ids.hasOwnProperty(id)) {
-    }
-    else {
-        resp.ids[id] = 0;
-        let isThere = core.isGoodEntry(await core.pubsContainer.getAsync(id));
-        if (isThere && ! resp.force && ! full) {
-            resp.ids[id] = 409;
-            resp.present += 1;
-        }
-        else {
-            let tdapi = "https://www.touchdevelop.com/api/";
-            let js = await td.downloadJsonAsync(tdapi + id);
-            if (js == null) {
-                resp.problems += 1;
-            }
-            else {
-                let coll = []
-                coll.push(/* async */ importRecAsync(resp, js["userid"]));
-                let kind = js["kind"];
-                if (kind == "script") {
-                    let jsb = clone(js);
-                    if (js["rootid"] != js["id"]) {
-                        let js2 = await td.downloadJsonAsync(tdapi + id + "/base");
-                        if (js2 != null) {
-                            jsb["baseid"] = js2["id"];
-                        }
-                    }
-                    await importRecAsync(resp, jsb["baseid"]);
-                    let s = await td.downloadTextAsync(tdapi + id + "/text?original=true&ids=true");
-                    jsb["text"] = withDefault(s, "no text");
-                    js = clone(jsb);
-                }
-
-                if ( ! isThere) {
-                    let apiRequest = await main.importOneAnythingAsync(js);
-                    if (apiRequest.status == 200) {
-                        resp.imported += 1;
-                    }
-                    else {
-                        resp.problems += 1;
-                    }
-                }
-
-                if (kind == "script") {
-                    for (let js3 of js["librarydependencyids"]) {
-                        coll.push(/* async */ importRecAsync(resp, td.toString(js3)));
-                    }
-                    for (let js31 of js["mergeids"]) {
-                        coll.push(/* async */ importRecAsync(resp, td.toString(js31)));
-                    }
-                }
-
-                coll.push(/* async */ importDepsAsync(resp, js, tdapi, id, "art"));
-                coll.push(/* async */ importDepsAsync(resp, js, tdapi, id, "comments"));
-                for (let task of coll) {
-                    await task;
-                }
-                resp.ids[id] = 200;
-                if (full && kind == "user") {
-                    /* async */ importUserScriptsAsync(resp, tdapi, id);
-                }
-            }
-        }
-    }
-}
-
-async function importDepsAsync(resp: RecImportResponse, js: JsonObject, tdapi: string, id: string, kind: string) : Promise<void>
-{
-    if (core.orZero(js[kind]) > 0) {
-        let js4 = await td.downloadJsonAsync(tdapi + id + "/" + kind + "?count=1000");
-        await parallel.forJsonAsync(js4["items"], async (json: JsonObject) => {
-            await importRecAsync(resp, json["id"]);
-        });
-    }
-}
-
-async function importUserScriptsAsync(resp: RecImportResponse, tdapi: string, id: string) : Promise<void>
-{
-    let keepGoing = true;
-    let cont = "";
-    while (keepGoing) {
-        let js4 = await td.downloadJsonAsync(tdapi + id + "/scripts?applyupdates=true&count=50" + cont);
-        await parallel.forJsonAsync(js4["items"], async (json: JsonObject) => {
-            await importRecAsync(resp, json["id"]);
-        });
-        let r = orEmpty(js4["continuation"]);
-        logger.info("import batch for " + id + " cont= " + r);
-        if (r != "") {
-            cont = "&continuation=" + r;
-        }
-        else {
-            keepGoing = false;
-        }
-    }
 }
 
