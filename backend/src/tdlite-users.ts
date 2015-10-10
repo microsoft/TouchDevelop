@@ -16,6 +16,7 @@ var clone = td.clone;
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
+import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as wordPassword from "./word-password"
@@ -821,4 +822,26 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
     }
 }
 
+export async function handleEmailVerificationAsync(req: restify.Request, res: restify.Response) : Promise<void>
+{
+    let coll = (/^\/verify\/([a-z]+)\/([a-z]+)/.exec(req.url()) || []);
+    let userJs = await core.getPubAsync(coll[1], "user");
+    let msg = "";
+    if (userJs == null) {
+        msg = "Cannot verify email - no such user.";
+    }
+    else if (orEmpty(userJs["emailcode"]) != coll[2]) {
+        msg = "Cannot verify email - invalid or expired code.";
+    }
+    else {
+        msg = "Thank you, your email was updated.";
+        await core.pubsContainer.updateAsync(userJs["id"], async (entry: JsonBuilder) => {
+            let jsb = entry["settings"];
+            jsb["emailverified"] = true;
+            jsb["previousemail"] = "";
+            entry["emailcode"] = "";
+        });
+    }
+    res.sendText(msg, "text/plain");
+}
 
