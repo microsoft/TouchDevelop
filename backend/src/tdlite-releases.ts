@@ -26,6 +26,7 @@ import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
+import * as tdliteTdCompiler from "./tdlite-tdcompiler"
 import * as main from "./tdlite"
 
 export type StringTransformer = (text: string) => Promise<string>;
@@ -248,7 +249,7 @@ export async function initAsync() : Promise<void>
             });
             if (name == "cloud") {
                 /* async */ pokeReleaseAsync(name, 15);
-                /* async */ deployCompileServiceAsync(rel3, req3);
+                /* async */ tdliteTdCompiler.deployCompileServiceAsync(rel3, req3);
             }
             req3.response = ({});
         }
@@ -427,65 +428,7 @@ export async function pokeReleaseAsync(relLabel: string, delay: number) : Promis
     });
 }
 
-/**
- * TODO include access token for the compile service
- */
-async function deployCompileServiceAsync(rel: PubRelease, req: core.ApiRequest) : Promise<void>
-{
-    let cfg = {};
-    let clientConfig = clientConfigForRelease(rel);
-    cfg["TDC_AUTH_KEY"] = td.serverSetting("TDC_AUTH_KEY", false);
-    cfg["TDC_ACCESS_TOKEN"] = td.serverSetting("TDC_ACCESS_TOKEN", false);
-    cfg["TDC_LITE_STORAGE"] = appContainer.url().replace(/\/[^\/]+$/g, "");
-    cfg["TDC_API_ENDPOINT"] = clientConfig.rootUrl + "/api/";
-    cfg["TD_RELEASE_ID"] = rel.releaseid;
-    cfg["TD_CLIENT_CONFIG"] = JSON.stringify(clientConfig.toJson());
-    let jsSrc = "";
-    for (let k of Object.keys(cfg)) {
-        jsSrc = jsSrc + "process.env." + k + " = " + JSON.stringify(cfg[k]) + ";\n";
-    }
-    jsSrc = jsSrc + "require(\"./noderunner.js\");\n";
-    let jsb = {
-        "files": [ {
-            "path": "script/compiled.js",
-            "content": jsSrc
-        }, {
-            "path": "script/noderunner.js",
-            "url": appContainer.url() + "/" + rel.releaseid + "/c/noderunner.js"
-        }] 
-    };
-    let file = {};        
-    if (false) {
-        logger.debug("cloud JS: " + JSON.stringify(clone(jsb), null, 2));
-    }
-
-    let request = td.createRequest(td.serverSetting("TDC_ENDPOINT", false) + "deploy");
-    request.setMethod("post");
-    request.setContentAsJson(clone(jsb));
-    let response = await request.sendAsync();
-    logger.info("cloud deploy: " + response);
-
-    let requestcfg = td.createRequest(td.serverSetting("TDC_ENDPOINT", false) + "setconfig");
-    requestcfg.setMethod("post");
-    requestcfg.setContentAsJson(({"AppSettings":
-  [
-     {"Name":"TD_RESTART_INTERVAL","Value":"900"}
-  ]
-}));
-    let response2 = await requestcfg.sendAsync();
-    logger.info("cloud deploy cfg: " + response2);
-
-    // ### give it time to come up and reindex docs
-    // TODO enable this back
-        /*
-        await td.sleepAsync(60);
-        await importDoctopicsAsync(req);
-        // await tdliteIndex.indexDocsAsync();
-        logger.info("docs reindexed");
-        */
-}
-
-function clientConfigForRelease(prel: PubRelease) : core.ClientConfig
+export function clientConfigForRelease(prel: PubRelease) : core.ClientConfig
 {
     let ccfg: core.ClientConfig;
     ccfg = core.ClientConfig.createFromJson(core.currClientConfig.toJson());

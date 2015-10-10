@@ -21,6 +21,7 @@ import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
+import * as tdliteTdCompiler from "./tdlite-tdcompiler"
 
 import * as main from "./tdlite"
 
@@ -34,7 +35,6 @@ var updateSlotTable: azureTable.Table;
 export var scripts: indexedStore.Store;
 export var scriptText: cachedStore.Container;
 var updateSlots: indexedStore.Store;
-var cacheCompiler: cachedStore.Container;
 
 var lastShowcaseDl: Date;
 var showcaseIds: string[];
@@ -275,59 +275,6 @@ export async function resolveScriptsAsync(entities: indexedStore.FetchResult, re
     entities.items = td.arrayToJson(coll);
 }
 
-async function forwardToCloudCompilerAsync(req: core.ApiRequest, api: string) : Promise<void>
-{
-    let resp = await queryCloudCompilerAsync(api);
-    if (resp == null) {
-        req.status = httpCode._400BadRequest;
-    }
-    else {
-        req.response = resp;
-    }
-}
-
-export async function queryCloudCompilerAsync(api: string) : Promise<JsonObject>
-{
-    let resp: JsonObject;
-    let js = (<JsonObject>null);
-    let canCache = /^[\w\/]+$/.test(api);
-    if (canCache) {
-        js = await cacheCompiler.getAsync(api);
-    }
-    let ver = await main.getCloudRelidAsync(false);
-    if (js != null && js["version"] == ver) {
-        resp = js["resp"];
-    }
-    else {
-        let url = td.serverSetting("TDC_ENDPOINT", false).replace(/-tdevmgmt-.*/g, "") + api + "?access_token=" + td.serverSetting("TDC_AUTH_KEY", false);
-        let request = td.createRequest(url);
-        logger.debug("cloud compiler: " + api);
-        let response = await request.sendAsync();
-        if (response.statusCode() == 200) {
-            if (td.startsWith(response.header("content-type"), "application/json")) {
-                resp = response.contentAsJson();
-            }
-            else {
-                resp = response.content();
-            }
-        }
-        else {
-            resp = (<JsonObject>null);
-            canCache = false;
-        }
-        logger.debug(JSON.stringify(td.arrayToJson(response.headerNames())));
-        if (canCache && response.header("X-TouchDevelop-RelID") == ver) {
-            let jsb = {};
-            jsb["version"] = ver;
-            if (resp != null) {
-                jsb["resp"] = resp;
-            }
-            await cacheCompiler.justInsertAsync(api, jsb);
-        }
-    }
-    return resp;
-}
-
 export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuilder, body: string, req: core.ApiRequest) : Promise<void>
 {
     if ( ! jsb.hasOwnProperty("id")) {
@@ -466,9 +413,6 @@ export async function initAsync() : Promise<void>
     scriptText = await cachedStore.createContainerAsync("scripttext", {
         access: "private"
     });
-    cacheCompiler = await cachedStore.createContainerAsync("cachecompiler", {
-        redisCacheSeconds: 600
-    });
     updateSlots = await indexedStore.createStoreAsync(core.pubsContainer, "updateslot");
     scripts = await indexedStore.createStoreAsync(core.pubsContainer, "script");
     core.registerPubKind({
@@ -495,11 +439,11 @@ export async function initAsync() : Promise<void>
         await core.throttleAsync(req, "tdcompile", 20);
         if (req.status == 200) {
             let s = req.origUrl.replace(/^\/api\/language\//g, "");
-            await forwardToCloudCompilerAsync(req, "language/" + s);
+            await tdliteTdCompiler.forwardToCloudCompilerAsync(req, "language/" + s);
         }
     });
     core.addRoute("GET", "doctopics", "", async (req1: core.ApiRequest) => {
-        let resp = await queryCloudCompilerAsync("doctopics");
+        let resp = await tdliteTdCompiler.queryCloudCompilerAsync("doctopics");
         req1.response = resp["topicsExt"];
     });
     core.addRoute("GET", "*script", "*", async (req2: core.ApiRequest) => {
@@ -511,7 +455,7 @@ export async function initAsync() : Promise<void>
             await core.throttleAsync(req2, "tdcompile", 20);
             if (req2.status == 200) {
                 let path = req2.origUrl.replace(/^\/api\/[a-z]+\//g, "");
-                await forwardToCloudCompilerAsync(req2, "q/" + req2.rootId + "/" + path);
+                await tdliteTdCompiler.forwardToCloudCompilerAsync(req2, "q/" + req2.rootId + "/" + path);
             }
         }
     });

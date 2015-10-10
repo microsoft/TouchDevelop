@@ -1964,3 +1964,17 @@ export function registerPubKind(desc:IPubKind)
     if (!somePubStore)
         somePubStore = desc.store;
 }
+
+export async function getCloudRelidAsync(includeVer: boolean) : Promise<string>
+{
+    let ver: string;
+    let entry = await settingsContainer.getAsync("releases");
+    let js = entry["ids"]["cloud"];
+    ver = js["relid"];
+    if (includeVer) {
+        ver = ver + "." + rewriteVersion + "." + js["numpokes"];
+    }
+    return ver;
+}
+
+
