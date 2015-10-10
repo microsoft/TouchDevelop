@@ -24,10 +24,8 @@ import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
-import * as tdliteUsers from "./tdlite-users"
 import * as main from "./tdlite"
 
-var orFalse = core.orFalse;
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
