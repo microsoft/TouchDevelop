@@ -29,7 +29,7 @@ import * as wordPassword from "./word-password"
 import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 import * as libratoNode from "./librato-node"
-import * as tdliteSearch from "./tdlite-search"
+import * as tdliteIndex from "./tdlite-index"
 import * as azureSearch from "./azure-search"
 import * as acs from "./acs"
 import * as tdliteDocs from "./tdlite-docs"
@@ -903,7 +903,7 @@ async function _initAsync() : Promise<void>
     azureSearch.init({
         allow_409: true
     });
-    await tdliteSearch.initAsync();
+    await tdliteIndex.initAsync();
     if (core.hasSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET")) {
         await microsoftTranslator.initAsync("", "");
     }
@@ -4020,7 +4020,7 @@ async function deployCompileServiceAsync(rel: PubRelease, req: core.ApiRequest) 
     if (false) {
         await td.sleepAsync(60);
         await importDoctopicsAsync(req);
-        // await tdliteSearch.indexDocsAsync();
+        // await tdliteIndex.indexDocsAsync();
         logger.info("docs reindexed");
     }
 }
@@ -4301,9 +4301,9 @@ async function importUserScriptsAsync(resp: RecImportResponse, tdapi: string, id
     }
 }
 
-function searchIndexArt(pub: PubArt) : tdliteSearch.ArtEntry
+function searchIndexArt(pub: PubArt) : tdliteIndex.ArtEntry
 {
-    let entry: tdliteSearch.ArtEntry;
+    let entry: tdliteIndex.ArtEntry;
     let tp = "picture";
     if (! pub.pictureurl) {
         tp = "sound";
@@ -4312,7 +4312,7 @@ function searchIndexArt(pub: PubArt) : tdliteSearch.ArtEntry
     if (pub.flags != null) {
         spr = pub.flags.indexOf("transparent") >= 0;
     }
-    entry = tdliteSearch.createArtEntry(pub.id, {
+    entry = tdliteIndex.createArtEntry(pub.id, {
         name: pub.name,
         description: pub.description,
         type: tp,
@@ -4328,7 +4328,7 @@ async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
     if (disableSearch) {
         return;
     }
-    let batch = tdliteSearch.createArtUpdate();
+    let batch = tdliteIndex.createArtUpdate();
     let coll2 = await core.addUsernameEtcCoreAsync(arts.singleFetchResult(clone(obj)).items);
     let pub = PubArt.createFromJson(clone(coll2[0]["pub"]));
     searchIndexArt(pub).upsertArt(batch);
@@ -4373,16 +4373,16 @@ function _initSearch() : void
     core.addRoute("POST", "search", "reindexdocs", async (req1: core.ApiRequest) => {
         core.checkPermission(req1, "operator");
         if (req1.status == 200) {
-            // /* async */ tdliteSearch.indexDocsAsync();
+            // /* async */ tdliteIndex.indexDocsAsync();
             req1.response = ({});
         }
     });
     core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
         core.checkPermission(req2, "operator");
         if (req2.status == 200) {
-            await tdliteSearch.clearArtIndexAsync();
+            await tdliteIndex.clearArtIndexAsync();
             /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
-                let batch = tdliteSearch.createArtUpdate();
+                let batch = tdliteIndex.createArtUpdate();
                 for (let js of await core.addUsernameEtcCoreAsync(json)) {
                     let pub = PubArt.createFromJson(clone(js["pub"]));
                     searchIndexArt(pub).upsertArt(batch);
@@ -4397,7 +4397,7 @@ function _initSearch() : void
     core.addRoute("DELETE", "admin", "searchindex", async (req: core.ApiRequest) => {
         core.checkPermission(req, "operator");
         if (req.status == 200) {
-            await tdliteSearch.clearPubIndexAsync();
+            await tdliteIndex.clearPubIndexAsync();
             req.response = { msg: "Gone." }            
         }
     });
@@ -4422,7 +4422,7 @@ function _initSearch() : void
 }
 
 async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[], req: core.ApiRequest): Promise<void> {
-    let batch = tdliteSearch.createPubsUpdate();
+    let batch = tdliteIndex.createPubsUpdate();
     let fetchResult = store.singleFetchResult(json);
     fetchResult.items = json;
      
@@ -4455,14 +4455,14 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
                 
         for (let pub of fetchResult.items) {
             let body = orEmpty(bodies[orEmpty(pub[fieldname])]);            
-            let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
+            let entry = tdliteIndex.toPubEntry(pub, body, pubFeatures(pub), 0);
             req.response["itemsReindexed"]++;
             entry.upsertPub(batch);
         }
     }
     else {
         for (let pub1 of fetchResult.items) {
-            let entry2 = tdliteSearch.toPubEntry(pub1, withDefault(pub1["text"], ""), pubFeatures(pub1), 0);
+            let entry2 = tdliteIndex.toPubEntry(pub1, withDefault(pub1["text"], ""), pubFeatures(pub1), 0);
             req.response["itemsReindexed"]++;
             entry2.upsertPub(batch);
         }
@@ -4994,7 +4994,7 @@ function _initConfig() : void
 
 async function executeSearchAsync(kind: string, q: string, req: core.ApiRequest) : Promise<void>
 {
-    let query = tdliteSearch.toPubQuery("pubs1", kind, q);
+    let query = tdliteIndex.toPubQuery("pubs1", kind, q);
     query.scoringProfile = "pubs";
     let qurl = query.toUrl();
     let request = azureSearch.createRequest(qurl);
@@ -5190,7 +5190,7 @@ function _initAdmin() : void
                     jsb[s] = orEmpty(td.serverSetting(s, true));
                 }
             }
-            jsb["search"] = await tdliteSearch.statisticsAsync();
+            jsb["search"] = await tdliteIndex.statisticsAsync();
             jsb["dmeta"] = deploymentMeta;
             jsb["load"] = await core.cpuLoadAsync();
             let redis0 = await core.redisClient.infoAsync();
@@ -5459,8 +5459,8 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     
     // ## search
     if ( ! options_.skipSearch) {
-        let batch = tdliteSearch.createPubsUpdate();
-        let entry = tdliteSearch.toPubEntry(pub, body, pubFeatures(pub), 0);
+        let batch = tdliteIndex.createPubsUpdate();
+        let entry = tdliteIndex.toPubEntry(pub, body, pubFeatures(pub), 0);
         entry.upsertPub(batch);
         /* async */ batch.sendAsync();
     }
