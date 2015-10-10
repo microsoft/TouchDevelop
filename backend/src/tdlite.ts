@@ -33,8 +33,6 @@ import * as tdliteSearch from "./tdlite-search"
 import * as azureSearch from "./azure-search"
 import * as acs from "./acs"
 import * as tdliteDocs from "./tdlite-docs"
-import * as sendgrid from "./sendgrid"
-import * as nodemailer from "./nodemailer"
 import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 import * as microsoftTranslator from "./microsoft-translator"
 import * as tdliteData from "./tdlite-data"
@@ -43,6 +41,7 @@ import * as tdliteHtml from "./tdlite-html"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteWorkspace from "./tdlite-workspace"
+import * as tdliteUsers from "./tdlite-users"
 
 var orZero = core.orZero;
 var orFalse = core.orFalse;
@@ -58,7 +57,6 @@ var logger = core.logger;
 var httpCode = restify.http();
 
 var comments: indexedStore.Store;
-var users: indexedStore.Store;
 var reviews: indexedStore.Store;
 var arts: indexedStore.Store;
 var artContainer: azureBlobStorage.Container;
@@ -72,11 +70,8 @@ var subscriptions: indexedStore.Store;
 var notificationsTable: azureTable.Table;
 var releases: indexedStore.Store;
 var appContainer: azureBlobStorage.Container;
-var settingsContainer: cachedStore.Container;
 var cacheRewritten: cachedStore.Container;
-var tokensTable: azureTable.Table;
 var filesContainer: azureBlobStorage.Container;
-var passcodesContainer: cachedStore.Container;
 var groupMemberships: indexedStore.Store;
 var abuseReports: indexedStore.Store;
 var compileContainer: azureBlobStorage.Container;
@@ -95,7 +90,6 @@ var artContentTypes: JsonObject;
 var disableSearch: boolean = false;
 var deploymentMeta: JsonObject;
 var tdDeployments: azureBlobStorage.Container;
-var lastSettingsCheck: number = 0;
 var mainReleaseName: string = "";
 var mbedCache: boolean = false;
 var faviconIco: Buffer;
@@ -104,9 +98,6 @@ var acsCallbackToken: string = "";
 var acsCallbackUrl: string = "";
 var loginHtml: JsonObject;
 var deployChannels: string[];
-var emailKeyid: string = "";
-var useSendgrid: boolean = false;
-var theServiceSettings: ServiceSettings;
 var auditContainer: cachedStore.Container;
 var auditStore: indexedStore.Store;
 var videoContainer: azureBlobStorage.Container;
@@ -114,8 +105,6 @@ var videoStore: indexedStore.Store;
 var promosTable: azureTable.Table;
 var templateSuffix: string = "";
 var initialApprovals: boolean = false;
-
-var settingsOptionsJson = tdliteData.settingsOptionsJson;
 
 export class PubComment
     extends td.JsonRecord
@@ -162,106 +151,6 @@ export interface IPubComment {
     comments: number;
     assignedtoid: string;
     resolved: string;
-}
-
-export class PubUser
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public haspicture: boolean = false;
-    @json public time: number = 0;
-    @json public about: string = "";
-    @json public features: number = 0;
-    @json public activedays: number = 0;
-    @json public receivedpositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public score: number = 0;
-    @json public isadult: boolean = false;
-    static createFromJson(o:JsonObject) { let r = new PubUser(); r.fromJson(o); return r; }
-}
-
-export interface IPubUser {
-    kind: string;
-    id: string;
-    url: string;
-    name: string;
-    haspicture: boolean;
-    time: number;
-    about: string;
-    features: number;
-    activedays: number;
-    receivedpositivereviews: number;
-    subscribers: number;
-    score: number;
-    isadult: boolean;
-}
-
-export class PubUserSettings
-    extends td.JsonRecord
-{
-    @json public nickname: string = "";
-    @json public aboutme: string = "";
-    @json public website: string = "";
-    @json public notifications: boolean = false;
-    @json public notifications2: string = "";
-    @json public picturelinkedtofacebook: string = "";
-    @json public picture: string = "";
-    @json public gender: string = "";
-    @json public realname: string = "";
-    @json public yearofbirth: number = 0;
-    @json public location: string = "";
-    @json public culture: string = "";
-    @json public howfound: string = "";
-    @json public programmingknowledge: string = "";
-    @json public occupation: string = "";
-    @json public twitterhandle: string = "";
-    @json public email: string = "";
-    @json public emailverificationsent: boolean = false;
-    @json public emailverified: boolean = false;
-    @json public emailnewsletter2: string = "";
-    @json public emailfrequency: string = "";
-    @json public editorMode: string = "";
-    @json public school: string = "";
-    @json public wallpaper: string = "";
-    @json public permissions: string = "";
-    @json public credit: number = 0;
-    @json public userid: string = "";
-    @json public previousemail: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubUserSettings(); r.fromJson(o); return r; }
-}
-
-export interface IPubUserSettings {
-    nickname: string;
-    aboutme: string;
-    website: string;
-    notifications: boolean;
-    notifications2: string;
-    picturelinkedtofacebook: string;
-    picture: string;
-    gender: string;
-    realname: string;
-    yearofbirth: number;
-    location: string;
-    culture: string;
-    howfound: string;
-    programmingknowledge: string;
-    occupation: string;
-    twitterhandle: string;
-    email: string;
-    emailverificationsent: boolean;
-    emailverified: boolean;
-    emailnewsletter2: string;
-    emailfrequency: string;
-    editorMode: string;
-    school: string;
-    wallpaper: string;
-    permissions: string;
-    credit: number;
-    userid: string;
-    previousemail: string;
 }
 
 export class PubReview
@@ -1018,35 +907,6 @@ export interface ICompilerConfig {
 }
 
 
-export class ServiceSettings
-    extends td.JsonRecord
-{
-    @json public paths: JsonObject;
-    @json public emailFrom: string = "";
-    @json public accounts: JsonObject;
-    @json public alarmingEmails: JsonObject;
-    @json public termsversion: string = "";
-    @json public blockedNicknameRx: string = "";
-    @json public tokenExpiration: number = 0;
-    @json public defaultLang: string = "";
-    @json public langs: JsonObject;
-    @json public envrewrite: JsonObject;
-    static createFromJson(o:JsonObject) { let r = new ServiceSettings(); r.fromJson(o); return r; }
-}
-
-export interface IServiceSettings {
-    paths: JsonObject;
-    emailFrom: string;
-    accounts: JsonObject;
-    alarmingEmails: JsonObject;
-    termsversion: string;
-    blockedNicknameRx: string;
-    tokenExpiration: number;
-    defaultLang: string;
-    langs: JsonObject;
-    envrewrite: JsonObject;
-}
-
 export class PubVideo
     extends td.JsonRecord
 {
@@ -1134,12 +994,6 @@ async function _initAsync() : Promise<void>
     }
     mbedworkshopCompiler.init();
     mbedworkshopCompiler.setVerbosity("debug");
-
-    if (core.hasSetting("SENDGRID_API_KEY")) {
-        useSendgrid = true;
-        await sendgrid.initAsync("", "");
-    }
-    await nodemailer.initAsync();
 
     azureSearch.init({
         allow_409: true
@@ -1261,17 +1115,13 @@ async function _initAsync() : Promise<void>
 async function _init_0Async() : Promise<void>
 {
     let notTableClient = await core.specTableClientAsync("NOTIFICATIONS");
-    tokensTable = await core.tableClient.createTableIfNotExistsAsync("tokens");
     core.pubsContainer = await cachedStore.createContainerAsync("pubs");
-    settingsContainer = await cachedStore.createContainerAsync("settings", {
+    core.settingsContainer = await cachedStore.createContainerAsync("settings", {
         inMemoryCacheSeconds: 5
     });
     cacheRewritten = await cachedStore.createContainerAsync("cacherewritten", {
         inMemoryCacheSeconds: 15,
         redisCacheSeconds: 3600
-    });
-    passcodesContainer = await cachedStore.createContainerAsync("passcodes", {
-        noCache: true
     });
     artContainer = await core.blobService.createContainerIfNotExistsAsync("pub", "hidden");
     aacContainer = await core.blobService.createContainerIfNotExistsAsync("aac", "hidden");
@@ -1311,7 +1161,7 @@ async function _init_0Async() : Promise<void>
     await _initArtAsync();
     await _initScreenshotsAsync();
     await _initReviewsAsync();
-    await _initUsersAsync();
+    await tdliteUsers.initAsync();
     await _initSubscriptionsAsync();
     await _initReleasesAsync();
     await _initAbusereportsAsync();
@@ -1326,85 +1176,6 @@ async function _init_0Async() : Promise<void>
     _initSearch();
     _initImport();
     await tdliteWorkspace.initAsync();
-}
-
-async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<IRedirectAndCookie>
-{
-    let token = new core.Token();
-    token.PartitionKey = user;
-    token.RowKey = azureBlobStorage.createRandomId(32);
-    token.time = await core.nowSecondsAsync();
-    token.reason = reason;
-    token.version = 2;
-    if (orEmpty(client_id) != "no-cookie") {
-        token.cookie = azureBlobStorage.createRandomId(32);
-    }
-    await core.pubsContainer.updateAsync(user, async (entry: JsonBuilder) => {
-        entry["lastlogin"] = await core.nowSecondsAsync();
-    });
-    await tokensTable.insertEntityAsync(token.toJson(), "or merge");
-    return {
-        url: tokenString(token),
-        cookie: token.cookie
-    }
-}
-
-function resolveUsers(entities: indexedStore.FetchResult, req: core.ApiRequest) : void
-{
-    let coll = (<PubUser[]>[]);
-    if (orFalse(req.queryOptions["imported"])) {
-        entities.items = td.arrayToJson(asArray(entities.items).filter(elt => ! elt["login"]));
-    }
-    for (let jsb of entities.items) {
-        let user = new PubUser();
-        coll.push(user);
-        user.fromJson(jsb["pub"]);
-        user.id = jsb["id"];
-        user.kind = jsb["kind"];
-        if ( ! core.fullTD) {
-            user.time = 0;
-        }
-        user.isadult = core.hasPermission(jsb, "adult");
-    }
-    entities.items = td.arrayToJson(coll);
-}
-
-
-async function buildSettingsAsync(userJson: JsonObject) : Promise<PubUserSettings>
-{
-    let r: PubUserSettings;
-    let settings = new PubUserSettings();
-    let user = new PubUser();
-    user.fromJson(userJson["pub"]);
-    let js = userJson["settings"];
-    if (js != null) {
-        let jsb = clone(js);
-        for (let kk of Object.keys(jsb)) {
-            let vv = jsb[kk];
-            if (td.startsWith(orEmpty(vv), "EnC$")) {
-                jsb[kk] = core.decrypt(vv);
-            }
-        }
-        settings.fromJson(clone(jsb));
-    }
-    settings.userid = userJson["id"];
-    settings.nickname = user.name;
-    settings.aboutme = user.about;
-    await refreshSettingsAsync();
-    let perms = {};
-    for (let s of orEmpty(userJson["permissions"]).split(",")) {
-        if (s != "") {
-            perms[s] = 1;
-            let js2 = core.settingsPermissions[s];
-            if (js2 != null) {
-                td.jsonCopyFrom(perms, js2);
-            }
-        }
-    }
-    settings.permissions = "," + Object.keys(perms).join(",") + ",";
-    settings.credit = orZero(userJson["credit"]);
-    return settings;
-    return r;
 }
 
 
@@ -1755,25 +1526,6 @@ async function importAnythingAsync(req: core.ApiRequest) : Promise<void>
     req.response = td.arrayToJson(coll);
 }
 
-async function importUserAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
-{
-    let user = new PubUser();
-    user.fromJson(body);
-    user.url = "";
-    user.features = 0;
-    user.activedays = 0;
-    user.subscribers = 0;
-    user.receivedpositivereviews = 0;
-    user.score = 0;
-    user.haspicture = false;
-
-    let jsb = {};
-    jsb["pub"] = user.toJson();
-    jsb["id"] = user.id;
-    jsb["secondaryid"] = cachedStore.freshShortId(12);
-    await users.insertAsync(jsb);
-}
-
 
 async function importGroupAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
@@ -1978,7 +1730,7 @@ async function _initGroupsAsync() : Promise<void>
     });
     core.addRoute("GET", "*user", "code", async (req3: core.ApiRequest) => {
         let passId = core.normalizeAndHash(req3.argument);
-        let codeObj = await passcodesContainer.getAsync(passId);
+        let codeObj = await tdliteUsers.passcodesContainer.getAsync(passId);
         if (codeObj == null || codeObj["kind"] == "reserved") {
             req3.status = httpCode._404NotFound;
         }
@@ -2027,7 +1779,7 @@ async function _initGroupsAsync() : Promise<void>
         core.meOnly(req5);
         if (req5.status == 200) {
             let passId1 = core.normalizeAndHash(req5.argument);
-            let codeObj1 = await passcodesContainer.getAsync(passId1);
+            let codeObj1 = await tdliteUsers.passcodesContainer.getAsync(passId1);
             if (codeObj1 == null || codeObj1["kind"] == "reserved") {
                 req5.status = 404;
             }
@@ -2043,7 +1795,7 @@ async function _initGroupsAsync() : Promise<void>
                         req5.status = httpCode._409Conflict;
                     }
                     else if (codeObj1["credit"] > 0) {
-                        await applyCodeAsync(req5.rootPub, codeObj1, passId1, req5);
+                        await tdliteUsers.applyCodeAsync(req5.rootPub, codeObj1, passId1, req5);
                         req5.response = ({});
                     }
                     else {
@@ -2075,7 +1827,7 @@ async function _initGroupsAsync() : Promise<void>
         if (req6.status == 200) {
             let grCode = orEmpty(req6.rootPub["code"]);
             if (grCode != "") {
-                await passcodesContainer.updateAsync(core.normalizeAndHash(grCode), async (entry1: JsonBuilder) => {
+                await tdliteUsers.passcodesContainer.updateAsync(core.normalizeAndHash(grCode), async (entry1: JsonBuilder) => {
                     entry1["kind"] = "reserved";
                 });
             }
@@ -2090,7 +1842,7 @@ async function _initGroupsAsync() : Promise<void>
             }
             grCode = numCode;
             let hashed = core.normalizeAndHash(grCode);
-            await passcodesContainer.updateAsync(hashed, async (entry2: JsonBuilder) => {
+            await tdliteUsers.passcodesContainer.updateAsync(hashed, async (entry2: JsonBuilder) => {
                 entry2["kind"] = "groupinvitation";
                 entry2["groupid"] = req6.rootId;
                 entry2["time"] = await core.nowSecondsAsync();
@@ -2109,7 +1861,7 @@ async function _initGroupsAsync() : Promise<void>
                 req.status = 404;
             }
             else {
-                await passcodesContainer.updateAsync(s1, async (entry4: JsonBuilder) => {
+                await tdliteUsers.passcodesContainer.updateAsync(s1, async (entry4: JsonBuilder) => {
                     entry4["kind"] = "reserved";
                 });
                 await core.pubsContainer.updateAsync(req.rootId, async (entry5: JsonBuilder) => {
@@ -2132,7 +1884,7 @@ async function _initGroupsAsync() : Promise<void>
         let store = groups;
         if (apiRequest1.verb == "users") {
             field = "userid";
-            store = users;
+            store = tdliteUsers.users;
         }
         if ( ! hasGlobalList1) {
             fetchResult1.items = td.arrayToJson(asArray(fetchResult1.items).filter(elt => grps1.hasOwnProperty(elt["pub"]["publicationid"])));
@@ -2145,7 +1897,7 @@ async function _initGroupsAsync() : Promise<void>
     core.addRoute("POST", "admin", "reindexgroups", async (req8: core.ApiRequest) => {
         core.checkPermission(req8, "operator");
         if (req8.status == 200) {
-            /* async */ users.getIndex("all").forAllBatchedAsync("all", 20, async (json: JsonObject) => {
+            /* async */ tdliteUsers.users.getIndex("all").forAllBatchedAsync("all", 20, async (json: JsonObject) => {
                 await parallel.forJsonAsync(json, async (json1: JsonObject) => {
                     await reindexGroupsAsync(json1);
                 });
@@ -2365,427 +2117,6 @@ async function _initReviewsAsync() : Promise<void>
         }
         else {
             req4.status = httpCode._409Conflict;
-        }
-    });
-}
-
-async function _initUsersAsync() : Promise<void>
-{
-    users = await indexedStore.createStoreAsync(core.pubsContainer, "user");
-    await core.setResolveAsync(users, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        resolveUsers(fetchResult, apiRequest);
-    });
-    await users.createIndexAsync("seconadaryid", entry => orEmpty(entry["secondaryid"]));
-    core.addRoute("GET", "secondaryid", "*", async (req: core.ApiRequest) => {
-        core.checkPermission(req, "user-mgmt");
-        if (req.status == 200) {
-            await core.anyListAsync(users, req, "secondaryid", req.verb);
-        }
-    });
-    // ### all
-    core.addRoute("POST", "*user", "permissions", async (req1: core.ApiRequest) => {
-        core.checkMgmtPermission(req1, "user-mgmt");
-        if (req1.status == 200) {
-            let perm = td.toString(req1.body["permissions"]);
-            if (perm != null) {
-                perm = core.normalizePermissions(perm);
-                core.checkPermission(req1, "root");
-                if (req1.status != 200) {
-                    return;
-                }
-                await auditLogAsync(req1, "set-perm", {
-                    data: perm
-                });
-                if (isAlarming(perm)) {
-                    await auditLogAsync(req1, "set-perm-high", {
-                        data: perm
-                    });
-                }
-                await updateAndUpsertAsync(core.pubsContainer, req1, async (entry1: JsonBuilder) => {
-                    entry1["permissions"] = perm;
-                    await sendPermissionNotificationAsync(req1, entry1);
-                });
-            }
-            let credit = td.toNumber(req1.body["credit"]);
-            if (credit != null) {
-                await auditLogAsync(req1, "set-credit", {
-                    data: credit.toString()
-                });
-                await updateAndUpsertAsync(core.pubsContainer, req1, async (entry2: JsonBuilder) => {
-                    entry2["credit"] = credit;
-                    entry2["totalcredit"] = credit;
-                });
-            }
-            req1.response = ({});
-        }
-    });
-    core.addRoute("GET", "*user", "permissions", async (req2: core.ApiRequest) => {
-        core.checkMgmtPermission(req2, "user-mgmt");
-        if (req2.status == 200) {
-            let jsb = {};
-            for (let s of ["permissions", "login"]) {
-                jsb[s] = orEmpty(req2.rootPub[s]);
-            }
-            for (let s1 of ["credit", "totalcredit", "lastlogin"]) {
-                jsb[s1] = orZero(req2.rootPub[s1]);
-            }
-            req2.response = clone(jsb);
-        }
-    });
-    core.addRoute("POST", "logout", "", async (req3: core.ApiRequest) => {
-        if (req3.userid != "") {
-            if (orFalse(req3.body["everywhere"])) {
-                let entities = await tokensTable.createQuery().partitionKeyIs(req3.userid).fetchAllAsync();
-                await parallel.forAsync(entities.length, async (x: number) => {
-                    let json = entities[x];
-                    // TODO: filter out reason=admin?
-                    let token = core.Token.createFromJson(json);
-                    await tokensTable.deleteEntityAsync(token.toJson());
-                    await core.redisClient.setpxAsync("tok:" + tokenString(token), "", 500);
-                });
-            }
-            else {
-                await tokensTable.deleteEntityAsync(req3.userinfo.token.toJson());
-                await core.redisClient.setpxAsync("tok:" + tokenString(req3.userinfo.token), "", 500);
-            }
-            req3.response = ({});
-            req3.headers = {};
-            let s4 = wrapAccessTokenCookie("logout").replace(/Dec 9999/g, "Dec 1971");
-            req3.headers["Set-Cookie"] = s4;
-        }
-        else {
-            req3.status = httpCode._401Unauthorized;
-        }
-    });
-    // This is for test users for load testing nd doe **system accounts**
-    core.addRoute("POST", "users", "", async (req4: core.ApiRequest) => {
-        core.checkPermission(req4, "root");
-        if (req4.status == 200) {
-            let opts = req4.body;
-            let pubUser = new PubUser();
-            pubUser.name = withDefault(opts["name"], "Dummy" + td.randomInt(100000));
-            pubUser.about = withDefault(opts["about"], "");
-            pubUser.time = await core.nowSecondsAsync();
-            let jsb1 = {};
-            jsb1["pub"] = pubUser.toJson();
-            jsb1["settings"] = ({});
-            jsb1["permissions"] = ",preview,";
-            jsb1["secondaryid"] = cachedStore.freshShortId(12);
-            if (false) {
-                jsb1["password"] = core.hashPassword("", opts["password"]);
-            }
-            await core.generateIdAsync(jsb1, 4);
-            await users.insertAsync(jsb1);
-            let pass2 = wordPassword.generate();
-            req4.rootId = jsb1["id"];
-            req4.rootPub = clone(jsb1);
-            await setPasswordAsync(req4, pass2, "");
-            let jsb3 = clone(await core.resolveOnePubAsync(users, req4.rootPub, req4));
-            jsb3["password"] = pass2;
-            req4.response = clone(jsb3);
-        }
-    });
-    core.addRoute("POST", "*user", "addauth", async (req5: core.ApiRequest) => {
-        let tokenJs = req5.userinfo.token;
-        if (orEmpty(req5.body["key"]) != core.tokenSecret) {
-            req5.status = httpCode._403Forbidden;
-        }
-        else if (tokenJs == null) {
-            req5.status = httpCode._404NotFound;
-        }
-        else {
-            let s2 = tokenJs.reason;
-            if (td.startsWith(s2, "id/")) {
-                await passcodesContainer.updateAsync(s2, async (entry3: JsonBuilder) => {
-                    entry3["userid"] = req5.rootId;
-                });
-                req5.response = ({});
-            }
-            else {
-                req5.status = httpCode._400BadRequest;
-            }
-        }
-    });
-    core.addRoute("POST", "*user", "swapauth", async (req: core.ApiRequest) => {
-        core.checkPermission(req, "root");
-        if (req.status != 200) {
-            return;
-        }
-        if (req.rootId == req.argument) {
-            req.status = httpCode._412PreconditionFailed;
-            return;
-        }
-        let otherUser = await core.getPubAsync(req.argument, "user");
-        if (otherUser == null) {
-            req.status = httpCode._404NotFound;
-            return;
-        }
-        let rootPassId = req.rootPub["login"];
-        let rootPass = await passcodesContainer.getAsync(rootPassId);
-        let otherPassId = otherUser["login"];
-        let otherPass = await passcodesContainer.getAsync(otherPassId);
-        if (rootPass == null || otherPass == null) {
-            req.status = httpCode._424FailedDependency;
-            return;
-        }
-        await passcodesContainer.updateAsync(rootPassId, async (entry4: JsonBuilder) => {
-            entry4["userid"] = otherUser["id"];
-        });
-        await passcodesContainer.updateAsync(otherPassId, async (entry5: JsonBuilder) => {
-            entry5["userid"] = req.rootId;
-        });
-        await core.pubsContainer.updateAsync(req.rootId, async (entry6: JsonBuilder) => {
-            entry6["login"] = otherPassId;
-        });
-        await core.pubsContainer.updateAsync(otherUser["id"], async (entry7: JsonBuilder) => {
-            entry7["login"] = rootPassId;
-        });
-        let jsb4 = {};
-        jsb4["oldrootpass"] = rootPass;
-        jsb4["oldotherpass"] = otherPass;
-        req.response = clone(jsb4);
-    });
-    core.addRoute("POST", "*user", "token", async (req7: core.ApiRequest) => {
-        core.checkPermission(req7, "signin-" + req7.rootId);
-        if (req7.status == 200) {
-            let resp = {};
-            let tok = await generateTokenAsync(req7.rootId, "admin", "webapp2");
-            if (tok.cookie) {
-                if (req7.headers == null) {
-                    req7.headers = {};
-                }
-                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(tok.cookie);
-            }
-            else {
-                assert(false, "no cookie in token");
-            }
-            await auditLogAsync(req7, "signin-as", {
-                data: core.sha256(tok.url).substr(0, 10)
-            });
-            resp["token"] = tok.url;
-            req7.response = clone(resp);
-        }
-    });
-    core.addRoute("DELETE", "*user", "", async (req8: core.ApiRequest) => {
-        await core.checkDeletePermissionAsync(req8);
-        // Level4 users cannot be deleted; you first have to downgrade their permissions.
-        if (req8.status == 200 && core.hasPermission(req8.rootPub, "level4")) {
-            req8.status = httpCode._402PaymentRequired;
-        }
-        if (req8.status == 200) {
-            await tdliteWorkspace.deleteAllHistoryAsync(req8.rootId, req8);
-            await deleteAllByUserAsync(comments, req8.rootId, req8);
-            await deleteAllByUserAsync(arts, req8.rootId, req8);
-            await deleteAllByUserAsync(tdliteScripts.scripts, req8.rootId, req8);
-            await deleteAllByUserAsync(pointers, req8.rootId, req8);
-            await deleteAllByUserAsync(screenshots, req8.rootId, req8);
-            await deleteAllByUserAsync(reviews, req8.rootId, req8);
-            // TODO We leave groups alone - rethink.
-            // Bugs, releases, etc just stay
-            let delok = await deleteAsync(req8.rootPub);
-            await auditLogAsync(req8, "delete", {
-                oldvalue: req8.rootPub
-            });
-            req8.response = ({ "msg": "have a nice life" });
-        }
-    });
-    core.addRoute("GET", "*user", "resetpassword", async (req9: core.ApiRequest) => {
-        await core.checkFacilitatorPermissionAsync(req9, req9.rootId);
-        if (req9.status == 200) {
-            let jsb2 = {};
-            let coll2 = td.range(0, 10).map<string>(elt => wordPassword.generate());
-            jsb2["passwords"] = td.arrayToJson(coll2);
-            req9.response = clone(jsb2);
-        }
-    });
-    core.addRoute("POST", "*user", "resetpassword", async (req10: core.ApiRequest) => {
-        await core.checkFacilitatorPermissionAsync(req10, req10.rootId);
-        if (req10.status == 200) {
-            let pass = orEmpty(req10.body["password"]);
-            let prevPass = orEmpty(req10.rootPub["login"]);
-            if (pass.length < 10) {
-                req10.status = httpCode._412PreconditionFailed;
-            }
-            else if ( ! td.startsWith(prevPass, "code/")) {
-                req10.status = httpCode._405MethodNotAllowed;
-            }
-            else {
-                await setPasswordAsync(req10, pass, prevPass);
-            }
-        }
-    });
-    core.addRoute("POST", "updatecodes", "", async (req11: core.ApiRequest) => {
-        core.checkPermission(req11, "root");
-        if (req11.status != 200) {
-            return;
-        }
-        let codes = req11.body["codes"];
-        await parallel.forBatchedAsync(codes.length, 50, async (x1: number) => {
-            let s5 = td.toString(codes[x1]);
-            await passcodesContainer.updateAsync(core.normalizeAndHash(s5), async (entry8: JsonBuilder) => {
-                assert(td.stringContains(entry8["permissions"], ","), "");
-                entry8["permissions"] = req11.body["permissions"];
-            });
-        }
-        , async () => {
-        });
-        req11.response = ({});
-    });
-    core.addRoute("POST", "generatecodes", "", async (req12: core.ApiRequest) => {
-        let perm1 = core.normalizePermissions(td.toString(req12.body["permissions"]));
-        let grps = orEmpty(req12.body["groups"]);
-        let addperm = "";
-        if (grps != "") {
-            addperm = ",user-mgmt";
-        }
-        if (perm1 == "") {
-            perm1 = "educator";
-        }
-        if (isAlarming(perm1)) {
-            req12.status = httpCode._402PaymentRequired;
-        }
-        let numCodes = td.toNumber(req12.body["count"]);
-        if (numCodes > 1000) {
-            req12.status = httpCode._413RequestEntityTooLarge;
-        }
-        core.checkPermission(req12, "gen-code," + perm1 + addperm);
-        if (req12.status == 200) {
-            let coll = (<string[]>[]);
-            let credit1 = td.toNumber(req12.body["credit"]);
-            await auditLogAsync(req12, "generatecodes", {
-                data: numCodes + "x" + credit1 + perm1,
-                newvalue: req12.body
-            });
-            await parallel.forAsync(numCodes, async (x2: number) => {
-                let id = cachedStore.freshShortId(12);
-                if (req12.body.hasOwnProperty("code")) {
-                    id = td.toString(req12.body["code"]);
-                }
-                let s3 = core.normalizeAndHash(id);
-                await passcodesContainer.updateAsync(s3, async (entry9: JsonBuilder) => {
-                    entry9["kind"] = "activationcode";
-                    entry9["userid"] = req12.userid;
-                    if (perm1 != "") {
-                        entry9["permissions"] = perm1;
-                    }
-                    entry9["groups"] = grps;
-                    entry9["orig_credit"] = credit1;
-                    entry9["credit"] = credit1;
-                    entry9["time"] = await core.nowSecondsAsync();
-                    entry9["description"] = orEmpty(req12.body["description"]);
-                    if (req12.body.hasOwnProperty("singlecredit")) {
-                        entry9["singlecredit"] = td.toNumber(req12.body["singlecredit"]);
-                    }
-                });
-                coll.push(id);
-            });
-            let fetchResult1 = core.somePubStore.singleFetchResult(({}));
-            fetchResult1.items = td.arrayToJson(coll);
-            req12.response = fetchResult1.toJson();
-        }
-    });
-    
-    if (false)
-    core.addRoute("POST", "admin", "reindexusers", async (req13: core.ApiRequest) => {
-        core.checkPermission(req13, "operator");
-        if (req13.status == 200) {
-            /* async */ users.getIndex("all").forAllBatchedAsync("all", 50, async (json2: JsonObject) => {
-                await parallel.forJsonAsync(json2, async (json3: JsonObject) => {
-                    let userid = json3["id"];
-                    let js2 = json3["settings"];
-                });
-            });
-            req13.response = ({});
-        }
-    });
-
-    emailKeyid = "EMAIL";
-    core.addRoute("POST", "*user", "settings", async (req4: core.ApiRequest) => {
-        let logcat = "admin-settings";
-        let updateOwn = false;
-        if (req4.rootId == req4.userid) {
-            core.checkPermission(req4, "adult");
-            if (req4.status == 200) {
-                await core.throttleAsync(req4, "settings", 120);
-                logcat = "user-settings";
-                updateOwn = true;
-            }
-        }
-        else {
-            await core.checkFacilitatorPermissionAsync(req4, req4.rootId);
-        }
-        if (req4.status == 200) {
-            let nick = orEmpty(req4.body["nickname"]).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-            await refreshSettingsAsync();
-            if (new RegExp(theServiceSettings.blockedNicknameRx).test(nick)) {
-                core.checkPermission(req4, "official");
-            }
-        }
-        if (req4.status == 200) {
-            let bld = await updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
-                let sett = await buildSettingsAsync(clone(entry));
-                let newEmail = td.toString(req4.body["email"]);
-                if (newEmail != null) {
-                    if (updateOwn) {
-                        if (sett.emailverified) {
-                            sett.previousemail = sett.email;
-                        }
-                        sett.emailverified = false;
-                        sett.email = newEmail;
-                        let id = azureBlobStorage.createRandomId(16).toLowerCase();
-                        entry["emailcode"] = id;
-                        if (/^[^@]+@[^@]+$/.test(newEmail)) {
-                            /* async */ nodemailer.sendAsync(newEmail, theServiceSettings.emailFrom, "email verification on " + core.myHost, "Please follow the link below to verify your new email address on " + core.myHost + "\n\n      " + core.self + "verify/" + req4.rootId + "/" + id + "\n\nThanks!");
-                        }
-                    }
-                    else {
-                        sett.email = newEmail;
-                        sett.emailverified = true;
-                        sett.previousemail = "";
-                        entry["emailcode"] = "";
-                    }
-                }
-                let settings = clone(sett.toJson());
-                core.setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
-                    "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
-                    "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
-                    "website", "yearofbirth"]);
-                for (let k of ["culture", "email", "previousemail", "gender", "location", "occupation", 
-                               "programmingknowledge", "realname", "school"]) {
-                    let val = settings[k];
-                    if (orEmpty(val) != "") {
-                        settings[k] = core.encrypt(val, emailKeyid);
-                    }
-                }
-                let value = clone(settings);
-                entry["settings"] = value;
-                sett = PubUserSettings.createFromJson(value);
-                sett.nickname = sett.nickname.substr(0, 25);
-                entry["pub"]["name"] = sett.nickname;
-                entry["pub"]["about"] = sett.aboutme;
-                req4.response = clone(settings);
-            });
-            await auditLogAsync(req4, logcat, {
-                oldvalue: req4.rootPub,
-                newvalue: clone(bld)
-            });
-        }
-    });
-    core.addRoute("GET", "*user", "settings", async (req5: core.ApiRequest) => {
-        if (req5.rootId == req5.userid) {
-        }
-        else {
-            await core.checkFacilitatorPermissionAsync(req5, req5.rootId);
-        }
-        if (req5.status == 200) {
-            if (req5.userid != req5.rootId) {
-                await auditLogAsync(req5, "view-settings");
-            }
-            let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
-            if (orEmpty(req5.queryOptions["format"]) != "short") {
-                core.copyJson(settingsOptionsJson, jsb);
-            }
-            req5.response = clone(jsb);
         }
     });
 }
@@ -3138,7 +2469,7 @@ async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
             await importReviewAsync(apiRequest, js);
         }
         else if (kind == "user") {
-            await importUserAsync(apiRequest, js);
+            await tdliteUsers.importUserAsync(apiRequest, js);
         }
         else if (kind == "comment") {
             await importCommentAsync(apiRequest, js);
@@ -3205,7 +2536,7 @@ async function _initSubscriptionsAsync() : Promise<void>
         }
         let users = await core.followPubIdsAsync(fetchResult.items, field, "user");
         fetchResult.items = td.arrayToJson(users);
-        resolveUsers(fetchResult, apiRequest);
+        tdliteUsers.resolveUsers(fetchResult, apiRequest);
     }
     , {
         byUserid: true,
@@ -3370,7 +2701,7 @@ async function _initReleasesAsync() : Promise<void>
         await core.addUsernameEtcAsync(fetchResult);
         let coll = (<PubRelease[]>[]);
         let labels = <IReleaseLabel[]>[];
-        let entry3 = await settingsContainer.getAsync("releases");
+        let entry3 = await core.settingsContainer.getAsync("releases");
         if (entry3 != null && entry3["ids"] != null) {
             let js = entry3["ids"];
             for (let k of Object.keys(js)) {
@@ -3405,7 +2736,7 @@ async function _initReleasesAsync() : Promise<void>
             rel1.branch = orEmpty(req1.body["branch"]);
             rel1.buildnumber = orZero(req1.body["buildnumber"]);
             if (looksLikeReleaseId(rel1.releaseid)) {
-                await settingsContainer.updateAsync("releaseversion", async (entry: JsonBuilder) => {
+                await core.settingsContainer.updateAsync("releaseversion", async (entry: JsonBuilder) => {
                     let x = orZero(entry[releaseVersionPrefix]) + 1;
                     entry[releaseVersionPrefix] = x;
                     rel1.version = releaseVersionPrefix + "." + x + "." + rel1.buildnumber;
@@ -3472,7 +2803,7 @@ async function _initReleasesAsync() : Promise<void>
             lab.relid = rel3.id;
             lab.numpokes = 0;
             await auditLogAsync(req3, "lbl-" + lab.name);
-            await settingsContainer.updateAsync("releases", async (entry2: JsonBuilder) => {
+            await core.settingsContainer.updateAsync("releases", async (entry2: JsonBuilder) => {
                 let jsb2 = entry2["ids"];
                 if (jsb2 == null) {
                     jsb2 = {};
@@ -3546,7 +2877,7 @@ async function serveReleaseAsync(req: restify.Request, res: restify.Response) : 
         relid = rel;
     }
     else {
-        let entry = await settingsContainer.getAsync("releases");
+        let entry = await core.settingsContainer.getAsync("releases");
         let js = entry["ids"][rel];
         if (js == null) {
             let entry3 = await core.getPubAsync(rel, "release");
@@ -3655,7 +2986,7 @@ async function rewriteAndCacheAsync(rel: string, relid: string, srcFile: string,
 
 async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) : Promise<void>
 {
-    await refreshSettingsAsync();
+    await core.refreshSettingsAsync();
     if (req.isCached) {
         return;
     }
@@ -3667,7 +2998,7 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
             if (value == null || value == "") {
                 let coll = (/^0([a-z]+)\.([A-Za-z]+)$/.exec(token) || []);
                 if (coll.length > 1) {
-                    tokenJs = await tokensTable.getEntityAsync(coll[1], coll[2]);
+                    tokenJs = await tdliteUsers.tokensTable.getEntityAsync(coll[1], coll[2]);
                     if (tokenJs != null) {
                         await core.redisClient.setpxAsync("tok:" + token, JSON.stringify(tokenJs), 1000 * 1000);
                     }
@@ -3702,7 +3033,7 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
                     return;
                 }
                 // minimum token expiration - 5min
-                if (orEmpty(token2.reason) != "code" && orZero(theServiceSettings.tokenExpiration) > 300 && await core.nowSecondsAsync() - token2.time > theServiceSettings.tokenExpiration) {
+                if (orEmpty(token2.reason) != "code" && orZero(core.serviceSettings.tokenExpiration) > 300 && await core.nowSecondsAsync() - token2.time > core.serviceSettings.tokenExpiration) {
                     // core.Token expired
                     req.status = httpCode._401Unauthorized;
                     return;
@@ -3723,13 +3054,6 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
             }
         }
     }
-}
-
-function tokenString(token: core.Token) : string
-{
-    let customToken: string;
-    customToken = "0" + token.PartitionKey + "." + token.RowKey;
-    return customToken;
 }
 
 export async function auditLogAsync(req: core.ApiRequest, type: string, options_0: IPubAuditLog = {}) : Promise<void>
@@ -3755,7 +3079,7 @@ export async function auditLogAsync(req: core.ApiRequest, type: string, options_
         }
     }
     if (req.userinfo.token != null) {
-        msg.tokenid = core.sha256(tokenString(req.userinfo.token)).substr(0, 10);
+        msg.tokenid = core.sha256(tdliteUsers.tokenString(req.userinfo.token)).substr(0, 10);
     }
     msg.type = type;
     msg.ip = core.encrypt(req.userinfo.ip, "AUDIT");
@@ -3846,7 +3170,7 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
     let id = core.pathToPtr(fn);
     let pathLang = orEmpty((/@([a-z][a-z])$/.exec(id) || [])[1]);
     if (pathLang != "") {
-        if (pathLang == theServiceSettings.defaultLang) {
+        if (pathLang == core.serviceSettings.defaultLang) {
             id = id.replace(/@..$/g, "");
             lang = "";
         }
@@ -3854,7 +3178,7 @@ async function servePointerAsync(req: restify.Request, res: restify.Response) : 
             lang = "@" + pathLang;
         }
     }
-    if (templateSuffix != "" && theServiceSettings.envrewrite.hasOwnProperty(id.replace(/^ptr-/g, ""))) {
+    if (templateSuffix != "" && core.serviceSettings.envrewrite.hasOwnProperty(id.replace(/^ptr-/g, ""))) {
         id = id + templateSuffix;
     }
     id = id + lang;
@@ -4116,7 +3440,7 @@ async function _initLoginAsync() : Promise<void>
             }
             core.checkPermission(req5, "root");
             if (req5.status == 200) {
-                let tok = await generateTokenAsync(req5.rootId, "admin", "no-cookie");
+                let tok = await tdliteUsers.generateTokenAsync(req5.rootId, "admin", "no-cookie");
                 assert(tok.cookie == "", "no cookie expected");
                 await auditLogAsync(req5, "rawtoken", {
                     data: core.sha256(tok.url).substr(0, 10)
@@ -4131,41 +3455,11 @@ async function _initLoginAsync() : Promise<void>
 
 
 
-async function createNewUserAsync(username: string, email: string, profileId: string, perms: string, realname: string, awaiting: boolean) : Promise<JsonBuilder>
-{
-    let r: JsonBuilder;
-    r = {};
-    let pubUser = new PubUser();
-    pubUser.name = username;
-    let settings = new PubUserSettings();
-    settings.email = core.encrypt(email, emailKeyid);
-    settings.realname = core.encrypt(realname, emailKeyid);
-    settings.emailverified = orEmpty(settings.email) != "";
-    r["pub"] = pubUser.toJson();
-    r["settings"] = settings.toJson();
-    r["login"] = profileId;
-    r["permissions"] = perms;
-    r["secondaryid"] = cachedStore.freshShortId(12);
-    if (awaiting) {
-        r["awaiting"] = awaiting;
-    }
-    let dictionary = core.setBuilderIfMissing(r, "groups");
-    let dictionary2 = core.setBuilderIfMissing(r, "owngroups");
-    await core.generateIdAsync(r, 8);
-    await users.insertAsync(r);
-    await passcodesContainer.updateAsync(profileId, async (entry: JsonBuilder) => {
-        entry["kind"] = "userpointer";
-        entry["userid"] = r["id"];
-    });
-    await sendPermissionNotificationAsync(core.emptyRequest, r);
-    return r;
-}
-
 async function getRedirectUrlAsync(user2: string, req: restify.Request) : Promise<string>
 {
     let url: string;
     let jsb = {};
-    let tok = await generateTokenAsync(user2, "code", req.query()["client_id"]);
+    let tok = await tdliteUsers.generateTokenAsync(user2, "code", req.query()["client_id"]);
     jsb["access_token"] = tok.url;
     jsb["state"] = req.query()["state"];
     jsb["id"] = user2;
@@ -4186,12 +3480,12 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
     let profileId = "id/" + provider + "/" + core.encryptId(providerUserId, "SOCIAL0");
     logger.debug("profileid: " + profile.id + " enc " + profileId);
     let modernId = profileId;
-    let entry2 = await passcodesContainer.getAsync(profileId);
+    let entry2 = await tdliteUsers.passcodesContainer.getAsync(profileId);
     // ## Legacy profiles
     if (false) {
         if (entry2 == null) {
             let legacyId = "id/" + provider + "/" + core.sha256(providerUserId);
-            let entry = await passcodesContainer.getAsync(legacyId);
+            let entry = await tdliteUsers.passcodesContainer.getAsync(legacyId);
             if (core.isGoodPub(entry, "userpointer") && await core.getPubAsync(entry["userid"], "user") != null) {
                 entry2 = entry;
                 profileId = legacyId;
@@ -4199,7 +3493,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
         if (entry2 == null) {
             let legacyId1 = "id/" + provider + "/" + td.replaceAll(providerUserId, ":", "/");
-            let entry1 = await passcodesContainer.getAsync(legacyId1);
+            let entry1 = await tdliteUsers.passcodesContainer.getAsync(legacyId1);
             if (core.isGoodPub(entry1, "userpointer") && await core.getPubAsync(entry1["userid"], "user") != null) {
                 entry2 = entry1;
                 profileId = legacyId1;
@@ -4207,7 +3501,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
         // If we have a legacy pointer, update it
         if (modernId != profileId && entry2 != null) {
-            await passcodesContainer.updateAsync(modernId, async (entry3: JsonBuilder) => {
+            await tdliteUsers.passcodesContainer.updateAsync(modernId, async (entry3: JsonBuilder) => {
                 td.jsonCopyFrom(entry3, entry2);
             });
         }
@@ -4234,7 +3528,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
             return "/";
         }
         logger.tick("PubUser@federated");
-        jsb = await createNewUserAsync(username, email, profileId, "", profile.name, false);
+        jsb = await tdliteUsers.createNewUserAsync(username, email, profileId, "", profile.name, false);
     }
     else {
         logger.tick("Login@federated");
@@ -4251,15 +3545,15 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
     }
     let user = jsb["id"];
-    let tok = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
+    let tok = await tdliteUsers.generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
 
     let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(tok.url)) + "&id=" + user;
     if (tok.cookie != "") {
         redirectUrl = redirectUrl + "&td_cookie=" + tok.cookie;
     }
-    await refreshSettingsAsync();
+    await core.refreshSettingsAsync();
     let session = new LoginSession();
-    session.termsOk = orEmpty(jsb["termsversion"]) == theServiceSettings.termsversion;
+    session.termsOk = orEmpty(jsb["termsversion"]) == core.serviceSettings.termsversion;
     session.codeOk = orEmpty(jsb["permissions"]) != "";
     if ( ! session.termsOk || ! session.codeOk) {
         session.state = cachedStore.freshShortId(16);
@@ -4287,7 +3581,7 @@ async function loginCreateUserAsync(req: restify.Request, session: LoginSession,
                 core.jsonAdd(entry, "credit", -1);
             });
             logger.tick("PubUser@code");
-            let jsb = await createNewUserAsync(tdUsername, "", core.normalizeAndHash(session.pass), ",student,", "", initialApprovals);
+            let jsb = await tdliteUsers.createNewUserAsync(tdUsername, "", core.normalizeAndHash(session.pass), ",student,", "", initialApprovals);
             let user2 = jsb["id"];
 
             await auditLogAsync(buildAuditApiRequest(req), "user-create-code", {
@@ -4332,7 +3626,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
             res.sendError(httpCode._429TooManyRequests, "Too many login attempts");
             return;
         }
-        let codeObj = await passcodesContainer.getAsync(passId);
+        let codeObj = await tdliteUsers.passcodesContainer.getAsync(passId);
         if (codeObj == null || codeObj["kind"] == "reserved") {
             msg = "Whoops! The code doesn't seem right. Keep trying!";
         }
@@ -4363,7 +3657,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                 }
                 else {
                     let userjson = await core.getPubAsync(session.userid, "user");
-                    await applyCodeAsync(userjson, codeObj, passId, buildAuditApiRequest(req));
+                    await tdliteUsers.applyCodeAsync(userjson, codeObj, passId, buildAuditApiRequest(req));
                     accessTokenRedirect(res, session.redirectUri);
                 }
             }
@@ -4395,7 +3689,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
     }
 
     if ( ! res.finished()) {
-        await refreshSettingsAsync();
+        await core.refreshSettingsAsync();
         let params = {};
         let inner = "kidornot";
         if (accessCode == "kid") {
@@ -4431,7 +3725,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                 res.redirect(302, "/");
                 return;
             }
-            if ( ! session.termsOk && termsversion == theServiceSettings.termsversion) {
+            if ( ! session.termsOk && termsversion == core.serviceSettings.termsversion) {
                 session.termsOk = true;
                 await serverAuth.options().setData(session.state, JSON.stringify(session.toJson()));
                 if (termsversion != "") {
@@ -4479,7 +3773,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
             }
         }
         if ( ! res.finished()) {
-            let agreeurl = "/oauth/dialog?td_session=" + encodeURIComponent(session.state) + "&td_agree=" + encodeURIComponent(theServiceSettings.termsversion);
+            let agreeurl = "/oauth/dialog?td_session=" + encodeURIComponent(session.state) + "&td_agree=" + encodeURIComponent(core.serviceSettings.termsversion);
             let disagreeurl = "/oauth/dialog?td_session=" + encodeURIComponent(session.state) + "&td_agree=noway";
             let lang21 = await handleLanguageAsync(req, res, true);
             params["MSG"] = msg;
@@ -4502,7 +3796,7 @@ function setGroupProps(group: PubGroup, body: JsonObject) : void
     group.fromJson(clone(bld));
 }
 
-async function addUserToGroupAsync(userid: string, gr: JsonObject, auditReq: core.ApiRequest) : Promise<void>
+export async function addUserToGroupAsync(userid: string, gr: JsonObject, auditReq: core.ApiRequest) : Promise<void>
 {
     let sub = new PubGroupMembership();
     sub.id = "gm-" + userid + "-" + gr["id"];
@@ -4698,7 +3992,7 @@ export async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
         name = withDefault(compileReq.meta["name"], name);
     }
     name = name.replace(/[^a-zA-Z0-9]+/g, "-");
-    let cfg = await settingsContainer.getAsync("compile");
+    let cfg = await core.settingsContainer.getAsync("compile");
     let sha = core.sha256(JSON.stringify(compileReq.toJson()) + "/" + mbedVersion + "/" + cfg["__version"]).substr(0, 32);
     let info = await compileContainer.getBlobToTextAsync(sha + ".json");
     let compileResp = new CompileResp();
@@ -4772,7 +4066,7 @@ export async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
                     // OK, looks like image ID
                 }
                 else {
-                    let tags = await settingsContainer.getAsync("compiletag");
+                    let tags = await core.settingsContainer.getAsync("compiletag");
                     if (tags == null) {
                         tags = ({});
                     }
@@ -5555,7 +4849,7 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
 /**
  * {action:ignoreReturn}
  */
-async function updateAndUpsertAsync(container: cachedStore.Container, req: core.ApiRequest, update:td.Action1<JsonBuilder>) : Promise<JsonBuilder>
+export async function updateAndUpsertAsync(container: cachedStore.Container, req: core.ApiRequest, update:td.Action1<JsonBuilder>) : Promise<JsonBuilder>
 {
     let bld: JsonBuilder;
     let last = {}
@@ -5848,7 +5142,7 @@ async function updatePointerAsync(req: core.ApiRequest) : Promise<void>
 async function pokeReleaseAsync(relLabel: string, delay: number) : Promise<void>
 {
     await td.sleepAsync(delay);
-    await settingsContainer.updateAsync("releases", async (entry: JsonBuilder) => {
+    await core.settingsContainer.updateAsync("releases", async (entry: JsonBuilder) => {
         let jsb = entry["ids"][relLabel];
         jsb["numpokes"] = jsb["numpokes"] + 1;
     });
@@ -5857,7 +5151,7 @@ async function pokeReleaseAsync(relLabel: string, delay: number) : Promise<void>
 export async function getCloudRelidAsync(includeVer: boolean) : Promise<string>
 {
     let ver: string;
-    let entry = await settingsContainer.getAsync("releases");
+    let entry = await core.settingsContainer.getAsync("releases");
     let js = entry["ids"]["cloud"];
     ver = js["relid"];
     if (includeVer) {
@@ -5934,8 +5228,8 @@ async function clearPtrCacheAsync(id: string) : Promise<void>
             entry1["version"] = "outdated";
         });
         if ( ! /@\w+$/.test(id)) {
-            await refreshSettingsAsync();
-            for (let lang of Object.keys(theServiceSettings.langs)) {
+            await core.refreshSettingsAsync();
+            for (let lang of Object.keys(core.serviceSettings.langs)) {
                 await cacheRewritten.updateAsync("ptrcache/" + chname + "/" + id + "@" + lang, async (entry2: JsonBuilder) => {
                     entry2["version"] = "outdated";
                 });
@@ -6001,8 +5295,8 @@ async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: Json
                 if ( ! official && ! /^(users|usercontent|preview|)$/.test(doctype)) {
                     official = true;
                 }
-                await refreshSettingsAsync();
-                let pathConfig = theServiceSettings.paths[doctype];
+                await core.refreshSettingsAsync();
+                let pathConfig = core.serviceSettings.paths[doctype];
                 if (pathConfig != null) {
                     td.jsonCopyFrom(pubdata, pathConfig);
                 }
@@ -6042,7 +5336,7 @@ function _initConfig() : void
             core.checkPermission(req, "root");
         }
         if (req.status == 200) {
-            let entry = await settingsContainer.getAsync(req.verb);
+            let entry = await core.settingsContainer.getAsync(req.verb);
             if (entry == null) {
                 req.response = ({});
             }
@@ -6059,10 +5353,10 @@ function _initConfig() : void
         if (req1.status == 200) {
             await auditLogAsync(req1, "update-settings", {
                 subjectid: req1.verb,
-                oldvalue: await settingsContainer.getAsync(req1.verb),
+                oldvalue: await core.settingsContainer.getAsync(req1.verb),
                 newvalue: req1.body
             });
-            await settingsContainer.updateAsync(req1.verb, async (entry1: JsonBuilder) => {
+            await core.settingsContainer.updateAsync(req1.verb, async (entry1: JsonBuilder) => {
                 core.copyJson(req1.body, entry1);
                 entry1["stamp"] = azureTable.createLogId();
             });
@@ -6120,39 +5414,21 @@ async function executeSearchAsync(kind: string, q: string, req: core.ApiRequest)
     core.buildListResponse(fetchResult2, req);
 }
 
-
-async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: string) : Promise<void>
+export async function deleteUserAsync(req8:core.ApiRequest)
 {
-    pass = core.normalizeAndHash(pass);
-    if (! prevPass) {
-        prevPass = pass;
-    }
-    let ok = false;
-    await passcodesContainer.updateAsync(pass, async (entry: JsonBuilder) => {
-        let kind = orEmpty(entry["kind"]);
-        if (kind == "" || kind == "reserved") {
-            entry["kind"] = "userpointer";
-            entry["userid"] = req.rootId;
-            ok = true;
-        }
-        else {
-            ok = false;
-        }
+    await tdliteWorkspace.deleteAllHistoryAsync(req8.rootId, req8);
+    await deleteAllByUserAsync(comments, req8.rootId, req8);
+    await deleteAllByUserAsync(arts, req8.rootId, req8);
+    await deleteAllByUserAsync(tdliteScripts.scripts, req8.rootId, req8);
+    await deleteAllByUserAsync(pointers, req8.rootId, req8);
+    await deleteAllByUserAsync(screenshots, req8.rootId, req8);
+    await deleteAllByUserAsync(reviews, req8.rootId, req8);
+    // TODO We leave groups alone - rethink.
+    // Bugs, releases, etc just stay
+    let delok = await deleteAsync(req8.rootPub);
+    await auditLogAsync(req8, "delete", {
+        oldvalue: req8.rootPub
     });
-    if (ok) {
-        await core.pubsContainer.updateAsync(req.rootId, async (entry1: JsonBuilder) => {
-            entry1["login"] = pass;
-        });
-        if (prevPass != pass) {
-            await passcodesContainer.updateAsync(prevPass, async (entry2: JsonBuilder) => {
-                entry2["kind"] = "reserved";
-            });
-        }
-        req.response = ({});
-    }
-    else {
-        req.status = httpCode._400BadRequest;
-    }
 }
 
 async function deleteAllByUserAsync(store: indexedStore.Store, id: string, req: core.ApiRequest) : Promise<void>
@@ -6194,60 +5470,6 @@ async function deleteReviewAsync(js: JsonObject) : Promise<boolean>
     return delok2;
 }
 
-
-async function refreshSettingsAsync() : Promise<void>
-{
-    let now = new Date().getTime();
-    if (now - lastSettingsCheck > 5000) {
-        while (lastSettingsCheck < 0) {
-            await td.sleepAsync(0.1);
-        }
-        now = new Date().getTime();
-        if (now - lastSettingsCheck > 5000) {
-            lastSettingsCheck = -1;
-            let entry2 = await settingsContainer.getAsync("settings");
-            if (entry2 == null) {
-                entry2 = ({ "permissions": {} });
-            }
-            let permMap = clone(entry2["permissions"]);
-            let numAdded = 1;
-            while (numAdded > 0) {
-                numAdded = 0;
-                for (let perm of Object.keys(permMap)) {
-                    let currperm = permMap[perm];
-                    for (let perm2 of Object.keys(permMap[perm])) {
-                        let otherperm = permMap[perm2];
-                        if (otherperm != null) {
-                            for (let perm3 of Object.keys(otherperm)) {
-                                if ( ! currperm.hasOwnProperty(perm3)) {
-                                    currperm[perm3] = 1;
-                                    numAdded = numAdded + 1;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            let jsb = ({
-  "paths": {},
-  "blockedNicknameRx": "official|touchdevelop",
-  "accounts": {},
-  "termsversion": "v1",
-  "emailFrom": "noreply@touchdevelop.com",
-  "tokenExpiration": 0,
-  "defaultLang": "en",
-  "langs": {},
-  "envrewrite": {},
-  "alarmingEmails": []
-});
-            td.jsonCopyFrom(jsb, entry2);
-            theServiceSettings = ServiceSettings.createFromJson(clone(jsb));
-            lastSettingsCheck = now;
-            core.settingsPermissions = clone(permMap);
-
-        }
-    }
-}
 
 function pubFeatures(pub: JsonObject) : string[]
 {    
@@ -6403,7 +5625,7 @@ function _initAdmin() : void
             if (cd.length < 64) {
                 cd = core.sha256(cd);
             }
-            let entry1 = await passcodesContainer.getAsync("code/" + cd);
+            let entry1 = await tdliteUsers.passcodesContainer.getAsync("code/" + cd);
             if (entry1 == null) {
                 entry1 = ({ "status": "four oh four" });
             }
@@ -6414,12 +5636,12 @@ function _initAdmin() : void
         core.checkPermission(req8, "root");
         if (req8.status == 200) {
             let cd1 = req8.body["code"];
-            let entry2 = await passcodesContainer.getAsync(cd1);
+            let entry2 = await tdliteUsers.passcodesContainer.getAsync(cd1);
             if (entry2 == null) {
                 entry2 = ({ "status": "four oh four" });
             }
             else if (orEmpty(req8.body["op"]) == "delete") {
-                await passcodesContainer.updateAsync(cd1, async (entry3: JsonBuilder) => {
+                await tdliteUsers.passcodesContainer.updateAsync(cd1, async (entry3: JsonBuilder) => {
                     for (let s4 of Object.keys(entry3)) {
                         delete entry3[s4];
                     }
@@ -6432,7 +5654,7 @@ function _initAdmin() : void
     core.addRoute("POST", "admin", "mbedint", async (req9: core.ApiRequest) => {
         core.checkPermission(req9, "root");
         if (req9.status == 200) {
-            let ccfg = CompilerConfig.createFromJson((await settingsContainer.getAsync("compile"))[req9.argument]);
+            let ccfg = CompilerConfig.createFromJson((await core.settingsContainer.getAsync("compile"))[req9.argument]);
             let jsb2 = clone(req9.body);
             let response2 = await mbedintRequestAsync(ccfg, jsb2);
             req9.response = response2.contentAsJson();
@@ -6476,8 +5698,8 @@ async function _initAcsAsync() : Promise<void>
                             entry1["acsFlag"] = stat;
                             entry1["acsJobId"] = jobid;
                         });
-                        await refreshSettingsAsync();
-                        let uid = orEmpty(theServiceSettings.accounts["acsreport"]);
+                        await core.refreshSettingsAsync();
+                        let uid = orEmpty(core.serviceSettings.accounts["acsreport"]);
                         if (uid != "") {
                             await setReqUserIdAsync(req, uid);
                             req.rootPub = await core.pubsContainer.getAsync(pubid);
@@ -6740,80 +5962,6 @@ async function copyDeploymentAsync(req: core.ApiRequest, target: string) : Promi
 }
 
 
-async function sendPermissionNotificationAsync(req: core.ApiRequest, r: JsonBuilder) : Promise<void>
-{
-    if (isAlarming(r["permissions"])) {
-        await refreshSettingsAsync();
-        if ( ! r.hasOwnProperty("settings")) {
-            r["settings"] = ({});
-        }
-        let name_ = withDefault(core.decrypt(r["settings"]["realname"]), r["pub"]["name"]);
-        let subj = "[TDLite] permissions for " + name_ + " set to " + r["permissions"];
-        let body = "By code.";
-        if (req.userid != "") {
-            let entry2 = req.userinfo.json;
-            body = "Permissions set by: " + entry2["pub"]["name"] + " " + currClientConfig.shareUrl + "/" + req.userid;
-        }
-        body = body + "\n\nTarget user: " + currClientConfig.shareUrl + "/" + r["id"];
-        await parallel.forJsonAsync(theServiceSettings.alarmingEmails, async (json: JsonObject) => {
-            let email = td.toString(json);
-            await sendgrid.sendAsync(email, "noreply@touchdevelop.com", subj, body);
-        });
-    }
-}
-
-async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, passId: string, auditReq: core.ApiRequest) : Promise<void>
-{
-    let userid = userjson["id"];
-    let credit = codeObj["credit"];
-    let singleCredit = codeObj["singlecredit"];
-    if (singleCredit != null) {
-        credit = Math.min(credit, singleCredit);
-    }
-    let perm = withDefault(codeObj["permissions"], "preview,");
-    await core.pubsContainer.updateAsync(userid, async (entry: JsonBuilder) => {
-        core.jsonAdd(entry, "credit", credit);
-        core.jsonAdd(entry, "totalcredit", credit);
-        if ( ! core.hasPermission(clone(entry), perm)) {
-            let existing = core.normalizePermissions(orEmpty(entry["permissions"]));
-            entry["permissions"] = existing + "," + perm;
-        }
-        if (! entry["firstcode"]) {
-            entry["firstcode"] = passId;
-        }
-        await sendPermissionNotificationAsync(core.emptyRequest, entry);
-    });
-    await passcodesContainer.updateAsync(passId, async (entry1: JsonBuilder) => {
-        entry1["credit"] = entry1["credit"] - credit;
-    });
-    await auditLogAsync(auditReq, "apply-code", {
-        userid: codeObj["userid"],
-        subjectid: userjson["id"],
-        publicationid: passId.replace(/^code\//g, ""),
-        publicationkind: "code",
-        oldvalue: codeObj
-    });
-    for (let grpid of orEmpty(codeObj["groups"]).split(",")) {
-        if (grpid != "") {
-            let grp = await core.getPubAsync(grpid, "group");
-            if (grp != null) {
-                await addUserToGroupAsync(userid, grp, auditReq);
-            }
-        }
-    }
-}
-
-function isAlarming(perm: string) : boolean
-{
-    let isAlarming2: boolean;
-    let jsb = {};
-    jsb["permissions"] = "non-alarming";
-    let isAlarming = ! core.hasPermission(clone(jsb), perm);
-    return isAlarming;
-    return isAlarming2;
-}
-
-
 function accessTokenRedirect(res: restify.Response, url2: string) : void
 {
     let tok = stripCookie(url2);
@@ -6823,25 +5971,7 @@ function accessTokenRedirect(res: restify.Response, url2: string) : void
     res.redirect(303, tok.url);
 }
 
-function wrapAccessTokenCookie(cookie: string): string 
-{
-    let value = "TD_ACCESS_TOKEN2=" + cookie + "; ";
-    if (core.hasHttps)
-        value += "Secure; "
-    value += "HttpOnly; Path=/; "
-    if (!/localhost:/.test(core.self))
-        value += "Domain=" + core.self.replace(/\/$/g, "").replace(/.*\//g, "").replace(/:\d+$/, "") + "; "
-    value += "Expires=Fri, 31 Dec 9999 23:59:59 GMT";
-    return value;
-}
-
-export interface IRedirectAndCookie
-{
-    url:string;
-    cookie:string;
-}
-
-function stripCookie(url2: string) : IRedirectAndCookie
+function stripCookie(url2: string) : tdliteUsers.IRedirectAndCookie
 {
     let cook: string;
     let coll = (/&td_cookie=([\w.]+)$/.exec(url2) || []);
@@ -6849,7 +5979,7 @@ function stripCookie(url2: string) : IRedirectAndCookie
     cook = "";
     if (cookie != null) {
         url2 = url2.substr(0, url2.length - coll[0].length);
-        cook = wrapAccessTokenCookie(cookie);
+        cook = tdliteUsers.wrapAccessTokenCookie(cookie);
     }
     return {
         url: url2,
@@ -7143,17 +6273,17 @@ function _initRuntime() : void
 async function handleLanguageAsync(req: restify.Request, res: restify.Response, setCookie: boolean) : Promise<string>
 {
     let lang2: string;
-    await refreshSettingsAsync();
-    let lang = theServiceSettings.defaultLang;
+    await core.refreshSettingsAsync();
+    let lang = core.serviceSettings.defaultLang;
     for (let s of orEmpty(req.header("Accept-Language")).split(",")) {
         let headerLang = orEmpty((/^\s*([a-z][a-z])/.exec(s) || [])[1]);
-        if (theServiceSettings.langs.hasOwnProperty(headerLang)) {
+        if (core.serviceSettings.langs.hasOwnProperty(headerLang)) {
             lang = headerLang;
             break;
         }
     }
     let cookieLang = orEmpty((/TD_LANG=([a-z][a-z])/.exec(orEmpty(req.header("Cookie"))) || [])[1]);
-    if (theServiceSettings.langs.hasOwnProperty(cookieLang)) {
+    if (core.serviceSettings.langs.hasOwnProperty(cookieLang)) {
         lang = cookieLang;
     }
     else {
@@ -7165,7 +6295,7 @@ async function handleLanguageAsync(req: restify.Request, res: restify.Response, 
             }
         }
     }
-    if (lang == theServiceSettings.defaultLang) {
+    if (lang == core.serviceSettings.defaultLang) {
         lang = "";
     }
     else {
@@ -7309,7 +6439,7 @@ async function _initPromoAsync() : Promise<void>
         if (req1.status != 200) {
             return;
         }
-        req1.response = await settingsContainer.getAsync("promo");
+        req1.response = await core.settingsContainer.getAsync("promo");
     });
     core.addRoute("GET", "*script", "promo", async (req2: core.ApiRequest) => {
         core.checkPermission(req2, "script-promo");

@@ -39,6 +39,7 @@
         "src/tdlite-core.ts",
         "src/tdlite-scripts.ts",
         "src/tdlite-workspace.ts",
+        "src/tdlite-users.ts",
         "src/tdlite.ts",
         "src/remote.ts"        
     ],

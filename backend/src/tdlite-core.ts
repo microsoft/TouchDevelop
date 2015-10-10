@@ -52,6 +52,39 @@ export var settingsPermissions: JsonObject;
 export var tableClient: azureTable.Client;
 export var throttleDisabled: boolean = false;
 export var tokenSecret:string;
+export var serviceSettings: ServiceSettings;
+export var settingsContainer: cachedStore.Container;
+
+var lastSettingsCheck: number = 0;
+
+export class ServiceSettings
+    extends td.JsonRecord
+{
+    @json public paths: JsonObject;
+    @json public emailFrom: string = "";
+    @json public accounts: JsonObject;
+    @json public alarmingEmails: JsonObject;
+    @json public termsversion: string = "";
+    @json public blockedNicknameRx: string = "";
+    @json public tokenExpiration: number = 0;
+    @json public defaultLang: string = "";
+    @json public langs: JsonObject;
+    @json public envrewrite: JsonObject;
+    static createFromJson(o:JsonObject) { let r = new ServiceSettings(); r.fromJson(o); return r; }
+}
+
+export interface IServiceSettings {
+    paths: JsonObject;
+    emailFrom: string;
+    accounts: JsonObject;
+    alarmingEmails: JsonObject;
+    termsversion: string;
+    blockedNicknameRx: string;
+    tokenExpiration: number;
+    defaultLang: string;
+    langs: JsonObject;
+    envrewrite: JsonObject;
+}
 
 export class RouteIndex
 {
@@ -1745,5 +1778,66 @@ export async function specTableClientAsync(pref: string) : Promise<azureTable.Cl
         storageAccessKey: td.serverSetting(pref + "_KEY", false)
     });
     return tableClient;
+}
+
+export function isAlarming(perm: string) : boolean
+{
+    let jsb = {};
+    jsb["permissions"] = "non-alarming";
+    return ! hasPermission(jsb, perm);
+}
+
+export async function refreshSettingsAsync() : Promise<void>
+{
+    let now = new Date().getTime();
+    if (now - lastSettingsCheck > 5000) {
+        while (lastSettingsCheck < 0) {
+            await td.sleepAsync(0.1);
+        }
+        now = new Date().getTime();
+        if (now - lastSettingsCheck > 5000) {
+            lastSettingsCheck = -1;
+            let entry2 = await settingsContainer.getAsync("settings");
+            if (entry2 == null) {
+                entry2 = ({ "permissions": {} });
+            }
+            let permMap = clone(entry2["permissions"]);
+            let numAdded = 1;
+            while (numAdded > 0) {
+                numAdded = 0;
+                for (let perm of Object.keys(permMap)) {
+                    let currperm = permMap[perm];
+                    for (let perm2 of Object.keys(permMap[perm])) {
+                        let otherperm = permMap[perm2];
+                        if (otherperm != null) {
+                            for (let perm3 of Object.keys(otherperm)) {
+                                if ( ! currperm.hasOwnProperty(perm3)) {
+                                    currperm[perm3] = 1;
+                                    numAdded = numAdded + 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            let jsb = {
+              "paths": {},
+              "blockedNicknameRx": "official|touchdevelop",
+              "accounts": {},
+              "termsversion": "v1",
+              "emailFrom": "noreply@touchdevelop.com",
+              "tokenExpiration": 0,
+              "defaultLang": "en",
+              "langs": {},
+              "envrewrite": {},
+              "alarmingEmails": []
+            };
+            td.jsonCopyFrom(jsb, entry2);
+            serviceSettings = ServiceSettings.createFromJson(clone(jsb));
+            lastSettingsCheck = now;
+            settingsPermissions = clone(permMap);
+
+        }
+    }
 }
 
