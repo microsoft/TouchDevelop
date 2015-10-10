@@ -25,6 +25,7 @@ import * as tdliteWorkspace from "./tdlite-workspace"
 import * as nodemailer from "./nodemailer"
 import * as sendgrid from "./sendgrid"
 import * as tdliteData from "./tdlite-data"
+import * as audit from "./tdlite-audit"
 import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
@@ -177,11 +178,11 @@ export async function initAsync() : Promise<void>
                 if (req1.status != 200) {
                     return;
                 }
-                await main.auditLogAsync(req1, "set-perm", {
+                await audit.logAsync(req1, "set-perm", {
                     data: perm
                 });
                 if (core.isAlarming(perm)) {
-                    await main.auditLogAsync(req1, "set-perm-high", {
+                    await audit.logAsync(req1, "set-perm-high", {
                         data: perm
                     });
                 }
@@ -192,7 +193,7 @@ export async function initAsync() : Promise<void>
             }
             let credit = td.toNumber(req1.body["credit"]);
             if (credit != null) {
-                await main.auditLogAsync(req1, "set-credit", {
+                await audit.logAsync(req1, "set-credit", {
                     data: credit.toString()
                 });
                 await main.updateAndUpsertAsync(core.pubsContainer, req1, async (entry2: JsonBuilder) => {
@@ -343,7 +344,7 @@ export async function initAsync() : Promise<void>
             else {
                 assert(false, "no cookie in token");
             }
-            await main.auditLogAsync(req7, "signin-as", {
+            await audit.logAsync(req7, "signin-as", {
                 data: core.sha256(tok.url).substr(0, 10)
             });
             resp["token"] = tok.url;
@@ -424,7 +425,7 @@ export async function initAsync() : Promise<void>
         if (req12.status == 200) {
             let coll = (<string[]>[]);
             let credit1 = td.toNumber(req12.body["credit"]);
-            await main.auditLogAsync(req12, "generatecodes", {
+            await audit.logAsync(req12, "generatecodes", {
                 data: numCodes + "x" + credit1 + perm1,
                 newvalue: req12.body
             });
@@ -537,7 +538,7 @@ export async function initAsync() : Promise<void>
                 entry["pub"]["about"] = sett.aboutme;
                 req4.response = clone(settings);
             });
-            await main.auditLogAsync(req4, logcat, {
+            await audit.logAsync(req4, logcat, {
                 oldvalue: req4.rootPub,
                 newvalue: clone(bld)
             });
@@ -551,7 +552,7 @@ export async function initAsync() : Promise<void>
         }
         if (req5.status == 200) {
             if (req5.userid != req5.rootId) {
-                await main.auditLogAsync(req5, "view-settings");
+                await audit.logAsync(req5, "view-settings");
             }
             let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
             if (orEmpty(req5.queryOptions["format"]) != "short") {
@@ -796,7 +797,7 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
     await passcodesContainer.updateAsync(passId, async (entry1: JsonBuilder) => {
         entry1["credit"] = entry1["credit"] - credit;
     });
-    await main.auditLogAsync(auditReq, "apply-code", {
+    await audit.logAsync(auditReq, "apply-code", {
         userid: codeObj["userid"],
         subjectid: userjson["id"],
         publicationid: passId.replace(/^code\//g, ""),

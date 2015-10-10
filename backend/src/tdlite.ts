@@ -39,6 +39,7 @@ import * as tdliteData from "./tdlite-data"
 import * as tdliteHtml from "./tdlite-html"
 
 import * as core from "./tdlite-core"
+import * as audit from "./tdlite-audit"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteWorkspace from "./tdlite-workspace"
 import * as tdliteUsers from "./tdlite-users"
@@ -98,8 +99,6 @@ var acsCallbackToken: string = "";
 var acsCallbackUrl: string = "";
 var loginHtml: JsonObject;
 var deployChannels: string[];
-var auditContainer: cachedStore.Container;
-var auditStore: indexedStore.Store;
 var videoContainer: azureBlobStorage.Container;
 var videoStore: indexedStore.Store;
 var promosTable: azureTable.Table;
@@ -465,39 +464,6 @@ export interface IReleaseLabel {
     releaseid: string;
     relid: string;
     numpokes: number;
-}
-
-export class PubAuditLog
-    extends td.JsonRecord
-{
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public type: string = "";
-    @json public userid: string = "";
-    @json public subjectid: string = "";
-    @json public publicationid: string = "";
-    @json public publicationkind: string = "";
-    @json public data: string = "";
-    @json public oldvalue: JsonObject;
-    @json public newvalue: JsonObject;
-    @json public ip: string = "";
-    @json public tokenid: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubAuditLog(); r.fromJson(o); return r; }
-}
-
-export interface IPubAuditLog {
-    kind?: string;
-    time?: number;
-    type?: string;
-    userid?: string;
-    subjectid?: string;
-    publicationid?: string;
-    publicationkind?: string;
-    data?: string;
-    oldvalue?: JsonObject;
-    newvalue?: JsonObject;
-    ip?: string;
-    tokenid?: string;
 }
 
 export class PubWebfile
@@ -1141,7 +1107,7 @@ async function _init_0Async() : Promise<void>
         redisCacheSeconds: 600,
         noBlobStorage: true
     });
-    await _initAuditAsync();
+    await audit.initAsync();
     // ## General
     core.addRoute("POST", "", "", async (req: core.ApiRequest) => {
         await core.performBatchAsync(req);
@@ -1676,7 +1642,7 @@ async function _initGroupsAsync() : Promise<void>
             jsb1["pub"] = group.toJson();
             await core.generateIdAsync(jsb1, 8);
             await groups.insertAsync(jsb1);
-            await auditLogAsync(req, "create-group", {
+            await audit.logAsync(req, "create-group", {
                 subjectid: req.userid,
                 publicationid: jsb1["id"],
                 publicationkind: "group",
@@ -1937,7 +1903,7 @@ async function _initGroupsAsync() : Promise<void>
             if (askedToJoin && gr.isclass && withDefault(gr.userid, "???") == req10.userid) {
                 // OK, this is an approval.
                 if (orFalse(req10.rootPub["awaiting"])) {
-                    await auditLogAsync(req10, "approve-user", {
+                    await audit.logAsync(req10, "approve-user", {
                         subjectid: req10.rootId,
                         publicationid: gr.id,
                         publicationkind: "group"
@@ -1990,7 +1956,7 @@ async function _initGroupsAsync() : Promise<void>
                     await core.pubsContainer.updateAsync(req11.rootId, async (entry9: JsonBuilder) => {
                         delete core.setBuilderIfMissing(entry9, "groups")[grid];
                     });
-                    await auditLogAsync(req11, "leave-group", {
+                    await audit.logAsync(req11, "leave-group", {
                         subjectid: req11.rootId,
                         publicationid: grid,
                         publicationkind: "group"
@@ -2802,7 +2768,7 @@ async function _initReleasesAsync() : Promise<void>
             lab.releaseid = rel3.releaseid;
             lab.relid = rel3.id;
             lab.numpokes = 0;
-            await auditLogAsync(req3, "lbl-" + lab.name);
+            await audit.logAsync(req3, "lbl-" + lab.name);
             await core.settingsContainer.updateAsync("releases", async (entry2: JsonBuilder) => {
                 let jsb2 = entry2["ids"];
                 if (jsb2 == null) {
@@ -3054,43 +3020,6 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
             }
         }
     }
-}
-
-export async function auditLogAsync(req: core.ApiRequest, type: string, options_0: IPubAuditLog = {}) : Promise<void>
-{
-    let options_ = new PubAuditLog(); options_.load(options_0);
-    let msg = options_;
-    msg.time = await core.nowSecondsAsync();
-    if (msg.userid == "") {
-        msg.userid = req.userid;
-    }
-    let pubkind = "";
-    if (req.rootPub != null) {
-        pubkind = orEmpty(req.rootPub["kind"]);
-    }
-    if (pubkind == "user" && msg.subjectid == "") {
-        msg.subjectid = req.rootId;
-    }
-    if (msg.publicationid == "") {
-        msg.publicationid = req.rootId;
-        msg.publicationkind = pubkind;
-        if (msg.subjectid == "" && pubkind != "") {
-            msg.subjectid = orEmpty(req.rootPub["pub"]["userid"]);
-        }
-    }
-    if (req.userinfo.token != null) {
-        msg.tokenid = core.sha256(tdliteUsers.tokenString(req.userinfo.token)).substr(0, 10);
-    }
-    msg.type = type;
-    msg.ip = core.encrypt(req.userinfo.ip, "AUDIT");
-    if (false) {
-        msg.oldvalue = core.encryptJson(msg.oldvalue, "AUDIT");
-        msg.newvalue = core.encryptJson(msg.newvalue, "AUDIT");
-    }
-    let jsb = {};
-    jsb["id"] = azureTable.createLogId();
-    jsb["pub"] = msg.toJson();
-    await auditStore.insertAsync(jsb);
 }
 
 
@@ -3442,7 +3371,7 @@ async function _initLoginAsync() : Promise<void>
             if (req5.status == 200) {
                 let tok = await tdliteUsers.generateTokenAsync(req5.rootId, "admin", "no-cookie");
                 assert(tok.cookie == "", "no cookie expected");
-                await auditLogAsync(req5, "rawtoken", {
+                await audit.logAsync(req5, "rawtoken", {
                     data: core.sha256(tok.url).substr(0, 10)
                 });
                 req5.response = (core.self + "?access_token=" + tok.url);
@@ -3584,7 +3513,7 @@ async function loginCreateUserAsync(req: restify.Request, session: LoginSession,
             let jsb = await tdliteUsers.createNewUserAsync(tdUsername, "", core.normalizeAndHash(session.pass), ",student,", "", initialApprovals);
             let user2 = jsb["id"];
 
-            await auditLogAsync(buildAuditApiRequest(req), "user-create-code", {
+            await audit.logAsync(audit.buildAuditApiRequest(req), "user-create-code", {
                 userid: session.ownerId,
                 subjectid: user2,
                 publicationid: session.groupid,
@@ -3657,7 +3586,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                 }
                 else {
                     let userjson = await core.getPubAsync(session.userid, "user");
-                    await tdliteUsers.applyCodeAsync(userjson, codeObj, passId, buildAuditApiRequest(req));
+                    await tdliteUsers.applyCodeAsync(userjson, codeObj, passId, audit.buildAuditApiRequest(req));
                     accessTokenRedirect(res, session.redirectUri);
                 }
             }
@@ -3733,7 +3662,7 @@ async function loginHandleCodeAsync(accessCode: string, res: restify.Response, r
                         entry1["termsversion"] = termsversion;
                     });
                 }
-                await auditLogAsync(buildAuditApiRequest(req), "user-agree", {
+                await audit.logAsync(audit.buildAuditApiRequest(req), "user-agree", {
                     userid: session.userid,
                     subjectid: session.userid,
                     data: termsversion,
@@ -3819,7 +3748,7 @@ export async function addUserToGroupAsync(userid: string, gr: JsonObject, auditR
         });
     }
     if (auditReq != null) {
-        await auditLogAsync(auditReq, "join-group", {
+        await audit.logAsync(auditReq, "join-group", {
             userid: pub["userid"],
             subjectid: userid,
             publicationid: gr["id"],
@@ -3882,8 +3811,8 @@ async function _initAbusereportsAsync() : Promise<void>
         if (core.canBeAdminDeleted(req3.rootPub)) {
             await core.checkDeletePermissionAsync(req3);
             if (req3.status == 200) {
-                await auditLogAsync(req3, "delete", {
-                    oldvalue: await auditDeleteValueAsync(req3.rootPub)
+                await audit.logAsync(req3, "delete", {
+                    oldvalue: await audit.auditDeleteValueAsync(req3.rootPub)
                 });
                 await deletePubRecAsync(req3.rootPub);
                 req3.response = ({});
@@ -4989,7 +4918,7 @@ async function _initPointersAsync() : Promise<void>
                     await storeNotificationsAsync(req, jsb1, "");
                     await scanAndSearchAsync(jsb1);
                     await clearPtrCacheAsync(ptr1.id);
-                    await auditLogAsync(req, "post-ptr", {
+                    await audit.logAsync(req, "post-ptr", {
                         newvalue: clone(jsb1)
                     });
                     await core.returnOnePubAsync(pointers, clone(jsb1), req);
@@ -5038,7 +4967,7 @@ async function _initPointersAsync() : Promise<void>
                         await setPointerPropsAsync(entry1, ({}));
                         ref = clone(entry1);
                     });
-                    await auditLogAsync(req2, "reindex-ptr", {
+                    await audit.logAsync(req2, "reindex-ptr", {
                         oldvalue: json1,
                         newvalue: ref
                     });
@@ -5130,7 +5059,7 @@ async function updatePointerAsync(req: core.ApiRequest) : Promise<void>
         let bld = await updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
             await setPointerPropsAsync(entry, req.body);
         });
-        await auditLogAsync(req, "update-ptr", {
+        await audit.logAsync(req, "update-ptr", {
             oldvalue: req.rootPub,
             newvalue: clone(bld)
         });
@@ -5351,7 +5280,7 @@ function _initConfig() : void
             req1.status = httpCode._404NotFound;
         }
         if (req1.status == 200) {
-            await auditLogAsync(req1, "update-settings", {
+            await audit.logAsync(req1, "update-settings", {
                 subjectid: req1.verb,
                 oldvalue: await core.settingsContainer.getAsync(req1.verb),
                 newvalue: req1.body
@@ -5426,7 +5355,7 @@ export async function deleteUserAsync(req8:core.ApiRequest)
     // TODO We leave groups alone - rethink.
     // Bugs, releases, etc just stay
     let delok = await deleteAsync(req8.rootPub);
-    await auditLogAsync(req8, "delete", {
+    await audit.logAsync(req8, "delete", {
         oldvalue: req8.rootPub
     });
 }
@@ -5437,9 +5366,9 @@ async function deleteAllByUserAsync(store: indexedStore.Store, id: string, req: 
     await store.getIndex("userid").forAllBatchedAsync(id, 50, async (json: JsonObject) => {
         await parallel.forJsonAsync(json, async (json1: JsonObject) => {
             if (logDelete) {
-                await auditLogAsync(req, "delete-by-user", {
+                await audit.logAsync(req, "delete-by-user", {
                     publicationid: json1["id"],
-                    oldvalue: await auditDeleteValueAsync(json1),
+                    oldvalue: await audit.auditDeleteValueAsync(json1),
                     publicationkind: json1["kind"]
                 });
             }
@@ -5585,13 +5514,13 @@ function _initAdmin() : void
         }
     });
     core.addRoute("POST", "admin", "copydeployment", async (req3: core.ApiRequest) => {
-        await auditLogAsync(req3, "copydeployment", {
+        await audit.logAsync(req3, "copydeployment", {
             data: req3.argument
         });
         await copyDeploymentAsync(req3, req3.argument);
     });
     core.addRoute("POST", "admin", "restart", async (req4: core.ApiRequest) => {
-        await auditLogAsync(req4, "copydeployment", {
+        await audit.logAsync(req4, "copydeployment", {
             data: "restart"
         });
         await copyDeploymentAsync(req4, core.myChannel);
@@ -6032,83 +5961,6 @@ async function handleEmailVerificationAsync(req: restify.Request, res: restify.R
     res.sendText(msg, "text/plain");
 }
 
-async function _initAuditAsync() : Promise<void>
-{
-    let auditTableClient = await core.specTableClientAsync("AUDIT_BLOB");
-    let auditBlobService = azureBlobStorage.createBlobService({
-        storageAccount: td.serverSetting("AUDIT_BLOB_ACCOUNT", false),
-        storageAccessKey: td.serverSetting("AUDIT_BLOB_KEY", false)
-    });
-    auditContainer = await cachedStore.createContainerAsync("audit", {
-        blobService: auditBlobService
-    });
-    auditStore = await indexedStore.createStoreAsync(auditContainer, "auditlog", {
-        tableClient: auditTableClient
-    });
-    let store = auditStore;
-    (<core.DecoratedStore><any>store).myResolve = async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
-        core.checkPermission(apiRequest, "audit");
-        if (apiRequest.status == 200) {
-            let coll = (<PubAuditLog[]>[]);
-            for (let jsb of fetchResult.items) {
-                let msg = PubAuditLog.createFromJson(jsb["pub"]);
-                msg.ip = core.decrypt(msg.ip);
-                coll.push(msg);
-            }
-            fetchResult.items = td.arrayToJson(coll);
-        }
-        else {
-            fetchResult.items = ([]);
-        }
-    }
-    ;
-    await store.createIndexAsync("all", entry => "all");
-    core.addRoute("GET", "audit", "", async (req: core.ApiRequest) => {
-        core.checkPermission(req, "audit");
-        if (req.status == 200) {
-            await core.anyListAsync(store, req, "all", "all");
-        }
-    });
-    await auditIndexAsync("userid");
-    await auditIndexAsync("publicationid");
-    await auditIndexAsync("subjectid");
-    await auditIndexAsync("type");
-}
-
-
-async function auditDeleteValueAsync(js: JsonObject) : Promise<JsonObject>
-{
-    let oldval2: JsonObject;
-    if (js["kind"] == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(js["id"]);
-        let jsb2 = clone(js);
-        jsb2["text"] = core.encrypt(entry2["text"], "AUDIT");
-        js = clone(jsb2);
-    }
-    return js;
-    return oldval2;
-}
-
-function buildAuditApiRequest(req: restify.Request) : core.ApiRequest
-{
-    let apiReq2: core.ApiRequest;
-    let apiReq = core.buildApiRequest("/api");
-    apiReq.userinfo.ip = req.remoteIp();
-    return apiReq;
-    return apiReq2;
-}
-
-async function auditIndexAsync(field: string) : Promise<void>
-{
-    let store = auditStore;
-    await store.createIndexAsync(field, entry => entry["pub"][field]);
-    core.addRoute("GET", "audit", field, async (req: core.ApiRequest) => {
-        core.checkPermission(req, "audit");
-        if (req.status == 200) {
-            await core.anyListAsync(store, req, field, req.argument);
-        }
-    });
-}
 
 export async function sendNotificationAsync(about: JsonObject, notkind: string, suplemental: JsonObject) : Promise<void>
 {

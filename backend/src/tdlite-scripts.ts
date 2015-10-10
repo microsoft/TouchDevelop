@@ -18,6 +18,7 @@ import * as parallel from "./parallel"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
+import * as audit from "./tdlite-audit"
 
 import * as main from "./tdlite"
 
@@ -346,7 +347,7 @@ export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuil
     let jsb2 = clone(jsb);
     delete jsb2["text"];
     let scr = clone(jsb2);
-    await main.auditLogAsync(req, "publish-script", {
+    await audit.logAsync(req, "publish-script", {
         subjectid: scr["pub"]["userid"],
         publicationid: scr["id"],
         publicationkind: "script",
