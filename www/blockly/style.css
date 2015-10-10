@@ -205,7 +205,7 @@ body, input {
   font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
 }
 
-.graduate-wrapper svg {
+.svg-wrapper svg {
   width: auto;
   height: 5rem; /* total height of a regular roundsymbol */
   width: 6rem; /* stupid IE */
@@ -217,14 +217,6 @@ body, input {
   font-size: 80%;
   text-align: center;
   white-space: nowrap;
-}
-
-body:not(.hasFota) .fota {
-  display: none;
-}
-
-body.hasFota .notfota {
-  display: none;
 }
 
 /* Misc */
@@ -241,7 +233,7 @@ a.command:hover {
 /* Very low-height displays: hide the icons, just keep the text (e.g. "run").
  * Hide script name, flatten icons. */
 @media (max-height: 600px) {
-  .roundsymbol, #script-description, .graduate-wrapper {
+  .roundsymbol, #script-description, .svg-wrapper {
     display: none !important;
   }
 
@@ -290,11 +282,11 @@ a.command:hover {
     display: inline;
   }
 
-  .graduate-wrapper {
+  .svg-wrapper {
     vertical-align: middle;
   }
 
-  .graduate-wrapper svg {
+  .svg-wrapper svg {
     height: 2.8rem;
     width: 4rem; /* stupid IE */
   }

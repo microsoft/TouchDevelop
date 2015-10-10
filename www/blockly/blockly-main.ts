@@ -48,7 +48,7 @@ module TDev {
     switch (message.type) {
       case External.MessageType.Init:
         setupEditor(<External.Message_Init> message);
-        setupButtons((<External.Message_Init> message).fota);
+        setupButtons();
         setupCurrentVersion(<External.Message_Init> message);
         break;
 
@@ -548,10 +548,7 @@ module TDev {
     });
   }
 
-  function setupButtons(fota: boolean) {
-    if (fota)
-      $("body").addClass("hasFota");
-
+  function setupButtons() {
     $("#command-quit").click(() => {
       doSave();
       post({ type: External.MessageType.Quit });

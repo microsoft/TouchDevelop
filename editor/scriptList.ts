@@ -7431,8 +7431,7 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ") +
-                        lf("Everyone will be able to see your script on the Internet. ")
+                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
