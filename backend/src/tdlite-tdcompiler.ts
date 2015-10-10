@@ -16,7 +16,6 @@ var clone = td.clone;
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as cachedStore from "./cached-store"
 import * as parallel from "./parallel"
-import * as kraken from "./kraken"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"

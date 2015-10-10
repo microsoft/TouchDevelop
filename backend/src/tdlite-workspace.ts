@@ -21,6 +21,7 @@ import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
+import * as tdliteCppCompiler from "./tdlite-cppcompiler"
 
 import * as main from "./tdlite"
 
@@ -318,7 +319,7 @@ async function postInstalledAsync(req: core.ApiRequest) : Promise<void>
     else {
         req.verb = req.subArgument;
         if (req.subArgument == "compile") {
-            await main.mbedCompileAsync(req);
+            await tdliteCppCompiler.mbedCompileAsync(req);
         }
         else if (req.subArgument == "publish") {
             await core.canPostAsync(req, "script");
