@@ -27,6 +27,7 @@ import * as sendgrid from "./sendgrid"
 import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
+import * as tdliteGroups from "./tdlite-groups"
 import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
@@ -158,6 +159,11 @@ export async function initAsync() : Promise<void>
     });
 
     users = await indexedStore.createStoreAsync(core.pubsContainer, "user");
+    core.registerPubKind({
+        store: users,
+        deleteWithAuthor: false,
+        importOne: importUserAsync
+    })
     await core.setResolveAsync(users, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         resolveUsers(fetchResult, apiRequest);
     });
@@ -724,7 +730,7 @@ export async function sendPermissionNotificationAsync(req: core.ApiRequest, r: J
     }
 }
 
-export async function importUserAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importUserAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let user = new PubUser();
     user.fromJson(body);
@@ -809,7 +815,7 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
         if (grpid != "") {
             let grp = await core.getPubAsync(grpid, "group");
             if (grp != null) {
-                await main.addUserToGroupAsync(userid, grp, auditReq);
+                await tdliteGroups.addUserToGroupAsync(userid, grp, auditReq);
             }
         }
     }

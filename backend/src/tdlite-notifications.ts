@@ -22,6 +22,7 @@ import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
+import * as tdliteGroups from "./tdlite-groups"
 
 import * as main from "./tdlite"
 
@@ -105,8 +106,8 @@ export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind
         for (let sub of await subscriptions.getIndex("publicationid").fetchAllAsync(userid)) {
             toNotify[sub["pub"]["userid"]] = "subscribed";
         }
-        for (let grJson of await main.getUser_sGroupsAsync(userid)) {
-            let gr = main.PubGroup.createFromJson(grJson["pub"]);
+        for (let grJson of await tdliteGroups.getUser_sGroupsAsync(userid)) {
+            let gr = tdliteGroups.PubGroup.createFromJson(grJson["pub"]);
             if (gr.isclass && gr.userid != userid) {
                 toNotify[gr.userid] = "class";
             }

@@ -435,7 +435,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
     });
 }
 
-export async function importScriptAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importScriptAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let pubScript = new PubScript();
     pubScript.fromJson(core.removeDerivedProperties(body));
@@ -471,6 +471,18 @@ export async function initAsync() : Promise<void>
     });
     updateSlots = await indexedStore.createStoreAsync(core.pubsContainer, "updateslot");
     scripts = await indexedStore.createStoreAsync(core.pubsContainer, "script");
+    core.registerPubKind({
+        store: scripts,
+        deleteWithAuthor: true,
+        importOne: importScriptAsync,
+        specialDeleteAsync: async (entryid:string, delentry:JsonObject) => {
+            await scriptText.updateAsync(entryid, async (entry1: JsonBuilder) => {
+                for (let fld of Object.keys(entry1)) {
+                    delete entry1[fld];
+                }
+            });
+        },
+    })
     await core.setResolveAsync(scripts, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveScriptsAsync(fetchResult, apiRequest, false);
     }
@@ -703,5 +715,3 @@ async function clearScriptCountsAsync(script: PubScript) : Promise<void>
         entry["pub"]["comments"] = 0;
     });
 }
-
-

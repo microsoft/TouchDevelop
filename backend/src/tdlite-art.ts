@@ -13,11 +13,9 @@ var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
-import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
 import * as kraken from "./kraken"
-import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
@@ -35,10 +33,10 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = core.httpCode;
 export var arts: indexedStore.Store;
-export var artContainer: azureBlobStorage.Container;
-export var thumbContainers: ThumbContainer[] = [];
+var artContainer: azureBlobStorage.Container;
+var thumbContainers: ThumbContainer[] = [];
 var aacContainer: azureBlobStorage.Container;
-export var screenshots: indexedStore.Store;
+var screenshots: indexedStore.Store;
 var artContentTypes: JsonObject;
 
 export class PubArt
@@ -163,6 +161,12 @@ export async function initAsync() : Promise<void>
       "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
     };
     arts = await indexedStore.createStoreAsync(core.pubsContainer, "art");
+    core.registerPubKind({
+        store: arts,
+        deleteWithAuthor: true,
+        importOne: importArtAsync,
+        specialDeleteAsync: deleteArtAsync,
+    })
     await core.setResolveAsync(arts, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveArtAsync(fetchResult, apiRequest);
     }
@@ -191,6 +195,12 @@ export async function initAsync() : Promise<void>
 async function initScreenshotsAsync() : Promise<void>
 {
     screenshots = await indexedStore.createStoreAsync(core.pubsContainer, "screenshot");
+    core.registerPubKind({
+        store: screenshots,
+        deleteWithAuthor: true,
+        importOne: importScreenshotAsync,
+        specialDeleteAsync: deleteArtAsync,
+    })
     await core.setResolveAsync(screenshots, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveScreenshotAsync(fetchResult, apiRequest);
     }
@@ -477,7 +487,7 @@ async function redownloadScreenshotAsync(js: JsonObject) : Promise<void>
     });
 }
 
-export async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let pubArt = new PubArt();
     pubArt.fromJson(core.removeDerivedProperties(body));
@@ -579,7 +589,7 @@ function fixArtProps(contentType: string, jsb: JsonBuilder) : void
     jsb["pub"]["arttype"] = arttype;
 }
 
-export async function importScreenshotAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importScreenshotAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let screenshot = new PubScreenshot();
     screenshot.fromJson(core.removeDerivedProperties(body));
@@ -615,4 +625,15 @@ export async function importScreenshotAsync(req: core.ApiRequest, body: JsonObje
     }
 }
 
+async function deleteArtAsync(entryid:string, entry:JsonObject)
+{
+    await artContainer.deleteBlobAsync(entryid);
+    for (let thumbContainer of thumbContainers) {
+        await thumbContainer.container.deleteBlobAsync(entryid);
+    }
+}
 
+export function hasThumbContainer(name:string)
+{
+    return thumbContainers.some(e => e.name == name);
+}

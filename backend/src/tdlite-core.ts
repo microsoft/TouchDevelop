@@ -1934,3 +1934,31 @@ export async function setReqUserIdAsync(req: ApiRequest, uid: string) : Promise<
         logger.setContextUser(uid);
     }
 }
+
+export interface IPubKind
+{
+    kind?: string;
+    store: indexedStore.Store;
+    deleteWithAuthor: boolean;
+    importOne?: (req:ApiRequest, js:JsonObject) => Promise<void>;
+    specialDeleteAsync?: (entryid:string, delentry:JsonBuilder) => Promise<void>;
+}
+
+var pubKinds:IPubKind[] = [];
+export function getPubKind(kind:string)
+{
+    if (!kind) return null
+    return pubKinds.filter(k => k.kind == kind)[0] || null
+}
+
+export function getPubKinds()
+{
+    return pubKinds.slice(0);
+}
+
+export function registerPubKind(desc:IPubKind)
+{
+    desc.kind = desc.store.kind;
+    assert(!getPubKind(desc.kind))
+    pubKinds.push(desc)
+}
