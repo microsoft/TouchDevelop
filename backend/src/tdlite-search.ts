@@ -25,6 +25,7 @@ import * as core from "./tdlite-core"
 import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
+import * as tdliteArt from "./tdlite-art"
 
 import * as main from "./tdlite"
 
@@ -131,10 +132,10 @@ export async function initAsync() : Promise<void>
         core.checkPermission(req2, "operator");
         if (req2.status == 200) {
             await tdliteIndex.clearArtIndexAsync();
-            /* async */ main.arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
+            /* async */ tdliteArt.arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
                 let batch = tdliteIndex.createArtUpdate();
                 for (let js of await core.addUsernameEtcCoreAsync(json)) {
-                    let pub = main.PubArt.createFromJson(clone(js["pub"]));
+                    let pub = tdliteArt.PubArt.createFromJson(clone(js["pub"]));
                     searchIndexArt(pub).upsertArt(batch);
                 }
                 let statusCode = await batch.sendAsync();
@@ -284,7 +285,7 @@ export async function executeSearchAsync(kind: string, q: string, req: core.ApiR
     core.buildListResponse(fetchResult2, req);
 }
 
-function searchIndexArt(pub: main.PubArt) : tdliteIndex.ArtEntry
+function searchIndexArt(pub: tdliteArt.PubArt) : tdliteIndex.ArtEntry
 {
     let entry: tdliteIndex.ArtEntry;
     let tp = "picture";
@@ -312,8 +313,8 @@ export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
         return;
     }
     let batch = tdliteIndex.createArtUpdate();
-    let coll2 = await core.addUsernameEtcCoreAsync(main.arts.singleFetchResult(clone(obj)).items);
-    let pub = main.PubArt.createFromJson(clone(coll2[0]["pub"]));
+    let coll2 = await core.addUsernameEtcCoreAsync(tdliteArt.arts.singleFetchResult(clone(obj)).items);
+    let pub = tdliteArt.PubArt.createFromJson(clone(coll2[0]["pub"]));
     searchIndexArt(pub).upsertArt(batch);
     /* async */ batch.sendAsync();
 

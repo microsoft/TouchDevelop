@@ -43,6 +43,8 @@
         "src/tdlite-workspace.ts",
         "src/tdlite-users.ts",
         "src/tdlite-notifications.ts",
+        "src/tdlite-art.ts",
+        "src/tdlite-vimeo.ts",
         "src/tdlite.ts",
         "src/remote.ts"        
     ],

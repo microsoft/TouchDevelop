@@ -54,6 +54,10 @@ export var throttleDisabled: boolean = false;
 export var tokenSecret:string;
 export var serviceSettings: ServiceSettings;
 export var settingsContainer: cachedStore.Container;
+export var currClientConfig: ClientConfig;
+export var releaseVersionPrefix: string = "0.0";
+export var rewriteVersion: number = 221;
+
 
 var lastSettingsCheck: number = 0;
 
@@ -190,6 +194,45 @@ export class ApireqUserInfo
     public ip: string = "";
 }
 
+
+export class ClientConfig
+    extends td.JsonRecord
+{
+    @json public workspaceUrl: string = "";
+    @json public searchUrl: string = "";
+    @json public searchApiKey: string = "";
+    @json public apiUrl: string = "";
+    @json public rootUrl: string = "";
+    @json public liteVersion: string = "";
+    @json public tdVersion: string = "";
+    @json public releaseid: string = "";
+    @json public relid: string = "";
+    @json public releaseLabel: string = "";
+    @json public shareUrl: string = "";
+    @json public cdnUrl: string = "";
+    @json public anonToken: string = "";
+    @json public primaryCdnUrl: string = "";
+    @json public altCdnUrls: string[];
+    static createFromJson(o:JsonObject) { let r = new ClientConfig(); r.fromJson(o); return r; }
+}
+
+export interface IClientConfig {
+    workspaceUrl: string;
+    searchUrl: string;
+    searchApiKey: string;
+    apiUrl: string;
+    rootUrl: string;
+    liteVersion: string;
+    tdVersion: string;
+    releaseid: string;
+    relid: string;
+    releaseLabel: string;
+    shareUrl: string;
+    cdnUrl: string;
+    anonToken: string;
+    primaryCdnUrl: string;
+    altCdnUrls: string[];
+}
 
 export async function fetchQueryAsync(query: azureTable.TableQuery, req: restify.Request) : Promise<JsonObject>
 {
@@ -1704,6 +1747,26 @@ export async function lateInitAsync()
     azureBlobStorage.init();
     blobService = azureBlobStorage.createBlobService();
     redisClient = await redis.createClientAsync("", 0, "");
+
+    currClientConfig = new ClientConfig();
+    currClientConfig.searchApiKey = td.serverSetting("AZURE_SEARCH_CLIENT_KEY", false);
+    currClientConfig.searchUrl = "https://" + td.serverSetting("AZURE_SEARCH_SERVICE_NAME", false) + ".search.windows.net";
+    currClientConfig.rootUrl = td.serverSetting("SELF", false).replace(/\/$/g, "");
+    currClientConfig.apiUrl = currClientConfig.rootUrl + "/api";
+    // this is no longer set from here - it's blobcontainer in installedheaders response
+    // currClientConfig.workspaceUrl = (await workspaceContainer[0].blobContainerAsync()).url() + "/";
+    currClientConfig.liteVersion = releaseVersionPrefix + ".r" + rewriteVersion;
+    currClientConfig.shareUrl = currClientConfig.rootUrl;
+    currClientConfig.cdnUrl = (await pubsContainer.blobContainerAsync()).url().replace(/\/pubs$/g, "");
+    currClientConfig.primaryCdnUrl = withDefault(td.serverSetting("CDN_URL", true), currClientConfig.cdnUrl);
+    currClientConfig.altCdnUrls = (<string[]>[]);
+    currClientConfig.altCdnUrls.push((await pubsContainer.blobContainerAsync()).url().replace(/\/pubs$/g, ""));
+    currClientConfig.altCdnUrls.push(currClientConfig.primaryCdnUrl);
+    currClientConfig.anonToken = basicCreds;
+    addRoute("GET", "clientconfig", "", async (req: ApiRequest) => {
+        req.response = currClientConfig.toJson();
+    });
+
 }
 
 export async function initFinalAsync()
