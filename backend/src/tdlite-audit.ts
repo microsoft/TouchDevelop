@@ -24,9 +24,8 @@ var auditStore: indexedStore.Store;
 var auditContainer: cachedStore.Container;
 
 export class PubAuditLog
-    extends td.JsonRecord
+    extends core.IdObject
 {
-    @td.json public kind: string = "";
     @td.json public time: number = 0;
     @td.json public type: string = "";
     @td.json public userid: string = "";

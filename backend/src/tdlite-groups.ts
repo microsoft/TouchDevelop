@@ -29,79 +29,23 @@ var groups: indexedStore.Store;
 var groupMemberships: indexedStore.Store;
 
 export class PubGroup
-    extends td.JsonRecord
+    extends core.TopPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public name: string = "";
     @td.json public pictureid: string = "";
     @td.json public allowexport: boolean = false;
     @td.json public allowappstatistics: boolean = false;
     @td.json public isrestricted: boolean = false;
     @td.json public isclass: boolean = false;
-    @td.json public description: string = "";
     @td.json public school: string = "";
     @td.json public grade: string = "";
-    @td.json public url: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
-    @td.json public positivereviews: number = 0;
-    @td.json public subscribers: number = 0;
-    @td.json public comments: number = 0;
     static createFromJson(o:JsonObject) { let r = new PubGroup(); r.fromJson(o); return r; }
 }
 
-export interface IPubGroup {
-    kind: string;
-    time: number;
-    id: string;
-    name: string;
-    pictureid: string;
-    allowexport: boolean;
-    allowappstatistics: boolean;
-    isrestricted: boolean;
-    isclass: boolean;
-    description: string;
-    school: string;
-    grade: string;
-    url: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    positivereviews: number;
-    subscribers: number;
-    comments: number;
-}
-
 export class PubGroupMembership
-    extends td.JsonRecord
+    extends core.Publication
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
     @td.json public publicationid: string = "";
     static createFromJson(o:JsonObject) { let r = new PubGroupMembership(); r.fromJson(o); return r; }
-}
-
-export interface IPubGroupMembership {
-    kind: string;
-    time: number;
-    id: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    publicationid: string;
 }
 
 export async function initAsync() : Promise<void>

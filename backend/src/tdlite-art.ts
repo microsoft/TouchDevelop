@@ -33,19 +33,10 @@ var screenshots: indexedStore.Store;
 var artContentTypes: JsonObject;
 
 export class PubArt
-    extends td.JsonRecord
+    extends core.Publication
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
     @td.json public name: string = "";
     @td.json public description: string = "";
-    @td.json public url: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
     @td.json public flags: string[];
     @td.json public pictureurl: string = "";
     @td.json public thumburl: string = "";
@@ -59,30 +50,6 @@ export class PubArt
     static createFromJson(o:JsonObject) { let r = new PubArt(); r.fromJson(o); return r; }
 }
 
-export interface IPubArt {
-    kind: string;
-    time: number;
-    id: string;
-    name: string;
-    description: string;
-    url: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    flags: string[];
-    pictureurl: string;
-    thumburl: string;
-    mediumthumburl: string;
-    wavurl: string;
-    aacurl: string;
-    contenttype: string;
-    bloburl: string;
-    arttype: string;
-    filehash: string;
-}
-
 export class ThumbContainer
 {
     public name: string = "";
@@ -91,40 +58,11 @@ export class ThumbContainer
 }
 
 export class PubScreenshot
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public url: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
-    @td.json public publicationid: string = "";
-    @td.json public publicationname: string = "";
-    @td.json public publicationkind: string = "";
     @td.json public pictureurl: string = "";
     @td.json public thumburl: string = "";
     static createFromJson(o:JsonObject) { let r = new PubScreenshot(); r.fromJson(o); return r; }
-}
-
-export interface IPubScreenshot {
-    kind: string;
-    time: number;
-    id: string;
-    url: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    pictureurl: string;
-    thumburl: string;
 }
 
 export async function initAsync() : Promise<void>

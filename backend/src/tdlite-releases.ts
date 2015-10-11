@@ -32,16 +32,9 @@ export var cacheRewritten: cachedStore.Container;
 var appContainer: azureBlobStorage.Container;
 
 export class PubRelease
-    extends td.JsonRecord
+    extends core.Publication
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
     @td.json public releaseid: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
     @td.json public labels: IReleaseLabel[];
     @td.json public commit: string = "";
     @td.json public branch: string = "";
@@ -51,23 +44,6 @@ export class PubRelease
     static createFromJson(o:JsonObject) { let r = new PubRelease(); r.fromJson(o); return r; }
 }
 
-export interface IPubRelease {
-    kind: string;
-    time: number;
-    id: string;
-    releaseid: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    labels: IReleaseLabel[];
-    commit: string;
-    branch: string;
-    buildnumber: number;
-    version: string;
-    name: string;
-}
-
 export interface IReleaseLabel {
     name: string;
     userid: string;
@@ -75,39 +51,6 @@ export interface IReleaseLabel {
     releaseid: string;
     relid: string;
     numpokes: number;
-}
-
-export class PubWebfile
-    extends td.JsonRecord
-{
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
-    @td.json public filename: string = "";
-    @td.json public contenttype: string = "";
-    @td.json public labels: string[];
-    @td.json public rawurl: string = "";
-    static createFromJson(o:JsonObject) { let r = new PubWebfile(); r.fromJson(o); return r; }
-}
-
-export interface IPubWebfile {
-    kind: string;
-    time: number;
-    id: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    filename: string;
-    contenttype: string;
-    labels: string[];
-    rawurl: string;
 }
 
 export function appContainerUrl()

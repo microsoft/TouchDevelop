@@ -53,6 +53,42 @@ export var currClientConfig: ClientConfig;
 export var releaseVersionPrefix: string = "0.0";
 export var rewriteVersion: number = 221;
 
+export class IdObject
+    extends td.JsonRecord
+{
+    @td.json public kind: string = "";
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+}
+
+export class Publication
+    extends IdObject
+{
+    @td.json public time: number = 0;       // time when publication was created (seconds since epoch)
+    @td.json public userid: string = "";     // user id of user who published
+    @td.json public userscore: number = 0;
+    @td.json public username: string = "";
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+}
+
+export class PubOnPub
+    extends Publication
+{
+    @td.json public publicationid: string = ""; // script id that is being commented on
+    @td.json public publicationname: string = ""; // script name
+    @td.json public publicationkind: string = ""; //
+}
+
+export class TopPub
+    extends Publication
+{
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public positivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
+}
 
 var lastSettingsCheck: number = 0;
 

@@ -21,21 +21,10 @@ var httpCode = core.httpCode;
 var reviews: indexedStore.Store;
 
 export class PubReview
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
-    @td.json public publicationid: string = "";
-    @td.json public publicationname: string = "";
-    @td.json public publicationkind: string = "";
     @td.json public publicationuserid: string = "";
-    @td.json public ispositive: boolean = false;
+    @td.json public ispositive: boolean = true;
     static createFromJson(o:JsonObject) { let r = new PubReview(); r.fromJson(o); return r; }
 }
 

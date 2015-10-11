@@ -36,21 +36,13 @@ var deployChannels: string[];
 export var templateSuffix: string = "";
 
 export class PubPointer
-    extends td.JsonRecord
+    extends core.Publication
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
     @td.json public path: string = "";
     @td.json public scriptid: string = "";
     @td.json public artid: string = "";
     @td.json public redirect: string = "";
     @td.json public description: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
     @td.json public comments: number = 0;
     @td.json public artcontainer: string = "";
     @td.json public parentpath: string = "";
@@ -58,27 +50,6 @@ export class PubPointer
     @td.json public scriptdescription: string = "";
     @td.json public breadcrumbtitle: string = "";
     static createFromJson(o:JsonObject) { let r = new PubPointer(); r.fromJson(o); return r; }
-}
-
-export interface IPubPointer {
-    kind: string;
-    time: number;
-    id: string;
-    path: string;
-    scriptid: string;
-    artid: string;
-    redirect: string;
-    description: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    comments: number;
-    artcontainer: string;
-    parentpath: string;
-    scriptname: string;
-    breadcrumbtitle: string;
 }
 
 export async function initAsync() : Promise<void>

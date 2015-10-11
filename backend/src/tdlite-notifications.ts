@@ -25,63 +25,19 @@ var subscriptions: indexedStore.Store;
 var notificationsTable: azureTable.Table;
 
 export class PubSubscription
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public publicationid: string = "";
-    @td.json public publicationname: string = "";
-    @td.json public publicationkind: string = "";
     static createFromJson(o:JsonObject) { let r = new PubSubscription(); r.fromJson(o); return r; }
 }
 
-export interface IPubSubscription {
-    kind: string;
-    time: number;
-    id: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-}
-
 export class PubNotification
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
     @td.json public notificationkind: string = "";
-    @td.json public userid: string = "";
-    @td.json public publicationid: string = "";
-    @td.json public publicationname: string = "";
-    @td.json public publicationkind: string = "";
     @td.json public supplementalid: string = "";
     @td.json public supplementalkind: string = "";
     @td.json public supplementalname: string = "";
     static createFromJson(o:JsonObject) { let r = new PubNotification(); r.fromJson(o); return r; }
-}
-
-export interface IPubNotification {
-    kind: string;
-    time: number;
-    id: string;
-    notificationkind: string;
-    userid: string;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    supplementalid: string;
-    supplementalkind: string;
-    supplementalname: string;
 }
 
 export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind: string) : Promise<void>

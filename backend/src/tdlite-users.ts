@@ -39,11 +39,8 @@ var useSendgrid: boolean = false;
 
 
 export class PubUser
-    extends td.JsonRecord
+    extends core.IdObject
 {
-    @td.json public kind: string = "";
-    @td.json public id: string = "";
-    @td.json public url: string = "";
     @td.json public name: string = "";
     @td.json public haspicture: boolean = false;
     @td.json public time: number = 0;
@@ -55,22 +52,6 @@ export class PubUser
     @td.json public score: number = 0;
     @td.json public isadult: boolean = false;
     static createFromJson(o:JsonObject) { let r = new PubUser(); r.fromJson(o); return r; }
-}
-
-export interface IPubUser {
-    kind: string;
-    id: string;
-    url: string;
-    name: string;
-    haspicture: boolean;
-    time: number;
-    about: string;
-    features: number;
-    activedays: number;
-    receivedpositivereviews: number;
-    subscribers: number;
-    score: number;
-    isadult: boolean;
 }
 
 export class PubUserSettings
@@ -105,37 +86,6 @@ export class PubUserSettings
     @td.json public userid: string = "";
     @td.json public previousemail: string = "";
     static createFromJson(o:JsonObject) { let r = new PubUserSettings(); r.fromJson(o); return r; }
-}
-
-export interface IPubUserSettings {
-    nickname: string;
-    aboutme: string;
-    website: string;
-    notifications: boolean;
-    notifications2: string;
-    picturelinkedtofacebook: string;
-    picture: string;
-    gender: string;
-    realname: string;
-    yearofbirth: number;
-    location: string;
-    culture: string;
-    howfound: string;
-    programmingknowledge: string;
-    occupation: string;
-    twitterhandle: string;
-    email: string;
-    emailverificationsent: boolean;
-    emailverified: boolean;
-    emailnewsletter2: string;
-    emailfrequency: string;
-    editorMode: string;
-    school: string;
-    wallpaper: string;
-    permissions: string;
-    credit: number;
-    userid: string;
-    previousemail: string;
 }
 
 export async function initAsync() : Promise<void>

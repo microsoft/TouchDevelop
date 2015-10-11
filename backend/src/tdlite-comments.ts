@@ -22,21 +22,9 @@ var httpCode = core.httpCode;
 var comments: indexedStore.Store;
 
 export class PubComment
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public url: string = "";
     @td.json public text: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
-    @td.json public userplatform: string[];
-    @td.json public publicationid: string = "";
-    @td.json public publicationname: string = "";
-    @td.json public publicationkind: string = "";
     @td.json public nestinglevel: number = 0;
     @td.json public positivereviews: number = 0;
     @td.json public subscribers: number = 0;
@@ -44,28 +32,6 @@ export class PubComment
     @td.json public assignedtoid: string = "";
     @td.json public resolved: string = "";
     static createFromJson(o:JsonObject) { let r = new PubComment(); r.fromJson(o); return r; }
-}
-
-export interface IPubComment {
-    kind: string;
-    time: number;
-    id: string;
-    url: string;
-    text: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    nestinglevel: number;
-    positivereviews: number;
-    subscribers: number;
-    comments: number;
-    assignedtoid: string;
-    resolved: string;
 }
 
 export async function initAsync() : Promise<void>

@@ -26,12 +26,9 @@ var tags2: indexedStore.Store;
  */
 
 export class PubTag
-    extends td.JsonRecord
+    extends core.IdObject
 {
-    @td.json public kind: string = "";
     @td.json public time: number = 0;
-    @td.json public id: string = "";
-    @td.json public url: string = "";
     @td.json public name: string = "";
     @td.json public category: string = "";
     @td.json public description: string = "";

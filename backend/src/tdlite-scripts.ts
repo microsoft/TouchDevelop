@@ -38,26 +38,13 @@ var showcaseIds: string[];
 
 
 export class PubScript
-    extends td.JsonRecord
+    extends core.TopPub
 {
-    @td.json public kind: string = "";
-    @td.json public time: number = 0;
-    @td.json public id: string = "";
     @td.json public baseid: string = "";
-    @td.json public url: string = "";
-    @td.json public name: string = "";
-    @td.json public description: string = "";
-    @td.json public userid: string = "";
-    @td.json public username: string = "";
-    @td.json public userscore: number = 0;
-    @td.json public userhaspicture: boolean = false;
     @td.json public icon: string = "";
     @td.json public iconbackground: string = "";
     @td.json public iconurl: string = "";
-    @td.json public positivereviews: number = 0;
     @td.json public cumulativepositivereviews: number = 0;
-    @td.json public subscribers: number = 0;
-    @td.json public comments: number = 0;
     @td.json public screenshots: number = 0;
     @td.json public platforms: string[];
     @td.json public capabilities: string[];
@@ -68,7 +55,6 @@ export class PubScript
     @td.json public updatetime: number = 0;
     @td.json public ishidden: boolean = false;
     @td.json public islibrary: boolean = false;
-    @td.json public userplatform: string[];
     @td.json public installations: number = 0;
     @td.json public runs: number = 0;
     @td.json public art: number = 0;
@@ -90,56 +76,6 @@ export class PubScript
     static createFromJson(o:JsonObject) { let r = new PubScript(); r.fromJson(o); return r; }
 }
 
-export interface IPubScript {
-    kind: string;
-    time: number;
-    id: string;
-    baseid: string;
-    url: string;
-    name: string;
-    description: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    icon: string;
-    iconbackground: string;
-    iconurl: string;
-    positivereviews: number;
-    cumulativepositivereviews: number;
-    subscribers: number;
-    comments: number;
-    screenshots: number;
-    platforms: string[];
-    capabilities: string[];
-    flows: string[];
-    haserrors: boolean;
-    rootid: string;
-    updateid: string;
-    updatetime: number;
-    ishidden: boolean;
-    islibrary: boolean;
-    userplatform: string[];
-    installations: number;
-    runs: number;
-    art: number;
-    toptagids: string[];
-    screenshotthumburl: string;
-    screenshoturl: string;
-    mergeids: string[];
-    editor: string;
-    meta: JsonObject;
-    iconArtId: string;
-    splashArtId: string;
-    raw: string;
-    scripthash: string;
-    sourceid: string;
-    updateroot: string;
-    unmoderated: boolean;
-    noexternallinks: boolean;
-    promo: JsonObject;
-}
-
 export class UpdateEntry
     extends td.JsonRecord
 {
@@ -149,14 +85,6 @@ export class UpdateEntry
     @td.json public time: number = 0;
     static createFromJson(o:JsonObject) { let r = new UpdateEntry(); r.fromJson(o); return r; }
 }
-
-export interface IUpdateEntry {
-    PartitionKey: string;
-    RowKey: string;
-    pub: string;
-    time: number;
-}
-
 
 export async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: core.ApiRequest, forSearch: boolean) : Promise<void>
 {
