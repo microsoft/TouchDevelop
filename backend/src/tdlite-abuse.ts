@@ -276,7 +276,7 @@ export function canHaveAbuseReport(baseKind: string) : boolean
     return canAbuse2;
 }
 
-export async function deleteUserAsync(req8:core.ApiRequest)
+async function deleteUserAsync(req8:core.ApiRequest)
 {
     await tdliteWorkspace.deleteAllHistoryAsync(req8.rootId, req8);
 

@@ -16,6 +16,8 @@ import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
+import * as tdliteIndex from "./tdlite-index"
+import * as tdliteSearch from "./tdlite-search"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
@@ -23,7 +25,7 @@ var orEmpty = td.orEmpty;
 
 var logger = core.logger;
 var httpCode = core.httpCode;
-export var arts: indexedStore.Store;
+var arts: indexedStore.Store;
 var artContainer: azureBlobStorage.Container;
 var thumbContainers: ThumbContainer[] = [];
 var aacContainer: azureBlobStorage.Container;
@@ -179,6 +181,24 @@ export async function initAsync() : Promise<void>
     core.addRoute("GET", "arthash", "*", async (req2: core.ApiRequest) => {
         await core.anyListAsync(arts, req2, "filehash", req2.verb);
     });
+    
+    core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
+        core.checkPermission(req2, "operator");
+        if (req2.status == 200) {
+            await tdliteIndex.clearArtIndexAsync();
+            /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
+                let batch = tdliteIndex.createArtUpdate();
+                for (let js of await core.addUsernameEtcCoreAsync(json)) {
+                    let pub = PubArt.createFromJson(td.clone(js["pub"]));
+                    searchIndexArt(pub).upsertArt(batch);
+                }
+                let statusCode = await batch.sendAsync();
+                logger.debug("reindex art, status: " + statusCode);
+            });
+            req2.status = httpCode._201Created;
+        }
+    });
+
 
     await initScreenshotsAsync();
 }
@@ -280,7 +300,7 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
     if (req.status == 200) {
         await arts.insertAsync(jsb);
         await notifications.storeAsync(req, jsb, "");
-        await search.upsertArtAsync(jsb);
+        await upsertArtAsync(jsb);
         await search.scanAndSearchAsync(jsb, {
             skipSearch: true
         });
@@ -548,7 +568,7 @@ async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<
         // 
         if (req.status == 200) {
             await arts.insertAsync(jsb);
-            await search.upsertArtAsync(jsb);
+            await upsertArtAsync(jsb);
             logger.debug("insert OK " + pubArt.id);
         }
     }
@@ -627,4 +647,42 @@ async function deleteArtAsync(entryid:string, entry:JsonObject)
 export function hasThumbContainer(name:string)
 {
     return thumbContainers.some(e => e.name == name);
+}
+
+function searchIndexArt(pub: PubArt) : tdliteIndex.ArtEntry
+{
+    let entry: tdliteIndex.ArtEntry;
+    let tp = "picture";
+    if (! pub.pictureurl) {
+        tp = "sound";
+    }
+    let spr = false;
+    if (pub.flags != null) {
+        spr = pub.flags.indexOf("transparent") >= 0;
+    }
+    entry = tdliteIndex.createArtEntry(pub.id, {
+        name: pub.name,
+        description: pub.description,
+        type: tp,
+        userid: pub.userid,
+        username: pub.username,
+        sprite: spr
+    });
+    return entry;
+}
+
+export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
+{
+    if (tdliteSearch.disableSearch) {
+        return;
+    }
+    let batch = tdliteIndex.createArtUpdate();
+    let coll2 = await core.addUsernameEtcCoreAsync(arts.singleFetchResult(td.clone(obj)).items);
+    let pub = PubArt.createFromJson(td.clone(coll2[0]["pub"]));
+    searchIndexArt(pub).upsertArt(batch);
+    /* async */ batch.sendAsync();
+
+    await tdliteSearch.scanAndSearchAsync(obj, {
+        skipScan: true
+    });
 }

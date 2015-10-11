@@ -18,7 +18,7 @@ var orEmpty = td.orEmpty;
 
 var logger = core.logger;
 var httpCode = core.httpCode;
-export var crashContainer: azureBlobStorage.Container;
+var crashContainer: azureBlobStorage.Container;
 
 
 export class BugReport
@@ -73,6 +73,14 @@ export interface IBugReport {
 function crashAndBurn() : void
 {
     assert(false, "/api/logcrash (OK)");
+}
+
+export async function saveBugReportAsync(json: JsonBuilder) {
+    let blobName = orEmpty(json["reportId"]);
+    if (blobName != "") {
+        let encReport = core.encrypt(JSON.stringify(json), "BUG");
+        let result4 = await crashContainer.createBlockBlobFromTextAsync(blobName, encReport);
+    }
 }
 
 export async function initAsync()

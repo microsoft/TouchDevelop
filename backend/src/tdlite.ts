@@ -55,9 +55,6 @@ var reinit = false;
 var logger = core.logger;
 var httpCode = restify.http();
 
-var faviconIco: Buffer;
-
-
 async function _initAsync() : Promise<void>
 {
     await core.initAsync();
@@ -74,15 +71,8 @@ async function _initAsync() : Promise<void>
     }
     if (core.hasSetting("RAYGUN_API_KEY")) {
         await raygun.initAsync({
-            private: ! core.fullTD,
-            saveReport: async (json: JsonObject) => {
-                let blobName = orEmpty(json["reportId"]);
-                if (blobName != "") {
-                    let encReport = core.encrypt(JSON.stringify(json), "BUG");
-                    let result4 = await tdliteCrashes.crashContainer.createBlockBlobFromTextAsync(blobName, encReport);
-                }
-            }
-
+            private: !core.fullTD,
+            saveReport: tdliteCrashes.saveBugReportAsync,
         });
     }
     if (core.hasSetting("LIBRATO_TOKEN")) {
@@ -165,11 +155,7 @@ async function _initAsync() : Promise<void>
                     await tdliteReleases.serveReleaseAsync(req4, res4);
                 }
                 else if (td.startsWith(req4.url(), "/favicon.ico")) {
-                    if (faviconIco == null) {
-                        let res = await tdliteReleases.filesContainer.getBlobToBufferAsync("favicon.ico");
-                        faviconIco = res.buffer();
-                    }
-                    res4.sendBuffer(faviconIco, "image/x-icon");
+                    res4.sendBuffer(await tdliteReleases.getFaviconAsync(), "image/x-icon");
                 }
                 else if (td.startsWith(req4.url(), "/verify/")) {
                     await tdliteUsers.handleEmailVerificationAsync(req4, res4);

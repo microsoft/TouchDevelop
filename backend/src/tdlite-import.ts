@@ -151,7 +151,7 @@ async function importFromPubloggerAsync(req: core.ApiRequest) : Promise<void>
     req.response = td.clone(resp);
 }
 
-export async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
+async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
 {
     let apiRequest: core.ApiRequest;
     let entry = await core.pubsContainer.getAsync(js["id"]);

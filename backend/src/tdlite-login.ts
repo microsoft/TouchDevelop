@@ -8,8 +8,10 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-
+import * as azureBlobStorage from "./azure-blob-storage"
+import * as azureTable from "./azure-table"
 import * as cachedStore from "./cached-store"
+import * as parallel from "./parallel"
 import * as restify from "./restify"
 import * as wordPassword from "./word-password"
 import * as serverAuth from "./server-auth"
@@ -30,6 +32,7 @@ var logger = core.logger;
 var httpCode = core.httpCode;
 var loginHtml: JsonObject;
 var initialApprovals: boolean = false;
+var tokensTable: azureTable.Table;
 
 export class LoginSession
     extends td.JsonRecord
@@ -60,12 +63,12 @@ export interface ILoginSession {
 }
 
 
-export async function initAsync() : Promise<void>
-{
+export async function initAsync(): Promise<void> {
     core.validateTokenAsync = validateTokenAsync;
     initialApprovals = core.myChannel == "test";
+    tokensTable = await core.tableClient.createTableIfNotExistsAsync("tokens");
 
-    restify.server().get("/api/ready/:userid", async (req1: restify.Request, res1: restify.Response) => {
+    restify.server().get("/api/ready/:userid", async(req1: restify.Request, res1: restify.Response) => {
         core.handleHttps(req1, res1);
         let throttleKey = core.sha256(req1.remoteIp()) + ":ready";
         if (await core.throttleCoreAsync(throttleKey, 1)) {
@@ -104,7 +107,7 @@ export async function initAsync() : Promise<void>
     loginHtml = td.clone(jsb);
 
     serverAuth.init({
-        makeJwt: async (profile: serverAuth.UserInfo, oauthReq: serverAuth.OauthRequest) => {            
+        makeJwt: async(profile: serverAuth.UserInfo, oauthReq: serverAuth.OauthRequest) => {
             let url2 = await loginFederatedAsync(profile, oauthReq);
             let stripped = stripCookie(url2);
             let jsb2 = ({ "headers": {} });
@@ -112,14 +115,14 @@ export async function initAsync() : Promise<void>
                 jsb2["headers"]["Set-Cookie"] = stripped.cookie;
             }
             jsb2["http redirect"] = stripped.url;
-            return jsb2;            
+            return jsb2;
         },
-        getData: async (key: string) => {
+        getData: async(key: string) => {
             let value: string;
             value = await core.redisClient.getAsync("authsess:" + key);
             return value;
         },
-        setData: async (key1: string, value1: string) => {
+        setData: async(key1: string, value1: string) => {
             let minutes = 30;
             await core.redisClient.setpxAsync("authsess:" + key1, value1, minutes * 60 * 1000);
         },
@@ -141,13 +144,13 @@ export async function initAsync() : Promise<void>
     if (core.hasSetting("FACEBOOK_CLIENT_SECRET")) {
         serverAuth.addFacebook();
     }
-    restify.server().get("/user/logout", async (req: restify.Request, res: restify.Response) => {
+    restify.server().get("/user/logout", async(req: restify.Request, res: restify.Response) => {
         res.redirect(302, "/signout");
     });
-    restify.server().get("/oauth/providers", async (req1: restify.Request, res1: restify.Response) => {
+    restify.server().get("/oauth/providers", async(req1: restify.Request, res1: restify.Response) => {
         serverAuth.validateOauthParameters(req1, res1);
         core.handleBasicAuth(req1, res1);
-        if ( ! res1.finished()) {
+        if (!res1.finished()) {
             let links = serverAuth.providerLinks(req1.query());
             let lang2 = await tdlitePointers.handleLanguageAsync(req1, res1, true);
             let html = await getLoginHtmlAsync("providers", lang2);
@@ -157,7 +160,7 @@ export async function initAsync() : Promise<void>
             res1.html(html);
         }
     });
-    restify.server().get("/oauth/dialog", async (req: restify.Request, res: restify.Response) => {
+    restify.server().get("/oauth/dialog", async(req: restify.Request, res: restify.Response) => {
         let sessionString = orEmpty(await serverAuth.options().getData(orEmpty(req.query()["td_session"])));
         let session = new LoginSession();
         session.state = cachedStore.freshShortId(16);
@@ -170,7 +173,7 @@ export async function initAsync() : Promise<void>
         }
         core.handleBasicAuth(req, res);
         await loginCreateUserAsync(req, session, res);
-        if ( ! res.finished()) {
+        if (!res.finished()) {
             let accessCode = orEmpty(req.query()["td_state"]);
             if (accessCode == "teacher") {
                 let query = req.url().replace(/^[^\?]*/g, "");
@@ -179,7 +182,7 @@ export async function initAsync() : Promise<void>
             }
             else if (accessCode == core.tokenSecret && session.userid != "") {
                 // **this is to be used during initial setup of a new cloud deployment**
-                await core.pubsContainer.updateAsync(session.userid, async (entry: JsonBuilder) => {
+                await core.pubsContainer.updateAsync(session.userid, async(entry: JsonBuilder) => {
                     core.jsonAdd(entry, "credit", 1000);
                     core.jsonAdd(entry, "totalcredit", 1000);
                     entry["permissions"] = ",admin,";
@@ -191,23 +194,23 @@ export async function initAsync() : Promise<void>
             }
         }
     });
-    restify.server().get("/oauth/gettoken", async (req3: restify.Request, res3: restify.Response) => {
+    restify.server().get("/oauth/gettoken", async(req3: restify.Request, res3: restify.Response) => {
         let s3 = req3.serverUrl() + "/oauth/login?state=foobar&response_type=token&client_id=no-cookie&redirect_uri=" + encodeURIComponent(req3.serverUrl() + "/oauth/gettokencallback") + "&u=" + encodeURIComponent(orEmpty(req3.query()["u"]));
         res3.redirect(303, s3);
     });
-    restify.server().get("/oauth/gettokencallback", async (req4: restify.Request, res4: restify.Response) => {
+    restify.server().get("/oauth/gettokencallback", async(req4: restify.Request, res4: restify.Response) => {
         let _new = "<p>Your access token is below. Only paste in applications you absolutely trust.</p>\n<pre id=\"token\">\nloading...\n</pre>\n<p>You could have added <code>?u=xyzw</code> to get access token for a different user (given the right permissions).\n</p>\n<script>\nsetTimeout(function() {\nvar h = document.location.href.replace(/oauth\\/gettoken.*access_token/, \"?access_token\").replace(/&.*/, \"\");\ndocument.getElementById(\"token\").textContent = h;\n}, 100)\n</script>";
         res4.html(td.replaceAll(td.replaceAll(template_html, "@JS@", ""), "@BODY@", _new));
     });
     if (false) {
-        core.addRoute("GET", "*user", "rawtoken", async (req5: core.ApiRequest) => {
+        core.addRoute("GET", "*user", "rawtoken", async(req5: core.ApiRequest) => {
             if (req5.userinfo.token.cookie != "") {
                 // Only cookie-less (service) tokens allowed here.
                 req5.status = httpCode._418ImATeapot;
             }
             core.checkPermission(req5, "root");
             if (req5.status == 200) {
-                let tok = await tdliteUsers.generateTokenAsync(req5.rootId, "admin", "no-cookie");
+                let tok = await generateTokenAsync(req5.rootId, "admin", "no-cookie");
                 assert(tok.cookie == "", "no cookie expected");
                 await audit.logAsync(req5, "rawtoken", {
                     data: core.sha256(tok.url).substr(0, 10)
@@ -216,17 +219,101 @@ export async function initAsync() : Promise<void>
             }
         });
     }
+
+    core.addRoute("POST", "logout", "", async(req3: core.ApiRequest) => {
+        if (req3.userid != "") {
+            if (core.orFalse(req3.body["everywhere"])) {
+                let entities = await tokensTable.createQuery().partitionKeyIs(req3.userid).fetchAllAsync();
+                await parallel.forAsync(entities.length, async(x: number) => {
+                    let json = entities[x];
+                    // TODO: filter out reason=admin?
+                    let token = core.Token.createFromJson(json);
+                    await tokensTable.deleteEntityAsync(token.toJson());
+                    await core.redisClient.setpxAsync("tok:" + tokenString(token), "", 500);
+                });
+            }
+            else {
+                await tokensTable.deleteEntityAsync(req3.userinfo.token.toJson());
+                await core.redisClient.setpxAsync("tok:" + tokenString(req3.userinfo.token), "", 500);
+            }
+            req3.response = ({});
+            req3.headers = {};
+            let s4 = wrapAccessTokenCookie("logout").replace(/Dec 9999/g, "Dec 1971");
+            req3.headers["Set-Cookie"] = s4;
+        }
+        else {
+            req3.status = httpCode._401Unauthorized;
+        }
+    });
+    
+    core.addRoute("POST", "*user", "token", async(req7: core.ApiRequest) => {
+        core.checkPermission(req7, "signin-" + req7.rootId);
+        if (req7.status == 200) {
+            let resp = {};
+            let tok = await generateTokenAsync(req7.rootId, "admin", "webapp2");
+            if (tok.cookie) {
+                if (req7.headers == null) {
+                    req7.headers = {};
+                }
+                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(tok.cookie);
+            }
+            else {
+                assert(false, "no cookie in token");
+            }
+            await audit.logAsync(req7, "signin-as", {
+                data: core.sha256(tok.url).substr(0, 10)
+            });
+            resp["token"] = tok.url;
+            req7.response = td.clone(resp);
+        }
+    });
 }
 
+async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<tdliteUsers.IRedirectAndCookie>
+{
+    let token = new core.Token();
+    token.PartitionKey = user;
+    token.RowKey = azureBlobStorage.createRandomId(32);
+    token.time = await core.nowSecondsAsync();
+    token.reason = reason;
+    token.version = 2;
+    if (orEmpty(client_id) != "no-cookie") {
+        token.cookie = azureBlobStorage.createRandomId(32);
+    }
+    await core.pubsContainer.updateAsync(user, async (entry: JsonBuilder) => {
+        entry["lastlogin"] = await core.nowSecondsAsync();
+    });
+    await tokensTable.insertEntityAsync(token.toJson(), "or merge");
+    return {
+        url: tokenString(token),
+        cookie: token.cookie
+    }
+}
 
+export function tokenString(token: core.Token) : string
+{
+    let customToken: string;
+    customToken = "0" + token.PartitionKey + "." + token.RowKey;
+    return customToken;
+}
 
-
+function wrapAccessTokenCookie(cookie: string): string 
+{
+    let value = "TD_ACCESS_TOKEN2=" + cookie + "; ";
+    if (core.hasHttps)
+        value += "Secure; "
+    value += "HttpOnly; Path=/; "
+    if (!/localhost:/.test(core.self))
+        value += "Domain=" + core.self.replace(/\/$/g, "").replace(/.*\//g, "").replace(/:\d+$/, "") + "; "
+    value += "Expires=Fri, 31 Dec 9999 23:59:59 GMT";
+    return value;
+}
 
 async function getRedirectUrlAsync(user2: string, req: restify.Request) : Promise<string>
 {
     let url: string;
     let jsb = {};
-    let tok = await tdliteUsers.generateTokenAsync(user2, "code", req.query()["client_id"]);
+    let tok = await generateTokenAsync(user2, "code", req.query()["client_id"]);
     jsb["access_token"] = tok.url;
     jsb["state"] = req.query()["state"];
     jsb["id"] = user2;
@@ -312,7 +399,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
     }
     let user = jsb["id"];
-    let tok = await tdliteUsers.generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
+    let tok = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
 
     let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(tok.url)) + "&id=" + user;
     if (tok.cookie != "") {
@@ -583,7 +670,7 @@ function stripCookie(url2: string) : tdliteUsers.IRedirectAndCookie
     cook = "";
     if (cookie != null) {
         url2 = url2.substr(0, url2.length - coll[0].length);
-        cook = tdliteUsers.wrapAccessTokenCookie(cookie);
+        cook = wrapAccessTokenCookie(cookie);
     }
     return {
         url: url2,
@@ -607,7 +694,7 @@ async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) :
             if (value == null || value == "") {
                 let coll = (/^0([a-z]+)\.([A-Za-z]+)$/.exec(token) || []);
                 if (coll.length > 1) {
-                    tokenJs = await tdliteUsers.tokensTable.getEntityAsync(coll[1], coll[2]);
+                    tokenJs = await tokensTable.getEntityAsync(coll[1], coll[2]);
                     if (tokenJs != null) {
                         await core.redisClient.setpxAsync("tok:" + token, JSON.stringify(tokenJs), 1000 * 1000);
                     }

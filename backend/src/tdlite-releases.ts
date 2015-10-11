@@ -25,10 +25,11 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = core.httpCode;
 var releases: indexedStore.Store;
-export var filesContainer: azureBlobStorage.Container;
+var filesContainer: azureBlobStorage.Container;
 var mainReleaseName: string = "";
+// TODO this is used in tdlite-pointers; it should use a different container instead
 export var cacheRewritten: cachedStore.Container;
-export var appContainer: azureBlobStorage.Container;
+var appContainer: azureBlobStorage.Container;
 
 export class PubRelease
     extends td.JsonRecord
@@ -107,6 +108,11 @@ export interface IPubWebfile {
     contenttype: string;
     labels: string[];
     rawurl: string;
+}
+
+export function appContainerUrl()
+{
+    return appContainer.url();
 }
 
 export async function initAsync() : Promise<void>
@@ -426,3 +432,11 @@ export function clientConfigForRelease(prel: PubRelease) : core.ClientConfig
     return ccfg;
 }
 
+var faviconIco: Buffer;
+export async function getFaviconAsync() {
+    if (faviconIco == null) {
+        let res = await filesContainer.getBlobToBufferAsync("favicon.ico");
+        faviconIco = res.buffer();
+    }
+    return faviconIco;
+}

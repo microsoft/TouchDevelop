@@ -25,7 +25,7 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = core.httpCode;
 
-var disableSearch: boolean = false;
+export var disableSearch: boolean = false;
 var acsCallbackToken: string = "";
 var acsCallbackUrl: string = "";
 
@@ -54,7 +54,7 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     let body = orEmpty(core.withDefault(pub["text"], obj["text"]));
     
     if (body == "" && store.kind == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(pub["id"]);
+        let entry2 = await tdliteScripts.getScriptTextAsync(pub["id"]);
         if (entry2 != null) {
             body = entry2["text"];
         }
@@ -121,22 +121,6 @@ export async function initAsync() : Promise<void>
             req1.response = ({});
         }
     });
-    core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
-        core.checkPermission(req2, "operator");
-        if (req2.status == 200) {
-            await tdliteIndex.clearArtIndexAsync();
-            /* async */ tdliteArt.arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
-                let batch = tdliteIndex.createArtUpdate();
-                for (let js of await core.addUsernameEtcCoreAsync(json)) {
-                    let pub = tdliteArt.PubArt.createFromJson(td.clone(js["pub"]));
-                    searchIndexArt(pub).upsertArt(batch);
-                }
-                let statusCode = await batch.sendAsync();
-                logger.debug("reindex art, status: " + statusCode);
-            });
-            req2.status = httpCode._201Created;
-        }
-    });
     
     core.addRoute("DELETE", "admin", "searchindex", async (req: core.ApiRequest) => {
         core.checkPermission(req, "operator");
@@ -190,7 +174,7 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
         })        
         let coll = fetchResult.items.map<string>(elt => orEmpty(elt[fieldname])).filter(elt1 => elt1 != "");
         let bodies = {};
-        let entries = await tdliteScripts.scriptText.getManyAsync(coll);
+        let entries = await tdliteScripts.getScriptTextsAsync(coll);
         for (let js2 of entries) {
             if (js2.hasOwnProperty("id")) {
                 bodies[js2["id"]] = js2["text"];
@@ -276,44 +260,6 @@ export async function executeSearchAsync(kind: string, q: string, req: core.ApiR
     }
     fetchResult2.items = td.arrayToJson(ids.map<JsonBuilder>(elt1 => byid[elt1]).filter(elt2 => elt2 != null));
     core.buildListResponse(fetchResult2, req);
-}
-
-function searchIndexArt(pub: tdliteArt.PubArt) : tdliteIndex.ArtEntry
-{
-    let entry: tdliteIndex.ArtEntry;
-    let tp = "picture";
-    if (! pub.pictureurl) {
-        tp = "sound";
-    }
-    let spr = false;
-    if (pub.flags != null) {
-        spr = pub.flags.indexOf("transparent") >= 0;
-    }
-    entry = tdliteIndex.createArtEntry(pub.id, {
-        name: pub.name,
-        description: pub.description,
-        type: tp,
-        userid: pub.userid,
-        username: pub.username,
-        sprite: spr
-    });
-    return entry;
-}
-
-export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
-{
-    if (disableSearch) {
-        return;
-    }
-    let batch = tdliteIndex.createArtUpdate();
-    let coll2 = await core.addUsernameEtcCoreAsync(tdliteArt.arts.singleFetchResult(td.clone(obj)).items);
-    let pub = tdliteArt.PubArt.createFromJson(td.clone(coll2[0]["pub"]));
-    searchIndexArt(pub).upsertArt(batch);
-    /* async */ batch.sendAsync();
-
-    await scanAndSearchAsync(obj, {
-        skipScan: true
-    });
 }
 
 async function initAcsAsync() : Promise<void>

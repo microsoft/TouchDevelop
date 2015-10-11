@@ -239,7 +239,7 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
         await core.pubsContainer.updateAsync(sid["id"], async (entry: JsonBuilder) => {
             entry["lastPointer"] = pub["id"];
         });
-        let entry1 = await tdliteScripts.scriptText.getAsync(sid["id"]);
+        let entry1 = await tdliteScripts.getScriptTextAsync(sid["id"]);
         let parentTopic = (<JsonObject>null);
         if (entry1 != null) {
             let coll = (/{parent[tT]opic:([\w\/@\-]+)}/.exec(orEmpty(entry1["text"])) || []);
@@ -327,7 +327,7 @@ async function getTemplateTextAsync(templatename: string, lang: string) : Promis
             return "Template script missing";
         }
         else if (orEmpty(scriptjs["pub"]["raw"]) == "html") {
-            let textObj = await tdliteScripts.scriptText.getAsync(scriptjs["id"]);
+            let textObj = await tdliteScripts.getScriptTextAsync(scriptjs["id"]);
             if (textObj == null) {
                 return "Script text not found.";
             }
@@ -386,7 +386,7 @@ async function clearPtrCacheAsync(id: string) : Promise<void>
     }
 }
 
-export function fixupTDHtml(html: string): string
+function fixupTDHtml(html: string): string
 {
     html = html
         .replace(/^<h1>[^<>]+<\/h1>/g, "")
@@ -408,7 +408,7 @@ async function renderScriptAsync(scriptid: string, v: JsonBuilder, pubdata: Json
         let raw = orEmpty(scriptjs["pub"]["raw"]);
 
         if (raw == "html") {
-            let entry = await tdliteScripts.scriptText.getAsync(scriptjs["id"]);
+            let entry = await tdliteScripts.getScriptTextAsync(scriptjs["id"]);
             v["text"] = entry["text"];
             pubdata["done"] = true;
         }

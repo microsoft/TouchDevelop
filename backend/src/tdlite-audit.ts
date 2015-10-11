@@ -16,7 +16,7 @@ import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteUsers from "./tdlite-users"
+import * as tdliteLogin from "./tdlite-login"
 
 
 var orEmpty = td.orEmpty;
@@ -79,7 +79,7 @@ export async function logAsync(req: core.ApiRequest, type: string, options_0: IP
         }
     }
     if (req.userinfo.token != null) {
-        msg.tokenid = core.sha256(tdliteUsers.tokenString(req.userinfo.token)).substr(0, 10);
+        msg.tokenid = core.sha256(tdliteLogin.tokenString(req.userinfo.token)).substr(0, 10);
     }
     msg.type = type;
     msg.ip = core.encrypt(req.userinfo.ip, "AUDIT");
@@ -139,7 +139,7 @@ export async function initAsync() : Promise<void>
 export async function auditDeleteValueAsync(js: JsonObject) : Promise<JsonObject>
 {
     if (js["kind"] == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(js["id"]);
+        let entry2 = await tdliteScripts.getScriptTextAsync(js["id"]);
         let jsb2 = td.clone(js);
         jsb2["text"] = core.encrypt(entry2["text"], "AUDIT");
         js = td.clone(jsb2);

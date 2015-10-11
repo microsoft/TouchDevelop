@@ -29,7 +29,7 @@ var httpCode = core.httpCode;
 
 var updateSlotTable: azureTable.Table;
 export var scripts: indexedStore.Store;
-export var scriptText: cachedStore.Container;
+var scriptText: cachedStore.Container;
 var updateSlots: indexedStore.Store;
 var promosTable: azureTable.Table;
 
@@ -751,3 +751,12 @@ async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
 }
 
 
+export function getScriptTextAsync(id: string) : Promise<JsonObject>
+{
+    return scriptText.getAsync(id); 
+}
+
+export function getScriptTextsAsync(ids: string[]): Promise<JsonObject[]>
+{
+    return scriptText.getManyAsync(ids);
+}

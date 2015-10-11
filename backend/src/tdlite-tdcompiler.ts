@@ -22,7 +22,7 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = core.httpCode;
 var cacheCompiler: cachedStore.Container;
-export var doctopics: JsonObject;
+var doctopics: JsonObject;
 var doctopicsByTopicid: JsonObject;
 export var doctopicsCss: string = "";
 var cloudRelid: string = "";
@@ -102,7 +102,7 @@ export async function deployCompileServiceAsync(rel: tdliteReleases.PubRelease, 
     let clientConfig = tdliteReleases.clientConfigForRelease(rel);
     cfg["TDC_AUTH_KEY"] = td.serverSetting("TDC_AUTH_KEY", false);
     cfg["TDC_ACCESS_TOKEN"] = td.serverSetting("TDC_ACCESS_TOKEN", false);
-    cfg["TDC_LITE_STORAGE"] = tdliteReleases.appContainer.url().replace(/\/[^\/]+$/g, "");
+    cfg["TDC_LITE_STORAGE"] = tdliteReleases.appContainerUrl().replace(/\/[^\/]+$/g, "");
     cfg["TDC_API_ENDPOINT"] = clientConfig.rootUrl + "/api/";
     cfg["TD_RELEASE_ID"] = rel.releaseid;
     cfg["TD_CLIENT_CONFIG"] = JSON.stringify(clientConfig.toJson());
@@ -117,7 +117,7 @@ export async function deployCompileServiceAsync(rel: tdliteReleases.PubRelease, 
             "content": jsSrc
         }, {
             "path": "script/noderunner.js",
-            "url": tdliteReleases.appContainer.url() + "/" + rel.releaseid + "/c/noderunner.js"
+            "url": tdliteReleases.appContainerUrl() + "/" + rel.releaseid + "/c/noderunner.js"
         }] 
     };
     let file = {};        

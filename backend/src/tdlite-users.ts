@@ -33,7 +33,6 @@ var logger = core.logger;
 var httpCode = core.httpCode;
 
 export var users: indexedStore.Store;
-export var tokensTable: azureTable.Table;
 export var passcodesContainer: cachedStore.Container;
 var emailKeyid: string = "";
 var settingsOptionsJson = tdliteData.settingsOptionsJson;
@@ -148,7 +147,6 @@ export async function initAsync() : Promise<void>
         await sendgrid.initAsync("", "");
     }
 
-    tokensTable = await core.tableClient.createTableIfNotExistsAsync("tokens");
     passcodesContainer = await cachedStore.createContainerAsync("passcodes", {
         noCache: true
     });
@@ -217,31 +215,6 @@ export async function initAsync() : Promise<void>
                 jsb[s1] = core.orZero(req2.rootPub[s1]);
             }
             req2.response = td.clone(jsb);
-        }
-    });
-    core.addRoute("POST", "logout", "", async (req3: core.ApiRequest) => {
-        if (req3.userid != "") {
-            if (orFalse(req3.body["everywhere"])) {
-                let entities = await tokensTable.createQuery().partitionKeyIs(req3.userid).fetchAllAsync();
-                await parallel.forAsync(entities.length, async (x: number) => {
-                    let json = entities[x];
-                    // TODO: filter out reason=admin?
-                    let token = core.Token.createFromJson(json);
-                    await tokensTable.deleteEntityAsync(token.toJson());
-                    await core.redisClient.setpxAsync("tok:" + tokenString(token), "", 500);
-                });
-            }
-            else {
-                await tokensTable.deleteEntityAsync(req3.userinfo.token.toJson());
-                await core.redisClient.setpxAsync("tok:" + tokenString(req3.userinfo.token), "", 500);
-            }
-            req3.response = ({});
-            req3.headers = {};
-            let s4 = wrapAccessTokenCookie("logout").replace(/Dec 9999/g, "Dec 1971");
-            req3.headers["Set-Cookie"] = s4;
-        }
-        else {
-            req3.status = httpCode._401Unauthorized;
         }
     });
     // This is for test users for load testing nd doe **system accounts**
@@ -331,27 +304,6 @@ export async function initAsync() : Promise<void>
         jsb4["oldrootpass"] = rootPass;
         jsb4["oldotherpass"] = otherPass;
         req.response = td.clone(jsb4);
-    });
-    core.addRoute("POST", "*user", "token", async (req7: core.ApiRequest) => {
-        core.checkPermission(req7, "signin-" + req7.rootId);
-        if (req7.status == 200) {
-            let resp = {};
-            let tok = await generateTokenAsync(req7.rootId, "admin", "webapp2");
-            if (tok.cookie) {
-                if (req7.headers == null) {
-                    req7.headers = {};
-                }
-                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(tok.cookie);
-            }
-            else {
-                assert(false, "no cookie in token");
-            }
-            await audit.logAsync(req7, "signin-as", {
-                data: core.sha256(tok.url).substr(0, 10)
-            });
-            resp["token"] = tok.url;
-            req7.response = td.clone(resp);
-        }
     });
     core.addRoute("GET", "*user", "resetpassword", async (req9: core.ApiRequest) => {
         await core.checkFacilitatorPermissionAsync(req9, req9.rootId);
@@ -625,46 +577,6 @@ export interface IRedirectAndCookie
     cookie:string;
 }
 
-export async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<IRedirectAndCookie>
-{
-    let token = new core.Token();
-    token.PartitionKey = user;
-    token.RowKey = azureBlobStorage.createRandomId(32);
-    token.time = await core.nowSecondsAsync();
-    token.reason = reason;
-    token.version = 2;
-    if (orEmpty(client_id) != "no-cookie") {
-        token.cookie = azureBlobStorage.createRandomId(32);
-    }
-    await core.pubsContainer.updateAsync(user, async (entry: JsonBuilder) => {
-        entry["lastlogin"] = await core.nowSecondsAsync();
-    });
-    await tokensTable.insertEntityAsync(token.toJson(), "or merge");
-    return {
-        url: tokenString(token),
-        cookie: token.cookie
-    }
-}
-
-export function tokenString(token: core.Token) : string
-{
-    let customToken: string;
-    customToken = "0" + token.PartitionKey + "." + token.RowKey;
-    return customToken;
-}
-
-export function wrapAccessTokenCookie(cookie: string): string 
-{
-    let value = "TD_ACCESS_TOKEN2=" + cookie + "; ";
-    if (core.hasHttps)
-        value += "Secure; "
-    value += "HttpOnly; Path=/; "
-    if (!/localhost:/.test(core.self))
-        value += "Domain=" + core.self.replace(/\/$/g, "").replace(/.*\//g, "").replace(/:\d+$/, "") + "; "
-    value += "Expires=Fri, 31 Dec 9999 23:59:59 GMT";
-    return value;
-}
-
 async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: string) : Promise<void>
 {
     pass = core.normalizeAndHash(pass);
@@ -699,7 +611,7 @@ async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: st
     }
 }
 
-export async function sendPermissionNotificationAsync(req: core.ApiRequest, r: JsonBuilder) : Promise<void>
+async function sendPermissionNotificationAsync(req: core.ApiRequest, r: JsonBuilder) : Promise<void>
 {
     if (core.isAlarming(r["permissions"])) {
         await core.refreshSettingsAsync();
