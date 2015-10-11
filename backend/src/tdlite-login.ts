@@ -78,6 +78,7 @@ export interface ILoginSession {
 
 export async function initAsync() : Promise<void>
 {
+    core.validateTokenAsync = validateTokenAsync;
     initialApprovals = core.myChannel == "test";
 
     restify.server().get("/api/ready/:userid", async (req1: restify.Request, res1: restify.Response) => {
@@ -603,6 +604,80 @@ function stripCookie(url2: string) : tdliteUsers.IRedirectAndCookie
     return {
         url: url2,
         cookie: cook
+    }
+}
+
+
+
+async function validateTokenAsync(req: core.ApiRequest, rreq: restify.Request) : Promise<void>
+{
+    await core.refreshSettingsAsync();
+    if (req.isCached) {
+        return;
+    }
+    let token = withDefault(rreq.header("x-td-access-token"), td.toString(req.queryOptions["access_token"]));
+    if (token != null && token != "null" && token != "undefined") {
+        let tokenJs = (<JsonObject>null);
+        if (td.startsWith(token, "0") && token.length < 100) {
+            let value = await core.redisClient.getAsync("tok:" + token);
+            if (value == null || value == "") {
+                let coll = (/^0([a-z]+)\.([A-Za-z]+)$/.exec(token) || []);
+                if (coll.length > 1) {
+                    tokenJs = await tdliteUsers.tokensTable.getEntityAsync(coll[1], coll[2]);
+                    if (tokenJs != null) {
+                        await core.redisClient.setpxAsync("tok:" + token, JSON.stringify(tokenJs), 1000 * 1000);
+                    }
+                }
+            }
+            else {
+                tokenJs = JSON.parse(value);
+            }
+        }
+        if (tokenJs == null) {
+            req.status = httpCode._401Unauthorized;
+        }
+        else {
+            let token2 = core.Token.createFromJson(tokenJs);
+            if (core.orZero(token2.version) < 2) {
+                req.status = httpCode._401Unauthorized;
+                return;
+            }
+            if (orEmpty(token2.cookie) != "") {
+                let ok = td.stringContains(orEmpty(rreq.header("cookie")), "TD_ACCESS_TOKEN2=" + token2.cookie);
+                if ( ! ok) {
+                    req.status = httpCode._401Unauthorized;
+                    logger.info("cookie missing, user=" + token2.PartitionKey);
+                    return;
+                }
+                let r = orEmpty(rreq.header("referer"));
+                if (td.startsWith(r, "http://localhost:") || td.startsWith(r, core.self + "app/")) {
+                }
+                else {
+                    req.status = httpCode._401Unauthorized;
+                    logger.info("bad referer: " + r + ", user = " + token2.PartitionKey);
+                    return;
+                }
+                // minimum token expiration - 5min
+                if (orEmpty(token2.reason) != "code" && core.orZero(core.serviceSettings.tokenExpiration) > 300 && await core.nowSecondsAsync() - token2.time > core.serviceSettings.tokenExpiration) {
+                    // core.Token expired
+                    req.status = httpCode._401Unauthorized;
+                    return;
+                }
+            }
+            let uid = token2.PartitionKey;
+            await core.setReqUserIdAsync(req, uid);
+            if (req.status == 200 && core.orFalse(req.userinfo.json["awaiting"])) {
+                req.status = httpCode._418ImATeapot;
+            }
+            if (req.status == 200) {
+                req.userinfo.token = token2;
+                req.userinfo.ip = rreq.remoteIp();
+                let uid2 = orEmpty(req.queryOptions["userid"]);
+                if (uid2 != "" && core.hasPermission(req.userinfo.json, "root")) {
+                    await core.setReqUserIdAsync(req, uid2);
+                }
+            }
+        }
     }
 }
 

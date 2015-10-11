@@ -26,6 +26,7 @@ import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
 import * as tdliteArt from "./tdlite-art"
+import * as tdliteAbuse from "./tdlite-abuse"
 
 import * as main from "./tdlite"
 
@@ -47,7 +48,7 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     if (disableSearch) {
         options_.skipSearch = true;
     }
-    if (acsCallbackUrl == "" || ! main.canHaveAbuseReport(obj["kind"])) {
+    if (acsCallbackUrl == "" || ! tdliteAbuse.canHaveAbuseReport(obj["kind"])) {
         options_.skipScan = true;
     }
     if (options_.skipScan && options_.skipSearch) {
@@ -107,6 +108,7 @@ export async function updateAndUpsertAsync(container: cachedStore.Container, req
 export async function initAsync() : Promise<void>
 {
     disableSearch = orEmpty(td.serverSetting("DISABLE_SEARCH", true)) == "true";
+    core.executeSearchAsync = executeSearchAsync;
 
     await initAcsAsync();
 
@@ -359,7 +361,7 @@ async function initAcsAsync() : Promise<void>
                                 jsb["text"] = "ACS flagged, policy codes " + JSON.stringify(stat["PolicyCodes"]);
                                 req.body = clone(jsb);
                                 req.rootId = pubid;
-                                await main.postAbusereportAsync(req);
+                                await tdliteAbuse.postAbusereportAsync(req);
                             }
                         }
                     }

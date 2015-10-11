@@ -37,6 +37,7 @@ var httpCode = core.httpCode;
 
 var videoContainer: azureBlobStorage.Container;
 var videoStore: indexedStore.Store;
+var embedThumbnails: cachedStore.Container;
 
 
 export class PubVideo
@@ -160,6 +161,73 @@ export async function initAsync() : Promise<void>
         let blobid = entry["pub"]["blobid"];
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.redirect(httpCode._302MovedTemporarily, core.currClientConfig.primaryCdnUrl + "/cachevideo/" + blobid + "-" + endpoint);
+    });
+    
+    await initEmbedThumbnailsAsync();
+}
+
+async function initEmbedThumbnailsAsync() : Promise<void>
+{
+    embedThumbnails = await cachedStore.createContainerAsync("embedthumbnails", {
+        inMemoryCacheSeconds: 120
+    });
+    restify.server().get("/thumbnail/:size/:provider/:id", async (req: restify.Request, res: restify.Response) => {
+        let referer = orEmpty(req.header("referer")).toLowerCase();
+        if (referer == "" || td.startsWith(referer, core.self) || td.startsWith(referer, "http://localhost:")) {
+            // ok, referer checked
+        }
+        else {
+            res.sendCustomError(httpCode._402PaymentRequired, "Bad referer");
+            return;
+        }
+        let provider = req.param("provider");
+        let id = req.param("id");
+        let path = provider + "/" + id;
+        let entry = await embedThumbnails.getAsync(path);
+        if (entry == null) {
+            let drop = await core.throttleCoreAsync(core.sha256(req.remoteIp()) + ":thumb", 10);
+            if (drop) {
+                res.sendError(httpCode._429TooManyRequests, "Too many thumbnail reqs");
+                return;
+            }
+            if (provider == "vimeo") {
+                if ( ! /^[0-9]+$/.test(id)) {
+                    res.sendError(httpCode._412PreconditionFailed, "Bad video id");
+                    return;
+                }
+                let js = await td.downloadJsonAsync("https://vimeo.com/api/oembed.json?url=" + encodeURIComponent("https://vimeo.com/" + id));
+                if (js == null) {
+                    res.sendError(httpCode._404NotFound, "");
+                    return;
+                }
+                let jsb = {};
+                jsb["info"] = js;
+                let ok = await embedThumbnails.tryInsertAsync(path, jsb);
+                entry = clone(jsb);
+            }
+            else {
+                res.sendError(httpCode._405MethodNotAllowed, "invalid provider");
+                return;
+            }
+        }
+        let sz = core.orZero(parseFloat(withDefault(req.param("size"), "0")));
+        if (sz <= 0) {
+            sz = 512;
+        }
+        let url = entry["info"]["thumbnail_url"];
+        url = url.replace(/_\d+\./g, "_" + sz + ".");
+        res.redirect(301, url);
+    });
+    restify.server().get("/embed/.*", async (req1: restify.Request, res1: restify.Response) => {
+        let id1 = req1.url().replace(/\?.*/g, "").replace(/^\/embed\//g, "");
+        if (/^[a-z0-9\-\/]+$/.test(id1)) {
+            let templ = "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Video</title>\n</head>\n<body>\n  <video controls autoplay preload=auto poster=\"{SELF}{ID}/thumb\" style='width:100%;height:100%'>\n    <source src=\"{SELF}{ID}/sd\" type=\"video/mp4\">\n    Video not supported.\n  </video>\n</body>\n</html>\n";
+            let s = td.replaceAll(td.replaceAll(templ, "{SELF}", core.self), "{ID}", id1);
+            res1.html(s);
+        }
+        else {
+            res1.sendError(httpCode._404NotFound, "Bad id");
+        }
     });
 }
 

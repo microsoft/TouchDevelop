@@ -359,17 +359,6 @@ export async function initAsync() : Promise<void>
             req7.response = clone(resp);
         }
     });
-    core.addRoute("DELETE", "*user", "", async (req8: core.ApiRequest) => {
-        await core.checkDeletePermissionAsync(req8);
-        // Level4 users cannot be deleted; you first have to downgrade their permissions.
-        if (req8.status == 200 && core.hasPermission(req8.rootPub, "level4")) {
-            req8.status = httpCode._402PaymentRequired;
-        }
-        if (req8.status == 200) {
-            await main.deleteUserAsync(req8);
-            req8.response = ({ "msg": "have a nice life" });
-        }
-    });
     core.addRoute("GET", "*user", "resetpassword", async (req9: core.ApiRequest) => {
         await core.checkFacilitatorPermissionAsync(req9, req9.rootId);
         if (req9.status == 200) {
