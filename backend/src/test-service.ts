@@ -21,10 +21,33 @@ import * as loggly from "./loggly"
 var logger: td.AppLogger;
 var testts: cachedStore.Container;
 
+class Foo
+    extends td.JsonRecord
+{
+    @td.json public foo1 = "";
+    @td.json public foo2 = 12;
+}
+
+class Bar
+    extends Foo
+{
+    @td.json public bar1 = "";
+    @td.json public bar2 = 42;
+}
 
 export async function _initAsync() : Promise<void>
 {
     logger = td.createLogger("myweb");
+    
+    let f = new Bar()
+    console.log(f.toJson());
+    f.fromJson({
+        foo1: "hello",
+        bar1: "world"
+    })
+    console.log(f.toJson());
+    
+    console.log(new Bar().toJson());
 
         await raygun.initAsync({
             saveReport: async (json: JsonObject) => {
