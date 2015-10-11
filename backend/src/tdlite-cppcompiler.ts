@@ -13,7 +13,6 @@ type JsonBuilder = td.JsonBuilder;
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as core from "./tdlite-core"
-import * as main from "./tdlite"
 import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 
 var withDefault = core.withDefault;

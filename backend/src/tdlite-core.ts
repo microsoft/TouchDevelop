@@ -287,49 +287,6 @@ export function addRoute(method: string, root: string, verb: string, handler: Ap
 
 var orEmpty = td.orEmpty;
 
-export async function performRoutingAsync(req: restify.Request, res: restify.Response) : Promise<void>
-{
-    let apiRequest = buildApiRequest(req.url());
-    apiRequest.method = req.method();
-    apiRequest.body = req.bodyAsJson();
-    await validateTokenAsync(apiRequest, req);
-    if (apiRequest.userid == "") {
-        apiRequest.throttleIp = sha256(req.remoteIp());
-    }
-    if ( ! apiRequest.isCached && apiRequest.userinfo.token == null) {
-        handleBasicAuth(req, res);
-    }
-    else {
-        handleHttps(req, res);
-    }
-    if ( ! res.finished()) {
-        let upgradeToken = apiRequest.queryOptions["upgrade"];
-        apiRequest.isUpgrade = upgradeToken != null && upgradeToken == tokenSecret;
-        apiRequest.isTopLevel = true;
-        if (apiRequest.status == 200) {
-            if (apiRequest.isCached) {
-                if ( ! (await handledByCacheAsync(apiRequest))) {
-                    await storeCacheAsync(apiRequest);
-                }
-            }
-            else {
-                await throttleAsync(apiRequest, "apireq", 2);
-                await performSingleRequestAsync(apiRequest);
-            }
-        }
-        sendResponse(apiRequest, req, res);
-    }
-}
-
-export function lookupRoute(apiRequest: ApiRequest, root: string, verb: string) : void
-{
-    if (apiRequest.route == null) {
-        if (RouteIndex.has(apiRequest.method, root, verb)) {
-            apiRequest.route = RouteIndex.at(apiRequest.method, root, verb)
-        }
-    }
-}
-
 export async function anyListAsync(store: indexedStore.Store, req: ApiRequest, idxName: string, key: string) : Promise<void>
 {
     let entities = await fetchAndResolveAsync(store, req, idxName, key);
@@ -392,82 +349,6 @@ export function nonEmpty(id: string) : boolean
     return b;
 }
 
-export async function performSingleRequestAsync(apiRequest: ApiRequest) : Promise<void>
-{
-    logger.newContext();
-    if (apiRequest.status == 200 && apiRequest.root == "me") {
-        if (apiRequest.userid == "") {
-            apiRequest.status = httpCode._401Unauthorized;
-        }
-        else {
-            apiRequest.root = apiRequest.userid;
-        }
-    }
-    if (apiRequest.status == 200) {
-        lookupRoute(apiRequest, apiRequest.root, apiRequest.verb);
-        if (apiRequest.verb != "") {
-            lookupRoute(apiRequest, apiRequest.root, "*");
-        }
-        if (apiRequest.route == null && apiRequest.root != "") {
-            let pub = await pubsContainer.getAsync(apiRequest.root);
-            if (pub == null || pub["kind"] == "reserved") {
-            }
-            else {
-                apiRequest.root = "*" + pub["kind"];
-                apiRequest.rootPub = pub;
-                apiRequest.rootId = pub["id"];
-                lookupRoute(apiRequest, "*" + pub["kind"], apiRequest.verb);
-                lookupRoute(apiRequest, "*pub", apiRequest.verb);
-                if (apiRequest.verb == "") {
-                }
-                else {
-                    lookupRoute(apiRequest, "*" + pub["kind"], "*");
-                }
-            }
-        }
-
-        if (apiRequest.route == null) {
-            await throttleAsync(apiRequest, "apireq", 3);
-            apiRequest.status = 404;
-        }
-        else {
-            await apiRequest.route.handler(apiRequest);
-        }
-        let cat = "ApiGet";
-        if (apiRequest.root == "") {
-            cat = "ApiBatch";
-        }
-        else if (apiRequest.verb == "installedlong" || apiRequest.root == "notificationslong" || apiRequest.verb == "notificationslong") {
-            cat = "ApiPoll";
-        }
-        else if (apiRequest.method != "GET") {
-            cat = "ApiPost";
-        }
-        else if ( ! apiRequest.isTopLevel) {
-            cat = "ApiInner";
-        }
-        let evArgs = {};
-        let path = apiRequest.method + " /api/";
-        if (apiRequest.route != null) {
-            path = path + apiRequest.route.root;
-            if (apiRequest.route.verb != "") {
-                path = path + "/" + apiRequest.route.verb;
-            }
-        }
-        else {
-            path = path + "*" + apiRequest.status;
-        }
-        evArgs["rawURL"] = sanitze(apiRequest.origUrl);
-        evArgs["user"] = apiRequest.userid;
-        evArgs["cat"] = cat;
-        evArgs["statusCode"] = apiRequest.status;
-        if (false) {
-            logger.customTick(path, td.clone(evArgs));
-        }
-        logger.measure(cat + "@" + path, logger.contextDuration());
-    }
-}
-
 export function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify.Response) : void
 {
     if (apiRequest.status != 200) {
@@ -507,59 +388,6 @@ export function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: 
             res.json(apiRequest.response);
         }
     }
-}
-
-export async function performBatchAsync(req: ApiRequest) : Promise<void>
-{
-    let reqArr = req.body["array"];
-    if (reqArr == null || reqArr.length > 50 || ! req.isTopLevel) {
-        req.status = httpCode._400BadRequest;
-    }
-    else {
-        let resps = asArray(td.clone(reqArr));
-        await parallel.forAsync(reqArr.length, async (x: number) => {
-            let inpReq = resps[x];
-            let resp = await performBatchedRequestAsync(inpReq, req, false);
-            resps[x] = resp;
-        });
-        let jsb = {};
-        jsb["code"] = 200;
-        jsb["array"] = td.arrayToJson(resps);
-        req.response = td.clone(jsb);
-    }
-}
-
-export async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, allowPost: boolean) : Promise<JsonBuilder>
-{
-    let resp: JsonBuilder;
-    let apiRequest = buildApiRequest(withDefault(inpReq["relative_url"], "/no-such-url"));
-    apiRequest.method = withDefault(inpReq["method"], "GET").toUpperCase();
-    apiRequest.userid = req.userid;
-    apiRequest.userinfo = req.userinfo;
-
-    apiRequest.isUpgrade = req.isUpgrade;
-    if ( ! allowPost) {
-        if (apiRequest.method != "GET") {
-            apiRequest.status = httpCode._405MethodNotAllowed;
-        }
-    }
-    if (apiRequest.status == 200) {
-        await performSingleRequestAsync(apiRequest);
-    }
-    resp = {};
-    resp["code"] = apiRequest.status;
-    if (apiRequest.status == 200) {
-        let etag = computeEtagOfJson(apiRequest.response);
-        let s = inpReq["If-None-Match"];
-        if (s != null && s == etag) {
-            resp["code"] = httpCode._304NotModified;
-        }
-        else {
-            resp["ETag"] = etag;
-            resp["body"] = apiRequest.response;
-        }
-    }
-    return resp;
 }
 
 export function buildApiRequest(url: string) : ApiRequest
@@ -1581,41 +1409,6 @@ export async function handledByCacheAsync(apiRequest: ApiRequest) : Promise<bool
     apiRequest.status = entry["status"];
     return true;
     return handled;
-}
-
-export async function storeCacheAsync(apiRequest: ApiRequest) : Promise<void>
-{
-    if (apiRequest.method != "GET") {
-        apiRequest.status = httpCode._405MethodNotAllowed;
-        return;
-    }
-    await throttleAsync(apiRequest, "apireq", 10);
-    if (apiRequest.status == httpCode._429TooManyRequests) {
-        return;
-    }
-    // 
-    await performSingleRequestAsync(apiRequest);
-    // 
-    let thekey = apiRequest.route.options.cacheKey;
-    if (!thekey) {
-        apiRequest.status = httpCode._404NotFound;
-        return;
-    }
-    let jsb = {};
-    let verkey = await cachedApiContainer.getAsync("@" + thekey);
-    if (verkey == null) {
-        jsb["cachekeyvalue"] = await flushApiCacheAsync(thekey);
-    }
-    else {
-        jsb["cachekeyvalue"] = verkey["value"];
-    }
-    jsb["cachekey"] = thekey;
-    jsb["status"] = apiRequest.status;
-    if (apiRequest.status == 200) {
-        jsb["response"] = apiRequest.response;
-    }
-    await cachedApiContainer.justInsertAsync(apiRequest.origUrl, jsb);
-    // TODO store etag/other headers?
 }
 
 /**
