@@ -123,11 +123,14 @@ export async function formatAsync(templ: string, pubdata: JsonBuilder) : Promise
 
 var orEmpty = td.orEmpty;
 
-function htmlQuote(tdUsername: string) : string
+export function htmlQuote(s: string) : string
 {
-    let _new: string;
-    _new = td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(tdUsername, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&#39;");
-    return _new;
+    s = td.replaceAll(s, "&", "&amp;")
+    s = td.replaceAll(s, "<", "&lt;")
+    s = td.replaceAll(s, ">", "&gt;")
+    s = td.replaceAll(s, "\"", "&quot;")
+    s = td.replaceAll(s, "\'", "&#39;")
+    return s;
 }
 
 export function init(expandInfo_:td.Action1<JsonBuilder>) : void

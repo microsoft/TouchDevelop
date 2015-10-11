@@ -18,8 +18,6 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = restify.http();
 
-var lastSearchReport: Date;
-
 
 export async function performBatchAsync(req: core.ApiRequest) : Promise<void>
 {

@@ -19,6 +19,7 @@ import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
 import * as restify from "./restify"
 import * as tdliteHtml from "./tdlite-html"
+import * as tdliteDocs from "./tdlite-docs"
 
 export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
 export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => Promise<void>;
@@ -674,12 +675,7 @@ export function orFalse(s: boolean) : boolean
     return td.toBoolean(s) || false;
 }
 
-export function htmlQuote(tdUsername: string) : string
-{
-    let _new: string;
-    _new = td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(tdUsername, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&#39;");
-    return _new;
-}
+export var htmlQuote = tdliteDocs.htmlQuote;
 
 export function handleBasicAuth(req: restify.Request, res: restify.Response) : void
 {
