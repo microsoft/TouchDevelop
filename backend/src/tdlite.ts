@@ -182,11 +182,10 @@ async function _init_0Async() : Promise<void>
         redisCacheSeconds: 600,
         noBlobStorage: true
     });
-    await audit.initAsync();
-    // ## General
-    core.addRoute("POST", "", "", tdliteRouting.performBatchAsync, {
-        noSizeCheck: true
-    });
+    
+    core.addRoute("POST", "", "", tdliteRouting.performBatchAsync, { noSizeCheck: true });
+    
+    await audit.initAsync();    
     await tdliteTicks.initAsync();
     await tdliteCrashes.initAsync();
     await tdliteAdmin.initAsync();
@@ -205,7 +204,6 @@ async function _init_0Async() : Promise<void>
     await tdlitePointers.initAsync();
     await tdliteVimeo.initAsync();
     await tdliteRuntime.initAsync();
-    // ## and other stuff
     await search.initAsync();
     await tdliteImport.initAsync();
     await tdliteWorkspace.initAsync();
