@@ -558,6 +558,13 @@ export async function initAsync() : Promise<void>
             req5.response = clone(jsb);
         }
     });
+
+    core.addRoute("POST", "*user", "progress", async (req: core.ApiRequest) => {
+        core.meOnly(req);
+        if (req.status == 200) {
+            req.response = ({});
+        }
+    });
 }
 
 export function resolveUsers(entities: indexedStore.FetchResult, req: core.ApiRequest) : void

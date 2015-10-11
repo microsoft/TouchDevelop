@@ -27,7 +27,6 @@ import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 import * as libratoNode from "./librato-node"
 import * as tdliteIndex from "./tdlite-index"
-import * as microsoftTranslator from "./microsoft-translator"
 import * as tdliteData from "./tdlite-data"
 
 import * as core from "./tdlite-core"
@@ -53,9 +52,9 @@ import * as tdliteAbuse from "./tdlite-abuse"
 import * as tdliteAdmin from "./tdlite-admin"
 import * as tdliteCrashes from "./tdlite-crashes"
 import * as tdliteChannels from "./tdlite-channels"
+import * as tdliteTicks from "./tdlite-ticks"
+import * as tdliteRuntime from "./tdlite-runtime"
 
-var orZero = core.orZero;
-var orFalse = core.orFalse;
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
@@ -115,9 +114,6 @@ async function _initAsync() : Promise<void>
     }
 
     await tdliteIndex.initAsync();
-    if (core.hasSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET")) {
-        await microsoftTranslator.initAsync("", "");
-    }
     let timeDelta = await core.redisClient.cachedTimeAsync() - new Date().getTime();
     logger.info("time difference to redis instance: " + timeDelta + "ms");
     if (false) {
@@ -216,7 +212,7 @@ async function _init_0Async() : Promise<void>
     , {
         noSizeCheck: true
     });
-    _initTicks();
+    await tdliteTicks.initAsync();
     await tdliteCrashes.initAsync();
     await tdliteAdmin.initAsync();
     await tdliteScripts.initAsync();
@@ -233,81 +229,12 @@ async function _init_0Async() : Promise<void>
     await tdliteChannels.initAsync();
     await tdlitePointers.initAsync();
     await tdliteVimeo.initAsync();
-    _initProgress();
-    _initRuntime();
+    await tdliteRuntime.initAsync();
     // ## and other stuff
     await search.initAsync();
     await tdliteImport.initAsync();
     await tdliteWorkspace.initAsync();
     await tdliteCppCompiler.initAsync();
-}
-
-
-
-
-function _initProgress() : void
-{
-    core.addRoute("POST", "*user", "progress", async (req: core.ApiRequest) => {
-        core.meOnly(req);
-        if (req.status == 200) {
-            req.response = ({});
-        }
-    });
-}
-
-
-function _initTicks() : void
-{
-    core.addRoute("POST", "ticks", "", async (req: core.ApiRequest) => {
-        let js = req.body["sessionEvents"];
-        if (js != null) {
-            for (let evName of Object.keys(js)) {
-                if (td.startsWith(evName, "browser.")) {
-                    logger.tick(td.replaceAll(evName, "browser.", "NewWebApp@"));
-                }
-                else if (/^(calcEdit|coreRun)(\|.*)?$/.test(evName)) {
-                    let jsb = {};
-                    jsb["repeat"] = td.clamp(0, 100, js[evName]);
-                    logger.customTick(evName.replace(/\|.*/g, ""), clone(jsb));
-                }
-            }
-        }
-        req.response = ({});
-    }
-    , {
-        noSizeCheck: true
-    });
-}
-
-function _initRuntime() : void
-{
-    core.addRoute("POST", "runtime", "translate", async (req: core.ApiRequest) => {
-        // TODO figure out the right permission here and throttle
-        core.checkPermission(req, "root-ptr");
-        if (req.status != 200) {
-            return;
-        }
-        let text = orEmpty(req.body["html"]);
-        let ishtml = true;
-        if (text == "") {
-            text = orEmpty(req.body["text"]);
-            ishtml = false;
-        }
-        let jsb = {};
-        if (text == "") {
-            jsb["translated"] = "";
-        }
-        else {
-            let translated = await microsoftTranslator.translateAsync(text, orEmpty(req.body["from"]), orEmpty(req.body["to"]), ishtml);
-            if (translated == null) {
-                req.status = httpCode._424FailedDependency;
-            }
-            else {
-                jsb["translated"] = translated;
-            }
-        }
-        req.response = clone(jsb);
-    });
 }
 
 
