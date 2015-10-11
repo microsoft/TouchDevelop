@@ -10,7 +10,6 @@ type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
 
-import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
 import * as restify from "./restify"

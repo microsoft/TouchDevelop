@@ -17,7 +17,6 @@ import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteArt from "./tdlite-art"
 import * as tdliteAbuse from "./tdlite-abuse"
 
 

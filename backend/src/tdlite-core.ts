@@ -15,7 +15,6 @@ var asArray = td.asArray;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as cachedStore from "./cached-store"
 import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
