@@ -19,7 +19,6 @@ import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteReleases from "./tdlite-releases"
 import * as tdliteImport from "./tdlite-import"
 
-var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
 var logger = core.logger;

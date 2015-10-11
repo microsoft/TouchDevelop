@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
@@ -17,7 +16,6 @@ import * as core from "./tdlite-core"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 
-var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
 var logger = core.logger;

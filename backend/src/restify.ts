@@ -9,7 +9,6 @@ import * as httpMod from 'http';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 

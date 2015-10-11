@@ -18,7 +18,6 @@ import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 
-var orFalse = core.orFalse;
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
