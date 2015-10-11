@@ -394,7 +394,7 @@ export async function initAsync() : Promise<void>
                 });
                 coll.push(id);
             });
-            let fetchResult1 = core.somePubStore.singleFetchResult(({}));
+            let fetchResult1 = users.singleFetchResult(({}));
             fetchResult1.items = td.arrayToJson(coll);
             req12.response = fetchResult1.toJson();
         }

@@ -18,6 +18,7 @@ var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = restify.http();
 
+var lastSearchReport: Date;
 
 
 export async function performBatchAsync(req: core.ApiRequest) : Promise<void>
@@ -224,6 +225,48 @@ export async function performRoutingAsync(req: restify.Request, res: restify.Res
                 await performSingleRequestAsync(apiRequest);
             }
         }
-        core.sendResponse(apiRequest, req, res);
+        sendResponse(apiRequest, req, res);
     }
 }
+
+function sendResponse(apiRequest: core.ApiRequest, req: restify.Request, res: restify.Response) : void
+{
+    if (apiRequest.status != 200) {
+        if (apiRequest.status == httpCode._401Unauthorized) {
+            res.sendError(httpCode._403Forbidden, "Invalid or missing ?access_token=...");
+        }
+        else if (apiRequest.status == httpCode._402PaymentRequired) {
+            res.sendCustomError(httpCode._402PaymentRequired, "Your account is not authorized to perform this operation.");
+        }
+        else {
+            res.sendError(apiRequest.status, "");
+        }
+    }
+    else if (apiRequest.response == null) {
+        assert(false, "response unset");
+    }
+    else {
+        let etag = core.computeEtagOfJson(apiRequest.response);
+        if (apiRequest.method == "GET" && orEmpty(req.header("If-None-Match")) == etag) {
+            res.sendError(httpCode._304NotModified, "");
+            return;
+        }
+        res.setHeader("ETag", etag);
+        if ( ! apiRequest.isCached) {
+            res.setHeader("Cache-Control", "no-cache, no-store");
+        }
+        if (apiRequest.headers != null) {
+            for (let hd of Object.keys(apiRequest.headers)) {
+                res.setHeader(hd, apiRequest.headers[hd]);
+            }
+        }
+        if (typeof apiRequest.response == "string") {
+            res.setHeader("X-Content-Type-Options", "nosniff");
+            res.sendText(td.toString(apiRequest.response), core.withDefault(apiRequest.responseContentType, "text/plain"));
+        }
+        else {
+            res.json(apiRequest.response);
+        }
+    }
+}
+

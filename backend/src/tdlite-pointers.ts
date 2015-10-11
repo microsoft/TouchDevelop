@@ -116,7 +116,7 @@ export async function initAsync() : Promise<void>
             let body = req.body;
             let ptr1 = new PubPointer();
             ptr1.path = orEmpty(body["path"]).replace(/^\/+/g, "");
-            ptr1.id = core.pathToPtr(ptr1.path);
+            ptr1.id = pathToPtr(ptr1.path);
             let matches = (/^usercontent\/([a-z]+)$/.exec(ptr1.path) || []);
             if (matches[1] == null) {
                 if (td.startsWith(ptr1.path, "users/" + req.userid + "/")) {
@@ -170,7 +170,7 @@ export async function initAsync() : Promise<void>
     tdliteDocs.init(async (v: JsonBuilder) => {
         let wp = orEmpty(v["webpath"]);
         if (wp != "") {
-            let ptrId = core.pathToPtr(wp.replace(/^\//g, ""));
+            let ptrId = pathToPtr(wp.replace(/^\//g, ""));
             v["ptrid"] = ptrId;
             let entry = await core.getPubAsync(ptrId, "pointer");
             if (entry != null) {
@@ -216,6 +216,16 @@ export async function initAsync() : Promise<void>
     });
 }
 
+function pathToPtr(fn: string) : string
+{
+    let s: string;
+    if (! fn) {
+        return "";
+    }
+    s = "ptr-" + fn.replace(/^\/+/g, "").replace(/[^a-zA-Z0-9@]/g, "-").toLowerCase();
+    return s;
+}
+
 async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promise<void>
 {
     let pub = ptr["pub"];
@@ -245,7 +255,7 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
             let coll = (/{parent[tT]opic:([\w\/@\-]+)}/.exec(orEmpty(entry1["text"])) || []);
             let r = orEmpty(coll[1]);
             if (r != "") {
-                parentTopic = await core.getPubAsync(core.pathToPtr(r), "pointer");
+                parentTopic = await core.getPubAsync(pathToPtr(r), "pointer");
             }
             coll = (/{bread[Cc]rumb[tT]itle:([^{}]+)}/.exec(orEmpty(entry1["text"])) || []);
             pub["breadcrumbtitle"] = withDefault(coll[1], pub["scriptname"]);
@@ -257,7 +267,7 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
                 if (currid == "") {
                     break;
                 }
-                parentTopic = await core.getPubAsync(core.pathToPtr(currid), "pointer");
+                parentTopic = await core.getPubAsync(pathToPtr(currid), "pointer");
                 if (parentTopic != null) {
                     break;
                 }
@@ -266,7 +276,7 @@ async function setPointerPropsAsync(ptr: JsonBuilder, body: JsonObject) : Promis
         if (parentTopic != null) {
             let parentRedir = orEmpty(parentTopic["pub"]["redirect"]);
             if (parentRedir != "") {
-                parentTopic = await core.getPubAsync(core.pathToPtr(parentRedir), "pointer");
+                parentTopic = await core.getPubAsync(pathToPtr(parentRedir), "pointer");
             }
         }
         if (parentTopic != null) {
@@ -309,7 +319,7 @@ async function updatePointerAsync(req: core.ApiRequest) : Promise<void>
 async function getTemplateTextAsync(templatename: string, lang: string) : Promise<string>
 {
     let r: string;
-    let id = core.pathToPtr(templatename.replace(/:.*/g, ""));
+    let id = pathToPtr(templatename.replace(/:.*/g, ""));
     let entry3 = (<JsonObject>null);
     if (entry3 == null) {
         entry3 = await core.getPubAsync(id + lang, "pointer");
@@ -545,7 +555,7 @@ export async function servePointerAsync(req: restify.Request, res: restify.Respo
     if (fn == "") {
         fn = "home";
     }
-    let id = core.pathToPtr(fn);
+    let id = pathToPtr(fn);
     let pathLang = orEmpty((/@([a-z][a-z])$/.exec(id) || [])[1]);
     if (pathLang != "") {
         if (pathLang == core.serviceSettings.defaultLang) {
@@ -635,7 +645,7 @@ export async function servePointerAsync(req: restify.Request, res: restify.Respo
                     let breadcrumb = ptr.breadcrumbtitle;
                     let sep = "&nbsp;&nbsp;»&nbsp; ";
                     for (let i = 0; i < 5; i++) {
-                        let parJson = await core.getPubAsync(core.pathToPtr(path), "pointer");
+                        let parJson = await core.getPubAsync(pathToPtr(path), "pointer");
                         if (parJson == null) {
                             break;
                         }
@@ -813,7 +823,7 @@ export async function simplePointerCacheAsync(urlPath: string, lang: string) : P
     let text: string;
     let versionMarker = "simple3";
     urlPath = urlPath + templateSuffix;
-    let id = core.pathToPtr(urlPath);
+    let id = pathToPtr(urlPath);
     let path = "ptrcache/" + core.myChannel + "/" + id + lang;
     let entry2 = await tdliteReleases.cacheRewritten.getAsync(path);
     if (entry2 == null || orEmpty(entry2["version"]) != versionMarker) {

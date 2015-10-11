@@ -6,7 +6,6 @@ import * as td from './td';
 import * as assert from 'assert';
 import * as crypto from 'crypto';
 import * as querystring from 'querystring';
-import * as child_process from 'child_process';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -19,7 +18,6 @@ import * as cachedStore from "./cached-store"
 import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
 import * as restify from "./restify"
-import * as tdliteIndex from "./tdlite-index"
 import * as tdliteHtml from "./tdlite-html"
 
 export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
@@ -27,7 +25,7 @@ export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequ
 
 export var validateTokenAsync : (req: ApiRequest, rreq: restify.Request) => Promise<void>;
 export var executeSearchAsync : (kind: string, q: string, req: ApiRequest) => Promise<void>;
-export var somePubStore: indexedStore.Store;
+var somePubStore: indexedStore.Store;
 export var logger = td.createLogger("tdlite");
 
 export var adminRequest: ApiRequest;
@@ -38,7 +36,6 @@ export var emptyRequest: ApiRequest;
 export var fullTD: boolean = false;
 export var hasHttps: boolean = false;
 export var httpCode = restify.http();
-export var lastSearchReport: Date;
 export var myChannel: string = "";
 export var myHost: string = "";
 export var nonSelfRedirect: string = "";
@@ -47,7 +44,7 @@ export var redisClient: redis.Client;
 export var self: string = "";
 export var settingsPermissions: JsonObject;
 export var tableClient: azureTable.Client;
-export var throttleDisabled: boolean = false;
+var throttleDisabled: boolean = false;
 export var tokenSecret:string;
 export var serviceSettings: ServiceSettings;
 export var settingsContainer: cachedStore.Container;
@@ -231,6 +228,7 @@ export interface IClientConfig {
     altCdnUrls: string[];
 }
 
+// TODO unused?
 export async function fetchQueryAsync(query: azureTable.TableQuery, req: restify.Request) : Promise<JsonObject>
 {
     let entities: JsonObject;
@@ -348,47 +346,6 @@ export function nonEmpty(id: string) : boolean
     return b;
 }
 
-export function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify.Response) : void
-{
-    if (apiRequest.status != 200) {
-        if (apiRequest.status == httpCode._401Unauthorized) {
-            res.sendError(httpCode._403Forbidden, "Invalid or missing ?access_token=...");
-        }
-        else if (apiRequest.status == httpCode._402PaymentRequired) {
-            res.sendCustomError(httpCode._402PaymentRequired, "Your account is not authorized to perform this operation.");
-        }
-        else {
-            res.sendError(apiRequest.status, "");
-        }
-    }
-    else if (apiRequest.response == null) {
-        assert(false, "response unset");
-    }
-    else {
-        let etag = computeEtagOfJson(apiRequest.response);
-        if (apiRequest.method == "GET" && orEmpty(req.header("If-None-Match")) == etag) {
-            res.sendError(httpCode._304NotModified, "");
-            return;
-        }
-        res.setHeader("ETag", etag);
-        if ( ! apiRequest.isCached) {
-            res.setHeader("Cache-Control", "no-cache, no-store");
-        }
-        if (apiRequest.headers != null) {
-            for (let hd of Object.keys(apiRequest.headers)) {
-                res.setHeader(hd, apiRequest.headers[hd]);
-            }
-        }
-        if (typeof apiRequest.response == "string") {
-            res.setHeader("X-Content-Type-Options", "nosniff");
-            res.sendText(td.toString(apiRequest.response), withDefault(apiRequest.responseContentType, "text/plain"));
-        }
-        else {
-            res.json(apiRequest.response);
-        }
-    }
-}
-
 export function buildApiRequest(url: string) : ApiRequest
 {
     let apiReq: ApiRequest;
@@ -455,15 +412,6 @@ export function increment(entry: JsonBuilder, counter: string, delta: number) : 
         x = 0;
     }
     basePub[counter] = x + delta;
-}
-
-export function computeEtagOfJson(resp: JsonObject) : string
-{
-    let etag: string;
-    let hash = crypto.createHash("md5");
-    hash.update(JSON.stringify(resp), "utf8");
-    etag = hash.digest().toString("base64");
-    return etag;
 }
 
 export interface IResolveOptions {
@@ -635,6 +583,15 @@ export function orZero(s: number) : number
     return r;
 }
 
+export function computeEtagOfJson(resp: JsonObject) : string
+{
+    let etag: string;
+    let hash = crypto.createHash("md5");
+    hash.update(JSON.stringify(resp), "utf8");
+    etag = hash.digest().toString("base64");
+    return etag;
+}
+
 export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRequest) : void
 {
     let bld = td.clone(entities.toJson());
@@ -657,23 +614,6 @@ export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRe
         }
     }
     req.response = td.clone(bld);
-}
-
-export function queueUpgradeTask(req: ApiRequest, task:Promise<void>) : void
-{
-    if (req.upgradeTasks == null) {
-        req.upgradeTasks = [];
-    }
-    req.upgradeTasks.push(task);
-}
-
-export async function awaitUpgradeTasksAsync(req: ApiRequest) : Promise<void>
-{
-    if (req.upgradeTasks != null) {
-        for (let task2 of req.upgradeTasks) {
-            await task2;
-        }
-    }
 }
 
 export function isGoodEntry(entry: JsonObject) : boolean
@@ -732,15 +672,6 @@ export function jsonAdd(entry: JsonBuilder, counter: string, delta: number) : vo
 export function orFalse(s: boolean) : boolean
 {
     return td.toBoolean(s) || false;
-}
-
-export function checkGroupPermission(req: ApiRequest) : void
-{
-    if (req.userid == req.rootPub["pub"]["userid"]) {
-    }
-    else {
-        checkPermission(req, "pub-mgmt");
-    }
 }
 
 export function htmlQuote(tdUsername: string) : string
@@ -885,25 +816,6 @@ export function setFields(bld: JsonBuilder, body: JsonObject, fields: string[]) 
     }
 }
 
-export function canBeAdminDeleted(jsonpub: JsonObject) : boolean
-{
-    let b: boolean;
-    b = /^(art|screenshot|comment|script|group|publist|channel|pointer)$/.test(jsonpub["kind"]);
-    return b;
-}
-
-export async function checkDeletePermissionAsync(req: ApiRequest) : Promise<void>
-{
-    let pub = req.rootPub["pub"];
-    let authorid = pub["userid"];
-    if (pub["kind"] == "user") {
-        authorid = pub["id"];
-    }
-    if (authorid != req.userid) {
-        await checkFacilitatorPermissionAsync(req, authorid);
-    }
-}
-
 export async function canPostAsync(req: ApiRequest, kind: string) : Promise<void>
 {
     if (req.userid == "") {
@@ -979,7 +891,24 @@ export async function throttleCoreAsync(throttleKey: string, tokenCost_s_: numbe
     args.push(accumulationSeconds * 1000 + "");
     // return wait times of up to 10000ms
     args.push("10000");
-    let value = await redisClient.evalAsync("local now     = ARGV[1]\nlocal rate    = ARGV[2] or 1000   -- token cost (1000ms - 1 token/seq)\nlocal burst   = ARGV[3] or 3600000    -- accumulate for up to an hour\nlocal dropAt  = ARGV[4] or 10000  -- return wait time of up to 10s; otherwise just drop the request\n\nlocal curr = redis.call(\"GET\", KEYS[1]) or 0\nlocal newHorizon = math.max(now - burst, curr + rate)\nlocal sleepTime  = math.max(0, newHorizon - now)\n\nif sleepTime > tonumber(dropAt) then\n  return -1\nelse\n  redis.call(\"SET\", KEYS[1], newHorizon)\n  return sleepTime\nend", keys, args);
+    let value = await redisClient.evalAsync(
+`
+local now     = ARGV[1]
+local rate    = ARGV[2] or 1000   -- token cost (1000ms - 1 token/seq)
+local burst   = ARGV[3] or 3600000    -- accumulate for up to an hour
+local dropAt  = ARGV[4] or 10000  -- return wait time of up to 10s; otherwise just drop the request
+
+local curr = redis.call(\"GET\", KEYS[1]) or 0
+local newHorizon = math.max(now - burst, curr + rate)
+local sleepTime  = math.max(0, newHorizon - now)
+
+if sleepTime > tonumber(dropAt) then
+  return -1
+else
+  redis.call(\"SET\", KEYS[1], newHorizon)
+  return sleepTime
+end
+`, keys, args);
     let sleepTime = td.toNumber(value);
     if (throttleDisabled) {
         sleepTime = 0;
@@ -1051,13 +980,6 @@ export function sanitizeJson(jsb: JsonBuilder) : void
     }
 }
 
-export function saltFilename(plain: string) : string
-{
-    let salted: string;
-    salted = plain + sha256("filesalt:" + tokenSecret + plain).substr(0, 20);
-    return salted;
-}
-
 export async function followIdsAsync(fetchResult: JsonObject[], field: string, kind: string) : Promise<JsonObject[]>
 {
     let pubs: JsonObject[];
@@ -1079,16 +1001,6 @@ export function checkPubPermission(req: ApiRequest) : void
     }
 }
 
-export function pathToPtr(fn: string) : string
-{
-    let s: string;
-    if (! fn) {
-        return "";
-    }
-    s = "ptr-" + fn.replace(/^\/+/g, "").replace(/[^a-zA-Z0-9@]/g, "-").toLowerCase();
-    return s;
-}
-
 export function hasSetting(key: string) : boolean
 {
     let hasSetting: boolean;
@@ -1100,32 +1012,6 @@ export function progress(message: string) : void
 {
     if (false) {
         logger.debug(message);
-    }
-}
-
-export async function cpuLoadAsync() : Promise<number>
-{
-    let load: number;
-    await new Promise(resume => {
-        child_process.execFile("wmic", ["cpu", "get", "loadpercentage"], function (err, res:string) {
-          var arr = [];
-          if (res)
-            res.replace(/\d+/g, m => { arr.push(parseFloat(m)); return "" });
-          load = 0;
-          arr.forEach(function(n) { load += n });
-          load = load / arr.length;
-          resume();
-        });
-    });
-    return load;
-}
-
-export async function statusReportLoopAsync() : Promise<void>
-{
-    while (true) {
-        await td.sleepAsync(30 + td.randomRange(0, 10));
-        let value = await cpuLoadAsync();
-        logger.measure("load-perc", value);
     }
 }
 
@@ -1177,14 +1063,6 @@ export function setHtmlHeaders(res: restify.Response) : void
     res.setHeader("X-XSS-Protection", "1");
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
     res.setHeader("X-Content-Type-Options", "nosniff");
-}
-
-export function twoDigits(p: number) : string
-{
-    let r: string;
-    let s = "0" + p;
-    return s.substr(s.length - 2, 2);
-    return r;
 }
 
 export function encrypt(val: string, keyid: string) : string
@@ -1336,11 +1214,6 @@ export function callerSharesGroupWith(req: ApiRequest, subjectJson: JsonObject) 
     return isFacilitator;
 }
 
-export function unsafeToJson(jsb: JsonBuilder) : JsonObject
-{
-    return jsb;
-}
-
 export function isAbuseSafe(elt: JsonObject) : boolean
 {
     let b2: boolean;
@@ -1470,46 +1343,6 @@ export function jsonArrayIndexOf(js: JsonObject[], id: string) : number
     return -1;
 }
 
-export async function failureReportLoopAsync() : Promise<void>
-{
-    let container = await blobService.createContainerIfNotExistsAsync("blobwritetest", "private");
-    let table = await tableClient.createTableIfNotExistsAsync("tablewritetest");
-    lastSearchReport = new Date();
-    while (true) {
-        await td.sleepAsync(300 + td.randomRange(0, 100));
-        /* async */ checkSearchAsync();
-        await td.sleepAsync(30);
-        /* async */ doFailureChecksAsync(container, table);
-    }
-}
-
-export async function checkSearchAsync() : Promise<void>
-{
-    let res = await tdliteIndex.statisticsAsync();
-    lastSearchReport = new Date();
-}
-
-export async function doFailureChecksAsync(container: azureBlobStorage.Container, table: azureTable.Table) : Promise<void>
-{
-    if (Date.now() - lastSearchReport.getTime() > 100000) {
-        logger.tick("Failure@search");
-    }
-    if (await redisClient.isStatusLateAsync()) {
-        logger.tick("Failure@redis");
-    }
-    let result2 = await container.createBlockBlobFromTextAsync(td.randomInt(1000) + "", "foobar", {
-        justTry: true
-    });
-    if ( ! result2.succeded()) {
-        logger.tick("Failure@blob");
-    }
-    let entity = azureTable.createEntity(td.randomInt(1000) + "", "foo");
-    let ok = await table.tryInsertEntityExtAsync(td.clone(entity), "or replace");
-    if ( ! ok) {
-        logger.tick("Failure@table");
-    }
-}
-
 export function resolveAsync(store: indexedStore.Store, entities: indexedStore.FetchResult, req: ApiRequest) {
     return (<DecoratedStore><any>store).myResolve(entities, req);
 }
@@ -1561,9 +1394,6 @@ export async function lateInitAsync()
 
 export async function initFinalAsync()
 {
-    if (hasSetting("LIBRATO_TOKEN")) {
-        /* async */ failureReportLoopAsync();
-    }
     emptyRequest = buildApiRequest("/api");
     adminRequest = buildApiRequest("/api");
     adminRequest.userinfo.json = ({ "groups": {} });

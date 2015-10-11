@@ -16,6 +16,7 @@ import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
 import * as tdliteUsers from "./tdlite-users"
 import * as tdliteIndex from "./tdlite-index"
+import * as tdliteStatus from "./tdlite-status"
 
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
@@ -60,7 +61,7 @@ export async function initAsync()
             }
             jsb["search"] = await tdliteIndex.statisticsAsync();
             jsb["dmeta"] = deploymentMeta;
-            jsb["load"] = await core.cpuLoadAsync();
+            jsb["load"] = await tdliteStatus.cpuLoadAsync();
             let redis0 = await core.redisClient.infoAsync();
             jsb["redis"] = redis0;
             if (core.orFalse(req1.queryOptions["text"])) {

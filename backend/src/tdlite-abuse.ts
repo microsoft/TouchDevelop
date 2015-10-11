@@ -134,7 +134,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("DELETE", "*user", "", async (req8: core.ApiRequest) => {
-        await core.checkDeletePermissionAsync(req8);
+        await checkDeletePermissionAsync(req8);
         // Level4 users cannot be deleted; you first have to downgrade their permissions.
         if (req8.status == 200 && core.hasPermission(req8.rootPub, "level4")) {
             req8.status = httpCode._402PaymentRequired;
@@ -145,8 +145,8 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("DELETE", "*pub", "", async (req3: core.ApiRequest) => {
-        if (core.canBeAdminDeleted(req3.rootPub)) {
-            await core.checkDeletePermissionAsync(req3);
+        if (canBeAdminDeleted(req3.rootPub)) {
+            await checkDeletePermissionAsync(req3);
             if (req3.status == 200) {
                 await audit.logAsync(req3, "delete", {
                     oldvalue: await audit.auditDeleteValueAsync(req3.rootPub)
@@ -165,11 +165,11 @@ export async function initAsync() : Promise<void>
         resp.publicationkind = req4.rootPub["kind"];
         resp.publicationname = withDefault(pub1["name"], "/" + req4.rootId);
         resp.publicationuserid = getAuthor(pub1);
-        resp.candeletekind = core.canBeAdminDeleted(req4.rootPub) || core.hasSpecialDelete(req4.rootPub);
+        resp.candeletekind = canBeAdminDeleted(req4.rootPub) || core.hasSpecialDelete(req4.rootPub);
         let reports = await abuseReports.getIndex("publicationid").fetchAsync(req4.rootId, ({"count":10}));
         resp.hasabusereports = reports.items.length > 0 || reports.continuation != "";
         if (resp.candeletekind) {
-            await core.checkDeletePermissionAsync(req4);
+            await checkDeletePermissionAsync(req4);
             if (req4.status == 200) {
                 resp.candelete = true;
                 if (resp.publicationuserid == req4.userid) {
@@ -308,5 +308,24 @@ async function deleteAllByUserAsync(store: indexedStore.Store, id: string, req: 
             await deletePubRecAsync(json1);
         });
     });
+}
+
+function canBeAdminDeleted(jsonpub: JsonObject) : boolean
+{
+    let b: boolean;
+    b = /^(art|screenshot|comment|script|group|publist|channel|pointer)$/.test(jsonpub["kind"]);
+    return b;
+}
+
+async function checkDeletePermissionAsync(req: core.ApiRequest) : Promise<void>
+{
+    let pub = req.rootPub["pub"];
+    let authorid = pub["userid"];
+    if (pub["kind"] == "user") {
+        authorid = pub["id"];
+    }
+    if (authorid != req.userid) {
+        await core.checkFacilitatorPermissionAsync(req, authorid);
+    }
 }
 

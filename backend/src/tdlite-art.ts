@@ -246,7 +246,7 @@ async function resolveArtAsync(entities: indexedStore.FetchResult, req: core.Api
         let id = "/" + pubArt.id;
         pubArt.contenttype = jsb["contentType"];
         if (req.isUpgrade) {
-            core.queueUpgradeTask(req, /* async */ redownloadArtAsync(jsb));
+            queueUpgradeTask(req, /* async */ redownloadArtAsync(jsb));
         }
         if (jsb["isImage"]) {
             pubArt.pictureurl = artContainer.url() + id;
@@ -270,7 +270,7 @@ async function resolveArtAsync(entities: indexedStore.FetchResult, req: core.Api
             pubArt.bloburl = artContainer.url() + "/" + jsb["filename"];
         }
     }
-    await core.awaitUpgradeTasksAsync(req);
+    await awaitUpgradeTasksAsync(req);
     entities.items = td.arrayToJson(coll);
 }
 
@@ -336,10 +336,10 @@ async function resolveScreenshotAsync(entities: indexedStore.FetchResult, req: c
         screenshot.pictureurl = artContainer.url() + id;
         screenshot.thumburl = thumbContainers[0].container.url() + id;
         if (req.isUpgrade) {
-            core.queueUpgradeTask(req, /* async */ redownloadScreenshotAsync(js));
+            queueUpgradeTask(req, /* async */ redownloadScreenshotAsync(js));
         }
     }
-    await core.awaitUpgradeTasksAsync(req);
+    await awaitUpgradeTasksAsync(req);
     entities.items = td.arrayToJson(coll);
 }
 
@@ -686,3 +686,21 @@ export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
         skipScan: true
     });
 }
+
+function queueUpgradeTask(req: core.ApiRequest, task:Promise<void>) : void
+{
+    if (req.upgradeTasks == null) {
+        req.upgradeTasks = [];
+    }
+    req.upgradeTasks.push(task);
+}
+
+async function awaitUpgradeTasksAsync(req: core.ApiRequest) : Promise<void>
+{
+    if (req.upgradeTasks != null) {
+        for (let task2 of req.upgradeTasks) {
+            await task2;
+        }
+    }
+}
+

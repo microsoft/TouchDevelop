@@ -46,6 +46,7 @@ import * as tdliteChannels from "./tdlite-channels"
 import * as tdliteTicks from "./tdlite-ticks"
 import * as tdliteRuntime from "./tdlite-runtime"
 import * as tdliteRouting from "./tdlite-routing"
+import * as tdliteStatus from "./tdlite-status"
 
 var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
@@ -82,7 +83,7 @@ async function _initAsync() : Promise<void>
             period: 60000,
             aggregate: true
         });
-        /* async */ core.statusReportLoopAsync();
+        /* async */ tdliteStatus.statusReportLoopAsync();
     }
 
     await core.lateInitAsync();
@@ -108,6 +109,10 @@ async function _initAsync() : Promise<void>
 
     await _init_0Async();
 
+    if (core.hasSetting("LIBRATO_TOKEN")) {
+        /* async */ tdliteStatus.failureReportLoopAsync();
+    }
+    
     await core.initFinalAsync();
 
     let server = restify.server();

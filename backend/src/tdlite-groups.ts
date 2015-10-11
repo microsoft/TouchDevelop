@@ -183,7 +183,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("POST", "*group", "", async (req: core.ApiRequest) => {
-        core.checkGroupPermission(req);
+        checkGroupPermission(req);
         if (req.status == 200) {
             let needsReindex = false;
             let user = orEmpty(req.body["userid"]);
@@ -211,7 +211,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("GET", "*group", "code", async (req2: core.ApiRequest) => {
-        core.checkGroupPermission(req2);
+        checkGroupPermission(req2);
         if (req2.status == 200) {
             let s = orEmpty(req2.rootPub["code"]);
             let jsb2 = {};
@@ -258,7 +258,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("GET", "*group", "approvals", async (req4: core.ApiRequest) => {
-        core.checkGroupPermission(req4);
+        checkGroupPermission(req4);
         if (req4.status == 200) {
             let js = req4.rootPub["approvals"];
             if (js == null) {
@@ -315,7 +315,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("POST", "*group", "code", async (req6: core.ApiRequest) => {
-        core.checkGroupPermission(req6);
+        checkGroupPermission(req6);
         if (req6.status == 200) {
             let grCode = orEmpty(req6.rootPub["code"]);
             if (grCode != "") {
@@ -346,7 +346,7 @@ export async function initAsync() : Promise<void>
         }
     });
     core.addRoute("DELETE", "*group", "code", async (req: core.ApiRequest) => {
-        core.checkGroupPermission(req);
+        checkGroupPermission(req);
         if (req.status == 200) {
             let s1 = core.normalizeAndHash(req.rootPub["code"]);
             if (s1 == "") {
@@ -606,3 +606,11 @@ export async function getUser_sGroupsAsync(subjectUserid: string) : Promise<Json
     return groups;
 }
 
+export function checkGroupPermission(req: core.ApiRequest) : void
+{
+    if (req.userid == req.rootPub["pub"]["userid"]) {
+    }
+    else {
+        core.checkPermission(req, "pub-mgmt");
+    }
+}
