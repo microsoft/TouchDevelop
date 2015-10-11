@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as cachedStore from "./cached-store"
@@ -35,20 +33,20 @@ export var appContainer: azureBlobStorage.Container;
 export class PubRelease
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public releaseid: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public labels: IReleaseLabel[];
-    @json public commit: string = "";
-    @json public branch: string = "";
-    @json public buildnumber: number = 0;
-    @json public version: string = "";
-    @json public name: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public releaseid: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public labels: IReleaseLabel[];
+    @td.json public commit: string = "";
+    @td.json public branch: string = "";
+    @td.json public buildnumber: number = 0;
+    @td.json public version: string = "";
+    @td.json public name: string = "";
     static createFromJson(o:JsonObject) { let r = new PubRelease(); r.fromJson(o); return r; }
 }
 
@@ -81,18 +79,18 @@ export interface IReleaseLabel {
 export class PubWebfile
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public filename: string = "";
-    @json public contenttype: string = "";
-    @json public labels: string[];
-    @json public rawurl: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public filename: string = "";
+    @td.json public contenttype: string = "";
+    @td.json public labels: string[];
+    @td.json public rawurl: string = "";
     static createFromJson(o:JsonObject) { let r = new PubWebfile(); r.fromJson(o); return r; }
 }
 
@@ -173,7 +171,7 @@ export async function initAsync() : Promise<void>
                 let ok = await core.tryInsertPubPointerAsync(key, jsb1["id"]);
                 if (ok) {
                     await releases.insertAsync(jsb1);
-                    await core.returnOnePubAsync(releases, clone(jsb1), req1);
+                    await core.returnOnePubAsync(releases, td.clone(jsb1), req1);
                 }
                 else {
                     let entry1 = await core.getPointedPubAsync(key, "release");

@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as parallel from "./parallel"
 import * as indexedStore from "./indexed-store"
@@ -33,27 +31,27 @@ var groupMemberships: indexedStore.Store;
 export class PubGroup
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public pictureid: string = "";
-    @json public allowexport: boolean = false;
-    @json public allowappstatistics: boolean = false;
-    @json public isrestricted: boolean = false;
-    @json public isclass: boolean = false;
-    @json public description: string = "";
-    @json public school: string = "";
-    @json public grade: string = "";
-    @json public url: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public positivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public name: string = "";
+    @td.json public pictureid: string = "";
+    @td.json public allowexport: boolean = false;
+    @td.json public allowappstatistics: boolean = false;
+    @td.json public isrestricted: boolean = false;
+    @td.json public isclass: boolean = false;
+    @td.json public description: string = "";
+    @td.json public school: string = "";
+    @td.json public grade: string = "";
+    @td.json public url: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public positivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
     static createFromJson(o:JsonObject) { let r = new PubGroup(); r.fromJson(o); return r; }
 }
 
@@ -84,14 +82,14 @@ export interface IPubGroup {
 export class PubGroupMembership
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public publicationid: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public publicationid: string = "";
     static createFromJson(o:JsonObject) { let r = new PubGroupMembership(); r.fromJson(o); return r; }
 }
 
@@ -174,14 +172,14 @@ export async function initAsync() : Promise<void>
                 subjectid: req.userid,
                 publicationid: jsb1["id"],
                 publicationkind: "group",
-                newvalue: clone(jsb1)
+                newvalue: td.clone(jsb1)
             });
-            await addUserToGroupAsync(group.userid, clone(jsb1), (<core.ApiRequest>null));
+            await addUserToGroupAsync(group.userid, td.clone(jsb1), (<core.ApiRequest>null));
             await notifications.storeAsync(req, jsb1, "");
             await search.scanAndSearchAsync(jsb1);
             // re-fetch user to include new permission
             await core.setReqUserIdAsync(req, req.userid);
-            await core.returnOnePubAsync(groups, clone(jsb1), req);
+            await core.returnOnePubAsync(groups, td.clone(jsb1), req);
         }
     });
     core.addRoute("POST", "*group", "", async (req: core.ApiRequest) => {
@@ -205,7 +203,7 @@ export async function initAsync() : Promise<void>
                 await reindexGroupsAsync(req.userinfo.json);
             }
             await search.updateAndUpsertAsync(core.pubsContainer, req, async (entry: JsonBuilder) => {
-                let group1 = PubGroup.createFromJson(clone(entry["pub"]));
+                let group1 = PubGroup.createFromJson(td.clone(entry["pub"]));
                 setGroupProps(group1, req.body);
                 entry["pub"] = group1.toJson();
             });
@@ -219,7 +217,7 @@ export async function initAsync() : Promise<void>
             let jsb2 = {};
             jsb2["code"] = s;
             jsb2["expiration"] = await core.nowSecondsAsync() + 365 * 24 * 3600;
-            req2.response = clone(jsb2);
+            req2.response = td.clone(jsb2);
         }
     });
     core.addRoute("GET", "*user", "code", async (req3: core.ApiRequest) => {
@@ -252,7 +250,7 @@ export async function initAsync() : Promise<void>
                 jsb3["data"] = codeObj["groupid"];
             }
             if (jsb3.hasOwnProperty("verb")) {
-                req3.response = clone(jsb3);
+                req3.response = td.clone(jsb3);
             }
             else {
                 req3.status = httpCode._404NotFound;
@@ -516,12 +514,12 @@ async function importGroupAsync(req: core.ApiRequest, body: JsonObject) : Promis
 
 function setGroupProps(group: PubGroup, body: JsonObject) : void
 {
-    let bld = clone(group.toJson());
+    let bld = td.clone(group.toJson());
     let fields = ["description", "pictureid"]
     if (core.fullTD)
         fields = fields.concat(["school", "grade", "allowappstatistics", "allowexport", "isrestricted"]);    
     core.setFields(bld, body, fields);
-    group.fromJson(clone(bld));
+    group.fromJson(td.clone(bld));
 }
 
 export async function addUserToGroupAsync(userid: string, gr: JsonObject, auditReq: core.ApiRequest) : Promise<void>

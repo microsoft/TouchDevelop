@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as parallel from "./parallel"
@@ -29,16 +27,16 @@ var notificationsTable: azureTable.Table;
 export class PubSubscription
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
     static createFromJson(o:JsonObject) { let r = new PubSubscription(); r.fromJson(o); return r; }
 }
 
@@ -58,17 +56,17 @@ export interface IPubSubscription {
 export class PubNotification
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public notificationkind: string = "";
-    @json public userid: string = "";
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public supplementalid: string = "";
-    @json public supplementalkind: string = "";
-    @json public supplementalname: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public notificationkind: string = "";
+    @td.json public userid: string = "";
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public supplementalid: string = "";
+    @td.json public supplementalkind: string = "";
+    @td.json public supplementalname: string = "";
     static createFromJson(o:JsonObject) { let r = new PubNotification(); r.fromJson(o); return r; }
 }
 
@@ -147,16 +145,16 @@ export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind
         }
         notification.userid = userid;
 
-        let jsb2 = clone(notification.toJson());
+        let jsb2 = td.clone(notification.toJson());
         jsb2["RowKey"] = notification.id;
 
         let ids = Object.keys(toNotify);
         await parallel.forAsync(ids.length, async (x: number) => {
             let id = ids[x];
-            let jsb3 = clone(jsb2);
+            let jsb3 = td.clone(jsb2);
             jsb3["PartitionKey"] = id;
             jsb3["notificationkind"] = toNotify[id];
-            await notificationsTable.insertEntityAsync(clone(jsb3), "or merge");
+            await notificationsTable.insertEntityAsync(td.clone(jsb3), "or merge");
             if (id != "all") {
                 await core.pubsContainer.updateAsync(id, async (entry: JsonBuilder) => {
                     let num = core.orZero(entry["notifications"]);
@@ -232,7 +230,7 @@ export async function initAsync() : Promise<void>
                 entry["lastNotificationId"] = topNot;
                 entry["notifications"] = 0;
             });
-            req6.response = clone(resp);
+            req6.response = td.clone(resp);
         }
     });
 }
@@ -321,10 +319,10 @@ export async function sendAsync(about: JsonObject, notkind: string, suplemental:
         notification.supplementalname = suplemental["pub"]["name"];
     }
     let target = notification.userid;
-    let jsb2 = clone(notification.toJson());
+    let jsb2 = td.clone(notification.toJson());
     jsb2["PartitionKey"] = target;
     jsb2["RowKey"] = notification.id;
-    await notificationsTable.insertEntityAsync(clone(jsb2), "or merge");
+    await notificationsTable.insertEntityAsync(td.clone(jsb2), "or merge");
     await core.pubsContainer.updateAsync(target, async (entry: JsonBuilder) => {
         core.jsonAdd(entry, "notifications", 1);
     });

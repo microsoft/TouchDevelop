@@ -12,8 +12,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -64,16 +62,16 @@ var lastSettingsCheck: number = 0;
 export class ServiceSettings
     extends td.JsonRecord
 {
-    @json public paths: JsonObject;
-    @json public emailFrom: string = "";
-    @json public accounts: JsonObject;
-    @json public alarmingEmails: JsonObject;
-    @json public termsversion: string = "";
-    @json public blockedNicknameRx: string = "";
-    @json public tokenExpiration: number = 0;
-    @json public defaultLang: string = "";
-    @json public langs: JsonObject;
-    @json public envrewrite: JsonObject;
+    @td.json public paths: JsonObject;
+    @td.json public emailFrom: string = "";
+    @td.json public accounts: JsonObject;
+    @td.json public alarmingEmails: JsonObject;
+    @td.json public termsversion: string = "";
+    @td.json public blockedNicknameRx: string = "";
+    @td.json public tokenExpiration: number = 0;
+    @td.json public defaultLang: string = "";
+    @td.json public langs: JsonObject;
+    @td.json public envrewrite: JsonObject;
     static createFromJson(o:JsonObject) { let r = new ServiceSettings(); r.fromJson(o); return r; }
 }
 
@@ -165,12 +163,12 @@ export interface IStoreDecorator {
 export class Token
     extends td.JsonRecord
 {
-    @json public PartitionKey: string = "";
-    @json public RowKey: string = "";
-    @json public time: number = 0;
-    @json public reason: string = "";
-    @json public cookie: string = "";
-    @json public version: number = 0;
+    @td.json public PartitionKey: string = "";
+    @td.json public RowKey: string = "";
+    @td.json public time: number = 0;
+    @td.json public reason: string = "";
+    @td.json public cookie: string = "";
+    @td.json public version: number = 0;
     static createFromJson(o:JsonObject) { let r = new Token(); r.fromJson(o); return r; }
 }
 
@@ -198,21 +196,21 @@ export class ApireqUserInfo
 export class ClientConfig
     extends td.JsonRecord
 {
-    @json public workspaceUrl: string = "";
-    @json public searchUrl: string = "";
-    @json public searchApiKey: string = "";
-    @json public apiUrl: string = "";
-    @json public rootUrl: string = "";
-    @json public liteVersion: string = "";
-    @json public tdVersion: string = "";
-    @json public releaseid: string = "";
-    @json public relid: string = "";
-    @json public releaseLabel: string = "";
-    @json public shareUrl: string = "";
-    @json public cdnUrl: string = "";
-    @json public anonToken: string = "";
-    @json public primaryCdnUrl: string = "";
-    @json public altCdnUrls: string[];
+    @td.json public workspaceUrl: string = "";
+    @td.json public searchUrl: string = "";
+    @td.json public searchApiKey: string = "";
+    @td.json public apiUrl: string = "";
+    @td.json public rootUrl: string = "";
+    @td.json public liteVersion: string = "";
+    @td.json public tdVersion: string = "";
+    @td.json public releaseid: string = "";
+    @td.json public relid: string = "";
+    @td.json public releaseLabel: string = "";
+    @td.json public shareUrl: string = "";
+    @td.json public cdnUrl: string = "";
+    @td.json public anonToken: string = "";
+    @td.json public primaryCdnUrl: string = "";
+    @td.json public altCdnUrls: string[];
     static createFromJson(o:JsonObject) { let r = new ClientConfig(); r.fromJson(o); return r; }
 }
 
@@ -268,7 +266,7 @@ export function addRoute(method: string, root: string, verb: string, handler: Ap
             let size = 0;
             if (req.body != null) {
                 if (options_.sizeCheckExcludes) {
-                    let jsb = clone(req.body);
+                    let jsb = td.clone(req.body);
                     delete jsb[options_.sizeCheckExcludes];
                     size = JSON.stringify(jsb).length;
                 }
@@ -464,7 +462,7 @@ export async function performSingleRequestAsync(apiRequest: ApiRequest) : Promis
         evArgs["cat"] = cat;
         evArgs["statusCode"] = apiRequest.status;
         if (false) {
-            logger.customTick(path, clone(evArgs));
+            logger.customTick(path, td.clone(evArgs));
         }
         logger.measure(cat + "@" + path, logger.contextDuration());
     }
@@ -518,7 +516,7 @@ export async function performBatchAsync(req: ApiRequest) : Promise<void>
         req.status = httpCode._400BadRequest;
     }
     else {
-        let resps = asArray(clone(reqArr));
+        let resps = asArray(td.clone(reqArr));
         await parallel.forAsync(reqArr.length, async (x: number) => {
             let inpReq = resps[x];
             let resp = await performBatchedRequestAsync(inpReq, req, false);
@@ -527,7 +525,7 @@ export async function performBatchAsync(req: ApiRequest) : Promise<void>
         let jsb = {};
         jsb["code"] = 200;
         jsb["array"] = td.arrayToJson(resps);
-        req.response = clone(jsb);
+        req.response = td.clone(jsb);
     }
 }
 
@@ -812,7 +810,7 @@ export function orZero(s: number) : number
 
 export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRequest) : void
 {
-    let bld = clone(entities.toJson());
+    let bld = td.clone(entities.toJson());
     bld["kind"] = "list";
     let etags = td.toString(req.queryOptions["etagsmode"]);
     if (etags == null) {
@@ -831,7 +829,7 @@ export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRe
             delete bld["items"];
         }
     }
-    req.response = clone(bld);
+    req.response = td.clone(bld);
 }
 
 export function queueUpgradeTask(req: ApiRequest, task:Promise<void>) : void
@@ -1714,7 +1712,7 @@ export async function doFailureChecksAsync(container: azureBlobStorage.Container
         logger.tick("Failure@blob");
     }
     let entity = azureTable.createEntity(td.randomInt(1000) + "", "foo");
-    let ok = await table.tryInsertEntityExtAsync(clone(entity), "or replace");
+    let ok = await table.tryInsertEntityExtAsync(td.clone(entity), "or replace");
     if ( ! ok) {
         logger.tick("Failure@table");
     }
@@ -1786,14 +1784,14 @@ export async function initFinalAsync()
 export function removeDerivedProperties(body: JsonObject) : JsonObject
 {
     let body2: JsonObject;
-    let jsb2 = clone(body);
+    let jsb2 = td.clone(body);
     for (let fld of ["username", "url"]) {
         jsb2[fld] = "";
     }
     for (let fld2 of ["userscore", "positivereviews", "comments", "subscribers"]) {
         jsb2[fld2] = 0;
     }
-    body = clone(jsb2);
+    body = td.clone(jsb2);
     body2 = body;
     return body2;
 }
@@ -1805,7 +1803,7 @@ export async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<
     coll2 = (<JsonBuilder[]>[]);
     for (let i = 0; i < entities.length; i++) {
         let userJs:any = users[i];
-        let root = clone(entities[i]);
+        let root = td.clone(entities[i]);
         coll2.push(root);
         if (userJs != null) {
             root["*userid"] = userJs;
@@ -1864,7 +1862,7 @@ export async function refreshSettingsAsync() : Promise<void>
             if (entry2 == null) {
                 entry2 = ({ "permissions": {} });
             }
-            let permMap = clone(entry2["permissions"]);
+            let permMap = td.clone(entry2["permissions"]);
             let numAdded = 1;
             while (numAdded > 0) {
                 numAdded = 0;
@@ -1896,9 +1894,9 @@ export async function refreshSettingsAsync() : Promise<void>
               "alarmingEmails": []
             };
             td.jsonCopyFrom(jsb, entry2);
-            serviceSettings = ServiceSettings.createFromJson(clone(jsb));
+            serviceSettings = ServiceSettings.createFromJson(td.clone(jsb));
             lastSettingsCheck = now;
-            settingsPermissions = clone(permMap);
+            settingsPermissions = td.clone(permMap);
 
         }
     }

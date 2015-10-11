@@ -9,8 +9,6 @@ import * as crypto from 'crypto';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as redis from "./redis"
@@ -351,7 +349,7 @@ export class Container
             names = namesUnique;
             let values = await redisClient.mgetAsync(names.map<string>(elt => pref + orEmpty(elt) + ":data"));
             let coll:Promise<void>[] = [];
-            let jsb = clone(values);
+            let jsb = td.clone(values);
             if (this.blob != null) {
                 for (let i = 0; i < names.length; i++) {
                     if (td.toString(values[i]) == null && orEmpty(names[i]) != "") {
@@ -386,7 +384,7 @@ export class Container
             timeoutIntervalInMs: blobTimeout
         });
         if (info.text() != null) {
-            values[i] = clone(info.text());
+            values[i] = td.clone(info.text());
             let js = JSON.parse(info.text());
             await this.saveCacheAsync(names[i], info.text(), js["__version"]);
         }

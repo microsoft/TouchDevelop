@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as parallel from "./parallel"
 import * as core from "./tdlite-core"
@@ -27,13 +25,13 @@ var importRunning: boolean = false;
 export class RecImportResponse
     extends td.JsonRecord
 {
-    @json public problems: number = 0;
-    @json public imported: number = 0;
-    @json public present: number = 0;
-    @json public attempts: number = 0;
-    @json public ids: JsonBuilder;
-    @json public force: boolean = false;
-    @json public fulluser: boolean = false;
+    @td.json public problems: number = 0;
+    @td.json public imported: number = 0;
+    @td.json public present: number = 0;
+    @td.json public attempts: number = 0;
+    @td.json public ids: JsonBuilder;
+    @td.json public force: boolean = false;
+    @td.json public fulluser: boolean = false;
     static createFromJson(o:JsonObject) { let r = new RecImportResponse(); r.fromJson(o); return r; }
 }
 
@@ -150,7 +148,7 @@ async function importFromPubloggerAsync(req: core.ApiRequest) : Promise<void>
         let r = core.orZero(entry1["start"]);
         entry1["start"] = Math.max(r, lastTime);
     });
-    req.response = clone(resp);
+    req.response = td.clone(resp);
 }
 
 export async function importOneAnythingAsync(js: JsonObject) : Promise<core.ApiRequest>
@@ -189,7 +187,7 @@ async function importDownloadPublicationAsync(id: string, resp: JsonBuilder, col
             resp[id] = 404;
         }
         else if (js["kind"] == "script") {
-            let jsb = clone(js);
+            let jsb = td.clone(js);
             if (js["rootid"] != id) {
                 let js3 = await td.downloadJsonAsync(url + "/base");
                 jsb["baseid"] = js3["id"];
@@ -199,7 +197,7 @@ async function importDownloadPublicationAsync(id: string, resp: JsonBuilder, col
             }
             let s2 = await td.downloadTextAsync(url + "/text?original=true&ids=true");
             jsb["text"] = s2;
-            coll2.push(clone(jsb));
+            coll2.push(td.clone(jsb));
         }
         else if (/^(runbucket|run|webapp)$/.test(js["kind"])) {
         }
@@ -235,7 +233,7 @@ export async function importRecAsync(resp: RecImportResponse, id: string) : Prom
                 coll.push(/* async */ importRecAsync(resp, js["userid"]));
                 let kind = js["kind"];
                 if (kind == "script") {
-                    let jsb = clone(js);
+                    let jsb = td.clone(js);
                     if (js["rootid"] != js["id"]) {
                         let js2 = await td.downloadJsonAsync(tdapi + id + "/base");
                         if (js2 != null) {
@@ -245,7 +243,7 @@ export async function importRecAsync(resp: RecImportResponse, id: string) : Prom
                     await importRecAsync(resp, jsb["baseid"]);
                     let s = await td.downloadTextAsync(tdapi + id + "/text?original=true&ids=true");
                     jsb["text"] = withDefault(s, "no text");
-                    js = clone(jsb);
+                    js = td.clone(jsb);
                 }
 
                 if ( ! isThere) {

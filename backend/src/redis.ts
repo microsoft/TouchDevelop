@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 
 var logger: td.AppLogger;
@@ -458,7 +456,7 @@ async function exampleAsync() : Promise<void>
     let args = [];
     args.push("key");
     args.push("value");
-    let result = await client.sendCommandAsync("append", clone(args));
+    let result = await client.sendCommandAsync("append", td.clone(args));
     // ### multi commands
     let multi = await client.multiAsync();
     let madd = await multi.saddAsync("key", "Yay");

@@ -9,8 +9,6 @@ import * as crypto from 'crypto';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -31,10 +29,10 @@ var compileContainer: azureBlobStorage.Container;
 export class CompileReq
     extends td.JsonRecord
 {
-    @json public config: string = "";
-    @json public source: string = "";
-    @json public meta: JsonObject;
-    @json public repohash: string = "";
+    @td.json public config: string = "";
+    @td.json public source: string = "";
+    @td.json public meta: JsonObject;
+    @td.json public repohash: string = "";
     static createFromJson(o:JsonObject) { let r = new CompileReq(); r.fromJson(o); return r; }
 }
 
@@ -48,7 +46,7 @@ export interface ICompileReq {
 export class CompileResp
     extends td.JsonRecord
 {
-    @json public statusurl: string = "";
+    @td.json public statusurl: string = "";
     static createFromJson(o:JsonObject) { let r = new CompileResp(); r.fromJson(o); return r; }
 }
 
@@ -59,10 +57,10 @@ export interface ICompileResp {
 export class CompileStatus
     extends td.JsonRecord
 {
-    @json public success: boolean = false;
-    @json public hexurl: string = "";
-    @json public mbedresponse: JsonBuilder;
-    @json public messages: JsonObject[];
+    @td.json public success: boolean = false;
+    @td.json public hexurl: string = "";
+    @td.json public mbedresponse: JsonBuilder;
+    @td.json public messages: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new CompileStatus(); r.fromJson(o); return r; }
 }
 
@@ -76,12 +74,12 @@ export interface ICompileStatus {
 export class CompilerConfig
     extends td.JsonRecord
 {
-    @json public repourl: string = "";
-    @json public platform: string = "";
-    @json public hexfilename: string = "";
-    @json public hexcontenttype: string = "";
-    @json public target_binary: string = "";
-    @json public internalUrl: string = "";
+    @td.json public repourl: string = "";
+    @td.json public platform: string = "";
+    @td.json public hexfilename: string = "";
+    @td.json public hexcontenttype: string = "";
+    @td.json public target_binary: string = "";
+    @td.json public internalUrl: string = "";
     static createFromJson(o:JsonObject) { let r = new CompilerConfig(); r.fromJson(o); return r; }
 }
 
@@ -105,7 +103,7 @@ export async function initAsync()
         core.checkPermission(req9, "root");
         if (req9.status == 200) {
             let ccfg = CompilerConfig.createFromJson((await core.settingsContainer.getAsync("compile"))[req9.argument]);
-            let jsb2 = clone(req9.body);
+            let jsb2 = td.clone(req9.body);
             let response2 = await mbedintRequestAsync(ccfg, jsb2);
             req9.response = response2.contentAsJson();
         }

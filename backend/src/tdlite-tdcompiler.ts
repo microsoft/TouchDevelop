@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as cachedStore from "./cached-store"
 import * as parallel from "./parallel"
@@ -124,12 +122,12 @@ export async function deployCompileServiceAsync(rel: tdliteReleases.PubRelease, 
     };
     let file = {};        
     if (false) {
-        logger.debug("cloud JS: " + JSON.stringify(clone(jsb), null, 2));
+        logger.debug("cloud JS: " + JSON.stringify(td.clone(jsb), null, 2));
     }
 
     let request = td.createRequest(td.serverSetting("TDC_ENDPOINT", false) + "deploy");
     request.setMethod("post");
-    request.setContentAsJson(clone(jsb));
+    request.setContentAsJson(td.clone(jsb));
     let response = await request.sendAsync();
     logger.info("cloud deploy: " + response);
 
@@ -162,7 +160,7 @@ export async function cacheCloudCompilerDataAsync(ver: string) : Promise<void>
         for (let js of asArray(doctopics)) {
             jsb[js["id"]] = js;
         }
-        doctopicsByTopicid = clone(jsb);
+        doctopicsByTopicid = td.clone(jsb);
         doctopicsCss = (await resp2)["css"];
         cloudRelid = ver;
     }

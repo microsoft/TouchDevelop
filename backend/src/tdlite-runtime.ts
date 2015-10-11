@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as core from "./tdlite-core"
 import * as microsoftTranslator from "./microsoft-translator"
@@ -50,7 +48,7 @@ export async function initAsync()
                 jsb["translated"] = translated;
             }
         }
-        req.response = clone(jsb);
+        req.response = td.clone(jsb);
     });
 }
 

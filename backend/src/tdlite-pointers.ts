@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as parallel from "./parallel"
 import * as restify from "./restify"
@@ -40,25 +38,25 @@ export var templateSuffix: string = "";
 export class PubPointer
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public path: string = "";
-    @json public scriptid: string = "";
-    @json public artid: string = "";
-    @json public redirect: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public comments: number = 0;
-    @json public artcontainer: string = "";
-    @json public parentpath: string = "";
-    @json public scriptname: string = "";
-    @json public scriptdescription: string = "";
-    @json public breadcrumbtitle: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public path: string = "";
+    @td.json public scriptid: string = "";
+    @td.json public artid: string = "";
+    @td.json public redirect: string = "";
+    @td.json public description: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public comments: number = 0;
+    @td.json public artcontainer: string = "";
+    @td.json public parentpath: string = "";
+    @td.json public scriptname: string = "";
+    @td.json public scriptdescription: string = "";
+    @td.json public breadcrumbtitle: string = "";
     static createFromJson(o:JsonObject) { let r = new PubPointer(); r.fromJson(o); return r; }
 }
 
@@ -110,7 +108,7 @@ export async function initAsync() : Promise<void>
     });
     core.addRoute("GET", "*script", "cardinfo", async (req14: core.ApiRequest) => {
         let jsb1 = await getCardInfoAsync(req14, req14.rootPub);
-        req14.response = clone(jsb1);
+        req14.response = td.clone(jsb1);
     });
     core.addRoute("POST", "pointers", "", async (req: core.ApiRequest) => {
         await core.canPostAsync(req, "pointer");
@@ -159,9 +157,9 @@ export async function initAsync() : Promise<void>
                     await search.scanAndSearchAsync(jsb1);
                     await clearPtrCacheAsync(ptr1.id);
                     await audit.logAsync(req, "post-ptr", {
-                        newvalue: clone(jsb1)
+                        newvalue: td.clone(jsb1)
                     });
-                    await core.returnOnePubAsync(pointers, clone(jsb1), req);
+                    await core.returnOnePubAsync(pointers, td.clone(jsb1), req);
                 }
             }
         }
@@ -187,8 +185,8 @@ export async function initAsync() : Promise<void>
             v["isvolatile"] = true;
             let jsb2 = await getCardInfoAsync(core.emptyRequest, pubObj);
             // use values from expansion only if there are not present in v
-            td.jsonCopyFrom(jsb2, clone(v));
-            td.jsonCopyFrom(v, clone(jsb2));
+            td.jsonCopyFrom(jsb2, td.clone(v));
+            td.jsonCopyFrom(v, td.clone(jsb2));
         }
         let promotag = orEmpty(v["promotag"]);
         if (promotag != "") {
@@ -205,7 +203,7 @@ export async function initAsync() : Promise<void>
                     let ref = {}
                     await pointers.container.updateAsync(json1["id"], async (entry1: JsonBuilder) => {
                         await setPointerPropsAsync(entry1, ({}));
-                        ref = clone(entry1);
+                        ref = td.clone(entry1);
                     });
                     await audit.logAsync(req2, "reindex-ptr", {
                         oldvalue: json1,
@@ -301,10 +299,10 @@ async function updatePointerAsync(req: core.ApiRequest) : Promise<void>
         });
         await audit.logAsync(req, "update-ptr", {
             oldvalue: req.rootPub,
-            newvalue: clone(bld)
+            newvalue: td.clone(bld)
         });
         await clearPtrCacheAsync(req.rootId);
-        await core.returnOnePubAsync(pointers, clone(bld), req);
+        await core.returnOnePubAsync(pointers, td.clone(bld), req);
     }
 }
 
@@ -503,7 +501,7 @@ async function rewriteAndCachePointerAsync(id: string, res: restify.Response, re
         jsb["expiration"] = await core.nowSecondsAsync() + td.randomRange(2000, 3600);
         jsb["status"] = 200;
         await rewrite(jsb);
-        entry2 = clone(jsb);
+        entry2 = td.clone(jsb);
 
         if (jsb["version"] == ver) {
             await tdliteReleases.cacheRewritten.updateAsync(path, async (entry: JsonBuilder) => {
@@ -581,7 +579,7 @@ export async function servePointerAsync(req: restify.Request, res: restify.Respo
                 let docid = fn.replace(/^docs\//g, "");
                 let doctopic = doctopicsByTopicid[docid];
                 if (doctopic != null) {
-                    pubdata = clone(doctopic);
+                    pubdata = td.clone(doctopic);
                     let html = topicList(doctopic, "", "");
                     pubdata["topiclist"] = html;
                     let resp = await tdliteTdCompiler.queryCloudCompilerAsync(fn);
@@ -735,7 +733,7 @@ export async function getCardInfoAsync(req: core.ApiRequest, pubJson: JsonObject
         return {};
     }
     let scr = tdliteScripts.PubScript.createFromJson(js3);
-    let jsb = clone(js3);
+    let jsb = td.clone(js3);
     jsb["description"] = scr.description.replace(/#docs/g, "");
     let vimeo = scr.meta["vimeo"];
     if (vimeo != null) {
@@ -823,7 +821,7 @@ export async function simplePointerCacheAsync(urlPath: string, lang: string) : P
         jsb2["version"] = versionMarker;
         let r = await getTemplateTextAsync(urlPath, lang);
         jsb2["text"] = orEmpty(r);
-        entry2 = clone(jsb2);
+        entry2 = td.clone(jsb2);
         await tdliteReleases.cacheRewritten.updateAsync(path, async (entry: JsonBuilder) => {
             core.copyJson(entry2, entry);
         });

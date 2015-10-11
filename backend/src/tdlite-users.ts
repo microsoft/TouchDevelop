@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -45,19 +43,19 @@ var useSendgrid: boolean = false;
 export class PubUser
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public haspicture: boolean = false;
-    @json public time: number = 0;
-    @json public about: string = "";
-    @json public features: number = 0;
-    @json public activedays: number = 0;
-    @json public receivedpositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public score: number = 0;
-    @json public isadult: boolean = false;
+    @td.json public kind: string = "";
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+    @td.json public name: string = "";
+    @td.json public haspicture: boolean = false;
+    @td.json public time: number = 0;
+    @td.json public about: string = "";
+    @td.json public features: number = 0;
+    @td.json public activedays: number = 0;
+    @td.json public receivedpositivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public score: number = 0;
+    @td.json public isadult: boolean = false;
     static createFromJson(o:JsonObject) { let r = new PubUser(); r.fromJson(o); return r; }
 }
 
@@ -80,34 +78,34 @@ export interface IPubUser {
 export class PubUserSettings
     extends td.JsonRecord
 {
-    @json public nickname: string = "";
-    @json public aboutme: string = "";
-    @json public website: string = "";
-    @json public notifications: boolean = false;
-    @json public notifications2: string = "";
-    @json public picturelinkedtofacebook: string = "";
-    @json public picture: string = "";
-    @json public gender: string = "";
-    @json public realname: string = "";
-    @json public yearofbirth: number = 0;
-    @json public location: string = "";
-    @json public culture: string = "";
-    @json public howfound: string = "";
-    @json public programmingknowledge: string = "";
-    @json public occupation: string = "";
-    @json public twitterhandle: string = "";
-    @json public email: string = "";
-    @json public emailverificationsent: boolean = false;
-    @json public emailverified: boolean = false;
-    @json public emailnewsletter2: string = "";
-    @json public emailfrequency: string = "";
-    @json public editorMode: string = "";
-    @json public school: string = "";
-    @json public wallpaper: string = "";
-    @json public permissions: string = "";
-    @json public credit: number = 0;
-    @json public userid: string = "";
-    @json public previousemail: string = "";
+    @td.json public nickname: string = "";
+    @td.json public aboutme: string = "";
+    @td.json public website: string = "";
+    @td.json public notifications: boolean = false;
+    @td.json public notifications2: string = "";
+    @td.json public picturelinkedtofacebook: string = "";
+    @td.json public picture: string = "";
+    @td.json public gender: string = "";
+    @td.json public realname: string = "";
+    @td.json public yearofbirth: number = 0;
+    @td.json public location: string = "";
+    @td.json public culture: string = "";
+    @td.json public howfound: string = "";
+    @td.json public programmingknowledge: string = "";
+    @td.json public occupation: string = "";
+    @td.json public twitterhandle: string = "";
+    @td.json public email: string = "";
+    @td.json public emailverificationsent: boolean = false;
+    @td.json public emailverified: boolean = false;
+    @td.json public emailnewsletter2: string = "";
+    @td.json public emailfrequency: string = "";
+    @td.json public editorMode: string = "";
+    @td.json public school: string = "";
+    @td.json public wallpaper: string = "";
+    @td.json public permissions: string = "";
+    @td.json public credit: number = 0;
+    @td.json public userid: string = "";
+    @td.json public previousemail: string = "";
     static createFromJson(o:JsonObject) { let r = new PubUserSettings(); r.fromJson(o); return r; }
 }
 
@@ -218,7 +216,7 @@ export async function initAsync() : Promise<void>
             for (let s1 of ["credit", "totalcredit", "lastlogin"]) {
                 jsb[s1] = core.orZero(req2.rootPub[s1]);
             }
-            req2.response = clone(jsb);
+            req2.response = td.clone(jsb);
         }
     });
     core.addRoute("POST", "logout", "", async (req3: core.ApiRequest) => {
@@ -267,11 +265,11 @@ export async function initAsync() : Promise<void>
             await users.insertAsync(jsb1);
             let pass2 = wordPassword.generate();
             req4.rootId = jsb1["id"];
-            req4.rootPub = clone(jsb1);
+            req4.rootPub = td.clone(jsb1);
             await setPasswordAsync(req4, pass2, "");
-            let jsb3 = clone(await core.resolveOnePubAsync(users, req4.rootPub, req4));
+            let jsb3 = td.clone(await core.resolveOnePubAsync(users, req4.rootPub, req4));
             jsb3["password"] = pass2;
-            req4.response = clone(jsb3);
+            req4.response = td.clone(jsb3);
         }
     });
     core.addRoute("POST", "*user", "addauth", async (req5: core.ApiRequest) => {
@@ -332,7 +330,7 @@ export async function initAsync() : Promise<void>
         let jsb4 = {};
         jsb4["oldrootpass"] = rootPass;
         jsb4["oldotherpass"] = otherPass;
-        req.response = clone(jsb4);
+        req.response = td.clone(jsb4);
     });
     core.addRoute("POST", "*user", "token", async (req7: core.ApiRequest) => {
         core.checkPermission(req7, "signin-" + req7.rootId);
@@ -352,7 +350,7 @@ export async function initAsync() : Promise<void>
                 data: core.sha256(tok.url).substr(0, 10)
             });
             resp["token"] = tok.url;
-            req7.response = clone(resp);
+            req7.response = td.clone(resp);
         }
     });
     core.addRoute("GET", "*user", "resetpassword", async (req9: core.ApiRequest) => {
@@ -361,7 +359,7 @@ export async function initAsync() : Promise<void>
             let jsb2 = {};
             let coll2 = td.range(0, 10).map<string>(elt => wordPassword.generate());
             jsb2["passwords"] = td.arrayToJson(coll2);
-            req9.response = clone(jsb2);
+            req9.response = td.clone(jsb2);
         }
     });
     core.addRoute("POST", "*user", "resetpassword", async (req10: core.ApiRequest) => {
@@ -489,7 +487,7 @@ export async function initAsync() : Promise<void>
         }
         if (req4.status == 200) {
             let bld = await search.updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
-                let sett = await buildSettingsAsync(clone(entry));
+                let sett = await buildSettingsAsync(td.clone(entry));
                 let newEmail = td.toString(req4.body["email"]);
                 if (newEmail != null) {
                     if (updateOwn) {
@@ -511,7 +509,7 @@ export async function initAsync() : Promise<void>
                         entry["emailcode"] = "";
                     }
                 }
-                let settings = clone(sett.toJson());
+                let settings = td.clone(sett.toJson());
                 core.setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
                     "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
                     "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
@@ -523,17 +521,17 @@ export async function initAsync() : Promise<void>
                         settings[k] = core.encrypt(val, emailKeyid);
                     }
                 }
-                let value = clone(settings);
+                let value = td.clone(settings);
                 entry["settings"] = value;
                 sett = PubUserSettings.createFromJson(value);
                 sett.nickname = sett.nickname.substr(0, 25);
                 entry["pub"]["name"] = sett.nickname;
                 entry["pub"]["about"] = sett.aboutme;
-                req4.response = clone(settings);
+                req4.response = td.clone(settings);
             });
             await audit.logAsync(req4, logcat, {
                 oldvalue: req4.rootPub,
-                newvalue: clone(bld)
+                newvalue: td.clone(bld)
             });
         }
     });
@@ -547,11 +545,11 @@ export async function initAsync() : Promise<void>
             if (req5.userid != req5.rootId) {
                 await audit.logAsync(req5, "view-settings");
             }
-            let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
+            let jsb = td.clone((await buildSettingsAsync(req5.rootPub)).toJson());
             if (orEmpty(req5.queryOptions["format"]) != "short") {
                 core.copyJson(settingsOptionsJson, jsb);
             }
-            req5.response = clone(jsb);
+            req5.response = td.clone(jsb);
         }
     });
 
@@ -592,14 +590,14 @@ async function buildSettingsAsync(userJson: JsonObject) : Promise<PubUserSetting
     user.fromJson(userJson["pub"]);
     let js = userJson["settings"];
     if (js != null) {
-        let jsb = clone(js);
+        let jsb = td.clone(js);
         for (let kk of Object.keys(jsb)) {
             let vv = jsb[kk];
             if (td.startsWith(orEmpty(vv), "EnC$")) {
                 jsb[kk] = core.decrypt(vv);
             }
         }
-        settings.fromJson(clone(jsb));
+        settings.fromJson(td.clone(jsb));
     }
     settings.userid = userJson["id"];
     settings.nickname = user.name;
@@ -785,7 +783,7 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
     await core.pubsContainer.updateAsync(userid, async (entry: JsonBuilder) => {
         core.jsonAdd(entry, "credit", credit);
         core.jsonAdd(entry, "totalcredit", credit);
-        if ( ! core.hasPermission(clone(entry), perm)) {
+        if ( ! core.hasPermission(td.clone(entry), perm)) {
             let existing = core.normalizePermissions(orEmpty(entry["permissions"]));
             entry["permissions"] = existing + "," + perm;
         }

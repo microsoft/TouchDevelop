@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
@@ -30,15 +28,15 @@ var tags2: indexedStore.Store;
 export class PubTag
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public category: string = "";
-    @json public description: string = "";
-    @json public instances: number = 0;
-    @json public topscreenshotids: string[];
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+    @td.json public name: string = "";
+    @td.json public category: string = "";
+    @td.json public description: string = "";
+    @td.json public instances: number = 0;
+    @td.json public topscreenshotids: string[];
     static createFromJson(o:JsonObject) { let r = new PubTag(); r.fromJson(o); return r; }
 }
 

@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -26,26 +24,26 @@ export var crashContainer: azureBlobStorage.Container;
 export class BugReport
     extends td.JsonRecord
 {
-    @json public exceptionConstructor: string = "";
-    @json public exceptionMessage: string = "";
-    @json public context: string = "";
-    @json public currentUrl: string = "";
-    @json public worldId: string = "";
-    @json public kind: string = "";
-    @json public scriptId: string = "";
-    @json public stackTrace: string = "";
-    @json public sourceURL: string = "";
-    @json public line: number = 0;
-    @json public eventTrace: string = "";
-    @json public userAgent: string = "";
-    @json public resolution: string = "";
-    @json public jsUrl: string = "";
-    @json public timestamp: number = 0;
-    @json public platform: string[];
-    @json public attachments: string[];
-    @json public tdVersion: string = "";
-    @json public logMessages: JsonObject;
-    @json public reportId: string = "";
+    @td.json public exceptionConstructor: string = "";
+    @td.json public exceptionMessage: string = "";
+    @td.json public context: string = "";
+    @td.json public currentUrl: string = "";
+    @td.json public worldId: string = "";
+    @td.json public kind: string = "";
+    @td.json public scriptId: string = "";
+    @td.json public stackTrace: string = "";
+    @td.json public sourceURL: string = "";
+    @td.json public line: number = 0;
+    @td.json public eventTrace: string = "";
+    @td.json public userAgent: string = "";
+    @td.json public resolution: string = "";
+    @td.json public jsUrl: string = "";
+    @td.json public timestamp: number = 0;
+    @td.json public platform: string[];
+    @td.json public attachments: string[];
+    @td.json public tdVersion: string = "";
+    @td.json public logMessages: JsonObject;
+    @td.json public reportId: string = "";
     static createFromJson(o:JsonObject) { let r = new BugReport(); r.fromJson(o); return r; }
 }
 
@@ -114,7 +112,7 @@ export async function initAsync()
         let js2 = report.toJson();
         let encReport = core.encrypt(JSON.stringify(js2), "BUG");
         let result4 = await crashContainer.createBlockBlobFromTextAsync(report.reportId, encReport);
-        let js = clone(js2);
+        let js = td.clone(js2);
         delete js["eventTrace"];
         delete js["logMessages"];
         delete js["attachments"];
@@ -141,14 +139,14 @@ export async function initAsync()
             st["methodName"] = elt3[1];
             st["fileName"] = withDefault(elt3[3], "unknown");
             st["lineNumber"] = parseFloat(withDefault(elt3[4], "1").replace(/:.*/g, ""));
-            trace.push(clone(st));
+            trace.push(td.clone(st));
             result3 = "";
             return result3;
         });
         if (trace.length == 0) {
             let st1 = {};
             st1["lineNumber"] = core.orZero(report.line);
-            trace.push(clone(st1));
+            trace.push(td.clone(st1));
         }
         else {
             for (let jsb2 of trace) {
@@ -171,7 +169,7 @@ export async function initAsync()
             let creq = td.createRequest("https://api.raygun.io/entries");
             creq.setHeader("X-ApiKey", td.serverSetting("RAYGUN_API_KEY2", false));
             creq.setMethod("post");
-            creq.setContentAsJson(clone(jsb));
+            creq.setContentAsJson(td.clone(jsb));
             let response = await creq.sendAsync();
             logger.debug("raygun: " + response + "");
         }

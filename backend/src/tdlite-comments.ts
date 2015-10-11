@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
@@ -26,25 +24,25 @@ var comments: indexedStore.Store;
 export class PubComment
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public text: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public nestinglevel: number = 0;
-    @json public positivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
-    @json public assignedtoid: string = "";
-    @json public resolved: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+    @td.json public text: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public nestinglevel: number = 0;
+    @td.json public positivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
+    @td.json public assignedtoid: string = "";
+    @td.json public resolved: string = "";
     static createFromJson(o:JsonObject) { let r = new PubComment(); r.fromJson(o); return r; }
 }
 
@@ -146,7 +144,7 @@ async function postCommentAsync(req: core.ApiRequest) : Promise<void>
         await notifications.storeAsync(req, jsb, "");
         await search.scanAndSearchAsync(jsb);
         // ### return comment back
-        await core.returnOnePubAsync(comments, clone(jsb), req);
+        await core.returnOnePubAsync(comments, td.clone(jsb), req);
     }
 }
 

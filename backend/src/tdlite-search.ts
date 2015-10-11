@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureSearch from "./azure-search"
 import * as acs from "./acs"
@@ -50,7 +48,7 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     logger.debug("inserting pub into search: " + obj["id"]);
 
     let store = indexedStore.storeByKind(obj["kind"]);
-    let fetchResult = store.singleFetchResult(clone(obj));
+    let fetchResult = store.singleFetchResult(td.clone(obj));
     await core.resolveAsync(store, fetchResult, core.adminRequest);
     let pub = fetchResult.items[0];
     let body = orEmpty(core.withDefault(pub["text"], obj["text"]));
@@ -130,7 +128,7 @@ export async function initAsync() : Promise<void>
             /* async */ tdliteArt.arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
                 let batch = tdliteIndex.createArtUpdate();
                 for (let js of await core.addUsernameEtcCoreAsync(json)) {
-                    let pub = tdliteArt.PubArt.createFromJson(clone(js["pub"]));
+                    let pub = tdliteArt.PubArt.createFromJson(td.clone(js["pub"]));
                     searchIndexArt(pub).upsertArt(batch);
                 }
                 let statusCode = await batch.sendAsync();
@@ -308,8 +306,8 @@ export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
         return;
     }
     let batch = tdliteIndex.createArtUpdate();
-    let coll2 = await core.addUsernameEtcCoreAsync(tdliteArt.arts.singleFetchResult(clone(obj)).items);
-    let pub = tdliteArt.PubArt.createFromJson(clone(coll2[0]["pub"]));
+    let coll2 = await core.addUsernameEtcCoreAsync(tdliteArt.arts.singleFetchResult(td.clone(obj)).items);
+    let pub = tdliteArt.PubArt.createFromJson(td.clone(coll2[0]["pub"]));
     searchIndexArt(pub).upsertArt(batch);
     /* async */ batch.sendAsync();
 
@@ -352,7 +350,7 @@ async function initAcsAsync() : Promise<void>
                             if (core.isGoodEntry(req.rootPub)) {
                                 let jsb = {};
                                 jsb["text"] = "ACS flagged, policy codes " + JSON.stringify(stat["PolicyCodes"]);
-                                req.body = clone(jsb);
+                                req.body = td.clone(jsb);
                                 req.rootId = pubid;
                                 await tdliteAbuse.postAbusereportAsync(req);
                             }

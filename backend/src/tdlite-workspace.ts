@@ -9,8 +9,6 @@ import * as crypto from 'crypto';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -37,10 +35,10 @@ var historyTable: azureTable.Table;
 export class PubVersion
     extends td.JsonRecord
 {
-    @json public instanceId: string = "";
-    @json public baseSnapshot: string = "";
-    @json public time: number = 0;
-    @json public version: number = 0;
+    @td.json public instanceId: string = "";
+    @td.json public baseSnapshot: string = "";
+    @td.json public time: number = 0;
+    @td.json public version: number = 0;
     static createFromJson(o:JsonObject) { let r = new PubVersion(); r.fromJson(o); return r; }
 }
 
@@ -54,19 +52,19 @@ export interface IPubVersion {
 export class PubHeader
     extends td.JsonRecord
 {
-    @json public guid: string = "";
-    @json public name: string = "";
-    @json public scriptId: string = "";
-    @json public scriptTime: number = 0;
-    @json public updateId: string = "";
-    @json public updateTime: number = 0;
-    @json public userId: string = "";
-    @json public status: string = "";
-    @json public scriptVersion: IPubVersion;
-    @json public hasErrors: string = "";
-    @json public recentUse: number = 0;
-    @json public editor: string = "";
-    @json public meta: JsonObject;
+    @td.json public guid: string = "";
+    @td.json public name: string = "";
+    @td.json public scriptId: string = "";
+    @td.json public scriptTime: number = 0;
+    @td.json public updateId: string = "";
+    @td.json public updateTime: number = 0;
+    @td.json public userId: string = "";
+    @td.json public status: string = "";
+    @td.json public scriptVersion: IPubVersion;
+    @td.json public hasErrors: string = "";
+    @td.json public recentUse: number = 0;
+    @td.json public editor: string = "";
+    @td.json public meta: JsonObject;
     static createFromJson(o:JsonObject) { let r = new PubHeader(); r.fromJson(o); return r; }
 }
 
@@ -109,17 +107,17 @@ export interface IPubHeaders {
 export class PubBody
     extends td.JsonRecord
 {
-    @json public guid: string = "";
-    @json public name: string = "";
-    @json public scriptId: string = "";
-    @json public userId: string = "";
-    @json public status: string = "";
-    @json public scriptVersion: IPubVersion;
-    @json public recentUse: number = 0;
-    @json public script: string = "";
-    @json public editorState: string = "";
-    @json public editor: string = "";
-    @json public meta: JsonObject;
+    @td.json public guid: string = "";
+    @td.json public name: string = "";
+    @td.json public scriptId: string = "";
+    @td.json public userId: string = "";
+    @td.json public status: string = "";
+    @td.json public scriptVersion: IPubVersion;
+    @td.json public recentUse: number = 0;
+    @td.json public script: string = "";
+    @td.json public editorState: string = "";
+    @td.json public editor: string = "";
+    @td.json public meta: JsonObject;
     static createFromJson(o:JsonObject) { let r = new PubBody(); r.fromJson(o); return r; }
 }
 
@@ -140,9 +138,9 @@ export interface IPubBody {
 export class InstalledResult
     extends td.JsonRecord
 {
-    @json public delay: number = 0;
-    @json public numErrors: number = 0;
-    @json public headers: JsonObject[];
+    @td.json public delay: number = 0;
+    @td.json public numErrors: number = 0;
+    @td.json public headers: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new InstalledResult(); r.fromJson(o); return r; }
 }
 
@@ -155,16 +153,16 @@ export interface IInstalledResult {
 export class PubInstalledHistory
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public historyid: string = "";
-    @json public scriptstatus: string = "";
-    @json public scriptname: string = "";
-    @json public scriptdescription: string = "";
-    @json public scriptid: string = "";
-    @json public isactive: boolean = false;
-    @json public meta: string = "";
-    @json public scriptsize: number = 0;
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public historyid: string = "";
+    @td.json public scriptstatus: string = "";
+    @td.json public scriptname: string = "";
+    @td.json public scriptdescription: string = "";
+    @td.json public scriptid: string = "";
+    @td.json public isactive: boolean = false;
+    @td.json public meta: string = "";
+    @td.json public scriptsize: number = 0;
     static createFromJson(o:JsonObject) { let r = new PubInstalledHistory(); r.fromJson(o); return r; }
 }
 
@@ -304,7 +302,7 @@ async function postInstalledAsync(req: core.ApiRequest) : Promise<void>
             for (let use of uses) {
                 let entity = azureTable.createEntity(req.rootId, orEmpty(use["guid"]));
                 entity["recentUse"] = use["recentUse"];
-                let ok = await installSlotsTable.tryUpdateEntityAsync(clone(entity), "merge");
+                let ok = await installSlotsTable.tryUpdateEntityAsync(td.clone(entity), "merge");
                 if ( ! ok) {
                     installedResult.numErrors += 1;
                 }
@@ -352,7 +350,7 @@ async function deleteHistoryAsync(req: core.ApiRequest, guid: string) : Promise<
     let entity = azureTable.createEntity(req.rootId, guid);
     entity["guid"] = guid;
     entity["status"] = "deleted";
-    await installSlotsTable.insertEntityAsync(clone(entity), "or replace");
+    await installSlotsTable.insertEntityAsync(td.clone(entity), "or replace");
 
     let wsContainer = workspaceForUser(req.rootId);
     let scriptGuid = req.rootId + "." + guid;
@@ -407,7 +405,7 @@ async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObje
 {
     let newSlot: JsonObject;
     core.progress("save 0");
-    let bodyBuilder = clone(body.toJson());
+    let bodyBuilder = td.clone(body.toJson());
     body.script = (<string>null);
     body.editorState = (<string>null);
     let bodyJson = body.toJson();
@@ -430,7 +428,7 @@ async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObje
     }
     else {
         prevBlob = slotJson["currentBlob"];
-        updatedSlot = clone(slotJson);
+        updatedSlot = td.clone(slotJson);
     }
     logger.tick("SaveScript");
     bodyBuilder["slotUserId"] = userid;
@@ -446,7 +444,7 @@ async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObje
         updatedSlot["meta"] = "{}";
     }
     updatedSlot["currentBlob"] = id2;
-    let updatedJson = clone(updatedSlot);
+    let updatedJson = td.clone(updatedSlot);
     let versionOK = body.status == "deleted" || prevBlob == body.scriptVersion.baseSnapshot || body.scriptVersion.baseSnapshot == "*";
     if (versionOK) {
         core.progress("save 2");
@@ -478,10 +476,10 @@ async function saveScriptAsync(userid: string, body: PubBody) : Promise<JsonObje
         hist.time = body.scriptVersion.time;
         hist.meta = updatedSlot["meta"];
         hist.scriptsize = orEmpty(bodyBuilder["script"]).length;
-        let jsb = clone(hist.toJson());
+        let jsb = td.clone(hist.toJson());
         jsb["PartitionKey"] = userid + "." + body.guid;
         jsb["RowKey"] = hist.historyid;
-        await historyTable.insertEntityAsync(clone(jsb), "or merge");
+        await historyTable.insertEntityAsync(td.clone(jsb), "or merge");
         core.progress("save 5");
         newSlot = headerFromSlot(updatedJson)
     }
@@ -550,12 +548,12 @@ async function publishScriptAsync(req: core.ApiRequest) : Promise<void>
         jsb["currentBlob"] = pubVersion.baseSnapshot;
         await tdliteScripts.publishScriptCoreAsync(pubScript, jsb, body["script"], req);
         // 
-        let slotBuilder = clone(slotJson);
+        let slotBuilder = td.clone(slotJson);
         slotBuilder["status"] = "published";
         slotBuilder["scriptId"] = pubScript.id;
         slotBuilder["userId"] = pubScript.userid;
         delete slotBuilder["__etag"];
-        let newSlot = clone(slotBuilder);
+        let newSlot = td.clone(slotBuilder);
         await installSlotsTable.updateEntityAsync(newSlot, "merge");
 
         req.response = { bodies: [headerFromSlot(newSlot)] };

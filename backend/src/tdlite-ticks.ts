@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as core from "./tdlite-core"
 
@@ -30,7 +28,7 @@ export async function initAsync()
                 else if (/^(calcEdit|coreRun)(\|.*)?$/.test(evName)) {
                     let jsb = {};
                     jsb["repeat"] = td.clamp(0, 100, js[evName]);
-                    logger.customTick(evName.replace(/\|.*/g, ""), clone(jsb));
+                    logger.customTick(evName.replace(/\|.*/g, ""), td.clone(jsb));
                 }
             }
         }

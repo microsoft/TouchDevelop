@@ -9,8 +9,6 @@ import * as querystring from 'querystring';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as restify from "./restify"
 
@@ -72,45 +70,45 @@ a.provider {
 export class ClientOauth
     extends td.JsonRecord
 {
-    @json public state: string = "";
-    @json public client_id: string = "";
-    @json public redirect_uri: string = "";
-    @json public scope: string = "";
-    @json public response_type: string = "";
-    @json public display: string = "";
-    @json public provider: string = "";
-    @json public td_state: string = "";
-    @json public u: string = "";
+    @td.json public state: string = "";
+    @td.json public client_id: string = "";
+    @td.json public redirect_uri: string = "";
+    @td.json public scope: string = "";
+    @td.json public response_type: string = "";
+    @td.json public display: string = "";
+    @td.json public provider: string = "";
+    @td.json public td_state: string = "";
+    @td.json public u: string = "";
     static createFromJson(o:JsonObject) { let r = new ClientOauth(); r.fromJson(o); return r; }
 }
 
 export class UserInfo
     extends td.JsonRecord
 {
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public email: string = "";
-    @json public redirectPrefix: string = "";
-    @json public state: string = "";
-    @json public userData: string = "";
+    @td.json public id: string = "";
+    @td.json public name: string = "";
+    @td.json public email: string = "";
+    @td.json public redirectPrefix: string = "";
+    @td.json public state: string = "";
+    @td.json public userData: string = "";
     static createFromJson(o:JsonObject) { let r = new UserInfo(); r.fromJson(o); return r; }
 }
 
 export class OauthRequest
     extends td.JsonRecord
 {
-    @json public state: string = "";
-    @json public client_id: string = "";
-    @json public redirect_uri: string = "";
-    @json public scope: string = "";
-    @json public response_type: string = "";
-    @json public display: string = "";
-    @json public access_token: string = "";
-    @json public nonce: string = "";
-    @json public response_mode: string = "";
-    @json public _provider: string = "";
-    @json public _client_oauth: ClientOauth;
-    @json public _info: UserInfo;
+    @td.json public state: string = "";
+    @td.json public client_id: string = "";
+    @td.json public redirect_uri: string = "";
+    @td.json public scope: string = "";
+    @td.json public response_type: string = "";
+    @td.json public display: string = "";
+    @td.json public access_token: string = "";
+    @td.json public nonce: string = "";
+    @td.json public response_mode: string = "";
+    @td.json public _provider: string = "";
+    @td.json public _client_oauth: ClientOauth;
+    @td.json public _info: UserInfo;
     static createFromJson(o:JsonObject) { let r = new OauthRequest(); r.fromJson(o); return r; }
 
     public async getAccessCodeAsync(code_: string, clientSecret: string, url: string) : Promise<JsonObject>
@@ -147,7 +145,7 @@ export class OauthRequest
         let clientOauth2 = this._client_oauth;
         hash["access_token"] = token;
         hash["state"] = clientOauth2.state;
-        url = clientOauth2.redirect_uri + "#" + toQueryString(clone(hash));
+        url = clientOauth2.redirect_uri + "#" + toQueryString(td.clone(hash));
         return url;
     }
 
@@ -171,11 +169,11 @@ export interface IOauthRequest {
 export class TokenReq
     extends td.JsonRecord
 {
-    @json public client_id: string = "";
-    @json public redirect_uri: string = "";
-    @json public code: string = "";
-    @json public client_secret: string = "";
-    @json public grant_type: string = "";
+    @td.json public client_id: string = "";
+    @td.json public redirect_uri: string = "";
+    @td.json public code: string = "";
+    @td.json public client_secret: string = "";
+    @td.json public grant_type: string = "";
     static createFromJson(o:JsonObject) { let r = new TokenReq(); r.fromJson(o); return r; }
 }
 
@@ -506,7 +504,7 @@ async function handleResponseAsync(state: string, req: restify.Request, res: res
                         if (jsb["iat"] == null) {
                             jsb["iat"] = now();
                         }
-                        // TODO token = nodeJwtSimple.encode(clone(jsb), tokenSecret, "HS256");
+                        // TODO token = nodeJwtSimple.encode(td.clone(jsb), tokenSecret, "HS256");
                         res.redirect(303, oauthRequest.makeRedirectUrl(token));
                     }
                 }

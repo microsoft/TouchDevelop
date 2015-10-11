@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
@@ -35,27 +33,27 @@ var artContentTypes: JsonObject;
 export class PubArt
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public url: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public flags: string[];
-    @json public pictureurl: string = "";
-    @json public thumburl: string = "";
-    @json public mediumthumburl: string = "";
-    @json public wavurl: string = "";
-    @json public aacurl: string = "";
-    @json public contenttype: string = "";
-    @json public bloburl: string = "";
-    @json public arttype: string = "";
-    @json public filehash: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public url: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public flags: string[];
+    @td.json public pictureurl: string = "";
+    @td.json public thumburl: string = "";
+    @td.json public mediumthumburl: string = "";
+    @td.json public wavurl: string = "";
+    @td.json public aacurl: string = "";
+    @td.json public contenttype: string = "";
+    @td.json public bloburl: string = "";
+    @td.json public arttype: string = "";
+    @td.json public filehash: string = "";
     static createFromJson(o:JsonObject) { let r = new PubArt(); r.fromJson(o); return r; }
 }
 
@@ -93,20 +91,20 @@ export class ThumbContainer
 export class PubScreenshot
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public pictureurl: string = "";
-    @json public thumburl: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public pictureurl: string = "";
+    @td.json public thumburl: string = "";
     static createFromJson(o:JsonObject) { let r = new PubScreenshot(); r.fromJson(o); return r; }
 }
 
@@ -276,7 +274,7 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
     jsb["kind"] = "art";
     await postArt_likeAsync(req, jsb);
     if (jsb.hasOwnProperty("existing")) {
-        await core.returnOnePubAsync(arts, clone(jsb["existing"]), req);
+        await core.returnOnePubAsync(arts, td.clone(jsb["existing"]), req);
         return;
     }
     if (req.status == 200) {
@@ -287,7 +285,7 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
             skipSearch: true
         });
         // ### return art back
-        await core.returnOnePubAsync(arts, clone(jsb), req);
+        await core.returnOnePubAsync(arts, td.clone(jsb), req);
     }
 }
 
@@ -379,7 +377,7 @@ async function postScreenshotAsync(req: core.ApiRequest) : Promise<void>
             await updateScreenshotCountersAsync(screenshot);
             await notifications.storeAsync(req, jsb, "");
             // ### return screenshot
-            await core.returnOnePubAsync(screenshots, clone(jsb), req);
+            await core.returnOnePubAsync(screenshots, td.clone(jsb), req);
         }
     }
 }

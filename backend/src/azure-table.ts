@@ -10,7 +10,6 @@ var azure_table_node = require("azure-table-node");
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
-var json = td.json;
 
 var logSeqNo: number = 0;
 var instanceId: string = "";
@@ -409,8 +408,8 @@ export class TableQuery
 export class QueryResult
     extends td.JsonRecord
 {
-    @json public items: JsonObject[];
-    @json public continuation: string = "";
+    @td.json public items: JsonObject[];
+    @td.json public continuation: string = "";
     static createFromJson(o:JsonObject) { let r = new QueryResult(); r.fromJson(o); return r; }
 }
 

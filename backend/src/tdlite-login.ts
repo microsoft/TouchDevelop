@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as cachedStore from "./cached-store"
 import * as restify from "./restify"
@@ -36,16 +34,16 @@ var initialApprovals: boolean = false;
 export class LoginSession
     extends td.JsonRecord
 {
-    @json public state: string = "";
-    @json public userid: string = "";
-    @json public redirectUri: string = "";
-    @json public groupid: string = "";
-    @json public passwords: string[];
-    @json public pass: string = "";
-    @json public ownerId: string = "";
-    @json public termsOk: boolean = false;
-    @json public codeOk: boolean = false;    
-    @json public nickname: string = "";
+    @td.json public state: string = "";
+    @td.json public userid: string = "";
+    @td.json public redirectUri: string = "";
+    @td.json public groupid: string = "";
+    @td.json public passwords: string[];
+    @td.json public pass: string = "";
+    @td.json public ownerId: string = "";
+    @td.json public termsOk: boolean = false;
+    @td.json public codeOk: boolean = false;    
+    @td.json public nickname: string = "";
     static createFromJson(o:JsonObject) { let r = new LoginSession(); r.fromJson(o); return r; }
 }
 
@@ -103,7 +101,7 @@ export async function initAsync() : Promise<void>
     jsb["agree"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.agree_html);
     jsb["usercreated"] = td.replaceAll(template_html, "@BODY@", tdliteHtml.user_created_html);
     jsb["providers"] = "";
-    loginHtml = clone(jsb);
+    loginHtml = td.clone(jsb);
 
     serverAuth.init({
         makeJwt: async (profile: serverAuth.UserInfo, oauthReq: serverAuth.OauthRequest) => {            
@@ -235,7 +233,7 @@ async function getRedirectUrlAsync(user2: string, req: restify.Request) : Promis
     if (tok.cookie != "") {
         jsb["td_cookie"] = tok.cookie;
     }
-    url = req.query()["redirect_uri"] + "#" + serverAuth.toQueryString(clone(jsb));
+    url = req.query()["redirect_uri"] + "#" + serverAuth.toQueryString(td.clone(jsb));
     return url;
 }
 
@@ -280,7 +278,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
     if (core.isGoodPub(entry2, "userpointer")) {
         let entry31 = await core.getPubAsync(entry2["userid"], "user");
         if (entry31 != null) {
-            jsb = clone(entry31);
+            jsb = td.clone(entry31);
             if (orEmpty(jsb["login"]) != profileId) {
                 await core.pubsContainer.updateAsync(jsb["id"], async (entry4: JsonBuilder) => {
                     entry4["login"] = profileId;
@@ -304,11 +302,11 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         let uidOverride = withDefault(oauthReq._client_oauth.u, jsb["id"]);
         if (uidOverride != jsb["id"]) {
             logger.info("login with override: " + jsb["id"] + "->" + uidOverride);
-            if (core.hasPermission(clone(jsb), "signin-" + uidOverride)) {
+            if (core.hasPermission(td.clone(jsb), "signin-" + uidOverride)) {
                 let entry41 = await core.getPubAsync(uidOverride, "user");
                 if (entry41 != null) {
                     logger.debug("login with override OK: " + jsb["id"] + "->" + uidOverride);
-                    jsb = clone(entry41);
+                    jsb = td.clone(entry41);
                 }
             }
         }
@@ -358,10 +356,10 @@ async function loginCreateUserAsync(req: restify.Request, session: LoginSession,
                 subjectid: user2,
                 publicationid: session.groupid,
                 publicationkind: "group",
-                newvalue: clone(jsb)
+                newvalue: td.clone(jsb)
             });
             if (initialApprovals) {
-                await tdliteGroups.addGroupApprovalAsync(groupJson, clone(jsb));
+                await tdliteGroups.addGroupApprovalAsync(groupJson, td.clone(jsb));
             }
             else {
                 await tdliteGroups.addUserToGroupAsync(user2, groupJson, (<core.ApiRequest>null));

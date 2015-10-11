@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
@@ -28,20 +26,20 @@ var channelMemberships: indexedStore.Store;
 export class PubChannel
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public pictureid: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public positivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public name: string = "";
+    @td.json public pictureid: string = "";
+    @td.json public description: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public positivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
     static createFromJson(o:JsonObject) { let r = new PubChannel(); r.fromJson(o); return r; }
 }
 
@@ -93,14 +91,14 @@ export async function initAsync() : Promise<void>
             await channels.insertAsync(jsb1);
             await notifications.storeAsync(req, jsb1, "");
             await search.scanAndSearchAsync(jsb1);
-            await core.returnOnePubAsync(channels, clone(jsb1), req);
+            await core.returnOnePubAsync(channels, td.clone(jsb1), req);
         }
     });
     core.addRoute("POST", "*channel", "", async (req1: core.ApiRequest) => {
         checkChannelPermission(req1, req1.rootPub);
         if (req1.status == 200) {
             await search.updateAndUpsertAsync(core.pubsContainer, req1, async (entry: JsonBuilder) => {
-                let lst1 = PubChannel.createFromJson(clone(entry["pub"]));
+                let lst1 = PubChannel.createFromJson(td.clone(entry["pub"]));
                 setChannelProps(lst1, req1.body);
                 entry["pub"] = lst1.toJson();
             });
@@ -202,9 +200,9 @@ export async function initAsync() : Promise<void>
 
 function setChannelProps(lst: PubChannel, body: JsonObject) : void
 {
-    let bld = clone(lst.toJson());
+    let bld = td.clone(lst.toJson());
     core.setFields(bld, body, ["description", "pictureid"]);
-    lst.fromJson(clone(bld));
+    lst.fromJson(td.clone(bld));
 }
 
 function checkChannelPermission(req: core.ApiRequest, listJs: JsonObject) : void

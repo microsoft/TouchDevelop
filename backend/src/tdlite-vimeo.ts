@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as restify from "./restify"
@@ -32,15 +30,15 @@ var embedThumbnails: cachedStore.Container;
 export class PubVideo
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public provider: string = "";
-    @json public providerid: string = "";
-    @json public blobid: string = "";
-    @json public sdvideourl: string = "";
-    @json public thumb512url: string = "";
-    @json public thumb128url: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public provider: string = "";
+    @td.json public providerid: string = "";
+    @td.json public blobid: string = "";
+    @td.json public sdvideourl: string = "";
+    @td.json public thumb512url: string = "";
+    @td.json public thumb128url: string = "";
     static createFromJson(o:JsonObject) { let r = new PubVideo(); r.fromJson(o); return r; }
 }
 
@@ -145,7 +143,7 @@ export async function initAsync() : Promise<void>
             BlobInfo = await task2;
             BlobInfo = await task3;
             await videoStore.insertAsync(jsb2);
-            entry = clone(jsb2);
+            entry = td.clone(jsb2);
         }
         let blobid = entry["pub"]["blobid"];
         res.setHeader("Access-Control-Allow-Origin", "*");
@@ -192,7 +190,7 @@ async function initEmbedThumbnailsAsync() : Promise<void>
                 let jsb = {};
                 jsb["info"] = js;
                 let ok = await embedThumbnails.tryInsertAsync(path, jsb);
-                entry = clone(jsb);
+                entry = td.clone(jsb);
             }
             else {
                 res.sendError(httpCode._405MethodNotAllowed, "invalid provider");

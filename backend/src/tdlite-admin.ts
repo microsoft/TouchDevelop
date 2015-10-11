@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
@@ -34,7 +32,7 @@ async function copyDeploymentAsync(req: core.ApiRequest, target: string) : Promi
     if (req.status == 200) {
         let jsb2 = JSON.parse((await tdDeployments.getBlobToTextAsync("000ch-" + core.myChannel)).text());
         jsb2["did"] = cachedStore.freshShortId(12);
-        req.response = clone(jsb2);
+        req.response = td.clone(jsb2);
         let result = await tdDeployments.createBlockBlobFromTextAsync("000ch-" + target, JSON.stringify(req.response), {
             contentType: "application/json;charset=utf8"
         });
@@ -70,7 +68,7 @@ export async function initAsync()
                 req1.response = s2;
             }
             else {
-                req1.response = clone(jsb);
+                req1.response = td.clone(jsb);
             }
         }
     });

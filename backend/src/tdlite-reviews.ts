@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
@@ -25,19 +23,19 @@ var reviews: indexedStore.Store;
 export class PubReview
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public publicationuserid: string = "";
-    @json public ispositive: boolean = false;
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public publicationuserid: string = "";
+    @td.json public ispositive: boolean = false;
     static createFromJson(o:JsonObject) { let r = new PubReview(); r.fromJson(o); return r; }
 }
 
@@ -241,7 +239,7 @@ async function postReviewAsync(req: core.ApiRequest) : Promise<void>
         if (req.status == 200) {
             // ### return heart back
             await notifications.storeAsync(req, jsb, "");
-            await core.returnOnePubAsync(reviews, clone(jsb), req);
+            await core.returnOnePubAsync(reviews, td.clone(jsb), req);
         }
     }
 }

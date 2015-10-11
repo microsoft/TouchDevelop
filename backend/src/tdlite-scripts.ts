@@ -9,8 +9,6 @@ type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as parallel from "./parallel"
@@ -42,53 +40,53 @@ var showcaseIds: string[];
 export class PubScript
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public baseid: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public icon: string = "";
-    @json public iconbackground: string = "";
-    @json public iconurl: string = "";
-    @json public positivereviews: number = 0;
-    @json public cumulativepositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
-    @json public screenshots: number = 0;
-    @json public platforms: string[];
-    @json public capabilities: string[];
-    @json public flows: string[];
-    @json public haserrors: boolean = false;
-    @json public rootid: string = "";
-    @json public updateid: string = "";
-    @json public updatetime: number = 0;
-    @json public ishidden: boolean = false;
-    @json public islibrary: boolean = false;
-    @json public userplatform: string[];
-    @json public installations: number = 0;
-    @json public runs: number = 0;
-    @json public art: number = 0;
-    @json public toptagids: string[];
-    @json public screenshotthumburl: string = "";
-    @json public screenshoturl: string = "";
-    @json public mergeids: string[];
-    @json public editor: string = "";
-    @json public meta: JsonObject;
-    @json public iconArtId: string = "";
-    @json public splashArtId: string = "";
-    @json public raw: string = "";
-    @json public scripthash: string = "";
-    @json public sourceid: string = "";
-    @json public updateroot: string = "";
-    @json public unmoderated: boolean = false;
-    @json public noexternallinks: boolean = false;
-    @json public promo: JsonObject;
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public baseid: string = "";
+    @td.json public url: string = "";
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public icon: string = "";
+    @td.json public iconbackground: string = "";
+    @td.json public iconurl: string = "";
+    @td.json public positivereviews: number = 0;
+    @td.json public cumulativepositivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
+    @td.json public screenshots: number = 0;
+    @td.json public platforms: string[];
+    @td.json public capabilities: string[];
+    @td.json public flows: string[];
+    @td.json public haserrors: boolean = false;
+    @td.json public rootid: string = "";
+    @td.json public updateid: string = "";
+    @td.json public updatetime: number = 0;
+    @td.json public ishidden: boolean = false;
+    @td.json public islibrary: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public installations: number = 0;
+    @td.json public runs: number = 0;
+    @td.json public art: number = 0;
+    @td.json public toptagids: string[];
+    @td.json public screenshotthumburl: string = "";
+    @td.json public screenshoturl: string = "";
+    @td.json public mergeids: string[];
+    @td.json public editor: string = "";
+    @td.json public meta: JsonObject;
+    @td.json public iconArtId: string = "";
+    @td.json public splashArtId: string = "";
+    @td.json public raw: string = "";
+    @td.json public scripthash: string = "";
+    @td.json public sourceid: string = "";
+    @td.json public updateroot: string = "";
+    @td.json public unmoderated: boolean = false;
+    @td.json public noexternallinks: boolean = false;
+    @td.json public promo: JsonObject;
     static createFromJson(o:JsonObject) { let r = new PubScript(); r.fromJson(o); return r; }
 }
 
@@ -145,10 +143,10 @@ export interface IPubScript {
 export class UpdateEntry
     extends td.JsonRecord
 {
-    @json public PartitionKey: string = "";
-    @json public RowKey: string = "";
-    @json public pub: string = "";
-    @json public time: number = 0;
+    @td.json public PartitionKey: string = "";
+    @td.json public RowKey: string = "";
+    @td.json public pub: string = "";
+    @td.json public time: number = 0;
     static createFromJson(o:JsonObject) { let r = new UpdateEntry(); r.fromJson(o); return r; }
 }
 
@@ -292,9 +290,9 @@ export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuil
     }
     // 
     await insertScriptAsync(jsb, pubScript, body, false);
-    let jsb2 = clone(jsb);
+    let jsb2 = td.clone(jsb);
     delete jsb2["text"];
-    let scr = clone(jsb2);
+    let scr = td.clone(jsb2);
     await audit.logAsync(req, "publish-script", {
         subjectid: scr["pub"]["userid"],
         publicationid: scr["id"],
@@ -346,7 +344,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
     await scripts.insertAsync(jsb);
     updateEntry.RowKey = jsb["indexId"];
     // 
-    let bodyBuilder = clone(pubScript.toJson());
+    let bodyBuilder = td.clone(pubScript.toJson());
     bodyBuilder["text"] = scriptText_;
     core.progress("publish - about to just insert");
     await scriptText.justInsertAsync(pubScript.id, bodyBuilder);
@@ -507,7 +505,7 @@ export async function initAsync() : Promise<void>
                 jsb["id"] = forceid;
             }
             await publishScriptCoreAsync(scr, jsb, td.toString(req3.body["text"]), req3);
-            await core.returnOnePubAsync(scripts, clone(jsb), req3);
+            await core.returnOnePubAsync(scripts, td.clone(jsb), req3);
         }
     }
     , {
@@ -543,7 +541,7 @@ export async function initAsync() : Promise<void>
                     meta = {};
                 }
                 else {
-                    meta = clone(meta);
+                    meta = td.clone(meta);
                 }
                 core.copyJson(req5.body, meta);
                 for (let k of Object.keys(meta)) {
@@ -556,7 +554,7 @@ export async function initAsync() : Promise<void>
                 }
                 else {
                     v["pub"]["meta"] = meta;
-                    req5.response = clone(meta);
+                    req5.response = td.clone(meta);
                 }
             });
             if (req5.rootPub["promo"] != null) {
@@ -690,10 +688,10 @@ async function initPromoAsync() : Promise<void>
         if (oldPromoId != "") {
             await parallel.forJsonAsync(promo["tags"], async (json: JsonObject) => {
                 let entity = azureTable.createEntity(td.toString(json), oldPromoId);
-                let ok = await promosTable.tryDeleteEntityAsync(clone(entity));
+                let ok = await promosTable.tryDeleteEntityAsync(td.clone(entity));
             });
         }
-        let jsb2 = clone(promo);
+        let jsb2 = td.clone(promo);
         td.jsonCopyFrom(jsb2, req3.body);
         let coll = (<string[]>[]);
         let newTags = jsb2["tags"];
@@ -713,7 +711,7 @@ async function initPromoAsync() : Promise<void>
             }
             jsb2["tags"] = td.arrayToJson(Object.keys(d));
         }
-        promo = clone(jsb2);
+        promo = td.clone(jsb2);
         let offsetHours = Math.round(td.clamp(-200000, 1000000, core.orZero(promo["priority"])));
         let newtime = Math.round(req3.rootPub["pub"]["time"] + offsetHours * 3600);
         let newId = (10000000000 - newtime) + "." + req3.rootId;
@@ -731,7 +729,7 @@ async function initPromoAsync() : Promise<void>
         await parallel.forJsonAsync(js, async (json1: JsonObject) => {
             let entity1 = azureTable.createEntity(td.toString(json1), newId);
             entity1["pub"] = req3.rootId;
-            await promosTable.insertEntityAsync(clone(entity1), "or merge");
+            await promosTable.insertEntityAsync(td.clone(entity1), "or merge");
         });
         await core.flushApiCacheAsync("promo");
         req3.response = promo;

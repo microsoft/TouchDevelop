@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as parallel from "./parallel"
 import * as indexedStore from "./indexed-store"
@@ -29,20 +27,20 @@ var abuseReports: indexedStore.Store;
 export class PubAbusereport
     extends td.JsonRecord
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public text: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public publicationuserid: string = "";
-    @json public resolution: string = "";
+    @td.json public kind: string = "";
+    @td.json public time: number = 0;
+    @td.json public id: string = "";
+    @td.json public text: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public userscore: number = 0;
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+    @td.json public publicationid: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public publicationuserid: string = "";
+    @td.json public resolution: string = "";
     static createFromJson(o:JsonObject) { let r = new PubAbusereport(); r.fromJson(o); return r; }
 }
 
@@ -66,13 +64,13 @@ export interface IPubAbusereport {
 export class CandeleteResponse
     extends td.JsonRecord
 {
-    @json public publicationkind: string = "";
-    @json public publicationname: string = "";
-    @json public publicationuserid: string = "";
-    @json public candeletekind: boolean = false;
-    @json public candelete: boolean = false;
-    @json public hasabusereports: boolean = false;
-    @json public canmanage: boolean = false;
+    @td.json public publicationkind: string = "";
+    @td.json public publicationname: string = "";
+    @td.json public publicationuserid: string = "";
+    @td.json public candeletekind: boolean = false;
+    @td.json public candelete: boolean = false;
+    @td.json public hasabusereports: boolean = false;
+    @td.json public canmanage: boolean = false;
     static createFromJson(o:JsonObject) { let r = new CandeleteResponse(); r.fromJson(o); return r; }
 }
 
@@ -255,7 +253,7 @@ export async function postAbusereportAsync(req: core.ApiRequest) : Promise<void>
             entry["abuseStatusPosted"] = "active";
         });
         await notifications.storeAsync(req, jsb, "");
-        await core.returnOnePubAsync(abuseReports, clone(jsb), req);
+        await core.returnOnePubAsync(abuseReports, td.clone(jsb), req);
     }
 }
 
