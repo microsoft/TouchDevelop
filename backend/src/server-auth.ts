@@ -107,8 +107,8 @@ export class OauthRequest
     @td.json public nonce: string = "";
     @td.json public response_mode: string = "";
     @td.json public _provider: string = "";
-    @td.json public _client_oauth: ClientOauth;
-    @td.json public _info: UserInfo;
+    @td.json public _client_oauth: JsonObject;
+    @td.json public _info: JsonObject;
     static createFromJson(o:JsonObject) { let r = new OauthRequest(); r.fromJson(o); return r; }
 
     public async getAccessCodeAsync(code_: string, clientSecret: string, url: string) : Promise<JsonObject>
@@ -142,7 +142,7 @@ export class OauthRequest
     {
         let url: string;
         let hash = {};
-        let clientOauth2 = this._client_oauth;
+        let clientOauth2 = ClientOauth.createFromJson(this._client_oauth);
         hash["access_token"] = token;
         hash["state"] = clientOauth2.state;
         url = clientOauth2.redirect_uri + "#" + toQueryString(td.clone(hash));
@@ -483,12 +483,12 @@ async function handleResponseAsync(state: string, req: restify.Request, res: res
                 else {
                     let token = "";
                     if (typeof jsb == "string") {
-                        oauthRequest._info = info;
+                        oauthRequest._info = info.toJson();
                         await globalOptions.setData(state, JSON.stringify(oauthRequest.toJson()));
                         res.redirect(303, td.toString(jsb));
                     }
                     else if (jsb.hasOwnProperty("http redirect")) {
-                        oauthRequest._info = info;
+                        oauthRequest._info = info.toJson();
                         await globalOptions.setData(state, JSON.stringify(oauthRequest.toJson()));
                         let hds = jsb["headers"];
                         if (hds != null) {
@@ -845,7 +845,7 @@ async function oauthLoginAsync(req: restify.Request, res: restify.Response) : Pr
             p.redirect_uri = redir;
             p.display = "touch";
             p._provider = provider.id;
-            p._client_oauth = clientOauth;
+            p._client_oauth = clientOauth.toJson();
             if (globalOptions.federationMaster) {
                 p.redirect_uri = "https://" + globalOptions.federationMaster + "/oauth/callback";
                 p.state = myHost + "," + state;
@@ -893,7 +893,7 @@ export async function userInfoByStateAsync(state: string) : Promise<UserInfo>
     }
     else {
         let oauthRequest = OauthRequest.createFromJson(JSON.parse(s));
-        info = oauthRequest._info;
+        info = UserInfo.createFromJson(oauthRequest._info);
     }
     return info;
 }

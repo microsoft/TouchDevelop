@@ -374,6 +374,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
             }
         }
     }
+    let clientOAuth = serverAuth.ClientOauth.createFromJson(oauthReq._client_oauth);
     if (jsb == null) {
         let email = profile.email;
         let username = profile.name.replace(/\s.*/g, "");
@@ -386,7 +387,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
     }
     else {
         logger.tick("Login@federated");
-        let uidOverride = withDefault(oauthReq._client_oauth.u, jsb["id"]);
+        let uidOverride = withDefault(clientOAuth.u, jsb["id"]);
         if (uidOverride != jsb["id"]) {
             logger.info("login with override: " + jsb["id"] + "->" + uidOverride);
             if (core.hasPermission(td.clone(jsb), "signin-" + uidOverride)) {
@@ -399,7 +400,7 @@ async function loginFederatedAsync(profile: serverAuth.UserInfo, oauthReq: serve
         }
     }
     let user = jsb["id"];
-    let tok = await generateTokenAsync(user, profileId, oauthReq._client_oauth.client_id);
+    let tok = await generateTokenAsync(user, profileId, clientOAuth.client_id);
 
     let redirectUrl = td.replaceAll(profile.redirectPrefix, "TOKEN", encodeURIComponent(tok.url)) + "&id=" + user;
     if (tok.cookie != "") {
