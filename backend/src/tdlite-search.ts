@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -13,22 +12,16 @@ var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
-import * as azureTable from "./azure-table"
 import * as azureSearch from "./azure-search"
-import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as acs from "./acs"
-import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteUsers from "./tdlite-users"
 import * as tdliteArt from "./tdlite-art"
 import * as tdliteAbuse from "./tdlite-abuse"
 
-import * as main from "./tdlite"
 
 var orEmpty = td.orEmpty;
 var logger = core.logger;

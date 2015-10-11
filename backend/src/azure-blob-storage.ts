@@ -4,10 +4,7 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as fs from 'fs';
-import * as util from 'util';
 import * as zlib from 'zlib';
-import * as crypto from 'crypto';
 
 var azure_storage = require("azure-storage");
 

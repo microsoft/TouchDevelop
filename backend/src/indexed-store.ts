@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -14,9 +13,7 @@ var clone = td.clone;
 var orEmpty = td.orEmpty;
 
 import * as cachedStore from "./cached-store"
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as azureTable from "./azure-table"
-import * as redis from "./redis"
 import * as parallel from "./parallel"
 
 var logger: td.AppLogger;

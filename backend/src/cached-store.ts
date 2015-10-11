@@ -15,7 +15,6 @@ var clone = td.clone;
 
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as redis from "./redis"
-import * as parallel from "./parallel"
 
 type UpdateJson = td.Action1<JsonBuilder>;
 

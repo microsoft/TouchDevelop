@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -13,19 +12,13 @@ var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
-import * as kraken from "./kraken"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteWorkspace from "./tdlite-workspace"
-import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 import * as tdliteUsers from "./tdlite-users"
-import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;

@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -21,15 +20,12 @@ import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as wordPassword from "./word-password"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteWorkspace from "./tdlite-workspace"
 import * as nodemailer from "./nodemailer"
 import * as sendgrid from "./sendgrid"
 import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as tdliteGroups from "./tdlite-groups"
-import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;

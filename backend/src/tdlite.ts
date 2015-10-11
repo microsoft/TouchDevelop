@@ -4,9 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
-import * as querystring from 'querystring';
-import * as child_process from 'child_process';
 import * as fs from 'fs';
 
 type JsonObject = td.JsonObject;
@@ -18,16 +15,13 @@ var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as cachedStore from "./cached-store"
-import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
 import * as restify from "./restify"
 import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 import * as libratoNode from "./librato-node"
 import * as tdliteIndex from "./tdlite-index"
-import * as tdliteData from "./tdlite-data"
 
 import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"

@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -13,29 +12,17 @@ var asArray = td.asArray;
 var json = td.json;
 var clone = td.clone;
 
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as cachedStore from "./cached-store"
-import * as parallel from "./parallel"
 import * as restify from "./restify"
-import * as indexedStore from "./indexed-store"
 import * as wordPassword from "./word-password"
 import * as serverAuth from "./server-auth"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteWorkspace from "./tdlite-workspace"
-import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
-import * as notifications from "./tdlite-notifications"
-import * as tdliteTdCompiler from "./tdlite-tdcompiler"
-import * as tdliteDocs from "./tdlite-docs"
-import * as tdliteReleases from "./tdlite-releases"
-import * as tdliteArt from "./tdlite-art"
 import * as tdliteHtml from "./tdlite-html"
 import * as tdliteUsers from "./tdlite-users"
 import * as tdlitePointers from "./tdlite-pointers"
 import * as tdliteGroups from "./tdlite-groups"
-import * as main from "./tdlite"
 
 export type StringTransformer = (text: string) => Promise<string>;
 

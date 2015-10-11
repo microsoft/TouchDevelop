@@ -23,7 +23,6 @@ import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
 import * as tdliteCppCompiler from "./tdlite-cppcompiler"
 
-import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;

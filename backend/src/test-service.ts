@@ -17,8 +17,6 @@ import * as parallel from "./parallel"
 import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as libratoNode from "./librato-node"
-import * as azureBlobStorage from "./azure-blob-storage"
-import * as redis from "./redis"
 import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 

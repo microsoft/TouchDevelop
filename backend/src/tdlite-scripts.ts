@@ -4,7 +4,6 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-//import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
@@ -23,7 +22,6 @@ import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
 import * as tdliteTdCompiler from "./tdlite-tdcompiler"
 
-import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
