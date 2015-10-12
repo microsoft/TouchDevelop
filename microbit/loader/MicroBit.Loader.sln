@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.MicroBit.Uploader", "Microbit.Loader\Microsoft.MicroBit.Uploader.csproj", "{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microbit.Uploader", "Microbit.Uploader\Microbit.Uploader.csproj", "{7DC6CA45-FD75-44BC-805E-708C812CD4BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7D60660-4E86-42A7-8ABD-A5DB169CC1E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DC6CA45-FD75-44BC-805E-708C812CD4BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC6CA45-FD75-44BC-805E-708C812CD4BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DC6CA45-FD75-44BC-805E-708C812CD4BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DC6CA45-FD75-44BC-805E-708C812CD4BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

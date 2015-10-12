@@ -26,7 +26,7 @@ namespace Microsoft.MicroBit
         public MainWindow()
         {
             InitializeComponent();
-            this.DeleteOnFlash = true;
+            this.DeleteOnUpload = true;
             this.VersionInfo = "v" + typeof(MainWindow).Assembly.GetName().Version.ToString();
             this.updateStatus("uploading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
@@ -85,22 +85,19 @@ namespace Microsoft.MicroBit
             set { SetValue(StatusProperty, value); }
         }
 
-        public static readonly DependencyProperty DeleteOnFlashProperty = DependencyProperty.Register("DeleteOnFlash", typeof(bool?), typeof(MainWindow));
-        public bool DeleteOnFlash
+        public static readonly DependencyProperty DeleteOnUploadProperty = DependencyProperty.Register("DeleteOnUpload", typeof(bool?), typeof(MainWindow));
+        public bool DeleteOnUpload
         {
-            get { return (bool)GetValue(DeleteOnFlashProperty); }
-            set { SetValue(DeleteOnFlashProperty, value); }
+            get { return (bool)GetValue(DeleteOnUploadProperty); }
+            set { SetValue(DeleteOnUploadProperty, value); }
         }
 
         static string getVolumeLabel(DriveInfo di)
         {
             try { return di.VolumeLabel; }
-            catch (IOException)
-            { }
-            catch (SecurityException)
-            { }
-            catch(UnauthorizedAccessException)
-            {}
+            catch (IOException) { }
+            catch (SecurityException) { }
+            catch(UnauthorizedAccessException) {}
             return "";
         }
 
@@ -109,12 +106,24 @@ namespace Microsoft.MicroBit
             this.handleFile(e.FullPath);
         }
 
+        void runIOSafe(Action a)
+        {
+            try
+            {
+                a();
+            }
+            catch (IOException) { }
+            catch (NotSupportedException) { }
+            catch (UnauthorizedAccessException) { }
+            catch (ArgumentException) { }
+        }
+
         void handleFile(string fullPath)
         {
             try
             {
-		// In case this is data-url download, at least Chrome will not rename file, but instead write to it
-	        // directly. This mean we may catch it in the act. Let's leave it some time to finish writing.
+	        	// In case this is data-url download, at least Chrome will not rename file, but instead write to it
+    	        // directly. This mean we may catch it in the act. Let's leave it some time to finish writing.
                 Thread.Sleep(500);
 
                 var info = new System.IO.FileInfo(fullPath);
@@ -131,18 +140,21 @@ namespace Microsoft.MicroBit
                 }
 
                 this.updateStatus("uploading " + info.Length + " bytes...");
-
                 var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                 File.Copy(info.FullName, trg, true);
                 this.updateStatus("uploading done");
 
-                var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnFlash));
+                var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnUpload));
                 if (del)
                 {
-                    File.Delete(info.FullName);
+                    var temp = System.IO.Path.ChangeExtension(info.FullName, ".uploaded.hex");
+                    runIOSafe(() =>
+                    {
+                        File.Copy(info.FullName, temp, true);
+                        File.Delete(info.FullName);
+                    });
                     this.updateStatus("uploading and cleaning done");
                 }
-
                 return;
             }
             catch (IOException) { }

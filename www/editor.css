@@ -1997,6 +1997,14 @@ span.errorSq .kw
     display: none;
 }
 
+.assume-mouse.assume-notouch .code-button-frame {
+  width:1.5em;
+  height:1.5em;
+}
+.assume-mouse.assume-notouch .code-button {
+  width:2.5em;
+}
+
 .code-button-desc
 {
   width: 100%;
