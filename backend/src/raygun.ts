@@ -8,9 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 
 var logger: td.AppLogger;
@@ -174,7 +171,7 @@ export async function initAsync(options_: IOptions = {}) : Promise<void>
             if (req)
                 req = { headers: { 'user-agent': req.headers['user-agent'] } }
             if (meta) {
-                meta = clone(meta);
+                meta = td.clone(meta);
                 delete meta.contextUser;
             }
         } else {
@@ -226,7 +223,7 @@ async function saveReportLoopAsync(options_: IOptions) : Promise<void>
             await td.sleepAsync(1);
         }
         else {
-            let jsb = clone(pendingReports[0]);
+            let jsb = td.clone(pendingReports[0]);
             pendingReports.shift();
             // Note that this may crash. It would kill this loop. This avoids sending error reports about error reports.
             // We don't think this is a problem since workers are restarted every 15 minutes.

@@ -4,14 +4,11 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-//import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as parallel from "./parallel"
@@ -21,8 +18,8 @@ import * as core from "./tdlite-core"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
+import * as tdliteTdCompiler from "./tdlite-tdcompiler"
 
-import * as main from "./tdlite"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
@@ -32,134 +29,62 @@ var httpCode = core.httpCode;
 
 var updateSlotTable: azureTable.Table;
 export var scripts: indexedStore.Store;
-export var scriptText: cachedStore.Container;
+var scriptText: cachedStore.Container;
 var updateSlots: indexedStore.Store;
-var cacheCompiler: cachedStore.Container;
+var promosTable: azureTable.Table;
 
 var lastShowcaseDl: Date;
 var showcaseIds: string[];
 
 
 export class PubScript
-    extends td.JsonRecord
+    extends core.TopPub
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public baseid: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public icon: string = "";
-    @json public iconbackground: string = "";
-    @json public iconurl: string = "";
-    @json public positivereviews: number = 0;
-    @json public cumulativepositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public comments: number = 0;
-    @json public screenshots: number = 0;
-    @json public platforms: string[];
-    @json public capabilities: string[];
-    @json public flows: string[];
-    @json public haserrors: boolean = false;
-    @json public rootid: string = "";
-    @json public updateid: string = "";
-    @json public updatetime: number = 0;
-    @json public ishidden: boolean = false;
-    @json public islibrary: boolean = false;
-    @json public userplatform: string[];
-    @json public installations: number = 0;
-    @json public runs: number = 0;
-    @json public art: number = 0;
-    @json public toptagids: string[];
-    @json public screenshotthumburl: string = "";
-    @json public screenshoturl: string = "";
-    @json public mergeids: string[];
-    @json public editor: string = "";
-    @json public meta: JsonObject;
-    @json public iconArtId: string = "";
-    @json public splashArtId: string = "";
-    @json public raw: string = "";
-    @json public scripthash: string = "";
-    @json public sourceid: string = "";
-    @json public updateroot: string = "";
-    @json public unmoderated: boolean = false;
-    @json public noexternallinks: boolean = false;
-    @json public promo: JsonObject;
+    @td.json public baseid: string = "";
+    @td.json public icon: string = "";
+    @td.json public iconbackground: string = "";
+    @td.json public iconurl: string = "";
+    @td.json public cumulativepositivereviews: number = 0;
+    @td.json public screenshots: number = 0;
+    @td.json public platforms: string[];
+    @td.json public capabilities: string[];
+    @td.json public flows: string[];
+    @td.json public haserrors: boolean = false;
+    @td.json public rootid: string = "";
+    @td.json public updateid: string = "";
+    @td.json public updatetime: number = 0;
+    @td.json public ishidden: boolean = false;
+    @td.json public islibrary: boolean = false;
+    @td.json public installations: number = 0;
+    @td.json public runs: number = 0;
+    @td.json public art: number = 0;
+    @td.json public toptagids: string[];
+    @td.json public screenshotthumburl: string = "";
+    @td.json public screenshoturl: string = "";
+    @td.json public mergeids: string[];
+    @td.json public editor: string = "";
+    @td.json public meta: JsonObject;
+    @td.json public iconArtId: string = "";
+    @td.json public splashArtId: string = "";
+    @td.json public raw: string = "";
+    @td.json public scripthash: string = "";
+    @td.json public sourceid: string = "";
+    @td.json public updateroot: string = "";
+    @td.json public unmoderated: boolean = false;
+    @td.json public noexternallinks: boolean = false;
+    @td.json public promo: JsonObject;
     static createFromJson(o:JsonObject) { let r = new PubScript(); r.fromJson(o); return r; }
-}
-
-export interface IPubScript {
-    kind: string;
-    time: number;
-    id: string;
-    baseid: string;
-    url: string;
-    name: string;
-    description: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    icon: string;
-    iconbackground: string;
-    iconurl: string;
-    positivereviews: number;
-    cumulativepositivereviews: number;
-    subscribers: number;
-    comments: number;
-    screenshots: number;
-    platforms: string[];
-    capabilities: string[];
-    flows: string[];
-    haserrors: boolean;
-    rootid: string;
-    updateid: string;
-    updatetime: number;
-    ishidden: boolean;
-    islibrary: boolean;
-    userplatform: string[];
-    installations: number;
-    runs: number;
-    art: number;
-    toptagids: string[];
-    screenshotthumburl: string;
-    screenshoturl: string;
-    mergeids: string[];
-    editor: string;
-    meta: JsonObject;
-    iconArtId: string;
-    splashArtId: string;
-    raw: string;
-    scripthash: string;
-    sourceid: string;
-    updateroot: string;
-    unmoderated: boolean;
-    noexternallinks: boolean;
-    promo: JsonObject;
 }
 
 export class UpdateEntry
     extends td.JsonRecord
 {
-    @json public PartitionKey: string = "";
-    @json public RowKey: string = "";
-    @json public pub: string = "";
-    @json public time: number = 0;
+    @td.json public PartitionKey: string = "";
+    @td.json public RowKey: string = "";
+    @td.json public pub: string = "";
+    @td.json public time: number = 0;
     static createFromJson(o:JsonObject) { let r = new UpdateEntry(); r.fromJson(o); return r; }
 }
-
-export interface IUpdateEntry {
-    PartitionKey: string;
-    RowKey: string;
-    pub: string;
-    time: number;
-}
-
 
 export async function resolveScriptsAsync(entities: indexedStore.FetchResult, req: core.ApiRequest, forSearch: boolean) : Promise<void>
 {
@@ -275,59 +200,6 @@ export async function resolveScriptsAsync(entities: indexedStore.FetchResult, re
     entities.items = td.arrayToJson(coll);
 }
 
-async function forwardToCloudCompilerAsync(req: core.ApiRequest, api: string) : Promise<void>
-{
-    let resp = await queryCloudCompilerAsync(api);
-    if (resp == null) {
-        req.status = httpCode._400BadRequest;
-    }
-    else {
-        req.response = resp;
-    }
-}
-
-export async function queryCloudCompilerAsync(api: string) : Promise<JsonObject>
-{
-    let resp: JsonObject;
-    let js = (<JsonObject>null);
-    let canCache = /^[\w\/]+$/.test(api);
-    if (canCache) {
-        js = await cacheCompiler.getAsync(api);
-    }
-    let ver = await main.getCloudRelidAsync(false);
-    if (js != null && js["version"] == ver) {
-        resp = js["resp"];
-    }
-    else {
-        let url = td.serverSetting("TDC_ENDPOINT", false).replace(/-tdevmgmt-.*/g, "") + api + "?access_token=" + td.serverSetting("TDC_AUTH_KEY", false);
-        let request = td.createRequest(url);
-        logger.debug("cloud compiler: " + api);
-        let response = await request.sendAsync();
-        if (response.statusCode() == 200) {
-            if (td.startsWith(response.header("content-type"), "application/json")) {
-                resp = response.contentAsJson();
-            }
-            else {
-                resp = response.content();
-            }
-        }
-        else {
-            resp = (<JsonObject>null);
-            canCache = false;
-        }
-        logger.debug(JSON.stringify(td.arrayToJson(response.headerNames())));
-        if (canCache && response.header("X-TouchDevelop-RelID") == ver) {
-            let jsb = {};
-            jsb["version"] = ver;
-            if (resp != null) {
-                jsb["resp"] = resp;
-            }
-            await cacheCompiler.justInsertAsync(api, jsb);
-        }
-    }
-    return resp;
-}
-
 export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuilder, body: string, req: core.ApiRequest) : Promise<void>
 {
     if ( ! jsb.hasOwnProperty("id")) {
@@ -346,9 +218,9 @@ export async function publishScriptCoreAsync(pubScript: PubScript, jsb: JsonBuil
     }
     // 
     await insertScriptAsync(jsb, pubScript, body, false);
-    let jsb2 = clone(jsb);
+    let jsb2 = td.clone(jsb);
     delete jsb2["text"];
-    let scr = clone(jsb2);
+    let scr = td.clone(jsb2);
     await audit.logAsync(req, "publish-script", {
         subjectid: scr["pub"]["userid"],
         publicationid: scr["id"],
@@ -400,7 +272,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
     await scripts.insertAsync(jsb);
     updateEntry.RowKey = jsb["indexId"];
     // 
-    let bodyBuilder = clone(pubScript.toJson());
+    let bodyBuilder = td.clone(pubScript.toJson());
     bodyBuilder["text"] = scriptText_;
     core.progress("publish - about to just insert");
     await scriptText.justInsertAsync(pubScript.id, bodyBuilder);
@@ -435,7 +307,7 @@ async function insertScriptAsync(jsb: JsonBuilder, pubScript: PubScript, scriptT
     });
 }
 
-export async function importScriptAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importScriptAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let pubScript = new PubScript();
     pubScript.fromJson(core.removeDerivedProperties(body));
@@ -466,11 +338,20 @@ export async function initAsync() : Promise<void>
     scriptText = await cachedStore.createContainerAsync("scripttext", {
         access: "private"
     });
-    cacheCompiler = await cachedStore.createContainerAsync("cachecompiler", {
-        redisCacheSeconds: 600
-    });
     updateSlots = await indexedStore.createStoreAsync(core.pubsContainer, "updateslot");
     scripts = await indexedStore.createStoreAsync(core.pubsContainer, "script");
+    core.registerPubKind({
+        store: scripts,
+        deleteWithAuthor: true,
+        importOne: importScriptAsync,
+        specialDeleteAsync: async (entryid:string, delentry:JsonObject) => {
+            await scriptText.updateAsync(entryid, async (entry1: JsonBuilder) => {
+                for (let fld of Object.keys(entry1)) {
+                    delete entry1[fld];
+                }
+            });
+        },
+    })
     await core.setResolveAsync(scripts, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveScriptsAsync(fetchResult, apiRequest, false);
     }
@@ -483,11 +364,11 @@ export async function initAsync() : Promise<void>
         await core.throttleAsync(req, "tdcompile", 20);
         if (req.status == 200) {
             let s = req.origUrl.replace(/^\/api\/language\//g, "");
-            await forwardToCloudCompilerAsync(req, "language/" + s);
+            await tdliteTdCompiler.forwardToCloudCompilerAsync(req, "language/" + s);
         }
     });
     core.addRoute("GET", "doctopics", "", async (req1: core.ApiRequest) => {
-        let resp = await queryCloudCompilerAsync("doctopics");
+        let resp = await tdliteTdCompiler.queryCloudCompilerAsync("doctopics");
         req1.response = resp["topicsExt"];
     });
     core.addRoute("GET", "*script", "*", async (req2: core.ApiRequest) => {
@@ -499,7 +380,7 @@ export async function initAsync() : Promise<void>
             await core.throttleAsync(req2, "tdcompile", 20);
             if (req2.status == 200) {
                 let path = req2.origUrl.replace(/^\/api\/[a-z]+\//g, "");
-                await forwardToCloudCompilerAsync(req2, "q/" + req2.rootId + "/" + path);
+                await tdliteTdCompiler.forwardToCloudCompilerAsync(req2, "q/" + req2.rootId + "/" + path);
             }
         }
     });
@@ -552,7 +433,7 @@ export async function initAsync() : Promise<void>
                 jsb["id"] = forceid;
             }
             await publishScriptCoreAsync(scr, jsb, td.toString(req3.body["text"]), req3);
-            await core.returnOnePubAsync(scripts, clone(jsb), req3);
+            await core.returnOnePubAsync(scripts, td.clone(jsb), req3);
         }
     }
     , {
@@ -588,7 +469,7 @@ export async function initAsync() : Promise<void>
                     meta = {};
                 }
                 else {
-                    meta = clone(meta);
+                    meta = td.clone(meta);
                 }
                 core.copyJson(req5.body, meta);
                 for (let k of Object.keys(meta)) {
@@ -601,7 +482,7 @@ export async function initAsync() : Promise<void>
                 }
                 else {
                     v["pub"]["meta"] = meta;
-                    req5.response = clone(meta);
+                    req5.response = td.clone(meta);
                 }
             });
             if (req5.rootPub["promo"] != null) {
@@ -664,10 +545,6 @@ export async function initAsync() : Promise<void>
     core.addRoute("GET", "*script", "family", async (req13: core.ApiRequest) => {
         await core.anyListAsync(scripts, req13, "rootid", req13.rootPub["pub"]["rootid"]);
     });
-    core.addRoute("GET", "*script", "cardinfo", async (req14: core.ApiRequest) => {
-        let jsb1 = await main.getCardInfoAsync(req14, req14.rootPub);
-        req14.response = clone(jsb1);
-    });
     
     if (false)
     core.addRoute("POST", "admin", "reindexscripts", async (req15: core.ApiRequest) => {
@@ -691,8 +568,9 @@ export async function initAsync() : Promise<void>
             req15.response = ({});
         }
     });
-}
 
+    await initPromoAsync();
+}
 
 async function clearScriptCountsAsync(script: PubScript) : Promise<void>
 {
@@ -704,4 +582,109 @@ async function clearScriptCountsAsync(script: PubScript) : Promise<void>
     });
 }
 
+async function initPromoAsync() : Promise<void>
+{
+    promosTable = await core.tableClient.createTableIfNotExistsAsync("promos");
+    await scripts.createCustomIndexAsync("promo", promosTable);
+    core.addRoute("GET", "promo-scripts", "*", async (req: core.ApiRequest) => {
+        await core.anyListAsync(scripts, req, "promo", req.verb);
+    }
+    , {
+        cacheKey: "promo"
+    });
+    core.addRoute("GET", "promo", "config", async (req1: core.ApiRequest) => {
+        core.checkPermission(req1, "script-promo");
+        if (req1.status != 200) {
+            return;
+        }
+        req1.response = await core.settingsContainer.getAsync("promo");
+    });
+    core.addRoute("GET", "*script", "promo", async (req2: core.ApiRequest) => {
+        core.checkPermission(req2, "script-promo");
+        if (req2.status != 200) {
+            return;
+        }
+        req2.response = await getPromoAsync(req2);
+    });
+    core.addRoute("POST", "*script", "promo", async (req3: core.ApiRequest) => {
+        core.checkPermission(req3, "script-promo");
+        if (req3.status != 200) {
+            return;
+        }
+        let promo = await getPromoAsync(req3);
+        let oldPromoId = orEmpty(req3.rootPub["promoId"]);
+        if (oldPromoId != "") {
+            await parallel.forJsonAsync(promo["tags"], async (json: JsonObject) => {
+                let entity = azureTable.createEntity(td.toString(json), oldPromoId);
+                let ok = await promosTable.tryDeleteEntityAsync(td.clone(entity));
+            });
+        }
+        let jsb2 = td.clone(promo);
+        td.jsonCopyFrom(jsb2, req3.body);
+        let coll = (<string[]>[]);
+        let newTags = jsb2["tags"];
+        if (newTags.length > 0) {
+            let d = {};
+            for (let jsb3 of newTags) {
+                d[td.toString(jsb3)] = "1";
+            }
+            d["all"] = "1";
+            if (false) {
+                let pubScript = PubScript.createFromJson(req3.rootPub["pub"]);
+                coll.push(pubScript.editor);
+                d[withDefault(pubScript.editor, "touchdevelop")] = "1";
+                if (td.stringContains(pubScript.description, "#docs")) {
+                    d["docs"] = "1";
+                }
+            }
+            jsb2["tags"] = td.arrayToJson(Object.keys(d));
+        }
+        promo = td.clone(jsb2);
+        let offsetHours = Math.round(td.clamp(-200000, 1000000, core.orZero(promo["priority"])));
+        let newtime = Math.round(req3.rootPub["pub"]["time"] + offsetHours * 3600);
+        let newId = (10000000000 - newtime) + "." + req3.rootId;
+        await core.pubsContainer.updateAsync(req3.rootId, async (entry: JsonBuilder) => {
+            entry["promo"] = promo;
+            entry["promoId"] = newId;
+        });
+        let js = promo["tags"];
+        if (core.jsonArrayIndexOf(js, "hidden") > 0) {
+            js = (["hidden"]);
+        }
+        else if (core.jsonArrayIndexOf(js, "preview") > 0) {
+            js = (["preview"]);
+        }
+        await parallel.forJsonAsync(js, async (json1: JsonObject) => {
+            let entity1 = azureTable.createEntity(td.toString(json1), newId);
+            entity1["pub"] = req3.rootId;
+            await promosTable.insertEntityAsync(td.clone(entity1), "or merge");
+        });
+        await core.flushApiCacheAsync("promo");
+        req3.response = promo;
+    });
+}
 
+async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
+{
+    let js2 = req.rootPub["promo"];
+    if (js2 == null) {
+        let jsb = ({ "tags": [], "priority": 0 });
+        let lastPtr = await core.getPubAsync(req.rootPub["lastPointer"], "pointer");
+        if (lastPtr != null) {
+            jsb["link"] = "/" + lastPtr["pub"]["path"];
+        }
+        return jsb;
+    }
+    return js2;
+}
+
+
+export function getScriptTextAsync(id: string) : Promise<JsonObject>
+{
+    return scriptText.getAsync(id); 
+}
+
+export function getScriptTextsAsync(ids: string[]): Promise<JsonObject[]>
+{
+    return scriptText.getManyAsync(ids);
+}

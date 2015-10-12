@@ -9,9 +9,6 @@ import * as httpMod from 'http';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 
 var logger: td.AppLogger;
@@ -300,7 +297,7 @@ export class Request
     {
         if (!this._query) {
             if (this.handle.query)
-                this._query = clone(this.handle.query);
+                this._query = td.clone(this.handle.query);
             else
                 this._query = {};            
         }

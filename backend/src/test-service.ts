@@ -9,16 +9,11 @@ import * as crypto from 'crypto';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as parallel from "./parallel"
 import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as libratoNode from "./librato-node"
-import * as azureBlobStorage from "./azure-blob-storage"
-import * as redis from "./redis"
 import * as raygun from "./raygun"
 import * as loggly from "./loggly"
 
@@ -26,16 +21,39 @@ import * as loggly from "./loggly"
 var logger: td.AppLogger;
 var testts: cachedStore.Container;
 
+class Foo
+    extends td.JsonRecord
+{
+    @td.json public foo1 = "";
+    @td.json public foo2 = 12;
+}
+
+class Bar
+    extends Foo
+{
+    @td.json public bar1 = "";
+    @td.json public bar2 = 42;
+}
 
 export async function _initAsync() : Promise<void>
 {
     logger = td.createLogger("myweb");
+    
+    let f = new Bar()
+    console.log(f.toJson());
+    f.fromJson({
+        foo1: "hello",
+        bar1: "world"
+    })
+    console.log(f.toJson());
+    
+    console.log(new Bar().toJson());
 
         await raygun.initAsync({
             saveReport: async (json: JsonObject) => {
-                let jsb = clone(json);
+                let jsb = td.clone(json);
                 delete jsb["logMessages"];
-                // td.log("SAVE: " + JSON.stringify(clone(jsb), null, 2));
+                // td.log("SAVE: " + JSON.stringify(td.clone(jsb), null, 2));
                 await td.sleepAsync(0.1);
             }
 
@@ -155,7 +173,7 @@ async function initRoutesAsync() : Promise<void>
     server.get("/:user/info", async (req10: restify.Request, res10: restify.Response) => {
         let jsb = {};
         jsb["name"] = req10.param("user");
-        res10.json(clone(jsb));
+        res10.json(td.clone(jsb));
     });
 }
 

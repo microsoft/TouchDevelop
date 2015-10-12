@@ -4,19 +4,14 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 var orEmpty = td.orEmpty;
 
 import * as cachedStore from "./cached-store"
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as azureTable from "./azure-table"
-import * as redis from "./redis"
 import * as parallel from "./parallel"
 
 var logger: td.AppLogger;
@@ -73,11 +68,11 @@ export class Store
                 let entity = azureTable.createEntity(key, indexId);
                 entity["pub"] = id;
                 // conflict may happen here on connection restart
-                await index.table.insertEntityAsync(clone(entity), "or merge");
+                await index.table.insertEntityAsync(td.clone(entity), "or merge");
             }
         });
         bld["indexId"] = indexId;
-        let newEntry = clone(bld);
+        let newEntry = td.clone(bld);
         await this.container.updateAsync(id, async (entry: JsonBuilder) => {
             let prevKind = entry["kind"];
             if (prevKind == null || prevKind == "reserved") {
@@ -85,7 +80,7 @@ export class Store
                 copyJson(newEntry, entry);
                 // This is in case we incremented some counters before the publication was finalized.
                 if (prev != null) {
-                    copyJson(clone(prev), entry["pub"]);
+                    copyJson(td.clone(prev), entry["pub"]);
                     entry["pub"]["kind"] = this.kind;
                 }
             }
@@ -178,7 +173,7 @@ export class Store
         await this.container.updateAsync(delid, async (entry: JsonBuilder) => {
             let kind = entry["kind"];
             if (kind != "reserved") {
-                delentry = clone(entry);
+                delentry = td.clone(entry);
                 if (hardDelete) {
                     for (let fld of Object.keys(entry)) {
                         if (fld == "indexId" || fld == "id") {
@@ -210,7 +205,7 @@ export class Store
                 let key = index.key(bld);
                 if (key != null && key != "") {
                     let entity = azureTable.createEntity(key, id2);
-                    let ok = await index.table.tryDeleteEntityAsync(clone(entity));
+                    let ok = await index.table.tryDeleteEntityAsync(td.clone(entity));
                     if ( ! ok) {
                         logger.debug("failed to remove idx entry: " + id2 + " - " + key + " at  idx " + index.name + " of " + this.kind);
                     }
@@ -245,9 +240,9 @@ export class Store
         let before = null;
         let after = null;
         await this.container.updateAsync(pubid, async (entry: JsonBuilder) => {
-            before = clone(entry);
+            before = td.clone(entry);
             await update(entry);
-            after = clone(entry);
+            after = td.clone(entry);
         });
         let id2 = before["indexId"];
         assert(after["indexId"] == id2, "");
@@ -258,7 +253,7 @@ export class Store
             if (beforeKey != afterKey) {
                 if (beforeKey != "") {
                     let entity = azureTable.createEntity(beforeKey, id2);
-                    let ok = await index.table.tryDeleteEntityAsync(clone(entity));
+                    let ok = await index.table.tryDeleteEntityAsync(td.clone(entity));
                 }
                 if (afterKey != null) {
                     let entity1 = azureTable.createEntity(afterKey, id2);
@@ -294,13 +289,13 @@ export class Index
     public async fetchAllAsync(key: string) : Promise<JsonObject[]>
     {
         let opts = ({ "count": 1000 });
-        let fetchResult = await this.fetchAsync(key, clone(opts));
+        let fetchResult = await this.fetchAsync(key, td.clone(opts));
         if (fetchResult.continuation != "") {
             let coll = (<JsonObject[]>[]);
             coll.push(fetchResult.items);
             while (fetchResult.continuation != "") {
                 opts["continuation"] = fetchResult.continuation;
-                fetchResult = await this.fetchAsync(key, clone(opts));
+                fetchResult = await this.fetchAsync(key, td.clone(opts));
                 coll.push(fetchResult.items);
             }
             let jsb = [];
@@ -320,11 +315,11 @@ export class Index
         if (batch > 0) {
             opts["count"] = batch;
         }
-        let fetchResult = await this.fetchAsync(key, clone(opts));
+        let fetchResult = await this.fetchAsync(key, td.clone(opts));
         await process(fetchResult.items);
         while (fetchResult.continuation != "") {
             opts["continuation"] = fetchResult.continuation;
-            fetchResult = await this.fetchAsync(key, clone(opts));
+            fetchResult = await this.fetchAsync(key, td.clone(opts));
             await process(fetchResult.items);
         }
     }
@@ -334,9 +329,9 @@ export class Index
 export class FetchResult
     extends td.JsonRecord
 {
-    @json public continuation: string = "";
-    @json public v: number = 0;
-    @json public items: JsonObject[];
+    @td.json public continuation: string = "";
+    @td.json public v: number = 0;
+    @td.json public items: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new FetchResult(); r.fromJson(o); return r; }
 }
 

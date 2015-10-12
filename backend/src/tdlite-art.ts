@@ -4,29 +4,20 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
-import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
 import * as kraken from "./kraken"
-import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteWorkspace from "./tdlite-workspace"
-import * as tdliteData from "./tdlite-data"
-import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
 import * as notifications from "./tdlite-notifications"
-import * as main from "./tdlite"
+import * as tdliteIndex from "./tdlite-index"
+import * as tdliteSearch from "./tdlite-search"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
@@ -34,62 +25,29 @@ var orEmpty = td.orEmpty;
 
 var logger = core.logger;
 var httpCode = core.httpCode;
-export var arts: indexedStore.Store;
-export var artContainer: azureBlobStorage.Container;
-export var thumbContainers: ThumbContainer[] = [];
+var arts: indexedStore.Store;
+var artContainer: azureBlobStorage.Container;
+var thumbContainers: ThumbContainer[] = [];
 var aacContainer: azureBlobStorage.Container;
-export var screenshots: indexedStore.Store;
+var screenshots: indexedStore.Store;
 var artContentTypes: JsonObject;
 
 export class PubArt
-    extends td.JsonRecord
+    extends core.Publication
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public url: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public flags: string[];
-    @json public pictureurl: string = "";
-    @json public thumburl: string = "";
-    @json public mediumthumburl: string = "";
-    @json public wavurl: string = "";
-    @json public aacurl: string = "";
-    @json public contenttype: string = "";
-    @json public bloburl: string = "";
-    @json public arttype: string = "";
-    @json public filehash: string = "";
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public flags: string[];
+    @td.json public pictureurl: string = "";
+    @td.json public thumburl: string = "";
+    @td.json public mediumthumburl: string = "";
+    @td.json public wavurl: string = "";
+    @td.json public aacurl: string = "";
+    @td.json public contenttype: string = "";
+    @td.json public bloburl: string = "";
+    @td.json public arttype: string = "";
+    @td.json public filehash: string = "";
     static createFromJson(o:JsonObject) { let r = new PubArt(); r.fromJson(o); return r; }
-}
-
-export interface IPubArt {
-    kind: string;
-    time: number;
-    id: string;
-    name: string;
-    description: string;
-    url: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    flags: string[];
-    pictureurl: string;
-    thumburl: string;
-    mediumthumburl: string;
-    wavurl: string;
-    aacurl: string;
-    contenttype: string;
-    bloburl: string;
-    arttype: string;
-    filehash: string;
 }
 
 export class ThumbContainer
@@ -100,40 +58,11 @@ export class ThumbContainer
 }
 
 export class PubScreenshot
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public userplatform: string[];
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public pictureurl: string = "";
-    @json public thumburl: string = "";
+    @td.json public pictureurl: string = "";
+    @td.json public thumburl: string = "";
     static createFromJson(o:JsonObject) { let r = new PubScreenshot(); r.fromJson(o); return r; }
-}
-
-export interface IPubScreenshot {
-    kind: string;
-    time: number;
-    id: string;
-    url: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    userplatform: string[];
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    pictureurl: string;
-    thumburl: string;
 }
 
 export async function initAsync() : Promise<void>
@@ -163,6 +92,12 @@ export async function initAsync() : Promise<void>
       "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
     };
     arts = await indexedStore.createStoreAsync(core.pubsContainer, "art");
+    core.registerPubKind({
+        store: arts,
+        deleteWithAuthor: true,
+        importOne: importArtAsync,
+        specialDeleteAsync: deleteArtAsync,
+    })
     await core.setResolveAsync(arts, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveArtAsync(fetchResult, apiRequest);
     }
@@ -184,6 +119,24 @@ export async function initAsync() : Promise<void>
     core.addRoute("GET", "arthash", "*", async (req2: core.ApiRequest) => {
         await core.anyListAsync(arts, req2, "filehash", req2.verb);
     });
+    
+    core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
+        core.checkPermission(req2, "operator");
+        if (req2.status == 200) {
+            await tdliteIndex.clearArtIndexAsync();
+            /* async */ arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
+                let batch = tdliteIndex.createArtUpdate();
+                for (let js of await core.addUsernameEtcCoreAsync(json)) {
+                    let pub = PubArt.createFromJson(td.clone(js["pub"]));
+                    searchIndexArt(pub).upsertArt(batch);
+                }
+                let statusCode = await batch.sendAsync();
+                logger.debug("reindex art, status: " + statusCode);
+            });
+            req2.status = httpCode._201Created;
+        }
+    });
+
 
     await initScreenshotsAsync();
 }
@@ -191,6 +144,12 @@ export async function initAsync() : Promise<void>
 async function initScreenshotsAsync() : Promise<void>
 {
     screenshots = await indexedStore.createStoreAsync(core.pubsContainer, "screenshot");
+    core.registerPubKind({
+        store: screenshots,
+        deleteWithAuthor: true,
+        importOne: importScreenshotAsync,
+        specialDeleteAsync: deleteArtAsync,
+    })
     await core.setResolveAsync(screenshots, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         await resolveScreenshotAsync(fetchResult, apiRequest);
     }
@@ -225,7 +184,7 @@ async function resolveArtAsync(entities: indexedStore.FetchResult, req: core.Api
         let id = "/" + pubArt.id;
         pubArt.contenttype = jsb["contentType"];
         if (req.isUpgrade) {
-            core.queueUpgradeTask(req, /* async */ redownloadArtAsync(jsb));
+            queueUpgradeTask(req, /* async */ redownloadArtAsync(jsb));
         }
         if (jsb["isImage"]) {
             pubArt.pictureurl = artContainer.url() + id;
@@ -249,7 +208,7 @@ async function resolveArtAsync(entities: indexedStore.FetchResult, req: core.Api
             pubArt.bloburl = artContainer.url() + "/" + jsb["filename"];
         }
     }
-    await core.awaitUpgradeTasksAsync(req);
+    await awaitUpgradeTasksAsync(req);
     entities.items = td.arrayToJson(coll);
 }
 
@@ -273,18 +232,18 @@ async function postArtAsync(req: core.ApiRequest) : Promise<void>
     jsb["kind"] = "art";
     await postArt_likeAsync(req, jsb);
     if (jsb.hasOwnProperty("existing")) {
-        await core.returnOnePubAsync(arts, clone(jsb["existing"]), req);
+        await core.returnOnePubAsync(arts, td.clone(jsb["existing"]), req);
         return;
     }
     if (req.status == 200) {
         await arts.insertAsync(jsb);
         await notifications.storeAsync(req, jsb, "");
-        await search.upsertArtAsync(jsb);
+        await upsertArtAsync(jsb);
         await search.scanAndSearchAsync(jsb, {
             skipSearch: true
         });
         // ### return art back
-        await core.returnOnePubAsync(arts, clone(jsb), req);
+        await core.returnOnePubAsync(arts, td.clone(jsb), req);
     }
 }
 
@@ -315,10 +274,10 @@ async function resolveScreenshotAsync(entities: indexedStore.FetchResult, req: c
         screenshot.pictureurl = artContainer.url() + id;
         screenshot.thumburl = thumbContainers[0].container.url() + id;
         if (req.isUpgrade) {
-            core.queueUpgradeTask(req, /* async */ redownloadScreenshotAsync(js));
+            queueUpgradeTask(req, /* async */ redownloadScreenshotAsync(js));
         }
     }
-    await core.awaitUpgradeTasksAsync(req);
+    await awaitUpgradeTasksAsync(req);
     entities.items = td.arrayToJson(coll);
 }
 
@@ -376,7 +335,7 @@ async function postScreenshotAsync(req: core.ApiRequest) : Promise<void>
             await updateScreenshotCountersAsync(screenshot);
             await notifications.storeAsync(req, jsb, "");
             // ### return screenshot
-            await core.returnOnePubAsync(screenshots, clone(jsb), req);
+            await core.returnOnePubAsync(screenshots, td.clone(jsb), req);
         }
     }
 }
@@ -477,7 +436,7 @@ async function redownloadScreenshotAsync(js: JsonObject) : Promise<void>
     });
 }
 
-export async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importArtAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let pubArt = new PubArt();
     pubArt.fromJson(core.removeDerivedProperties(body));
@@ -547,7 +506,7 @@ export async function importArtAsync(req: core.ApiRequest, body: JsonObject) : P
         // 
         if (req.status == 200) {
             await arts.insertAsync(jsb);
-            await search.upsertArtAsync(jsb);
+            await upsertArtAsync(jsb);
             logger.debug("insert OK " + pubArt.id);
         }
     }
@@ -579,7 +538,7 @@ function fixArtProps(contentType: string, jsb: JsonBuilder) : void
     jsb["pub"]["arttype"] = arttype;
 }
 
-export async function importScreenshotAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importScreenshotAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let screenshot = new PubScreenshot();
     screenshot.fromJson(core.removeDerivedProperties(body));
@@ -615,4 +574,71 @@ export async function importScreenshotAsync(req: core.ApiRequest, body: JsonObje
     }
 }
 
+async function deleteArtAsync(entryid:string, entry:JsonObject)
+{
+    await artContainer.deleteBlobAsync(entryid);
+    for (let thumbContainer of thumbContainers) {
+        await thumbContainer.container.deleteBlobAsync(entryid);
+    }
+}
+
+export function hasThumbContainer(name:string)
+{
+    return thumbContainers.some(e => e.name == name);
+}
+
+function searchIndexArt(pub: PubArt) : tdliteIndex.ArtEntry
+{
+    let entry: tdliteIndex.ArtEntry;
+    let tp = "picture";
+    if (! pub.pictureurl) {
+        tp = "sound";
+    }
+    let spr = false;
+    if (pub.flags != null) {
+        spr = pub.flags.indexOf("transparent") >= 0;
+    }
+    entry = tdliteIndex.createArtEntry(pub.id, {
+        name: pub.name,
+        description: pub.description,
+        type: tp,
+        userid: pub.userid,
+        username: pub.username,
+        sprite: spr
+    });
+    return entry;
+}
+
+export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
+{
+    if (tdliteSearch.disableSearch) {
+        return;
+    }
+    let batch = tdliteIndex.createArtUpdate();
+    let coll2 = await core.addUsernameEtcCoreAsync(arts.singleFetchResult(td.clone(obj)).items);
+    let pub = PubArt.createFromJson(td.clone(coll2[0]["pub"]));
+    searchIndexArt(pub).upsertArt(batch);
+    /* async */ batch.sendAsync();
+
+    await tdliteSearch.scanAndSearchAsync(obj, {
+        skipScan: true
+    });
+}
+
+function queueUpgradeTask(req: core.ApiRequest, task:Promise<void>) : void
+{
+    if (req.upgradeTasks == null) {
+        req.upgradeTasks = [];
+    }
+    req.upgradeTasks.push(task);
+}
+
+async function awaitUpgradeTasksAsync(req: core.ApiRequest) : Promise<void>
+{
+    if (req.upgradeTasks != null) {
+        for (let task2 of req.upgradeTasks) {
+            await task2;
+        }
+    }
+}
 

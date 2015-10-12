@@ -4,46 +4,39 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteUsers from "./tdlite-users"
+import * as tdliteLogin from "./tdlite-login"
 
-import * as main from "./tdlite"
 
 var orEmpty = td.orEmpty;
 var auditStore: indexedStore.Store;
 var auditContainer: cachedStore.Container;
 
 export class PubAuditLog
-    extends td.JsonRecord
+    extends core.IdObject
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public type: string = "";
-    @json public userid: string = "";
-    @json public subjectid: string = "";
-    @json public publicationid: string = "";
-    @json public publicationkind: string = "";
-    @json public data: string = "";
-    @json public oldvalue: JsonObject;
-    @json public newvalue: JsonObject;
-    @json public ip: string = "";
-    @json public tokenid: string = "";
+    @td.json public time: number = 0;
+    @td.json public type: string = "";
+    @td.json public userid: string = "";
+    @td.json public subjectid: string = "";
+    @td.json public publicationid: string = "";
+    @td.json public publicationkind: string = "";
+    @td.json public data: string = "";
+    @td.json public oldvalue: JsonObject;
+    @td.json public newvalue: JsonObject;
+    @td.json public ip: string = "";
+    @td.json public tokenid: string = "";
     static createFromJson(o:JsonObject) { let r = new PubAuditLog(); r.fromJson(o); return r; }
 }
 
@@ -85,7 +78,7 @@ export async function logAsync(req: core.ApiRequest, type: string, options_0: IP
         }
     }
     if (req.userinfo.token != null) {
-        msg.tokenid = core.sha256(tdliteUsers.tokenString(req.userinfo.token)).substr(0, 10);
+        msg.tokenid = core.sha256(tdliteLogin.tokenString(req.userinfo.token)).substr(0, 10);
     }
     msg.type = type;
     msg.ip = core.encrypt(req.userinfo.ip, "AUDIT");
@@ -145,10 +138,10 @@ export async function initAsync() : Promise<void>
 export async function auditDeleteValueAsync(js: JsonObject) : Promise<JsonObject>
 {
     if (js["kind"] == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(js["id"]);
-        let jsb2 = clone(js);
+        let entry2 = await tdliteScripts.getScriptTextAsync(js["id"]);
+        let jsb2 = td.clone(js);
         jsb2["text"] = core.encrypt(entry2["text"], "AUDIT");
-        js = clone(jsb2);
+        js = td.clone(jsb2);
     }
     return js;
 }

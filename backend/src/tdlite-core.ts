@@ -6,31 +6,27 @@ import * as td from './td';
 import * as assert from 'assert';
 import * as crypto from 'crypto';
 import * as querystring from 'querystring';
-import * as child_process from 'child_process';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as cachedStore from "./cached-store"
 import * as redis from "./redis"
 import * as indexedStore from "./indexed-store"
 import * as restify from "./restify"
-import * as tdliteIndex from "./tdlite-index"
 import * as tdliteHtml from "./tdlite-html"
+import * as tdliteDocs from "./tdlite-docs"
 
 export type ApiReqHandler = (req: ApiRequest) => Promise<void>;
 export type ResolutionCallback = (fetchResult: indexedStore.FetchResult, apiRequest: ApiRequest) => Promise<void>;
 
 export var validateTokenAsync : (req: ApiRequest, rreq: restify.Request) => Promise<void>;
 export var executeSearchAsync : (kind: string, q: string, req: ApiRequest) => Promise<void>;
-export var somePubStore: indexedStore.Store;
+var somePubStore: indexedStore.Store;
 export var logger = td.createLogger("tdlite");
 
 export var adminRequest: ApiRequest;
@@ -41,7 +37,6 @@ export var emptyRequest: ApiRequest;
 export var fullTD: boolean = false;
 export var hasHttps: boolean = false;
 export var httpCode = restify.http();
-export var lastSearchReport: Date;
 export var myChannel: string = "";
 export var myHost: string = "";
 export var nonSelfRedirect: string = "";
@@ -50,7 +45,7 @@ export var redisClient: redis.Client;
 export var self: string = "";
 export var settingsPermissions: JsonObject;
 export var tableClient: azureTable.Client;
-export var throttleDisabled: boolean = false;
+var throttleDisabled: boolean = false;
 export var tokenSecret:string;
 export var serviceSettings: ServiceSettings;
 export var settingsContainer: cachedStore.Container;
@@ -58,22 +53,58 @@ export var currClientConfig: ClientConfig;
 export var releaseVersionPrefix: string = "0.0";
 export var rewriteVersion: number = 221;
 
+export class IdObject
+    extends td.JsonRecord
+{
+    @td.json public kind: string = "";
+    @td.json public id: string = "";
+    @td.json public url: string = "";
+}
+
+export class Publication
+    extends IdObject
+{
+    @td.json public time: number = 0;       // time when publication was created (seconds since epoch)
+    @td.json public userid: string = "";     // user id of user who published
+    @td.json public userscore: number = 0;
+    @td.json public username: string = "";
+    @td.json public userhaspicture: boolean = false;
+    @td.json public userplatform: string[];
+}
+
+export class PubOnPub
+    extends Publication
+{
+    @td.json public publicationid: string = ""; // script id that is being commented on
+    @td.json public publicationname: string = ""; // script name
+    @td.json public publicationkind: string = ""; //
+}
+
+export class TopPub
+    extends Publication
+{
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public positivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public comments: number = 0;
+}
 
 var lastSettingsCheck: number = 0;
 
 export class ServiceSettings
     extends td.JsonRecord
 {
-    @json public paths: JsonObject;
-    @json public emailFrom: string = "";
-    @json public accounts: JsonObject;
-    @json public alarmingEmails: JsonObject;
-    @json public termsversion: string = "";
-    @json public blockedNicknameRx: string = "";
-    @json public tokenExpiration: number = 0;
-    @json public defaultLang: string = "";
-    @json public langs: JsonObject;
-    @json public envrewrite: JsonObject;
+    @td.json public paths: JsonObject;
+    @td.json public emailFrom: string = "";
+    @td.json public accounts: JsonObject;
+    @td.json public alarmingEmails: JsonObject;
+    @td.json public termsversion: string = "";
+    @td.json public blockedNicknameRx: string = "";
+    @td.json public tokenExpiration: number = 0;
+    @td.json public defaultLang: string = "";
+    @td.json public langs: JsonObject;
+    @td.json public envrewrite: JsonObject;
     static createFromJson(o:JsonObject) { let r = new ServiceSettings(); r.fromJson(o); return r; }
 }
 
@@ -165,12 +196,12 @@ export interface IStoreDecorator {
 export class Token
     extends td.JsonRecord
 {
-    @json public PartitionKey: string = "";
-    @json public RowKey: string = "";
-    @json public time: number = 0;
-    @json public reason: string = "";
-    @json public cookie: string = "";
-    @json public version: number = 0;
+    @td.json public PartitionKey: string = "";
+    @td.json public RowKey: string = "";
+    @td.json public time: number = 0;
+    @td.json public reason: string = "";
+    @td.json public cookie: string = "";
+    @td.json public version: number = 0;
     static createFromJson(o:JsonObject) { let r = new Token(); r.fromJson(o); return r; }
 }
 
@@ -198,21 +229,21 @@ export class ApireqUserInfo
 export class ClientConfig
     extends td.JsonRecord
 {
-    @json public workspaceUrl: string = "";
-    @json public searchUrl: string = "";
-    @json public searchApiKey: string = "";
-    @json public apiUrl: string = "";
-    @json public rootUrl: string = "";
-    @json public liteVersion: string = "";
-    @json public tdVersion: string = "";
-    @json public releaseid: string = "";
-    @json public relid: string = "";
-    @json public releaseLabel: string = "";
-    @json public shareUrl: string = "";
-    @json public cdnUrl: string = "";
-    @json public anonToken: string = "";
-    @json public primaryCdnUrl: string = "";
-    @json public altCdnUrls: string[];
+    @td.json public workspaceUrl: string = "";
+    @td.json public searchUrl: string = "";
+    @td.json public searchApiKey: string = "";
+    @td.json public apiUrl: string = "";
+    @td.json public rootUrl: string = "";
+    @td.json public liteVersion: string = "";
+    @td.json public tdVersion: string = "";
+    @td.json public releaseid: string = "";
+    @td.json public relid: string = "";
+    @td.json public releaseLabel: string = "";
+    @td.json public shareUrl: string = "";
+    @td.json public cdnUrl: string = "";
+    @td.json public anonToken: string = "";
+    @td.json public primaryCdnUrl: string = "";
+    @td.json public altCdnUrls: string[];
     static createFromJson(o:JsonObject) { let r = new ClientConfig(); r.fromJson(o); return r; }
 }
 
@@ -234,6 +265,7 @@ export interface IClientConfig {
     altCdnUrls: string[];
 }
 
+// TODO unused?
 export async function fetchQueryAsync(query: azureTable.TableQuery, req: restify.Request) : Promise<JsonObject>
 {
     let entities: JsonObject;
@@ -268,7 +300,7 @@ export function addRoute(method: string, root: string, verb: string, handler: Ap
             let size = 0;
             if (req.body != null) {
                 if (options_.sizeCheckExcludes) {
-                    let jsb = clone(req.body);
+                    let jsb = td.clone(req.body);
                     delete jsb[options_.sizeCheckExcludes];
                     size = JSON.stringify(jsb).length;
                 }
@@ -288,49 +320,6 @@ export function addRoute(method: string, root: string, verb: string, handler: Ap
 }
 
 var orEmpty = td.orEmpty;
-
-export async function performRoutingAsync(req: restify.Request, res: restify.Response) : Promise<void>
-{
-    let apiRequest = buildApiRequest(req.url());
-    apiRequest.method = req.method();
-    apiRequest.body = req.bodyAsJson();
-    await validateTokenAsync(apiRequest, req);
-    if (apiRequest.userid == "") {
-        apiRequest.throttleIp = sha256(req.remoteIp());
-    }
-    if ( ! apiRequest.isCached && apiRequest.userinfo.token == null) {
-        handleBasicAuth(req, res);
-    }
-    else {
-        handleHttps(req, res);
-    }
-    if ( ! res.finished()) {
-        let upgradeToken = apiRequest.queryOptions["upgrade"];
-        apiRequest.isUpgrade = upgradeToken != null && upgradeToken == tokenSecret;
-        apiRequest.isTopLevel = true;
-        if (apiRequest.status == 200) {
-            if (apiRequest.isCached) {
-                if ( ! (await handledByCacheAsync(apiRequest))) {
-                    await storeCacheAsync(apiRequest);
-                }
-            }
-            else {
-                await throttleAsync(apiRequest, "apireq", 2);
-                await performSingleRequestAsync(apiRequest);
-            }
-        }
-        sendResponse(apiRequest, req, res);
-    }
-}
-
-export function lookupRoute(apiRequest: ApiRequest, root: string, verb: string) : void
-{
-    if (apiRequest.route == null) {
-        if (RouteIndex.has(apiRequest.method, root, verb)) {
-            apiRequest.route = RouteIndex.at(apiRequest.method, root, verb)
-        }
-    }
-}
 
 export async function anyListAsync(store: indexedStore.Store, req: ApiRequest, idxName: string, key: string) : Promise<void>
 {
@@ -392,176 +381,6 @@ export function nonEmpty(id: string) : boolean
     let b: boolean;
     b = id != null && id != "";
     return b;
-}
-
-export async function performSingleRequestAsync(apiRequest: ApiRequest) : Promise<void>
-{
-    logger.newContext();
-    if (apiRequest.status == 200 && apiRequest.root == "me") {
-        if (apiRequest.userid == "") {
-            apiRequest.status = httpCode._401Unauthorized;
-        }
-        else {
-            apiRequest.root = apiRequest.userid;
-        }
-    }
-    if (apiRequest.status == 200) {
-        lookupRoute(apiRequest, apiRequest.root, apiRequest.verb);
-        if (apiRequest.verb != "") {
-            lookupRoute(apiRequest, apiRequest.root, "*");
-        }
-        if (apiRequest.route == null && apiRequest.root != "") {
-            let pub = await pubsContainer.getAsync(apiRequest.root);
-            if (pub == null || pub["kind"] == "reserved") {
-            }
-            else {
-                apiRequest.root = "*" + pub["kind"];
-                apiRequest.rootPub = pub;
-                apiRequest.rootId = pub["id"];
-                lookupRoute(apiRequest, "*" + pub["kind"], apiRequest.verb);
-                lookupRoute(apiRequest, "*pub", apiRequest.verb);
-                if (apiRequest.verb == "") {
-                }
-                else {
-                    lookupRoute(apiRequest, "*" + pub["kind"], "*");
-                }
-            }
-        }
-
-        if (apiRequest.route == null) {
-            await throttleAsync(apiRequest, "apireq", 3);
-            apiRequest.status = 404;
-        }
-        else {
-            await apiRequest.route.handler(apiRequest);
-        }
-        let cat = "ApiGet";
-        if (apiRequest.root == "") {
-            cat = "ApiBatch";
-        }
-        else if (apiRequest.verb == "installedlong" || apiRequest.root == "notificationslong" || apiRequest.verb == "notificationslong") {
-            cat = "ApiPoll";
-        }
-        else if (apiRequest.method != "GET") {
-            cat = "ApiPost";
-        }
-        else if ( ! apiRequest.isTopLevel) {
-            cat = "ApiInner";
-        }
-        let evArgs = {};
-        let path = apiRequest.method + " /api/";
-        if (apiRequest.route != null) {
-            path = path + apiRequest.route.root;
-            if (apiRequest.route.verb != "") {
-                path = path + "/" + apiRequest.route.verb;
-            }
-        }
-        else {
-            path = path + "*" + apiRequest.status;
-        }
-        evArgs["rawURL"] = sanitze(apiRequest.origUrl);
-        evArgs["user"] = apiRequest.userid;
-        evArgs["cat"] = cat;
-        evArgs["statusCode"] = apiRequest.status;
-        if (false) {
-            logger.customTick(path, clone(evArgs));
-        }
-        logger.measure(cat + "@" + path, logger.contextDuration());
-    }
-}
-
-export function sendResponse(apiRequest: ApiRequest, req: restify.Request, res: restify.Response) : void
-{
-    if (apiRequest.status != 200) {
-        if (apiRequest.status == httpCode._401Unauthorized) {
-            res.sendError(httpCode._403Forbidden, "Invalid or missing ?access_token=...");
-        }
-        else if (apiRequest.status == httpCode._402PaymentRequired) {
-            res.sendCustomError(httpCode._402PaymentRequired, "Your account is not authorized to perform this operation.");
-        }
-        else {
-            res.sendError(apiRequest.status, "");
-        }
-    }
-    else if (apiRequest.response == null) {
-        assert(false, "response unset");
-    }
-    else {
-        let etag = computeEtagOfJson(apiRequest.response);
-        if (apiRequest.method == "GET" && orEmpty(req.header("If-None-Match")) == etag) {
-            res.sendError(httpCode._304NotModified, "");
-            return;
-        }
-        res.setHeader("ETag", etag);
-        if ( ! apiRequest.isCached) {
-            res.setHeader("Cache-Control", "no-cache, no-store");
-        }
-        if (apiRequest.headers != null) {
-            for (let hd of Object.keys(apiRequest.headers)) {
-                res.setHeader(hd, apiRequest.headers[hd]);
-            }
-        }
-        if (typeof apiRequest.response == "string") {
-            res.setHeader("X-Content-Type-Options", "nosniff");
-            res.sendText(td.toString(apiRequest.response), withDefault(apiRequest.responseContentType, "text/plain"));
-        }
-        else {
-            res.json(apiRequest.response);
-        }
-    }
-}
-
-export async function performBatchAsync(req: ApiRequest) : Promise<void>
-{
-    let reqArr = req.body["array"];
-    if (reqArr == null || reqArr.length > 50 || ! req.isTopLevel) {
-        req.status = httpCode._400BadRequest;
-    }
-    else {
-        let resps = asArray(clone(reqArr));
-        await parallel.forAsync(reqArr.length, async (x: number) => {
-            let inpReq = resps[x];
-            let resp = await performBatchedRequestAsync(inpReq, req, false);
-            resps[x] = resp;
-        });
-        let jsb = {};
-        jsb["code"] = 200;
-        jsb["array"] = td.arrayToJson(resps);
-        req.response = clone(jsb);
-    }
-}
-
-export async function performBatchedRequestAsync(inpReq: JsonBuilder, req: ApiRequest, allowPost: boolean) : Promise<JsonBuilder>
-{
-    let resp: JsonBuilder;
-    let apiRequest = buildApiRequest(withDefault(inpReq["relative_url"], "/no-such-url"));
-    apiRequest.method = withDefault(inpReq["method"], "GET").toUpperCase();
-    apiRequest.userid = req.userid;
-    apiRequest.userinfo = req.userinfo;
-
-    apiRequest.isUpgrade = req.isUpgrade;
-    if ( ! allowPost) {
-        if (apiRequest.method != "GET") {
-            apiRequest.status = httpCode._405MethodNotAllowed;
-        }
-    }
-    if (apiRequest.status == 200) {
-        await performSingleRequestAsync(apiRequest);
-    }
-    resp = {};
-    resp["code"] = apiRequest.status;
-    if (apiRequest.status == 200) {
-        let etag = computeEtagOfJson(apiRequest.response);
-        let s = inpReq["If-None-Match"];
-        if (s != null && s == etag) {
-            resp["code"] = httpCode._304NotModified;
-        }
-        else {
-            resp["ETag"] = etag;
-            resp["body"] = apiRequest.response;
-        }
-    }
-    return resp;
 }
 
 export function buildApiRequest(url: string) : ApiRequest
@@ -630,15 +449,6 @@ export function increment(entry: JsonBuilder, counter: string, delta: number) : 
         x = 0;
     }
     basePub[counter] = x + delta;
-}
-
-export function computeEtagOfJson(resp: JsonObject) : string
-{
-    let etag: string;
-    let hash = crypto.createHash("md5");
-    hash.update(JSON.stringify(resp), "utf8");
-    etag = hash.digest().toString("base64");
-    return etag;
 }
 
 export interface IResolveOptions {
@@ -810,9 +620,18 @@ export function orZero(s: number) : number
     return r;
 }
 
+export function computeEtagOfJson(resp: JsonObject) : string
+{
+    let etag: string;
+    let hash = crypto.createHash("md5");
+    hash.update(JSON.stringify(resp), "utf8");
+    etag = hash.digest().toString("base64");
+    return etag;
+}
+
 export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRequest) : void
 {
-    let bld = clone(entities.toJson());
+    let bld = td.clone(entities.toJson());
     bld["kind"] = "list";
     let etags = td.toString(req.queryOptions["etagsmode"]);
     if (etags == null) {
@@ -831,24 +650,7 @@ export function buildListResponse(entities: indexedStore.FetchResult, req: ApiRe
             delete bld["items"];
         }
     }
-    req.response = clone(bld);
-}
-
-export function queueUpgradeTask(req: ApiRequest, task:Promise<void>) : void
-{
-    if (req.upgradeTasks == null) {
-        req.upgradeTasks = [];
-    }
-    req.upgradeTasks.push(task);
-}
-
-export async function awaitUpgradeTasksAsync(req: ApiRequest) : Promise<void>
-{
-    if (req.upgradeTasks != null) {
-        for (let task2 of req.upgradeTasks) {
-            await task2;
-        }
-    }
+    req.response = td.clone(bld);
 }
 
 export function isGoodEntry(entry: JsonObject) : boolean
@@ -909,21 +711,7 @@ export function orFalse(s: boolean) : boolean
     return td.toBoolean(s) || false;
 }
 
-export function checkGroupPermission(req: ApiRequest) : void
-{
-    if (req.userid == req.rootPub["pub"]["userid"]) {
-    }
-    else {
-        checkPermission(req, "pub-mgmt");
-    }
-}
-
-export function htmlQuote(tdUsername: string) : string
-{
-    let _new: string;
-    _new = td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(tdUsername, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&#39;");
-    return _new;
-}
+export var htmlQuote = tdliteDocs.htmlQuote;
 
 export function handleBasicAuth(req: restify.Request, res: restify.Response) : void
 {
@@ -1060,25 +848,6 @@ export function setFields(bld: JsonBuilder, body: JsonObject, fields: string[]) 
     }
 }
 
-export function canBeAdminDeleted(jsonpub: JsonObject) : boolean
-{
-    let b: boolean;
-    b = /^(art|screenshot|comment|script|group|publist|channel|pointer)$/.test(jsonpub["kind"]);
-    return b;
-}
-
-export async function checkDeletePermissionAsync(req: ApiRequest) : Promise<void>
-{
-    let pub = req.rootPub["pub"];
-    let authorid = pub["userid"];
-    if (pub["kind"] == "user") {
-        authorid = pub["id"];
-    }
-    if (authorid != req.userid) {
-        await checkFacilitatorPermissionAsync(req, authorid);
-    }
-}
-
 export async function canPostAsync(req: ApiRequest, kind: string) : Promise<void>
 {
     if (req.userid == "") {
@@ -1154,7 +923,24 @@ export async function throttleCoreAsync(throttleKey: string, tokenCost_s_: numbe
     args.push(accumulationSeconds * 1000 + "");
     // return wait times of up to 10000ms
     args.push("10000");
-    let value = await redisClient.evalAsync("local now     = ARGV[1]\nlocal rate    = ARGV[2] or 1000   -- token cost (1000ms - 1 token/seq)\nlocal burst   = ARGV[3] or 3600000    -- accumulate for up to an hour\nlocal dropAt  = ARGV[4] or 10000  -- return wait time of up to 10s; otherwise just drop the request\n\nlocal curr = redis.call(\"GET\", KEYS[1]) or 0\nlocal newHorizon = math.max(now - burst, curr + rate)\nlocal sleepTime  = math.max(0, newHorizon - now)\n\nif sleepTime > tonumber(dropAt) then\n  return -1\nelse\n  redis.call(\"SET\", KEYS[1], newHorizon)\n  return sleepTime\nend", keys, args);
+    let value = await redisClient.evalAsync(
+`
+local now     = ARGV[1]
+local rate    = ARGV[2] or 1000   -- token cost (1000ms - 1 token/seq)
+local burst   = ARGV[3] or 3600000    -- accumulate for up to an hour
+local dropAt  = ARGV[4] or 10000  -- return wait time of up to 10s; otherwise just drop the request
+
+local curr = redis.call(\"GET\", KEYS[1]) or 0
+local newHorizon = math.max(now - burst, curr + rate)
+local sleepTime  = math.max(0, newHorizon - now)
+
+if sleepTime > tonumber(dropAt) then
+  return -1
+else
+  redis.call(\"SET\", KEYS[1], newHorizon)
+  return sleepTime
+end
+`, keys, args);
     let sleepTime = td.toNumber(value);
     if (throttleDisabled) {
         sleepTime = 0;
@@ -1226,13 +1012,6 @@ export function sanitizeJson(jsb: JsonBuilder) : void
     }
 }
 
-export function saltFilename(plain: string) : string
-{
-    let salted: string;
-    salted = plain + sha256("filesalt:" + tokenSecret + plain).substr(0, 20);
-    return salted;
-}
-
 export async function followIdsAsync(fetchResult: JsonObject[], field: string, kind: string) : Promise<JsonObject[]>
 {
     let pubs: JsonObject[];
@@ -1254,16 +1033,6 @@ export function checkPubPermission(req: ApiRequest) : void
     }
 }
 
-export function pathToPtr(fn: string) : string
-{
-    let s: string;
-    if (! fn) {
-        return "";
-    }
-    s = "ptr-" + fn.replace(/^\/+/g, "").replace(/[^a-zA-Z0-9@]/g, "-").toLowerCase();
-    return s;
-}
-
 export function hasSetting(key: string) : boolean
 {
     let hasSetting: boolean;
@@ -1275,32 +1044,6 @@ export function progress(message: string) : void
 {
     if (false) {
         logger.debug(message);
-    }
-}
-
-export async function cpuLoadAsync() : Promise<number>
-{
-    let load: number;
-    await new Promise(resume => {
-        child_process.execFile("wmic", ["cpu", "get", "loadpercentage"], function (err, res:string) {
-          var arr = [];
-          if (res)
-            res.replace(/\d+/g, m => { arr.push(parseFloat(m)); return "" });
-          load = 0;
-          arr.forEach(function(n) { load += n });
-          load = load / arr.length;
-          resume();
-        });
-    });
-    return load;
-}
-
-export async function statusReportLoopAsync() : Promise<void>
-{
-    while (true) {
-        await td.sleepAsync(30 + td.randomRange(0, 10));
-        let value = await cpuLoadAsync();
-        logger.measure("load-perc", value);
     }
 }
 
@@ -1352,14 +1095,6 @@ export function setHtmlHeaders(res: restify.Response) : void
     res.setHeader("X-XSS-Protection", "1");
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
     res.setHeader("X-Content-Type-Options", "nosniff");
-}
-
-export function twoDigits(p: number) : string
-{
-    let r: string;
-    let s = "0" + p;
-    return s.substr(s.length - 2, 2);
-    return r;
 }
 
 export function encrypt(val: string, keyid: string) : string
@@ -1511,11 +1246,6 @@ export function callerSharesGroupWith(req: ApiRequest, subjectJson: JsonObject) 
     return isFacilitator;
 }
 
-export function unsafeToJson(jsb: JsonBuilder) : JsonObject
-{
-    return jsb;
-}
-
 export function isAbuseSafe(elt: JsonObject) : boolean
 {
     let b2: boolean;
@@ -1585,41 +1315,6 @@ export async function handledByCacheAsync(apiRequest: ApiRequest) : Promise<bool
     return handled;
 }
 
-export async function storeCacheAsync(apiRequest: ApiRequest) : Promise<void>
-{
-    if (apiRequest.method != "GET") {
-        apiRequest.status = httpCode._405MethodNotAllowed;
-        return;
-    }
-    await throttleAsync(apiRequest, "apireq", 10);
-    if (apiRequest.status == httpCode._429TooManyRequests) {
-        return;
-    }
-    // 
-    await performSingleRequestAsync(apiRequest);
-    // 
-    let thekey = apiRequest.route.options.cacheKey;
-    if (!thekey) {
-        apiRequest.status = httpCode._404NotFound;
-        return;
-    }
-    let jsb = {};
-    let verkey = await cachedApiContainer.getAsync("@" + thekey);
-    if (verkey == null) {
-        jsb["cachekeyvalue"] = await flushApiCacheAsync(thekey);
-    }
-    else {
-        jsb["cachekeyvalue"] = verkey["value"];
-    }
-    jsb["cachekey"] = thekey;
-    jsb["status"] = apiRequest.status;
-    if (apiRequest.status == 200) {
-        jsb["response"] = apiRequest.response;
-    }
-    await cachedApiContainer.justInsertAsync(apiRequest.origUrl, jsb);
-    // TODO store etag/other headers?
-}
-
 /**
  * {action:ignoreReturn}
  */
@@ -1680,46 +1375,6 @@ export function jsonArrayIndexOf(js: JsonObject[], id: string) : number
     return -1;
 }
 
-export async function failureReportLoopAsync() : Promise<void>
-{
-    let container = await blobService.createContainerIfNotExistsAsync("blobwritetest", "private");
-    let table = await tableClient.createTableIfNotExistsAsync("tablewritetest");
-    lastSearchReport = new Date();
-    while (true) {
-        await td.sleepAsync(300 + td.randomRange(0, 100));
-        /* async */ checkSearchAsync();
-        await td.sleepAsync(30);
-        /* async */ doFailureChecksAsync(container, table);
-    }
-}
-
-export async function checkSearchAsync() : Promise<void>
-{
-    let res = await tdliteIndex.statisticsAsync();
-    lastSearchReport = new Date();
-}
-
-export async function doFailureChecksAsync(container: azureBlobStorage.Container, table: azureTable.Table) : Promise<void>
-{
-    if (Date.now() - lastSearchReport.getTime() > 100000) {
-        logger.tick("Failure@search");
-    }
-    if (await redisClient.isStatusLateAsync()) {
-        logger.tick("Failure@redis");
-    }
-    let result2 = await container.createBlockBlobFromTextAsync(td.randomInt(1000) + "", "foobar", {
-        justTry: true
-    });
-    if ( ! result2.succeded()) {
-        logger.tick("Failure@blob");
-    }
-    let entity = azureTable.createEntity(td.randomInt(1000) + "", "foo");
-    let ok = await table.tryInsertEntityExtAsync(clone(entity), "or replace");
-    if ( ! ok) {
-        logger.tick("Failure@table");
-    }
-}
-
 export function resolveAsync(store: indexedStore.Store, entities: indexedStore.FetchResult, req: ApiRequest) {
     return (<DecoratedStore><any>store).myResolve(entities, req);
 }
@@ -1771,9 +1426,6 @@ export async function lateInitAsync()
 
 export async function initFinalAsync()
 {
-    if (hasSetting("LIBRATO_TOKEN")) {
-        /* async */ failureReportLoopAsync();
-    }
     emptyRequest = buildApiRequest("/api");
     adminRequest = buildApiRequest("/api");
     adminRequest.userinfo.json = ({ "groups": {} });
@@ -1786,14 +1438,14 @@ export async function initFinalAsync()
 export function removeDerivedProperties(body: JsonObject) : JsonObject
 {
     let body2: JsonObject;
-    let jsb2 = clone(body);
+    let jsb2 = td.clone(body);
     for (let fld of ["username", "url"]) {
         jsb2[fld] = "";
     }
     for (let fld2 of ["userscore", "positivereviews", "comments", "subscribers"]) {
         jsb2[fld2] = 0;
     }
-    body = clone(jsb2);
+    body = td.clone(jsb2);
     body2 = body;
     return body2;
 }
@@ -1805,7 +1457,7 @@ export async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<
     coll2 = (<JsonBuilder[]>[]);
     for (let i = 0; i < entities.length; i++) {
         let userJs:any = users[i];
-        let root = clone(entities[i]);
+        let root = td.clone(entities[i]);
         coll2.push(root);
         if (userJs != null) {
             root["*userid"] = userJs;
@@ -1864,7 +1516,7 @@ export async function refreshSettingsAsync() : Promise<void>
             if (entry2 == null) {
                 entry2 = ({ "permissions": {} });
             }
-            let permMap = clone(entry2["permissions"]);
+            let permMap = td.clone(entry2["permissions"]);
             let numAdded = 1;
             while (numAdded > 0) {
                 numAdded = 0;
@@ -1896,9 +1548,9 @@ export async function refreshSettingsAsync() : Promise<void>
               "alarmingEmails": []
             };
             td.jsonCopyFrom(jsb, entry2);
-            serviceSettings = ServiceSettings.createFromJson(clone(jsb));
+            serviceSettings = ServiceSettings.createFromJson(td.clone(jsb));
             lastSettingsCheck = now;
-            settingsPermissions = clone(permMap);
+            settingsPermissions = td.clone(permMap);
 
         }
     }
@@ -1934,3 +1586,47 @@ export async function setReqUserIdAsync(req: ApiRequest, uid: string) : Promise<
         logger.setContextUser(uid);
     }
 }
+
+export interface IPubKind
+{
+    kind?: string;
+    store: indexedStore.Store;
+    deleteWithAuthor: boolean;
+    importOne?: (req:ApiRequest, js:JsonObject) => Promise<void>;
+    specialDeleteAsync?: (entryid:string, delentry:JsonBuilder) => Promise<void>;
+}
+
+var pubKinds:IPubKind[] = [];
+export function getPubKind(kind:string)
+{
+    if (!kind) return null
+    return pubKinds.filter(k => k.kind == kind)[0] || null
+}
+
+export function getPubKinds()
+{
+    return pubKinds.slice(0);
+}
+
+export function registerPubKind(desc:IPubKind)
+{
+    desc.kind = desc.store.kind;
+    assert(!getPubKind(desc.kind))
+    pubKinds.push(desc)
+    if (!somePubStore)
+        somePubStore = desc.store;
+}
+
+export async function getCloudRelidAsync(includeVer: boolean) : Promise<string>
+{
+    let ver: string;
+    let entry = await settingsContainer.getAsync("releases");
+    let js = entry["ids"]["cloud"];
+    ver = js["relid"];
+    if (includeVer) {
+        ver = ver + "." + rewriteVersion + "." + js["numpokes"];
+    }
+    return ver;
+}
+
+

@@ -4,17 +4,13 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as fs from 'fs';
-import * as util from 'util';
 import * as zlib from 'zlib';
-import * as crypto from 'crypto';
 
 var azure_storage = require("azure-storage");
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 
 var logSeqNo: number = 0;
@@ -118,7 +114,7 @@ export class BlobService
         }
         corsRule["MaxAgeInSeconds"] = maxAgeInSeconds;
         logger.debug("setting cors");
-        let result = await this.setServicePropertiesAsync(clone(props));
+        let result = await this.setServicePropertiesAsync(td.clone(props));
         success = result["isSuccessful"];
         return success;
     }
@@ -622,7 +618,7 @@ function prepOptions(options: ICreateOptions) : ICreateOptions
     if (!options) options = {}
     if (!options.timeoutIntervalInMs)
         delete options.timeoutIntervalInMs
-    let opts = clone(options)
+    let opts = td.clone(options)
     opts["accessConditions"] = {};
     let etag = invalidToEmpty(options.etag);
     if (etag != "") {
@@ -640,7 +636,7 @@ function prepGetOptions(options: IGetOptions) : IGetOptions
     if (!options) options = {}
     if (!options.timeoutIntervalInMs)
         delete options.timeoutIntervalInMs
-    let opts = clone(options);
+    let opts = td.clone(options);
     opts["startTime"] = logger.loggerDuration();
     return opts;
 }

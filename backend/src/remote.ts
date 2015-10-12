@@ -7,7 +7,6 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as zlib from 'zlib';
 import * as path from 'path';
-import * as child_process from 'child_process';
 
 var isConsole = false;
 

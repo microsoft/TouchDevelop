@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 import * as azureSearch from "./azure-search"
 import * as parallel from "./parallel"
@@ -35,16 +33,16 @@ var documentMimetypes: td.SMap<string> = {
 export class ArtEntry
     extends td.JsonRecord
 {
-    @json public id: string = "";
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public type: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public time: number = 0;
-    @json public sprite: boolean = false;
-    @json public tags: string = "";
-    @json public score: number = 0;
+    @td.json public id: string = "";
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public type: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public time: number = 0;
+    @td.json public sprite: boolean = false;
+    @td.json public tags: string = "";
+    @td.json public score: number = 0;
     static createFromJson(o:JsonObject) { let r = new ArtEntry(); r.fromJson(o); return r; }
 
     /**
@@ -74,20 +72,20 @@ export interface IArtEntry {
 export class PubEntry
     extends td.JsonRecord
 {
-    @json public id: string = "";
-    @json public kind: string = "";
-    @json public score: number = 0;
-    @json public name: string = "";
-    @json public description: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public body: string = "";
-    @json public hashes: string[];
-    @json public features: string[];
-    @json public time: number = 0;
-    @json public editor: string = "";
-    @json public artkind: string = "";
-    @json public arttype: string = "";
+    @td.json public id: string = "";
+    @td.json public kind: string = "";
+    @td.json public score: number = 0;
+    @td.json public name: string = "";
+    @td.json public description: string = "";
+    @td.json public userid: string = "";
+    @td.json public username: string = "";
+    @td.json public body: string = "";
+    @td.json public hashes: string[];
+    @td.json public features: string[];
+    @td.json public time: number = 0;
+    @td.json public editor: string = "";
+    @td.json public artkind: string = "";
+    @td.json public arttype: string = "";
     static createFromJson(o:JsonObject) { let r = new PubEntry(); r.fromJson(o); return r; }
 
     /**
@@ -517,7 +515,7 @@ export async function statisticsAsync() : Promise<JsonObject>
         let index = coll[x];
         jsres[index.indexName()] = await index.statisticsAsync();
     });
-    res = clone(jsres);
+    res = td.clone(jsres);
     return res;
 }
 

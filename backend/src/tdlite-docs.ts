@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 
 
@@ -73,7 +72,7 @@ export async function formatAsync(templ: string, pubdata: JsonBuilder) : Promise
         }
         for (let fn of Object.keys(pubdata)) {
             if ( ! sectjs.hasOwnProperty(fn)) {
-                sectjs[fn] = clone(pubdata[fn]);
+                sectjs[fn] = td.clone(pubdata[fn]);
             }
         }
         let expanded = "";
@@ -112,7 +111,7 @@ export async function formatAsync(templ: string, pubdata: JsonBuilder) : Promise
         }
         sinks[target] = orEmpty(sinks[target]) + expanded;
     }
-    td.jsonCopyFrom(pubdata, clone(sinks));
+    td.jsonCopyFrom(pubdata, td.clone(sinks));
     let expanded1 = td.replaceFn(templ, /@([a-zA-Z0-9_]+)@/g, (elt2: string[]) => {
         let result2: string;
         let key1 = elt2[1];
@@ -124,11 +123,14 @@ export async function formatAsync(templ: string, pubdata: JsonBuilder) : Promise
 
 var orEmpty = td.orEmpty;
 
-function htmlQuote(tdUsername: string) : string
+export function htmlQuote(s: string) : string
 {
-    let _new: string;
-    _new = td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(td.replaceAll(tdUsername, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&#39;");
-    return _new;
+    s = td.replaceAll(s, "&", "&amp;")
+    s = td.replaceAll(s, "<", "&lt;")
+    s = td.replaceAll(s, ">", "&gt;")
+    s = td.replaceAll(s, "\"", "&quot;")
+    s = td.replaceAll(s, "\'", "&#39;")
+    return s;
 }
 
 export function init(expandInfo_:td.Action1<JsonBuilder>) : void

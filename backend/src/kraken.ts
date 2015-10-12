@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 
 var logger: td.AppLogger;
@@ -45,7 +44,7 @@ async function sendRequestAsync(url: string, payload: JsonBuilder, retry: number
     resp = (<JsonObject>null);
     let request = td.createRequest(url);
     request.setMethod("POST");
-    request.setContentAsJson(clone(payload));
+    request.setContentAsJson(td.clone(payload));
     let response = await request.sendAsync();
     let res = response.contentAsJson();
     logger.debug("optimize status: " + response.statusCode());

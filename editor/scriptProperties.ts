@@ -272,6 +272,8 @@ module TDev
                 Util.reportError("bitvm compile", e, false);
                 if (dbg)
                     ModalDialog.showText(e.stack)
+                else
+                    HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
                 return
             }
 
@@ -292,6 +294,8 @@ module TDev
                 Util.reportError("bitvm download", e, false);
                 if (dbg)
                     ModalDialog.showText(e.stack)
+                else
+                    HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
             })
         }
 

@@ -426,7 +426,7 @@ module TDev {
             break;
 
           case MessageType.Compile:
-            if (!Cloud.bitvm() && Cloud.anonMode(lf("C++ compilation"))) {
+            if (TheEditor.useNativeCompilation() && Cloud.anonMode(lf("C++ compilation"))) {
               this.post(<Message_CompileAck>{
                 type: MessageType.CompileAck,
                 status: Status.Error,
@@ -449,7 +449,7 @@ module TDev {
                 break;
               case Language.TouchDevelop:
                 fixupLibs(message1.libs);
-                if (Cloud.bitvm()) {
+                if (!TheEditor.useNativeCompilation()) {
                   compileLanguage = Language.TouchDevelop;
                   code = roundtrip1(message1.text, message1.libs);
                 } else {

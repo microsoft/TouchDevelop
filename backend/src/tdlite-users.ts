@@ -4,30 +4,25 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
-import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
+import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as wordPassword from "./word-password"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteWorkspace from "./tdlite-workspace"
 import * as nodemailer from "./nodemailer"
 import * as sendgrid from "./sendgrid"
 import * as tdliteData from "./tdlite-data"
 import * as audit from "./tdlite-audit"
 import * as search from "./tdlite-search"
-import * as main from "./tdlite"
+import * as tdliteGroups from "./tdlite-groups"
 
 var orFalse = core.orFalse;
 var withDefault = core.withDefault;
@@ -37,7 +32,6 @@ var logger = core.logger;
 var httpCode = core.httpCode;
 
 export var users: indexedStore.Store;
-export var tokensTable: azureTable.Table;
 export var passcodesContainer: cachedStore.Container;
 var emailKeyid: string = "";
 var settingsOptionsJson = tdliteData.settingsOptionsJson;
@@ -45,103 +39,53 @@ var useSendgrid: boolean = false;
 
 
 export class PubUser
-    extends td.JsonRecord
+    extends core.IdObject
 {
-    @json public kind: string = "";
-    @json public id: string = "";
-    @json public url: string = "";
-    @json public name: string = "";
-    @json public haspicture: boolean = false;
-    @json public time: number = 0;
-    @json public about: string = "";
-    @json public features: number = 0;
-    @json public activedays: number = 0;
-    @json public receivedpositivereviews: number = 0;
-    @json public subscribers: number = 0;
-    @json public score: number = 0;
-    @json public isadult: boolean = false;
+    @td.json public name: string = "";
+    @td.json public haspicture: boolean = false;
+    @td.json public time: number = 0;
+    @td.json public about: string = "";
+    @td.json public features: number = 0;
+    @td.json public activedays: number = 0;
+    @td.json public receivedpositivereviews: number = 0;
+    @td.json public subscribers: number = 0;
+    @td.json public score: number = 0;
+    @td.json public isadult: boolean = false;
     static createFromJson(o:JsonObject) { let r = new PubUser(); r.fromJson(o); return r; }
-}
-
-export interface IPubUser {
-    kind: string;
-    id: string;
-    url: string;
-    name: string;
-    haspicture: boolean;
-    time: number;
-    about: string;
-    features: number;
-    activedays: number;
-    receivedpositivereviews: number;
-    subscribers: number;
-    score: number;
-    isadult: boolean;
 }
 
 export class PubUserSettings
     extends td.JsonRecord
 {
-    @json public nickname: string = "";
-    @json public aboutme: string = "";
-    @json public website: string = "";
-    @json public notifications: boolean = false;
-    @json public notifications2: string = "";
-    @json public picturelinkedtofacebook: string = "";
-    @json public picture: string = "";
-    @json public gender: string = "";
-    @json public realname: string = "";
-    @json public yearofbirth: number = 0;
-    @json public location: string = "";
-    @json public culture: string = "";
-    @json public howfound: string = "";
-    @json public programmingknowledge: string = "";
-    @json public occupation: string = "";
-    @json public twitterhandle: string = "";
-    @json public email: string = "";
-    @json public emailverificationsent: boolean = false;
-    @json public emailverified: boolean = false;
-    @json public emailnewsletter2: string = "";
-    @json public emailfrequency: string = "";
-    @json public editorMode: string = "";
-    @json public school: string = "";
-    @json public wallpaper: string = "";
-    @json public permissions: string = "";
-    @json public credit: number = 0;
-    @json public userid: string = "";
-    @json public previousemail: string = "";
+    @td.json public nickname: string = "";
+    @td.json public aboutme: string = "";
+    @td.json public website: string = "";
+    @td.json public notifications: boolean = false;
+    @td.json public notifications2: string = "";
+    @td.json public picturelinkedtofacebook: string = "";
+    @td.json public picture: string = "";
+    @td.json public gender: string = "";
+    @td.json public realname: string = "";
+    @td.json public yearofbirth: number = 0;
+    @td.json public location: string = "";
+    @td.json public culture: string = "";
+    @td.json public howfound: string = "";
+    @td.json public programmingknowledge: string = "";
+    @td.json public occupation: string = "";
+    @td.json public twitterhandle: string = "";
+    @td.json public email: string = "";
+    @td.json public emailverificationsent: boolean = false;
+    @td.json public emailverified: boolean = false;
+    @td.json public emailnewsletter2: string = "";
+    @td.json public emailfrequency: string = "";
+    @td.json public editorMode: string = "";
+    @td.json public school: string = "";
+    @td.json public wallpaper: string = "";
+    @td.json public permissions: string = "";
+    @td.json public credit: number = 0;
+    @td.json public userid: string = "";
+    @td.json public previousemail: string = "";
     static createFromJson(o:JsonObject) { let r = new PubUserSettings(); r.fromJson(o); return r; }
-}
-
-export interface IPubUserSettings {
-    nickname: string;
-    aboutme: string;
-    website: string;
-    notifications: boolean;
-    notifications2: string;
-    picturelinkedtofacebook: string;
-    picture: string;
-    gender: string;
-    realname: string;
-    yearofbirth: number;
-    location: string;
-    culture: string;
-    howfound: string;
-    programmingknowledge: string;
-    occupation: string;
-    twitterhandle: string;
-    email: string;
-    emailverificationsent: boolean;
-    emailverified: boolean;
-    emailnewsletter2: string;
-    emailfrequency: string;
-    editorMode: string;
-    school: string;
-    wallpaper: string;
-    permissions: string;
-    credit: number;
-    userid: string;
-    previousemail: string;
 }
 
 export async function initAsync() : Promise<void>
@@ -152,12 +96,16 @@ export async function initAsync() : Promise<void>
         await sendgrid.initAsync("", "");
     }
 
-    tokensTable = await core.tableClient.createTableIfNotExistsAsync("tokens");
     passcodesContainer = await cachedStore.createContainerAsync("passcodes", {
         noCache: true
     });
 
     users = await indexedStore.createStoreAsync(core.pubsContainer, "user");
+    core.registerPubKind({
+        store: users,
+        deleteWithAuthor: false,
+        importOne: importUserAsync
+    })
     await core.setResolveAsync(users, async (fetchResult: indexedStore.FetchResult, apiRequest: core.ApiRequest) => {
         resolveUsers(fetchResult, apiRequest);
     });
@@ -215,32 +163,7 @@ export async function initAsync() : Promise<void>
             for (let s1 of ["credit", "totalcredit", "lastlogin"]) {
                 jsb[s1] = core.orZero(req2.rootPub[s1]);
             }
-            req2.response = clone(jsb);
-        }
-    });
-    core.addRoute("POST", "logout", "", async (req3: core.ApiRequest) => {
-        if (req3.userid != "") {
-            if (orFalse(req3.body["everywhere"])) {
-                let entities = await tokensTable.createQuery().partitionKeyIs(req3.userid).fetchAllAsync();
-                await parallel.forAsync(entities.length, async (x: number) => {
-                    let json = entities[x];
-                    // TODO: filter out reason=admin?
-                    let token = core.Token.createFromJson(json);
-                    await tokensTable.deleteEntityAsync(token.toJson());
-                    await core.redisClient.setpxAsync("tok:" + tokenString(token), "", 500);
-                });
-            }
-            else {
-                await tokensTable.deleteEntityAsync(req3.userinfo.token.toJson());
-                await core.redisClient.setpxAsync("tok:" + tokenString(req3.userinfo.token), "", 500);
-            }
-            req3.response = ({});
-            req3.headers = {};
-            let s4 = wrapAccessTokenCookie("logout").replace(/Dec 9999/g, "Dec 1971");
-            req3.headers["Set-Cookie"] = s4;
-        }
-        else {
-            req3.status = httpCode._401Unauthorized;
+            req2.response = td.clone(jsb);
         }
     });
     // This is for test users for load testing nd doe **system accounts**
@@ -264,11 +187,11 @@ export async function initAsync() : Promise<void>
             await users.insertAsync(jsb1);
             let pass2 = wordPassword.generate();
             req4.rootId = jsb1["id"];
-            req4.rootPub = clone(jsb1);
+            req4.rootPub = td.clone(jsb1);
             await setPasswordAsync(req4, pass2, "");
-            let jsb3 = clone(await core.resolveOnePubAsync(users, req4.rootPub, req4));
+            let jsb3 = td.clone(await core.resolveOnePubAsync(users, req4.rootPub, req4));
             jsb3["password"] = pass2;
-            req4.response = clone(jsb3);
+            req4.response = td.clone(jsb3);
         }
     });
     core.addRoute("POST", "*user", "addauth", async (req5: core.ApiRequest) => {
@@ -329,39 +252,7 @@ export async function initAsync() : Promise<void>
         let jsb4 = {};
         jsb4["oldrootpass"] = rootPass;
         jsb4["oldotherpass"] = otherPass;
-        req.response = clone(jsb4);
-    });
-    core.addRoute("POST", "*user", "token", async (req7: core.ApiRequest) => {
-        core.checkPermission(req7, "signin-" + req7.rootId);
-        if (req7.status == 200) {
-            let resp = {};
-            let tok = await generateTokenAsync(req7.rootId, "admin", "webapp2");
-            if (tok.cookie) {
-                if (req7.headers == null) {
-                    req7.headers = {};
-                }
-                req7.headers["Set-Cookie"] = wrapAccessTokenCookie(tok.cookie);
-            }
-            else {
-                assert(false, "no cookie in token");
-            }
-            await audit.logAsync(req7, "signin-as", {
-                data: core.sha256(tok.url).substr(0, 10)
-            });
-            resp["token"] = tok.url;
-            req7.response = clone(resp);
-        }
-    });
-    core.addRoute("DELETE", "*user", "", async (req8: core.ApiRequest) => {
-        await core.checkDeletePermissionAsync(req8);
-        // Level4 users cannot be deleted; you first have to downgrade their permissions.
-        if (req8.status == 200 && core.hasPermission(req8.rootPub, "level4")) {
-            req8.status = httpCode._402PaymentRequired;
-        }
-        if (req8.status == 200) {
-            await main.deleteUserAsync(req8);
-            req8.response = ({ "msg": "have a nice life" });
-        }
+        req.response = td.clone(jsb4);
     });
     core.addRoute("GET", "*user", "resetpassword", async (req9: core.ApiRequest) => {
         await core.checkFacilitatorPermissionAsync(req9, req9.rootId);
@@ -369,7 +260,7 @@ export async function initAsync() : Promise<void>
             let jsb2 = {};
             let coll2 = td.range(0, 10).map<string>(elt => wordPassword.generate());
             jsb2["passwords"] = td.arrayToJson(coll2);
-            req9.response = clone(jsb2);
+            req9.response = td.clone(jsb2);
         }
     });
     core.addRoute("POST", "*user", "resetpassword", async (req10: core.ApiRequest) => {
@@ -453,7 +344,7 @@ export async function initAsync() : Promise<void>
                 });
                 coll.push(id);
             });
-            let fetchResult1 = core.somePubStore.singleFetchResult(({}));
+            let fetchResult1 = users.singleFetchResult(({}));
             fetchResult1.items = td.arrayToJson(coll);
             req12.response = fetchResult1.toJson();
         }
@@ -497,7 +388,7 @@ export async function initAsync() : Promise<void>
         }
         if (req4.status == 200) {
             let bld = await search.updateAndUpsertAsync(core.pubsContainer, req4, async (entry: JsonBuilder) => {
-                let sett = await buildSettingsAsync(clone(entry));
+                let sett = await buildSettingsAsync(td.clone(entry));
                 let newEmail = td.toString(req4.body["email"]);
                 if (newEmail != null) {
                     if (updateOwn) {
@@ -519,7 +410,7 @@ export async function initAsync() : Promise<void>
                         entry["emailcode"] = "";
                     }
                 }
-                let settings = clone(sett.toJson());
+                let settings = td.clone(sett.toJson());
                 core.setFields(settings, req4.body, ["aboutme", "culture", "editorMode", "emailfrequency", "emailnewsletter2", 
                     "gender", "howfound", "location", "nickname", "notifications", "notifications2", "occupation", "picture", 
                     "picturelinkedtofacebook", "programmingknowledge", "realname", "school", "twitterhandle", "wallpaper", 
@@ -531,17 +422,17 @@ export async function initAsync() : Promise<void>
                         settings[k] = core.encrypt(val, emailKeyid);
                     }
                 }
-                let value = clone(settings);
+                let value = td.clone(settings);
                 entry["settings"] = value;
                 sett = PubUserSettings.createFromJson(value);
                 sett.nickname = sett.nickname.substr(0, 25);
                 entry["pub"]["name"] = sett.nickname;
                 entry["pub"]["about"] = sett.aboutme;
-                req4.response = clone(settings);
+                req4.response = td.clone(settings);
             });
             await audit.logAsync(req4, logcat, {
                 oldvalue: req4.rootPub,
-                newvalue: clone(bld)
+                newvalue: td.clone(bld)
             });
         }
     });
@@ -555,11 +446,18 @@ export async function initAsync() : Promise<void>
             if (req5.userid != req5.rootId) {
                 await audit.logAsync(req5, "view-settings");
             }
-            let jsb = clone((await buildSettingsAsync(req5.rootPub)).toJson());
+            let jsb = td.clone((await buildSettingsAsync(req5.rootPub)).toJson());
             if (orEmpty(req5.queryOptions["format"]) != "short") {
                 core.copyJson(settingsOptionsJson, jsb);
             }
-            req5.response = clone(jsb);
+            req5.response = td.clone(jsb);
+        }
+    });
+
+    core.addRoute("POST", "*user", "progress", async (req: core.ApiRequest) => {
+        core.meOnly(req);
+        if (req.status == 200) {
+            req.response = ({});
         }
     });
 }
@@ -593,14 +491,14 @@ async function buildSettingsAsync(userJson: JsonObject) : Promise<PubUserSetting
     user.fromJson(userJson["pub"]);
     let js = userJson["settings"];
     if (js != null) {
-        let jsb = clone(js);
+        let jsb = td.clone(js);
         for (let kk of Object.keys(jsb)) {
             let vv = jsb[kk];
             if (td.startsWith(orEmpty(vv), "EnC$")) {
                 jsb[kk] = core.decrypt(vv);
             }
         }
-        settings.fromJson(clone(jsb));
+        settings.fromJson(td.clone(jsb));
     }
     settings.userid = userJson["id"];
     settings.nickname = user.name;
@@ -626,46 +524,6 @@ export interface IRedirectAndCookie
 {
     url:string;
     cookie:string;
-}
-
-export async function generateTokenAsync(user: string, reason: string, client_id: string) : Promise<IRedirectAndCookie>
-{
-    let token = new core.Token();
-    token.PartitionKey = user;
-    token.RowKey = azureBlobStorage.createRandomId(32);
-    token.time = await core.nowSecondsAsync();
-    token.reason = reason;
-    token.version = 2;
-    if (orEmpty(client_id) != "no-cookie") {
-        token.cookie = azureBlobStorage.createRandomId(32);
-    }
-    await core.pubsContainer.updateAsync(user, async (entry: JsonBuilder) => {
-        entry["lastlogin"] = await core.nowSecondsAsync();
-    });
-    await tokensTable.insertEntityAsync(token.toJson(), "or merge");
-    return {
-        url: tokenString(token),
-        cookie: token.cookie
-    }
-}
-
-export function tokenString(token: core.Token) : string
-{
-    let customToken: string;
-    customToken = "0" + token.PartitionKey + "." + token.RowKey;
-    return customToken;
-}
-
-export function wrapAccessTokenCookie(cookie: string): string 
-{
-    let value = "TD_ACCESS_TOKEN2=" + cookie + "; ";
-    if (core.hasHttps)
-        value += "Secure; "
-    value += "HttpOnly; Path=/; "
-    if (!/localhost:/.test(core.self))
-        value += "Domain=" + core.self.replace(/\/$/g, "").replace(/.*\//g, "").replace(/:\d+$/, "") + "; "
-    value += "Expires=Fri, 31 Dec 9999 23:59:59 GMT";
-    return value;
 }
 
 async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: string) : Promise<void>
@@ -702,7 +560,7 @@ async function setPasswordAsync(req: core.ApiRequest, pass: string, prevPass: st
     }
 }
 
-export async function sendPermissionNotificationAsync(req: core.ApiRequest, r: JsonBuilder) : Promise<void>
+async function sendPermissionNotificationAsync(req: core.ApiRequest, r: JsonBuilder) : Promise<void>
 {
     if (core.isAlarming(r["permissions"])) {
         await core.refreshSettingsAsync();
@@ -724,7 +582,7 @@ export async function sendPermissionNotificationAsync(req: core.ApiRequest, r: J
     }
 }
 
-export async function importUserAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
+async function importUserAsync(req: core.ApiRequest, body: JsonObject) : Promise<void>
 {
     let user = new PubUser();
     user.fromJson(body);
@@ -786,7 +644,7 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
     await core.pubsContainer.updateAsync(userid, async (entry: JsonBuilder) => {
         core.jsonAdd(entry, "credit", credit);
         core.jsonAdd(entry, "totalcredit", credit);
-        if ( ! core.hasPermission(clone(entry), perm)) {
+        if ( ! core.hasPermission(td.clone(entry), perm)) {
             let existing = core.normalizePermissions(orEmpty(entry["permissions"]));
             entry["permissions"] = existing + "," + perm;
         }
@@ -809,10 +667,32 @@ export async function applyCodeAsync(userjson: JsonObject, codeObj: JsonObject, 
         if (grpid != "") {
             let grp = await core.getPubAsync(grpid, "group");
             if (grp != null) {
-                await main.addUserToGroupAsync(userid, grp, auditReq);
+                await tdliteGroups.addUserToGroupAsync(userid, grp, auditReq);
             }
         }
     }
 }
 
+export async function handleEmailVerificationAsync(req: restify.Request, res: restify.Response) : Promise<void>
+{
+    let coll = (/^\/verify\/([a-z]+)\/([a-z]+)/.exec(req.url()) || []);
+    let userJs = await core.getPubAsync(coll[1], "user");
+    let msg = "";
+    if (userJs == null) {
+        msg = "Cannot verify email - no such user.";
+    }
+    else if (orEmpty(userJs["emailcode"]) != coll[2]) {
+        msg = "Cannot verify email - invalid or expired code.";
+    }
+    else {
+        msg = "Thank you, your email was updated.";
+        await core.pubsContainer.updateAsync(userJs["id"], async (entry: JsonBuilder) => {
+            let jsb = entry["settings"];
+            jsb["emailverified"] = true;
+            jsb["previousemail"] = "";
+            entry["emailcode"] = "";
+        });
+    }
+    res.sendText(msg, "text/plain");
+}
 

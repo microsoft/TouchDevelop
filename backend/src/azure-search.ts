@@ -8,8 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var json = td.json;
-var clone = td.clone;
 
 
 var apiKey: string = "";
@@ -78,7 +76,7 @@ export class BatchUpdate
         let url = "/indexes/" + this.indexName + "/docs/index?api-version=" + apiVersion;
         let request = createRequest(url);
         request.setMethod("post");
-        request.setContentAsJson(clone(this.root));
+        request.setContentAsJson(td.clone(this.root));
         let response = await sendRequestAsync(request);
         let js = response.contentAsJson();
         statusCode = response.statusCode();
@@ -154,7 +152,7 @@ export class IndexDefinition
         log("creating index " + this.indexName);
         log(JSON.stringify(this.indexBuilder()));
         let request = createRequest("/indexes/" + encodeURIComponent(this.indexName) + "?api-version=" + apiVersion);
-        request.setContentAsJson(clone(this.indexBuilder()));
+        request.setContentAsJson(td.clone(this.indexBuilder()));
         request.setMethod("put");
         request.setHeader("Prefer", "return=representation");
         let response = await sendRequestAsync(request);

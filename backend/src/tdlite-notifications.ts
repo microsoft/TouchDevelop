@@ -4,26 +4,19 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
 import * as azureTable from "./azure-table"
-import * as azureBlobStorage from "./azure-blob-storage"
 import * as parallel from "./parallel"
-import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
-import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteUsers from "./tdlite-users"
+import * as tdliteGroups from "./tdlite-groups"
 
-import * as main from "./tdlite"
 
 var orEmpty = td.orEmpty;
 var logger = core.logger;
@@ -32,63 +25,19 @@ var subscriptions: indexedStore.Store;
 var notificationsTable: azureTable.Table;
 
 export class PubSubscription
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public userid: string = "";
-    @json public username: string = "";
-    @json public userscore: number = 0;
-    @json public userhaspicture: boolean = false;
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
     static createFromJson(o:JsonObject) { let r = new PubSubscription(); r.fromJson(o); return r; }
 }
 
-export interface IPubSubscription {
-    kind: string;
-    time: number;
-    id: string;
-    userid: string;
-    username: string;
-    userscore: number;
-    userhaspicture: boolean;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-}
-
 export class PubNotification
-    extends td.JsonRecord
+    extends core.PubOnPub
 {
-    @json public kind: string = "";
-    @json public time: number = 0;
-    @json public id: string = "";
-    @json public notificationkind: string = "";
-    @json public userid: string = "";
-    @json public publicationid: string = "";
-    @json public publicationname: string = "";
-    @json public publicationkind: string = "";
-    @json public supplementalid: string = "";
-    @json public supplementalkind: string = "";
-    @json public supplementalname: string = "";
+    @td.json public notificationkind: string = "";
+    @td.json public supplementalid: string = "";
+    @td.json public supplementalkind: string = "";
+    @td.json public supplementalname: string = "";
     static createFromJson(o:JsonObject) { let r = new PubNotification(); r.fromJson(o); return r; }
-}
-
-export interface IPubNotification {
-    kind: string;
-    time: number;
-    id: string;
-    notificationkind: string;
-    userid: string;
-    publicationid: string;
-    publicationname: string;
-    publicationkind: string;
-    supplementalid: string;
-    supplementalkind: string;
-    supplementalname: string;
 }
 
 export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind: string) : Promise<void>
@@ -105,8 +54,8 @@ export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind
         for (let sub of await subscriptions.getIndex("publicationid").fetchAllAsync(userid)) {
             toNotify[sub["pub"]["userid"]] = "subscribed";
         }
-        for (let grJson of await main.getUser_sGroupsAsync(userid)) {
-            let gr = main.PubGroup.createFromJson(grJson["pub"]);
+        for (let grJson of await tdliteGroups.getUser_sGroupsAsync(userid)) {
+            let gr = tdliteGroups.PubGroup.createFromJson(grJson["pub"]);
             if (gr.isclass && gr.userid != userid) {
                 toNotify[gr.userid] = "class";
             }
@@ -152,16 +101,16 @@ export async function storeAsync(req: core.ApiRequest, jsb: JsonBuilder, subkind
         }
         notification.userid = userid;
 
-        let jsb2 = clone(notification.toJson());
+        let jsb2 = td.clone(notification.toJson());
         jsb2["RowKey"] = notification.id;
 
         let ids = Object.keys(toNotify);
         await parallel.forAsync(ids.length, async (x: number) => {
             let id = ids[x];
-            let jsb3 = clone(jsb2);
+            let jsb3 = td.clone(jsb2);
             jsb3["PartitionKey"] = id;
             jsb3["notificationkind"] = toNotify[id];
-            await notificationsTable.insertEntityAsync(clone(jsb3), "or merge");
+            await notificationsTable.insertEntityAsync(td.clone(jsb3), "or merge");
             if (id != "all") {
                 await core.pubsContainer.updateAsync(id, async (entry: JsonBuilder) => {
                     let num = core.orZero(entry["notifications"]);
@@ -237,7 +186,7 @@ export async function initAsync() : Promise<void>
                 entry["lastNotificationId"] = topNot;
                 entry["notifications"] = 0;
             });
-            req6.response = clone(resp);
+            req6.response = td.clone(resp);
         }
     });
 }
@@ -326,10 +275,10 @@ export async function sendAsync(about: JsonObject, notkind: string, suplemental:
         notification.supplementalname = suplemental["pub"]["name"];
     }
     let target = notification.userid;
-    let jsb2 = clone(notification.toJson());
+    let jsb2 = td.clone(notification.toJson());
     jsb2["PartitionKey"] = target;
     jsb2["RowKey"] = notification.id;
-    await notificationsTable.insertEntityAsync(clone(jsb2), "or merge");
+    await notificationsTable.insertEntityAsync(td.clone(jsb2), "or merge");
     await core.pubsContainer.updateAsync(target, async (entry: JsonBuilder) => {
         core.jsonAdd(entry, "notifications", 1);
     });

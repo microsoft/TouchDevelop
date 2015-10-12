@@ -343,11 +343,12 @@ export function asArray(o:JsonObject) : JsonObject[]
     return <any>o;
 }
 
-export function json(className : any, fieldName : string) {
+export function json(className: any, fieldName: string) {
     var t = (<any>Reflect).getMetadata("design:type", className, fieldName);
-    if (!className.__fields)
-        className.__fields = []
-    var e:any = { name: fieldName }
+    if (!className.hasOwnProperty("__fields")) {
+        className.__fields = (className.__fields || []).slice(0)
+    }
+    var e: any = { name: fieldName }
     switch (t.name) {
     case "String":
         e.toJson = v => toString(v);
@@ -361,21 +362,19 @@ export function json(className : any, fieldName : string) {
         e.toJson = v => toBoolean(v);
         e.fromJson = v => toBoolean(v);
         break;
-    default:
+    case "Array":
+    case "Object":
         e.toJson = v => v;
         e.fromJson = v => v;
+        break;
+    default:
+        throw new Error("Type " + t.name + " not supported for @td.json")
+        e.toJson = v => v;
+        e.fromJson = v => v;
+        break;    
     }
 
     className.__fields.push(e)
-
-    //className.foobar = 42;
-    //className.constructor.baz = 412;
-    //console.log(className.createFromJson)
-    //console.log(className)
-    //console.log(fieldName)
-    //console.log(t)
-    //console.log(t.name)
-    // t.name
 }
 
 export class JsonRecord

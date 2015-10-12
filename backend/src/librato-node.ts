@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 
 var logger: td.AppLogger;
@@ -159,13 +158,13 @@ async function handleAggregateAsync() : Promise<void>
                     attr["summarize_function"] = "average";
                     curr["period"] = Math.round(options.period / 1000);
                     let request3 = createReq(name0);
-                    request3.setContentAsJson(clone(curr));
+                    request3.setContentAsJson(td.clone(curr));
                     request3.setMethod("put");
                     let response2 = await request3.sendAsync();
                     logger.debug("set attr: " + response2);
                     if (response2.statusCode() != 204) {
                         logger.warning("resp: " + response2.content());
-                        logger.debug("put: " + JSON.stringify(clone(curr), null, 2));
+                        logger.debug("put: " + JSON.stringify(td.clone(curr), null, 2));
                     }
                 }
             }

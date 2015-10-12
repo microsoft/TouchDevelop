@@ -4,36 +4,27 @@
 
 import * as td from './td';
 import * as assert from 'assert';
-import * as crypto from 'crypto';
 
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
 var asArray = td.asArray;
-var json = td.json;
-var clone = td.clone;
 
-import * as azureTable from "./azure-table"
 import * as azureSearch from "./azure-search"
-import * as azureBlobStorage from "./azure-blob-storage"
-import * as parallel from "./parallel"
 import * as acs from "./acs"
-import * as restify from "./restify"
 import * as cachedStore from "./cached-store"
 import * as indexedStore from "./indexed-store"
 import * as core from "./tdlite-core"
 import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
-import * as tdliteUsers from "./tdlite-users"
-import * as tdliteArt from "./tdlite-art"
+import * as tdliteAbuse from "./tdlite-abuse"
 
-import * as main from "./tdlite"
 
 var orEmpty = td.orEmpty;
 var logger = core.logger;
 var httpCode = core.httpCode;
 
-var disableSearch: boolean = false;
+export var disableSearch: boolean = false;
 var acsCallbackToken: string = "";
 var acsCallbackUrl: string = "";
 
@@ -47,7 +38,7 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     if (disableSearch) {
         options_.skipSearch = true;
     }
-    if (acsCallbackUrl == "" || ! main.canHaveAbuseReport(obj["kind"])) {
+    if (acsCallbackUrl == "" || ! tdliteAbuse.canHaveAbuseReport(obj["kind"])) {
         options_.skipScan = true;
     }
     if (options_.skipScan && options_.skipSearch) {
@@ -56,13 +47,13 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
     logger.debug("inserting pub into search: " + obj["id"]);
 
     let store = indexedStore.storeByKind(obj["kind"]);
-    let fetchResult = store.singleFetchResult(clone(obj));
+    let fetchResult = store.singleFetchResult(td.clone(obj));
     await core.resolveAsync(store, fetchResult, core.adminRequest);
     let pub = fetchResult.items[0];
     let body = orEmpty(core.withDefault(pub["text"], obj["text"]));
     
     if (body == "" && store.kind == "script") {
-        let entry2 = await tdliteScripts.scriptText.getAsync(pub["id"]);
+        let entry2 = await tdliteScripts.getScriptTextAsync(pub["id"]);
         if (entry2 != null) {
             body = entry2["text"];
         }
@@ -107,6 +98,7 @@ export async function updateAndUpsertAsync(container: cachedStore.Container, req
 export async function initAsync() : Promise<void>
 {
     disableSearch = orEmpty(td.serverSetting("DISABLE_SEARCH", true)) == "true";
+    core.executeSearchAsync = executeSearchAsync;
 
     await initAcsAsync();
 
@@ -126,22 +118,6 @@ export async function initAsync() : Promise<void>
         if (req1.status == 200) {
             // /* async */ tdliteIndex.indexDocsAsync();
             req1.response = ({});
-        }
-    });
-    core.addRoute("POST", "art", "reindex", async (req2: core.ApiRequest) => {
-        core.checkPermission(req2, "operator");
-        if (req2.status == 200) {
-            await tdliteIndex.clearArtIndexAsync();
-            /* async */ tdliteArt.arts.getIndex("all").forAllBatchedAsync("all", 100, async (json: JsonObject[]) => {
-                let batch = tdliteIndex.createArtUpdate();
-                for (let js of await core.addUsernameEtcCoreAsync(json)) {
-                    let pub = tdliteArt.PubArt.createFromJson(clone(js["pub"]));
-                    searchIndexArt(pub).upsertArt(batch);
-                }
-                let statusCode = await batch.sendAsync();
-                logger.debug("reindex art, status: " + statusCode);
-            });
-            req2.status = httpCode._201Created;
         }
     });
     
@@ -197,7 +173,7 @@ async function reindexEntriesAsync(store: indexedStore.Store, json: JsonObject[]
         })        
         let coll = fetchResult.items.map<string>(elt => orEmpty(elt[fieldname])).filter(elt1 => elt1 != "");
         let bodies = {};
-        let entries = await tdliteScripts.scriptText.getManyAsync(coll);
+        let entries = await tdliteScripts.getScriptTextsAsync(coll);
         for (let js2 of entries) {
             if (js2.hasOwnProperty("id")) {
                 bodies[js2["id"]] = js2["text"];
@@ -285,44 +261,6 @@ export async function executeSearchAsync(kind: string, q: string, req: core.ApiR
     core.buildListResponse(fetchResult2, req);
 }
 
-function searchIndexArt(pub: tdliteArt.PubArt) : tdliteIndex.ArtEntry
-{
-    let entry: tdliteIndex.ArtEntry;
-    let tp = "picture";
-    if (! pub.pictureurl) {
-        tp = "sound";
-    }
-    let spr = false;
-    if (pub.flags != null) {
-        spr = pub.flags.indexOf("transparent") >= 0;
-    }
-    entry = tdliteIndex.createArtEntry(pub.id, {
-        name: pub.name,
-        description: pub.description,
-        type: tp,
-        userid: pub.userid,
-        username: pub.username,
-        sprite: spr
-    });
-    return entry;
-}
-
-export async function upsertArtAsync(obj: JsonBuilder) : Promise<void>
-{
-    if (disableSearch) {
-        return;
-    }
-    let batch = tdliteIndex.createArtUpdate();
-    let coll2 = await core.addUsernameEtcCoreAsync(tdliteArt.arts.singleFetchResult(clone(obj)).items);
-    let pub = tdliteArt.PubArt.createFromJson(clone(coll2[0]["pub"]));
-    searchIndexArt(pub).upsertArt(batch);
-    /* async */ batch.sendAsync();
-
-    await scanAndSearchAsync(obj, {
-        skipScan: true
-    });
-}
-
 async function initAcsAsync() : Promise<void>
 {
     if (false && core.hasSetting("ACS_PASSWORD")) {
@@ -357,9 +295,9 @@ async function initAcsAsync() : Promise<void>
                             if (core.isGoodEntry(req.rootPub)) {
                                 let jsb = {};
                                 jsb["text"] = "ACS flagged, policy codes " + JSON.stringify(stat["PolicyCodes"]);
-                                req.body = clone(jsb);
+                                req.body = td.clone(jsb);
                                 req.rootId = pubid;
-                                await main.postAbusereportAsync(req);
+                                await tdliteAbuse.postAbusereportAsync(req);
                             }
                         }
                     }

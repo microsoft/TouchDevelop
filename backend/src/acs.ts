@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 var _username: string = "";
 var _password: string = "";
@@ -93,7 +92,7 @@ function createRequest(path: string, payload: JsonBuilder) : td.WebRequest
     request.setHeader("OrgId", _orgId);
     request.setHeader("Host", "coreservice.centralvalidation.com");
     request.setMethod("post");
-    request.setContentAsJson(clone(payload));
+    request.setContentAsJson(td.clone(payload));
     request.setHeader("Accept", "application/json");
     return request;
 }

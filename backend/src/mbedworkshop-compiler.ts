@@ -8,7 +8,6 @@ import * as assert from 'assert';
 type JsonObject = td.JsonObject;
 type JsonBuilder = td.JsonBuilder;
 
-var clone = td.clone;
 
 var logger: td.AppLogger;
 var options: IOptions;
@@ -49,7 +48,7 @@ export class CompilationRequest
             repl[fn] = new Buffer(this.replaceFiles[fn], "utf8").toString("base64");
         }
         let req = td.createRequest(url);
-        let payload = clone(jsb);
+        let payload = td.clone(jsb);
         req.setContentAsJson(payload);
         logger.debug(JSON.stringify(payload, null, 2));
         req.setMethod("post");
