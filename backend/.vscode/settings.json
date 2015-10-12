@@ -1,5 +1,6 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	// Specifies the folder path containing the tsserver and lib*.d.ts files to use.
-	"typescript.tsdk": "c:/dev/touchdevelop/backend/node_modules/typescript/lib"
+	// No longer needed for VS Code 0.9.1+
+	// "typescript.tsdk": "c:/dev/touchdevelop/backend/node_modules/typescript/lib"
 }
