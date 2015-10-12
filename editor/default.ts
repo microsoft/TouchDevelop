@@ -226,7 +226,14 @@ module TDev
         if (/withTracing/.test(url)) withTracing = true;
         if (/enableUndo/.test(url)) TDev.Collab.enableUndo = true;
         if (/nohub/.test(url) || Cloud.isRestricted()) { TDev.noHub = true; TDev.hubHash = "list:installed-scripts"; }
-        if (/(usegcc|bitvm)=1/.test(url)) Cloud.useEmbeddedGcc = true;
+
+        if (/bitvm=0/.test(url)) {
+            Cloud.useEmbeddedGcc = false;
+            Cloud.useNativeCompilation = true;
+        }
+        if (/usegcc=1/.test(url)) {
+            Cloud.useEmbeddedGcc = true;
+        }
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
         if (/lfDebug/.test(url)) Util.translationDebug = true;

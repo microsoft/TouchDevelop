@@ -2156,9 +2156,14 @@ module TDev
             });
         }
 
+        public useNativeCompilation()
+        {
+            return Cloud.useNativeCompilation || (Script && /#c\+\+/i.test(Script.getDescription()))
+        }
+
         private currentScriptCompiling: string;
         public compile(btn: HTMLElement, debug: boolean) {
-            if (!Cloud.bitvm() && Cloud.anonMode(lf("C++ compilation"))) {
+            if (this.useNativeCompilation() && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2168,10 +2173,10 @@ module TDev
                 return;
             }
 
-            if (Cloud.bitvm())
-                this.bytecodeCompileWithUi(Script, debug);
-            else
+            if (this.useNativeCompilation())
                 this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
+            else
+                this.bytecodeCompileWithUi(Script, debug);
         }
 
         public setupPlayButton()

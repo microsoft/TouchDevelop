@@ -4,11 +4,9 @@ module TDev.Cloud {
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
     var microbitGitTag = "v5";
-    export function bitvm(): boolean {
-       return !!/bitvm=1/.test(document.location.href);
-    }
 
-    export var useEmbeddedGcc = false;
+    export var useEmbeddedGcc = true;
+    export var useNativeCompilation = false;
 
     export interface EditorWidgets {
         // edit
