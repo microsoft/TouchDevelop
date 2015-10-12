@@ -7,8 +7,8 @@ meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // A #microbit game library.
-#jQ4IQuvOFlO30X8o meta import micro\u003abit {
-  pub "xqypse"
+#Bxq3veJYtQclVJkg meta import micro\u003abit {
+  pub "vlwuan"
   usage {
     type Image
     action `sync` \_libinit()
@@ -37,7 +37,7 @@ meta parentIds "";
     action `async` show_number(value: Number, interval: Number)
     action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
     action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
     action `sync` in_background(body: Action)
     action `async` calibrate()
     action `sync` forever(body: Action)
@@ -47,10 +47,16 @@ meta parentIds "";
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `async` plot_image(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `sync` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String)
   }
 }
 #GSTBzUmgzKqh572M
@@ -175,7 +181,7 @@ action game_over() {
       #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
         #qN0fKrhol7iI1zpn basic[lib micro\u003abit] →clear_screen;
         #puFgaW4Ecm7oLMUb basic[lib micro\u003abit] →pause(150);
-        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →plot_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →show_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
         #hEC9RO8x3BjNU7ZD basic[lib micro\u003abit] →pause(150);
       }
       #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);

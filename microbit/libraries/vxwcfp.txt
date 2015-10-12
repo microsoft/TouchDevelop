@@ -971,6 +971,7 @@ action clear(#TcdNAKsIbu986dqh img: * Image) {
   #K4ZFXN4ytxFTfH2s for 0 ≤ i < $img→leds→count do {
     #kA4W7IWpYB4o2624 $img→leds→set_at($i, 0);
   }
+  meta sync;
 }
 #xq3rVK5p1wAVqxhU
 var button_a\u002bb : Sprite {
@@ -1428,7 +1429,7 @@ action test_multi_scroll() {
   }
   #dH24BpCdIjxC0udR code→on_button_pressed("B");
   #xGRNMYqr5Oobo6Iv where `implicit` \_body\_() {
-    #xdthtZf2mEoAmQO3 code→plot_image("0 0 0 0 0\n0 1 1 1 0\n0 1 0 1 0\n0 1 1 1 0\n0 0 0 0 0");
+    #xdthtZf2mEoAmQO3 code→show_leds("0 0 0 0 0\n0 1 1 1 0\n0 1 0 1 0\n0 1 1 1 0\n0 0 0 0 0");
   }
   meta private;
   meta test;
@@ -1809,17 +1810,16 @@ action on_event(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callback: Action
   meta private;
 }
 #onoJvm2kWsEKngil
-action plot_image(#ernyV6gPgL4qDGoq leds: String) {
-  #rBvxZoWlXqe4OGJu // Shows an image on the LED screen.
+action plot_image(#ernyV6gPgL4qDGoq @this: * Image, #WFoT4dBWCh1ithfE x_offset: Number) {
+  #rBvxZoWlXqe4OGJu // Plots an image on the LED screen at a given horizontal offset.
   #tDblt41VcVbCsUSo // {help:functions/plot-image}
-  #s8YV3gi5HVFr3xIo // {weight:95}
+  #s8YV3gi5HVFr3xIo // {weight:0}
   #xEmIyabRwSkr6RM8 // {namespace:basic}
   #x4ytGwZranX41qtX // {language:leds:bitframe}
   #xrkeEg0XKHn2gsPg // {shim:micro_bit::plotImage}
-  #QG4WQ2IObQEhJUPA $img := code→parse_image($leds);
   #ojT1o4w2BY2UWgbC $anim_id := data→current_animation + 1;
   #xUoVRkjvbkwKlNdl data→current_animation := $anim_id;
-  #fhaDUozS8M02z1k0 code→render_image($img, 0);
+  #fhaDUozS8M02z1k0 code→render_image($@this, $x_offset);
   meta sync;
 }
 #xPty4Z96gEpPmXcC
@@ -2065,7 +2065,7 @@ action test_show_number() {
 action test_plot_image() {
   #uv2qjBz92QKG6jb4 // {shim:}
   #xWC0vpIb0g6zkauY code→\_libinit;
-  #HAPp3WJOXLG3Hd5l code→plot_image("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
+  #HAPp3WJOXLG3Hd5l code→show_leds("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
   #kBUen1jy0k4wINSh code→pause(1000);
   #xFXsetNa4Qhcgcja $img := code→create_image("0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 0 0 0 0\n0 1 1 1 0 0 0 1 0 0\n0 0 1 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0");
   #x7RQ0L8v7jnJDs4P $img→plot_frame(1);
@@ -2132,6 +2132,7 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
     #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
     #xk1nhHhK4p6I76aX `return` ;
   }
+  meta sync;
 }
 #KgNK732SuRLWRKOO
 var pitch_pin : String {
@@ -2162,4 +2163,17 @@ action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Num
   #wQpnycOYR16SMb15 // {namespace:image}
   #OFsNMj5vqD4C4rm4 // {weight:65}
   #uM7fnoqbHXxpqA12 $@this→show_image(5 * $index);
+}
+#x07I9YOUT6XAu5Ky
+action show_leds(#Agy1tNVQeIcg2pFD leds: String) {
+  #a1ZU6jET0rFURbW6 // Shows an image on the LED screen and pauses for 400 milliseconds.
+  #rah4E4gr6b4ZXnki // {help:functions/show-leds}
+  #q2YahTUs7lFN2x05 // {weight:95}
+  #x8YEphMMwGJeCtZ4 // {namespace:basic}
+  #M7D8GVVyvj4k5vxo // {language:leds:bitframe}
+  #WkpvN4lkB72SdNex // {shim:micro_bit::showLeds}
+  #xxOvJbn2Cq3yEODu $img := code→parse_image($leds);
+  #PxGM08x89BhHv061 $anim_id := data→current_animation + 1;
+  #HV3laxnE0UPmy2xE data→current_animation := $anim_id;
+  #mCtsVb9IzQqrk427 code→render_image($img, 0);
 }
