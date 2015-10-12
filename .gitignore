@@ -19,6 +19,8 @@ microbit/flasher/Microbit.Flasher/bin
 microbit/flasher/Microbit.Flasher/obj
 microbit/loader/Microbit.Loader/bin
 microbit/loader/Microbit.Loader/obj
+microbit/loader/Microbit.Uploader/bin
+microbit/loader/Microbit.Uploader/obj
 backend/built
 
 # visual studio
