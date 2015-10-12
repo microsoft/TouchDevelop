@@ -216,7 +216,7 @@ module TDev {
       // (which maps a string literal to a constant). This function transforms
       // the arguments for some known specific C++ functions.
       private specialTreatment(e: H.Env, f: string, actualArgs: J.JExpr[]) {
-        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation" || f == "micro_bit::plotImage") {
+        if (f == "micro_bit::createImage" || f == "micro_bit::showAnimation" || f == "micro_bit::showLeds") {
           var x = H.isStringLiteral(actualArgs[0]);
           if (x === "")
             x = "0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n";
