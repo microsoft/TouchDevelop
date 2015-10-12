@@ -26,7 +26,7 @@ namespace Microsoft.MicroBit
         public MainWindow()
         {
             InitializeComponent();
-            this.DeleteOnFlash = true;
+            this.DeleteOnUpload = true;
             this.VersionInfo = "v" + typeof(MainWindow).Assembly.GetName().Version.ToString();
             this.updateStatus("uploading...");
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
@@ -85,11 +85,11 @@ namespace Microsoft.MicroBit
             set { SetValue(StatusProperty, value); }
         }
 
-        public static readonly DependencyProperty DeleteOnFlashProperty = DependencyProperty.Register("DeleteOnFlash", typeof(bool?), typeof(MainWindow));
-        public bool DeleteOnFlash
+        public static readonly DependencyProperty DeleteOnUploadProperty = DependencyProperty.Register("DeleteOnUpload", typeof(bool?), typeof(MainWindow));
+        public bool DeleteOnUpload
         {
-            get { return (bool)GetValue(DeleteOnFlashProperty); }
-            set { SetValue(DeleteOnFlashProperty, value); }
+            get { return (bool)GetValue(DeleteOnUploadProperty); }
+            set { SetValue(DeleteOnUploadProperty, value); }
         }
 
         static string getVolumeLabel(DriveInfo di)
@@ -136,7 +136,7 @@ namespace Microsoft.MicroBit
                 File.Copy(info.FullName, trg, true);
                 this.updateStatus("uploading done");
 
-                var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnFlash));
+                var del = (bool)Dispatcher.Invoke((Func<Boolean>)(() => this.DeleteOnUpload));
                 if (del)
                 {
                     File.Delete(info.FullName);
