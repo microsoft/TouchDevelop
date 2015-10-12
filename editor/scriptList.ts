@@ -999,17 +999,7 @@
                     World.syncAsync(true, undefined, false,
                         () => {
                             Cloud.isOnlineWithPingAsync()
-                                .then((isOnline: boolean) => {
-                                    if (isOnline) {
-                                        HTML.showProgressNotification(lf("sign in expired - refreshing..."));
-                                        Login.show();
-                                    }
-                                    else {
-                                        tick(Ticks.offlineLoginSync);
-                                        var message = lf("cannot sync - you appear to be offline");
-                                        HTML.showProgressNotification(message);
-                                    }
-                                });
+                                .done((isOnline: boolean) => Cloud.showSigninNotification(isOnline));
                         },
                         (seconds) => {
                             var delta = "";
@@ -1036,7 +1026,7 @@
                                 msg = "Adjust it " + delta + ".";
                             }
                             Ticker.tick(Ticks.hubWrongTime);
-                            HTML.showWarningNotification(lf("can't sync! fix the time on your device"), msg);
+                            HTML.showWarningNotification(lf("can't sync! fix the time on your device"), { details: msg });
                         },
                         () => {
                             if (!canAsk(true)) return;

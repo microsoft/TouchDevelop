@@ -994,6 +994,11 @@ div.wall-box-tile>div.wall-box
   border-radius: 0.2em;
 }
 
+.warningNotification a {
+  color:white;
+  font-weight: bold;
+}
+
 .warningNotification .frownie {
     font-size: 1.5em;
     display:inline-block;

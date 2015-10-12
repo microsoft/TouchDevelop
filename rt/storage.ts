@@ -31,9 +31,9 @@ module TDev {
         export function showTemporaryWarning() {
             if (temporary) {
                 if (Cloud.isAccessTokenExpired())
-                    HTML.showWarningNotification(lf("Web site data not available, sign in to back up your scripts!"), lf("Your browser does not allow TouchDevelop to store data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage. Sign in or change your browser settings to avoid loosing your work. All the changes not saved to the cloud will be lost when leaving this page."));
+                    HTML.showWarningNotification(lf("Web site data not available, sign in to back up your scripts!"), { details: lf("Your browser does not allow TouchDevelop to store data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage. Sign in or change your browser settings to avoid loosing your work. All the changes not saved to the cloud will be lost when leaving this page.") });
                 else if (Cloud.isOffline())
-                    HTML.showWarningNotification(lf("Web site data not available, connect to internet to back up your scripts!"), lf("Your browser does not allow TouchDevelop to store data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage. Sign in or change your browser settings to avoid loosing your work. All the changes not saved to the cloud will be lost when leaving this page."));
+                    HTML.showWarningNotification(lf("Web site data not available, connect to internet to back up your scripts!"), { details: lf("Your browser does not allow TouchDevelop to store data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage. Sign in or change your browser settings to avoid loosing your work. All the changes not saved to the cloud will be lost when leaving this page.") });
                 return true;
             } else {
                 return false;
