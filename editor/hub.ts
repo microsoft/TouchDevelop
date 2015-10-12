@@ -99,6 +99,7 @@ module TDev.Browser {
                 wallStop: true,
                 scriptConvertToDocs: true,
                 nextTutorialsList: true,
+                codeSearch: true,
                 // section
                 dataSection: true,
                 eventsSection: true,
