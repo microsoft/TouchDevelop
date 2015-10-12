@@ -1402,7 +1402,10 @@ export async function lateInitAsync()
     azureBlobStorage.init();
     blobService = azureBlobStorage.createBlobService();
     redisClient = await redis.createClientAsync("", 0, "");
+}
 
+export async function initFinalAsync()
+{
     currClientConfig = new ClientConfig();
     currClientConfig.searchApiKey = td.serverSetting("AZURE_SEARCH_CLIENT_KEY", false);
     currClientConfig.searchUrl = "https://" + td.serverSetting("AZURE_SEARCH_SERVICE_NAME", false) + ".search.windows.net";
@@ -1422,10 +1425,6 @@ export async function lateInitAsync()
         req.response = currClientConfig.toJson();
     });
 
-}
-
-export async function initFinalAsync()
-{
     emptyRequest = buildApiRequest("/api");
     adminRequest = buildApiRequest("/api");
     adminRequest.userinfo.json = ({ "groups": {} });

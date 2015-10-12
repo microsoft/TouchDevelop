@@ -105,6 +105,8 @@ export async function initAsync() : Promise<void>
     azureSearch.init({
         allow_409: true
     });
+    
+    await tdliteIndex.initAsync();
 
     core.addRoute("GET", "search", "", async (req: core.ApiRequest) => {
         // this may be a bit too much to ask

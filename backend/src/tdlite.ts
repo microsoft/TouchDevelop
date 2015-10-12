@@ -96,7 +96,6 @@ async function _initAsync() : Promise<void>
         azureBlobStorage.assumeContainerExists();
     }
 
-    await tdliteIndex.initAsync();
     let timeDelta = await core.redisClient.cachedTimeAsync() - new Date().getTime();
     logger.info("time difference to redis instance: " + timeDelta + "ms");
     if (false) {
@@ -107,7 +106,7 @@ async function _initAsync() : Promise<void>
     indexedStore.init(core.tableClient);
     // cachedStore.getLogger().setVerbosity("info");
 
-    await _init_0Async();
+    await initSubsystems();
 
     if (core.hasSetting("LIBRATO_TOKEN")) {
         /* async */ tdliteStatus.failureReportLoopAsync();
@@ -176,7 +175,7 @@ async function _initAsync() : Promise<void>
 }
 
 
-async function _init_0Async() : Promise<void>
+async function initSubsystems() : Promise<void>
 {
     core.pubsContainer = await cachedStore.createContainerAsync("pubs");
     core.settingsContainer = await cachedStore.createContainerAsync("settings", {
