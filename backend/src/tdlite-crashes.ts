@@ -104,18 +104,34 @@ export async function initAsync()
     });
     core.addRoute("POST", "bug", "", async (req1: core.ApiRequest) => {
         let report = BugReport.createFromJson(req1.body);
-        let jsb = ({ "details": { "client": { }, "error": { "stackTrace": [] }, "environment": { }, "request": { "headers": {} }, "user": { }, "context": { } } });
-        let timestamp = report.timestamp;
-        jsb["occurredOn"] = new Date(timestamp);
-        let det = jsb["details"];
-        det["machineName"] = orEmpty(report.worldId);
-        det["version"] = orEmpty(report.tdVersion);
-        det["request"]["headers"]["User-Agent"] = orEmpty(report.userAgent);
-        if (core.fullTD) {
-            det["user"]["identifier"] = req1.userid;
-        }
-        det["error"]["message"] = withDefault(report.exceptionConstructor, "Error");
-        det["error"]["innerError"] = orEmpty(report.exceptionMessage);
+        let jsb = {
+            "details": {
+                "client": {
+                    "name": "tdlite",
+                    "version": "0.0.1"
+                },
+                "error": {
+                    "stackTrace": [],
+                    "message": withDefault(report.exceptionConstructor, "Error"),
+                    "innerError": orEmpty(report.exceptionMessage),
+                    "className": "Error",
+                },
+                "environment": {},
+                "request": {
+                    "headers": {
+                        "User-Agent": orEmpty(report.userAgent),
+                    }
+                },
+                "user": {
+                    "identifier": core.fullTD ? req1.userid : undefined
+                },
+                "context": {},
+                "machineName": orEmpty(report.worldId),
+                "version": orEmpty(report.tdVersion),
+            },
+            "occurredOn": new Date(report.timestamp),
+        };
+        
         report.reportId = "BuG" + (20000000000000 - await core.redisClient.cachedTimeAsync()) + azureTable.createRandomId(10);
         let js2 = report.toJson();
         let encReport = core.encrypt(JSON.stringify(js2), "BUG");
@@ -124,50 +140,9 @@ export async function initAsync()
         delete js["eventTrace"];
         delete js["logMessages"];
         delete js["attachments"];
+        let det = jsb["details"];
         det["userCustomData"] = js;
-        let trace = det["error"]["stackTrace"];
-        let s = td.replaceFn(orEmpty(report.stackTrace), /^[^@\s]*:\d+/g, (elt: string[]) => {
-            let result: string;
-            result = "   at " + elt[0];
-            return result;
-        });
-        s = td.replaceFn(s, /^([^@\s]*)@(.*)/g, (elt1: string[]) => {
-            let result1: string;
-            result1 = "   at " + elt1[1] + " (" + elt1[2] + ")";
-            return result1;
-        });
-        s = td.replaceFn(s, / at (\S+?):([\d:]+)$/g, (elt2: string[]) => {
-            let result2: string;
-            result2 = " at nofn (" + elt2[1] + ":" + elt2[2] + ")";
-            return result2;
-        });
-        s = td.replaceFn(s, / at (\S+)[^(]*(\((\S+?):([\d:]+)\))?/g, (elt3: string[]) => {
-            let result3: string;
-            let st = {};
-            st["methodName"] = elt3[1];
-            st["fileName"] = withDefault(elt3[3], "unknown");
-            st["lineNumber"] = parseFloat(withDefault(elt3[4], "1").replace(/:.*/g, ""));
-            trace.push(td.clone(st));
-            result3 = "";
-            return result3;
-        });
-        if (trace.length == 0) {
-            let st1 = {};
-            st1["lineNumber"] = core.orZero(report.line);
-            trace.push(td.clone(st1));
-        }
-        else {
-            for (let jsb2 of trace) {
-                let grps = (/^([^\.]+)\.(.*)/.exec(orEmpty(jsb2["methodName"])) || []);
-                if (grps.length > 2) {
-                    jsb2["className"] = grps[1];
-                    jsb2["methodName"] = grps[2];
-                }
-                else {
-                    jsb2["className"] = "X";
-                }
-            }
-        }
+        det["error"]["stackTrace"] = buildStackTrace(orEmpty(report.stackTrace), report.line);
         logger.info("stored crash: " + report.reportId);
         if (! report.tdVersion) {
             // Skip reporting of errors from local builds.
@@ -188,4 +163,117 @@ export async function initAsync()
     });
 }
 
+function buildStackTrace(stk: string, line:number) {
+    let trace = [];
+    for (let s of stk.split(/\n/)) {
+        s = td.replaceFn(s, /^[^@\s]*:\d+/g, (elt: string[]) => {
+            return "   at " + elt[0];
+        });
+        s = td.replaceFn(s, /^([^@\s]*)@(.*)/g, (elt1: string[]) => {
+            return "   at " + elt1[1] + " (" + elt1[2] + ")";
+        });
+        s = td.replaceFn(s, / at (\S+?):([\d:]+)$/g, (elt2: string[]) => {
+            return " at nofn (" + elt2[1] + ":" + elt2[2] + ")";
+        });
+        s = td.replaceFn(s, / at (\S+)[^(]*(\((\S+?):([\d:]+)\))?/g, (elt3: string[]) => {
+            let result3: string;
+            let st = {};
+            st["methodName"] = elt3[1];
+            st["fileName"] = withDefault(elt3[3], "unknown");
+            st["lineNumber"] = parseFloat(withDefault(elt3[4], "1").replace(/:.*/g, ""));
+            trace.push(td.clone(st));
+            return "";
+        });
+    }
+    
+    if (trace.length == 0) {
+        let st1 = {};
+        st1["lineNumber"] = core.orZero(line);
+        trace.push(td.clone(st1));
+    }
+    else {
+        for (let jsb2 of trace) {
+            let grps = (/^([^\.]+)\.(.*)/.exec(orEmpty(jsb2["methodName"])) || []);
+            if (grps.length > 2) {
+                jsb2["className"] = grps[1];
+                jsb2["methodName"] = grps[2];
+            }
+            else {
+                jsb2["className"] = "X";
+            }
+        }
+    }
+    
+    return trace;
+}
 
+function testit()
+{
+    var err1 =
+`Error: OOPS: no such {shim:nosuchfun} from do stuff
+    at Object.oops (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:10235:23)
+    at Compiler.handleActionCall (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:91878:39)
+    at Compiler.visitCall (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:91928:30)
+    at Call.accept (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:48897:30)
+    at Compiler.NodeVisitor.dispatch (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:49262:26)
+    at Compiler.visitExprHolder (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92007:30)
+    at ExprHolder.accept (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:48352:26)
+    at Compiler.NodeVisitor.dispatch (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:49262:26)
+    at Compiler.visitExprStmt (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92202:26)
+    at ExprStmt.accept (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:46221:26)
+    at Compiler.NodeVisitor.dispatch (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:49262:26)
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92219:31
+    at Array.forEach (native)
+    at Compiler.visitCodeBlock (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92217:29)
+    at CodeBlock.accept (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:45687:26)
+    at Compiler.NodeVisitor.dispatch (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:49262:26)
+    at Compiler.visitAction (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92228:26)
+    at Action.accept (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:47069:26)
+    at Compiler.NodeVisitor.dispatch (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:49262:26)
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92298:35
+    at Array.forEach (native)
+    at Compiler.dump (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92296:25)
+    at Compiler.compileApp (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:92314:26)
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:91717:35
+    at Array.forEach (native)
+    at Compiler.run (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:91716:53)
+    at Function.ScriptProperties.bytecodeCompile (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:123801:19)
+    at Editor.bytecodeCompileWithUi (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:101404:35)
+    at Editor.compile (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:101485:22)
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:101501:27
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:1383:21
+    at ClickHandler.newCb [as f] (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:14304:28)
+    at ClickHandler.fireClick (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:14257:22)
+    at ClickHandler.handleEvent (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:14242:34)`
+    
+    var err2 =
+`Error: OOPS: no such {shim:nosuchfun} from do stuff
+    at https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:1383:21
+    at ClickHandler.newCb [as f] (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:14304:28)
+    at ClickHandler.handleEvent (https://az742082.vo.msecnd.net/app/2519576283037080000-aba1dbfd.fd09.4679.bce8.3d4b8d7ef6ef-micmo/c/main.js:14242:34)`
+ 
+ var err3 = 
+`check@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:10165:32
+uninstallAsync@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:85480:33
+https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:114476:53
+https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:99366:18
+https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:13783:42
+_notify@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:13729:28
+then@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:13794:29
+updateEditorStateAsync@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:99363:70
+uninstallAsync@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:114467:58
+uninstall@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:114459:36
+https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:113837:149
+https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:113778:26
+newCb@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:14223:30
+fireClick@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:14176:23
+handleEvent@https://az742082.vo.msecnd.net/app/2519585664678950000-77bbe272.1d35.445f.a414.33700cd13e25-81749/c/main.js:14142:43`
+   
+ let tst = s => buildStackTrace(s, 42).forEach(f => assert(/^\w+(\.\w+)?$/.test(f.methodName)))
+ tst(err1);
+ tst(err2);
+ tst(err3);   
+}
+
+if (!module.parent)
+    testit();
