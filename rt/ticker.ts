@@ -816,6 +816,8 @@ module TDev {
                     r.exceptionConstructor = "DB " + r.exceptionConstructor;
                 if (/autotest-/.test(ctx))
                     r.exceptionConstructor = "TEST " + r.exceptionConstructor;
+                if (/^bitvm/.test(ctx))
+                    r.exceptionConstructor = "BITVM " + r.exceptionConstructor;
 
                 if (err.wabCrashInfo) {
                     r.stackTrace = err.wabCrashInfo + "\nJavaScript:\n" + r.stackTrace;
