@@ -1242,6 +1242,17 @@ module TDev.Browser {
                 
                 editors.sort((a, b) => a.order - b.order);
                 
+                // add import editor
+                editors.push({
+                    company: "BBC micro:bit",
+                    name: lf("Import Code"),
+                    description: lf("Import a script from a .hex file"),
+                    origin:"",
+                    path:"",
+                    id: "import",
+                    order: 5,
+                })
+                
                 var elts = [];
                 editors.forEach(k => {
                     var icon = div("sdIcon");
@@ -1283,6 +1294,10 @@ module TDev.Browser {
             if (Cloud.isRestricted())
                 chooseEditorAsync().done((editor) => {
                     if (!editor) return;
+                    if (editor == "import") {
+                        ArtUtil.importHexFileDialog();
+                        return;
+                    }
                     var p = Promise.as("");
                     if (editor == "touchdevelop")
                         p = Promise.as(ScriptCache.forcedUpdate('nmhibf').text);

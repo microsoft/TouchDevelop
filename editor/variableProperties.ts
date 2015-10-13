@@ -717,32 +717,48 @@ module TDev
             d.style.backgroundImage = Cloud.artCssImg(id, true);
             return d;
         }
+        
+        export function importHexFileDialog() {
+            var m = new ModalDialog();
+            var input = HTML.mkTextInput("file", lf("choose .hex files"));
+            input.multiple = false;
+            
+            m.add(div('wall-dialog-header', lf("import code")));
+            m.add(div('wall-dialog-body', lf("Imports the code from an .hex file created for the BBC micro:bit. Hint: you can also drag and drop .hex files in the editor to import them!")));
+            m.add(div('wall-dialog-body', input));
+            m.addOk(lf("import"), () => {
+                m.dismiss();
+                var file = input.files[0];
+                if (file)   
+                    handleHexFile(file);
+            });
+            m.show();            
+        }
 
         export function handleHexFile(file: File)
         {
             var guid = ""
 
             HTML.fileReadAsDataURLAsync(file)
-            .then((dat:string) => {
-                var str = RT.String_.valueFromArtUrl(dat)
-                var tmp = AST.Bytecode.Binary.extractSource(str)
-                if (!tmp.meta) {
-                    HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
-                    return
-                }
-                var hd:Cloud.Header = JSON.parse(tmp.meta)
-                hd.guid = Util.guidGen()
-                guid = hd.guid
-                // renaming is tricky - would need to rename the text as well ...
-                // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
+                .then((dat: string) => {
+                    var str = RT.String_.valueFromArtUrl(dat)
+                    var tmp = AST.Bytecode.Binary.extractSource(str)
+                    if (!tmp.meta) {
+                        HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
+                        return
+                    }
+                    var hd: Cloud.Header = JSON.parse(tmp.meta)
+                    hd.guid = Util.guidGen()
+                    guid = hd.guid
+                    // renaming is tricky - would need to rename the text as well ...
+                    // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
 
-                return World.setInstalledScriptAsync(hd, tmp.text, null)
-                .then(() => Browser.TheHost.clearAsync(false))
-                .then(() => {
-                    Util.setHash("#list:installed-scripts:script:" + guid + ":overview")
-                })
-            })
-            .done()
+                    return World.setInstalledScriptAsync(hd, tmp.text, null)
+                        .then(() => Browser.TheHost.clearAsync(false))
+                        .then(() => {
+                            Util.setHash("#list:installed-scripts:script:" + guid + ":overview")
+                        })
+                }).done();
         }
         
         function uploadFile(file: File) {
