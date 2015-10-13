@@ -2173,7 +2173,5 @@ action show_leds(#Agy1tNVQeIcg2pFD leds: String) {
   #M7D8GVVyvj4k5vxo // {language:leds:bitframe}
   #WkpvN4lkB72SdNex // {shim:micro_bit::showLeds}
   #xxOvJbn2Cq3yEODu $img := code→parse_image($leds);
-  #PxGM08x89BhHv061 $anim_id := data→current_animation + 1;
-  #HV3laxnE0UPmy2xE data→current_animation := $anim_id;
-  #mCtsVb9IzQqrk427 code→render_image($img, 0);
+  #KrQe1YwMxdRhx6GZ $img→show_image(0);
 }

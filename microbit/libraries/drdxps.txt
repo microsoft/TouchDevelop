@@ -6,8 +6,8 @@ meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
-#gwogMoY7UjqCbG5I meta import micro\u003abit {
-  pub "vlwuan"
+#N47jMngJaCJf8PX8 meta import micro\u003abit {
+  pub "brinah"
   usage {
     type Image
     action `sync` \_libinit()
@@ -76,8 +76,11 @@ action plot_all() {
   #Kf7bsANqYZRuDX8A // Turns all LEDS on
   #xfEAxWsrYpI8LsrE // {namespace:led}
   #xeNqHFR4dPLWb9Gl // {help:functions/plot-all}
-  #RQ3QvXSxNBWw7kQW $img := image[lib micro\u003abit] →create_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
-  #GcTYa6KnONW0HJVs $img→plot_image(0);
+  #XTQai3Nb2nzgE04T for 0 ≤ i < 5 do {
+    #sZ4AYvycaWDrPWQR for 0 ≤ j < 5 do {
+      #zK0BvwMjXrxYI5u5 led[lib micro\u003abit] →plot($i, $j);
+    }
+  }
   meta sync;
 }
 #vsHySw7q1f2qmubh
