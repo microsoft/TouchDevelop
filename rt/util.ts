@@ -276,6 +276,17 @@ module TDev{
         a.href = url;
         return a.href;
     }
+    
+    export function trimAfter(s: string, searchString: string): string {
+        if (!s) return s;
+        var index = s.indexOf(searchString, 0);
+        if (index > -1) return s.substr(index + searchString.length);
+        else return s;
+    }  
+    
+    export function firstSentence(s: string): string {
+        return Util.trimAfter(s, ".");
+    } 
 
     export function httpGetJsonAsync(filename:string, contentTypeOrHeaders? : any) : Promise {
         return httpGetTextAsync(filename, contentTypeOrHeaders).then((s) => JSON.parse(s));

@@ -3606,7 +3606,7 @@ module TDev
                 sig.push(" -- ")
 
             var translate = find.property instanceof AST.LibraryRefAction
-            sig.push(this.renderHelpCore(find.property.getDescription(), translate))
+            sig.push(this.renderHelpCore(Util.firstSentence(find.property.getDescription()), translate))
 
             return sig
         }
@@ -3736,7 +3736,7 @@ module TDev
                 if (th.def) {
                     addTopic(th.def.getKind().getName())
                     if (results.length == 0)
-                        setHelp(th.def.getName() + " -- " + th.def.getDescription())
+                        setHelp(th.def.getName() + " -- " + Util.firstSentence(th.def.getDescription()))
                 }
             }
 
@@ -3745,7 +3745,7 @@ module TDev
             } else if (this.stmt instanceof AST.OptionalParameter) {
                 var opt = (<AST.OptionalParameter>this.stmt).recordField
                 if (opt && opt.getDescription())
-                    setHelp(this.renderHelpCore(opt.getName() + " -- " + opt.getDescription(), true))
+                    setHelp(this.renderHelpCore(opt.getName() + " -- " + Util.firstSentence(opt.getDescription()), true))
             }
 
             if (!didIt) setHelp("")
