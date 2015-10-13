@@ -354,7 +354,7 @@ export async function initAsync() : Promise<void>
     core.addRoute("POST", "admin", "reindexusers", async (req13: core.ApiRequest) => {
         core.checkPermission(req13, "operator");
         if (req13.status == 200) {
-            /* async */ users.getIndex("all").forAllBatchedAsync("all", 50, async (json2: JsonObject) => {
+            /* async */ users.getIndex("all").forAllBatchedAsync("all", 50, async (json2) => {
                 await parallel.forJsonAsync(json2, async (json3: JsonObject) => {
                     let userid = json3["id"];
                     let js2 = json3["settings"];

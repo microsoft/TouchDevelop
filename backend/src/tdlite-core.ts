@@ -98,7 +98,7 @@ export class ServiceSettings
     @td.json public paths: JsonObject;
     @td.json public emailFrom: string = "";
     @td.json public accounts: JsonObject;
-    @td.json public alarmingEmails: JsonObject;
+    @td.json public alarmingEmails: string[];
     @td.json public termsversion: string = "";
     @td.json public blockedNicknameRx: string = "";
     @td.json public tokenExpiration: number = 0;
@@ -106,19 +106,6 @@ export class ServiceSettings
     @td.json public langs: JsonObject;
     @td.json public envrewrite: JsonObject;
     static createFromJson(o:JsonObject) { let r = new ServiceSettings(); r.fromJson(o); return r; }
-}
-
-export interface IServiceSettings {
-    paths: JsonObject;
-    emailFrom: string;
-    accounts: JsonObject;
-    alarmingEmails: JsonObject;
-    termsversion: string;
-    blockedNicknameRx: string;
-    tokenExpiration: number;
-    defaultLang: string;
-    langs: JsonObject;
-    envrewrite: JsonObject;
 }
 
 export class RouteIndex

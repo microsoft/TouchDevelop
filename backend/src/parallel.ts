@@ -89,7 +89,7 @@ async function exampleAsync() : Promise< void >
     // {hide}
     let js = ({});
     // {/hide}
-    await forJsonAsync(js, async(jchild: td.JsonObject) => {
+    await forJsonAsync(<any>js, async(jchild: td.JsonObject) => {
         // do something with ``child``
     });
     // ### queue
@@ -129,7 +129,7 @@ export function createQueue(maxRunning: number) : Queue
 /**
  * Applies the ``action`` action to the array element or field values.
  */
-export async function forJsonAsync(js: td.JsonObject, action:td.JsonAction) : Promise< void >
+export async function forJsonAsync(js: td.JsonObject[], action:td.JsonAction) : Promise< void >
 {
     if (Array.isArray(js)) {
         await forAsync(js.length, async(x: number) => {

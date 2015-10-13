@@ -551,7 +551,7 @@ export async function initAsync() : Promise<void>
     core.addRoute("POST", "admin", "reindexscripts", async (req15: core.ApiRequest) => {
         core.checkPermission(req15, "operator");
         if (req15.status == 200) {
-            /* async */ scripts.getIndex("all").forAllBatchedAsync("all", 50, async (json: JsonObject) => {
+            /* async */ scripts.getIndex("all").forAllBatchedAsync("all", 50, async (json) => {
                 await parallel.forJsonAsync(json, async (json1: JsonObject) => {
                     let pub = json1["pub"];
                     let r = orFalse(pub["noexternallinks"]);
