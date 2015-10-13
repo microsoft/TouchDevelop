@@ -751,27 +751,36 @@ module TDev.HTML {
             progressNotificationAnimation.begin();
         }
     }
+    
+    export interface ShowWarningNotificationsOptions {
+        details?: string;
+        els?: HTMLElement[];
+        onClick?: () => void;
+    }
 
-    export function showWarningNotification(msgText: string, details: string = null) {
+    export function showWarningNotification(msgText: string, options?: ShowWarningNotificationsOptions) {
         if (Browser.isHeadless) {
             Util.log("warning: " + msgText);
             return;
         }
 
         var msg = div("warningNotification",
-            div('frownie', ":("), div('info', msgText)
-            );
-        if (details) {
+            div('frownie', ":("), div('info', msgText));
+        if (options && options.els) msg.appendChildren(options.els);        
+        if (options && options.details) {
             msg.appendChild(div('info link', 'learn more...'));
             msg.withClick(() => {
                 tick(Ticks.warningNotificationTap);
-                ModalDialog.info(msgText, details);
+                ModalDialog.info(msgText, options.details);
             });
-        }
+        } else if (options && options.onClick)
+            msg.withClick(() => {
+                options.onClick();
+            }); 
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
         a.delay = 6000;
-        a.duration = 3000;
+        a.duration = 500;
         a.begin();
     }
 

@@ -3,7 +3,7 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
-    var microbitGitTag = "v5";
+    var microbitGitTag = "v7";
 
     export var useEmbeddedGcc = true;
     export var useNativeCompilation = false;
@@ -856,7 +856,19 @@ module TDev.Cloud {
     export function errorCallback(action: string = lf("do this")) {
         return e => handlePostingError(e, action)
     }
-
+    
+    export function showSigninNotification(isOnline: boolean) {
+        if (isOnline)
+            HTML.showWarningNotification(lf("can't sync your scripts! tap here to sign in"), {
+                onClick: () => {
+                    var login = (<any>TDev).Login;
+                    if (login && login.show)
+                        login.show()
+                }
+            });
+        else HTML.showProgressNotification(lf("can't sync - you appear to be offline"));
+    }
+            
     export function handlePostingError(e: any, action: string, modal = true) {
         if (e) {
             if (e.status == 502) {
@@ -876,17 +888,7 @@ module TDev.Cloud {
                     // in lite, 403 always means missing or expired access token
                     if (localStorage['everLoggedIn'])
                         Cloud.isOnlineWithPingAsync()
-                            .then(isOnline => {
-                                if (isOnline) {
-                                    var login = (<any>TDev).Login;
-                                    if (login && login.show) {
-                                        login.show()
-                                        return
-                                    }
-                                }
-                                ModalDialog.info(lf("sign-in required"), lf("Sign-in is required, but you appear to be offline."))
-                            })
-                            .done()
+                            .done(isOnline => Cloud.showSigninNotification(isOnline));
                     else
                         authenticateAsync(action).done()
                 } else {

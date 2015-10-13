@@ -9,8 +9,8 @@ meta parentIds "";
 action main() {
   #D34u4ORZ4Owljhx8 skip;
 }
-#xmYa2ElhnnoT0BUj meta import micro\u003abit {
-  pub "jqldsq"
+#DAN7NzaVEIeexALH meta import micro\u003abit {
+  pub "vlwuan"
   usage {
     type Image
     action `sync` \_libinit()
@@ -39,7 +39,7 @@ action main() {
     action `async` show_number(value: Number, interval: Number)
     action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
     action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
     action `sync` in_background(body: Action)
     action `async` calibrate()
     action `sync` forever(body: Action)
@@ -49,31 +49,33 @@ action main() {
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
     action `sync` warning(message: String)
     action `sync` analog_set_period(pin: String, micros: Number)
     action `sync` analog_set_pitch_pin(name: String)
-    action `async` analog_pitch(frequency: Number, millis: Number)
+    action `sync` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String)
   }
 }
-#Tv1ilagXmK2nPDH1 meta import micro\u003abit_screen {
-  pub "nzngii"
+#MLvRxY6v0wUBQONd meta import micro\u003abit_screen {
+  pub "vmodll"
   usage {
-    action `async` toggle(x: Number, y: Number)
-    action `async` plot_all()
-    action `async` toggle_all()
+    action `sync` toggle(x: Number, y: Number)
+    action `sync` plot_all()
+    action `sync` toggle_all()
     action `async` fade_in(ms: Number)
     action `async` fade_out(ms: Number)
-    action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
+    action `sync` screenshot() returns(img: ♻ micro\u003abit → Image)
   }
-  #c62QJFX3B2ee8ray resolve micro\u003abit = ♻ micro\u003abit with {
+  #xjkLt64E5P2Qke2K resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#rotK466AGr3pvcUM meta import micro\u003abit_game {
-  pub "lwagkt"
+#xz51YKViuWiCp87n meta import micro\u003abit_game {
+  pub "hnmzma"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -92,7 +94,7 @@ action main() {
     action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
   }
-  #xavDu9U7D9yIoTqX resolve micro\u003abit = ♻ micro\u003abit with {
+  #qZn17LIfKubDIXHV resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #fsUcEJz94XxSURFH meta import micro\u003abit_senses {

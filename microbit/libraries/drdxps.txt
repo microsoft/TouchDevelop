@@ -6,8 +6,8 @@ meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
-#OGCKfvX9V4gziHxf meta import micro\u003abit {
-  pub "lfuzog"
+#gwogMoY7UjqCbG5I meta import micro\u003abit {
+  pub "vlwuan"
   usage {
     type Image
     action `sync` \_libinit()
@@ -34,19 +34,28 @@ meta parentIds "";
     action `async` show_animation(leds: String, interval: Number)
     action `sync` running_time() returns(now: Number)
     action `async` show_number(value: Number, interval: Number)
-    action `sync` set_pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
     action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
     action `sync` in_background(body: Action)
     action `async` calibrate()
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
-    action `async` plot_image(leds: String)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `sync` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String)
   }
 }
 #ljbL9TDyViQp60st
@@ -60,14 +69,16 @@ action toggle(#VUPjYYFrhOWw74RY x: Number, #nnwwBs7Gvq4QOFhz y: Number) {
   else {
     #fr9fcMhf84RFYCe9 @\u267b→micro\u003abit→plot($x, $y);
   }
+  meta sync;
 }
 #x3aHYXZCFqQM4N5z
 action plot_all() {
   #Kf7bsANqYZRuDX8A // Turns all LEDS on
   #xfEAxWsrYpI8LsrE // {namespace:led}
   #xeNqHFR4dPLWb9Gl // {help:functions/plot-all}
-  #RQ3QvXSxNBWw7kQW $img := @\u267b→micro\u003abit→create_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
-  #xIAiTtckArbe5wC2 $img→show_image(0);
+  #RQ3QvXSxNBWw7kQW $img := image[lib micro\u003abit] →create_image("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+  #GcTYa6KnONW0HJVs $img→plot_image(0);
+  meta sync;
 }
 #vsHySw7q1f2qmubh
 action example() {
@@ -96,6 +107,7 @@ action toggle_all() {
       #xy1D6qKToA7LgBRZ code→toggle($i, $j);
     }
   }
+  meta sync;
 }
 #gFU1OsaYQ427Dy3x
 action fade_in(#NkDJQP4M8hf8ByOK ms: Number) {
@@ -164,4 +176,5 @@ action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image)
       }
     }
   }
+  meta sync;
 }
