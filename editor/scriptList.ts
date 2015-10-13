@@ -504,9 +504,18 @@
             var str = Ticker.bugReportToString(bb, true)
             var stack = []
 
-            str += "\n\nStackTrace:\n"
+            if (bug.attachments) {
+                bug.attachments.forEach((a, i) => {
+                    var e = div("stackTraceEntry", lf("Attachement #{0}", i))
+                    e.withClick(() => {
+                        ModalDialog.showText(a)
+                    })
+                    stack.push(e)
+                })
+            }
 
             if (Array.isArray(bb.parsedStackTrace)) {
+                stack.push(div("sdBold", lf("Stack trace:")))
                 bb.parsedStackTrace.forEach(it => {
                     var fn = it.fileName
                     var e = div("stackTraceEntry", "at " + it.className + "." + it.methodName + " (" + fn.replace(/.*\//, "") + ":" + it.lineNumber + ")")
@@ -528,6 +537,7 @@
                     stack.push(e)
                 })
             } else {
+                str += "\n\nStackTrace:\n"
                 str += bb.stackTrace
             }
 
@@ -541,6 +551,7 @@
 
             var pre = div(null, str)
             pre.style.whiteSpace = "pre";
+            pre.style.marginBottom = "1em";
             view.prependHTML(pre)
 
             return view.showAsync().done()
