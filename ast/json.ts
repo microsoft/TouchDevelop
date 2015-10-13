@@ -523,6 +523,7 @@ module TDev.AST.Json
                 value: n.data,
                 stringForm: n.stringForm,
                 enumValue: n.enumVal,
+                hintValue: n.hintVal,
                 hintArtId: n.hintArtId,
             }
         }
