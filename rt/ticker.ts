@@ -887,18 +887,21 @@ module TDev {
             return r;
         }
 
-        export function bugReportToString(b:BugReport)
+        export function bugReportToString(b:BugReport, short = false)
         {
             var e = (s:string) => s.replace(/\r?\n/, " ");
-            return "Error: " + e(b.exceptionMessage) + "\n" +
+            var r = 
+                   "Error: " + e(b.exceptionMessage) + "\n" +
                    "URL: " + e(b.currentUrl) + " (script: " + e(b.scriptId) + ", context: " + e(b.context) + ")\n" +
                    "JS-URL: " + e(b.jsUrl) + "\n" +
                    "Platform: " + e(Browser.platformCaps.join(", ")) + "\n" +
                    "UserAgent: " + e(b.userAgent) + " (resolution: " + e(b.resolution) + ")\n" +
-                   "Date: " + new Date(b.timestamp).toString() + "\n" +
-                   "\n" +
+                   "Date: " + new Date(b.timestamp).toString() + "\n"
+            if (!short)
+                r += "\n" +
                    "RecentEvents:\n" + b.eventTrace + "\n\n" +
                    "StackTrace:\n" + b.stackTrace + "\n\n";
+            return r;
         }
 
         export function bugReportForHash(b:BugReport)

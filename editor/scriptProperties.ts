@@ -268,7 +268,9 @@ module TDev
             try {
                 c.run()
             } catch (e) {
-                e.bugAttachments = [app.serialize()]
+                if (app != Script)
+                    // Script is automatically attached
+                    e.bugAttachments = [app.serialize()]
                 Util.reportError("bitvm compile", e, false);
                 if (dbg)
                     ModalDialog.showText(e.stack)

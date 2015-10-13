@@ -44,7 +44,7 @@ export class BugReport
     @td.json public tdVersion: string = "";
     @td.json public logMessages: JsonObject;
     @td.json public reportId: string = "";
-    public parsedStackTrace: JsonObject[];
+    @td.json public parsedStackTrace: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new BugReport(); r.fromJson(o); return r; }
 }
 

@@ -479,18 +479,66 @@
 
         public getInstalledHeaders() { return this.installedHeaders }
 
+        static fileLinesCache: StringMap<string[]> = {}
+
+        static highlightLine(e:HTMLElement, fn:string, ln:number)
+        {
+            var ctx = 4;
+
+            if (!e) return;
+            var lines = Host.fileLinesCache[fn]
+            if (!lines) return;
+            for (var off = -ctx; off <= ctx; ++off) {
+                var line = lines[ln + off - 1]
+                if (line != null) {
+                    e.appendChild(div("stackTraceLine " + (off == 0 ? "highlight" : ""), line))
+                }
+            }
+        }
+
         static showBugReport(bug: BugReport)
         {
             var bb = Util.flatClone(bug);
             bb.eventTrace = "";
             bb.logMessages = []
-            var str = Ticker.bugReportToString(bb)
+            var str = Ticker.bugReportToString(bb, true)
+            var stack = []
+
+            str += "\n\nStackTrace:\n"
+
+            if (Array.isArray(bb.parsedStackTrace)) {
+                bb.parsedStackTrace.forEach(it => {
+                    var fn = it.fileName
+                    var e = div("stackTraceEntry", "at " + it.className + "." + it.methodName + " (" + fn.replace(/.*\//, "") + ":" + it.lineNumber + ")")
+                    if (/^http/.test(fn))
+                        e.withClick(() => {
+                            if (!Host.fileLinesCache.hasOwnProperty(fn)) {
+                                HTML.showProgressNotification(lf("downloading source file {0}", fn))
+                                Util.httpGetTextAsync(fn)
+                                    .done(text => {
+                                        Host.fileLinesCache[fn] = text.split(/\n/)
+                                        Host.highlightLine(e, fn, it.lineNumber)
+                                        e = null
+                                    })
+                            } else {
+                                Host.highlightLine(e, fn, it.lineNumber)
+                                e = null
+                            }
+                        })
+                    stack.push(e)
+                })
+            } else {
+                str += bb.stackTrace
+            }
+
 
             var view = new RT.AppLogView();
             view.charts(false)
             view.reversed(false)
             view.append(bug.logMessages);
             
+            view.prependHTML(div(null, stack))
+
             var pre = div(null, str)
             pre.style.whiteSpace = "pre";
             view.prependHTML(pre)

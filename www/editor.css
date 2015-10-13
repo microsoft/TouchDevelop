@@ -6129,3 +6129,18 @@ table.dashboard tr td[data-completed^="yes"] {
 .art-review .art-link {
   right: 0;
 }
+
+.stackTraceEntry {
+  padding-left: 1em;
+  font-size: 0.8em;
+  color: blue;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.stackTraceLine {
+  font-size: 0.6em;
+  font-family: monospace;
+  white-space: pre;
+  color: #333;
+}
