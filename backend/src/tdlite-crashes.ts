@@ -24,6 +24,7 @@ var crashContainer: azureBlobStorage.Container;
 export class BugReport
     extends td.JsonRecord
 {
+    @td.json public reportId: string = "";
     @td.json public exceptionConstructor: string = "";
     @td.json public exceptionMessage: string = "";
     @td.json public context: string = "";
@@ -43,7 +44,6 @@ export class BugReport
     @td.json public attachments: string[];
     @td.json public tdVersion: string = "";
     @td.json public logMessages: JsonObject;
-    @td.json public reportId: string = "";
     @td.json public parsedStackTrace: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new BugReport(); r.fromJson(o); return r; }
 }
@@ -98,7 +98,9 @@ export async function initAsync()
                     "innerError": orEmpty(report.exceptionMessage),
                     "className": "Error",
                 },
-                "environment": {},
+                "environment": {
+                    "deviceName": report.reportId
+                },
                 "request": {
                     "headers": {
                         "User-Agent": orEmpty(report.userAgent),
@@ -120,7 +122,8 @@ export async function initAsync()
         let js = td.clone(js2);
         delete js["eventTrace"];
         delete js["logMessages"];
-        delete js["attachments"];        
+        delete js["attachments"];
+        delete js["parsedStackTrace"];
         jsb["details"]["userCustomData"] = js;
         logger.info("stored crash: " + report.reportId);
         if (! report.tdVersion) {

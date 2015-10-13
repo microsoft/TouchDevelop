@@ -169,7 +169,7 @@ export async function initAsync() : Promise<void>
     core.addRoute("POST", "admin", "reindexpointers", async (req2: core.ApiRequest) => {
         core.checkPermission(req2, "operator");
         if (req2.status == 200) {
-            /* async */ pointers.getIndex("all").forAllBatchedAsync("all", 50, async (json: JsonObject) => {
+            /* async */ pointers.getIndex("all").forAllBatchedAsync("all", 50, async (json) => {
                 await parallel.forJsonAsync(json, async (json1: JsonObject) => {
                     let ref = {}
                     await pointers.container.updateAsync(json1["id"], async (entry1: JsonBuilder) => {
@@ -187,7 +187,7 @@ export async function initAsync() : Promise<void>
     });
 }
 
-function pathToPtr(fn: string) : string
+export function pathToPtr(fn: string) : string
 {
     let s: string;
     if (! fn) {

@@ -296,7 +296,7 @@ async function deleteUserAsync(req8:core.ApiRequest)
 async function deleteAllByUserAsync(store: indexedStore.Store, id: string, req: core.ApiRequest) : Promise<void>
 {
     let logDelete = store.kind != "review";
-    await store.getIndex("userid").forAllBatchedAsync(id, 50, async (json: JsonObject) => {
+    await store.getIndex("userid").forAllBatchedAsync(id, 50, async (json) => {
         await parallel.forJsonAsync(json, async (json1: JsonObject) => {
             if (logDelete) {
                 await audit.logAsync(req, "delete-by-user", {

@@ -333,7 +333,7 @@ export async function initAsync() : Promise<void>
     core.addRoute("POST", "admin", "reindexgroups", async (req8: core.ApiRequest) => {
         core.checkPermission(req8, "operator");
         if (req8.status == 200) {
-            /* async */ tdliteUsers.users.getIndex("all").forAllBatchedAsync("all", 20, async (json: JsonObject) => {
+            /* async */ tdliteUsers.users.getIndex("all").forAllBatchedAsync("all", 20, async (json) => {
                 await parallel.forJsonAsync(json, async (json1: JsonObject) => {
                     await reindexGroupsAsync(json1);
                 });
