@@ -200,9 +200,7 @@ module TDev
                 this.managementSection = div("formLine",
                     this.revertButton = HTML.mkButton(lf("revert to published version"), () => {
                         ModalDialog.ask(lf("Do you really want to revert this script to the latest published version?"), lf("revert"), () => { this.revert(); });
-                    }),
-                    (Browser.isCellphone ? null :
-                    HTML.mkButton(lf("print"), () => this.renderScript()))
+                    })
                     ),
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
@@ -400,11 +398,6 @@ module TDev
             }
             
             HelpTopic.printText(text, s.getName());
-        }
-
-        private renderScript()
-        {
-            ScriptProperties.printScript(Script);
         }
 
         private publicToTest()
