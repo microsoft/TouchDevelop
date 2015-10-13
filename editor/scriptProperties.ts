@@ -202,8 +202,7 @@ module TDev
                         ModalDialog.ask(lf("Do you really want to revert this script to the latest published version?"), lf("revert"), () => { this.revert(); });
                     }),
                     (Browser.isCellphone ? null :
-                    HTML.mkButton(lf("print"), () => this.renderScript())),
-                    HTML.mkButton(lf("diff to base"), () => ScriptProperties.diffToBase())
+                    HTML.mkButton(lf("print"), () => this.renderScript()))
                     ),
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
@@ -301,25 +300,6 @@ module TDev
                 else
                     HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
             })
-        }
-
-        static diffToBase()
-        {
-            var id = ScriptEditorWorldInfo.baseId
-            if (!id) {
-                ModalDialog.info("no can do", "no base script")
-                return;
-            }
-
-            ScriptProperties.showDiff(
-                ScriptCache.getScriptAsync(id).then(text => {
-                    if (!text) return;
-                    var baseapp = AST.Parser.parseScript(text);
-                    AST.Diff.diffApps(baseapp, Script, {
-                        tutorialMode: /tutorialDiff/.test(document.URL)
-                    });
-                    return Script;
-                }))
         }
 
         static showDiff(getScrAsync:Promise, additionalActions:any = {}, showAll = false, hd?: Cloud.Header)
