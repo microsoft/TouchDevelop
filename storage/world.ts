@@ -728,6 +728,7 @@ module TDev {
                             Cloud.accessTokenExpired();
                     }
                     if (onNotLoggedIn) onNotLoggedIn();
+                    World.cancelContinuouslySync(); // stop continuously script
                     return message;
                 }
                 else if (!Cloud.isTouchDevelopOnline()) {
