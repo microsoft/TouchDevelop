@@ -1090,7 +1090,7 @@ module TDev.AST.Bytecode
                 return
             }
 
-            if (shm && /^micro_bit::(createImage|showAnimation|plotImage)$/.test(shm[1])) {
+            if (shm && /^micro_bit::(createImage|showAnimation|showLeds)$/.test(shm[1])) {
                 Util.assert(args[0].getLiteral() != null)
                 this.emitImageLiteral(args[0].getLiteral())
                 args.shift()
