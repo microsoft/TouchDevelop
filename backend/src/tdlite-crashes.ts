@@ -44,31 +44,10 @@ export class BugReport
     @td.json public tdVersion: string = "";
     @td.json public logMessages: JsonObject;
     @td.json public reportId: string = "";
+    public parsedStackTrace: JsonObject[];
     static createFromJson(o:JsonObject) { let r = new BugReport(); r.fromJson(o); return r; }
 }
 
-export interface IBugReport {
-    exceptionConstructor: string;
-    exceptionMessage: string;
-    context: string;
-    currentUrl: string;
-    worldId: string;
-    kind: string;
-    scriptId: string;
-    stackTrace: string;
-    sourceURL: string;
-    line: number;
-    eventTrace: string;
-    userAgent: string;
-    resolution: string;
-    jsUrl: string;
-    timestamp: number;
-    platform: string[];
-    attachments: string[];
-    tdVersion: string;
-    logMessages: JsonObject;
-    reportId: string;
-}
 
 function crashAndBurn() : void
 {
@@ -104,6 +83,9 @@ export async function initAsync()
     });
     core.addRoute("POST", "bug", "", async (req1: core.ApiRequest) => {
         let report = BugReport.createFromJson(req1.body);
+        report.reportId = "BuG" + (20000000000000 - await core.redisClient.cachedTimeAsync()) + azureTable.createRandomId(10);
+        report.parsedStackTrace = buildStackTrace(orEmpty(report.stackTrace), report.line);
+        
         let jsb = {
             "details": {
                 "client": {
@@ -111,7 +93,7 @@ export async function initAsync()
                     "version": "0.0.1"
                 },
                 "error": {
-                    "stackTrace": [],
+                    "stackTrace": report.parsedStackTrace,
                     "message": withDefault(report.exceptionConstructor, "Error"),
                     "innerError": orEmpty(report.exceptionMessage),
                     "className": "Error",
@@ -132,17 +114,14 @@ export async function initAsync()
             "occurredOn": new Date(report.timestamp),
         };
         
-        report.reportId = "BuG" + (20000000000000 - await core.redisClient.cachedTimeAsync()) + azureTable.createRandomId(10);
         let js2 = report.toJson();
         let encReport = core.encrypt(JSON.stringify(js2), "BUG");
         let result4 = await crashContainer.createBlockBlobFromTextAsync(report.reportId, encReport);
         let js = td.clone(js2);
         delete js["eventTrace"];
         delete js["logMessages"];
-        delete js["attachments"];
-        let det = jsb["details"];
-        det["userCustomData"] = js;
-        det["error"]["stackTrace"] = buildStackTrace(orEmpty(report.stackTrace), report.line);
+        delete js["attachments"];        
+        jsb["details"]["userCustomData"] = js;
         logger.info("stored crash: " + report.reportId);
         if (! report.tdVersion) {
             // Skip reporting of errors from local builds.
@@ -156,7 +135,9 @@ export async function initAsync()
             let response = await creq.sendAsync();
             logger.debug("raygun: " + response + "");
         }
-        req1.response = ({});
+        req1.response = {
+            reportId: report.reportId
+        };
     }
     , {
         noSizeCheck: true
