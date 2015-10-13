@@ -14,6 +14,8 @@ module TDev {
     path: string;
     // url to the logo image
     logoUrl: string;
+    // order in menu
+    order: number;
   }
 
   var externalEditorsCache: ExternalEditor[] = null;
@@ -61,7 +63,8 @@ module TDev {
           id: "blockly",
           origin: origin,
           path: path + "blockly/editor.html",
-          logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo"
+          logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
+          order: 0,
         }, {
           company: "Code Kingdoms",
           name: "CK JavaScript",
@@ -69,7 +72,8 @@ module TDev {
           id: 'codekingdoms',
           origin: ckOrigin,
           path: ckPath,
-          logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png'
+          logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
+          order: 1,
         }];
 
       if (TDev.isBeta) {
@@ -81,7 +85,8 @@ module TDev {
           id: "python",
           origin: "https://microbit.pythonanywhere.com",
           path: "/editor.html",
-          logoUrl: origin + '/static/img/python-powered.png'
+          logoUrl: origin + '/static/img/python-powered.png',
+          order:3
         })
       }
     }

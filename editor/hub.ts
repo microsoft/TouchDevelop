@@ -1237,7 +1237,10 @@ module TDev.Browser {
                     id: "touchdevelop",
                     origin: "",
                     path: "",
+                    order: 2,
                 }].concat(getExternalEditors());
+                
+                editors.sort((a, b) => a.order - b.order);
                 
                 var elts = [];
                 editors.forEach(k => {
