@@ -12,6 +12,7 @@ type JsonBuilder = td.JsonBuilder;
 
 import * as azureTable from "./azure-table"
 import * as azureBlobStorage from "./azure-blob-storage"
+import * as raygun from "./raygun"
 import * as core from "./tdlite-core"
 import * as mbedworkshopCompiler from "./mbedworkshop-compiler"
 
@@ -60,6 +61,7 @@ export class CompileStatus
     @td.json public hexurl: string = "";
     @td.json public mbedresponse: JsonBuilder;
     @td.json public messages: JsonObject[];
+    @td.json public bugReportId: string = "";
     static createFromJson(o:JsonObject) { let r = new CompileStatus(); r.fromJson(o); return r; }
 }
 
@@ -252,10 +254,7 @@ async function mbedwsDownloadAsync(sha: string, compile: mbedworkshopCompiler.Co
     task = await compile.statusAsync(false);
     let st = new CompileStatus();
     logger.measure("MbedWsCompileTime", logger.contextDuration());
-    st.success = task.success;
-    // Just in case...
-    let s = JSON.stringify(task.payload).replace(/\w+@github.com/g, "[...]@github.com");
-    st.mbedresponse = JSON.parse(s);
+    st.success = task.success;    
     if (task.success) {
         let bytes = await task.downloadAsync(compile);
         if (bytes.length == 0) {
@@ -270,9 +269,30 @@ async function mbedwsDownloadAsync(sha: string, compile: mbedworkshopCompiler.Co
             logger.tick("MbedHexCreated");
         }
     }
+    
+    var err: any = null;
+    if (!task.success) {
+        err = new Error("Compilation failed");
+        st.bugReportId = raygun.mkReportId()
+        err.tdMeta = { reportId: st.bugReportId }
+        let payload = JSON.parse(JSON.stringify(task.payload).replace(/\w+@github.com/g, "[...]@github.com"))
+        delete payload["replace_files"];         
+        err.bugAttachments = [
+            core.withDefault(payload.result ? payload.result.exception : null, "Cannot find exception")
+                .replace(/(\\r)?\\n/g, "\n")
+                .replace(/['"], ["']/g, "\n"),                
+            JSON.stringify(payload, null, 1),
+            compile.replaceFiles["/source/main.cpp"]            
+        ];
+        st.mbedresponse = { result: { exception: "ReportID: " + st.bugReportId }}
+    }
+    
     let result2 = await compileContainer.createBlockBlobFromTextAsync(sha + ".json", JSON.stringify(st.toJson()), {
         contentType: "application/json; charset=utf-8"
     });
+    
+    if (err)    
+        throw err;
 }
 
 async function mbedintDownloadAsync(sha: string, jsb2: JsonBuilder, ccfg: CompilerConfig) : Promise<void>

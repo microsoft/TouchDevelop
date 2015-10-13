@@ -506,7 +506,8 @@
 
             if (bug.attachments) {
                 bug.attachments.forEach((a, i) => {
-                    var e = div("stackTraceEntry", lf("Attachement #{0}", i))
+                    var e = div("stackTraceEntry", lf("Attachment #{0} ({1} chars): {2}...", i, a.length, 
+                        a.replace(/\s+/g, " ").slice(0, 20)))
                     e.withClick(() => {
                         ModalDialog.showText(a)
                     })
@@ -514,8 +515,9 @@
                 })
             }
 
+            stack.push(div("sdBold", lf("Stack trace:")))
+
             if (Array.isArray(bb.parsedStackTrace)) {
-                stack.push(div("sdBold", lf("Stack trace:")))
                 bb.parsedStackTrace.forEach(it => {
                     var fn = it.fileName
                     var e = div("stackTraceEntry", "at " + it.className + "." + it.methodName + " (" + fn.replace(/.*\//, "") + ":" + it.lineNumber + ")")
@@ -537,8 +539,7 @@
                     stack.push(e)
                 })
             } else {
-                str += "\n\nStackTrace:\n"
-                str += bb.stackTrace
+                stack.push(div("stackTraceLine", bb.stackTrace))
             }
 
 

@@ -77,8 +77,9 @@ export function mkBugReport(err:any, ctx = "")
         reportId: mkReportId(),
     }
 
-    if (Array.isArray(err.bugAttachments))
+    if (Array.isArray(err.bugAttachments)) {
         td.pushRange(r.attachments, err.bugAttachments)
+    }
 
     var meta = err.tdMeta
     if (meta) {
