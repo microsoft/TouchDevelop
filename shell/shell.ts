@@ -277,8 +277,9 @@ class ApiRequest {
     {
         var buf = new Buffer(JSON.stringify(r), "utf8")
         var hd:any = { 'Content-Type': 'application/json; encoding=utf-8' }
-        if (/gzip/.test(this.req.headers['accept-encoding'])) {
-            buf = (<any>zlib).gzipSync(buf);
+        var zl:any = zlib;
+        if (zl.gzipSync && /gzip/.test(this.req.headers['accept-encoding'])) {
+            buf = zl.gzipSync(buf);
             hd['Content-Encoding'] = 'gzip';
         }
         hd['Content-Length'] = buf.length;
@@ -1111,7 +1112,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numDeploys: tdstate.numDeploys,
             numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
-            versionStamp: "v5",
+            versionStamp: "v6",
         })
     },
 
