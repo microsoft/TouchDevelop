@@ -14,6 +14,8 @@ import * as azureTable from "./azure-table"
 import * as parallel from "./parallel"
 import * as core from "./tdlite-core"
 import * as tdliteScripts from "./tdlite-scripts"
+import * as tdliteSearch from "./tdlite-search"
+import * as tdliteIndex from "./tdlite-index"
 
 
 var orEmpty = td.orEmpty;
@@ -28,8 +30,7 @@ export async function initAsync() : Promise<void>
     await tdliteScripts.scripts.createCustomIndexAsync("promo", promosTable);
     core.addRoute("GET", "promo-scripts", "*", async (req: core.ApiRequest) => {
         await core.anyListAsync(tdliteScripts.scripts, req, "promo", req.verb);
-    }
-    , {
+    }, {
         cacheKey: "promo"
     });
     core.addRoute("GET", "promo", "config", async (req1: core.ApiRequest) => {
@@ -72,7 +73,7 @@ export async function initAsync() : Promise<void>
             if (false) {
                 let pubScript = tdliteScripts.PubScript.createFromJson(req3.rootPub["pub"]);
                 coll.push(pubScript.editor);
-                d[withDefault(pubScript.editor, "touchdevelop")] = "1";
+                d[core.withDefault(pubScript.editor, "touchdevelop")] = "1";
                 if (td.stringContains(pubScript.description, "#docs")) {
                     d["docs"] = "1";
                 }
@@ -118,3 +119,30 @@ async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
     return js2;
 }
 
+export async function reindexAsync(req: core.ApiRequest)
+{
+    let store = tdliteScripts.scripts;
+    let lst = await store.getIndex("promo").fetchAsync("all", req.queryOptions);
+    
+    req.response = {
+        continuation: lst.continuation,
+        itemCount: lst.items.length,
+        itemsReindexed: 0
+    }
+    
+    await core.resolveAsync(store, lst, core.emptyRequest);
+    
+    let batch = tdliteIndex.createPubsUpdate();
+    
+    await parallel.forJsonAsync(lst.items, async (e) => {    
+        let jtxt = await tdliteScripts.getScriptTextAsync(e["id"]) || {}
+        let secondary = await tdliteSearch.secondarySearchEntryAsync(e, jtxt["text"] || "");
+        if (secondary) {
+            let entry2 = tdliteIndex.toPubEntry(secondary, secondary["body"], [], 0);
+            entry2.upsertPub(batch);
+            req.response["itemsReindexed"]++;
+        }        
+    })
+    
+    await batch.sendAsync();
+}

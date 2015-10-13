@@ -18,6 +18,8 @@ import * as core from "./tdlite-core"
 import * as tdliteIndex from "./tdlite-index"
 import * as tdliteScripts from "./tdlite-scripts"
 import * as tdliteAbuse from "./tdlite-abuse"
+import * as tdlitePointers from "./tdlite-pointers"
+import * as tdlitePromos from "./tdlite-promos"
 
 
 var orEmpty = td.orEmpty;
@@ -31,6 +33,50 @@ var acsCallbackUrl: string = "";
 export interface IScanAndSearchOptions {
     skipSearch?: boolean;
     skipScan?: boolean;
+}
+
+async function fillUpPointerBodyAsync(res: JsonBuilder): Promise<void> {
+    let promo = res["promo"];
+    let link: string = promo.link;
+    if (!link) return;
+
+    link = link.replace(core.self, "/");
+    if (link[0] != '/') return;
+    let ptr = await core.getPubAsync(tdlitePointers.pathToPtr(link), "pointer")
+    if (!ptr) return;
+    let scr = await core.getPubAsync(ptr["pub"]["scriptid"], "script");    
+    if (!scr) return;
+    let pscr = scr["pub"];
+    let txt = tdliteScripts.getScriptTextAsync(scr["id"])
+    if (!txt || !txt["text"]) return;
+    
+    res["description"] = pscr["name"] + "\n" + res["description"];
+    res["body"] = pscr["description"] + "\n" + txt["text"];
+}
+
+export async function secondarySearchEntryAsync(obj: JsonBuilder, body: string): Promise<JsonBuilder> {
+    let res = td.clone(obj);
+    res["body"] = body;
+    let kind: string = obj["kind"];
+    if (kind == "script" && obj["promo"]) {
+        let promo = obj["promo"]
+        if (!promo) return <JsonBuilder>null;
+
+        let promotags: string[] = promo || []
+        if (promotags.length == 0)
+            return <JsonBuilder>null;
+        
+        res["kind"] = "promo";
+        res["id"] = "promo-" + res["id"];
+        res["name"] = promo["name"];
+        res["description"] = promo["description"];
+        
+        await fillUpPointerBodyAsync(res);
+    
+        return res;
+    } else {
+        return <JsonBuilder>null;
+    }
 }
 
 export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSearchOptions = {}) : Promise<void>
@@ -64,6 +110,11 @@ export async function scanAndSearchAsync(obj: JsonBuilder, options_: IScanAndSea
         let batch = tdliteIndex.createPubsUpdate();
         let entry = tdliteIndex.toPubEntry(pub, body, pubFeatures(pub), 0);
         entry.upsertPub(batch);
+        let secondary = await secondarySearchEntryAsync(pub, body);
+        if (secondary) {
+            let entry2 = tdliteIndex.toPubEntry(secondary, secondary["body"], [], 0);
+            entry2.upsertPub(batch);
+        }
         /* async */ batch.sendAsync();
     }
     // ## scan
@@ -136,7 +187,11 @@ export async function initAsync() : Promise<void>
         if (req.status != 200) return;
         let store = indexedStore.storeByKind(req.argument);
         if (!store) {
-            req.status = httpCode._404NotFound;
+            if (req.argument == "promo") {
+                await tdlitePromos.reindexAsync(req)
+            } else {
+                req.status = httpCode._404NotFound;
+            }    
             return;
         }
         
