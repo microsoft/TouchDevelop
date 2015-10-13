@@ -859,14 +859,14 @@ module TDev.Cloud {
     
     export function showSigninNotification(isOnline: boolean) {
         if (isOnline)
-            HTML.showWarningNotification(lf("can't sync your scripts! tap here to sign in"), {
+            HTML.showWarningNotification(lf("cannot sync - tap here to sign in"), {
                 onClick: () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
                         login.show()
                 }
             });
-        else HTML.showProgressNotification(lf("can't sync - you appear to be offline"));
+        else HTML.showProgressNotification(lf("cannot sync - you appear to be offline"));
     }
             
     export function handlePostingError(e: any, action: string, modal = true) {

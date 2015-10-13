@@ -1086,7 +1086,7 @@
                                 msg = "Adjust it " + delta + ".";
                             }
                             Ticker.tick(Ticks.hubWrongTime);
-                            HTML.showWarningNotification(lf("can't sync! fix the time on your device"), { details: msg });
+                            HTML.showWarningNotification(lf("cannot sync! fix the time on your device"), { details: msg });
                         },
                         () => {
                             if (!canAsk(true)) return;
