@@ -718,99 +718,115 @@ module TDev
             return d;
         }
         
+        export function isHexFile(file: File): boolean {
+            return file && /\.hex$/i.test(file.name);
+        }
+        
         export function importHexFileDialog() {
             var m = new ModalDialog();
             var input = HTML.mkTextInput("file", lf("choose .hex files"));
-            input.multiple = false;
+            input.multiple = true;
             
             m.add(div('wall-dialog-header', lf("import code")));
-            m.add(div('wall-dialog-body', lf("Imports the code from an .hex file created for the BBC micro:bit. Hint: you can also drag and drop .hex files in the editor to import them!")));
+            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit. Hint: you can also drag and drop .hex files in the editor to import them!")));
             m.add(div('wall-dialog-body', input));
             m.addOk(lf("import"), () => {
                 m.dismiss();
-                var file = input.files[0];
-                if (file)   
-                    handleHexFile(file);
+                handleHexFiles(Util.toArray(input.files));
             });
             m.show();            
         }
 
-        export function handleHexFile(file: File)
-        {
-            var guid = ""
-
-            HTML.fileReadAsDataURLAsync(file)
+        export function handleHexFiles(files: File[]) {
+            if (!files || !files.length) return;
+            
+            var guids: string[] = [];
+            Promise.sequentialMap(files, file => installHexFile(file))
+                .then((gs) => {
+                    guids = gs.filter(g => !!g);
+                    return Browser.TheHost.clearAsync(false);
+                }).done(() => {
+                    if (guids.length > 0) Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                });
+        }
+        
+        function installHexFile(file: File): Promise { // Guid
+            if (!file) return Promise.as(undefined);
+            
+            var guid: string = "";
+            return HTML.fileReadAsDataURLAsync(file)
                 .then((dat: string) => {
                     var str = RT.String_.valueFromArtUrl(dat)
                     var tmp = AST.Bytecode.Binary.extractSource(str)
                     if (!tmp.meta) {
                         HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
-                        return
+                        return Promise.as(undefined);
                     }
                     var hd: Cloud.Header = JSON.parse(tmp.meta)
                     hd.guid = Util.guidGen()
                     guid = hd.guid
                     // renaming is tricky - would need to rename the text as well ...
                     // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
-
                     return World.setInstalledScriptAsync(hd, tmp.text, null)
-                        .then(() => Browser.TheHost.clearAsync(false))
-                        .then(() => {
-                            Util.setHash("#list:installed-scripts:script:" + guid + ":overview")
-                        })
-                }).done();
+                        .then(() => guid);
+                });
         }
         
         function uploadFile(file: File) {
             if (!file) return;
-                if (/\.hex$/.test(file.name)) {
-                    handleHexFile(file)
-                    return
-                }
-                if (Cloud.anonMode(lf("uploading art"))) return;
-                var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
-                var sizeLimit = 1
-                if (isDoc) sizeLimit = 8
-                if (file.size > sizeLimit*1024*1024) {
-                    ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
+            if (ArtUtil.isHexFile((file))) {
+                handleHexFiles([file])
+                return;
+            }
+            if (Cloud.anonMode(lf("uploading art"))) return;
+            var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
+            var sizeLimit = 1
+            if (isDoc) sizeLimit = 8
+            if (file.size > sizeLimit*1024*1024) {
+                ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
+            } else {
+                var name = file.name;
+                var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
+                if (m) name = m[1];
+                if (/^image\/(png|jpeg)$/i.test(file.type)) {
+                    ArtUtil.uploadPictureDialogAsync({
+                        removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
+                        input: HTML.mkFileInput(file, 1),
+                        initialName: name,
+                        finalDialog: !Script
+                    })
+                        .done((art: JsonArt) => {
+                            if (art && Script) {
+                                var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
+                                TheEditor.addNode(n);
+                            }
+                        });
+                } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
+                    ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                        if (art && Script) {
+                            var n = TheEditor.freshSoundResource(art.name, art.wavurl);
+                            TheEditor.addNode(n);
+                        }
+                    });
+                } else if (Cloud.lite && isDoc) {
+                    ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                        if (art && Script) {
+                            var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
+                            TheEditor.addNode(n);
+                        }
+                    });
                 } else {
-                    var name = file.name;
-                    var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
-                    if (m) name = m[1];
-                    if (/^image\/(png|jpeg)$/i.test(file.type)) {
-                        ArtUtil.uploadPictureDialogAsync({
-                            removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
-                            input: HTML.mkFileInput(file, 1),
-                            initialName: name,
-                            finalDialog: !Script
-                        })
-                            .done((art: JsonArt) => {
-                                if (art && Script) {
-                                    var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
-                                    TheEditor.addNode(n);
-                                }
-                            });
-                    } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
-                        ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                            if (art && Script) {
-                                var n = TheEditor.freshSoundResource(art.name, art.wavurl);
-                                TheEditor.addNode(n);
-                            }
-                        });
-                    } else if (Cloud.lite && isDoc) {
-                        ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                            if (art && Script) {
-                                var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
-                                TheEditor.addNode(n);
-                            }
-                        });
-                    } else {
-                        ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
-                    }
+                    ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
                 }
-            }        
+            }
+        }  
         
         function uploadFiles(files: File[]) {
+            if (files.some(ArtUtil.isHexFile)) {
+                handleHexFiles(files);
+                return;       
+            }
+            
             if (!Cloud.hasPermission("batch-post-art") && !TDev.dbg) return;
 
             var m = new ModalDialog();

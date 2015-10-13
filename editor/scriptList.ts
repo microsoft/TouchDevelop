@@ -6475,7 +6475,7 @@
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
-            "import": "bitcompile,#ccc",
+            "import": "bitload,#ccc",
             "*": "emptycircle,#85BB65",
         }
 
