@@ -2101,7 +2101,7 @@ module TDev.AST
                                 var picMap = inP[i].getStringValueArtIds();
                                 if (picMap) args[i].hintArtId = picMap[lit];
                                 if(str.indexOf(lit) >= 0)
-                                    args[i].enumVal = lit;
+                                    args[i].hintVal = lit;
                             }
                         }                        
                     }
