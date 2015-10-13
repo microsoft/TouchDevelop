@@ -203,8 +203,7 @@ module TDev
                     }),
                     (Browser.isCellphone ? null :
                     HTML.mkButton(lf("print"), () => this.renderScript())),
-                    HTML.mkButton(lf("diff to base"), () => ScriptProperties.diffToBase()),
-                    HTML.mkButton(lf("make atomic"), () => ScriptProperties.makeAtomic())
+                    HTML.mkButton(lf("diff to base"), () => ScriptProperties.diffToBase())
                     ),
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
@@ -321,39 +320,6 @@ module TDev
                     });
                     return Script;
                 }))
-        }
-
-        static makeAtomic()
-        {
-            var acts = AST.AtomicVisitor.run(Script)
-            acts = acts.filter(a => !a.isAtomic && a.getName() != "main")
-            if (acts.length == 0) {
-                ModalDialog.info(lf("it's as atomic as it gets"),
-                                 lf("All functions that could be marked atomic already are."))
-                return
-            }
-
-            var names = ""
-
-            if (acts.length > 10) {
-                names = acts.map(a => a.getName()).slice(0, 8).join(", ") + " and " + (acts.length - 8) + " more"
-            } else {
-                names = acts.map(a => a.getName()).join(", ")
-            }
-
-
-            ModalDialog.ask("The following actions can be made atomic: " + names,
-                            "make atomic",
-                            () => {
-                                TheEditor.undoMgr.clearCalc();
-                                TheEditor.undoMgr.pushMainUndoState();
-                                acts.forEach(a => {
-                                    a.isAtomic = true
-                                    a.notifyChange()
-                                })
-                                TheEditor.dismissSidePane();
-                                TheEditor.queueNavRefresh();
-                            })
         }
 
         static showDiff(getScrAsync:Promise, additionalActions:any = {}, showAll = false, hd?: Cloud.Header)
