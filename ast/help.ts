@@ -186,6 +186,7 @@ module TDev {
         updatetime:number;
         ishidden:boolean; // whether the user has indicated that this script should be hidden
         islibrary:boolean; // whether the user has indicated that this script is a reusable library
+        useCppCompiler: boolean; // whether th euser has indicated that this script requires to use the C++ compiler
         installations:number; // an approximation of how many TouchDevelop users have currently installed this script
         runs:number; // an estimate of how often users have run this script
         platforms:string[];

@@ -14,6 +14,7 @@ module TDev
         private iconArtIdContainer = div("scriptPropContainer");
         private splashArtIdContainer = div("scriptPropContainer");
         private isLibrary:HTMLElement;
+        private useCppCompiler: HTMLElement;
         private allowExport: HTMLElement;
         private isCloud: HTMLElement;
         private formRoot = div(null);
@@ -183,6 +184,7 @@ module TDev
 
             this.isLibrary = HTML.mkCheckBox(lf("this script is a library"), (v) => this.theScript.isLibrary = v);
             this.isLibrary.appendChild(Editor.mkHelpLink("libraries"));
+            this.useCppCompiler = HTML.mkCheckBox(lf("use C++ compiler"), (v) => this.theScript.useCppCompiler = v);
             this.allowExport = HTML.mkCheckBox(lf("allow other users to export to app"), (v) => this.exportChanged(v));
             this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
@@ -233,6 +235,7 @@ module TDev
                     ),
                 this.settingsSection = div("formLine",
                     this.isLibrary,
+                    this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
                     this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null,
                     this.editor.widgetEnabled("scriptPropertiesPropertyAllowExport") ? this.allowExport : null),
                 dbg ? div("formLine",
@@ -875,6 +878,7 @@ module TDev
             this.splashArtIdContainer.setChildren([splashArtId.mkBox().withClick(() => this.setSplashArtId())]);
 
             HTML.setCheckboxValue(this.isLibrary, this.theScript.isLibrary);
+            HTML.setCheckboxValue(this.useCppCompiler, this.theScript.useCppCompiler);
             HTML.setCheckboxValue(this.allowExport, this.theScript.allowExport);
             HTML.setCheckboxValue(this.isCloud, this.theScript.isCloud);
 

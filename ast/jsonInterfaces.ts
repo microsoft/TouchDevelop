@@ -398,6 +398,7 @@ module TDev.AST.Json
 
         platform: string; // comma-separated
         isLibrary: boolean;
+        useCppCompiler: boolean;
         allowExport: boolean;
         showAd: boolean;
         hasIds: boolean; // does it have stable, persistent ids for every stmt

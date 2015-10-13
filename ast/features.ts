@@ -99,6 +99,7 @@ module TDev.AST {
         {
             super.visitApp(a);
             if (a.isLibrary) this.use("library");
+            if (a.useCppCompiler) this.use("cppCompiler");
             if (a.isCloud) this.use("cloud");
             if (this.includeCaps && this.anonBrowser)
                 this.use("anonBrowser")

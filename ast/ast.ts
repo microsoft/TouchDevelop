@@ -2492,7 +2492,7 @@ module TDev.AST {
         }
 
         // split screen is used as a hit when loaded in the editor, serialized when publishing
-        static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen" ];
+        static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen", "useCppCompiler" ];
 
         public headerStmt: AppHeaderStmt;
         public nodeType() { return "app"; }
@@ -2542,7 +2542,8 @@ module TDev.AST {
         public hasTests():boolean { return this.allActions().some((a) => a.isTest()); }
         public isTestOnly():boolean { return !this.mainAction() && this.hasTests() }
         public localGuid:string = Util.guidGen();
-        public isLibrary:boolean;
+        public isLibrary: boolean;
+        public useCppCompiler: boolean;
         public isCloud: boolean;
 
         public isTopLevel = false;
@@ -2952,6 +2953,7 @@ module TDev.AST {
                 updateid: "",
                 ishidden: true,
                 islibrary: this.isLibrary,
+                useCppCompiler: this.useCppCompiler,
                 installations: 0,
                 runs: 0,
             };

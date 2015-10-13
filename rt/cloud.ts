@@ -145,6 +145,7 @@ module TDev.Cloud {
         scriptPropertiesPropertyCloud?: boolean;
         scriptPropertiesPropertyAllowExport?: boolean;
         scriptPropertiesPropertyAtomic?: boolean;
+        scriptPropertiesUseCppCompiler?: boolean;
         stringEditFullScreen?: boolean;
         persistanceRadio?: boolean;
         wallScreenshot?: boolean;
