@@ -53,6 +53,7 @@ module TDev
             var widgets = Browser.EditorSettings.widgets();
             var ifDefault = inTutorial ? null : widgets.ifConditionDefault;
             var forDefault = inTutorial ? null : widgets.forConditionDefault;
+            var whileBodyDefault = inTutorial ? null : widgets.whileBodyDefault;
             var whileDefault = inTutorial ? null : widgets.whileConditionDefault;
             return [{
                     name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
@@ -66,7 +67,7 @@ module TDev
                 },
                 {
                     name: "while", desc: lf("repeat while"), tick: Ticks.codeWhile,
-                    node: "while " + (whileDefault || "\\u0001need_Boolean\\u003Aloop_condition") + " do { }",
+                    node: "while " + (whileDefault || "\\u0001need_Boolean\\u003Aloop_condition") + " do { " + whileBodyDefault + " }",
                     widget: ''
                 },
                 {

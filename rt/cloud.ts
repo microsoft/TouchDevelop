@@ -160,6 +160,7 @@ module TDev.Cloud {
         ifConditionDefault?: string;
         forConditionDefault?: string;
         whileConditionDefault?: string;
+        whileBodyDefault?: string;
     }
 
     export interface EditorMode {
