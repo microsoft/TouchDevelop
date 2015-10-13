@@ -1235,8 +1235,9 @@ module TDev
             if (!AST.proMode &&
                 decl instanceof AST.Action
                 && this.selector.selectedStmt
+                && this.selector.selectedStmt.isPlaceholder()
                 && !this.isDebuggerMode()
-                && !this.isReadOnly)
+                && !this.isReadOnly)                
                 this.editNode(this.selector.selectedStmt);
         }
 
