@@ -772,16 +772,19 @@ module TDev
             return HTML.fileReadAsDataURLAsync(file)
                 .then((dat: string) => {
                     var str = RT.String_.valueFromArtUrl(dat)
-                    var f: AST.Json.JWorkspace;
+                    var f: Cloud.Workspace;
                     try {
-                        f = <AST.Json.JWorkspace>JSON.parse(str);
+                        f = <Cloud.Workspace>JSON.parse(str);
                     }
                     catch (e) {                        
                         HTML.showErrorNotification(lf("This json file is invalid."))
                         return Promise.as(undefined);
                     }
+                    
+                    f.scripts = (f.scripts || []).filter(f => !!f);
+                    if (!f.scripts || !f.scripts.length) return Promise.as([]);
 
-                    return Promise.sequentialMap(f.scripts || [], script => {
+                    return Promise.sequentialMap(f.scripts, script => {
                         if (!script.source) {
                             HTML.showErrorNotification(lf("This script is missing the source."))
                             return Promise.as(undefined);                            

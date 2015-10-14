@@ -657,6 +657,14 @@ module TDev.Cloud {
         editor?: string;
         pendingMerge?: string;
     }
+    
+    export interface Workspace {
+        scripts: {
+            header: Header;
+            source: string;
+        }[];
+    }    
+    
     export interface AskSomething {
         title: string;
         picture?: string;

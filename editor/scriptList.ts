@@ -6992,7 +6992,7 @@
                     var header = <Cloud.Header>r[1];
                     if (!text || !header) return;
 
-                    var f = <AST.Json.JWorkspace>{
+                    var f = <Cloud.Workspace>{
                         scripts: [{
                             header: header,
                             source: text,
