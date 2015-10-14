@@ -25,6 +25,7 @@ backend/built
 
 # visual studio
 *.suo
+*.user
 
 # vim
 tags
