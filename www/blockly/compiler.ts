@@ -855,7 +855,7 @@ function compileNot(e: Environment, b: B.Block): J.JExpr {
 }
 
 function compileRandom(e: Environment, b: B.Block): J.JExpr {
-  return H.mathCall("random", [H.mkNumberLiteral(parseInt(b.getFieldValue("limit")))]);
+  return H.mathCall("random", [H.mkNumberLiteral(parseInt(b.getFieldValue("limit"))+1)]);
 }
 
 function defaultValueForType(t: Point): J.JExpr {
