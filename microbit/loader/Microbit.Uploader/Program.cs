@@ -9,6 +9,7 @@ namespace Microsoft.MicroBit
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         [STAThread]
         static void Main()
         {

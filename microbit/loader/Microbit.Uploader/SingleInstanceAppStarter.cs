@@ -21,7 +21,7 @@ using Microsoft.VisualBasic.ApplicationServices;
 
 namespace Microsoft.MicroBit
 {
-    internal class SingleInstanceAppStarter
+    internal static class SingleInstanceAppStarter
     {
         static SingleInstanceApp app = null;
 
