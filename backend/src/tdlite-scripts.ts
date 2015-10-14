@@ -95,7 +95,6 @@ export async function resolveScriptsAsync(entities: indexedStore.FetchResult, re
         let updates = {};
         updates[""] = "1";
         entities.items = asArray(entities.items).filter((elt: JsonObject) => {
-            let result: boolean;
             if ( ! elt["pub"]["ishidden"]) {
                 let key = orEmpty(elt["updateKey"]);
                 if (updates[key] == null) {
@@ -104,7 +103,6 @@ export async function resolveScriptsAsync(entities: indexedStore.FetchResult, re
                 }
             }
             return false;
-            return result;
         });
     }
     else if (entities.items.length == 1) {

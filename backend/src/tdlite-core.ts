@@ -1447,6 +1447,7 @@ export async function addUsernameEtcCoreAsync(entities: JsonObject[]) : Promise<
         coll2.push(root);
         if (userJs != null) {
             root["*userid"] = userJs;
+            userJs = userJs["pub"];
         } else {
             userJs = {};
         }

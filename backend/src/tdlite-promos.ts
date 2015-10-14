@@ -118,31 +118,3 @@ async function getPromoAsync(req: core.ApiRequest) : Promise<JsonObject>
     }
     return js2;
 }
-
-export async function reindexAsync(req: core.ApiRequest)
-{
-    let store = tdliteScripts.scripts;
-    let lst = await store.getIndex("promo").fetchAsync("all", req.queryOptions);
-    
-    req.response = {
-        continuation: lst.continuation,
-        itemCount: lst.items.length,
-        itemsReindexed: 0
-    }
-    
-    await core.resolveAsync(store, lst, core.emptyRequest);
-    
-    let batch = tdliteIndex.createPubsUpdate();
-    
-    await parallel.forJsonAsync(lst.items, async (e) => {    
-        let jtxt = await tdliteScripts.getScriptTextAsync(e["id"]) || {}
-        let secondary = await tdliteSearch.secondarySearchEntryAsync(e, jtxt["text"] || "");
-        if (secondary) {
-            let entry2 = tdliteIndex.toPubEntry(secondary, secondary["body"], [], 0);
-            entry2.upsertPub(batch);
-            req.response["itemsReindexed"]++;
-        }        
-    })
-    
-    await batch.sendAsync();
-}

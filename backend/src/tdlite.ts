@@ -52,7 +52,7 @@ var withDefault = core.withDefault;
 var orEmpty = td.orEmpty;
 
 
-var reinit = false;
+var reinit = true;
 
 var logger = core.logger;
 var httpCode = restify.http();
