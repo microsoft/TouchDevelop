@@ -3657,7 +3657,7 @@ module TDev
 
                 e.nameOverride = isNum ? s + "" : isEnum ? s : Util.fmt('"{0}"', s);
                 e.descOverride = "insert";
-                e.iconOverride = "svg:NumberedList,white";
+                e.iconOverride = "svg:EmptyCircle,white";
                 e.colorOverride = "rgb(0, 204, 153)";
                 var spic = picStringValues[s];
                 if (spic) {
