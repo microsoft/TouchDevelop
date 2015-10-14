@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Microsoft.MicroBit
 {
     /// <summary>
     /// Class containing methods to retrieve specific file system paths.
     /// </summary>
-    public static class KnownFoldersNativeMethods
+    internal static class KnownFoldersNativeMethods
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        [SecurityCritical]
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public static string GetDownloadPath()
         {
             IntPtr outPath;
@@ -19,7 +22,9 @@ namespace Microsoft.MicroBit
             else return null;
         }
 
+        [SuppressMessage("Microsoft.Security", "CA5122:PInvokesShouldNotBeSafeCriticalFxCopRule")]
         [DllImport("Shell32.dll")]
+        [SecurityCritical]
         private static extern int SHGetKnownFolderPath(
             [MarshalAs(UnmanagedType.LPStruct)]Guid rfid, uint dwFlags, IntPtr hToken,
             out IntPtr ppszPath);

@@ -8,8 +8,10 @@ using System.Windows.Forms;
 
 namespace Microsoft.MicroBit
 {
-    public partial class MainForm : Form
+    internal partial class MainForm : Form
     {
+        FileSystemWatcher watcher;
+
         public MainForm()
         {
             InitializeComponent();
@@ -22,7 +24,7 @@ namespace Microsoft.MicroBit
 
         private void initializeFileWatch()
         {
-            if (!this.checkTOU()) return;
+            if (!checkTOU()) return;
 
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
@@ -31,10 +33,10 @@ namespace Microsoft.MicroBit
                 return;
             }
 
-            var watcher = new FileSystemWatcher(downloads);
-            watcher.Renamed += (sender, e) => this.handleFileEvent(e);
-            watcher.Created += (sender, e) => this.handleFileEvent(e);
-            watcher.EnableRaisingEvents = true;
+            this.watcher = new FileSystemWatcher(downloads);
+            this.watcher.Renamed += (sender, e) => this.handleFileEvent(e);
+            this.watcher.Created += (sender, e) => this.handleFileEvent(e);
+            this.watcher.EnableRaisingEvents = true;
 
             this.updateStatus("waiting for .hex file...");
             try
@@ -44,7 +46,7 @@ namespace Microsoft.MicroBit
             catch (IOException) { }
         }
 
-        private bool checkTOU()
+        static bool checkTOU()
         {
             var v = (int)Application.UserAppDataRegistry.GetValue("TermOfUse", 0);
             if (v != 1)
