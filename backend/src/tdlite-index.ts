@@ -160,7 +160,11 @@ export class PubQuery
         let filter: string;
         let coll = (<string[]>[]);
         if (this.kind != "") {
-            coll.push("kind eq '" + this.kind + "'");
+            if (this.kind == "web") {
+                coll.push("(" + ["script", "pointer", "promo"].map(s => `kind eq '${s}'`).join(" or ") + ")")
+            } else {
+                coll.push(`kind eq '${this.kind}'`);
+            }    
         }
         let includedUsers = (<string[]>[]);
         for (let user of Object.keys(this.users)) {
@@ -256,6 +260,7 @@ async function initArtSearchIndexAsync(noCreate:boolean) : Promise<void>
     let imaggatags = schema.addField("tags", "Edm.String");
     imaggatags.setRetrievable(false);
     let score = schema.addField("score", "Edm.Double");
+    score.setFilterable(true);
     let profile = schema.addScoringProfile("editorpics");
     profile.setWeight(schema.keyField(), 10);
     profile.setWeight(name, 5);
@@ -459,11 +464,12 @@ async function initPubSearchIndexAsync(noCreate:boolean) : Promise<void>
     profile.setWeight(schema.keyField(), 10);
     profile.setWeight(userid, 10);
     profile.setWeight(username, 30);
-    profile.setWeight(name, 1000);
-    profile.setWeight(description, 50);
+    profile.setWeight(name, 100);
+    profile.setWeight(description, 40);
     profile.setWeight(body, 5);
-    profile.setWeight(hashes, 20);
+    profile.setWeight(hashes, 50);
     profile.setWeight(features, 20);
+    profile.addMagnitude(score, 50, "linear", 0, 100, false);
     schema.addCORSOrigin("*");
     if (noCreate)
         pubsIndex = schema.get();
@@ -599,6 +605,14 @@ export function toPubEntry(pub: JsonObject, body: string, features: string[], sc
     if (entry.kind == "pointer") {
         entry.name = pub["path"] + " " + pub["scriptname"]
         entry.description = pub["scriptdescription"]
+        entry.score += 20;
+    }
+    
+    if (features.indexOf("@official") >= 0)
+        entry.score += 30;
+    
+    if (entry.kind == "promo") {
+        entry.score += 70;
     }
         
     // specific indexing
@@ -648,7 +662,7 @@ export function toPubQuery(index: string, kind: string, text: string) : PubQuery
     query.kind = kind;
     // This doesn't seem to work, so no ordering on time
     // query.orderby = "@search.score desc, time desc";
-    query.select = "id,kind,name,score,time";
+    query.select = "id,kind,name,score,features,time";
     query.users = {};
     query.features = {};
     query.hashes = {};
@@ -673,6 +687,9 @@ export function toPubQuery(index: string, kind: string, text: string) : PubQuery
         }
         else if (key == "kind") {
             query.kind = val;
+        }
+        else if (key == "hash") {
+            query.hashes[val] = "true";
         }
         else {
             let m = (/(\~)?([#@*])([a-zA-Z0-9_\.]+)/.exec(word) || []);
@@ -732,7 +749,7 @@ function cleanQuery(text: string) : string
     }
     else {
         text = cloudSpecifcRepl(text);
-        text = text.replace(/[^a-zA-Z0-9#@*~ ]+/g, " ");
+        text = text.replace(/[^a-zA-Z0-9#@*~\- ]+/g, " ");
         text = text.toLowerCase();
         return text;
     }
