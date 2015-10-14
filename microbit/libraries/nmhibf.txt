@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #D34u4ORZ4Owljhx8 skip;
+  #bxVDodSvPI9uwy4S skip;
 }
-#DAN7NzaVEIeexALH meta import micro\u003abit {
-  pub "vlwuan"
+#geZI4SBuYAqrfdGb meta import micro\u003abit {
+  pub "bcdsst"
   usage {
     type Image
     action `sync` \_libinit()
@@ -56,13 +56,15 @@ action main() {
     action `sync` warning(message: String)
     action `sync` analog_set_period(pin: String, micros: Number)
     action `sync` analog_set_pitch_pin(name: String)
-    action `sync` analog_pitch(frequency: Number, ms: Number)
+    action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
     action `async` show_leds(leds: String)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `async` note(name: String) returns(frequency: Number)
   }
 }
 #MLvRxY6v0wUBQONd meta import micro\u003abit_screen {
-  pub "vmodll"
+  pub "fqycyb"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
