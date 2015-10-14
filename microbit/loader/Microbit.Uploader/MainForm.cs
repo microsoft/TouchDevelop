@@ -16,6 +16,8 @@ namespace Microsoft.MicroBit
         public MainForm()
         {
             InitializeComponent();
+            var v = typeof(MainForm).Assembly.GetName().Version;
+            this.versionLabel.Text = "v" + v.Major + "." + v.Minor;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -183,6 +185,11 @@ namespace Microsoft.MicroBit
             this.WindowState = FormWindowState.Normal;
             this.Show();
             this.Activate();
+        }
+
+        private void versionLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://www.touchdevelop.com/microbit");
         }
     }
 }
