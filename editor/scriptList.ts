@@ -6854,6 +6854,7 @@
             }
             
             var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
+            clone.classList.add("sdUninstall");
             var save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
 
             var uninstall:HTMLElement;
@@ -6890,7 +6891,7 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, clone, save, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, save, clone, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
