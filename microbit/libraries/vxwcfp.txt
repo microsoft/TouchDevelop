@@ -2222,6 +2222,7 @@ action note(#G5aP8OToIirHnSrm name: String) returns(#icSfcpgaQI61R31i frequency:
     #STVoohtLA3YlXWin code→warning("Sorry, we don\'t know about this note.");
     #SaL0iE3iTWdYkP1k `return` 0;
   }
+  meta sync;
 }
 #TBFylGTXdsJStI6d
 var note_table : Json_Object {
