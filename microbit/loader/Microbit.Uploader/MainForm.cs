@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Security;
 using System.Threading;
@@ -80,6 +81,12 @@ namespace Microsoft.MicroBit
             this.handleFile(e.FullPath);
         }
 
+        void setBackgroundColor(Color c)
+        {
+            Callback cb = () => this.BackColor = c;
+            this.Invoke(cb);
+        }
+
         volatile int copying;
         void handleFile(string fullPath)
         {
@@ -106,6 +113,7 @@ namespace Microsoft.MicroBit
                     return;
                 try
                 {
+                    this.setBackgroundColor(Color.Yellow);
                     this.updateStatus("detected " + info.Name);
                     var drive = getMicrobitDrive();
                     if (drive == null)
@@ -133,6 +141,7 @@ namespace Microsoft.MicroBit
                 }
                 finally
                 {
+                    this.setBackgroundColor(Color.White);
                     Interlocked.Exchange(ref this.copying, 0);
                 }
             }
