@@ -1302,7 +1302,7 @@ module TDev.Browser {
                 chooseEditorAsync().done((editor) => {
                     if (!editor) return;
                     if (editor == "import") {
-                        ArtUtil.importHexFileDialog();
+                        ArtUtil.importFileDialog();
                         return;
                     }
                     var p = Promise.as("");

@@ -558,7 +558,7 @@ module TDev {
 
           case MessageType.Load:
             var message4 = <Message_Load> event.data;
-            ArtUtil.handleHexFiles([message4.file]);
+            ArtUtil.handleImportFiles([message4.file]);
             break;
 
           default:

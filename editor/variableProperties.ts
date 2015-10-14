@@ -717,40 +717,89 @@ module TDev
             d.style.backgroundImage = Cloud.artCssImg(id, true);
             return d;
         }
-        
+                
         export function isHexFile(file: File): boolean {
             return file && /\.hex$/i.test(file.name);
         }
         
-        export function importHexFileDialog() {
+        export function isJsonFile(file: File): boolean {
+            return file && /\.json$/i.test(file.name);            
+        }
+        
+        export function isImportable(file: File): boolean {
+            return isHexFile(file) || isJsonFile(file);
+        }        
+        
+        export function importFileDialog() {
             var m = new ModalDialog();
-            var input = HTML.mkTextInput("file", lf("choose .hex files"));
+            var input = HTML.mkTextInput("file", lf("choose .hex or .json files"));
             input.multiple = true;
+            input.accept = ".hex,.json";
             
             m.add(div('wall-dialog-header', lf("import code")));
-            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit. Hint: you can also drag and drop .hex files in the editor to import them!")));
+            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .json files. Hint: you can also drag and drop the files in the editor to import them!")));
             m.add(div('wall-dialog-body', input));
             m.addOk(lf("import"), () => {
                 m.dismiss();
-                handleHexFiles(Util.toArray(input.files));
+                handleImportFiles(Util.toArray(input.files));
             });
             m.show();            
         }
 
-        export function handleHexFiles(files: File[]) {
+        export function handleImportFiles(files: File[]) {
             if (!files || !files.length) return;
             
             var guids: string[] = [];
-            Promise.sequentialMap(files, file => installHexFile(file))
-                .then((gs) => {
-                    guids = gs.filter(g => !!g);
+            Promise.sequentialMap(files, file => installFile(file))
+                .then((gs:string[]) => {
+                    gs.filter(g => !!g).forEach(g => guids = guids.concat(g));
                     return Browser.TheHost.clearAsync(false);
                 }).done(() => {
                     if (guids.length > 0) Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
                 });
         }
         
-        function installHexFile(file: File): Promise { // Guid
+        function installFile(file: File) : Promise {
+            if (isHexFile(file)) return installHexFile(file);
+            if (isJsonFile(file)) return installJsonFile(file);
+            return Promise.as(undefined);
+        }
+
+        function installJsonFile(file: File): Promise { // string[] (guids)
+            if (!file) return Promise.as(undefined);
+            
+            var guid: string = "";
+            return HTML.fileReadAsDataURLAsync(file)
+                .then((dat: string) => {
+                    var str = RT.String_.valueFromArtUrl(dat)
+                    var f: AST.Json.JWorkspace;
+                    try {
+                        f = <AST.Json.JWorkspace>JSON.parse(str);
+                    }
+                    catch (e) {                        
+                        HTML.showErrorNotification(lf("This json file is invalid."))
+                        return Promise.as(undefined);
+                    }
+
+                    return Promise.sequentialMap(f.scripts || [], script => {
+                        if (!script.source) {
+                            HTML.showErrorNotification(lf("This script is missing the source."))
+                            return Promise.as(undefined);                            
+                        }
+                        if (!script.header) {
+                            HTML.showErrorNotification(lf("This script is missing the header."))
+                            return Promise.as(undefined);                            
+                        }
+                        script.header.guid = Util.guidGen()
+                        guid = script.header.guid
+                        
+                        return World.setInstalledScriptAsync(script.header, script.source, null)
+                            .then(() => guid);                        
+                    })                    
+                });
+        }
+        
+        function installHexFile(file: File): Promise { // string[] (guid)
             if (!file) return Promise.as(undefined);
             
             var guid: string = "";
@@ -768,14 +817,14 @@ module TDev
                     // renaming is tricky - would need to rename the text as well ...
                     // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
                     return World.setInstalledScriptAsync(hd, tmp.text, null)
-                        .then(() => guid);
+                        .then(() => [guid]);
                 });
         }
         
         function uploadFile(file: File) {
             if (!file) return;
-            if (ArtUtil.isHexFile((file))) {
-                handleHexFiles([file])
+            if (ArtUtil.isImportable((file))) {
+                handleImportFiles([file])
                 return;
             }
             if (Cloud.anonMode(lf("uploading art"))) return;
@@ -822,8 +871,8 @@ module TDev
         }  
         
         function uploadFiles(files: File[]) {
-            if (files.some(ArtUtil.isHexFile)) {
-                handleHexFiles(files);
+            if (files.some(ArtUtil.isImportable)) {
+                handleImportFiles(files);
                 return;       
             }
             
@@ -870,7 +919,7 @@ module TDev
                 if (e.clipboardData) {
                     // has file?
                     var files = Util.toArray<File>(e.clipboardData.files).filter((file: File) => /^(image|sound)/.test(file.type));
-                    if ((Cloud.hasPermission("batch-post-art") || TDev.dbg) && files.length > 1) {
+                    if (files.length > 1) {
                         e.stopPropagation(); // Stops some browsers from redirecting.
                         e.preventDefault();
                         uploadFiles(files);
@@ -900,8 +949,8 @@ module TDev
             }, false);
             r.addEventListener('drop', (e) => {
                 var files = Util.toArray<File>(e.dataTransfer.files)
-                    .filter((file: File) => /\.hex$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
-                if ((Cloud.hasPermission("batch-post-art")  || TDev.dbg) && files.length > 1) {
+                    .filter((file: File) => /\.(hex|json)$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
+                if (files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
                     uploadFiles(files);
