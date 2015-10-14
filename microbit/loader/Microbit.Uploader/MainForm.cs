@@ -175,10 +175,12 @@ namespace Microsoft.MicroBit
             return "";
         }
 
-        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        private void trayIcon_Click(object sender, EventArgs e)
         {
+            this.WindowState = FormWindowState.Minimized;
             this.WindowState = FormWindowState.Normal;
-            this.BringToFront();
+            this.Show();
+            this.Activate();
         }
     }
 }
