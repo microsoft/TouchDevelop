@@ -1372,10 +1372,11 @@
                 div("wall-dialog-header", lf("create new group")),
                 div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',
-                    div('', div('', lf("group name (minimum 4 characters)")), name),
-                    div('', div('', lf("group description")), descr),
+                    div('', div('', lf("name (minimum 4 characters)")), name),
+                    div('', div('', lf("description")), descr),
                     EditorSettings.widgets().groupAllowExportApp ? div('', allowExport) : undefined
-                    ),
+                ),
+                div("wall-dialog-body", lf("The group name cannot be changed afterwards.")),
                 div("wall-dialog-buttons",
                     cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButtonOnce(lf("create"), () => {
