@@ -72,6 +72,7 @@ namespace Microsoft.MicroBit
             Callback a = (Callback)(() =>
             {
                 this.statusLabel.Text = value;
+                this.trayIcon.Text = value;
             });
             this.Invoke(a);
         }
@@ -113,6 +114,8 @@ namespace Microsoft.MicroBit
                     return;
                 try
                 {
+                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
+
                     this.setBackgroundColor(Color.Yellow);
                     this.updateStatus("detected " + info.Name);
                     var drive = getMicrobitDrive();
@@ -170,6 +173,12 @@ namespace Microsoft.MicroBit
             catch (SecurityException) { }
             catch (UnauthorizedAccessException) { }
             return "";
+        }
+
+        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
         }
     }
 }

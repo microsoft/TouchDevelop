@@ -117,7 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="trayIcon.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="trayIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAABMLAAATCwAAAAAAAAAA
+        AAD/////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////9/83f+L9YP/afJg/2XyXP9m8l3/ZvJd/2byXf9m8l3/ZfJc/2jy
+        X/+J9YL/2/zZ/////////////////6D3mv8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbr
+        B/8W6wf/FusH/xbrB/+a9pP//////837yv8W6wf/FusH/4/1h//M+8n/zfvK/8r6x//K+sf/yvrH/8r6
+        x//N+8r/zPvJ/5L2i/8W6wf/FusH/8X6wv9J7z3/FusH/7b5sf//////////////////////////////
+        ////////////////////////v/q7/xbrB/9B7zX/FusH/yPsFf//////1fvS/ybsGf+e95j/////////
+        /////////////5P2jP8n7Bn/3Pza//////8o7Rr/FusH/xbrB/8j7BX//////9P70P8b6wz/mvaT////
+        //////////////////+O9Yb/G+sM/9r82P//////Ke0b/xbrB/9H7zz/FusH/7r5tv//////////////
+        ////////////////////////////////////////wvq+/xbrB/8/7zP/yfrG/xbrB/8W6wf/lPaN/9n8
+        1v/Y/NX/1fvS/9X70v/V+9L/1fvS/9j81f/Z/Nb/mfaS/xbrB/8W6wf/w/q///////+c95b/FusH/xbr
+        B/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/lvaP/////////////////9v8
+        2f+E9Hz/XPFS/1rxT/9a8U//WvFP/1rxT/9a8U//WvFP/1vxUf+C9Hr/2PzV////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAA==
+</value>
+  </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAABMLAAATCwAAAAAAAAAA
