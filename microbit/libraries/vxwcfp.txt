@@ -2118,7 +2118,7 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
   #Mh0Oeb4E8cK3WWWW // {namespace:pins}
   #xGfz4I04h2bsO91l // {help:functions/analog-pitch}
   #xEGCJ6YyP3Gaw9ug // {weight:14}
-  #Nv7yTShmVzRRmckP // {hints:frequency:400}
+  #Nv7yTShmVzRRmckP // {hints:frequency:440}
   #lyVvmxzXMSk4YDmd // {hints:ms:500}
   #fx1pQM2jYhWeMW8F if data→pitch_pin→is_invalid `or` data→pitch_pin→is_empty then {
     #X9dWOHCIYzY5e4Eq code→warning("Pitch pin not set! Use `pins->set pitch pin` to setup which pin to use.");
@@ -2132,7 +2132,9 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
     #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
     #xk1nhHhK4p6I76aX `return` ;
   }
-  meta sync;
+  #xbFhJ20GSASivmak $secs := math→max(1, $ms) / 1000;
+  #c9RnAE2uzKh6Cqax media→play_note($frequency, 1, $secs);
+  #Bdrwg0EArm46eHAx time→sleep($secs);
 }
 #KgNK732SuRLWRKOO
 var pitch_pin : String {
@@ -2144,12 +2146,12 @@ action test_pitch() {
   #YTd12LqhKZ4TaZc2 // {shim:}
   #seC2W2nEHKYskZWx code→\_libinit;
   #ZIUeBcsS2CnLOyAX code→analog_set_pitch_pin("P0");
-  #HgqlbD1gvQviXx8z for 0 ≤ i < 5 do {
-    #U0MwRtD11cCn27TG code→analog_pitch(400 + $i * 100, 500);
+  #HgqlbD1gvQviXx8z for 0 ≤ i < 10 do {
+    #U0MwRtD11cCn27TG code→analog_pitch(400 + $i * 100, 1000);
   }
   #dDCdl0EzpaRtSQeM code→pause(1000);
   #xFHA2N0ccuekrNB6 code→analog_write_pin("P0", 512);
-  #AgpJ3he45LX41vYs for 0 ≤ j < 5 do {
+  #AgpJ3he45LX41vYs for 0 ≤ j < 10 do {
     #VA5aDXkUjZHNPhD9 code→analog_set_period("P0", 5000 - $j * 100);
     #zq5NuKyDLAFXhWKl code→pause(500);
   }
@@ -2174,4 +2176,25 @@ action show_leds(#Agy1tNVQeIcg2pFD leds: String) {
   #WkpvN4lkB72SdNex // {shim:micro_bit::showLeds}
   #xxOvJbn2Cq3yEODu $img := code→parse_image($leds);
   #KrQe1YwMxdRhx6GZ $img→show_image(0);
+}
+#t4AKY0PCv6CBzZ12
+action play_note(#zExdWNZANFRC5nyu frequency: Number, #Ulhn7NcyJhmRukqz ms: Number) {
+  #RQfvAHuFsy3gBARR // Plays a music tone through pin `P0` for the given duration.
+  #cyajATGMs74bzPW7 // {help:functions/play-note}
+  #xQkMwqu2Oa6nrGiE // {namespace:music}
+  #ZTzyTPXsUFIyRaeU // {weight:90}
+  #dIQ0LIbfqHjwOyCO // {hints:frequency:440}
+  #xa04A5Hpj2lPJQ2M // {hints:ms:1000}
+  #L4roLQqOhkhZifAC code→analog_set_pitch_pin("P0");
+  #DGH7JMwHU0ka6VR6 code→analog_pitch($frequency, $ms);
+}
+#q80UeIEQE4foqp5T
+action test_music() {
+  #ADNnaMD8sbQ092vx // {shim:}
+  #cnnl5nwTO8MNlzG2 code→\_libinit;
+  #bt7ZIZfVg1aOLLEt code→play_note(440, 1000);
+  #wBYXZY7x529yWQG4 code→play_note(480, 1000);
+  #nq42JFfrOqGl2QKO code→play_note(520, 1000);
+  meta private;
+  meta test;
 }
