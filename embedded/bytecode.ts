@@ -97,7 +97,7 @@ module TDev.AST.Bytecode
     {
         var inf = (<any>TDev).bytecodeInfo
         funcInfo = inf.functions;
-        hex = inf.hex;
+        hex = Cloud.isFota() ? inf.fotahex : inf.hex;
 
         var i = 0;
         var upperAddr = "0000"

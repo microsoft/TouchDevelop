@@ -823,7 +823,7 @@ module TDev.Cloud {
     }
 
     export function isFota() {
-        return navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
+        return /fota=1/.test(document.URL) || navigator.userAgent.indexOf("Profile/OTA-DFU1.0") > 0;
     }
     
     export function canCompile() {
