@@ -2210,7 +2210,7 @@ action test_music() {
 action note(#G5aP8OToIirHnSrm name: String) returns(#icSfcpgaQI61R31i frequency: Number) {
   #MBVL4W7GtZth7c8Q // Gets the frequency of a note.
   #yhvDBEaWWEbLTw4a // {enum:name:C=262,D=294,E=330,F=349,G=392,A=440,B=494,C3=131,D3=147,E3=165,F3=175,G3=196,A3=220,B3=247,C4=262,D4=294,E4=330,F4=349,G4=392,A4=440,B4=494,C5=523,D5=587,E5=659,F5=698,G5=784,A5=880,B5=989}
-  #CEuFbUNDPjFBgtrO // {shim:microbit::TD_ID}
+  #CEuFbUNDPjFBgtrO // {shim:TD_ID}
   #xhQC7C2c52WDwr8z // {namespace:music}
   #iXmcRdXDoHI3JVod // {weight:40}
   #x3L2s27YTHChFBvT // {help:functions/note}
