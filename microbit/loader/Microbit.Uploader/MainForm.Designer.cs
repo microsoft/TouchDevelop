@@ -49,7 +49,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.White;
-            this.pictureBox1.Image = global::Microbit.Uploader.Properties.Resources.logo480;
+            this.pictureBox1.Image = global::Microsoft.MicroBit.Properties.Resources.logo480;
             this.pictureBox1.InitialImage = null;
             this.pictureBox1.Location = new System.Drawing.Point(0, -2);
             this.pictureBox1.Name = "pictureBox1";

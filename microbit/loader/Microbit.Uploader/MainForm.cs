@@ -52,13 +52,15 @@ namespace Microsoft.MicroBit
             var v = (int)Application.UserAppDataRegistry.GetValue("TermOfUse", 0);
             if (v != 1)
             {
-                var r = MessageBox.Show(@"Press 'Yes' to agree with the Terms of Use.", "Microsoft Uploader for micro:bit Terms Of Use", MessageBoxButtons.YesNo);
-                if (r != DialogResult.Yes)
+                using (var f = new LicenseDialog())
                 {
-                    Application.Exit();
-                    return false;
+                    var r = f.ShowDialog();
+                    if (r != DialogResult.Yes)
+                    {
+                        Application.Exit();
+                        return false;
+                    }
                 }
-
                 Application.UserAppDataRegistry.SetValue("TermOfUse", 1, RegistryValueKind.DWord);
             }
 
