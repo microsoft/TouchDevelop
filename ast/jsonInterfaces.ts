@@ -675,5 +675,10 @@ The following function can be used to apply JSON diff:
     }
 
 */
-
+    export interface JWorkspace {
+        scripts: {
+            header: Cloud.Header;
+            source: string;
+        }[];
+    }    
 }

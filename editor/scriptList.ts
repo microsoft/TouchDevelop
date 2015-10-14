@@ -6854,6 +6854,7 @@
             }
             
             var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
+            var save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
 
             var uninstall:HTMLElement;
             var moderate:HTMLElement;
@@ -6889,7 +6890,7 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, clone, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, clone, save, uninstall, this.showcaseBtns()]);
             return btns;
         }
 
@@ -6981,6 +6982,25 @@
                     return this.correspondingTopic;
             }
             return this;
+        }
+        
+        public saveAsync(): Promise {
+            var guid = this.getGuid();
+            return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
+                .then(r => {
+                    var text = <string>r[0];
+                    var header = <Cloud.Header>r[1];
+                    if (!text || !header) return;
+
+                    var f = <AST.Json.JWorkspace>{
+                        scripts: [{
+                            header: header,
+                            source: text,
+                        }]
+                    };
+                    HTML.browserDownload('data:application/json;base64,' + Util.base64Encode(JSON.stringify(f)),
+                        this.cloudHeader.name.replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".json");                    
+                });
         }
         
         public cloneAsync(): Promise {
