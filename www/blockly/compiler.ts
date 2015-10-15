@@ -1066,7 +1066,10 @@ function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
   var cond = compileExpression(e, b.getInputTargetBlock("COND"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return H.mkWhile(H.mkExprHolder([], cond), body);
+  return H.mkWhile(H.mkExprHolder([], cond), body.concat([
+    // Insert a pause instruction after the body of the while loop.
+    H.mkExprStmt(H.mkExprHolder([], H.stdCall("pause", [H.mkNumberLiteral(20)])))
+  ]));
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
