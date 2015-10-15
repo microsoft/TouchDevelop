@@ -933,18 +933,18 @@ interface Environment {
 interface Binding {
   name: string;
   type: Point;
-  isForVariable?: boolean;
+  usedAsForIndex: number;
   incompatibleWithFor?: boolean;
 }
 
 function isCompiledAsLocal(b: Binding) {
-  return b.isForVariable && !b.incompatibleWithFor;
+  return b.usedAsForIndex && !b.incompatibleWithFor;
 }
 
 function extend(e: Environment, x: string, t: Type): Environment {
   assert(lookup(e, x) == null);
   return {
-    bindings: [{ name: x, type: ground(t) }].concat(e.bindings)
+    bindings: [{ name: x, type: ground(t), usedAsForIndex: 0 }].concat(e.bindings)
   };
 }
 
@@ -1006,7 +1006,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bDo = b.getInputTargetBlock("DO");
 
   var binding = lookup(e, bVar);
-  assert(binding.isForVariable);
+  assert(binding.usedAsForIndex > 0);
 
   if (isClassicForLoop(b) && !binding.incompatibleWithFor)
     // In the perfect case, we can do a local binding that declares a local
@@ -1383,10 +1383,12 @@ function mkEnv(w: B.Workspace): Environment {
       // It's ok for two loops to share the same variable.
       if (lookup(e, x) == null)
         e = extend(e, x, Type.Number);
-      lookup(e, x).isForVariable = true;
+      lookup(e, x).usedAsForIndex++;
       // Unless the loop starts at 0 and and increments by one, we can't compile
-      // as a TouchDevelop for loop.
-      if (!isClassicForLoop(b))
+      // as a TouchDevelop for loop. Also, if multiple loops share the same
+      // variable, that means there's potential race conditions in concurrent
+      // code, so faithfully compile this as a global variable.
+      if (!isClassicForLoop(b) || lookup(e, x).usedAsForIndex > 1)
         lookup(e, x).incompatibleWithFor = true;
     }
   });
@@ -1411,7 +1413,7 @@ function mkEnv(w: B.Workspace): Environment {
         e = extend(e, x, null);
 
       var binding = lookup(e, x);
-      if (binding.isForVariable)
+      if (binding.usedAsForIndex)
         // Second reason why we can't compile as a TouchDevelop for-loop: loop
         // index is assigned to
         binding.incompatibleWithFor = true;
@@ -1421,7 +1423,7 @@ function mkEnv(w: B.Workspace): Environment {
         e = extend(e, x, null);
 
       var binding = lookup(e, x);
-      if (binding.isForVariable && !variableIsScoped(b, x))
+      if (binding.usedAsForIndex && !variableIsScoped(b, x))
         // Third reason why we can't compile to a TouchDevelop for-loop: loop
         // index is read outside the loop.
         binding.incompatibleWithFor = true;
