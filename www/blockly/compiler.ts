@@ -907,9 +907,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
     case "text":
       return compileText(e, b);
     case 'device_build_image':
-        return compileBuildImage(e, b, false);
+        return compileImage(e, b, false, "image", "create image");
     case 'device_build_big_image':
-        return compileBuildImage(e, b, true);
+        return compileImage(e, b, true, "image", "create image");
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type]);
@@ -933,18 +933,18 @@ interface Environment {
 interface Binding {
   name: string;
   type: Point;
-  isForVariable?: boolean;
+  usedAsForIndex: number;
   incompatibleWithFor?: boolean;
 }
 
 function isCompiledAsLocal(b: Binding) {
-  return b.isForVariable && !b.incompatibleWithFor;
+  return b.usedAsForIndex && !b.incompatibleWithFor;
 }
 
 function extend(e: Environment, x: string, t: Type): Environment {
   assert(lookup(e, x) == null);
   return {
-    bindings: [{ name: x, type: ground(t) }].concat(e.bindings)
+    bindings: [{ name: x, type: ground(t), usedAsForIndex: 0 }].concat(e.bindings)
   };
 }
 
@@ -1006,7 +1006,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
   var bDo = b.getInputTargetBlock("DO");
 
   var binding = lookup(e, bVar);
-  assert(binding.isForVariable);
+  assert(binding.usedAsForIndex > 0);
 
   if (isClassicForLoop(b) && !binding.incompatibleWithFor)
     // In the perfect case, we can do a local binding that declares a local
@@ -1066,7 +1066,10 @@ function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
 function compileWhile(e: Environment, b: B.Block): J.JStmt {
   var cond = compileExpression(e, b.getInputTargetBlock("COND"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  return H.mkWhile(H.mkExprHolder([], cond), body);
+  return H.mkWhile(H.mkExprHolder([], cond), body.concat([
+    // Insert a pause instruction after the body of the while loop.
+    H.mkExprStmt(H.mkExprHolder([], H.stdCall("pause", [H.mkNumberLiteral(20)])))
+  ]));
 }
 
 function compileForever(e: Environment, b: B.Block): J.JStmt {
@@ -1134,7 +1137,7 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[])
   return mkCallWithCallback(e, "input", event, compiledArgs, body);
 }
 
-function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
+function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string): J.JCall {
   var state = "";
   var rows = 5;
   var columns = big ? 10 : 5;
@@ -1147,7 +1150,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
       state += /TRUE/.test(b.getFieldValue("LED" + j + i)) ? "1" : "0";
     }
   }
-  return H.namespaceCall("image", "create image", [H.mkStringLiteral(state)]);
+  return H.namespaceCall(n, f, [H.mkStringLiteral(state)]);
 }
 
 // A description of each function from the "device library". Types are fetched
@@ -1324,6 +1327,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileEvent(e, b, "on pin pressed", [ "NAME" ]));
           break;
 
+        case 'device_show_leds':
+          stmts.push(H.mkExprStmt(H.mkExprHolder([], compileImage(e, b, false, "basic", "show leds"))));
+          break;
+
         default:
           if (b.type in stdCallTable)
             stmts.push(compileStdBlock(e, b, stdCallTable[b.type]));
@@ -1380,10 +1387,12 @@ function mkEnv(w: B.Workspace): Environment {
       // It's ok for two loops to share the same variable.
       if (lookup(e, x) == null)
         e = extend(e, x, Type.Number);
-      lookup(e, x).isForVariable = true;
+      lookup(e, x).usedAsForIndex++;
       // Unless the loop starts at 0 and and increments by one, we can't compile
-      // as a TouchDevelop for loop.
-      if (!isClassicForLoop(b))
+      // as a TouchDevelop for loop. Also, if multiple loops share the same
+      // variable, that means there's potential race conditions in concurrent
+      // code, so faithfully compile this as a global variable.
+      if (!isClassicForLoop(b) || lookup(e, x).usedAsForIndex > 1)
         lookup(e, x).incompatibleWithFor = true;
     }
   });
@@ -1408,7 +1417,7 @@ function mkEnv(w: B.Workspace): Environment {
         e = extend(e, x, null);
 
       var binding = lookup(e, x);
-      if (binding.isForVariable)
+      if (binding.usedAsForIndex)
         // Second reason why we can't compile as a TouchDevelop for-loop: loop
         // index is assigned to
         binding.incompatibleWithFor = true;
@@ -1418,7 +1427,7 @@ function mkEnv(w: B.Workspace): Environment {
         e = extend(e, x, null);
 
       var binding = lookup(e, x);
-      if (binding.isForVariable && !variableIsScoped(b, x))
+      if (binding.usedAsForIndex && !variableIsScoped(b, x))
         // Third reason why we can't compile to a TouchDevelop for-loop: loop
         // index is read outside the loop.
         binding.incompatibleWithFor = true;

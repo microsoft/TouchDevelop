@@ -52,7 +52,7 @@ export async function sendAsync(to: string, from: string, subject: string, text:
     assert(!!subject, "missing subject");
     logger.debug("sending email");
 
-    await new Promise(resume => {
+    await new Promise((resume, reject) => {
         var opts = options_
         var payload:any = {
           to : to,
@@ -65,8 +65,8 @@ export async function sendAsync(to: string, from: string, subject: string, text:
         if (opts.bcc) payload.bcc = opts.bcc.split(';');
         if (opts.cc) payload.cc = opts.cc.split(';');
         nodemailer.sendMail(payload, (err, json) => {
-          if (err) throw new Error("nodemailer error: " + err)     
-          resume();
+            if (err) reject(err);
+            else resume();
         });
     });
 }
