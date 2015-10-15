@@ -1927,7 +1927,14 @@ module TDev
                     title: lf("tap there"),
                     description: lf("need to edit elsewhere")
                 })
-            } else if (ins.stmt != currStmt) {
+            } else if (ins.stmt != currStmt &&
+                // the diff engine uses the AST.ActionHeader
+                // while the DeclNameHolder is pointing at the Action stmt
+                !(ins.stmt instanceof AST.ActionHeader
+                  && currStmt instanceof AST.DeclNameHolder
+                  && (<AST.DeclNameHolder>currStmt).parentDecl instanceof AST.Action
+                    && (<AST.ActionHeader>ins.stmt).action == (<AST.DeclNameHolder>currStmt).parentDecl)
+                ) {
                 if (ins.stmt.renderedAs) {
                     var target = <HTMLElement>ins.stmt.renderedAs.firstChild
                     if (ins.calcButton == Ticks.btnAddDown) {
