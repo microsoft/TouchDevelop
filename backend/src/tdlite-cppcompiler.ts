@@ -141,7 +141,8 @@ export async function mbedCompileAsync(req: core.ApiRequest) : Promise<void>
         logger.tick("MbedCacheHit");
         req.response = compileResp.toJson();
     }
-    else if (cfg[compileReq.config] == null) {
+    else if (cfg[compileReq.config.replace(/-fota$/, "")] == null) {
+        logger.info("compile config doesn't exists: " + compileReq.config)
         req.status = httpCode._412PreconditionFailed;
     }
     else {
