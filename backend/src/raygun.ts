@@ -161,10 +161,13 @@ export async function initAsync(options_: IOptions = {}) : Promise<void>
       logException : function(err, meta) {
         logger.debug("sending crash: " + err.message);
         var req = err.tdNodeRequest
+        if (!meta) meta = {}
+        if (meta.socketHost && /(ECONNRESET|socket hang up)$/.test(err.message)) {
+            err.message += " at " + meta.socketHost
+        }
         if (pendingReports) {
             var js = mkBugReport(err, "custom")
-            pendingReports.push(js)
-            if (!meta) meta = {}
+            pendingReports.push(js)            
             meta.reportId = js.reportId
         }
         if (opt.private) {
