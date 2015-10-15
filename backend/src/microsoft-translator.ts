@@ -148,16 +148,9 @@ export async function translateAsync(text: string, from: string, to: string, htm
 /**
  * Initializes the credentials needed to call the Microsoft Translator APIs. If not provided, the ``MICROSOFT_TRANSLATOR_CLIENT_ID`` and ``MICROSOFT_TRANSLATOR_CLIENT_SECRET`` server setting are used.
  */
-export async function initAsync(clientId: string, clientSecret: string) : Promise<void>
-{
-    if (clientId == "") {
-        clientId = td.serverSetting("MICROSOFT_TRANSLATOR_CLIENT_ID", false);
-    }
-    if (clientSecret == "") {
-        clientSecret = td.serverSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET", false);
-    }
-    clientId = clientId;
-    clientSecret = clientSecret;
+export async function initAsync(clientId_ = "", clientSecret_ = ""): Promise<void> {
+    clientId = clientId_ || td.serverSetting("MICROSOFT_TRANSLATOR_CLIENT_ID", false);
+    clientSecret = clientSecret_ || td.serverSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET", false);
     logger = td.createLogger("translator");
     logger.debug("client id: " + clientId);
 }

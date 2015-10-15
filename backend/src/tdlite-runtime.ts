@@ -20,7 +20,7 @@ var httpCode = core.httpCode;
 export async function initAsync()
 {
     if (core.hasSetting("MICROSOFT_TRANSLATOR_CLIENT_SECRET")) {
-        await microsoftTranslator.initAsync("", "");
+        await microsoftTranslator.initAsync();
     }
 
     core.addRoute("POST", "runtime", "translate", async (req: core.ApiRequest) => {
