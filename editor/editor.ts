@@ -2137,9 +2137,9 @@ module TDev
                         if (!json) return; // something deeper was broken
                         if (!json.success) {
                             ModalDialog.showText(
-                                "For debugging, here's the URL to the JSON file:\n" + json.url +
-                                "\n\nThis is ARM's error message:\n" + External.makeOutMbedErrorMsg(json) +
-                                "\n\nFor reference, here's the C++ we sent them:\n" + cpp,
+                                "Internal compilation error. "+
+                                "Please file a bug and include the following information:\n" +
+                                External.makeOutMbedErrorMsg(json),
                                 lf("Compilation error"));
                         } else {
                             document.location.href = json.hexurl;
