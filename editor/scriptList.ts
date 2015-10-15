@@ -1033,27 +1033,7 @@
                 var noOtherAsk = () => {
                     if (!canAsk(false)) return;
                     if (!Cloud.isOnline()) return;
-
-                    var translateNag = !!localStorage["translateNagged"];
-
-                    if (!Cloud.lite && dbg &&
-                        !!Cloud.getUserId() && !translateNag
-                        && (<any>window).userScore > 30 && Math.random() < 0.1) { // only 20% get nagged of powerusers
-                        localStorage["translateNagged"] = "1";
-                        tick(Ticks.translateNagDisplay);
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("Help us translate TouchDevelop!")),
-                            div("wall-dialog-body", lf("We need your help to translate the TouchDevelop UI. Enter a couple translations in our translation and help the community!")),
-                            div("wall-dialog-buttons",
-                                HTML.mkButton(lf("maybe later"), () => { m.dismiss(); }),
-                                HTML.mkButton(lf("i want to help"), () => {
-                                    tick(Ticks.translateNagOk);
-                                    RT.Web.browseAsync("https://touchdeveloptranslator.azurewebsites.net/#").done();
-                                }))
-                        ]);
-                        m.show();
-                    }
+                    // no more nagging!
                 };
                 if (Cloud.hasAccessToken() && Cloud.getUserId()) {
                     World.syncAsync(true, undefined, false,
