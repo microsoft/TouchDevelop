@@ -1232,12 +1232,14 @@ module TDev
         // [fromCloud]: was this triggered by a collaboration pull?
         public renderDecl(decl: AST.Decl, transparent : boolean = false, fromCloud=false) {
             this.goToLocation(new CodeLocation(decl), !transparent, fromCloud);
-            if (!AST.proMode &&
-                decl instanceof AST.Action
+            if (!AST.proMode
+                && !this.isDebuggerMode()
+                && !this.isReadOnly
+                && !(!SizeMgr.portraitMode && !SizeMgr.splitScreen)
+                && decl instanceof AST.Action
                 && this.selector.selectedStmt
                 && this.selector.selectedStmt.isPlaceholder()
-                && !this.isDebuggerMode()
-                && !this.isReadOnly)                
+                )                
                 this.editNode(this.selector.selectedStmt);
         }
 
