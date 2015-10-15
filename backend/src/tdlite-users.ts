@@ -400,7 +400,14 @@ export async function initAsync() : Promise<void>
                         let id = azureBlobStorage.createRandomId(16).toLowerCase();
                         entry["emailcode"] = id;
                         if (/^[^@]+@[^@]+$/.test(newEmail)) {
-                            /* async */ nodemailer.sendAsync(newEmail, core.serviceSettings.emailFrom, "email verification on " + core.myHost, "Please follow the link below to verify your new email address on " + core.myHost + "\n\n      " + core.self + "verify/" + req4.rootId + "/" + id + "\n\nThanks!");
+                            let txt = "Please follow the link below to verify your new email address on " + core.myHost + "\n\n" +
+                                "      " + core.self + "verify/" + req4.rootId + "/" + id + "\n\n" +
+                                "Thanks!\n";
+                            /* async */ nodemailer.sendAsync(newEmail, core.serviceSettings.emailFrom,
+                                    "email verification on " + core.myHost, txt)
+                                .then(() => { }, e => {
+                                    logger.info(`nodemailer send failed: ${newEmail}: ${e.message}`)
+                                })
                         }
                     }
                     else {
