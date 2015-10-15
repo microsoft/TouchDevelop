@@ -907,9 +907,9 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
     case "text":
       return compileText(e, b);
     case 'device_build_image':
-        return compileBuildImage(e, b, false);
+        return compileImage(e, b, false, "image", "create image");
     case 'device_build_big_image':
-        return compileBuildImage(e, b, true);
+        return compileImage(e, b, true, "image", "create image");
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type]);
@@ -1137,7 +1137,7 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[])
   return mkCallWithCallback(e, "input", event, compiledArgs, body);
 }
 
-function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
+function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string): J.JCall {
   var state = "";
   var rows = 5;
   var columns = big ? 10 : 5;
@@ -1150,7 +1150,7 @@ function compileBuildImage(e: Environment, b: B.Block, big: boolean): J.JCall {
       state += /TRUE/.test(b.getFieldValue("LED" + j + i)) ? "1" : "0";
     }
   }
-  return H.namespaceCall("image", "create image", [H.mkStringLiteral(state)]);
+  return H.namespaceCall(n, f, [H.mkStringLiteral(state)]);
 }
 
 // A description of each function from the "device library". Types are fetched
@@ -1325,6 +1325,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
 
         case 'device_pin_event':
           stmts.push(compileEvent(e, b, "on pin pressed", [ "NAME" ]));
+          break;
+
+        case 'device_show_leds':
+          stmts.push(H.mkExprStmt(H.mkExprHolder([], compileImage(e, b, false, "basic", "show leds"))));
           break;
 
         default:
