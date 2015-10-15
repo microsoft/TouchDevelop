@@ -51,7 +51,7 @@ export var serviceSettings: ServiceSettings;
 export var settingsContainer: cachedStore.Container;
 export var currClientConfig: ClientConfig;
 export var releaseVersionPrefix: string = "0.0";
-export var rewriteVersion: number = 221;
+export var rewriteVersion: number = 222;
 
 export class IdObject
     extends td.JsonRecord

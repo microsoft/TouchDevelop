@@ -284,7 +284,7 @@ export async function serveReleaseAsync(req: restify.Request, res: restify.Respo
                 }
                 let suff = "?releaseid=" + encodeURIComponent(relid) + "\"";
                 text = td.replaceAll(text, "\"browsers.html\"", "\"browsers.html" + suff);
-                text = td.replaceAll(text, "\"error.html\"", "\"error.html" + suff);
+                text = td.replaceAll(text, "\"error.html\"", "\"error.html" + suff);                
                 text = td.replaceAll(text, "\"./", "\"" + core.currClientConfig.primaryCdnUrl + "/app/" + relid + "/c/");
                 let verPref = "var tdVersion = \"" + ver + "\";\n" + "var tdConfig = " + JSON.stringify(ccfg.toJson(), null, 2) + ";\n";
                 text = td.replaceAll(text, "var rootUrl = ", verPref + "var tdlite = \"url\";\nvar rootUrl = ");
@@ -296,11 +296,12 @@ export async function serveReleaseAsync(req: restify.Request, res: restify.Respo
             });
         }
         else if (fn == "app.manifest") {
-            await rewriteAndCacheAsync(rel, relid, fn, "text/cache-manifest", res, async (text1: string) => {
+            await rewriteAndCacheAsync(rel, relid, fn, "text/cache-manifest", res, async (text: string) => {
                 let result1: string;
-                text1 = td.replaceAll(text1, "./", core.currClientConfig.primaryCdnUrl + "/app/" + relid + "/c/");
-                text1 = text1 + "\n# " + core.rewriteVersion + "\n";
-                result1 = text1;
+                text = td.replaceAll(text, "../../../", core.currClientConfig.primaryCdnUrl + "/");
+                text = td.replaceAll(text, "./", core.currClientConfig.primaryCdnUrl + "/app/" + relid + "/c/");
+                text = text + "\n# v" + core.rewriteVersion + "\n";
+                result1 = text;
                 return result1;
             });
         }
