@@ -52,14 +52,14 @@ p, ul {
 
 <div id="#storage" class="hidden">
 <div style='font-size:1.2em; margin: 3em 0;'>
-    <span style='color:red; font-weight:bold;'>TouchDevelop could not write to local database.</span>
+    <span style='color:red; font-weight:bold;'>Touch Develop could not write to local database.</span>
     <p>Your browser reported the following problem:<br /> <span class="errorInfo"></span></p>
-    <p>Please make sure that TouchDevelop is allowed to store data in your browser, and then go back to <a href="https://www.touchdevelop.com/app/">touchdevelop.com/app</a> and try again.</p>
+    <p>Please make sure that Touch Develop is allowed to store data in your browser, and then go back to <a href="https://www.touchdevelop.com/app/">touchdevelop.com/app</a> and try again.</p>
     <p>Check that you don't have multiple tabs open with the Touch Develop.</p>
 </div>
 <h2>About Browser Storage</h2>
 <p>
-    TouchDevelop stores your scripts and data in a database maintained by your browser.
+    Touch Develop stores your scripts and data in a database maintained by your browser.
     Browsers impose restrictions on whether a website is allowed to store data, and how much data it may use.
     Go to the settings of your browser and make sure that touchdevelop.com is allowed to store (more) data.
 </p>
@@ -81,8 +81,8 @@ p, ul {
 
 <div id="#storageinit" class="hidden">
 <div style='font-size:1.2em; margin: 3em 0;'>
-    <span style='color:red; font-weight:bold;'>TouchDevelop could not create a local database.</span>
-    <p>TouchDevelop needs to create a database to store your installed scripts.</p>
+    <span style='color:red; font-weight:bold;'>Touch Develop could not create a local database.</span>
+    <p>Touch Develop needs to create a database to store your installed scripts.</p>
     <p>Your browser reported the following problem:<br /> <span class="errorInfo"></span></p>
     <p>Please make sure that your browser is not running in <em>InPrivate</em> (Internet Explorer), <em>Private</em> (Firefox) or <em>Private Browsing</em> (Safari) mode where local databases are not allowed.
     Go to <a href="https://www.touchdevelop.com/app/">touchdevelop.com/app</a> in a regular browser window.</p>
@@ -90,7 +90,7 @@ p, ul {
 </div>
 <h2>About Browser Storage</h2>
 <p>
-    TouchDevelop stores your scripts and data in a database maintained by your browser.
+    Touch Develop stores your scripts and data in a database maintained by your browser.
     Browsers impose restrictions on whether a website is allowed to store data, and how much data it may use.
     Go to the settings of your browser and make sure that touchdevelop.com is allowed to store (more) data.
 </p>
@@ -227,6 +227,11 @@ If this doesn't work, this <a
 </body>
 <script type="text/javascript">
     var e;
+    function handleVisibilityChange() {
+        if (!document.hidden)
+            window.history.back();
+    }
+    
     function update() {
         var h = window.location.href
         var i = h.indexOf('#')
@@ -247,6 +252,9 @@ If this doesn't work, this <a
         if (e) e.className = "";
         var elements = document.getElementsByClassName("errorInfo");
         for (i = 0; i < elements.length; i++) elements[i].innerText = errorInfo;
+        
+        if (h == "#oneTab" && document.visibilityState)
+            document.addEventListener("visibilitychange", handleVisibilityChange, false);
     }
     window.addEventListener("hashchange", update);
     update();
