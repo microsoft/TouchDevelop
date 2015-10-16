@@ -634,10 +634,10 @@ Blockly.Blocks['controls_simple_for'] = {
         init: function () {
             this.setHelpUrl('https://live.microbit.co.uk/functions/note');
             this.setColour(230);
-            this.appendDummyInput().appendField(x+" note");
+            this.appendDummyInput().appendField(x == "1" ? "one whole note" : x+" note");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
-            this.setTooltip(x == "1" ? "A whole note" : "A "+x+"th note");
+            this.setTooltip((x == "1" ? "A whole note." : "A "+x+"th note.") + " Set the variable \"whole note\" to change the default tempo.");
         }
     };
 });
@@ -648,9 +648,11 @@ Blockly.Blocks['device_play_note'] = {
     this.setHelpUrl('https://live.microbit.co.uk/functions/play-note');
     this.setColour(160);
     this.appendDummyInput()
-        .appendField("play note");
+        .appendField("play");
     this.appendValueInput("note")
         .setCheck("Number");
+    this.appendDummyInput()
+        .appendField("for");
     this.appendValueInput("duration")
         .setCheck("Number");
     this.setInputsInline(true);
