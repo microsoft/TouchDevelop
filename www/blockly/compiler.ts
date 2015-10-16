@@ -877,6 +877,19 @@ function defaultValueForType(t: Point): J.JExpr {
   throw new Error("No default value for type");
 }
 
+function compileNote(e: Environment, b: B.Block): J.JExpr {
+  var note = b.type.match(/^device_note_([A-G])/)[1];
+  return H.namespaceCall("music", "note", [ H.mkStringLiteral(note) ]);
+}
+
+function compileDuration(e: Environment, b: B.Block): J.JExpr {
+  var matches = b.type.match(/^device_duration_1\/(\d+)/);
+  if (matches)
+    return H.mkSimpleCall("/", [ H.mkGlobalRef("whole note"), H.mkNumberLiteral(parseInt(matches[1])) ]);
+  else
+    return H.mkGlobalRef("whole note");
+}
+
 // [t] is the expected type; we assume that we never null block children
 // (because placeholder blocks have been inserted by the type-checking phase
 // whenever a block was actually missing).
@@ -884,6 +897,12 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
   assert(b != null);
   if (b.disabled || b.type == "placeholder")
     return defaultValueForType(returnType(e, b));
+
+  // Tricks for musical notes...
+  if (b.type.match(/^device_note_/))
+    return compileNote(e, b);
+  if (b.type.match(/^device_duration_/))
+    return compileDuration(e, b);
 
   switch (b.type) {
     case "math_number":
@@ -1270,6 +1289,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "set brightness",
     args: [ "value" ]
   },
+  device_play_note: {
+    namespace: "music",
+    f: "play note",
+    args: [ "note", "duration" ]
+  }
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -1454,6 +1478,19 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
       else
         append(stmtsMain, compileStatements(e, b));
     });
+
+    // It's magic! The user can either assign to "whole note" (and everything
+    // works out), or not do it, and if they need it, the variable will be
+    // declared and assigned to automatically.
+    var foundWholeNote = e.bindings.filter(x => x.name == "whole note").length > 0;
+    var needsWholeNote = w.getAllBlocks().filter(x => !!x.type.match(/^device_duration_/)).length > 0;
+    if (!foundWholeNote && needsWholeNote) {
+      stmtsMain.unshift(
+        H.mkExprStmt(
+          H.mkExprHolder([],
+            H.mkSimpleCall(":=", [H.mkGlobalRef("whole note"), H.mkNumberLiteral(60)]))));
+        e = extend(e, "whole note", Type.Number);
+    }
 
     decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
 
