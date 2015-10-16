@@ -908,7 +908,7 @@ module TDev.Browser {
 
         function permissionReview()
         {
-            ModalDialog.editText(lf("Ignored permissions"), "student,preview,educator", perms => {
+            ModalDialog.editText(lf("Ignored permissions"), "student,preview,educator,master-teacher,beta-teacher,partner", perms => {
                 var okperms = {}
                 perms.split(/,/).forEach(p => okperms[p] = 1)
                 okperms[""] = 1
@@ -925,7 +925,7 @@ module TDev.Browser {
                     .done()
                 var userList = ""
                 var fin = () => {
-                    userList += csv(["User ID", "Nickname", "Real name", "Email", "Permission"])
+                    userList += csv(["User ID", "Nickname", "Permission"])
                     var pp = users.map(u =>
                         Browser.TheApiCacheMgr.getAsync(u.id + "/permissions")
                         .then(r => {
@@ -933,10 +933,11 @@ module TDev.Browser {
                                 return Promise.as()
                             var per = r.permissions.split(/,/).filter(p => !!p)
                             per.sort()
-                            return Browser.TheApiCacheMgr.getAsync(u.id + "/settings?format=short")
-                            .then(set => {
-                                userList += csv([u.id, u.name, set.realname, set.email, per.join(", ")])
-                            })
+
+                            userList += csv([u.id, u.name, per.join(", ")])
+
+                            //return Browser.TheApiCacheMgr.getAsync(u.id + "/settings?format=short")
+                            //.then(set => { userList += csv([u.id, u.name, set.realname, set.email, per.join(", ")]) })
                         }))
                     Promise.join(pp).then(() => {
                         ModalDialog.showText(userList)
