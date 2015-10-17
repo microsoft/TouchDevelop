@@ -6066,7 +6066,7 @@
                             var metaInput: HTMLInputElement;
                             var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
                                 metaInput = HTML.mkTextInputWithOk("url", sn.description ,() => {
-                                    var id = sn.parseIds(metaInput.value)[0] || null;
+                                    var id = sn.parseIds(metaInput.value, true)[0] || null;
                                     metaInput.value = id ? sn.idToUrl(id) : "";
                                     HTML.showProgressNotification(lf("saving..."));
                                     var payload = {}; payload[sn.id] = id;

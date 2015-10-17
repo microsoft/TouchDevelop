@@ -382,7 +382,7 @@ module TDev {
         id: string;
         name: string;
         description: string;
-        parseIds: (text: string) => string[];
+        parseIds: (text: string, inmeta?:boolean) => string[];
         idToUrl: (id: string) => string;
         idToHTMLAsync?: (id: string) => Promise; // HTMLElement;
     }
@@ -423,16 +423,18 @@ module TDev {
             id: "videoptr",
             name: "TouchDevelop Video",
             description: lf("TouchDevelop video (/td/videos/...)"),
-            parseIds: text => {
-                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+            parseIds: (text, ismeta)  => {
+                var pref = Cloud.getServiceUrl().replace(/(test|stage|live)/, "www")
+                var m = /^(https:\/\/[^\/]+)\/(\S+)/.exec(text) 
+                if (!ismeta && (!m || m[1] != pref)) return []
                 if (m)
-                    text = m[1]
+                    text = m[2]
                 text = text.replace(/^\/+/, "")
                 text = text.replace(/^embed\//, "")
                 text = text.replace(/[^a-z0-9-\/]/g, "-")
                 return [text]
             },
-            idToUrl: id => Cloud.getServiceUrl() + "/embed/" + id,
+            idToUrl: id => Cloud.getServiceUrl().replace(/(test|stage|live)/, "www") + "/embed/" + id,
             idToHTMLAsync: id => {
                     id = id.replace(/[^a-z0-9-\/]/g, "-")
                     return Promise.as(HTML.mkLazyVideoPlayer(
@@ -443,10 +445,11 @@ module TDev {
             id: "bbc",
             name: "BBC Video",
             description: lf("BBC video (https://files.microbit.co.uk/clips/...)"),
-            parseIds: text => {
-                var m = /^https:\/\/[^\/]+\/(.*)/.exec(text)
+            parseIds: (text, ismeta) => {
+                var m = /^(https:\/\/[^\/]+)\/(.*)/.exec(text)
+                if (!ismeta && (!m || m[1] != "https://files.microbit.co.uk")) return []
                 if (m)
-                    text = m[1]
+                    text = m[2]
                 text = text.replace(/^\/+/, "")
                 text = text.replace(/^clips\//, "")
                 text = text.replace(/[^a-z0-9-\/]/g, "-")
