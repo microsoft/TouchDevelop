@@ -266,6 +266,11 @@ module TDev {
         text:string; // report text
         resolution:string;
         publicationuserid:string;
+
+        // this are available to moderators only
+        usernumreports?:number;
+        publicationnumabuses?:number;
+        publicationusernumabuses?:number;
     }
 
     export interface JsonChannel extends JsonPublication

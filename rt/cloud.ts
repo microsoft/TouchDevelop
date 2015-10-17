@@ -910,6 +910,10 @@ module TDev.Cloud {
                 ModalDialog.info(lf("access denied"), lf("Your account is not authorized to perform this action."));
                 return;
             }
+            else if (e.status == 404) {
+                ModalDialog.info(lf("publication not found"), lf("Maybe it has been removed?"));
+                return;
+            }
             else if (e.status == 400)
                 throw new Error(lf("Cloud precondition violated ({0})", e.errorMessage));
         }

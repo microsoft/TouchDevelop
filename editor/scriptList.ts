@@ -1968,6 +1968,7 @@
 
         public loadDetails(s:BrowserPage, tab = ""):void
         {
+            AbuseReview.hide()
             TipManager.setTip(null);
             ModalDialog.dismissCurrent();
             this.searchBox.style.opacity = "1"
@@ -3264,7 +3265,12 @@
 
         public mkSmallBox():HTMLElement
         {
-            return this.mkBoxCore(false).withClick(() => { this.parentBrowser.loadDetails(this) });
+            var box = this.mkBoxCore(false)
+            return box.withClick(() => { 
+                if (!/ visited/.test(box.className))
+                    box.className += " visited";
+                this.parentBrowser.loadDetails(this) 
+            });
         }
 
         public mkSmallBoxNoClick():HTMLElement
@@ -3524,8 +3530,8 @@
                 var loading = div("sdLoadingMore", lf("loading more..."));
                 this.tabContent.appendChild(loading);
                 this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
-                    loading.className = "";
-                    loading.setChildren(elts.map((c) => this.tabBox(c)));
+                    loading.removeSelf();
+                    elts.forEach((c) => this.tabContent.appendChild(this.tabBox(c)));
                     if (!!cont) loading.appendChild(this.loadMoreBtn(cont));
                     else loading.appendChild(this.finalListElt())
                 });
@@ -4888,8 +4894,24 @@
         public tabBox(cc:JsonIdObject):HTMLElement
         {
             var c = <JsonAbuseReport>cc;
-            return div(null,
+            var confirmed = false;
+            var delBtn = 
+                HTML.mkAsyncButton(lf("delete"), () => {
+                    if (confirmed) {
+                        return AbuseReportInfo.deletePubAsync(c.publicationid)
+                            .then(v => { if (v) delBtn.removeSelf() })
+                    } else {
+                        delBtn.setChildren(lf("for sure?"))
+                        confirmed = true
+                        return Promise.as()
+                    }
+                })
+            var delDiv = div(null, delBtn)
+            return div("abusePair",
                 ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
+                div("abuseButtons", 
+                    HTML.mkAsyncButton(lf("ignore"), () => AbuseReportInfo.setAbuseStatusAsync(cc.id, "ignored")),
+                    delBtn),
                 ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
         }
     }
@@ -5177,6 +5199,14 @@
             return null;
         }
 
+        public initOverlay()
+        {
+            this._reports.initElements();
+            this._reports.tabLoaded = true;
+            this._reports.initTab();
+            return this._reports.tabContent;
+        }
+
         public initTab()
         {
             this._reports.initElements();
@@ -5186,6 +5216,16 @@
         }
 
         public mkTabsCore():BrowserTab[] { return [this]; }
+
+        public refresh()
+        {
+            this.invalidateCaches();
+            this._reports.initTab();
+        }
+
+        private invalidateCaches() {
+            TheApiCacheMgr.invalidate("abusereports");
+        }
     }
 
     export class SubscriptionsTab
@@ -6777,7 +6817,7 @@
             var hdiv = div("sdInlineHd", span("sdInlineHdLabel", hd));
             var r = div("inlineBlock sdInlineContentContainer sdScriptBox sdBox-" + hd.replace(/ /g, "-"), hdiv, elt);
             return r.withClick(() => {
-               KeyboardMgr.triggerClick(<HTMLElement>r.lastChild);
+                KeyboardMgr.triggerClick(<HTMLElement>r.lastChild);
             });
         }
 
@@ -9440,7 +9480,13 @@
             if (big)
                 res.className += " sdBigHeader";
 
-            return this.withUpdate(res, (u:JsonAbuseReport) => {
+            var firstResolved = true
+
+            Util.setTimeout(1, () => this.withUpdate(res, (u:JsonAbuseReport) => {
+                var par = res
+                while (par && !/abusePair/.test(par.className))
+                    par = <HTMLElement>par.parentNode;
+                var resolved = true
                 if (u.resolution == "ignored") {
                     icon.setChildren(HTML.mkImg("svg:fa-check-square-o,white"))
                     icon.style.background = "#308919";
@@ -9449,12 +9495,33 @@
                     icon.style.background = "#308919";
                 } else {
                     icon.setChildren(HTML.mkImg("svg:fa-flag,white"))
+                    resolved = false
                     icon.style.background = "#e72a2a";
                 }
+                if (firstResolved) {
+                    res.setAttribute("data-resolved", resolved ? "yes" : "no");
+                    if (par)
+                        par.setAttribute("data-resolved", resolved ? "yes" : "no");
+                    firstResolved = false
+                }
                 textBlock.setChildren([ u.text ]);
-                author.setChildren(["-- ", u.username]);
-                addInfoInner.setChildren([Util.timeSince(u.time) + " on " + u.publicationname]);
-            });
+                var usersuff = ""
+                if (u.usernumreports)
+                    usersuff = " (" + u.usernumreports + ")"
+                author.setChildren(["-- ", u.username + usersuff]);
+                var pubsuff = ""
+                if (u.publicationnumabuses) {
+                    pubsuff = " (" + u.publicationnumabuses
+                    var diff = u.publicationusernumabuses - u.publicationnumabuses
+                    if (diff > 0) {
+                        pubsuff += " + " + diff + " on other"
+                    }
+                    pubsuff += ")"
+                }
+                addInfoInner.setChildren([Util.timeSince(u.time) + " on " + u.publicationname + pubsuff]);
+            }));
+
+            return res;
         }
 
         static box(c:JsonAbuseReport)
@@ -9479,13 +9546,20 @@
 
             })
 
+
             return r;
         }
 
         public mkSmallBox():HTMLElement
         {
-            return this.mkBoxCore(false).withClick(() =>
-                TheApiCacheMgr.getAsync(this.publicId, true).done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, false, this.publicId)));
+            var box = this.mkBoxCore(false);
+            box.withClick(() => {
+                if (!/ visited/.test(box.className))
+                    box.className += " visited";
+                TheApiCacheMgr.getAsync(this.publicId, true)
+                    .done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, false, this.publicId));
+            })
+            return box;
         }
 
         public initTab()
@@ -9500,6 +9574,27 @@
         public mkBigBox():HTMLElement { return null; }
 
         public mkTabsCore():BrowserTab[] { return [this]; }
+
+        static setAbuseStatusAsync(abuseid:string, status:string) 
+        {
+            return Cloud.postPrivateApiAsync(abuseid, { resolution: status })
+            .then(() => {
+                TheApiCacheMgr.refetch(abuseid)
+            })
+        }
+
+        static deletePubAsync(pubid:string)
+        {
+            return Cloud.deletePrivateApiAsync(pubid)
+            .then(() => {
+                TheApiCacheMgr.refetch(pubid)
+                HTML.showProgressNotification(lf("gone."))
+                return true;
+            }, e => {
+                Cloud.handlePostingError(e, lf("delete publication"))
+                return false;
+            });
+        }
 
         static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "", onDeleted : () => void = undefined)
         {
@@ -9518,15 +9613,11 @@
             .then((resp:CanDeleteResponse) => {
                 var b = TheHost
                 var del = () => {
-                    HTML.showProgressNotification(lf("deleting..."));            
-                    Cloud.deletePrivateApiAsync(pubid)
-                    .done(() => {
-                        TheApiCacheMgr.refetch(pubid)
-                        HTML.showProgressNotification(lf("gone."))
-                        if (onDeleted) onDeleted();
-                    }, e => Cloud.handlePostingError(e, lf("delete '{0}'", resp.publicationname)));
+                    HTML.showProgressNotification(lf("deleting..."));
+                    AbuseReportInfo.deletePubAsync(pubid).done(v => {
+                        if (v && onDeleted) onDeleted();
+                    })
                 }
-
                 var godelete = () => {
                     ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname),
                                     lf("delete"),
@@ -9543,12 +9634,8 @@
                 }
                 var setstatus = (status:string) => {
                     m.dismiss()
-                    Cloud.postPrivateApiAsync(abuseid, { resolution: status })
-                    .then(() => {
-                        TheApiCacheMgr.refetch(abuseid)
-                        HTML.showProgressNotification(lf("resolution updated."))
-                    })
-                    .done()
+                    AbuseReportInfo.setAbuseStatusAsync(abuseid, status)
+                    .done(() => HTML.showProgressNotification(lf("resolution updated.")))
                 }
 
                 if (!abuseid && resp.publicationuserid == Cloud.getUserId()) {
