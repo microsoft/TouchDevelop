@@ -299,12 +299,45 @@ module TDev.AST.Bytecode
             if (this.def) n += this.def.getName()
             if (this.isarg) n = "ARG " + n
             if (this.isRef()) n = "REF " + n
+            if (this.isByRefLocal()) n = "BYREF " + n
             return "[" + n + "]"
         }
 
         isRef()
         {
             return this.def && isRefKind(this.def.getKind())
+        }
+
+        refSuff()
+        {
+            if (this.isRef()) return "Ref"
+            else return ""
+        }
+        
+
+        isByRefLocal()
+        {
+            return this.def instanceof LocalDef && (<LocalDef>this.def).isByRef()
+        }
+
+        emitStoreByRef(proc:Procedure)
+        {
+            Util.assert(this.def instanceof LocalDef)
+
+            if (this.isByRefLocal()) {
+                this.emitLoadLocal(proc);
+                proc.emit("pop {r1}", 0xbc02);
+                proc.emitCallRaw("bitvm::stloc" + (this.isRef() ? "Ref" : "")); // unref internal
+            } else {
+                this.emitStore(proc)
+            }
+        }
+
+        emitStoreCore(proc:Procedure)
+        {
+            var op = proc.emit("STR", 0x9000)
+            op.arg0 = this
+            op.arg1 = proc.currStack
         }
 
         emitStore(proc:Procedure)
@@ -314,8 +347,9 @@ module TDev.AST.Bytecode
 
             if (this.def instanceof GlobalDef) {
                 proc.emitInt(this.index)
-                proc.emitCall("bitvm::stglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
+                proc.emitCall("bitvm::stglb" + this.refSuff(), 0); // unref internal
             } else {
+                Util.assert(!this.isByRefLocal())
                 if (this.isRef()) {
                     var op = proc.emit("LDR", 0x9800)
                     op.arg0 = this
@@ -323,9 +357,7 @@ module TDev.AST.Bytecode
                     proc.emitCallRaw("bitvm::decr");
                 }
                 proc.emit("pop {r0}", 0xbc01);
-                var op = proc.emit("STR", 0x9000)
-                op.arg0 = this
-                op.arg1 = proc.currStack
+                this.emitStoreCore(proc)
             }
         }
 
@@ -336,21 +368,35 @@ module TDev.AST.Bytecode
             op.arg1 = proc.currStack
         }
 
-        emitLoad(proc:Procedure)
+        emitLoadByRef(proc:Procedure)
+        {
+            if (this.isByRefLocal()) {
+                this.emitLoadLocal(proc);
+                proc.emitCallRaw("bitvm::ldloc" + this.refSuff())
+                proc.emit("push {r0}", 0xb401);
+            } else this.emitLoad(proc);
+        }
+
+        emitLoadLocal(proc:Procedure)
+        {
+            if (this.isarg && proc.argsInR5) {
+                Util.assert(0 <= this.index && this.index < 32)
+                proc.emit("ldr r0, [r5, #4*" + this.index + "]", 0x6828 | (this.index<<6))
+            } else {
+                this.emitLoadCore(proc)
+            }
+        }
+
+        emitLoad(proc:Procedure, direct = false)
         {
             if (this.def instanceof GlobalDef) {
                 proc.emitInt(this.index)
-                proc.emitCall("bitvm::ldglb" + (this.isRef() ? "Ref" : ""), 0); // unref internal
+                proc.emitCall("bitvm::ldglb" + this.refSuff(), 0); // unref internal
             } else {
-                if (this.isarg && proc.argsInR5) {
-                    Util.assert(0 <= this.index && this.index < 32)
-                    proc.emit("ldr r0, [r5, #4*" + this.index + "]", 0x6828 | (this.index<<6))
-                } else {
-                    this.emitLoadCore(proc)
-                }
-
+                Util.assert(direct || !this.isByRefLocal())
+                this.emitLoadLocal(proc);
                 proc.emit("push {r0}", 0xb401);
-                if (this.isRef()) {
+                if (this.isRef() || this.isByRefLocal()) {
                     proc.emitCallRaw("bitvm::incr");
                 }
             }
@@ -360,7 +406,7 @@ module TDev.AST.Bytecode
         {
             // Util.assert(!this.isarg)
             Util.assert(!(this.def instanceof GlobalDef))
-            if (this.isRef()) {
+            if (this.isRef() || this.isByRefLocal()) {
                 var op = proc.emit("LDR", 0x9800)
                 op.arg0 = this
                 op.arg1 = proc.currStack
@@ -982,7 +1028,7 @@ module TDev.AST.Bytecode
                 this.globalIndex(trg.referencedData()).emitStore(this.proc);
             } else if (trg.referencedLocal()) {
                 this.dispatch(src);
-                this.localIndex(trg.referencedLocal()).emitStore(this.proc);
+                this.localIndex(trg.referencedLocal()).emitStoreByRef(this.proc);
             } else {
                 Util.oops("bad assignment: " + trg.nodeType())
             }
@@ -1234,6 +1280,16 @@ module TDev.AST.Bytecode
 
         visitExprHolder(eh:ExprHolder)
         {
+            var ai = eh.assignmentInfo()
+            if (ai && ai.definedVars)
+                ai.definedVars.forEach(l => {
+                    if (l.isByRef()) {
+                        var li = this.localIndex(l)
+                        li.emitClrIfRef(this.proc) // in case there was something already there
+                        this.proc.emitCallRaw("bitvm::mkloc" + li.refSuff())
+                        li.emitStoreCore(this.proc)
+                    }
+                })
             if (eh.isPlaceholder())
                 this.proc.emit("nop", 0x46c0);
             else
@@ -1291,9 +1347,10 @@ module TDev.AST.Bytecode
             var inlproc = new Procedure()
             inlproc.argsInR5 = true
             this.binary.procs.push(inlproc);
+            var isRef = (l:LocalDef) => l.isByRef() || isRefKind(l.getKind())
 
-            var refs  = inl.closure.filter(l => isRefKind(l.getKind()))
-            var flats = inl.closure.filter(l => !isRefKind(l.getKind()))
+            var refs  = inl.closure.filter(l => isRef(l))
+            var flats = inl.closure.filter(l => !isRef(l))
 
             var caps = refs.concat(flats)
 
@@ -1306,7 +1363,7 @@ module TDev.AST.Bytecode
 
             caps.forEach((l, i) => {
                 this.emitInt(i)
-                this.localIndex(l).emitLoad(this.proc)
+                this.localIndex(l).emitLoad(this.proc, true) // direct load
                 this.proc.emitCall("bitvm::stclo", 0)
                 // already done by emitCall
                 // this.proc.emit("push {r0}", 0xb401);
@@ -1352,7 +1409,7 @@ module TDev.AST.Bytecode
                 if (d._lastWriteLocation instanceof InlineAction) {
                     this.emitInlineAction(<InlineAction>d._lastWriteLocation)
                 } else {
-                    this.localIndex(d).emitLoad(this.proc);
+                    this.localIndex(d).emitLoadByRef(this.proc);
                 }
             } else if (d instanceof SingletonDef) {
                 this.emitInt(0)
@@ -1530,7 +1587,9 @@ module TDev.AST.Bytecode
             this.proc.emitClrs(retl ? retl.local : null, true);
 
             if (retl) {
-                this.localIndex(retl.local).emitLoadCore(this.proc)
+                var li = this.localIndex(retl.local);
+                Util.assert(!li.isByRefLocal())
+                li.emitLoadCore(this.proc)
             }
 
             Util.assert(this.proc.currStack == 0)
