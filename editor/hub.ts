@@ -469,6 +469,8 @@ module TDev.Browser {
                     scriptHistoryTab: true,
                     awaitClock: true,
                     tutorialGoToPreviousStep: true,
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,
                 }
             },
         },
@@ -513,6 +515,8 @@ module TDev.Browser {
                     scriptHistoryTab: true,
                     tutorialGoToPreviousStep: true,
                     awaitClock: true,
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,                    
                     
                     // for docs
                     artSection: true,
@@ -533,8 +537,6 @@ module TDev.Browser {
                     calcSearchArt: true,
                     searchArtRefactoring: true,
                     editLibraryButton: true,                    
-                    scriptPrintScript: true,
-                    scriptPrintTopic: true,                    
                     scriptEmail: true,
                     publicationComments: true,
                 }

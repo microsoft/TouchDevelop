@@ -124,6 +124,9 @@ module TDev.AST {
 
         public toString()
         {
+            var ns = this.getNamespaces();
+            if (ns && ns[0])
+                return ns[0] + " → " + this.getName();
             return this.getNamespace() + this.getName();
         }
 

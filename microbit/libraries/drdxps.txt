@@ -6,8 +6,8 @@ meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
-#N47jMngJaCJf8PX8 meta import micro\u003abit {
-  pub "brinah"
+#qXnlCWSQj8KJ9sqD meta import micro\u003abit {
+  pub "vzzjsk"
   usage {
     type Image
     action `sync` \_libinit()
@@ -46,16 +46,18 @@ meta parentIds "";
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
     action `sync` warning(message: String)
     action `sync` analog_set_period(pin: String, micros: Number)
     action `sync` analog_set_pitch_pin(name: String)
-    action `sync` analog_pitch(frequency: Number, ms: Number)
+    action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
-    action `async` show_leds(leds: String)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` note(name: String) returns(frequency: Number)
   }
 }
 #ljbL9TDyViQp60st

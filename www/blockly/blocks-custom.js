@@ -616,6 +616,52 @@ Blockly.Blocks['controls_simple_for'] = {
   }
 };
 
+["A", "B", "C", "D", "E", "F", "G"].forEach(function (x) {
+    Blockly.Blocks['device_note_'+x] = {
+        init: function () {
+            this.setHelpUrl('https://live.microbit.co.uk/functions/note');
+            this.setColour(230);
+            this.appendDummyInput().appendField(x);
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setTooltip('The '+x+' note from the scale');
+        }
+    };
+});
+
+["1", "1/2", "1/4", "1/8", "1/16"].forEach(function (x) {
+    Blockly.Blocks['device_duration_'+x] = {
+        init: function () {
+            this.setHelpUrl('https://live.microbit.co.uk/functions/note');
+            this.setColour(230);
+            this.appendDummyInput().appendField(x == "1" ? "one whole note" : x+" note");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setTooltip((x == "1" ? "A whole note." : "A "+x+"th note.") + " Set the variable \"whole note\" to change the default tempo.");
+        }
+    };
+});
+
+
+Blockly.Blocks['device_play_note'] = {
+  init: function() {
+    this.setHelpUrl('https://live.microbit.co.uk/functions/play-note');
+    this.setColour(160);
+    this.appendDummyInput()
+        .appendField("play");
+    this.appendValueInput("note")
+        .setCheck("Number");
+    this.appendDummyInput()
+        .appendField("for");
+    this.appendValueInput("duration")
+        .setCheck("Number");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Play a given note on P0. You can also provide a specific frequency.');
+  }
+};
+
 Blockly.pathToMedia = "./media/";
 
 // Here's a helper to override the help URL for a block that's *already defined
