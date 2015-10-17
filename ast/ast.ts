@@ -2570,6 +2570,11 @@ module TDev.AST {
             return this.librariesAndThis().some(l => l.isCloud())
         }
 
+        public usesCppCompiler()
+        {
+            return this.librariesAndThis().some(l => l.resolved && l.resolved.useCppCompiler)
+        }
+
         private meta:any = {};
 
         public notifyChange()

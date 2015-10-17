@@ -2161,7 +2161,7 @@ module TDev
 
         public useNativeCompilation()
         {
-            return Cloud.useNativeCompilation || (Script && /#cplusplus/i.test(Script.getDescription()))
+            return Cloud.useNativeCompilation || (Script && Script.usesCppCompiler())
         }
 
         private currentScriptCompiling: string;
