@@ -209,8 +209,10 @@ module TDev.AST
         private nothingLocals:LocalDef[] = [];
         private localScopes: LocalDef[][] = [[]];
         private readOnlyLocals:LocalDef[] = [];
+        private outsideScopeLocals:LocalDef[] = [];
         private invisibleLocals:LocalDef[] = [];
         private writtenLocals:LocalDef[] = [];
+        private readLocals:LocalDef[] = [];
         private currLoop:Stmt;
 
         private inAtomic = false;
@@ -541,7 +543,9 @@ module TDev.AST
         {
             this.localScopes.peek().push(v);
             this.allLocals.push(v);
+            v._isByRef = false;
             v.lastUsedAt = this.timestamp++;
+            this.recordLocalRead(v);
         }
 
         private lookupSymbol(t:ThingRef) : AST.Decl
@@ -1170,6 +1174,8 @@ module TDev.AST
         {
             this.scope(() => {
                 var prevReadOnly = this.readOnlyLocals;
+                var prevRead = this.readLocals;
+                var prevOutsideScopeLocals = this.outsideScopeLocals;
                 var prevWritten = this.writtenLocals;
                 var prevSect = this.actionSection;
                 var prevAtomic = this.inAtomic;
@@ -1181,16 +1187,19 @@ module TDev.AST
 
                 this.currLoop = null;
                 this.writtenLocals = [];
+                this.readLocals = [];
 
                 this.actionSection = ActionSection.Lambda;
                 this.inAtomic = k instanceof ActionKind && (<ActionKind>k).isAtomic();
-                this.readOnlyLocals = this.snapshotLocals();
+                this.outsideScopeLocals = this.snapshotLocals()
+                this.readOnlyLocals = AST.writableLocalsInClosures ? this.outsideScopeLocals.filter(l => !l.isRegular) : this.outsideScopeLocals.slice(0);
                 if (Cloud.isRestricted())
                     this.invisibleLocals = this.snapshotLocals();
 
                 try {
                     f()
                 } finally {
+                    this.readLocals = prevRead;
                     this.writtenLocals = prevWritten;
                     this.readOnlyLocals = prevReadOnly;
                     this.inAtomic = prevAtomic;
@@ -1200,6 +1209,7 @@ module TDev.AST
                     this.reportedUnassigned = prevRep;
                     this.currLoop = prevLoop;
                     this.invisibleLocals = prevInvisibleLocals;
+                    this.outsideScopeLocals = prevOutsideScopeLocals;
                 }
             })
         }
@@ -1216,6 +1226,7 @@ module TDev.AST
                 this.typeCheck(inl.body);
                 if (!this.reportedUnassigned)
                     this.checkAssignment(inl);
+                this.computeClosure(inl);
             })
         }
 
@@ -1357,6 +1368,9 @@ module TDev.AST
             }
 
             if (t.def instanceof LocalDef)
+                this.recordLocalRead(<LocalDef>t.def)
+
+            if (t.def instanceof LocalDef)
                 t.forceLocal = true;
             else if (t.def instanceof SingletonDef)
                 t.forceLocal = false;
@@ -1496,6 +1510,17 @@ module TDev.AST
             t._kind = this.core.Task.createInstance([arg.getKind()])
         }
 
+        private computeClosure(inl:InlineAction)
+        {
+            inl.closure = [];
+            inl.allLocals = [];
+            this.readLocals.forEach(l => {
+               if (this.outsideScopeLocals.indexOf(l) >= 0)
+                    inl.closure.push(l)
+                inl.allLocals.push(l)
+            })
+        }
+
         private handleFun(t:Call, args:Expr[])
         {
             var ak:ActionKind = null
@@ -1537,13 +1562,22 @@ module TDev.AST
                     }
                 }
                 this.expectExpr(args[1], resKind, "lambda expression")
+                if (ak)
+                    this.computeClosure(synth);
             });
 
             t._kind = ak || this.core.Unknown
         }
 
+        private recordLocalRead(loc:LocalDef)
+        {
+            if (this.readLocals.indexOf(loc) < 0)
+                this.readLocals.push(loc);
+        }
+
         private recordLocalWrite(loc:LocalDef)
         {
+            this.recordLocalRead(loc);
             if (this.writtenLocals.indexOf(loc) < 0)
                 this.writtenLocals.push(loc);
         }
@@ -1611,11 +1645,14 @@ module TDev.AST
                     } else {
                         var loc = <LocalDef>thing;
                         if (this.readOnlyLocals.indexOf(loc) >= 0) {
-                            if (this.actionSection == ActionSection.Lambda)
+                            if (!AST.writableLocalsInClosures && this.actionSection == ActionSection.Lambda) {
                                 this.markError(trg, lf("TD107: inline functions cannot assign to locals from outside like '{0}'", name));
-                            else
+                            } else {
                                 this.markError(trg, lf("TD108: you cannot assign to the local variable '{0}'", name));
+                            }
                         } else {
+                            if (this.outsideScopeLocals.indexOf(loc) >= 0)
+                                loc._isByRef = true;
                             this.recordLocalWrite(loc)
                         }
                     }

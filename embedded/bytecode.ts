@@ -1288,13 +1288,12 @@ module TDev.AST.Bytecode
 
         emitInlineAction(inl:InlineAction)
         {
-            var locs = AST.Compiler.computeCapturedLocals(inl);
             var inlproc = new Procedure()
             inlproc.argsInR5 = true
             this.binary.procs.push(inlproc);
 
-            var refs  = locs.capturedLocals.filter(l => isRefKind(l.getKind()))
-            var flats = locs.capturedLocals.filter(l => !isRefKind(l.getKind()))
+            var refs  = inl.closure.filter(l => isRefKind(l.getKind()))
+            var flats = inl.closure.filter(l => !isRefKind(l.getKind()))
 
             var caps = refs.concat(flats)
 
@@ -1324,7 +1323,7 @@ module TDev.AST.Bytecode
                     return l
                 })
 
-                locs.allLocals.forEach(l => {
+                inl.allLocals.forEach(l => {
                     l._lastWriteLocation = null;
                     if (caps.indexOf(l) == -1)
                         this.proc.mkLocal(l)

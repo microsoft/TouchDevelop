@@ -22,6 +22,7 @@ module TDev.AST {
 
     export var propRenames:StringMap<string> = {};
     export var crossKindRenames:StringMap<string> = {};
+    export var writableLocalsInClosures = true;
 
     export function reset()
     {
@@ -1129,6 +1130,8 @@ module TDev.AST {
         public inParameters:LocalDef[] = [];
         public outParameters:LocalDef[] = [];
         public body:CodeBlock;
+        public closure:LocalDef[];
+        public allLocals:LocalDef[];
 
         public isImplicit:boolean;
         public isOptional:boolean;
@@ -2244,9 +2247,11 @@ module TDev.AST {
         public isSynthetic:boolean;
         public isHiddenOut:boolean;
         public isOut:boolean;
+        public _isByRef:boolean; // set by TypeChecker for locals written in closures
         public _lastWriteLocation:Stmt;
         public _converterAction:InlineAction;
 
+        public isByRef() { return this._isByRef }
         public writeWithType(app:App, tw:TokenWriter)
         {
             tw.id(this.getName()).op0(':').kind(app, this.getKind());
