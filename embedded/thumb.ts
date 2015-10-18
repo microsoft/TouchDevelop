@@ -50,14 +50,14 @@ module TDev.AST.Thumb
                         if (v == null) return emitErr("expecting register name", actual)
                     } else if (enc.isImmediate) {
                         actual = actual.replace(/^#/, "")
-                        v = parseOneInt(actual);
+                        v = bin.parseOneInt(actual);
                         if (v == null) {
                             return emitErr("expecting number", actual)
                         } else {
                             if (this.opcode == 0xb000) // add sp, #imm
-                                stack = v;
+                                stack = v / 4;
                             else if (this.opcode == 0xb080) // sub sp, #imm
-                                stack = -v;
+                                stack = -(v / 4);
                         }
                     } else if (enc.isRegList) {
                         if (actual != "{") return emitErr("expecting {", actual);
@@ -73,15 +73,21 @@ module TDev.AST.Thumb
                                 stack++;
                             else if (this.opcode == 0xbc00) // pop
                                 stack--;
+                            if (tokens[j] == ",") j++;
                         }
                         actual = tokens[j++]; // skip close brace
                     } else if (enc.isLabel) {
                         actual = actual.replace(/^#/, "")
                         if (/^[+-]?\d+$/.test(actual)) {
-                            v = parseInt(actual)
+                            v = parseInt(actual, 10)
                         } else {
-                            // TODO
-                            return emitErr("labels not supported yet", actual)
+                            v = bin.getRelativeLabel(actual)
+                            if (v == null) {
+                                if (bin.finalEmit)
+                                    return emitErr("unknown label", actual)
+                                else
+                                    v = 42
+                            }
                         }
                     } else {
                         Util.die()
@@ -133,6 +139,8 @@ module TDev.AST.Thumb
         public errors:AssemblyError[] = [];
         public buf:number[];
         private labels:StringMap<number> = {};
+        private stackpointers:StringMap<number> = {};
+        private stack = 0;
 
         private emitShort(op:number)
         {
@@ -143,6 +151,58 @@ module TDev.AST.Thumb
         private location()
         {
             return this.buf.length * 2;
+        }
+
+        public parseOneInt(s:string)
+        {
+            var mul = 1
+            while (m = /^([^\*]*)\*(.*)$/.exec(s)) {
+                var tmp = this.parseOneInt(m[1])
+                if (tmp == null) return null;
+                mul *= tmp;
+                s = m[2]
+            }
+
+            if (/^-/.test(s)) {
+                mul *= -1;
+                s = s.slice(1)
+            }
+
+            var v:number = null
+
+            var m = /^0x([a-f0-9]+)$/i.exec(s)
+            if (m) v = parseInt(m[1], 16)
+
+            m = /^0b([01]+)$/i.exec(s)
+            if (m) v = parseInt(m[1], 2)
+
+            m = /^(\d+)$/i.exec(s)
+            if (m) v = parseInt(m[1], 10)
+
+            m = /^(\w+)@(\d+)$/.exec(s)
+            if (m) {
+                if (mul != 1)
+                    this.directiveError("multiplication not supported with saved stacks");
+                if (this.stackpointers.hasOwnProperty(m[1]))
+                    v = 4 * (this.stack - this.stackpointers[m[1]] + parseInt(m[2]))
+                else
+                    this.directiveError("saved stack not found")
+            }
+
+            if (v == null && this.labels.hasOwnProperty(s)) {
+                v = this.labels[s] + this.baseOffset
+            }
+
+            if (v == null || isNaN(v)) return null;
+
+            return v * mul;
+        }
+
+        public getRelativeLabel(s:string)
+        {
+            if (!this.labels.hasOwnProperty(s))
+                return null
+            return this.labels[s] - (this.location() + 4);
         }
 
         private align(n:number)
@@ -179,7 +239,7 @@ module TDev.AST.Thumb
 
         private parseNumber(words:string[]):number
         {
-            var v = parseOneInt(words.shift())
+            var v = this.parseOneInt(words.shift())
             if (v == null) return null;
             return v;
         }
@@ -232,8 +292,7 @@ module TDev.AST.Thumb
                     this.directiveError("expecting one argument");
             }
 
-            var num0 = parseInt(words[1])
-            if (isNaN(num0)) num0 = null;
+            var num0 = this.parseOneInt(words[1]);
 
             switch (words[0]) {
                 case ".ascii":
@@ -292,14 +351,37 @@ module TDev.AST.Thumb
                     this.emitSpace(words);
                     break;
 
+                // The usage for this is as follows:
+                // push {...}
+                // @stackstart locals   ; locals := sp
+                // ...
+                // ldr r0, [pc, locals@3] ; load local number 3
+                // ...
+                // @stackempty locals ; expect an empty stack here
+                case "@stackstart":
+                    expectOne();
+                    this.stackpointers[words[1]] = this.stack;
+                    break;
+
+                case "@stackempty":
+                    if (this.stackpointers[words[1]] == null)
+                        this.directiveError("no such saved stack")
+                    else if (this.stackpointers[words[1]] != this.stack)
+                        this.directiveError("stack mismatch")
+                    break;
+
+                case ".section":
                 case ".global":
+                    this.stackpointers = {};
+                    this.stack = 0;
+                    break;
+
                 case ".text":
                 case ".cpu":
                 case ".fpu":
                 case ".eabi_attribute":
                 case ".code":
                 case ".file":
-                case ".section":
                 case ".thumb_func":
                 case ".type":
                     break;
@@ -323,6 +405,9 @@ module TDev.AST.Thumb
             for (var i = 0; i < instructions.length; ++i) {
                 var op = instructions[i].emit(this, words)
                 if (!op.error) {
+                    this.stack += op.stack;
+                    if (this.stack < 0)
+                        this.directiveError("stack underflow")
                     this.emitShort(op.opcode);
                     return;
                 }
@@ -355,7 +440,17 @@ module TDev.AST.Thumb
                 var m = /^([\.\w]+):$/.exec(words[0])
                 
                 if (m) {
-                    this.labels[m[1]] = this.location();
+                    if (this.finalEmit) {
+                        var curr = this.labels[m[1]]
+                        if (curr == null)
+                            Util.die()
+                        Util.assert(curr == this.location())
+                    } else {
+                        if (this.labels.hasOwnProperty(m[1]))
+                            this.directiveError("label redefinition")
+                        else
+                            this.labels[m[1]] = this.location();
+                    }
                     words.shift();
                 }
 
@@ -374,6 +469,7 @@ module TDev.AST.Thumb
 
             Util.assert(this.buf == null);
 
+            this.lines = text.split(/\n/);
             this.buf = [];
             this.labels = {};
             this.iterLines();
@@ -382,6 +478,7 @@ module TDev.AST.Thumb
                 return;
 
             this.buf = [];
+            this.finalEmit = true;
             this.iterLines();
         }
     }
@@ -396,7 +493,7 @@ module TDev.AST.Thumb
         }
         var m = /^r(\d+)$/.exec(actual)
         if (m) {
-            var r = parseInt(m[1])
+            var r = parseInt(m[1], 10)
             if (0 <= r && r < 16)
                 return r;
         }
@@ -422,6 +519,10 @@ module TDev.AST.Thumb
         var words = line.split(/\s/).filter(s => !!s)
         if (!words[0]) return null
         if (/^;/.test(words[0])) return null
+        for (var i = 1; i < words.length; ++i) {
+            if (/^;/.test(words[i]))
+                return words.slice(0, i);
+        }
         return words
     }
     
@@ -547,7 +648,7 @@ module TDev.AST.Thumb
         add("lsrs  $r0, $r1",        0x40c0, 0xffc0);
         add("lsrs  $r0, $r1, $i6",   0x0800, 0xf800);
         add("mov   $r0, $r1",        0x4600, 0xffc0);
-        add("mov   $r2, $r3",        0x4600, 0xff00);
+        //add("mov   $r2, $r3",        0x4600, 0xff00);
         add("movs  $r0, $r1",        0x0000, 0xffc0);
         add("movs  $r5, $i0",        0x2000, 0xf800);
         add("muls  $r0, $r1",        0x4340, 0xffc0);
@@ -627,37 +728,6 @@ module TDev.AST.Thumb
         }
     }
 
-    function parseOneInt(s:string)
-    {
-        var mul = 1
-        while (m = /^([^\*]*)\*(.*)$/.exec(s)) {
-            var tmp = parseOneInt(m[1])
-            if (tmp == null) return null;
-            mul *= tmp;
-            s = m[2]
-        }
-
-        if (/^-/.test(s)) {
-            mul *= -1;
-            s = s.slice(1)
-        }
-
-        var v = null
-
-        var m = /^0x([a-f0-9]+)$/i.exec(s)
-        if (m) v = parseInt(m[1], 16)
-
-        m = /^0b([01]+)$/i.exec(s)
-        if (m) v = parseInt(m[1], 2)
-
-        m = /^\d+$/i.exec(s)
-        if (m) v = parseInt(m[1], 10)
-
-        if (v == null) return null;
-
-        return v * mul;
-    }
-
     export function testOne(op:string, code:number)
     {
         var b = new Binary()
@@ -665,33 +735,95 @@ module TDev.AST.Thumb
         Util.assert(b.buf[0] == code)
     }
 
-    export function test()
+    function expectError(asm:string)
     {
         var b = new Binary();
-        b.emit(
-            "lsls r0, r0, #8\n" +
-            "push {lr}\n" +
-            "mov r0, r1\n" +
-            "movs r0, #100\n" +
-            "push {r0}\n" +
-            "push {lr,r0}\n" +
-            "pop {lr,r0}\n" +
-            "b #+12\n" +
-            "bne #-12\n" +
+        b.emit(asm);
+        if (b.errors.length == 0) {
+            Util.oops("ASMTEST: expecting error for: " + asm)
+        }
+        // console.log(b.errors[0].message)
+    }
 
-            "lsl r0, r0, #8\n" +
-            "push {pc,lr}\n" +
-            "push {r17}\n" +
-            "mov r0, r1\n" +
-            "movs r14, #100\n" +
-            "push {r0\n" +
-            "push lr,r0}\n" +
-            "pop {lr,r0}\n" +
-            "b #+11\n" +
-            "bne foo\n" +
-            ""
-            )
-        b.errors.forEach(e => console.log(e.message))
+    export function tohex(n:number)
+    {
+        if (n < 0 || n > 0xffff)
+            return ("0x" + n.toString(16)).toLowerCase()
+        else
+            return ("0x" + ("000" + n.toString(16)).slice(-4)).toLowerCase()
+    }
+
+    function expect(disasm:string)
+    {
+        var exp = []
+        var asm = disasm.replace(/^([0-9a-fA-F]{4})\s/gm, (w, n) => {
+            exp.push(parseInt(n, 16))
+            return ""
+        })
+
+        var b = new Binary();
+        b.emit(asm);
+        if (b.errors.length > 0) {
+            console.log(b.errors[0].message)
+            Util.oops("ASMTEST: not expecting errors")
+        }
+
+        if (b.buf.length != exp.length)
+            Util.oops("ASMTEST: wrong buf len")
+        for (var i = 0; i < exp.length; ++i) {
+            if (b.buf[i] != exp[i])
+                Util.oops("ASMTEST: wrong buf content, exp:" + tohex(exp[i]) + ", got: " + tohex(b.buf[i]))
+        }
+    }
+
+    export function test()
+    {
+        expectError("lsl r0, r0, #8");
+        expectError("push {pc,lr}");
+        expectError("push {r17}");
+        expectError("mov r0, r1 foo");
+        expectError("movs r14, #100");
+        expectError("push {r0");
+        expectError("push lr,r0}");
+        expectError("pop {lr,r0}");
+        expectError("b #+11");
+        expectError("b #+102400");
+        expectError("bne undefined_label");
+        expectError(".foobar");
+
+        expect(
+            "0200    lsls    r0, r0, #8\n" +
+            "b500    push    {lr}\n" +
+            "2064    movs    r0, #100        ; 0x64\n" +
+            "b401    push    {r0}\n" +
+            "bc08    pop     {r3}\n" +
+            "b501    push    {r0, lr}\n" +
+            "4770    bx      lr\n" +
+            "0000    .balign 4\n" +
+            "e6c0    .word   -72000\n" +
+            "fffe\n" )
+
+        expect(
+            "4291       cmp     r1, r2\n" +
+            "d100       bne     l6\n" +
+            "e000       b       l8\n" +
+            "1840   l6: adds    r0, r0, r1\n" +
+            "4718   l8: bx      r3\n")
+
+        expect(
+            "         @stackstart base\n" +
+            "b403     push    {r0, r1}\n" +
+            "         @stackstart locals\n" +
+            "9801     ldr     r0, [sp, locals@1]\n" +
+            "b401     push    {r0}\n" +
+            "9802     ldr     r0, [sp, locals@1]\n" +
+            "bc01     pop     {r0}\n" +
+            "         @stackempty locals\n" +
+            "9901     ldr     r1, [sp, locals@1]\n" +
+            "9102     str     r1, [sp, base@0]\n" +
+            "         @stackempty locals\n" +
+            "b082     sub     sp, #8\n" +
+            "         @stackempty base\n")
     }
 
 }
