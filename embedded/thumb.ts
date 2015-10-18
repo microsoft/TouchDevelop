@@ -2,6 +2,15 @@
 
 module TDev.AST.Thumb
 {
+    interface EmitResult {
+        stack: number;
+        opcode: number;
+        error?: string;
+        errorAt?: string;
+    }
+
+    var badNameError = emitErr("opcode name doesn't match", "<name>")
+
     class Instruction
     {
         public name:string;
@@ -23,11 +32,12 @@ module TDev.AST.Thumb
             this.args = words.slice(1)
         }
 
-        emit(tokens:string[])
+        emit(bin:Binary, tokens:string[]):EmitResult
         {
-            if (tokens[0] != this.name) return null;
+            if (tokens[0] != this.name) return badNameError;
             var r = this.opcode;
             var j = 1;
+            var stack = 0;
 
             for (var i = 0; i < this.args.length; ++i) {
                 var formal = this.args[i]
@@ -37,56 +47,342 @@ module TDev.AST.Thumb
                     var v = null
                     if (enc.isRegister) {
                         v = registerNo(actual);
+                        if (v == null) return emitErr("expecting register name", actual)
                     } else if (enc.isImmediate) {
                         actual = actual.replace(/^#/, "")
-                        var mul = 1
-                        while (m = /^(\d+)\*(.*)$/.exec(actual)) {
-                            mul *= parseInt(m[1])
-                            actual = m[2]
+                        v = parseOneInt(actual);
+                        if (v == null) {
+                            return emitErr("expecting number", actual)
+                        } else {
+                            if (this.opcode == 0xb000) // add sp, #imm
+                                stack = v;
+                            else if (this.opcode == 0xb080) // sub sp, #imm
+                                stack = -v;
                         }
-                        var m = /^\d+$/.exec(actual)
-                        if (m)
-                            v = mul * parseInt(actual)
                     } else if (enc.isRegList) {
-                        if (actual != "{") return null;
+                        if (actual != "{") return emitErr("expecting {", actual);
                         v = 0;
                         while (tokens[j] != "}") {
-                            var no = registerNo(tokens[j++])
-                            if (no == null) return null;
+                            actual = tokens[j++];
+                            if (!actual)
+                                return emitErr("expecting }", tokens[j - 2])
+                            var no = registerNo(actual);
+                            if (no == null) return emitErr("expecting register name", actual)
                             v |= (1 << no);
+                            if (this.opcode == 0xb400) // push
+                                stack++;
+                            else if (this.opcode == 0xbc00) // pop
+                                stack--;
                         }
-                        j++; // skip close brace
+                        actual = tokens[j++]; // skip close brace
                     } else if (enc.isLabel) {
                         actual = actual.replace(/^#/, "")
                         if (/^[+-]?\d+$/.test(actual)) {
                             v = parseInt(actual)
                         } else {
                             // TODO
-                            return null
+                            return emitErr("labels not supported yet", actual)
                         }
                     } else {
                         Util.die()
                     }
-                    if (v == null) return null;
+                    if (v == null) return emitErr("didn't understand it", actual); // shouldn't happen
                     v = enc.encode(v)
-                    if (v == null) return null;
+                    if (v == null) return emitErr("argument out of range or mis-aligned", actual);
                     Util.assert((r & v) == 0)
                     r |= v;
                 } else if (formal == actual) {
                     // skip
                 } else {
-                    return null
+                    return emitErr("expecting " + formal, actual)
                 }
             }
 
-            if (tokens[j]) return null
+            if (tokens[j]) return emitErr("trailing tokens", tokens[j])
 
-            return r
+            return {
+                stack: stack,
+                opcode: r,
+            }
         }
 
         toString()
         {
             return this.friendlyFmt;
+        }
+    }
+
+    export interface AssemblyError
+    {
+        ctx:string;
+        message:string;
+    }
+
+    export class Binary
+    {
+        constructor()
+        {
+        }
+
+        public baseOffset:number;
+        public finalEmit:boolean;
+        private lines:string[];
+        private currLineNo:number;
+        private currLine:string;
+        private errorCtx = "";
+        public errors:AssemblyError[] = [];
+        public buf:number[];
+        private labels:StringMap<number> = {};
+
+        private emitShort(op:number)
+        {
+            Util.assert(0 <= op && op <= 0xffff);
+            this.buf.push(op);
+        }
+
+        private location()
+        {
+            return this.buf.length * 2;
+        }
+
+        private align(n:number)
+        {
+            Util.assert(n == 2 || n == 4 || n == 8 || n == 16)
+            while (this.location() % n != 0)
+                this.emitShort(0);
+        }
+
+        private directiveError(msg:string)
+        {
+            this.errors.push({
+                ctx: this.errorCtx,
+                message: lf("Directive error: {0} at {1} (@{2})", msg, this.currLine, this.currLineNo)
+            })
+        }
+
+        private emitString(l:string)
+        {
+            function byteAt(s:string, i:number) { return (s.charCodeAt(i) || 0) & 0xff }
+
+            var m = /^\s*.\w+\s+(".*")\s*$/.exec(l)
+            var s:string;
+            if (!m || !(s = parseString(m[1]))) {
+                this.directiveError("expecting string")
+            } else {
+                this.align(4);
+                // l.length + 1 to NUL terminate
+                for (var i = 0; i < l.length + 1; i += 2) {
+                    this.emitShort( (byteAt(s, i*2+1) << 8) | byteAt(s, i*2) )
+                }
+            }
+        }
+
+        private parseNumber(words:string[]):number
+        {
+            var v = parseOneInt(words.shift())
+            if (v == null) return null;
+            return v;
+        }
+
+        private parseNumbers(words:string[])
+        {
+            words = words.slice(1)
+            var nums:number[] = []
+            while (true) {
+                var n = this.parseNumber(words)
+                if (n == null) {
+                    this.directiveError("cannot parse number at " + words[0])
+                    break;
+                } else
+                    nums.push(n)
+
+                if (words[0] == ",") {
+                    words.shift()
+                } else if (words[0] == null) {
+                    break;
+                } else {
+                    this.directiveError("expecting number, got " + words[0])
+                    break;
+                }
+            }
+            return nums
+        }
+
+        private emitSpace(words:string[])
+        {
+            var nums = this.parseNumbers(words);
+            if (nums.length == 1)
+                nums.push(0)
+            if (nums.length != 2)
+                this.directiveError("expecting one or two numbers")
+            else if (nums[0] % 2 != 0)
+                this.directiveError("only even space supported")
+            else {
+                var f = nums[1] & 0xff;
+                f = f | (f << 8)
+                for (var i = 0; i < nums[0]; i += 2)
+                    this.emitShort(f)
+            }
+        }
+        
+        private handleDirective(l:string, words:string[])
+        {
+            var expectOne = () => {
+                if (words.length != 2)
+                    this.directiveError("expecting one argument");
+            }
+
+            var num0 = parseInt(words[1])
+            if (isNaN(num0)) num0 = null;
+
+            switch (words[0]) {
+                case ".ascii":
+                case ".asciz":
+                case ".string":
+                    this.emitString(l);
+                    break;
+                case ".align":
+                    expectOne();
+                    if (num0 != null) {
+                        if (num0 == 0) return;
+                        if (num0 <= 4) {
+                            this.align(1 << num0);
+                        } else {
+                            this.directiveError("expecting 1, 2, 3 or 4 (for 2, 4, 8, or 16 byte alignment)")
+                        }
+                    } else this.directiveError("expecting number");
+                    break;
+                case ".balign":
+                    expectOne();
+                    if (num0 != null) {
+                        if (num0 == 1) return;
+                        if (num0 == 2 || num0 == 4 || num0 == 8 || num0 == 16) {
+                            this.align(num0);
+                        } else {
+                            this.directiveError("expecting 2, 4, 8, or 16")
+                        }
+                    } else this.directiveError("expecting number");
+                    break;
+                case ".hword":
+                case ".short":
+                case ".2bytes":
+                    this.parseNumbers(words).forEach(n => {
+                        // we allow negative numbers
+                        if (-0x8000 <= n && n <= 0xffff)
+                            this.emitShort(n & 0xffff)
+                        else
+                            this.directiveError("expecting int16")
+                    })
+                    break;
+                case ".word":
+                case ".4bytes":
+                    this.parseNumbers(words).forEach(n => {
+                        // we allow negative numbers
+                        if (-0x80000000 <= n && n <= 0xffffffff) {
+                            this.emitShort(n & 0xffff)
+                            this.emitShort((n >> 16) & 0xffff)
+                        } else {
+                            this.directiveError("expecting int32")
+                        }
+                    })
+                    break;
+
+                case ".skip":
+                case ".space":
+                    this.emitSpace(words);
+                    break;
+
+                case ".global":
+                case ".text":
+                case ".cpu":
+                case ".fpu":
+                case ".eabi_attribute":
+                case ".code":
+                case ".file":
+                case ".section":
+                case ".thumb_func":
+                case ".type":
+                    break;
+
+                case "@":
+                    // @ sp needed
+                    break;
+
+                default:
+                    if (/^\.cfi_/.test(words[0])) {
+                        // ignore
+                    } else {
+                        this.directiveError("unknown directive")
+                    }
+                    break;
+            }
+        }
+
+        private handleInstruction(words:string[])
+        {
+            for (var i = 0; i < instructions.length; ++i) {
+                var op = instructions[i].emit(this, words)
+                if (!op.error) {
+                    this.emitShort(op.opcode);
+                    return;
+                }
+            }
+
+            var w0 = words[0].toLowerCase().replace(/s$/, "").replace(/[^a-z]/g, "")
+
+            var msg = lf("Error assembling: {0} (@{1})\n", this.currLine, this.currLineNo)
+            var possibilities = instructions.filter(i => i.name == w0 || i.name == w0 + "s")
+            if (possibilities.length > 0) {
+                possibilities.forEach(i => {
+                    var err = i.emit(this, words)
+                    msg += lf("   Maybe: {0} ({1} at '{2}')\n", i.toString(), err.error, err.errorAt)
+                })
+            }
+
+            this.errors.push({ message: msg, ctx: this.errorCtx })
+        }
+
+        private iterLines()
+        {
+            this.currLineNo = 0;
+            this.lines.forEach(l => {
+                this.currLineNo++;
+                this.currLine = l;
+
+                var words = tokenize(l)
+                if (!words) return;
+
+                var m = /^([\.\w]+):$/.exec(words[0])
+                
+                if (m) {
+                    this.labels[m[1]] = this.location();
+                    words.shift();
+                }
+
+                if (/^[\.@]/.test(words[0])) {
+                    this.handleDirective(l, words);
+                } else {
+                    this.handleInstruction(words);
+                }
+
+            })
+        }
+
+        public emit(text:string)
+        {
+            init();
+
+            Util.assert(this.buf == null);
+
+            this.buf = [];
+            this.labels = {};
+            this.iterLines();
+
+            if (this.errors.length > 0)
+                return;
+
+            this.buf = [];
+            this.iterLines();
         }
     }
 
@@ -99,7 +395,11 @@ module TDev.AST.Thumb
             case "sp": actual = "r13"; break;
         }
         var m = /^r(\d+)$/.exec(actual)
-        if (m) return parseInt(m[1])
+        if (m) {
+            var r = parseInt(m[1])
+            if (0 <= r && r < 16)
+                return r;
+        }
         return null;
     }
 
@@ -118,8 +418,8 @@ module TDev.AST.Thumb
 
     function tokenize(line:string):string[]
     {
-        line = line.replace(/[\[\]\!\{\}]/g, m => " " + m + " ")
-        var words = line.split(/[\s,]/).filter(s => !!s)
+        line = line.replace(/[\[\]\!\{\},]/g, m => " " + m + " ")
+        var words = line.split(/\s/).filter(s => !!s)
         if (!words[0]) return null
         if (/^;/.test(words[0])) return null
         return words
@@ -234,6 +534,7 @@ module TDev.AST.Thumb
         add("ldr   $r0, [$r1, $i5]", 0x6800, 0xf800);
         add("ldr   $r0, [$r1, $r4]", 0x5800, 0xfe00);
         add("ldr   $r5, [pc, $i1]",  0x4800, 0xf800);
+        //add("ldr   $r5, $la",        0x4800, 0xf800);
         add("ldr   $r5, [sp, $i1]",  0x9800, 0xf800);
         add("ldrb  $r0, [$r1, $i4]", 0x7800, 0xf800);
         add("ldrb  $r0, [$r1, $r4]", 0x5c00, 0xfe00);
@@ -307,50 +608,67 @@ module TDev.AST.Thumb
 
     }
 
-    function assemble(text:string)
+    function parseString(s:string)
     {
-        init();
+        var toks = AST.Lexer.tokenize(s)
+        if (toks.length != 1 ||
+            toks[0].category != AST.TokenType.String)
+            return null
+        return toks[0].data
+    }
 
-        var buf = []
+    function emitErr(msg:string, tok:string)
+    {
+        return {
+            stack: null,
+            opcode: null,
+            error: msg,
+            errorAt: tok
+        }
+    }
 
-        text.split(/\n/).forEach(l => {
-            var words = tokenize(l)
-            if (!words) return;
+    function parseOneInt(s:string)
+    {
+        var mul = 1
+        while (m = /^([^\*]*)\*(.*)$/.exec(s)) {
+            var tmp = parseOneInt(m[1])
+            if (tmp == null) return null;
+            mul *= tmp;
+            s = m[2]
+        }
 
-            for (var i = 0; i < instructions.length; ++i) {
-                var op = instructions[i].emit(words)
-                if (op != null) {
-                    buf.push(op)
-                    return;
-                }
-            }
+        if (/^-/.test(s)) {
+            mul *= -1;
+            s = s.slice(1)
+        }
 
-            var w0 = words[0].toLowerCase().replace(/s$/, "").replace(/[^a-z]/g, "")
+        var v = null
 
-            var msg = lf("Error encoding: {0}\n", l)
-            var possibilities = instructions.filter(i => i.name == w0 || i.name == w0 + "s")
-            if (possibilities.length > 0) {
-                possibilities.forEach(i => msg += lf("   Maybe: {0}\n", i.toString()))
-            }
-            console.log(msg)
-        })
+        var m = /^0x([a-f0-9]+)$/i.exec(s)
+        if (m) v = parseInt(m[1], 16)
 
-        // console.log(buf.map(Bytecode.tohex).join(", "))
+        m = /^0b([01]+)$/i.exec(s)
+        if (m) v = parseInt(m[1], 2)
 
-        return buf;
+        m = /^\d+$/i.exec(s)
+        if (m) v = parseInt(m[1], 10)
 
+        if (v == null) return null;
+
+        return v * mul;
     }
 
     export function testOne(op:string, code:number)
     {
-        var buf = assemble(op)
-        Util.assert(buf[0] == code)
+        var b = new Binary()
+        b.emit(op)
+        Util.assert(b.buf[0] == code)
     }
 
     export function test()
     {
-        init();
-        assemble(
+        var b = new Binary();
+        b.emit(
             "lsls r0, r0, #8\n" +
             "push {lr}\n" +
             "mov r0, r1\n" +
@@ -360,9 +678,20 @@ module TDev.AST.Thumb
             "pop {lr,r0}\n" +
             "b #+12\n" +
             "bne #-12\n" +
+
+            "lsl r0, r0, #8\n" +
+            "push {pc,lr}\n" +
+            "push {r17}\n" +
+            "mov r0, r1\n" +
+            "movs r14, #100\n" +
+            "push {r0\n" +
+            "push lr,r0}\n" +
+            "pop {lr,r0}\n" +
+            "b #+11\n" +
+            "bne foo\n" +
             ""
             )
+        b.errors.forEach(e => console.log(e.message))
     }
+
 }
-
-
