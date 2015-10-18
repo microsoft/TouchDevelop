@@ -5,6 +5,7 @@ module TDev.AST.Thumb
     interface EmitResult {
         stack: number;
         opcode: number;
+        opcode2?: number;
         error?: string;
         errorAt?: string;
     }
@@ -55,9 +56,9 @@ module TDev.AST.Thumb
                             return emitErr("expecting number", actual)
                         } else {
                             if (this.opcode == 0xb000) // add sp, #imm
-                                stack = v / 4;
-                            else if (this.opcode == 0xb080) // sub sp, #imm
                                 stack = -(v / 4);
+                            else if (this.opcode == 0xb080) // sub sp, #imm
+                                stack = (v / 4);
                         }
                     } else if (enc.isRegList) {
                         if (actual != "{") return emitErr("expecting {", actual);
@@ -93,6 +94,12 @@ module TDev.AST.Thumb
                         Util.die()
                     }
                     if (v == null) return emitErr("didn't understand it", actual); // shouldn't happen
+
+                    if (this.name == "bl") {
+                        if (tokens[j]) return emitErr("trailing tokens", tokens[j])
+                        return this.emitBl(v, actual);
+                    }
+                        
                     v = enc.encode(v)
                     if (v == null) return emitErr("argument out of range or mis-aligned", actual);
                     Util.assert((r & v) == 0)
@@ -109,6 +116,27 @@ module TDev.AST.Thumb
             return {
                 stack: stack,
                 opcode: r,
+            }
+        }
+
+        private emitBl(v:number, actual:string):EmitResult
+        {
+            if (v % 2) return emitErr("uneven BL?", actual);
+            var off = v / 2
+            Util.assert(off != null)
+            if ((off|0) != off ||
+                // we can actually support more but the board has 256k (128k instructions)
+                !(-128*1024 <= off && off <= 128*1024))
+                return emitErr("jump out of range", actual);
+
+            // note that off is already in instructions, not bytes
+            var imm11 = off & 0x7ff
+            var imm10 = (off >> 11) & 0x3ff
+
+            return {
+                opcode : (off & 0xf0000000) ? (0xf400 | imm10) : (0xf000 | imm10)
+                opcode2: (0xf800 | imm11)
+                stack: 0
             }
         }
 
@@ -133,6 +161,7 @@ module TDev.AST.Thumb
         public baseOffset:number;
         public finalEmit:boolean;
         public checkStack = true;
+        public lookupExternalLabel:(name:string)=>number;
         private lines:string[];
         private currLineNo:number;
         private currLine:string;
@@ -191,8 +220,26 @@ module TDev.AST.Thumb
                     this.directiveError("saved stack not found")
             }
 
-            if (v == null && this.labels.hasOwnProperty(s)) {
-                v = this.labels[s] + this.baseOffset
+            m = /^(.*)@(hi|lo)$/.exec(s)
+            if (m && this.looksLikeLabel(m[1])) {
+                v = this.lookupLabel(m[1], true)
+                if (v != null) {
+                    v >>= 1;
+                    if (0 <= v && v <= 0xffff) {
+                        if (m[1] == "hi")
+                            v = (v >> 8) & 0xff
+                        else
+                            v = v & 0xff
+                    } else {
+                        this.directiveError("@hi/lo out of range")
+                        v = null
+                    }
+                }
+            }
+
+            if (v == null && this.looksLikeLabel(s)) {
+                v = this.lookupLabel(s, true);
+                v += this.baseOffset;
             }
 
             if (v == null || isNaN(v)) return null;
@@ -200,11 +247,32 @@ module TDev.AST.Thumb
             return v * mul;
         }
 
+        private looksLikeLabel(name:string)
+        {
+            return /^[\.a-zA-Z_][\.\w+]*$/.test(name)
+        }
+
+        private lookupLabel(name:string, direct = false)
+        {
+            var v = null;
+            if (this.labels.hasOwnProperty(name))
+                v = this.labels[name];
+            else if (this.lookupExternalLabel)
+                v = this.lookupExternalLabel(name)
+            if (v == null && direct) {
+                if (this.finalEmit)
+                    this.directiveError("unknown label: " + name);
+                else
+                    v = 42;
+            }
+            return null;
+        }
+
         public getRelativeLabel(s:string)
         {
-            if (!this.labels.hasOwnProperty(s))
-                return null
-            return this.labels[s] - (this.location() + 4);
+            var l = this.lookupLabel(s);
+            if (l == null) return null;
+            return l - (this.location() + 4);
         }
 
         private align(n:number)
@@ -418,6 +486,8 @@ module TDev.AST.Thumb
                     if (this.checkStack && this.stack < 0)
                         this.directiveError("stack underflow")
                     this.emitShort(op.opcode);
+                    if (op.opcode2 != null)
+                        this.emitShort(op.opcode2);
                     return;
                 }
             }
@@ -721,6 +791,8 @@ module TDev.AST.Thumb
         add("b     $lb11",           0xe000, 0xf800);
         add("bal   $lb11",           0xe000, 0xf800);
 
+        // handled specially - 32 bit instruction
+        add("bl    $lb",             0xf000, 0xf800);
     }
 
     function parseString(s:string)
@@ -840,12 +912,12 @@ module TDev.AST.Thumb
             "9901      ldr     r1, [sp, locals@1]\n" +
             "9102      str     r1, [sp, base@0]\n" +
             "          @stackempty locals\n" +
-            "b082      sub     sp, #8\n" +
+            "b002      add     sp, #8\n" +
             "          @stackempty base\n")
 
         expect(
-            "b010      add sp, #4*16\n" +
-            "b090      sub sp, #4*16\n" 
+            "b090      sub sp, #4*16\n" +
+            "b010      add sp, #4*16\n" 
             )
 
         expect(
