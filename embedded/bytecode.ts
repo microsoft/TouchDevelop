@@ -645,7 +645,7 @@ module TDev.AST.Bytecode
         emit(name:string, code:number):Opcode
         {
             var op = new Opcode(name, code)
-            // if (/^[a-z]/.test(name)) Thumb.testOne(name, code)
+            if (/^[a-z]/.test(name)) Thumb.testOne(name, code)
             op.currStack = this.currStack
             this.currStack += op.stackOffset();
             Util.assert(this.currStack >= 0);
