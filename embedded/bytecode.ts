@@ -140,7 +140,7 @@ module TDev.AST.Bytecode
         return funcInfo[name]
     }
 
-    function tohex(n:number)
+    export function tohex(n:number)
     {
         if (n < 0 || n > 0xffff)
             return ("0x" + n.toString(16)).toLowerCase()
@@ -619,7 +619,7 @@ module TDev.AST.Bytecode
             if (name == "JMPZ") {
                 this.emit("pop {r0}", 0xbc01);
                 this.emit("cmp r0, #0", 0x2800)
-                this.emit("bne +2", 0xd100)
+                this.emit("bne #0", 0xd100)
             } else if (name == "JMP") {
                 // ok
             } else {
@@ -645,6 +645,7 @@ module TDev.AST.Bytecode
         emit(name:string, code:number):Opcode
         {
             var op = new Opcode(name, code)
+            // if (/^[a-z]/.test(name)) Thumb.testOne(name, code)
             op.currStack = this.currStack
             this.currStack += op.stackOffset();
             Util.assert(this.currStack >= 0);
@@ -681,15 +682,15 @@ module TDev.AST.Bytecode
                 this.emitMov(n)
             } else if (n <= 0xffff) {
                 this.emitMov((n >> 8) & 0xff)
-                this.emit("lsls r0, #8", 0x0200)
+                this.emit("lsls r0, r0, #8", 0x0200)
                 this.emitAdd(n & 0xff)
             } else {
                 this.emitMov((n >> 24) & 0xff)
-                this.emit("lsls r0, #8", 0x0200)
+                this.emit("lsls r0, r0, #8", 0x0200)
                 this.emitAdd((n >> 16) & 0xff)
-                this.emit("lsls r0, #8", 0x0200)
+                this.emit("lsls r0, r0, #8", 0x0200)
                 this.emitAdd((n >> 8) & 0xff)
-                this.emit("lsls r0, #8", 0x0200)
+                this.emit("lsls r0, r0, #8", 0x0200)
                 this.emitAdd((n >> 0) & 0xff)
             }
             if (isNeg) {

@@ -4,3 +4,4 @@
 ///<reference path='emitter.ts'/>
 ///<reference path='lambda_lifter.ts'/>
 ///<reference path='bytecode.ts'/>
+///<reference path='thumb.ts'/>
