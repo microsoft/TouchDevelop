@@ -1790,7 +1790,7 @@
                     } else if (/\/scripts/.test(path)) {
                         tick(Ticks.browseListTags);
                         Ticker.rawTick("browseListTag_" + MdComments.shrink(header));
-                    } else if (/^promo-scripts\/[\w\-]+$/.test(path)) {
+                    } else if (/^promo-scripts\/[\w\-@]+$/.test(path)) {
                         tick(Ticks.browseListNew);
                         header = lf("promo {0}", path.replace("promo-scripts/", ""))
                     } else {
@@ -7947,7 +7947,6 @@
                 }
                 var fields = cfg.fields || {}
                 var alltags = cfg.tags || ["all"]
-                var autotags = cfg.autotags || ["all"]
                 fields["order"] = { desc: lf("Ordering slot (1-99); if empty 100 is assumed"), type: "number", optional: 100 }
                 fields["priority"] = { desc: lf("Publication time-shift (in hours; -9999 to +9999)"), type: "number" }
                 fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
