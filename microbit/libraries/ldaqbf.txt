@@ -7,8 +7,8 @@ meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // A #microbit game library.
-#h5mk44KGgQpDC5N7 meta import micro\u003abit {
-  pub "vzzjsk"
+#FICjbNZc86cUSakA meta import micro\u003abit {
+  pub "lqzmez"
   usage {
     type Image
     action `sync` \_libinit()
@@ -47,7 +47,6 @@ meta parentIds "";
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -59,6 +58,8 @@ meta parentIds "";
     action `async` show_leds(leds: String, ms: Number)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
   }
 }
 #GSTBzUmgzKqh572M
@@ -183,8 +184,7 @@ action game_over() {
       #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
         #qN0fKrhol7iI1zpn basic[lib micro\u003abit] →clear_screen;
         #puFgaW4Ecm7oLMUb basic[lib micro\u003abit] →pause(150);
-        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →show_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
-        #hEC9RO8x3BjNU7ZD basic[lib micro\u003abit] →pause(150);
+        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →show_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1", 400);
       }
       #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);
       #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string("GAME OVER", 100);
@@ -193,11 +193,15 @@ action game_over() {
       #x4rEDnGkUJtAWTaO basic[lib micro\u003abit] →pause(1200);
       #yLXE2y2NZSOZ4hkU if `not` $resetable then {
         #dnWQBAxjz4gBfilO $resetable := true;
-        #JpUpYdS8VxtUCBhc input[lib micro\u003abit] →on_button_pressed("A+B");
+        #DCGW4inW2417ZeGs input[lib micro\u003abit] →on_button_pressed("B");
+        #jlvkfCXJKYj1Uy2m where `implicit` \_body\_() {
+          #I1TCauF6Nju3OJLl control[lib micro\u003abit] →reset;
+        }
+        #JpUpYdS8VxtUCBhc input[lib micro\u003abit] →on_button_pressed("A");
         #vKAd2LoMcHflYCrz where `implicit` \_body\_() {
           #xtgCqbDV0YAeMKyS control[lib micro\u003abit] →reset;
         }
-        #dnNXBzVzYDagXXZk basic[lib micro\u003abit] →show_string("PRESS A+B TO RESET", 100);
+        #dnNXBzVzYDagXXZk basic[lib micro\u003abit] →show_string("PRESS A OR B TO RESTART", 100);
       }
     }
   }

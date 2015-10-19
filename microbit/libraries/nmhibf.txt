@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #bxVDodSvPI9uwy4S skip;
+  #pJrejsN3lO4TPu3T skip;
 }
-#I6sU500cXJNuBUii meta import micro\u003abit {
-  pub "vzzjsk"
+#SVXVucr3dRK4J6Y7 meta import micro\u003abit {
+  pub "lqzmez"
   usage {
     type Image
     action `sync` \_libinit()
@@ -49,7 +49,6 @@ action main() {
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -61,10 +60,12 @@ action main() {
     action `async` show_leds(leds: String, ms: Number)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
   }
 }
-#Mq74zo8AYCYQ46Bl meta import micro\u003abit_screen {
-  pub "ntnaek"
+#Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
+  pub "xrsbct"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -73,11 +74,11 @@ action main() {
     action `async` fade_out(ms: Number)
     action `sync` screenshot() returns(img: ♻ micro\u003abit → Image)
   }
-  #kUztOvBiNHsH4wsY resolve micro\u003abit = ♻ micro\u003abit with {
+  #Msmo63osSl8VOt4V resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#TKni5k5Gbn4kH0c1 meta import micro\u003abit_game {
-  pub "vxryfu"
+#x2LHHGswL451jMCn meta import micro\u003abit_game {
+  pub "pyfuaj"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -96,10 +97,10 @@ action main() {
     action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
   }
-  #xUH7brhcjEOVicHM resolve micro\u003abit = ♻ micro\u003abit with {
+  #uTSBhGGRoLDgCI2N resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#qZlAHl6aemYnFwpg meta import micro\u003abit_senses {
+#xk593tAL91e8H2C4 meta import micro\u003abit_senses {
   pub "jztbbx"
   usage {
     action `sync` on_screen_up(body: Action)
@@ -108,6 +109,6 @@ action main() {
     action `sync` on_logo_up(body: Action)
     action `sync` on_logo_down(body: Action)
   }
-  #EyR2XiS4LxY4SSjZ resolve micro\u003abit = ♻ micro\u003abit with {
+  #BbNcU7atbNNbBQmr resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }

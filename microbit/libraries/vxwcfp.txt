@@ -1809,29 +1809,6 @@ action on_event(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callback: Action
   #Bux3nIa98lMeKv4u code→notify_event_registration("on event " ∥ $id);
   meta private;
 }
-#onoJvm2kWsEKngil
-action plot_image(#ernyV6gPgL4qDGoq leds: String) {
-  #rBvxZoWlXqe4OGJu // Plots an image on the LED screen.
-  #IwSxNX5J5yP2nuNJ // {help:functions/plot-image}
-  #x73OJhHaFso82NU5 // {weight:80}
-  #FWhfCp2Ho1rgrtXs // {namespace:basic}
-  #HfxfdlZ9v2AZFpWY // {language:leds:bitframe}
-  #sk9dFWNx5qcSEmSz // {shim:micro_bit::plotImage}
-  #uRJXoEd33ev4KjEE $img := code→parse_image($leds);
-  #V19ZZ7xJpYyuVPHp for 0 ≤ i < 5 do {
-    #eDbyQ6YIAHykALbB for 0 ≤ j < 5 do {
-      #UEfHCrcq4FORMeXJ $led := data→leds→at(code→index($i, $j));
-      #nuDNZps4sflZsPhZ $state := 0;
-      #nUXlqzBvYHzNDu9U if $img→pixel($i, $j) then {
-        #z9edbDRl8h3Gmmup $state := 1;
-      }
-      #rUnkOwgHcjQQcoEZ code→set_led_color($state, $led);
-    }
-  }
-  #FabT5oNh9J2dliYe code→update_board;
-  #pBvK2k0OwDTl5kt9 skip;
-  meta sync;
-}
 #xPty4Z96gEpPmXcC
 var counters : Json_Builder {
   // {shim:}
@@ -2246,4 +2223,28 @@ var note_table : Json_Object {
   is\_resource = true;
   url = "data:text/plain;base64,ewogICAgIkMiOjI2MiwKICAgICJEIjoyOTQsCiAgICAiRSI6MzMwLAogICAgIkYiOjM0OSwKICAgICJHIjozOTIsCiAgICAiQSI6NDQwLAogICAgIkIiOjQ5NCwKICAgIAogICAgIkMzIjoxMzEsCiAgICAiRDMiOjE0NywKICAgICJFMyI6MTY1LAogICAgIkYzIjoxNzUsCiAgICAiRzMiOjE5NiwKICAgICJBMyI6MjIwLAogICAgIkIzIjoyNDcsCiAgICAKICAgICJDNCI6MjYyLAogICAgIkQ0IjoyOTQsCiAgICAiRTQiOjMzMCwKICAgICJGNCI6MzQ5LAogICAgIkc0IjozOTIsCiAgICAiQTQiOjQ0MCwKICAgICJCNCI6NDk0LAogICAgCiAgICAiQzUiOjUyMywKICAgICJENSI6NTg3LAogICAgIkU1Ijo2NTksCiAgICAiRjUiOjY5OCwKICAgICJHNSI6Nzg0LAogICAgIkE1Ijo4ODAsCiAgICAiQjUiOjk4OQp9";
   transient = true;
+}
+#xUYxOeKj6LoMvF7P
+action plot_leds(#WQt3HgKnNR1dkKwC leds: String) {
+  #jJiF4GeW3y5L8ZvJ // Plots an image on the LED screen.
+  #xeTbykuSWaF0nr9g // {help:functions/plot-leds}
+  #w9yQC2gSVG43NHs2 // {weight:80}
+  #C2NdzXO4YdWRnaEW // {namespace:basic}
+  #xCxDF5VU01h01Yh6 // {language:leds:bitframe}
+  #BA24IxYmXqkPDxLQ // {shim:micro_bit::plotLeds}
+  #cs0dZUvcOoT2Tbj4 $img := code→parse_image($leds);
+  #dfutR56803BeCdLx code→render_image($img, 0);
+  meta sync;
+}
+#CMiSgO7T4A4heu2z
+action plot_image(#OrAkEEB8qLoT4Mzd @this: * Image, #HXxAUi2ymf5FqRzN x_offset: Number) {
+  #c8b4vsUEisjXLh2u // Plots a frame from the image at offset ``x offset``.
+  #rVAalBbYMFEqtpEC // {help:functions/plot-image}
+  #L9R3IVcl2KNAEQL2 // {namespace:image}
+  #HThvzxSJtOTHengS // {namespace:led}
+  #xhU09kichmIGxHZV // {weight:69}
+  #Kl4zmpg9HVwUey6O // {hints:x offset:0,5,10}
+  #VfYDTi9V6fB4yWKi // {shim:micro_bit::plotImage}
+  #M8USzI3sH1AvswWQ code→render_image($@this, $x_offset);
+  meta sync;
 }

@@ -6,8 +6,8 @@ meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
-#qXnlCWSQj8KJ9sqD meta import micro\u003abit {
-  pub "vzzjsk"
+#mExzaWj10ZHeHz4P meta import micro\u003abit {
+  pub "lqzmez"
   usage {
     type Image
     action `sync` \_libinit()
@@ -46,7 +46,6 @@ meta parentIds "";
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -58,6 +57,8 @@ meta parentIds "";
     action `async` show_leds(leds: String, ms: Number)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
   }
 }
 #ljbL9TDyViQp60st
