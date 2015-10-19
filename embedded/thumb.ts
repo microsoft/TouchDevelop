@@ -42,7 +42,7 @@ module TDev.AST.Thumb
 
             for (var i = 0; i < this.args.length; ++i) {
                 var formal = this.args[i]
-                var actual = tokens[j++].toLowerCase()
+                var actual = tokens[j++]
                 if (/^\$/.test(formal)) {
                     var enc = encoders[formal]
                     var v = null
@@ -134,8 +134,8 @@ module TDev.AST.Thumb
             var imm10 = (off >> 11) & 0x3ff
 
             return {
-                opcode : (off & 0xf0000000) ? (0xf400 | imm10) : (0xf000 | imm10)
-                opcode2: (0xf800 | imm11)
+                opcode: (off & 0xf0000000) ? (0xf400 | imm10) : (0xf000 | imm10),
+                opcode2: (0xf800 | imm11),
                 stack: 0
             }
         }
@@ -249,6 +249,8 @@ module TDev.AST.Thumb
 
         private looksLikeLabel(name:string)
         {
+            if (/^(r\d|pc|sp|lr)$/i.test(name))
+                return false
             return /^[\.a-zA-Z_][\.\w+]*$/.test(name)
         }
 
@@ -265,7 +267,7 @@ module TDev.AST.Thumb
                 else
                     v = 42;
             }
-            return null;
+            return v;
         }
 
         public getRelativeLabel(s:string)
@@ -301,12 +303,12 @@ module TDev.AST.Thumb
         {
             function byteAt(s:string, i:number) { return (s.charCodeAt(i) || 0) & 0xff }
 
-            var m = /^\s*.\w+\s+(".*")\s*$/.exec(l)
+            var m = /^\s*([\w\.]+\s*:\s*)?.\w+\s+(".*")\s*$/.exec(l)
             var s:string;
-            if (!m || !(s = parseString(m[1]))) {
+            if (!m || null == (s = parseString(m[2]))) {
                 this.directiveError("expecting string")
             } else {
-                this.align(4);
+                this.align(2);
                 // l.length + 1 to NUL terminate
                 for (var i = 0; i < l.length + 1; i += 2) {
                     this.emitShort( (byteAt(s, i*2+1) << 8) | byteAt(s, i*2) )
@@ -369,7 +371,7 @@ module TDev.AST.Thumb
                     this.directiveError("expecting one argument");
             }
 
-            var num0 = this.parseOneInt(words[1]);
+            var num0:number;
 
             switch (words[0]) {
                 case ".ascii":
@@ -379,6 +381,7 @@ module TDev.AST.Thumb
                     break;
                 case ".align":
                     expectOne();
+                    num0 = this.parseOneInt(words[1]);
                     if (num0 != null) {
                         if (num0 == 0) return;
                         if (num0 <= 4) {
@@ -390,6 +393,7 @@ module TDev.AST.Thumb
                     break;
                 case ".balign":
                     expectOne();
+                    num0 = this.parseOneInt(words[1]);
                     if (num0 != null) {
                         if (num0 == 1) return;
                         if (num0 == 2 || num0 == 4 || num0 == 8 || num0 == 16) {
@@ -533,6 +537,8 @@ module TDev.AST.Thumb
                     words.shift();
                 }
 
+                if (words.length == 0) return;
+
                 if (/^[\.@]/.test(words[0])) {
                     this.handleDirective(l, words);
                 } else {
@@ -570,6 +576,7 @@ module TDev.AST.Thumb
     function registerNo(actual:string)
     {
         if (!actual) return null;
+        actual = actual.toLowerCase()
         switch (actual) {
             case "pc": actual = "r15"; break;
             case "lr": actual = "r14"; break;
@@ -798,8 +805,9 @@ module TDev.AST.Thumb
     function parseString(s:string)
     {
         var toks = AST.Lexer.tokenize(s)
-        if (toks.length != 1 ||
-            toks[0].category != AST.TokenType.String)
+        if (toks.length != 2 ||
+            toks[0].category != AST.TokenType.String ||
+            toks[1].category != AST.TokenType.EOF)
             return null
         return toks[0].data
     }
