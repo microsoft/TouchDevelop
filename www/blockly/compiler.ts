@@ -352,7 +352,7 @@ module Helpers {
       textVersion: "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex",
       jsonVersion: "v0.1,resolved",
 
-      name: name+" (converted)",
+      name: name,
       comment: description,
       autoIcon: "",
       autoColor: "",

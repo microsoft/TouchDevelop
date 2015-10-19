@@ -417,7 +417,7 @@ module TDev {
 
     // Run the program when loaded if it compiles and if the simulator is
     // already visible.
-    var ast = compileOrError();
+    var ast = compileOrError(false);
     if (ast)
       post(<External.Message_Run> {
         type: External.MessageType.Run,
@@ -460,7 +460,7 @@ module TDev {
     dirty = false;
   }
 
-  function compileOrError(msgSel?: string) {
+  function compileOrError(appendSuffix: boolean, msgSel?: string) {
     var ast: TDev.AST.Json.JApp;
 
     $(".blocklySelected, .blocklyError").each((i, x) =>
@@ -472,7 +472,7 @@ module TDev {
 
     try {
       ast = compile(Blockly.mainWorkspace, {
-        name: getName(),
+        name: getName() + (appendSuffix ? " (converted)" : ""),
         description: getDescription()
       });
     } catch (e) {
@@ -522,7 +522,7 @@ module TDev {
   };
 
   function doGraduate(msgSel?: string) {
-    var ast = compileOrError(msgSel);
+    var ast = compileOrError(true, msgSel);
     if (!ast)
       return;
     doSave();
@@ -535,7 +535,7 @@ module TDev {
   }
 
   function doCompile(msgSel?: string) {
-    var ast = compileOrError(msgSel);
+    var ast = compileOrError(false, msgSel);
     if (!ast)
       return;
     doSave();
@@ -569,7 +569,7 @@ module TDev {
       e.stopPropagation();
     });
     $("#command-run").click(() => {
-      var ast = compileOrError("#errorsRun");
+      var ast = compileOrError(false, "#errorsRun");
       if (!ast)
         return;
       post(<External.Message_Run> {
