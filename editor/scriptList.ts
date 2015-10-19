@@ -2218,7 +2218,7 @@
                             s.slice(0, shortLen) + "... ",
                             div("sdExpandButton",
                                 s.length > shortLen ?
-                                    "expand (+" + (s.length - shortLen) + ")" :
+                                    "expand (+" + (s.length - shortLen) + " characters)" :
                                     "expand",
                                 div("sdExpandButtonTarget").withClick(() => {
                                     Browser.setInnerHTML(r, Util.formatText(s));
