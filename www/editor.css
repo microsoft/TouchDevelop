@@ -3224,7 +3224,7 @@ left: 0;
   position: absolute;
   bottom: 0;
   left: 0;
-  opacity: 0.5;
+  opacity: 0.9;
 }
 
 .sdIcon .sdIndex {
@@ -3544,7 +3544,7 @@ div.sdTabTileLabel {
 .sdInlineHd {
   position: absolute;
   font-weight: bold;
-  opacity: 0.15;
+  opacity: 0.6;
 }
 
 .sdList-comments {
