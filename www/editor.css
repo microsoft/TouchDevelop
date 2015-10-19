@@ -1,5 +1,3 @@
-/* Fonts */
-
 div.calcButtonHelp {
     font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
 }
@@ -2872,6 +2870,13 @@ a.md-bigbutton:hover {
 .sdTabLabel[data-selected^="yes"]
 {
   color: black;
+  font-weight: bold;
+}
+
+.sdTabLabel:nth-of-type(n+2):before{
+    content: " | ";
+    padding: 0 0.5em;
+    font-weight: normal;
 }
 
 .sdHeaderContainer {
