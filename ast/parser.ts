@@ -558,6 +558,24 @@ module TDev { export module AST {
             }
 
 
+            if (Cloud.isRestricted()) {
+                // rewrite `basic->plot image(s)` into `basic->show leds(s, 400)`
+                toks.forEach((t, i) => {
+                    if (t instanceof PropertyRef &&
+                        t.getText() == "plot image" &&
+                        toks[i - 1] instanceof ThingRef &&
+                        toks[i - 1].getText() == "basic" &&
+                        toks[i + 3] &&
+                        toks[i + 1].getOperator() == "(" &&
+                        toks[i + 2].getStringLiteral() != null &&
+                        toks[i + 3].getOperator() == ")")
+                    {
+                        (<PropertyRef>t).data = "show leds"
+                        toks.splice(i + 3, 0, mkOp(","), mkOp("4"), mkOp("0"), mkOp("0"))
+                    }
+                })
+            }
+
             if (toks.length > 0)
             {
                 var r = new ExprHolder();
