@@ -5454,8 +5454,8 @@
                 var time = 0;
                 if (a) time = a.time;
                 var timeStr = "";
-                if (time) timeStr = Util.timeSince(time) + " :: ";
-                if (this.publicId) timeStr += "/" + this.publicId;
+                if (time) timeStr = Util.timeSince(time);
+                if (this.publicId) timeStr += " :: /" + this.publicId;
                 addInfo.setChildren([timeStr]);
 
                 nameBlock.setChildren([this.getTitle()]);
@@ -5707,8 +5707,8 @@
                 var time = 0;
                 if (a) time = a.time;
                 var timeStr = "";
-                if (time) timeStr = Util.timeSince(time) + " :: ";
-                if (this.publicId) timeStr += "/" + this.publicId;
+                if (time) timeStr = Util.timeSince(time);
+                if (this.publicId) timeStr += " :: /" + this.publicId;
                 addInfo.setChildren([timeStr]);
 
                 nameBlock.setChildren([a.name]);
@@ -6560,8 +6560,8 @@
                 if (this.jsonScript) time = this.jsonScript.time;
                 if (!time && this.cloudHeader && this.cloudHeader.scriptVersion) time = this.cloudHeader.scriptVersion.time;
                 var timeStr = "";
-                if (time) timeStr = Util.timeSince(time) + " :: ";
-                if (this.publicId) timeStr += "/" + this.publicId;
+                if (time) timeStr = Util.timeSince(time);
+                if (this.publicId) timeStr += " :: /" + this.publicId;
                 if (this.publicId && this.jsonScript) {
                     if (this.jsonScript.ishidden)
                         timeStr += lf(" [hidden]")
