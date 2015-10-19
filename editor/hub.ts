@@ -616,7 +616,6 @@ module TDev.Browser {
                 
                     // editor specific                  
                     publishDescription: true,
-                    sendPullRequest: true,
                     scriptPullChanges: true,
                     testAction: true,
                     testsSection: true,
