@@ -226,10 +226,12 @@ module TDev.AST.Thumb
                 if (v != null) {
                     v >>= 1;
                     if (0 <= v && v <= 0xffff) {
-                        if (m[1] == "hi")
+                        if (m[2] == "hi")
                             v = (v >> 8) & 0xff
-                        else
+                        else if (m[2] == "lo")
                             v = v & 0xff
+                        else
+                            Util.die()
                     } else {
                         this.directiveError("@hi/lo out of range")
                         v = null
@@ -309,9 +311,9 @@ module TDev.AST.Thumb
                 this.directiveError("expecting string")
             } else {
                 this.align(2);
-                // l.length + 1 to NUL terminate
-                for (var i = 0; i < l.length + 1; i += 2) {
-                    this.emitShort( (byteAt(s, i*2+1) << 8) | byteAt(s, i*2) )
+                // s.length + 1 to NUL terminate
+                for (var i = 0; i < s.length + 1; i += 2) {
+                    this.emitShort( (byteAt(s, i+1) << 8) | byteAt(s, i) )
                 }
             }
         }
@@ -926,6 +928,17 @@ module TDev.AST.Thumb
         expect(
             "b090      sub sp, #4*16\n" +
             "b010      add sp, #4*16\n" 
+            )
+
+        expect(
+            "6261      .string \"abc\"\n" +
+            "0063      \n" 
+            )
+
+        expect(
+            "6261      .string \"abcde\"\n" +
+            "6463      \n"  +
+            "0065      \n" 
             )
 
         expect(
