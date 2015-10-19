@@ -1156,7 +1156,8 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[])
   return mkCallWithCallback(e, "input", event, compiledArgs, body);
 }
 
-function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string): J.JCall {
+function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string, args?: J.JExpr[]): J.JCall {
+  args = args === undefined ? [] : args;
   var state = "";
   var rows = 5;
   var columns = big ? 10 : 5;
@@ -1169,7 +1170,7 @@ function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: st
       state += /TRUE/.test(b.getFieldValue("LED" + j + i)) ? "1" : "0";
     }
   }
-  return H.namespaceCall(n, f, [H.mkStringLiteral(state)]);
+  return H.namespaceCall(n, f, [<J.JExpr> H.mkStringLiteral(state)].concat(args));
 }
 
 // A description of each function from the "device library". Types are fetched
@@ -1352,7 +1353,8 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;
 
         case 'device_show_leds':
-          stmts.push(H.mkExprStmt(H.mkExprHolder([], compileImage(e, b, false, "basic", "show leds"))));
+          stmts.push(H.mkExprStmt(H.mkExprHolder([],
+            compileImage(e, b, false, "basic", "show leds", [ H.mkNumberLiteral(400) ]))));
           break;
 
         default:
