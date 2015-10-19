@@ -1940,21 +1940,6 @@ a.button, a.button:hover, a.button:visited {
   margin-left: 0.5em;
 }
 
-.gray-button {
-  border: none;
-  background: #eee;
-  color: #686868 !important;
-  font-size: 1em;
-  vertical-align: top;
-}
-.green-button {
-  border: none;
-  background: #008b00;
-  color: #fff !important;
-  font-size: 1em;
-  vertical-align: top;
-}
-
 .radio-button {
   border: none;
 }
