@@ -351,13 +351,13 @@ module TDev.Cloud {
                 m.fullWhite();
                 var ignoreDismiss = false;
                 m.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("maybe later"), () => { m.dismiss() }, "gray-button"),
+                    HTML.mkButton(lf("maybe later"), () => { m.dismiss() }),
                     HTML.mkButton(lf("sign in"), () => {
                         ignoreDismiss = true;
                         m.dismiss()
                         if (login) login.show();
                         else loginAsync().done(v => r.success(v))
-                    }, "green-button")));
+                    })));
                 m.onDismiss = () => {
                     if (!ignoreDismiss) r.success(false);
                 };

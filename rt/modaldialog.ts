@@ -17,6 +17,7 @@ module TDev
             this.outerDialog = div("modalDialogOuter", div("modalDialogMid", this.floating));
             if (header)
                 this.add(div("wall-dialog-header", header))
+            this.fullWhite();
         }
 
         public opacity = 0.85;
@@ -406,16 +407,22 @@ module TDev
 
         public fullBlack()
         {
-            this.outerDialog.className += " modalFullBlack";
+            this.outerDialog.classList.add("modalFullBlack");
+            this.outerDialog.classList.remove("modalFullWhite");
+            this.outerDialog.classList.remove("modalFullYellow");
         }
        
         public fullWhite()
         {
-            this.outerDialog.className += " modalFullWhite";
+            this.outerDialog.classList.remove("modalFullBlack");
+            this.outerDialog.classList.add("modalFullWhite");
+            this.outerDialog.classList.remove("modalFullYellow");
         }
 
         public fullYellow() {
-            this.outerDialog.className += " modalFullYellow";
+            this.outerDialog.classList.remove("modalFullBlack");
+            this.outerDialog.classList.remove("modalFullWhite");
+            this.outerDialog.classList.add("modalFullYellow");
         }
 
         public setScroll()

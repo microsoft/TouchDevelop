@@ -371,7 +371,7 @@
                         localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
                     d.dismiss();
-                }, "green-button")
+                })
             ));
             d.fullWhite()
             d.canDismiss = false;

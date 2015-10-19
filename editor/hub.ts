@@ -2338,14 +2338,14 @@ module TDev.Browser {
                         this.showingTemporarySignin = false;
                         d.canDismiss = true;
                         d.dismiss();
-                    }, "gray-button"),
+                    }),
                     HTML.mkButton(lf("sign in"), () => {
                         this.showingTemporarySignin = false;
                         if (Login.show()) {
                             d.canDismiss = true;
                             d.dismiss();
                         }
-                    }, "green-button")
+                    })
                 ));
                 d.fullWhite()
                     d.canDismiss = false;
