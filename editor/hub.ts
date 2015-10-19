@@ -790,7 +790,15 @@ module TDev.Browser {
                     m.add(promoDiv)
                     Cloud.getPrivateApiAsync("config/promo")
                         .then(resp => {
-                            (resp.autotags || []).concat((resp.tags || [])).forEach(t => {
+                            var tags = (resp.autotags || []).concat((resp.tags || []))
+                            var addtags = [];
+                            (resp.addlangs || []).forEach(l => {
+                                tags.forEach(t => {
+                                    if (resp.addlangs.indexOf(t) < 0)
+                                        addtags.push(t + "@" + l)
+                                })
+                            })
+                            tags.concat(addtags).forEach(t => {
                                 promoDiv.appendChild(
                                     HTML.mkButton(t, () => { Util.setHash("#list:promo-scripts/" + t) }))
                             })
