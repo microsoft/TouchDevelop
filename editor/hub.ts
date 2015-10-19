@@ -466,7 +466,6 @@ module TDev.Browser {
                     "return": true,
                     "break": true,
                     hideMyScriptHeader: true,
-                    scriptHistoryTab: true,
                     awaitClock: true,
                     tutorialGoToPreviousStep: true,
                     scriptPrintScript: true,
