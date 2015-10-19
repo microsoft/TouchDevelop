@@ -6,6 +6,7 @@ meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta allowExport "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -2049,11 +2050,13 @@ action test_show_number() {
   meta test;
 }
 #jFmD5xkFyWwpGTFt
-action test_plot_image() {
+action test_plot_leds() {
   #uv2qjBz92QKG6jb4 // {shim:}
   #xWC0vpIb0g6zkauY code→\_libinit;
-  #HAPp3WJOXLG3Hd5l code→plot_image("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
+  #HAPp3WJOXLG3Hd5l code→plot_leds("0 0 0 0 0\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n1 0 0 0 0");
   #kBUen1jy0k4wINSh code→pause(1000);
+  #xekvRRnvmhQHiMBK code→plot_leds("0 0 0 0 1\n0 1 0 1 0\n0 0 1 0 0\n0 0 0 1 0\n0 0 0 0 0");
+  #xzmqbCGIOoCg2MsE code→pause(1000);
   #xFXsetNa4Qhcgcja $img := code→create_image("0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 0 0 0 0\n0 1 1 1 0 0 0 1 0 0\n0 0 1 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0");
   #x7RQ0L8v7jnJDs4P $img→plot_frame(1);
   #fL5VgMaVovLc2kVR code→pause(1000);
@@ -2085,7 +2088,7 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period}
   #PAYMs0BDD8RbLR3B // {weight:10}
   #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
-  #Xh232b04YquKwayo // {hints:micros:5000}
+  #Xh232b04YquKwayo // {hints:micros:20000}
   #eskzFxC3911B24dS if `not` data→pitch_pin→is_invalid `and` data→pitch_pin→equals($pin) then {
     #iJ3KsCdT2LKFuhZU $p := code→pin_by_name($pin);
   }
