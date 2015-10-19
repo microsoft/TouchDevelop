@@ -3825,11 +3825,11 @@
         }
 
         public initTab() {
-            var loadingDiv = div('bigLoadingMore', 'loading...');
+            var loadingDiv = div('bigLoadingMore', lf("loading..."));
             this.tabContent.setChildren([loadingDiv]);
 
             if (!Cloud.getUserId()) {
-                loadingDiv.setChildren([ "sign in required" ])
+                loadingDiv.setChildren([ HTML.mkLinkButton(lf("sign in required"), () => Login.show()) ])
                 return;
             }
 
