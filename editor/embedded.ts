@@ -62,7 +62,7 @@ module TDev {
     var reservedNames = [
       // Namespaces from microbit-touchdevelop/MicroBitTouchDevelop.h
       "user_types", "globals", "create", "collection", "touch_develop", "ref",
-      "ds1307", "string", "action", "math", "number", "boolean", "bits",
+      "ds1307", "string", "action", "math", "number", "boolean", "bits", "internal_main",
 
       // Types
       "Number", "Boolean", "String", "ManagedString", "Collection",
