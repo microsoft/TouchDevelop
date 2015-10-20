@@ -95,6 +95,8 @@ module TDev.AST.Bytecode
 
     function setup()
     {
+        if (funcInfo) return; // already done
+
         var inf = (<any>TDev).bytecodeInfo
         funcInfo = inf.functions;
         hex = Cloud.isFota() ? inf.fotahex : inf.hex;
@@ -534,7 +536,7 @@ module TDev.AST.Bytecode
             this.locals.forEach(l => {
                 this.emit("push {r0} ; loc")
             })
-            this.emit("@stackstart locals")
+            this.emit("@stackmark locals")
 
             this.body += suff
 
@@ -627,7 +629,7 @@ module TDev.AST.Bytecode
 
         stringLiteral(s:string)
         {
-            return "\"" + s.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r") + "\""
+            return "\"" + s.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\u0000/g, "\\z") + "\""
         }
          
         emitString(s:string, needsSeqId = true):string
@@ -1063,6 +1065,8 @@ module TDev.AST.Bytecode
                 }
             } else if (pkn == "Invalid") {
                 this.emitInt(0);
+            } else if (pkn == "App" && p.getName() == "thumb") {
+                var str = e.args[1].getStringLiteral()
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")) {
                 this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk", 0);
@@ -1214,7 +1218,7 @@ module TDev.AST.Bytecode
 
                 this.proc.emit(".section code");
                 this.proc.emitLbl(this.proc.label);
-                this.proc.emit("@stackstart inlfunc");
+                this.proc.emit("@stackmark inlfunc");
                 this.proc.emit("push {r5, lr}");
                 this.proc.emit("adds r5, r1, #0");
                 this.proc.pushLocals();
@@ -1466,8 +1470,8 @@ module TDev.AST.Bytecode
 
             this.proc.emit(".section code");
             this.proc.emitLbl(this.proc.label);
-            this.proc.emit("@stackstart func");
-            this.proc.emit("@stackstart args");
+            this.proc.emit("@stackmark func");
+            this.proc.emit("@stackmark args");
             this.proc.emit("push {lr}");
 
             this.proc.pushLocals();
@@ -1542,6 +1546,27 @@ module TDev.AST.Bytecode
             Util.oops("unhandled stmt: " + s.nodeType())
         }
     }
+
+    function lintThumb(asm:string, err:(msg:string) => void)
+    {
+        setup();
+        var code =
+            ".section code\n" +
+            "@stackmark base\n" +
+            "_start:\n" +
+            asm + "\n" +
+            "@stackempty base\n"
+        var b = new Thumb.Binary();
+        b.lookupExternalLabel = lookupFunctionAddr;
+        b.throwOnError = false;
+        b.emit(code)
+
+        if (b.errors.length > 0) {
+            b.errors.forEach(e => console.log(e.message))
+            err(b.errors.map(e => e.message).join("\n"))
+        }
+    }
+    TypeChecker.lintThumb = lintThumb;
 
     function asmline(s:string)
     {

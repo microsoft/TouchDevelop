@@ -436,12 +436,12 @@ module TDev.AST.Thumb
 
                 // The usage for this is as follows:
                 // push {...}
-                // @stackstart locals   ; locals := sp
-                // ...
+                // @stackmark locals   ; locals := sp
+                // ... some push/pops ...
                 // ldr r0, [pc, locals@3] ; load local number 3
-                // ...
+                // ... some push/pops ...
                 // @stackempty locals ; expect an empty stack here
-                case "@stackstart":
+                case "@stackmark":
                     expectOne();
                     this.stackpointers[words[1]] = this.stack;
                     break;
@@ -516,6 +516,9 @@ module TDev.AST.Thumb
         {
             this.currLineNo = 0;
             this.lines.forEach(l => {
+                if (this.errors.length > 10)
+                    return;
+
                 this.currLineNo++;
                 this.currLine = l;
 
@@ -529,7 +532,7 @@ module TDev.AST.Thumb
                         var curr = this.labels[m[1]]
                         if (curr == null)
                             Util.die()
-                        Util.assert(curr == this.location())
+                        Util.assert(this.errors.length > 0 || curr == this.location())
                     } else {
                         if (this.labels.hasOwnProperty(m[1]))
                             this.directiveError("label redefinition")
@@ -911,9 +914,9 @@ module TDev.AST.Thumb
             "4718  l8: bx      r3\n")
 
         expect(
-            "          @stackstart base\n" +
+            "          @stackmark base\n" +
             "b403      push    {r0, r1}\n" +
-            "          @stackstart locals\n" +
+            "          @stackmark locals\n" +
             "9801      ldr     r0, [sp, locals@1]\n" +
             "b401      push    {r0}\n" +
             "9802      ldr     r0, [sp, locals@1]\n" +
