@@ -309,7 +309,7 @@
 
         private notificationsCount = -1;
         public addNotificationCounter(notificationBox : HTMLElement) {
-            var notificationsBtn = HTML.mkImg('svg:bell,#444');
+            var notificationsBtn = HTML.mkImg('svg:gel-alert,#fff');
             notificationsBtn.id = "notificationsBtn";
             var notificationsCounterDiv = div('notificationCounter');
 
