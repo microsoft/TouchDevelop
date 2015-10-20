@@ -86,6 +86,10 @@ body, input {
   width: 100%;
 }
 
+#script-description {
+  text-overflow: ellipsis;
+}
+
 #script-icons > *:not(:first-child) {
   display: inline-block;
   cursor: pointer;
