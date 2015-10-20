@@ -5080,6 +5080,9 @@
             var kind = jn ? jn.publicationkind : c.kind
             var notkind = jn ? jn.notificationkind : ""
 
+            if (notkind == "deleted")
+                return lab(lf("deleted"), AbuseReportInfo.pubDeleted(jn))
+
             switch (kind) {
             case "script":
                 return div(null, lab(notkind == "moderated" ? lf("made public") :
@@ -9688,6 +9691,15 @@
             .done(() => { }, e => Cloud.handlePostingError(e, "report/delete"));
         }
 
+        static pubDeleted(notification:JsonNotification)
+        {
+            var icon = div("sdIcon", HTML.mkImg("svg:fa-ban,#333,clip=80"));
+            icon.style.background = "#ff6";
+            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", div("sdCommentBlock", div("sdCommentBlockInner",
+                lf("Your publication /{0} ({1}) has been deleted by a moderator.", 
+                    notification.publicationid, notification.publicationname ))))));
+            return res;
+        }
     }
 
     export class CommentInfo
