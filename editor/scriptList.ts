@@ -210,7 +210,7 @@
             else if (this.backToEditor)
                 btn = ScriptInfo.mkBtn(icon, lf("script"), () => this.showHub());
             else if (!Cloud.isRestricted()) // hub not available
-                btn = ScriptInfo.mkBtn(icon, lf("the hub"), () => this.showHub());
+                btn = ScriptInfo.mkBtn(icon, lf("the hub"), () => this.showHub(true));
             else
                 btn = ScriptInfo.mkBtn(icon, lf("back"), () => window.location.href = "/");
             this.backContainer.setChildren([btn]);
@@ -378,7 +378,7 @@
             d.show();
         }
 
-        public showHub()
+        public showHub(forceHub = false)
         {
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething) {
                 this.hideSidePane();
@@ -386,6 +386,10 @@
             }
 
             var ed = this.backToEditor;
+
+            if (!ed && Cloud.isRestricted() && !forceHub)
+                return;
+
             this.hide();
             if (ed) {
                 TheEditor.restore();
@@ -10328,7 +10332,7 @@
 
                     var m = /[^`]\{template:(\w+)\}/.exec(topic.json.text);
                     var justFollow = () => {
-                        TheHost.showHub();
+                        TheHost.showHub(true);
                         TheEditor.followTopic(topic);
                     }
                     var startNew = () => {
