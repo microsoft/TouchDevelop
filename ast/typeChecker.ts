@@ -96,6 +96,7 @@ module TDev.AST
         private isTopExpr = false;
 
         static lastStoreLocalsAt:ExprHolder;
+        static lintThumb : (asm:string, err:(msg:string) => void) => void;
 
         constructor() {
             super()
@@ -1775,6 +1776,11 @@ module TDev.AST
                 this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
                 this.lintJavaScript(t.args[2].getStringLiteral(), /async/.test(t.prop().getName()))
                 break;
+            case "thumb":
+                if (!checkArgumentCount(2)) return;
+                if (TypeChecker.lintThumb)
+                    TypeChecker.lintThumb(t.args[1].getStringLiteral(), e => this.markError(t, e))
+                break;
             case "import":
                 if (!checkArgumentCount(4)) return;
                     var manager = t.args[1].getStringLiteral() || ""
@@ -1925,7 +1931,7 @@ module TDev.AST
             }
 
             if (prop && prop.parentKind == this.core.App &&
-                /^(javascript|import)/.test(prop.getName())) {
+                /^(javascript|import|thumb)/.test(prop.getName())) {
                 this.handleJavascriptImport(t);
             }
 

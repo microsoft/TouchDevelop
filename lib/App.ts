@@ -868,6 +868,13 @@ module TDev.RT {
         export function import_(manager : string, module: string, version: string): void {
         }
 
+        //? When compiled to ARM Thumb, inline the body.
+        //@ [script].lang("thumb")
+        //@ dbgOnly
+        export function thumb(script:string) : void
+        {
+        }
+
         //? Get the current incomming HTTP web request
         //@ betaOnly
         export function server_request(s:IStackFrame) : ServerRequest
