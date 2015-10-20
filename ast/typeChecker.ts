@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD212:
+// Next available error: TD214:
 
 module TDev.AST
 {
@@ -96,7 +96,7 @@ module TDev.AST
         private isTopExpr = false;
 
         static lastStoreLocalsAt:ExprHolder;
-        static lintThumb : (asm:string, err:(msg:string) => void) => void;
+        static lintThumb : (a:Action, asm:string, err:(msg:string) => void) => void;
 
         constructor() {
             super()
@@ -864,7 +864,7 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
-            this.inShim = this.topApp.entireShim || /{shim:.*}/.test(node.getDescription())
+            this.inShim = this.topApp.entireShim || node.getShimName() != null;
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1778,8 +1778,11 @@ module TDev.AST
                 break;
             case "thumb":
                 if (!checkArgumentCount(2)) return;
+                if (!this.inShim)
+                    this.markError(t, lf("TD213: app->thumb only supported inside of {shim:}"))
+                this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
                 if (TypeChecker.lintThumb)
-                    TypeChecker.lintThumb(t.args[1].getStringLiteral(), e => this.markError(t, e))
+                    TypeChecker.lintThumb(this.currentAction, t.args[1].getStringLiteral(), e => this.markError(t, e))
                 break;
             case "import":
                 if (!checkArgumentCount(4)) return;

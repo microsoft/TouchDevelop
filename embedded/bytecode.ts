@@ -745,8 +745,16 @@ module TDev.AST.Bytecode
     {
         useAction(a:Action)
         {
-            if (/{shim:.*}/.test(a.getDescription()))
-                return
+            if (a.getShimName() != null && !a._compilerInlineBody) {
+                a.body.stmts.forEach(s => {
+                    var str = AST.getEmbeddedLangaugeToken(s)
+                    if (str && (<ExprStmt>s).expr.parsed.getCalledProperty().getName() == "thumb") {
+                        a._compilerInlineBody = s;
+                    }
+                })
+                if (!a._compilerInlineBody)
+                    return
+            }
             super.useAction(a)
         }
     }
@@ -948,6 +956,11 @@ module TDev.AST.Bytecode
             this.proc.emit("push {r1}");
         }
 
+        reportError(msg:string)
+        {
+            Util.userError(msg)
+        }
+
         handleActionCall(e:Call)
         {
             var aa = e.calledExtensionAction() || e.calledAction()
@@ -962,15 +975,15 @@ module TDev.AST.Bytecode
             Util.assert(args.length == aa.getInParameters().length)
 
             var a:Action = aa._compilerInfo || aa
-            var shm = /{shim:([^{}]*)}/.exec(a.getDescription())
+            var shm = a.getShimName();
             var hasret = !!aa.getOutParameters()[0]
 
-            if (shm && shm[1] == "TD_NOOP") {
+            if (shm == "TD_NOOP") {
                 Util.assert(!hasret)
                 return
             }
 
-            if (shm && /^micro_bit::(createImage|showAnimation|showLeds)$/.test(shm[1])) {
+            if (/^micro_bit::(createImage|showAnimation|showLeds)$/.test(shm)) {
                 Util.assert(args[0].getLiteral() != null)
                 this.emitImageLiteral(args[0].getLiteral())
                 args.shift()
@@ -982,25 +995,41 @@ module TDev.AST.Bytecode
             }
 
 
-            if (shm) {
+            if (shm != null) {
                 var mask = this.getMask(args)
-                var msg = "{shim:" + shm[1] + "} from " + a.getName()
-                if (!shm[1])
-                    Util.oops("called " + msg)
+                var msg = "{shim:" + shm + "} from " + a.getName()
+                if (!shm)
+                    Util.oops("called " + msg + " (with empty {shim:}")
 
-                var inf = lookupFunc(shm[1])
+                var inf = lookupFunc(shm)
 
-                if (!inf)
-                    Util.oops("no such " + msg)
-
-                if (!hasret) {
-                    Util.assert(inf.type == "P", "expecting procedure for " + msg);
+                if (a._compilerInlineBody) {
+                    if (inf)
+                        this.reportError(lf("app->thumb inline body not allowed in {shim:{0}} (already defined in runtime)", shm))
+                    funcInfo[shm] = {
+                        type: hasret ? "F" : "P",
+                        args: a.getInParameters().length,
+                        idx: 0,
+                        value: 0
+                    }
+                    try {
+                        this.proc.emitCall(shm, mask)
+                    } finally {
+                        delete funcInfo[shm]
+                    }
                 } else {
-                    Util.assert(inf.type == "F", "expecting function for " + msg);
-                }
-                Util.assert(args.length == inf.args, "argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
+                    if (!inf)
+                        Util.oops("no such " + msg)
 
-                this.proc.emitCall(shm[1], mask)
+                    if (!hasret) {
+                        Util.assert(inf.type == "P", "expecting procedure for " + msg);
+                    } else {
+                        Util.assert(inf.type == "F", "expecting function for " + msg);
+                    }
+                    Util.assert(args.length == inf.args, "argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
+
+                    this.proc.emitCall(shm, mask)
+                }
             } else {
                 this.proc.emit("bl " + this.procIndex(a).label)
                 if (args.length > 0) {
@@ -1395,6 +1424,15 @@ module TDev.AST.Bytecode
 
             this.proc = this.procIndex(a);
 
+            if (a.getShimName() != null) {
+                var body = AST.getEmbeddedLangaugeToken(a._compilerInlineBody)
+                Util.assert(body != null)
+                Util.assert(body.getStringLiteral() != null)
+                this.proc.emit(body.getStringLiteral())
+                this.proc.emit("@stackempty func");
+                return
+            }
+
             var ret = this.proc.mkLabel("actret")
             a._compilerBreakLabel = ret;
             this.dispatch(a.body)
@@ -1461,6 +1499,25 @@ module TDev.AST.Bytecode
             p.action = a;
             this.binary.addProc(p)
 
+            var shimname = a.getShimName()
+            if (shimname != null) {
+                Util.assert(!!a._compilerInlineBody)
+
+                if (!/^\w+$/.test(shimname))
+                    this.reportError(lf("invalid inline shim name: {shim:{0}}", shimname))
+
+                if (a.getInParameters().length > 4)
+                    this.reportError(lf("inline shims support only up to 4 arguments"));
+
+                this.proc.label = shimname
+
+                this.proc.emit(".section code");
+                this.proc.emitLbl(this.proc.label);
+                this.proc.emit("@stackmark func");
+                return
+            }
+
+
             var inparms = a.getInParameters().map(p => p.local)
             this.proc.args = inparms.map((p, i) => {
                 var l = new Location(i, p);
@@ -1477,6 +1534,7 @@ module TDev.AST.Bytecode
             this.proc.pushLocals();
 
             visitStmts(a.body, s => {
+
                 if (s instanceof ExprStmt) {
                     var ai = (<ExprStmt>s).expr.assignmentInfo()
                     if (ai) {
@@ -1547,13 +1605,13 @@ module TDev.AST.Bytecode
         }
     }
 
-    function lintThumb(asm:string, err:(msg:string) => void)
+    function lintThumb(act:Action, asm:string, err:(msg:string) => void)
     {
         setup();
         var code =
             ".section code\n" +
             "@stackmark base\n" +
-            "_start:\n" +
+            act.getShimName() + ":\n" +
             asm + "\n" +
             "@stackempty base\n"
         var b = new Thumb.Binary();
@@ -1563,14 +1621,15 @@ module TDev.AST.Bytecode
 
         if (b.errors.length > 0) {
             b.errors.forEach(e => console.log(e.message))
-            err(b.errors.map(e => e.message).join("\n"))
+            err(lf("TD212: thumb assembler error") + "\n" +
+                b.errors.map(e => e.message).join("\n"))
         }
     }
     TypeChecker.lintThumb = lintThumb;
 
     function asmline(s:string)
     {
-        if (!/:$/.test(s))
+        if (!/(^\s)|(:$)/.test(s))
             s = "    " + s
         return s + "\n"
     }

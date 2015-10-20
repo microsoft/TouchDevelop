@@ -1816,6 +1816,7 @@ module TDev.AST {
         public _isActionTypeDef:boolean;
         public _compilerInlineAction:InlineAction;
         public _compilerParentAction:Action; // this is only set for synthetic actions created in compiler for lambda expressions
+        public _compilerInlineBody:Stmt;
         public _skipIntelliProfile:boolean;
         public allLocals:LocalDef[];
         public accept(v:NodeVisitor) { return v.visitAction(this); }
@@ -1853,6 +1854,13 @@ module TDev.AST {
             var res = [];
             desc.replace(/{namespace:([^}]+)}/g, (m, ns) => { res.push(ns); return "" })
             return res
+        }
+
+        public getShimName():string
+        {
+            var shm = /{shim:([^{}]*)}/.exec(this.getDescription())
+            if (shm) return shm[1]
+            return null
         }
 
         public getFlags()
