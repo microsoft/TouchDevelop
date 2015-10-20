@@ -1101,6 +1101,12 @@ module TDev.AST.Bytecode
                 args.forEach(a => this.dispatch(a))
             }
 
+            if (shm && shm[1] == "TD_ID") {
+                Util.assert(args.length == 1)
+                // argument already on stack
+                return;
+            }
+
 
             if (shm) {
                 var mask = this.getMask(args)
