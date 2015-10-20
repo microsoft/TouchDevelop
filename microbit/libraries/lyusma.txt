@@ -92,9 +92,10 @@ action main() {
   #SNTTZp3SXz6JkWWX pins;
   #cxm5ZRGniZuabbsH events;
   #w9qtFNmNqcWH4xF9 game;
+  #xVSeqKOnHOk6JFR2 music[lib micro\u003abit];
 }
-#usICLRI0RLgsWatF meta import micro\u003abit {
-  pub "jqldsq"
+#G0lH23nax1Sltq2S meta import micro\u003abit {
+  pub "zmjejw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -123,7 +124,7 @@ action main() {
     action `async` show_number(value: Number, interval: Number)
     action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
     action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
     action `sync` in_background(body: Action)
     action `async` calibrate()
     action `sync` forever(body: Action)
@@ -133,14 +134,19 @@ action main() {
     action `sync` camera(@event: String)
     action `sync` audio_recorder(@event: String)
     action `sync` alert(@event: String)
-    action `sync` plot_image(leds: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
     action `sync` warning(message: String)
     action `sync` analog_set_period(pin: String, micros: Number)
     action `sync` analog_set_pitch_pin(name: String)
-    action `async` analog_pitch(frequency: Number, millis: Number)
+    action `async` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
   }
 }
 #Wc1pO4N99lJnJtZj
@@ -165,20 +171,20 @@ var img : ♻ micro\u003abit → Image {
   transient = true;
 }
 #xvqxk1q4qCZk22MO meta import micro\u003abit_screen {
-  pub "nzngii"
+  pub "xrsbct"
   usage {
-    action `async` toggle(x: Number, y: Number)
-    action `async` plot_all()
-    action `async` toggle_all()
+    action `sync` toggle(x: Number, y: Number)
+    action `sync` plot_all()
+    action `sync` toggle_all()
     action `async` fade_in(ms: Number)
     action `async` fade_out(ms: Number)
-    action `async` screenshot() returns(img: ♻ micro\u003abit → Image)
+    action `sync` screenshot() returns(img: ♻ micro\u003abit → Image)
   }
   #OE9022wXGJBOumFg resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #P952wWx2TsBNbUPl meta import micro\u003abit_senses {
-  pub "vkmzfe"
+  pub "jztbbx"
   usage {
     action `sync` on_screen_up(body: Action)
     action `sync` on_screen_down(body: Action)
@@ -189,8 +195,8 @@ var img : ♻ micro\u003abit → Image {
   #xtFHv49Gg2zXwu3M resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
-#ctgp5VB0k69XVFAX meta import micro\u003abit_game {
-  pub "lwagkt"
+#nxBsrWkksKmQnONy meta import micro\u003abit_game {
+  pub "pyfuaj"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -209,7 +215,7 @@ var img : ♻ micro\u003abit → Image {
     action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
   }
-  #SCM2ihMv5V1HeY6m resolve micro\u003abit = ♻ micro\u003abit with {
+  #iFGAT33WIPN92bpo resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #BVGhpbmca
