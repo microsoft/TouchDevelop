@@ -4048,7 +4048,8 @@
                             })
 
                         if (this.parent.publicId) {
-                            Util.assert(!!js.id)
+                            if (!js.id)
+                                return cont; // script deleted?
                             if (js.baseid) getFor(js.baseid)
                         }
                         else
