@@ -449,25 +449,31 @@ module TDev {
             var compileLanguage, code;
             switch (message1.language) {
               case Language.CPlusPlus:
+                // We got C++ in, we therefore want to compile some C++.
                 compileLanguage = Language.CPlusPlus;
                 code = Promise.as(message1.text);
                 break;
               case Language.TouchDevelop:
                 fixupLibs(message1.libs);
-                if (!TheEditor.useNativeCompilation()) {
-                  compileLanguage = Language.TouchDevelop;
-                  code = roundtrip1(message1.text, message1.libs);
-                } else {
+                // We got a TouchDevelop AST.
+                if (message1.text.useCppCompiler) {
+                  // The external editor demands C++ compilation. Generate the
+                  // C++ code
                   compileLanguage = Language.CPlusPlus;
                   code = roundtrip(message1.text, message1.libs).then((a: J.JApp) => {
                     return Embedded.compile(a);
                   });
+                } else {
+                  // The external editor is fine with compiling with "bitvm".
+                  compileLanguage = Language.TouchDevelop;
+                  code = roundtrip1(message1.text, message1.libs);
                 }
                 break;
             }
 
             switch (compileLanguage) {
               case Language.CPlusPlus:
+                // Native C++ compilation.
                 TheEditor.compileWithUi(this.guid, code, message1.name).then(json => {
                   console.log(json);
                   // Aborted because of a retry, perhaps.
@@ -500,6 +506,7 @@ module TDev {
                 break;
 
               case Language.TouchDevelop:
+                // In-browser "bitvm" compilation.
                 code.then((ast: AST.App) => {
                   try {
                     ast.localGuid = this.guid;
