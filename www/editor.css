@@ -2854,7 +2854,7 @@ a.md-bigbutton:hover {
 .sdTabLabel {
   color: #6c6c6c;
   display: inline-block;
-  margin-right: 0.95em;
+  margin-right: 0.5em;
   cursor: pointer;
   line-height:2em;
 }
