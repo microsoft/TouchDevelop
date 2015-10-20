@@ -560,6 +560,23 @@ module TDev
             return res;
         }
 
+        private renderEmbeddedLangauge(n:AST.ExprStmt):string
+        {
+            var emb = AST.getEmbeddedLangaugeToken(n);
+            if (emb) {
+                var lines = emb.getStringLiteral().split(/\n/)
+                if (lines.length > 50) lines = lines.slice(0, 50).concat(["..."])
+                lines = lines.map(s => s.length > 80 ? s.slice(0,80) + "..." : s)
+                lines = lines.map(s => Util.htmlEscape(s))
+                return (
+                    this.tline(this.renderExprHolder(n.expr, n.expr.tokens.slice(0, 2)) + this.kw(" inline")) +
+                    this.possibleError(n) +
+                    Renderer.tdiv("inline-language", lines.join("\n")))
+            }
+
+            return null;
+        }
+
         private renderExprStmt(n:AST.ExprStmt, suffix = "")
         {
             if (n.isPlaceholder()) {
@@ -568,6 +585,8 @@ module TDev
                 else
                     return this.tline("<span class='greyed greyer'>" + Cloud.config.doNothingText + "</span>");
             } else {
+                var r = this.renderEmbeddedLangauge(n);
+                if (r) return r;
                 var toks = this.renderExprHolder(n.expr, n.expr.tokens)
                 toks += suffix
                 if (n.isVarDef())

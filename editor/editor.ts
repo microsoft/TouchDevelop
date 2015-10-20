@@ -195,6 +195,7 @@ module TDev
                         else if (/\.html/i.test(name)) editor.getSession().setMode("ace/mode/html");
                         else if (/\.sql/i.test(name)) editor.getSession().setMode("ace/mode/sql");
                         else if (/\.mysql/i.test(name)) editor.getSession().setMode("ace/mode/mysql");
+                        else if (/\.thumb/i.test(name)) editor.getSession().setMode("ace/mode/assembly_armthumb");
                         else if (/\.(h(pp)?|c(pp)?|cxx)/i.test(name)) editor.getSession().setMode("ace/mode/c_cpp");
                         editor.setValue(value);
                         editor.clearSelection();
@@ -5054,6 +5055,22 @@ module TDev
         {
             this.selector.moveCarret(off);
             this.editNode(this.selector.selectedStmt);
+        }
+
+        public editInlineLangauge(s:AST.Stmt)
+        {
+            var literal = AST.getEmbeddedLangaugeToken(s)
+            if (!literal) return;
+
+            EditorHost.editFullScreenAsync(
+                literal.languageHint ? 'inline.' + literal.languageHint : '', literal.getStringLiteral())
+            .done(text => {
+                if (text != null) {
+                    (<AST.Literal>literal).data = text
+                    s.notifyChange()
+                    this.refreshDecl()
+                }
+            })
         }
 
         public nodeTap(s:AST.AstNode, isInner:boolean, isBelow = false)

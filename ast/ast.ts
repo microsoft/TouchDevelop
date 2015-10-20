@@ -5619,4 +5619,34 @@ module TDev.AST {
         }
         return r
     }
+
+    export function getEmbeddedLangaugeToken(n:Stmt):Expr
+    {
+        if (!(n instanceof ExprStmt)) return null;
+
+        var toks = (<ExprStmt>n).expr.tokens
+
+        if (toks.length == 5 &&
+            toks[0].getThing() == api.core.App.singleton &&
+            toks[1].getProperty() &&
+            /^thumb$/.test(toks[1].getProperty().getName()) &&
+            toks[2].getOperator() == "(" &&
+            toks[3].getStringLiteral() != null &&
+            toks[4].getOperator() == ")")
+            return <Expr>toks[3];
+
+        if (toks.length == 7 &&
+            toks[0].getThing() == api.core.App.singleton &&
+            toks[1].getProperty() &&
+            /^javascript|javascript async$/.test(toks[1].getProperty().getName()) &&
+            toks[2].getOperator() == "(" &&
+            toks[3].getStringLiteral() != null &&
+            toks[4].getOperator() == "," &&
+            toks[5].getStringLiteral() != null &&
+            toks[6].getOperator() == ")")
+            return <Expr>toks[5];
+
+        return null;
+    }
+
 }
