@@ -8,7 +8,7 @@
 * do not define `myfunction` label yourself
 * use `app->thumb` to define the body of the function
 * remember to do a `bx lr` or `pop {lr}` at the end
-* parameters are in `r0` to `r3`; return value goes in `r0`
+* parameters are in `r0` to `r3`; return value goes in `r0` (standard calling convention)
 * you can call runtime functions, for example `bl micro_bit::showNumber` will work
 
 ### Supported instructions
@@ -123,7 +123,7 @@ blt   LABEL
 
 ### Registers
 
-Generally speaking, stick to `R0-R7` plus `PC`, `SP` and `LR`. `R8-R13` will
+Generally speaking, stick to `R0-R7` plus `PC`, `SP` and `LR`. `R8-R12` will
 work with a few instructions but not many.
 
 ### GCC
