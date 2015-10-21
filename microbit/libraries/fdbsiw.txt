@@ -14,7 +14,7 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
   #giwZfV8Lt049ksV2 code→write_string("\r\n");
 }
 #KayLKTp6ax4o8wIi meta import micro\u003abit {
-  pub "hwpbmu"
+  pub "zmjejw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -27,7 +27,7 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
     action `sync` point(x: Number, y: Number) returns(on: Boolean)
     action `async` show_string(text: String, interval: Number)
     action `sync` unplot(x: Number, y: Number)
-    action `async` on_button_pressed(name: String, body: Action)
+    action `sync` on_button_pressed(name: String, body: Action)
     action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` compass_heading() returns(degrees: Number)
     action `sync` acceleration(dimension: String) returns(millig: Number)
@@ -41,20 +41,31 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
     action `async` show_animation(leds: String, interval: Number)
     action `sync` running_time() returns(now: Number)
     action `async` show_number(value: Number, interval: Number)
-    action `sync` set_pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
-    action `sync` pixel(img: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `async` clear(img: ♻ micro\u003abit → Image)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
     action `sync` in_background(body: Action)
     action `async` calibrate()
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
-    action `async` on_pin_pressed(name: String, body: Action)
-    action `async` remote_control(@event: String)
-    action `async` camera(@event: String)
-    action `async` audio_recorder(@event: String)
-    action `async` alert(@event: String)
-    action `async` plot_image(leds: String)
-    action `async` test_image_partial_paste()
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` audio_recorder(@event: String)
+    action `sync` alert(@event: String)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
   }
 }
 #AABkMop1Z4RJQfcY
@@ -65,17 +76,15 @@ action example() {
   #USJSQxggyA9b7Xk5 // * print a piece of text
   #DJAddA2AQVd3x44R code→write_string("world");
   #ZGvSLSTMY2eH7BGS // * print a number formatted as ``x: value``.
-  #CPTexj2njchbeTaq code→write_number("x", 5);
+  #CPTexj2njchbeTaq code→write_number(5);
   #gnakx4J3bNeA6l5y // * read a line of text from Serial
   #xMVREMMWm4TP690d $msg := code→read_string;
   meta private;
 }
 #pvd0wLlxZ7vuecCJ
-action write_number(#xRu2iG9IAA5YJC38 name: String, #k2kI6XM6EpaLIU35 value: Number) {
+action write_number(#k2kI6XM6EpaLIU35 value: Number) {
   #UPZWaaK4FPhqLQv5 // Prints a numeric value to the serial
   #ABpnPKKwPATyuC4K // {namespace:serial}
-  #xe5wAf6XYmtUOf8x code→write_string($name);
-  #lLAHmgIoRRAXTKXl code→write_string(": ");
   #xyMeH7KZaUtgWna4 code→write_string($value→to_string);
 }
 #hGNQralaeJZymMYt
@@ -104,12 +113,14 @@ action write_screen() {
   #W6GWMYLuhTKpZfVd // Sends the current pixel values, byte-per-pixel, over serial.
   #MaKPhWXTpJB2NNWZ // {namespace:serial}
   #ejsGWhn5BXXX8fl4 // {shim:uBit.serial.sendDisplayState}
+  #xU3oa2GHPQS1plg0 app→log("serial: write screen");
 }
 #x6Hp3T5XixrKOXp4
 action read_screen() {
   #xkl7dNT5Lc785ZVZ // Reads the screen from serial.
   #ApoeWPHDMVNc7MjB // {namespace:serial}
   #tZxNxHtIuaSuvjo0 // {shim:uBit.serial.readDisplayState}
+  #eUUa4Y2jh2Gby4Ls app→log("serial: read screen");
 }
 #xBHnPm4TuXZ1XJba
 action read_image() returns(#i9cIYIjnk4B1camX img: ♻ micro\u003abit → Image) {
