@@ -6235,8 +6235,8 @@ table.dashboard tr td[data-completed^="yes"] {
 .inline-language .error .main {
   font-weight: bold;
 }
-.inline-language .error .main::after {
-  content: " ▲▲▲"
+.inline-language .error .main::before {
+  content: "▲▲▲ "
 }
 .inline-language .error .hints {
   font-size: 0.8em;

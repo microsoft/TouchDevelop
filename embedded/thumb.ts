@@ -155,6 +155,7 @@ module TDev.AST.Thumb
         public baseOffset:number;
         public finalEmit:boolean;
         public checkStack = true;
+        public inlineMode = false;
         public lookupExternalLabel:(name:string)=>number;
         private lines:string[];
         private currLineNo:number = 0;
@@ -293,7 +294,7 @@ module TDev.AST.Thumb
         {
             var err = <InlineError>{
                 scope: this.scope,
-                message: lf("{0}: {1} (@{2})\n{3}", msg, this.currLine, this.currLineNo, hints),
+                message: lf("  -> Line {2} ('{1}'), error: {0}\n{3}", msg, this.currLine, this.currLineNo, hints),
                 lineNo: this.currLineNo,
                 line: this.currLine,
                 coremsg: msg,
@@ -306,7 +307,8 @@ module TDev.AST.Thumb
 
         private directiveError(msg:string)
         {
-            this.pushError(lf("directive error: {0}", msg))
+            this.pushError(msg)
+            // this.pushError(lf("directive error: {0}", msg))
         }
 
         private emitString(l:string)
@@ -553,6 +555,8 @@ module TDev.AST.Thumb
                     } else {
                         if (this.labels.hasOwnProperty(lblname))
                             this.directiveError(lf("label redefinition"))
+                        else if (this.inlineMode && /^_/.test(lblname))
+                            this.directiveError(lf("labels starting with '_' are reserved for the compiler"))
                         else
                             this.labels[lblname] = this.location();
                     }
@@ -576,7 +580,7 @@ module TDev.AST.Thumb
 
             Util.assert(this.buf == null);
 
-            this.lines = text.split(/\n/);
+            this.lines = text.split(/\r?\n/);
             this.stack = 0;
             this.buf = [];
             this.labels = {};

@@ -730,13 +730,33 @@ module TDev.AST.Bytecode
             Thumb.test(); // just in case
             var b = new Thumb.Binary();
             b.lookupExternalLabel = lookupFunctionAddr;
-            b.throwOnError = true;
+            // b.throwOnError = true;
             b.emit(this.csource);
             if (b.errors.length > 0) {
-                b.errors.forEach(e => console.log(e.message))
-                throw new Error(b.errors[0].message)
+                var userErrors = ""
+                b.errors.forEach(e => {
+                    var m = /^user(\d+)/.exec(e.scope)
+                    if (m) {
+                        // This generally shouldn't happen, but it may for certin kind of global 
+                        // errors - jump range and label redefinitions
+                        var no = parseInt(m[1])
+                        var proc = this.procs.filter(p => p.seqNo == no)[0]
+                        if (proc && proc.action)
+                            userErrors += lf("At function " + proc.action.getName() + ":\n")
+                        else
+                            userErrors += lf("At inline assembly:\n")
+                        userErrors += e.message
+                    }
+                })
+
+                if (userErrors) {
+                    ModalDialog.showText(userErrors, lf("errors in inline assembly"))
+                } else {
+                    throw new Error(b.errors[0].message)
+                }
+            } else {
+                this.buf = b.buf;
             }
-            this.buf = b.buf;
         }
     }
 
@@ -842,11 +862,17 @@ module TDev.AST.Bytecode
             this.binary.addSource(metainfo, scripttext)
             this.binary.assemble()
 
-            var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n"
-            return {
-                dataurl: "data:application/x-microbit-hex;base64," + Util.base64Encode(hex),
+            var res = {
+                dataurl: null,
                 csource: src
             }
+
+            if (!this.binary.buf)
+                return res;
+
+            var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n";
+            res.dataurl = "data:application/x-microbit-hex;base64," + Util.base64Encode(hex)
+            return res;
         }
 
         visitAstNode(n:AstNode)
@@ -1623,6 +1649,7 @@ module TDev.AST.Bytecode
 
         b.lookupExternalLabel = lookupFunctionAddr;
         b.throwOnError = false;
+        b.inlineMode = true;
         b.emit(code)
 
         return b.errors;
