@@ -22,6 +22,7 @@ module TDev.AST {
 
     export var propRenames:StringMap<string> = {};
     export var crossKindRenames:StringMap<string> = {};
+    export var writableLocalsInClosures = true;
 
     export function reset()
     {
@@ -137,6 +138,7 @@ module TDev.AST {
         public _compilerContinueLabel:any;
         public _converterAwait:boolean;
         public _compilerInfo:any;
+        public _inlineErrors:InlineError[];
 
         constructor() {
             super()
@@ -1129,6 +1131,8 @@ module TDev.AST {
         public inParameters:LocalDef[] = [];
         public outParameters:LocalDef[] = [];
         public body:CodeBlock;
+        public closure:LocalDef[];
+        public allLocals:LocalDef[];
 
         public isImplicit:boolean;
         public isOptional:boolean;
@@ -1813,6 +1817,7 @@ module TDev.AST {
         public _isActionTypeDef:boolean;
         public _compilerInlineAction:InlineAction;
         public _compilerParentAction:Action; // this is only set for synthetic actions created in compiler for lambda expressions
+        public _compilerInlineBody:Stmt;
         public _skipIntelliProfile:boolean;
         public allLocals:LocalDef[];
         public accept(v:NodeVisitor) { return v.visitAction(this); }
@@ -1850,6 +1855,13 @@ module TDev.AST {
             var res = [];
             desc.replace(/{namespace:([^}]+)}/g, (m, ns) => { res.push(ns); return "" })
             return res
+        }
+
+        public getShimName():string
+        {
+            var shm = /{shim:([^{}]*)}/.exec(this.getDescription())
+            if (shm) return shm[1]
+            return null
         }
 
         public getFlags()
@@ -2244,9 +2256,11 @@ module TDev.AST {
         public isSynthetic:boolean;
         public isHiddenOut:boolean;
         public isOut:boolean;
+        public _isByRef:boolean; // set by TypeChecker for locals written in closures
         public _lastWriteLocation:Stmt;
         public _converterAction:InlineAction;
 
+        public isByRef() { return this._isByRef }
         public writeWithType(app:App, tw:TokenWriter)
         {
             tw.id(this.getName()).op0(':').kind(app, this.getKind());
@@ -5614,4 +5628,34 @@ module TDev.AST {
         }
         return r
     }
+
+    export function getEmbeddedLangaugeToken(n:Stmt):Expr
+    {
+        if (!(n instanceof ExprStmt)) return null;
+
+        var toks = (<ExprStmt>n).expr.tokens
+
+        if (toks.length == 5 &&
+            toks[0].getThing() == api.core.App.singleton &&
+            toks[1].getProperty() &&
+            /^thumb$/.test(toks[1].getProperty().getName()) &&
+            toks[2].getOperator() == "(" &&
+            toks[3].getStringLiteral() != null &&
+            toks[4].getOperator() == ")")
+            return <Expr>toks[3];
+
+        if (toks.length == 7 &&
+            toks[0].getThing() == api.core.App.singleton &&
+            toks[1].getProperty() &&
+            /^javascript|javascript async$/.test(toks[1].getProperty().getName()) &&
+            toks[2].getOperator() == "(" &&
+            toks[3].getStringLiteral() != null &&
+            toks[4].getOperator() == "," &&
+            toks[5].getStringLiteral() != null &&
+            toks[6].getOperator() == ")")
+            return <Expr>toks[5];
+
+        return null;
+    }
+
 }

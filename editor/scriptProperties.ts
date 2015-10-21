@@ -292,7 +292,8 @@ module TDev
 
                 ScriptProperties.firstTime = false
 
-                HTML.browserDownload(res.dataurl, "microbit-" + app.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
+                if (res.dataurl)
+                    HTML.browserDownload(res.dataurl, "microbit-" + app.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
             })
             .done(() => {},
             e => {

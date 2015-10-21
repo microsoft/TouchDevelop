@@ -152,6 +152,7 @@ module TDev.AST {
                             case 'r': c = '\r'; break;
                             case 'q': c = '\"'; break;
                             case 'j': c = ''; break;
+                            case 'z': c = '\u0000'; break;
                             case '_': c = '_'; break;
                             case 'u':
                                 {

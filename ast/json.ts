@@ -689,6 +689,8 @@ module TDev.AST.Json
                 reference: n.name,
                 inParameters: this.toJsons(n.inParameters),
                 outParameters: this.toJsons(n.outParameters),
+                allLocals: n.allLocals.map(l => this.ref(l)),
+                capturedLocals: n.closure.map(l => this.ref(l)),
                 isImplicit: n.isImplicit,
                 isOptional: n.isOptional,
                 body: n.body,
@@ -841,6 +843,7 @@ module TDev.AST.Json
             return {
                 name: n.getName(),
                 type: n.getKind(),
+                isByRef: n.isByRef(),
             }
         }
 

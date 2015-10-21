@@ -564,7 +564,11 @@ module TDev.AST
             if (l) return l;
             return (this.inlineCurrentAction? "l_" :"$") + this.localNameCtx.quote(d.getName(), d.nodeId);
         }
-        private localVarRef(d:LocalDef) { return (this.inlineCurrentAction? this.term(this.localVarName(d)) : this.term("s." + this.localVarName(d))); }
+        private localVarRef(d:LocalDef, direct = false) {
+            var t = this.inlineCurrentAction ? this.localVarName(d) : "s." + this.localVarName(d);
+            if (!direct && d.isByRef()) t += ".ref";
+            return this.term(t);
+        }
 
         private globalVarId(d:Decl) { return "$" + d.getStableName(); }
 
@@ -702,6 +706,13 @@ module TDev.AST
         private runmap_variables: string[][] = [];
 
         private topExpr(eHolder: ExprHolder, s: Stmt): JsExpr {
+            var ai = eHolder.assignmentInfo()
+            if (ai && ai.definedVars)
+                ai.definedVars.forEach(l => {
+                    if (l.isByRef())
+                        this.aux.push(this.localVarRef(l, true).gets(this.term("{ref:undefined}")))
+                })
+
 
             var nodeId = eHolder.stableId.replace(/\./g, "_");
             var blockId = s.parent.stableId.replace(/\./g, "_");  // associate stmt's ExprHolder with enclosing block [CCC]
@@ -934,25 +945,6 @@ module TDev.AST
             return this.unit
         }
 
-        static computeCapturedLocals(inl:InlineAction)
-        {
-            var finder = new VariableFinder();
-            finder.traverse(inl.body);
-            var capturedLocals:LocalDef[] = [];
-            var writtenLocals = finder.writtenLocals.slice(0);
-            writtenLocals.pushRange(inl.inParameters)
-            writtenLocals.pushRange(inl.outParameters)
-            finder.readLocals.forEach((l) => {
-                if (writtenLocals.indexOf(l) < 0) capturedLocals.push(l);
-            });
-            var allLocals = finder.readLocals;
-            finder.writtenLocals.forEach((l) => {
-                if (allLocals.indexOf(l) < 0) allLocals.push(l);
-            });
-
-            return { allLocals: allLocals, capturedLocals: capturedLocals };
-        }
-
         private compileInlineAction(inl:InlineAction)
         {
             var a = new Action();
@@ -969,13 +961,12 @@ module TDev.AST
             inl.inParameters.forEach((p) => a.header.inParameters.push(new ActionParameter(p)))
             inl.outParameters.forEach((p) => a.header.outParameters.push(new ActionParameter(p)))
 
-            var locs = Compiler.computeCapturedLocals(inl)
-            a.allLocals = locs.allLocals;
-            locs.capturedLocals.forEach((p) => a.header.inParameters.push(new ActionParameter(p)));
+            a.allLocals = inl.allLocals;
+            inl.closure.forEach((p) => a.header.inParameters.push(new ActionParameter(p)));
             this.innerActions.push(a);
 
             this.markLocation(inl);
-            var refs:JsExpr[] = locs.capturedLocals.map((l) => this.newTmpVar("lmbv", this.localVarRef(l)));
+            var refs:JsExpr[] = inl.closure.map((l) => this.newTmpVar("lmbv", this.localVarRef(l, true)));
 
             // -1 for this
             // +2 for previous, returnAddr
@@ -2117,7 +2108,7 @@ module TDev.AST
                 if (param.local == undefined)
                     this.wr("  return " + param.getName() + ";\n");
                 else
-                    this.wr("  return " + this.localVarName(param.local) + ";\n");
+                    this.wr("  return " + this.localVarRef(param.local) + ";\n");
             }
             this.wr("}\n");
             while (prevMax <= this.maxArgsToCheck)
@@ -2165,7 +2156,7 @@ module TDev.AST
                 if (a.getOutParameters().length > 1)
                     this.wr("  s.results = [];\n");
                 a.allLocals.forEach((l) => {
-                    this.wr("  " + this.localVarRef(l).toString() + " = ");
+                    this.wr("  " + this.localVarRef(l, true).toString() + " = ");
                     if (a.getInParameters().some((p:ActionParameter) => p.local == l)) {
                       this.wr(this.localVarName(l));
                     } else {

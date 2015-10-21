@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD212:
+// Next available error: TD214:
 
 module TDev.AST
 {
@@ -89,6 +89,16 @@ module TDev.AST
         Lambda,
     }
 
+    export interface InlineError
+    {
+        scope:string;
+        message:string;
+        line:string;
+        lineNo:number;
+        coremsg:string;
+        hints:string;
+    }
+
     export class TypeChecker
         extends NodeVisitor
     {
@@ -96,6 +106,7 @@ module TDev.AST
         private isTopExpr = false;
 
         static lastStoreLocalsAt:ExprHolder;
+        static lintThumb : (a:Action, asm:string) => InlineError[];
 
         constructor() {
             super()
@@ -209,8 +220,10 @@ module TDev.AST
         private nothingLocals:LocalDef[] = [];
         private localScopes: LocalDef[][] = [[]];
         private readOnlyLocals:LocalDef[] = [];
+        private outsideScopeLocals:LocalDef[] = [];
         private invisibleLocals:LocalDef[] = [];
         private writtenLocals:LocalDef[] = [];
+        private readLocals:LocalDef[] = [];
         private currLoop:Stmt;
 
         private inAtomic = false;
@@ -541,7 +554,9 @@ module TDev.AST
         {
             this.localScopes.peek().push(v);
             this.allLocals.push(v);
+            v._isByRef = false;
             v.lastUsedAt = this.timestamp++;
+            this.recordLocalRead(v);
         }
 
         private lookupSymbol(t:ThingRef) : AST.Decl
@@ -859,7 +874,7 @@ module TDev.AST
             node.clearError();
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
-            this.inShim = this.topApp.entireShim || /{shim:.*}/.test(node.getDescription())
+            this.inShim = this.topApp.entireShim || node.getShimName() != null;
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1170,6 +1185,8 @@ module TDev.AST
         {
             this.scope(() => {
                 var prevReadOnly = this.readOnlyLocals;
+                var prevRead = this.readLocals;
+                var prevOutsideScopeLocals = this.outsideScopeLocals;
                 var prevWritten = this.writtenLocals;
                 var prevSect = this.actionSection;
                 var prevAtomic = this.inAtomic;
@@ -1181,16 +1198,19 @@ module TDev.AST
 
                 this.currLoop = null;
                 this.writtenLocals = [];
+                this.readLocals = [];
 
                 this.actionSection = ActionSection.Lambda;
                 this.inAtomic = k instanceof ActionKind && (<ActionKind>k).isAtomic();
-                this.readOnlyLocals = this.snapshotLocals();
+                this.outsideScopeLocals = this.snapshotLocals()
+                this.readOnlyLocals = AST.writableLocalsInClosures ? this.outsideScopeLocals.filter(l => !l.isRegular) : this.outsideScopeLocals.slice(0);
                 if (Cloud.isRestricted())
                     this.invisibleLocals = this.snapshotLocals();
 
                 try {
                     f()
                 } finally {
+                    this.readLocals = prevRead;
                     this.writtenLocals = prevWritten;
                     this.readOnlyLocals = prevReadOnly;
                     this.inAtomic = prevAtomic;
@@ -1200,6 +1220,7 @@ module TDev.AST
                     this.reportedUnassigned = prevRep;
                     this.currLoop = prevLoop;
                     this.invisibleLocals = prevInvisibleLocals;
+                    this.outsideScopeLocals = prevOutsideScopeLocals;
                 }
             })
         }
@@ -1216,6 +1237,7 @@ module TDev.AST
                 this.typeCheck(inl.body);
                 if (!this.reportedUnassigned)
                     this.checkAssignment(inl);
+                this.computeClosure(inl);
             })
         }
 
@@ -1357,6 +1379,9 @@ module TDev.AST
             }
 
             if (t.def instanceof LocalDef)
+                this.recordLocalRead(<LocalDef>t.def)
+
+            if (t.def instanceof LocalDef)
                 t.forceLocal = true;
             else if (t.def instanceof SingletonDef)
                 t.forceLocal = false;
@@ -1496,6 +1521,17 @@ module TDev.AST
             t._kind = this.core.Task.createInstance([arg.getKind()])
         }
 
+        private computeClosure(inl:InlineAction)
+        {
+            inl.closure = [];
+            inl.allLocals = [];
+            this.readLocals.forEach(l => {
+               if (this.outsideScopeLocals.indexOf(l) >= 0)
+                    inl.closure.push(l)
+                inl.allLocals.push(l)
+            })
+        }
+
         private handleFun(t:Call, args:Expr[])
         {
             var ak:ActionKind = null
@@ -1537,13 +1573,22 @@ module TDev.AST
                     }
                 }
                 this.expectExpr(args[1], resKind, "lambda expression")
+                if (ak)
+                    this.computeClosure(synth);
             });
 
             t._kind = ak || this.core.Unknown
         }
 
+        private recordLocalRead(loc:LocalDef)
+        {
+            if (this.readLocals.indexOf(loc) < 0)
+                this.readLocals.push(loc);
+        }
+
         private recordLocalWrite(loc:LocalDef)
         {
+            this.recordLocalRead(loc);
             if (this.writtenLocals.indexOf(loc) < 0)
                 this.writtenLocals.push(loc);
         }
@@ -1611,11 +1656,14 @@ module TDev.AST
                     } else {
                         var loc = <LocalDef>thing;
                         if (this.readOnlyLocals.indexOf(loc) >= 0) {
-                            if (this.actionSection == ActionSection.Lambda)
+                            if (!AST.writableLocalsInClosures && this.actionSection == ActionSection.Lambda) {
                                 this.markError(trg, lf("TD107: inline functions cannot assign to locals from outside like '{0}'", name));
-                            else
+                            } else {
                                 this.markError(trg, lf("TD108: you cannot assign to the local variable '{0}'", name));
+                            }
                         } else {
+                            if (this.outsideScopeLocals.indexOf(loc) >= 0)
+                                loc._isByRef = true;
                             this.recordLocalWrite(loc)
                         }
                     }
@@ -1737,6 +1785,22 @@ module TDev.AST
                 if (!checkArgumentCount(3)) return;
                 this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
                 this.lintJavaScript(t.args[2].getStringLiteral(), /async/.test(t.prop().getName()))
+                break;
+            case "thumb":
+                if (!checkArgumentCount(2)) return;
+                if (!this.inShim)
+                    // TODO check that there is only one
+                    this.markError(t, lf("TD213: app->thumb only supported inside of {shim:}"))
+                this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
+                if (TypeChecker.lintThumb) {
+                    var errs = TypeChecker.lintThumb(this.currentAction, t.args[1].getStringLiteral())
+                    if (errs.length > 0) {
+                        this.markError(t, lf("TD212: thumb assembler error"))
+                        this.lastStmt._inlineErrors = errs;
+                    } else {
+                        this.lastStmt._inlineErrors = null;
+                    }
+                }
                 break;
             case "import":
                 if (!checkArgumentCount(4)) return;
@@ -1888,7 +1952,7 @@ module TDev.AST
             }
 
             if (prop && prop.parentKind == this.core.App &&
-                /^(javascript|import)/.test(prop.getName())) {
+                /^(javascript|import|thumb)/.test(prop.getName())) {
                 this.handleJavascriptImport(t);
             }
 

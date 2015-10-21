@@ -146,6 +146,8 @@ module TDev
                         else
                             ch.withClick(() => TheEditor.nodeTap(s, true, true))
                         prevLines.push(ch)
+                    } else if (/inline-language/.test(ch.className)) {
+                        ch.withClick(() => TheEditor.editInlineLangauge(s))
                     } else if (/callstackmark/.test(ch.className)) {
                         ch.withClick(() => TheEditor.showStackFrame(s));
                     } else {
