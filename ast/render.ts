@@ -583,12 +583,12 @@ module TDev
                 var str = ""
                 var j = 0
                 lines.forEach((l, i) => {
-                    str += l + "\n"
-                    while (inlErr[j] && inlErr[j].lineNo == i + 1 + shift) {
+                    while (inlErr[j] && inlErr[j].lineNo == i + shift) {
                         var err = inlErr[j++]
                         str += Renderer.tdiv("error", Renderer.tdiv("main", Util.htmlEscape(err.coremsg)) +
                                             Renderer.tdiv("hints", Util.htmlEscape(err.hints)))
                     }
+                    str += l + "\n"
                 })
                 return (
                     this.tline(this.renderExprHolder(n.expr, n.expr.tokens.slice(0, 2)) + this.kw(" inline")) +

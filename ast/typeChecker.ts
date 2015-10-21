@@ -91,7 +91,7 @@ module TDev.AST
 
     export interface InlineError
     {
-        ctx:string;
+        scope:string;
         message:string;
         line:string;
         lineNo:number;

@@ -157,9 +157,10 @@ module TDev.AST.Thumb
         public checkStack = true;
         public lookupExternalLabel:(name:string)=>number;
         private lines:string[];
-        private currLineNo:number;
-        private currLine:string;
-        private errorCtx = "";
+        private currLineNo:number = 0;
+        private realCurrLineNo:number;
+        private currLine:string = "";
+        private scope = "";
         public errors:InlineError[] = [];
         public buf:number[];
         private labels:StringMap<number> = {};
@@ -250,11 +251,19 @@ module TDev.AST.Thumb
             return /^[\.a-zA-Z_][\.\w+]*$/.test(name)
         }
 
+        private scopedName(name:string)
+        {
+            if (name[0] == "." && this.scope)
+                return this.scope + "$" + name;
+            else return name;
+        }
+
         private lookupLabel(name:string, direct = false)
         {
             var v = null;
-            if (this.labels.hasOwnProperty(name))
-                v = this.labels[name];
+            var scoped = this.scopedName(name)
+            if (this.labels.hasOwnProperty(scoped))
+                v = this.labels[scoped];
             else if (this.lookupExternalLabel)
                 v = this.lookupExternalLabel(name)
             if (v == null && direct) {
@@ -280,10 +289,10 @@ module TDev.AST.Thumb
                 this.emitShort(0);
         }
 
-        private pushError(msg:string, hints:string = "")
+        public pushError(msg:string, hints:string = "")
         {
             var err = <InlineError>{
-                ctx: this.errorCtx,
+                scope: this.scope,
                 message: lf("{0}: {1} (@{2})\n{3}", msg, this.currLine, this.currLineNo, hints),
                 lineNo: this.currLineNo,
                 line: this.currLine,
@@ -452,9 +461,9 @@ module TDev.AST.Thumb
                         this.directiveError(lf("stack mismatch"))
                     break;
 
-                case "@errorctx":
-                    this.errorCtx = words[1] || "";
-                    this.currLineNo = 0;
+                case "@scope":
+                    this.scope = words[1] || "";
+                    this.currLineNo = this.scope ? 0 : this.realCurrLineNo;
                     break;
 
                 case ".section":
@@ -519,11 +528,14 @@ module TDev.AST.Thumb
         private iterLines()
         {
             this.currLineNo = 0;
+            this.realCurrLineNo = 0;
+            this.scope = "";
             this.lines.forEach(l => {
                 if (this.errors.length > 10)
                     return;
 
                 this.currLineNo++;
+                this.realCurrLineNo++;
                 this.currLine = l;
 
                 var words = tokenize(l)
@@ -532,16 +544,17 @@ module TDev.AST.Thumb
                 var m = /^([\.\w]+):$/.exec(words[0])
                 
                 if (m) {
+                    var lblname = this.scopedName(m[1])
                     if (this.finalEmit) {
-                        var curr = this.labels[m[1]]
+                        var curr = this.labels[lblname]
                         if (curr == null)
                             Util.die()
                         Util.assert(this.errors.length > 0 || curr == this.location())
                     } else {
-                        if (this.labels.hasOwnProperty(m[1]))
+                        if (this.labels.hasOwnProperty(lblname))
                             this.directiveError(lf("label redefinition"))
                         else
-                            this.labels[m[1]] = this.location();
+                            this.labels[lblname] = this.location();
                     }
                     words.shift();
                 }

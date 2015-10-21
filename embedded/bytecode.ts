@@ -956,11 +956,6 @@ module TDev.AST.Bytecode
             this.proc.emit("push {r1}");
         }
 
-        reportError(msg:string)
-        {
-            Util.userError(msg)
-        }
-
         handleActionCall(e:Call)
         {
             var aa = e.calledExtensionAction() || e.calledAction()
@@ -1004,8 +999,7 @@ module TDev.AST.Bytecode
                 var inf = lookupFunc(shm)
 
                 if (a._compilerInlineBody) {
-                    if (inf)
-                        this.reportError(lf("app->thumb inline body not allowed in {shim:{0}} (already defined in runtime)", shm))
+                    Util.assert(!inf);
                     funcInfo[shm] = {
                         type: hasret ? "F" : "P",
                         args: a.getInParameters().length,
@@ -1430,6 +1424,7 @@ module TDev.AST.Bytecode
                 Util.assert(body.getStringLiteral() != null)
                 this.proc.emit(body.getStringLiteral())
                 this.proc.emit("@stackempty func");
+                this.proc.emit("@scope");
                 return
             }
 
@@ -1503,16 +1498,11 @@ module TDev.AST.Bytecode
             if (shimname != null) {
                 Util.assert(!!a._compilerInlineBody)
 
-                if (!/^\w+$/.test(shimname))
-                    this.reportError(lf("invalid inline shim name: {shim:{0}}", shimname))
-
-                if (a.getInParameters().length > 4)
-                    this.reportError(lf("inline shims support only up to 4 arguments"));
-
                 this.proc.label = shimname
 
                 this.proc.emit(".section code");
                 this.proc.emitLbl(this.proc.label);
+                this.proc.emit("@scope user" + p.seqNo)
                 this.proc.emit("@stackmark func");
                 return
             }
@@ -1608,20 +1598,36 @@ module TDev.AST.Bytecode
     function lintThumb(act:Action, asm:string)
     {
         setup();
+
+        var shimname = act.getShimName();
+
+        var b = new Thumb.Binary();
+        if (lookupFunc(shimname))
+            b.pushError(lf("app->thumb inline body not allowed in {shim:{0}} (already defined in runtime)", shimname))
+        if (!/^\w+$/.test(shimname))
+            b.pushError(lf("invalid characters in shim name: {shim:{0}}", shimname))
+        if (act.getInParameters().length > 4)
+            b.pushError(lf("inline shims support only up to 4 arguments"));
+
+        if (b.errors.length > 0)
+            return b.errors;
+
         var code =
             ".section code\n" +
-            "@stackmark base\n" +
-            act.getShimName() + ":\n" +
-            "@errorctx user\n" +
+            "@stackmark func\n" +
+            shimname + ":\n" +
+            "@scope user\n" +
             asm + "\n" +
-            "@stackempty base\n"
-        var b = new Thumb.Binary();
+            "@stackempty func\n" +
+            "@scope\n"
+
         b.lookupExternalLabel = lookupFunctionAddr;
         b.throwOnError = false;
         b.emit(code)
 
         return b.errors;
     }
+
     TypeChecker.lintThumb = lintThumb;
 
     function asmline(s:string)
