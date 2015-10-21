@@ -1037,7 +1037,7 @@ module TDev.AST.Bytecode
                 args.forEach(a => this.dispatch(a))
             }
 
-            if (shm && shm[1] == "TD_ID") {
+            if (shm == "TD_ID") {
                 Util.assert(args.length == 1)
                 // argument already on stack
                 return;
