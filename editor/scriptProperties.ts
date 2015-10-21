@@ -286,6 +286,10 @@ module TDev
                 if (showSource)
                     ModalDialog.showText(res.csource)
 
+                if (!res.sourceSaved) {
+                    HTML.showWarningNotification("program compiled, but without the source; to save for later use the 'save' button")
+                }
+
                 ScriptProperties.firstTime = false
 
                 HTML.browserDownload(res.dataurl, "microbit-" + app.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
