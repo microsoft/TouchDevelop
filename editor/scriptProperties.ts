@@ -830,11 +830,8 @@ module TDev
             var mdSet = false;
             if (this.theScript.isLibrary) {
                 var docs = ScriptProperties.libraryDocs(this.theScript, this.theScript.getName(), true)
-                if (docs) {
-                    this.mdRoot.setChildren([ div("varLabel", lf("library documentation")), <any>docs ])
-                } else {
-                    Browser.setInnerHTML(this.mdRoot, lf("No library documentation found."));
-                }
+                if (docs) this.mdRoot.setChildren([<any>docs])
+                else this.mdRoot.setChildren([]);
             } else {
                 this.mdRoot.setChildren([]);
             }
