@@ -1026,7 +1026,7 @@ module TDev.AST.Bytecode
                 return
             }
 
-            if (/^micro_bit::(createImage|showAnimation|showLeds)$/.test(shm)) {
+            if (/^micro_bit::(createImage|showAnimation|showLeds|plotLeds)$/.test(shm)) {
                 Util.assert(args[0].getLiteral() != null)
                 this.emitImageLiteral(args[0].getLiteral())
                 args.shift()
@@ -1037,7 +1037,7 @@ module TDev.AST.Bytecode
                 args.forEach(a => this.dispatch(a))
             }
 
-            if (shm && shm[1] == "TD_ID") {
+            if (shm == "TD_ID") {
                 Util.assert(args.length == 1)
                 // argument already on stack
                 return;
