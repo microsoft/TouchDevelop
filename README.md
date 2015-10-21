@@ -13,7 +13,7 @@ Touch Develop is a touch-friendly, cross-platform, mobile-first app creation env
 [![devDependency Status](https://david-dm.org/Microsoft/TouchDevelop/dev-status.svg)](https://david-dm.org/Microsoft/TouchDevelop#info=devDependencies)
 
 
-**This repo contains the source code of the TouchDevelop editor.** If you are
+**This repo contains the source code of the Touch Develop editor.** If you are
 intending to write Touch Develop scripts, you want to go to
 `touchdevelop.com`:
 * **stable:** https://www.touchdevelop.com/app/
@@ -36,7 +36,7 @@ Other pages of interest:
 
 ## What's in this repo?
 
-The repo is mostly written in [Typescript](http://www.typescriptlang.org/) with tiny pieces
+The repo is mostly written in [TypeScript](http://www.typescriptlang.org/) with tiny pieces
 of HTML gluing.
 
 This repo contains the source code for:
@@ -46,13 +46,17 @@ This repo contains the source code for:
  * the runtime
 * the node.js client
 
-However, you will not find the cloud backend code here. Indeed,
-[https://www.touchdevelop.com](https://www.touchdevelop.com) takes care of
-storing and managing the scripts.
+The next-generation cloud backend for Touch Develop is available in
+[TouchDevelop-backend repo](https://github.com/microsoft/touchdevelop-backend).
+It was originally written in Touch Develop itself (see [script tdlite](https://www.touchdevelop.com/aycxg)
+if you're interested) and was later converted to TypeScript.
+It is currently used for the [BBC micro:bit](https://www.microbit.co.uk)
+and will be deployed at https://www.touchdevelop.com shortly.
+
 
 ## Contributing
 
-There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md) to TouchDevelop.
+There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/blob/master/CONTRIBUTING.md) to Touch Develop.
 
 * [submit bugs](https://github.com/Microsoft/TouchDevelop/issues) and help us verify fixes as they are checked in.
 * review the [source code changes](https://github.com/Microsoft/TouchDevelop/pulls)
@@ -60,11 +64,11 @@ There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/bl
 
 If you're not a developer but still would like to help, we've got more tasks for you!
 
-* [help translate the user inferface](https://touchdeveloptranslator.azurewebsites.net): do you use TouchDevelop and speak a foreign language? You can help!
+* [help translate the user inferface](https://touchdeveloptranslator.azurewebsites.net): do you use Touch Develop and speak a foreign language? You can help!
 
 ## Setup
 
-In order to build TouchDevelop, ensure that you have [Git](http://git-scm.com/downloads) and [Node.js](http://nodejs.org/) installed.
+In order to build Touch Develop, ensure that you have [Git](http://git-scm.com/downloads) and [Node.js](http://nodejs.org/) installed.
 
 * clone a copy of the repo:
 
@@ -72,7 +76,7 @@ In order to build TouchDevelop, ensure that you have [Git](http://git-scm.com/do
 git clone https://github.com/Microsoft/TouchDevelop.git
 ````
 
-* change to the TouchDevelop directory:
+* change to the Touch Develop directory:
 
 ````
 cd TouchDevelop
@@ -97,7 +101,7 @@ choco install -y nodejs git visualstudiocode arduino python2 pip
 
 ## Building
 
-There's different ways to build and run TouchDevelop:
+There's different ways to build and run Touch Develop:
 
 * just build:
 
@@ -147,8 +151,8 @@ You can use your favorite editor to edit the TypeScript file. Here are a couple 
 All the docs are available online at
 [https://www.touchdevelop.com/docs](https://www.touchdevelop.com/docs).
 
-The docs are authored as TouchDevelop scripts in TouchDevelop itself. You can
-fork them and send pull requests from TouchDevelop itself to update them.
+The docs are authored as Touch Develop scripts in Touch Develop itself. You can
+fork them and send pull requests from Touch Develop itself to update them.
 You can update the local cache of documents by running this command:
 
     jake update-docs
@@ -171,37 +175,37 @@ The `client.js` is built by default.
 ## The various directories in the tree
 
 * `ast`: contains the lexer, parser, type-checker and ast definitions for the
-  TouchDevelop language
+  Touch Develop language
 * `browser`: feature-detection
-* `editor`: the TouchDevelop user interface that drives the website: hub, script
+* `editor`: the Touch Develop user interface that drives the website: hub, script
   list, editor itself
 * `generated`: files needed for the build that are re-generated manually once in
   a while
 * `intellitrain`:
 * `json`:
-* `lib`: the libraries exposed to TouchDevelop scripts, written in TypeScript
+* `lib`: the libraries exposed to Touch Develop scripts, written in TypeScript
 * `libcordova`: Apache Cordova specific implementations
 * `libnode`: Node.JS specific implementations
 * `libwab`: WebAppBooster implementations, used by the Windows Phone client
 * `libwinRT`: (deprecated) WinRT specific implementations
 * `mc`: Minecraft bindings
-* `noderunner`: runs in the cloud, and parses TouchDevelop scripts / compiles
+* `noderunner`: runs in the cloud, and parses Touch Develop scripts / compiles
   them by responding to requests on `/api`.
 * `node-webkit`: configuration files for the node-webkit app creation
 * `officemix`: office mix app host
-* `rt`: various run-time support libraries for the TouchDevelop application:
+* `rt`: various run-time support libraries for the Touch Develop application:
   in-browser storage, cloud connection, promises, DOM utilities...
-* `runner`: the run-time system for *generated* TouchDevelop apps; that is, once
-  a TouchDevelop script is packaged as an app (webapp, cordova app, etc.),
+* `runner`: the run-time system for *generated* Touch Develop apps; that is, once
+  a Touch Develop script is packaged as an app (webapp, cordova app, etc.),
   `runner.js` is the runtime system and the stub is in `webapp`
 * `shell`: shell app used by Azure and node-webkit; basically a way to serve
   files locally
 * `storage`: code for syncing your locally-stored scripts and the cloud storage,
-  in the TouchDevelop application
+  in the Touch Develop application
 * `tools`: internal tools that are part of the build (pre-processing)
 * `webapp`: the stub file that is used to generate the HTML5 Web App when
   exporting a script
-* `www`: the base files that make up the TouchDevelop website (html and css)
+* `www`: the base files that make up the Touch Develop website (html and css)
 
 ### Structure of the generated website / app
 
