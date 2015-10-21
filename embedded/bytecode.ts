@@ -629,7 +629,23 @@ module TDev.AST.Bytecode
 
         stringLiteral(s:string)
         {
-            return "\"" + s.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\u0000/g, "\\z") + "\""
+            var r = "\""
+            for (var i = 0; i < s.length; ++i) {
+                // TODO generate warning when seeing high character ?
+                var c = s.charCodeAt(i) & 0xff
+                var cc = String.fromCharCode(c)
+                if (cc == "\\" || cc == "\"")
+                    r += "\\" + cc
+                else if (cc == "\n")
+                    r += "\\n"
+                else if (c <= 0xf)
+                    r += "\\x0" + c.toString(16)
+                else if (c < 32 || c > 127)
+                    r += "\\x" + c.toString(16)
+                else
+                    r += cc;
+            }
+            return r + "\""
         }
          
         emitString(s:string, needsSeqId = true):string

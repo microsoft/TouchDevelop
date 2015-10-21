@@ -154,19 +154,26 @@ module TDev.AST {
                             case 'j': c = ''; break;
                             case 'z': c = '\u0000'; break;
                             case '_': c = '_'; break;
-                            case 'u':
-                                {
-                                    var hex = input.slice(inputPos + len, inputPos + len + 4);
-                                    var charCode = parseInt(hex, 16);
-                                    if (isNaN(charCode)) {
-                                        error("invalid unicode sequence");
-                                        sb += "\\";
-                                    } else {
-                                        c = String.fromCharCode(charCode);
-                                        len += 4;
-                                    }
-                                    break;
+                            case 'x':
+                                var hex = input.slice(inputPos + len, inputPos + len + 2);
+                                if (!/^[a-f0-9]+$/i.test(hex)) {
+                                    error("invalid \\x sequence");
+                                    sb += "\\";
+                                } else {
+                                    c = String.fromCharCode(parseInt(hex, 16));
+                                    len += 2;
                                 }
+                                break;
+                            case 'u':
+                                var hex = input.slice(inputPos + len, inputPos + len + 4);
+                                if (!/^[a-f0-9]+$/i.test(hex)) {
+                                    error("invalid unicode sequence");
+                                    sb += "\\";
+                                } else {
+                                    c = String.fromCharCode(parseInt(hex, 16));
+                                    len += 4;
+                                }
+                                break;
                             default:
                                 if (/[A-Za-z0-9]/.test(c)) {
                                     error("invalid escape sequence");
