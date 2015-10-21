@@ -190,7 +190,6 @@ to have `-masm-syntax-unified` which can be used together with with `-S`.
 ### Gotchas
 
 Emitting single bytes (with `.1byte` or `.byte`) is not supported.
-`.hword` and `.word` (16 and 32 bit) as well as strings (with `.string` are supported.
 
 ### Limiations
 
