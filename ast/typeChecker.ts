@@ -89,6 +89,16 @@ module TDev.AST
         Lambda,
     }
 
+    export interface InlineError
+    {
+        ctx:string;
+        message:string;
+        line:string;
+        lineNo:number;
+        coremsg:string;
+        hints:string;
+    }
+
     export class TypeChecker
         extends NodeVisitor
     {
@@ -96,7 +106,7 @@ module TDev.AST
         private isTopExpr = false;
 
         static lastStoreLocalsAt:ExprHolder;
-        static lintThumb : (a:Action, asm:string, err:(msg:string) => void) => void;
+        static lintThumb : (a:Action, asm:string) => InlineError[];
 
         constructor() {
             super()
@@ -1779,10 +1789,18 @@ module TDev.AST
             case "thumb":
                 if (!checkArgumentCount(2)) return;
                 if (!this.inShim)
+                    // TODO check that there is only one
                     this.markError(t, lf("TD213: app->thumb only supported inside of {shim:}"))
                 this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
-                if (TypeChecker.lintThumb)
-                    TypeChecker.lintThumb(this.currentAction, t.args[1].getStringLiteral(), e => this.markError(t, e))
+                if (TypeChecker.lintThumb) {
+                    var errs = TypeChecker.lintThumb(this.currentAction, t.args[1].getStringLiteral())
+                    if (errs.length > 0) {
+                        this.markError(t, lf("TD212: thumb assembler error"))
+                        this.lastStmt._inlineErrors = errs;
+                    } else {
+                        this.lastStmt._inlineErrors = null;
+                    }
+                }
                 break;
             case "import":
                 if (!checkArgumentCount(4)) return;

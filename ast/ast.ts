@@ -138,6 +138,7 @@ module TDev.AST {
         public _compilerContinueLabel:any;
         public _converterAwait:boolean;
         public _compilerInfo:any;
+        public _inlineErrors:InlineError[];
 
         constructor() {
             super()

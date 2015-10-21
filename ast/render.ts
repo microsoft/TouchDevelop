@@ -565,13 +565,35 @@ module TDev
             var emb = AST.getEmbeddedLangaugeToken(n);
             if (emb) {
                 var lines = emb.getStringLiteral().split(/\n/)
-                if (lines.length > 50) lines = lines.slice(0, 50).concat(["..."])
+                var shift = 0;
+                var inlErr = (n._inlineErrors || []).slice(0)
+                inlErr.sort((a, b) => a.lineNo - b.lineNo)
+                if (lines.length > 50) {
+                    if (inlErr[0] && inlErr[0].lineNo > 10) {
+                        shift = inlErr[0].lineNo - 10;
+                    }
+                    lines = lines.slice(shift, shift + 50).concat(["..."])
+                    if (shift > 0) {
+                        lines.unshift("...")
+                        shift--;
+                    }
+                }
                 lines = lines.map(s => s.length > 80 ? s.slice(0,80) + "..." : s)
                 lines = lines.map(s => Util.htmlEscape(s))
+                var str = ""
+                var j = 0
+                lines.forEach((l, i) => {
+                    str += l + "\n"
+                    while (inlErr[j] && inlErr[j].lineNo == i + 1 + shift) {
+                        var err = inlErr[j++]
+                        str += Renderer.tdiv("error", Renderer.tdiv("main", Util.htmlEscape(err.coremsg)) +
+                                            Renderer.tdiv("hints", Util.htmlEscape(err.hints)))
+                    }
+                })
                 return (
                     this.tline(this.renderExprHolder(n.expr, n.expr.tokens.slice(0, 2)) + this.kw(" inline")) +
                     this.possibleError(n) +
-                    Renderer.tdiv("inline-language", lines.join("\n")))
+                    Renderer.tdiv("inline-language", str))
             }
 
             return null;

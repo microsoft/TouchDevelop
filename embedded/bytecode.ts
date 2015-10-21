@@ -1605,13 +1605,14 @@ module TDev.AST.Bytecode
         }
     }
 
-    function lintThumb(act:Action, asm:string, err:(msg:string) => void)
+    function lintThumb(act:Action, asm:string)
     {
         setup();
         var code =
             ".section code\n" +
             "@stackmark base\n" +
             act.getShimName() + ":\n" +
+            "@errorctx user\n" +
             asm + "\n" +
             "@stackempty base\n"
         var b = new Thumb.Binary();
@@ -1619,11 +1620,7 @@ module TDev.AST.Bytecode
         b.throwOnError = false;
         b.emit(code)
 
-        if (b.errors.length > 0) {
-            b.errors.forEach(e => console.log(e.message))
-            err(lf("TD212: thumb assembler error") + "\n" +
-                b.errors.map(e => e.message).join("\n"))
-        }
+        return b.errors;
     }
     TypeChecker.lintThumb = lintThumb;
 

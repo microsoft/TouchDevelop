@@ -146,12 +146,6 @@ module TDev.AST.Thumb
         }
     }
 
-    export interface AssemblyError
-    {
-        ctx:string;
-        message:string;
-    }
-
     export class Binary
     {
         constructor()
@@ -166,7 +160,7 @@ module TDev.AST.Thumb
         private currLineNo:number;
         private currLine:string;
         private errorCtx = "";
-        public errors:AssemblyError[] = [];
+        public errors:InlineError[] = [];
         public buf:number[];
         private labels:StringMap<number> = {};
         private stackpointers:StringMap<number> = {};
@@ -213,11 +207,11 @@ module TDev.AST.Thumb
             m = /^(\w+)@(\d+)$/.exec(s)
             if (m) {
                 if (mul != 1)
-                    this.directiveError("multiplication not supported with saved stacks");
+                    this.directiveError(lf("multiplication not supported with saved stacks"));
                 if (this.stackpointers.hasOwnProperty(m[1]))
                     v = 4 * (this.stack - this.stackpointers[m[1]] + parseInt(m[2]))
                 else
-                    this.directiveError("saved stack not found")
+                    this.directiveError(lf("saved stack not found"))
             }
 
             m = /^(.*)@(hi|lo)$/.exec(s)
@@ -233,7 +227,7 @@ module TDev.AST.Thumb
                         else
                             Util.die()
                     } else {
-                        this.directiveError("@hi/lo out of range")
+                        this.directiveError(lf("@hi/lo out of range"))
                         v = null
                     }
                 }
@@ -265,7 +259,7 @@ module TDev.AST.Thumb
                 v = this.lookupExternalLabel(name)
             if (v == null && direct) {
                 if (this.finalEmit)
-                    this.directiveError("unknown label: " + name);
+                    this.directiveError(lf("unknown label: {0}", name));
                 else
                     v = 42;
             }
@@ -286,8 +280,16 @@ module TDev.AST.Thumb
                 this.emitShort(0);
         }
 
-        private pushError(err:AssemblyError)
+        private pushError(msg:string, hints:string = "")
         {
+            var err = <InlineError>{
+                ctx: this.errorCtx,
+                message: lf("{0}: {1} (@{2})\n{3}", msg, this.currLine, this.currLineNo, hints),
+                lineNo: this.currLineNo,
+                line: this.currLine,
+                coremsg: msg,
+                hints: hints
+            }
             this.errors.push(err)
             if (this.throwOnError)
                 throw new Error(err.message)
@@ -295,10 +297,7 @@ module TDev.AST.Thumb
 
         private directiveError(msg:string)
         {
-            this.pushError({
-                ctx: this.errorCtx,
-                message: lf("Directive error: {0} at {1} (@{2})", msg, this.currLine, this.currLineNo)
-            })
+            this.pushError(lf("directive error: {0}", msg))
         }
 
         private emitString(l:string)
@@ -308,7 +307,7 @@ module TDev.AST.Thumb
             var m = /^\s*([\w\.]+\s*:\s*)?.\w+\s+(".*")\s*$/.exec(l)
             var s:string;
             if (!m || null == (s = parseString(m[2]))) {
-                this.directiveError("expecting string")
+                this.directiveError(lf("expecting string"))
             } else {
                 this.align(2);
                 // s.length + 1 to NUL terminate
@@ -332,7 +331,7 @@ module TDev.AST.Thumb
             while (true) {
                 var n = this.parseNumber(words)
                 if (n == null) {
-                    this.directiveError("cannot parse number at " + words[0])
+                    this.directiveError(lf("cannot parse number at '{0}'", words[0]))
                     break;
                 } else
                     nums.push(n)
@@ -342,7 +341,7 @@ module TDev.AST.Thumb
                 } else if (words[0] == null) {
                     break;
                 } else {
-                    this.directiveError("expecting number, got " + words[0])
+                    this.directiveError(lf("expecting number, got '{0}'", words[0]))
                     break;
                 }
             }
@@ -355,9 +354,9 @@ module TDev.AST.Thumb
             if (nums.length == 1)
                 nums.push(0)
             if (nums.length != 2)
-                this.directiveError("expecting one or two numbers")
+                this.directiveError(lf("expecting one or two numbers"))
             else if (nums[0] % 2 != 0)
-                this.directiveError("only even space supported")
+                this.directiveError(lf("only even space supported"))
             else {
                 var f = nums[1] & 0xff;
                 f = f | (f << 8)
@@ -370,7 +369,7 @@ module TDev.AST.Thumb
         {
             var expectOne = () => {
                 if (words.length != 2)
-                    this.directiveError("expecting one argument");
+                    this.directiveError(lf("expecting one argument"));
             }
 
             var num0:number;
@@ -389,9 +388,9 @@ module TDev.AST.Thumb
                         if (num0 <= 4) {
                             this.align(1 << num0);
                         } else {
-                            this.directiveError("expecting 1, 2, 3 or 4 (for 2, 4, 8, or 16 byte alignment)")
+                            this.directiveError(lf("expecting 1, 2, 3 or 4 (for 2, 4, 8, or 16 byte alignment)"))
                         }
-                    } else this.directiveError("expecting number");
+                    } else this.directiveError(lf("expecting number"));
                     break;
                 case ".balign":
                     expectOne();
@@ -401,9 +400,9 @@ module TDev.AST.Thumb
                         if (num0 == 2 || num0 == 4 || num0 == 8 || num0 == 16) {
                             this.align(num0);
                         } else {
-                            this.directiveError("expecting 2, 4, 8, or 16")
+                            this.directiveError(lf("expecting 2, 4, 8, or 16"))
                         }
-                    } else this.directiveError("expecting number");
+                    } else this.directiveError(lf("expecting number"));
                     break;
                 case ".hword":
                 case ".short":
@@ -413,7 +412,7 @@ module TDev.AST.Thumb
                         if (-0x8000 <= n && n <= 0xffff)
                             this.emitShort(n & 0xffff)
                         else
-                            this.directiveError("expecting int16")
+                            this.directiveError(lf("expecting int16"))
                     })
                     break;
                 case ".word":
@@ -424,7 +423,7 @@ module TDev.AST.Thumb
                             this.emitShort(n & 0xffff)
                             this.emitShort((n >> 16) & 0xffff)
                         } else {
-                            this.directiveError("expecting int32")
+                            this.directiveError(lf("expecting int32"))
                         }
                     })
                     break;
@@ -448,9 +447,14 @@ module TDev.AST.Thumb
 
                 case "@stackempty":
                     if (this.stackpointers[words[1]] == null)
-                        this.directiveError("no such saved stack")
+                        this.directiveError(lf("no such saved stack"))
                     else if (this.stackpointers[words[1]] != this.stack)
-                        this.directiveError("stack mismatch")
+                        this.directiveError(lf("stack mismatch"))
+                    break;
+
+                case "@errorctx":
+                    this.errorCtx = words[1] || "";
+                    this.currLineNo = 0;
                     break;
 
                 case ".section":
@@ -459,12 +463,12 @@ module TDev.AST.Thumb
                     this.stack = 0;
                     break;
 
+                case ".file":
                 case ".text":
                 case ".cpu":
                 case ".fpu":
                 case ".eabi_attribute":
                 case ".code":
-                case ".file":
                 case ".thumb_func":
                 case ".type":
                     break;
@@ -477,7 +481,7 @@ module TDev.AST.Thumb
                     if (/^\.cfi_/.test(words[0])) {
                         // ignore
                     } else {
-                        this.directiveError("unknown directive")
+                        this.directiveError(lf("unknown directive"))
                     }
                     break;
             }
@@ -490,7 +494,7 @@ module TDev.AST.Thumb
                 if (!op.error) {
                     this.stack += op.stack;
                     if (this.checkStack && this.stack < 0)
-                        this.directiveError("stack underflow")
+                        this.pushError(lf("stack underflow"))
                     this.emitShort(op.opcode);
                     if (op.opcode2 != null)
                         this.emitShort(op.opcode2);
@@ -500,16 +504,16 @@ module TDev.AST.Thumb
 
             var w0 = words[0].toLowerCase().replace(/s$/, "").replace(/[^a-z]/g, "")
 
-            var msg = lf("Error assembling: {0} (@{1})\n", this.currLine, this.currLineNo)
+            var hints = ""
             var possibilities = instructions.filter(i => i.name == w0 || i.name == w0 + "s")
             if (possibilities.length > 0) {
                 possibilities.forEach(i => {
                     var err = i.emit(this, words)
-                    msg += lf("   Maybe: {0} ({1} at '{2}')\n", i.toString(), err.error, err.errorAt)
+                    hints += lf("   Maybe: {0} ({1} at '{2}')\n", i.toString(), err.error, err.errorAt)
                 })
             }
 
-            this.pushError({ message: msg, ctx: this.errorCtx })
+            this.pushError(lf("assembly error"), hints);
         }
 
         private iterLines()
@@ -535,7 +539,7 @@ module TDev.AST.Thumb
                         Util.assert(this.errors.length > 0 || curr == this.location())
                     } else {
                         if (this.labels.hasOwnProperty(m[1]))
-                            this.directiveError("label redefinition")
+                            this.directiveError(lf("label redefinition"))
                         else
                             this.labels[m[1]] = this.location();
                     }
@@ -566,7 +570,7 @@ module TDev.AST.Thumb
             this.iterLines();
 
             if (this.checkStack && this.stack != 0)
-                this.directiveError("stack misaligned at the end of the file")
+                this.directiveError(lf("stack misaligned at the end of the file"))
 
             if (this.errors.length > 0)
                 return;
