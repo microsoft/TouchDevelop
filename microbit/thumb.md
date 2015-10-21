@@ -11,6 +11,19 @@
 * parameters are in `r0` to `r3`; return value goes in `r0` (standard calling convention)
 * you can call runtime functions, for example `bl micro_bit::showNumber` will work
 
+The function can have body other than `app->thumb`, but it will be ignored when
+compiling to Thumb. This can be used to provide simulator support. `app->thumb` itself
+is ignored when executing as Touch Develop.
+
+Note, that if you call any blocking runtime function (eg., `micro_bit::pause`)
+you should mark the outer function as non-atomic to get proper enforcement
+in the code that calls it.
+
+Do not put more than one `app->thumb` in a function.
+
+Labels starting with `.` are local to function. Other labels are global are
+best avoided.
+
 ### Supported instructions
 
 The following instructions are supported:
@@ -121,6 +134,46 @@ bls   LABEL
 blt   LABEL
 ```
 
+### Supported standard directives
+
+```
+.string  "string literal" - emit NUL terminated, 16-bit aligned string
+.ascii   "string literal" - same
+.asciz   "string literal" - same
+.align   N                - align to (1 << N) bytes; (N in 1, 2, 3, 4)
+.balign  N                - align to N bytes; (N in 2, 4, 8, 16)
+.hword   N                - emit 16 bit number (can be signed or unsigned)
+.short   N                - same
+.2bytes  N                - same
+.word    N                - emit 32 bit number (can be signed or unsigned)
+.4bytes  N                - same
+.skip    N M              - emit N bytes of M (M defaults to 0)
+.section ...              - resets various counters
+.global                   - same
+```
+
+A number of other directives are ignored.
+
+### Stack tracking
+
+The assembler can keep track of `push/pop` and `add/sub sp, #imm` instructions.
+
+
+```
+@stackmark NAME
+@stackempty NAME
+```
+
+The usage for this is as follows:
+```
+push {...}
+@stackmark locals   ; locals := sp
+... some push/pops ...
+ldr r0, [pc, locals@3] ; load local number 3
+... some push/pops ...
+@stackempty locals ; expect an empty stack here
+```
+
 ### Registers
 
 Generally speaking, stick to `R0-R7` plus `PC`, `SP` and `LR`. `R8-R12` will
@@ -134,6 +187,27 @@ not work with the TD inline assembler without fixing it up. In particular, GCC
 insists on skipping the `s` suffix if `adds`, `subs` etc.  GCC 5.0 is reported
 to have `-masm-syntax-unified` which can be used together with with `-S`.
 
+### Gotchas
+
+Emitting single bytes (with `.1byte` or `.byte`) is not supported.
+`.hword` and `.word` (16 and 32 bit) as well as strings (with `.string` are supported.
+
+### Limiations
+
+Currently, assembly functions cannot call other assembly functions, or Touch
+Develop functions. This will be lifted in future.
+
+The reachability analysis for `{shim:...}` functions with `app->thumb` might get
+confused.
+
+If an instruction takes 3 register arguments, we do not support the 2-register
+shortcut form.
+
+Label processing is a bit simplistic.
+
+No warnings for ordering of registers in register lists.
+
+Most directives are ignored.
 
 ### See also
 
