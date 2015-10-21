@@ -10814,7 +10814,9 @@
 
                 if (this.isMine()) {
                     btn.appendChild(HTML.mkButton(lf("add script"),() => {
-                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, header: "add a script to your list", searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
+                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, 
+                            header: lf("add a script to your list"), 
+                            searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
                             if (info) this.addScriptAsync(info).done(() => {
                                 this.browser().loadDetails(this);
                             });

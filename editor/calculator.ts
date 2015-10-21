@@ -1890,7 +1890,7 @@ module TDev
                 }
             });
 
-            m.choose(boxes, { header: "Bind to:" });
+            m.choose(boxes, { header: lf("bind to:") });
 
             if (this.currentInstruction) {
                 if (!tipBox) {
@@ -2900,17 +2900,17 @@ module TDev
             });
 
             if (!copied) {
-                d = new DeclEntry("need anything else?");
-                d.description = "copy to clipboard first!";
+                d = new DeclEntry(lf("need anything else?"));
+                d.description = lf("copy to clipboard first!");
                 d.icon = "svg:Question,white";
                 boxes.push(d.mkBox().withClick(() => {
-                    ModalDialog.info("copy to clipboard first",
-                        "To replace an expression A with an expression B, first enter or find expression B, select it, copy to clipboard. " +
-                        "Then find expression A, select it, and press \"replace all in ...\" button.");
+                    ModalDialog.info(lf("copy to clipboard first"),
+                        lf("To replace an expression A with an expression B, first enter or find expression B, select it, copy to clipboard.") +
+                        lf("Then find expression A, select it, and press \"replace all in ...\" button."));
                 }));
             }
 
-            m.choose(boxes, { header: "Replace with:" });
+            m.choose(boxes, { header: lf("replace with:") });
         }
 
         public pasteTokens()
