@@ -1034,6 +1034,23 @@ module TDev.AST.Bytecode
             Util.assert(args.length == aa.getInParameters().length)
 
             var a:Action = aa._compilerInfo || aa
+
+            Util.assert(args.length == a.getInParameters().length)
+
+            if (a != aa) {
+                var params = a.getParameters().slice(-a.getInParameters().length)
+                params.forEach(p => {
+                    var sv = p.getStringValues()
+                    if (!sv) return
+                    var emap = (<any>sv).enumMap
+                    if (emap) {
+                        var v = emap[args[0].getStringLiteral()]
+                        Util.assert(v != null)
+                        args[0].enumVal = v;
+                    }
+                })
+            }
+
             var shm = a.getShimName();
             var hasret = !!aa.getOutParameters()[0]
 
