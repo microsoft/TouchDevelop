@@ -1,4 +1,3 @@
-
 ///<reference path='refs.ts'/>
 
 module TDev
@@ -262,6 +261,32 @@ module TDev
             var guid = app.localGuid
             var st = TheEditor.saveStateAsync()
                 .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
+                .then(r => {
+                    var hd:Cloud.Header = r[1]
+                    var text:string = r[0]
+
+                    var meta = JSON.stringify(hd)
+
+                    var lzma = (<any>window).LZMA;
+
+                    if (!lzma)
+                        return [meta, Util.stringToUint8Array(Util.toUTF8(text))]
+
+                    var newMeta = {
+                        compression: "LZMA",
+                        metaSize: meta.length,
+                        textSize: text.length
+                    }
+
+                    var rp = new PromiseInv()
+
+                    var buf = meta + text
+                    lzma.compress(buf, 7, cbuf => {
+                        rp.success([JSON.stringify(newMeta), cbuf])
+                    }, progress => {})
+
+                    return rp;
+                })
 
             var c = new AST.Bytecode.Compiler(app)
             try {
@@ -279,10 +304,7 @@ module TDev
             }
 
             st.then(r => {
-                var hd:Cloud.Header = r[1]
-                var txt:string = r[0]
-
-                var res = c.serialize(!ScriptProperties.firstTime, JSON.stringify(hd), txt)
+                var res = c.serialize(!ScriptProperties.firstTime, r[0], r[1])
                 if (showSource)
                     ModalDialog.showText(res.csource)
 

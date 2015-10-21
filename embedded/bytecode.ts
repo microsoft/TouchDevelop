@@ -691,29 +691,43 @@ module TDev.AST.Bytecode
             this.csource += this.stringsBody
         }
 
-        addSource(meta:string, text:string)
+        addSource(meta:string, blob:Uint8Array)
         {
-            if (meta.length + text.length > 40000) {
+            var metablob = Util.stringToUint8Array(Util.toUTF8(meta))
+            var totallen = metablob.length + blob.length
+
+            if (totallen > 40000) {
                 return false;
             }
-
-            meta = Util.toUTF8(meta)
-            text = Util.toUTF8(text)
-
-            Util.assert(meta.length < 0xffff)
-            Util.assert(text.length < 0xffff)
 
             this.emit(".balign 16");
             this.emit(".short 0x1441");
             this.emit(".short 0x2f0e");
             this.emit(".short 0x2fb8");
             this.emit(".short 0xbba2");
-            this.emit(".short " + meta.length);
-            this.emit(".short " + text.length);
+            this.emit(".short " + metablob.length);
+            this.emit(".short " + blob.length);
             this.emit(".short 0"); // future use
             this.emit(".short 0"); // future use
-            
-            this.emit("_stored_program: .string " + this.stringLiteral(meta + text))
+
+            var str = "_stored_program: .string \""
+
+            var addblob = (b:Uint8Array) => {
+                for (var i = 0; i < b.length; ++i) {
+                    var v = b[i] & 0xff
+                    if (v <= 0xf)
+                        str += "\\x0" + v.toString(16)
+                    else
+                        str += "\\x" + v.toString(16)
+                }
+            }
+
+            addblob(metablob)
+            addblob(blob)
+
+            str += "\""
+
+            this.emit(str)
 
             return true;
         }
@@ -723,27 +737,29 @@ module TDev.AST.Bytecode
             var metaLen = 0
             var textLen = 0
             var toGo = 0
-            var buf = ""
+            var buf:number[];
+            var ptr = 0;
             hexfile.split(/\r?\n/).forEach(ln => {
                 var m = /^:10....0041140E2FB82FA2BB(....)(....)(....)(....)(..)/.exec(ln)
                 if (m) {
                     metaLen = parseInt(swapBytes(m[1]), 16)
                     textLen = parseInt(swapBytes(m[2]), 16)
                     toGo = metaLen + textLen
+                    buf = <any>new Uint8Array(toGo)
                 } else if (toGo > 0) {
                     m = /^:10....00(.*)(..)$/.exec(ln)
                     var k = m[1]
                     while (toGo > 0 && k.length > 0) {
-                        buf += String.fromCharCode(parseInt(k[0] + k[1], 16))
+                        buf[ptr++] = parseInt(k[0] + k[1], 16)
                         k = k.slice(2)
                         toGo--
                     }
                 }
             })
-            Util.assert(toGo == 0 && buf.length == metaLen + textLen)
+            Util.assert(toGo == 0 && ptr == buf.length)
             return {
-                meta: Util.fromUTF8(buf.slice(0, metaLen)),
-                text: Util.fromUTF8(buf.slice(metaLen))
+                meta: Util.fromUTF8Bytes(buf.slice(0, metaLen)),
+                text: buf.slice(metaLen)
             }
         }
 
@@ -869,7 +885,7 @@ module TDev.AST.Bytecode
             }
         }
 
-        public serialize(shortForm:boolean, metainfo:string, scripttext:string)
+        public serialize(shortForm:boolean, metainfo:string, blob:Uint8Array)
         {
             shortForm = false; // this doesn't work yet
             var src = "";
@@ -880,7 +896,7 @@ module TDev.AST.Bytecode
                 this.binary.serialize()
                 src = this.binary.csource
             }
-            var sourceSaved = this.binary.addSource(metainfo, scripttext);
+            var sourceSaved = this.binary.addSource(metainfo, blob);
             this.binary.assemble()
 
             var res = {
