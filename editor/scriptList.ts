@@ -8518,6 +8518,23 @@
                                     })
                             })
                         }))
+                accountButtons.appendChild(
+                    HTML.mkButton(lf("can publish?"),
+                        () => {
+                            var path = this.publicId + "/permissions"
+                            Cloud.getPrivateApiAsync(path)
+                            .done(resp => {
+                                ModalDialog.editText(lf("user allowed to publish ({0})", "yes/no"), resp.nopublish ? "no" : "yes",
+                                    t => {
+                                        if (t != "yes" && t != "no") {
+                                            ModalDialog.info(lf("invalid value"), lf("Expecting '{0}' or '{1}'", "yes", "no"))
+                                            return Promise.as()
+                                        } else
+                                            return Cloud.postPrivateApiAsync(path, { nopublish: t == "no" })
+                                                .then(r => {}, e => Cloud.handlePostingError(e, lf("set publish rights")))
+                                    })
+                            })
+                        }))
             }
 
             if (Cloud.isRestricted()) {

@@ -1490,7 +1490,7 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
       stmtsMain.unshift(
         H.mkExprStmt(
           H.mkExprHolder([],
-            H.mkSimpleCall(":=", [H.mkGlobalRef("whole note"), H.mkNumberLiteral(60)]))));
+            H.mkSimpleCall(":=", [H.mkGlobalRef("whole note"), H.mkNumberLiteral(2000)]))));
         e = extend(e, "whole note", Type.Number);
     }
 

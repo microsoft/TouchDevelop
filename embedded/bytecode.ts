@@ -794,6 +794,10 @@ module TDev.AST.Bytecode
 
         addSource(meta:string, text:string)
         {
+            if (meta.length + text.length > 40000) {
+                return false;
+            }
+
             while (this.buf.length % 8 != 0)
                 this.buf.push(0)
             
@@ -820,6 +824,8 @@ module TDev.AST.Bytecode
                 Util.assert(c1 <= 255)
                 this.buf.push((c1 << 8) | c0)
             }
+
+            return true;
         }
 
         static extractSource(hexfile:string)
@@ -942,8 +948,8 @@ module TDev.AST.Bytecode
                 this.binary.serialize()
                 len0 = this.binary.buf.length * 2
             }
+            var sourceSaved = this.binary.addSource(metainfo, scripttext);
 
-            this.binary.addSource(metainfo, scripttext)
             var len1 = this.binary.buf.length * 2 - len0
 
             var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n"
@@ -956,7 +962,8 @@ module TDev.AST.Bytecode
                 this.binary.csource + "\n}; }\n"
             return {
                 dataurl: "data:application/x-microbit-hex;base64," + Util.base64Encode(hex),
-                csource: r
+                csource: r,
+                sourceSaved: sourceSaved
             }
         }
 
