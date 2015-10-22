@@ -524,6 +524,7 @@
             if (Array.isArray(bb.parsedStackTrace)) {
                 bb.parsedStackTrace.forEach(it => {
                     var fn = it.fileName
+                    if (!fn) return
                     var e = div("stackTraceEntry", "at " + it.className + "." + it.methodName + " (" + fn.replace(/.*\//, "") + ":" + it.lineNumber + ")")
                     if (/^http/.test(fn))
                         e.withClick(() => {

@@ -814,12 +814,37 @@ module TDev
                         HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
                         return Promise.as(undefined);
                     }
-                    var hd: Cloud.Header = JSON.parse(tmp.meta)
+                    var hd: any = JSON.parse(tmp.meta)
+                    if (hd.compression == "LZMA") {
+                        var lzma = (<any>window).LZMA;
+                        if (!lzma) {
+                            HTML.showErrorNotification(lf("LZMA decompressor not installed."))
+                            return Promise.as()
+                        }
+                        var rp = new PromiseInv();
+                        lzma.decompress(tmp.text, res => {
+                            var meta = res.slice(0, hd.metaSize);
+                            var text = res.slice(hd.metaSize);
+                            rp.success([JSON.parse(meta), text])
+                        }, prog => {})
+                        return rp;
+                    } else if (hd.compression) {
+                        HTML.showErrorNotification(lf("Compression type {0} not supported.", hd.compression))
+                        return Promise.as()
+                    } else {
+                        return Promise.as([hd, Util.fromUTF8Bytes(tmp.text)])
+                    }
+                })
+                .then(dat => {
+                    if (!dat) return Promise.as();
+
+                    var hd:Cloud.Header = dat[0]
+                    var text:string = dat[1]
                     hd.guid = Util.guidGen()
                     guid = hd.guid
                     // renaming is tricky - would need to rename the text as well ...
                     // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
-                    return World.setInstalledScriptAsync(hd, tmp.text, null)
+                    return World.setInstalledScriptAsync(hd, text, null)
                         .then(() => [guid]);
                 });
         }
