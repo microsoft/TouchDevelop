@@ -311,6 +311,7 @@ module TDev.AST.Bytecode
         peepHole()
         {
             /* TODO
+               TODO remember that used labels are instructions, push{r0} lbl: pop{r0} cannot be eliminated
             var res = []
             for (var i = 0; i < this.body.length; ++i) {
                 var op = this.body[i]
@@ -423,7 +424,11 @@ module TDev.AST.Bytecode
             if (name == "JMPZ") {
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("bne #0")
+                this.emit("bne #0") // this is to *skip* the following 'b' instruction; bne itself has a very short range
+            } else if (name == "JMPNZ") {
+                this.emit("pop {r0}");
+                this.emit("cmp r0, #0")
+                this.emit("beq #0")
             } else if (name == "JMP") {
                 // ok
             } else {
@@ -1113,6 +1118,26 @@ module TDev.AST.Bytecode
             }
         }
 
+        emitLazyOp(op:string, arg0:Expr, arg1:Expr)
+        {
+            this.dispatch(arg0)
+
+            var lblEnd = this.proc.mkLabel("lazy")
+
+            if (op == "and") {
+                this.proc.emitJmp(lblEnd, "JMPZ")
+            } else if (op == "or") {
+                this.proc.emitJmp(lblEnd, "JMPNZ")
+            } else {
+                Util.die()
+            }
+
+            this.dispatch(arg1)
+            this.proc.emit("pop {r0}")
+            this.proc.emitLbl(lblEnd);
+            this.proc.emit("push {r0}")
+        }
+
         visitCall(e:Call)
         {
             var p = e.getCalledProperty()
@@ -1165,8 +1190,6 @@ module TDev.AST.Bytecode
                 }
             } else if (pkn == "Invalid") {
                 this.emitInt(0);
-            } else if (pkn == "App" && p.getName() == "thumb") {
-                var str = e.args[1].getStringLiteral()
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")) {
                 this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk", 0);
@@ -1174,6 +1197,9 @@ module TDev.AST.Bytecode
                 this.emitAsString(e.args[0]);
                 this.emitAsString(e.args[1]);
                 this.proc.emitCall("string::concat_op", 3);
+            } else if (pkn == "Boolean" && /^(and|or)$/.test(p.getName())) {
+                Util.assert(e.args.length == 2)
+                this.emitLazyOp(p.getName(), e.args[0], e.args[1])
             } else {
                 var args = e.args.slice(0)
                 if (args[0].getThing() instanceof SingletonDef)
