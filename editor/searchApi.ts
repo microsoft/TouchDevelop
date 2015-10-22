@@ -375,12 +375,6 @@ module TDev
             }
 
             var addList = (entries: IntelliItem[]) => {
-                var cmpName = (a: IntelliItem, b: IntelliItem) =>
-                    b.alphaOverride() - a.alphaOverride() ||
-                    Util.stringCompare(a.getName(), b.getName());
-                var cmpScoreThenName = (a: IntelliItem, b: IntelliItem) =>
-                        b.lastMatchScore - a.lastMatchScore || b.score - a.score || cmpName(a, b);
-
                 if (entries.length == 0) return;
                 if (terms.length > 0) {
                     var totalProps = 0;
@@ -389,9 +383,9 @@ module TDev
                         if (it.lowSearch) it.lastMatchScore *= 0.05;
                         return it.lastMatchScore > 0;
                     });
-                    entries.sort(cmpScoreThenName);
+                    entries.sort(IntelliItem.cmpScoreThenName);
                 } else {
-                    entries.sort(cmpName);
+                    entries.sort(IntelliItem.cmpName);
                 }
                 if (entries.length == 0) return;
                 // if (!!n) items.push(div("navHeader", n));

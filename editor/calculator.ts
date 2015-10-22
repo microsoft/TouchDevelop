@@ -3951,6 +3951,10 @@ module TDev
             })
             this.intelliPredictor.scoreIntelliItems(items, this.cursorPosition);
             (<any>items).usedProfile = usedProfile;
+
+            if (Cloud.isRestricted())
+                items.sort(IntelliItem.cmpName);
+
             return items;
         }
 
