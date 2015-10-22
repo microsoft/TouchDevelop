@@ -370,9 +370,15 @@ module TDev
             if (this.searchApi.visible)
                 this.searchApi.dismissing();
 
-            if (this.expr && this.expr.tokens.length == 0 && this.stmt instanceof AST.InlineActions) {
+            if (this.expr && this.stmt instanceof AST.InlineActions && 
+                (this.expr.tokens.length == 0 || /^TD182:/.test(this.stmt.getError()))) {
                 var bl = new AST.CodeBlock();
                 bl.stmts = [];
+                if (this.expr.tokens.length > 0) {
+                    var copy = AST.Parser.emptyExprStmt()
+                    copy.expr.tokens = this.expr.tokens
+                    bl.stmts.push(copy)
+                }
                 (<AST.InlineActions>this.stmt).actions.stmts.forEach((a:AST.InlineAction) => {
                     if (!a.body) return
                     a.body.stmts.forEach(s => {
