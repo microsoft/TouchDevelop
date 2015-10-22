@@ -5163,6 +5163,8 @@ module TDev.AST {
     {
         props:any = {};
         topicPath:string;
+        singletonOrder:StringMap<number> = {};
+        singletonNo = 0;
 
         public visitAstNode(n:AstNode) {
             this.visitChildren(n);
@@ -5218,6 +5220,11 @@ module TDev.AST {
         {
             if (t.def)
                 this.incr(t.def.usageKey())
+            if (t.def instanceof SingletonDef) {
+                var n = t.def.getName()
+                if (!this.singletonOrder.hasOwnProperty(n))
+                    this.singletonOrder[n] = ++this.singletonNo;
+            }
         }
 
         public visitGlobalDef(t: GlobalDef)
@@ -5302,6 +5309,7 @@ module TDev.AST {
     {
         public allowAllLibraries : boolean = true;
         private properties:any; // p.helpTopic() => #occurences
+        private singletonOrder:StringMap<number> = {};
 
         public merge(other : IntelliProfile)
         {
@@ -5313,6 +5321,10 @@ module TDev.AST {
                     else this.properties[k] = other.properties[k];
                 });
             }
+
+            Object.keys(other.singletonOrder).forEach(k => {
+                this.singletonOrder[k] = other.singletonOrder[k];
+            })
         }
 
         static helpfulProperties = {
@@ -5383,6 +5395,13 @@ module TDev.AST {
             else this.properties[k] = 1
         }
 
+        public getSingletonOrder(name:string)
+        {
+            if (this.singletonOrder.hasOwnProperty(name))
+                return this.singletonOrder[name]
+            return 0
+        }
+
         public loadFrom(node:AstNode, builtin : boolean)
         {
             var v = new IntelliCollector()
@@ -5392,6 +5411,7 @@ module TDev.AST {
             Object.keys(v.props).forEach(k => {
                 this.properties[k.toLowerCase()] = v.props[k]
             })
+            this.singletonOrder = v.singletonOrder;
         }
     }
 

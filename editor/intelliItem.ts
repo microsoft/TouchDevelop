@@ -42,6 +42,12 @@ module TDev
             if (this.prop instanceof AST.LibraryRef) return 5;
             if (this.prop && !Script.canUseProperty(this.prop)) return -10;
             if (this.matchAny) return -1e10;
+
+            if (Cloud.isRestricted() && TheEditor.intelliProfile && this.decl instanceof AST.SingletonDef) {
+                var order = TheEditor.intelliProfile.getSingletonOrder(this.decl.getName())
+                if (!order) return 0;
+                else return (1000 - order) / 1000
+            }
             return 0;
         }
 
