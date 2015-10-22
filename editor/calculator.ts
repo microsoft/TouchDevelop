@@ -1245,8 +1245,17 @@ module TDev
                 this.deleteTokens(this.cursorPosition, 1);
             }
 
-
-            if (o == "(" && pos > 0 && pos < this.expr.tokens.length) {
+            if (/^[0-9]$/.test(o) &&
+                prevTok instanceof AST.ThingRef &&
+                this.getLocals().some(l => l.getName() == prevTok.getText() + o))
+            {
+                // It looks like foo2 to the user, but really is [foo][2]
+                // and foo2 is an existing variable. Let's glue it.
+                var t = AST.mkThing(prevTok.getText() + o)
+                this.cursorPosition--;
+                this.deleteTokens(this.cursorPosition, 1);
+                this.insertToken(t)
+            } else if (o == "(" && 0 < pos && pos < this.expr.tokens.length) {
                 this.cursorPosition = pos;
             } else {
                 var n:AST.Token = AST.mkOp(o);
