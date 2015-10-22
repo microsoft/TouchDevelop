@@ -43,11 +43,18 @@ module TDev
             if (this.prop && !Script.canUseProperty(this.prop)) return -10;
             if (this.matchAny) return -1e10;
 
-            if (Cloud.isRestricted() && TheEditor.intelliProfile && this.decl instanceof AST.SingletonDef) {
-                var order = TheEditor.intelliProfile.getSingletonOrder(this.decl.getName())
-                if (!order) return 0;
-                else return (1000 - order) / 1000
+            if (Cloud.isRestricted() && TheEditor.intelliProfile) {
+                if (this.decl instanceof AST.SingletonDef) {
+                    var order = TheEditor.intelliProfile.getSingletonOrder(this.decl.getName())
+                    if (!order) return 0;
+                    else return (1000 - order) / 1000
+                }
+
+                if (this.prop instanceof AST.LibraryRefAction) {
+                    return (<AST.LibraryRefAction>this.prop)._weight * 1e-10;
+                }
             }
+
             return 0;
         }
 
