@@ -6814,7 +6814,7 @@
                 [
                     this,
                     new ScriptDetailsTab(this),
-                    EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
+                    this.cloudHeader && EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
                     EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
                     Cloud.lite ? new AbuseReportsTab(this) : null,
                 ];
