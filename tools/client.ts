@@ -3654,7 +3654,7 @@ function tdupload(args:string[])
         if (!fs.existsSync(p))
             return;
         var fileToRead = p.replace(/^www\//, "microbit/overrideupload/")
-        if (!liteId || fileToRead == p || !fs.existsSync(fileToRead))
+        if (!liteId || !/microbit/.test(liteUrl) || fileToRead == p || !fs.existsSync(fileToRead))
             fileToRead = p;
         fs.readFile(fileToRead, (err, data) => {
             if (err) {
