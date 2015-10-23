@@ -913,26 +913,27 @@ module TDev.HTML {
     }
     
     export function browserDownload(dataurl: string, name: string) {
-        if ((<any>window).navigator.msSaveOrOpenBlob) {
-            try {
+        try {
+            if ((<any>window).navigator.msSaveOrOpenBlob) {
                 var m = /data:([^;]+);base64,/.exec(dataurl)
                 var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
                 var result = (<any>window).navigator.msSaveOrOpenBlob(b, name);
-            } catch(e) {
-                HTML.showProgressNotification(lf("saving file failed..."));
-            }
-        } else {
-            var link = <any>window.document.createElement('a');
-
-            link.href = dataurl;
-            if (typeof link.download == "string") {
-                link.download = name;
-                document.body.appendChild(link); // for FF
-                link.click();
-                document.body.removeChild(link);
             } else {
-                document.location.href = dataurl;
+                var link = <any>window.document.createElement('a');
+
+                link.href = dataurl;
+                if (typeof link.download == "string") {
+                    link.download = name;
+                    document.body.appendChild(link); // for FF
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    document.location.href = dataurl;
+                }
             }
+        } catch (e) {
+            Util.reportError("browserdownload", e, false);
+            HTML.showProgressNotification(lf("saving file failed..."));
         }
     }
 
