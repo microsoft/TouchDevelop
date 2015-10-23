@@ -345,7 +345,7 @@ module TDev.Cloud {
                     lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
                     (!(<any>TDev).TheEditor ? "" :
                       "<p class='agree'>" +
-                      lf("You can run and save your scripts locally, but to compile and access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
+                      lf("You can run and save your scripts locally, but to access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
                       "</p>")
                     )
                 m.fullWhite();

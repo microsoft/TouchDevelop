@@ -81,7 +81,7 @@ module TDev
             Meta.chooseScriptAsync({
                 searchPath: "scripts?count=50&q=" + encodeURIComponent("*library "),
                 filter: (s) => s.isLibrary(),
-                header: "choose library to use",
+                header: lf("choose library"),
             }).done((s) => {
                 if (s) f(s)
             })

@@ -373,7 +373,7 @@ module TDev
                 }
                 var m = new ModalDialog();
                 var acts = api.eventMgr.availableEvents().map(mkEvent)
-                m.choose(acts, { mkSeeMore: DeclEntry.mkSeeMore, header: "which kind of event to add?" });
+                m.choose(acts, { mkSeeMore: DeclEntry.mkSeeMore, header: lf("which kind of event to add?") });
             }
 
             var addLibrary = () => {

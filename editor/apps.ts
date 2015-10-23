@@ -121,7 +121,7 @@ module TDev.AppExport
                 m0.dismiss();
 
                 if (data.message) {
-                    ModalDialog.info("export to app", "You cannot export to app: " + data.message);
+                    ModalDialog.info(lf("export to app"), lf("You cannot export to app: {0}", data.message));
                     return;
                 }
 
@@ -138,7 +138,7 @@ module TDev.AppExport
                 var deleteBtn = null;
 
                 function previewUrl() {
-                    previewUrlMsg.setChildren(['Computing URL...']);
+                    previewUrlMsg.setChildren([lf("Computing URL...")]);
                     progressBar.start();
                     var name = nameInput.value;
                     createWebAppAsync(id, name, true).then((res) => {
@@ -157,14 +157,14 @@ module TDev.AppExport
                     var lnk = RT.Link.mk(url, RT.LinkKind.hyperlink)
                     lnk.set_title("my web app \"" + name + "\"")
                     RT.ShareManager.addShareButtons(m, lnk, {
-                        header: "share your web app!",
+                        header: lf("share your web app!"),
                         noDismiss: true
                     })
                 }
                 function createApp() {
                     createBtn.removeSelf();
                     hideLegalEtc();
-                    msg.setChildren(['Creating Web App...']);
+                    msg.setChildren([lf("Creating Web App...")]);
                     progressBar.start();
                     var name = nameInput.value;
                     createWebAppAsync(id, name).then((res) => {
@@ -177,7 +177,7 @@ module TDev.AppExport
                                 "<div class='smallText' style='margin-top:0.8em'>To delete the Web App later, go back to this dialog for the same installed published script.</div>");
                             addShare(url, name)
                         } else {
-                            msg.setChildren([div('wall-dialog-header', "Sorry, the app could not be created. "), res ? res.message : ""]);
+                            msg.setChildren([div('wall-dialog-header', lf("Sorry, the app could not be created. ")), res ? res.message : ""]);
                         }
                         buttonsDiv.setChildren([HTML.mkButton(lf("close"), () => {
                             m.dismiss();
@@ -186,13 +186,13 @@ module TDev.AppExport
                 }
                 function deleteApp() {
                     deleteBtn.removeSelf();
-                    msg.setChildren(['Deleting Web App...']);
+                    msg.setChildren([lf("Deleting Web App...")]);
                     progressBar.start();
                     deleteWebAppAsync(id).then((res) => {
                         progressBar.stop();
                         if (res && res.deleted) {
                             msg.setChildren([]);
-                            Browser.setInnerHTML(msg, "Your Web App has been deleted!");
+                            Browser.setInnerHTML(msg, lf("Your Web App has been deleted!"));
                         } else {
                             msg.setChildren([div('wall-dialog-header', "Sorry, the app could not be deleted. "), res ? res.message : ""]);
                         }
