@@ -40,7 +40,7 @@
                 if (settings && EditorSettings.widgets().hubChannels)
                     menuItems.push({ id: "channels", name: lf("Channels"), tick: Ticks.siteMenuChannels, handler: () => this.showList("channels") });
                 if (!Cloud.getUserId())
-                    menuItems.push({ id: "signin", name: lf("Sign In"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
+                    menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
                 var siteLogo = elt("siteLogo");
