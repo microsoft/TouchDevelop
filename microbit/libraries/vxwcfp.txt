@@ -20,48 +20,44 @@ action \_libinit() {
     #BamJivB3cALMYQoQ data→start_time := time→now;
     #pJfHUw7KRZ5r6xTq data→board := media→create_portrait_board(612, 498 + 100);
     #tGJciuV0e2iZndkr wall→set_background(colors→transparent);
-    #xHZJdg4oIJlrN7cX $picture := art→microbit_schema→clone;
-    #mes9Z70SlnN52zQT $padding := 27;
-    #q8k7EFimR0fMv4GZ $left := 205;
-    #xjbIl53FS2hhHDRL $@top := 156;
-    #xunTJ84HrUYQtyK7 $picture→fill_rect($left - $padding, $@top, 205 + $padding + 4, 200 + $padding + 4, 0, colors→black);
-    #aAHm3HC4MpRUsZ4n $picture→fill_rect(274, 74, 63, 16, 0, colors→black);
-    #xHQWCYdhMT39OHlO data→bkg := data→board→create_picture($picture);
+    #xHZJdg4oIJlrN7cX data→picture := art→microbit_schema→clone;
+    #mes9Z70SlnN52zQT data→padding := 27;
+    #q8k7EFimR0fMv4GZ data→left := 205;
+    #xjbIl53FS2hhHDRL data→@top := 156;
+    #aAHm3HC4MpRUsZ4n data→picture→fill_rect(274, 74, 63, 16, 0, colors→black);
+    #xHQWCYdhMT39OHlO data→bkg := data→board→create_picture(data→picture);
     #tduKnQa7ilnDwAR8 data→bkg→width := data→board→width;
     #Y4hGkvffxjBnxeqh data→bkg→left := 0;
     #biiwiRxx6lfA2TSm data→bkg→@top := 0;
     #xYFT5Uzzo7KE5Kr1 code→create_buttons;
     #CT4ZDKfwZOw9wE2M data→finger := data→board→create_ellipse(20, 20);
     #JoeW2bsnEkDyWSyt data→finger→set_opacity(0);
-    #NAj8gc9TnnnW95KJ data→led_on_color := "#ff7f7f" →to_color;
-    #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
-    #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
     #mEta1VHYHeLZUHiH data→back_leds := data→board→create_sprite_set;
     #xWKGWdrq4hPuEt6s data→leds := data→board→create_sprite_set;
-    #PDctHCuC00kxArHt $back_led_color := "#202020" →to_color;
     #SfZi0Q4PST9W8C6f $led_opacity := 127 / 255;
     #md36WuHm2WM6OUim $led_w := 10;
     #wL4ZbsjEBlcHVdT4 $led_offset := 48;
     #czF5GDH9tIShJiHQ $led_h := 20;
     #eOl4yTJgCvJGnDPC for 0 ≤ i < 5 do {
-      #xu2j46v9YsXKI68O $led_top := $i * $led_offset + $@top;
+      #xu2j46v9YsXKI68O $led_top := $i * $led_offset + data→@top;
       #VtKgwueOnr9ToKNo for 0 ≤ j < 5 do {
-        #xbwb4ptsRLHB8U2X $led_left := $j * $led_offset + $left;
+        #xbwb4ptsRLHB8U2X $led_left := $j * $led_offset + data→left;
         #pjVTyTlf5kQ4qA6G $back_led := data→board→create_rectangle($led_w, $led_h);
-        #g3hU6N2QIM8jrYG2 $back_led→set_color($back_led_color);
         #cuWZqw3O5y2yXQb5 $led := data→board→create_rectangle($led_w + 8, $led_h + 8);
         #m96ZgbF29ABbEmoL $back_led→left := $led_left;
         #xGiwGuU71Tu9FgU5 $back_led→@top := $led_top;
         #QjqcjX5p0pAvotrx $led→x := $back_led→x;
         #avXCJDNsL2TCMLfU $led→y := $back_led→y;
+        #WPrSA3bt4MdkOVEE $led→color := colors→transparent;
         #GCX2ykJxlYVUyoYt $led→set_opacity($led_opacity);
-        #CHZZokuNOWAxkrC2 $led→set_color(data→led_off_color);
         #g49uDAC8FfRzMF9O $led→set_shadow(10, colors→red, 0, 0);
         #LZwZ7CQdOe5bMLP7 code→led_index_anim($back_led, $j, $i);
         #N1DKQdDMWiPq5R3f data→back_leds→add($back_led);
         #IwDQ2EgCXYvDIWQD data→leds→add($led);
       }
     }
+    #xN44GIpThDd2JQn5 code→init_theme;
+    #qLoyPDrDUdeG77Vv code→set_theme("");
     #QIjvtSonf6Bx38tP code→init_eyes;
     #auzjzpClkNJY94I3 code→init_axis;
     #BlWLf7LrHMucdyNB code→init_pins;
@@ -2250,4 +2246,103 @@ action plot_image(#OrAkEEB8qLoT4Mzd @this: * Image, #HXxAUi2ymf5FqRzN x_offset: 
   #VfYDTi9V6fB4yWKi // {shim:micro_bit::plotImage}
   #M8USzI3sH1AvswWQ code→render_image($@this, $x_offset);
   meta sync;
+}
+#veAWzsaQ3mAeSOvA
+action set_theme(#cJ3VYThrkFH2nnon name: String) {
+  #x5CwjchVbMRh3uoA // {shim:}
+  #f2xg2qfKJ7v1Lq5x if $name→is_empty then {
+    #uH4b8fL22EjTKz0h $name := data→current_theme;
+  }
+  #e4B1ZURot54YEGiY data→current_theme := $name;
+  #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
+  #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
+  #qyDWsRI4ytHtFd8g $leds_background := colors→black;
+  #HFTjMO2guOv7Rm2w if data→current_theme→equals("blue") then {
+    #e1DeXSmMGEeWOuR8 data→led_on_color := colors→blue;
+    #thMgho7JD3MYX4td data→back_led_color := "#ffffff" →to_color;
+    #tpaF1iFuz32wgCsx data→theme_button→color := colors→red;
+    #tkh2jZG0YKruthlp data→theme_button_text→text := "RED";
+  }
+  else {
+    #NAj8gc9TnnnW95KJ data→led_on_color := "#ff7f7f" →to_color;
+    #PDctHCuC00kxArHt data→back_led_color := "#202020" →to_color;
+    #UNyIvSrjPwjuejLI data→theme_button→color := colors→blue;
+    #dF7uimXe2syAdKRJ data→theme_button_text→text := "BLUE";
+  }
+  #xunTJ84HrUYQtyK7 data→picture→fill_rect(data→left - data→padding, data→@top, 205 + data→padding + 4, 200 + data→padding + 4, 0, $leds_background);
+  #y83CLwRPgvZv68BM for 0 ≤ i < data→back_leds→count do {
+    #j0NqowF1gJYZbFxY $sprite := data→back_leds→at($i);
+    #uUA4sC8H8ziHanbz $sprite→set_color(data→back_led_color);
+  }
+  #xLIqmgbYCB5fxAPi for 0 ≤ j < data→leds→count do {
+    #gxG2ZfmOxSI7272S $sp := data→leds→at($j);
+    #xCqSX9GgsvwAdse6 if `not` $sp→color→equals(colors→transparent) then {
+      #KKuXMjFU6exhXzyG $sp→color := data→led_on_color;
+    }
+  }
+  meta private;
+  meta sync;
+}
+#CIQ4veOCB3b54xEF
+var back_led_color : Color {
+  // {shim:}
+  transient = true;
+}
+#pKuVW9VLAsoLATs1
+var current_theme : String {
+  // {shim:}
+}
+#ZcRIUJagQtw2kOc3
+action init_theme() {
+  #xG4G6cfMaEbWqlM9 // {shim:}
+  #EkEHXeeTIhNElM4z data→theme_button := data→board→create_ellipse(42, 42);
+  #sfJgDE9vpMmOJbD7 data→theme_button→set_pos(data→board→width - 64, 54);
+  #UAxpSTycnW8y28Sg data→theme_button→set_gradient(false);
+  #B2CwAWAZnJLS03hT data→theme_button_text := data→board→create_text(100, 40, 20, "RED");
+  #D3Q0VYJTEsOeCSSW data→theme_button_text→set_color(colors→black);
+  #xmkTU26RbeIFb2Jc data→theme_button_text→fit_text;
+  #e4SNFryMf0J07YJC data→theme_button_text→x := data→theme_button→x + 7;
+  #tgvI4UL0HsxskMLH data→theme_button_text→y := data→theme_button→y - 34;
+  #LzHTvRzGmrVF5uqf data→theme_button→on_touch_down($touch_down);
+  #j2kGPOFC3VpxGuvH where touch_down(x: Number, y: Number) {
+    #zUofeW9VI4OAw6vA if data→current_theme→equals("red") then {
+      #KyZyX0ozrSc7lt7e code→set_theme("blue");
+    }
+    else {
+      #ihyfyE1odrtrY2mB code→set_theme("red");
+    }
+    #Ekmnrj2o99FWFUDY code→update_board;
+  }
+  meta private;
+  meta sync;
+}
+#xdhVzgfGv2tKJXiC
+var theme_button : Sprite {
+  // {shim:}
+  transient = true;
+}
+#xzT4DM36ZVg22KDW
+var padding : Number {
+  // {shim:}
+  transient = true;
+}
+#IumTSFIHhbwxn3H4
+var left : Number {
+  // {shim:}
+  transient = true;
+}
+#ySs9JtsfD489KWqC
+var @top : Number {
+  // {shim:}
+  transient = true;
+}
+#R4ySKAi8lAt3lPo4
+var picture : Picture {
+  // {shim:}
+  transient = true;
+}
+#kgAKd05Qka2tkxaX
+var theme_button_text : Sprite {
+  // {shim:}
+  transient = true;
 }
