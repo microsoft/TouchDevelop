@@ -832,7 +832,7 @@ module TDev
                         HTML.showErrorNotification(lf("Compression type {0} not supported.", hd.compression))
                         return Promise.as()
                     } else {
-                        return Promise.as([hd, Util.fromUTF8Bytes(tmp.text)])
+                        return Promise.as([hd, Util.fromUTF8Bytes(<any>tmp.text)])
                     }
                 })
                 .then(dat => {

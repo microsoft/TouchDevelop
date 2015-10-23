@@ -751,9 +751,16 @@ module TDev.AST.Bytecode
                 }
             })
             Util.assert(toGo == 0 && ptr == buf.length)
+            var bufmeta = new Uint8Array(metaLen)
+            var buftext = new Uint8Array(textLen)
+            for (var i = 0; i < metaLen; ++i)
+                bufmeta[i] = buf[i];
+            for (var i = 0; i < textLen; ++i)
+                buftext[i] = buf[metaLen + i];
+            // iOS Safari doesn't seem to have slice() on Uint8Array
             return {
-                meta: Util.fromUTF8Bytes(buf.slice(0, metaLen)),
-                text: buf.slice(metaLen)
+                meta: Util.fromUTF8Bytes(<any>bufmeta),
+                text: buftext
             }
         }
 
