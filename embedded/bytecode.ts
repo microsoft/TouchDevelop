@@ -24,9 +24,9 @@ module TDev.AST.Bytecode
     */
 
     interface FuncInfo {
+        name: string;
         type: string;
         args: number;
-        idx: number;
         value: number;
     }
 
@@ -34,6 +34,7 @@ module TDev.AST.Bytecode
     var hex:string[];
     var hexStartAddr:number;
     var hexStartIdx:number;
+    var dirtyLines = 0;
 
     function swapBytes(str:string)
     {
@@ -44,53 +45,40 @@ module TDev.AST.Bytecode
         return r
     }
 
-    function fillValue(types:string)
+    function fillValues(jsinf:any)
     {
-        var num = 0
-        var pref = ""
+        funcInfo = {};
+        var funs:FuncInfo[] = jsinf.functions;
 
-        Object.keys(funcInfo).forEach(k => {
-            var inf = funcInfo[k]
-            if (types.indexOf(inf.type) >= 0) {
-                num = Math.max(inf.idx + 1, num)
-                if (inf.idx < 2) {
-                    var m = /^0x([a-f0-9]{8})$/.exec(k)
-                    pref = pref + swapBytes(m[1]).toUpperCase()
-                }
+        Object.keys(jsinf.enums).forEach(k => {
+            funcInfo[k] = {
+                name: k,
+                type: "E",
+                args: 0,
+                value: jsinf.enums[k]
             }
         })
 
-        var i = 0;
-        var j = -1;
-        var data = []
-        for (; i < hex.length; ++i) {
+        dirtyLines = 1;
+
+        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
             var m = /^:10(....)00(.{16})/.exec(hex[i])
-            if (m && m[2] == pref) {
-                j = 0;
-            }
 
-            if (j >= 0) {
-                var s = hex[i].slice(9)
-                while (s.length >= 8) {
-                    data.push(parseInt(swapBytes(s.slice(0, 8)), 16))
-                    s = s.slice(8)
-                }
-            }
+            if (!m) continue;
 
-            if (data.length > num) break
+            dirtyLines++;
+
+            var s = hex[i].slice(9)
+            while (s.length >= 8) {
+                var inf = funs.shift()
+                if (!inf) return;
+                funcInfo[inf.name] = inf;
+                inf.value = parseInt(swapBytes(s.slice(0, 8)), 16) & 0xfffffffe
+                s = s.slice(8)
+            }
         }
 
-        Util.assert(data.length > num)
-
-        Object.keys(funcInfo).forEach(k => {
-            var inf = funcInfo[k]
-            if (types.indexOf(inf.type) >= 0) {
-                inf.value = data[inf.idx]
-                if ("PF".indexOf(inf.type) >= 0)
-                    inf.value = inf.value & 0xfffffffe
-                Util.assert(inf.value != null)
-            }
-        })
+        Util.die();
     }
 
     function setup()
@@ -98,7 +86,6 @@ module TDev.AST.Bytecode
         if (funcInfo) return; // already done
 
         var inf = (<any>TDev).bytecodeInfo
-        funcInfo = inf.functions;
         hex = Cloud.isFota() ? inf.fotahex : inf.hex;
 
         var i = 0;
@@ -114,8 +101,10 @@ module TDev.AST.Bytecode
             }
         }
 
-        fillValue("PFX")
-        fillValue("E")
+        if (!hexStartAddr)
+            Util.oops("No hex start")
+
+        fillValues(inf)
     }
 
     function isRefKind(k:Kind)
@@ -322,6 +311,7 @@ module TDev.AST.Bytecode
         peepHole()
         {
             /* TODO
+               TODO remember that used labels are instructions, push{r0} lbl: pop{r0} cannot be eliminated
             var res = []
             for (var i = 0; i < this.body.length; ++i) {
                 var op = this.body[i]
@@ -434,7 +424,11 @@ module TDev.AST.Bytecode
             if (name == "JMPZ") {
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("bne #0")
+                this.emit("bne #0") // this is to *skip* the following 'b' instruction; bne itself has a very short range
+            } else if (name == "JMPNZ") {
+                this.emit("pop {r0}");
+                this.emit("cmp r0, #0")
+                this.emit("beq #0")
             } else if (name == "JMP") {
                 // ok
             } else {
@@ -579,7 +573,7 @@ module TDev.AST.Bytecode
                 if (myhex[i] == null) Util.die();
                 var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
                 if (!m) { i++; continue; }
-                Util.assert(i == hexStartIdx || /^0+$/.test(m[3]))
+                Util.assert(i <= hexStartIdx + dirtyLines || /^0+$/.test(m[3]))
 
 
                 var bytes = [0x10, parseInt(m[1], 16), parseInt(m[2], 16), 0]
@@ -676,7 +670,7 @@ module TDev.AST.Bytecode
             Util.assert(this.csource == "");
 
             this.emit("; start");
-            this.emit(".short 0x4203");
+            this.emit(".short 0x4204");
             this.emit(".short " + this.globals.length);
             this.emit(".short " + this.nextStringId);
             this.emit(".short 0"); // future use
@@ -1088,6 +1082,7 @@ module TDev.AST.Bytecode
                 if (a._compilerInlineBody) {
                     Util.assert(!inf);
                     funcInfo[shm] = {
+                        name: shm,
                         type: hasret ? "F" : "P",
                         args: a.getInParameters().length,
                         idx: 0,
@@ -1121,6 +1116,26 @@ module TDev.AST.Bytecode
                 if (hasret)
                     this.proc.emit("push {r0}");
             }
+        }
+
+        emitLazyOp(op:string, arg0:Expr, arg1:Expr)
+        {
+            this.dispatch(arg0)
+
+            var lblEnd = this.proc.mkLabel("lazy")
+
+            if (op == "and") {
+                this.proc.emitJmp(lblEnd, "JMPZ")
+            } else if (op == "or") {
+                this.proc.emitJmp(lblEnd, "JMPNZ")
+            } else {
+                Util.die()
+            }
+
+            this.dispatch(arg1)
+            this.proc.emit("pop {r0}")
+            this.proc.emitLbl(lblEnd);
+            this.proc.emit("push {r0}")
         }
 
         visitCall(e:Call)
@@ -1175,8 +1190,6 @@ module TDev.AST.Bytecode
                 }
             } else if (pkn == "Invalid") {
                 this.emitInt(0);
-            } else if (pkn == "App" && p.getName() == "thumb") {
-                var str = e.args[1].getStringLiteral()
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")) {
                 this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk", 0);
@@ -1184,6 +1197,9 @@ module TDev.AST.Bytecode
                 this.emitAsString(e.args[0]);
                 this.emitAsString(e.args[1]);
                 this.proc.emitCall("string::concat_op", 3);
+            } else if (pkn == "Boolean" && /^(and|or)$/.test(p.getName())) {
+                Util.assert(e.args.length == 2)
+                this.emitLazyOp(p.getName(), e.args[0], e.args[1])
             } else {
                 var args = e.args.slice(0)
                 if (args[0].getThing() instanceof SingletonDef)

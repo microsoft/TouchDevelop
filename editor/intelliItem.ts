@@ -37,10 +37,24 @@ module TDev
         {
             if (this.cbOverride) return 30;
             if (this.decl instanceof AST.LocalDef) return 20;
-            if (this.decl && this.decl.getKind() instanceof ThingSetKind) return 10;
+            if (this.prop instanceof AST.GlobalDef) return 15;
+            if (this.decl && this.decl.getKind() instanceof ThingSetKind) return -1;
             if (this.prop instanceof AST.LibraryRef) return 5;
             if (this.prop && !Script.canUseProperty(this.prop)) return -10;
             if (this.matchAny) return -1e10;
+
+            if (Cloud.isRestricted() && TheEditor.intelliProfile) {
+                if (this.decl instanceof AST.SingletonDef) {
+                    var order = TheEditor.intelliProfile.getSingletonOrder(this.decl.getName())
+                    if (!order) return 0;
+                    else return (1000 - order) / 1000
+                }
+
+                if (this.prop instanceof AST.LibraryRefAction) {
+                    return (<AST.LibraryRefAction>this.prop)._weight * 1e-10;
+                }
+            }
+
             return 0;
         }
 
@@ -279,6 +293,17 @@ module TDev
                 return r;
             }
             return IntelliItem.matchString((this.getName() + " " + this.getDesc(true)).toLowerCase(), terms, 100, 10, 1);
+        }
+
+        static cmpName(a: IntelliItem, b: IntelliItem)
+        {
+            return b.alphaOverride() - a.alphaOverride() ||
+                   Util.stringCompare(a.getName(), b.getName());
+        }
+
+        static cmpScoreThenName(a: IntelliItem, b: IntelliItem)
+        {
+            return b.lastMatchScore - a.lastMatchScore || b.score - a.score || IntelliItem.cmpName(a, b);
         }
     }
 }

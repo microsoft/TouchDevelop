@@ -370,9 +370,15 @@ module TDev
             if (this.searchApi.visible)
                 this.searchApi.dismissing();
 
-            if (this.expr && this.expr.tokens.length == 0 && this.stmt instanceof AST.InlineActions) {
+            if (this.expr && this.stmt instanceof AST.InlineActions && 
+                (this.expr.tokens.length == 0 || /^TD182:/.test(this.stmt.getError()))) {
                 var bl = new AST.CodeBlock();
                 bl.stmts = [];
+                if (this.expr.tokens.length > 0) {
+                    var copy = AST.Parser.emptyExprStmt()
+                    copy.expr.tokens = this.expr.tokens
+                    bl.stmts.push(copy)
+                }
                 (<AST.InlineActions>this.stmt).actions.stmts.forEach((a:AST.InlineAction) => {
                     if (!a.body) return
                     a.body.stmts.forEach(s => {
@@ -1245,8 +1251,17 @@ module TDev
                 this.deleteTokens(this.cursorPosition, 1);
             }
 
-
-            if (o == "(" && pos > 0 && pos < this.expr.tokens.length) {
+            if (/^[0-9]$/.test(o) &&
+                prevTok instanceof AST.ThingRef &&
+                this.getLocals().some(l => l.getName() == prevTok.getText() + o))
+            {
+                // It looks like foo2 to the user, but really is [foo][2]
+                // and foo2 is an existing variable. Let's glue it.
+                var t = AST.mkThing(prevTok.getText() + o)
+                this.cursorPosition--;
+                this.deleteTokens(this.cursorPosition, 1);
+                this.insertToken(t)
+            } else if (o == "(" && 0 < pos && pos < this.expr.tokens.length) {
                 this.cursorPosition = pos;
             } else {
                 var n:AST.Token = AST.mkOp(o);
@@ -3936,6 +3951,10 @@ module TDev
             })
             this.intelliPredictor.scoreIntelliItems(items, this.cursorPosition);
             (<any>items).usedProfile = usedProfile;
+
+            if (Cloud.isRestricted())
+                items.sort(IntelliItem.cmpName);
+
             return items;
         }
 
