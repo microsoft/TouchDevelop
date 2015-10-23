@@ -34,7 +34,7 @@ module TDev.Login
             "&redirect_uri=" + encodeURIComponent(hereUrl) +
             "&identity_provider=" + encodeURIComponent(Cloud.getIdentityProvider() || "") +
             "&state=" + encodeURIComponent(Cloud.oauthStates()[0]) + addParameters;
-        ProgressOverlay.show("signing in...")
+        ProgressOverlay.show(lf("signing in..."))
         Util.navigateInWindow(url);
 
         return true;
