@@ -2246,7 +2246,7 @@ module TDev.AST {
         }
         public nodeType() { return "localDef"; }
         public accept(v:NodeVisitor) { return v.visitLocalDef(this); }
-        public getDescription():string { return ": " + this.getKind().toString() + " -- a local variable"; }
+        public getDescription():string { return ": " + this.getKind().toString() + lf(" -- a local variable"); }
         public rename(nn:string) { this.setName(nn); }
         public setKind(k: Kind) { this._kind = k }
         public usageKey() { return this.getName(); }
