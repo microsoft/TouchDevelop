@@ -260,7 +260,7 @@ module TDev
                     TheEditor.dismissSidePane()
                 });
             this.runBtn = div("");
-            this.compileBtn = Cloud.canCompile() ? div("") : undefined;
+            this.compileBtn = Cloud.canCompile() && !SizeMgr.phoneMode ? div("") : undefined;
             this.updateRunButton();
             this.runBtn.style.position = "relative";
             if (this.compileBtn) {

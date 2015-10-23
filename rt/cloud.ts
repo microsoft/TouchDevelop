@@ -827,8 +827,8 @@ module TDev.Cloud {
     }
     
     export function canCompile() {
-        return Cloud.isRestricted() &&
-            (Cloud.isFota() || Browser.isDesktop || Browser.isTablet);
+        // always allow compilation since it is used to save sources as well
+        return Cloud.isRestricted();
     }
 
     export function postUserInstalledCompileAsync(guid: string, cppSource: string, meta: any = {}): Promise {
