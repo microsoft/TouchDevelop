@@ -9,17 +9,17 @@ meta parentIds "";
 // The list of #microbit supported APIs.
 #Lfh62trBUHiPyt65
 action main() {
-  #EHiM59bhD8SdJNdc // namespaces
-  #lYPvYSUJurXkntc3 basic;
-  #y6kj0BBUYlWuwy6W led;
-  #xPTTNHFnhdSz2dhl input;
+  #EHiM59bhD8SdJNdc // namespace order
+  #lYPvYSUJurXkntc3 basic[lib micro\u003abit];
+  #y6kj0BBUYlWuwy6W led[lib micro\u003abit];
+  #xPTTNHFnhdSz2dhl input[lib micro\u003abit];
   #D2z4dybkpmvwZyDo math;
-  #jpHdDKNpGylh7PAD image;
-  #SNTTZp3SXz6JkWWX pins;
+  #jpHdDKNpGylh7PAD image[lib micro\u003abit];
+  #SNTTZp3SXz6JkWWX pins[lib micro\u003abit];
   #xVSeqKOnHOk6JFR2 music[lib micro\u003abit];
-  #w9qtFNmNqcWH4xF9 game;
-  #cxm5ZRGniZuabbsH events;
-  #FbxqDG6K9icP69Mq control;
+  #w9qtFNmNqcWH4xF9 game[lib micro\u003abit_game];
+  #cxm5ZRGniZuabbsH events[lib micro\u003abit];
+  #FbxqDG6K9icP69Mq control[lib micro\u003abit];
   #xSn8t2IaNKG1wYPa bits;
   #iBKCrFATYjJq1exg create;
   #v2bLbE0rFvUVnt41 serial[lib micro\u003abit_serial];
