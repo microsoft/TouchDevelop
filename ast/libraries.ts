@@ -564,20 +564,21 @@ module TDev.AST {
         {
         }
 
-        public createSingleton(name:string):SingletonDef
+        public createSingleton(name:string, lib:LibraryRef):SingletonDef
         {
             var k = new Kind(name, lf("Extensions"));
             k._contexts = KindContext.None;
             var th = mkSingletonDef(name, k);
             th.isExtension = true;
+            th.firstLibraryRef = lib;
             return th
         }
 
-        private addSingleton(name:string)
+        private addSingleton(name:string, lib:LibraryRef)
         {
             if (api.getThing(name)) return
 
-            var th = this.createSingleton(name)
+            var th = this.createSingleton(name, lib)
             this.singletonList.push(th)
             this.singletons[th.getName()] = th
         }
@@ -593,7 +594,7 @@ module TDev.AST {
             this.app.libraries().forEach(l => {
                 l.getPublicActions().forEach(a => {
                     a.getNamespaces().forEach(ns => {
-                        this.addSingleton(ns)
+                        this.addSingleton(ns, l)
                         if (!this.extensions.hasOwnProperty(ns))
                             this.extensions[ns] = { actions: {}, actionList: [] }
                         var e = this.extensions[ns];

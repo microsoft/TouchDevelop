@@ -1365,7 +1365,7 @@ module TDev.AST
                 if (!t.def && t.namespaceLibraryName()) {
                     if (!t.namespaceLibrary || t.namespaceLibrary.deleted)
                         t.namespaceLibrary = Script.libraries().filter(l => l.getName() == t.namespaceLibraryName())[0]
-                    t.def = Script.libNamespaceCache.createSingleton(t.data)
+                    t.def = Script.libNamespaceCache.createSingleton(t.data, t.namespaceLibrary)
                 }
                 if (!t.def) {
                     this.markError(t, lf("TD101: cannot find '{0}'", t.data));

@@ -1744,6 +1744,7 @@ module TDev.AST {
         extends Decl
     {
         public isExtension = false;
+        public firstLibraryRef:LibraryRef;
         public _isBrowsable = true;
         constructor() {
             super()
@@ -3591,6 +3592,8 @@ module TDev.AST {
                 tw.id("\u0001" + this.def.getName())
             else if (this.namespaceLibraryName())
                 tw.id(this.getText()).op0("[").id("lib").id(this.namespaceLibraryName()).op0("]")
+            else if (this.def instanceof SingletonDef && (<SingletonDef>this.def).firstLibraryRef)
+                tw.id(this.getText()).op0("[").id("lib").id((<SingletonDef>this.def).firstLibraryRef.getName()).op0("]")
             else
                 tw.id(this.getText());
         }
