@@ -1,6 +1,6 @@
 bool           action::is_invalid            (Action a);                             // F1
-RefAction*     action::mk                    (int reflen, int totallen, int startptr); // F3 bvm
-void           action::run                   (RefAction *a);                         // P1 bvm
+Action         action::mk                    (int reflen, int totallen, int startptr); // F3 bvm
+void           action::run                   (Action a);                             // P1 bvm
 int            bits::and_uint32              (int x, int y);                         // F2
 int            bits::or_uint32               (int x, int y);                         // F2
 int            bits::rotate_left_uint32      (int x, int y);                         // F2
@@ -80,7 +80,6 @@ void           micro_bit::events::audio_recorder (int event);                   
 void           micro_bit::events::camera     (int event);                            // P1
 void           micro_bit::events::remote_control (int event);                            // P1
 void           micro_bit::fiberDone          (void *a);                              // P1 over
-void           micro_bit::fiberHelper        (void *a);                              // P1 over
 void           micro_bit::forever            (Action a);                             // P1 over
 void           micro_bit::forever_stub       (void *a);                              // P1 over
 void           micro_bit::generate_event     (int id, int event);                    // P2

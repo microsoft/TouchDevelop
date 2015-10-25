@@ -1351,7 +1351,9 @@ module TDev.AST.Bytecode
                 })
 
                 this.proc.emit(".section code");
+                this.proc.emit(".balign 4");
                 this.proc.emitLbl(this.proc.label);
+                this.proc.emit(".short 0xffff, 0x0000   ; action literal");
                 this.proc.emit("@stackmark inlfunc");
                 this.proc.emit("push {r5, lr}");
                 this.proc.emit("adds r5, r1, #0");
