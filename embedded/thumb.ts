@@ -182,6 +182,9 @@ module TDev.AST.Thumb
 
         public parseOneInt(s:string)
         {
+            if (!s)
+                return null;
+
             var mul = 1
             while (m = /^([^\*]*)\*(.*)$/.exec(s)) {
                 var tmp = this.parseOneInt(m[1])
@@ -349,6 +352,8 @@ module TDev.AST.Thumb
 
                 if (words[0] == ",") {
                     words.shift()
+                    if (words[0] == null)
+                        break;
                 } else if (words[0] == null) {
                     break;
                 } else {
@@ -373,6 +378,24 @@ module TDev.AST.Thumb
                 f = f | (f << 8)
                 for (var i = 0; i < nums[0]; i += 2)
                     this.emitShort(f)
+            }
+        }
+
+        private emitBytes(words:string[])
+        {
+            var nums = this.parseNumbers(words)
+            if (nums.length % 2 != 0) {
+                this.directiveError(".bytes needs an even number of arguments")
+                nums.push(0)
+            }
+            for (var i = 0; i < nums.length; i += 2) {
+                var n0 = nums[i]
+                var n1 = nums[i+1]
+                if (0 <= n0 && n1 <= 0xff &&
+                    0 <= n1 && n0 <= 0xff)
+                    this.emitShort((n0&0xff) | ((n1&0xff) << 8))
+                else
+                    this.directiveError(lf("expecting uint8"))
             }
         }
         
@@ -414,6 +437,9 @@ module TDev.AST.Thumb
                             this.directiveError(lf("expecting 2, 4, 8, or 16"))
                         }
                     } else this.directiveError(lf("expecting number"));
+                    break;
+                case ".byte":
+                    this.emitBytes(words);
                     break;
                 case ".hword":
                 case ".short":

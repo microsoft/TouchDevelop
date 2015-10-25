@@ -465,12 +465,14 @@ module TDev.AST.Bytecode
             this.emit("adds r0, #" + v)
         }
 
-        emitLdPtr(lbl:string)
+        emitLdPtr(lbl:string, push = false)
         {
             Util.assert(!!lbl)
-            this.emit("movs r1, " + lbl + "@hi   ; ldptr " + lbl)
-            this.emit("lsls r1, r1, #8")
-            this.emit("adds r1, " + lbl + "@lo   ; endldptr");
+            this.emit("movs r0, " + lbl + "@hi   ; ldptr " + lbl)
+            this.emit("lsls r0, r0, #8")
+            this.emit("adds r0, " + lbl + "@lo   ; endldptr");
+            if (push)
+                this.emit("push {r0}")
         }
 
         emitInt(v:number, keepInR0 = false)
@@ -546,8 +548,6 @@ module TDev.AST.Bytecode
         buf:number[];
         csource = "";
 
-        stringSeq:StringMap<number> = {};
-        nextStringId = 0;
         strings:StringMap<string> = {};
         stringsBody = "";
         lblNo = 0;
@@ -642,22 +642,22 @@ module TDev.AST.Bytecode
             return r + "\""
         }
          
-        emitString(s:string, needsSeqId = true):string
+        emitLiteral(s:string)
+        {
+            this.stringsBody += s + "\n"
+        }
+
+        emitString(s:string):string
         {
             if (this.strings.hasOwnProperty(s))
                 return this.strings[s]
 
             var lbl = "_str" + this.lblNo++
             this.strings[s] = lbl;
-            this.stringsBody += lbl + ": .string " + this.stringLiteral(s) + "\n"
+            this.emitLiteral(".balign 4");
+            this.emitLiteral(lbl + "meta: .short 0xffff, " + s.length)
+            this.emitLiteral(lbl + ": .string " + this.stringLiteral(s))
             return lbl
-        }
-
-        getStringId(s:string):number
-        {
-            if (!this.stringSeq.hasOwnProperty(s))
-                this.stringSeq[s] = this.nextStringId++;
-            return this.stringSeq[s];
         }
 
         emit(s:string)
@@ -670,12 +670,9 @@ module TDev.AST.Bytecode
             Util.assert(this.csource == "");
 
             this.emit("; start");
-            this.emit(".short 0x4204");
+            this.emit(".short 0x4205");
             this.emit(".short " + this.globals.length);
-            this.emit(".short " + this.nextStringId);
-            this.emit(".short 0"); // future use
-            this.emit(".short 0");
-            this.emit(".short 0");
+            this.emit(".space 12"); // future use and 16 byte alignment
 
             this.procs.forEach(p => {
                 this.csource += "\n"
@@ -995,8 +992,8 @@ module TDev.AST.Bytecode
             var lit = "";
             for (var i = 0; i < s.length; ++i) {
                 switch (s[i]) {
-                case "0": lit += "\u0000"; x++; break;
-                case "1": lit += "\u0001"; x++; break;
+                case "0": lit += "0,"; x++; break;
+                case "1": lit += "1,"; x++; break;
                 case " ": break;
                 case "\n":
                     if (w == 0)
@@ -1014,11 +1011,16 @@ module TDev.AST.Bytecode
 
             if (x > 0) h++; // non-terminated last line
 
-            this.emitInt(w);
-            this.emitInt(h);
-            var lbl = this.binary.emitString(lit);
-            this.proc.emitLdPtr(lbl);
-            this.proc.emit("push {r1}");
+
+            var lbl = "_img" + this.binary.lblNo++
+
+            this.binary.emitLiteral(".balign 4");
+            this.binary.emitLiteral(lbl + ": .short 0xffff")
+            this.binary.emitLiteral("        .byte " + w + ", " + h)
+            if (lit.length % 4 != 0)
+                lit += "42" // pad
+            this.binary.emitLiteral("        .byte " + lit)
+            this.proc.emitLdPtr(lbl, true);
         }
 
         handleActionCall(e:Call)
@@ -1060,13 +1062,13 @@ module TDev.AST.Bytecode
                 return
             }
 
-            if (/^micro_bit::(createImage|showAnimation|showLeds|plotLeds)$/.test(shm)) {
+            if (/^micro_bit::(createImage|createReadOnlyImage|showAnimation|showLeds|plotLeds)$/.test(shm)) {
                 Util.assert(args[0].getLiteral() != null)
                 this.emitImageLiteral(args[0].getLiteral())
                 args.shift()
                 args.forEach(a => this.dispatch(a))
                 // fake it, so we don't get assert down below and mask is correct
-                args = [<Expr>mkLit(0), mkLit(0), mkLit(0)].concat(args)
+                args = [<Expr>mkLit(0)].concat(args)
             } else {
                 args.forEach(a => this.dispatch(a))
             }
@@ -1161,10 +1163,6 @@ module TDev.AST.Bytecode
 
             var pkn = p.parentKind.getRoot().getName()
 
-            if (p.parentKind.getRoot() == api.core.Collection &&
-                isRefKind(p.parentKind.getParameter(0)))
-                pkn = "RefCollection";
-
             if (e.args.length == 1 && p.getName() == "is invalid") {
                 this.dispatch(e.args[0])
                 this.proc.emitCall("bitvm::is_invalid", this.getMask(e.args));
@@ -1199,7 +1197,14 @@ module TDev.AST.Bytecode
                 this.emitInt(0);
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "Collection of")) {
-                this.proc.emitCall(isRefKind(e.getKind().getParameter(0)) ? "refcollection::mk" : "collection::mk", 0);
+                var argK = e.getKind().getParameter(0)
+                if (argK == api.core.String)
+                    this.proc.emitInt(3);
+                else if (isRefKind(argK))
+                    this.proc.emitInt(1);
+                else
+                    this.proc.emitInt(0);
+                this.proc.emitCall("collection::mk", 0);
             } else if (p == api.core.StringConcatProp) {
                 this.emitAsString(e.args[0]);
                 this.emitAsString(e.args[1]);
@@ -1222,8 +1227,7 @@ module TDev.AST.Bytecode
                     Util.assert(typeof args[1].getLiteral() == "string")
                     this.dispatch(args[0])
                     var lbl = this.binary.emitString(args[1].getLiteral())
-                    this.proc.emitLdPtr(lbl)
-                    this.proc.emit("push {r1}");
+                    this.proc.emitLdPtr(lbl, true)
                     this.proc.emitCall(nm, 0)
                     return
                 }
@@ -1289,10 +1293,8 @@ module TDev.AST.Bytecode
                     this.proc.emitCall("string::mkEmpty", 0);
                 } else {
                     var lbl = this.binary.emitString(l.data)
-                    var id = this.binary.getStringId(lbl)
-                    this.emitInt(id, true);
-                    this.proc.emitLdPtr(lbl);
-                    this.proc.emitCallRaw("bitvm::stringLiteral")
+                    this.proc.emitLdPtr(lbl + "meta", false);
+                    this.proc.emitCallRaw("bitvm::stringData")
                     this.proc.emit("push {r0}");
                 }
             }
@@ -1320,8 +1322,7 @@ module TDev.AST.Bytecode
 
             this.emitInt(refs.length)
             this.emitInt(caps.length)
-            this.proc.emitLdPtr(inlproc.label);
-            this.proc.emit("push {r1}");
+            this.proc.emitLdPtr(inlproc.label, true);
             this.proc.emitCall("action::mk", 0)
 
             caps.forEach((l, i) => {
