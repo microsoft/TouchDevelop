@@ -60,7 +60,7 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     var handle = (res:http.ClientResponse) => {
         if (res.statusCode != 200) {
             console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, safeuri);
-            if (res.statusCode == 500 && /admin\/reindex/.test(uri) && numRetries > 0) {
+            if ((res.statusCode == 424 || res.statusCode == 500) && /(import\/|admin\/reindex)/.test(uri) && numRetries > 0) {
                 tdevGet(uri, f, numRetries - 1, body, contentType)
                 return
             }
@@ -78,7 +78,9 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
         })
         res.on("data", (ch) => { d += ch; });
         res.on("end", () => {
-            finish(d)
+            if (res.statusCode == 200)
+                finish(d)
+            else console.log(d)
         });
     }
 
@@ -3839,6 +3841,78 @@ function reindexsearch(args:string[])
     }
 }
 
+function importone(store:string, cont = "")
+{
+    var k = tdliteKey()
+
+    var total = 0
+    var total200 = 0
+    var total409 = 0
+    var totalErr = 0
+
+    var start = Date.now()
+
+    var count = /scripts|art|screenshots/.test(store) ? 100 : 500
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/import/" + store + "?count=" + count + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+
+            // console.log(parsed)
+            var err = "";
+            var exerr = "";
+
+            Object.keys(parsed.publications).forEach(k => {
+                var n = parsed.publications[k]
+                total++
+                if (n == 200) total200++;
+                else if (n == 409) {
+                    exerr += k + ", "
+                    total409++;
+                } else {
+                    err += k + ":" + n + ", "
+                    totalErr++;
+                }
+            })
+
+            if (exerr)
+                console.log("EXISTS", exerr)
+
+            if (err)
+                console.log("ERROR", err)
+
+            var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+
+            console.log(tm, store, 
+                total200 + "ok + " + total409 + "ex + " + totalErr + "err = " + total,
+                "c:" + parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5, {})
+
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
+function importlist(args:string[])
+{
+    if (args.length >= 1) {
+        importone(args[0], args[1] || "")
+    }
+}
+
+function litepost(args:string[])
+{
+    var k = tdliteKey()
+    var dat = args[1] ? JSON.parse(args[1]) : {}
+
+    tdevGet(k.liteUrl + "api/" + args[0] + "?nothingreally=42" + k.key, resp => {
+        var parsed = JSON.parse(resp)
+        console.log(parsed)
+    }, 5, dat)
+}
+
 function concatlibs() {
     var meta = JSON.parse(fs.readFileSync("microbit/libraries/meta.json", "utf8"))
     meta.text = {}
@@ -3910,6 +3984,8 @@ var cmds = {
     "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
     "uploadhtml": { f:uploadhtml, a:'FILENAME.html', h:'upload html file as script'},
     "reindexsearch": { f:reindexsearch, a:'[store [conttok]]', h:'re-index search documents in lite cloud'},
+    "importlist": { f:importlist, a:'[store [conttok]]', h:'import from td.com to lite cloud'},
+    "litepost": { f:litepost, a:'PATH [DATA]', h:'post DATA or {} to /api/PATH'},
 }
 
 export interface ScriptTemplate {
