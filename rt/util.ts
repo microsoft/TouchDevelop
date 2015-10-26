@@ -3180,6 +3180,14 @@ module TDev{
         onGoBack();
     }
 
+    export function toFileName(name: string, defaultName: string): string {
+        name = name || "";
+        var filename = name.replace(/[^\w]+/g, " ").trim().replace(/ /g, "-")
+            || defaultName;
+        if (!/^\w/.test(filename)) filename = "_" + filename;
+        return filename;
+    }
+      
     export function mkAbsoluteUrl(relativeUrl: string): string {
         return Ticker.mainJsName.replace(/main.js$/, "") + relativeUrl;
     }

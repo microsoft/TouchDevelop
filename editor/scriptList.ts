@@ -7030,7 +7030,7 @@
                         }]
                     };
                     HTML.browserDownload('data:application/json;base64,' + Util.base64Encode(Util.toUTF8(JSON.stringify(f))),
-                        this.cloudHeader.name.replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".json");                    
+                        Util.toFileName(this.cloudHeader.name, 'script') + ".json");                    
                 });
         }
         

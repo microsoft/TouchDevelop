@@ -681,7 +681,7 @@ module TDev.RT {
                 }
                 else {
                     var url = this.canvas.toDataURL('image/png');
-                    HTML.browserDownload(url, defaultName);
+                    HTML.browserDownload(url, Util.toFileName(defaultName, 'pic'));
                 }
                 return defaultName;
             });
