@@ -33,6 +33,11 @@ module TDev {
             return getScriptCacheTableAsync()
                 .then((table:Storage.Table) => table.setItemsAsync(storage.scriptCache))
         }
+        
+        export function forceUpdateId(id: string): string {
+            var libCache = (<any>TDev).shippedLibraryCache
+            return !libCache ? id : libCache.updates[id] || id;
+        }
 
         export function forcedUpdate(id: string): { text: string; json: any; }
         {

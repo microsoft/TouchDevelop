@@ -78,9 +78,11 @@ module TDev
 
         static libraryChooser(f:(s:Browser.ScriptInfo) => void)
         {
+            var libs : StringMap<string> = {};
+            Script.libraries().forEach(lib => libs[ScriptCache.forceUpdateId(lib.getId())] = "1");
             Meta.chooseScriptAsync({
                 searchPath: "scripts?count=50&q=" + encodeURIComponent("*library "),
-                filter: (s) => s.isLibrary(),
+                filter: (s) => s.isLibrary() && !libs[ScriptCache.forceUpdateId(s.publicId || s.getGuid())],
                 header: lf("choose library"),
             }).done((s) => {
                 if (s) f(s)
