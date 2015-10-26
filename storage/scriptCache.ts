@@ -46,6 +46,11 @@ module TDev {
 
             return null
         }
+        
+        export function shippedLibrariesJson(): StringMap<any>  {
+            var libCache: { text: StringMap<string>; json: StringMap<any>; } = (<any>TDev).shippedLibraryCache
+            return libCache ? libCache.json : undefined;
+        }
 
         export function getScriptAsync(id: string) : Promise // of string
         {

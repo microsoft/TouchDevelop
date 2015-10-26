@@ -247,7 +247,7 @@ module TDev.Meta {
         Browser.TheHost.getLocationList("recent-scripts", (itms:Browser.BrowserPage[], cont:string) => {
             var m = new ModalDialog();
             var selected = false;
-
+            
             var converter = (s : Browser.ScriptInfo) => {
                 if (!options.filter || options.filter(s))
                     return s.mkSmallBoxNoClick().withClick(() => {
@@ -258,40 +258,58 @@ module TDev.Meta {
                 else return null;
             };
 
+            var ids: StringMap<string> = {};            
             var boxes = []
             var maxCount = options.maxItems || 50;
             for(var i = 0; i < itms.length && boxes.length < maxCount; ++i) {
                 var p = itms[i];
                 if (p instanceof Browser.ScriptInfo) {
+                    ids[p.publicId || ""] = "1";
                     var s = <Browser.ScriptInfo>p;
                     var b = converter(s);
                     if (!!b) boxes.push(b);
                 }
             }
-
-            if (options.searchPath)
-                options.queryAsync = (terms : string) => {
-                    return new Promise((onSuccess, onError, onProgress) => {
-                        Browser.TheHost.getLocationList(options.searchPath + encodeURIComponent(terms),
-                            (itms:Browser.BrowserPage[], cont:string) => {
-                                var bxs = [];
-                                itms.forEach((itm) => {
-                                    if (itm instanceof Browser.ScriptInfo) {
-                                        var b = converter(<Browser.ScriptInfo>itm);
-                                        if (!!b)
-                                            bxs.push(b);
-                                    }
-                                });
-                                onSuccess(bxs);
-                            }, true);
+            
+            var pr = Promise.as();
+            // add built-in scripts as needed
+            var libs = ScriptCache.shippedLibrariesJson();
+            if (libs) {
+                var infos = Object.keys(libs)
+                    .filter(id => !ids[id])
+                    .map(id => Browser.TheHost.getScriptInfo(libs[id]));
+                pr = pr.then(() => Promise.join(infos.map(si => si.getJsonScriptPromise())))
+                    .then(() => {
+                        infos.map(converter).filter(b => !!b)
+                            .forEach(b => boxes.push(b));
                     });
+            }
+            
+            pr.done(() => {
+                if (options.searchPath)
+                    options.queryAsync = (terms: string) => {
+                        return new Promise((onSuccess, onError, onProgress) => {
+                            Browser.TheHost.getLocationList(options.searchPath + encodeURIComponent(terms),
+                                (itms: Browser.BrowserPage[], cont: string) => {
+                                    var bxs = [];
+                                    itms.forEach((itm) => {
+                                        if (itm instanceof Browser.ScriptInfo) {
+                                            var b = converter(<Browser.ScriptInfo>itm);
+                                            if (!!b)
+                                                bxs.push(b);
+                                        }
+                                    });
+                                    onSuccess(bxs);
+                                }, true);
+                        });
+                    };
+
+                m.onDismiss = () => {
+                    if (!selected) r.success(null)
                 };
 
-            m.onDismiss = () => {
-                if (!selected) r.success(null)
-            };
-
-            m.choose(boxes, options)
+                m.choose(boxes, options)
+            });
         });
 
         return r;
