@@ -323,7 +323,7 @@ Blockly.Blocks['device_point'] = {
         .appendField("y");
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
-    this.setTooltip('Returns 1 if the LED at coordinates (x, y) is on, 0 otherwise.');
+    this.setTooltip('Returns true if the LED at coordinates (x, y) is on, false otherwise.');
   }
 };
 
@@ -675,6 +675,7 @@ Blockly.Blocks['device_play_note'] = {
 };
 
 Blockly.pathToMedia = "./media/";
+Blockly.BlockSvg.START_HAT = true;
 
 // Here's a helper to override the help URL for a block that's *already defined
 // by Blockly*. For blocks that we define ourselves, just change the call to
