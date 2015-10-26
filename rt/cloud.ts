@@ -3,7 +3,7 @@ module TDev.Cloud {
 
     export var lite = false;
     export var litePermissions:StringMap<boolean> = {};
-    var microbitGitTag = "v9";
+    var microbitGitTag = "v10";
 
     export var useEmbeddedGcc = true;
     export var useNativeCompilation = false;
