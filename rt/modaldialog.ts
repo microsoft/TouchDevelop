@@ -309,10 +309,6 @@ module TDev
             return b;
         }
 
-        public critical() {
-            this.floating.classList.add('bg-critical');
-        }
-
         static showText(s:string, title:string = null, msg:string = null, done : () => void = null) : ModalDialog
         {
             var m = new ModalDialog();
@@ -423,6 +419,13 @@ module TDev
             this.outerDialog.classList.remove("modalFullBlack");
             this.outerDialog.classList.remove("modalFullWhite");
             this.outerDialog.classList.add("modalFullYellow");
+        }
+                
+        public critical() {
+            this.outerDialog.classList.remove("modalFullBlack");
+            this.outerDialog.classList.remove("modalFullWhite");
+            this.outerDialog.classList.remove("modalFullYellow");
+            this.floating.classList.add('bg-critical');
         }
 
         public setScroll()
