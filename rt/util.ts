@@ -2585,9 +2585,9 @@ module TDev{
             } else if (spec == ":jq") {
                 r = Util.jsStringQuote(r);
             } else if (spec == ":uri") {
-                r = encodeURIComponent(r);
+                r = encodeURIComponent(r).replace(/'/g, "%27").replace(/"/g, "%22");
             } else if (spec == ":url") {
-                r = encodeURI(r);
+                r = encodeURI(r).replace(/'/g, "%27").replace(/"/g, "%22");
             } else if (spec == ":%") {
                 r = (v * 100).toFixed(1).toString() + '%';
             }
