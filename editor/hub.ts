@@ -647,7 +647,10 @@ module TDev.Browser {
             var m = new ModalDialog();
             m.fullWhite();
             m.add(div("wall-dialog-header", Runtime.appName));
-            m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
+            if (Cloud.config.tdVersion)
+                m.add(div("wall-dialog-body", lf("Web app version {0}.", Cloud.config.tdVersion)));
+            else
+                m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
             var legalButtons = Cloud.config.legalButtons.map(b => link(b.name, b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
