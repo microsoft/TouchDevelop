@@ -619,8 +619,9 @@ module TDev {
 
       // Load the editor; send the initial message.
       var iframe = document.createElement("iframe");
-      // allow-popups is for the Blockly help menu item
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+      // allow-popups is for the Blockly help menu item; allow-modals is for the
+      // rename variable prompt
+      iframe.setAttribute("sandbox", "allow-modals allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", () => {
         TheChannel = new Channel(editor, iframe, data.guid);
 
