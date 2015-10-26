@@ -1057,11 +1057,11 @@ div.wall-box-tile>div.wall-box
   position: absolute;
   width: 30em;
   left: 0;
-  top: 0;
+  bottom: 0;
   background-color: #41900D;
   font-size: 0.5em;
   color: white;
-  padding: 0.7em;
+  padding: 0.8em;
   text-align: left;
   z-index:1;
 }
