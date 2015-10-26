@@ -165,7 +165,6 @@ module TDev
                     HTML.td(row, 'index').innerText = i.toString();
                     Util.range(frame * this.rows, this.rows).forEach(j => {
                         var cell = HTML.td(row, 'bit');
-                        cell.title = "(" + j + ", " + i + ")";
                         var k = this.cellIndex(i,j);
                         this.bitCells[k] = cell;
                         cell.setFlag('on', !!bits[k]);

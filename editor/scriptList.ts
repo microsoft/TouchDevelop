@@ -1227,7 +1227,6 @@
             var name = HTML.mkTextInput("text", lf("enter invitation code"));
             name.maxLength = 64;
             name.pattern = '\d{9,64}';
-            name.title = lf("a number between 9 and 64 characters long");
             name.value = code || "";
 
             var codeid = name.value;
