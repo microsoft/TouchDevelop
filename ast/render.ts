@@ -483,7 +483,7 @@ module TDev
         private expr(e:AST.ExprHolder)
         {
             if (e.isPlaceholder())
-                return this.id("...");
+                return AST.proMode ? this.id("...") : Renderer.tspanRaw("greyed", "add code here");
             else
                 return this.dispatch(e);
         }

@@ -51,28 +51,28 @@ module TDev
         static insertionButtons(): { name: string; desc: string; tick: Ticks; node: string; widget: string; }[]{
             var inTutorial = !!TheEditor.stepTutorial;
             var widgets = Browser.EditorSettings.widgets();
-            var ifDefault = inTutorial ? null : widgets.ifConditionDefault;
-            var forDefault = inTutorial ? null : widgets.forConditionDefault;
-            var whileBodyDefault = inTutorial ? null : widgets.whileBodyDefault;
-            var whileDefault = inTutorial ? null : widgets.whileConditionDefault;
+            var ifDefault = inTutorial ? "" : widgets.ifConditionDefault;
+            var forDefault = inTutorial ? "" : widgets.forConditionDefault;
+            var whileBodyDefault = inTutorial ? "" : widgets.whileBodyDefault;
+            var whileDefault = inTutorial ? "" : widgets.whileConditionDefault;
             return [{
                     name: "if", desc: lf("conditional"), tick: Ticks.codeIf,
-                    node: "if " + (ifDefault || "\\u0001need_Boolean\\u003Acondition") + " then { }",
+                    node: "if " + (ifDefault || "") + " then { }",
                     widget:''
                 },
                 {
                     name: "for", desc: lf("repeat n times"), tick: Ticks.codeFor,
-                    node: "for 0 <= i < " + (forDefault || "\\u0001need_Number") + " do { }",
+                    node: "for 0 <= i < " + (forDefault || "") + " do { }",
                     widget: ''
                 },
                 {
                     name: "while", desc: lf("repeat while"), tick: Ticks.codeWhile,
-                    node: "while " + (whileDefault || "\\u0001need_Boolean\\u003Aloop_condition") + " do { " + whileBodyDefault + " }",
+                    node: "while " + (whileDefault || "") + " do { " + (whileBodyDefault || "") + " }",
                     widget: ''
                 },
                 {
                     name: "for each", desc: lf("repeat on collection"), tick: Ticks.codeForEach,
-                    node: "foreach e in \\u0001need_Collection\\u005bString\\u005d\\u003Acollection do { }",
+                    node: "foreach e in  do { }",
                     widget: "foreach",
                 },
                 {
