@@ -3614,7 +3614,7 @@
                                 HTML.showProgressNotification(lf("deleting key..."));
                                 Cloud.deletePrivateApiAsync("me/keys?uri=" + encodeURIComponent(c.uri))
                                     .done(() => d.removeSelf(), e => Cloud.handlePostingError(e, lf("delete key")));
-                            });
+                            }, true);
                         })
                     )
                 );
@@ -6536,7 +6536,7 @@
             var numbers = div("sdNumbers");
             var author = div("sdAuthorInner");
             var addInfo = div("sdAddInfoInner", this.publicId);
-            var abuseDiv = big ? div(null, this.reportAbuse(true, false, () => {
+            var abuseDiv = big ? div(null, this.reportAbuse(true, true, () => {
                 // upon deleting uninstall as well.
                 this.uninstallAsync(false)
                 // force a sync
@@ -9644,7 +9644,7 @@
                                     lf("delete"),
                                     () => {
                                         if (doubleConfirm)
-                                            ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
+                                            ModalDialog.ask(lf("Are you really sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
                                         else del();
                                     })
                 }
@@ -10617,7 +10617,7 @@
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())
-                    if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit)
+                    if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit, true)
                     else doit()
                 }))
 
