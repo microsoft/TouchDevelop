@@ -3634,6 +3634,7 @@ div.sdTabTileLabel {
 
 .sdExpandButton {
   color: #000;
+  font-weight: bold;
   border-bottom: 1px dotted #00d;
   display: inline-block;
   position: relative;
@@ -3646,7 +3647,7 @@ div.sdTabTileLabel {
   top: -1.5em;
   left: 0em;
   background: rgba(255, 255, 255, 0.01);
-  pointer: cursor;
+  cursor:pointer;
   z-index: 1;
 }
 

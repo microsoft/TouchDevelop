@@ -2220,12 +2220,8 @@
             if (s.replace(/[^\n]/g, "").length > 3 || s.length > maxLen) {
                 var r:HTMLElement =
                     div("sdExpandableText",
-                            s.slice(0, shortLen) + "... ",
-                            div("sdExpandButton",
-                                s.length > shortLen ?
-                                    "expand (+" + (s.length - shortLen) + " characters)" :
-                                    "expand",
-                                div("sdExpandButtonTarget").withClick(() => {
+                            s.slice(0, shortLen) + " ",
+                            div("sdExpandButton", "...", div("sdExpandButtonTarget").withClick(() => {
                                     Browser.setInnerHTML(r, Util.formatText(s));
                                 })));
                 return r;
