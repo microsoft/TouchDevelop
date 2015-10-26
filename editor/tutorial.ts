@@ -1079,10 +1079,11 @@ module TDev
             }            
 
             m.add(div('wall-dialog-buttons',
-                HTML.mkButton(lf("finished"), () => {
-                    willNowPublish = true;
-                    m.dismiss();
-                })
+                Util.delayButton(
+                    HTML.mkButton(lf("finished"), () => {
+                        willNowPublish = true;
+                        m.dismiss();
+                    }), 1000)
             ));
             if (this.hourOfCode)
                 m.add(div('wall-dialog-body hoc-notice',
