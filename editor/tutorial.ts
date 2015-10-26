@@ -1067,7 +1067,6 @@ module TDev
                 }
             }
 
-            var challenges = this.topic.challengesTopic();            
             if (this.finalHTML) {
                 var finalDiv = m.addHTML(this.finalHTML);
                 MdComments.attachVideoHandlers(finalDiv, true);
@@ -1076,15 +1075,11 @@ module TDev
                 m.add(this.createStars());
                 m.add(div('wall-dialog-header', lf("Well done!")));
                 m.add(div('wall-dialog-body',
-                    challenges ? lf("Open the challenges to keep improving your code. ") : null,
-                    lf("You can keep customizing your app as much as you want. Have fun!")));
+                    lf("You can keep customizing your script as much as you want. Have fun!")));
             }            
 
             m.add(div('wall-dialog-buttons',
-                challenges ? HTML.mkButton(lf("open challenges"), () => {
-                    Util.navigateNewWindow("/" + challenges);
-                }) : null,
-                HTML.mkButton(lf("keep editing"), () => {
+                HTML.mkButton(lf("finished"), () => {
                     willNowPublish = true;
                     m.dismiss();
                 })
