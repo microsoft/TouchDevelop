@@ -968,9 +968,9 @@ module TDev.Browser {
             var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";
             
             var copyrights = "<div class='beta-legal'>" + 
-                versionNote +
+                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;") +
+                "&nbsp;&nbsp;" + versionNote +
                 "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
-                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;")
                 "</div>";
 
             Browser.setInnerHTML(beta, copyrights);
