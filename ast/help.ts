@@ -881,13 +881,13 @@ module TDev {
                     var artId = m[3];
                     var width = parseFloat(m[5] || "12");
                     var height = parseFloat(m[6] || "12");
-                    if (width > 30) {
-                        height = 30 / width * height;
-                        width = 30;
+                    if (width > 40) {
+                        height = 40 / width * height;
+                        width = 40;
                     }
-                    if (height > 20) {
-                        width = 20 / height * width;
-                        height = 20;
+                    if (height > 40) {
+                        width = 40 / height * width;
+                        height = 40;
                     }
                     var caption = m[7];
                     if (artId && !url) {
