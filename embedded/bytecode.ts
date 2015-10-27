@@ -1016,7 +1016,7 @@ module TDev.AST.Bytecode
 
             this.binary.emitLiteral(".balign 4");
             this.binary.emitLiteral(lbl + ": .short 0xffff")
-            this.binary.emitLiteral("        .byte " + w + ", " + h)
+            this.binary.emitLiteral("        .short " + w + ", " + h)
             if (lit.length % 4 != 0)
                 lit += "42" // pad
             this.binary.emitLiteral("        .byte " + lit)
