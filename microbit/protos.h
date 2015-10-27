@@ -141,6 +141,7 @@ void           micro_bit::showDigit          (int n);                           
 void           micro_bit::showImage          (RefImage *i, int offset);              // P2 over
 void           micro_bit::showLeds           (int w, int h, uint32_t bitmap, int delay); // P4 over
 void           micro_bit::showLetter         (RefString *s);                         // P1 over
+int            micro_bit::thermometerGetTemperature ();                                     // F0 over
 void           micro_bit::unPlot             (int x, int y);                         // P2
 int            number::div                   (int x, int y);                         // F2
 bool           number::eq                    (int x, int y);                         // F2
