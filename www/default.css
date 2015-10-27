@@ -1330,6 +1330,7 @@ input[data-invalid^="yes"]
 }
 
 .close-round-buttons {
+  color:black;
   position: absolute;
   top: 0.2em;
   right: 0.2em;
