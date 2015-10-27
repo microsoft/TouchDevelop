@@ -41,12 +41,18 @@ namespace Microsoft.MicroBit
             this.watcher.Created += (sender, e) => this.handleFileEvent(e);
             this.watcher.EnableRaisingEvents = true;
 
-            this.updateStatus("waiting for .hex file...");
+            this.waitingForHexFileStatus();
             try
             {
                 Process.Start("https://www.microbit.co.uk/app/#");
             }
             catch (IOException) { }
+        }
+
+        private void waitingForHexFileStatus()
+        {
+            this.updateStatus("waiting for .hex file...");
+            this.trayIcon.ShowBalloonTip(3000, "micro:bit uploader ready...", "waiting for .hex file...", ToolTipIcon.None);
         }
 
         static bool checkTOU()
@@ -118,7 +124,6 @@ namespace Microsoft.MicroBit
                     return;
                 try
                 {
-                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
 
                     this.setBackgroundColor(Color.Yellow);
                     this.updateStatus("detected " + info.Name);
@@ -126,9 +131,11 @@ namespace Microsoft.MicroBit
                     if (drive == null)
                     {
                         this.updateStatus("no MICROBIT drive detected");
+                        this.trayIcon.ShowBalloonTip(3000, "cancelled uploading to micro:bit...", "no MICROBIT drive detected", ToolTipIcon.None);
                         return;
                     }
 
+                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
                     this.updateStatus("uploading .hex file (" + info.Length / 1000 + " kb)...");
                     var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                     File.Copy(info.FullName, trg, true);
@@ -144,7 +151,7 @@ namespace Microsoft.MicroBit
                     catch (NotSupportedException) { }
                     catch (UnauthorizedAccessException) { }
                     catch (ArgumentException) { }
-                    this.updateStatus("uploading and cleaning done");
+                    this.waitingForHexFileStatus();
                 }
                 finally
                 {
