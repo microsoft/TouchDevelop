@@ -2017,12 +2017,6 @@ module TDev {
             return "";
         }
         
-        public challengesTopic(): string {
-            var m = /\{topic:([^:\}]+)\/tutorial\}/i.exec(this.json.text);
-            if (m) return m[1] + "/challenges";
-            return "";
-        }
-
         public nextTutorials(): string[] {
             var m = /\{stnexttutorials:([^\}]+)\}/i.exec(this.json.text);
             if (m) return m[1].split(',');
