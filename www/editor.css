@@ -1506,9 +1506,9 @@ a.md-api-entry-link {
 }
 
 .md-comment {
-  font-size: 0.8em;
+  font-size: 0.9em;
   line-height: normal;
-  color: #6c6c6c;
+  color: #2c4c2c;
   padding-left: 0.2em;
   display:inline-block;
 }
@@ -1617,14 +1617,15 @@ div.md-video-link > svg {
 .stmt[data-nest="2"] { border-left-color: #bd1; }
 .stmt[data-nest="3"] { border-left-color: #ccc; }
 
+.stmt.stmt-comment {
+    border-left-color: #4c7c4c;
+    border-radius:0.2em;
+}
+
 .decl
 {
   padding: 1em 0em 1em 0em;
 }
-
-.portrait .decl {
-}
-
 
 .line[data-search-result^="yes"]
 {
