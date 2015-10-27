@@ -4692,7 +4692,9 @@ module TDev
 
                     Util.log("new cloud header, state=" + state);
 
-                    if (state == "downloaded") {
+                    if (state == "skippedMerge") {
+                        if (incoming) ProgressOverlay.hide()
+                    } else if (state == "downloaded") {
                         if (incoming) ProgressOverlay.hide()
                         if (Script)
                             this.reload()
