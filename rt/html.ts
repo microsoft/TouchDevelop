@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 
-
+declare function saveAs(data: Blob, filename: string, disableAutoBOM: boolean); 
+    
 module TDev.HTML {
     export function tr(parent: HTMLElement, cl: string) {
         var d = document.createElement('tr');
@@ -912,8 +913,15 @@ module TDev.HTML {
         return r;
     }
     
-    export function browserDownload(dataurl: string, name: string) {
+    export function browserDownload(dataurl: string, name: string) {        
         try {
+            if (saveAs) {
+                var m = /data:([^;]+);base64,/.exec(dataurl)
+                var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
+                saveAs(b, name, true);
+                return;
+            }
+            
             if ((<any>window).navigator.msSaveOrOpenBlob) {
                 var m = /data:([^;]+);base64,/.exec(dataurl)
                 var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
