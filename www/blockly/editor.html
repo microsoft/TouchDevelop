@@ -126,10 +126,13 @@
             </shadow>
           </value>
           <value name="pausetime">
-            <block type="math_number">
+            <shadow type="math_number">
               <field name="NUM">150</field>
-            </block>
+            </shadow>
           </value>
+        </block>
+        <block type="text">
+          <field name="TEXT">Some text</field>
         </block>
         <block type="device_clear_display"></block>
         <block type="device_forever"></block>
@@ -193,23 +196,23 @@
       </category>
       <category name="Images" colour="20">
         <block type="device_show_image_offset">
-          <value name="offset">
+          <shadow name="offset">
             <block type="math_number">
               <field name="NUM">0</field>
             </block>
-          </value>
+          </shadow>
         </block>
         <block type="device_scroll_image">
-            <value name="frame offset">
+            <shadow name="frame offset">
                 <block type="math_number">
                     <field name="NUM">5</field>
                 </block>
-            </value>
-            <value name="delay">
+            </shadow>
+            <shadow name="delay">
                 <block type="math_number">
                     <field name="NUM">200</field>
                 </block>
-            </value>
+            </shadow>
         </block>
         <block type="device_build_image"></block>
         <block type="device_build_big_image"></block>
@@ -234,19 +237,19 @@
       </category>
       <category name="Loops" colour="120">
         <block type="controls_repeat_ext">
-          <value name="TIMES">
+          <shadow name="TIMES">
             <shadow type="math_number">
               <field name="NUM">3</field>
             </shadow>
-          </value>
+          </shadow>
         </block>
         <block type="device_while"></block>
         <block type="controls_simple_for">
-          <value name="TO">
+          <shadow name="TO">
             <shadow type="math_number">
               <field name="NUM">4</field>
             </shadow>
-          </value>
+          </shadow>
         </block>
         <!-- <block type="controls_for"> -->
         <!--   <value name="FROM"> -->
@@ -299,13 +302,13 @@
       </category>
       <category name="Music">
         <block type="device_play_note">
-          <value name="note">
+          <shadow name="note">
             <shadow type="device_note_A"></shadow>
-          </value>
-          <value name="duration">
+          </shadow>
+          <shadow name="duration">
             <block type="device_duration_1/4">
             </block>
-          </value>
+          </shadow>
         </block>
         <block type="device_note_A"></block>
         <block type="device_note_B"></block>
@@ -320,14 +323,8 @@
         <block type="device_duration_1/8"></block>
         <block type="device_duration_1/16"></block>
       </category>
-      <category name="Comment">
-        <block type="device_comment">
-          <value name="comment">
-            <block type="text">
-              <field name="TEXT"></field>
-            </block>
-          </value>
-        </block>
+      <category name="Comments" colour="180">
+        <block type="device_comment2"></block>
       </category>
     </xml>
     <div class="popup hidden" id="popup-log">
