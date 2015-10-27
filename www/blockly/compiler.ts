@@ -1231,6 +1231,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "point",
     args: [ "x", "y" ]
   },
+  device_temperature: {
+    namespace: "input",
+    f: "temperature",
+    args: []
+  },
   device_heading: {
     namespace: "input",
     f: "compass heading",
