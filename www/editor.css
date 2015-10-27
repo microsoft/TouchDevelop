@@ -3477,6 +3477,10 @@ div.sdTabTileLabel {
   display: inline-block;
 }
 
+.sdBigButton:hover {
+  border: solid white 0.25em;
+}
+
 .phone .sdBigButtonFull {
   width:11.5em;
 }

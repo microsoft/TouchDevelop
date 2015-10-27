@@ -490,6 +490,11 @@ p.wall-record
   color: black;
 }
 
+.wall-button:hover {
+  color:white;
+  background:black;
+}
+
 #theWall .wall-button, #wall-overlay .wall-button /* Windows 8 Modern guidelines */
 {
     text-transform:uppercase;
@@ -558,6 +563,14 @@ textarea
   color: black;
   border-color: black;
 }
+
+.modalFullYellow .modalDialog .wall-button:hover,
+.modalFullWhite .modalDialog .wall-button:hover
+{
+  color: white;
+  background-color:black;
+}
+
 .modalFullBlack .modalDialog .wall-button
 {
   color: white;
