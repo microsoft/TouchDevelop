@@ -30,6 +30,10 @@ div.notificationBox {
     cursor:pointer;
 }
 
+div.notificationBox:hover {
+  background-color:#ccc;
+}
+
 div.notificationBox > svg {
     margin:-0.4em;
 }
@@ -2990,6 +2994,13 @@ a.md-bigbutton:hover {
     cursor:pointer;
 }
 
+.sdShareIcon {
+  color:#888;
+}
+.sdShareIcon:hover {
+  color:#000;
+}
+
 .sdAuthorLabel .svg
 {
     width:1.4em;
@@ -4051,6 +4062,10 @@ right:4.5em;
 .hubTile {
   position: absolute;
   cursor: pointer;
+}
+
+.hubTile:hover {
+  border: solid white 0.1em;
 }
 
 .hubTileSize1 {

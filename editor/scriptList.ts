@@ -3354,15 +3354,15 @@
             var text = this.twitterMessage();
 
             if (EditorSettings.widgets().scriptEmail)         
-                btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
+                btns.push(div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:email,currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
 
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["twitter", "facebook"].map(network =>
-                    div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+                    div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:" + network + ",currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
             if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
-                btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
+                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100")).withClick(() => {
                     Meta.chooseListAsync({
                         header: lf("add to channel"),
                         custombuttons: [
@@ -6259,7 +6259,7 @@
         public shareButtons() {
             var btns = super.shareButtons();
             if (!this.editor() && EditorSettings.widgets().scriptPrintScript) btns.push(
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
+                div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
                 );
             return btns;
         }
@@ -8234,7 +8234,7 @@
                 var authorHead = this.thumbnail(false);
                 authorHead.classList.add("teamHead");
                 authorDiv.setChildren([
-                    div("inlineBlock", authorHead, div("sdAuthorLabel", this.userName))
+                    div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
                     ,
                     div("floatright", info.shareButtons() )
@@ -9900,7 +9900,7 @@
         public shareButtons() {
             var btns = super.shareButtons();
             if (EditorSettings.widgets().scriptPrintTopic) btns.push(
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { this.topic.print() })
+                div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { this.topic.print() })
                 );
             return btns;
         }
