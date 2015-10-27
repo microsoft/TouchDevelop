@@ -15,12 +15,13 @@ module TDev {
 
         // this is so that the Editor can react to changes made by sync
         // state is: 
-        // "uploaded"   - when a new version was sent to the cloud, and we got a new snapshotId
-        // "published"  - after a script is published
-        // "downloaded" - after a merge, or just plain download
+        // "uploaded"     - when a new version was sent to the cloud, and we got a new snapshotId
+        // "published"    - after a script is published
+        // "downloaded"   - after a merge, or just plain download
+        // "skippedMerge" - like "downloaded", but we kept the local version
         export var newHeaderCallbackAsync = (h:Cloud.Header, state:string) => Promise.as();
         // this is called before we attempt a merge; the editor should save the state if the guid matches and display
-        // a progress overlay until newHeaderCallbackAsync({ guid: guid }, "downloaded") is called
+        // a progress overlay until newHeaderCallbackAsync({ guid: guid }, "downloaded" or "skippedMerge") is called
         export var incomingHeaderAsync = (guid:string) => Promise.as();
 
         var currentUserInfo:any = null;
@@ -240,7 +241,7 @@ module TDev {
                     })
                     .then(resp =>
                         setInstalledAsync(indexTable, scriptsTable, header, resp.script, resp.editorState, null, JSON.stringify(resp.extra || {})))
-                    .then(() => skipMsg ? Promise.as() : newHeaderCallbackAsync(header, "downloaded"))
+                    .then(() => newHeaderCallbackAsync(header, skipMsg ? "skippedMerge" : "downloaded"))
                     .then(() => header.scriptVersion.instanceId == "cloud" ? Promise.as() : uploadInstalledAsync(indexTable, scriptsTable, header))
             }
 
