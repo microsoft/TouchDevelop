@@ -288,7 +288,7 @@ module TDev.HTML {
         return elt;
     }
 
-    export function mkImg(url:string, cls : string = undefined):HTMLElement {
+    export function mkImg(url:string, cls? : string, alt?: string):HTMLElement {
         if (/^\//.test(url))
             url = (<any> url).slice(1);
 
@@ -303,7 +303,7 @@ module TDev.HTML {
         } else {
             var elt = <HTMLImageElement> document.createElement("img");
             elt.src = proxyResource(url);
-            elt.alt = "";
+            elt.alt = alt || "";
             img = elt;
         }
         if (cls)
