@@ -2050,15 +2050,19 @@ module TDev
 
         private currentCompilationModalDialog: ModalDialog;
 
-        private showCompilationDialog(inBrowser: boolean) {
-            var hideKey = "compileDialogHide";
+        private showCompilationDialog(inBrowser: boolean) : HTMLElement {
+            var buttonDiv: HTMLElement = undefined;
+            
             this.currentCompilationModalDialog = new ModalDialog();
+            /*
+            var hideKey = "compileDialogHide";
             if (inBrowser && !!window.localStorage.getItem(hideKey)) {
                 if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
-                return;
+                return undefined;
             }
+            */
             if (!inBrowser) {
                 var progress = HTML.mkProgressBar(); progress.start();
                 this.currentCompilationModalDialog.add(progress);
@@ -2076,17 +2080,21 @@ module TDev
                     ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be uploaded onto your BBC micro:bit.")
                     : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
-            }    
+            }
+            this.currentCompilationModalDialog.add(buttonDiv = div('wall-dialog-buttons'))
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
-            if (inBrowser)
-                this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
+            //if (inBrowser)
+            //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
+            
+            return buttonDiv;
         }
 
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
-            if (!showSource) this.showCompilationDialog(true);
-            ScriptProperties.bytecodeCompile(app, showSource);
+            var buttonDiv: HTMLElement = undefined;
+            if (!showSource) buttonDiv = this.showCompilationDialog(true);
+            ScriptProperties.bytecodeCompile(app, buttonDiv, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
