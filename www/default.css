@@ -547,6 +547,10 @@ textarea
   width:calc(100% - 2em);
 }
 
+input.wall-textbox:hover {
+  border-color: #ccc;
+}
+
 .legacy-wall-box .wall-text {
     white-space: pre-wrap;
 }
@@ -802,6 +806,14 @@ div.topButtons button {
   text-align: center;
   width: 2.5em;
   height: 2.5em;
+}
+
+.code-button-frame:hover,
+.topMenu-button-frame:hover,
+.tabMenu-button-frame:hover
+{
+  background-color:black;
+  color:white;
 }
 
 .tabMenu-button-frame {
@@ -2024,8 +2036,8 @@ a.button, a.button:hover, a.button:visited {
 {
     text-wrap:normal;
     white-space:pre-line;
-	font-size: 0.8em;
-	color: #666;
+	 font-size: 0.8em;
+	 color: #666;
 }
 
 .navImg .svg {

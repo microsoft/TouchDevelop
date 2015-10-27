@@ -77,6 +77,10 @@ button.navItem
     border-left: 0.5em solid transparent;
 }
 
+button.navItem:hover {
+  border-left-color:#E72A59;
+}
+
 .navItem
 {
   font-family: inherit;
@@ -415,6 +419,10 @@ div.calcDebug {
   height: 100px;
   margin: 1px;
   padding: 0;
+}
+
+.calcButton:hover {
+    border: solid 1px #bbb;
 }
 
 .phone .calcButton {
@@ -891,6 +899,7 @@ textarea.commentEdit {
   display: inline-block;
   vertical-align: bottom;
   white-space: pre;
+  border:1px solid transparent;
 }
 
 .calcToken[data-selected^="yes"]
@@ -900,7 +909,7 @@ textarea.commentEdit {
   border-radius: 0.3em;
 }
 
-.tokenToken {
+.calcToken:hover, .tokenToken {
   border:#aaa solid 1px;
   border-radius: 0.3em;
 }
@@ -2302,7 +2311,9 @@ div.decl > div.stmt {
     padding: 0em;
     cursor:pointer;
 }
-
+.sdThumb.teamHead:hover {
+  background-color:#ccc;
+}
 .sdThumb.teamHead .sdIcon {
   margin: .2em;
 
@@ -2783,6 +2794,11 @@ a.md-bigbutton:hover {
   overflow: hidden;
 }
 
+.sdHeaderOuter:hover
+{
+  border-left-color:#E72A59;
+}
+
 .sdBaseHeader {
   padding-left: 0em;
   background: #F4F4FF;
@@ -2860,6 +2876,10 @@ a.md-bigbutton:hover {
   margin-right: 0.5em;
   cursor: pointer;
   line-height:2em;
+}
+
+.sdTabLabel:hover {
+  text-decoration: underline;
 }
 
 .sdMoreDiv {
@@ -2975,6 +2995,10 @@ a.md-bigbutton:hover {
     width:1.4em;
     height:1.4em;
     margin-right:0.3em;
+}
+
+.sdAuthorLabel:hover {
+  text-decoration:underline;
 }
 
 .sdSocialEmbed .svg
@@ -3861,6 +3885,10 @@ right:4.5em;
    padding-top: 1em;
    padding-bottom: 1em;
    cursor: pointer;
+}
+
+.sdReportAbuse:hover {
+  text-decoration:underline;
 }
 
 .sdDocsHeader .sdReportAbuse {
