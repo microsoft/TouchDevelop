@@ -1441,6 +1441,7 @@ a.idlink, a.idlink:hover, a.idlink:visited, a.idlink:active, a.idlink:link {
 .md-img img {
   max-height: 100%;
   max-width: 100%;
+  width:auto;
 }
 
 .md-caption {

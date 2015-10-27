@@ -1191,7 +1191,7 @@ module TDev
                       ".md-img { margin:0.5em; clear:both; width:100%; text-align:center; position:relative; }\n" +
                       ".md-img-inner { position:relative; display:inline-block; width:100%; }\n" +
                       ".md-img .caption { font-size:0.8em; }\n" +
-                      ".md-img img { max-height: 100%; max-width: 100%; }\n" +
+                      ".md-img img { max-height: 100%; max-width: 100%; width:auto;}\n" +
                       ".md-box { page-break-inside: avoid; }\n" +
                       ".md-box-header, .md-box-header-print { font-weight: bold; font-size: 1.2em; }\n" +
                       ".md-box, .md-box-landscape, .md-box-portrait { margin-left: 2em;  margin-bottom:0.5em; border: 1px solid #555; border-left-width: 0.5em; padding: 1em; }\n" +
