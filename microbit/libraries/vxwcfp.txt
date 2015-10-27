@@ -2291,6 +2291,7 @@ var back_led_color : Color {
 #pKuVW9VLAsoLATs1
 var current_theme : String {
   // {shim:}
+  transient = true;
 }
 #ZcRIUJagQtw2kOc3
 action init_theme() {
@@ -2345,4 +2346,14 @@ var picture : Picture {
 var theme_button_text : Sprite {
   // {shim:}
   transient = true;
+}
+#xxmFVVtdBqvw9AQy
+action temperature() returns(#xBZ4CpbFL4CvRApl temp: Number) {
+  #iJmxeqmb8usTYoBE // Gets the temperature in Celsius degrees (°C).
+  #xbkpE9efBEU3vReG // {weight:70}
+  #trqBmVFo8y4PREFi // {help:/functions/temperature}
+  #ettU9cm9h4KGIsTs // {namespace:input}
+  #fokjMzX103zh4OIf // {shim:uBit.thermometer.getTemperature}
+  #w2zqRCAFyOt1oUWQ `return` 21;
+  meta sync;
 }
