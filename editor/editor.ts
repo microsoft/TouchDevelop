@@ -594,6 +594,7 @@ module TDev
             return {
                 stack: () => {
                     this.hideWallAsync().then(() => {
+                        if (!TDev.Script) return;
                         TheEditor.showStackTrace();
                         if (!TheEditor.isDebuggerMode())
                             TheEditor.searchFor("");
@@ -602,6 +603,7 @@ module TDev
 
                 debug: () => {
                     this.hideWallAsync().then(() => {
+                        if (!TDev.Script) return;
                         if (!TheEditor.isDebuggerMode()) TheEditor.enterDebuggerMode();
                         TheEditor.updateDebuggerButtons(true); // disable the stepping buttons, because enterDebuggerMode explicitly enables them
                         TheEditor.showStackTrace();
@@ -1594,7 +1596,7 @@ module TDev
             return x;
         }
         public getCurrentScriptId(): string {
-            return ScriptEditorWorldInfo.status === "published" ? ScriptEditorWorldInfo.baseId : Script.localGuid;
+            return ScriptEditorWorldInfo.status === "published" ? ScriptEditorWorldInfo.baseId : ScriptEditorWorldInfo.guid
         }
         public getBaseScriptId(): string {
             return ScriptEditorWorldInfo.baseId || "unknown";

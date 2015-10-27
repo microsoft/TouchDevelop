@@ -295,10 +295,14 @@ module TDev {
         rt.initFrom(compiledScript);
         if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
+        rt.host.currentGuid = ScriptEditorWorldInfo.guid;
         rt.initPageStack();
         // Requires [TheChannel] to be setup properly (so that we know which
         // editor logo to show).
         (<EditorHost> rt.host).showWall();
+
+        //rt.sessions.setEditorScriptContext(Cloud.getUserId(), ScriptEditorWorldInfo.guid, "no name",
+        //      TheEditor.getBaseScriptId(), TheEditor.getCurrentAuthorId());
 
         var main = compiledScript.actionsByName[mainName];
         rt.stopAsync().done(() => {
