@@ -2082,6 +2082,11 @@ function proxyEditor(cmds:string[], req, resp)
         if (file == "mbit.html") {
             file = "index.html"
             localPath += "/microbit/overrideupload"
+            var oldrewrite = rewrite;
+            rewrite = d => {
+                if (oldrewrite) d = rewrite(d);
+                return d.replace(/\.\.\/\.\.\/files\//g, "https://az742082.vo.msecnd.net/files/");
+            };
         }
         else if (fs.existsSync(localPath + "/www/" + file))
             localPath += "/www"
