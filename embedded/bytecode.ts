@@ -566,6 +566,10 @@ module TDev.AST.Bytecode
 
             Util.assert(this.buf.length < 32000)
 
+            var minLen = (dirtyLines + 1) * 8;
+            while (this.buf.length < minLen)
+                this.buf.push(0);
+
             var i = hexStartIdx;
             var ptr = 0
             var togo = 32000 / 8;
