@@ -2379,7 +2379,7 @@ module TDev.Browser {
                     var w = img.width;
                     var h = img.height;
                     if (w < 150 || h < 150) {
-                        error.setChildren("image too small (we need 150x150px or more)")
+                        error.setChildren(lf("image too small (we need 150x150px or more)"))
                         return;
                     }
 
@@ -2403,11 +2403,11 @@ module TDev.Browser {
                             content: uri.replace(/^[^,]*,/, ""),
                             contentType: "image/jpeg"
                     })).done(resp => {
-                        msg.setChildren("picture changed; it may take a few minutes and a page reload for the changes to show up");
+                        msg.setChildren(lf("picture changed; it may take a few minutes and a page reload for the changes to show up"));
                         onUpd();
                         updatePreview();
                     }, err => {
-                        error.setChildren("failed to upload image");
+                        error.setChildren(lf("failed to upload image"));
                         updatePreview();
                     })
                 }
@@ -2417,20 +2417,20 @@ module TDev.Browser {
 
             var widget = div("form-section",
                 div("float-right", preview),
-                div(null, "picture"),
+                div(null, lf("picture")),
                 div(null, chooser),
                 error,
                 msg,
                 HTML.mkButton(lf("remove picture"), () => {
                     Util.httpDeleteAsync(Cloud.getPrivateApiUrl("me/picture")).done(() => {
-                        msg.setChildren("picture removed");
+                        msg.setChildren(lf("picture removed"));
                         updatePreview();
                     })
                 }),
                 !fbButton ? null :
                 HTML.mkButton(lf("get from facebook"), () => {
                     Util.httpPostJsonAsync(Cloud.getPrivateApiUrl("me/settings"), { picturelinkedtofacebook: true }).done(() => {
-                        msg.setChildren("picture linked to your facebook profile");
+                        msg.setChildren(lf("picture linked to your facebook profile"));
                         updatePreview();
                     })
                 }),
