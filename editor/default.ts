@@ -470,10 +470,7 @@ module TDev
 
         if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            if (/\./.test(mx[1]))
-                Cloud.config.rootUrl = "https://" + mx[1]
-            else
-                Cloud.config.rootUrl = "http://" + mx[1] + ".cloudapp.net"
+            Cloud.config.rootUrl = "https://" + mx[1]
         }
 
         if ((<any>window).tdlite) {
@@ -490,6 +487,7 @@ module TDev
 
         if (Cloud.lite) (<any>window).rootUrl = Cloud.config.rootUrl;
 
+        Cloud.fullTD = (!Cloud.lite || /touchdevelop.com/.test(Cloud.config.rootUrl));
 
         if (/httplog=1/.test(document.URL)) {
             HttpLog.enabled = true;
