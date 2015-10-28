@@ -989,6 +989,7 @@ module TDev.Browser {
 
         export function setThemeFromSettings()
         {
+            initThemes();
             var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
             if (m)
                 EditorSettings.setTheme(themes[m[2]]);
