@@ -8533,7 +8533,7 @@
                         }))
             }
 
-            if (Cloud.isRestricted()) {
+            if (false && Cloud.isRestricted()) {
                 ch.push(div("", text(lf("Groups of this user:"))));
                 if (!this.groupsTab) {
                     this.groupsTab = new GroupsTab(this);
