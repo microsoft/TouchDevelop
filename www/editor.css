@@ -6296,3 +6296,8 @@ table.dashboard tr td[data-completed^="yes"] {
 .inline-language .error .hints {
   font-size: 0.8em;
 }
+
+.inline-description {
+  font-size:0.8em;
+  color:#333;
+}

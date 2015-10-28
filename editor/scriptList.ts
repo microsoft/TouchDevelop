@@ -8461,15 +8461,15 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (/,adult,/.test(s.permissions)) {
-                        edit(lf("{0}", 
-                            s.emailverified 
+                        edit(lf("email (private)"), "email");
+                        cc.push(div('inline-description', s.emailverified 
                               ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
-                                       : lf("no previous email"))), 
-                                "email")
-                        edit(lf("real name (private)"), "realname")
+                                        : lf("no previous email")))
+                        );
+                        edit(lf("real name (private)"), "realname");
                     }
 
                     if (s.credit && /,post-group,/.test(s.permissions))
