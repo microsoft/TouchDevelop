@@ -658,7 +658,7 @@ module TDev.Browser {
                 m.add(div("wall-dialog-body", lf("Web app version {0}.", Cloud.config.tdVersion)));
             else
                 m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
-            var legalButtons = Cloud.config.legalButtons.map(b => link(b.name, b.url));
+            var legalButtons = Cloud.config.legalButtons.map(b => link(lf_static(b.name, true), b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
                 Cloud.getUserId() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : undefined,
@@ -975,7 +975,7 @@ module TDev.Browser {
             var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";
             
             var copyrights = "<div class='beta-legal'>" + 
-                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;") +
+                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", lf_static(b.name, true))).join("&nbsp;|&nbsp;") +
                 "&nbsp;&nbsp;" + versionNote +
                 "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
                 "</div>";
