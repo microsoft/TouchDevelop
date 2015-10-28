@@ -1664,7 +1664,7 @@ module TDev
             if (ph) {
                 editBtns = this.keyBlock(0, 5, 2, 1);
                 editBtns[0].setTextEx("123", lf("number entry"), Ticks.calcBtnNumberKeypad, () => this.switchToNumberKeypad());
-                editBtns[1].setTextEx("\"(,)\"", "\"...\", not, true", Ticks.calcBtnMiscKeypad, () => this.switchToMiscKeypad());
+                editBtns[1].setTextEx("\"abc\"", "(), not, true", Ticks.calcBtnMiscKeypad, () => this.switchToMiscKeypad());
                 editBtns[2].clear();
             } else {
                 editBtns = this.keyBlock(pm ? 0 : 6, 7, 2, 1);
