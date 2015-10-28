@@ -26,7 +26,7 @@ module TDev { export module RT {
             var m = new Message();
             m.set_message(message);
             m.set_source("");
-            m.set_from("me");
+            m.set_from(lf("me"));
             return m;
         }
 

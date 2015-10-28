@@ -5856,6 +5856,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 }
 
 .editor-mode {
+    vertical-align: top;
     width:6em;
     cursor:pointer;
     display:inline-block;
@@ -5864,7 +5865,6 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
     margin-right:0.5em;
     padding-top:1em;
     padding-bottom:1em;
-    border: 0.2em solid #00f;
 }
 .editor-mode .pic {
     width:100%;

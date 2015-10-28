@@ -8,333 +8,40 @@ module TDev.Browser {
         title: string; // localized            
     }
 
-    export var editorModes: StringMap<Cloud.EditorMode> = {
-        'block': {
-            id: 'block',
-            name: lf("beginner"),
-            descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
-            astMode: 1,
-            artId: 'brfljsds',
-            widgets: {
-                // edit
-                addNewButton: true,
-                undoButton: true,
-                changeSkillLevel: true,
-                // refactoring
-                promoteRefactoring: true,
-                fixItButton: true,
-                splitScreen: false,
-                splitScreenOnLoad: true,
-                shareScriptToGroup: true,
-                searchArtRefactoring: true,
-                calcSearchArt: true,
-                scriptPropertiesIcons: true,
-                // statements
-                stringConcatProperty: true,
-                show: true,                
-                "return": true,
-                // sections
-                dataSection: true,
-                artSection: true,
-                librariesSection: true,
-                // ui
-                wallScreenshot: true,
-                wallHeart: true,
-                startTutorialButton: true,
-                nextTutorialsList: true,
-                // hub
-                hubTutorials : true,
-                hubShowcase : true,
-                hubSocial: true,
-                publicationComments: true,
-                translateComments: true,
-
-                whileConditionDefault: "true",
-                forConditionDefault: "5",
-                ifConditionDefault: "true",
-
-                scriptSocialLinks: Cloud.lite,
-                scriptEmail: true,
-            }
-        },
-        'classic': {
-            id: 'classic',
-            name: lf("coder"),
-            descr: lf("Edit code as text, more options, for aspiring app writers!"),
-            artId: 'ehymsljr',
-            astMode: 2,
-            widgets: {
-                // edit
-                addNewButton: true,
-                undoButton: true,
-                // refactoring
-                promoteRefactoring: true,
-                fixItButton: true,
-                splitScreen: true,
-                shareScriptToGroup: true,
-                searchArtRefactoring: true,
-                calcSearchArt: true,
-                tokenRefactoring:true,
-                // misc
-                groupAllowExportApp: true,
-                changeSkillLevel: true,
-                // edit
-                copyPaste: true,
-                selectStatements: true,
-                selectExpressions: true,
-                // features
-                actionSettings: true,
-                publishAsHidden: true,
-                // refactoring
-                simplify: true,
-                // ui
-                splitButton: true,
-                uploadArtInSearchButton: true,
-                calcApiHelp: true,
-                sideRunButton: true,
-                tutorialGoToPreviousStep: true,
-                helpLinks: true,
-                wallScreenshot: true,
-                wallHeart: true,
-                wallStop: true,
-                scriptConvertToDocs: true,
-                nextTutorialsList: true,
-                codeSearch: true,
-                // section
-                dataSection: true,
-                eventsSection: true,
-                pagesSection: true,
-                artSection: true,
-                librariesSection: true,
-                scriptProperties: true,
-                objectsSection: true,
-                decoratorsSection: true,
-                scriptPropertiesIcons: true,
-                scriptPropertiesSettings: true,
-                scriptPropertiesPropertyAtomic: true,
-                scriptPropertiesManagement: true,
-                databaseSection: true,
-                persistanceRadio: true,
-                // statements
-                comment: true,
-                foreach: true,
-                boxed: true,
-                stringConcatProperty: true,
-                show: true,
-                "return": true,
-                "break": true,
-                "continue": true,
-                // hub
-                hubTutorials: true,
-                hubLearn: true,
-                hubShowcase: true,
-                hubSocial: true,
-                hubTopAndNew : true,
-                hubScriptUpdates: true,
-                hubUsers: true,
-                notifyAppReloaded: true,
-                startTutorialButton: true,
-                publicationComments: true,
-                translateComments: true,
-                searchHelp: true,
-                outAssign: true,
-
-                scriptSocialLinks: Cloud.lite,
-                scriptPrintScript: true,
-                scriptPrintTopic: true,
-                scriptEmail: true,
-            }
-        },
-        'pro': {
-            id: 'pro',
-            name: lf("expert"),
-            artId: 'indivfwz',
-            descr: lf("'Javascripty' curly braces, all the tools, for experienced devs!"),
-            astMode: 3,
-            widgets: {
-                // edit
-                addNewButton: true,
-                undoButton: true,
-                // refactoring
-                promoteRefactoring: true,
-                fixItButton: true,
-                splitScreen: true,
-                shareScriptToGroup: true,
-                searchArtRefactoring: true,
-                calcSearchArt: true,
-                makeAsyncRefactoring: true,
-                tokenRefactoring:true,
-                // misc
-                groupAllowExportApp: true,
-                changeSkillLevel: true,
-                // edit
-                copyPaste: true,
-                selectStatements: true,
-                selectExpressions: true,
-                // features
-                actionSettings: true,
-                publishAsHidden: true,
-                // refactoring
-                simplify: true,
-                // ui
-                splitButton: true,
-                uploadArtInSearchButton: true,
-                calcApiHelp: true,
-                sideRunButton: true,
-                tutorialGoToPreviousStep: true,
-                helpLinks: true,
-                wallScreenshot: true,
-                wallHeart: true,
-                wallStop: true,
-                // section
-                dataSection: true,
-                eventsSection: true,
-                artSection: true,
-                librariesSection: true,
-                scriptProperties: true,
-                scriptPropertiesSettings: true,
-                scriptPropertiesPropertyAtomic: true,
-                databaseSection: true,
-                // statements
-                comment: true,
-                foreach: true,
-                boxed: true,
-                show: true,
-                "return": true,
-                "break": true,
-                "continue": true,
-                stringConcatProperty: true,
-                //navigation
-                codeSearch: true,
-                findReferences: true,
-                gotoNavigation: true,
-                // refactorings
-                moveToLibrary: true,
-                stripBlock: true,
-                // debugging
-                toggleBreakpoint: true,
-                debugButton: true,
-                // ui
-                publishDescription: true,
-                sendPullRequest: true,
-                scriptStats: true,
-                userSocialTab: true,
-                scriptConvertToDocs: true,
-                nextTutorialsList: true,
-                // sections
-                testsSection: true,
-                actionTypesSection: true,
-                pagesSection: true,
-                objectsSection: true,
-                decoratorsSection: true,
-                // script lifecycle
-                updateButton: true,
-                editLibraryButton: true,
-                errorsButton: true,
-                logsButton: true,
-                deployButton: true,
-                // ui
-                pluginsButton: true,
-                runTestsButton: true,
-                scriptPropertiesManagement: true,
-                scriptPropertiesIcons: true,
-                scriptPropertiesExport: true,
-                scriptPropertiesPlatform: true,
-                scriptPropertiesInstrumentation: true,
-                scriptPropertiesData: true,
-                wallLogsButton: true,
-                scriptPropertiesPropertyCloud: true,
-                scriptPropertiesPropertyAllowExport: true,
-                stringEditFullScreen: true,
-                persistanceRadio: true,
-                awaitClock: true,
-                // language
-                async: true,
-                testAction: true,
-                lambda: true,
-                // hub
-                commentHistory: true,
-                scriptPullChanges: true,
-                scriptDiffToBase: true,
-                scriptHistoryTab: true,
-                scriptInsightsTab: true,
-                notifyAppReloaded: true,
-                showTemporaryNotice: true,
-                githubLinks: true,
-                hubLearn: true,
-                hubShowcase: true,
-                hubSocial: true,
-                hubTopAndNew: true,
-                hubScriptUpdates: true,
-                hubUsers: true,
-                hubTags: true,
-                hubMyArt: true,
-                publicationComments: true,
-                translateComments: true,
-                searchHelp: true,
-                outAssign: true,
-
-                scriptSocialLinks: Cloud.lite,
-                scriptPrintScript: true,
-                scriptPrintTopic: true,
-                scriptEmail: true,
-            }
-        }
-    }
-            
-    export var themes: StringMap<Cloud.ClientTheme> = {
-        'expert': {
-            name: lf("Expert"),
-            description: lf("All options turned on"),
-            editorMode: editorModes['pro']
-        },
-        'azure': {
-            name: lf("Azure"),
-            description: lf("Azure web development"),
-            scriptTemplates: ['blank', 'game', 'pages', 'blankwebapi', 'blankazurewebapi', 'blankmysqlwebapi' , 'blankazureeventhubs', 'blanknodelibrary'],
-            editorMode: editorModes['pro']
-        },
-        'minecraft': {
-            name: "Minecraft",
-            description: lf("Learn to code with Minecraft"),
-            logoArtId: 'eopyzwpm',
-            tutorialsTopic: 'minecrafttutorials',
-            scriptSearch: '#minecraft',
-            scriptTemplates: ['blankminecraft', 'blankcreeper'],
-            noAnimations: true,
-            editorMode: {
-                id: 'minecraft',
-                name: lf("minecraft"),
+    var editorModes: StringMap<Cloud.EditorMode>;
+    var themes: StringMap<Cloud.ClientTheme>;
+    
+    function initThemes() {
+        if (editorModes && themes) return;
+        
+        editorModes = {
+            'block': {
+                id: 'block',
+                name: lf("beginner"),
                 descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
-                astMode: 2,
+                astMode: 1,
                 artId: 'brfljsds',
                 widgets: {
                     // edit
                     addNewButton: true,
                     undoButton: true,
                     changeSkillLevel: true,
-                    async: true,
-                    // refactoring                    
-                    updateButton: true,
+                    // refactoring
                     promoteRefactoring: true,
                     fixItButton: true,
                     splitScreen: false,
                     splitScreenOnLoad: true,
                     shareScriptToGroup: true,
-                    // searchArtRefactoring: true,
-                    // calcSearchArt: true,
-                    scriptProperties: true,
+                    searchArtRefactoring: true,
+                    calcSearchArt: true,
                     scriptPropertiesIcons: true,
                     // statements
-                    copyPaste: true,
-                    selectStatements: true,
                     stringConcatProperty: true,
-                    show: true,                
+                    show: true,
                     "return": true,
-                    gotoNavigation: true,
                     // sections
                     dataSection: true,
-                    // artSection: true,
+                    artSection: true,
                     librariesSection: true,
                     // ui
                     wallScreenshot: true,
@@ -342,288 +49,588 @@ module TDev.Browser {
                     startTutorialButton: true,
                     nextTutorialsList: true,
                     // hub
-                    hubTutorials : true,
-                    // hubShowcase : true,
-                    // hubSocial: true,
+                    hubTutorials: true,
+                    hubShowcase: true,
+                    hubSocial: true,
                     publicationComments: true,
                     translateComments: true,
-    
+
                     whileConditionDefault: "true",
-                    whileBodyDefault: "skip; minecraft->pause(20);",
                     forConditionDefault: "5",
                     ifConditionDefault: "true",
-    
+
                     scriptSocialLinks: Cloud.lite,
-                }
-            }
-        },
-        'rpi': {
-            name: "Raspberry Pi",
-            description: lf("Learn to code with Raspberry Pi"),
-            logoArtId: 'eopyzwpm',
-            tutorialsTopic: 'minecraftpitutorials',
-            scriptTemplates: ['blankminecraftpi'],
-            noAnimations: true,
-            lowMemory: true,
-            editorMode: editorModes['block'],
-        },
-        'arduino': {
-            name: "Arduino",
-            description: lf("Program Arduino boards"),
-            logoArtId: 'kzajxznr',
-            wallpaperArtId: 'kzajxznr',
-            tutorialsTopic: 'arduinotutorials',
-            scriptSearch: '#arduino',
-            scriptTemplates: ['blankarduino', 'blankesplore'],
-            intelliProfileId: 'kbmkc',
-            editorMode: editorModes['classic'],
-        },
-        'engduino': {
-            name: "Engduino",
-            description: lf("Programming the Engduino"),
-            logoArtId: 'qmjzqlkc',
-            wallpaperArtId: 'qmjzqlkc',
-            scriptSearch: '#engduino',
-            scriptTemplates: ['blankengduino'],
-            intelliProfileId: 'kbmkc',
-            editorMode: editorModes['classic'],
-        },
-        'microbit': {
-            name:'BBC micro:bit',
-            description: ' ',
-            scriptSearch: '#microbit',
-            scriptTemplates: ['blankmicrobit'],
-            intelliProfileId: 'upfje',
-            editorMode: {
-                id: 'microbit',
-                name: 'Micro Bit',
-                descr: lf("Micro Bit mode!"),
-                astMode: 2,
-                widgets: {
-                    hubTutorials: true,
-                    addNewButton: true,
-                    undoButton: true,
-                    promoteRefactoring: true,
-                    copyPaste: true,
-                    comment: true,
-                    dataSection: true,
-                    gotoNavigation: true,
-                    splitScreenOnLoad: true,
-                    updateButton: true,
-                    forceMainAsAction: true,
-                    singleReturnValue: true,
-                    integerNumbers: true,
-                    codeSearch: true,
-                    librariesSection: true,
-                    scriptPropertiesSettings: true,
-                    editorRunOnLoad: true,
-                    whileConditionDefault: "true",
-                    whileBodyDefault: "skip; basic->pause(20);",
-                    forConditionDefault: "5",
-                    "return": true,
-                    "break": true,
-                    hideMyScriptHeader: true,
-                    scriptPrintScript: true,
-                    scriptPrintTopic: true,
-                    tutorialGoToPreviousStep: true,
+                    scriptEmail: true,
                 }
             },
-        },
-        'restricted': {
-            name: "Restricted",
-            description: lf("Opinionated restricted mode"),
-            scriptTemplates: ['blank'],
-            intelliProfileId: 'lyusma',
-            editorMode: {
-                id: 'restricted',
-                name: lf("restricted"),
-                descr: lf("Restricted mode!"),
+            'classic': {
+                id: 'classic',
+                name: lf("coder"),
+                descr: lf("Edit code as text, more options, for aspiring app writers!"),
+                artId: 'ehymsljr',
                 astMode: 2,
                 widgets: {
+                    // edit
                     addNewButton: true,
                     undoButton: true,
+                    // refactoring
                     promoteRefactoring: true,
                     fixItButton: true,
-                    copyPaste: true,
-                    comment: true,
-                    dataSection: true,
-                    objectsSection: true,
-                    gotoNavigation: true,
-                    splitScreenOnLoad: true,
-                    updateButton: true,
-                    forceMainAsAction: true,
-                    singleReturnValue: true,
-                    integerNumbers: true,
-                    codeSearch: true,
-                    librariesSection: true,
-                    scriptPropertiesSettings: true,
-                    editorRunOnLoad: true,
-                    calcApiHelp: true,
-                    calcHelpOverlay: true,
-                    whileConditionDefault: "true",
-                    whileBodyDefault: "skip; basic->pause(20);",
-                    forConditionDefault: "5",
-                    "return": true,
-                    "break": true,
-                    hideMyScriptHeader: true,
-                    awaitClock: true,
-                    tutorialGoToPreviousStep: true,
-                    scriptPrintScript: true,
-                    scriptPrintTopic: true,
-                }
-            },
-        },
-        'restrictedteacher': {
-            name: "Restricted Teacher",
-            description: lf("Opinionated restricted mode"),
-            scriptTemplates: ['blank', 'blankdocs'],
-            intelliProfileId: 'lyusma',
-            editorMode: {
-                id: 'restrictedteacher',
-                name: lf("teacher"),
-                descr: lf("Restricted teacher mode!"),
-                astMode: 2,
-                widgets: {
-                    addNewButton: true,
-                    undoButton: true,
-                    promoteRefactoring: true,
-                    copyPaste: true,
-                    comment: true,
-                    dataSection: true,
-                    objectsSection: true,                    
-                    gotoNavigation: true,
-                    splitScreenOnLoad: true,
-                    updateButton: true,
-                    forceMainAsAction: true,
-                    singleReturnValue: true,
-                    integerNumbers: true,
-                    codeSearch: true,
-                    librariesSection: true,
-                    scriptProperties: true,
-                    scriptPropertiesSettings: true,
-                    scriptPropertiesUseCppCompiler: true,
-                    editorRunOnLoad: true,
-                    calcApiHelp: true,
-                    calcHelpOverlay: true,
-                    whileConditionDefault: "true",
-                    whileBodyDefault: "skip; basic->pause(20);",
-                    forConditionDefault: "5",
-                    "return": true,
-                    "break": true,
-                    hideMyScriptHeader: true,
-                    scriptHistoryTab: true,
-                    tutorialGoToPreviousStep: true,
-                    awaitClock: true,
-                    scriptPrintScript: true,
-                    scriptPrintTopic: true,                    
-                    
-                    // for docs
-                    artSection: true,
-                    selectStatements: true,
-                    
-                    // teacher specific
-                    scriptDiffToBase: true,                    
-                    scriptConvertToDocs: true,
-                    socialNetworks: true,
-                    socialNetworkvideoptr:true,
-                    socialNetworkart: true,
-                    socialNetworkbbc: true,
-                    publishAsHidden: true,
-                    computingAtSchool: true,
                     splitScreen: true,
-                    splitButton: true,
-                    actionSettings: true,
-                    calcSearchArt: true,
+                    shareScriptToGroup: true,
                     searchArtRefactoring: true,
-                    editLibraryButton: true,                    
-                    scriptEmail: true,
-                    publicationComments: true,
-                }
-            },
-        },
-        'restrictededitor': {
-            name: "Restricted Editor",
-            description: lf("Opinionated restricted mode"),
-            scriptTemplates: ['blank', 'blankdocs'],
-            editorMode: {
-                id: 'restricteditor',
-                name: lf("editor"),
-                descr: lf("Restricted editor mode!"),
-                astMode: 2,
-                widgets: {
-                    addNewButton: true,
-                    undoButton: true,
-                    promoteRefactoring: true,
+                    calcSearchArt: true,
+                    tokenRefactoring: true,
+                    // misc
+                    groupAllowExportApp: true,
+                    changeSkillLevel: true,
+                    // edit
                     copyPaste: true,
-                    comment: true,
-                    dataSection: true,
-                    gotoNavigation: true,
-                    updateButton: true,
-                    forceMainAsAction: true,
-                    singleReturnValue: true,
-                    integerNumbers: true,
+                    selectStatements: true,
+                    selectExpressions: true,
+                    // features
+                    actionSettings: true,
+                    publishAsHidden: true,
+                    // refactoring
+                    simplify: true,
+                    // ui
+                    splitButton: true,
+                    uploadArtInSearchButton: true,
+                    calcApiHelp: true,
+                    sideRunButton: true,
+                    tutorialGoToPreviousStep: true,
+                    helpLinks: true,
+                    wallScreenshot: true,
+                    wallHeart: true,
+                    wallStop: true,
+                    scriptConvertToDocs: true,
+                    nextTutorialsList: true,
                     codeSearch: true,
+                    // section
+                    dataSection: true,
+                    eventsSection: true,
+                    pagesSection: true,
+                    artSection: true,
                     librariesSection: true,
                     scriptProperties: true,
-                    scriptPropertiesSettings: true,
-                    scriptPropertiesUseCppCompiler: true,
-                    scriptPropertiesPropertyAtomic: true,
-                    editorRunOnLoad: true,
-                    calcApiHelp: true,
-                    calcHelpOverlay: true,                    
-                    whileConditionDefault: "true",
-                    whileBodyDefault: "skip; basic->pause(20);",
-                    forConditionDefault: "5",
-                    artSection: true,
-                    "return": true,
-                    "break": true,
-                    splitScreenOnLoad: false,
-                    findReferences: true,
-                    selectStatements: true,
-                    stringEditFullScreen: true,
                     objectsSection: true,
                     decoratorsSection: true,
-                    persistanceRadio: true,
-                    databaseSection: true,
+                    scriptPropertiesIcons: true,
+                    scriptPropertiesSettings: true,
+                    scriptPropertiesPropertyAtomic: true,
                     scriptPropertiesManagement: true,
-                    hideMyScriptHeader: true,
-                    scriptHistoryTab: true,
-                    tutorialGoToPreviousStep: true,
-                    awaitClock: true,
-                
-                    //MORE
-                    
-                    // teacher specific
-                    scriptDiffToBase: true,
-                    scriptConvertToDocs: true,
-                    socialNetworks: true,
-                    socialNetworkvideoptr:true,
-                    socialNetworkart: true,
-                    socialNetworkbbc: true,
-                    publishAsHidden: true,
-                    computingAtSchool: true,
-                    splitScreen: true,
-                    splitButton: true,
-                    actionSettings: true,
-                    calcSearchArt: true,
-                    searchArtRefactoring: true,
-                    editLibraryButton: true,
+                    databaseSection: true,
+                    persistanceRadio: true,
+                    // statements
+                    comment: true,
+                    foreach: true,
+                    boxed: true,
+                    stringConcatProperty: true,
+                    show: true,
+                    "return": true,
+                    "break": true,
+                    "continue": true,
+                    // hub
+                    hubTutorials: true,
+                    hubLearn: true,
+                    hubShowcase: true,
+                    hubSocial: true,
+                    hubTopAndNew: true,
+                    hubScriptUpdates: true,
+                    hubUsers: true,
+                    notifyAppReloaded: true,
+                    startTutorialButton: true,
+                    publicationComments: true,
+                    translateComments: true,
+                    searchHelp: true,
+                    outAssign: true,
+
+                    scriptSocialLinks: Cloud.lite,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
-                    publicationComments: true,
-                
-                    // editor specific                  
-                    publishDescription: true,
-                    scriptPullChanges: true,
-                    testAction: true,
-                    testsSection: true,
-                    tokenRefactoring:true,
+                }
+            },
+            'pro': {
+                id: 'pro',
+                name: lf("expert"),
+                artId: 'indivfwz',
+                descr: lf("'Javascripty' curly braces, all the tools, for experienced devs!"),
+                astMode: 3,
+                widgets: {
+                    // edit
+                    addNewButton: true,
+                    undoButton: true,
+                    // refactoring
+                    promoteRefactoring: true,
+                    fixItButton: true,
+                    splitScreen: true,
+                    shareScriptToGroup: true,
+                    searchArtRefactoring: true,
+                    calcSearchArt: true,
+                    makeAsyncRefactoring: true,
+                    tokenRefactoring: true,
+                    // misc
+                    groupAllowExportApp: true,
+                    changeSkillLevel: true,
+                    // edit
+                    copyPaste: true,
+                    selectStatements: true,
                     selectExpressions: true,
+                    // features
+                    actionSettings: true,
+                    publishAsHidden: true,
+                    // refactoring
+                    simplify: true,
+                    // ui
+                    splitButton: true,
+                    uploadArtInSearchButton: true,
+                    calcApiHelp: true,
+                    sideRunButton: true,
+                    tutorialGoToPreviousStep: true,
+                    helpLinks: true,
+                    wallScreenshot: true,
+                    wallHeart: true,
+                    wallStop: true,
+                    // section
+                    dataSection: true,
+                    eventsSection: true,
+                    artSection: true,
+                    librariesSection: true,
+                    scriptProperties: true,
+                    scriptPropertiesSettings: true,
+                    scriptPropertiesPropertyAtomic: true,
+                    databaseSection: true,
+                    // statements
+                    comment: true,
+                    foreach: true,
+                    boxed: true,
+                    show: true,
+                    "return": true,
+                    "break": true,
+                    "continue": true,
+                    stringConcatProperty: true,
+                    //navigation
+                    codeSearch: true,
+                    findReferences: true,
+                    gotoNavigation: true,
+                    // refactorings
+                    moveToLibrary: true,
+                    stripBlock: true,
+                    // debugging
+                    toggleBreakpoint: true,
+                    debugButton: true,
+                    // ui
+                    publishDescription: true,
+                    sendPullRequest: true,
+                    scriptStats: true,
+                    userSocialTab: true,
+                    scriptConvertToDocs: true,
+                    nextTutorialsList: true,
+                    // sections
+                    testsSection: true,
+                    actionTypesSection: true,
+                    pagesSection: true,
+                    objectsSection: true,
+                    decoratorsSection: true,
+                    // script lifecycle
+                    updateButton: true,
+                    editLibraryButton: true,
+                    errorsButton: true,
+                    logsButton: true,
+                    deployButton: true,
+                    // ui
+                    pluginsButton: true,
+                    runTestsButton: true,
+                    scriptPropertiesManagement: true,
+                    scriptPropertiesIcons: true,
+                    scriptPropertiesExport: true,
+                    scriptPropertiesPlatform: true,
+                    scriptPropertiesInstrumentation: true,
+                    scriptPropertiesData: true,
+                    wallLogsButton: true,
+                    scriptPropertiesPropertyCloud: true,
+                    scriptPropertiesPropertyAllowExport: true,
+                    stringEditFullScreen: true,
+                    persistanceRadio: true,
+                    awaitClock: true,
+                    // language
+                    async: true,
+                    testAction: true,
+                    lambda: true,
+                    // hub
+                    commentHistory: true,
+                    scriptPullChanges: true,
+                    scriptDiffToBase: true,
+                    scriptHistoryTab: true,
+                    scriptInsightsTab: true,
+                    notifyAppReloaded: true,
+                    showTemporaryNotice: true,
+                    githubLinks: true,
+                    hubLearn: true,
+                    hubShowcase: true,
+                    hubSocial: true,
+                    hubTopAndNew: true,
+                    hubScriptUpdates: true,
+                    hubUsers: true,
+                    hubTags: true,
+                    hubMyArt: true,
+                    publicationComments: true,
+                    translateComments: true,
+                    searchHelp: true,
+                    outAssign: true,
+
+                    scriptSocialLinks: Cloud.lite,
+                    scriptPrintScript: true,
+                    scriptPrintTopic: true,
+                    scriptEmail: true,
                 }
             }
         }
-    };
+
+        themes = {
+            'expert': {
+                name: lf("Expert"),
+                description: lf("All options turned on"),
+                editorMode: editorModes['pro']
+            },
+            'azure': {
+                name: lf("Azure"),
+                description: lf("Azure web development"),
+                scriptTemplates: ['blank', 'game', 'pages', 'blankwebapi', 'blankazurewebapi', 'blankmysqlwebapi', 'blankazureeventhubs', 'blanknodelibrary'],
+                editorMode: editorModes['pro']
+            },
+            'minecraft': {
+                name: "Minecraft",
+                description: lf("Learn to code with Minecraft"),
+                logoArtId: 'eopyzwpm',
+                tutorialsTopic: 'minecrafttutorials',
+                scriptSearch: '#minecraft',
+                scriptTemplates: ['blankminecraft', 'blankcreeper'],
+                noAnimations: true,
+                editorMode: {
+                    id: 'minecraft',
+                    name: lf("minecraft"),
+                    descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
+                    astMode: 2,
+                    artId: 'brfljsds',
+                    widgets: {
+                        // edit
+                        addNewButton: true,
+                        undoButton: true,
+                        changeSkillLevel: true,
+                        async: true,
+                        // refactoring                    
+                        updateButton: true,
+                        promoteRefactoring: true,
+                        fixItButton: true,
+                        splitScreen: false,
+                        splitScreenOnLoad: true,
+                        shareScriptToGroup: true,
+                        // searchArtRefactoring: true,
+                        // calcSearchArt: true,
+                        scriptProperties: true,
+                        scriptPropertiesIcons: true,
+                        // statements
+                        copyPaste: true,
+                        selectStatements: true,
+                        stringConcatProperty: true,
+                        show: true,
+                        "return": true,
+                        gotoNavigation: true,
+                        // sections
+                        dataSection: true,
+                        // artSection: true,
+                        librariesSection: true,
+                        // ui
+                        wallScreenshot: true,
+                        wallHeart: true,
+                        startTutorialButton: true,
+                        nextTutorialsList: true,
+                        // hub
+                        hubTutorials: true,
+                        // hubShowcase : true,
+                        // hubSocial: true,
+                        publicationComments: true,
+                        translateComments: true,
+
+                        whileConditionDefault: "true",
+                        whileBodyDefault: "skip; minecraft->pause(20);",
+                        forConditionDefault: "5",
+                        ifConditionDefault: "true",
+
+                        scriptSocialLinks: Cloud.lite,
+                    }
+                }
+            },
+            'rpi': {
+                name: "Raspberry Pi",
+                description: lf("Learn to code with Raspberry Pi"),
+                logoArtId: 'eopyzwpm',
+                tutorialsTopic: 'minecraftpitutorials',
+                scriptTemplates: ['blankminecraftpi'],
+                noAnimations: true,
+                lowMemory: true,
+                editorMode: editorModes['block'],
+            },
+            'arduino': {
+                name: "Arduino",
+                description: lf("Program Arduino boards"),
+                logoArtId: 'kzajxznr',
+                wallpaperArtId: 'kzajxznr',
+                tutorialsTopic: 'arduinotutorials',
+                scriptSearch: '#arduino',
+                scriptTemplates: ['blankarduino', 'blankesplore'],
+                intelliProfileId: 'kbmkc',
+                editorMode: editorModes['classic'],
+            },
+            'engduino': {
+                name: "Engduino",
+                description: lf("Programming the Engduino"),
+                logoArtId: 'qmjzqlkc',
+                wallpaperArtId: 'qmjzqlkc',
+                scriptSearch: '#engduino',
+                scriptTemplates: ['blankengduino'],
+                intelliProfileId: 'kbmkc',
+                editorMode: editorModes['classic'],
+            },
+            'microbit': {
+                name: 'BBC micro:bit',
+                description: ' ',
+                scriptSearch: '#microbit',
+                scriptTemplates: ['blankmicrobit'],
+                intelliProfileId: 'upfje',
+                editorMode: {
+                    id: 'microbit',
+                    name: 'Micro Bit',
+                    descr: lf("Micro Bit mode!"),
+                    astMode: 2,
+                    widgets: {
+                        hubTutorials: true,
+                        addNewButton: true,
+                        undoButton: true,
+                        promoteRefactoring: true,
+                        copyPaste: true,
+                        comment: true,
+                        dataSection: true,
+                        gotoNavigation: true,
+                        splitScreenOnLoad: true,
+                        updateButton: true,
+                        forceMainAsAction: true,
+                        singleReturnValue: true,
+                        integerNumbers: true,
+                        codeSearch: true,
+                        librariesSection: true,
+                        scriptPropertiesSettings: true,
+                        editorRunOnLoad: true,
+                        whileConditionDefault: "true",
+                        whileBodyDefault: "skip; basic->pause(20);",
+                        forConditionDefault: "5",
+                        "return": true,
+                        "break": true,
+                        hideMyScriptHeader: true,
+                        scriptPrintScript: true,
+                        scriptPrintTopic: true,
+                        tutorialGoToPreviousStep: true,
+                    }
+                },
+            },
+            'restricted': {
+                name: "Restricted",
+                description: lf("Opinionated restricted mode"),
+                scriptTemplates: ['blank'],
+                intelliProfileId: 'lyusma',
+                editorMode: {
+                    id: 'restricted',
+                    name: lf("restricted"),
+                    descr: lf("Restricted mode!"),
+                    astMode: 2,
+                    widgets: {
+                        addNewButton: true,
+                        undoButton: true,
+                        promoteRefactoring: true,
+                        fixItButton: true,
+                        copyPaste: true,
+                        comment: true,
+                        dataSection: true,
+                        objectsSection: true,
+                        gotoNavigation: true,
+                        splitScreenOnLoad: true,
+                        updateButton: true,
+                        forceMainAsAction: true,
+                        singleReturnValue: true,
+                        integerNumbers: true,
+                        codeSearch: true,
+                        librariesSection: true,
+                        scriptPropertiesSettings: true,
+                        editorRunOnLoad: true,
+                        calcApiHelp: true,
+                        calcHelpOverlay: true,
+                        whileConditionDefault: "true",
+                        whileBodyDefault: "skip; basic->pause(20);",
+                        forConditionDefault: "5",
+                        "return": true,
+                        "break": true,
+                        hideMyScriptHeader: true,
+                        awaitClock: true,
+                        tutorialGoToPreviousStep: true,
+                        scriptPrintScript: true,
+                        scriptPrintTopic: true,
+                    }
+                },
+            },
+            'restrictedteacher': {
+                name: "Restricted Teacher",
+                description: lf("Opinionated restricted mode"),
+                scriptTemplates: ['blank', 'blankdocs'],
+                intelliProfileId: 'lyusma',
+                editorMode: {
+                    id: 'restrictedteacher',
+                    name: lf("teacher"),
+                    descr: lf("Restricted teacher mode!"),
+                    astMode: 2,
+                    widgets: {
+                        addNewButton: true,
+                        undoButton: true,
+                        promoteRefactoring: true,
+                        copyPaste: true,
+                        comment: true,
+                        dataSection: true,
+                        objectsSection: true,
+                        gotoNavigation: true,
+                        splitScreenOnLoad: true,
+                        updateButton: true,
+                        forceMainAsAction: true,
+                        singleReturnValue: true,
+                        integerNumbers: true,
+                        codeSearch: true,
+                        librariesSection: true,
+                        scriptProperties: true,
+                        scriptPropertiesSettings: true,
+                        scriptPropertiesUseCppCompiler: true,
+                        editorRunOnLoad: true,
+                        calcApiHelp: true,
+                        calcHelpOverlay: true,
+                        whileConditionDefault: "true",
+                        whileBodyDefault: "skip; basic->pause(20);",
+                        forConditionDefault: "5",
+                        "return": true,
+                        "break": true,
+                        hideMyScriptHeader: true,
+                        scriptHistoryTab: true,
+                        tutorialGoToPreviousStep: true,
+                        awaitClock: true,
+                        scriptPrintScript: true,
+                        scriptPrintTopic: true,                    
+                    
+                        // for docs
+                        artSection: true,
+                        selectStatements: true,
+                    
+                        // teacher specific
+                        scriptDiffToBase: true,
+                        scriptConvertToDocs: true,
+                        socialNetworks: true,
+                        socialNetworkvideoptr: true,
+                        socialNetworkart: true,
+                        socialNetworkbbc: true,
+                        publishAsHidden: true,
+                        computingAtSchool: true,
+                        splitScreen: true,
+                        splitButton: true,
+                        actionSettings: true,
+                        calcSearchArt: true,
+                        searchArtRefactoring: true,
+                        editLibraryButton: true,
+                        scriptEmail: true,
+                        publicationComments: true,
+                    }
+                },
+            },
+            'restrictededitor': {
+                name: "Restricted Editor",
+                description: lf("Opinionated restricted mode"),
+                scriptTemplates: ['blank', 'blankdocs'],
+                editorMode: {
+                    id: 'restricteditor',
+                    name: lf("editor"),
+                    descr: lf("Restricted editor mode!"),
+                    astMode: 2,
+                    widgets: {
+                        addNewButton: true,
+                        undoButton: true,
+                        promoteRefactoring: true,
+                        copyPaste: true,
+                        comment: true,
+                        dataSection: true,
+                        gotoNavigation: true,
+                        updateButton: true,
+                        forceMainAsAction: true,
+                        singleReturnValue: true,
+                        integerNumbers: true,
+                        codeSearch: true,
+                        librariesSection: true,
+                        scriptProperties: true,
+                        scriptPropertiesSettings: true,
+                        scriptPropertiesUseCppCompiler: true,
+                        scriptPropertiesPropertyAtomic: true,
+                        editorRunOnLoad: true,
+                        calcApiHelp: true,
+                        calcHelpOverlay: true,
+                        whileConditionDefault: "true",
+                        whileBodyDefault: "skip; basic->pause(20);",
+                        forConditionDefault: "5",
+                        artSection: true,
+                        "return": true,
+                        "break": true,
+                        splitScreenOnLoad: false,
+                        findReferences: true,
+                        selectStatements: true,
+                        stringEditFullScreen: true,
+                        objectsSection: true,
+                        decoratorsSection: true,
+                        persistanceRadio: true,
+                        databaseSection: true,
+                        scriptPropertiesManagement: true,
+                        hideMyScriptHeader: true,
+                        scriptHistoryTab: true,
+                        tutorialGoToPreviousStep: true,
+                        awaitClock: true,
+                
+                        //MORE
+                    
+                        // teacher specific
+                        scriptDiffToBase: true,
+                        scriptConvertToDocs: true,
+                        socialNetworks: true,
+                        socialNetworkvideoptr: true,
+                        socialNetworkart: true,
+                        socialNetworkbbc: true,
+                        publishAsHidden: true,
+                        computingAtSchool: true,
+                        splitScreen: true,
+                        splitButton: true,
+                        actionSettings: true,
+                        calcSearchArt: true,
+                        searchArtRefactoring: true,
+                        editLibraryButton: true,
+                        scriptPrintScript: true,
+                        scriptPrintTopic: true,
+                        scriptEmail: true,
+                        publicationComments: true,
+                
+                        // editor specific                  
+                        publishDescription: true,
+                        scriptPullChanges: true,
+                        testAction: true,
+                        testsSection: true,
+                        tokenRefactoring: true,
+                        selectExpressions: true,
+                    }
+                }
+            }
+        }
+    }
 
     export module EditorSettings {
         export var AST_BLOCK = 1;
@@ -651,7 +658,7 @@ module TDev.Browser {
                 m.add(div("wall-dialog-body", lf("Web app version {0}.", Cloud.config.tdVersion)));
             else
                 m.add(div("wall-dialog-body", lf("Running against cloud services v{0}.", relId)));
-            var legalButtons = Cloud.config.legalButtons.map(b => link(b.name, b.url));
+            var legalButtons = Cloud.config.legalButtons.map(b => link(lf_static(b.name, true), b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
                 Cloud.getUserId() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : undefined,
@@ -968,7 +975,7 @@ module TDev.Browser {
             var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";
             
             var copyrights = "<div class='beta-legal'>" + 
-                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", b.name)).join("&nbsp;|&nbsp;") +
+                Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", lf_static(b.name, true))).join("&nbsp;|&nbsp;") +
                 "&nbsp;&nbsp;" + versionNote +
                 "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
                 "</div>";
@@ -982,6 +989,7 @@ module TDev.Browser {
 
         export function setThemeFromSettings()
         {
+            initThemes();
             var m = /(\?|&)theme=([a-z]+)(#|&|$)/.exec(window.location.href);
             if (m)
                 EditorSettings.setTheme(themes[m[2]]);
@@ -1053,6 +1061,8 @@ module TDev.Browser {
         }
 
         export function loadEditorMode(id: string) {
+            initThemes();
+            
             if (id === "coder") id = 'classic'; // legacy
             var mode =  editorModes[id] || editorModes['block'];
             if (mode)
@@ -1073,6 +1083,7 @@ module TDev.Browser {
 
         var currentEditorMode: Cloud.EditorMode;
         export function editorMode(): Cloud.EditorMode {
+            initThemes();
             if (!currentEditorMode) {
                 currentEditorMode = currentTheme && currentTheme.editorMode
                     ? currentTheme.editorMode
@@ -1107,6 +1118,7 @@ module TDev.Browser {
         }
 
         export function createChooseSkillLevelElements(click?: () => void): HTMLElement[] {
+            initThemes();            
             return Util.values(editorModes).map((mode, index) => {
                 var pic = div('pic');
                 pic.style.background = Cloud.artCssImg(mode.artId, true);
