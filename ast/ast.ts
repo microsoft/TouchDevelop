@@ -2956,7 +2956,7 @@ module TDev.AST {
                 time: 0,
                 id: "",
                 userid: "me",
-                username: "Me",
+                username: lf("Me"),
                 name: this.getName(),
                 description: this.comment,
                 icon: this.icon,
