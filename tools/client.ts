@@ -3805,6 +3805,111 @@ function fetchlibraries(args) {
         }))
 }
 
+function dlscripttext(args:string[])
+{
+    var files = fs.readdirSync("dl")
+    var i = 0
+    if (args[0])
+        files = files.filter(f => f > args[0])
+
+    var pushMode = args[1] == "push"
+
+    var tm0 = 1420099200 
+    var start = Date.now();
+    var k = tdliteKey()
+
+    var loop = i => {
+        if (!files[i]) return;
+        var j = JSON.parse(fs.readFileSync("dl/" + files[i], "utf8"))
+        var items = j.items.filter(it => it.time >= tm0)
+        var num = 1
+        var oneup = () => {
+            if (--num == 0) {
+                var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+                console.log(tm, "DONE", files[i], i + "/" + files.length)
+                loop(i+1)
+            }
+        }
+
+        var pref = "https://www.touchdevelop.com/api/"
+
+        items.forEach(s => {
+            ++num;
+            if (pushMode) {
+                fs.readFile("dls/" + s.id, "utf8", (err, dat) => {
+                    if (err) {
+                        console.log("ERROR", s.id, err.message)
+                        oneup()
+                    } else {
+                        tdevGet(k.liteUrl + "api/" + s.id + "/importfixup?foo=bar" + k.key, resp => {
+                            if (!/scripthash/.test(resp))
+                                console.log("ERROR", s.id, resp)
+                            //console.log(s.id, resp)
+                            oneup()
+                        }, 1, { text: dat })
+                    }
+                })
+            } else {
+                tdevGet(pref + s.id + "/text?original=true", text => {
+                    if (!text) {
+                        console.log("ERROR", s.id)
+                        oneup()
+                    } else if (/^meta hasIds "yes"/m.test(text)) {
+                        fs.writeFileSync("dls/" + s.id, text)
+                        oneup()
+                    } else {
+                        console.log("IDS", s.id)
+                        fs.writeFileSync("dls/" + s.id + ".noid", text)
+                        tdevGet(pref + s.id + "/text?original=true&ids=true", text => {
+                            if (!text) {
+                                console.log("ERROR", s.id, "second")
+                                oneup()
+                            }
+                            else {
+                                fs.writeFileSync("dls/" + s.id, text)
+                                oneup()
+                            }
+                        }, 5)
+                    }
+                }, 5)
+            }
+        })
+        oneup()
+    }
+
+    loop(0)
+}
+
+function dllite(args:string[])
+{
+    var k = tdliteKey()
+
+    var total = 0
+    var store = args[0]
+    var start = Date.now()
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/" + store + "?count=1000" + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+            var fn = "dl/" + store + "-" + Date.now() + ".json"
+            fs.writeFileSync(fn, resp)
+
+            total += parsed.items.length
+
+            var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+            console.log(tm, store, 
+                "total:" + total,
+                parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5)
+
+    var cont = args[1] || ""
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
 function reindexone(store:string, cont = "")
 {
     var k = tdliteKey()
@@ -3986,6 +4091,8 @@ var cmds = {
     "reindexsearch": { f:reindexsearch, a:'[store [conttok]]', h:'re-index search documents in lite cloud'},
     "importlist": { f:importlist, a:'[store [conttok]]', h:'import from td.com to lite cloud'},
     "litepost": { f:litepost, a:'PATH [DATA]', h:'post DATA or {} to /api/PATH'},
+    "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
+    "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
 }
 
 export interface ScriptTemplate {
