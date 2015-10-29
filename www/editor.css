@@ -8,7 +8,6 @@ div.calcButtonHelp {
 .navHeader,
 .calcOp,
 .slTabLabelContainer,
-.sdName,
 .sdListLabel,
 .sdHeading,
 .hubTileTagNumber,
@@ -17,6 +16,13 @@ div.calcButtonHelp {
 .hubSectionHeader
 {
     font-family: "Segoe UI Light", "Segoe UI", "Segoe WP Light", "Segoe WP",
+             "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "TD Symbols", Sans-Serif;
+    font-weight: 200;
+}
+
+.sdName
+{
+    font-family: "TitleFont", "Segoe UI Light", "Segoe UI", "Segoe WP Light", "Segoe WP",
              "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "TD Symbols", Sans-Serif;
     font-weight: 200;
 }
