@@ -23,6 +23,8 @@ namespace Microsoft.MicroBit
         private void MainForm_Load(object sender, EventArgs e)
         {
             this.initializeFileWatch();
+            if (DateTime.Now > new DateTime(2016, 8, 1))
+                this.backgroundPictureBox.Visible = false;
         }
 
         private void initializeFileWatch()
@@ -32,7 +34,7 @@ namespace Microsoft.MicroBit
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
-                this.updateStatus("oops, can't find the Downloads folder");
+                this.updateStatus("oops, can't find the `Downloads` folder");
                 return;
             }
 
@@ -42,11 +44,6 @@ namespace Microsoft.MicroBit
             this.watcher.EnableRaisingEvents = true;
 
             this.waitingForHexFileStatus();
-            try
-            {
-                Process.Start("https://www.microbit.co.uk/app/#");
-            }
-            catch (IOException) { }
         }
 
         private void waitingForHexFileStatus()
@@ -196,7 +193,18 @@ namespace Microsoft.MicroBit
 
         private void versionLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://www.touchdevelop.com/microbit");
+            try
+            {
+                Process.Start("https://www.touchdevelop.com/microbit");
+            }
+            catch (IOException) { }
+        }
+
+        private void backgroundPictureBox_Click(object sender, EventArgs e)
+        {
+            try {
+                Process.Start("https://www.microbit.co.uk/app/#");
+            } catch (IOException) { }
         }
     }
 }

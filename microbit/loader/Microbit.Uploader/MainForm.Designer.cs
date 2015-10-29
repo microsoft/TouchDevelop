@@ -31,10 +31,10 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.statusLabel = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.backgroundPictureBox = new System.Windows.Forms.PictureBox();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.versionLabel = new System.Windows.Forms.LinkLabel();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.backgroundPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // statusLabel
@@ -47,17 +47,19 @@
             this.statusLabel.TabIndex = 1;
             this.statusLabel.Text = "loading...";
             // 
-            // pictureBox1
+            // backgroundPictureBox
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.White;
-            this.pictureBox1.Image = global::Microsoft.MicroBit.Properties.Resources.logo480;
-            this.pictureBox1.InitialImage = null;
-            this.pictureBox1.Location = new System.Drawing.Point(0, -2);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(388, 238);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.backgroundPictureBox.BackColor = System.Drawing.Color.White;
+            this.backgroundPictureBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.backgroundPictureBox.Image = global::Microsoft.MicroBit.Properties.Resources.logo480;
+            this.backgroundPictureBox.InitialImage = null;
+            this.backgroundPictureBox.Location = new System.Drawing.Point(0, -2);
+            this.backgroundPictureBox.Name = "backgroundPictureBox";
+            this.backgroundPictureBox.Size = new System.Drawing.Size(388, 238);
+            this.backgroundPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.backgroundPictureBox.TabIndex = 0;
+            this.backgroundPictureBox.TabStop = false;
+            this.backgroundPictureBox.Click += new System.EventHandler(this.backgroundPictureBox_Click);
             // 
             // trayIcon
             // 
@@ -68,7 +70,7 @@
             // versionLabel
             // 
             this.versionLabel.AutoSize = true;
-            this.versionLabel.Location = new System.Drawing.Point(348, 261);
+            this.versionLabel.Location = new System.Drawing.Point(348, 255);
             this.versionLabel.Name = "versionLabel";
             this.versionLabel.Size = new System.Drawing.Size(28, 13);
             this.versionLabel.TabIndex = 2;
@@ -84,7 +86,7 @@
             this.ClientSize = new System.Drawing.Size(388, 283);
             this.Controls.Add(this.versionLabel);
             this.Controls.Add(this.statusLabel);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.backgroundPictureBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -94,7 +96,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Microsoft Uploader for micro:bit";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.backgroundPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -102,7 +104,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox backgroundPictureBox;
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.LinkLabel versionLabel;
