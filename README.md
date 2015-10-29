@@ -3,12 +3,6 @@
 Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
-[![App Status](https://www.touchdevelop.com/badges/release/current)](https://www.touchdevelop.com/app)
-[![Beta Status](https://www.touchdevelop.com/badges/release/beta)](https://www.touchdevelop.com/app/beta)
-[![latest Status](https://www.touchdevelop.com/badges/release/latest)](https://www.touchdevelop.com/app/latest)
-[![Cloud Status](https://www.touchdevelop.com/badges/release/cloud)](https://www.touchdevelop.com/)
-
-
 [![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
 [![devDependency Status](https://david-dm.org/Microsoft/TouchDevelop/dev-status.svg)](https://david-dm.org/Microsoft/TouchDevelop#info=devDependencies)
 
