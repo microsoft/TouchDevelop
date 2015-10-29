@@ -90,7 +90,7 @@
       </div>
     </div>
     <xml id="blockly-toolbox" style="display: none">
-      <category name="Basic" colour="160">
+      <category name="Basic">
         <!-- <block type="text"></block> -->
         <!-- <block type="math_number"> -->
         <!--   <field name="NUM">0</field> -->
@@ -107,40 +107,37 @@
         <!-- </block> -->
         <block type="device_show_number">
           <value name="number">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">2</field>
-            </shadow>
+            </block>
           </value>
           <value name="pausetime">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">150</field>
-            </shadow>
+            </block>
           </value>
         </block>
         <block type="device_show_leds">
         </block>
         <block type="device_print_message">
           <value name="message">
-            <shadow type="text">
+            <block type="text">
               <field name="TEXT">Hello world</field>
-            </shadow>
+            </block>
           </value>
           <value name="pausetime">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">150</field>
-            </shadow>
+            </block>
           </value>
-        </block>
-        <block type="text">
-          <field name="TEXT">Some text</field>
         </block>
         <block type="device_clear_display"></block>
         <block type="device_forever"></block>
         <block type="device_pause">
           <value name="pause">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">100</field>
-            </shadow>
+            </block>
           </value>
         </block>
       </category>
@@ -149,69 +146,69 @@
 
         <block type="device_plot">
           <value name="x">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
           <value name="y">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
         </block>
         <block type="device_unplot">
           <value name="x">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
           <value name="y">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
         </block>
         <block type="device_point">
           <value name="x">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
           <value name="y">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
         </block>
 
         <block type="device_get_brightness"></block>
         <block type="device_set_brightness">
             <value name="value">
-                <shadow type="math_number">
-                    <field name="NUM">255</field>
-                </shadow>
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
             </value>
         </block>
 
       </category>
-      <category name="Images" colour="20">
+      <category name="Images">
         <block type="device_show_image_offset">
           <value name="offset">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">0</field>
-            </shadow>
+            </block>
           </value>
         </block>
         <block type="device_scroll_image">
             <value name="frame offset">
-                <shadow type="math_number">
+                <block type="math_number">
                     <field name="NUM">5</field>
-                </shadow>
+                </block>
             </value>
             <value name="delay">
-                <shadow type="math_number">
+                <block type="math_number">
                     <field name="NUM">200</field>
-                </shadow>
+                </block>
             </value>
         </block>
         <block type="device_build_image"></block>
@@ -226,7 +223,7 @@
         <block type="device_temperature"></block>
         <block type="device_get_acceleration"></block>
       </category>
-      <category name="If" colour="210">
+      <category name="If">
         <block type="controls_if"></block>
         <block type="controls_if">
           <mutation else="1"></mutation>
@@ -235,20 +232,20 @@
           <mutation elseif="1" else="1"></mutation>
         </block>
       </category>
-      <category name="Loops" colour="120">
+      <category name="Loops">
         <block type="controls_repeat_ext">
           <value name="TIMES">
-            <shadow type="math_number">
-              <field name="NUM">4</field>
-            </shadow>
+            <block type="math_number">
+              <field name="NUM">3</field>
+            </block>
           </value>
         </block>
         <block type="device_while"></block>
         <block type="controls_simple_for">
           <value name="TO">
-            <shadow type="math_number">
+            <block type="math_number">
               <field name="NUM">4</field>
-            </shadow>
+            </block>
           </value>
         </block>
         <!-- <block type="controls_for"> -->
@@ -270,7 +267,7 @@
         <!-- </block> -->
         <block type="device_forever"></block>
       </category>
-      <category name="Logic" colour="210">
+      <category name="Logic">
         <block type="math_number">
           <field name="NUM">0</field>
         </block>
@@ -279,7 +276,7 @@
         <block type="logic_negate"></block>
         <block type="logic_boolean"></block>
       </category>
-      <category name="Maths" colour="230">
+      <category name="Maths">
         <block type="math_arithmetic"></block>
         <block type="math_op2"></block>
         <block type="math_op3"></block>
@@ -296,18 +293,15 @@
           <block type="device_get_analog_pin"></block>
           <block type="device_set_analog_pin"></block>
       </category>
-      <category name="Variables" colour="330">
+      <category name="Variables">
         <block type="variables_set"></block>
         <block type="variables_get"></block>
       </category>
       <category name="Music">
         <block type="device_play_note">
-          <value name="note">
-            <shadow type="device_note_A"></shadow>
-          </value>
           <value name="duration">
-            <shadow type="device_duration_1/4">
-            </shadow>
+            <block type="device_duration_1/4">
+            </block>
           </value>
         </block>
         <block type="device_note_A"></block>
@@ -323,8 +317,14 @@
         <block type="device_duration_1/8"></block>
         <block type="device_duration_1/16"></block>
       </category>
-      <category name="Comments" colour="180">
-        <block type="device_comment2"></block>
+      <category name="Comment">
+        <block type="device_comment">
+          <value name="comment">
+            <block type="text">
+              <field name="TEXT"></field>
+            </block>
+          </value>
+        </block>
       </category>
     </xml>
     <div class="popup hidden" id="popup-log">

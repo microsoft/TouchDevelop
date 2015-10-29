@@ -323,7 +323,7 @@ Blockly.Blocks['device_point'] = {
         .appendField("y");
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
-    this.setTooltip('Returns true if the LED at coordinates (x, y) is on, false otherwise.');
+    this.setTooltip('Returns 1 if the LED at coordinates (x, y) is on, 0 otherwise.');
   }
 };
 
@@ -487,25 +487,12 @@ Blockly.Blocks['device_forever'] = {
   }
 };
 
-Blockly.Blocks['device_comment2'] = {
-  init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/td/comment');
-    this.setColour(180);
-    this.appendDummyInput()
-        .appendField("// comment:")
-        .appendField(new Blockly.FieldTextInput("this code does ..."), "comment");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('Comment a piece of code. Comment is preserved when converting.');
-  }
-};
-
 Blockly.Blocks['device_comment'] = {
   init: function() {
     this.setHelpUrl('https://live.microbit.co.uk/td/comment');
-    this.setColour(180);
+    this.setColour(120);
     this.appendDummyInput()
-        .appendField("// comment");
+        .appendField("comment");
     this.appendValueInput("comment")
         .setCheck("String");
     this.setInputsInline(true);
@@ -688,7 +675,6 @@ Blockly.Blocks['device_play_note'] = {
 };
 
 Blockly.pathToMedia = "./media/";
-Blockly.BlockSvg.START_HAT = true;
 
 // Here's a helper to override the help URL for a block that's *already defined
 // by Blockly*. For blocks that we define ourselves, just change the call to

@@ -94,7 +94,10 @@ export module SVG {
     };
     
     var gelIcons : StringMap<string> = {
-        alert: "M42,34v-6c-0.2-4.6-3.6-8.4-8-9.3V16h-4v2.7c-4.4,0.9-7.8,4.7-8,9.3v6l-6,8h32L42,34z M28,44 l8,0 l0,4 l-8,0 z"
+        alert: "M42,34v-6c-0.2-4.6-3.6-8.4-8-9.3V16h-4v2.7c-4.4,0.9-7.8,4.7-8,9.3v6l-6,8h32L42,34z M28,44 l8,0 l0,4 l-8,0 z",
+        love: "M45.4,20.6c-3.5-3.5-9-3.5-12.5,0c-0.3,0.3-0.6,0.7-0.9,1.1c-0.3-0.4-0.6-0.7-0.9-1.1c-3.5-3.5-9-3.5-12.5,0c-3.5,3.5-3.5,9,0,12.5L32,46.5l13.4-13.4C48.9,29.6,48.9,24,45.4,20.6z",
+        share: "M21.2,37.8c1.6,0,3-0.7,4-1.8l9,4.8c-0.1,0.4-0.2,0.8-0.2,1.3c0,3,2.5,5.5,5.5,5.5s5.5-2.4,5.5-5.5c0-3-2.5-5.5-5.5-5.5c-1.6,0-3,0.7-4,1.8L26,33.2v-2.7l9.7-5.5c1,1,2.3,1.5,3.8,1.5c3,0,5.5-2.5,5.5-5.5s-2.5-5.5-5.5-5.5S34,17.9,34,21c0,0.6,0.1,1.1,0.2,1.6L25 28.4c-1-0.9-2.3-1.5-3.8-1.5c-3,0-5.5,2.4-5.5,5.5C15.8,35.3,18.2,37.8,21.2,37.8z",
+        save: "M42.5,15H16v31.6h30.9V19.4L42.5,15z M31.4,17.8h3.9V25h-3.9V17.8z M37.5,43.8H25.2v-9.4h12.4L37.5,43.8L37.5,43.8z M44.1,43.8h-4V32H22.7v11.9h-3.9v-26h6.1v9.7h12.9v-9.7h4.1l2.2,2.2C44.1,20.1,44.1,43.8,44.1,43.8z",
     };
 
     var iconMapping:any = {
@@ -105,15 +108,15 @@ export module SVG {
         settings: "fa-cogs",
         setting: "fa-cogs",
         chapback: "fa-fast-backward",
-        save: "fa-floppy-o",
+        save: "gel-save",
         email: "fa-envelope-o",
         cycle: "fa-refresh",
         folder: "fa-folder-open",
         video: "fa-video-camera",
         rewind: "fa-backward",
-        sharethis: "fa-share-alt",
+        sharethis: "gel-share",
         subtract: "fa-minus",
-        heart: "fa-heart-o",
+        heart: "gel-love",
         award: "fa-trophy",
         person: "fa-user",
         art: "fa-paint-brush",
