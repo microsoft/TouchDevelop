@@ -1132,10 +1132,6 @@ function compileStdBlock(e: Environment, b: B.Block, f: StdFunc) {
   return H.mkExprStmt(H.mkExprHolder([], compileStdCall(e, b, f)));
 }
 
-function compileComment2(e: Environment, b: B.Block): J.JStmt {
-  return H.mkComment(b.getFieldValue("comment"));
-}
-
 function compileComment(e: Environment, b: B.Block): J.JStmt {
   var arg = compileExpression(e, b.getInputTargetBlock("comment"));
   assert(arg.nodeType == "stringLiteral");
@@ -1331,11 +1327,6 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileSet(e, b));
           break;
 
-        case 'device_comment2':
-          stmts.push(compileComment2(e, b));
-          break;
-
-        // For legacy
         case 'device_comment':
           stmts.push(compileComment(e, b));
           break;

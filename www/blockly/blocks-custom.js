@@ -487,25 +487,12 @@ Blockly.Blocks['device_forever'] = {
   }
 };
 
-Blockly.Blocks['device_comment2'] = {
-  init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/td/comment');
-    this.setColour(180);
-    this.appendDummyInput()
-        .appendField("// comment:")
-        .appendField(new Blockly.FieldTextInput("this code does ..."), "comment");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setTooltip('Comment a piece of code. Comment is preserved when converting.');
-  }
-};
-
 Blockly.Blocks['device_comment'] = {
   init: function() {
     this.setHelpUrl('https://live.microbit.co.uk/td/comment');
-    this.setColour(180);
+    this.setColour(120);
     this.appendDummyInput()
-        .appendField("// comment");
+        .appendField("comment");
     this.appendValueInput("comment")
         .setCheck("String");
     this.setInputsInline(true);
