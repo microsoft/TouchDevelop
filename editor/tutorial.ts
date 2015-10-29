@@ -1826,6 +1826,10 @@ module TDev
                             })
                         }
                         return;
+                    case "change":
+                        this.stepCompleted();
+                        Util.setTimeout(1000, () => this.update());
+                        return;
                     default:
                         HTML.showErrorNotification(lf("unknown tutorial step: {0}", cmd))
                         this.stepCompleted()
