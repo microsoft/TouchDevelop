@@ -432,7 +432,7 @@ div.calcDebug {
 }
 
 .calcButton:hover {
-    border: solid 1px #bbb;
+    outline: solid 1px #bbb;
 }
 
 .phone .calcButton {
@@ -4966,7 +4966,6 @@ div.bitmatrixbtns {
   right: 1em;
   width:8em;
   text-align: right;
-  margin-top:1em;
 }
 
 div.bitmatrixbtns > button {
@@ -5018,7 +5017,7 @@ table.bitpreview > tr > td.bit > div {
 }
 
 table.bitmatrix > tr > td.bit:hover > div {
-    border-color:white;
+    border-color:#ccc;
 }
 
 table.bitmatrix > tr > td.bit[data-on=yes] > div {
