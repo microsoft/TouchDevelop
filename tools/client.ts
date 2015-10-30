@@ -3910,6 +3910,35 @@ function dllite(args:string[])
     loop(cont)
 }
 
+function countpubs(args:string[])
+{
+    var store = args[0]
+    var cont = args[1] || ""
+
+    var k = tdliteKey()
+
+    var total = 0
+    var totalHidden = 0
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/admin/countpubs/" + store + "?count=500" + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+
+            totalHidden += parsed.hiddenItemCount
+            total += parsed.itemCount
+
+            console.log(store, 
+                "total:" + total + " hidden:" + totalHidden,
+                 parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5)
+
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
 function reindexone(store:string, cont = "")
 {
     var k = tdliteKey()
@@ -4089,10 +4118,11 @@ var cmds = {
     "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
     "uploadhtml": { f:uploadhtml, a:'FILENAME.html', h:'upload html file as script'},
     "reindexsearch": { f:reindexsearch, a:'[store [conttok]]', h:'re-index search documents in lite cloud'},
-    "importlist": { f:importlist, a:'[store [conttok]]', h:'import from td.com to lite cloud'},
+    "importlist": { f:importlist, a:'store [conttok]', h:'import from td.com to lite cloud'},
     "litepost": { f:litepost, a:'PATH [DATA]', h:'post DATA or {} to /api/PATH'},
     "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
     "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
+    "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
 }
 
 export interface ScriptTemplate {
