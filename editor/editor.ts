@@ -2474,29 +2474,27 @@ module TDev
             this.libExtractor.moveDecl(decl);
         }
 
-        public cutDecl(decl:AST.Decl, dontCopy = false)
-        {
-            if (decl.nodeType() == "action" && decl.getName() == "main" && !Script.isLibrary) {
+        public cutDecl(decl: AST.Decl, dontCopy = false) {
+            if (decl == Script) {
+                Util.log("cancelled script cut");
+                return; // can't delete script from editor
+            }
+            
+            if (decl.nodeType() == "action"
+                && decl.getName() == "main"
+                && !Script.isLibrary) {
                 // not allowed to delete "main" in non-library scripts
                 Util.log("cancelled main cut");
                 return;
             }
 
-            if (decl == Script) {
-                ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
-                    lf("uninstall"),
-                    () => {
-                        this.uninstallCurrentScriptAsync().done();
-                    });
-            } else {
-                this.undoMgr.pushMainUndoState();
-                if (!dontCopy)
-                    this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
-                var prev = this.scriptNav.previousDecl(decl);
-                Script.deleteDecl(decl);
-                this.renderDecl(prev);
-                this.queueNavRefresh();
-            }
+            this.undoMgr.pushMainUndoState();
+            if (!dontCopy)
+                this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
+            var prev = this.scriptNav.previousDecl(decl);
+            Script.deleteDecl(decl);
+            this.renderDecl(prev);
+            this.queueNavRefresh();
         }
 
         public pasteNode()

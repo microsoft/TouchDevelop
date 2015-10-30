@@ -6892,7 +6892,7 @@
             }
 
             if (this.cloudHeader) {
-                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("remove"), null,() => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
