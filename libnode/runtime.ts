@@ -836,9 +836,15 @@ module TDev.RT.Node {
         return Promise.as(r)
     }
 
+    export var isShuttingDown = false; // TODO expose this somewhere?
+
     var httpActions:any = {
         info: (args, req, resp) => getRuntimeInfoAsync(args[0] || "").done(r => resp.send(200, r)),
         ready: (args, req, resp) => resp.send(200, { ready: true }),
+        shutdown: (args, req, resp) => {
+            isShuttingDown = true;
+            resp.send(201, { })
+        },
     }
 
     function specialHttpRequest(req, resp)

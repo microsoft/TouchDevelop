@@ -1112,7 +1112,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numDeploys: tdstate.numDeploys,
             numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
-            versionStamp: "v6",
+            versionStamp: "v7",
         })
     },
 
@@ -1515,13 +1515,27 @@ class Worker {
 
     public shutdown()
     {
+        var u = this.getUrl()
+        u.path = "/-tdevmgmt-/" + config.deploymentKey + "/shutdown"
+        debug.log("sending shutdown request")
+        var creq = http.request(u, cres => {
+            debug.log("shutdown request: " + cres.statusCode)
+        })
+        creq.on("error", err => {
+            debug.log("shutdown request error: " + err.message)
+        })
+        creq.end()
+
         this.isdying = true;
         setTimeout(() => {
-                if (this.child) this.child.kill()
+                if (this.child) {
+                    debug.log("sending kill signal")
+                    this.child.kill()
+                }
                 setTimeout(() => {
                     if (this.child) this.child.kill("SIGKILL")
                 }, 5000)
-            }, 30000)
+            }, 3*60000)
     }
 
     public description()
@@ -2849,9 +2863,6 @@ function main()
             var tlsSessionStore = {}
             sslapp.on("newSession", (id, data, cb) => {
                 id = id.toString("hex")
-                console.log(id)
-                console.log(data.length)
-                console.log(data)
                 if (tlsSessionStoreCount > 50000) {
                     tlsSessionStore = {}
                     tlsSessionStoreCount = 0
