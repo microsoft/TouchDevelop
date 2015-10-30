@@ -703,6 +703,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse review"), () => { AbuseReview.show() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
+                    (Cloud.hasPermission("stats") ? HTML.mkButton(lf("stats"), () => { stats() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
                     (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
@@ -921,6 +922,49 @@ module TDev.Browser {
                         HTML.mkButton("cancel", () => {
                             m.dismiss()
                     })))
+                }, e => Cloud.handlePostingError(e, ""))
+            })
+        }
+
+        function stats()
+        {
+            var fields = {
+                "Scripts": "New_script,New_script_hidden",
+                "Scripts (public)": "New_script",
+                "Scripts (hidden)": "New_script_hidden",
+                "Resources": "New_art",
+                "URLs": "New_pointer",
+                "Accounts": "PubUser@federated",
+                "Logins": "Login@federated",
+                "/app/ served": "ServeApp@index.html",
+                "Homepage served": "ServePtr@home,ServePtrFirst@home",
+                "Other page served": "ServePtr@other,ServePtrFirst@other",
+            }
+
+            ModalDialog.editText(lf("How many days back?"), "180", days => {
+                var flds = {}
+                Object.keys(fields).forEach(k => {
+                    fields[k].split(/,\s*/).forEach(f => { flds[f] = 1 })
+                })
+                return Cloud.postPrivateApiAsync("dailystats", { start: Date.now()/1000-parseInt(days,10)*24*3600, length: 365, fields: Object.keys(flds) })
+                .then(resp => {
+                    var res = csv(["Date"].concat(Object.keys(fields)))
+                    for (var i = 0; i < resp.length; ++i) {
+                        var tm = new Date((resp.start + i * 24 * 3600) * 1000)
+                        var line = [tm.getUTCFullYear() + "-" + (tm.getUTCMonth()+1) + "-" + tm.getUTCDate()]
+                        Object.keys(fields).forEach(k => {
+                            var n = 0
+                            fields[k].split(/,\s*/).forEach(f => {
+                                n += (resp.values[f][i] || 0)
+                            })
+                            line.push(n.toString())
+                        })
+                        res += csv(line)
+                    }
+
+                    var dataurl = "data:text/csv;base64," + Util.base64Encode(res)
+                    HTML.browserDownload(dataurl, "stats.csv")
+
                 }, e => Cloud.handlePostingError(e, ""))
             })
         }
