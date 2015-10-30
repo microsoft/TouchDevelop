@@ -3306,7 +3306,7 @@ module TDev{
           if (currentLocale != locale) {
               window.localStorage.setItem("userLocale", locale);
               seeTranslatedText(true);
-              if(reloadIfNeeded)
+              if(reloadIfNeeded && !Storage.temporary)
                   Util.setTimeout(500, () => window.location.reload());
           }
     }
