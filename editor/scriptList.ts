@@ -228,6 +228,7 @@
         }
         
         public initMeAsync(): Promise {
+            Util.setUserLanguageSetting("", true)
             var id = Cloud.getUserId();
             if (!id) {
                 this.initSignin();
@@ -249,7 +250,6 @@
                     }
                     Cloud.setPermissions(settings.permissions);
                     EditorSettings.setThemeFromSettings();
-                    Util.setUserLanguageSetting(settings.culture, true);
                     if (!EditorSettings.currentTheme) EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     this.initSignin(settings.nickname);
@@ -1877,6 +1877,10 @@
                         this.moreDiv.setChildren([div("sdLoadingMore",
                             lf("no scripts yet, "), HTML.mkLinkButton(lf("create code"), () => { TemplateManager.createScript() }), lf(" to get started!"))]);    
                     }
+                    
+                    this.moreDiv.appendChild(HTML.mkButton(lf("import code"), () => {
+                        ArtUtil.importFileDialog();
+                    }));    
                     
                 }, noCache, includeETags);
             }

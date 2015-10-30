@@ -2489,7 +2489,7 @@ module TDev.Browser {
                 Browser.setInnerHTML(dialogBody, "")
 
                 var nickname, website, twitterhandle, githubuser, minecraftuser, location, area, aboutme, realname, gender, yearofbirth,
-                    culture, howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
+                    howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
                     school;
 
                 if (!notificationsOnly) {
@@ -2520,13 +2520,6 @@ module TDev.Browser {
                 dialogBody.appendChild(Hub.userPictureChooser(settings.picturelinkedtofacebook === false, () => { updated = true }))
 
                 dialogBody.appendChild(div("form-title", lf("private profile")));
-
-                    var cultureOptions = [HTML.mkOption("", "")];
-                    for (var i = 0; i < settings.cultureoptions.length; i++)
-                        cultureOptions.push(HTML.mkOption(settings.cultureoptions[i], settings.culturenames[i], (settings.culture || (<any>navigator).language) == settings.cultureoptions[i]));
-                    var cultureBox = HTML.mkComboBox(cultureOptions);
-                    culture = <HTMLSelectElement>textEntry(lf("preferred language"), cultureBox);
-                    cultureBox.style.fontSize = "0.8em";
 
                     realname = <HTMLInputElement>textEntry(lf("real name"), HTML.mkTextInput("text", lf("real name")),
                         lf("Your full name"));
@@ -2633,7 +2626,6 @@ module TDev.Browser {
                             progressBar.start();
                             saveBtn.setChildren(lf("saving..."));
                             err.setChildren([])
-                            var cultureValue = culture === undefined ? undefined : culture.options[culture.selectedIndex].value;
                             Cloud.postUserSettingsAsync({
                                     nickname: nickname === undefined ? undefined : nickname.value,
                                     website: website === undefined ? undefined : website.value,
@@ -2642,7 +2634,6 @@ module TDev.Browser {
                                     realname: realname === undefined ? undefined : realname.value,
                                     gender: gender === undefined ? undefined : gender.options[gender.selectedIndex].value,
                                     howfound: howfound === undefined ? undefined : howfound.options[howfound.selectedIndex].value,
-                                    culture: cultureValue,
                                     yearofbirth: yearofbirth === undefined ? undefined : parseInt(yearofbirth.options[yearofbirth.selectedIndex].value),
                                     programmingknowledge: programmingknowledge === undefined ? undefined : programmingknowledge.options[programmingknowledge.selectedIndex].value,
                                     occupation: occupation === undefined ? undefined : occupation.options[occupation.selectedIndex].value,
@@ -2662,7 +2653,6 @@ module TDev.Browser {
                                     else {
                                         if (resp.emailverificationsent) d.onDismiss = undefined;
                                         updated = true;
-                                        Util.setUserLanguageSetting(cultureValue);
                                         d.dismiss();
                                         if (resp.emailverificationsent)
                                         {
