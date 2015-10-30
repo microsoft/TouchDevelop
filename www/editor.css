@@ -2884,6 +2884,7 @@ a.md-bigbutton:hover {
   color: #6c6c6c;
   display: inline-block;
   margin-right: 0.5em;
+  padding: 0 0.5em;
   cursor: pointer;
   line-height:2em;
 }
@@ -2904,12 +2905,6 @@ a.md-bigbutton:hover {
 {
   color: black;
   font-weight: bold;
-}
-
-.sdTabLabel:nth-of-type(n+2):before{
-    content: " | ";
-    padding: 0 0.5em;
-    font-weight: normal;
 }
 
 .sdHeaderContainer {
