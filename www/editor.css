@@ -2103,13 +2103,13 @@ div.decl > div.stmt {
 }
 
 @keyframes blinkLocation {
-  0% { background-color: #ff0; }
-  15% { background-color: #ffc; }
-  30% { background-color: #ff0; }
-  45% { background-color: #ffc; }
-  60% { background-color: #ff0; }
+  0% { background-color: #ff0; color:#000; }
+  15% { background-color: #ffc; color:#000; }
+  30% { background-color: #ff0; color:#000; }
+  45% { background-color: #ffc; color:#000; }
+  60% { background-color: #ff0; color:#000; }
   100% { background-color: inherit; }
-}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-ms-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }  @-ms-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }
 
 
 .codeSearchItem .navItemInner {
