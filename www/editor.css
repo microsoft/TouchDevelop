@@ -4960,23 +4960,21 @@ table.bitpreview {
     display:block;
 }
 
-div.bitmatrix > div.btns {
-  position:absolute;
-  right:0em;
-  vertical-align:top;
-  margin-top:0.5em;
+div.bitmatrixbtns {
+  position: absolute;
+  top:0em;
+  right: 1em;
+  width:8em;
+  text-align: right;
+  margin-top:1em;
 }
 
-div.bitmatrix > div.btns > button {
+div.bitmatrixbtns > button {
   display:inline-block;
 }
 
 table.bitmatrix > tr.bitheader {
   text-align: center;
-}
-
-table.bitmatrix > tr.bitrow {
-
 }
 
 #scriptEditor[data-blockmode="yes"] table.bitmatrix > tr > td.index {
@@ -5006,16 +5004,16 @@ table.bitmatrix > tr > td.bit > div {
 }
 
 table.bitpreview > tr > td.bit {
-    width:1em;
-    height:1em;
+    width:1.1em;
+    height:1.1em;
 }
 
 table.bitpreview > tr > td.bit > div {
     border-radius:2px;
     background-color:#ddd;
     border: 0.05em solid gray;
-    width:0.5em;
-    height:0.8em;
+    width:0.6em;
+    height:0.9em;
     margin:0.1em 0.25em 0.1em 0.25em;
 }
 
