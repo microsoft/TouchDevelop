@@ -1057,6 +1057,7 @@ module TDev
             var willNowPublish = false;
 
             m.onDismiss = () => {
+                tick(Ticks.tutorialEnd);
                 if (Script) {
                     TheEditor.saveStateAsync({ forReal: true }).done(() => {
                         if (willNowPublish)

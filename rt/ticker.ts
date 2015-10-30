@@ -33,6 +33,8 @@ module TDev {
         hourOfCodeMore,
         hourOfCodeFinal,
 
+        tutorialStart,
+        tutorialEnd,
         tutorialTranslateSplash,
         tutorialTranslateStep,
         tutorialTranslateScript,

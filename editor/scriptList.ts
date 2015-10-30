@@ -10353,6 +10353,7 @@
                         return
                     }
 
+                    Ticker.tick(Ticks.tutorialStart);                    
                     if (topic.isBuiltIn)
                         Ticker.rawTick("startTutorial_" + topic.id);
 
