@@ -187,8 +187,11 @@ module TDev
                 this.dialog.add(this.root);
                 this.dialog.fullWhite();
                 this.dialog.stretchWide();
-                this.dialog.setScroll();
-                this.dialog.onDismiss = () => this.calculator.checkNextDisplay();
+                
+                this.root.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
+                Util.setupDragToScroll(this.root);
+                
+                this.dialog.onDismiss = () => this.calculator.checkNextDisplay();                
                 this.dialog.show();
             }
         }
