@@ -948,10 +948,14 @@ module TDev.Browser {
                 })
                 return Cloud.postPrivateApiAsync("dailystats", { start: Date.now()/1000-parseInt(days,10)*24*3600, length: 365, fields: Object.keys(flds) })
                 .then(resp => {
+                    if (resp.length < 1) {
+                        ModalDialog.info(lf("sorry"), lf("no data returned"))
+                        return;
+                    }
+
                     var res = csv(["Date"].concat(Object.keys(fields)))
-                    for (var i = 0; i < resp.length; ++i) {
-                        var tm = new Date((resp.start + i * 24 * 3600) * 1000)
-                        var line = [tm.getUTCFullYear() + "-" + (tm.getUTCMonth()+1) + "-" + tm.getUTCDate()]
+                    var addValues = (hd:string, i:number) => {
+                        var line = [hd]
                         Object.keys(fields).forEach(k => {
                             var n = 0
                             fields[k].split(/,\s*/).forEach(f => {
@@ -961,6 +965,25 @@ module TDev.Browser {
                         })
                         res += csv(line)
                     }
+
+                    Object.keys(flds).forEach(f => {
+                        var sum = 0
+                        for (var i = 0; i < resp.length; ++i) {
+                            sum += resp.values[f][i]
+                        }
+                        resp.values[f][resp.length + 1] = sum
+                        resp.values[f][resp.length + 2] = Math.round(sum / resp.length * 100) / 100
+                    })
+
+                    for (var i = 0; i < resp.length; ++i) {
+                        var tm = new Date((resp.start + i * 24 * 3600) * 1000)
+                        var hd = tm.getUTCFullYear() + "-" + (tm.getUTCMonth()+1) + "-" + tm.getUTCDate()
+                        addValues(hd, i)
+                    }
+
+                    addValues("Total", resp.length + 1)
+                    addValues("Avarage", resp.length + 2)
+                    addValues("Lifetime total", resp.length)
 
                     var dataurl = "data:text/csv;base64," + Util.base64Encode(res)
                     HTML.browserDownload(dataurl, "stats.csv")
