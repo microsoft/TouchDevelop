@@ -76,6 +76,8 @@ module TDev {
             return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
 
+        var pendingMetaItems = [];
+
         function setInstalledAsync(
             indexTable: Storage.Table,
             scriptsTable: Storage.Table,
@@ -89,8 +91,16 @@ module TDev {
             // In the case of a regular script, we can recover the metadata from
             // the script body. In the case of an external editor, we demand
             // that the caller properly set the metadata.
-            if (script && !header.editor && (!header.meta || header.meta.comment === undefined))
+            if (script && !header.editor && (!header.meta || header.meta.comment === undefined)) {
                 header.meta = getScriptMeta(script);
+                if (Cloud.lite) {
+                    // will try to store the meta
+                    pendingMetaItems.push({
+                        guid: header.guid,
+                        meta: header.meta
+                    })
+                }
+            }
             if (header.editor && (!header.meta || !header.meta.name)) {
                 Util.log("ERROR pre-condition not met for [setInstalledAsync]; bailing");
                 debugger;
@@ -641,6 +651,7 @@ module TDev {
                 // properties to prevent some promises from being
                 // garbage-collected until we move on to the next step?
                 time("diff");
+                pendingMetaItems = [];
                 data.downloaded = Promise.thenEach(newerHeaders, (h: Cloud.Header) => {
                     if (syncVersion != mySyncVersion) return canceled;
                     return downloadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(-1, 0, 0) });
@@ -664,6 +675,11 @@ module TDev {
                         ModalDialog.info(lf("publishing failed"), lf("There was a versioning mismatch between your local state and the cloud. Please check the content of the script you want to publish and then try again."));
                 }));
                 data.progress = Cloud.postPendingProgressAsync();
+                // This is performance optimization - after import from the old cloud script entries have no meta and thus meta
+                // has to be re-generated on every sync on a new device. Here, we'll push meta to the cloud.
+                if (Cloud.lite && pendingMetaItems.length > 0) {
+                    data.postmeta = Cloud.postUserInstalledAsync(<any>{ metas: pendingMetaItems })
+                }
                 return Promise.join(data);
             }).then(() => {
                 time("publish");
