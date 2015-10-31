@@ -1689,7 +1689,7 @@ module TDev.Browser {
             }
 
             if (h[1] == "signin") {
-                Login.show(h[2] || "list:installed-scripts")
+                Login.show(h[2] || (Cloud.isRestricted() ? "list:installed-scripts" : "hub"))
                 return
             }
 
