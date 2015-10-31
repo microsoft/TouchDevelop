@@ -6831,7 +6831,9 @@
 
 
         private mkButtons()
-        {
+        {     
+            var clone : HTMLElement;
+            var save : HTMLElement;            
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
                 var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon)),
@@ -6882,10 +6884,6 @@
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
             }
             
-            var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
-            clone.classList.add("sdUninstall");
-            var save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
-
             var uninstall:HTMLElement;
             var moderate:HTMLElement;
             var editWithGroup:HTMLElement;
@@ -6899,6 +6897,10 @@
                 uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("remove"), null,() => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
+                clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
+                clone.classList.add("sdUninstall");
+                save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
+                
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
