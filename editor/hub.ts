@@ -1688,6 +1688,11 @@ module TDev.Browser {
                 return
             }
 
+            if (h[1] == "migrate") {
+                Login.show("hub", "&u=" + encodeURIComponent(h[2]))
+                return
+            }
+
             if (h[1] == "signin") {
                 Login.show(h[2] || (Cloud.isRestricted() ? "list:installed-scripts" : "hub"))
                 return
