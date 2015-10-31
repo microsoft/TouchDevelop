@@ -9714,7 +9714,7 @@
             var icon = div("sdIcon", HTML.mkImg("svg:fa-ban,#333,clip=80"));
             icon.style.background = "#ff6";
             var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", div("sdCommentBlock", div("sdCommentBlockInner",
-                lf("Your publication /{0} ({1}) has been deleted by a moderator.", 
+                lf("Something you published ({1}, /{0}) has been deleted by a moderator.", 
                     notification.publicationid, notification.publicationname ))))));
             return res;
         }
