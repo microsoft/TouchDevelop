@@ -1,3 +1,7 @@
+* {
+  transition: transform 0.1s, background-color 0.1s;
+}
+
 div.calcButtonHelp {
     font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
 }
