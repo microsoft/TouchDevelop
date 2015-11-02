@@ -22,12 +22,12 @@ module TDev.AbuseReview
             root = div("abuseReview",
                 HTML.mkButton(lf("abuse reports"), () => {
                     show();
-                }),
+                }, "onlyHidden"),
                 HTML.mkButton(lf("refresh"), () => {
                     refresh();
                 }),
                 resolved,
-                HTML.mkButton(lf("dismiss"), () => {
+                HTML.mkButton(lf("minimize"), () => {
                     hide();
                 }),
                 scroll = div("scroll"))

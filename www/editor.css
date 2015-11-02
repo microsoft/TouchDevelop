@@ -6229,6 +6229,14 @@ table.dashboard tr td[data-completed^="yes"] {
   overflow-x:hidden;
 }
 
+.onlyHidden {
+  display: none;
+}
+
+.abuseReviewHidden .onlyHidden {
+  display: inline-block;
+}
+
 .abuseReviewHidden {
   font-size: 0.5em;
   height: 2.7em;
