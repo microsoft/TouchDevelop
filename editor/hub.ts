@@ -661,7 +661,7 @@ module TDev.Browser {
             var legalButtons = Cloud.config.legalButtons.map(b => link(lf_static(b.name, true), b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
-                Cloud.getUserId() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : undefined,
+                Cloud.getUserId() ? HTML.mkButton(lf("Sign out"), () => TheEditor.logoutDialog()) : undefined,
                 legalButtons
                 ));
 
