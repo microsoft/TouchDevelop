@@ -7556,7 +7556,7 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ")
+                        lf("Remember: everyone will be able to see your script if you publish it, so make sure it doesn’t contain your passwords or personal information.")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
@@ -7725,7 +7725,7 @@
                     .then(() => {
                         var hash = HistoryMgr.windowHash()
                         if (allowUndo && restoreAsync) {
-                            HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            HTML.showUndoNotification(lf("{0} has been removed.", this.getTitle()), () => {
                                 restoreAsync.then((restore) => restore())
                                     .then(() => this.browser().updateInstalledHeaderCacheAsync())
                                     .then(() => TheEditor.historyMgr.reload(hash))
@@ -8491,7 +8491,7 @@
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private)"), "email");
                         cc.push(div('inline-description', s.emailverified 
-                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
+                              ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
