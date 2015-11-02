@@ -6894,12 +6894,12 @@
             }
 
             if (this.cloudHeader) {
-                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("remove"), null,() => this.uninstall());
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:uninstall,white", lf("remove"), null,() => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
-                clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
+                clone = mkBtn(Ticks.browseClone, "svg:clone,white", lf("clone"), null, () => this.cloneAsync().done());
                 clone.classList.add("sdUninstall");
-                save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
+                save = mkBtn(Ticks.browseSave, "svg:save,white", lf("save"), null, () => this.saveAsync().done());
                 
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;

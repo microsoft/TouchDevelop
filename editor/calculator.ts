@@ -3807,7 +3807,7 @@ module TDev
 
             if (curPage == pages) {
                 var search = pages == 1 ? keys[keys.length - 1] : keys[keys.length - 2];
-                search.setImage("svg:Search,#5A5AFF,clip=100", lf("more"), Ticks.calcNextIntelliPageSearch,
+                search.setImage("svg:search,#5A5AFF,clip=100", lf("more"), Ticks.calcNextIntelliPageSearch,
                               () => {
                                     if (this.searchApi.visible) {
                                         this.searchApi.cancel();
