@@ -1,5 +1,5 @@
 * {
-  transition: transform 0.1s, background-color 0.1s;
+  transition: transform 0.1s, background-color 0.1s;                      /*CSSpref*/  -webkit-transition: -webkit-transform 0.1s, background-color 0.1s;  -moz-transition: -moz-transform 0.1s, background-color 0.1s;  -ms-transition: -ms-transform 0.1s, background-color 0.1s;
 }
 
 div.calcButtonHelp {
