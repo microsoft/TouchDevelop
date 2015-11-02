@@ -2970,7 +2970,7 @@ a.md-bigbutton:hover {
   display: inline-block;
 }
 
-.sdIcon .svg {
+.sdIcon svg {
     width: 100%;
     height: 100%;
 }
