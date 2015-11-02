@@ -22,7 +22,7 @@ module TDev.AbuseReview
             root = div("abuseReview",
                 HTML.mkButton(lf("abuse reports"), () => {
                     show();
-                }),
+                }, "onlyHidden"),
                 HTML.mkButton(lf("refresh"), () => {
                     refresh();
                 }),
