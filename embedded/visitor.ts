@@ -30,7 +30,7 @@ module TDev {
               return this.visitGlobalDef(env, n13.name, n13.type, n13.comment);
             case "localDef":
               var n1 = <J.JLocalDef> n;
-              return this.visitLocalDef(env, n1.name, n1.id, n1.type);
+              return this.visitLocalDef(env, n1.name, n1.id, n1.type, n1.isByRef);
             case "localRef":
               var n11 = <J.JLocalRef> n;
               return this.visitLocalRef(env, n11.name, <any> n11.localId);
@@ -115,7 +115,8 @@ module TDev {
         env: T,
         name: string,
         id: string,
-        type: J.JTypeRef): U                                              { throw new Error("Not implemented"); }
+        type: J.JTypeRef,
+        isByRef: boolean): U                                              { throw new Error("Not implemented"); }
       public visitLocalRef(env: T, name: string, id: string): U           { throw new Error("Not implemented"); }
       public visitExprHolder(
         env: T,
