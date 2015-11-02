@@ -562,7 +562,7 @@ module TDev.Cloud {
     export function onlineInfo(): string {
         if (Cloud.isOffline()) {
             var msg = lf("You appear to be offline. ") + (isTouchDevelopOnline()
-                ? lf("Please connect to the internet.")
+                ? lf("Please connect to the internet and try again.")
                 : lf("Please go to the settings in the main hub to disable offline mode."));
             return msg;
         }

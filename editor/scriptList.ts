@@ -3890,7 +3890,7 @@
                         return r
                     }, e => {
                         HTML.showProgressNotification(lf("error reading history; are you connected to internet?"));
-                        return [div('', lf("Oops, couldn't get the history. Please check your internet and try again."))];
+                        return [div('', lf("Oops, we couldn't access your script history. Please check your internet connection and try again."))];
                     })
             }
 
@@ -8504,7 +8504,7 @@
                         cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
-                }, e => Cloud.handlePostingError(e, lf("getting settings")))
+                }, e => Cloud.handlePostingError(e, lf("get settings")))
 
                 if (this.isMe())
                     refreshSettings()
