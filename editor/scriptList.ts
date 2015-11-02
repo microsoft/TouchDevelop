@@ -3267,10 +3267,20 @@
 
         public equals(other:BrowserPage) { return other && (this == other || this.persistentId() == other.persistentId()); }
 
+        public isDeleted()
+        {
+            return false;
+        }
+
         public mkSmallBox():HTMLElement
         {
             var box = this.mkBoxCore(false)
             return box.withClick(() => { 
+                if (this.isDeleted()) {
+                    HTML.wrong(box);
+                    return;
+                }
+
                 if (!/ visited/.test(box.className))
                     box.className += " visited";
                 this.parentBrowser.loadDetails(this) 
@@ -6259,6 +6269,11 @@
             return this.app ? this.app.getDescription() : "";
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
+
+        public isDeleted()
+        {
+            return (<any>this.jsonScript) === false;
+        }
 
         public shareButtons() {
             var btns = super.shareButtons();
