@@ -1324,6 +1324,26 @@ module TDev.Browser {
     }
     
     export module TemplateManager {        
+        export var createEditor : ExternalEditor = {
+            company: "BBC micro:bit",
+            name: lf("Create Code"),
+            description: lf("Create a new script"),
+            origin: "",
+            path: "",
+            id: "create",
+            order: 5,
+            logoUrl: "",
+        };
+        export var importEditor : ExternalEditor = {
+            company: "BBC micro:bit",
+            name: lf("Import Code"),
+            description: lf("Import a script from a file"),
+            origin: "",
+            path: "",
+            id: "import",
+            order: 6,
+            logoUrl: "",
+        };
         export function chooseEditorAsync() : Promise { // of ScriptTemplate
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
@@ -1342,29 +1362,11 @@ module TDev.Browser {
                 editors.sort((a, b) => a.order - b.order);
                 
                 // add import editor
-                editors.push({
-                    company: "BBC micro:bit",
-                    name: lf("Import Code"),
-                    description: lf("Import a script from a .hex file"),
-                    origin:"",
-                    path:"",
-                    id: "import",
-                    order: 5,
-                })
+                editors.push(importEditor)
                 
                 var elts = [];
-                editors.forEach(k => {
-                    var icon = div("sdIcon");
-                    var ic = ScriptInfo.editorIcons[k.id].split(',');
-                    icon.style.backgroundColor = ic[1]
-                    icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
-
-                    var nameBlock = div("sdName", k.name);
-                    var hd = div("sdNameBlock", nameBlock);
-                    var author = div("sdAuthorInner", k.company);                    
-                    var addInfo = div("sdAddInfoInner", k.description);
-                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
-
+                editors.forEach((k : ExternalEditor) => {
+                    var res = mkEditorBox(k);
                     res.withClick(() => {
                         m.onDismiss = undefined;
                         m.dismiss();
@@ -1376,6 +1378,20 @@ module TDev.Browser {
             });
         }
         
+        export function mkEditorBox(k: ExternalEditor): HTMLElement {
+            var icon = div("sdIcon");
+            var ic = ScriptInfo.editorIcons[k.id].split(',');
+            icon.style.backgroundColor = ic[1]
+            icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
+
+            var nameBlock = div("sdName", k.name);
+            var hd = div("sdNameBlock", nameBlock);
+            var author = div("sdAuthorInner", k.company);
+            var addInfo = div("sdAddInfoInner", k.description);
+            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
+            return res;
+        }
+                
         export function createScript() {
             var gotoTemplate = () => {
                 chooseScriptFromTemplateAsync()

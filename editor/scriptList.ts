@@ -1858,29 +1858,35 @@
                         if (!item)
                             this.showSidePane();
                     }
+                    
+                    this.moreDiv.setChildren([]);
+                                        
+                    if (/^installed/.test(path)) {
+                        if (Cloud.isRestricted()) {
+                            this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
+                                tick(Ticks.browseCreateCode);
+                                TemplateManager.createScript()
+                            }));
+                        }
+                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
+                            tick(Ticks.browseImportCode);
+                            ArtUtil.importFileDialog();
+                        }));
+                    }    
 
                     if (ncont) {
                         this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
-                            this.moreDiv.setChildren([div("sdLoadingMore", lf("loading more..."))]);
+                            this.moreDiv.appendChild(div("sdLoadingMore", lf("loading more...")));
                             loadEntries(ncont);
                         })]);
-                    } else if (this.hasMore && this.moreDiv) {
-                        this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
+                    } else if (this.hasMore) {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.displayLimit += Host.maxDisplayAtOnce;
                             if (this.displayLimit >= this.topLocations.length && this.moreDiv)
                                 this.moreDiv.setChildren([])
                             this.syncView(false)
-                        })]);
+                        }));
                     }
-                    
-                    if (Cloud.isRestricted() && !ncont && /^installed/.test(path) && this.topLocations.length == 0) {
-                        this.moreDiv.setChildren([div("sdLoadingMore",
-                            lf("no scripts yet, "), HTML.mkLinkButton(lf("create code"), () => { TemplateManager.createScript() }), lf(" to get started!"))]);    
-                    }
-                    
-                    this.moreDiv.appendChild(HTML.mkButton(lf("import code"), () => {
-                        ArtUtil.importFileDialog();
-                    }));    
                     
                 }, noCache, includeETags);
             }
@@ -6519,6 +6525,7 @@
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
+            "create": "edit,#ccc",
             "import": "bitload,#ccc",
             "*": "emptycircle,#85BB65",
         }

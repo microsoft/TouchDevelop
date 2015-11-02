@@ -455,6 +455,8 @@ module TDev {
         browseSendPullRequest,
         browseClone,
         browseSave,
+        browseCreateCode,
+        browseImportCode,
         browsePublicationNotes,
         browseListPointers,
         browseListBugs,
