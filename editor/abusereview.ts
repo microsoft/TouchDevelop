@@ -27,7 +27,7 @@ module TDev.AbuseReview
                     refresh();
                 }),
                 resolved,
-                HTML.mkButton(lf("dismiss"), () => {
+                HTML.mkButton(lf("minimize"), () => {
                     hide();
                 }),
                 scroll = div("scroll"))
