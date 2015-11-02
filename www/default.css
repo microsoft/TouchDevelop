@@ -491,8 +491,7 @@ p.wall-record
 }
 
 .wall-button:hover {
-  color:white;
-  background:black;
+  background: rgba(100,100,100,0.2);
 }
 
 #theWall .wall-button, #wall-overlay .wall-button /* Windows 8 Modern guidelines */
@@ -812,8 +811,7 @@ div.topButtons button {
 .topMenu-button-frame:hover,
 .tabMenu-button-frame:hover
 {
-  background-color:black;
-  color:white;
+  background: rgba(100,100,100,0.3);
 }
 
 .tabMenu-button-frame {

@@ -1,3 +1,7 @@
+* {
+  transition: transform 0.1s, background-color 0.1s;
+}
+
 div.calcButtonHelp {
     font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
 }
@@ -88,7 +92,7 @@ button.navItem
 }
 
 button.navItem:hover {
-  border-left-color:#E72A59;
+  border-left-color:rgba(100,100,100,0.3);
 }
 
 .navItem
@@ -2806,7 +2810,7 @@ a.md-bigbutton:hover {
 
 .sdHeaderOuter:hover
 {
-  border-left-color:#E72A59;
+  border-left-color:rgba(100,100,100,0.3);
 }
 
 .sdBaseHeader {
@@ -3516,7 +3520,7 @@ div.sdTabTileLabel {
 }
 
 .sdBigButton:hover {
-  border: solid white 0.25em;
+  transform: translate(0.15em, 0.15em);                      /*CSSpref*/  -webkit-transform: translate(0.15em, 0.15em);  -moz-transform: translate(0.15em, 0.15em);  -ms-transform: translate(0.15em, 0.15em);
 }
 
 .phone .sdBigButtonFull {
@@ -4066,7 +4070,7 @@ right:4.5em;
 }
 
 .hubTile:hover {
-  border: solid white 0.1em;
+  transform: translate(0.1em, 0.1em);                      /*CSSpref*/  -webkit-transform: translate(0.1em, 0.1em);  -moz-transform: translate(0.1em, 0.1em);  -ms-transform: translate(0.1em, 0.1em);
 }
 
 .hubTileSize1 {

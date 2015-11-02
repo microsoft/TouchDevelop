@@ -1034,7 +1034,7 @@ module TDev {
                     // return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
                     return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}'>{2}</div>", posterUrl, playerUrl, SVG.getVideoPlay(posterUrl));
                 }
-            } else if (Cloud.lite && macro == "bbc") {
+            } else if (Cloud.isRestricted() && macro == "bbc") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
                 if (!arg)

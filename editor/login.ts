@@ -4,14 +4,13 @@
 
 module TDev.Login
 {
-    export function show(hash: string = null): boolean {
+    export function show(hash: string = null, addParameters = ""): boolean {
         // Cloud.isOnline should be checked prior to call this api
         if (/skipLogin/.test(document.URL)) {
             HTML.showErrorNotification("skipLogin specified; won't login")
             return false;
         }
 
-        var addParameters = "";
         var m = /u=\w+/.exec(document.URL);
         if (m)
             addParameters = "&" + m[0];
@@ -38,5 +37,18 @@ module TDev.Login
         Util.navigateInWindow(url);
 
         return true;
+    }
+
+    export function migrate()
+    {
+        Util.httpPostRealJsonAsync("https://next.touchdevelop.com/api/migrationtoken", { 
+            access_token:  decodeURIComponent(TDev.Cloud.getAccessToken()) 
+        }).then(tok => {
+            Util.navigateInWindow("https://next.touchdevelop.com/app/#hub:migrate:" + tok.migrationtoken)
+        }, e => {
+            if (e.status == 409)
+                ModalDialog.info(lf("already migrated"), lf("Your account has already been migrated."))
+            else throw e;
+        }).done()
     }
 }
