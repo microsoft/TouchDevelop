@@ -137,7 +137,7 @@ module TDev {
               "}\n"
             : "\nvoid app_main() {\n"+
               "  touch_develop::main();\n"+
-              "}\n")
+              "}\n") + "\n\n// vim: sw=2 ts=2"
         );
       });
     }
