@@ -75,11 +75,11 @@ module TDev {
         var lambdas = actions.map((a: J.JInlineAction) => {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
-            env.indent + "auto "+n+"_ = "+
-              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
-            env.indent + "auto "+n+" = new std::function<"+
+            env.indent +
+            "std::function<"+
                 H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-              ">("+n+"_);"
+              "> "+n+" = "+
+            this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
         });
         return (lambdas.join("\n")+"\n"+
