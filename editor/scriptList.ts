@@ -7052,8 +7052,8 @@
                             source: text,
                         }]
                     };
-                    HTML.browserDownload('data:application/json;base64,' + Util.base64Encode(Util.toUTF8(JSON.stringify(f))),
-                        Util.toFileName(this.cloudHeader.name, 'script') + ".json");                    
+                    HTML.browserDownloadText(JSON.stringify(f), Util.toFileName(this.cloudHeader.name, 'script') + ".json", 
+                            "application/json");
                 });
         }
         

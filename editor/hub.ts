@@ -986,7 +986,7 @@ module TDev.Browser {
                     addValues("Lifetime total", resp.length)
 
                     var dataurl = "data:text/csv;base64," + Util.base64Encode(res)
-                    HTML.browserDownload(dataurl, "stats.csv")
+                    HTML.browserDownloadText(res, "stats.csv", "text/csv")
 
                 }, e => Cloud.handlePostingError(e, ""))
             })

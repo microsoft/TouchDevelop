@@ -905,7 +905,8 @@ module TDev.AST.Bytecode
             this.binary.assemble()
 
             var res = {
-                dataurl: null,
+                data: null,
+                contentType: "application/x-microbit-hex",
                 csource: src,
                 sourceSaved: sourceSaved
             }
@@ -914,7 +915,7 @@ module TDev.AST.Bytecode
                 return res;
 
             var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n";
-            res.dataurl = "data:application/x-microbit-hex;base64," + Util.base64Encode(hex)
+            res.data = hex;
             return res;
         }
 

@@ -314,13 +314,13 @@ module TDev
 
                 ScriptProperties.firstTime = false
 
-                if (res.dataurl) {
+                if (res.data) {
                     var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
                     if (buttonHolder)
                         buttonHolder.appendChild(HTML.mkButton(lf("download .hex file"), () => {
-                            HTML.browserDownload(res.dataurl, fn);                           
+                            HTML.browserDownloadText(res.data, fn, res.contentType);
                         }));
-                    HTML.browserDownload(res.dataurl, fn);
+                    HTML.browserDownloadText(res.data, fn, res.contentType);
                 }
             })
             .done(() => {},
