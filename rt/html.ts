@@ -431,6 +431,7 @@ module TDev.HTML {
         "application/javascript": "js",
         "text/plain": "txt",
         "application/pdf": "pdf",
+        "application/x-zip-compressed": "zip",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
