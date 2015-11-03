@@ -5,7 +5,6 @@ int            bits::and_uint32              (int x, int y);                    
 int            bits::or_uint32               (int x, int y);                         // F2
 int            bits::rotate_left_uint32      (int x, int y);                         // F2
 int            bits::rotate_right_uint32     (int x, int y);                         // F2
-uint32_t       bits::rotl32c                 (uint32_t x, uint32_t n);               // F2
 int            bits::shift_left_uint32       (int x, int y);                         // F2
 int            bits::shift_right_uint32      (int x, int y);                         // F2
 int            bits::xor_uint32              (int x, int y);                         // F2

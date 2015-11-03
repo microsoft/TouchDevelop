@@ -1398,10 +1398,6 @@ module TDev.AST
                 }
             }
 
-            if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0 && !Cloud.useEmbeddedGcc) {
-                this.markError(t, lf("TD208: inline functions cannot access locals from outside; try 'promote to data' on '{0}'", l.getName()))
-            }
-
 
             t._kind = t.def.getKind();
             if (t.def instanceof LocalDef) {

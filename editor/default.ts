@@ -228,11 +228,7 @@ module TDev
         if (/nohub/.test(url) || Cloud.isRestricted()) { TDev.noHub = true; TDev.hubHash = "list:installed-scripts"; }
 
         if (/bitvm=0/.test(url)) {
-            Cloud.useEmbeddedGcc = false;
             Cloud.useNativeCompilation = true;
-        }
-        if (/usegcc=1/.test(url)) {
-            Cloud.useEmbeddedGcc = true;
         }
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
