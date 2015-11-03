@@ -3946,8 +3946,12 @@ function reindexone(store:string, cont = "")
     var total = 0
     var totalReindexed = 0
 
+    var path = "admin/reindex/" + store
+    if (store == "groupmembers")
+        path = "groups/reimportmembers";
+
     var loop = (cont:string) =>
-        tdevGet(k.liteUrl + "api/admin/reindex/" + store + "?count=100" + cont + k.key, resp => {
+        tdevGet(k.liteUrl + "api/" + path + "?count=100" + cont + k.key, resp => {
             var parsed = JSON.parse(resp)
 
             totalReindexed += parsed.itemsReindexed
