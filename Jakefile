@@ -236,7 +236,8 @@ mkSimpleTask('build/ace-main.js', [
 mkSimpleTask('build/blockly-main.js', [
     "www/blockly/blockly-main.ts",
     "www/blockly/compiler.ts",
-    "editor/messages.ts"
+    "editor/messages.ts",
+    "ast/jsonInterfaces.ts"
 ], "www/blockly/refs.ts");
 
 // Now come the rules for files that are obtained by concatenating multiple

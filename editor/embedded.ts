@@ -66,7 +66,7 @@ module TDev {
 
       // Types
       "Number", "Boolean", "String", "ManagedString", "Collection",
-      "Collection_of", "Ref",
+      "Collection_of", "Ref", "TdError", "DalAdapter",
     ];
 
     // Compile an entire program, including its libraries.

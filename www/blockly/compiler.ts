@@ -179,7 +179,8 @@ module Helpers {
       nodeType: "localDef",
       id: null,
       name: x,
-      type: t
+      type: t,
+      isByRef: false,
     };
   }
 
@@ -319,6 +320,8 @@ module Helpers {
       reference: reference,
       isImplicit: isImplicit,
       isOptional: false,
+      capturedLocals: [],
+      allLocals: [],
     }
   }
 
