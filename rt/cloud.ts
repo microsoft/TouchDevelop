@@ -212,6 +212,9 @@ module TDev.Cloud {
         doNothingText: string;
         hintLevel: string;
 
+        primaryCdnUrl: string;
+        altCdnUrls: string[];
+
         tdVersion?: string;
         releaseid?: string;
         relid?: string;
@@ -231,6 +234,12 @@ module TDev.Cloud {
         searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
         searchUrl: "https://tdsearch.search.windows.net",
         cdnUrl: "https://az31353.vo.msecnd.net",
+        primaryCdnUrl: "https://az31353.vo.msecnd.net",
+        altCdnUrls: [
+            "https://az31353.vo.msecnd.net",
+            "https://touchdevelop.blob.core.windows.net",
+            "http://cdn.touchdevelop.com",
+        ],
         translateCdnUrl: "https://tdtutorialtranslator.blob.core.windows.net",
         translateApiUrl: "https://tdtutorialtranslator.azurewebsites.net/api",
         workspaceUrl: null,
@@ -251,10 +260,37 @@ module TDev.Cloud {
 
     export function isArtUrl(url : string) : boolean {
         if (!url) return false;
-        var pubUrl = config.cdnUrl + "/pub/";
-        return url.substr(0, pubUrl.length) == pubUrl
-            || /\.\/art\//i.test(url) // exported apps
-            || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url); // legacy
+        if (/\.\/art\//i.test(url))
+            return true; // exported apps
+
+        for (var i = 0; i < config.altCdnUrls.length; ++i) {
+            var pubUrl = config.altCdnUrls[i] + "/pub/";
+            if (url.substr(0, pubUrl.length) == pubUrl)
+                return true
+        }
+
+        return false
+    }
+
+    function stripCdnUrl(url : string) {
+        if (!isArtUrl(url)) return null;
+        return url.replace(/^.*?\/pub\//, "")
+    }
+
+    export function toCdnUrl(url: string, thumbContainer = "") : string
+    {
+        if (!thumbContainer) thumbContainer = "pub"
+
+        var tmp = stripCdnUrl(url)
+        if (tmp) return config.primaryCdnUrl + "/" + thumbContainer + "/" + tmp
+        else return url
+    }
+
+    export function getArtId(url: string) : string
+    {
+        var tmp = stripCdnUrl(url)
+        if (/^\w+/.test(tmp)) return tmp;
+        else return null;
     }
 
     export function artCssImg(id: string, thumb = false): string {
@@ -262,7 +298,7 @@ module TDev.Cloud {
     }
 
     export function artUrl(id: string, thumb = false): string {
-        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.cdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
+        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.primaryCdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
     }
     
     export function setPermissions(perms:string = null)

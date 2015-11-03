@@ -1208,10 +1208,9 @@ var apiHandlers = {
             TDev.Script.librariesAndThis().forEach(l => {
                 if (l.resolved)
                     l.resolved.resources().forEach(v => {
-                        var pref = "https://az31353.vo.msecnd.net/pub/"
-                        var u = v.url
-                        if (u && u.slice(0, pref.length) == pref)
-                            res.artIds.push(u.slice(pref.length))
+                        var id = TDev.Cloud.getArtId(v.url)
+                        if (id)
+                            res.artIds.push(id)
                     })
             })
 

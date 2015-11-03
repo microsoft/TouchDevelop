@@ -152,7 +152,7 @@ module TDev.AST.Apps {
         setProp('var webAppGuid = "{0:jq}"', app.localGuid)
         setProp('var runtimeFlags = "{0:jq}"', options.runtimeFlags || "")
 
-        var theBase = Cloud.config.cdnUrl + "/app/" + options.relId + "/c/";
+        var theBase = Cloud.config.primaryCdnUrl + "/app/" + options.relId + "/c/";
 
 
         AST.TypeChecker.tcApp(app)
