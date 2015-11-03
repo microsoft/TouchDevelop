@@ -75,11 +75,11 @@ module TDev {
         var lambdas = actions.map((a: J.JInlineAction) => {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
-            env.indent + "auto "+n+"_ = "+
-              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
-            env.indent + "auto "+n+" = new std::function<"+
+            env.indent +
+            "std::function<"+
                 H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-              ">("+n+"_);"
+              "> "+n+" = "+
+            this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
         });
         return (lambdas.join("\n")+"\n"+
@@ -88,8 +88,11 @@ module TDev {
 
       public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
         var decls = locals.map(d => {
-          var x = H.defaultValueForType(this.libraryMap, d.type);
-          return this.visit(env, d) + (x ? " = " + x : "") + ";";
+          // Side-effect: marks [d] as promoted, if needed.
+          var decl = this.visit(env, d);
+          var defaultValue = H.defaultValueForType(this.libraryMap, d.type);
+          var initialValue = !H.isPromoted(env, d.id) && defaultValue ? " = " + defaultValue : "";
+          return decl + initialValue + ";";
         });
         return decls.join("\n"+env.indent) +
           (decls.length ? "\n" + env.indent : "") +
@@ -104,11 +107,23 @@ module TDev {
         //   which C and C++ accept both "f" and "&f" (we hence use the former)
         // - arrays, strings, user-defined objects, which are in fact of type
         //   "ManagedType<T>", no "&" operator here.
-        return H.resolveLocal(env, name, id);
+        // However, we now support capture-by-reference. This means that the
+        // data is ref-counted (so as to be shared), but assignment and
+        // reference operate on the ref-counted data (not on the pointer), so we
+        // must add a dereference there.
+        var prefix = H.isPromoted(env, id) ? "*" : "";
+        return prefix+H.resolveLocal(env, name, id);
       }
 
-      public visitLocalDef(env: H.Env, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(env, this.libraryMap, type)+" "+H.resolveLocal(env, name, id);
+      public visitLocalDef(env: H.Env, name: string, id: string, type: J.JTypeRef, isByRef: boolean) {
+        var t = H.mkType(env, this.libraryMap, type);
+        var l = H.resolveLocal(env, name, id);
+        if (H.shouldPromoteToRef(env, type, isByRef)) {
+          H.markPromoted(env, id);
+          return "ManagedType<"+ t + "> " + l + "(new "+t+")";
+        } else {
+          return t + " " + l;
+        }
       }
 
       // Allows the target to redefine their own string type.

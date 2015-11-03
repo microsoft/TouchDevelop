@@ -228,6 +228,7 @@
         }
         
         public initMeAsync(): Promise {
+            Util.setUserLanguageSetting("", true)
             var id = Cloud.getUserId();
             if (!id) {
                 this.initSignin();
@@ -249,7 +250,6 @@
                     }
                     Cloud.setPermissions(settings.permissions);
                     EditorSettings.setThemeFromSettings();
-                    Util.setUserLanguageSetting(settings.culture, true);
                     if (!EditorSettings.currentTheme) EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     this.initSignin(settings.nickname);
@@ -1858,24 +1858,34 @@
                         if (!item)
                             this.showSidePane();
                     }
+                    
+                    this.moreDiv.setChildren([]);
+                                        
+                    if (/^installed/.test(path)) {
+                        if (Cloud.isRestricted()) {
+                            this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
+                                tick(Ticks.browseCreateCode);
+                                TemplateManager.createScript()
+                            }));
+                        }
+                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
+                            tick(Ticks.browseImportCode);
+                            ArtUtil.importFileDialog();
+                        }));
+                    }    
 
                     if (ncont) {
                         this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
-                            this.moreDiv.setChildren([div("sdLoadingMore", lf("loading more..."))]);
+                            this.moreDiv.appendChild(div("sdLoadingMore", lf("loading more...")));
                             loadEntries(ncont);
                         })]);
-                    } else if (this.hasMore && this.moreDiv) {
-                        this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
+                    } else if (this.hasMore) {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.displayLimit += Host.maxDisplayAtOnce;
                             if (this.displayLimit >= this.topLocations.length && this.moreDiv)
                                 this.moreDiv.setChildren([])
                             this.syncView(false)
-                        })]);
-                    }
-                    
-                    if (Cloud.isRestricted() && !ncont && /^installed/.test(path) && this.topLocations.length == 0) {
-                        this.moreDiv.setChildren([div("sdLoadingMore",
-                            lf("no scripts yet, "), HTML.mkLinkButton(lf("create code"), () => { TemplateManager.createScript() }), lf(" to get started!"))]);    
+                        }));
                     }
                     
                 }, noCache, includeETags);
@@ -3263,10 +3273,20 @@
 
         public equals(other:BrowserPage) { return other && (this == other || this.persistentId() == other.persistentId()); }
 
+        public isDeleted()
+        {
+            return false;
+        }
+
         public mkSmallBox():HTMLElement
         {
             var box = this.mkBoxCore(false)
             return box.withClick(() => { 
+                if (this.isDeleted()) {
+                    HTML.wrong(box);
+                    return;
+                }
+
                 if (!/ visited/.test(box.className))
                     box.className += " visited";
                 this.parentBrowser.loadDetails(this) 
@@ -3870,7 +3890,7 @@
                         return r
                     }, e => {
                         HTML.showProgressNotification(lf("error reading history; are you connected to internet?"));
-                        return [div('', lf("Oops, couldn't get the history. Please check your internet and try again."))];
+                        return [div('', lf("Oops, we couldn't access your script history. Please check your internet connection and try again."))];
                     })
             }
 
@@ -6256,6 +6276,11 @@
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
+        public isDeleted()
+        {
+            return (<any>this.jsonScript) === false;
+        }
+
         public shareButtons() {
             var btns = super.shareButtons();
             if (!this.editor() && EditorSettings.widgets().scriptPrintScript) btns.push(
@@ -6500,6 +6525,7 @@
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
+            "create": "edit,#ccc",
             "import": "bitload,#ccc",
             "*": "emptycircle,#85BB65",
         }
@@ -6827,7 +6853,9 @@
 
 
         private mkButtons()
-        {
+        {     
+            var clone : HTMLElement;
+            var save : HTMLElement;            
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
                 var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon)),
@@ -6878,10 +6906,6 @@
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
             }
             
-            var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
-            clone.classList.add("sdUninstall");
-            var save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
-
             var uninstall:HTMLElement;
             var moderate:HTMLElement;
             var editWithGroup:HTMLElement;
@@ -6892,9 +6916,13 @@
             }
 
             if (this.cloudHeader) {
-                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:uninstall,white", lf("remove"), null,() => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
+                clone = mkBtn(Ticks.browseClone, "svg:clone,white", lf("clone"), null, () => this.cloneAsync().done());
+                clone.classList.add("sdUninstall");
+                save = mkBtn(Ticks.browseSave, "svg:save,white", lf("save"), null, () => this.saveAsync().done());
+                
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -7024,8 +7052,8 @@
                             source: text,
                         }]
                     };
-                    HTML.browserDownload('data:application/json;base64,' + Util.base64Encode(Util.toUTF8(JSON.stringify(f))),
-                        Util.toFileName(this.cloudHeader.name, 'script') + ".json");                    
+                    HTML.browserDownloadText(JSON.stringify(f), Util.toFileName(this.cloudHeader.name, 'script') + ".json", 
+                            "application/json");
                 });
         }
         
@@ -7528,7 +7556,7 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ")
+                        lf("Remember: everyone will be able to see your script if you publish it, so make sure it doesn’t contain your passwords or personal information.")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
@@ -7697,7 +7725,7 @@
                     .then(() => {
                         var hash = HistoryMgr.windowHash()
                         if (allowUndo && restoreAsync) {
-                            HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            HTML.showUndoNotification(lf("{0} has been removed.", this.getTitle()), () => {
                                 restoreAsync.then((restore) => restore())
                                     .then(() => this.browser().updateInstalledHeaderCacheAsync())
                                     .then(() => TheEditor.historyMgr.reload(hash))
@@ -8463,7 +8491,7 @@
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private)"), "email");
                         cc.push(div('inline-description', s.emailverified 
-                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
+                              ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
@@ -8476,7 +8504,7 @@
                         cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
-                }, e => Cloud.handlePostingError(e, lf("getting settings")))
+                }, e => Cloud.handlePostingError(e, lf("get settings")))
 
                 if (this.isMe())
                     refreshSettings()
@@ -9710,7 +9738,7 @@
             var icon = div("sdIcon", HTML.mkImg("svg:fa-ban,#333,clip=80"));
             icon.style.background = "#ff6";
             var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", div("sdCommentBlock", div("sdCommentBlockInner",
-                lf("Your publication /{0} ({1}) has been deleted by a moderator.", 
+                lf("Something you published ({1}, /{0}) has been deleted by a moderator.", 
                     notification.publicationid, notification.publicationname ))))));
             return res;
         }
@@ -10353,6 +10381,7 @@
                         return
                     }
 
+                    Ticker.tick(Ticks.tutorialStart);                    
                     if (topic.isBuiltIn)
                         Ticker.rawTick("startTutorial_" + topic.id);
 

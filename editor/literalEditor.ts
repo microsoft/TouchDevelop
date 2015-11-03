@@ -51,6 +51,7 @@ module TDev
 
     export class BitMatrixLiteralEditor extends LiteralEditor {
         private root: HTMLElement;
+        private btns: HTMLElement;
         private table: HTMLElement;
         private plusBtn: HTMLElement;
         private minusBtn: HTMLElement;
@@ -76,9 +77,6 @@ module TDev
             this.okBtn = HTML.mkRoundButton("svg:check,currentColor", lf("ok"), Ticks.noEvent, () => {
                 if (this.dialog) this.dialog.dismiss();
             })
-            this.okBtn.style.position = "absolute";
-            this.okBtn.style.bottom = "0em";
-            this.okBtn.style.right = "0em";
 
             this.table = div('bitmatrices');
             
@@ -115,11 +113,10 @@ module TDev
                 });
             }
             
+            this.btns = div('bitmatrixbtns', this.animTable, this.plusBtn, this.minusBtn, this.okBtn);
             this.root = div('bitmatrix',
-                div('btns', this.animTable, this.plusBtn, this.minusBtn),
                 this.table,
-                this.hintDiv,
-                this.okBtn);
+                this.hintDiv);
 
             this.updateTable(literal.data);
             
@@ -186,11 +183,15 @@ module TDev
 
             if (!this.dialog) {
                 this.dialog = new ModalDialog();
+                this.dialog.add(this.btns);
                 this.dialog.add(this.root);
                 this.dialog.fullWhite();
                 this.dialog.stretchWide();
-                this.dialog.setScroll();
-                this.dialog.onDismiss = () => this.calculator.checkNextDisplay();
+                
+                this.root.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
+                Util.setupDragToScroll(this.root);
+                
+                this.dialog.onDismiss = () => this.calculator.checkNextDisplay();                
                 this.dialog.show();
             }
         }

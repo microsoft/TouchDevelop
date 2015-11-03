@@ -5,7 +5,7 @@ module TDev
     {
         private overlay = div("modalOverlay");
         private dialog = div("modalDialog");
-        private floating:HTMLElement;
+        private floating: HTMLElement;
         private outerDialog:HTMLElement;
         private savedKeyState = null;
         private id = Random.uniqueId();
@@ -120,10 +120,10 @@ module TDev
 
         public stretchWide()
         {
-            this.floating.style.width = 'calc(100% - 4em)';
+            this.floating.style.width = 'calc(100% - 1em)';
             this.dialog.style.width = '100%';
         }
-
+        
         public showBare(what:HTMLElement = null)
         {
             Ticker.dbg("ModalDialog.showBare0");
@@ -389,7 +389,7 @@ module TDev
 
             return m
         }
-
+        
         public noChrome()
         {
             this.outerDialog.className += " modalNoChrome";
@@ -428,8 +428,7 @@ module TDev
             this.floating.classList.add('bg-critical');
         }
 
-        public setScroll()
-        {
+        public setScroll() {
             this.dialog.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
             Util.setupDragToScroll(this.dialog);
         }

@@ -914,19 +914,53 @@ module TDev.HTML {
         return r;
     }
     
-    export function browserDownload(dataurl: string, name: string) {        
+    export function browserDownloadText(text: string, name: string, contentType: string) {
         try {
-            if (saveAs) {
-                var m = /data:([^;]+);base64,/.exec(dataurl)
-                var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
+            var buf = Util.stringToUint8Array(Util.toUTF8(text))
+
+            if (typeof saveAs !== "undefined") {
+                var b = new Blob([buf], { type: contentType })
                 saveAs(b, name, true);
                 return;
             }
             
             if ((<any>window).navigator.msSaveOrOpenBlob) {
-                var m = /data:([^;]+);base64,/.exec(dataurl)
-                var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
+                var b = new Blob([buf], { type: contentType })
                 var result = (<any>window).navigator.msSaveOrOpenBlob(b, name);
+            } else {
+                var link = <any>window.document.createElement('a');
+                var dataurl = "data:" + contentType + ";base64," + Util.base64EncodeBytes(<any>buf);
+                if (typeof link.download == "string") {
+                    link.href = dataurl;
+                    link.download = name;
+                    document.body.appendChild(link); // for FF
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    document.location.href = dataurl;
+                }
+            }
+        } catch (e) {
+            Util.reportError("browserdownload", e, false);
+            HTML.showProgressNotification(lf("saving file failed..."));
+        }
+    }
+
+    export function browserDownload(dataurl: string, name: string) {        
+        try {
+            var getblob = () => {
+                var m = /data:([^;]+);base64,/.exec(dataurl)
+                var buf = Util.stringToUint8Array(atob(dataurl.slice(m[0].length)))
+                return new Blob([buf], { type: m[1] })
+            }
+
+            if (typeof saveAs !== "undefined") {
+                saveAs(getblob(), name, true);
+                return;
+            }
+            
+            if ((<any>window).navigator.msSaveOrOpenBlob) {
+                var result = (<any>window).navigator.msSaveOrOpenBlob(getblob(), name);
             } else {
                 var link = <any>window.document.createElement('a');
 

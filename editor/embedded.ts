@@ -66,7 +66,7 @@ module TDev {
 
       // Types
       "Number", "Boolean", "String", "ManagedString", "Collection",
-      "Collection_of", "Ref",
+      "Collection_of", "Ref", "TdError", "DalAdapter",
     ];
 
     // Compile an entire program, including its libraries.
@@ -137,7 +137,7 @@ module TDev {
               "}\n"
             : "\nvoid app_main() {\n"+
               "  touch_develop::main();\n"+
-              "}\n")
+              "}\n") + "\n\n// vim: sw=2 ts=2"
         );
       });
     }

@@ -1300,8 +1300,8 @@ module TDev
             if (this.widgetEnabled("calcHelpOverlay")) {
                 elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
-                    m.add(div('wall-dialog-header', lf("got a question?")));
-                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
+                    m.add(div('wall-dialog-header', lf("Have a question?")));
+                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below for more information.")));
                     m.add(div('wall-dialog-buttons',
                         HTML.mkAButton(lf("read the docs"), Cloud.config.helpPath),
                         this.widgetEnabled("computingAtSchool") ? HTML.mkAButton(lf("CAS resources"), "http://community.computingatschool.org.uk/resources?category=139") : undefined,
@@ -2474,29 +2474,27 @@ module TDev
             this.libExtractor.moveDecl(decl);
         }
 
-        public cutDecl(decl:AST.Decl, dontCopy = false)
-        {
-            if (decl.nodeType() == "action" && decl.getName() == "main" && !Script.isLibrary) {
+        public cutDecl(decl: AST.Decl, dontCopy = false) {
+            if (decl == Script) {
+                Util.log("cancelled script cut");
+                return; // can't delete script from editor
+            }
+            
+            if (decl.nodeType() == "action"
+                && decl.getName() == "main"
+                && !Script.isLibrary) {
                 // not allowed to delete "main" in non-library scripts
                 Util.log("cancelled main cut");
                 return;
             }
 
-            if (decl == Script) {
-                ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
-                    lf("uninstall"),
-                    () => {
-                        this.uninstallCurrentScriptAsync().done();
-                    });
-            } else {
-                this.undoMgr.pushMainUndoState();
-                if (!dontCopy)
-                    this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
-                var prev = this.scriptNav.previousDecl(decl);
-                Script.deleteDecl(decl);
-                this.renderDecl(prev);
-                this.queueNavRefresh();
-            }
+            this.undoMgr.pushMainUndoState();
+            if (!dontCopy)
+                this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
+            var prev = this.scriptNav.previousDecl(decl);
+            Script.deleteDecl(decl);
+            this.renderDecl(prev);
+            this.queueNavRefresh();
         }
 
         public pasteNode()
@@ -5509,7 +5507,8 @@ module TDev
             } else {
                 var topic = HelpTopic.contextTopics[0];
                 if (Cloud.lite) {
-                    if (topic.json && topic.json.helpPath) Util.navigateNewWindow("/" + topic.json.helpPath);
+                    if (topic.json && topic.json.helpPath)
+                        Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
                 }
                 else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }

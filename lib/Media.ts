@@ -16,13 +16,14 @@ module TDev.RT {
         //? Plays a monotone sine wave
         //@ [gain].defl(1) [frequency].defl(440)
         export function tone(frequency: number, gain: number) {
+            if (Math_.is_nan(frequency) || Math_.is_nan(gain)) return;
             AudioContextManager.tone(frequency, gain);
         }
         
         //? Plays a monotone note
         //@ [gain].defl(1) [frequency].defl(440) [seconds].defl(1)
         export function play_note(frequency: number, gain: number, seconds: number, r: ResumeCtx) {    
-            if (seconds <= 0) return;
+            if (Math_.is_nan(frequency) || Math_.is_nan(gain) || Math_.is_nan(seconds) || seconds <= 0) return;
             
             AudioContextManager.tone(frequency, gain);
             Util.setTimeout(seconds * 1000, () => {

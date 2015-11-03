@@ -236,7 +236,8 @@ mkSimpleTask('build/ace-main.js', [
 mkSimpleTask('build/blockly-main.js', [
     "www/blockly/blockly-main.ts",
     "www/blockly/compiler.ts",
-    "editor/messages.ts"
+    "editor/messages.ts",
+    "ast/jsonInterfaces.ts"
 ], "www/blockly/refs.ts");
 
 // Now come the rules for files that are obtained by concatenating multiple
@@ -418,13 +419,15 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
   var upload = function (buildVersion) {
     console.log("[I] uploading v" + buildVersion)
     var procs = [];
-    if (process.env.TD_UPLOAD_LITE_KEY) {
-        console.log("[I] uploading to lite")
-	var cmd = 'node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion;
+    ["TD_UPLOAD_NEXT_KEY", "TD_UPLOAD_LITE_KEY"].forEach(function (n) {
+        var setting = process.env[n];
+        if (!setting) return
+        console.log("[I] uploading to " + n)
+	var cmd = 'node build/client.js tdupload ' + setting + ' ' + buildVersion;
         if (process.env.TRAVIS_BRANCH == "master")
 	  cmd += ' latest';
         procs.push(cmd);
-    }
+    })
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
     runAndComplete(procs, this);

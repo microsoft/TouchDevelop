@@ -661,7 +661,7 @@ module TDev.Browser {
             var legalButtons = Cloud.config.legalButtons.map(b => link(lf_static(b.name, true), b.url));
             var btns: HTMLElement;
             m.add(btns = div("wall-dialog-buttons",
-                Cloud.getUserId() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : undefined,
+                Cloud.getUserId() ? HTML.mkButton(lf("Sign out"), () => TheEditor.logoutDialog()) : undefined,
                 legalButtons
                 ));
 
@@ -703,6 +703,7 @@ module TDev.Browser {
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse review"), () => { AbuseReview.show() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("permission review"), () => { permissionReview() }) : null),
+                    (Cloud.hasPermission("stats") ? HTML.mkButton(lf("stats"), () => { stats() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
                     (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
@@ -921,6 +922,72 @@ module TDev.Browser {
                         HTML.mkButton("cancel", () => {
                             m.dismiss()
                     })))
+                }, e => Cloud.handlePostingError(e, ""))
+            })
+        }
+
+        function stats()
+        {
+            var fields = {
+                "Scripts": "New_script,New_script_hidden",
+                "Scripts (public)": "New_script",
+                "Scripts (hidden)": "New_script_hidden",
+                "Resources": "New_art",
+                "URLs": "New_pointer",
+                "Accounts": "PubUser@federated",
+                "Logins": "Login@federated",
+                "/app/ served": "ServeApp@index.html",
+                "Homepage served": "ServePtr@home,ServePtrFirst@home",
+                "Other page served": "ServePtr@other,ServePtrFirst@other",
+            }
+
+            ModalDialog.editText(lf("How many days back?"), "180", days => {
+                var flds = {}
+                Object.keys(fields).forEach(k => {
+                    fields[k].split(/,\s*/).forEach(f => { flds[f] = 1 })
+                })
+                return Cloud.postPrivateApiAsync("dailystats", { start: Date.now()/1000-parseInt(days,10)*24*3600, length: 365, fields: Object.keys(flds) })
+                .then(resp => {
+                    if (resp.length < 1) {
+                        ModalDialog.info(lf("sorry"), lf("no data returned"))
+                        return;
+                    }
+
+                    var res = csv(["Date"].concat(Object.keys(fields)))
+                    var addValues = (hd:string, i:number) => {
+                        var line = [hd]
+                        Object.keys(fields).forEach(k => {
+                            var n = 0
+                            fields[k].split(/,\s*/).forEach(f => {
+                                n += (resp.values[f][i] || 0)
+                            })
+                            line.push(n.toString())
+                        })
+                        res += csv(line)
+                    }
+
+                    Object.keys(flds).forEach(f => {
+                        var sum = 0
+                        for (var i = 0; i < resp.length; ++i) {
+                            sum += resp.values[f][i]
+                        }
+                        resp.values[f][resp.length + 1] = sum
+                        resp.values[f][resp.length + 2] = Math.round(sum / resp.length * 100) / 100
+                    })
+
+                    for (var i = 0; i < resp.length; ++i) {
+                        var tm = new Date((resp.start + i * 24 * 3600) * 1000)
+                        var hd = tm.getUTCFullYear() + "-" + (tm.getUTCMonth()+1) + "-" + tm.getUTCDate()
+                        addValues(hd, i)
+                    }
+
+                    addValues("Total", resp.length + 1)
+                    addValues("Avarage", resp.length + 2)
+                    addValues("Lifetime total", resp.length)
+
+                    var dataurl = "data:text/csv;base64," + Util.base64Encode(res)
+                    HTML.browserDownloadText(res, "stats.csv", "text/csv")
+
                 }, e => Cloud.handlePostingError(e, ""))
             })
         }
@@ -1257,6 +1324,26 @@ module TDev.Browser {
     }
     
     export module TemplateManager {        
+        export var createEditor : ExternalEditor = {
+            company: "BBC micro:bit",
+            name: lf("Create Code"),
+            description: lf("Create a new script"),
+            origin: "",
+            path: "",
+            id: "create",
+            order: 5,
+            logoUrl: "",
+        };
+        export var importEditor : ExternalEditor = {
+            company: "BBC micro:bit",
+            name: lf("Import Code"),
+            description: lf("Import a script from a file"),
+            origin: "",
+            path: "",
+            id: "import",
+            order: 6,
+            logoUrl: "",
+        };
         export function chooseEditorAsync() : Promise { // of ScriptTemplate
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
@@ -1275,29 +1362,11 @@ module TDev.Browser {
                 editors.sort((a, b) => a.order - b.order);
                 
                 // add import editor
-                editors.push({
-                    company: "BBC micro:bit",
-                    name: lf("Import Code"),
-                    description: lf("Import a script from a .hex file"),
-                    origin:"",
-                    path:"",
-                    id: "import",
-                    order: 5,
-                })
+                editors.push(importEditor)
                 
                 var elts = [];
-                editors.forEach(k => {
-                    var icon = div("sdIcon");
-                    var ic = ScriptInfo.editorIcons[k.id].split(',');
-                    icon.style.backgroundColor = ic[1]
-                    icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
-
-                    var nameBlock = div("sdName", k.name);
-                    var hd = div("sdNameBlock", nameBlock);
-                    var author = div("sdAuthorInner", k.company);                    
-                    var addInfo = div("sdAddInfoInner", k.description);
-                    var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
-
+                editors.forEach((k : ExternalEditor) => {
+                    var res = mkEditorBox(k);
                     res.withClick(() => {
                         m.onDismiss = undefined;
                         m.dismiss();
@@ -1309,6 +1378,20 @@ module TDev.Browser {
             });
         }
         
+        export function mkEditorBox(k: ExternalEditor): HTMLElement {
+            var icon = div("sdIcon");
+            var ic = ScriptInfo.editorIcons[k.id].split(',');
+            icon.style.backgroundColor = ic[1]
+            icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
+
+            var nameBlock = div("sdName", k.name);
+            var hd = div("sdNameBlock", nameBlock);
+            var author = div("sdAuthorInner", k.company);
+            var addInfo = div("sdAddInfoInner", k.description);
+            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
+            return res;
+        }
+                
         export function createScript() {
             var gotoTemplate = () => {
                 chooseScriptFromTemplateAsync()
@@ -1621,8 +1704,13 @@ module TDev.Browser {
                 return
             }
 
+            if (h[1] == "migrate") {
+                Login.show("hub", "&u=" + encodeURIComponent(h[2]))
+                return
+            }
+
             if (h[1] == "signin") {
-                Login.show(h[2] || "list:installed-scripts")
+                Login.show(h[2] || (Cloud.isRestricted() ? "list:installed-scripts" : "hub"))
                 return
             }
 
@@ -2489,7 +2577,7 @@ module TDev.Browser {
                 Browser.setInnerHTML(dialogBody, "")
 
                 var nickname, website, twitterhandle, githubuser, minecraftuser, location, area, aboutme, realname, gender, yearofbirth,
-                    culture, howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
+                    howfound, programmingknowledge, occupation, email, emailnewsletter, emailfrequency, pushNotifications,
                     school;
 
                 if (!notificationsOnly) {
@@ -2520,13 +2608,6 @@ module TDev.Browser {
                 dialogBody.appendChild(Hub.userPictureChooser(settings.picturelinkedtofacebook === false, () => { updated = true }))
 
                 dialogBody.appendChild(div("form-title", lf("private profile")));
-
-                    var cultureOptions = [HTML.mkOption("", "")];
-                    for (var i = 0; i < settings.cultureoptions.length; i++)
-                        cultureOptions.push(HTML.mkOption(settings.cultureoptions[i], settings.culturenames[i], (settings.culture || (<any>navigator).language) == settings.cultureoptions[i]));
-                    var cultureBox = HTML.mkComboBox(cultureOptions);
-                    culture = <HTMLSelectElement>textEntry(lf("preferred language"), cultureBox);
-                    cultureBox.style.fontSize = "0.8em";
 
                     realname = <HTMLInputElement>textEntry(lf("real name"), HTML.mkTextInput("text", lf("real name")),
                         lf("Your full name"));
@@ -2633,7 +2714,6 @@ module TDev.Browser {
                             progressBar.start();
                             saveBtn.setChildren(lf("saving..."));
                             err.setChildren([])
-                            var cultureValue = culture === undefined ? undefined : culture.options[culture.selectedIndex].value;
                             Cloud.postUserSettingsAsync({
                                     nickname: nickname === undefined ? undefined : nickname.value,
                                     website: website === undefined ? undefined : website.value,
@@ -2642,7 +2722,6 @@ module TDev.Browser {
                                     realname: realname === undefined ? undefined : realname.value,
                                     gender: gender === undefined ? undefined : gender.options[gender.selectedIndex].value,
                                     howfound: howfound === undefined ? undefined : howfound.options[howfound.selectedIndex].value,
-                                    culture: cultureValue,
                                     yearofbirth: yearofbirth === undefined ? undefined : parseInt(yearofbirth.options[yearofbirth.selectedIndex].value),
                                     programmingknowledge: programmingknowledge === undefined ? undefined : programmingknowledge.options[programmingknowledge.selectedIndex].value,
                                     occupation: occupation === undefined ? undefined : occupation.options[occupation.selectedIndex].value,
@@ -2662,7 +2741,6 @@ module TDev.Browser {
                                     else {
                                         if (resp.emailverificationsent) d.onDismiss = undefined;
                                         updated = true;
-                                        Util.setUserLanguageSetting(cultureValue);
                                         d.dismiss();
                                         if (resp.emailverificationsent)
                                         {

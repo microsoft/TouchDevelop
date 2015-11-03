@@ -33,6 +33,8 @@ module TDev {
         hourOfCodeMore,
         hourOfCodeFinal,
 
+        tutorialStart,
+        tutorialEnd,
         tutorialTranslateSplash,
         tutorialTranslateStep,
         tutorialTranslateScript,
@@ -453,6 +455,8 @@ module TDev {
         browseSendPullRequest,
         browseClone,
         browseSave,
+        browseCreateCode,
+        browseImportCode,
         browsePublicationNotes,
         browseListPointers,
         browseListBugs,

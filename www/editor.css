@@ -1,3 +1,7 @@
+* {
+  transition: transform 0.1s, background-color 0.1s;                      /*CSSpref*/  -webkit-transition: -webkit-transform 0.1s, background-color 0.1s;  -moz-transition: -moz-transform 0.1s, background-color 0.1s;  -ms-transition: -ms-transform 0.1s, background-color 0.1s;
+}
+
 div.calcButtonHelp {
     font-family: "Segoe UI", "Segoe WP", "Helvetica Neue", Sans-Serif;
 }
@@ -88,7 +92,7 @@ button.navItem
 }
 
 button.navItem:hover {
-  border-left-color:#E72A59;
+  border-left-color:rgba(100,100,100,0.3);
 }
 
 .navItem
@@ -432,7 +436,7 @@ div.calcDebug {
 }
 
 .calcButton:hover {
-    border: solid 1px #bbb;
+    outline: solid 1px #bbb;
 }
 
 .phone .calcButton {
@@ -2103,13 +2107,13 @@ div.decl > div.stmt {
 }
 
 @keyframes blinkLocation {
-  0% { background-color: #ff0; }
-  15% { background-color: #ffc; }
-  30% { background-color: #ff0; }
-  45% { background-color: #ffc; }
-  60% { background-color: #ff0; }
+  0% { background-color: #ff0; color:#000; }
+  15% { background-color: #ffc; color:#000; }
+  30% { background-color: #ff0; color:#000; }
+  45% { background-color: #ffc; color:#000; }
+  60% { background-color: #ff0; color:#000; }
   100% { background-color: inherit; }
-}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }  @-ms-keyframes blinkLocation { 0% { background-color: #ff0; } 15% { background-color: #ffc; } 30% { background-color: #ff0; } 45% { background-color: #ffc; } 60% { background-color: #ff0; } 100% { background-color: inherit; } }
+}   /*CSSpref*/ @-webkit-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }  @-moz-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }  @-ms-keyframes blinkLocation { 0% { background-color: #ff0; color:#000; } 15% { background-color: #ffc; color:#000; } 30% { background-color: #ff0; color:#000; } 45% { background-color: #ffc; color:#000; } 60% { background-color: #ff0; color:#000; } 100% { background-color: inherit; } }
 
 
 .codeSearchItem .navItemInner {
@@ -2806,7 +2810,7 @@ a.md-bigbutton:hover {
 
 .sdHeaderOuter:hover
 {
-  border-left-color:#E72A59;
+  border-left-color:rgba(100,100,100,0.3);
 }
 
 .sdBaseHeader {
@@ -2884,6 +2888,7 @@ a.md-bigbutton:hover {
   color: #6c6c6c;
   display: inline-block;
   margin-right: 0.5em;
+  padding: 0 0.5em;
   cursor: pointer;
   line-height:2em;
 }
@@ -2904,12 +2909,6 @@ a.md-bigbutton:hover {
 {
   color: black;
   font-weight: bold;
-}
-
-.sdTabLabel:nth-of-type(n+2):before{
-    content: " | ";
-    padding: 0 0.5em;
-    font-weight: normal;
 }
 
 .sdHeaderContainer {
@@ -2971,7 +2970,7 @@ a.md-bigbutton:hover {
   display: inline-block;
 }
 
-.sdIcon .svg {
+.sdIcon svg {
     width: 100%;
     height: 100%;
 }
@@ -3521,7 +3520,7 @@ div.sdTabTileLabel {
 }
 
 .sdBigButton:hover {
-  border: solid white 0.25em;
+  transform: translate(0.15em, 0.15em);                      /*CSSpref*/  -webkit-transform: translate(0.15em, 0.15em);  -moz-transform: translate(0.15em, 0.15em);  -ms-transform: translate(0.15em, 0.15em);
 }
 
 .phone .sdBigButtonFull {
@@ -3576,7 +3575,7 @@ div.sdTabTileLabel {
 }
 
 .sdHeart .sdBigButtonHalf .sdBigButtonDesc {
-    font-size: 2em;
+    font-size: 1.8em;
     bottom: 0.3em;
 }
 
@@ -4071,7 +4070,7 @@ right:4.5em;
 }
 
 .hubTile:hover {
-  border: solid white 0.1em;
+  transform: translate(0.1em, 0.1em);                      /*CSSpref*/  -webkit-transform: translate(0.1em, 0.1em);  -moz-transform: translate(0.1em, 0.1em);  -ms-transform: translate(0.1em, 0.1em);
 }
 
 .hubTileSize1 {
@@ -4965,23 +4964,20 @@ table.bitpreview {
     display:block;
 }
 
-div.bitmatrix > div.btns {
-  position:absolute;
-  right:0em;
-  vertical-align:top;
-  margin-top:0.5em;
+div.bitmatrixbtns {
+  position: absolute;
+  top:0em;
+  right: 1em;
+  width:8em;
+  text-align: right;
 }
 
-div.bitmatrix > div.btns > button {
+div.bitmatrixbtns > button {
   display:inline-block;
 }
 
 table.bitmatrix > tr.bitheader {
   text-align: center;
-}
-
-table.bitmatrix > tr.bitrow {
-
 }
 
 #scriptEditor[data-blockmode="yes"] table.bitmatrix > tr > td.index {
@@ -5011,21 +5007,21 @@ table.bitmatrix > tr > td.bit > div {
 }
 
 table.bitpreview > tr > td.bit {
-    width:1em;
-    height:1em;
+    width:1.1em;
+    height:1.1em;
 }
 
 table.bitpreview > tr > td.bit > div {
     border-radius:2px;
     background-color:#ddd;
     border: 0.05em solid gray;
-    width:0.5em;
-    height:0.8em;
+    width:0.6em;
+    height:0.9em;
     margin:0.1em 0.25em 0.1em 0.25em;
 }
 
 table.bitmatrix > tr > td.bit:hover > div {
-    border-color:white;
+    border-color:#ccc;
 }
 
 table.bitmatrix > tr > td.bit[data-on=yes] > div {
@@ -6231,6 +6227,14 @@ table.dashboard tr td[data-completed^="yes"] {
   background: #fff;
   overflow-y:scroll;
   overflow-x:hidden;
+}
+
+.onlyHidden {
+  display: none;
+}
+
+.abuseReviewHidden .onlyHidden {
+  display: inline-block;
 }
 
 .abuseReviewHidden {
