@@ -1300,8 +1300,8 @@ module TDev
             if (this.widgetEnabled("calcHelpOverlay")) {
                 elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
-                    m.add(div('wall-dialog-header', lf("got a question?")));
-                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
+                    m.add(div('wall-dialog-header', lf("Have a question?")));
+                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below for more information.")));
                     m.add(div('wall-dialog-buttons',
                         HTML.mkAButton(lf("read the docs"), Cloud.config.helpPath),
                         this.widgetEnabled("computingAtSchool") ? HTML.mkAButton(lf("CAS resources"), "http://community.computingatschool.org.uk/resources?category=139") : undefined,

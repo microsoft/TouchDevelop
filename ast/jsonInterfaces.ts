@@ -250,6 +250,8 @@ module TDev.AST.Json
         locals?:JLocalDef[]; // this contains the reference in short mode; it never contains anything else
         isImplicit:boolean;
         isOptional:boolean;
+        allLocals: JLocalDef[];
+        capturedLocals: JLocalDef[];
     }
 
     export interface JOptionalParameter extends JNode
@@ -377,6 +379,7 @@ module TDev.AST.Json
     {
         name:string;
         type:JTypeRef;
+        isByRef: boolean;
     }
 
     // Response to:

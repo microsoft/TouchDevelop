@@ -140,6 +140,10 @@ module TDev {
         libName: string;
 
         indent: string;
+
+        // A table of id's that have been promoted to ref-counted types (because
+        // they were captured by a closure). Modified in an imperative manner.
+        promotedIds: StringMap<boolean>;
       }
 
       export function indent(e: Env): Env {
@@ -149,7 +153,16 @@ module TDev {
           globalNameMap: e.globalNameMap,
           libName: e.libName,
           indent: e.indent + "  ",
+          promotedIds: e.promotedIds,
         };
+      }
+
+      export function markPromoted(e: Env, id: string) {
+        e.promotedIds[id] = true;
+      }
+
+      export function isPromoted(e: Env, id: string) {
+        return e.promotedIds[id];
       }
 
       export function emptyEnv(g: GlobalNameMap, libName: string): Env {
@@ -165,6 +178,7 @@ module TDev {
           globalNameMap: g,
           libName: libName,
           indent: "",
+          promotedIds: {},
         };
       }
 
@@ -238,6 +252,10 @@ module TDev {
           return m[n];
         else
           return n;
+      }
+
+      export function shouldPromoteToRef(e: Env, t: J.JTypeRef, isByRef: boolean) {
+        return typeof t == "string" && isByRef;
       }
 
 
@@ -325,7 +343,7 @@ module TDev {
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
         if (isLambda)
-          return "[=] "+args+" -> "+retType;
+          return "[=] "+args+" mutable -> "+retType;
         else
           return retType + " " + name + args;
       }

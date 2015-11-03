@@ -3890,7 +3890,7 @@
                         return r
                     }, e => {
                         HTML.showProgressNotification(lf("error reading history; are you connected to internet?"));
-                        return [div('', lf("Oops, couldn't get the history. Please check your internet and try again."))];
+                        return [div('', lf("Oops, we couldn't access your script history. Please check your internet connection and try again."))];
                     })
             }
 
@@ -7556,7 +7556,7 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ")
+                        lf("Remember: everyone will be able to see your script if you publish it, so make sure it doesn’t contain your passwords or personal information.")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
@@ -7725,7 +7725,7 @@
                     .then(() => {
                         var hash = HistoryMgr.windowHash()
                         if (allowUndo && restoreAsync) {
-                            HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            HTML.showUndoNotification(lf("{0} has been removed.", this.getTitle()), () => {
                                 restoreAsync.then((restore) => restore())
                                     .then(() => this.browser().updateInstalledHeaderCacheAsync())
                                     .then(() => TheEditor.historyMgr.reload(hash))
@@ -8491,7 +8491,7 @@
                     if (/,adult,/.test(s.permissions)) {
                         edit(lf("email (private)"), "email");
                         cc.push(div('inline-description', s.emailverified 
-                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
+                              ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
@@ -8504,7 +8504,7 @@
                         cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
-                }, e => Cloud.handlePostingError(e, lf("getting settings")))
+                }, e => Cloud.handlePostingError(e, lf("get settings")))
 
                 if (this.isMe())
                     refreshSettings()
