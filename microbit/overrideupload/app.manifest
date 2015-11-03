@@ -19,7 +19,6 @@ CACHE:
 ./blockly/media/delete.mp3
 ./jquery-2.1.4.min.js
 ./font-awesome.min.css
-./external/FileSaver.min.js
 ./external/lzma_worker-min.js
 https://az742082.vo.msecnd.net/files/images/bg-site-header.png
 https://az742082.vo.msecnd.net/files/images/bg-site-header-mobile.png
