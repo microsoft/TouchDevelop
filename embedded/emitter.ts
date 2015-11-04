@@ -384,7 +384,9 @@ module TDev {
         if (s !== null)
           return null;
 
-        var x = H.defaultValueForType(this.libraryMap, t);
+        var def = comment.match(/{default:([^}]+)}/);
+
+        var x = def ? def[1] : H.defaultValueForType(this.libraryMap, t);
         return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.resolveGlobal(e, name) +
           (x ? " = " + x : "") + ";"
       }
