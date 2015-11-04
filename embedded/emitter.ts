@@ -474,15 +474,18 @@ module TDev {
       }
 
       private typeStub(e: H.Env, r: J.JRecord) {
+        var n = H.resolveGlobal(e, r.name);
+
         var s = H.isShim(r.comment);
         if (s !== null)
+          return e.indent + "typedef "+s+" "+n+";";
+        else if (s === "")
           return null;
-
-        var n = H.resolveGlobal(e, r.name);
-        return [
-          e.indent + "struct " + n + "_;",
-          e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
-        ].join("\n");
+        else
+          return [
+            e.indent + "struct " + n + "_;",
+            e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
+          ].join("\n");
       }
 
       private wrapNamespaceIf(e: H.Env, s: string) {
@@ -583,7 +586,7 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = this.wrapNamespaceIf(e, globalsCode + forwardDeclarations.join("\n"));
+        this.prototypes = this.wrapNamespaceIf(e, globalsCode + "\n" + forwardDeclarations.join("\n"));
         this.code = this.wrapNamespaceIf(e, this.compileImageLiterals(e) + userFunctions.join("\n"));
         this.tPrototypes = this.wrapNamespaceIf(e, typeStubsCode);
         this.tCode = this.wrapNamespaceIf(e, typeDefsCode);
