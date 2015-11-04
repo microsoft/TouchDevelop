@@ -1862,17 +1862,15 @@
                     this.moreDiv.setChildren([]);
                                         
                     if (/^installed/.test(path)) {
-                        if (Cloud.isRestricted()) {
-                            this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
-                                tick(Ticks.browseCreateCode);
-                                TemplateManager.createScript()
-                            }));
-                        }
+                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
+                            tick(Ticks.browseCreateCode);
+                            TemplateManager.createScript()
+                        }));
                         this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
                             tick(Ticks.browseImportCode);
                             ArtUtil.importFileDialog();
                         }));
-                    }    
+                    }
 
                     if (ncont) {
                         this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
