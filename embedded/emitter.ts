@@ -88,7 +88,10 @@ module TDev {
           env.indent + this.visit(env, expr.tree) + ";");
       }
 
-      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
+      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExpr) {
+        if (H.isInitialRecordAssignment(locals, expr))
+          return this.visit(env, locals[0])+"(new "+H.mkType(env, this.libraryMap, locals[0].type)+"_)";
+
         var decls = locals.map(d => {
           // Side-effect: marks [d] as promoted, if needed.
           var decl = this.visit(env, d);
@@ -122,7 +125,7 @@ module TDev {
         var l = H.resolveLocal(env, name, id);
         if (H.shouldPromoteToRef(env, type, isByRef)) {
           H.markPromoted(env, id);
-          return "ManagedType<"+ t + "> " + l + "(new "+t+")";
+          return "Ref<"+ t + "> " + l;
         } else {
           return t + " " + l;
         }
