@@ -908,8 +908,18 @@ module TDev
                 hd += this.op(" ()");
             }
             if (n.action.hasOutParameters()) {
-                returns = this.tline(this.kw("returns") + this.op(" ("));
-                outParms = this.renderBlock(n.outParameters);
+                var params = n.action.getOutParameters();
+                if (params.length == 1) {
+                    // Inline, simplified version of visitActionParameter
+                    // without the name.
+                    var p = params[0];
+                    returns = this.stmt(p, this.diffLine(p, p.diffAltStmt, p => [
+                                this.kw("returns"),
+                                this.kind(p.getKind())]) + this.possibleError(p));
+                } else {
+                    outParms = this.renderBlock(n.outParameters);
+                    returns = this.tline(this.kw("returns") + this.op(" ("));
+                }
             }
 
             if (AST.proMode && !inParms && !outParms)
