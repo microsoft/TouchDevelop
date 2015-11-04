@@ -88,7 +88,7 @@ module TDev {
           env.indent + this.visit(env, expr.tree) + ";");
       }
 
-      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
+      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExpr) {
         var decls = locals.map(d => {
           // Side-effect: marks [d] as promoted, if needed.
           var decl = this.visit(env, d);
@@ -96,9 +96,10 @@ module TDev {
           var initialValue = !H.isPromoted(env, d.id) && defaultValue ? " = " + defaultValue : "";
           return decl + initialValue + ";";
         });
+        var statement = H.isInitialRecordAssignment(locals, expr) ? "" : this.visit(env, expr);
         return decls.join("\n"+env.indent) +
           (decls.length ? "\n" + env.indent : "") +
-          this.visit(env, expr);
+          statement;
       }
 
       public visitLocalRef(env: H.Env, name: string, id: string) {
@@ -122,7 +123,7 @@ module TDev {
         var l = H.resolveLocal(env, name, id);
         if (H.shouldPromoteToRef(env, type, isByRef)) {
           H.markPromoted(env, id);
-          return "ManagedType<"+ t + "> " + l + "(new "+t+")";
+          return "Ref<"+ t + "> " + l;
         } else {
           return t + " " + l;
         }
@@ -312,11 +313,11 @@ module TDev {
         // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
         // and TouchDevelop writes "÷point -> create".
         if (H.isRecordConstructor(name, args)) {
-          // Note: we cannot call new on type definitions from other libraries.
+          // Note: we cannot call create on type definitions from other libraries.
           // So the type we're looking for is always in the current scope's
           // "user_types" namespace.
           var struct_name = "user_types::"+H.resolveGlobal(env, <any> parent)+"_";
-          return "ManagedType<"+struct_name+">(new "+struct_name+"())";
+          return "Ref<"+struct_name+">()";
         }
 
         // 1) A call to a function, either in the current scope, or belonging to
@@ -519,7 +520,7 @@ module TDev {
         else
           return [
             e.indent + "struct " + n + "_;",
-            e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
+            e.indent + "typedef Ref<" + n + "_> " + n + ";",
           ].join("\n");
       }
 

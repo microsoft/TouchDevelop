@@ -474,6 +474,21 @@ module TDev {
         return ret;
       }
 
+      export function isInitialRecordAssignment(locals: J.JLocalDef[], expr: J.JExpr) {
+        return (
+          locals.length == 1 &&
+          expr.nodeType == "call" &&
+          (<J.JCall> expr).name == ":=" &&
+          (<J.JCall> expr).args.length == 2 &&
+          (<J.JCall> expr).args[1].nodeType == "call" &&
+          isRecordConstructor(
+            (<J.JCall> (<J.JCall> expr).args[1]).name,
+            (<J.JCall> (<J.JCall> expr).args[1]).args) &&
+          (<J.JCall> expr).args[0].nodeType == "localRef" &&
+          (<J.JLocalRef> (<J.JCall> expr).args[0]).localId == <any> locals[0].id
+        );
+      }
+
       // JStringLiteral { value: VALUE } -> VALUE
       export function isStringLiteral(x: J.JNode) {
         return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value;
