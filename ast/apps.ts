@@ -45,7 +45,6 @@ module TDev.AST.Apps {
         azureSite?: string;
         cordova?: CordovaOptions;
         runtimeFlags?: string;
-        apiKeys? : StringMap<string>;
         failOnError? : boolean;
     }
 
@@ -109,7 +108,6 @@ module TDev.AST.Apps {
             authorId: options.userId,
             scriptGuid: app.localGuid,
             azureSite: options.azureSite,
-            apiKeys: options.apiKeys,
         }
 
         var setProp = (s:string, v:string) => {
@@ -120,8 +118,7 @@ module TDev.AST.Apps {
 
         var instructions: AST.Apps.DeploymentInstructions = {
             meta: {},
-            files : [],
-            apiKeys:{}
+            files : []
         };
 
         if (!isCloud) {

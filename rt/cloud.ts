@@ -948,9 +948,6 @@ module TDev.Cloud {
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notificationchannel"), body);
     }
-    export function getUserApiKeysAsync(): Promise {
-        return Util.httpGetJsonAsync(getPrivateApiUrl("me/keys"));
-    }
 
     export function getUserSettingsAsync(): Promise {
         return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"))

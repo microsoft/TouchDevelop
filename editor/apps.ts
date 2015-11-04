@@ -59,8 +59,7 @@ module TDev.AppExport
         termsOfUse: string,
         privacyStatement: string,
         logoDataUrl: string,
-        isGame : boolean,
-        apiKeys: any
+        isGame : boolean
         ) {
         var logo = Util.splitDataUrl(logoDataUrl);
         return Cloud.postAppAsync(id, appPlatform, {
@@ -72,7 +71,6 @@ module TDev.AppExport
             privacystatement: privacyStatement,
             logocontent: logo ? logo.content : null,
             logocontenttype: logo ? logo.contentType : null,
-            apikeys: apiKeys,
             game : isGame,
             jsUrl: (<any>window).mainJsName
         })
@@ -1326,7 +1324,6 @@ module TDev.AppExport
             relId: relOverride || relId,
             baseUrl: baseUrl,
             azureSite: Azure.getDestinationAppUrl(app),
-            apiKeys: {},
             failOnError: true,
         };
         if (!relOverride && /\/localhost[:\/]/.test(baseUrl))
@@ -1477,35 +1474,6 @@ module TDev.AppExport
 
         md.add(div('wall-dialog-body', span("wall-dialog-field-label", lf("app reverse domain (required)")), domainInput));
 
-        var apiKeys = compiled.packageResources.filter(r => r.kind == "key");
-        var keyInputs = [];
-        if (apiKeys.length > 0) {
-            var online = Cloud.isOnline();
-            apiKeys.forEach((pk: PackageResource) => {
-                var keyInput = HTML.mkTextInput("text", lf("Enter the api key (required)"));
-                keyInput.value = options.apiKeys[pk.url] || "";
-                keyInput.maxLength = 256;
-                keyInput.classList.add("wall-dialog-field-block");
-                keyInput.setAttribute("data-api-key-url", pk.url);
-                keyInput.readOnly = online;
-                keyInputs.push(keyInput);
-                md.add(div("wall-dialog-body", HTML.mkA("", pk.url, '_blank', pk.url), keyInput));
-            });
-            if (online && keyInputs.some(ki => !ki.value)) {
-                Cloud.getUserApiKeysAsync()
-                    .done((keys: TDev.RT.JsonKey[]) => {
-                        var values: StringMap<string> = {};
-                        keys.forEach(k => values[k.uri] = k.value);
-                        keyInputs.forEach(ki => {
-                            if (!ki.value) ki.value = values[ki.getAttribute("data-api-key-url")] || "";
-                            ki.readOnly = false;
-                        });
-                    }, e => {
-                        keyInputs.forEach(ki => { ki.readOnly = false; });
-                    });
-            }
-        }
-
         md.add(div('wall-dialog-buttons',
             HTML.mkButton(lf("build"), () => {
                 tick(Ticks.cordovaBuild);
@@ -1513,7 +1481,6 @@ module TDev.AppExport
                 options.cordova.website = webInput.value || "";
                 options.cordova.email = emailInput.value || "";
                 options.cordova.domain = domainInput.value || "";
-                keyInputs.forEach(ki => { options.apiKeys[ki.getAttribute('data-api-key-url')] = ki.value });
                 app.editorState.cordova = options.cordova;
 
                 md.dismiss();

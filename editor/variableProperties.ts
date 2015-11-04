@@ -480,12 +480,10 @@ module TDev
     {
         private url: HTMLInputElement;
         private value: HTMLTextAreaElement;
-        private keyUrl: HTMLInputElement;
         constructor() {
             super()
             this.value = HTML.mkTextArea("variableDesc");
             this.url = HTML.mkTextInput("text", lf("url"));
-            this.keyUrl = HTML.mkTextInput("text", lf("key uri"));
         }
 
         public set(v: string) {
@@ -494,27 +492,14 @@ module TDev
                 // TODO: limit size of value
                 this.value.value = value;
                 this.url.value = "";
-                this.keyUrl.value = "";
             } else {
-                var key = TDev.RT.String_.valueFromKeyUrl(v);
-                if (key) {
-                    this.value.value = "";
-                    this.url.value = "";
-                    this.keyUrl.value = key;
-                }
-                else {
-                    this.value.value = "";
-                    this.url.value = v;
-                    this.keyUrl.value = "";
-                }
+                this.value.value = "";
+                this.url.value = v;
             }
         }
         public get() {
             var v = this.value.value;
             if (v) return TDev.RT.String_.valueToArtUrl(v);
-
-            var k = this.keyUrl.value;
-            if (k) return TDev.RT.String_.valueToKeyUrl(k);
 
             return this.url.value;
         }
@@ -531,9 +516,7 @@ module TDev
                 div('', span("varLabel", lf("value")), HTML.mkButton(lf("full screen"),() => this.editFullScreenAsync().done())),
                 this.value,
                 labelDiv = div("varLabel", lf("url")),
-                this.url,
-                div("varLabel", lf("key url")),
-                this.keyUrl);
+                this.url);
             return d;
         }
     }

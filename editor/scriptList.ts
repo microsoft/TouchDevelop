@@ -3611,93 +3611,6 @@
         }
     }
 
-    export class KeysTab
-        extends BrowserTab
-    {
-        constructor(par:BrowserPage) {
-            super(par)
-        }
-        public getId() { return "keys"; }
-        public getName() { return lf("keys"); }
-
-        private mkBox(b: Host, c: TDev.RT.JsonKey) {
-            var valueDiv = div("", lf("show"));
-            var d = div("sdKey",
-                    div("sdKeyUri", HTML.mkA('', c.uri, '_blank', c.uri)),
-                    div('',
-                        HTML.mkButton(lf("show"), () => {
-                            ModalDialog.showText(c.value, "key value", c.uri);
-                        }),
-                        HTML.mkButton(lf("delete"), () => {
-                            ModalDialog.ask(lf("Are you sure you want to delete this key? There is no undo for this operation."), lf("delete it"), () => {
-                                HTML.showProgressNotification(lf("deleting key..."));
-                                Cloud.deletePrivateApiAsync("me/keys?uri=" + encodeURIComponent(c.uri))
-                                    .done(() => d.removeSelf(), e => Cloud.handlePostingError(e, lf("delete key")));
-                            }, true);
-                        })
-                    )
-                );
-            return d;
-        }
-
-        public tabBox(c: TDev.RT.JsonKey)
-        {
-            return this.mkBox(this.browser(), c);
-        }
-
-        public initTab() {
-            var descDiv : HTMLElement = div('sdInlineHelp', 'The keys are stored in the TouchDevelop cloud and only available to you. \n'
-                + 'You can use keys to use web services that require an API key without sharing your key with other users. \n'
-                + 'When your script is exported into an app, the key is automatically embedded into the generated app. \n'
-                + 'When a user uses a script that requires a key, the user will be automatically prompted to enter their own key. \n'
-                + "The 'service url' is the url that points to the registration page to get the key. It uniquely identifies your key. \n"
-                + 'Keys can be deleted at any time.');
-            this.tabContent.setChildren([
-                descDiv,
-                HTML.mkButton(lf("add key"), () => {
-                var uriInput = HTML.mkTextInput("text", lf("key uri"));
-                var valueInput = HTML.mkTextInput("text", lf("key value"));
-                var m = new ModalDialog();
-                m.add([
-                    div("wall-dialog-header", lf("add key")),
-                    div("wall-dialog-body", <HTMLElement[]>[
-                        div('', "Service Uri"),
-                        uriInput,
-                        div('', "API Key value"),
-                        valueInput
-                    ]),
-                    div("wall-dialog-buttons", HTML.mkButton(lf("save"), () => {
-                        m.dismiss();
-                        HTML.showProgressNotification(lf("saving key..."));
-                        var key: TDev.RT.JsonKey = { uri : uriInput.value, value : valueInput.value };
-                        Cloud.postPrivateApiAsync("me/keys", key)
-                            .done(
-                                () => {
-                                    HTML.showProgressNotification(lf("key saved..."));
-                                    this.initTab();
-                                },
-                                e => HTML.showProgressNotification(lf("could not save key; are you connected to internet?"))
-                            );
-                    }))
-                ]);
-                m.show();
-            })]);
-
-            var loadingDiv = div('bigLoadingMore', lf("loading..."));
-            this.tabContent.appendChildren([loadingDiv]);
-            Cloud.getUserApiKeysAsync()
-                .done((keys : TDev.RT.JsonKey[]) => {
-                    loadingDiv.removeSelf();
-                    var boxes = keys.map(key => this.tabBox(key));
-                    this.tabContent.appendChildren(boxes);
-                },
-                (e) => {
-                    loadingDiv.removeSelf();
-                    this.tabContent.appendChildren(div('', lf("failed to load keys; are you connected to internet?")));
-                });
-        }
-    }
-
     export class HistoryTab
         extends BrowserTab
     {
@@ -8619,8 +8532,8 @@
     export class UserPrivateTab extends BrowserMultiTab {
         constructor(par: UserInfo) {
             super(par,
-                "Informations about apps, keys and cloud sessions.",
-                KeysTab, CloudSessionsTab
+                lf("Private user information."),
+                CloudSessionsTab
                 );
         }
 

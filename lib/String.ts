@@ -11,16 +11,6 @@ module TDev.RT {
         //@ robust
         export function split(self:string, separator:string) : Collection<string> { return Collection.mkStrings(self.split(separator)); }
 
-        export function valueFromKeyUrl(url: string) {
-            if (/^apikey:/i.test(url))
-                return Web.url_decode(url.substring("apikey:".length));
-            return null;
-        }
-
-        export function valueToKeyUrl(value: string) {
-            return "apikey:" + Web.url_encode(value);
-        }
-
         export function valueFromArtUrl(url: string) {
             var m = /^data:[^,]*base64,/i.exec(url)
             if (m)
@@ -35,9 +25,6 @@ module TDev.RT {
         export function fromArtUrl(url: string) {
             var value = valueFromArtUrl(url);
             if (value) return Promise.wrap(value);
-
-            var key = valueFromKeyUrl(url);
-            if (key) return ApiManager.getKeyAsync(key);
 
             return ArtCache.getArtAsync(url)
                 .then(dataUrl => {
