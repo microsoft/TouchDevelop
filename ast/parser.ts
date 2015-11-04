@@ -378,7 +378,7 @@ module TDev { export module AST {
             r.parseFrom(this)
         }
 
-        private parseParameters(lbl:string,sep:string)
+        private parseParameters(lbl:string,sep:string, out = false)
         {
             var parens = false;
             var res:ActionParameter[] = [];
@@ -407,7 +407,7 @@ module TDev { export module AST {
                 var t = this.parseTypeAnnotation();
 
                 var loc = mkLocal(n, t);
-                var ap = new ActionParameter(loc);
+                var ap = new ActionParameter(loc, out);
                 ap.setStableName(lbl2)
                 index++;
                 res.push(ap);
@@ -444,7 +444,7 @@ module TDev { export module AST {
 
             if (this.gotKw("returns")) {
                 this.shift();
-                res.outParameters = this.parseParameters(lbl,"_4");
+                res.outParameters = this.parseParameters(lbl,"_4", true);
             }
 
             return res;

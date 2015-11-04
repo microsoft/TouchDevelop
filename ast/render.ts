@@ -248,7 +248,10 @@ module TDev
         }
 
         public visitFieldName(n: AST.FieldName) {
-            return this.id(n.data) + this.op(":");
+            if (n.isOut)
+                return this.kw("returns");
+            else
+                return this.id(n.data) + this.op(":");
         }
 
         public visitLiteral(n:AST.Literal)

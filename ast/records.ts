@@ -27,7 +27,7 @@ module TDev.AST {
     export class FieldName
         extends AST.Literal
     {
-        constructor() {
+        constructor(public isOut = false) {
             super();
         }
 

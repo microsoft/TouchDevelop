@@ -608,7 +608,7 @@ module TDev.AST {
         public emptyStmt(name? : string, kind? : Kind)
         {
             var isOut = (<ActionHeader>this.parent).outParameters == this;
-            var r = new ActionParameter(mkLocal((<AST.ActionHeader>this.parent).action.nameLocal(name || (isOut ? "r" : "p")), kind || api.core.Number));
+            var r = new ActionParameter(mkLocal((<AST.ActionHeader>this.parent).action.nameLocal(name || (isOut ? "r" : "p")), kind || api.core.Number), isOut);
             r.parent = this;
             return r;
         }
@@ -1353,14 +1353,14 @@ module TDev.AST {
         // into an editable statement.
         private exprHolder = new AST.ExprHolder();
 
-        constructor(public local:LocalDef) {
+        constructor(public local:LocalDef, private isOut = false) {
             super();
 
             this.setupForEdit()
         }
 
         public setupForEdit() { 
-            var name = new FieldName();
+            var name = new FieldName(this.isOut);
             name.data = this.getName();
             this.exprHolder.tokens = [ <AST.Token> name ].concat(propertyRefsForKind(this.local.getKind()));
             this.exprHolder.parsed = new AST.Literal(); // placeholder
@@ -4478,7 +4478,7 @@ module TDev.AST {
                     extractedStmts.push(stmt);
                     l = copy;
                 }
-                extractedAction.header.outParameters.push(new ActionParameter(l));
+                extractedAction.header.outParameters.push(new ActionParameter(l, true));
             });
             this.extracted.setChildren(extractedStmts);
 
