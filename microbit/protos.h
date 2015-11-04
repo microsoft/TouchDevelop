@@ -32,10 +32,7 @@ void           bitvm::stglbRef               (uint32_t v, int idx);             
 void           bitvm::stloc                  (RefLocal *r, uint32_t v);              // P2
 void           bitvm::stlocRef               (RefRefLocal *r, uint32_t v);           // P2
 uint32_t       bitvm::stringLiteral          (int id, uint32_t off);                 // F2
-bool           boolean::and_                 (bool x, bool y);                       // F2
 bool           boolean::equals               (bool x, bool y);                       // F2
-bool           boolean::not_                 (bool x);                               // F1
-bool           boolean::or_                  (bool x, bool y);                       // F2
 RefString*     boolean::to_string            (int v);                                // F1 over
 void           collection::add               (RefCollection *c, int x);              // P2 bvm
 int            collection::at                (RefCollection *c, int x);              // F2 bvm
@@ -142,17 +139,7 @@ void           micro_bit::showLeds           (int w, int h, uint32_t bitmap, int
 void           micro_bit::showLetter         (RefString *s);                         // P1 over
 int            micro_bit::thermometerGetTemperature ();                                     // F0 over
 void           micro_bit::unPlot             (int x, int y);                         // P2
-int            number::div                   (int x, int y);                         // F2
-bool           number::eq                    (int x, int y);                         // F2
-bool           number::geq                   (int x, int y);                         // F2
-bool           number::gt                    (int x, int y);                         // F2
-bool           number::leq                   (int x, int y);                         // F2
-bool           number::lt                    (int x, int y);                         // F2
-int            number::minus                 (int x, int y);                         // F2
-bool           number::neq                   (int x, int y);                         // F2
-int            number::plus                  (int x, int y);                         // F2
 void           number::post_to_wall          (int n);                                // P1 over
-int            number::times                 (int x, int y);                         // F2
 RefString*     number::to_character          (int x);                                // F1 over
 RefString*     number::to_string             (int x);                                // F1 over
 RefRecord*     record::mk                    (int reflen, int totallen);             // F2 bvm
