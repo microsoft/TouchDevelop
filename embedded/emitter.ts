@@ -76,9 +76,11 @@ module TDev {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
             env.indent +
-            "std::function<"+
-                H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-              "> "+n+" = "+
+            H.findTypeDef(
+              "std::function<"+
+                  H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
+                ">") +
+            " "+n+" = "+
             this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
         });
@@ -426,8 +428,20 @@ module TDev {
           throw new Error("Not supported (multiple return parameters)");
 
         var env2 = H.indent(env);
+
+        // Properly initializing the outparam with a default value is important,
+        // because it guarantees that the function always ends with a proper
+        // return statement of an initialized value. (Never returning is NOT an
+        // error in TouchDevelop).
+        var outParamInitialization = "";
+        if (outParams.length > 0) {
+          var defaultValue = H.defaultValueForType(this.libraryMap, outParams[0].type);
+          var initialValue = defaultValue ? " = " + defaultValue : "";
+          outParamInitialization = env2.indent + this.visit(env2, outParams[0]) + initialValue + ";";
+        }
+
         var bodyText = [
-          outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
+          outParamInitialization,
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.resolveLocalDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");

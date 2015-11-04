@@ -376,9 +376,22 @@ module TDev {
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
         if (isLambda)
-          return "[=] "+args+" mutable -> "+retType;
+          // Let the compiler infer the return type.
+          return "[=] "+args+" mutable";
         else
           return retType + " " + name + args;
+      }
+
+      var typeDefTable = {
+        "std::function<void ()>": "closure",
+        "std::function<void (Number)>": "closure1",
+      };
+
+      export function findTypeDef(s: string) {
+        if (s in typeDefTable)
+          return typeDefTable[s];
+        else
+          return s;
       }
 
       // Generate the return instruction for the function.
