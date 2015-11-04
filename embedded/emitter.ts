@@ -253,13 +253,9 @@ module TDev {
       }
 
       private safeGet(x: string, f: string): string {
-        // NOTE: this works because the default constructor for [ManagedType]
-        // initializes its [object] field to [NULL].
-        return (
-          "("+x+".operator->() != NULL "+
-          "? "+x+"->"+f+" "+
-          ": (uBit.panic(TD_UNINITIALIZED_OBJECT_TYPE), "+x+"->"+f+"))"
-        );
+        // Object types are now always initialized through the default [Ref]
+        // constructor.
+        return x+"->"+f;
       }
 
       public visitCall(env: H.Env,
