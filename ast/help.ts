@@ -392,7 +392,7 @@ module TDev {
         {
             id: "art",
             name: "TouchDevelop Art",
-            description: lf("Cover art ({0}/...)", Cloud.config.cdnUrl),
+            description: lf("Cover art ({0}/...)", Cloud.config.primaryCdnUrl),
             parseIds: text => {
                 var links = [];
                 if (text)
@@ -402,8 +402,8 @@ module TDev {
                     });
                 return links;
             },
-            idToUrl: id => Cloud.config.cdnUrl + "/pub/" + id,
-            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.cdnUrl + "/pub/" + id))
+            idToUrl: id => Cloud.config.primaryCdnUrl + "/pub/" + id,
+            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.primaryCdnUrl + "/pub/" + id))
         }, {
             id: "youtube",
             name: "YouTube",
@@ -855,8 +855,8 @@ module TDev {
         static findArtId(id : string) : string {
             var artVar = Script ? Script.resources().filter((r) => MdComments.shrink(r.getName()) == MdComments.shrink(id))[0] : null;
 
-            ["https://az31353.vo.msecnd.net/pub/", 
-             Cloud.config.cdnUrl + "/pub/"].forEach(artPref => {
+            Cloud.config.altCdnUrls.forEach(artHost => {
+                var artPref = artHost + "/pub/"
                 if (artVar && artVar.url && artVar.url.slice(0, artPref.length) == artPref) {
                     var newId = artVar.url.slice(artPref.length)
                     if (/^\w+$/.test(newId)) id = newId;
@@ -893,9 +893,13 @@ module TDev {
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
                         url = Cloud.artUrl(artId);
+                    } else if (!Cloud.isArtUrl(url)) {
+                        url = "no-such-image";
                     }
+                    if (url)
+                        url = Cloud.toCdnUrl(url);
                     var urlsafe = HTML.proxyResource(url);
-                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url);
+                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url)
                     var r = "<div class='md-img'><div class='md-img-inner'>";
                     r += Util.fmt("<img src=\"{0}\" alt='picture' style='height:{1}em'/></div>", urlsafe, height);
                     if (caption) {
@@ -2415,7 +2419,7 @@ module TDev {
         static findById(id:string):HelpTopic
         {
             // deprecated in lite
-            if (Cloud.lite) return null;
+            if (Cloud.isRestricted()) return null;
             
             // make sure things are initialized
             HelpTopic.getAll();

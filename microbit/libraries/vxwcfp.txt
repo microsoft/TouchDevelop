@@ -6,7 +6,6 @@ meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta allowExport "yes";
 meta hasIds "yes";
-meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -290,7 +289,7 @@ action bit(#qNb6K0K0Rv5gyH5O state: Number, #lJdGRw37BIcyWKtc x: Number) returns
 }
 #BdGhpbmca
 table Image {
-  // {shim:}
+  // {shim:MicroBitImage}
   type = "Object";
   persistent = false;
   fields {
@@ -2150,7 +2149,7 @@ action test_pitch() {
 }
 #Homv4VKEXNUbTAb4
 action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Number) {
-  #fCfOCntjWE4DNymC // Plots the ``index``-th frame of the image on the screen.
+  #fCfOCntjWE4DNymC // Draws the ``index``-th frame of the image on the screen.
   #xasY934N29G7WBjg // {help:functions/plot-frame}
   #wQpnycOYR16SMb15 // {namespace:image}
   #OFsNMj5vqD4C4rm4 // {weight:65}
@@ -2158,7 +2157,7 @@ action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Num
 }
 #x07I9YOUT6XAu5Ky
 action show_leds(#Agy1tNVQeIcg2pFD leds: String, #H23Wq0aPH08LnwS6 ms: Number) {
-  #a1ZU6jET0rFURbW6 // Shows an image on the LED screen and pauses for the given milliseconds.
+  #a1ZU6jET0rFURbW6 // Draws an image on the LED screen and pauses for the given milliseconds.
   #rah4E4gr6b4ZXnki // {help:functions/show-leds}
   #q2YahTUs7lFN2x05 // {weight:95}
   #x8YEphMMwGJeCtZ4 // {namespace:basic}
@@ -2225,7 +2224,7 @@ var note_table : Json_Object {
 }
 #xUYxOeKj6LoMvF7P
 action plot_leds(#WQt3HgKnNR1dkKwC leds: String) {
-  #jJiF4GeW3y5L8ZvJ // Plots an image on the LED screen.
+  #jJiF4GeW3y5L8ZvJ // Draws an image on the LED screen.
   #xeTbykuSWaF0nr9g // {help:functions/plot-leds}
   #w9yQC2gSVG43NHs2 // {weight:80}
   #C2NdzXO4YdWRnaEW // {namespace:basic}

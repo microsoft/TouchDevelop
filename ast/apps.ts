@@ -45,7 +45,6 @@ module TDev.AST.Apps {
         azureSite?: string;
         cordova?: CordovaOptions;
         runtimeFlags?: string;
-        apiKeys? : StringMap<string>;
         failOnError? : boolean;
     }
 
@@ -109,7 +108,6 @@ module TDev.AST.Apps {
             authorId: options.userId,
             scriptGuid: app.localGuid,
             azureSite: options.azureSite,
-            apiKeys: options.apiKeys,
         }
 
         var setProp = (s:string, v:string) => {
@@ -120,8 +118,7 @@ module TDev.AST.Apps {
 
         var instructions: AST.Apps.DeploymentInstructions = {
             meta: {},
-            files : [],
-            apiKeys:{}
+            files : []
         };
 
         if (!isCloud) {
@@ -152,7 +149,7 @@ module TDev.AST.Apps {
         setProp('var webAppGuid = "{0:jq}"', app.localGuid)
         setProp('var runtimeFlags = "{0:jq}"', options.runtimeFlags || "")
 
-        var theBase = Cloud.config.cdnUrl + "/app/" + options.relId + "/c/";
+        var theBase = Cloud.config.primaryCdnUrl + "/app/" + options.relId + "/c/";
 
 
         AST.TypeChecker.tcApp(app)

@@ -230,9 +230,10 @@ module TDev.HTML {
     }
     export function patchWavToMp4Url(url: string): string {
         if (url) {
-            var m = url.match(/^http(s?):\/\/(cdn\.touchdevelop\.com|az31353\.vo\.msecnd\.net)\/pub\/(\w+)/i);
-            if (m) return 'https://' + m[2] + '/aac/' + m[3] + '.m4a';
-            if (/^\.\/art\//i.test(url)) return url + '.m4a';
+            if (/^\.\/art\//i.test(url))
+                return url + '.m4a';
+            else if (Cloud.isArtUrl(url))
+                return Cloud.toCdnUrl(url, "aac") + ".m4a";
         }
         return url;
     }
@@ -431,6 +432,7 @@ module TDev.HTML {
         "application/javascript": "js",
         "text/plain": "txt",
         "application/pdf": "pdf",
+        "application/x-zip-compressed": "zip",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
@@ -1129,9 +1131,12 @@ module TDev.HTML {
     {
         // Must be idempotent
         if (!url) return url;
-        // only do it for az31353.vo.msecnd.net ?
+
+        url = Cloud.toCdnUrl(url); // this replaces all legacy CDN URLs with the most recent one
+
         if (localCdn && !/http:\/\/localhost/i.test(url) &&
-            /^(https:\/\/az31353.vo.msecnd.net|http:\/\/cdn.touchdevelop.com|https?:\/\/lexmediaservice3.blob.core.windows.net|https:\/\/tdtutorialtranslator.blob.core.windows.net)/i.test(url)) {
+            (Cloud.isArtUrl(url) ||
+            /^(https?:\/\/lexmediaservice3.blob.core.windows.net|https:\/\/tdtutorialtranslator.blob.core.windows.net)/i.test(url))) {
             url = localCdn + encodeURIComponent(url)
         }
         return url
