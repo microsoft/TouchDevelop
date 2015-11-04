@@ -1463,7 +1463,7 @@ function getScript(id:string)
 
 function downloadScript(arg:string, f:(s:string) => void)
 {
-    tdevGet(arg + "/text?original=true", (text) => {
+    tdevGet(arg + "/text?original=true&ids=true", (text) => {
         function save(text) {
             if (!scriptsCache[arg]) {
                 scriptsCache[arg] = text;
@@ -4065,6 +4065,89 @@ function concatlibs() {
     fs.writeFileSync("build/libraries.js", txt)
 }
 
+function genid()
+{
+    return "#id" + Math.floor(Math.random()*100000000) + " "
+}
+
+function pubhelp()
+{
+    var k = tdliteKey()
+    var s = JSON.parse("[" + fs.readFileSync("generated/help.cache","utf8") + "]")
+    var topics = s[1]
+    var namemap = {}
+
+    topics.forEach(t => {
+        t.newid = t.name.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase().replace(/^-/, "").replace(/-$/, "")
+        t.oldid = t.name.replace(/[']/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+        namemap[t.oldid] = t
+    })
+
+    topics = topics.filter(t => /#docs/i.test(t.description))
+    console.log(topics.length)
+
+    var p = Math.floor(Math.random() * topics.length)
+
+    topics.forEach(t => {
+        getScriptAsync(t.id, src => {
+            src = src.replace(/^action main.*\n/m, ln => {
+                return ln + genid() + "// {topic:/docs/" + t.newid + "}\n"
+            })
+            src = src.replace(/\[(.*?)\]\s*\(\/([a-zA-Z0-9]+)\)/g, (tot, nm, lnk) => {
+                var top = namemap[lnk.toLowerCase()]
+                if (!top) {
+                    //console.log("missing link: " + lnk + " [" + nm + "] in /docs/" + t.newid)
+                    return "[" + nm + "] (/docs/" + lnk.toLowerCase() + ")"
+                } else {
+                    return "[" + nm + "] (/docs/" + top.newid + ")"
+                }
+            })
+            src = src.replace(/ \{parenttopic:([\w]+)\}/ig, (tot, lnk) => {
+                var top = namemap[lnk.toLowerCase()]
+                var newid = (top ? top.newid : lnk.toLowerCase())
+                if (!top) {
+                    console.log("missing parent link: " + lnk + " in /docs/" + t.newid)
+                } else {
+                    // console.log("parent: " + t.newid + " -> " + newid)
+                }
+                return " {parentTopic:/docs/" + newid + "}"
+            })
+
+            //console.log(src.length, t.oldid)
+            //return
+
+            var post = (p, d, f) => 
+                tdevGet(k.liteUrl + "api/" + p + "?foo=bar" + k.key, f, 1, d)
+
+            post("scripts", { 
+                name: t.name,
+                description: t.description,
+                baseid: t.id,
+                text: src,
+                iconbackground: t.iconbackground,
+                icon: t.icon,
+                iconArtId: t.iconArtId,
+                splashArtId:  t.splashArtId,
+            }, resp => {
+                var d = JSON.parse(resp)
+                console.log("/docs/" + t.newid, d.id)
+                post("pointers", {
+                    path: "/docs/" + t.newid,
+                    scriptid: d.id
+                }, resp => {
+                })
+
+                if (t.newid != t.oldid)
+                    post("pointers", {
+                        path: "/docs/" + t.oldid,
+                        redirect: "/docs/" + t.newid,
+                    }, resp => {
+                    })
+            }) 
+        })
+    })
+}
+
 var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
@@ -4127,6 +4210,7 @@ var cmds = {
     "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
     "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
     "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
+    "pubhelp": { f:pubhelp, a:'', h:'re-publish help' },
 }
 
 export interface ScriptTemplate {
