@@ -6525,8 +6525,8 @@
             "docs": "fa-file-text-o,#E00069",
             "html": "fa-code,#E00069",
             "ace": "braces,#007fff",
-            "create": "edit,#ccc",
-            "import": "bitload,#ccc",
+            "create": "gel-create,#ccc",
+            "import": "gel-import,#ccc",
             "*": "emptycircle,#85BB65",
         }
 
