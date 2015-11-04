@@ -1463,7 +1463,7 @@ module TDev.AST.Bytecode
             this.proc.emitLbl(cont);
             idx.emitLoad(this.proc);
             this.emitInt(1);
-            this.proc.emitCall("number::plus", 0);
+            this.proc.emitCall("number::add", 0);
             idx.emitStore(this.proc);
             this.proc.stackEmpty();
             this.proc.emitJmp(top);
