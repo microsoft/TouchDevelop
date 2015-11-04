@@ -157,8 +157,7 @@ module TDev
                 //    img.style.marginTop = "0.3em";
                 //} else {
                 //}
-                var img = div('store-button', name);
-                return HTML.mkButtonElt("wall-button", img).withClick(() => {
+                return HTML.mkButton(name, () => {
                     e.saveStateAsync({ forReal: true }).done(() => {
                         if (store == "azure") {
                             tick(Ticks.exportAzure);
