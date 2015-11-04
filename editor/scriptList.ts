@@ -3306,7 +3306,7 @@
             if (!big || !this.getPublicationId()) return null;
 
             if (Cloud.lite) {
-                return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report/delete")).withClick(() => {
+                return div("sdReportAbuse", lf("Report/Delete")).withClick(() => {
                     AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm, undefined, onDeleted)
                 });
             }
@@ -9558,7 +9558,7 @@
         static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "", onDeleted : () => void = undefined)
         {
             if (Cloud.isOffline()) {
-                Cloud.showModalOnlineInfo("report/delete");
+                Cloud.showModalOnlineInfo("Report/Delete");
                 return;
             }
             
