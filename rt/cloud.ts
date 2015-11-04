@@ -4,7 +4,7 @@ module TDev.Cloud {
     export var lite = false;
     export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
-    var microbitGitTag = "v16";
+    var microbitGitTag = "v17";
 
     export var useNativeCompilation = false;
 

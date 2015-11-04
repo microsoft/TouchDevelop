@@ -250,6 +250,8 @@ module TDev {
       }
 
       private safeGet(x: string, f: string): string {
+        // NOTE: this works because the default constructor for [ManagedType]
+        // initializes its [object] field to [NULL].
         return (
           "("+x+".operator->() != NULL "+
           "? "+x+"->"+f+" "+
@@ -277,7 +279,7 @@ module TDev {
                 if (k)
                   return k+"";
                 else
-                  return this.visit(env, a)
+                  return this.visit(H.resetPriority(env), a)
               });
             var t = typeArgument ? "<" + typeArgument + ">" : "";
             return f + t + "(" + argsCode.join(", ") + ")";
@@ -302,7 +304,7 @@ module TDev {
           var newTypeArg = typeArgument || H.mkType(env, this.libraryMap, typeArgs[0]);
           assert(args.length && args[0].nodeType == "call");
           var call = <J.JCall> args[0];
-          return this.visitCall(env, call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
+          return this.visitCall(H.resetPriority(env), call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
         }
 
         // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
@@ -317,13 +319,13 @@ module TDev {
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
-        var resolvedName = this.resolveCall(env, args[0], name);
+        var resolvedName = this.resolveCall(H.resetPriority(env), args[0], name);
         if (resolvedName)
           return mkCall(resolvedName, true);
 
         // 2) A call to the assignment operator on the receiver. C++ assignment.
         else if (name == ":=")
-          return this.visit(env, args[0]) + " = " + this.visit(env, args[1]);
+          return this.visit(H.resetPriority(env), args[0]) + " = " + this.visit(H.resetPriority(env), args[1]);
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
@@ -335,15 +337,15 @@ module TDev {
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var prefixedName = t.lib
-            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
-            : this.resolveCall(env, H.mkCodeRef(), name);
+            ? this.resolveCall(H.resetPriority(env), H.mkLibraryRef(t.lib), name)
+            : this.resolveCall(H.resetPriority(env), H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
 
         // 5) Field access for an object.
         else if (callType == "field")
           // TODO handle collisions at the record-field level.
-          return this.safeGet(this.visit(env, args[0]), H.mangle(name));
+          return this.safeGet(this.visit(H.resetPriority(env), args[0]), H.mangle(name));
 
         // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
         else if (args.length && H.isSingletonRef(args[0]) == "♻")
@@ -363,8 +365,25 @@ module TDev {
         // that contains the functions that operate on typedef'd "Number".
         else {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          // Same thing, assuming no collisions for built-in operators.
-          return t.type.toLowerCase()+"::"+mkCall(H.mangle(name), false);
+          var op = H.lookupOperator(t.type.toLowerCase()+"::"+name);
+          if (op) {
+            var needsParentheses = op.prio > H.priority(env);
+            var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+            var rightPriority = op.right ? op.prio - 1 : op.prio;
+            var leftPriority = op.prio;
+            if (args.length == 2)
+              return wrap(
+                this.visit(H.setPriority(env, leftPriority), args[0]) +
+                " " + op.op + " " +
+                this.visit(H.setPriority(env, rightPriority), args[1]));
+            else {
+              assert(args.length == 1);
+              return wrap(op.op + this.visit(H.setPriority(env, leftPriority), args[0]));
+            }
+          } else {
+            // We assume no collisions for built-in operators.
+            return mkCall(t.type.toLowerCase()+"::"+H.mangle(name), false);
+          }
         }
       }
 

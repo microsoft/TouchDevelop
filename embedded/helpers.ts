@@ -98,18 +98,26 @@ module TDev {
         "xor_eq ": null,
       };
 
-      var replacementTable = {
-        "<": "lt",
-        "≤": "leq",
-        "≠": "neq",
-        "=": "eq",
-        ">": "gt",
-        "≥": "geq",
-        "+": "plus",
-        "-": "minus",
-        "/": "div",
-        "*": "times",
+      var operatorTable = {
+        // http://en.cppreference.com/w/cpp/language/operator_precedence
+        "boolean::not": { prio: 3, right: false, op: "!" },
+        "number::/": { prio: 5, right: true, op: "/" },
+        "number::*": { prio: 5, right: false, op: "*" },
+        "number::+": { prio: 6, right: false, op: "+" },
+        "number::-": { prio: 6, right: true, op: "-" },
+        "number::<": { prio: 8, right: false, op: "<" },
+        "number::≤": { prio: 8, right: false, op: "<=" },
+        "number::>": { prio: 8, right: false, op: ">" },
+        "number::≥": { prio: 8, right: false, op: ">=" },
+        "number::≠": { prio: 9, right: false, op: "!=" },
+        "number::=": { prio: 9, right: false, op: "==" },
+        "boolean::and": { prio: 13, right: false, op: "&&" },
+        "boolean::or": { prio: 14, right: false, op: "||" },
       };
+
+      export function lookupOperator(op: string) {
+        return operatorTable[op];
+      }
 
       export interface GlobalNameMap {
         libraries: StringMap<StringMap<string>>;
@@ -141,9 +149,32 @@ module TDev {
 
         indent: string;
 
+        // The current precedence level.
+        priority: number;
+
         // A table of id's that have been promoted to ref-counted types (because
         // they were captured by a closure). Modified in an imperative manner.
         promotedIds: StringMap<boolean>;
+      }
+
+      export function setPriority(e: Env, p: number): Env {
+        return {
+          usedNames: e.usedNames,
+          localNames: e.localNames,
+          globalNameMap: e.globalNameMap,
+          libName: e.libName,
+          priority: p,
+          indent: e.indent,
+          promotedIds: e.promotedIds,
+        };
+      }
+
+      export function priority(e: Env): number {
+        return e.priority;
+      }
+
+      export function resetPriority(e: Env): Env {
+        return setPriority(e, 16);
       }
 
       export function indent(e: Env): Env {
@@ -152,6 +183,7 @@ module TDev {
           localNames: e.localNames,
           globalNameMap: e.globalNameMap,
           libName: e.libName,
+          priority: e.priority,
           indent: e.indent + "  ",
           promotedIds: e.promotedIds,
         };
@@ -178,6 +210,7 @@ module TDev {
           globalNameMap: g,
           libName: libName,
           indent: "",
+          priority: 16,
           promotedIds: {},
         };
       }
@@ -189,7 +222,7 @@ module TDev {
       // Converts a string into a valid C++ identifier. Unsafe unless you're
       // positive there won't be conflicts.
       export function mangle(name: string) {
-        var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
+        var candidate = name.replace(/\W/g, "_");
         if (candidate in cppKeywords)
           candidate += "_";
         else if (candidate.match(/^\d/))
