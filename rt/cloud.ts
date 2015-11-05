@@ -6,6 +6,8 @@ module TDev.Cloud {
     export var litePermissions:StringMap<boolean> = {};
     var microbitGitTag = "v23";
 
+    export var _migrate: () => void;
+
     export var useNativeCompilation = false;
 
     export interface EditorWidgets {
@@ -948,6 +950,10 @@ module TDev.Cloud {
             }
             else if (e.status == 404) {
                 ModalDialog.info(lf("publication not found"), lf("Maybe it has been removed?"));
+                return;
+            }
+            else if (e.status == 442 && _migrate) {
+                _migrate();
                 return;
             }
             else if (e.status == 400)

@@ -41,14 +41,24 @@ module TDev.Login
 
     export function migrate()
     {
+        ProgressOverlay.show(lf("migrating account..."))
+
+        var migrationToken = ""
         Util.httpPostRealJsonAsync("https://next.touchdevelop.com/api/migrationtoken", { 
             access_token:  decodeURIComponent(TDev.Cloud.getAccessToken()) 
         }).then(tok => {
-            Util.navigateInWindow("https://next.touchdevelop.com/app/#hub:migrate:" + tok.migrationtoken)
-        }, e => {
-            if (e.status == 409)
-                ModalDialog.info(lf("already migrated"), lf("Your account has already been migrated."))
-            else throw e;
-        }).done()
+            migrationToken = "&u=" + encodeURIComponent(tok.migrationtoken)
+        }, e => { })
+        .then(() => {
+            World.cancelSync();
+            Cloud.setAccessToken(undefined);
+            Util.navigatingAway = true; // prevent oneTab error
+            window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
+            return TheEditor.resetWorldAsync()
+        })
+        .then(() => {
+            Login.show("hub", migrationToken)
+        })
+        .done()
     }
 }

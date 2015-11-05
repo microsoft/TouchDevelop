@@ -277,6 +277,8 @@ module TDev
         [ 'cached', 'checking', 'downloading', 'error', 'noupdate', 'obsolete', 'progress', 'updateready'
           ].forEach((ev) => appCache.addEventListener(ev, logAppCacheEvent, false));
 
+        Cloud._migrate = Login.migrate;
+
         World.getScriptMeta = (script) => {
             var s = AST.Parser.parseScript(script);
             return s.toMeta();
