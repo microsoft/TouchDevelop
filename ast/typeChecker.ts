@@ -1174,10 +1174,7 @@ module TDev.AST
             var unassigned = this.outLocals.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
                 this.reportedUnassigned = true;
-                node.addHint(
-                    lf("return parameter{0:s} {1} may be unassigned before the function finishes",
-                             unassigned.length, 
-                             unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
+                node.addHint(lf("the function may not always return a value; insert a return statement?"));
             }
         }
 

@@ -154,9 +154,12 @@ class ApiRequest {
     data:any = {}
     cmd:string[] = [];
     reqNo = ++currentReqNo;
+    encrypted = false;
+    respStream = null;
 
     constructor(public req:http.ServerRequest, public resp:http.ServerResponse)
     {
+        this.respStream = this.resp;
     }
 
     forwardToWorkers()
@@ -215,8 +218,8 @@ class ApiRequest {
     {
         info.log("HTTP error " + code + ": " + text)
         this.resp.writeHead(code, { 'Content-Type': 'text/plain' })
-        this.resp.write(text, "utf8")
-        this.resp.end()
+        this.respStream.write(text, "utf8")
+        this.respStream.end()
     }
 
     setCors()
@@ -241,6 +244,63 @@ class ApiRequest {
         }
     }
 
+    forwardToOneWorker()
+    {
+        var w = pickWorker()
+        var u = w.getUrl()
+        u.method = this.data.method || "GET"
+        u.headers = {} // no headers
+        u.path = this.data.url
+
+        var creq = http.request(u, cres => {
+            readRes(cres, total => {
+                this.ok({
+                    resp: total.toString("utf8"),
+                    headers: cres.headers,
+                    code: cres.statusCode
+                })
+            })
+        })
+        creq.on("error", err => {
+            this.ok({
+                code: 600,
+                resp: err.message || (err + "")
+            })
+        })
+        if (typeof this.data.body == "string")
+            creq.end(this.data.body)
+        else if (typeof this.data == "object")
+            creq.end(JSON.stringify(this.data.body))
+        else creq.end()
+    }
+
+    handleEncryptedMgmt()
+    {
+        var stream = decipherReq(this.req)
+        if (stream == this.req)
+            this.error(403, "Not encrypted")
+
+        var g = zlib.createGunzip(undefined);
+        (<any>stream).pipe(g);
+        readRes(g, total => {
+            var op = JSON.parse(total.toString("utf8"))
+            // make sure this is somewhat long string
+            if (op.op == "ShellMgmtCommand") {
+                this.encrypted = true;
+                this.respStream = cipherResp(this.resp);
+                this.cmd = op.cmd
+                this.data = op.data
+                if (this.cmd[0] == "worker") {
+                    this.forwardToOneWorker();
+                } else {
+                    this.processMgmt()
+                }
+            } else {
+                this.error(403, "bad op")
+            }
+        })
+    }
+
     handleMgmt(cmd:string[])
     {
         var buf = ""
@@ -257,17 +317,23 @@ class ApiRequest {
 
         var req = this.req
         if (req.method == "POST" || req.method == "PUT") {
+            /*
+            var stream = decipherReq(req)
+            this.encrypted = (stream != req)
+            if (this.encrypted)
+                this.respStream = cipherResp(this.resp);
+            */
+
+            var stream = <any>req
             if (/gzip/.test(req.headers['content-encoding'])) {
                 var g = zlib.createGunzip(undefined);
-                (<any>req).pipe(g);
-                g.setEncoding('utf8');
-                g.on('data', (chunk) => { buf += chunk });
-                g.on('end', final);
-            } else {
-                req.setEncoding('utf8');
-                req.on('data', (chunk) => { buf += chunk });
-                req.on('end', final);
+                stream.pipe(g);
+                stream = g;
             }
+            readRes(stream, total => {
+                buf = total.toString("utf8")
+                final()
+            })
         } else {
             final()
         }
@@ -280,12 +346,11 @@ class ApiRequest {
         var zl:any = zlib;
         if (zl.gzipSync && /gzip/.test(this.req.headers['accept-encoding'])) {
             buf = zl.gzipSync(buf);
-            hd['Content-Encoding'] = 'gzip';
+            hd['Content-Encoding'] = this.encrypted ? 'x-td-encgz' : 'gzip';
         }
-        hd['Content-Length'] = buf.length;
         this.resp.writeHead(200, hd)
-        this.resp.write(buf)
-        this.resp.end()
+        this.respStream.write(buf)
+        this.respStream.end()
     }
 
     exception(e:any)
@@ -1112,7 +1177,8 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numDeploys: tdstate.numDeploys,
             numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
-            versionStamp: "v7",
+            encryption: !!key,
+            versionStamp: "v10",
         })
     },
 
@@ -2151,6 +2217,43 @@ function proxyEditor(cmds:string[], req, resp)
     }
 }
 
+var key:Buffer = null;
+
+function decipherReq(req) {
+    var err = function(m) {
+        console.log("decipher: " + m)
+    }
+
+    if (!key) return req;
+
+    var iv = req.headers["x-tdshell-iv"]
+    if (!iv) {
+        err("No iv")
+        return req
+    }
+    iv = new Buffer(iv.replace(/\s+/g, ""), "hex")
+    if (!iv || iv.length != 16) {
+        err("bad iv")
+        return req
+    }
+
+    var ciph = <any>crypto.createDecipheriv("AES256", key, iv)
+    req.pipe(ciph)
+    ciph.tdEncrypted = true
+    return ciph
+}
+
+function cipherResp(res) {
+    if (!key) return res;
+    var oiv = crypto.randomBytes(16)
+    res.setHeader("x-tdshell-iv", oiv.toString("hex"))
+    var enciph = <any>crypto.createCipheriv("AES256", key, oiv)
+    enciph.pipe(res);
+    var g = zlib.createGzip(undefined);
+    g.pipe(enciph)
+    return g
+}
+
 function specHandleReq(req, resp)
 {
     var ar = new ApiRequest(req, resp);
@@ -2172,8 +2275,13 @@ function specHandleReq(req, resp)
                 resp.writeHead(200, "OK");
                 resp.end();
             } else {
-                if (cmd[1] === config.deploymentKey) {
-                    ar.handleMgmt(cmd.slice(2))
+                if (cmd[1] === "encrypted") {
+                    ar.handleEncryptedMgmt()
+                } else if (cmd[1] === config.deploymentKey) {
+                    if (key)
+                        ar.error(418, "only encrypted allowed")
+                    else
+                        ar.handleMgmt(cmd.slice(2))
                 } else {
                     ar.error(403, "wrong key")
                 }
@@ -2262,9 +2370,18 @@ function handleReq(req, resp)
 {
     setupHeaders(req)
 
-    if (/^\/-tdevmgmt-/.test(req.url))
+    if (/^\/-tdevmgmt-/.test(req.url)) {
         specHandleReq(req, resp)
-    else if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
+        return;
+    }
+
+    if (key) {
+        resp.writeHead(418, "Only encrypted allowed")
+        resp.end("Only encrypted allowed")
+        return
+    }
+
+    if (allowEditor && /^\/(favicon\.ico|editor\/)/.test(req.url))
         specHandleReq(req, resp)
     else if (workers.length == 0)
         whenWorkers.push(() => handleReq(req, resp))
@@ -2703,8 +2820,20 @@ function main()
 
     config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
 
+    var onlyEncrypted = false
+    if (/^\*/.test(process.env['TD_DEPLOYMENT_KEY'])) {
+        onlyEncrypted = true
+        process.env['TD_DEPLOYMENT_KEY'] = process.env['TD_DEPLOYMENT_KEY'].slice(1)
+    }
+
     if (process.env['TD_DEPLOYMENT_KEY']) {
         config.deploymentKey = process.env['TD_DEPLOYMENT_KEY']
+    }
+
+    if (onlyEncrypted) {
+        var h = crypto.createHash("sha256")
+        h.update(config.deploymentKey)
+        key = h.digest()
     }
 
     info.log("Deployment key: " + config.deploymentKey);

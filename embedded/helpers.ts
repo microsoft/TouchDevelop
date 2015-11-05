@@ -376,9 +376,19 @@ module TDev {
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
         if (isLambda)
-          return "[=] "+args+" mutable -> "+retType;
+          // Let the compiler infer the return type.
+          return "[=] "+args+" mutable";
         else
           return retType + " " + name + args;
+      }
+
+      export function findTypeDef(env: Env, libMap: LibMap, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+        if (!inParams.length && !outParams.length)
+          return "Action";
+        else if (inParams.length == 1 && !outParams.length)
+          return "Action1<"+mkType(env, libMap, inParams[0].type)+">";
+        else
+          return mkSignature(env, libMap, "", inParams, outParams);
       }
 
       // Generate the return instruction for the function.
@@ -464,6 +474,21 @@ module TDev {
       // JStringLiteral { value: VALUE } -> VALUE
       export function isStringLiteral(x: J.JNode) {
         return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value;
+      }
+
+      export function isInitialRecordAssignment(locals: J.JLocalDef[], expr: J.JExpr) {
+        return (
+          locals.length == 1 &&
+          expr.nodeType == "call" &&
+          (<J.JCall> expr).name == ":=" &&
+          (<J.JCall> expr).args.length == 2 &&
+          (<J.JCall> expr).args[1].nodeType == "call" &&
+          isRecordConstructor(
+            (<J.JCall> (<J.JCall> expr).args[1]).name,
+            (<J.JCall> (<J.JCall> expr).args[1]).args) &&
+          (<J.JCall> expr).args[0].nodeType == "localRef" &&
+          (<J.JLocalRef> (<J.JCall> expr).args[0]).localId == <any> locals[0].id
+        );
       }
 
       export function willCompile (f: J.JAction) {

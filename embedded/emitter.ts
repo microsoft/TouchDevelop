@@ -76,9 +76,8 @@ module TDev {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
             env.indent +
-            "std::function<"+
-                H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-              "> "+n+" = "+
+            H.findTypeDef(env, this.libraryMap, a.inParameters, a.outParameters)+
+            " "+n+" = "+
             this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
         });
@@ -86,7 +85,10 @@ module TDev {
           env.indent + this.visit(env, expr.tree) + ";");
       }
 
-      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
+      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExpr) {
+        if (H.isInitialRecordAssignment(locals, expr))
+          return this.visit(env, locals[0])+"(new "+H.mkType(env, this.libraryMap, locals[0].type)+"_)";
+
         var decls = locals.map(d => {
           // Side-effect: marks [d] as promoted, if needed.
           var decl = this.visit(env, d);
@@ -120,7 +122,7 @@ module TDev {
         var l = H.resolveLocal(env, name, id);
         if (H.shouldPromoteToRef(env, type, isByRef)) {
           H.markPromoted(env, id);
-          return "ManagedType<"+ t + "> " + l + "(new "+t+")";
+          return "Ref<"+ t + "> " + l;
         } else {
           return t + " " + l;
         }
@@ -250,13 +252,9 @@ module TDev {
       }
 
       private safeGet(x: string, f: string): string {
-        // NOTE: this works because the default constructor for [ManagedType]
-        // initializes its [object] field to [NULL].
-        return (
-          "("+x+".operator->() != NULL "+
-          "? "+x+"->"+f+" "+
-          ": (uBit.panic(TD_UNINITIALIZED_OBJECT_TYPE), "+x+"->"+f+"))"
-        );
+        // The overload of [->] in [ManagedType] takes care of checking that the
+        // underlying object is properly initialized.
+        return x+"->"+f;
       }
 
       public visitCall(env: H.Env,
@@ -426,8 +424,20 @@ module TDev {
           throw new Error("Not supported (multiple return parameters)");
 
         var env2 = H.indent(env);
+
+        // Properly initializing the outparam with a default value is important,
+        // because it guarantees that the function always ends with a proper
+        // return statement of an initialized value. (Never returning is NOT an
+        // error in TouchDevelop).
+        var outParamInitialization = "";
+        if (outParams.length > 0) {
+          var defaultValue = H.defaultValueForType(this.libraryMap, outParams[0].type);
+          var initialValue = defaultValue ? " = " + defaultValue : "";
+          outParamInitialization = env2.indent + this.visit(env2, outParams[0]) + initialValue + ";";
+        }
+
         var bodyText = [
-          outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
+          outParamInitialization,
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.resolveLocalDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
