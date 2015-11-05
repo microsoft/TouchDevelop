@@ -905,7 +905,7 @@ module TDev.Cloud {
     
     export function showSigninNotification(isOnline: boolean) {
         if (isOnline)
-            HTML.showWarningNotification(lf("cannot sync - tap here to sign in"), {
+            HTML.showWarningNotification(lf("You are not currently signed in: sign in or dismiss this message"), {
                 onClick: () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
