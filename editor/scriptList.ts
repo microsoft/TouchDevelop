@@ -7460,7 +7460,7 @@
                                 }
                             } else {
                                 if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
-                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
+                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script could not be published, please check your internet connection. If this does not resolve your issue, go to the help page for more information."));
                             }
                         }).done();
                     })
