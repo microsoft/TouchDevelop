@@ -71,6 +71,7 @@ RefImage*      micro_bit::createImageFromString (RefString *s);                 
 int            micro_bit::digitalReadPin     (MicroBitPin& p);                       // F1
 void           micro_bit::digitalWritePin    (MicroBitPin& p, int value);            // P2
 RefImage*      micro_bit::displayScreenShot  ();                                     // F0 over
+void           micro_bit::displayStopAnimation ();                                     // P0 over
 void           micro_bit::enablePitch        (MicroBitPin& p);                       // P1
 void           micro_bit::events::alert      (int event);                            // P1
 void           micro_bit::events::audio_recorder (int event);                            // P1
