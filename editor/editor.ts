@@ -4131,7 +4131,7 @@ module TDev
             });
         }
 
-        private resetWorldAsync() : TDev.Promise
+        public resetWorldAsync() : TDev.Promise
         {
             Ticker.dbg("resetWorldAsync");
             setGlobalScript(undefined);

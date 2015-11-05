@@ -716,6 +716,9 @@ module TDev {
                 if (Util.navigatingAway) {
                     HTML.showProgressNotification(undefined);
                     return undefined;
+                } else if (status == 442 && Cloud._migrate) {
+                    Cloud._migrate();
+                    return undefined;
                 } else if (status == 400) {
                     var message = lf("Cloud precondition violated") + info;
                     HTML.showProgressNotification(message)
