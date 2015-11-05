@@ -2690,12 +2690,13 @@
                 }
                 res = this.heartId(id);
             } else {
-                this.getAnd("me/reviewed/" + id, (d) => {
-                    res = d.id;
-                    if (late && changedMyMind) {
-                        changedMyMind(res);
-                    }
-                });
+                if (Cloud.hasAccessToken())
+                    this.getAnd("me/reviewed/" + id, (d) => {
+                        res = d.id;
+                        if (late && changedMyMind) {
+                            changedMyMind(res);
+                        }
+                    });
             }
 
             late = true;
@@ -2766,6 +2767,8 @@
 
         public handleError(err: any, entry: ApiCacheEntry) {
             entry.gotError(err);
+
+            Util.log("APIERR: " + entry.path + " -> " + err)
 
             if (this.offlineErrorReported) return;
             if (!window.localStorage["everLoggedIn"])
