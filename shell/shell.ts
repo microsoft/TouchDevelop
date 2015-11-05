@@ -256,6 +256,7 @@ class ApiRequest {
             readRes(cres, total => {
                 this.ok({
                     resp: total.toString("utf8"),
+                    headers: cres.headers,
                     code: cres.statusCode
                 })
             })
@@ -1177,7 +1178,7 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
             encryption: !!key,
-            versionStamp: "v8",
+            versionStamp: "v10",
         })
     },
 
@@ -2376,6 +2377,7 @@ function handleReq(req, resp)
 
     if (key) {
         resp.writeHead(418, "Only encrypted allowed")
+        resp.end("Only encrypted allowed")
         return
     }
 
@@ -2818,11 +2820,17 @@ function main()
 
     config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
 
+    var onlyEncrypted = false
+    if (/^\*/.test(process.env['TD_DEPLOYMENT_KEY'])) {
+        onlyEncrypted = true
+        process.env['TD_DEPLOYMENT_KEY'] = process.env['TD_DEPLOYMENT_KEY'].slice(1)
+    }
+
     if (process.env['TD_DEPLOYMENT_KEY']) {
         config.deploymentKey = process.env['TD_DEPLOYMENT_KEY']
     }
 
-    if (process.env['TD_ONLY_ENCRYPTED']) {
+    if (onlyEncrypted) {
         var h = crypto.createHash("sha256")
         h.update(config.deploymentKey)
         key = h.digest()
