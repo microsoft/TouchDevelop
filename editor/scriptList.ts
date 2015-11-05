@@ -1870,13 +1870,36 @@
                             tick(Ticks.browseImportCode);
                             ArtUtil.importFileDialog();
                         }));
+                    } 
+
+                    if (/^pointers$/.test(path) && Cloud.hasPermission("global-list")) {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("create pointer"), () => {
+                            var from = HTML.mkTextInput("text", lf("from..."));
+                            var to = HTML.mkTextInput("text", lf("to..."));
+                            var m = new ModalDialog();
+                            m.add(div('wall-dialog-header', lf("create pointer")));
+                            m.add(div('wall-dialog-body', from));
+                            m.add(div('wall-dialog-body', to));
+                            m.addOk(lf("create"), () => {
+                                var f = from.value;
+                                var t = to.value;
+                                if (f && t)
+                                    Cloud.postPrivateApiAsync("pointers", { path: f, redirect: t })
+                                        .done(() => {
+                                            HTML.showProgressNotification(lf("pointer created"));
+                                            TheApiCacheMgr.invalidate("")
+                                        }, e => Cloud.handlePostingError(e, lf("create pointer")));
+                                m.dismiss();
+                            })
+                            m.show();
+                        }))
                     }
 
                     if (ncont) {
-                        this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.moreDiv.appendChild(div("sdLoadingMore", lf("loading more...")));
                             loadEntries(ncont);
-                        })]);
+                        }));
                     } else if (this.hasMore) {
                         this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.displayLimit += Host.maxDisplayAtOnce;
