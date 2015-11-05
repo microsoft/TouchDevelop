@@ -541,7 +541,7 @@ module TDev
 
             this.add(list);
 
-            this.buttondiv = div('wall-dialog-buttons');
+            this.buttondiv = div('wall-dialog-buttons modalChooseBtns');
             if (options.custombuttons !== undefined)
                 this.buttondiv.appendChildren(options.custombuttons);
             else

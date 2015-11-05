@@ -398,6 +398,11 @@ font-size:1.2em;
   font-size: 0.6em;
 }
 
+.modalChooseBtns > button {
+  color:white !important;
+  border-color:white !important;
+}
+
 .modalDialogOuterLong .modalDialogInner {
   height: 100%;
   width: auto;
