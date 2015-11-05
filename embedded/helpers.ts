@@ -382,16 +382,13 @@ module TDev {
           return retType + " " + name + args;
       }
 
-      var typeDefTable = {
-        "std::function<void ()>": "closure",
-        "std::function<void (Number)>": "closure1",
-      };
-
-      export function findTypeDef(s: string) {
-        if (s in typeDefTable)
-          return typeDefTable[s];
+      export function findTypeDef(env: Env, libMap: LibMap, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+        if (!inParams.length && !outParams.length)
+          return "Action";
+        else if (inParams.length == 1 && !outParams.length)
+          return "Action1<"+mkType(env, libMap, inParams[0].type)+">";
         else
-          return s;
+          return mkSignature(env, libMap, "", inParams, outParams);
       }
 
       // Generate the return instruction for the function.
