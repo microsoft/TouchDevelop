@@ -76,10 +76,7 @@ module TDev {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
             env.indent +
-            H.findTypeDef(
-              "std::function<"+
-                  H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-                ">") +
+            H.findTypeDef(env, this.libraryMap, a.inParameters, a.outParameters)+
             " "+n+" = "+
             this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
