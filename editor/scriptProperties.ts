@@ -246,7 +246,7 @@ module TDev
                     HTML.mkButton(lf("time tc"), () => Editor.testScriptTc()),
                     HTML.mkButton(lf("speech driven"), () => TheEditor.calculator.searchApi.listenToSpeech()),
                     HTML.mkButton(lf("TypeScript"), () => ModalDialog.showText(new AST.Converter(TDev.Script).run().text)),
-                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(Script, undefined, true))
+                    HTML.mkButton(lf("bytecode"), () => ScriptProperties.bytecodeCompile(Script, true))
                 ) : undefined,
                 Browser.EditorSettings.changeSkillLevelDiv(this.editor, Ticks.changeSkillScriptProperties, "formLine marginBottom"),
                 this.mdRoot
@@ -255,7 +255,7 @@ module TDev
         }
 
         static firstTime = true;
-        static bytecodeCompile(app : AST.App, buttonHolder : HTMLElement, showSource = false)
+        static bytecodeCompile(app : AST.App, showSource = false)
         {
             var guid = app.localGuid
             var st = TheEditor.saveStateAsync()
@@ -315,10 +315,6 @@ module TDev
 
                 if (res.data) {
                     var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
-                    if (buttonHolder)
-                        buttonHolder.appendChild(HTML.mkButton(lf("download .hex file"), () => {
-                            HTML.browserDownloadText(res.data, fn, res.contentType);
-                        }));
                     HTML.browserDownloadText(res.data, fn, res.contentType);
                 }
             })

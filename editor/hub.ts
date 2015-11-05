@@ -1327,7 +1327,7 @@ module TDev.Browser {
     
     export module TemplateManager {        
         export var createEditor : ExternalEditor = {
-            company: "BBC micro:bit",
+            company: "",
             name: lf("Create Code"),
             description: lf("Create a new script"),
             origin: "",
@@ -1337,7 +1337,7 @@ module TDev.Browser {
             logoUrl: "",
         };
         export var importEditor : ExternalEditor = {
-            company: "BBC micro:bit",
+            company: "",
             name: lf("Import Code"),
             description: lf("Import a script from a file"),
             origin: "",

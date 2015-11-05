@@ -1986,8 +1986,7 @@ module TDev
 
         private currentCompilationModalDialog: ModalDialog;
 
-        private showCompilationDialog(inBrowser: boolean) : HTMLElement {
-            var buttonDiv: HTMLElement = undefined;
+        private showCompilationDialog(inBrowser: boolean) {
             
             this.currentCompilationModalDialog = new ModalDialog();
             /*
@@ -2017,20 +2016,16 @@ module TDev
                     : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
-            this.currentCompilationModalDialog.add(buttonDiv = div('wall-dialog-buttons'))
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             //if (inBrowser)
             //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
-            
-            return buttonDiv;
         }
 
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
-            var buttonDiv: HTMLElement = undefined;
-            if (!showSource) buttonDiv = this.showCompilationDialog(true);
-            ScriptProperties.bytecodeCompile(app, buttonDiv, showSource);
+            if (!showSource) this.showCompilationDialog(true);
+            ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
@@ -2132,7 +2127,7 @@ module TDev
         public setupPlayButton()
         {
             var children : HTMLElement[] = [];
-            if (this.currentRt && this.currentRt.canResume())
+        if (this.currentRt && this.currentRt.canResume())
                 children = [ Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.codeResume, "Ctrl-M", () => this.resumeExecution()) ];
             else
                 children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-M", () => this.runMainAction()) ];
