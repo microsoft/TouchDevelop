@@ -2024,6 +2024,7 @@ module TDev
         }
 
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
+            tick(Ticks.coreNativeCompile);
             if (!showSource) this.showCompilationDialog(true);
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)

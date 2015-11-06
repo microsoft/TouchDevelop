@@ -242,6 +242,9 @@ module TDev {
         editorTutorialNext,
         editorTutorialPrevious,
 
+        externalCompile,
+        externalRun,
+
         sideAddAction,
         sideAddActionTest,
         sideAddActionTypeDef,
@@ -336,6 +339,7 @@ module TDev {
         commentBugTracking,
 
         coreRun,
+        coreNativeCompile,
         coreResume,
         coreRerun,
         corePublishHidden,
