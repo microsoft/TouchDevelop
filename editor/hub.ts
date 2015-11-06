@@ -2501,10 +2501,10 @@ module TDev.Browser {
                     preview.src = uri;
                     msg.setChildren([])
                     error.setChildren([])
-                    Util.httpPostTextAsync(Cloud.getPrivateApiUrl("me/picture"), JSON.stringify({
+                    Cloud.postPrivateApiAsync("me/picture", {
                             content: uri.replace(/^[^,]*,/, ""),
                             contentType: "image/jpeg"
-                    })).done(resp => {
+                    }).done(resp => {
                         msg.setChildren(lf("picture changed; it may take a few minutes and a page reload for the changes to show up"));
                         onUpd();
                         updatePreview();
