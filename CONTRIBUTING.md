@@ -5,7 +5,7 @@
 TouchDevelop is currently accepting contributions in the form of bug fixes, features or design changes.
 
 ## Contributing bug fixes
-A bug must have an issue tracking it in the issue tracker that has been approved ("Milestone == Community") by the TouchDevelop team. Your pull request should include a link to the bug that you are fixing. If you've submitted a PR for a bug, please post a comment in the bug to avoid duplication of effort.
+A bug must have an issue tracking it in the issue tracker that has been approved ("Milestone == Community") by the TouchDevelop team. Your pull request should include a link to the bug that you are fixing. If you've submitted a PR for a bug, please post a comment in the bug clearly stating that you've done so, to save anyone else doing it as well.
 
 ## Contributing features or design changes
 Features or design changes (things that add new or improved functionality to TouchDevelop) may be accepted, but will need to first be approved (marked as "Milestone == Community" by a TouchDevelop coordinator with the message "Approved") in the suggestion issue.
