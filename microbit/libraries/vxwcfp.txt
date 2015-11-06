@@ -2363,11 +2363,13 @@ action temperature() returns(#xBZ4CpbFL4CvRApl temp: Number) {
 }
 #Vl55kdKb5D1kgSyk
 action stop_animation() {
-  #ATIWVp4tTwDxB4Bp // Cancels the current animation.
-  #d4LAQbEUe7uRZJAS // {namespace:leds}
+  #ATIWVp4tTwDxB4Bp // Cancels the current animation and clears other pending animations.
+  #d4LAQbEUe7uRZJAS // {namespace:led}
   #Ix2qKgTtbnPMed6L // {weight:10}
   #xbNtuxocqqClsImw // {shim:uBit.display.stopAnimation}
   #BDAdp8kwFZFXSYHu data→current_animation := data→current_animation + 1;
+  #gQ12sQ2hZdAouv1m records→Animation_table→clear;
+  meta sync;
 }
 #BVGhpbmcgdGFibGUa
 table Animation {
