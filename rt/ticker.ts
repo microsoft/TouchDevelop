@@ -629,7 +629,7 @@ module TDev {
 
         export function init()
         {
-            if (!/ckns_policy=..0/.test(document.cookie)) {
+            if (/ckns_policy=..0/.test(document.cookie)) {
                 disable();
                 return;
             }
