@@ -229,6 +229,7 @@ module TDev.Cloud {
         
         cachedScripts?: string[];
         userVoice?: string;
+        tickFilter?: StringMap<number>;
     }
 
     export var config: ClientConfig = {

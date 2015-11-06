@@ -261,8 +261,7 @@ module TDev
 
         Revisions.parseUrlParameters(url);
 
-        if (!Cloud.lite)
-            Ticker.init()
+        Ticker.init()
 
         RT.Perf.init(TDev.AST.Compiler.version, Cloud.currentReleaseId);
 

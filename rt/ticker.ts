@@ -623,6 +623,11 @@ module TDev {
 
         export function init()
         {
+            if (!/ckns_policy=..0/.test(document.cookie)) {
+                disable();
+                return;
+            }
+
             var d = window.localStorage["ticksDelay"] * 1;
             if (d) delay = d;
 
@@ -923,10 +928,19 @@ module TDev {
             tn = tn.replace(/[^a-zA-Z_]/g, "_")
 
             Util.log("TICK: " + tn)
-            if (sessionEvents[tn])
-                sessionEvents[tn]++;
+            if (shouldStoreTick(tn))
+                if (sessionEvents[tn])
+                    sessionEvents[tn]++;
+                else
+                    sessionEvents[tn] = 1;
+        }
+
+        function shouldStoreTick(tn:string)
+        {
+            if (Cloud.config.tickFilter)
+                return !!Cloud.config.tickFilter[tn];
             else
-                sessionEvents[tn] = 1;
+                return true;
         }
 
         function tickBase(t: Ticks, sep: string, arg?: string) {
@@ -956,7 +970,7 @@ module TDev {
             }
 
             // this one we only wanted logged, not counted
-            if (t != Ticks.dbgEvent) {
+            if (t != Ticks.dbgEvent && shouldStoreTick(tn)) {
                 if (sessionEvents[tn])
                     sessionEvents[tn]++;
                 else
