@@ -1923,9 +1923,9 @@ module TDev.Browser {
         {
             var m = new ModalDialog();
             m.addHTML(
-                Util.fmt("<h3>{0:q} requires sign&nbsp;in</h3>", name) +
+                Util.fmt(lf("<h3>{0:q} requires sign&nbsp;in</h3>"), name) +
                   "<p class='agree'>" +
-                  "This tutorial uses cloud data which is shared with other users." +
+                  lf("This tutorial uses cloud data which is shared with other users.") +
                   "</p>"
                 )
             m.fullWhite();
