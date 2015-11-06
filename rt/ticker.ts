@@ -438,6 +438,8 @@ module TDev {
 
         publishShareGroup,
 
+        browseEditInstall,
+        browseRunInstall,
         browseRun,
         browseEdit,
         browsePin,
@@ -921,13 +923,14 @@ module TDev {
 
         export function rawTick(tn:string)
         {
+            Util.log("TICK: " + tn)
+
             if (!initialized || disabled) return;
 
             checkDate();
 
             tn = tn.replace(/[^a-zA-Z_]/g, "_")
 
-            Util.log("TICK: " + tn)
             if (shouldStoreTick(tn))
                 if (sessionEvents[tn])
                     sessionEvents[tn]++;

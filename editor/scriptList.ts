@@ -1404,6 +1404,7 @@
         }
 
         public openNewScriptAsync(stub: World.ScriptStub, t: ScriptTemplate = null): Promise {
+            Ticker.rawTick("NewScript_" + stub.editorName)
             if (currentScreen)
                 currentScreen.hide()
             stub.scriptName = this.newScriptName(stub.scriptName);
@@ -6255,6 +6256,10 @@
             if (!this.cloudHeader || this.cloudHeader.status == "deleted") {
                 if (!this.publicId) return Promise.as(); // hmm?
                 this.browser().hide();
+                if (TheEditor.runImmediately)
+                    tick(Ticks.browseRunInstall);
+                else
+                    tick(Ticks.browseEditInstall);
                 return TheEditor.prepareForLoadAsync("installing and loading script",
                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
             } else {
@@ -7643,7 +7648,6 @@
         }
 
         private uninstallAsync(allowUndo = true): Promise {
-            tick(Ticks.browseUninstall);
             var id = this.getGuid();
             var restoreAsync : Promise = null
             return Editor.updateEditorStateAsync(id, (st) => {
