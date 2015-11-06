@@ -62,6 +62,7 @@ action \_libinit() {
     #BlWLf7LrHMucdyNB code→init_pins;
     #xVIOjGStCgdLjic6 code→update_axis;
     #ByFADaJmirytJ02b code→background_animation;
+    #xmVrpXc8aqbE3dq6 `async` code→animation_worker;
     #pNdJy7kyaeqKZhfS data→board→on_every_frame;
     #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
       #WF6Md7jUVLVAe3m4 code→update_board;
@@ -208,7 +209,6 @@ action clear_screen() {
   #Lc4GU4SQEeDXJcAp // {namespace:basic}
   #WwZ9Imwcdzf4H2Db // {weight:79}
   #IsinvyLebNu1rsu9 // {shim:micro_bit::clearScreen}
-  #oucBbE834sepGmyq data→current_animation := data→current_animation + 1;
   #yVSc2bJhsH0utE1x foreach led in data→leds
   do {
     #Tgb6koDUxsIrk8ua $led→set_color(data→led_off_color);
@@ -412,31 +412,33 @@ action scroll_image(#dVF1wUlpKx2pPtHa @this: * Image, #Fr2rDLarbEiIzfHm x_offset
   #xtyyk9lLDfqJLWpL // {hints:x offset per step:5,1}
   #kK2O5fLxOlBFvjHG // {hints:interval:400,100}
   #UrNHQ26Tc7HxFp1p // {shim:micro_bit::scrollImage}
-  #xtlglkDAp2Q1OJUh $anim_id := data→current_animation + 1;
-  #T4QhXCtmkTUbQtWp data→current_animation := $anim_id;
+  #xtlglkDAp2Q1OJUh $anim_id := data→current_animation;
   #Jysm4Pd4lszqgxXV $x_offset_per_step := math→round($x_offset_per_step);
-  #xluG50TZnkrViJjL if $x_offset_per_step > 0 then {
-    #xMcTw7gf2Fz9FwZ8 $x_offset_per_step := math→max(1, $x_offset_per_step);
-    #CXEE00t44mfWLUIC $x := 0;
-    #GwuUOeH3zqRBqEQ1 while $x + 4 < $@this→width do {
-      #x5vjJ5zSuf1rqKnV $@this→render_image($x);
-      #OwLsXGKEmYf3u4Gj code→pause($interval);
-      #PHeDA80GctvZmtme if data→current_animation ≠ $anim_id then {
-        #ietA2urgnfVpp2ss `return` ;
+  #Hv8BBJJLK4ATmTYK code→queue_animation_and_wait;
+  #lyweMkPTU58Kbmtp where `implicit` \_body\_() {
+    #xluG50TZnkrViJjL if $x_offset_per_step > 0 then {
+      #xMcTw7gf2Fz9FwZ8 $dx := math→max(1, $x_offset_per_step);
+      #CXEE00t44mfWLUIC $x := 0;
+      #GwuUOeH3zqRBqEQ1 while $x + 4 < $@this→width do {
+        #x5vjJ5zSuf1rqKnV $@this→render_image($x);
+        #OwLsXGKEmYf3u4Gj code→pause($interval);
+        #PHeDA80GctvZmtme if data→current_animation ≠ $anim_id then {
+          #ietA2urgnfVpp2ss `return` ;
+        }
+        #wDxlPdR9HkBH4PHv $x := $x + $dx;
       }
-      #wDxlPdR9HkBH4PHv $x := $x + $x_offset_per_step;
     }
-  }
-  else {
-    #xQMEmAD35uksb3qz $x_offset_per_step := math→min( - 1, $x_offset_per_step);
-    #JkulbmMt5UmnsSIB $x := $@this→width - 5;
-    #ujNFlLWKwHnNk5rJ while $x ≥ 0 do {
-      #Gp42FT0fV8jwrcE4 $@this→render_image($x);
-      #d4IJlY2NIltFZZiE code→pause($interval);
-      #uLdovnfNVFKKXuXO if data→current_animation ≠ $anim_id then {
-        #yJCgIFUX2A0x3Os4 `return` ;
+    else {
+      #xQMEmAD35uksb3qz $dx := math→min( - 1, $x_offset_per_step);
+      #JkulbmMt5UmnsSIB $x := $@this→width - 5;
+      #ujNFlLWKwHnNk5rJ while $x ≥ 0 do {
+        #Gp42FT0fV8jwrcE4 $@this→render_image($x);
+        #d4IJlY2NIltFZZiE code→pause($interval);
+        #uLdovnfNVFKKXuXO if data→current_animation ≠ $anim_id then {
+          #yJCgIFUX2A0x3Os4 `return` ;
+        }
+        #xgrTFzGv8MLnnysv $x := $x + $dx;
       }
-      #xgrTFzGv8MLnnysv $x := $x + $x_offset_per_step;
     }
   }
 }
@@ -505,13 +507,19 @@ action show_string(#EEchsFBax4g4Pk4y text: String, #xhQbPcu59cxTmgPb interval: N
   #kf4HddkY4wQUaUAU // {shim:micro_bit::scrollString}
   #DMmxTOrCif13ztvx $interval := math→round($interval);
   #N4KPZT9PpUDTn9R1 if $text→is_empty then {
-    #YB68tFgWoN2PlJYA code→clear_screen;
-    #YvZOGJUcPcBXex8I code→pause($interval * 5);
+    #yIHTm1wXSp2w8fes code→queue_animation_and_wait;
+    #GcGnNDNYH7xeg0od where `implicit` \_body\_() {
+      #YB68tFgWoN2PlJYA code→clear_screen;
+      #YvZOGJUcPcBXex8I code→pause($interval * 5);
+    }
   }
   else { #Qv7UTtB9F3o4pkvl if $text→count = 1 then {
-    #jQ3KH7NUrCa547Rj $sprite := code→create_image_from_string($text);
-    #y26xiE0eE4lGwFIH $sprite→show_image(0);
-    #TxqzE2nAu66dxqXK code→pause($interval * 5);
+    #YeGT0NEaIr4ew2Wd code→queue_animation_and_wait;
+    #x4NHkwmJbhbUpSeh where `implicit` \_body\_() {
+      #jQ3KH7NUrCa547Rj $sprite := code→create_image_from_string($text);
+      #y26xiE0eE4lGwFIH $sprite→show_image(0);
+      #TxqzE2nAu66dxqXK code→pause($interval * 5);
+    }
   }
   else {
     #yCPOXhiQN5kj94eK if `not` $text→starts_with(" ") then {
@@ -564,8 +572,6 @@ action show_image(#x4Os5UgJK1k1DyDo @this: * Image, #WCEICn0SBZ7AnvYq x_offset: 
   #s0MpoKh2adnhmM8z // {weight:69}
   #RfVXECzwY1YjIfSF // {hints:x offset:0,5,10}
   #UN2qrX2ZL1nyHdhU // {shim:micro_bit::showImage}
-  #HdrqajmjHl4dPdlr $anim_id := data→current_animation + 1;
-  #xs4eu6OT8oa4dXAd data→current_animation := $anim_id;
   #AqfPdUQhQ8tq2B7e code→render_image($@this, $x_offset);
 }
 #gszRC4JNYzCIA8xJ
@@ -840,8 +846,7 @@ action show_number(#arqB8R393DWmG4yx value: Number, #xwSeYvwN5k4Kt277 interval: 
   #dxD9lszdBNwzGAUk // {shim:micro_bit::scrollNumber}
   #x5tg98AeJkbUQbiv $value := math→round($value);
   #C3O0Rmqfj0wV31Uh $interval := math→round($interval);
-  #Vu43lGOjfn56mgm4 $s := $value→to_string;
-  #oIZAtpmgCfqgmA3B code→show_string($s, $interval);
+  #oIZAtpmgCfqgmA3B code→show_string($value→to_string, $interval);
 }
 #QY3E6cU6eBZ2OJSF
 var prelude\u002ecpp : String {
@@ -2355,4 +2360,72 @@ action temperature() returns(#xBZ4CpbFL4CvRApl temp: Number) {
   #fokjMzX103zh4OIf // {shim:uBit.thermometer.getTemperature}
   #w2zqRCAFyOt1oUWQ `return` 21;
   meta sync;
+}
+#Vl55kdKb5D1kgSyk
+action stop_animation() {
+  #ATIWVp4tTwDxB4Bp // Cancels the current animation.
+  #d4LAQbEUe7uRZJAS // {namespace:leds}
+  #Ix2qKgTtbnPMed6L // {weight:10}
+  #xbNtuxocqqClsImw // {shim:uBit.display.stopAnimation}
+  #BDAdp8kwFZFXSYHu data→current_animation := data→current_animation + 1;
+}
+#BVGhpbmcgdGFibGUa
+table Animation {
+  // {shim:}
+  type = "Table";
+  persistent = false;
+  fields {
+    #e2tjt3wkHvRy11YN fn : Action
+  }
+}
+#zhNkP3CWz74bNvt9
+action animation_worker() {
+  #Cymc1fF7P43K4gho // {shim:}
+  #twUDLvYsbqiIiLNp while true do {
+    #Z12yqFGgOP8zzrgk $anim := records→Animation_table→row_at(0);
+    #TCtfj65FNI3BQu5k if `not` $anim→is_invalid then {
+      #x42IFPmOy8OMd94D $anim→fn→run;
+      #xwyIlpRntu8n4vEo $anim→delete_row;
+    }
+    else {
+      #xZksFGo4EkNM0dh8 records→Animation_table→wait_for_update;
+    }
+  }
+  meta private;
+}
+#bMFwG1RBnkCrq3IP
+action queue_animation_and_wait(#lZbLVMHV26CI2Azb body: Action) {
+  #pSk1SAXTgEkwXI52 // {shim:}
+  #y91tnga0ipumHs77 $anim := records→Animation_table→add_row;
+  #W4ekNcG32RwDFN64 $anim→fn := $body;
+  #VyXEejIbvlKT85x0 while true do {
+    #r2yPaxh1j83WPSQq if $anim→is_deleted then {
+      #lZZj1cN4JVqKGeD3 `break` ;
+    }
+    #x64FBWkpzD1lr3ys records→Animation_table→wait_for_update;
+  }
+  meta private;
+}
+#xfKBe2N4OpGoOMjI
+action test_animations() {
+  #C28AVJ2OeeVO9UJB // {shim:}
+  #NAatOLGkWDaNdLSJ code→\_libinit;
+  #xM8mK0o47XZ2xL4w code→on_button_pressed("A");
+  #Ec9RhvIua6hxfiau where `implicit` \_body\_() {
+    #xxDjfJsq8yJ2hJZg code→show_string("A", 150);
+  }
+  #dkWr85kOaggITn84 code→on_button_pressed("B");
+  #Ujf724J59Y9Agp4u where `implicit` \_body\_() {
+    #fkIWDo3j3WYiNeTE code→show_string("B", 150);
+  }
+  meta private;
+  meta test;
+}
+#vtW004u24giFHFCF
+action show_frame(#so5UArm5bvzzbO7Q img: * Image, #wbgk1lJLlqXDa2l4 frame: Number) {
+  #ul6aa2q9FEngpuGm // Shows a particular frame of the image strip.
+  #FO4MMEEFSc9G0nTb // {namespace:image}
+  #gCr4tw5bcjlK72W2 // {weight:70}
+  #xA18S6STfkQQmHSO // {help:functions/show-frame}
+  #RqxUSeIfDyXF0l5K $img→show_image($frame * 5);
 }
