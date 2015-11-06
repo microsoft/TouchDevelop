@@ -937,8 +937,9 @@ module TDev {
 
         function shouldStoreTick(tn:string)
         {
+            if (!tn) return false;
             if (Cloud.config.tickFilter)
-                return !!Cloud.config.tickFilter[tn];
+                return !!Cloud.config.tickFilter[tn.replace(/\|.*/, "")];
             else
                 return true;
         }
