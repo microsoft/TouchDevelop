@@ -7,7 +7,7 @@ CACHE:
 ./editor.css
 
 # this is worker.js file; it will likely not change and it needs to sit under td.com domain, not on cdn
-https://www.touchdevelop.com/app/?releaseid=2519967637668242448-920d9e58.a88e.4fa8.bcd1.9be5ba29da9f-workerjs
+/app/?releaseid=2519967637668242448-920d9e58.a88e.4fa8.bcd1.9be5ba29da9f-workerjs
 
 NETWORK:
 *
