@@ -204,7 +204,10 @@ input.logSearchInput {
   color: #008b00;
 }
 
-.modalDialog a.wall-button, .modalDialog a.wall-button:hover, .modalDialog a.wall-button:visited {
+.modalDialog .wall-button,
+.modalDialog .wall-button:hover,
+.modalDialog .wall-button:visited
+{
   font-weight: normal;
   text-decoration: none;
   color:white;

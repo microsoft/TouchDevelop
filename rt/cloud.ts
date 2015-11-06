@@ -52,7 +52,6 @@ module TDev.Cloud {
         splitButton?: boolean;
         uploadArtInSearchButton?: boolean;
         calcApiHelp?: boolean;
-        calcHelpOverlay?: boolean;
         sideRunButton?: boolean;
         tutorialGoToPreviousStep?: boolean;
         helpLinks?: boolean;
@@ -229,6 +228,7 @@ module TDev.Cloud {
         touchDevelopLogoUrl?: string;
         
         cachedScripts?: string[];
+        userVoice?: string;
     }
 
     export var config: ClientConfig = {
@@ -257,6 +257,7 @@ module TDev.Cloud {
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
+        userVoice:"touchdevelop"
     }
 
     export function isArtUrl(url : string) : boolean {
