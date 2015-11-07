@@ -35,6 +35,7 @@ module TDev {
         export var isWebkit = false;
         export var isAndroid = false;
         export var isMacOSX = false;
+        export var isWindows = false;
         export var isWindows8plus = false;
         export var isRaspberryPiDebian = false;
         export var isCompiledApp = false;
@@ -272,6 +273,8 @@ module TDev {
                 if (m) webkitVersion = parseInt(m[1]);
             }
             isMacOSX = /Macintosh/.test(userAgent);
+            if (/Windows NT/.test(userAgent))
+                isWindows = true;
             if (/Windows NT (6.[2-9]|[789])/.test(userAgent))
                 isWindows8plus = true;
             mobileWebkit = isWebkit && isMobile;

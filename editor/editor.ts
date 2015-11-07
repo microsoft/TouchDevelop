@@ -2016,6 +2016,14 @@ module TDev
                     : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
+            
+            if (TDev.dbg && Browser.isDesktop && Browser.isWindows) {
+                this.currentCompilationModalDialog.add(div("wall-dialog-body",
+                    lf("Tired of copying the .hex file? "),
+                    HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader app!")))
+                );
+            }
+            
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             //if (inBrowser)
             //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
