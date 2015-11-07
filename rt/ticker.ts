@@ -242,6 +242,9 @@ module TDev {
         editorTutorialNext,
         editorTutorialPrevious,
 
+        externalCompile,
+        externalRun,
+
         sideAddAction,
         sideAddActionTest,
         sideAddActionTypeDef,
@@ -336,6 +339,7 @@ module TDev {
         commentBugTracking,
 
         coreRun,
+        coreNativeCompile,
         coreResume,
         coreRerun,
         corePublishHidden,
@@ -438,6 +442,8 @@ module TDev {
 
         publishShareGroup,
 
+        browseEditInstall,
+        browseRunInstall,
         browseRun,
         browseEdit,
         browsePin,
@@ -623,6 +629,11 @@ module TDev {
 
         export function init()
         {
+            if (/ckns_policy=..0/.test(document.cookie)) {
+                disable();
+                return;
+            }
+
             var d = window.localStorage["ticksDelay"] * 1;
             if (d) delay = d;
 
@@ -916,17 +927,28 @@ module TDev {
 
         export function rawTick(tn:string)
         {
+            Util.log("TICK: " + tn)
+
             if (!initialized || disabled) return;
 
             checkDate();
 
             tn = tn.replace(/[^a-zA-Z_]/g, "_")
 
-            Util.log("TICK: " + tn)
-            if (sessionEvents[tn])
-                sessionEvents[tn]++;
+            if (shouldStoreTick(tn))
+                if (sessionEvents[tn])
+                    sessionEvents[tn]++;
+                else
+                    sessionEvents[tn] = 1;
+        }
+
+        function shouldStoreTick(tn:string)
+        {
+            if (!tn) return false;
+            if (Cloud.config.tickFilter)
+                return !!Cloud.config.tickFilter[tn.replace(/\|.*/, "")];
             else
-                sessionEvents[tn] = 1;
+                return true;
         }
 
         function tickBase(t: Ticks, sep: string, arg?: string) {
@@ -956,7 +978,7 @@ module TDev {
             }
 
             // this one we only wanted logged, not counted
-            if (t != Ticks.dbgEvent) {
+            if (t != Ticks.dbgEvent && shouldStoreTick(tn)) {
                 if (sessionEvents[tn])
                     sessionEvents[tn]++;
                 else

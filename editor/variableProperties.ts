@@ -952,7 +952,12 @@ module TDev
                 }
             })            
             r.addEventListener('dragover', function(e) {
-                if (e.dataTransfer.types[0] == 'Files') {
+                var types = e.dataTransfer.types;
+                var found = false;
+                for (var i = 0; i < types.length; ++i)
+                    if (types[i] == "Files")
+                        found = true;
+                if (found) {
                     if (e.preventDefault) e.preventDefault(); // Necessary. Allows us to drop.
                     e.dataTransfer.dropEffect = 'copy';  // See the section on the DataTransfer object.
                     return false;

@@ -435,6 +435,7 @@ module TDev {
             break;
 
           case MessageType.Compile:
+            tick(Ticks.externalCompile);
             if (TheEditor.useNativeCompilation() && Cloud.anonMode(lf("C++ compilation"))) {
               this.post(<Message_CompileAck>{
                 type: MessageType.CompileAck,
@@ -552,6 +553,7 @@ module TDev {
             break;
 
           case MessageType.Run:
+            tick(Ticks.externalRun);
             var message3 = <Message_Run> event.data;
             var side = document.getElementById("externalEditorSide");
             if (message3.onlyIfSplit && side.offsetWidth == 0)
