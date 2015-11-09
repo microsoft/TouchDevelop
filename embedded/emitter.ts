@@ -508,10 +508,10 @@ module TDev {
         var n = H.resolveGlobal(e, r.name);
 
         var s = H.isShim(r.comment);
-        if (s !== null)
-          return e.indent + "typedef "+s+" "+n+";";
-        else if (s === "")
+        if (s === "")
           return null;
+        else if (s !== null)
+          return e.indent + "typedef "+s+" "+n+";";
         else
           return [
             e.indent + "struct " + n + "_;",
