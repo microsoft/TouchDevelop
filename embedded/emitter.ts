@@ -282,6 +282,12 @@ module TDev {
           }
         };
 
+        var mkWrap = (prio: number) => {
+          var needsParentheses = prio > H.priority(env);
+          var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+          return wrap;
+        };
+
         // The [JCall] node has several, different, often unrelated purposes.
         // This function identifies (tentatively) the different cases and
         // compiles each one of them into something that makes sense.
@@ -312,6 +318,16 @@ module TDev {
           var struct_name = "user_types::"+H.resolveGlobal(env, <any> parent)+"_";
           return "ManagedType<"+struct_name+">(new "+struct_name+"())";
         }
+
+        // 0c) Special-casing for [Thing -> invalid] (an invalid record).
+        if (H.isInvalidRecord(name, args))
+          // See remark above.
+          return "ManagedType<user_types::"+H.resolveGlobal(env, (<J.JCall> args[0]).name)+"_>()";
+
+        // 0d) Special casing for [thing -> is invalid] (test if null).
+        if (name == "is invalid" && H.resolveTypeRef(this.libraryMap, parent).user)
+          // 9 is the precedence of ==
+          return mkWrap(9)(this.visit(env, args[0]) + ".get() == NULL");
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
@@ -363,8 +379,7 @@ module TDev {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var op = H.lookupOperator(t.type.toLowerCase()+"::"+name);
           if (op) {
-            var needsParentheses = op.prio > H.priority(env);
-            var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+            var wrap = mkWrap(op.prio);
             var rightPriority = op.right ? op.prio - 1 : op.prio;
             var leftPriority = op.prio;
             if (args.length == 2)

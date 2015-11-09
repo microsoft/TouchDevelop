@@ -476,6 +476,15 @@ module TDev {
         return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value;
       }
 
+      export function isInvalidRecord(name: string, args: J.JExpr[]) {
+        return (
+          name == "invalid" &&
+          args.length == 1 &&
+          args[0].nodeType == "call" &&
+          (<any> (<J.JCall> args[0]).parent) == "records" &&
+          isSingletonRef((<J.JCall> args[0]).args[0]) == "records");
+      }
+
       export function isInitialRecordAssignment(locals: J.JLocalDef[], expr: J.JExpr) {
         return (
           locals.length == 1 &&
