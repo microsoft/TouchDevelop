@@ -150,6 +150,7 @@ module TDev.RT {
                         if (this._showNotifications)
                             HTML.showProxyNotification("Proxy Error: Could not perform web request. " + Cloud.onlineInfo(), this._url);
                         return this.mkProxyCrash(proxyResponse);
+                    case 429:
                     case 503:
                         if (this._showNotifications)
                             HTML.showProxyNotification("Proxy Error: Could not perform web request. Did you transfer a lot of data recently? (code 503)", this._url);
