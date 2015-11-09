@@ -1897,6 +1897,7 @@ module TDev.Browser {
         private mkFnBtn(lbl: string, f: () => void, t = Ticks.noEvent, modal = false, size = 1, ovrLbl = null) {
             var elt = div("hubTile hubTileBtn hubTileSize" + size,
                 dirAuto(div("hubTileBtnLabel " + (
+                    size <= 1 && Util.wordLength(lbl) > 18 ? " hubTileBtnLabelTiny" :
                     size <= 1 && Util.wordLength(lbl) > 10 ? " hubTileBtnLabelSmall" :
                         Util.wordLength(lbl) >= 7 || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium"
                             : ""), ovrLbl, lbl)));
