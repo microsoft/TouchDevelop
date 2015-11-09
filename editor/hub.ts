@@ -1378,9 +1378,9 @@ module TDev.Browser {
         
         export function mkEditorBox(k: ExternalEditor): HTMLElement {
             var icon = div("sdIcon");
-            var ic = ScriptInfo.editorIcons[k.id].split(',');
-            icon.style.backgroundColor = ic[1]
-            icon.setChildren([HTML.mkImg("svg:" + ic[0] + ",white")]);
+            var ic = ScriptInfo.editorIcons[k.id];
+            icon.style.backgroundColor = ic.background;
+            icon.setChildren([HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))]);
 
             var nameBlock = div("sdName", k.name);
             var hd = div("sdNameBlock", nameBlock);
