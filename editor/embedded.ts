@@ -28,7 +28,7 @@ module TDev {
     function compile1(globalNameMap: H.GlobalNameMap, libs: J.JApp[], resolveMap: StringMap<string>, a: J.JApp): EmitterOutput
     {
       try {
-        var libRef: J.JCall = a.isLibrary ? H.mkLibraryRef(a.name) : null;
+        var libRef: J.JCall = H.mkLibraryRef(a.name);
         var libName = a.isLibrary ? a.name : null;
 
         var env = H.emptyEnv(globalNameMap, libName);
@@ -75,19 +75,33 @@ module TDev {
       // script.
       var libraries = a.decls.filter((d: J.JDecl) => d.nodeType == "library");
       var resolveMap = buildResolveMap(<J.JLibrary[]> libraries);
+      var mainResolveMap: StringMap<string> = {};
       var textPromises = libraries.map((j: J.JDecl, i: number) => {
         var pubId = (<J.JLibrary> j).libIdentifier;
         return AST.loadScriptAsync(World.getAnyScriptAsync, pubId).then((resp: AST.LoadScriptResult) => {
           var s = Script;
-          // Use the name by which this library is referred to in the script.
-          (<any> s)._name = libraries[i].name;
           Script = resp.prevScript;
-          return Promise.as(J.dump(s));
+          var jApp = J.dump(s);
+          mainResolveMap[libraries[i].name] = jApp.name;
+          return Promise.as(jApp);
         });
       });
       textPromises.push(Promise.as(a));
-      resolveMap.push({});
       return Promise.join(textPromises).then((everything: J.JApp[]) => {
+        // Consider the following situation. The main script binds [libA] as
+        // [libA']. The main script binds [libB] as [libB], but [libB] binds
+        // [libA] as [libA'']. Right now, the [resolveMap] for [libB] maps
+        // [libA] to [libA']. We need to use [mainResolveMap] (which maps
+        // [libA'] to [libA'']) to fix [resolveMap] so that it maps [libA''] to
+        // [libA].
+        Object.keys(resolveMap).forEach((libName: string) => {
+          var libMap = resolveMap[libName];
+          Object.keys(libMap).forEach((x: string) => {
+            libMap[x] = mainResolveMap[libMap[x]];
+          });
+        });
+        // And now the main map for the main script.
+        resolveMap.push(mainResolveMap);
         // TouchDevelop allows any name; thus, both "Thing$" and "Thing@" sanitize
         // to "Thing_". We need to disambuigate them. Because there may be
         // references across library to these names, we need to agree on a final
@@ -114,6 +128,8 @@ module TDev {
           // TODO we should be doing the same thing for libraries, in case the
           // user has two libraries that desugar to the same name... not going
           // to happen?
+          // This is the "real" name of the library (which may be different from
+          // the "known here as"... name).
           if (a.isLibrary)
             globalNameMap.libraries[a.name] = tdToCpp;
           else

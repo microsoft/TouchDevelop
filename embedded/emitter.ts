@@ -192,17 +192,12 @@ module TDev {
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
-          if (this.libRef)
-            // If compiling a library, no scope actually means the library's
-            // scope. This step is required to possibly find a shim. This means
-            // that we may generate "lib::f()" where we could've just written
-            // "f()", but since the prototypes have been written out already,
-            // that's fine.
-            return this.resolveCall(env, this.libRef, name);
-          else
-            // Call to a function from the current script.
-            return H.resolveGlobal(env, name);
-
+          // If compiling a library, no scope actually means the library's
+          // scope. This step is required to possibly find a shim. This means
+          // that we may generate "lib::f()" where we could've just written
+          // "f()", but since the prototypes have been written out already,
+          // that's fine.
+          return this.resolveCall(env, this.libRef, name);
 
         // Is this a call to a library?
         var n = H.isLibrary(receiver);
@@ -220,9 +215,12 @@ module TDev {
                 "Hint: break on exceptions in the debugger and walk up the call stack to "+
                 "figure out which action it is.");
             return s;
-          } else {
+          } else if (n in this.resolveMap) {
             // Actual call to a library function
-            return H.resolveGlobalL(env, n, name);
+            return H.resolveGlobalL(env, this.resolveMap[n], name);
+          } else {
+            // Call to a function from the current script.
+            return H.resolveGlobal(env, name);
           }
         }
 
