@@ -6625,7 +6625,7 @@
 
                 if (!this.jsonScript) return;
 
-                if (!Cloud.isRestricted() && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
+                if (!Cloud.lite && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
                     updateHideButton();
                 }
 
