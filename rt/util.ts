@@ -287,7 +287,7 @@ module TDev{
     export function trimAfter(s: string, searchString: string): string {
         if (!s) return s;
         var index = s.indexOf(searchString, 0);
-        if (index > -1) return s.substr(index + searchString.length);
+        if (index > -1) return s.substr(0, index + searchString.length);
         else return s;
     }  
     
