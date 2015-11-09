@@ -1206,7 +1206,6 @@ module TDev.Browser {
                 m.add(div('wall-dialog-header', lf("choose your coding skill level")));
                 m.add(div('wall-dialog-body', lf("We will adapt the editor to your coding skill level. You can change your skill level later in the hub.")));
                 m.add(div('wall-dialog-body center', EditorSettings.createChooseSkillLevelElements(() => m.dismiss())));
-                m.add(Editor.mkHelpLink("skill levels"));
                 m.fullWhite();
                 m.show();
             });
