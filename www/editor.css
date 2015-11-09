@@ -5854,7 +5854,7 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 
 .editor-mode {
     vertical-align: top;
-    width:6em;
+    width:7em;
     cursor:pointer;
     display:inline-block;
     align-content:center;
@@ -5865,14 +5865,14 @@ div.wall-dialog-body ul.tutorial-list li div.tutTileOuter {
 }
 .editor-mode .pic {
     width:100%;
-    height:6em;
+    height:7em;
 }
 .editor-mode .title {
     width:100%;
     margin-left:0;
 }
 .editor-mode .descr {
-    font-size:0.8em;
+    font-size:0.7em;
 }
 .editor-mode[data-selected^=no]  {
   border-color: #ccc;
