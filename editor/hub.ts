@@ -1901,7 +1901,7 @@ module TDev.Browser {
                 dirAuto(div("hubTileBtnLabel " + (
                     size <= 1 && wordLength > 18 ? " hubTileBtnLabelTiny" :
                     size <= 1 && (wordLength > 10) ? " hubTileBtnLabelSmall" :
-                    wordLength >= 7 || (words >=3 && wordLength > 4) || (size < 3 && lbl.length > 20) ? " hubTileBtnLabelMedium"
+                    wordLength >= 7 || (words >=3 && wordLength > 4) || (size < 3 && lbl.length > 20) || Util.hasCJKChars(lbl) ? " hubTileBtnLabelMedium"
                     : ""), ovrLbl, lbl)));
             (<any>elt).fnBtn = 1;
             var f0 = () => { tick(t); f() };
