@@ -1690,7 +1690,7 @@ export function updatelang(args:string[])
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
-        fs.writeFileSync("generated/locale/strings.json", JSON.stringify(strings));
+        fs.writeFileSync("generated/strings.json", JSON.stringify(strings));
     }
 
     tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/languages", resp => {
