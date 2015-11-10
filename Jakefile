@@ -165,6 +165,7 @@ mkSimpleTask('build/storage.js', [
 ], "storage/refs.ts");
 mkSimpleTask('build/embedded.js', [
     'build/ast.d.ts',
+    'build/storage.d.ts',
     'embedded'
 ], "embedded/refs.ts");
 mkSimpleTask('build/ast.js', [
@@ -214,6 +215,7 @@ mkSimpleTask('build/nrunner.js', [
     'build/browser.d.ts',
     'rt/typings.d.ts',
     'build/rt.d.ts',
+    'build/embedded.d.ts',
     'build/ast.d.ts',
     'build/libnode.d.ts',
     'noderunner'
@@ -240,6 +242,15 @@ mkSimpleTask('build/blockly-main.js', [
     "ast/jsonInterfaces.ts"
 ], "www/blockly/refs.ts");
 
+file('build/libraries.js', expand([
+  "build/client.js",
+  "microbit/libraries",
+  "microbit"]
+), { async:true }, function () {
+  runAndComplete(['node build/client concatlibs'], this);
+})
+
+
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
 // previously, as there are ordering issues with initialization of global variables
@@ -255,10 +266,13 @@ var concatMap = {
         "build/browser",
         "build/rt",
         "build/ast",
+        "build/storage",
+        "build/embedded",
         "build/api.js",
         "generated/langs.js",
         "build/libnode",
         "build/pkgshell.js",
+        "build/libraries.js",
         "build/nrunner.js",
     ],
     "build/noderuntime.js": [
@@ -379,7 +393,7 @@ task('default', [
   'build/officemix.d.ts',
   'build/ace-main.js',
   'build/blockly-main.js',
-  'concat-libs',
+  'build/libraries.js',
   'log'
 ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
@@ -409,7 +423,10 @@ desc('run local test suite')
 task('test', [ 'info', 'build/client.js', 'default' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
-  runAndComplete(['node build/client.js buildtest'], this);
+  runAndComplete([
+    'node build/client.js buildtest',
+    'node build/noderunner.js compilertest'
+  ], this);
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
@@ -527,11 +544,7 @@ task('cordova', [ 'default' ], {}, function () {
 });
 
 task('update-libs', ["build/client.js"], { async:true}, function () {
-  runAndComplete(['node build/client fetchlibraries'], this);  
-})
-
-task('concat-libs', ["build/client.js"], { async:true}, function () {
-  runAndComplete(['node build/client concatlibs'], this);  
+  runAndComplete(['node build/client fetchlibraries'], this);
 })
 
 // vim: ft=javascript

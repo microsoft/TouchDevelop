@@ -2092,7 +2092,7 @@ module TDev
                             ModalDialog.showText(
                                 "Internal compilation error. "+
                                 "Please file a bug and include the following information:\n" +
-                                External.makeOutMbedErrorMsg(json),
+                                Embedded.makeOutMbedErrorMsg(json),
                                 lf("Compilation error"));
                         } else {
                             document.location.href = json.hexurl;

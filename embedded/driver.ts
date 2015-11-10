@@ -15,6 +15,38 @@ module TDev {
       [index: string]: T;
     }
 
+    export function parseScript(text: string): Promise { // of AST.App
+      return AST.loadScriptAsync((id: string) => {
+        if (id == "")
+          return Promise.as(text);
+        else
+          return World.getAnyScriptAsync(id);
+      }, "").then((resp: AST.LoadScriptResult) => {
+        // Otherwise, eventually, this will result in our script being
+        // saved in the TouchDevelop format...
+        var s = Script;
+        Script = null;
+        // The function writes its result in a global
+        return Promise.as(s);
+      });
+    }
+
+    export function makeOutMbedErrorMsg(json: any) {
+      var errorMsg = "unknown error";
+      // This JSON format is *very* unstructured...
+      if (json.mbedresponse) {
+        if (json.messages) {
+          var messages = json.messages.filter(m =>
+            m.severity == "error" || m.type == "Error"
+          );
+          errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
+        } else if (json.mbedresponse.result) {
+          errorMsg = json.mbedresponse.result.exception;
+        }
+      }
+      return errorMsg;
+    }
+
     interface EmitterOutput {
       prototypes: string;
       code: string;

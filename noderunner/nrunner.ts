@@ -3,6 +3,7 @@
 ///<reference path='../build/rt.d.ts'/>
 ///<reference path='../build/ast.d.ts'/>
 ///<reference path='../build/libnode.d.ts'/>
+///<reference path='../build/embedded.d.ts'/>
 ///<reference path='../typings/node/node.d.ts'/>
 ///<reference path='jsonapi.ts'/>
 
@@ -1967,6 +1968,59 @@ function getScriptAsync(id:string)
         })
 }
 
+function compilerTest() {
+    console.log("COMPILER TEST");
+    var tests = {
+        bqutuo: {}, // pac man runaway
+        hixlrc: {}, // two-player pong (reversed)
+        rwadai: { skipBitVm: true }, // clock demo
+        xhfhgq: {}, // bitvm test1
+    };
+    window.localStorage.setItem("access_token", accessToken.replace("?access_token=", ""));
+    TDev.Cloud.config.rootUrl = apiEndpoint.replace("/api/", "");
+    Object.keys(tests).forEach((pubId: string) => {
+        var name;
+        var displayId = pubId;
+        var logMsg = (s: string) => name+" ("+displayId+"): "+s;
+        TDev.Cloud.getPublicApiAsync(pubId).then((j: TDev.JsonScript) => {
+            if (pubId != j.updateid)
+                console.log(logMsg("found newer version: "+j.updateid));
+            displayId = j.updateid;
+            return TDev.Util.httpGetTextAsync(TDev.Cloud.getPublicApiUrl(j.updateid+"/text"));
+        }).then((text: string) => {
+            return TDev.Embedded.parseScript(text);
+        }).then((a: TDev.AST.App) => {
+            name = a.getName();
+            console.log(logMsg("parsing → touchdevelop ✓"));
+            if (tests[pubId].skipBitVm) {
+                console.log(logMsg("skipping bitvm"));
+            } else {
+                (new TDev.AST.Bytecode.Compiler(a)).run();
+                console.log(logMsg("touchdevelop → hex (bitvm) ✓"));
+            }
+
+            return TDev.Embedded.compile(TDev.AST.Json.dump(a))
+        }).then((cpp: string) => {
+            console.log(logMsg("touchdevelop → cpp ✓"));
+
+            var fakeGuid = "d9b98ebe-3bf9-4f73-9452-459e59f2dbf5";
+            return TDev.Cloud.postUserInstalledCompileAsync(fakeGuid, cpp, { name: name });
+        }).then(json => {
+            if (!json)
+                throw new Error(logMsg("no response from ARM cloud"));
+            if (!json.success) {
+                console.log(TDev.Embedded.makeOutMbedErrorMsg(json));
+                throw new Error(logMsg("compilation failure"));
+            }
+            console.log(logMsg("cpp → hex (arm cloud) ✓"));
+        }, (e) => {
+            console.log(logMsg("compilation failure"));
+            console.log(e.stack);
+            process.exit(1);
+        }).done();
+    });
+}
+
 export function globalInit()
 {
     TDev.Browser.isNodeJS = true;
@@ -2057,6 +2111,8 @@ export function globalInit()
         addIds(process.argv.slice(3))
     } else if (process.argv[2] == "mergetest") {
         mergetest(process.argv.slice(3))
+    } else if (process.argv[2] == "compilertest") {
+        compilerTest();
     } else if (process.argv[2] == "ts") {
         ts(process.argv.slice(3))
     } else {
