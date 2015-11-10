@@ -1980,10 +1980,12 @@ function compilerTest() {
     TDev.Cloud.config.rootUrl = apiEndpoint.replace("/api/", "");
     Object.keys(tests).forEach((pubId: string) => {
         var name;
-        var logMsg = (s: string) => name+" ("+pubId+"): "+s;
+        var displayId = pubId;
+        var logMsg = (s: string) => name+" ("+displayId+"): "+s;
         TDev.Cloud.getPublicApiAsync(pubId).then((j: TDev.JsonScript) => {
             if (pubId != j.updateid)
                 console.log(logMsg("found newer version: "+j.updateid));
+            displayId = j.updateid;
             return TDev.Util.httpGetTextAsync(TDev.Cloud.getPublicApiUrl(j.updateid+"/text"));
         }).then((text: string) => {
             return TDev.Embedded.parseScript(text);
