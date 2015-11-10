@@ -1968,6 +1968,11 @@ function getScriptAsync(id:string)
         })
 }
 
+// This function exercises the ARM compile service. It randomizes the input so
+// as not to hit Michał's cache that sits in-between us and the ARM compile
+// service. The variable [nruns] controls the number of requests we send for
+// each script.
+// It also exercises the bitvm compiler (once) for each script.
 function compilerTest() {
     console.log("COMPILER TEST");
     var tests = {
@@ -1976,6 +1981,7 @@ function compilerTest() {
         rwadai: { skipBitVm: true }, // clock demo
         xhfhgq: {}, // bitvm test1
     };
+    var nruns = 1;
     window.localStorage.setItem("access_token", accessToken.replace("?access_token=", ""));
     TDev.Cloud.config.rootUrl = apiEndpoint.replace("/api/", "");
     Object.keys(tests).forEach((pubId: string) => {
@@ -2004,15 +2010,20 @@ function compilerTest() {
             console.log(logMsg("touchdevelop → cpp ✓"));
 
             var fakeGuid = "d9b98ebe-3bf9-4f73-9452-459e59f2dbf5";
-            return TDev.Cloud.postUserInstalledCompileAsync(fakeGuid, cpp, { name: name });
-        }).then(json => {
-            if (!json)
-                throw new Error(logMsg("no response from ARM cloud"));
-            if (!json.success) {
-                console.log(TDev.Embedded.makeOutMbedErrorMsg(json));
-                throw new Error(logMsg("compilation failure"));
-            }
-            console.log(logMsg("cpp → hex (arm cloud) ✓"));
+            var r = [];
+            for (var i = 0; i < nruns; ++i)
+                r.push(TDev.Cloud.postUserInstalledCompileAsync(fakeGuid, cpp+"\n// "+Math.random(), { name: name }));
+            return TDev.Promise.join(r);
+        }).then(jsons => {
+            jsons.forEach(json => {
+                if (!json)
+                    throw new Error(logMsg("no response from ARM cloud"));
+                if (!json.success) {
+                    console.log(TDev.Embedded.makeOutMbedErrorMsg(json));
+                    throw new Error(logMsg("compilation failure"));
+                }
+            });
+            console.log(logMsg("cpp → hex (arm cloud) ×"+nruns+" ✓"));
         }, (e) => {
             console.log(logMsg("compilation failure"));
             console.log(e.stack);
