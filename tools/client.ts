@@ -3953,8 +3953,8 @@ function reindexone(store:string, cont = "")
     var totalReindexed = 0
 
     var path = "admin/reindex/" + store
-    if (store == "groupmembers")
-        path = "groups/reimportmembers";
+    if (/\//.test(store))
+        path = store
 
     var loop = (cont:string) =>
         tdevGet(k.liteUrl + "api/" + path + "?count=100" + cont + k.key, resp => {

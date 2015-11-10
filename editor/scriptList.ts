@@ -3577,8 +3577,8 @@
                 this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
                     loading.removeSelf();
                     elts.forEach((c) => this.tabContent.appendChild(this.tabBox(c)));
-                    if (!!cont) loading.appendChild(this.loadMoreBtn(cont));
-                    else loading.appendChild(this.finalListElt())
+                    if (!!cont) this.tabContent.appendChild(this.loadMoreBtn(cont));
+                    else this.tabContent.appendChild(this.finalListElt())
                 });
             });
             return btn;
