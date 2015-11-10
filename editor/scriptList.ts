@@ -9650,7 +9650,7 @@
                     m.add(
                         div("wall-dialog-buttons", [
                             HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                            resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
+                            Cloud.getUserId() && resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
                             !abuseid && HTML.mkButton(lf("report"), () => {
                                 if (inp.value.trim().length < 5)
                                     err.setChildren(lf("Need some reason."))
