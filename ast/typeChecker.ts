@@ -465,7 +465,7 @@ module TDev.AST
                         var msg = ""
 
                         if (k.hasContext(KindContext.Parameter))
-                            msg = lf("tap 'store in var' to store it in a variable or select a property on it");
+                            msg = lf("did you want to use this value?");
                         else
                             msg = lf("now you can select a property on it");
 

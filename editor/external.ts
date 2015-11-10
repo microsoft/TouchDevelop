@@ -106,22 +106,6 @@ module TDev {
 
     import J = AST.Json;
 
-    export function makeOutMbedErrorMsg(json: any) {
-      var errorMsg = "unknown error";
-      // This JSON format is *very* unstructured...
-      if (json.mbedresponse) {
-        if (json.messages) {
-          var messages = json.messages.filter(m =>
-            m.severity == "error" || m.type == "Error"
-          );
-          errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
-        } else if (json.mbedresponse.result) {
-          errorMsg = json.mbedresponse.result.exception;
-        }
-      }
-      return errorMsg;
-    }
-
     export function pullLatestLibraryVersion(pubId: string): Promise { // of string
       var forced = ScriptCache.forcedUpdate(pubId)
       if (forced) return Promise.as(forced.json.id)
@@ -197,22 +181,6 @@ module TDev {
       });
     }
 
-    function parseScript(text: string): Promise { // of AST.App
-      return AST.loadScriptAsync((id: string) => {
-        if (id == "")
-          return Promise.as(text);
-        else
-          return World.getAnyScriptAsync(id);
-      }, "").then((resp: AST.LoadScriptResult) => {
-        // Otherwise, eventually, this will result in our script being
-        // saved in the TouchDevelop format...
-        var s = Script;
-        Script = null;
-        // The function writes its result in a global
-        return Promise.as(s);
-      });
-    }
-
     // For compatibility with the old format
     function fixupLibs(libs: { [i: string]: any }) {
       Object.keys(libs).forEach((k: string) => {
@@ -224,7 +192,7 @@ module TDev {
     function roundtrip1(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of AST.App
       return addLibraries(a, libs).then(() => {
         var text = J.serialize(a);
-        return parseScript(text).then((a: AST.App) => {
+        return Embedded.parseScript(text).then((a: AST.App) => {
           if (AST.TypeChecker.tcApp(a) > 0) {
             throw new Error("We received a script with errors and cannot compile it. " +
                 "Try converting then fixing the errors manually.");
@@ -274,7 +242,7 @@ module TDev {
     }
 
     function typeCheckAndRun(text: string, mainName = "main") {
-      parseScript(text).then((a: AST.App) => {
+      Embedded.parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
         // The call to [tcApp] also has the desired side-effect of resolving
         // names.
@@ -492,7 +460,7 @@ module TDev {
                     });
                     document.location.href = json.hexurl;
                   } else {
-                    var errorMsg = makeOutMbedErrorMsg(json);
+                    var errorMsg = Embedded.makeOutMbedErrorMsg(json);
                     this.post(<Message_CompileAck>{
                       type: MessageType.CompileAck,
                       status: Status.Error,

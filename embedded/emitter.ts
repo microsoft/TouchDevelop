@@ -192,17 +192,12 @@ module TDev {
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
-          if (this.libRef)
-            // If compiling a library, no scope actually means the library's
-            // scope. This step is required to possibly find a shim. This means
-            // that we may generate "lib::f()" where we could've just written
-            // "f()", but since the prototypes have been written out already,
-            // that's fine.
-            return this.resolveCall(env, this.libRef, name);
-          else
-            // Call to a function from the current script.
-            return H.resolveGlobal(env, name);
-
+          // If compiling a library, no scope actually means the library's
+          // scope. This step is required to possibly find a shim. This means
+          // that we may generate "lib::f()" where we could've just written
+          // "f()", but since the prototypes have been written out already,
+          // that's fine.
+          return this.resolveCall(env, this.libRef, name);
 
         // Is this a call to a library?
         var n = H.isLibrary(receiver);
@@ -220,9 +215,12 @@ module TDev {
                 "Hint: break on exceptions in the debugger and walk up the call stack to "+
                 "figure out which action it is.");
             return s;
-          } else {
+          } else if (n in this.resolveMap) {
             // Actual call to a library function
-            return H.resolveGlobalL(env, n, name);
+            return H.resolveGlobalL(env, this.resolveMap[n], name);
+          } else {
+            // Call to a function from the current script.
+            return H.resolveGlobal(env, name);
           }
         }
 
@@ -284,6 +282,12 @@ module TDev {
           }
         };
 
+        var mkWrap = (prio: number) => {
+          var needsParentheses = prio > H.priority(env);
+          var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+          return wrap;
+        };
+
         // The [JCall] node has several, different, often unrelated purposes.
         // This function identifies (tentatively) the different cases and
         // compiles each one of them into something that makes sense.
@@ -314,6 +318,24 @@ module TDev {
           var struct_name = "user_types::"+H.resolveGlobal(env, <any> parent)+"_";
           return "ManagedType<"+struct_name+">(new "+struct_name+"())";
         }
+
+        // 0c) Special-casing for [Thing -> invalid] (an invalid record).
+        if (H.isInvalidRecord(name, args))
+          // See remark above.
+          return "ManagedType<user_types::"+H.resolveGlobal(env, (<J.JCall> args[0]).name)+"_>()";
+
+        // 0d) Special casing for [thing -> is invalid] (test if null).
+        if (name == "is invalid" && H.resolveTypeRef(this.libraryMap, parent).user) {
+          // 9 is the precedence of ==
+          return mkWrap(9)(this.visit(H.setPriority(env, 9), args[0]) + ".get() == NULL");
+        }
+
+        // 0e) Special casing for [thing -> equals] (address comparison)
+        if (name == "equals" && H.resolveTypeRef(this.libraryMap, parent).user)
+          return mkWrap(9)(
+              this.visit(
+                H.setPriority(env, 9), args[0]) + "==" +
+                this.visit(H.setPriority(env, 9), args[1]));
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
@@ -365,8 +387,7 @@ module TDev {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var op = H.lookupOperator(t.type.toLowerCase()+"::"+name);
           if (op) {
-            var needsParentheses = op.prio > H.priority(env);
-            var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+            var wrap = mkWrap(op.prio);
             var rightPriority = op.right ? op.prio - 1 : op.prio;
             var leftPriority = op.prio;
             if (args.length == 2)

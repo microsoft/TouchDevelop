@@ -49,7 +49,6 @@
 ///<reference path='plugins.ts'/>
 ///<reference path='external.ts'/>
 ///<reference path='messages.ts'/>
-///<reference path='embedded.ts'/>
 ///<reference path='literalEditor.ts'/>
 ///<reference path='abusereview.ts'/>
 ///<reference path='../intellitrain/train.ts'/>

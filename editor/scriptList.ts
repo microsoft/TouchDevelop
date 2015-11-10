@@ -6457,39 +6457,39 @@
             if (!editor) editor = "touchdevelop"
             return editor
         }
-
-        static editorIcons = {
-            "blockly": "blockeditor,#AA2FE7",
-            "codekingdoms": "codekingdoms,#ffffff",
-            "python": "python,#ffffff",
-            "touchdevelop": "touchdevelop,#0095ff",
-            "library": "recycle,#48A300",
-            "docs": "fa-file-text-o,#E00069",
-            "html": "fa-code,#E00069",
-            "ace": "braces,#007fff",
-            "create": "gel-create,#ccc",
-            "import": "gel-import,#ccc",
-            "*": "emptycircle,#85BB65",
-        }
+        
+        static editorIcons: StringMap<{
+            icon: string;
+            background: string;
+            color?: string;
+        }> = {
+            "blockly": { icon: "blockeditor", background: "#AA2FE7" },
+            "codekingdoms": { icon: "codekingdoms", background: "#ffffff" },
+            "python": { icon: "python", background: "#ffffff" },
+            "touchdevelop": { icon: "touchdevelop", background: "#0095ff" },
+            "library": { icon: "recycle", background: "#48A300" },
+            "docs": { icon: "fa-file-text-o", background: "#E00069" },
+            "html": { icon: "fa-code", background: "#E00069" },
+            "ace": { icon: "braces", background: "#007fff" },
+            "create": { icon: "gel-create", background: "#00ec00", color: "#000" },
+            "import": { icon: "gel-import", background: "#00ec00", color: "#000" },
+            "*": { icon: "emptycircle", background: "#85BB65" }
+        };
 
         public iconImg(thumb: boolean): HTMLElement {
             if (this.app.iconArtId)
                 return ArtUtil.artImg(this.app.iconArtId, thumb)
 
-            var ic = ScriptInfo.editorIcons[this.getScriptType()]
-            if (!ic) ic = ScriptInfo.editorIcons["*"]
-            ic = ic.replace(/,.*/, "")
+            var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
 
-            return HTML.mkImg("svg:" + ic + ",white")
+            return HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))
         }
 
         public iconBgColor():string
         {
             if (Cloud.isRestricted()) {
-                var ic = ScriptInfo.editorIcons[this.getScriptType()]
-                if (!ic) ic = ScriptInfo.editorIcons["*"]
-                ic = ic.replace(/.*,/, "")
-                return ic
+                var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
+                return ic.background
             }
             return this.app.htmlColor()
         }

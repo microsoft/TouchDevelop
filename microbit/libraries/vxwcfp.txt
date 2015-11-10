@@ -63,6 +63,7 @@ action \_libinit() {
     #xVIOjGStCgdLjic6 code→update_axis;
     #ByFADaJmirytJ02b code→background_animation;
     #xmVrpXc8aqbE3dq6 `async` code→animation_worker;
+    #xkycDjt57DBUf4Xz `async` code→event_bus_worker;
     #pNdJy7kyaeqKZhfS data→board→on_every_frame;
     #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
       #WF6Md7jUVLVAe3m4 code→update_board;
@@ -553,12 +554,13 @@ action on_button_pressed(#M03fUuuX2m9eRu7n name: String, #LzMsXwEMSCmDzfWI body:
   #bb2jhwAjjludGu2o // {weight:58}
   #fm3i5OlTIzr9FGuU // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B,A+B=MICROBIT_ID_BUTTON_AB}
   #KwFDbs7Kr12Y7FTP // {shim:micro_bit::onButtonPressed}
-  #FMX7Dy8may7mfc7j code→notify_event_registration("on button pressed " ∥ $name);
+  #OzSnTzWiKXQk0HlQ $evid := "on button pressed " ∥ $name;
+  #FMX7Dy8may7mfc7j code→notify_event_registration($evid);
   #h2x2L30VBbMGVNED $btn := code→button_from_id($name);
   #xOIGjOLy2Zmt99MW code→clear_button_handler($name);
   #F5Y2ciTtYo87uZSG $ev := $btn→on_touch_down($touch_up);
   #j0K6jsuWQ4V0EcaI where touch_up(x: Number, y: Number) {
-    #UZ7doRhNRnR5s62g `async` $body→run;
+    #zvnW22u4MgaK24ge code→queue_event_bus($body, $evid);
   }
   #hijH5eY42toXLOFF code→store_button_handler($name, $ev);
   meta sync;
@@ -912,6 +914,10 @@ action test_buttons() {
   #gmr7aY7MXcYsbncb code→on_button_pressed("B");
   #Rp8qiY1vzviZ2kWq where `implicit` \_body\_() {
     #Wf7Z3Bn5plHJ78I1 code→show_string("B", 100);
+  }
+  #NO9PrQ5LFZfQfagg code→on_button_pressed("A+B");
+  #POC91PYG4214TJp0 where `implicit` \_body\_() {
+    #xYIv0xzaNMKmq0z3 code→show_string("A+B", 150);
   }
   meta private;
   meta test;
@@ -1631,11 +1637,12 @@ action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Ac
   #UZIoGA4CKSwhMxlf // {weight:57}
   #OgqWJNwCulcyJT7l // {enum:name:P0=MICROBIT_ID_IO_P0,P1=MICROBIT_ID_IO_P1,P2=MICROBIT_ID_IO_P2}
   #xZ0ArWZwbu4SBuBn // {shim:micro_bit::onPinPressed}
-  #nPpJQoCs8nAIigcE code→notify_event_registration("on pin pressed " ∥ $name);
+  #jDgDoJLo4kvbVPvk $evid := "on pin pressed " ∥ $name;
+  #nPpJQoCs8nAIigcE code→notify_event_registration($evid);
   #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
   #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
   #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
-    #xs5qVip6FU1jDpOm `async` $body→run;
+    #NbkK6P2y62Y9tOIt code→queue_event_bus($body, $evid);
   }
   meta sync;
 }
@@ -2430,4 +2437,44 @@ action show_frame(#so5UArm5bvzzbO7Q img: * Image, #wbgk1lJLlqXDa2l4 frame: Numbe
   #gCr4tw5bcjlK72W2 // {weight:70}
   #xA18S6STfkQQmHSO // {help:functions/show-frame}
   #RqxUSeIfDyXF0l5K $img→show_image($frame * 5);
+}
+#jK3Ut2qwQC0bZ07k
+table Event_Bus {
+  // {shim:}
+  type = "Table";
+  persistent = false;
+  fields {
+    #kng9nuProLg6HpFo fn : Action
+    #lz2qarlZRUAVl0SD name : String
+  }
+}
+#xQHQZkhjqzpE4CRi
+action event_bus_worker() {
+  #xDyM0UomTSCQXKSV // {shim:}
+  #HakK0IQSqWKY8zju while true do {
+    #FTMD9oKdw4fcscHD $ev := records→Event_Bus_table→row_at(0);
+    #xG44rWke0lFZ2GrH if `not` $ev→is_invalid then {
+      #qUZz8iwjSjiyyavq $ev→fn→run;
+      #E7aHvwM2U423dBK6 $ev→delete_row;
+    }
+    else {
+      #P594Nj69PCQ9z45m records→Event_Bus_table→wait_for_update;
+    }
+  }
+  meta private;
+}
+#uBLXg1puXSO4QzoW
+action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
+  #chlGhAEHEEsL01Wv // {shim:}
+  #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
+  #xv0tUVTZQbNE3PW4 if $c < 10 then {
+    #mbqwhgLr24hPftS9 $ev := records→Event_Bus_table→add_row;
+    #Guj24KBD912FcSYv $ev→name := $name;
+    #OvyZqeICJJ2sQbR4 $ev→fn := $body;
+  }
+  else {
+    #SzvR3GyWF2k4aEW8 app→log("skipped event " ∥ $name ∥ ", bus full");
+  }
+  meta private;
+  meta sync;
 }
