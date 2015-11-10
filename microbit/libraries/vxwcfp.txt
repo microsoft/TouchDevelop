@@ -2466,14 +2466,8 @@ action event_bus_worker() {
 #uBLXg1puXSO4QzoW
 action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
   #chlGhAEHEEsL01Wv // {shim:}
-  #NpFfWiYSSrNXvvQY $c := 0;
-  #kjMOASgzL4ThV4oE foreach eb in records→Event_Bus_table
-  do {
-    #xuKiuV4YTvIuJYLL if $eb→name→equals($name) then {
-      #eiPzA9GxYNRXmnAQ $c := $c + 1;
-    }
-  }
-  #xv0tUVTZQbNE3PW4 if $c < 5 then {
+  #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
+  #xv0tUVTZQbNE3PW4 if $c < 10 then {
     #mbqwhgLr24hPftS9 $ev := records→Event_Bus_table→add_row;
     #Guj24KBD912FcSYv $ev→name := $name;
     #OvyZqeICJJ2sQbR4 $ev→fn := $body;
