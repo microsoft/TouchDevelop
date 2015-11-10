@@ -915,7 +915,7 @@ module TDev.HTML {
         return r;
     }
     
-    export function browserDownloadText(text: string, name: string, contentType: string) {
+    export function browserDownloadText(text: string, name: string, contentType: string = "application/octet-stream") {
         try {
             var buf = Util.stringToUint8Array(Util.toUTF8(text))
 
@@ -925,7 +925,7 @@ module TDev.HTML {
                 return;
             }
             
-            if ((<any>window).navigator.msSaveOrOpenBlob) {
+            if ((<any>window).navigator.msSaveOrOpenBlob && !Browser.isMobile) {
                 var b = new Blob([buf], { type: contentType })
                 var result = (<any>window).navigator.msSaveOrOpenBlob(b, name);
             } else {
