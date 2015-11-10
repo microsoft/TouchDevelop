@@ -6990,11 +6990,11 @@
 
                     var f = <Cloud.Workspace>{
                         scripts: [{
-                            header: header,
+                            header: World.stripHeaderForSave(header),
                             source: text,
                         }]
                     };
-                    HTML.browserDownloadText(JSON.stringify(f), Util.toFileName(this.cloudHeader.name, 'script') + ".json", 
+                    HTML.browserDownloadText(JSON.stringify(f, null, 1), Util.toFileName(this.cloudHeader.name, 'script') + ".json", 
                             "application/json");
                 });
         }

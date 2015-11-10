@@ -264,7 +264,7 @@ module TDev
                     var hd:Cloud.Header = r[1]
                     var text:string = r[0]
 
-                    var meta = JSON.stringify(hd)
+                    var meta = JSON.stringify(World.stripHeaderForSave(hd))
 
                     var lzma = (<any>window).LZMA;
 

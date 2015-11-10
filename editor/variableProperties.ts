@@ -776,12 +776,8 @@ module TDev
                             HTML.showErrorNotification(lf("This script is missing the header."))
                             return Promise.as(undefined);                            
                         }
-                        script.header.guid = Util.guidGen()
-                        guid = script.header.guid
-                        
-                        return World.setInstalledScriptAsync(script.header, script.source, null)
-                            .then(() => guid);                        
-                    })                    
+                        return World.installFromSaveAsync(script.header, script.source).then(h => h.guid)
+                    })
                 });
         }
         
@@ -823,12 +819,7 @@ module TDev
 
                     var hd:Cloud.Header = dat[0]
                     var text:string = dat[1]
-                    hd.guid = Util.guidGen()
-                    guid = hd.guid
-                    // renaming is tricky - would need to rename the text as well ...
-                    // hd.name += " " + Random.uniqueId(3) // todo - rename based on installed scripts
-                    return World.setInstalledScriptAsync(hd, text, null)
-                        .then(() => [guid]);
+                    return World.installFromSaveAsync(hd, text).then(h => [h.guid]);
                 });
         }
         

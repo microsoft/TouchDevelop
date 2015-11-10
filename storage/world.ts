@@ -51,9 +51,10 @@ module TDev {
             // [Cloud.Header] where [editor] is either undefined, or a string
             // (meaning external editor).
             editorName: string;
-            // When the editor is "touchdevelop", this is the same value that
+            // When the editor is "touchdevelop", these are the same value that
             // can be obtained by running [getScriptMeta] on [scriptText].
             scriptName: string;
+            scriptComment?: string;
             // When the editor is "touchdevelop", initially contains a template, then
             // gets mutated by [newScriptAsync] with extra meta information before
             // being saved to storage. When the editor is external, remains blank.
@@ -106,6 +107,8 @@ module TDev {
                 debugger;
                 return Promise.as();
             }
+            if (header.meta)
+                header.name = header.meta.name;
             headerItem[header.guid] = JSON.stringify(header);
             var bodyItem = {}
             // protz: I believe we can get rid of this assert now that we have
@@ -870,6 +873,48 @@ module TDev {
         export function getCurrentTime() {
             return Math.floor(new Date().getTime()/1000);
         }
+
+        export function stripHeaderForSave(hd:Cloud.Header): Cloud.Header
+        {
+            return <any>{
+                scriptId: hd.scriptId,
+                userId: hd.userId,
+                status: hd.status,
+                // store date of last modification, not most recent use
+                recentUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
+                editor: hd.editor,
+                meta: !hd.editor ? undefined : {
+                    name: hd.meta.name,
+                    comment: hd.meta.comment
+                },
+            }
+        }
+
+        export function installFromSaveAsync(hd:Cloud.Header, scriptText: string): Promise // of Cloud.Header
+        {
+            var h = <Cloud.Header>(<any>{
+                status: hd.status,
+                scriptId: hd.scriptId,
+                userId: hd.userId,
+                meta: hd.meta,
+                scriptVersion: <Cloud.Version>{
+                    instanceId: Cloud.getWorldId(), 
+                    version: 0, 
+                    time: hd.recentUse || getCurrentTime(), 
+                    baseSnapshot: "" 
+                },
+                guid: Util.guidGen(),
+                editor: hd.editor,
+                recentUse: getCurrentTime(),
+            });
+            return Promise.join({
+                indexTable: getIndexTablePromise(),
+                scriptsTable: getScriptsTablePromise(),
+            }).then(function (data/*: SyncData*/) {
+                return setInstalledAsync(data.indexTable, data.scriptsTable, h, scriptText, null, null, null).then(() => h);
+            });
+        }
+
         function installAsync(status: string, scriptId: string, userId: string, stub: ScriptStub) : Promise // of Cloud.Header
         {
             var meta;
@@ -887,6 +932,7 @@ module TDev {
                 meta = {
                     localGuid: Util.guidGen(),
                     name: stub.scriptName,
+                    comment: stub.scriptComment,
                 };
             }
             var h = <Cloud.Header>(<any>{
@@ -934,6 +980,7 @@ module TDev {
                             // convention
                             editorName: json.editor || "touchdevelop",
                             scriptName: json.name,
+                            scriptComment: json.description,
                         });
                     }
                 });

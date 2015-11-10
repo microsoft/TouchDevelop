@@ -3917,6 +3917,8 @@ function countpubs(args:string[])
 
     var k = tdliteKey()
 
+    var counters = {}
+
     var total = 0
     var totalHidden = 0
 
@@ -3924,12 +3926,16 @@ function countpubs(args:string[])
         tdevGet(k.liteUrl + "api/admin/countpubs/" + store + "?count=500" + cont + k.key, resp => {
             var parsed = JSON.parse(resp)
 
-            totalHidden += parsed.hiddenItemCount
-            total += parsed.itemCount
+            Object.keys(parsed).forEach(k => {
+                var v = parsed[k]
+                if (typeof v == "number" && v > 0) {
+                    k = k.replace(/Count$/, "")
+                    if (!counters[k]) counters[k] = 0
+                    counters[k] += v
+                }
+            })
 
-            console.log(store, 
-                "total:" + total + " hidden:" + totalHidden,
-                 parsed.continuation)
+            console.log(store, "total:", JSON.stringify(counters), parsed.continuation)
 
             if (parsed.continuation)
                 loop("&continuation=" + parsed.continuation)
