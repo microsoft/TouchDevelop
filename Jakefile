@@ -491,6 +491,11 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
       'node build/client.js updatelang'], this);
 });
 
+task('update-lang', [ 'build/client.js', 'default' ], { async: true }, function() {
+  var task = this;
+  runAndComplete(
+    [ 'node build/client.js updatelang'], this);
+});
 
 task('azure', [ 'build/shell.js' ], { async: true }, function() {
   jake.mkdirP("build/azure")

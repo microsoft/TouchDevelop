@@ -1656,7 +1656,7 @@ export function updatelang(args:string[])
                     keys[k] = 1
                 else {
                     console.log("would skip: " + k)
-                    keys[k] = 1
+                    //keys[k] = 1
                 }
             })
         })
@@ -1664,13 +1664,18 @@ export function updatelang(args:string[])
         kk.sort()
         kk.forEach((k, i) => keys[k] = i)
         res += "var keys = " + arrToStr(kk) + ";\n\n"
+        if (!fs.existsSync("generated/locale"))
+            fs.mkdirSync("generated/locale");
+        fs.writeFileSync("generated/locale/strings.json", arrToStr(kk));
         langs.forEach(l => {
             var arr = []
+            var tr = {};
             var map = allTrans[l]
             var numTr = 0
             Object.keys(map).forEach(k => {
                 if (keys[k] !== undefined) {
                     arr[keys[k]] = map[k]
+                    tr[k] = map[k];
                     numTr++
                 }
             })
@@ -1678,6 +1683,8 @@ export function updatelang(args:string[])
             for(var i = 0; i < arr.length; ++i)
                 if (!arr[i]) arr[i] = 0
             res += "if (lang == \"" + l + "\") { TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + "); return true; }\n\n"
+            
+            fs.writeFileSync("generated/locale/" + l + ".json", JSON.stringify(tr));
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
