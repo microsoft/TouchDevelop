@@ -772,7 +772,7 @@ module TDev
                     return Promise.sequentialMap(f.scripts, script => {
                         var src = script.source;
                         var header = script.header;
-                        if (!src || !(src instanceof String)) {
+                        if (!src) {
                             HTML.showErrorNotification(lf("This script is missing the source."))
                             return Promise.as(undefined);                            
                         }
@@ -781,7 +781,10 @@ module TDev
                             return Promise.as(undefined);                            
                         }
                         return World.installFromSaveAsync(script.header, script.source)
-                            .then(h => h.guid)
+                            .then(h => h.guid, e => {
+                                HTML.showErrorNotification("Sorry, this script file is invalid.");
+                                return undefined;
+                            })
                     })
                 });
         }
