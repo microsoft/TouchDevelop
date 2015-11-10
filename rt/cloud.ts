@@ -1,7 +1,7 @@
 ///<reference path='refs.ts'/>
 module TDev.Cloud {
 
-    export var lite = false;
+    export var lite = true;
     export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
     var microbitGitTag = "v24";
