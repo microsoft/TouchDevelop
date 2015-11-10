@@ -733,22 +733,24 @@ module TDev
             if (!files || !files.length) return;
             
             var guids: string[] = [];
-            Promise.sequentialMap(files, file => installFile(file))
+            Promise.sequentialMap(files, file => installFileAsync(file))
                 .then((gs:string[]) => {
                     gs.filter(g => !!g).forEach(g => guids = guids.concat(g));
                     return Browser.TheHost.clearAsync(false);
                 }).done(() => {
                     if (guids.length > 0) Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                }, e => {
+                    HTML.showErrorNotification("Oops, we could not import those files.");
                 });
         }
         
-        function installFile(file: File) : Promise {
-            if (isHexFile(file)) return installHexFile(file);
-            if (isJsonFile(file)) return installJsonFile(file);
+        function installFileAsync(file: File) : Promise {
+            if (isHexFile(file)) return installHexFileAsync(file);
+            if (isJsonFile(file)) return installJsonFileAsync(file);
             return Promise.as(undefined);
         }
 
-        function installJsonFile(file: File): Promise { // string[] (guids)
+        function installJsonFileAsync(file: File): Promise { // string[] (guids)
             if (!file) return Promise.as(undefined);
             
             var guid: string = "";
@@ -758,43 +760,50 @@ module TDev
                     var f: Cloud.Workspace;
                     try {
                         f = <Cloud.Workspace>JSON.parse(str);
+                        f.scripts = (f.scripts || []).filter(f => !!f);
                     }
                     catch (e) {                        
-                        HTML.showErrorNotification(lf("This json file is invalid."))
+                        HTML.showErrorNotification(lf("Sorry, this script file is invalid."))
                         return Promise.as(undefined);
                     }
                     
-                    f.scripts = (f.scripts || []).filter(f => !!f);
                     if (!f.scripts || !f.scripts.length) return Promise.as([]);
 
                     return Promise.sequentialMap(f.scripts, script => {
-                        if (!script.source) {
+                        var src = script.source;
+                        var header = script.header;
+                        if (!src || !(src instanceof String)) {
                             HTML.showErrorNotification(lf("This script is missing the source."))
                             return Promise.as(undefined);                            
                         }
-                        if (!script.header) {
+                        if (!header) {
                             HTML.showErrorNotification(lf("This script is missing the header."))
                             return Promise.as(undefined);                            
                         }
-                        return World.installFromSaveAsync(script.header, script.source).then(h => h.guid)
+                        return World.installFromSaveAsync(script.header, script.source)
+                            .then(h => h.guid)
                     })
                 });
         }
         
-        function installHexFile(file: File): Promise { // string[] (guid)
+        function installHexFileAsync(file: File): Promise { // string[] (guid)
             if (!file) return Promise.as(undefined);
             
             var guid: string = "";
             return HTML.fileReadAsDataURLAsync(file)
                 .then((dat: string) => {
-                    var str = RT.String_.valueFromArtUrl(dat)
-                    var tmp = AST.Bytecode.Binary.extractSource(str)
-                    if (!tmp.meta) {
+                    var str = RT.String_.valueFromArtUrl(dat)                    
+                    var tmp = AST.Bytecode.Binary.extractSource(str || "")
+                    if (!tmp || !tmp.meta || !tmp.text) {
                         HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
                         return Promise.as(undefined);
                     }
                     var hd: any = JSON.parse(tmp.meta)
-                    if (hd.compression == "LZMA") {
+                    if (!hd) {
+                            HTML.showErrorNotification(lf("This .hex file is not valid."))
+                            return Promise.as()                        
+                    }
+                    else if (hd.compression == "LZMA") {
                         var lzma = (<any>window).LZMA;
                         if (!lzma) {
                             HTML.showErrorNotification(lf("LZMA decompressor not installed."))

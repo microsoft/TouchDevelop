@@ -730,8 +730,10 @@ module TDev.AST.Bytecode
             return true;
         }
 
-        static extractSource(hexfile:string)
+        static extractSource(hexfile: string): { meta: string; text: Uint8Array;}
         {
+            if (!hexfile) return undefined;
+            
             var metaLen = 0
             var textLen = 0
             var toGo = 0
@@ -754,7 +756,10 @@ module TDev.AST.Bytecode
                     }
                 }
             })
-            Util.assert(toGo == 0 && ptr == buf.length)
+            if (!buf || !(toGo == 0 && ptr == buf.length)) {
+                Util.log("invalid log file");
+                return undefined;
+            }
             var bufmeta = new Uint8Array(metaLen)
             var buftext = new Uint8Array(textLen)
             for (var i = 0; i < metaLen; ++i)
