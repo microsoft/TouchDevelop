@@ -6994,7 +6994,7 @@
                             source: text,
                         }]
                     };
-                    HTML.browserDownloadText(JSON.stringify(f, null, 1), Util.toFileName(this.cloudHeader.name, 'script') + ".json");
+                    HTML.browserDownloadText(JSON.stringify(f, null, 1), Util.toFileName(this.cloudHeader.name, 'script') + ".json", "octet/stream");
                 });
         }
         
