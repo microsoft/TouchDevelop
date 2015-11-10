@@ -325,9 +325,17 @@ module TDev {
           return "ManagedType<user_types::"+H.resolveGlobal(env, (<J.JCall> args[0]).name)+"_>()";
 
         // 0d) Special casing for [thing -> is invalid] (test if null).
-        if (name == "is invalid" && H.resolveTypeRef(this.libraryMap, parent).user)
+        if (name == "is invalid" && H.resolveTypeRef(this.libraryMap, parent).user) {
           // 9 is the precedence of ==
-          return mkWrap(9)(this.visit(env, args[0]) + ".get() == NULL");
+          return mkWrap(9)(this.visit(H.setPriority(env, 9), args[0]) + ".get() == NULL");
+        }
+
+        // 0e) Special casing for [thing -> equals] (address comparison)
+        if (name == "equals" && H.resolveTypeRef(this.libraryMap, parent).user)
+          return mkWrap(9)(
+              this.visit(
+                H.setPriority(env, 9), args[0]) + "==" +
+                this.visit(H.setPriority(env, 9), args[1]));
 
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
