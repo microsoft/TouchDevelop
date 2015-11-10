@@ -1647,15 +1647,18 @@ export function updatelang(args:string[])
     }
 
     var finish = () => {
+        var strings = {}
         var keys = {}
         var res = "TDev.Util._languageData = function (lang) {\n"
         langs.forEach(l => {
             Object.keys(allTrans[l]).forEach(k => {
                 if (keys[k] === 1) return
-                if (usedSet.hasOwnProperty(k))
+                if (usedSet.hasOwnProperty(k)) {
                     keys[k] = 1
+                    strings[k] = k;
+                }
                 else {
-                    console.log("would skip: " + k)
+                    console.log("skipping: " + k)
                     //keys[k] = 1
                 }
             })
@@ -1666,7 +1669,6 @@ export function updatelang(args:string[])
         res += "var keys = " + arrToStr(kk) + ";\n\n"
         if (!fs.existsSync("generated/locale"))
             fs.mkdirSync("generated/locale");
-        fs.writeFileSync("generated/locale/strings.json", arrToStr(kk));
         langs.forEach(l => {
             var arr = []
             var tr = {};
@@ -1688,6 +1690,7 @@ export function updatelang(args:string[])
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
+        fs.writeFileSync("generated/locale/strings.json", JSON.stringify(strings));
     }
 
     tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/languages", resp => {
