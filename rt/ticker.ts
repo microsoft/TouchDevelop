@@ -969,7 +969,6 @@ module TDev {
 
             if (!initialized || disabled) return;
 
-            poke();
             checkDate();
 
             var m = <TickEvent>{ timestamp: Util.now(), event: t, arg: arg }
@@ -981,6 +980,9 @@ module TDev {
                 if (logMsgs.length >= logSz)
                     logIdx = 0;
             }
+
+            if (t != Ticks.dbgEvent)
+                poke();
 
             // this one we only wanted logged, not counted
             if (t != Ticks.dbgEvent && shouldStoreTick(tn)) {
@@ -1017,6 +1019,8 @@ module TDev {
         {
             var id = getCurrentEditorId();
             if (id && !document.hidden && lastPoke) {
+                if (Browser.isCellphone)
+                    id += "_mobile"
                 rawTick("editor_" + id)
                 lastPoke = 0;
             }
