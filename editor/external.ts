@@ -539,7 +539,7 @@ module TDev {
 
           case MessageType.Load:
             var message4 = <Message_Load> event.data;
-            ArtUtil.handleImportFiles([message4.file]);
+            ArtUtil.handleImportFilesAsync([message4.file]).done();
             break;
 
           default:

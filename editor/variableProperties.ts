@@ -700,19 +700,7 @@ module TDev
             d.style.backgroundImage = Cloud.artCssImg(id, true);
             return d;
         }
-                
-        export function isHexFile(file: File): boolean {
-            return file && /\.hex$/i.test(file.name);
-        }
-
-        export function isJsonFile(file: File): boolean {
-            return file && /\.js(z|on)$/i.test(file.name);            
-        }
-        
-        export function isImportable(file: File): boolean {
-            return isHexFile(file) || isJsonFile(file);
-        }        
-        
+       
         export function importFileDialog() {
             var m = new ModalDialog();
             var input = HTML.mkTextInput("file", lf("choose .hex or .json files"));
@@ -724,30 +712,31 @@ module TDev
             m.add(div('wall-dialog-body', input));
             m.addOk(lf("import"), () => {
                 m.dismiss();
-                handleImportFiles(Util.toArray(input.files));
+                handleImportFilesAsync(Util.toArray(input.files))
+                    .done((guids:string[]) => {
+                        HTML.showNotificationText(lf("{0} file{0:s} imported", guids.length));
+                    });
             });
             m.show();            
         }
 
-        export function handleImportFiles(files: File[]) {
-            if (!files || !files.length) return;
+        export function handleImportFilesAsync(files: File[]) {
+            if (!files || !files.length) return Promise.as([]);
             
             var guids: string[] = [];
-            Promise.sequentialMap(files, file => installFileAsync(file))
+            return Promise.sequentialMap(files, file => installFileAsync(file))
                 .then((gs:string[]) => {
                     gs.filter(g => !!g).forEach(g => guids = guids.concat(g));
                     return Browser.TheHost.clearAsync(false);
-                }).done(() => {
+                }).then(() => {
                     if (guids.length > 0) Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
-                }, e => {
-                    HTML.showErrorNotification("Oops, we could not import those files.");
+                    return guids;
                 });
         }
         
-        function installFileAsync(file: File) : Promise {
-            if (isHexFile(file)) return installHexFileAsync(file);
-            if (isJsonFile(file)) return installJsonFileAsync(file);
-            return Promise.as(undefined);
+        function installFileAsync(file: File): Promise {
+            return installHexFileAsync(file)
+                .then(res => res ? undefined : installJsonFileAsync(file));
         }
         
         function installJsonFileAsync(file: File): Promise { // string[] (guids)
@@ -802,7 +791,9 @@ module TDev
                 .then((dat: string) => {
                     var str = RT.String_.valueFromArtUrl(dat)                    
                     var tmp = AST.Bytecode.Binary.extractSource(str || "")
-                    if (!tmp || !tmp.meta || !tmp.text) {
+                    if (!tmp) return Promise.as(undefined);
+                    
+                    if (!tmp.meta || !tmp.text) {
                         HTML.showErrorNotification(lf("This .hex file doesn't contain source."))
                         return Promise.as(undefined);
                     }
@@ -842,91 +833,92 @@ module TDev
         
         function uploadFile(file: File) {
             if (!file) return;
-            if (ArtUtil.isImportable((file))) {
-                handleImportFiles([file])
-                return;
-            }
-            if (Cloud.anonMode(lf("uploading art"))) return;
-            var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
-            var sizeLimit = 1
-            if (isDoc) sizeLimit = 8
-            if (file.size > sizeLimit*1024*1024) {
-                ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
-            } else {
-                var name = file.name;
-                var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
-                if (m) name = m[1];
-                if (/^image\/(png|jpeg)$/i.test(file.type)) {
-                    ArtUtil.uploadPictureDialogAsync({
-                        removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
-                        input: HTML.mkFileInput(file, 1),
-                        initialName: name,
-                        finalDialog: !Script
-                    })
-                        .done((art: JsonArt) => {
-                            if (art && Script) {
-                                var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
-                                TheEditor.addNode(n);
-                            }
-                        });
-                } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
-                    ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                        if (art && Script) {
-                            var n = TheEditor.freshSoundResource(art.name, art.wavurl);
-                            TheEditor.addNode(n);
+
+            handleImportFilesAsync([file])
+                .then(guids => {
+                    if (guids.length > 0) return;
+                    if (Cloud.anonMode(lf("uploading art"))) return;
+                    var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
+                    var sizeLimit = 1
+                    if (isDoc) sizeLimit = 8
+                    if (file.size > sizeLimit * 1024 * 1024) {
+                        ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
+                    } else {
+                        var name = file.name;
+                        var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
+                        if (m) name = m[1];
+                        if (/^image\/(png|jpeg)$/i.test(file.type)) {
+                            ArtUtil.uploadPictureDialogAsync({
+                                removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
+                                input: HTML.mkFileInput(file, 1),
+                                initialName: name,
+                                finalDialog: !Script
+                            })
+                                .done((art: JsonArt) => {
+                                    if (art && Script) {
+                                        var n = TheEditor.freshPictureResource(art.name, art.pictureurl);
+                                        TheEditor.addNode(n);
+                                    }
+                                });
+                        } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
+                            ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                                if (art && Script) {
+                                    var n = TheEditor.freshSoundResource(art.name, art.wavurl);
+                                    TheEditor.addNode(n);
+                                }
+                            });
+                        } else if (Cloud.lite && isDoc) {
+                            ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                                if (art && Script) {
+                                    var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
+                                    TheEditor.addNode(n);
+                                }
+                            });
+                        } else {
+                            ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
                         }
-                    });
-                } else if (Cloud.lite && isDoc) {
-                    ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
-                        if (art && Script) {
-                            var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
-                            TheEditor.addNode(n);
-                        }
-                    });
-                } else {
-                    ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
-                }
-            }
-        }  
+                    }
+                })
+        }
         
         function uploadFiles(files: File[]) {
-            if (files.some(ArtUtil.isImportable)) {
-                handleImportFiles(files);
-                return;       
-            }
-            
-            if (!Cloud.hasPermission("batch-post-art") && !TDev.dbg) return;
+            handleImportFilesAsync(files)
+                .then(guids => {
+                    if (guids.length > 0) return;
 
-            var m = new ModalDialog();
-            var template = HTML.mkTextArea("wall-input");
-            template.placeholder = lf("Art name template");
-            template.value = "{name}"
-            var descr = HTML.mkTextArea("wall-input");
-            descr.placeholder = lf("Enter the description");
-            m.add(div('wall-dialog-header', lf("uploading art {0} resources", files.length)));
-            m.add(template);
-            m.add(descr);
-            m.add(div("wall-dialog-body", lf("Everyone will be able to access those art resources. ")));
-            m.add(Cloud.mkLegalDiv());            
-            m.addOk(lf("upload"), () => {
-                var d = descr.value || "";
-                var t = template.value; if (t.indexOf("{name}") < 0) t += "{name}";
-                var ps = files.map(file =>
-                    HTML.fileReadAsDataURLAsync(file)
-                        .then(uri => {
-                            if (!uri) return Promise.as();
-                            else {
-                                var name = file.name.substr(0, RT.String_.last_index_of(file.name, '.', file.name.length));
-                                name = t.replace("{name}", name);
-                                Util.log('uploading ' + file.name + '->' + name)
-                                return uploadArtAsync(name, d, uri);
-                            }
-                        })
-                    );
-                Promise.join(ps)
-                    .done(() => m.dismiss());
-            });
-            m.show();
+                    if (!Cloud.hasPermission("batch-post-art") && !TDev.dbg) return;
+
+                    var m = new ModalDialog();
+                    var template = HTML.mkTextArea("wall-input");
+                    template.placeholder = lf("Art name template");
+                    template.value = "{name}"
+                    var descr = HTML.mkTextArea("wall-input");
+                    descr.placeholder = lf("Enter the description");
+                    m.add(div('wall-dialog-header', lf("uploading art {0} resources", files.length)));
+                    m.add(template);
+                    m.add(descr);
+                    m.add(div("wall-dialog-body", lf("Everyone will be able to access those art resources. ")));
+                    m.add(Cloud.mkLegalDiv());
+                    m.addOk(lf("upload"), () => {
+                        var d = descr.value || "";
+                        var t = template.value; if (t.indexOf("{name}") < 0) t += "{name}";
+                        var ps = files.map(file =>
+                            HTML.fileReadAsDataURLAsync(file)
+                                .then(uri => {
+                                    if (!uri) return Promise.as();
+                                    else {
+                                        var name = file.name.substr(0, RT.String_.last_index_of(file.name, '.', file.name.length));
+                                        name = t.replace("{name}", name);
+                                        Util.log('uploading ' + file.name + '->' + name)
+                                        return uploadArtAsync(name, d, uri);
+                                    }
+                                })
+                        );
+                        Promise.join(ps)
+                            .done(() => m.dismiss());
+                    });
+                    m.show();
+                })
         }
         
         export function setupDragAndDrop(r: HTMLElement) {
@@ -972,8 +964,7 @@ module TDev
                 }
             }, false);
             r.addEventListener('drop', (e) => {
-                var files = Util.toArray<File>(e.dataTransfer.files)
-                    .filter((file: File) => /\.(hex|json|jsz)$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
+                var files = Util.toArray<File>(e.dataTransfer.files);
                 if (files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
