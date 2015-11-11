@@ -878,12 +878,12 @@ module TDev {
         {
             return <any>{
                 scriptId: hd.scriptId,
-                userId: hd.userId,
+                userId: Cloud.isRestricted() ? undefined : hd.userId,
                 status: hd.status,
                 // store date of last modification, not most recent use
-                recentUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
-                editor: hd.editor,
-                meta: !hd.editor ? undefined : {
+                lastUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
+                editor: hd.editor || "touchdevelop",
+                meta: {
                     name: hd.meta.name,
                     comment: hd.meta.comment
                 },
@@ -895,16 +895,16 @@ module TDev {
             var h = <Cloud.Header>(<any>{
                 status: hd.status,
                 scriptId: hd.scriptId,
-                userId: hd.userId,
+                userId: hd.userId || (hd.scriptId ? "bogususerid" : ""),
                 meta: hd.meta,
                 scriptVersion: <Cloud.Version>{
                     instanceId: Cloud.getWorldId(), 
                     version: 0, 
-                    time: hd.recentUse || getCurrentTime(), 
+                    time: (<any>hd).lastUse || hd.recentUse || getCurrentTime(), 
                     baseSnapshot: "" 
                 },
                 guid: Util.guidGen(),
-                editor: hd.editor,
+                editor: hd.editor == "touchdevelop" ? "" : hd.editor,
                 recentUse: getCurrentTime(),
             });
             return Promise.join({
