@@ -757,7 +757,6 @@ module TDev.AST.Bytecode
                 }
             })
             if (!buf || !(toGo == 0 && ptr == buf.length)) {
-                Util.log("invalid log file");
                 return undefined;
             }
             var bufmeta = new Uint8Array(metaLen)

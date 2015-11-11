@@ -750,14 +750,13 @@ module TDev
                     buf = new Uint8Array(dat);
                     return lzmaDecompressAsync(buf);
                 }).then((strc: string) => {        
-                    str = strc || Util.fromUTF8Bytes(Util.toArray(buf));
                     var f: Cloud.Workspace;
                     try {
+                        str = strc || Util.fromUTF8Bytes(Util.toArray(buf));
                         f = <Cloud.Workspace>JSON.parse(str);
                         f.scripts = (f.scripts || []).filter(f => !!f);
                     }
                     catch (e) {                        
-                        HTML.showErrorNotification(lf("Sorry, this script file is invalid."))
                         return Promise.as(undefined);
                     }
                     
