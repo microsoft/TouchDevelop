@@ -1618,8 +1618,7 @@ export function stringCompare(an:string, bn:string)
 
 export function updatelang(args:string[])
 {
-    var excluded = ["hi"]
-    var langs = ["none"]
+    var langs = []
 
     var allTrans = {}
     var numStarted = 0
@@ -1667,8 +1666,8 @@ export function updatelang(args:string[])
         kk.sort()
         kk.forEach((k, i) => keys[k] = i)
         res += "var keys = " + arrToStr(kk) + ";\n\n"
-        if (!fs.existsSync("generated/locale"))
-            fs.mkdirSync("generated/locale");
+        if (!fs.existsSync("build/locale"))
+            fs.mkdirSync("build/locale");
         langs.forEach(l => {
             var arr = []
             var tr = {};
@@ -1685,17 +1684,29 @@ export function updatelang(args:string[])
             for(var i = 0; i < arr.length; ++i)
                 if (!arr[i]) arr[i] = 0
             res += "if (lang == \"" + l + "\") { TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + "); return true; }\n\n"
-            
-            fs.writeFileSync("generated/locale/" + l + ".json", JSON.stringify(tr));
+            fs.writeFileSync("build/locale/" + l + ".json", JSON.stringify(tr));
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
         fs.writeFileSync("generated/strings.json", JSON.stringify(strings));
     }
+    
+    fs.readdirSync("locales").forEach((folder: string) => {
+        var fn = "locales/" + folder + "/strings.json";
+        console.log("importing " + fn);
+        var js = JSON.parse(fs.readFileSync(fn, "utf8"));
+        Object.keys(js).forEach(key => {
+            if (!js[key]) delete js[key];
+        })
+        allTrans[folder] = js;
+        langs.push(folder);
+    })
+    
+    finish();
 
+/*    
     tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/languages", resp => {
         var ll = JSON.parse(resp)
-        excluded.forEach(l => delete ll[l])
         langs = Object.keys(ll)
 
         langs.forEach(l => {
@@ -1707,6 +1718,7 @@ export function updatelang(args:string[])
             })
         })
     })
+    */
 }
 
 export function updatehelp(args:string[])

@@ -22,6 +22,7 @@ microbit/loader/Microbit.Loader/obj
 microbit/loader/Microbit.Uploader/bin
 microbit/loader/Microbit.Uploader/obj
 backend/built
+build/locales
 
 # visual studio
 *.suo
