@@ -2866,7 +2866,7 @@ module TDev{
 
     }
 
-    export function fromUTF8Bytes(binstr:number[])
+    export function fromUTF8Bytes(binstr:Uint8Array)
     {
         if (!binstr) return ""
 

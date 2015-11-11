@@ -907,6 +907,7 @@ module TDev {
                 editor: hd.editor == "touchdevelop" ? "" : hd.editor,
                 recentUse: getCurrentTime(),
             });
+            if (!h.editor) h.meta = null; // force recompute of meta
             return Promise.join({
                 indexTable: getIndexTablePromise(),
                 scriptsTable: getScriptsTablePromise(),

@@ -767,7 +767,7 @@ module TDev.AST.Bytecode
                 buftext[i] = buf[metaLen + i];
             // iOS Safari doesn't seem to have slice() on Uint8Array
             return {
-                meta: Util.fromUTF8Bytes(<any>bufmeta),
+                meta: Util.fromUTF8Bytes(bufmeta),
                 text: buftext
             }
         }

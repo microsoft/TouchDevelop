@@ -743,7 +743,7 @@ module TDev
         
         function installFileAsync(file: File): Promise {
             return installHexFileAsync(file)
-                .then(res => res ? undefined : installJsonFileAsync(file));
+                .then(res => res ? res : installJsonFileAsync(file));
         }
         
         function installJsonFileAsync(file: File): Promise { // string[] (guids)
@@ -759,7 +759,7 @@ module TDev
                 }).then((strc: string) => {        
                     var f: Cloud.Workspace;
                     try {
-                        str = strc || Util.fromUTF8Bytes(Util.toArray(buf));
+                        str = strc || Util.fromUTF8Bytes(buf);
                         f = <Cloud.Workspace>JSON.parse(str);
                         f.scripts = (f.scripts || []).filter(f => !!f);
                     }
@@ -793,9 +793,9 @@ module TDev
             if (!file) return Promise.as(undefined);
             
             var guid: string = "";
-            return HTML.fileReadAsDataURLAsync(file)
-                .then((dat: string) => {
-                    var str = RT.String_.valueFromArtUrl(dat)                    
+            return HTML.fileReadAsArrayBufferAsync(file)
+                .then((dat) => {
+                    var str = Util.fromUTF8Bytes(new Uint8Array(dat));
                     var tmp = AST.Bytecode.Binary.extractSource(str || "")
                     if (!tmp) return Promise.as(undefined);
                     
@@ -809,23 +809,18 @@ module TDev
                             return Promise.as()                        
                     }
                     else if (hd.compression == "LZMA") {
-                        var lzma = (<any>window).LZMA;
-                        if (!lzma) {
-                            HTML.showErrorNotification(lf("LZMA decompressor not installed."))
-                            return Promise.as()
-                        }
-                        var rp = new PromiseInv();
-                        lzma.decompress(tmp.text, res => {
-                            var meta = res.slice(0, hd.metaSize);
-                            var text = res.slice(hd.metaSize);
-                            rp.success([JSON.parse(meta), text])
-                        }, prog => {})
-                        return rp;
+                        return lzmaDecompressAsync(tmp.text)
+                            .then(res => {
+                                if (!res) return null;
+                                var meta = res.slice(0, hd.metaSize);
+                                var text = res.slice(hd.metaSize);
+                                return [JSON.parse(meta), text]
+                            })
                     } else if (hd.compression) {
                         HTML.showErrorNotification(lf("Compression type {0} not supported.", hd.compression))
                         return Promise.as()
                     } else {
-                        return Promise.as([hd, Util.fromUTF8Bytes(<any>tmp.text)])
+                        return Promise.as([hd, Util.fromUTF8Bytes(tmp.text)])
                     }
                 })
                 .then(dat => {
@@ -834,7 +829,7 @@ module TDev
                     var hd:Cloud.Header = dat[0]
                     var text:string = dat[1]
                     return World.installFromSaveAsync(hd, text).then(h => [h.guid]);
-                });
+                }, err => Promise.as(undefined));
         }
         
         function uploadFile(file: File) {
