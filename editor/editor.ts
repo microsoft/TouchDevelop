@@ -3277,6 +3277,7 @@ module TDev
 
                 return final();
             }).then(() => {
+                Ticker.setCurrentEditorId("touchdevelop");
                 if (!shouldRun) return Browser.EditorSettings.initEditorModeAsync().then(() => this.setMode(true))
                 else return Promise.as();
             }).then(() => {

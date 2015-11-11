@@ -242,6 +242,8 @@ module TDev {
         editorTutorialNext,
         editorTutorialPrevious,
 
+        externalSave,
+        externalLoad,
         externalCompile,
         externalRun,
 
@@ -605,7 +607,7 @@ module TDev {
         var disabled = false;
         var delay = 10; // initial, 10s
         var chunkId = 1;
-        var maxDelay = 1200; // 1200s
+        var maxDelay = 300; // 300s
         var initialized = false;
 
         export var mainJsName = "unknown";
@@ -664,6 +666,8 @@ module TDev {
                     sendOutEvents(prevEvents);
                 }
             }
+
+            usageTick();
 
             initialized = true;
         }
@@ -965,6 +969,7 @@ module TDev {
 
             if (!initialized || disabled) return;
 
+            poke();
             checkDate();
 
             var m = <TickEvent>{ timestamp: Util.now(), event: t, arg: arg }
@@ -1007,6 +1012,29 @@ module TDev {
             else
                 return logMsgs.slice(0);
         }
+
+        function usageTick()
+        {
+            var id = getCurrentEditorId();
+            if (id && !document.hidden && lastPoke) {
+                rawTick("editor_" + id)
+                lastPoke = 0;
+            }
+            // avarage out to once per 10s, but get more even probabilistic distribution
+            Util.setTimeout(RT.Math_.random_range(3000,17000), usageTick)
+        }
+
+        var currentEditorId:string;
+        var lastPoke:number;
+        export function poke()
+        {
+            lastPoke = Util.now();
+        }
+        export function setCurrentEditorId(id:string) {
+            Util.log("set editor: " + id)
+            currentEditorId = id;
+        }
+        export function getCurrentEditorId() { return currentEditorId; }
     }
 
     export function tick(t: Ticks, arg?: string) { Ticker.tick(t, arg) }

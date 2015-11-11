@@ -304,6 +304,7 @@ module TDev {
 
         switch ((<Message> event.data).type) {
           case MessageType.Save: {
+            tick(Ticks.externalSave);
             var message = <Message_Save> event.data;
             World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
               var scriptText = message.script.scriptText;
@@ -538,6 +539,7 @@ module TDev {
             break;
 
           case MessageType.Load:
+            tick(Ticks.externalLoad);
             var message4 = <Message_Load> event.data;
             ArtUtil.handleImportFilesAsync([message4.file]).done();
             break;
@@ -585,6 +587,8 @@ module TDev {
         version: null,
         baseSnapshot: null,
       };
+
+      Ticker.setCurrentEditorId(editor.id);
 
       // Clear leftover iframes and simulators.
       document.getElementById("externalEditorSide").setChildren([]);

@@ -1973,8 +1973,10 @@
 
             if (s instanceof TopicInfo)
                 this.reloadHelpTopic = setHash;
-            else
+            else {
+                Ticker.setCurrentEditorId("shell");
                 this.reloadHelpTopic = null;
+            }
             Host.tryUpdate();
 
             this.syncTabVisibility();
