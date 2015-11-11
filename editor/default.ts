@@ -344,24 +344,7 @@ module TDev
             return Promise.as();
         }
 
-        if (/livelang/.test(url)) {
-            return Util.httpGetJsonAsync("https://touchdeveloptranslator.azurewebsites.net/api/Svc/export"
-                    + "?user=" + encodeURIComponent(Cloud.getUserId())
-                    + "&lang=" + encodeURIComponent(Util.getTranslationLanguage()))
-                .then(resp => {
-                    if (resp && resp.translations) {
-                        var tr = resp.translations[Util.getTranslationLanguage()]
-                        if (tr) {
-                            Util.setTranslationTable(tr)
-                            return initEditorAsync()
-                        }
-                    }
-                    HTML.showErrorNotification("cannot load language " + Util.getTranslationLanguage())
-                    return initEditorAsync()
-                })
-
-        } else
-            return initEditorAsync();
+        return initEditorAsync();
     }
 
     function search(query: string)
