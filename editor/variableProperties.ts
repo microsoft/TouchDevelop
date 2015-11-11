@@ -713,9 +713,7 @@ module TDev
             m.addOk(lf("import"), () => {
                 m.dismiss();
                 handleImportFilesAsync(Util.toArray(input.files))
-                    .done((guids:string[]) => {
-                        HTML.showNotificationText(lf("{0} file{0:s} imported", guids.length));
-                    });
+                    .done();
             });
             m.show();            
         }
@@ -724,14 +722,23 @@ module TDev
             if (!files || !files.length) return Promise.as([]);
             
             var guids: string[] = [];
-            return Promise.sequentialMap(files, file => installFileAsync(file))
+            var index = 0;
+            return ProgressOverlay.lockAndShowAsync(lf("importing files..."))
+                .then(() => Promise.sequentialMap(files, (file,i) => {
+                    ProgressOverlay.setProgress(++index + "/" + files.length);
+                    return installFileAsync(file);   
+                }))
                 .then((gs:string[]) => {
                     gs.filter(g => !!g).forEach(g => guids = guids.concat(g));
                     return Browser.TheHost.clearAsync(false);
                 }).then(() => {
-                    if (guids.length > 0) Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                    ProgressOverlay.hide();
+                    if (guids.length > 0) {
+                        HTML.showProgressNotification(lf("{0} file{0:s} imported", guids.length));
+                        Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                    }
                     return guids;
-                });
+                }, e => ProgressOverlay.hide());
         }
         
         function installFileAsync(file: File): Promise {
@@ -832,7 +839,7 @@ module TDev
         
         function uploadFile(file: File) {
             if (!file) return;
-
+                    
             handleImportFilesAsync([file])
                 .then(guids => {
                     if (guids.length > 0) return;
