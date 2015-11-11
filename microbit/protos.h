@@ -49,6 +49,7 @@ void           contract::assert              (int cond, uint32_t msg);          
 void           ds1307::adjust                (user_types::DateTime d);               // P1
 uint8_t        ds1307::bcd2bin               (uint8_t val);                          // F1
 uint8_t        ds1307::bin2bcd               (uint8_t val);                          // F1
+Action         invalid::action               ();                                     // F0
 int            math::abs                     (int x);                                // F1
 int            math::clamp                   (int l, int h, int x);                  // F3
 int            math::max                     (int x, int y);                         // F2
@@ -178,5 +179,6 @@ void           string::post_to_wall          (RefString *s);                    
 RefString*     string::substring             (RefString *s, int i, int j);           // F3 bvm
 int            string::to_character_code     (RefString *s);                         // F1 bvm
 int            string::to_number             (RefString *s);                         // F1 bvm
+void           touch_develop::dispatchEvent  (MicroBitEvent e);                      // P1
 void           touch_develop::internal_main  ();                                     // P0
 ManagedString  touch_develop::mk_string      (char* c);                              // F1
