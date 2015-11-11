@@ -324,7 +324,7 @@ module TDev
                 if (dbg)
                     ModalDialog.showText(e.stack)
                 else
-                    HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
+                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
             })
         }
 
