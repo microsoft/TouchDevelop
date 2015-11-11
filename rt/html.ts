@@ -414,6 +414,19 @@ module TDev.HTML {
         readAsync(): Promise; // of string
     }
 
+     export function fileReadAsArrayBufferAsync(f: File) : Promise { // ArrayBuffer
+        if (!f)
+            return Promise.as(null);
+        else {
+            return new Promise((onSuccess, onError, onProgress) => {
+                var reader = new FileReader();
+                reader.onerror = (ev) => onSuccess(null);
+                reader.onload = (ev) => onSuccess(reader.result);
+                reader.readAsArrayBuffer(f);
+            });
+        }
+    }
+   
     export function fileReadAsDataURLAsync(f: File) : Promise {
         if (!f)
             return Promise.as(null);
@@ -915,10 +928,13 @@ module TDev.HTML {
         return r;
     }
     
-    export function browserDownloadText(text: string, name: string, contentType: string = "application/octet-stream") {
+    export function browserDownloadText(text: string, name: string, contentType: string = "octet/stream") {
+        var buf = Util.stringToUint8Array(Util.toUTF8(text))
+        browserDownloadUInt8Array(buf, name, contentType);
+    }
+    
+    export function browserDownloadUInt8Array(buf: Uint8Array, name: string, contentType: string = "octet/stream") {        
         try {
-            var buf = Util.stringToUint8Array(Util.toUTF8(text))
-
             if (typeof saveAs !== "undefined") {
                 var b = new Blob([buf], { type: contentType })
                 saveAs(b, name, true);

@@ -6982,6 +6982,7 @@
         
         public saveAsync(): Promise {
             var guid = this.getGuid();
+            var json: string;
             return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
                 .then(r => {
                     var text = <string>r[0];
@@ -6994,8 +6995,13 @@
                             source: text,
                         }]
                     };
-                    HTML.browserDownloadText(JSON.stringify(f, null, 1), Util.toFileName(this.cloudHeader.name, 'script') + ".json", "octet/stream");
-                });
+                    json = JSON.stringify(f, null, 1);
+                    return lzmaCompressAsync(json).then((jsonz: Uint8Array) => {
+                        var fileName = Util.toFileName(this.cloudHeader.name, 'script');
+                        if (jsonz) HTML.browserDownloadUInt8Array(jsonz, fileName + ".jsz");
+                        else HTML.browserDownloadText(json, fileName + ".json");
+                        });
+                });    
         }
         
         public cloneAsync(): Promise {

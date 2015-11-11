@@ -118,6 +118,36 @@ module TDev {
         return document.createTextNode(s);
     }
 
+    export function lzmaDecompressAsync(buf: Uint8Array): Promise { // string
+        var lzma = (<any>window).LZMA;
+        if (!lzma) return Promise.as(undefined);
+        return new Promise((onSuccess, onError, onProgress) => {
+            try {
+                lzma.decompress(buf, (res, error) => {
+                    onSuccess(error ? undefined : res);
+                })
+            }
+            catch(e) {
+                onSuccess(undefined);
+            }    
+        })
+    }
+    
+    export function lzmaCompressAsync(text: string): Promise { // UInt8Array
+        var lzma = (<any>window).LZMA;
+        if (!lzma) return Promise.as(undefined);
+        return new Promise((onSuccess, onError, onProgress) => {
+            try {
+                lzma.compress(text, 7, (res, error) => {
+                    onSuccess(error ? undefined : new Uint8Array(res));
+                })
+            }
+            catch(e) {
+                onSuccess(undefined);
+            }    
+        })
+    }
+
     export function img(cl: string, src: string, alt: string) : HTMLImageElement
     {
         var elt: HTMLImageElement = <HTMLImageElement> document.createElement("img");

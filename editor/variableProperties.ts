@@ -704,9 +704,9 @@ module TDev
         export function isHexFile(file: File): boolean {
             return file && /\.hex$/i.test(file.name);
         }
-        
+
         export function isJsonFile(file: File): boolean {
-            return file && /\.json$/i.test(file.name);            
+            return file && /\.js(z|on)$/i.test(file.name);            
         }
         
         export function isImportable(file: File): boolean {
@@ -717,7 +717,7 @@ module TDev
             var m = new ModalDialog();
             var input = HTML.mkTextInput("file", lf("choose .hex or .json files"));
             input.multiple = true;
-            input.accept = ".hex,.json";
+            input.accept = ".hex,.json,.jsz";
             
             m.add(div('wall-dialog-header', lf("import code")));
             m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .json files. Hint: you can also drag and drop the files in the editor to import them!")));
@@ -749,14 +749,19 @@ module TDev
             if (isJsonFile(file)) return installJsonFileAsync(file);
             return Promise.as(undefined);
         }
-
+        
         function installJsonFileAsync(file: File): Promise { // string[] (guids)
             if (!file) return Promise.as(undefined);
             
             var guid: string = "";
-            return HTML.fileReadAsDataURLAsync(file)
-                .then((dat: string) => {
-                    var str = RT.String_.valueFromArtUrl(dat)
+            var buf: Uint8Array;
+            var str: string;
+            return HTML.fileReadAsArrayBufferAsync(file)
+                .then((dat: ArrayBuffer) => {
+                    buf = new Uint8Array(dat);
+                    return lzmaDecompressAsync(buf);
+                }).then((strc: string) => {        
+                    str = strc || Util.fromUTF8Bytes(Util.toArray(buf));
                     var f: Cloud.Workspace;
                     try {
                         f = <Cloud.Workspace>JSON.parse(str);
@@ -968,7 +973,7 @@ module TDev
             }, false);
             r.addEventListener('drop', (e) => {
                 var files = Util.toArray<File>(e.dataTransfer.files)
-                    .filter((file: File) => /\.(hex|json)$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
+                    .filter((file: File) => /\.(hex|json|jsz)$/.test(file.name) || HTML.documentMimeTypes.hasOwnProperty(file.type) || /^(image|sound)/.test(file.type));
                 if (files.length > 1) {
                     e.stopPropagation(); // Stops some browsers from redirecting.
                     e.preventDefault();
