@@ -743,7 +743,7 @@ module TDev
         
         function installFileAsync(file: File): Promise {
             return installHexFileAsync(file)
-                .then(res => res ? undefined : installJsonFileAsync(file));
+                .then(res => res ? res : installJsonFileAsync(file));
         }
         
         function installJsonFileAsync(file: File): Promise { // string[] (guids)
