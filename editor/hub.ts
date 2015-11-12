@@ -931,13 +931,37 @@ module TDev.Browser {
                 "Scripts": "New_script,New_script_hidden",
                 "Scripts (public)": "New_script",
                 "Scripts (hidden)": "New_script_hidden",
+                "#docs scripts": "CreateHashDocsScript",
                 "Resources": "New_art",
                 "URLs": "New_pointer",
                 "Accounts": "PubUser@federated",
+                "Abuse reports": "New_abusereport",
                 "Logins": "Login@federated",
+                "Hearts": "New_review",
                 "/app/ served": "ServeApp@index.html",
                 "Homepage served": "ServePtr@home,ServePtrFirst@home",
                 "Other page served": "ServePtr@other,ServePtrFirst@other",
+                "Usage: TD": "app_editor_touchdevelop",
+                "Usage: Blocks": "app_editor_blockly",
+                "Usage: CK": "app_editor_codekingdoms",
+                "Usage: Python": "app_editor_python",
+                "Usage: My Scripts": "app_editor_shell",
+                "Mobile: TD": "app_editor_touchdevelop_mobile",
+                "Mobile: Blocks": "app_editor_blockly_mobile",
+                "Mobile: CK": "app_editor_codekingdoms_mobile",
+                "Mobile: Python": "app_editor_python_mobile",
+                "Mobile: My Scripts": "app_editor_shell_mobile",
+                "New script TD": "app_NewScript_touchdevelop",
+                "New script Blocks": "app_NewScript_blockly",
+                "New script CK": "app_NewScript_codekingdoms",
+                "New script Python": "app_NewScript_python",
+                "Simulator Runs": "app_coreRun,app_externalRun",
+                "Compiles": "app_coreNativeCompile",
+                "WebApp Start": "app_mainInit",
+                "Edit Script": "app_browseEdit",
+                "Install Script": "app_browseEditInstall",
+                "Uninstall Script": "app_browseUninstall",
+                "File Save": "app_browseSave",
             }
 
             ModalDialog.editText(lf("How many days back?"), "180", days => {
@@ -970,6 +994,9 @@ module TDev.Browser {
                         for (var i = 0; i < resp.length; ++i) {
                             sum += resp.values[f][i]
                         }
+                        if (/^app_editor_/.test(f))
+                            // convert to minutes
+                            sum = Math.round(sum / 6) 
                         resp.values[f][resp.length + 1] = sum
                         resp.values[f][resp.length + 2] = Math.round(sum / resp.length * 100) / 100
                     })
