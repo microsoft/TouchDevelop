@@ -10,12 +10,12 @@ module TDev.AbuseReview
     {
         if (!root) {
             var resolved = 
-                HTML.mkButton(lf("resolved: shown"), () => {
+                HTML.mkButton(lf("hide resolved reports"), () => {
                     if (root.getAttribute("data-hideresolved") == "yes") {
-                        resolved.setChildren(lf("resolved: shown"))
+                        resolved.setChildren(lf("hide resolved reports"))
                         root.setAttribute("data-hideresolved", "no")
                     } else {
-                        resolved.setChildren(lf("resolved: hidden"))
+                        resolved.setChildren(lf("show all reports"))
                         root.setAttribute("data-hideresolved", "yes")
                     }
                 })
