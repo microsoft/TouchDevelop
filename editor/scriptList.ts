@@ -9550,7 +9550,7 @@
         {
             var box = this.mkBoxCore(false);
             box.withClick(() => {
-                if (!/ visited/.test(box.className))
+                if (!Cloud.isRestricted() && !/ visited/.test(box.className))
                     box.className += " visited";
                 TheApiCacheMgr.getAsync(this.publicId, true)
                     .done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, false, this.publicId));
@@ -9643,11 +9643,11 @@
 
                     if (abuseid) {
                         m.add([
-                            div("wall-dialog-header", lf("resolve report about '{0}'", resp.publicationname)),
+                            div("wall-dialog-header", lf("resolve report about '{0}' /{1}", resp.publicationname, pubid)),
                         ])
                     } else {
                         m.add([
-                            div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
+                            div("wall-dialog-header", lf("report abuse about '{0}' /{1}", resp.publicationname, pubid)),
                             div("", inp),
                             err,
                             div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
