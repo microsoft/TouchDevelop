@@ -4856,11 +4856,19 @@
         {
             var c = <JsonAbuseReport>cc;
             var confirmed = false;
+            var del = () => AbuseReportInfo.deletePubAsync(c.publicationid)
+                            .then(v => { if (v) delBtn.removeSelf() })
             var delBtn = 
                 HTML.mkAsyncButton(lf("delete"), () => {
-                    if (confirmed) {
-                        return AbuseReportInfo.deletePubAsync(c.publicationid)
-                            .then(v => { if (v) delBtn.removeSelf() })
+                    if (Cloud.isRestricted()) {
+                        ModalDialog.ask(lf("Are you sure you want to delete '{0}' /{1}? No undo.", c.publicationname, c.publicationid),
+                                        lf("delete"),
+                                        () => {
+                                            del().done();
+                                        })
+                        return Promise.as();
+                    } else if (confirmed) {
+                        return del();
                     } else {
                         delBtn.setChildren(lf("for sure?"))
                         confirmed = true
