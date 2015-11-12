@@ -6267,6 +6267,10 @@ table.dashboard tr td[data-completed^="yes"] {
   display: none;
 }
 
+.abusePair[data-deleted^="yes"] .abuseButtons button {
+  display: none;
+}
+
 .abuseButtons {
   display: inline-block;
   width: 8em;

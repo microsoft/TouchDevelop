@@ -9497,6 +9497,7 @@
                 } else if (u.resolution == "deleted") {
                     icon.setChildren(HTML.mkImg("svg:fa-trash,white"))
                     icon.style.background = "#308919";
+                    if (par) par.setAttribute("data-deleted", "yes")
                 } else {
                     icon.setChildren(HTML.mkImg("svg:fa-flag,white"))
                     resolved = false
