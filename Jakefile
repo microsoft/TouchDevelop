@@ -445,8 +445,6 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
 	  cmd += ' latest';
         procs.push(cmd);
     })
-    var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
-    procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
     runAndComplete(procs, this);
   };
   if (!process.env.TRAVIS) {

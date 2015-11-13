@@ -3617,20 +3617,7 @@ function tdupload(args:string[])
         lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
 
     console.log("releaseid:" + lbl)
-
-    if (key == "direct") {
-        var atokF = "access_token.txt"
-        if (!fs.existsSync(atokF)) {
-            console.warn("Access token not found.");
-            console.log("Open the following link in your browser:");
-            console.log("   https://www.touchdevelop.com/oauth/dialog?client_id=upload&response_type=token");
-            console.log("Log in with your admin credentials, and save the access token in a text file with the following name.");
-            console.log("   ./" + atokF)
-            console.log("The token will be valid for up to one year. Do not share or check in the access token --- it identifies you personally.");
-            return
-        }
-        var td_tok = "?access_token=" + fs.readFileSync(atokF, "utf8").replace(/\s/g, "").replace(/^#access_token=/, "")
-    }
+   
 
     // Recursively enumerates in each entry that's a directory
     var expand = function (fileList) {
@@ -3703,19 +3690,6 @@ function tdupload(args:string[])
                     contentType: mime,
                     content: content,
                 })
-            } else if (td_tok) {
-                var url = "https://www.touchdevelop.com/app/" + lbl + "/" + fileName + td_tok
-                tdevGet(url, (resp) => {
-                    console.log(fileName + ": " + resp)
-                }, 1, data, mime)
-            } else {
-                var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
-                url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
-                url += "&contentType=" + encodeURIComponent(mime)
-
-                tdevGet(url, (resp) => {
-                    console.log(fileName + ": " + resp)
-                }, 1, data)
             }
         })
     })
