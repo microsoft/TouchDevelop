@@ -1623,10 +1623,14 @@ export function updatelang(args:string[])
     var allTrans = {}
     var numStarted = 0
 
+    var strings = {}
     var usedSet = {}
     JSON.parse(fs.readFileSync("build/localization.json", "utf8")).strings.forEach(s => {
         usedSet[s] = 1
+        if(s)
+            strings[s] = s;
     })
+    fs.writeFileSync("generated/strings.json", JSON.stringify(strings, null, 2));
 
     var arrToStr = arr => {
         var res = "["
@@ -1646,7 +1650,6 @@ export function updatelang(args:string[])
     }
 
     var finish = () => {
-        var strings = {}
         var keys = {}
         var res = "TDev.Util._languageData = function (lang) {\n"
         langs.forEach(l => {
@@ -1654,7 +1657,6 @@ export function updatelang(args:string[])
                 if (keys[k] === 1) return
                 if (usedSet.hasOwnProperty(k)) {
                     keys[k] = 1
-                    strings[k] = k;
                 }
                 else {
                     console.log("skipping: " + k)
@@ -1688,7 +1690,6 @@ export function updatelang(args:string[])
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
-        fs.writeFileSync("generated/strings.json", JSON.stringify(strings));
     }
     
     fs.readdirSync("locales").forEach((folder: string) => {
