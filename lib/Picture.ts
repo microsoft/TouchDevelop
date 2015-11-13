@@ -1186,6 +1186,11 @@ module TDev.RT {
                             ctx.lineTo(parseFloat(path.attr('x2')), parseFloat(path.attr('y2')));
                             Picture.parseStrokeStyle(ctx,path);
                             break;
+                        case 'rect':
+                            ctx.rect(parseFloat(path.attr('x')), parseFloat(path.attr('y')), parseFloat(path.attr('width')), parseFloat(path.attr('height')))
+                            Picture.parseFillStyle(ctx, path);
+                            Picture.parseStrokeStyle(ctx, path);
+                            break;
                         default:
                             Util.log('svg rendering: unsupported command ' + path.name());
                             return null;
