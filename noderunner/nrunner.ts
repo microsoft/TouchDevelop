@@ -308,27 +308,6 @@ function getAstInfo(flags:TDev.StringMap<string>)
     return r;
 }
 
-function httpGetBufferAsync(u:string)
-{
-    var r = new TDev.PromiseInv()
-    var p = url.parse(u);
-
-    https.get(u, (res:http.ClientResponse) => {
-        if (res.statusCode == 200) {
-            var bufs = []
-            res.on('data', (c) => { bufs.push(c) });
-            res.on('end', () => {
-                r.success(Buffer.concat(bufs))
-            })
-
-        } else {
-            r.error(null)
-        }
-    });
-
-    return r
-}
-
 var cachedLibroots = {}
 function getAstInfoWithLibs(ar:ApiRequest, opts:TDev.StringMap<string>)
 {
@@ -910,14 +889,6 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
     }
 }
 
-var tgzBufferPromise = null;
-function getTgzAsync()
-{
-    if (!tgzBufferPromise)
-        tgzBufferPromise = httpGetBufferAsync("https://az31353.vo.msecnd.net/app/" + relId + "/touchdevelop.tgz")
-    return tgzBufferPromise
-}
-
 var tdKey = (
 "-----BEGIN PUBLIC KEY-----\n" +
 "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAweLfmQya+jN+J0m0ND26\n" +
@@ -1086,16 +1057,6 @@ var apiHandlers = {
 
         case "shell.js":
             ar.text((<any>TDev).pkgShell['server.js'], "application/javascript")
-            break;
-
-        case "touchdevelop.tgz":
-            getTgzAsync().done(buff => {
-                hr.writeHead(200, {
-                    "Content-Type": "application/x-compressed",
-                    "Content-Length": buff.length + ""
-                });
-                hr.end(buff)
-            })
             break;
 
         case "touchdevelop-rpi.sh":
