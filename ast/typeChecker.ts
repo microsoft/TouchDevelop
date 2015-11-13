@@ -1315,6 +1315,7 @@ module TDev.AST
                 }
 
                 this.typeCheckInlineAction(ia);
+                ia.closure.forEach(l => this.recordLocalRead(l))
             });
 
             this.localScopes[p] = prevScope
