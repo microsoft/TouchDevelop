@@ -254,7 +254,8 @@ module TDev.Cloud {
         localTopicPath: "#topic:",
         legalButtons: [
             { name: "terms of use", url: "/terms-of-use" },
-            { name: "privacy and cookies", url: "/privacy"}
+            { name: "privacy and cookies", url: "/privacy"},
+            { name: "support", url:"https://touchdevelop.uservoice.com" }
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
