@@ -273,7 +273,8 @@ module TDev
 
                     var newMeta = {
                         compression: "LZMA",
-                        metaSize: meta.length,
+                        metaSize: meta.length, // SAVE-COMPAT
+                        headerSize: meta.length,
                         textSize: text.length
                     }
 

@@ -883,6 +883,9 @@ module TDev {
                 // store date of last modification, not most recent use
                 lastUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
                 editor: hd.editor || "touchdevelop",
+                name: hd.meta.name,
+                comment: hd.meta.comment,
+                // SAVE-COMPAT
                 meta: {
                     name: hd.meta.name,
                     comment: hd.meta.comment
@@ -892,21 +895,39 @@ module TDev {
 
         export function installFromSaveAsync(hd:Cloud.Header, scriptText: string): Promise // of Cloud.Header
         {
+            var tm = (<any>hd).lastUse || hd.recentUse || getCurrentTime();
+            tm = Util.intBetween(1350000000, tm, getCurrentTime());
+            if (!hd.meta) hd.meta = {}
+            var name = hd.name || hd.meta.name || "no name"
+            var comment = (<any>hd).comment || hd.meta.comment || ""
             var h = <Cloud.Header>(<any>{
-                status: hd.status,
+                status: hd.status === "published" ? "published" : "unpublished",
                 scriptId: hd.scriptId,
                 userId: hd.userId || (hd.scriptId ? "bogususerid" : ""),
-                meta: hd.meta,
+                name: name,
+                meta: {
+                    name: name,
+                    comment: comment,
+                },
                 scriptVersion: <Cloud.Version>{
                     instanceId: Cloud.getWorldId(), 
                     version: 0, 
-                    time: (<any>hd).lastUse || hd.recentUse || getCurrentTime(), 
+                    time: tm,
                     baseSnapshot: "" 
                 },
                 guid: Util.guidGen(),
                 editor: hd.editor == "touchdevelop" ? "" : hd.editor,
                 recentUse: getCurrentTime(),
             });
+            if (!/^\w{1,50}$/.test(h.editor))
+                h.editor = "";
+            if (!/^[a-z]{1,20}$/.test(h.scriptId)) {
+                h.scriptId = "";
+                h.userId = "";
+            }
+            if (h.userId && !/^[a-z]{1,20}$/.test(h.userId))
+                h.userId = "bogususerid";
+
             if (!h.editor) h.meta = null; // force recompute of meta
             return Promise.join({
                 indexTable: getIndexTablePromise(),

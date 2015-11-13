@@ -812,7 +812,7 @@ module TDev
                         return lzmaDecompressAsync(tmp.text)
                             .then(res => {
                                 if (!res) return null;
-                                var meta = res.slice(0, hd.metaSize);
+                                var meta = res.slice(0, hd.headerSize || hd.metaSize);
                                 var text = res.slice(hd.metaSize);
                                 return [JSON.parse(meta), text]
                             })
