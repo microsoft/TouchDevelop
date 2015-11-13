@@ -1057,6 +1057,7 @@ module TDev
             var willNowPublish = false;
 
             m.onDismiss = () => {
+                tick(Ticks.tutorialEnd);
                 if (Script) {
                     TheEditor.saveStateAsync({ forReal: true }).done(() => {
                         if (willNowPublish)
@@ -1067,7 +1068,6 @@ module TDev
                 }
             }
 
-            var challenges = this.topic.challengesTopic();            
             if (this.finalHTML) {
                 var finalDiv = m.addHTML(this.finalHTML);
                 MdComments.attachVideoHandlers(finalDiv, true);
@@ -1076,18 +1076,15 @@ module TDev
                 m.add(this.createStars());
                 m.add(div('wall-dialog-header', lf("Well done!")));
                 m.add(div('wall-dialog-body',
-                    challenges ? lf("Open the challenges to keep improving your code. ") : null,
-                    lf("You can keep customizing your app as much as you want. Have fun!")));
+                    lf("You can keep customizing your script as much as you want. Have fun!")));
             }            
 
             m.add(div('wall-dialog-buttons',
-                challenges ? HTML.mkButton(lf("open challenges"), () => {
-                    Util.navigateNewWindow("/" + challenges);
-                }) : null,
-                HTML.mkButton(lf("keep editing"), () => {
-                    willNowPublish = true;
-                    m.dismiss();
-                })
+                Util.delayButton(
+                    HTML.mkButton(lf("finished"), () => {
+                        willNowPublish = true;
+                        m.dismiss();
+                    }), 1000)
             ));
             if (this.hourOfCode)
                 m.add(div('wall-dialog-body hoc-notice',
@@ -1829,6 +1826,10 @@ module TDev
                                 description: lf("run the plugin")
                             })
                         }
+                        return;
+                    case "change":
+                        this.stepCompleted();
+                        Util.setTimeout(1000, () => this.update());
                         return;
                     default:
                         HTML.showErrorNotification(lf("unknown tutorial step: {0}", cmd))

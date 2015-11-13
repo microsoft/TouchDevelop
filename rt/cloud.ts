@@ -1,11 +1,13 @@
 ///<reference path='refs.ts'/>
 module TDev.Cloud {
 
-    export var lite = false;
+    export var lite = true;
+    export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
-    var microbitGitTag = "v9";
+    var microbitGitTag = "v25";
 
-    export var useEmbeddedGcc = true;
+    export var _migrate: () => void;
+
     export var useNativeCompilation = false;
 
     export interface EditorWidgets {
@@ -50,7 +52,6 @@ module TDev.Cloud {
         splitButton?: boolean;
         uploadArtInSearchButton?: boolean;
         calcApiHelp?: boolean;
-        calcHelpOverlay?: boolean;
         sideRunButton?: boolean;
         tutorialGoToPreviousStep?: boolean;
         helpLinks?: boolean;
@@ -211,6 +212,9 @@ module TDev.Cloud {
         doNothingText: string;
         hintLevel: string;
 
+        primaryCdnUrl: string;
+        altCdnUrls: string[];
+
         tdVersion?: string;
         releaseid?: string;
         relid?: string;
@@ -224,12 +228,20 @@ module TDev.Cloud {
         touchDevelopLogoUrl?: string;
         
         cachedScripts?: string[];
+        userVoice?: string;
+        tickFilter?: StringMap<number>;
     }
 
     export var config: ClientConfig = {
         searchApiKey: "E43690E2B2A39FEB68117546BF778DB8", // touchdevelop web app query key in portal 
         searchUrl: "https://tdsearch.search.windows.net",
         cdnUrl: "https://az31353.vo.msecnd.net",
+        primaryCdnUrl: "https://az31353.vo.msecnd.net",
+        altCdnUrls: [
+            "https://az31353.vo.msecnd.net",
+            "https://touchdevelop.blob.core.windows.net",
+            "http://cdn.touchdevelop.com",
+        ],
         translateCdnUrl: "https://tdtutorialtranslator.blob.core.windows.net",
         translateApiUrl: "https://tdtutorialtranslator.azurewebsites.net/api",
         workspaceUrl: null,
@@ -246,14 +258,42 @@ module TDev.Cloud {
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
+        userVoice:"touchdevelop"
     }
 
     export function isArtUrl(url : string) : boolean {
         if (!url) return false;
-        var pubUrl = config.cdnUrl + "/pub/";
-        return url.substr(0, pubUrl.length) == pubUrl
-            || /\.\/art\//i.test(url) // exported apps
-            || /^http:\/\/cdn.touchdevelop.com\/pub\//i.test(url); // legacy
+        if (/\.\/art\//i.test(url))
+            return true; // exported apps
+
+        for (var i = 0; i < config.altCdnUrls.length; ++i) {
+            var pubUrl = config.altCdnUrls[i] + "/pub/";
+            if (url.substr(0, pubUrl.length) == pubUrl)
+                return true
+        }
+
+        return false
+    }
+
+    function stripCdnUrl(url : string) {
+        if (!isArtUrl(url)) return null;
+        return url.replace(/^.*?\/pub\//, "")
+    }
+
+    export function toCdnUrl(url: string, thumbContainer = "") : string
+    {
+        if (!thumbContainer) thumbContainer = "pub"
+
+        var tmp = stripCdnUrl(url)
+        if (tmp) return config.primaryCdnUrl + "/" + thumbContainer + "/" + tmp
+        else return url
+    }
+
+    export function getArtId(url: string) : string
+    {
+        var tmp = stripCdnUrl(url)
+        if (/^\w+/.test(tmp)) return tmp;
+        else return null;
     }
 
     export function artCssImg(id: string, thumb = false): string {
@@ -261,7 +301,7 @@ module TDev.Cloud {
     }
 
     export function artUrl(id: string, thumb = false): string {
-        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.cdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
+        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.primaryCdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
     }
     
     export function setPermissions(perms:string = null)
@@ -284,7 +324,7 @@ module TDev.Cloud {
 
     export function isRestricted()
     {
-        return !!lite;
+        return !fullTD;
     }
 
     export function getServiceUrl() { return config.rootUrl; }
@@ -561,7 +601,7 @@ module TDev.Cloud {
     export function onlineInfo(): string {
         if (Cloud.isOffline()) {
             var msg = lf("You appear to be offline. ") + (isTouchDevelopOnline()
-                ? lf("Please connect to the internet.")
+                ? lf("Please connect to the internet and try again.")
                 : lf("Please go to the settings in the main hub to disable offline mode."));
             return msg;
         }
@@ -869,7 +909,7 @@ module TDev.Cloud {
     
     export function showSigninNotification(isOnline: boolean) {
         if (isOnline)
-            HTML.showWarningNotification(lf("cannot sync - tap here to sign in"), {
+            HTML.showWarningNotification(lf("You are not currently signed in: sign in or dismiss this message"), {
                 onClick: () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
@@ -914,6 +954,10 @@ module TDev.Cloud {
                 ModalDialog.info(lf("publication not found"), lf("Maybe it has been removed?"));
                 return;
             }
+            else if (e.status == 442 && _migrate) {
+                _migrate();
+                return;
+            }
             else if (e.status == 400)
                 throw new Error(lf("Cloud precondition violated ({0})", e.errorMessage));
         }
@@ -947,9 +991,6 @@ module TDev.Cloud {
     export function postNotificationChannelAsync(body: PushNotificationRequestBody) : Promise // of void
     {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notificationchannel"), body);
-    }
-    export function getUserApiKeysAsync(): Promise {
-        return Util.httpGetJsonAsync(getPrivateApiUrl("me/keys"));
     }
 
     export function getUserSettingsAsync(): Promise {

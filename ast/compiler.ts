@@ -472,7 +472,6 @@ module TDev.AST
         artUrlSuffix?: string;
         azureSite?: string;
         problemCallback?: (prob: string) => void;
-        apiKeys?: StringMap<string>;
         usedProperties?:StringMap<boolean>;
     }
 
@@ -2511,17 +2510,7 @@ module TDev.AST
                         this.packageResources.push(resource)
                         this.addResourceAsFile(resource);
                     } else if (kindName === 'String') {
-                        var key = TDev.RT.String_.valueFromKeyUrl(resourceUrl);
-                        if (key) { // is this a key?
-                            // do we have a key available?
-                            var keyValue = this.options.apiKeys ? this.options.apiKeys[key] : '';
-                            if (keyValue) // embed value if available
-                                resourceUrl = TDev.RT.String_.valueToArtUrl(keyValue);
-                            else { //no key available
-                                resourceUrl = undefined;
-                                this.packageResources.push({ kind: 'key', url: key, id: null, packageUrl: null, type: "string" });
-                            }
-                        } else if (!TDev.RT.String_.valueFromArtUrl(resourceUrl)) { // this is an url
+                        if (!TDev.RT.String_.valueFromArtUrl(resourceUrl)) { // this is an url
                             resource.packageUrl = encodeURI('./art/' + qualId + suff);
                             resourceUrl = resource.packageUrl;
                             this.packageResources.push(resource)

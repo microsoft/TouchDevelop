@@ -124,12 +124,10 @@ module TDev {
                 .then((authenticated) => {
                     if (authenticated) {
                         var userid = Cloud.getUserId();
-                        var tdtoken = Cloud.getAccessToken();
                         Util.log('asking TD server for revision service access token');
-                        var tokenserviceurl = "https://www.touchdevelop.com/api/" + userid + "/storage/access_token?access_token=" + tdtoken;
-                        return Util.httpRequestAsync(tokenserviceurl, "POST", undefined).then(
-                            (text) => {
-                                var json = JSON.parse(text);
+                        return Cloud.postPrivateApiAsync("me/storage/access_token", {})
+                        .then(
+                            (json) => {
                                 var token = json["access_token"];
                                 var expires_in = json["expires_in"];
                                 setRevisionServiceToken(token, expires_in);

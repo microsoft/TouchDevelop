@@ -15,12 +15,13 @@ module TDev {
 
         // this is so that the Editor can react to changes made by sync
         // state is: 
-        // "uploaded"   - when a new version was sent to the cloud, and we got a new snapshotId
-        // "published"  - after a script is published
-        // "downloaded" - after a merge, or just plain download
+        // "uploaded"     - when a new version was sent to the cloud, and we got a new snapshotId
+        // "published"    - after a script is published
+        // "downloaded"   - after a merge, or just plain download
+        // "skippedMerge" - like "downloaded", but we kept the local version
         export var newHeaderCallbackAsync = (h:Cloud.Header, state:string) => Promise.as();
         // this is called before we attempt a merge; the editor should save the state if the guid matches and display
-        // a progress overlay until newHeaderCallbackAsync({ guid: guid }, "downloaded") is called
+        // a progress overlay until newHeaderCallbackAsync({ guid: guid }, "downloaded" or "skippedMerge") is called
         export var incomingHeaderAsync = (guid:string) => Promise.as();
 
         var currentUserInfo:any = null;
@@ -50,9 +51,10 @@ module TDev {
             // [Cloud.Header] where [editor] is either undefined, or a string
             // (meaning external editor).
             editorName: string;
-            // When the editor is "touchdevelop", this is the same value that
+            // When the editor is "touchdevelop", these are the same value that
             // can be obtained by running [getScriptMeta] on [scriptText].
             scriptName: string;
+            scriptComment?: string;
             // When the editor is "touchdevelop", initially contains a template, then
             // gets mutated by [newScriptAsync] with extra meta information before
             // being saved to storage. When the editor is external, remains blank.
@@ -75,6 +77,8 @@ module TDev {
             return Promise.join([indexTable.setItemsAsync(headerItem), scriptsTable.setItemsAsync(bodyItem)]);
         }
 
+        var pendingMetaItems = [];
+
         function setInstalledAsync(
             indexTable: Storage.Table,
             scriptsTable: Storage.Table,
@@ -88,13 +92,23 @@ module TDev {
             // In the case of a regular script, we can recover the metadata from
             // the script body. In the case of an external editor, we demand
             // that the caller properly set the metadata.
-            if (script && !header.editor && (!header.meta || header.meta.comment === undefined))
+            if (script && !header.editor && (!header.meta || header.meta.comment === undefined)) {
                 header.meta = getScriptMeta(script);
+                if (Cloud.lite) {
+                    // will try to store the meta
+                    pendingMetaItems.push({
+                        guid: header.guid,
+                        meta: header.meta
+                    })
+                }
+            }
             if (header.editor && (!header.meta || !header.meta.name)) {
                 Util.log("ERROR pre-condition not met for [setInstalledAsync]; bailing");
                 debugger;
                 return Promise.as();
             }
+            if (header.meta)
+                header.name = header.meta.name;
             headerItem[header.guid] = JSON.stringify(header);
             var bodyItem = {}
             // protz: I believe we can get rid of this assert now that we have
@@ -240,7 +254,7 @@ module TDev {
                     })
                     .then(resp =>
                         setInstalledAsync(indexTable, scriptsTable, header, resp.script, resp.editorState, null, JSON.stringify(resp.extra || {})))
-                    .then(() => skipMsg ? Promise.as() : newHeaderCallbackAsync(header, "downloaded"))
+                    .then(() => newHeaderCallbackAsync(header, skipMsg ? "skippedMerge" : "downloaded"))
                     .then(() => header.scriptVersion.instanceId == "cloud" ? Promise.as() : uploadInstalledAsync(indexTable, scriptsTable, header))
             }
 
@@ -640,6 +654,7 @@ module TDev {
                 // properties to prevent some promises from being
                 // garbage-collected until we move on to the next step?
                 time("diff");
+                pendingMetaItems = [];
                 data.downloaded = Promise.thenEach(newerHeaders, (h: Cloud.Header) => {
                     if (syncVersion != mySyncVersion) return canceled;
                     return downloadInstalledAsync(data.indexTable, data.scriptsTable, h).then(() => { progress(-1, 0, 0) });
@@ -663,6 +678,11 @@ module TDev {
                         ModalDialog.info(lf("publishing failed"), lf("There was a versioning mismatch between your local state and the cloud. Please check the content of the script you want to publish and then try again."));
                 }));
                 data.progress = Cloud.postPendingProgressAsync();
+                // This is performance optimization - after import from the old cloud script entries have no meta and thus meta
+                // has to be re-generated on every sync on a new device. Here, we'll push meta to the cloud.
+                if (Cloud.lite && pendingMetaItems.length > 0) {
+                    data.postmeta = Cloud.postUserInstalledAsync(<any>{ metas: pendingMetaItems })
+                }
                 return Promise.join(data);
             }).then(() => {
                 time("publish");
@@ -698,6 +718,9 @@ module TDev {
                 Util.log('nosync: ' + info);
                 if (Util.navigatingAway) {
                     HTML.showProgressNotification(undefined);
+                    return undefined;
+                } else if (status == 442 && Cloud._migrate) {
+                    Cloud._migrate();
                     return undefined;
                 } else if (status == 400) {
                     var message = lf("Cloud precondition violated") + info;
@@ -850,6 +873,49 @@ module TDev {
         export function getCurrentTime() {
             return Math.floor(new Date().getTime()/1000);
         }
+
+        export function stripHeaderForSave(hd:Cloud.Header): Cloud.Header
+        {
+            return <any>{
+                scriptId: hd.scriptId,
+                userId: Cloud.isRestricted() ? undefined : hd.userId,
+                status: hd.status,
+                // store date of last modification, not most recent use
+                lastUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
+                editor: hd.editor || "touchdevelop",
+                meta: {
+                    name: hd.meta.name,
+                    comment: hd.meta.comment
+                },
+            }
+        }
+
+        export function installFromSaveAsync(hd:Cloud.Header, scriptText: string): Promise // of Cloud.Header
+        {
+            var h = <Cloud.Header>(<any>{
+                status: hd.status,
+                scriptId: hd.scriptId,
+                userId: hd.userId || (hd.scriptId ? "bogususerid" : ""),
+                meta: hd.meta,
+                scriptVersion: <Cloud.Version>{
+                    instanceId: Cloud.getWorldId(), 
+                    version: 0, 
+                    time: (<any>hd).lastUse || hd.recentUse || getCurrentTime(), 
+                    baseSnapshot: "" 
+                },
+                guid: Util.guidGen(),
+                editor: hd.editor == "touchdevelop" ? "" : hd.editor,
+                recentUse: getCurrentTime(),
+            });
+            if (!h.editor) h.meta = null; // force recompute of meta
+            return Promise.join({
+                indexTable: getIndexTablePromise(),
+                scriptsTable: getScriptsTablePromise(),
+            }).then(function (data/*: SyncData*/) {
+                return setInstalledAsync(data.indexTable, data.scriptsTable, h, scriptText, null, null, null).then(() => h);
+            });
+        }
+
         function installAsync(status: string, scriptId: string, userId: string, stub: ScriptStub) : Promise // of Cloud.Header
         {
             var meta;
@@ -867,6 +933,7 @@ module TDev {
                 meta = {
                     localGuid: Util.guidGen(),
                     name: stub.scriptName,
+                    comment: stub.scriptComment,
                 };
             }
             var h = <Cloud.Header>(<any>{
@@ -914,6 +981,7 @@ module TDev {
                             // convention
                             editorName: json.editor || "touchdevelop",
                             scriptName: json.name,
+                            scriptComment: json.description,
                         });
                     }
                 });

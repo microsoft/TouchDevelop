@@ -180,7 +180,6 @@ module TDev
         // debugger notifiers
         notifyBreakpointHit(bp: string): void;
         notifyBreakpointContinue(): void;
-        initApiKeysAsync(): Promise;
         agreeTermsOfUseAsync(): Promise;
         liveMode(): boolean;
         dontWaitForEvents(): boolean;
@@ -1836,8 +1835,7 @@ module TDev
                         if (!this.isStopped())
                             return;
                         // missing must be setup after the loading dialog is gone
-                        this.host.initApiKeysAsync()
-                            .then(() => this.host.agreeTermsOfUseAsync())
+                        this.host.agreeTermsOfUseAsync()
                             .done(() => {
                                 try {
                                     var entryPt = this.getActionFrame(mk, args);
@@ -2798,7 +2796,6 @@ module TDev
         private artInitializers = [];
         private artPromises: Promise[] = [];
         public missingApis: string[] = [];
-        private apiKeys: any = {};
         public globals:string[] = [];
         public libScripts:any;
         public libs:any;
@@ -2819,17 +2816,6 @@ module TDev
         public autoRouting: boolean;
         public azureSite: string;
         public scriptGuid: string;
-
-        public allApiKeys(): ApiKey[] {
-            var r = {};
-            Object.keys(this.libScripts).forEach(cs => {
-                var keys = this.libScripts[cs].apiKeys;
-                Object.keys(keys).forEach(key => r[key] = keys[key]);
-            });
-            return Object.keys(r).map(k => {
-                return { url: k, value: r[k] };
-            });
-        }
 
         public scriptTitle: string = "";
         public scriptColor: string = "";
@@ -2972,27 +2958,12 @@ module TDev
         public registerArtResource(clsName:string, id:string, url:string)
         {
             this.artInitializers.push((data:any) => {
-                if (!!data[id]) {
-                    // detect API keys
-                    if (clsName === "String_") {
-                        var key = TDev.RT.String_.valueFromKeyUrl(url);
-                        if (key) this.apiKeys[key] = <string>data[id];
-                    }
+                if (!!data[id])
                     return;
-                }
                 var f = (<any>TDev).RT[clsName].fromArtUrl;
                 if (!!f)
                     this.artPromises.push(
                         f(url).then((v: any) => {
-                            // detect API Keys
-                            if (clsName === "String_") {
-                                var key = TDev.RT.String_.valueFromKeyUrl(url);
-                                if (key) {
-                                    // user might not have a key already,
-                                    // or might not have an internet connection to load it
-                                    this.apiKeys[key] = v;
-                                }
-                            }
                             // load missing data
                             if (v === undefined) {
                                 switch (clsName) {
@@ -3022,7 +2993,6 @@ module TDev
 
         public initArtAsync(datas:any) : Promise
         {
-            this.apiKeys = {};
             return Promise.join(this.forEachData(datas, (d, cs) => cs.initArtCoreAsync(d)));
         }
 
@@ -3097,7 +3067,7 @@ module TDev
 
         public lookupAction(libName:string, actName:string) { return (<CompiledScript>this.libScripts[libName]).actionsByStableName[actName]; }
 
-        static additionalScriptStateFields = ["leaderboard_score", "apikeys_consent", "source_access"];
+        static additionalScriptStateFields = ["leaderboard_score", "source_access"];
 
         public init(code:string, missingApis:string[], packageResources : PackageResource[], safe:boolean)
         {

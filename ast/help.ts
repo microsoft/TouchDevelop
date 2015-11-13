@@ -392,7 +392,7 @@ module TDev {
         {
             id: "art",
             name: "TouchDevelop Art",
-            description: lf("Cover art ({0}/...)", Cloud.config.cdnUrl),
+            description: lf("Cover art ({0}/...)", Cloud.config.primaryCdnUrl),
             parseIds: text => {
                 var links = [];
                 if (text)
@@ -402,8 +402,8 @@ module TDev {
                     });
                 return links;
             },
-            idToUrl: id => Cloud.config.cdnUrl + "/pub/" + id,
-            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.cdnUrl + "/pub/" + id))
+            idToUrl: id => Cloud.config.primaryCdnUrl + "/pub/" + id,
+            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.primaryCdnUrl + "/pub/" + id))
         }, {
             id: "youtube",
             name: "YouTube",
@@ -855,8 +855,8 @@ module TDev {
         static findArtId(id : string) : string {
             var artVar = Script ? Script.resources().filter((r) => MdComments.shrink(r.getName()) == MdComments.shrink(id))[0] : null;
 
-            ["https://az31353.vo.msecnd.net/pub/", 
-             Cloud.config.cdnUrl + "/pub/"].forEach(artPref => {
+            Cloud.config.altCdnUrls.forEach(artHost => {
+                var artPref = artHost + "/pub/"
                 if (artVar && artVar.url && artVar.url.slice(0, artPref.length) == artPref) {
                     var newId = artVar.url.slice(artPref.length)
                     if (/^\w+$/.test(newId)) id = newId;
@@ -881,21 +881,25 @@ module TDev {
                     var artId = m[3];
                     var width = parseFloat(m[5] || "12");
                     var height = parseFloat(m[6] || "12");
-                    if (width > 30) {
-                        height = 30 / width * height;
-                        width = 30;
+                    if (width > 40) {
+                        height = 40 / width * height;
+                        width = 40;
                     }
-                    if (height > 20) {
-                        width = 20 / height * width;
-                        height = 20;
+                    if (height > 40) {
+                        width = 40 / height * width;
+                        height = 40;
                     }
                     var caption = m[7];
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
                         url = Cloud.artUrl(artId);
+                    } else if (!Cloud.isArtUrl(url)) {
+                        url = "no-such-image";
                     }
+                    if (url)
+                        url = Cloud.toCdnUrl(url);
                     var urlsafe = HTML.proxyResource(url);
-                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url);
+                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url)
                     var r = "<div class='md-img'><div class='md-img-inner'>";
                     r += Util.fmt("<img src=\"{0}\" alt='picture' style='height:{1}em'/></div>", urlsafe, height);
                     if (caption) {
@@ -1034,7 +1038,7 @@ module TDev {
                     // return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
                     return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}'>{2}</div>", posterUrl, playerUrl, SVG.getVideoPlay(posterUrl));
                 }
-            } else if (Cloud.lite && macro == "bbc") {
+            } else if (macro == "bbc") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
@@ -2017,12 +2021,6 @@ module TDev {
             return "";
         }
         
-        public challengesTopic(): string {
-            var m = /\{topic:([^:\}]+)\/tutorial\}/i.exec(this.json.text);
-            if (m) return m[1] + "/challenges";
-            return "";
-        }
-
         public nextTutorials(): string[] {
             var m = /\{stnexttutorials:([^\}]+)\}/i.exec(this.json.text);
             if (m) return m[1].split(',');
@@ -2421,7 +2419,7 @@ module TDev {
         static findById(id:string):HelpTopic
         {
             // deprecated in lite
-            if (Cloud.lite) return null;
+            if (Cloud.isRestricted()) return null;
             
             // make sure things are initialized
             HelpTopic.getAll();

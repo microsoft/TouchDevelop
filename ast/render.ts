@@ -248,7 +248,10 @@ module TDev
         }
 
         public visitFieldName(n: AST.FieldName) {
-            return this.id(n.data) + this.op(":");
+            if (n.isOut)
+                return this.kw("returns");
+            else
+                return this.id(n.data) + this.op(":");
         }
 
         public visitLiteral(n:AST.Literal)
@@ -483,7 +486,7 @@ module TDev
         private expr(e:AST.ExprHolder)
         {
             if (e.isPlaceholder())
-                return this.id("...");
+                return AST.proMode ? this.id("...") : Renderer.tspanRaw("greyed", "add code here");
             else
                 return this.dispatch(e);
         }
@@ -908,8 +911,18 @@ module TDev
                 hd += this.op(" ()");
             }
             if (n.action.hasOutParameters()) {
-                returns = this.tline(this.kw("returns") + this.op(" ("));
-                outParms = this.renderBlock(n.outParameters);
+                var params = n.action.getOutParameters();
+                if (params.length == 1) {
+                    // Inline, simplified version of visitActionParameter
+                    // without the name.
+                    var p = params[0];
+                    returns = this.stmt(p, this.diffLine(p, p.diffAltStmt, p => [
+                                this.kw("returns"),
+                                this.kind(p.getKind())]) + this.possibleError(p));
+                } else {
+                    outParms = this.renderBlock(n.outParameters);
+                    returns = this.tline(this.kw("returns") + this.op(" ("));
+                }
             }
 
             if (AST.proMode && !inParms && !outParms)
@@ -1191,7 +1204,7 @@ module TDev
                       ".md-img { margin:0.5em; clear:both; width:100%; text-align:center; position:relative; }\n" +
                       ".md-img-inner { position:relative; display:inline-block; width:100%; }\n" +
                       ".md-img .caption { font-size:0.8em; }\n" +
-                      ".md-img img { max-height: 100%; max-width: 100%; }\n" +
+                      ".md-img img { max-height: 100%; max-width: 100%; width:auto;}\n" +
                       ".md-box { page-break-inside: avoid; }\n" +
                       ".md-box-header, .md-box-header-print { font-weight: bold; font-size: 1.2em; }\n" +
                       ".md-box, .md-box-landscape, .md-box-portrait { margin-left: 2em;  margin-bottom:0.5em; border: 1px solid #555; border-left-width: 0.5em; padding: 1em; }\n" +

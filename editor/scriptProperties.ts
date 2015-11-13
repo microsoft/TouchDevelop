@@ -157,8 +157,7 @@ module TDev
                 //    img.style.marginTop = "0.3em";
                 //} else {
                 //}
-                var img = div('store-button', name);
-                return HTML.mkButtonElt("wall-button", img).withClick(() => {
+                return HTML.mkButton(name, () => {
                     e.saveStateAsync({ forReal: true }).done(() => {
                         if (store == "azure") {
                             tick(Ticks.exportAzure);
@@ -265,7 +264,7 @@ module TDev
                     var hd:Cloud.Header = r[1]
                     var text:string = r[0]
 
-                    var meta = JSON.stringify(hd)
+                    var meta = JSON.stringify(World.stripHeaderForSave(hd))
 
                     var lzma = (<any>window).LZMA;
 
@@ -314,8 +313,10 @@ module TDev
 
                 ScriptProperties.firstTime = false
 
-                if (res.dataurl)
-                    HTML.browserDownload(res.dataurl, "microbit-" + app.getName().replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".hex"); 
+                if (res.data) {
+                    var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
+                    HTML.browserDownloadText(res.data, fn, res.contentType);
+                }
             })
             .done(() => {},
             e => {
@@ -323,7 +324,7 @@ module TDev
                 if (dbg)
                     ModalDialog.showText(e.stack)
                 else
-                    HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
+                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
             })
         }
 

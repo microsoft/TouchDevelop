@@ -4,14 +4,13 @@
 
 module TDev.Login
 {
-    export function show(hash: string = null): boolean {
+    export function show(hash: string = null, addParameters = ""): boolean {
         // Cloud.isOnline should be checked prior to call this api
         if (/skipLogin/.test(document.URL)) {
             HTML.showErrorNotification("skipLogin specified; won't login")
             return false;
         }
 
-        var addParameters = "";
         var m = /u=\w+/.exec(document.URL);
         if (m)
             addParameters = "&" + m[0];
@@ -38,5 +37,28 @@ module TDev.Login
         Util.navigateInWindow(url);
 
         return true;
+    }
+
+    export function migrate()
+    {
+        ProgressOverlay.show(lf("migrating account..."))
+
+        var migrationToken = ""
+        Util.httpPostRealJsonAsync("https://next.touchdevelop.com/api/migrationtoken", { 
+            access_token:  decodeURIComponent(TDev.Cloud.getAccessToken()) 
+        }).then(tok => {
+            migrationToken = "&u=" + encodeURIComponent(tok.migrationtoken)
+        }, e => { })
+        .then(() => {
+            World.cancelSync();
+            Cloud.setAccessToken(undefined);
+            Util.navigatingAway = true; // prevent oneTab error
+            window.onunload = () => { }; // clearing out the onunload event handler; the regular one would write to stuff to storage again
+            return TheEditor.resetWorldAsync()
+        })
+        .then(() => {
+            Login.show("hub", migrationToken)
+        })
+        .done()
     }
 }

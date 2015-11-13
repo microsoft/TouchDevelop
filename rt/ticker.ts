@@ -33,6 +33,8 @@ module TDev {
         hourOfCodeMore,
         hourOfCodeFinal,
 
+        tutorialStart,
+        tutorialEnd,
         tutorialTranslateSplash,
         tutorialTranslateStep,
         tutorialTranslateScript,
@@ -240,6 +242,11 @@ module TDev {
         editorTutorialNext,
         editorTutorialPrevious,
 
+        externalSave,
+        externalLoad,
+        externalCompile,
+        externalRun,
+
         sideAddAction,
         sideAddActionTest,
         sideAddActionTypeDef,
@@ -334,6 +341,7 @@ module TDev {
         commentBugTracking,
 
         coreRun,
+        coreNativeCompile,
         coreResume,
         coreRerun,
         corePublishHidden,
@@ -436,6 +444,8 @@ module TDev {
 
         publishShareGroup,
 
+        browseEditInstall,
+        browseRunInstall,
         browseRun,
         browseEdit,
         browsePin,
@@ -453,6 +463,8 @@ module TDev {
         browseSendPullRequest,
         browseClone,
         browseSave,
+        browseCreateCode,
+        browseImportCode,
         browsePublicationNotes,
         browseListPointers,
         browseListBugs,
@@ -595,7 +607,7 @@ module TDev {
         var disabled = false;
         var delay = 10; // initial, 10s
         var chunkId = 1;
-        var maxDelay = 1200; // 1200s
+        var maxDelay = 300; // 300s
         var initialized = false;
 
         export var mainJsName = "unknown";
@@ -619,6 +631,11 @@ module TDev {
 
         export function init()
         {
+            if (/ckns_policy=..0/.test(document.cookie)) {
+                disable();
+                return;
+            }
+
             var d = window.localStorage["ticksDelay"] * 1;
             if (d) delay = d;
 
@@ -649,6 +666,8 @@ module TDev {
                     sendOutEvents(prevEvents);
                 }
             }
+
+            usageTick();
 
             initialized = true;
         }
@@ -912,17 +931,28 @@ module TDev {
 
         export function rawTick(tn:string)
         {
+            Util.log("TICK: " + tn)
+
             if (!initialized || disabled) return;
 
             checkDate();
 
             tn = tn.replace(/[^a-zA-Z_]/g, "_")
 
-            Util.log("TICK: " + tn)
-            if (sessionEvents[tn])
-                sessionEvents[tn]++;
+            if (shouldStoreTick(tn))
+                if (sessionEvents[tn])
+                    sessionEvents[tn]++;
+                else
+                    sessionEvents[tn] = 1;
+        }
+
+        function shouldStoreTick(tn:string)
+        {
+            if (!tn) return false;
+            if (Cloud.config.tickFilter)
+                return !!Cloud.config.tickFilter[tn.replace(/\|.*/, "")];
             else
-                sessionEvents[tn] = 1;
+                return true;
         }
 
         function tickBase(t: Ticks, sep: string, arg?: string) {
@@ -951,8 +981,11 @@ module TDev {
                     logIdx = 0;
             }
 
+            if (t != Ticks.dbgEvent)
+                poke();
+
             // this one we only wanted logged, not counted
-            if (t != Ticks.dbgEvent) {
+            if (t != Ticks.dbgEvent && shouldStoreTick(tn)) {
                 if (sessionEvents[tn])
                     sessionEvents[tn]++;
                 else
@@ -981,6 +1014,31 @@ module TDev {
             else
                 return logMsgs.slice(0);
         }
+
+        function usageTick()
+        {
+            var id = getCurrentEditorId();
+            if (id && !document.hidden && lastPoke) {
+                if (Browser.isCellphone)
+                    id += "_mobile"
+                rawTick("editor_" + id)
+                lastPoke = 0;
+            }
+            // avarage out to once per 10s, but get more even probabilistic distribution
+            Util.setTimeout(RT.Math_.random_range(3000,17000), usageTick)
+        }
+
+        var currentEditorId:string;
+        var lastPoke:number;
+        export function poke()
+        {
+            lastPoke = Util.now();
+        }
+        export function setCurrentEditorId(id:string) {
+            Util.log("set editor: " + id)
+            currentEditorId = id;
+        }
+        export function getCurrentEditorId() { return currentEditorId; }
     }
 
     export function tick(t: Ticks, arg?: string) { Ticker.tick(t, arg) }

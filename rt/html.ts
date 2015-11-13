@@ -1,6 +1,7 @@
 ///<reference path='refs.ts'/>
 
-
+declare function saveAs(data: Blob, filename: string, disableAutoBOM: boolean); 
+    
 module TDev.HTML {
     export function tr(parent: HTMLElement, cl: string) {
         var d = document.createElement('tr');
@@ -229,9 +230,10 @@ module TDev.HTML {
     }
     export function patchWavToMp4Url(url: string): string {
         if (url) {
-            var m = url.match(/^http(s?):\/\/(cdn\.touchdevelop\.com|az31353\.vo\.msecnd\.net)\/pub\/(\w+)/i);
-            if (m) return 'https://' + m[2] + '/aac/' + m[3] + '.m4a';
-            if (/^\.\/art\//i.test(url)) return url + '.m4a';
+            if (/^\.\/art\//i.test(url))
+                return url + '.m4a';
+            else if (Cloud.isArtUrl(url))
+                return Cloud.toCdnUrl(url, "aac") + ".m4a";
         }
         return url;
     }
@@ -288,7 +290,7 @@ module TDev.HTML {
         return elt;
     }
 
-    export function mkImg(url:string, cls : string = undefined):HTMLElement {
+    export function mkImg(url:string, cls? : string, alt?: string):HTMLElement {
         if (/^\//.test(url))
             url = (<any> url).slice(1);
 
@@ -303,7 +305,7 @@ module TDev.HTML {
         } else {
             var elt = <HTMLImageElement> document.createElement("img");
             elt.src = proxyResource(url);
-            elt.alt = "";
+            elt.alt = alt || "";
             img = elt;
         }
         if (cls)
@@ -412,6 +414,19 @@ module TDev.HTML {
         readAsync(): Promise; // of string
     }
 
+     export function fileReadAsArrayBufferAsync(f: File) : Promise { // ArrayBuffer
+        if (!f)
+            return Promise.as(null);
+        else {
+            return new Promise((onSuccess, onError, onProgress) => {
+                var reader = new FileReader();
+                reader.onerror = (ev) => onSuccess(null);
+                reader.onload = (ev) => onSuccess(reader.result);
+                reader.readAsArrayBuffer(f);
+            });
+        }
+    }
+   
     export function fileReadAsDataURLAsync(f: File) : Promise {
         if (!f)
             return Promise.as(null);
@@ -430,6 +445,7 @@ module TDev.HTML {
         "application/javascript": "js",
         "text/plain": "txt",
         "application/pdf": "pdf",
+        "application/x-zip-compressed": "zip",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
@@ -912,12 +928,56 @@ module TDev.HTML {
         return r;
     }
     
-    export function browserDownload(dataurl: string, name: string) {
+    export function browserDownloadText(text: string, name: string, contentType: string = "octet/stream") {
+        var buf = Util.stringToUint8Array(Util.toUTF8(text))
+        browserDownloadUInt8Array(buf, name, contentType);
+    }
+    
+    export function browserDownloadUInt8Array(buf: Uint8Array, name: string, contentType: string = "octet/stream") {        
         try {
-            if ((<any>window).navigator.msSaveOrOpenBlob) {
-                var m = /data:([^;]+);base64,/.exec(dataurl)
-                var b = new Blob([atob(dataurl.slice(m[0].length))], { type: m[1] })
+            if (typeof saveAs !== "undefined") {
+                var b = new Blob([buf], { type: contentType })
+                saveAs(b, name, true);
+                return;
+            }
+            
+            if ((<any>window).navigator.msSaveOrOpenBlob && !Browser.isMobile) {
+                var b = new Blob([buf], { type: contentType })
                 var result = (<any>window).navigator.msSaveOrOpenBlob(b, name);
+            } else {
+                var link = <any>window.document.createElement('a');
+                var dataurl = "data:" + contentType + ";base64," + Util.base64EncodeBytes(<any>buf);
+                if (typeof link.download == "string") {
+                    link.href = dataurl;
+                    link.download = name;
+                    document.body.appendChild(link); // for FF
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    document.location.href = dataurl;
+                }
+            }
+        } catch (e) {
+            Util.reportError("browserdownload", e, false);
+            HTML.showProgressNotification(lf("saving file failed..."));
+        }
+    }
+
+    export function browserDownload(dataurl: string, name: string) {        
+        try {
+            var getblob = () => {
+                var m = /data:([^;]+);base64,/.exec(dataurl)
+                var buf = Util.stringToUint8Array(atob(dataurl.slice(m[0].length)))
+                return new Blob([buf], { type: m[1] })
+            }
+
+            if (typeof saveAs !== "undefined") {
+                saveAs(getblob(), name, true);
+                return;
+            }
+            
+            if ((<any>window).navigator.msSaveOrOpenBlob) {
+                var result = (<any>window).navigator.msSaveOrOpenBlob(getblob(), name);
             } else {
                 var link = <any>window.document.createElement('a');
 
@@ -1087,9 +1147,12 @@ module TDev.HTML {
     {
         // Must be idempotent
         if (!url) return url;
-        // only do it for az31353.vo.msecnd.net ?
+
+        url = Cloud.toCdnUrl(url); // this replaces all legacy CDN URLs with the most recent one
+
         if (localCdn && !/http:\/\/localhost/i.test(url) &&
-            /^(https:\/\/az31353.vo.msecnd.net|http:\/\/cdn.touchdevelop.com|https?:\/\/lexmediaservice3.blob.core.windows.net|https:\/\/tdtutorialtranslator.blob.core.windows.net)/i.test(url)) {
+            (Cloud.isArtUrl(url) ||
+            /^(https?:\/\/lexmediaservice3.blob.core.windows.net|https:\/\/tdtutorialtranslator.blob.core.windows.net)/i.test(url))) {
             url = localCdn + encodeURIComponent(url)
         }
         return url

@@ -149,7 +149,7 @@ module TDev
         {
             var par = this.prop ? this.prop.parentKind : null
             var arrow = null
-            if (par && !par.shortName() && !this.prop.getInfixPriority())
+            if (!SizeMgr.phoneMode && par && !par.shortName() && !this.prop.getInfixPriority())
                 arrow = span("calcArrow", this.prop.getArrow())
             var sn = this.shortName();
             var inner:HTMLElement;

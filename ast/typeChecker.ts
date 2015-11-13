@@ -465,7 +465,7 @@ module TDev.AST
                         var msg = ""
 
                         if (k.hasContext(KindContext.Parameter))
-                            msg = lf("tap 'store in var' to store it in a variable or select a property on it");
+                            msg = lf("did you want to use this value?");
                         else
                             msg = lf("now you can select a property on it");
 
@@ -1174,10 +1174,7 @@ module TDev.AST
             var unassigned = this.outLocals.filter((v) => this.writtenLocals.indexOf(v) < 0);
             if (unassigned.length > 0) {
                 this.reportedUnassigned = true;
-                node.addHint(
-                    lf("return parameter{0:s} {1} may be unassigned before the function finishes",
-                             unassigned.length, 
-                             unassigned.map((v) => "'" + v.getName() + "'").join(", ")))
+                node.addHint(lf("the function may not always return a value; insert a return statement?"));
             }
         }
 
@@ -1318,6 +1315,7 @@ module TDev.AST
                 }
 
                 this.typeCheckInlineAction(ia);
+                ia.closure.forEach(l => this.recordLocalRead(l))
             });
 
             this.localScopes[p] = prevScope
@@ -1396,10 +1394,6 @@ module TDev.AST
                         l._kind = this.typeHint;
                     }
                 }
-            }
-
-            if (!this.inShim && this.invisibleLocals.indexOf(l) >= 0 && !Cloud.useEmbeddedGcc) {
-                this.markError(t, lf("TD208: inline functions cannot access locals from outside; try 'promote to data' on '{0}'", l.getName()))
             }
 
 

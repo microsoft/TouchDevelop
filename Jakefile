@@ -165,6 +165,7 @@ mkSimpleTask('build/storage.js', [
 ], "storage/refs.ts");
 mkSimpleTask('build/embedded.js', [
     'build/ast.d.ts',
+    'build/storage.d.ts',
     'embedded'
 ], "embedded/refs.ts");
 mkSimpleTask('build/ast.js', [
@@ -214,6 +215,7 @@ mkSimpleTask('build/nrunner.js', [
     'build/browser.d.ts',
     'rt/typings.d.ts',
     'build/rt.d.ts',
+    'build/embedded.d.ts',
     'build/ast.d.ts',
     'build/libnode.d.ts',
     'noderunner'
@@ -236,8 +238,18 @@ mkSimpleTask('build/ace-main.js', [
 mkSimpleTask('build/blockly-main.js', [
     "www/blockly/blockly-main.ts",
     "www/blockly/compiler.ts",
-    "editor/messages.ts"
+    "editor/messages.ts",
+    "ast/jsonInterfaces.ts"
 ], "www/blockly/refs.ts");
+
+file('build/libraries.js', expand([
+  "build/client.js",
+  "microbit/libraries",
+  "microbit"]
+), { async:true }, function () {
+  runAndComplete(['node build/client concatlibs'], this);
+})
+
 
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
@@ -254,10 +266,13 @@ var concatMap = {
         "build/browser",
         "build/rt",
         "build/ast",
+        "build/storage",
+        "build/embedded",
         "build/api.js",
         "generated/langs.js",
         "build/libnode",
         "build/pkgshell.js",
+        "build/libraries.js",
         "build/nrunner.js",
     ],
     "build/noderuntime.js": [
@@ -378,7 +393,7 @@ task('default', [
   'build/officemix.d.ts',
   'build/ace-main.js',
   'build/blockly-main.js',
-  'concat-libs',
+  'build/libraries.js',
   'log'
 ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
@@ -408,7 +423,10 @@ desc('run local test suite')
 task('test', [ 'info', 'build/client.js', 'default' ], { async: true }, function () {
   var task = this;
   console.log("[I] running tests")
-  runAndComplete(['node build/client.js buildtest'], this);
+  runAndComplete([
+    'node build/client.js buildtest',
+    'node build/noderunner.js compilertest'
+  ], this);
 });
 
 // this task runs as a "after_success" step in the travis-ci automation
@@ -418,13 +436,15 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
   var upload = function (buildVersion) {
     console.log("[I] uploading v" + buildVersion)
     var procs = [];
-    if (process.env.TD_UPLOAD_LITE_KEY) {
-        console.log("[I] uploading to lite")
-	var cmd = 'node build/client.js tdupload ' + process.env.TD_UPLOAD_LITE_KEY + ' ' + buildVersion;
+    ["TD_UPLOAD_NEXT_KEY", "TD_UPLOAD_LITE_KEY"].forEach(function (n) {
+        var setting = process.env[n];
+        if (!setting) return
+        console.log("[I] uploading to " + n)
+	var cmd = 'node build/client.js tdupload ' + setting + ' ' + buildVersion;
         if (process.env.TRAVIS_BRANCH == "master")
 	  cmd += ' latest';
         procs.push(cmd);
-    }
+    })
     var uploadKey = process.env.TD_UPLOAD_KEY || "direct";
     procs.push('node build/client.js tdupload ' + uploadKey + ' ' + buildVersion);
     runAndComplete(procs, this);
@@ -471,6 +491,11 @@ task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function(
       'node build/client.js updatelang'], this);
 });
 
+task('update-lang', [ 'build/client.js', 'default' ], { async: true }, function() {
+  var task = this;
+  runAndComplete(
+    [ 'node build/client.js updatelang'], this);
+});
 
 task('azure', [ 'build/shell.js' ], { async: true }, function() {
   jake.mkdirP("build/azure")
@@ -495,9 +520,9 @@ task('nw-npm', {async : true }, function() {
 task('nw-build', [ 'default', 'nw-npm' ], { async : true }, function() {
   var task = this;
   console.log('[I] building nw packages')
-  var nwBuilder = require('node-webkit-builder');
+  var nwBuilder = require('nw-builder');
   var nw = new nwBuilder({
-      version: '0.12.0',
+      version: '0.12.2',
       files: 'build/nw/**',
       platforms: ['win32', 'osx32', 'linux32'],
       buildDir: 'build/nw_build',
@@ -524,11 +549,7 @@ task('cordova', [ 'default' ], {}, function () {
 });
 
 task('update-libs', ["build/client.js"], { async:true}, function () {
-  runAndComplete(['node build/client fetchlibraries'], this);  
-})
-
-task('concat-libs', ["build/client.js"], { async:true}, function () {
-  runAndComplete(['node build/client concatlibs'], this);  
+  runAndComplete(['node build/client fetchlibraries'], this);
 })
 
 // vim: ft=javascript

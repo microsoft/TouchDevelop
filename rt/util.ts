@@ -118,6 +118,36 @@ module TDev {
         return document.createTextNode(s);
     }
 
+    export function lzmaDecompressAsync(buf: Uint8Array): Promise { // string
+        var lzma = (<any>window).LZMA;
+        if (!lzma) return Promise.as(undefined);
+        return new Promise((onSuccess, onError, onProgress) => {
+            try {
+                lzma.decompress(buf, (res, error) => {
+                    onSuccess(error ? undefined : res);
+                })
+            }
+            catch(e) {
+                onSuccess(undefined);
+            }    
+        })
+    }
+    
+    export function lzmaCompressAsync(text: string): Promise { // UInt8Array
+        var lzma = (<any>window).LZMA;
+        if (!lzma) return Promise.as(undefined);
+        return new Promise((onSuccess, onError, onProgress) => {
+            try {
+                lzma.compress(text, 7, (res, error) => {
+                    onSuccess(error ? undefined : new Uint8Array(res));
+                })
+            }
+            catch(e) {
+                onSuccess(undefined);
+            }    
+        })
+    }
+
     export function img(cl: string, src: string, alt: string) : HTMLImageElement
     {
         var elt: HTMLImageElement = <HTMLImageElement> document.createElement("img");
@@ -221,6 +251,13 @@ module TDev{
             });
         return result;
     }
+       
+    export function hasCJKChars(s: string): boolean {
+        // http://stackoverflow.com/questions/15033196/using-javascript-to-check-whether-a-string-contains-japanese-characters-includi        
+        var b = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf\u3130-\u318F\uAC00-\uD7AF]/
+            .test(s);
+        return b;
+    }
 
     export function wordLength(s:string)
     {
@@ -280,7 +317,7 @@ module TDev{
     export function trimAfter(s: string, searchString: string): string {
         if (!s) return s;
         var index = s.indexOf(searchString, 0);
-        if (index > -1) return s.substr(index + searchString.length);
+        if (index > -1) return s.substr(0, index + searchString.length);
         else return s;
     }  
     
@@ -2585,9 +2622,9 @@ module TDev{
             } else if (spec == ":jq") {
                 r = Util.jsStringQuote(r);
             } else if (spec == ":uri") {
-                r = encodeURIComponent(r);
+                r = encodeURIComponent(r).replace(/'/g, "%27").replace(/"/g, "%22");
             } else if (spec == ":url") {
-                r = encodeURI(r);
+                r = encodeURI(r).replace(/'/g, "%27").replace(/"/g, "%22");
             } else if (spec == ":%") {
                 r = (v * 100).toFixed(1).toString() + '%';
             }
@@ -2829,7 +2866,7 @@ module TDev{
 
     }
 
-    export function fromUTF8Bytes(binstr:number[])
+    export function fromUTF8Bytes(binstr:Uint8Array)
     {
         if (!binstr) return ""
 
@@ -3180,6 +3217,14 @@ module TDev{
         onGoBack();
     }
 
+    export function toFileName(name: string, defaultName: string): string {
+        name = name || "";
+        var filename = name.replace(/[^\w]+/g, " ").trim().replace(/ /g, "-")
+            || defaultName;
+        if (!/^\w/.test(filename)) filename = "_" + filename;
+        return filename;
+    }
+      
     export function mkAbsoluteUrl(relativeUrl: string): string {
         return Ticker.mainJsName.replace(/main.js$/, "") + relativeUrl;
     }
@@ -3298,7 +3343,7 @@ module TDev{
           if (currentLocale != locale) {
               window.localStorage.setItem("userLocale", locale);
               seeTranslatedText(true);
-              if(reloadIfNeeded)
+              if(reloadIfNeeded && !Storage.temporary)
                   Util.setTimeout(500, () => window.location.reload());
           }
     }

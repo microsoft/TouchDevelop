@@ -681,7 +681,7 @@ module TDev.RT {
                 }
                 else {
                     var url = this.canvas.toDataURL('image/png');
-                    HTML.browserDownload(url, defaultName);
+                    HTML.browserDownload(url, Util.toFileName(defaultName, 'pic'));
                 }
                 return defaultName;
             });
@@ -1185,6 +1185,11 @@ module TDev.RT {
                             ctx.moveTo(parseFloat(path.attr('x1')), parseFloat(path.attr('y1')));
                             ctx.lineTo(parseFloat(path.attr('x2')), parseFloat(path.attr('y2')));
                             Picture.parseStrokeStyle(ctx,path);
+                            break;
+                        case 'rect':
+                            ctx.rect(parseFloat(path.attr('x')), parseFloat(path.attr('y')), parseFloat(path.attr('width')), parseFloat(path.attr('height')))
+                            Picture.parseFillStyle(ctx, path);
+                            Picture.parseStrokeStyle(ctx, path);
                             break;
                         default:
                             Util.log('svg rendering: unsupported command ' + path.name());

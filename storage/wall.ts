@@ -361,8 +361,6 @@ module TDev {
         public notifyTutorial(cmd: string) {
         }
 
-        public initApiKeysAsync(): Promise  // boolean : reload
-        { return Promise.as(); }
         public agreeTermsOfUseAsync(): Promise {
             return Promise.as();
         }

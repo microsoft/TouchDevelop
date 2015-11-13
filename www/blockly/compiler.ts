@@ -179,7 +179,8 @@ module Helpers {
       nodeType: "localDef",
       id: null,
       name: x,
-      type: t
+      type: t,
+      isByRef: false,
     };
   }
 
@@ -319,6 +320,8 @@ module Helpers {
       reference: reference,
       isImplicit: isImplicit,
       isOptional: false,
+      capturedLocals: [],
+      allLocals: [],
     }
   }
 
@@ -1230,6 +1233,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     namespace: "led",
     f: "point",
     args: [ "x", "y" ]
+  },
+  device_temperature: {
+    namespace: "input",
+    f: "temperature",
+    args: []
   },
   device_heading: {
     namespace: "input",

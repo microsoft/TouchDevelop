@@ -23,6 +23,8 @@ namespace Microsoft.MicroBit
         private void MainForm_Load(object sender, EventArgs e)
         {
             this.initializeFileWatch();
+            if (DateTime.Now > new DateTime(2016, 8, 1))
+                this.backgroundPictureBox.Visible = false;
         }
 
         private void initializeFileWatch()
@@ -32,7 +34,7 @@ namespace Microsoft.MicroBit
             var downloads = KnownFoldersNativeMethods.GetDownloadPath();
             if (downloads == null)
             {
-                this.updateStatus("oops, can't find the Downloads folder");
+                this.updateStatus("oops, can't find the `Downloads` folder");
                 return;
             }
 
@@ -41,12 +43,13 @@ namespace Microsoft.MicroBit
             this.watcher.Created += (sender, e) => this.handleFileEvent(e);
             this.watcher.EnableRaisingEvents = true;
 
+            this.waitingForHexFileStatus();
+        }
+
+        private void waitingForHexFileStatus()
+        {
             this.updateStatus("waiting for .hex file...");
-            try
-            {
-                Process.Start("https://www.microbit.co.uk/app/#");
-            }
-            catch (IOException) { }
+            this.trayIcon.ShowBalloonTip(3000, "micro:bit uploader ready...", "waiting for .hex file...", ToolTipIcon.None);
         }
 
         static bool checkTOU()
@@ -118,7 +121,6 @@ namespace Microsoft.MicroBit
                     return;
                 try
                 {
-                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
 
                     this.setBackgroundColor(Color.Yellow);
                     this.updateStatus("detected " + info.Name);
@@ -126,9 +128,11 @@ namespace Microsoft.MicroBit
                     if (drive == null)
                     {
                         this.updateStatus("no MICROBIT drive detected");
+                        this.trayIcon.ShowBalloonTip(3000, "cancelled uploading to micro:bit...", "no MICROBIT drive detected", ToolTipIcon.None);
                         return;
                     }
 
+                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
                     this.updateStatus("uploading .hex file (" + info.Length / 1000 + " kb)...");
                     var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
                     File.Copy(info.FullName, trg, true);
@@ -144,7 +148,7 @@ namespace Microsoft.MicroBit
                     catch (NotSupportedException) { }
                     catch (UnauthorizedAccessException) { }
                     catch (ArgumentException) { }
-                    this.updateStatus("uploading and cleaning done");
+                    this.waitingForHexFileStatus();
                 }
                 finally
                 {
@@ -189,7 +193,18 @@ namespace Microsoft.MicroBit
 
         private void versionLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://www.touchdevelop.com/microbit");
+            try
+            {
+                Process.Start("https://www.touchdevelop.com/microbit");
+            }
+            catch (IOException) { }
+        }
+
+        private void backgroundPictureBox_Click(object sender, EventArgs e)
+        {
+            try {
+                Process.Start("https://www.microbit.co.uk/app/#");
+            } catch (IOException) { }
         }
     }
 }

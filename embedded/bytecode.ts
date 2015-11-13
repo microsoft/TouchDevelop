@@ -566,6 +566,10 @@ module TDev.AST.Bytecode
 
             Util.assert(this.buf.length < 32000)
 
+            var minLen = (dirtyLines + 1) * 8;
+            while (this.buf.length < minLen)
+                this.buf.push(0);
+
             var i = hexStartIdx;
             var ptr = 0
             var togo = 32000 / 8;
@@ -723,8 +727,10 @@ module TDev.AST.Bytecode
             return true;
         }
 
-        static extractSource(hexfile:string)
+        static extractSource(hexfile: string): { meta: string; text: Uint8Array;}
         {
+            if (!hexfile) return undefined;
+            
             var metaLen = 0
             var textLen = 0
             var toGo = 0
@@ -747,7 +753,9 @@ module TDev.AST.Bytecode
                     }
                 }
             })
-            Util.assert(toGo == 0 && ptr == buf.length)
+            if (!buf || !(toGo == 0 && ptr == buf.length)) {
+                return undefined;
+            }
             var bufmeta = new Uint8Array(metaLen)
             var buftext = new Uint8Array(textLen)
             for (var i = 0; i < metaLen; ++i)
@@ -756,7 +764,7 @@ module TDev.AST.Bytecode
                 buftext[i] = buf[metaLen + i];
             // iOS Safari doesn't seem to have slice() on Uint8Array
             return {
-                meta: Util.fromUTF8Bytes(<any>bufmeta),
+                meta: Util.fromUTF8Bytes(bufmeta),
                 text: buftext
             }
         }
@@ -898,7 +906,8 @@ module TDev.AST.Bytecode
             this.binary.assemble()
 
             var res = {
-                dataurl: null,
+                data: null,
+                contentType: "application/x-microbit-hex",
                 csource: src,
                 sourceSaved: sourceSaved
             }
@@ -907,7 +916,7 @@ module TDev.AST.Bytecode
                 return res;
 
             var hex = this.binary.patchHex(shortForm).join("\r\n") + "\r\n";
-            res.dataurl = "data:application/x-microbit-hex;base64," + Util.base64Encode(hex)
+            res.data = hex;
             return res;
         }
 
@@ -1461,7 +1470,7 @@ module TDev.AST.Bytecode
             this.proc.emitLbl(cont);
             idx.emitLoad(this.proc);
             this.emitInt(1);
-            this.proc.emitCall("number::plus", 0);
+            this.proc.emitCall("number::add", 0);
             idx.emitStore(this.proc);
             this.proc.stackEmpty();
             this.proc.emitJmp(top);

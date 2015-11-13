@@ -2,8 +2,8 @@
   "devDependencies": {
     "jake": "latest",
     "typescript": "1.4",
-    "nw": "^0.12.0",
-    "node-webkit-builder": "latest"
+    "nw": "^0.12.2",
+    "nw-builder": "latest"
   },
   "dependencies": {
     "source-map": "^0.2.0",

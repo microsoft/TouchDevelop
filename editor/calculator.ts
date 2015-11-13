@@ -1434,6 +1434,8 @@ module TDev
 
         public inlineEdit(l:AST.Token)
         {
+            if (l instanceof AST.FieldName && (<AST.FieldName> l).isOut)
+                return;
             this.unselect();
             if (this.checkNextDisplay()) return;
             this.inlineEditAt = this.expr.tokens.indexOf(l);
@@ -1664,7 +1666,7 @@ module TDev
             if (ph) {
                 editBtns = this.keyBlock(0, 5, 2, 1);
                 editBtns[0].setTextEx("123", lf("number entry"), Ticks.calcBtnNumberKeypad, () => this.switchToNumberKeypad());
-                editBtns[1].setTextEx("\"(,)\"", "\"...\", not, true", Ticks.calcBtnMiscKeypad, () => this.switchToMiscKeypad());
+                editBtns[1].setTextEx("\"abc\"", "(), not, true", Ticks.calcBtnMiscKeypad, () => this.switchToMiscKeypad());
                 editBtns[2].clear();
             } else {
                 editBtns = this.keyBlock(pm ? 0 : 6, 7, 2, 1);
@@ -3807,7 +3809,7 @@ module TDev
 
             if (curPage == pages) {
                 var search = pages == 1 ? keys[keys.length - 1] : keys[keys.length - 2];
-                search.setImage("svg:Search,#5A5AFF,clip=100", lf("more"), Ticks.calcNextIntelliPageSearch,
+                search.setImage("svg:search,#5A5AFF,clip=100", lf("more"), Ticks.calcNextIntelliPageSearch,
                               () => {
                                     if (this.searchApi.visible) {
                                         this.searchApi.cancel();

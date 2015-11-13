@@ -125,10 +125,13 @@
     cursor:pointer;
     display: inline-block;
     margin: 0 9px 5px 0;
-    padding: 0 12px 0 0; }
-  .nav-list__item--last,
-  .nav-list li:last-child {
-    border-right: none; }
+    padding: 0 7px 2px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    }
+  .nav-list__item:hover{
+    border-color:#fff;
+  }
   .nav-list__item--selected {
     text-decoration: underline; }    
 /**
@@ -261,6 +264,7 @@
 div.notificationBox {
   left:14em !important;
   top:0.5em !important;
+  color:white;
 }
 
 .phone div.notificationBox {
@@ -347,12 +351,13 @@ div.siteMenuBtn {
   color:#fff !important;
 }
 #siteLogo { cursor:pointer;}
-/*
-.kbm.docs {
-  background-image: url(https://microbit0.blob.core.windows.net/pub/pcslkqeo);
+@font-face {
+  font-family: "TitleFont";
+  src: url("https://az742082.vo.msecnd.net/files/fonts/GTWalsheim/GTWalsheim_gdi.eot");
+  src: url("https://az742082.vo.msecnd.net/files/fonts/GTWalsheim/GTWalsheim_gdi.eot?#iefix") format("embedded-opentype"), url("https://az742082.vo.msecnd.net/files/fonts/GTWalsheim/GTWalsheim_gdi.woff2") format("woff2"), url("https://az742082.vo.msecnd.net/files/fonts/GTWalsheim/GTWalsheim_gdi.woff") format("woff"), url("https://az742082.vo.msecnd.net/files/fonts/GTWalsheim/GTWalsheim_gdi.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal; }
   
-}*/
-
 </style>    
 <div id="root">
 	<div id="siteHeader" class="site-header hidden">  	
@@ -626,6 +631,7 @@ statusMsg("js initialized");
     @import url("./editor.css");
 </style>
 <script type="text/javascript"> statusMsg("css imported"); </script>
+<script src="./external/lzma_worker-min.js" type="text/javascript"></script>
 <script src="./browser.js" type="text/javascript"></script>
 <script type="text/javascript">
 statusMsg("browser detector loaded");
@@ -668,10 +674,11 @@ statusMsg("browser detector finished");
     { name: "Terms of use", url: "/terms-of-use" },
     { name: "Privacy policy", url: "/privacy"},
     { name: "Partners", url: "/partners"},
-    { name: "House Rules", url: "/house-rules"},
+    { name: "House rules", url: "/house-rules"},
   ];
   TDev.Cloud.config.doNothingText = "add code here";
   TDev.Cloud.config.hintLevel = "semi";
+  TDev.Cloud.config.userVoice = "";
 </script>
 </div>
 </body>

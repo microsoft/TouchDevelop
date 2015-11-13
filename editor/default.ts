@@ -228,11 +228,7 @@ module TDev
         if (/nohub/.test(url) || Cloud.isRestricted()) { TDev.noHub = true; TDev.hubHash = "list:installed-scripts"; }
 
         if (/bitvm=0/.test(url)) {
-            Cloud.useEmbeddedGcc = false;
             Cloud.useNativeCompilation = true;
-        }
-        if (/usegcc=1/.test(url)) {
-            Cloud.useEmbeddedGcc = true;
         }
 
         //if (/endKeywords/.test(url)) Renderer.useEndKeywords = true;
@@ -265,8 +261,7 @@ module TDev
 
         Revisions.parseUrlParameters(url);
 
-        if (!Cloud.lite)
-            Ticker.init()
+        Ticker.init()
 
         RT.Perf.init(TDev.AST.Compiler.version, Cloud.currentReleaseId);
 
@@ -280,6 +275,8 @@ module TDev
         }
         [ 'cached', 'checking', 'downloading', 'error', 'noupdate', 'obsolete', 'progress', 'updateready'
           ].forEach((ev) => appCache.addEventListener(ev, logAppCacheEvent, false));
+
+        Cloud._migrate = Login.migrate;
 
         World.getScriptMeta = (script) => {
             var s = AST.Parser.parseScript(script);
@@ -347,24 +344,7 @@ module TDev
             return Promise.as();
         }
 
-        if (/livelang/.test(url)) {
-            return Util.httpGetJsonAsync("https://touchdeveloptranslator.azurewebsites.net/api/Svc/export"
-                    + "?user=" + encodeURIComponent(Cloud.getUserId())
-                    + "&lang=" + encodeURIComponent(Util.getTranslationLanguage()))
-                .then(resp => {
-                    if (resp && resp.translations) {
-                        var tr = resp.translations[Util.getTranslationLanguage()]
-                        if (tr) {
-                            Util.setTranslationTable(tr)
-                            return initEditorAsync()
-                        }
-                    }
-                    HTML.showErrorNotification("cannot load language " + Util.getTranslationLanguage())
-                    return initEditorAsync()
-                })
-
-        } else
-            return initEditorAsync();
+        return initEditorAsync();
     }
 
     function search(query: string)
@@ -470,10 +450,7 @@ module TDev
 
         if (mx && mx[1] != "0") {
             Cloud.lite = true;
-            if (/\./.test(mx[1]))
-                Cloud.config.rootUrl = "https://" + mx[1]
-            else
-                Cloud.config.rootUrl = "http://" + mx[1] + ".cloudapp.net"
+            Cloud.config.rootUrl = "https://" + mx[1]
         }
 
         if ((<any>window).tdlite) {
@@ -490,6 +467,7 @@ module TDev
 
         if (Cloud.lite) (<any>window).rootUrl = Cloud.config.rootUrl;
 
+        Cloud.fullTD = (!Cloud.lite || /touchdevelop.com/.test(Cloud.config.rootUrl));
 
         if (/httplog=1/.test(document.URL)) {
             HttpLog.enabled = true;

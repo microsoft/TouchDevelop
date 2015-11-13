@@ -228,6 +228,7 @@
         }
         
         public initMeAsync(): Promise {
+            Util.setUserLanguageSetting("", true)
             var id = Cloud.getUserId();
             if (!id) {
                 this.initSignin();
@@ -249,7 +250,6 @@
                     }
                     Cloud.setPermissions(settings.permissions);
                     EditorSettings.setThemeFromSettings();
-                    Util.setUserLanguageSetting(settings.culture, true);
                     if (!EditorSettings.currentTheme) EditorSettings.loadEditorMode(settings.editorMode);
                     EditorSettings.setWallpaper(settings.wallpaper, false);
                     this.initSignin(settings.nickname);
@@ -309,7 +309,7 @@
 
         private notificationsCount = -1;
         public addNotificationCounter(notificationBox : HTMLElement) {
-            var notificationsBtn = HTML.mkImg('svg:gel-alert,#fff');
+            var notificationsBtn = HTML.mkImg('svg:gel-alert,currentColor');
             notificationsBtn.id = "notificationsBtn";
             var notificationsCounterDiv = div('notificationCounter');
 
@@ -968,13 +968,13 @@
                 return [
                     div("powered-by powered-by-first",
                         div("text", lf("Cloud services by")),
-                        div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux")) )))
+                        div("img", HTML.mkA("", "https://www.touchdevelop.com/", "_blank", HTML.mkImg(Cloud.artUrl("hrztfaux"), null, lf("Touch Develop logo")))))
                     , div("powered-by",
                         div("text", lf("BBC micro:bit runtime by")),
-                        div("img", HTML.mkA("", "http://www.lancaster.ac.uk/", "_blank", HTML.mkImg(Cloud.artUrl("fcyoveaf")))))
+                        div("img", HTML.mkA("", "http://www.lancaster.ac.uk/", "_blank", HTML.mkImg(Cloud.artUrl("fcyoveaf"), null, lf("University of Lancaster logo")))))
                     , div("powered-by",
                         div("text", lf("Compiler services by")),
-                        div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah")))))
+                        div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah"), null, lf("ARM logo")))))
                     ];
             }
             return [];
@@ -1227,7 +1227,6 @@
             var name = HTML.mkTextInput("text", lf("enter invitation code"));
             name.maxLength = 64;
             name.pattern = '\d{9,64}';
-            name.title = lf("a number between 9 and 64 characters long");
             name.value = code || "";
 
             var codeid = name.value;
@@ -1405,6 +1404,7 @@
         }
 
         public openNewScriptAsync(stub: World.ScriptStub, t: ScriptTemplate = null): Promise {
+            Ticker.rawTick("NewScript_" + stub.editorName)
             if (currentScreen)
                 currentScreen.hide()
             stub.scriptName = this.newScriptName(stub.scriptName);
@@ -1859,24 +1859,55 @@
                         if (!item)
                             this.showSidePane();
                     }
+                    
+                    this.moreDiv.setChildren([]);
+                                        
+                    if (/^installed/.test(path)) {
+                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
+                            tick(Ticks.browseCreateCode);
+                            TemplateManager.createScript()
+                        }));
+                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
+                            tick(Ticks.browseImportCode);
+                            ArtUtil.importFileDialog();
+                        }));
+                    } 
+
+                    if (/^pointers$/.test(path) && Cloud.hasPermission("global-list")) {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("create pointer"), () => {
+                            var from = HTML.mkTextInput("text", lf("from..."));
+                            var to = HTML.mkTextInput("text", lf("to..."));
+                            var m = new ModalDialog();
+                            m.add(div('wall-dialog-header', lf("create pointer")));
+                            m.add(div('wall-dialog-body', from));
+                            m.add(div('wall-dialog-body', to));
+                            m.addOk(lf("create"), () => {
+                                var f = from.value;
+                                var t = to.value;
+                                if (f && t)
+                                    Cloud.postPrivateApiAsync("pointers", { path: f, redirect: t })
+                                        .done(() => {
+                                            HTML.showProgressNotification(lf("pointer created"));
+                                            TheApiCacheMgr.invalidate("")
+                                        }, e => Cloud.handlePostingError(e, lf("create pointer")));
+                                m.dismiss();
+                            })
+                            m.show();
+                        }))
+                    }
 
                     if (ncont) {
-                        this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
-                            this.moreDiv.setChildren([div("sdLoadingMore", lf("loading more..."))]);
+                        this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
+                            this.moreDiv.appendChild(div("sdLoadingMore", lf("loading more...")));
                             loadEntries(ncont);
-                        })]);
-                    } else if (this.hasMore && this.moreDiv) {
-                        this.moreDiv.setChildren([HTML.mkButton(lf("load more"), () => {
+                        }));
+                    } else if (this.hasMore) {
+                        this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.displayLimit += Host.maxDisplayAtOnce;
                             if (this.displayLimit >= this.topLocations.length && this.moreDiv)
                                 this.moreDiv.setChildren([])
                             this.syncView(false)
-                        })]);
-                    }
-                    
-                    if (Cloud.isRestricted() && !ncont && /^installed/.test(path) && this.topLocations.length == 0) {
-                        this.moreDiv.setChildren([div("sdLoadingMore",
-                            lf("no scripts yet, "), HTML.mkLinkButton(lf("create code"), () => { TemplateManager.createScript() }), lf(" to get started!"))]);    
+                        }));
                     }
                     
                 }, noCache, includeETags);
@@ -1942,8 +1973,10 @@
 
             if (s instanceof TopicInfo)
                 this.reloadHelpTopic = setHash;
-            else
+            else {
+                Ticker.setCurrentEditorId("shell");
                 this.reloadHelpTopic = null;
+            }
             Host.tryUpdate();
 
             this.syncTabVisibility();
@@ -2220,12 +2253,8 @@
             if (s.replace(/[^\n]/g, "").length > 3 || s.length > maxLen) {
                 var r:HTMLElement =
                     div("sdExpandableText",
-                            s.slice(0, shortLen) + "... ",
-                            div("sdExpandButton",
-                                s.length > shortLen ?
-                                    "expand (+" + (s.length - shortLen) + " characters)" :
-                                    "expand",
-                                div("sdExpandButtonTarget").withClick(() => {
+                            s.slice(0, shortLen) + " ",
+                            div("sdExpandButton", "...", div("sdExpandButtonTarget").withClick(() => {
                                     Browser.setInnerHTML(r, Util.formatText(s));
                                 })));
                 return r;
@@ -2687,12 +2716,13 @@
                 }
                 res = this.heartId(id);
             } else {
-                this.getAnd("me/reviewed/" + id, (d) => {
-                    res = d.id;
-                    if (late && changedMyMind) {
-                        changedMyMind(res);
-                    }
-                });
+                if (Cloud.hasAccessToken())
+                    this.getAnd("me/reviewed/" + id, (d) => {
+                        res = d.id;
+                        if (late && changedMyMind) {
+                            changedMyMind(res);
+                        }
+                    });
             }
 
             late = true;
@@ -2763,6 +2793,8 @@
 
         public handleError(err: any, entry: ApiCacheEntry) {
             entry.gotError(err);
+
+            Util.log("APIERR: " + entry.path + " -> " + err)
 
             if (this.offlineErrorReported) return;
             if (!window.localStorage["everLoggedIn"])
@@ -3268,10 +3300,20 @@
 
         public equals(other:BrowserPage) { return other && (this == other || this.persistentId() == other.persistentId()); }
 
+        public isDeleted()
+        {
+            return false;
+        }
+
         public mkSmallBox():HTMLElement
         {
             var box = this.mkBoxCore(false)
             return box.withClick(() => { 
+                if (this.isDeleted()) {
+                    HTML.wrong(box);
+                    return;
+                }
+
                 if (!/ visited/.test(box.className))
                     box.className += " visited";
                 this.parentBrowser.loadDetails(this) 
@@ -3293,7 +3335,7 @@
             if (!big || !this.getPublicationId()) return null;
 
             if (Cloud.lite) {
-                return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report/delete")).withClick(() => {
+                return div("sdReportAbuse", lf("Report/Delete")).withClick(() => {
                     AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm, undefined, onDeleted)
                 });
             }
@@ -3359,15 +3401,15 @@
             var text = this.twitterMessage();
 
             if (EditorSettings.widgets().scriptEmail)         
-                btns.push(div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:email,#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
+                btns.push(div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:email,currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
 
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["twitter", "facebook"].map(network =>
-                    div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:" + network + ",#888,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
+                    div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:" + network + ",currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
                     ));
             }
             if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
-                btns.unshift(div("sdAuthorLabel", HTML.mkImg("svg:list,#888,clip=100")).withClick(() => {
+                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100")).withClick(() => {
                     Meta.chooseListAsync({
                         header: lf("add to channel"),
                         custombuttons: [
@@ -3537,8 +3579,8 @@
                 this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
                     loading.removeSelf();
                     elts.forEach((c) => this.tabContent.appendChild(this.tabBox(c)));
-                    if (!!cont) loading.appendChild(this.loadMoreBtn(cont));
-                    else loading.appendChild(this.finalListElt())
+                    if (!!cont) this.tabContent.appendChild(this.loadMoreBtn(cont));
+                    else this.tabContent.appendChild(this.finalListElt())
                 });
             });
             return btn;
@@ -3593,93 +3635,6 @@
                         }).done();
                     }
            })]);
-        }
-    }
-
-    export class KeysTab
-        extends BrowserTab
-    {
-        constructor(par:BrowserPage) {
-            super(par)
-        }
-        public getId() { return "keys"; }
-        public getName() { return lf("keys"); }
-
-        private mkBox(b: Host, c: TDev.RT.JsonKey) {
-            var valueDiv = div("", lf("show"));
-            var d = div("sdKey",
-                    div("sdKeyUri", HTML.mkA('', c.uri, '_blank', c.uri)),
-                    div('',
-                        HTML.mkButton(lf("show"), () => {
-                            ModalDialog.showText(c.value, "key value", c.uri);
-                        }),
-                        HTML.mkButton(lf("delete"), () => {
-                            ModalDialog.ask(lf("Are you sure you want to delete this key? There is no undo for this operation."), lf("delete it"), () => {
-                                HTML.showProgressNotification(lf("deleting key..."));
-                                Cloud.deletePrivateApiAsync("me/keys?uri=" + encodeURIComponent(c.uri))
-                                    .done(() => d.removeSelf(), e => Cloud.handlePostingError(e, lf("delete key")));
-                            });
-                        })
-                    )
-                );
-            return d;
-        }
-
-        public tabBox(c: TDev.RT.JsonKey)
-        {
-            return this.mkBox(this.browser(), c);
-        }
-
-        public initTab() {
-            var descDiv : HTMLElement = div('sdInlineHelp', 'The keys are stored in the TouchDevelop cloud and only available to you. \n'
-                + 'You can use keys to use web services that require an API key without sharing your key with other users. \n'
-                + 'When your script is exported into an app, the key is automatically embedded into the generated app. \n'
-                + 'When a user uses a script that requires a key, the user will be automatically prompted to enter their own key. \n'
-                + "The 'service url' is the url that points to the registration page to get the key. It uniquely identifies your key. \n"
-                + 'Keys can be deleted at any time.');
-            this.tabContent.setChildren([
-                descDiv,
-                HTML.mkButton(lf("add key"), () => {
-                var uriInput = HTML.mkTextInput("text", lf("key uri"));
-                var valueInput = HTML.mkTextInput("text", lf("key value"));
-                var m = new ModalDialog();
-                m.add([
-                    div("wall-dialog-header", lf("add key")),
-                    div("wall-dialog-body", <HTMLElement[]>[
-                        div('', "Service Uri"),
-                        uriInput,
-                        div('', "API Key value"),
-                        valueInput
-                    ]),
-                    div("wall-dialog-buttons", HTML.mkButton(lf("save"), () => {
-                        m.dismiss();
-                        HTML.showProgressNotification(lf("saving key..."));
-                        var key: TDev.RT.JsonKey = { uri : uriInput.value, value : valueInput.value };
-                        Cloud.postPrivateApiAsync("me/keys", key)
-                            .done(
-                                () => {
-                                    HTML.showProgressNotification(lf("key saved..."));
-                                    this.initTab();
-                                },
-                                e => HTML.showProgressNotification(lf("could not save key; are you connected to internet?"))
-                            );
-                    }))
-                ]);
-                m.show();
-            })]);
-
-            var loadingDiv = div('bigLoadingMore', lf("loading..."));
-            this.tabContent.appendChildren([loadingDiv]);
-            Cloud.getUserApiKeysAsync()
-                .done((keys : TDev.RT.JsonKey[]) => {
-                    loadingDiv.removeSelf();
-                    var boxes = keys.map(key => this.tabBox(key));
-                    this.tabContent.appendChildren(boxes);
-                },
-                (e) => {
-                    loadingDiv.removeSelf();
-                    this.tabContent.appendChildren(div('', lf("failed to load keys; are you connected to internet?")));
-                });
         }
     }
 
@@ -3875,7 +3830,7 @@
                         return r
                     }, e => {
                         HTML.showProgressNotification(lf("error reading history; are you connected to internet?"));
-                        return [div('', lf("Oops, couldn't get the history. Please check your internet and try again."))];
+                        return [div('', lf("Oops, we couldn't access your script history. Please check your internet connection and try again."))];
                     })
             }
 
@@ -4901,11 +4856,19 @@
         {
             var c = <JsonAbuseReport>cc;
             var confirmed = false;
+            var del = () => AbuseReportInfo.deletePubAsync(c.publicationid)
+                            .then(v => { if (v) delBtn.removeSelf() })
             var delBtn = 
                 HTML.mkAsyncButton(lf("delete"), () => {
-                    if (confirmed) {
-                        return AbuseReportInfo.deletePubAsync(c.publicationid)
-                            .then(v => { if (v) delBtn.removeSelf() })
+                    if (Cloud.isRestricted()) {
+                        ModalDialog.ask(lf("Are you sure you want to delete '{0}' /{1}? No undo.", c.publicationname, c.publicationid),
+                                        lf("delete"),
+                                        () => {
+                                            del().done();
+                                        })
+                        return Promise.as();
+                    } else if (confirmed) {
+                        return del();
                     } else {
                         delBtn.setChildren(lf("for sure?"))
                         confirmed = true
@@ -6261,10 +6224,15 @@
         }
         public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
+        public isDeleted()
+        {
+            return (<any>this.jsonScript) === false;
+        }
+
         public shareButtons() {
             var btns = super.shareButtons();
             if (!this.editor() && EditorSettings.widgets().scriptPrintScript) btns.push(
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
+                div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
                 );
             return btns;
         }
@@ -6298,6 +6266,10 @@
             if (!this.cloudHeader || this.cloudHeader.status == "deleted") {
                 if (!this.publicId) return Promise.as(); // hmm?
                 this.browser().hide();
+                if (TheEditor.runImmediately)
+                    tick(Ticks.browseRunInstall);
+                else
+                    tick(Ticks.browseEditInstall);
                 return TheEditor.prepareForLoadAsync("installing and loading script",
                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
             } else {
@@ -6495,38 +6467,39 @@
             if (!editor) editor = "touchdevelop"
             return editor
         }
-
-        static editorIcons = {
-            "blockly": "blockeditor,#AA2FE7",
-            "codekingdoms": "codekingdoms,#ffffff",
-            "python": "python,#ffffff",
-            "touchdevelop": "touchdevelop,#0095ff",
-            "library": "recycle,#48A300",
-            "docs": "fa-file-text-o,#E00069",
-            "html": "fa-code,#E00069",
-            "ace": "braces,#007fff",
-            "import": "bitload,#ccc",
-            "*": "emptycircle,#85BB65",
-        }
+        
+        static editorIcons: StringMap<{
+            icon: string;
+            background: string;
+            color?: string;
+        }> = {
+            "blockly": { icon: "blockeditor", background: "#AA2FE7" },
+            "codekingdoms": { icon: "codekingdoms", background: "#ffffff" },
+            "python": { icon: "python", background: "#ffffff" },
+            "touchdevelop": { icon: "touchdevelop", background: "#0095ff" },
+            "library": { icon: "recycle", background: "#48A300" },
+            "docs": { icon: "fa-file-text-o", background: "#E00069" },
+            "html": { icon: "fa-code", background: "#E00069" },
+            "ace": { icon: "braces", background: "#007fff" },
+            "create": { icon: "gel-create", background: "#00ec00", color: "#000" },
+            "import": { icon: "gel-import", background: "#00ec00", color: "#000" },
+            "*": { icon: "emptycircle", background: "#85BB65" }
+        };
 
         public iconImg(thumb: boolean): HTMLElement {
             if (this.app.iconArtId)
                 return ArtUtil.artImg(this.app.iconArtId, thumb)
 
-            var ic = ScriptInfo.editorIcons[this.getScriptType()]
-            if (!ic) ic = ScriptInfo.editorIcons["*"]
-            ic = ic.replace(/,.*/, "")
+            var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
 
-            return HTML.mkImg("svg:" + ic + ",white")
+            return HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))
         }
 
         public iconBgColor():string
         {
             if (Cloud.isRestricted()) {
-                var ic = ScriptInfo.editorIcons[this.getScriptType()]
-                if (!ic) ic = ScriptInfo.editorIcons["*"]
-                ic = ic.replace(/.*,/, "")
-                return ic
+                var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
+                return ic.background
             }
             return this.app.htmlColor()
         }
@@ -6540,7 +6513,7 @@
             var numbers = div("sdNumbers");
             var author = div("sdAuthorInner");
             var addInfo = div("sdAddInfoInner", this.publicId);
-            var abuseDiv = big ? div(null, this.reportAbuse(true, false, () => {
+            var abuseDiv = big ? div(null, this.reportAbuse(true, true, () => {
                 // upon deleting uninstall as well.
                 this.uninstallAsync(false)
                 // force a sync
@@ -6662,7 +6635,7 @@
 
                 if (!this.jsonScript) return;
 
-                if (!Cloud.isRestricted() && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
+                if (!Cloud.lite && abuseDiv && this.publicId && this.jsonScript.userid == Cloud.getUserId()) {
                     updateHideButton();
                 }
 
@@ -6832,7 +6805,9 @@
 
 
         private mkButtons()
-        {
+        {     
+            var clone : HTMLElement;
+            var save : HTMLElement;            
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
                 var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon)),
@@ -6883,10 +6858,6 @@
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
             }
             
-            var clone = mkBtn(Ticks.browseClone, "svg:paste,white", lf("clone"), null, () => this.cloneAsync().done());
-            clone.classList.add("sdUninstall");
-            var save = mkBtn(Ticks.browseSave, "svg:fa-floppy-o,white", lf("save"), null, () => this.saveAsync().done());
-
             var uninstall:HTMLElement;
             var moderate:HTMLElement;
             var editWithGroup:HTMLElement;
@@ -6897,9 +6868,13 @@
             }
 
             if (this.cloudHeader) {
-                uninstall = mkBtn(Ticks.browseUninstall, "svg:cross,white", lf("uninstall"), null,() => this.uninstall());
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:uninstall,white", lf("remove"), null,() => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
+                clone = mkBtn(Ticks.browseClone, "svg:clone,white", lf("clone"), null, () => this.cloneAsync().done());
+                clone.classList.add("sdUninstall");
+                save = mkBtn(Ticks.browseSave, "svg:save,white", lf("save"), null, () => this.saveAsync().done());
+                
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -7017,6 +6992,7 @@
         
         public saveAsync(): Promise {
             var guid = this.getGuid();
+            var json: string;
             return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
                 .then(r => {
                     var text = <string>r[0];
@@ -7025,13 +7001,17 @@
 
                     var f = <Cloud.Workspace>{
                         scripts: [{
-                            header: header,
+                            header: World.stripHeaderForSave(header),
                             source: text,
                         }]
                     };
-                    HTML.browserDownload('data:application/json;base64,' + Util.base64Encode(Util.toUTF8(JSON.stringify(f))),
-                        this.cloudHeader.name.replace(/[^\w]+/g, " ").trim().replace(/ /g, "-") + ".json");                    
-                });
+                    json = JSON.stringify(f, null, 1);
+                    return lzmaCompressAsync(json).then((jsonz: Uint8Array) => {
+                        var fileName = Util.toFileName(this.cloudHeader.name, 'script');
+                        if (jsonz) HTML.browserDownloadUInt8Array(jsonz, fileName + ".jsz");
+                        else HTML.browserDownloadText(json, fileName + ".json");
+                        });
+                });    
         }
         
         public cloneAsync(): Promise {
@@ -7500,7 +7480,7 @@
                                 }
                             } else {
                                 if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
-                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script might not have been successfully published. Another attempt will be made when you sync again later.") + " " + message);
+                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script could not be published, please check your internet connection. If this does not resolve your issue, go to the help page for more information."));
                             }
                         }).done();
                     })
@@ -7533,7 +7513,7 @@
                     m.add(div("wall-dialog-header", lf("Publish script"), Editor.mkHelpLink("publishing", lf("learn about publishing"))));
 
                     m.add(div("wall-dialog-body",
-                        lf("Do NOT store PASSWORDS or PERSONAL INFORMATION in your script code. ")
+                        lf("Remember: everyone will be able to see your script if you publish it, so make sure it doesn’t contain your passwords or personal information.")
                         ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
@@ -7683,7 +7663,6 @@
         }
 
         private uninstallAsync(allowUndo = true): Promise {
-            tick(Ticks.browseUninstall);
             var id = this.getGuid();
             var restoreAsync : Promise = null
             return Editor.updateEditorStateAsync(id, (st) => {
@@ -7702,7 +7681,7 @@
                     .then(() => {
                         var hash = HistoryMgr.windowHash()
                         if (allowUndo && restoreAsync) {
-                            HTML.showUndoNotification(lf("{0} has been uninstalled.", this.getTitle()), () => {
+                            HTML.showUndoNotification(lf("{0} has been removed.", this.getTitle()), () => {
                                 restoreAsync.then((restore) => restore())
                                     .then(() => this.browser().updateInstalledHeaderCacheAsync())
                                     .then(() => TheEditor.historyMgr.reload(hash))
@@ -8239,7 +8218,7 @@
                 var authorHead = this.thumbnail(false);
                 authorHead.classList.add("teamHead");
                 authorDiv.setChildren([
-                    div("inlineBlock", authorHead, div("sdAuthorLabel", this.userName))
+                    div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
                     ,
                     div("floatright", info.shareButtons() )
@@ -8466,22 +8445,22 @@
                     edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
                     if (/,adult,/.test(s.permissions)) {
-                        edit(lf("{0}", 
-                            s.emailverified 
-                              ? lf("We require your email address for validation purposes and may contact you regarding your BBC micro:bit account. We will not pass it on to third parties.") 
+                        edit(lf("email (private)"), "email");
+                        cc.push(div('inline-description', s.emailverified 
+                              ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.") 
                               : lf("email is not verified, {0}",
                                      s.previousemail 
                                        ? lf("previous email: {0}", s.previousemail) 
-                                       : lf("no previous email"))), 
-                                "email")
-                        edit(lf("real name (private)"), "realname")
+                                        : lf("no previous email")))
+                        );
+                        edit(lf("real name (private)"), "realname");
                     }
 
                     if (s.credit && /,post-group,/.test(s.permissions))
                         cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
                     settingsDiv.setChildren(cc)
-                }, e => Cloud.handlePostingError(e, lf("getting settings")))
+                }, e => Cloud.handlePostingError(e, lf("get settings")))
 
                 if (this.isMe())
                     refreshSettings()
@@ -8538,7 +8517,7 @@
                         }))
             }
 
-            if (Cloud.isRestricted()) {
+            if (false && Cloud.isRestricted()) {
                 ch.push(div("", text(lf("Groups of this user:"))));
                 if (!this.groupsTab) {
                     this.groupsTab = new GroupsTab(this);
@@ -8596,8 +8575,8 @@
     export class UserPrivateTab extends BrowserMultiTab {
         constructor(par: UserInfo) {
             super(par,
-                "Informations about apps, keys and cloud sessions.",
-                KeysTab, CloudSessionsTab
+                lf("Private user information."),
+                CloudSessionsTab
                 );
         }
 
@@ -9518,6 +9497,7 @@
                 } else if (u.resolution == "deleted") {
                     icon.setChildren(HTML.mkImg("svg:fa-trash,white"))
                     icon.style.background = "#308919";
+                    if (par) par.setAttribute("data-deleted", "yes")
                 } else {
                     icon.setChildren(HTML.mkImg("svg:fa-flag,white"))
                     resolved = false
@@ -9579,7 +9559,7 @@
         {
             var box = this.mkBoxCore(false);
             box.withClick(() => {
-                if (!/ visited/.test(box.className))
+                if (!Cloud.isRestricted() && !/ visited/.test(box.className))
                     box.className += " visited";
                 TheApiCacheMgr.getAsync(this.publicId, true)
                     .done(resp => AbuseReportInfo.abuseOrDelete(resp.publicationid, false, this.publicId));
@@ -9624,7 +9604,7 @@
         static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "", onDeleted : () => void = undefined)
         {
             if (Cloud.isOffline()) {
-                Cloud.showModalOnlineInfo("report/delete");
+                Cloud.showModalOnlineInfo("Report/Delete");
                 return;
             }
             
@@ -9648,7 +9628,7 @@
                                     lf("delete"),
                                     () => {
                                         if (doubleConfirm)
-                                            ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
+                                            ModalDialog.ask(lf("Are you really sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
                                         else del();
                                     })
                 }
@@ -9672,11 +9652,11 @@
 
                     if (abuseid) {
                         m.add([
-                            div("wall-dialog-header", lf("resolve report about '{0}'", resp.publicationname)),
+                            div("wall-dialog-header", lf("resolve report about '{0}' /{1}", resp.publicationname, pubid)),
                         ])
                     } else {
                         m.add([
-                            div("wall-dialog-header", lf("report abuse about '{0}'", resp.publicationname)),
+                            div("wall-dialog-header", lf("report abuse about '{0}' /{1}", resp.publicationname, pubid)),
                             div("", inp),
                             err,
                             div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
@@ -9687,7 +9667,7 @@
                     m.add(
                         div("wall-dialog-buttons", [
                             HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                            resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
+                            Cloud.getUserId() && resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
                             !abuseid && HTML.mkButton(lf("report"), () => {
                                 if (inp.value.trim().length < 5)
                                     err.setChildren(lf("Need some reason."))
@@ -9715,7 +9695,7 @@
             var icon = div("sdIcon", HTML.mkImg("svg:fa-ban,#333,clip=80"));
             icon.style.background = "#ff6";
             var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", div("sdCommentBlock", div("sdCommentBlockInner",
-                lf("Your publication /{0} ({1}) has been deleted by a moderator.", 
+                lf("Something you published ({1}, /{0}) has been deleted by a moderator.", 
                     notification.publicationid, notification.publicationname ))))));
             return res;
         }
@@ -9905,7 +9885,7 @@
         public shareButtons() {
             var btns = super.shareButtons();
             if (EditorSettings.widgets().scriptPrintTopic) btns.push(
-                div("sdAuthorLabel phone-hidden", HTML.mkImg("svg:print,#888,clip=100")).withClick(() => { this.topic.print() })
+                div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { this.topic.print() })
                 );
             return btns;
         }
@@ -10358,6 +10338,7 @@
                         return
                     }
 
+                    Ticker.tick(Ticks.tutorialStart);                    
                     if (topic.isBuiltIn)
                         Ticker.rawTick("startTutorial_" + topic.id);
 
@@ -10621,7 +10602,7 @@
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())
-                    if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit)
+                    if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit, true)
                     else doit()
                 }))
 

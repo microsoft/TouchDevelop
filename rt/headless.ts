@@ -110,7 +110,6 @@ module TDev {
 
         public updateCloudState(hasCloudState: boolean, type: string, status: string) { }
 
-        public initApiKeysAsync(): TDev.Promise { return TDev.Promise.as(); }
         public agreeTermsOfUseAsync(): TDev.Promise { return TDev.Promise.as(); }
         public notifyTutorial(cmd : string) { }
 

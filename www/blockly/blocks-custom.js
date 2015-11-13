@@ -327,6 +327,18 @@ Blockly.Blocks['device_point'] = {
   }
 };
 
+Blockly.Blocks['device_temperature'] = {
+    init: function () {
+        this.setHelpUrl('https://live.microbit.co.uk/functions/temperature');
+        this.setColour(230);
+        this.appendDummyInput()
+            .appendField("temperature (°C)");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Returns a temperature in Celsius degrees.');
+    }
+};
+
 Blockly.Blocks['device_heading'] = {
     init: function () {
         this.setHelpUrl('https://live.microbit.co.uk/functions/compass-heading');

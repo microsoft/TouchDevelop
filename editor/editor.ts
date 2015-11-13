@@ -100,70 +100,6 @@ module TDev
             TheEditor.wallShown();
         }
 
-        public initApiKeysAsync(): Promise
-        {
-            var rt = this.currentRt;
-            var compiled = rt.compiled;
-
-            var consent = !!rt.datas["this"]["apikeys_consent"];
-            // collect all api keys
-            var apiKeys = compiled.allApiKeys();
-            var missingKeys = apiKeys.some(apiKey => !apiKey.value);
-            if (apiKeys.length > 0 && (!consent || missingKeys)) {
-                return new Promise((onSuccess, onError, onProgress) => {
-                    var m = new ModalDialog();
-                    m.add([
-                        div("wall-dialog-header", lf("allow access to your API keys?")),
-                        div("wall-dialog-body", lf("The following API keys are required to run this script. Do you allow access to this script to read to your API keys?"))
-                    ]);
-                    var inputs = [];
-                    apiKeys.forEach((apiKey: ApiKey) => {
-                        m.add(div("wall-dialog-body", HTML.mkA('', apiKey.url, '_blank', apiKey.url)));
-                        var input = HTML.mkTextInput("text", lf("key value"));
-                        input.value = apiKey.value || "";
-                        m.add(div("wall-dialog-body", input));
-                        inputs.push(input);
-                    });
-                    m.add(div("wall-dialog-buttons", HTML.mkButton(lf("allow"), () => {
-                        m.onDismiss = null;
-                        m.dismiss();
-                        rt.datas["this"]["apikeys_consent"] = consent = true;
-                        if (Cloud.isOnline() && Cloud.getUserId()) {
-                            var promises = apiKeys.map((apiKey: ApiKey, index: number) => {
-                                var value = inputs[index].value || "";
-                                return (value !== apiKey.value)
-                                    ? Cloud.postPrivateApiAsync("me/keys", { uri: apiKey.url, value: inputs[index].value })
-                                           .then(() => { }, e => Cloud.handlePostingError(e, lf("save key"))) : null;
-                            }).filter(p => p != null);
-                            if (promises.length == 0)
-                                onSuccess(false);
-                            else {
-                                HTML.showProgressNotification(lf("saving keys..."));
-                                Promise.join(promises).done(() => {
-                                    HTML.showProgressNotification(lf("saving keys done."), true);
-                                    onSuccess(true);
-                                });
-                            }
-                        }
-                    }),
-                        HTML.mkButton(lf("cancel"), () => m.dismiss())
-                    ));
-                    m.add(div("wall-dialog-body", lf("Changing a value with automatically delete your script data. The API key values will automatically be stored in the cloud and are only available to you. When exporting your script to an app, the API keys are automatically embedded in the app. You can delete any of your keys by tapping on your user name in the hub and selecting the 'keys' tab.")));
-                    m.onDismiss = () => onSuccess(null);
-                    m.show();
-                }).then((needsReload: boolean) => {
-                    if (!needsReload) return Promise.as();
-
-                    // clear state to force realoading art
-                    rt.datas = {};
-                    return rt.initDataAsync().then(() => {
-                        rt.datas["this"]["apikeys_consent"] = consent;
-                    });
-                });
-            }
-            return Promise.as();
-        }
-
         public showAppView(logs? : LogMessage[]) {
             TDev.RT.App.showAppLogAsync(logs, undefined, els => {
                 els.filter(el => !!el.dataset['crash']).forEach(el => {
@@ -594,6 +530,7 @@ module TDev
             return {
                 stack: () => {
                     this.hideWallAsync().then(() => {
+                        if (!TDev.Script) return;
                         TheEditor.showStackTrace();
                         if (!TheEditor.isDebuggerMode())
                             TheEditor.searchFor("");
@@ -602,6 +539,7 @@ module TDev
 
                 debug: () => {
                     this.hideWallAsync().then(() => {
+                        if (!TDev.Script) return;
                         if (!TheEditor.isDebuggerMode()) TheEditor.enterDebuggerMode();
                         TheEditor.updateDebuggerButtons(true); // disable the stepping buttons, because enterDebuggerMode explicitly enables them
                         TheEditor.showStackTrace();
@@ -1295,17 +1233,17 @@ module TDev
 
         public displayLeft(nodes: any) {
             this.codeInner.setChildren(nodes);
-            if (this.widgetEnabled("calcHelpOverlay")) {
+            if (!this.stepTutorial) {
                 elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
-                    m.add(div('wall-dialog-header', lf("got a question?")));
-                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below to get more help...")));
+                    m.add(div('wall-dialog-header', lf("Have a question?")));
+                    m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below for more information.")));
                     m.add(div('wall-dialog-buttons',
+                        Cloud.config.userVoice ? HTML.mkAButton(lf("send feedback"), "https://" + Cloud.config.userVoice + ".uservoice.com") : undefined,
                         HTML.mkAButton(lf("read the docs"), Cloud.config.helpPath),
                         this.widgetEnabled("computingAtSchool") ? HTML.mkAButton(lf("CAS resources"), "http://community.computingatschool.org.uk/resources?category=139") : undefined,
-                        this.widgetEnabled("userVoice") ? HTML.mkAButton("Post an idea", "https://touchdevelop.uservoice.com") : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())
-                        ));
+                    ));
                     m.show();
                 })));
             }
@@ -1594,7 +1532,7 @@ module TDev
             return x;
         }
         public getCurrentScriptId(): string {
-            return ScriptEditorWorldInfo.status === "published" ? ScriptEditorWorldInfo.baseId : Script.localGuid;
+            return ScriptEditorWorldInfo.status === "published" ? ScriptEditorWorldInfo.baseId : ScriptEditorWorldInfo.guid
         }
         public getBaseScriptId(): string {
             return ScriptEditorWorldInfo.baseId || "unknown";
@@ -2049,14 +1987,17 @@ module TDev
         private currentCompilationModalDialog: ModalDialog;
 
         private showCompilationDialog(inBrowser: boolean) {
-            var hideKey = "compileDialogHide";
+            
             this.currentCompilationModalDialog = new ModalDialog();
+            /*
+            var hideKey = "compileDialogHide";
             if (inBrowser && !!window.localStorage.getItem(hideKey)) {
                 if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                     this.currentCompilationModalDialog.dismiss();
                 this.currentCompilationModalDialog = undefined;
-                return;
+                return undefined;
             }
+            */
             if (!inBrowser) {
                 var progress = HTML.mkProgressBar(); progress.start();
                 this.currentCompilationModalDialog.add(progress);
@@ -2074,15 +2015,24 @@ module TDev
                     ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be uploaded onto your BBC micro:bit.")
                     : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
-            }    
+            }
+            
+            if (TDev.dbg && Browser.isDesktop && Browser.isWindows) {
+                this.currentCompilationModalDialog.add(div("wall-dialog-body",
+                    lf("Tired of copying the .hex file? "),
+                    HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader app!")))
+                );
+            }
+            
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
-            if (inBrowser)
-                this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
+            //if (inBrowser)
+            //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
         }
 
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
+            tick(Ticks.coreNativeCompile);
             if (!showSource) this.showCompilationDialog(true);
             ScriptProperties.bytecodeCompile(app, showSource);
             if (!showSource)
@@ -2142,7 +2092,7 @@ module TDev
                             ModalDialog.showText(
                                 "Internal compilation error. "+
                                 "Please file a bug and include the following information:\n" +
-                                External.makeOutMbedErrorMsg(json),
+                                Embedded.makeOutMbedErrorMsg(json),
                                 lf("Compilation error"));
                         } else {
                             document.location.href = json.hexurl;
@@ -2186,7 +2136,7 @@ module TDev
         public setupPlayButton()
         {
             var children : HTMLElement[] = [];
-            if (this.currentRt && this.currentRt.canResume())
+        if (this.currentRt && this.currentRt.canResume())
                 children = [ Editor.mkTopMenuItem("svg:resume,currentColor", lf("resume"), Ticks.codeResume, "Ctrl-M", () => this.resumeExecution()) ];
             else
                 children = [ Editor.mkTopMenuItem("svg:play,currentColor", lf("run main"), Ticks.codeRun, "Ctrl-M", () => this.runMainAction()) ];
@@ -2464,29 +2414,27 @@ module TDev
             this.libExtractor.moveDecl(decl);
         }
 
-        public cutDecl(decl:AST.Decl, dontCopy = false)
-        {
-            if (decl.nodeType() == "action" && decl.getName() == "main" && !Script.isLibrary) {
+        public cutDecl(decl: AST.Decl, dontCopy = false) {
+            if (decl == Script) {
+                Util.log("cancelled script cut");
+                return; // can't delete script from editor
+            }
+            
+            if (decl.nodeType() == "action"
+                && decl.getName() == "main"
+                && !Script.isLibrary) {
                 // not allowed to delete "main" in non-library scripts
                 Util.log("cancelled main cut");
                 return;
             }
 
-            if (decl == Script) {
-                ModalDialog.ask(lf("are you sure you want to uninstall the current script? there is no undo for this!"),
-                    lf("uninstall"),
-                    () => {
-                        this.uninstallCurrentScriptAsync().done();
-                    });
-            } else {
-                this.undoMgr.pushMainUndoState();
-                if (!dontCopy)
-                    this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
-                var prev = this.scriptNav.previousDecl(decl);
-                Script.deleteDecl(decl);
-                this.renderDecl(prev);
-                this.queueNavRefresh();
-            }
+            this.undoMgr.pushMainUndoState();
+            if (!dontCopy)
+                this.clipMgr.copy({ type: "decls", data: decl.serialize(), scriptId: (Script ? Script.localGuid : Util.guidGen()), isCut: true });
+            var prev = this.scriptNav.previousDecl(decl);
+            Script.deleteDecl(decl);
+            this.renderDecl(prev);
+            this.queueNavRefresh();
         }
 
         public pasteNode()
@@ -3329,6 +3277,7 @@ module TDev
 
                 return final();
             }).then(() => {
+                Ticker.setCurrentEditorId("touchdevelop");
                 if (!shouldRun) return Browser.EditorSettings.initEditorModeAsync().then(() => this.setMode(true))
                 else return Promise.as();
             }).then(() => {
@@ -4192,7 +4141,7 @@ module TDev
             });
         }
 
-        private resetWorldAsync() : TDev.Promise
+        public resetWorldAsync() : TDev.Promise
         {
             Ticker.dbg("resetWorldAsync");
             setGlobalScript(undefined);
@@ -4690,7 +4639,9 @@ module TDev
 
                     Util.log("new cloud header, state=" + state);
 
-                    if (state == "downloaded") {
+                    if (state == "skippedMerge") {
+                        if (incoming) ProgressOverlay.hide()
+                    } else if (state == "downloaded") {
                         if (incoming) ProgressOverlay.hide()
                         if (Script)
                             this.reload()
@@ -5497,7 +5448,8 @@ module TDev
             } else {
                 var topic = HelpTopic.contextTopics[0];
                 if (Cloud.lite) {
-                    if (topic.json && topic.json.helpPath) Util.navigateNewWindow("/" + topic.json.helpPath);
+                    if (topic.json && topic.json.helpPath)
+                        Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
                 }
                 else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
             }

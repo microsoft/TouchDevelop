@@ -60,7 +60,7 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     var handle = (res:http.ClientResponse) => {
         if (res.statusCode != 200) {
             console.error("%s: OOPS, status %d for %s", new Date()+"", res.statusCode, safeuri);
-            if (res.statusCode == 500 && /admin\/reindex/.test(uri) && numRetries > 0) {
+            if ((res.statusCode == 424 || res.statusCode == 500) && /(import\/|admin\/reindex)/.test(uri) && numRetries > 0) {
                 tdevGet(uri, f, numRetries - 1, body, contentType)
                 return
             }
@@ -78,7 +78,9 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
         })
         res.on("data", (ch) => { d += ch; });
         res.on("end", () => {
-            finish(d)
+            if (res.statusCode == 200)
+                finish(d)
+            else console.log(d)
         });
     }
 
@@ -1461,7 +1463,7 @@ function getScript(id:string)
 
 function downloadScript(arg:string, f:(s:string) => void)
 {
-    tdevGet(arg + "/text?original=true", (text) => {
+    tdevGet(arg + "/text?original=true&ids=true", (text) => {
         function save(text) {
             if (!scriptsCache[arg]) {
                 scriptsCache[arg] = text;
@@ -1616,8 +1618,7 @@ export function stringCompare(an:string, bn:string)
 
 export function updatelang(args:string[])
 {
-    var excluded = ["hi"]
-    var langs = ["none"]
+    var langs = []
 
     var allTrans = {}
     var numStarted = 0
@@ -1645,16 +1646,19 @@ export function updatelang(args:string[])
     }
 
     var finish = () => {
+        var strings = {}
         var keys = {}
         var res = "TDev.Util._languageData = function (lang) {\n"
         langs.forEach(l => {
             Object.keys(allTrans[l]).forEach(k => {
                 if (keys[k] === 1) return
-                if (usedSet.hasOwnProperty(k))
+                if (usedSet.hasOwnProperty(k)) {
                     keys[k] = 1
+                    strings[k] = k;
+                }
                 else {
-                    console.log("would skip: " + k)
-                    keys[k] = 1
+                    console.log("skipping: " + k)
+                    //keys[k] = 1
                 }
             })
         })
@@ -1662,13 +1666,17 @@ export function updatelang(args:string[])
         kk.sort()
         kk.forEach((k, i) => keys[k] = i)
         res += "var keys = " + arrToStr(kk) + ";\n\n"
+        if (!fs.existsSync("build/locale"))
+            fs.mkdirSync("build/locale");
         langs.forEach(l => {
             var arr = []
+            var tr = {};
             var map = allTrans[l]
             var numTr = 0
             Object.keys(map).forEach(k => {
                 if (keys[k] !== undefined) {
                     arr[keys[k]] = map[k]
+                    tr[k] = map[k];
                     numTr++
                 }
             })
@@ -1676,14 +1684,29 @@ export function updatelang(args:string[])
             for(var i = 0; i < arr.length; ++i)
                 if (!arr[i]) arr[i] = 0
             res += "if (lang == \"" + l + "\") { TDev.Util._setLanguageArray(keys, " + arrToStr(arr) + "); return true; }\n\n"
+            fs.writeFileSync("build/locale/" + l + ".json", JSON.stringify(tr));
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
+        fs.writeFileSync("generated/strings.json", JSON.stringify(strings));
     }
+    
+    fs.readdirSync("locales").forEach((folder: string) => {
+        var fn = "locales/" + folder + "/strings.json";
+        console.log("importing " + fn);
+        var js = JSON.parse(fs.readFileSync(fn, "utf8"));
+        Object.keys(js).forEach(key => {
+            if (!js[key]) delete js[key];
+        })
+        allTrans[folder] = js;
+        langs.push(folder);
+    })
+    
+    finish();
 
+/*    
     tdevGet("https://touchdeveloptranslator.azurewebsites.net/api/languages", resp => {
         var ll = JSON.parse(resp)
-        excluded.forEach(l => delete ll[l])
         langs = Object.keys(ll)
 
         langs.forEach(l => {
@@ -1695,6 +1718,7 @@ export function updatelang(args:string[])
             })
         })
     })
+    */
 }
 
 export function updatehelp(args:string[])
@@ -3803,6 +3827,146 @@ function fetchlibraries(args) {
         }))
 }
 
+function dlscripttext(args:string[])
+{
+    var files = fs.readdirSync("dl")
+    var i = 0
+    if (args[0])
+        files = files.filter(f => f > args[0])
+
+    var pushMode = args[1] == "push"
+
+    var tm0 = 1420099200 
+    var start = Date.now();
+    var k = tdliteKey()
+
+    var loop = i => {
+        if (!files[i]) return;
+        var j = JSON.parse(fs.readFileSync("dl/" + files[i], "utf8"))
+        var items = j.items.filter(it => it.time >= tm0)
+        var num = 1
+        var oneup = () => {
+            if (--num == 0) {
+                var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+                console.log(tm, "DONE", files[i], i + "/" + files.length)
+                loop(i+1)
+            }
+        }
+
+        var pref = "https://www.touchdevelop.com/api/"
+
+        items.forEach(s => {
+            ++num;
+            if (pushMode) {
+                fs.readFile("dls/" + s.id, "utf8", (err, dat) => {
+                    if (err) {
+                        console.log("ERROR", s.id, err.message)
+                        oneup()
+                    } else {
+                        tdevGet(k.liteUrl + "api/" + s.id + "/importfixup?foo=bar" + k.key, resp => {
+                            if (!/scripthash/.test(resp))
+                                console.log("ERROR", s.id, resp)
+                            //console.log(s.id, resp)
+                            oneup()
+                        }, 1, { text: dat })
+                    }
+                })
+            } else {
+                tdevGet(pref + s.id + "/text?original=true", text => {
+                    if (!text) {
+                        console.log("ERROR", s.id)
+                        oneup()
+                    } else if (/^meta hasIds "yes"/m.test(text)) {
+                        fs.writeFileSync("dls/" + s.id, text)
+                        oneup()
+                    } else {
+                        console.log("IDS", s.id)
+                        fs.writeFileSync("dls/" + s.id + ".noid", text)
+                        tdevGet(pref + s.id + "/text?original=true&ids=true", text => {
+                            if (!text) {
+                                console.log("ERROR", s.id, "second")
+                                oneup()
+                            }
+                            else {
+                                fs.writeFileSync("dls/" + s.id, text)
+                                oneup()
+                            }
+                        }, 5)
+                    }
+                }, 5)
+            }
+        })
+        oneup()
+    }
+
+    loop(0)
+}
+
+function dllite(args:string[])
+{
+    var k = tdliteKey()
+
+    var total = 0
+    var store = args[0]
+    var start = Date.now()
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/" + store + "?count=1000" + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+            var fn = "dl/" + store + "-" + Date.now() + ".json"
+            fs.writeFileSync(fn, resp)
+
+            total += parsed.items.length
+
+            var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+            console.log(tm, store, 
+                "total:" + total,
+                parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5)
+
+    var cont = args[1] || ""
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
+function countpubs(args:string[])
+{
+    var store = args[0]
+    var cont = args[1] || ""
+
+    var k = tdliteKey()
+
+    var counters = {}
+
+    var total = 0
+    var totalHidden = 0
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/admin/countpubs/" + store + "?count=500" + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+
+            Object.keys(parsed).forEach(k => {
+                var v = parsed[k]
+                if (typeof v == "number" && v > 0) {
+                    k = k.replace(/Count$/, "")
+                    if (!counters[k]) counters[k] = 0
+                    counters[k] += v
+                }
+            })
+
+            console.log(store, "total:", JSON.stringify(counters), parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5)
+
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
 function reindexone(store:string, cont = "")
 {
     var k = tdliteKey()
@@ -3810,8 +3974,12 @@ function reindexone(store:string, cont = "")
     var total = 0
     var totalReindexed = 0
 
+    var path = "admin/reindex/" + store
+    if (/\//.test(store))
+        path = store
+
     var loop = (cont:string) =>
-        tdevGet(k.liteUrl + "api/admin/reindex/" + store + "?count=100" + cont + k.key, resp => {
+        tdevGet(k.liteUrl + "api/" + path + "?count=100" + cont + k.key, resp => {
             var parsed = JSON.parse(resp)
 
             totalReindexed += parsed.itemsReindexed
@@ -3839,6 +4007,78 @@ function reindexsearch(args:string[])
     }
 }
 
+function importone(store:string, cont = "")
+{
+    var k = tdliteKey()
+
+    var total = 0
+    var total200 = 0
+    var total409 = 0
+    var totalErr = 0
+
+    var start = Date.now()
+
+    var count = /scripts|art|screenshots/.test(store) ? 100 : 500
+
+    var loop = (cont:string) =>
+        tdevGet(k.liteUrl + "api/import/" + store + "?count=" + count + cont + k.key, resp => {
+            var parsed = JSON.parse(resp)
+
+            // console.log(parsed)
+            var err = "";
+            var exerr = "";
+
+            Object.keys(parsed.publications).forEach(k => {
+                var n = parsed.publications[k]
+                total++
+                if (n == 200) total200++;
+                else if (n == 409) {
+                    exerr += k + ", "
+                    total409++;
+                } else {
+                    err += k + ":" + n + ", "
+                    totalErr++;
+                }
+            })
+
+            if (exerr)
+                console.log("EXISTS", exerr)
+
+            if (err)
+                console.log("ERROR", err)
+
+            var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
+
+            console.log(tm, store, 
+                total200 + "ok + " + total409 + "ex + " + totalErr + "err = " + total,
+                "c:" + parsed.continuation)
+
+            if (parsed.continuation)
+                loop("&continuation=" + parsed.continuation)
+        }, 5, {})
+
+    if (cont) cont = "&continuation=" + cont
+    loop(cont)
+}
+
+function importlist(args:string[])
+{
+    if (args.length >= 1) {
+        importone(args[0], args[1] || "")
+    }
+}
+
+function litepost(args:string[])
+{
+    var k = tdliteKey()
+    var dat = args[1] ? JSON.parse(args[1]) : {}
+
+    tdevGet(k.liteUrl + "api/" + args[0] + "?nothingreally=42" + k.key, resp => {
+        var parsed = JSON.parse(resp)
+        console.log(parsed)
+    }, 5, dat)
+}
+
 function concatlibs() {
     var meta = JSON.parse(fs.readFileSync("microbit/libraries/meta.json", "utf8"))
     meta.text = {}
@@ -3851,6 +4091,89 @@ function concatlibs() {
         txt += fs.readFileSync("microbit/bytecode.js", "utf8")
     console.log("create library cache file; " + txt.length + " bytes")
     fs.writeFileSync("build/libraries.js", txt)
+}
+
+function genid()
+{
+    return "#id" + Math.floor(Math.random()*100000000) + " "
+}
+
+function pubhelp()
+{
+    var k = tdliteKey()
+    var s = JSON.parse("[" + fs.readFileSync("generated/help.cache","utf8") + "]")
+    var topics = s[1]
+    var namemap = {}
+
+    topics.forEach(t => {
+        t.newid = t.name.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase().replace(/^-/, "").replace(/-$/, "")
+        t.oldid = t.name.replace(/[']/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+        namemap[t.oldid] = t
+    })
+
+    topics = topics.filter(t => /#docs/i.test(t.description))
+    console.log(topics.length)
+
+    var p = Math.floor(Math.random() * topics.length)
+
+    topics.forEach(t => {
+        getScriptAsync(t.id, src => {
+            src = src.replace(/^action main.*\n/m, ln => {
+                return ln + genid() + "// {topic:/docs/" + t.newid + "}\n"
+            })
+            src = src.replace(/\[(.*?)\]\s*\(\/([a-zA-Z0-9]+)\)/g, (tot, nm, lnk) => {
+                var top = namemap[lnk.toLowerCase()]
+                if (!top) {
+                    //console.log("missing link: " + lnk + " [" + nm + "] in /docs/" + t.newid)
+                    return "[" + nm + "] (/docs/" + lnk.toLowerCase() + ")"
+                } else {
+                    return "[" + nm + "] (/docs/" + top.newid + ")"
+                }
+            })
+            src = src.replace(/ \{parenttopic:([\w]+)\}/ig, (tot, lnk) => {
+                var top = namemap[lnk.toLowerCase()]
+                var newid = (top ? top.newid : lnk.toLowerCase())
+                if (!top) {
+                    console.log("missing parent link: " + lnk + " in /docs/" + t.newid)
+                } else {
+                    // console.log("parent: " + t.newid + " -> " + newid)
+                }
+                return " {parentTopic:/docs/" + newid + "}"
+            })
+
+            //console.log(src.length, t.oldid)
+            //return
+
+            var post = (p, d, f) => 
+                tdevGet(k.liteUrl + "api/" + p + "?foo=bar" + k.key, f, 1, d)
+
+            post("scripts", { 
+                name: t.name,
+                description: t.description,
+                baseid: t.id,
+                text: src,
+                iconbackground: t.iconbackground,
+                icon: t.icon,
+                iconArtId: t.iconArtId,
+                splashArtId:  t.splashArtId,
+            }, resp => {
+                var d = JSON.parse(resp)
+                console.log("/docs/" + t.newid, d.id)
+                post("pointers", {
+                    path: "/docs/" + t.newid,
+                    scriptid: d.id
+                }, resp => {
+                })
+
+                if (t.newid != t.oldid)
+                    post("pointers", {
+                        path: "/docs/" + t.oldid,
+                        redirect: "/docs/" + t.newid,
+                    }, resp => {
+                    })
+            }) 
+        })
+    })
 }
 
 var cmds = {
@@ -3910,6 +4233,12 @@ var cmds = {
     "copyscript": { f:copyscript, a:'SCRIPTBLOBURL', h:'copy script from storage account to another'},
     "uploadhtml": { f:uploadhtml, a:'FILENAME.html', h:'upload html file as script'},
     "reindexsearch": { f:reindexsearch, a:'[store [conttok]]', h:'re-index search documents in lite cloud'},
+    "importlist": { f:importlist, a:'store [conttok]', h:'import from td.com to lite cloud'},
+    "litepost": { f:litepost, a:'PATH [DATA]', h:'post DATA or {} to /api/PATH'},
+    "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
+    "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
+    "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
+    "pubhelp": { f:pubhelp, a:'', h:'re-publish help' },
 }
 
 export interface ScriptTemplate {
@@ -4193,3 +4522,4 @@ export function main()
 }
 
 main();
+

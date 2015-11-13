@@ -75,21 +75,26 @@ module TDev {
         var lambdas = actions.map((a: J.JInlineAction) => {
           var n = H.resolveLocal(env, map[a.reference.id], a.reference.id);
           return (
-            env.indent + "auto "+n+"_ = "+
-              this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n" +
-            env.indent + "auto "+n+" = new std::function<"+
-                H.mkSignature(env, this.libraryMap, "", a.inParameters, a.outParameters)+
-              ">("+n+"_);"
+            env.indent +
+            H.findTypeDef(env, this.libraryMap, a.inParameters, a.outParameters)+
+            " "+n+" = "+
+            this.visitAction(env, "", n, a.inParameters, a.outParameters, a.body, false, true)+";\n"
           );
         });
         return (lambdas.join("\n")+"\n"+
           env.indent + this.visit(env, expr.tree) + ";");
       }
 
-      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExprHolder) {
+      public visitExprHolder(env: H.Env, locals: J.JLocalDef[], expr: J.JExpr) {
+        if (H.isInitialRecordAssignment(locals, expr))
+          return this.visit(env, locals[0])+"(new "+H.mkType(env, this.libraryMap, locals[0].type)+"_)";
+
         var decls = locals.map(d => {
-          var x = H.defaultValueForType(this.libraryMap, d.type);
-          return this.visit(env, d) + (x ? " = " + x : "") + ";";
+          // Side-effect: marks [d] as promoted, if needed.
+          var decl = this.visit(env, d);
+          var defaultValue = H.defaultValueForType(this.libraryMap, d.type);
+          var initialValue = !H.isPromoted(env, d.id) && defaultValue ? " = " + defaultValue : "";
+          return decl + initialValue + ";";
         });
         return decls.join("\n"+env.indent) +
           (decls.length ? "\n" + env.indent : "") +
@@ -104,11 +109,23 @@ module TDev {
         //   which C and C++ accept both "f" and "&f" (we hence use the former)
         // - arrays, strings, user-defined objects, which are in fact of type
         //   "ManagedType<T>", no "&" operator here.
-        return H.resolveLocal(env, name, id);
+        // However, we now support capture-by-reference. This means that the
+        // data is ref-counted (so as to be shared), but assignment and
+        // reference operate on the ref-counted data (not on the pointer), so we
+        // must add a dereference there.
+        var prefix = H.isPromoted(env, id) ? "*" : "";
+        return prefix+H.resolveLocal(env, name, id);
       }
 
-      public visitLocalDef(env: H.Env, name: string, id: string, type: J.JTypeRef) {
-        return H.mkType(env, this.libraryMap, type)+" "+H.resolveLocal(env, name, id);
+      public visitLocalDef(env: H.Env, name: string, id: string, type: J.JTypeRef, isByRef: boolean) {
+        var t = H.mkType(env, this.libraryMap, type);
+        var l = H.resolveLocal(env, name, id);
+        if (H.shouldPromoteToRef(env, type, isByRef)) {
+          H.markPromoted(env, id);
+          return "Ref<"+ t + "> " + l;
+        } else {
+          return t + " " + l;
+        }
       }
 
       // Allows the target to redefine their own string type.
@@ -175,17 +192,12 @@ module TDev {
         // Is this a call in the current scope?
         var scoped = H.isScopedCall(receiver);
         if (scoped)
-          if (this.libRef)
-            // If compiling a library, no scope actually means the library's
-            // scope. This step is required to possibly find a shim. This means
-            // that we may generate "lib::f()" where we could've just written
-            // "f()", but since the prototypes have been written out already,
-            // that's fine.
-            return this.resolveCall(env, this.libRef, name);
-          else
-            // Call to a function from the current script.
-            return H.resolveGlobal(env, name);
-
+          // If compiling a library, no scope actually means the library's
+          // scope. This step is required to possibly find a shim. This means
+          // that we may generate "lib::f()" where we could've just written
+          // "f()", but since the prototypes have been written out already,
+          // that's fine.
+          return this.resolveCall(env, this.libRef, name);
 
         // Is this a call to a library?
         var n = H.isLibrary(receiver);
@@ -203,9 +215,12 @@ module TDev {
                 "Hint: break on exceptions in the debugger and walk up the call stack to "+
                 "figure out which action it is.");
             return s;
-          } else {
+          } else if (n in this.resolveMap) {
             // Actual call to a library function
-            return H.resolveGlobalL(env, n, name);
+            return H.resolveGlobalL(env, this.resolveMap[n], name);
+          } else {
+            // Call to a function from the current script.
+            return H.resolveGlobal(env, name);
           }
         }
 
@@ -235,11 +250,9 @@ module TDev {
       }
 
       private safeGet(x: string, f: string): string {
-        return (
-          "("+x+".operator->() != NULL "+
-          "? "+x+"->"+f+" "+
-          ": (uBit.panic(TD_UNINITIALIZED_OBJECT_TYPE), "+x+"->"+f+"))"
-        );
+        // The overload of [->] in [ManagedType] takes care of checking that the
+        // underlying object is properly initialized.
+        return x+"->"+f;
       }
 
       public visitCall(env: H.Env,
@@ -262,11 +275,17 @@ module TDev {
                 if (k)
                   return k+"";
                 else
-                  return this.visit(env, a)
+                  return this.visit(H.resetPriority(env), a)
               });
             var t = typeArgument ? "<" + typeArgument + ">" : "";
             return f + t + "(" + argsCode.join(", ") + ")";
           }
+        };
+
+        var mkWrap = (prio: number) => {
+          var needsParentheses = prio > H.priority(env);
+          var wrap = needsParentheses ? x => "(" + x + ")" : x => x;
+          return wrap;
         };
 
         // The [JCall] node has several, different, often unrelated purposes.
@@ -287,7 +306,7 @@ module TDev {
           var newTypeArg = typeArgument || H.mkType(env, this.libraryMap, typeArgs[0]);
           assert(args.length && args[0].nodeType == "call");
           var call = <J.JCall> args[0];
-          return this.visitCall(env, call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
+          return this.visitCall(H.resetPriority(env), call.name, call.args, call.typeArgs, call.parent, call.callType, newTypeArg);
         }
 
         // 0b) Ha ha! But actually, guess what? For records, it's the opposite,
@@ -300,15 +319,33 @@ module TDev {
           return "ManagedType<"+struct_name+">(new "+struct_name+"())";
         }
 
+        // 0c) Special-casing for [Thing -> invalid] (an invalid record).
+        if (H.isInvalidRecord(name, args))
+          // See remark above.
+          return "ManagedType<user_types::"+H.resolveGlobal(env, (<J.JCall> args[0]).name)+"_>()";
+
+        // 0d) Special casing for [thing -> is invalid] (test if null).
+        if (name == "is invalid" && H.resolveTypeRef(this.libraryMap, parent).user) {
+          // 9 is the precedence of ==
+          return mkWrap(9)(this.visit(H.setPriority(env, 9), args[0]) + ".get() == NULL");
+        }
+
+        // 0e) Special casing for [thing -> equals] (address comparison)
+        if (name == "equals" && H.resolveTypeRef(this.libraryMap, parent).user)
+          return mkWrap(9)(
+              this.visit(
+                H.setPriority(env, 9), args[0]) + "==" +
+                this.visit(H.setPriority(env, 9), args[1]));
+
         // 1) A call to a function, either in the current scope, or belonging to
         // a TouchDevelop library. Resolves to a C++ function call.
-        var resolvedName = this.resolveCall(env, args[0], name);
+        var resolvedName = this.resolveCall(H.resetPriority(env), args[0], name);
         if (resolvedName)
           return mkCall(resolvedName, true);
 
         // 2) A call to the assignment operator on the receiver. C++ assignment.
         else if (name == ":=")
-          return this.visit(env, args[0]) + " = " + this.visit(env, args[1]);
+          return this.visit(H.resetPriority(env), args[0]) + " = " + this.visit(H.resetPriority(env), args[1]);
 
         // 3) Reference to a variable in the global scope.
         else if (args.length && H.isSingletonRef(args[0]) == "data")
@@ -320,15 +357,15 @@ module TDev {
         else if (callType == "extension") {
           var t = H.resolveTypeRef(this.libraryMap, parent);
           var prefixedName = t.lib
-            ? this.resolveCall(env, H.mkLibraryRef(t.lib), name)
-            : this.resolveCall(env, H.mkCodeRef(), name);
+            ? this.resolveCall(H.resetPriority(env), H.mkLibraryRef(t.lib), name)
+            : this.resolveCall(H.resetPriority(env), H.mkCodeRef(), name);
           return mkCall(prefixedName, false);
         }
 
         // 5) Field access for an object.
         else if (callType == "field")
           // TODO handle collisions at the record-field level.
-          return this.safeGet(this.visit(env, args[0]), H.mangle(name));
+          return this.safeGet(this.visit(H.resetPriority(env), args[0]), H.mangle(name));
 
         // 6a) Lone reference to a library (e.g. ♻ micro:bit just by itself).
         else if (args.length && H.isSingletonRef(args[0]) == "♻")
@@ -348,8 +385,24 @@ module TDev {
         // that contains the functions that operate on typedef'd "Number".
         else {
           var t = H.resolveTypeRef(this.libraryMap, parent);
-          // Same thing, assuming no collisions for built-in operators.
-          return t.type.toLowerCase()+"::"+mkCall(H.mangle(name), false);
+          var op = H.lookupOperator(t.type.toLowerCase()+"::"+name);
+          if (op) {
+            var wrap = mkWrap(op.prio);
+            var rightPriority = op.right ? op.prio - 1 : op.prio;
+            var leftPriority = op.prio;
+            if (args.length == 2)
+              return wrap(
+                this.visit(H.setPriority(env, leftPriority), args[0]) +
+                " " + op.op + " " +
+                this.visit(H.setPriority(env, rightPriority), args[1]));
+            else {
+              assert(args.length == 1);
+              return wrap(op.op + this.visit(H.setPriority(env, leftPriority), args[0]));
+            }
+          } else {
+            // We assume no collisions for built-in operators.
+            return mkCall(t.type.toLowerCase()+"::"+H.mangle(name), false);
+          }
         }
       }
 
@@ -369,7 +422,9 @@ module TDev {
         if (s !== null)
           return null;
 
-        var x = H.defaultValueForType(this.libraryMap, t);
+        var def = comment.match(/{default:([^}]+)}/);
+
+        var x = def ? def[1] : H.defaultValueForType(this.libraryMap, t);
         return e.indent + H.mkType(e, this.libraryMap, t) + " " + H.resolveGlobal(e, name) +
           (x ? " = " + x : "") + ";"
       }
@@ -390,8 +445,20 @@ module TDev {
           throw new Error("Not supported (multiple return parameters)");
 
         var env2 = H.indent(env);
+
+        // Properly initializing the outparam with a default value is important,
+        // because it guarantees that the function always ends with a proper
+        // return statement of an initialized value. (Never returning is NOT an
+        // error in TouchDevelop).
+        var outParamInitialization = "";
+        if (outParams.length > 0) {
+          var defaultValue = H.defaultValueForType(this.libraryMap, outParams[0].type);
+          var initialValue = defaultValue ? " = " + defaultValue : "";
+          outParamInitialization = env2.indent + this.visit(env2, outParams[0]) + initialValue + ";";
+        }
+
         var bodyText = [
-          outParams.length ? env2.indent + this.visit(env2, outParams[0]) + ";" : "",
+          outParamInitialization,
           this.visitMany(env2, body),
           outParams.length ? env2.indent + H.mkReturn(H.resolveLocalDef(env, outParams[0])) : "",
         ].filter(x => x != "").join("\n");
@@ -459,15 +526,18 @@ module TDev {
       }
 
       private typeStub(e: H.Env, r: J.JRecord) {
-        var s = H.isShim(r.comment);
-        if (s !== null)
-          return null;
-
         var n = H.resolveGlobal(e, r.name);
-        return [
-          e.indent + "struct " + n + "_;",
-          e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
-        ].join("\n");
+
+        var s = H.isShim(r.comment);
+        if (s === "")
+          return null;
+        else if (s !== null)
+          return e.indent + "typedef "+s+" "+n+";";
+        else
+          return [
+            e.indent + "struct " + n + "_;",
+            e.indent + "typedef ManagedType<" + n + "_> " + n + ";",
+          ].join("\n");
       }
 
       private wrapNamespaceIf(e: H.Env, s: string) {
@@ -568,7 +638,7 @@ module TDev {
         // By convention, because we're forced to return a string, write the
         // output parameters in the member variables. Image literals are scoped
         // within our namespace.
-        this.prototypes = this.wrapNamespaceIf(e, globalsCode + forwardDeclarations.join("\n"));
+        this.prototypes = this.wrapNamespaceIf(e, globalsCode + "\n" + forwardDeclarations.join("\n"));
         this.code = this.wrapNamespaceIf(e, this.compileImageLiterals(e) + userFunctions.join("\n"));
         this.tPrototypes = this.wrapNamespaceIf(e, typeStubsCode);
         this.tCode = this.wrapNamespaceIf(e, typeDefsCode);

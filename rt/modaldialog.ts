@@ -5,7 +5,7 @@ module TDev
     {
         private overlay = div("modalOverlay");
         private dialog = div("modalDialog");
-        private floating:HTMLElement;
+        private floating: HTMLElement;
         private outerDialog:HTMLElement;
         private savedKeyState = null;
         private id = Random.uniqueId();
@@ -120,10 +120,10 @@ module TDev
 
         public stretchWide()
         {
-            this.floating.style.width = 'calc(100% - 4em)';
+            this.floating.style.width = 'calc(100% - 1em)';
             this.dialog.style.width = '100%';
         }
-
+        
         public showBare(what:HTMLElement = null)
         {
             Ticker.dbg("ModalDialog.showBare0");
@@ -309,10 +309,6 @@ module TDev
             return b;
         }
 
-        public critical() {
-            this.floating.classList.add('bg-critical');
-        }
-
         static showText(s:string, title:string = null, msg:string = null, done : () => void = null) : ModalDialog
         {
             var m = new ModalDialog();
@@ -393,7 +389,7 @@ module TDev
 
             return m
         }
-
+        
         public noChrome()
         {
             this.outerDialog.className += " modalNoChrome";
@@ -424,9 +420,15 @@ module TDev
             this.outerDialog.classList.remove("modalFullWhite");
             this.outerDialog.classList.add("modalFullYellow");
         }
+                
+        public critical() {
+            this.outerDialog.classList.remove("modalFullBlack");
+            this.outerDialog.classList.remove("modalFullWhite");
+            this.outerDialog.classList.remove("modalFullYellow");
+            this.floating.classList.add('bg-critical');
+        }
 
-        public setScroll()
-        {
+        public setScroll() {
             this.dialog.style.maxHeight = (SizeMgr.windowHeight * 0.8) / SizeMgr.topFontSize + "em";
             Util.setupDragToScroll(this.dialog);
         }
@@ -539,7 +541,7 @@ module TDev
 
             this.add(list);
 
-            this.buttondiv = div('wall-dialog-buttons');
+            this.buttondiv = div('wall-dialog-buttons modalChooseBtns');
             if (options.custombuttons !== undefined)
                 this.buttondiv.appendChildren(options.custombuttons);
             else

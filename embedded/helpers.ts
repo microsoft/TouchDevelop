@@ -98,18 +98,26 @@ module TDev {
         "xor_eq ": null,
       };
 
-      var replacementTable = {
-        "<": "lt",
-        "≤": "leq",
-        "≠": "neq",
-        "=": "eq",
-        ">": "gt",
-        "≥": "geq",
-        "+": "plus",
-        "-": "minus",
-        "/": "div",
-        "*": "times",
+      var operatorTable = {
+        // http://en.cppreference.com/w/cpp/language/operator_precedence
+        "boolean::not": { prio: 3, right: false, op: "!" },
+        "number::/": { prio: 5, right: true, op: "/" },
+        "number::*": { prio: 5, right: false, op: "*" },
+        "number::+": { prio: 6, right: false, op: "+" },
+        "number::-": { prio: 6, right: true, op: "-" },
+        "number::<": { prio: 8, right: false, op: "<" },
+        "number::≤": { prio: 8, right: false, op: "<=" },
+        "number::>": { prio: 8, right: false, op: ">" },
+        "number::≥": { prio: 8, right: false, op: ">=" },
+        "number::≠": { prio: 9, right: false, op: "!=" },
+        "number::=": { prio: 9, right: false, op: "==" },
+        "boolean::and": { prio: 13, right: false, op: "&&" },
+        "boolean::or": { prio: 14, right: false, op: "||" },
       };
+
+      export function lookupOperator(op: string) {
+        return operatorTable[op];
+      }
 
       export interface GlobalNameMap {
         libraries: StringMap<StringMap<string>>;
@@ -140,6 +148,33 @@ module TDev {
         libName: string;
 
         indent: string;
+
+        // The current precedence level.
+        priority: number;
+
+        // A table of id's that have been promoted to ref-counted types (because
+        // they were captured by a closure). Modified in an imperative manner.
+        promotedIds: StringMap<boolean>;
+      }
+
+      export function setPriority(e: Env, p: number): Env {
+        return {
+          usedNames: e.usedNames,
+          localNames: e.localNames,
+          globalNameMap: e.globalNameMap,
+          libName: e.libName,
+          priority: p,
+          indent: e.indent,
+          promotedIds: e.promotedIds,
+        };
+      }
+
+      export function priority(e: Env): number {
+        return e.priority;
+      }
+
+      export function resetPriority(e: Env): Env {
+        return setPriority(e, 16);
       }
 
       export function indent(e: Env): Env {
@@ -148,8 +183,18 @@ module TDev {
           localNames: e.localNames,
           globalNameMap: e.globalNameMap,
           libName: e.libName,
+          priority: e.priority,
           indent: e.indent + "  ",
+          promotedIds: e.promotedIds,
         };
+      }
+
+      export function markPromoted(e: Env, id: string) {
+        e.promotedIds[id] = true;
+      }
+
+      export function isPromoted(e: Env, id: string) {
+        return e.promotedIds[id];
       }
 
       export function emptyEnv(g: GlobalNameMap, libName: string): Env {
@@ -165,6 +210,8 @@ module TDev {
           globalNameMap: g,
           libName: libName,
           indent: "",
+          priority: 16,
+          promotedIds: {},
         };
       }
 
@@ -175,7 +222,7 @@ module TDev {
       // Converts a string into a valid C++ identifier. Unsafe unless you're
       // positive there won't be conflicts.
       export function mangle(name: string) {
-        var candidate = name.replace(/\W/g, x => (replacementTable[x] || "_"));
+        var candidate = name.replace(/\W/g, "_");
         if (candidate in cppKeywords)
           candidate += "_";
         else if (candidate.match(/^\d/))
@@ -238,6 +285,10 @@ module TDev {
           return m[n];
         else
           return n;
+      }
+
+      export function shouldPromoteToRef(e: Env, t: J.JTypeRef, isByRef: boolean) {
+        return typeof t == "string" && isByRef;
       }
 
 
@@ -325,9 +376,19 @@ module TDev {
         var retType = outParams.length ? mkType(env, libMap, outParams[0].type) : "void";
         var args = "(" + inParams.map(p => mkParam(env, libMap, p)).join(", ") + ")";
         if (isLambda)
-          return "[=] "+args+" -> "+retType;
+          // Let the compiler infer the return type.
+          return "[=] "+args+" mutable";
         else
           return retType + " " + name + args;
+      }
+
+      export function findTypeDef(env: Env, libMap: LibMap, inParams: J.JLocalDef[], outParams: J.JLocalDef[]) {
+        if (!inParams.length && !outParams.length)
+          return "Action";
+        else if (inParams.length == 1 && !outParams.length)
+          return "Action1<"+mkType(env, libMap, inParams[0].type)+">";
+        else
+          return mkSignature(env, libMap, "", inParams, outParams);
       }
 
       // Generate the return instruction for the function.
@@ -413,6 +474,30 @@ module TDev {
       // JStringLiteral { value: VALUE } -> VALUE
       export function isStringLiteral(x: J.JNode) {
         return x.nodeType == "stringLiteral" && (<J.JStringLiteral> x).value;
+      }
+
+      export function isInvalidRecord(name: string, args: J.JExpr[]) {
+        return (
+          name == "invalid" &&
+          args.length == 1 &&
+          args[0].nodeType == "call" &&
+          (<any> (<J.JCall> args[0]).parent) == "records" &&
+          isSingletonRef((<J.JCall> args[0]).args[0]) == "records");
+      }
+
+      export function isInitialRecordAssignment(locals: J.JLocalDef[], expr: J.JExpr) {
+        return (
+          locals.length == 1 &&
+          expr.nodeType == "call" &&
+          (<J.JCall> expr).name == ":=" &&
+          (<J.JCall> expr).args.length == 2 &&
+          (<J.JCall> expr).args[1].nodeType == "call" &&
+          isRecordConstructor(
+            (<J.JCall> (<J.JCall> expr).args[1]).name,
+            (<J.JCall> (<J.JCall> expr).args[1]).args) &&
+          (<J.JCall> expr).args[0].nodeType == "localRef" &&
+          (<J.JLocalRef> (<J.JCall> expr).args[0]).localId == <any> locals[0].id
+        );
       }
 
       export function willCompile (f: J.JAction) {

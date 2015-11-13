@@ -35,6 +35,7 @@ module TDev {
         export var isWebkit = false;
         export var isAndroid = false;
         export var isMacOSX = false;
+        export var isWindows = false;
         export var isWindows8plus = false;
         export var isRaspberryPiDebian = false;
         export var isCompiledApp = false;
@@ -272,6 +273,8 @@ module TDev {
                 if (m) webkitVersion = parseInt(m[1]);
             }
             isMacOSX = /Macintosh/.test(userAgent);
+            if (/Windows NT/.test(userAgent))
+                isWindows = true;
             if (/Windows NT (6.[2-9]|[789])/.test(userAgent))
                 isWindows8plus = true;
             mobileWebkit = isWebkit && isMobile;
@@ -500,7 +503,7 @@ module TDev {
                         "<li>In iOS 7, 8 and 8.1, open 'Safari', tap on the Bookmarks button, then tap on the 'Private' button in the lower left corner of the screen.</li>" +
                         "</ul>");
                 else
-                    return genericMessage("<p>Your browser does not seem to allow storing data.</p>", "regular internet browser");
+                    return genericMessage("<p>" + what + " does not seem to allow storing data.</p>", "regular internet browser");
             }
 
             // detect whether a resilient database was ever used
@@ -510,11 +513,11 @@ module TDev {
             // in some configrations, we will use an in-memory database instead
             if (!canWebSql && !canIndexedDB && !isWP8app && !canMemoryTable) {
                 if (browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11)
-                    return genericMessage("<p>You are running Internet Explorer in the InPrivate mode. TouchDevelop does not support this mode, as TouchDevelop needs to maintain a database of installed scripts, but the InPrivate mode does not allow the use of databases.</p>",
+                    return genericMessage("<p>You are running Internet Explorer in the InPrivate mode. " + what + " does not support this mode, as " + what + " needs to maintain a database of installed scripts, but the InPrivate mode does not allow the use of databases.</p>",
                         "a regular Internet Explorer window");
                 else
                     return genericMessage("<p>Your browser does not seem to support databases.</p>",
-                        "<a href='https://www.touchdevelop.com/app/.browsers#supported'>a supported browser </a>");
+                        "<a href='/app/.browsers#supported'>a supported browser </a>");
             }
 
             return null;
@@ -634,10 +637,7 @@ module TDev {
                 if (isIndex) {
                     reportBrowser("IEMobile");
                     browsersHtml();
-                } else {
-                    supportedBrowsers("<p>The TouchDevelop Web App doesn't work on Windows Phone 7.</p>",
-                        "<p>Please get the free <a href='http://windowsphone.com/s?appId=fe08ccec-a360-e011-81d2-78e7d1fa76f8'>TouchDevelop app from the Windows Phone Store</a> instead.</p>");
-                }
+                } else supportedBrowsers("<p>The " + what + " Web App doesn't work on Windows Phone 7.</p>");
             } else if (/ MSIE [6789]/.test(userAgent)) {
                 statusMsg("IEx userAgent: " + userAgent);
                 if (isIndex) {
@@ -645,7 +645,7 @@ module TDev {
                     else reportBrowser("IE8-");
                     browsersHtml();
                 } else {
-                    supportedBrowsers("<p>TouchDevelop doesn't work with Internet Explorer 9 or earlier.<p/>",
+                    supportedBrowsers("<p>" + what + " doesn't work with Internet Explorer 9 or earlier.<p/>",
                                       '<p>You can upgrade your browser to <a href="http://windows.microsoft.com/en-us/internet-explorer/downloads/ie-10/worldwide-languages">Internet Explorer 10</a> if you are running Windows 7, ' +
                                       'or upgrade your operating system to <a href="http://windows.microsoft.com/en-US/windows/buy">Windows 8</a> which comes with Internet Explorer 10, or try the latest version of Chrome or Firefox.</p>');
                 }

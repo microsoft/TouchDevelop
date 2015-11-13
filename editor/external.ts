@@ -106,22 +106,6 @@ module TDev {
 
     import J = AST.Json;
 
-    export function makeOutMbedErrorMsg(json: any) {
-      var errorMsg = "unknown error";
-      // This JSON format is *very* unstructured...
-      if (json.mbedresponse) {
-        if (json.messages) {
-          var messages = json.messages.filter(m =>
-            m.severity == "error" || m.type == "Error"
-          );
-          errorMsg = messages.map(m => m.message + "\n" + m.text).join("\n");
-        } else if (json.mbedresponse.result) {
-          errorMsg = json.mbedresponse.result.exception;
-        }
-      }
-      return errorMsg;
-    }
-
     export function pullLatestLibraryVersion(pubId: string): Promise { // of string
       var forced = ScriptCache.forcedUpdate(pubId)
       if (forced) return Promise.as(forced.json.id)
@@ -197,22 +181,6 @@ module TDev {
       });
     }
 
-    function parseScript(text: string): Promise { // of AST.App
-      return AST.loadScriptAsync((id: string) => {
-        if (id == "")
-          return Promise.as(text);
-        else
-          return World.getAnyScriptAsync(id);
-      }, "").then((resp: AST.LoadScriptResult) => {
-        // Otherwise, eventually, this will result in our script being
-        // saved in the TouchDevelop format...
-        var s = Script;
-        Script = null;
-        // The function writes its result in a global
-        return Promise.as(s);
-      });
-    }
-
     // For compatibility with the old format
     function fixupLibs(libs: { [i: string]: any }) {
       Object.keys(libs).forEach((k: string) => {
@@ -224,7 +192,7 @@ module TDev {
     function roundtrip1(a: J.JApp, libs: { [i: string]: LibEntry }): Promise { // of AST.App
       return addLibraries(a, libs).then(() => {
         var text = J.serialize(a);
-        return parseScript(text).then((a: AST.App) => {
+        return Embedded.parseScript(text).then((a: AST.App) => {
           if (AST.TypeChecker.tcApp(a) > 0) {
             throw new Error("We received a script with errors and cannot compile it. " +
                 "Try converting then fixing the errors manually.");
@@ -274,7 +242,7 @@ module TDev {
     }
 
     function typeCheckAndRun(text: string, mainName = "main") {
-      parseScript(text).then((a: AST.App) => {
+      Embedded.parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
         // The call to [tcApp] also has the desired side-effect of resolving
         // names.
@@ -295,10 +263,14 @@ module TDev {
         rt.initFrom(compiledScript);
         if (!(rt.host instanceof ExternalHost))
           rt.setHost(new ExternalHost());
+        rt.host.currentGuid = ScriptEditorWorldInfo.guid;
         rt.initPageStack();
         // Requires [TheChannel] to be setup properly (so that we know which
         // editor logo to show).
         (<EditorHost> rt.host).showWall();
+
+        //rt.sessions.setEditorScriptContext(Cloud.getUserId(), ScriptEditorWorldInfo.guid, "no name",
+        //      TheEditor.getBaseScriptId(), TheEditor.getCurrentAuthorId());
 
         var main = compiledScript.actionsByName[mainName];
         rt.stopAsync().done(() => {
@@ -332,6 +304,7 @@ module TDev {
 
         switch ((<Message> event.data).type) {
           case MessageType.Save: {
+            tick(Ticks.externalSave);
             var message = <Message_Save> event.data;
             World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
               var scriptText = message.script.scriptText;
@@ -431,6 +404,7 @@ module TDev {
             break;
 
           case MessageType.Compile:
+            tick(Ticks.externalCompile);
             if (TheEditor.useNativeCompilation() && Cloud.anonMode(lf("C++ compilation"))) {
               this.post(<Message_CompileAck>{
                 type: MessageType.CompileAck,
@@ -487,7 +461,7 @@ module TDev {
                     });
                     document.location.href = json.hexurl;
                   } else {
-                    var errorMsg = makeOutMbedErrorMsg(json);
+                    var errorMsg = Embedded.makeOutMbedErrorMsg(json);
                     this.post(<Message_CompileAck>{
                       type: MessageType.CompileAck,
                       status: Status.Error,
@@ -548,6 +522,7 @@ module TDev {
             break;
 
           case MessageType.Run:
+            tick(Ticks.externalRun);
             var message3 = <Message_Run> event.data;
             var side = document.getElementById("externalEditorSide");
             if (message3.onlyIfSplit && side.offsetWidth == 0)
@@ -564,8 +539,9 @@ module TDev {
             break;
 
           case MessageType.Load:
+            tick(Ticks.externalLoad);
             var message4 = <Message_Load> event.data;
-            ArtUtil.handleImportFiles([message4.file]);
+            ArtUtil.handleImportFilesAsync([message4.file]).done();
             break;
 
           default:
@@ -612,6 +588,8 @@ module TDev {
         baseSnapshot: null,
       };
 
+      Ticker.setCurrentEditorId(editor.id);
+
       // Clear leftover iframes and simulators.
       document.getElementById("externalEditorSide").setChildren([]);
       var iframeDiv = document.getElementById("externalEditorFrame");
@@ -619,8 +597,9 @@ module TDev {
 
       // Load the editor; send the initial message.
       var iframe = document.createElement("iframe");
-      // allow-popups is for the Blockly help menu item
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups");
+      // allow-popups is for the Blockly help menu item; allow-modals is for the
+      // rename variable prompt
+      iframe.setAttribute("sandbox", "allow-modals allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", () => {
         TheChannel = new Channel(editor, iframe, data.guid);
 

@@ -6,7 +6,6 @@ meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta allowExport "yes";
 meta hasIds "yes";
-meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -20,11 +19,10 @@ action \_libinit() {
     #BamJivB3cALMYQoQ data→start_time := time→now;
     #pJfHUw7KRZ5r6xTq data→board := media→create_portrait_board(612, 498 + 100);
     #tGJciuV0e2iZndkr wall→set_background(colors→transparent);
-    #xHZJdg4oIJlrN7cX data→picture := art→microbit_schema→clone;
+    #xHZJdg4oIJlrN7cX data→picture := media→create_picture(612, 498);
     #mes9Z70SlnN52zQT data→padding := 27;
     #q8k7EFimR0fMv4GZ data→left := 205;
     #xjbIl53FS2hhHDRL data→@top := 156;
-    #aAHm3HC4MpRUsZ4n data→picture→fill_rect(274, 74, 63, 16, 0, colors→black);
     #xHQWCYdhMT39OHlO data→bkg := data→board→create_picture(data→picture);
     #tduKnQa7ilnDwAR8 data→bkg→width := data→board→width;
     #Y4hGkvffxjBnxeqh data→bkg→left := 0;
@@ -57,12 +55,14 @@ action \_libinit() {
       }
     }
     #xN44GIpThDd2JQn5 code→init_theme;
-    #qLoyPDrDUdeG77Vv code→set_theme("");
     #QIjvtSonf6Bx38tP code→init_eyes;
     #auzjzpClkNJY94I3 code→init_axis;
     #BlWLf7LrHMucdyNB code→init_pins;
     #xVIOjGStCgdLjic6 code→update_axis;
+    #qLoyPDrDUdeG77Vv code→set_theme("");
     #ByFADaJmirytJ02b code→background_animation;
+    #xmVrpXc8aqbE3dq6 `async` code→animation_worker;
+    #xkycDjt57DBUf4Xz `async` code→event_bus_worker;
     #pNdJy7kyaeqKZhfS data→board→on_every_frame;
     #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
       #WF6Md7jUVLVAe3m4 code→update_board;
@@ -209,7 +209,6 @@ action clear_screen() {
   #Lc4GU4SQEeDXJcAp // {namespace:basic}
   #WwZ9Imwcdzf4H2Db // {weight:79}
   #IsinvyLebNu1rsu9 // {shim:micro_bit::clearScreen}
-  #oucBbE834sepGmyq data→current_animation := data→current_animation + 1;
   #yVSc2bJhsH0utE1x foreach led in data→leds
   do {
     #Tgb6koDUxsIrk8ua $led→set_color(data→led_off_color);
@@ -290,7 +289,7 @@ action bit(#qNb6K0K0Rv5gyH5O state: Number, #lJdGRw37BIcyWKtc x: Number) returns
 }
 #BdGhpbmca
 table Image {
-  // {shim:}
+  // {shim:MicroBitImage}
   type = "Object";
   persistent = false;
   fields {
@@ -413,41 +412,43 @@ action scroll_image(#dVF1wUlpKx2pPtHa @this: * Image, #Fr2rDLarbEiIzfHm x_offset
   #xtyyk9lLDfqJLWpL // {hints:x offset per step:5,1}
   #kK2O5fLxOlBFvjHG // {hints:interval:400,100}
   #UrNHQ26Tc7HxFp1p // {shim:micro_bit::scrollImage}
-  #xtlglkDAp2Q1OJUh $anim_id := data→current_animation + 1;
-  #T4QhXCtmkTUbQtWp data→current_animation := $anim_id;
+  #xtlglkDAp2Q1OJUh $anim_id := data→current_animation;
   #Jysm4Pd4lszqgxXV $x_offset_per_step := math→round($x_offset_per_step);
-  #xluG50TZnkrViJjL if $x_offset_per_step > 0 then {
-    #xMcTw7gf2Fz9FwZ8 $x_offset_per_step := math→max(1, $x_offset_per_step);
-    #CXEE00t44mfWLUIC $x := 0;
-    #GwuUOeH3zqRBqEQ1 while $x + 4 < $@this→width do {
-      #x5vjJ5zSuf1rqKnV $@this→render_image($x);
-      #OwLsXGKEmYf3u4Gj code→pause($interval);
-      #PHeDA80GctvZmtme if data→current_animation ≠ $anim_id then {
-        #ietA2urgnfVpp2ss `return` ;
+  #Hv8BBJJLK4ATmTYK code→queue_animation_and_wait;
+  #lyweMkPTU58Kbmtp where `implicit` \_body\_() {
+    #xluG50TZnkrViJjL if $x_offset_per_step > 0 then {
+      #xMcTw7gf2Fz9FwZ8 $dx := math→max(1, $x_offset_per_step);
+      #CXEE00t44mfWLUIC $x := 0;
+      #GwuUOeH3zqRBqEQ1 while $x + 4 < $@this→width do {
+        #x5vjJ5zSuf1rqKnV $@this→render_image($x);
+        #OwLsXGKEmYf3u4Gj code→pause($interval);
+        #PHeDA80GctvZmtme if data→current_animation ≠ $anim_id then {
+          #ietA2urgnfVpp2ss `return` ;
+        }
+        #wDxlPdR9HkBH4PHv $x := $x + $dx;
       }
-      #wDxlPdR9HkBH4PHv $x := $x + $x_offset_per_step;
     }
-  }
-  else {
-    #xQMEmAD35uksb3qz $x_offset_per_step := math→min( - 1, $x_offset_per_step);
-    #JkulbmMt5UmnsSIB $x := $@this→width - 5;
-    #ujNFlLWKwHnNk5rJ while $x ≥ 0 do {
-      #Gp42FT0fV8jwrcE4 $@this→render_image($x);
-      #d4IJlY2NIltFZZiE code→pause($interval);
-      #uLdovnfNVFKKXuXO if data→current_animation ≠ $anim_id then {
-        #yJCgIFUX2A0x3Os4 `return` ;
+    else {
+      #xQMEmAD35uksb3qz $dx := math→min( - 1, $x_offset_per_step);
+      #JkulbmMt5UmnsSIB $x := $@this→width - 5;
+      #ujNFlLWKwHnNk5rJ while $x ≥ 0 do {
+        #Gp42FT0fV8jwrcE4 $@this→render_image($x);
+        #d4IJlY2NIltFZZiE code→pause($interval);
+        #uLdovnfNVFKKXuXO if data→current_animation ≠ $anim_id then {
+          #yJCgIFUX2A0x3Os4 `return` ;
+        }
+        #xgrTFzGv8MLnnysv $x := $x + $dx;
       }
-      #xgrTFzGv8MLnnysv $x := $x + $x_offset_per_step;
     }
   }
 }
 #j6How14prTjVLiKJ
 action button_is_pressed(#dwrDe5YG33oG3MHB name: String) returns(#RdtB26hD1lA5OO8J pressed: Boolean) {
-  #xDfRt2S0C1CkPSHd // Get the button state (pressed or not)
+  #xDfRt2S0C1CkPSHd // Get the button state (pressed or not) for ``A`` and ``B``.
   #dmv7pPfdUX3Nii67 // {help:functions/button-is-pressed}
   #RVFWVBfCjLPg2uRU // {namespace:input}
   #yTzqdrDfKTub5zSp // {weight:59}
-  #xROirQwDWqY9ZgYL // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B,A+B=MICROBIT_ID_BUTTON_AB}
+  #xROirQwDWqY9ZgYL // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B}
   #QFNxD51gqBGenDQ6 // {shim:micro_bit::isButtonPressed}
   #ntxF2QNxLArWB2V5 $name := $name→trim(" \t")→to_lower_case;
   #nA1Wp5PR401L45J9 if data→board→touched then {
@@ -457,10 +458,6 @@ action button_is_pressed(#dwrDe5YG33oG3MHB name: String) returns(#RdtB26hD1lA5OO
     #PhXWkNR6epuZNkBa if data→finger→overlaps_with($target) then {
       #IKV9abE47o0mPXbn `return` true;
     }
-    else { #ygZVwXLOFLFiif92 if $name→equals("a") `or` $name→equals("b") then {
-      #xs22kr2OiamSiMnW `return` code→button_is_pressed("A+B");
-    }
-    else { } } 
   }
   #rujS852B1Sx8Gh1f if $name→equals("a") `and` (senses→is_key_pressed("a") `or` senses→is_key_pressed("left")) then {
     #eNt8xKqeXVB6CgMS `return` true;
@@ -506,13 +503,19 @@ action show_string(#EEchsFBax4g4Pk4y text: String, #xhQbPcu59cxTmgPb interval: N
   #kf4HddkY4wQUaUAU // {shim:micro_bit::scrollString}
   #DMmxTOrCif13ztvx $interval := math→round($interval);
   #N4KPZT9PpUDTn9R1 if $text→is_empty then {
-    #YB68tFgWoN2PlJYA code→clear_screen;
-    #YvZOGJUcPcBXex8I code→pause($interval * 5);
+    #yIHTm1wXSp2w8fes code→queue_animation_and_wait;
+    #GcGnNDNYH7xeg0od where `implicit` \_body\_() {
+      #YB68tFgWoN2PlJYA code→clear_screen;
+      #YvZOGJUcPcBXex8I code→pause($interval * 5);
+    }
   }
   else { #Qv7UTtB9F3o4pkvl if $text→count = 1 then {
-    #jQ3KH7NUrCa547Rj $sprite := code→create_image_from_string($text);
-    #y26xiE0eE4lGwFIH $sprite→show_image(0);
-    #TxqzE2nAu66dxqXK code→pause($interval * 5);
+    #YeGT0NEaIr4ew2Wd code→queue_animation_and_wait;
+    #x4NHkwmJbhbUpSeh where `implicit` \_body\_() {
+      #jQ3KH7NUrCa547Rj $sprite := code→create_image_from_string($text);
+      #y26xiE0eE4lGwFIH $sprite→show_image(0);
+      #TxqzE2nAu66dxqXK code→pause($interval * 5);
+    }
   }
   else {
     #yCPOXhiQN5kj94eK if `not` $text→starts_with(" ") then {
@@ -546,12 +549,13 @@ action on_button_pressed(#M03fUuuX2m9eRu7n name: String, #LzMsXwEMSCmDzfWI body:
   #bb2jhwAjjludGu2o // {weight:58}
   #fm3i5OlTIzr9FGuU // {enum:name:A=MICROBIT_ID_BUTTON_A,B=MICROBIT_ID_BUTTON_B,A+B=MICROBIT_ID_BUTTON_AB}
   #KwFDbs7Kr12Y7FTP // {shim:micro_bit::onButtonPressed}
-  #FMX7Dy8may7mfc7j code→notify_event_registration("on button pressed " ∥ $name);
+  #OzSnTzWiKXQk0HlQ $evid := "on button pressed " ∥ $name;
+  #FMX7Dy8may7mfc7j code→notify_event_registration($evid);
   #h2x2L30VBbMGVNED $btn := code→button_from_id($name);
   #xOIGjOLy2Zmt99MW code→clear_button_handler($name);
   #F5Y2ciTtYo87uZSG $ev := $btn→on_touch_down($touch_up);
   #j0K6jsuWQ4V0EcaI where touch_up(x: Number, y: Number) {
-    #UZ7doRhNRnR5s62g `async` $body→run;
+    #zvnW22u4MgaK24ge code→queue_event_bus($body, $evid);
   }
   #hijH5eY42toXLOFF code→store_button_handler($name, $ev);
   meta sync;
@@ -565,8 +569,6 @@ action show_image(#x4Os5UgJK1k1DyDo @this: * Image, #WCEICn0SBZ7AnvYq x_offset: 
   #s0MpoKh2adnhmM8z // {weight:69}
   #RfVXECzwY1YjIfSF // {hints:x offset:0,5,10}
   #UN2qrX2ZL1nyHdhU // {shim:micro_bit::showImage}
-  #HdrqajmjHl4dPdlr $anim_id := data→current_animation + 1;
-  #xs4eu6OT8oa4dXAd data→current_animation := $anim_id;
   #AqfPdUQhQ8tq2B7e code→render_image($@this, $x_offset);
 }
 #gszRC4JNYzCIA8xJ
@@ -757,12 +759,6 @@ action set_brightness(#kQeLgaV0YyWLTlCU value: Number) {
   }
   meta sync;
 }
-#Et2Tdn7Nn4t5nKoV
-var microbit_schema : Picture {
-  is\_resource = true;
-  url = "https://microbit0.blob.core.windows.net/pub/pcslkqeo";
-  transient = true;
-}
 #amts8p71bcrUxkz1
 action test_main() {
   #xyiiPHS90ToCvNsw // {shim:}
@@ -806,11 +802,11 @@ action update_axis() {
   #dkkLIU2fisYJPDgs for 0 ≤ i < 5 do {
     #L6R7REP2RTV1ScG3 $sprite := data→led_indexes→at($i);
     #x05FmmbOP9lsYovE $sprite→x := 211 + $i * 48;
-    #UkRsH3J4KCopUW6L $sprite→@bottom := 146;
+    #UkRsH3J4KCopUW6L $sprite→@bottom := 138;
   }
   #x9NcX2IPJTEr0YWB for 0 ≤ j < 5 do {
     #GkDVBnIsjWst55Xl $sprite := data→led_indexes→at(5 + $j);
-    #xscN82XsBQ0HyOK0 $sprite→right := 190;
+    #xscN82XsBQ0HyOK0 $sprite→right := 180;
     #ARG4f5kv6L542Vrc $sprite→y := 165 + $j * 48;
   }
   #XTCqT7R96r4UdteD data→led_x_index_legend→@bottom := 120;
@@ -841,8 +837,7 @@ action show_number(#arqB8R393DWmG4yx value: Number, #xwSeYvwN5k4Kt277 interval: 
   #dxD9lszdBNwzGAUk // {shim:micro_bit::scrollNumber}
   #x5tg98AeJkbUQbiv $value := math→round($value);
   #C3O0Rmqfj0wV31Uh $interval := math→round($interval);
-  #Vu43lGOjfn56mgm4 $s := $value→to_string;
-  #oIZAtpmgCfqgmA3B code→show_string($s, $interval);
+  #oIZAtpmgCfqgmA3B code→show_string($value→to_string, $interval);
 }
 #QY3E6cU6eBZ2OJSF
 var prelude\u002ecpp : String {
@@ -908,6 +903,10 @@ action test_buttons() {
   #gmr7aY7MXcYsbncb code→on_button_pressed("B");
   #Rp8qiY1vzviZ2kWq where `implicit` \_body\_() {
     #Wf7Z3Bn5plHJ78I1 code→show_string("B", 100);
+  }
+  #NO9PrQ5LFZfQfagg code→on_button_pressed("A+B");
+  #POC91PYG4214TJp0 where `implicit` \_body\_() {
+    #xYIv0xzaNMKmq0z3 code→show_string("A+B", 150);
   }
   meta private;
   meta test;
@@ -1329,7 +1328,7 @@ action init_axis() {
   #q7cMCQpYupmXc3oS data→led_indexes := data→board→create_sprite_set;
   #x36Llp6v7tD4OgDD for 0 ≤ l < 2 do {
     #xPsYPYIXtbJBJDDl for 0 ≤ k < 5 do {
-      #WVBiy4HYa9LPzM9f $index := data→board→create_text(100, 40, 20, $k→to_string);
+      #WVBiy4HYa9LPzM9f $index := data→board→create_text(100, 40, 16, $k→to_string);
       #GP3ccJkbFZoGfIOo $index→fit_text;
       #bZpgALZp1Y7Pqvwq $index→set_color(colors→white);
       #rJHNHPvhK2CuW6K5 data→led_indexes→add($index);
@@ -1434,16 +1433,16 @@ action test_multi_scroll() {
 #cEmz3y3ohmdp6AXY
 action init_eyes() {
   #xufwLhiDE0bQWtRU // {shim:}
-  #bjkoPxbCzJ4pL2uK data→eye_y := 75;
-  #NkEaRwjz7rWxJKQK data→eye_left := 275;
-  #v783038Eh682f2OC data→eye_right := 323;
+  #bjkoPxbCzJ4pL2uK data→eye_y := 86;
+  #NkEaRwjz7rWxJKQK data→eye_left := 276;
+  #v783038Eh682f2OC data→eye_right := 324;
   #eiAcEwONRspI5U37 data→left_eye := data→board→create_ellipse(13, 13);
-  #kvrBgQVgS7G0K2jA data→left_eye→color := colors→gray;
+  #kvrBgQVgS7G0K2jA data→left_eye→color := colors→blue;
   #Xl8q5Ud55nALw4Qz data→left_eye→left := data→eye_left;
   #NEMjm8SQ7r0P45jG data→left_eye→@top := data→eye_y;
   #pshgYorYc1f0W1RK data→left_eye→set_friction(1);
   #R6QEKy3rQdbXOaX1 data→right_eye := data→board→create_ellipse(13, 13);
-  #cOqnG6djBmo9cbBW data→right_eye→color := colors→gray;
+  #cOqnG6djBmo9cbBW data→right_eye→color := data→left_eye→color;
   #GZdwztrKXD2QRxAJ data→right_eye→left := data→eye_right;
   #k85veqcrDilOuwDt data→right_eye→@top := data→eye_y;
   #HRun2WhRntsb626o data→right_eye→set_friction(1);
@@ -1627,11 +1626,12 @@ action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Ac
   #UZIoGA4CKSwhMxlf // {weight:57}
   #OgqWJNwCulcyJT7l // {enum:name:P0=MICROBIT_ID_IO_P0,P1=MICROBIT_ID_IO_P1,P2=MICROBIT_ID_IO_P2}
   #xZ0ArWZwbu4SBuBn // {shim:micro_bit::onPinPressed}
-  #nPpJQoCs8nAIigcE code→notify_event_registration("on pin pressed " ∥ $name);
+  #jDgDoJLo4kvbVPvk $evid := "on pin pressed " ∥ $name;
+  #nPpJQoCs8nAIigcE code→notify_event_registration($evid);
   #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
   #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
   #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
-    #xs5qVip6FU1jDpOm `async` $body→run;
+    #NbkK6P2y62Y9tOIt code→queue_event_bus($body, $evid);
   }
   meta sync;
 }
@@ -2150,7 +2150,7 @@ action test_pitch() {
 }
 #Homv4VKEXNUbTAb4
 action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Number) {
-  #fCfOCntjWE4DNymC // Plots the ``index``-th frame of the image on the screen.
+  #fCfOCntjWE4DNymC // Draws the ``index``-th frame of the image on the screen.
   #xasY934N29G7WBjg // {help:functions/plot-frame}
   #wQpnycOYR16SMb15 // {namespace:image}
   #OFsNMj5vqD4C4rm4 // {weight:65}
@@ -2158,7 +2158,7 @@ action plot_frame(#xYYuLhKmEWIzIX1x @this: * Image, #AJWLlSJwoTdXgT9i index: Num
 }
 #x07I9YOUT6XAu5Ky
 action show_leds(#Agy1tNVQeIcg2pFD leds: String, #H23Wq0aPH08LnwS6 ms: Number) {
-  #a1ZU6jET0rFURbW6 // Shows an image on the LED screen and pauses for the given milliseconds.
+  #a1ZU6jET0rFURbW6 // Draws an image on the LED screen and pauses for the given milliseconds.
   #rah4E4gr6b4ZXnki // {help:functions/show-leds}
   #q2YahTUs7lFN2x05 // {weight:95}
   #x8YEphMMwGJeCtZ4 // {namespace:basic}
@@ -2225,7 +2225,7 @@ var note_table : Json_Object {
 }
 #xUYxOeKj6LoMvF7P
 action plot_leds(#WQt3HgKnNR1dkKwC leds: String) {
-  #jJiF4GeW3y5L8ZvJ // Plots an image on the LED screen.
+  #jJiF4GeW3y5L8ZvJ // Draws an image on the LED screen.
   #xeTbykuSWaF0nr9g // {help:functions/plot-leds}
   #w9yQC2gSVG43NHs2 // {weight:80}
   #C2NdzXO4YdWRnaEW // {namespace:basic}
@@ -2251,25 +2251,26 @@ action plot_image(#OrAkEEB8qLoT4Mzd @this: * Image, #HXxAUi2ymf5FqRzN x_offset: 
 action set_theme(#cJ3VYThrkFH2nnon name: String) {
   #x5CwjchVbMRh3uoA // {shim:}
   #f2xg2qfKJ7v1Lq5x if $name→is_empty then {
-    #uH4b8fL22EjTKz0h $name := data→current_theme;
+    #uH4b8fL22EjTKz0h $name := "red";
   }
   #e4B1ZURot54YEGiY data→current_theme := $name;
   #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
   #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
   #qyDWsRI4ytHtFd8g $leds_background := colors→black;
+  #evzUYi83YPBOBMlr $markup := art→boar\u002esvg;
   #HFTjMO2guOv7Rm2w if data→current_theme→equals("blue") then {
     #e1DeXSmMGEeWOuR8 data→led_on_color := colors→blue;
-    #thMgho7JD3MYX4td data→back_led_color := "#ffffff" →to_color;
-    #tpaF1iFuz32wgCsx data→theme_button→color := colors→red;
-    #tkh2jZG0YKruthlp data→theme_button_text→text := "RED";
+    #thMgho7JD3MYX4td data→back_led_color := "#aaa" →to_color;
+    #waG9f7vlgr57D4RL data→left_eye→color := "#273EE2" →to_color;
   }
   else {
+    #E12o9ZhEzBrBdaxR $markup := $markup→replace("#273EE2", "#3ADCFE")→replace("#D4AF37", "#989898")→replace("#F9F9F9", "#000");
     #NAj8gc9TnnnW95KJ data→led_on_color := "#ff7f7f" →to_color;
     #PDctHCuC00kxArHt data→back_led_color := "#202020" →to_color;
-    #UNyIvSrjPwjuejLI data→theme_button→color := colors→blue;
-    #dF7uimXe2syAdKRJ data→theme_button_text→text := "BLUE";
+    #HzF84IyeFuNZEN0S data→left_eye→color := "#3ADCFE" →to_color;
   }
-  #xunTJ84HrUYQtyK7 data→picture→fill_rect(data→left - data→padding, data→@top, 205 + data→padding + 4, 200 + data→padding + 4, 0, $leds_background);
+  #o0Sg6ZIdqIY2MrO7 data→right_eye→color := data→left_eye→color;
+  #DflzlS5FVtxTtiv3 data→picture→blend_svg($markup, 0, 0, 612, 498, 0);
   #y83CLwRPgvZv68BM for 0 ≤ i < data→back_leds→count do {
     #j0NqowF1gJYZbFxY $sprite := data→back_leds→at($i);
     #uUA4sC8H8ziHanbz $sprite→set_color(data→back_led_color);
@@ -2291,6 +2292,7 @@ var back_led_color : Color {
 #pKuVW9VLAsoLATs1
 var current_theme : String {
   // {shim:}
+  transient = true;
 }
 #ZcRIUJagQtw2kOc3
 action init_theme() {
@@ -2298,10 +2300,11 @@ action init_theme() {
   #EkEHXeeTIhNElM4z data→theme_button := data→board→create_ellipse(42, 42);
   #sfJgDE9vpMmOJbD7 data→theme_button→set_pos(data→board→width - 64, 54);
   #UAxpSTycnW8y28Sg data→theme_button→set_gradient(false);
-  #B2CwAWAZnJLS03hT data→theme_button_text := data→board→create_text(100, 40, 20, "RED");
-  #D3Q0VYJTEsOeCSSW data→theme_button_text→set_color(colors→black);
+  #gvxgpbcF2Vh2n8p5 data→theme_button→set_color(colors→white);
+  #B2CwAWAZnJLS03hT data→theme_button_text := data→board→create_text(100, 40, 20, "THEME");
+  #D3Q0VYJTEsOeCSSW data→theme_button_text→set_color(colors→white);
   #xmkTU26RbeIFb2Jc data→theme_button_text→fit_text;
-  #e4SNFryMf0J07YJC data→theme_button_text→x := data→theme_button→x + 7;
+  #e4SNFryMf0J07YJC data→theme_button_text→x := data→theme_button→x;
   #tgvI4UL0HsxskMLH data→theme_button_text→y := data→theme_button→y - 34;
   #LzHTvRzGmrVF5uqf data→theme_button→on_touch_down($touch_down);
   #j2kGPOFC3VpxGuvH where touch_down(x: Number, y: Number) {
@@ -2344,5 +2347,131 @@ var picture : Picture {
 #kgAKd05Qka2tkxaX
 var theme_button_text : Sprite {
   // {shim:}
+  transient = true;
+}
+#xxmFVVtdBqvw9AQy
+action temperature() returns(#xBZ4CpbFL4CvRApl temp: Number) {
+  #iJmxeqmb8usTYoBE // Gets the temperature in Celsius degrees (°C).
+  #xbkpE9efBEU3vReG // {weight:70}
+  #trqBmVFo8y4PREFi // {help:functions/temperature}
+  #ettU9cm9h4KGIsTs // {namespace:input}
+  #fokjMzX103zh4OIf // {shim:uBit.thermometer.getTemperature}
+  #w2zqRCAFyOt1oUWQ `return` 21;
+  meta sync;
+}
+#Vl55kdKb5D1kgSyk
+action stop_animation() {
+  #ATIWVp4tTwDxB4Bp // Cancels the current animation and clears other pending animations.
+  #d4LAQbEUe7uRZJAS // {namespace:led}
+  #Ix2qKgTtbnPMed6L // {weight:10}
+  #xbNtuxocqqClsImw // {shim:uBit.display.stopAnimation}
+  #BDAdp8kwFZFXSYHu data→current_animation := data→current_animation + 1;
+  #gQ12sQ2hZdAouv1m records→Animation_table→clear;
+  meta sync;
+}
+#BVGhpbmcgdGFibGUa
+table Animation {
+  // {shim:}
+  type = "Table";
+  persistent = false;
+  fields {
+    #e2tjt3wkHvRy11YN fn : Action
+  }
+}
+#zhNkP3CWz74bNvt9
+action animation_worker() {
+  #Cymc1fF7P43K4gho // {shim:}
+  #twUDLvYsbqiIiLNp while true do {
+    #Z12yqFGgOP8zzrgk $anim := records→Animation_table→row_at(0);
+    #TCtfj65FNI3BQu5k if `not` $anim→is_invalid then {
+      #x42IFPmOy8OMd94D $anim→fn→run;
+      #xwyIlpRntu8n4vEo $anim→delete_row;
+    }
+    else {
+      #xZksFGo4EkNM0dh8 records→Animation_table→wait_for_update;
+    }
+  }
+  meta private;
+}
+#bMFwG1RBnkCrq3IP
+action queue_animation_and_wait(#lZbLVMHV26CI2Azb body: Action) {
+  #pSk1SAXTgEkwXI52 // {shim:}
+  #y91tnga0ipumHs77 $anim := records→Animation_table→add_row;
+  #W4ekNcG32RwDFN64 $anim→fn := $body;
+  #VyXEejIbvlKT85x0 while true do {
+    #r2yPaxh1j83WPSQq if $anim→is_deleted then {
+      #lZZj1cN4JVqKGeD3 `break` ;
+    }
+    #x64FBWkpzD1lr3ys records→Animation_table→wait_for_update;
+  }
+  meta private;
+}
+#xfKBe2N4OpGoOMjI
+action test_animations() {
+  #C28AVJ2OeeVO9UJB // {shim:}
+  #NAatOLGkWDaNdLSJ code→\_libinit;
+  #xM8mK0o47XZ2xL4w code→on_button_pressed("A");
+  #Ec9RhvIua6hxfiau where `implicit` \_body\_() {
+    #xxDjfJsq8yJ2hJZg code→show_string("A", 150);
+  }
+  #dkWr85kOaggITn84 code→on_button_pressed("B");
+  #Ujf724J59Y9Agp4u where `implicit` \_body\_() {
+    #fkIWDo3j3WYiNeTE code→show_string("B", 150);
+  }
+  meta private;
+  meta test;
+}
+#vtW004u24giFHFCF
+action show_frame(#so5UArm5bvzzbO7Q img: * Image, #wbgk1lJLlqXDa2l4 frame: Number) {
+  #ul6aa2q9FEngpuGm // Shows a particular frame of the image strip.
+  #FO4MMEEFSc9G0nTb // {namespace:image}
+  #gCr4tw5bcjlK72W2 // {weight:70}
+  #xA18S6STfkQQmHSO // {help:functions/show-frame}
+  #RqxUSeIfDyXF0l5K $img→show_image($frame * 5);
+}
+#jK3Ut2qwQC0bZ07k
+table Event_Bus {
+  // {shim:}
+  type = "Table";
+  persistent = false;
+  fields {
+    #kng9nuProLg6HpFo fn : Action
+    #lz2qarlZRUAVl0SD name : String
+  }
+}
+#xQHQZkhjqzpE4CRi
+action event_bus_worker() {
+  #xDyM0UomTSCQXKSV // {shim:}
+  #HakK0IQSqWKY8zju while true do {
+    #FTMD9oKdw4fcscHD $ev := records→Event_Bus_table→row_at(0);
+    #xG44rWke0lFZ2GrH if `not` $ev→is_invalid then {
+      #qUZz8iwjSjiyyavq $ev→fn→run;
+      #E7aHvwM2U423dBK6 $ev→delete_row;
+    }
+    else {
+      #P594Nj69PCQ9z45m records→Event_Bus_table→wait_for_update;
+    }
+  }
+  meta private;
+}
+#uBLXg1puXSO4QzoW
+action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
+  #chlGhAEHEEsL01Wv // {shim:}
+  #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
+  #xv0tUVTZQbNE3PW4 if $c < 10 then {
+    #mbqwhgLr24hPftS9 $ev := records→Event_Bus_table→add_row;
+    #Guj24KBD912FcSYv $ev→name := $name;
+    #OvyZqeICJJ2sQbR4 $ev→fn := $body;
+  }
+  else {
+    #SzvR3GyWF2k4aEW8 app→log("skipped event " ∥ $name ∥ ", bus full");
+  }
+  meta private;
+  meta sync;
+}
+#HHvqKQqbQ5Uea74Z
+var boar\u002esvg : String {
+  is\_resource = true;
+  url = "data:text/plain;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0OTggNDA2IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA0OTggNDA2IiB3aWR0aD0iNDk4IiBoZWlnaHQ9IjQwNiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBhdGggZD0iTTQ5OCwzMS45QzQ5OCwxNC4zLDQ4My43LDAsNDY2LjEsMEgzMS45QzE0LjMsMCwwLDE0LjMsMCwzMS45djM0Mi4yQzAsMzkxLjcsMTQuMyw0MDYsMzEuOSw0MDZoNDM0LjIKCQljMTcuNiwwLDMxLjktMTQuMywzMS45LTMxLjlWMzEuOXogTTE0LjMsMjA2LjdjLTIuNywwLTQuOC0yLjItNC44LTQuOGMwLTIuNywyLjItNC44LDQuOC00LjhjMi43LDAsNC44LDIuMiw0LjgsNC44CgkJQzE5LjIsMjA0LjYsMTcsMjA2LjcsMTQuMywyMDYuN3ogTTQ4Ni4yLDIwNi43Yy0yLjcsMC00LjgtMi4yLTQuOC00LjhjMC0yLjcsMi4yLTQuOCw0LjgtNC44YzIuNywwLDQuOCwyLjIsNC44LDQuOAoJCUM0OTEsMjA0LjYsNDg4LjgsMjA2LjcsNDg2LjIsMjA2Ljd6Ii8+CgkJCTxwYXRoIGZpbGw9IiNENEFGMzciIGQ9Ik0wLDM1Ny43djE5LjJjMCwxMC44LDYuMiwyMC4yLDE0LjQsMjUuMnYtNDQuNEgweiIvPgoJCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDgzLjYsNDAyYzguMi01LDE0LjQtMTQuNCwxNC40LTI1LjF2LTE5LjJoLTE0LjRWNDAyeiIvPgoJCTxyZWN0IHg9IjY2LjciIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSI3OS4xIiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iOTEuNCIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjEwMy43IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTY0LjMiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTc2LjYiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTg4LjkiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjAxLjMiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjEzLjYiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjc1LjIiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSIyODcuNSIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjI5OS44IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMzEyLjEiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSIzMjQuNSIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjM4NS4xIiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjM5Ny40IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjQwOS43IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjQyMiIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSIxMC4zIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNMTM5LjEsMzE3LjNjLTEyLjgsMC0yMi4xLDEwLjMtMjMuMSwyMy4xVjQwNmg0Ni4ydi02NS42QzE2Mi4yLDMyNy43LDE1MS45LDMxNy4zLDEzOS4xLDMxNy4zegoJCQkgTTEzOS4zLDM2MC4xYy0xMC43LDAtMTkuMy04LjYtMTkuMy0xOS4zYzAtMTAuNyw4LjYtMTkuMywxOS4zLTE5LjNjMTAuNywwLDE5LjMsOC43LDE5LjMsMTkuMwoJCQlDMTU4LjYsMzUxLjUsMTUwLDM2MC4xLDEzOS4zLDM2MC4xeiIvPgoJCTxwYXRoIGZpbGw9IiNENEFGMzciIGQ9Ik0yNDksMzE3LjNjLTEyLjgsMC0yMi4xLDEwLjMtMjMuMSwyMy4xVjQwNmg0Ni4ydi02NS42QzI3Mi4xLDMyNy43LDI2MS44LDMxNy4zLDI0OSwzMTcuM3ogTTI0OS40LDM2MC4xCgkJCWMtMTAuNywwLTE5LjMtOC42LTE5LjMtMTkuM2MwLTEwLjcsOC42LTE5LjMsMTkuMy0xOS4zYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjNDMjY4LjcsMzUxLjUsMjYwLjEsMzYwLjEsMjQ5LjQsMzYwLjF6Ii8+CgkJPHBhdGggZmlsbD0iI0Q0QUYzNyIgZD0iTTM1OS45LDMxNy4zYy0xMi44LDAtMjIuMSwxMC4zLTIzLjEsMjMuMVY0MDZIMzgzdi02NS42QzM4MywzMjcuNywzNzIuNywzMTcuMywzNTkuOSwzMTcuM3ogTTM2MCwzNjAuMQoJCQljLTEwLjcsMC0xOS4zLTguNi0xOS4zLTE5LjNjMC0xMC43LDguNi0xOS4zLDE5LjMtMTkuM2MxMC43LDAsMTkuMyw4LjcsMTkuMywxOS4zQzM3OS4zLDM1MS41LDM3MC43LDM2MC4xLDM2MCwzNjAuMXoiLz4KCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDU4LDMxNy42Yy0xMywwLTIzLjYsMTAuNi0yMy42LDIzLjZjMCwwLDAsMC4xLDAsMC4xaDBWNDA2SDQ2OWM0LjMsMCw4LjQtMSwxMi42LTIuN3YtNjAuNwoJCQljMC0wLjQsMC0wLjksMC0xLjNDNDgxLjYsMzI4LjEsNDcxLDMxNy42LDQ1OCwzMTcuNnogTTQ1Ny44LDM2MC45Yy0xMC43LDAtMTkuMy04LjYtMTkuMy0xOS4zYzAtMTAuNyw4LjYtMTkuMywxOS4zLTE5LjMKCQkJYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjNDNDc3LjEsMzUyLjIsNDY4LjQsMzYwLjksNDU3LjgsMzYwLjl6Ii8+CgkJPHBhdGggZmlsbD0iI0Q0QUYzNyIgZD0iTTE2LjUsMzQxLjJjMCwwLjQtMC4xLDAuOS0wLjEsMS4zdjYwLjdjNC4xLDEuNyw4LjYsMi43LDEyLjksMi43aDM0LjR2LTY0LjdoMC4zYzAsMCwwLTAuMSwwLTAuMQoJCQljMC0xMy0xMC42LTIzLjYtMjMuNy0yMy42QzI3LjIsMzE3LjYsMTYuNSwzMjguMSwxNi41LDM0MS4yeiBNMjEuMiwzNDEuNmMwLTEwLjcsOC43LTE5LjMsMTkuMy0xOS4zYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjMKCQkJYzAsMTAuNy04LjYsMTkuMy0xOS4zLDE5LjNDMjkuOSwzNjAuOSwyMS4yLDM1Mi4yLDIxLjIsMzQxLjZ6Ii8+CgkJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSIxMTUsNTYuNyAxNzMuMSwwIDExNSwwIAkJIi8+CgkJPHBhdGggZmlsbD0iIzI3M0VFMiIgZD0iTTExNC4yLDBIMjUuOUMxMi4xLDIuMSwwLDEzLjMsMCwyNy43djgzLjlMMTE0LjIsMHoiLz4KCQk8cG9seWdvbiBmaWxsPSIjMjczRUUyIiBwb2ludHM9IjE3MywyNy45IDIwMi41LDAgMTczLDAgCQkiLz4KCQkJPHBhdGggZD0iTTM1LjcsMzc2LjRjMC0yLjgsMi4xLTUuMSw1LjUtNS4xYzMuMywwLDUuNSwyLjQsNS41LDUuMXY0LjdjMCwyLjgtMi4yLDUuMS01LjUsNS4xYy0zLjMsMC01LjUtMi40LTUuNS01LjFWMzc2LjR6CgkJCQkgTTQzLjMsMzc2LjRjMC0xLjMtMC44LTIuMy0yLjItMi4zYy0xLjMsMC0yLjEsMS4xLTIuMSwyLjN2NC43YzAsMS4yLDAuOCwyLjMsMi4xLDIuM2MxLjMsMCwyLjItMS4xLDIuMi0yLjNWMzc2LjR6Ii8+CgkJCTxwYXRoIGQ9Ik0xMzYuMiwzNzQuMWMyLjgsMCwzLjQtMC44LDMuNC0yLjVoMi45djE0LjNoLTMuNHYtOS41aC0zVjM3NC4xeiIvPgoJCQk8cGF0aCBkPSJNMjQ4LjYsMzc4LjVjMS43LTEsMy0xLjcsMy0zLjFjMC0xLjEtMC43LTEuNi0xLjYtMS42Yy0xLDAtMS44LDAuNi0xLjgsMi4xaC0zLjNjMC0yLjYsMS44LTQuNiw1LjEtNC42CgkJCQljMi42LDAsNC45LDEuMyw0LjksNC4zYzAsMi40LTIuMywzLjktMy44LDQuN2MtMiwxLjMtMi41LDEuOC0yLjUsMi45aDYuMXYyLjdoLTEwQzI0NC44LDM4MS4yLDI0Ni40LDM3OS45LDI0OC42LDM3OC41eiIvPgoJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSI1NC4xLDI0Mi40IDU0LjEsMjc0LjEgMjIuNCwyNzQuMSAJIi8+CgkJPHBhdGggZD0iTTQ4LjEsMjcwLjlsLTAuNi0xLjdoLTUuMWwtMC42LDEuN2gtMy41bDUuMS0xNC4zaDMuMWw1LjIsMTQuM0g0OC4xeiBNNDUsMjYwLjdsLTEuOCw1LjloMy41TDQ1LDI2MC43eiIvPgoJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSI0NDYuMiwxNjQuNiA0NDYuMiwxMzIuOCA0NzcuOSwxMzIuOCAJIi8+CgkJPHBhdGggZD0iTTQ0OS4xLDEzNS44aDUuOWMzLjksMCw0LjcsMi40LDQuNywzLjljMCwxLjgtMS40LDIuOS0yLjUsMy4yYzAuOSwwLDIuNiwxLjEsMi42LDMuM2MwLDEuNS0wLjgsNC00LjcsNGgtNlYxMzUuOHoKCQkJIE00NTQuNCwxNDEuN2MxLjYsMCwyLTEsMi0xLjdjMC0wLjYtMC4zLTEuNy0yLTEuN2gtMnYzLjRINDU0LjR6IE00NTIuNCwxNDQuMXYzLjVoMi4xYzEuNiwwLDItMSwyLTEuOGMwLTAuNy0wLjQtMS44LTItMS44CgkJCUg0NTIuNHoiLz4KCQk8cGF0aCBkPSJNMzUyLjEsMzgxLjFjMCwxLjYsMC45LDIuNSwyLjIsMi41YzEuMiwwLDEuOS0wLjksMS45LTEuOWMwLTEuMi0wLjYtMi0yLjEtMmgtMS4zdi0yLjZoMS4zYzEuNSwwLDEuOS0wLjcsMS45LTEuOAoJCQljMC0xLjEtMC43LTEuNi0xLjYtMS42Yy0xLjQsMC0xLjgsMC44LTEuOCwyLjFoLTMuM2MwLTIuNCwxLjUtNC42LDUuMS00LjZjMi42LDAsNSwxLjMsNSw0YzAsMS42LTEsMi44LTIuMSwzLjIKCQkJYzEuMywwLjUsMi4zLDEuNiwyLjMsMy41YzAsMi43LTIuNCw0LjMtNS4yLDQuM2MtMy41LDAtNS41LTIuMS01LjUtNS4xSDM1Mi4xeiIvPgoJCTxwYXRoIGQ9Ik0zNjguNSwzODUuOWgtMy4xbC01LjEtMTQuM2gzLjVsMy4xLDEwLjFsMy4xLTEwLjFoMy42TDM2OC41LDM4NS45eiIvPgoJCQk8cGF0aCBkPSJNNDQ0LjQsMzc4LjNoNy40djIuNWgtMS41Yy0wLjYsMy4zLTMsNS41LTcuMSw1LjVjLTQuOCwwLTcuNS0zLjUtNy41LTcuNWMwLTMuOSwyLjgtNy41LDcuNS03LjVjMy44LDAsNi40LDIuMyw2LjYsNQoJCQkJaC0zLjVjLTAuMi0xLjEtMS40LTIuMi0zLjEtMi4yYy0yLjcsMC00LjEsMi4zLTQuMSw0LjdjMCwyLjUsMS40LDQuNyw0LjQsNC43YzIsMCwzLjItMS4yLDMuNC0yLjdoLTIuNVYzNzguM3oiLz4KCQkJPHBhdGggZD0iTTQ2MS40LDM4MC45di05LjNoMy4zdjE0LjNoLTMuNWwtNS4yLTkuMnY5LjJoLTMuM3YtMTQuM2gzLjVMNDYxLjQsMzgwLjl6Ii8+CgkJCTxwYXRoIGQ9Ik00NzIuNywzNzEuNmM0LjgsMCw3LjUsMy41LDcuNSw3LjJzLTIuNyw3LjItNy41LDcuMmgtNS4zdi0xNC4zSDQ3Mi43eiBNNDcwLjgsMzc0LjR2OC42aDEuOGMyLjcsMCw0LjItMi4xLDQuMi00LjMKCQkJCXMtMS42LTQuMy00LjItNC4zSDQ3MC44eiIvPgoJPHBhdGggZmlsbD0iIzI3M0VFMiIgZD0iTTIzMC42LDY5LjdjLTIuOSwwLTUuMywyLjQtNS4zLDUuM2MwLDIuOSwyLjQsNS4zLDUuMyw1LjNjMi45LDAsNS4zLTIuNCw1LjMtNS4zCgkJQzIzNS45LDcyLjEsMjMzLjUsNjkuNywyMzAuNiw2OS43Ii8+Cgk8cGF0aCBmaWxsPSIjMjczRUUyIiBkPSJNMjY5LjksNTAuMkwyNjkuOSw1MC4ybC0zOS41LDB2MGMtMTQuMSwwLjEtMjQuNiwxMC43LTI0LjYsMjQuOGMwLDEzLjksMTAuNCwyNC40LDI0LjMsMjQuN3YwaDM5LjYKCQljMTQuMiwwLDI0LjgtMTAuNiwyNC44LTI0LjdDMjk0LjUsNjEsMjg0LDUwLjMsMjY5LjksNTAuMiBNMjY5LjcsODkuMkwyNjkuNyw4OS4ybC0zOS4zLDBjLTcuNy0wLjEtMTQtNi40LTE0LTE0LjIKCQljMC03LjgsNi40LTE0LjIsMTQuMi0xNC4yaDM5LjFjNy44LDAsMTQuMiw2LjQsMTQuMiwxNC4yQzI4My45LDgyLjksMjc3LjUsODkuMiwyNjkuNyw4OS4yIi8+Cgk8cGF0aCBmaWxsPSIjMjczRUUyIiBkPSJNMjY5LjcsODAuM2MyLjksMCw1LjMtMi40LDUuMy01LjNjMC0yLjktMi40LTUuMy01LjMtNS4zYy0yLjksMC01LjMsMi40LTUuMyw1LjMKCQlDMjY0LjQsNzcuOSwyNjYuOCw4MC4zLDI2OS43LDgwLjMiLz4KCTxwYXRoIGZpbGw9IiM5Nzk3OTciIGQ9Ik00NzQuMywyMzIuNmgtNTYuMmMtMC41LDAtMS0wLjQtMS0xdi01Ni4yYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yCgkJQzQ3NS4zLDIzMi4yLDQ3NC44LDIzMi42LDQ3NC4zLDIzMi42Ii8+Cgk8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMTAyMDIiIHN0cm9rZS13aWR0aD0iMC4yMDU3IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik00NzQuMywyMzIuNmgtNTYuMmMtMC41LDAtMS0wLjQtMS0xdi01Ni4yCgkJYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yQzQ3NS4zLDIzMi4yLDQ3NC44LDIzMi42LDQ3NC4zLDIzMi42eiIvPgoJPHBhdGggZD0iTTQ2MS45LDIwMy41YzAsOC43LTcsMTUuNy0xNS43LDE1LjdjLTguNywwLTE1LjctNy0xNS43LTE1LjdjMC04LjcsNy0xNS43LDE1LjctMTUuN0M0NTQuOSwxODcuOCw0NjEuOSwxOTQuOSw0NjEuOSwyMDMuNQoJCSIvPgoJPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuMTAyOCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNDYxLjksMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuNwoJCWMtOC43LDAtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43QzQ1NC45LDE4Ny44LDQ2MS45LDE5NC45LDQ2MS45LDIwMy41eiIvPgoJPHBhdGggZmlsbD0iIzk3OTc5NyIgZD0iTTgyLjEsMjMyLjZIMjUuOWMtMC41LDAtMS0wLjQtMS0xdi01Ni4yYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yCgkJQzgzLDIzMi4yLDgyLjYsMjMyLjYsODIuMSwyMzIuNiIvPgoJPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDEwMjAyIiBzdHJva2Utd2lkdGg9IjAuMjA1NyIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNODIuMSwyMzIuNkgyNS45Yy0wLjUsMC0xLTAuNC0xLTF2LTU2LjIKCQljMC0wLjUsMC40LTEsMS0xaDU2LjJjMC41LDAsMSwwLjQsMSwxdjU2LjJDODMsMjMyLjIsODIuNiwyMzIuNiw4Mi4xLDIzMi42eiIvPgoJPHBhdGggZD0iTTY5LjcsMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuN3MtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43UzY5LjcsMTk0LjksNjkuNywyMDMuNSIvPgoJPHBhdGggZmlsbD0iI0Y5RjlGOSIgZD0iTTMzMy44LDMxMC4zSDE2NS45Yy04LjMsMC0xNS02LjctMTUtMTVWMTI3LjVjMC04LjMsNi43LTE1LDE1LTE1aDE2Ny44YzguMywwLDE1LDYuNywxNSwxNXYxNjcuOAoJCUMzNDguOCwzMDMuNiwzNDIuMSwzMTAuMywzMzMuOCwzMTAuM3oiLz4KCTxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjEwMjgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTY5LjcsMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuNwoJCXMtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43UzY5LjcsMTk0LjksNjkuNywyMDMuNXoiLz4KCQk8L2c+Cjwvc3ZnPg==";
   transient = true;
 }
