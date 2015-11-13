@@ -3741,7 +3741,7 @@ function tdupload(args:string[])
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
                     uploadFiles()
-                    uploadRaygunDeployment(liteId, process.env['TRAVIS_COMMIT'], 'travis: ' + process.env['TRAVIS_BUILD_NUMBER'])
+                    //uploadRaygunDeployment(liteId, process.env['TRAVIS_COMMIT'], 'travis: ' + process.env['TRAVIS_BUILD_NUMBER'])
                 }
             }, 1, {
                 releaseid: lbl,
