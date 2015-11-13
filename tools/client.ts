@@ -3768,10 +3768,9 @@ function uploadRaygunDeployment(version: string, commit:string, comment: string)
         comment: comment,
         scmIdentifier: commit
     };
-    var req = http.request({
-        protocol: 'https',
+    var req = https.request({
         host: 'app.raygun.io',
-        port: '80',
+        port: 80,
         path: '/deployments',        
         method: "POST",
         headers : { 'content-type': 'application/json; charset=utf8' }
