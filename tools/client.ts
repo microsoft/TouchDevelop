@@ -3741,7 +3741,7 @@ function tdupload(args:string[])
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
                     uploadFiles()
-                    uploadRaygunDeployment(liteId, process.env['TRAVIS_COMMIT'], 'travis: ' + process.env['TRAVIS_BUILD_NUMBER'])
+                    uploadRaygunDeployment(d)
                 }
             }, 1, {
                 releaseid: lbl,
@@ -3756,18 +3756,23 @@ function tdupload(args:string[])
     }
 }
 
-function uploadRaygunDeployment(version: string, commit: string, comment: string) {
+function uploadRaygunDeployment(d: {
+    id: string;
+    version: string;
+    username: string;
+}) {
     if (!process.env['RAYGUN_API_KEY'] || !process.env["RAYGUN_AUTH_TOKEN"]) return;
 
     console.log('creating raygun deployment');
     var body = {
         apiKey: process.env['RAYGUN_API_KEY'],
-        version: version,
-        ownerName: "travis",
+        version: d.version,
+        ownerName: d.username,
         emailAddress: "build@touchdevelop.com",
-        comment: comment,
-        scmIdentifier: commit
+        comment: d.id,
+        scmIdentifier: process.env['TRAVIS_COMMIT']
     };
+    console.log(JSON.stringify(body, null, 2));
     try {
         var req = https.request({
             host: 'app.raygun.io',
