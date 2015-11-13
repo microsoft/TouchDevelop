@@ -3741,7 +3741,7 @@ function tdupload(args:string[])
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
                     uploadFiles()
-                    //uploadRaygunDeployment(liteId, process.env['TRAVIS_COMMIT'], 'travis: ' + process.env['TRAVIS_BUILD_NUMBER'])
+                    uploadRaygunDeployment(liteId, process.env['TRAVIS_COMMIT'], 'travis: ' + process.env['TRAVIS_BUILD_NUMBER'])
                 }
             }, 1, {
                 releaseid: lbl,
@@ -3756,9 +3756,9 @@ function tdupload(args:string[])
     }
 }
 
-function uploadRaygunDeployment(version: string, commit:string, comment: string) {
-    if (!process.env['RAYGUN_API_KEY']) return;
-    
+function uploadRaygunDeployment(version: string, commit: string, comment: string) {
+    if (!process.env['RAYGUN_API_KEY'] || !process.env["RAYGUN_AUTH_TOKEN"]) return;
+
     console.log('creating raygun deployment');
     var body = {
         apiKey: process.env['RAYGUN_API_KEY'],
@@ -3768,14 +3768,19 @@ function uploadRaygunDeployment(version: string, commit:string, comment: string)
         comment: comment,
         scmIdentifier: commit
     };
-    var req = https.request({
-        host: 'app.raygun.io',
-        port: 80,
-        path: '/deployments',        
-        method: "POST",
-        headers : { 'content-type': 'application/json; charset=utf8' }
-    });
-    req.end(JSON.stringify(body))
+    try {
+        var req = https.request({
+            host: 'app.raygun.io',
+            path: '/deployments?authToken=' + process.env["RAYGUN_AUTH_TOKEN"],
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json; charset=utf8'
+            }
+        });
+        req.end(JSON.stringify(body))
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 function setlabel(args:string[])
