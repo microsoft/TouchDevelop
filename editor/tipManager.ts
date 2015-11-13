@@ -9,7 +9,8 @@ module TDev {
         el?: HTMLElement;
         decl?: AST.Decl;
         forceTop?:boolean;
-        forceBottom?:boolean;
+        forceBottom?: boolean;
+        clientHeight?: number;
     }
 
     export module TipManager {
@@ -161,7 +162,7 @@ module TDev {
             else {
                 if (tip.forceBottom || (!tip.forceTop && top < parent.clientHeight / 2)) {
                     currentTipDiv.style.bottom = '';
-                    currentTipDiv.style.top = (top + 5 + el.clientHeight) + 'px';
+                    currentTipDiv.style.top = (top + (tip.clientHeight|| (5 + el.clientHeight))) + 'px';
                     triangleClass += 't';
                 }
                 else {

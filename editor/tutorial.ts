@@ -1938,6 +1938,8 @@ module TDev
                 ) {
                 if (ins.stmt.renderedAs) {
                     var target = <HTMLElement>ins.stmt.renderedAs.firstChild
+                    var forceBottom = false;
+                    var clientHeight: number = undefined;
                     if (ins.calcButton == Ticks.btnAddDown) {
                         var lastLine = target
                         while (target) {
@@ -1947,8 +1949,15 @@ module TDev
                         }
                         target = lastLine
                     }
+                    else if (ins.calcButton == Ticks.sideActionAddInput || ins.calcButton == Ticks.sideActionAddOutput) {
+                        clientHeight = target.clientHeight;
+                        target = <HTMLElement>target.firstElementChild;
+                        forceBottom = true;
+                    }
                     TipManager.setTip({
                         el: target,
+                        forceBottom: forceBottom,
+                        clientHeight : clientHeight,
                         title: lf("tap there"),
                         description: lf("select that line")
                     })
