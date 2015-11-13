@@ -3715,7 +3715,8 @@ function tdupload(args:string[])
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
                     uploadFiles()
-                    uploadRaygunDeployment(d)
+                    if (/touchdevelop/i.test(liteUrl))
+                        uploadRaygunDeployment(d)
                 }
             }, 1, {
                 releaseid: lbl,
