@@ -3735,7 +3735,9 @@ function uploadRaygunDeployment(d: {
     version: string;
     username: string;
 }) {
-    if (!process.env['RAYGUN_API_KEY'] || !process.env["RAYGUN_AUTH_TOKEN"]) return;
+    if (!process.env.RAYGUN_API_KEY
+        || !process.env.RAYGUN_AUTH_TOKEN
+        || process.env.TRAVIS_BRANCH != "master") return;
 
     console.log('creating raygun deployment');
     var body = {
