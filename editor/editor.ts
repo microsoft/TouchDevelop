@@ -6000,6 +6000,8 @@ module TDev
         {
             if (h == "#") h = "#" + TDev.hubHash;
 
+            h = h.replace(/%23/g, "#")
+
             var i = h.indexOf("#access_token=");
             if (i != -1) {
                 if(!Cloud.parseAccessToken(h,
