@@ -972,15 +972,15 @@ module TDev.Cloud {
     }
     export function postBugReportAsync(bug: BugReport) : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("bug"), bug);
+        return postPrivateApiAsync("bug", bug);
     }
     export function postTicksAsync(ticks:any) : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("ticks"), ticks);
+        return postPrivateApiAsync("ticks", ticks);
     }
     export function postNotificationsAsync() : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("me/notifications"), "");
+        return postPrivateApiAsync("me/notifications", {});
     }
     export interface PushNotificationRequestBody {
            // Push notification URL;
