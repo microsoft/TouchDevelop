@@ -79,6 +79,15 @@ module TDev {
 
         var pendingMetaItems = [];
 
+        function setUnInstalledAsync(
+            indexTable: Storage.Table,
+            scriptsTable: Storage.Table,
+            header: Cloud.Header)
+        {
+            return setInstalledAsync(indexTable, scriptsTable, uninstall(header), <any>0, <any>0, <any>0, <any>0)
+        }
+
+
         function setInstalledAsync(
             indexTable: Storage.Table,
             scriptsTable: Storage.Table,
@@ -268,10 +277,10 @@ module TDev {
                             .then((script) => script == null // transient download error?
                                 ? Promise.as() // ignore
                                 : script == "" // published script deleted in cloud? (rare, but possible)
-                                ? setInstalledAsync(indexTable, scriptsTable, uninstall(getHeader(body)), undefined, undefined, null, null)
+                                ? setUnInstalledAsync(indexTable, scriptsTable, getHeader(body))
                                 : setInstalledAsync(indexTable, scriptsTable, getHeader(body), script, body.editorState, null, cloudScriptVersion));
                     else if (body.script == "") // unpublished script deleted in cloud? (not sure how possible, but observed in practice)
-                        return setInstalledAsync(indexTable, scriptsTable, uninstall(getHeader(body)), undefined, undefined, null, null);
+                        return setUnInstalledAsync(indexTable, scriptsTable, getHeader(body));
                     else
                         return setInstalledAsync(indexTable, scriptsTable, getHeader(body), body.script, body.editorState, null, cloudScriptVersion);
                 }
@@ -830,8 +839,8 @@ module TDev {
             }).then(function (data/*: SyncData*/) {
                 var h = data.items[guid];
                 if (!h) return undefined; // already uninstalled?
-                var header = uninstall(<Cloud.Header>JSON.parse(h));
-                return setInstalledAsync(data.indexTable, data.scriptsTable, header, undefined, undefined, null, null);
+                var header = <Cloud.Header>JSON.parse(h);
+                return setUnInstalledAsync(data.indexTable, data.scriptsTable, header);
             });
         }
         export function publishAsync(guid: string, hidden:boolean) : Promise // of void

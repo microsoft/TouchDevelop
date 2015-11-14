@@ -7371,8 +7371,10 @@
                                 app.libraries().forEach((l: AST.LibraryRef) => {
                                     if (l.pubid) return;
                                     var hd = <Cloud.Header>headers[l.guid];
-                                    if (!hd) {
-                                        HTML.showErrorNotification(lf("cannot find library reference {0} in {1}", l.getName(), app.getName()))
+                                    if (!hd || hd.status == "deleted") {
+                                        ModalDialog.info(lf("cannot publish"),
+                                            lf("We couldn't find library reference {0} in {1}; please edit the script and fix it before publishing.",
+                                                l.getName(), app.getName()))
                                         canPublish = false;
                                         return;
                                     }
