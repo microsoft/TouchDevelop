@@ -3314,7 +3314,7 @@
                     return;
                 }
 
-                if (!/ visited/.test(box.className))
+                if (!Cloud.isRestricted() && !/ visited/.test(box.className))
                     box.className += " visited";
                 this.parentBrowser.loadDetails(this) 
             });
