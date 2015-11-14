@@ -3965,6 +3965,8 @@ function countpubs(args:string[])
                     k = k.replace(/Count$/, "")
                     if (!counters[k]) counters[k] = 0
                     counters[k] += v
+                } else if (v !== 0) {
+                    console.log("RESP", k, v)
                 }
             })
 
