@@ -10,10 +10,11 @@ module TDev {
         android2  ,
         android4  ,
         chrome    ,
+        chromeiOS ,
         firefox   ,
         safari    ,
         silkOld   ,
-        silk,
+        silk      ,
         opera     ,
         nodeJS    ,
         maxthon   ,
@@ -307,7 +308,7 @@ module TDev {
 
 
             if (isMobile && browser == BrowserSoftware.safari && /CriOS/.test(userAgent)) {
-                browser = BrowserSoftware.chrome;
+                browser = BrowserSoftware.chromeiOS;
                 setBrowserVersion("CriOS");
             }
 
@@ -415,41 +416,40 @@ module TDev {
             var message = (problemHTML: string, fixHTML: string = undefined) => <UnsupportedMessage>{ problemHTML: problemHTML, fixHTML: fixHTML };
             var genericMessage = (problemHTML: string, upgradedBrowserName: string = undefined) => message(problemHTML, upgradedBrowserName ?
                 "<p>Follow these easy steps to run " + what + " on your device:</p>" +
-                "<ol class='light'><li>open <b>" + upgradedBrowserName + "</b></li><li>navigate to <u>touchdevelop.com" + path + "</u></li></ol>" +
+                "<ol class='light'><li>open <b>" + upgradedBrowserName + "</b></li><li>navigate to <u>" + path + "</u></li></ol>" +
                 "<p>You can copy&amp;paste the link into " + upgradedBrowserName + ".</p>" : undefined);
 
             if (isEmbedded)
-                return genericMessage("<p>It seems you're running TouchDevelop inside of another app.</p>", "your regular internet browser");
+                return genericMessage("<p>It seems you're running " + what + " inside of another app.</p>", "your regular internet browser");
 
             // only firefox supported
             var olderAndroidMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on Android:</p>" +
                 "<ol class='light'><li><b>try to install the latest <a href='market://details?id=org.mozilla.firefox&hl=en'>Firefox Browser</a></b> from the Google Play Store</li>" +
-                "<li>open <u>touchdevelop.com" + path + "</u> in the Chrome Browser</li></ol>" +
+                "<li>open <u>" + path + "</u> in the Chrome Browser</li></ol>" +
                 "<p>You can copy&amp;paste the link into Firefox.</p>");
-
-            // chrome, firefox, opera
+            
             var chromeAndroidMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on Android:</p>" +
                 "<ol class='light'><li><b>install the latest <a href='market://details?id=com.android.chrome&hl=en'>Chrome Browser</a> or <a href='market://details?id=org.mozilla.firefox&hl=en'>Firefox Browser</a> or <a href='market://details?id=com.opera.browser&hl=en'>Opera Browser</a> </b> from the Google Play Store</li>" +
-                "<li>open <u>touchdevelop.com" + path + "</u> in the Chrome Browser</li></ol>" +
+                "<li>open <u>" + path + "</u> in the Chrome Browser</li></ol>" +
                 "<p>You can copy&amp;paste the link into the installed browser.</p>");
 
             var upgradeMessage = (problemHTML: string) => message(problemHTML,
                 "<p>Follow these easy steps to run " + what + " on your device:</p>" +
-                "<ol class='light'><li>upgrade your browser to the latest version</li><li>navigate to <u>touchdevelop.com" + path + "</u></li></ol>" +
+                "<ol class='light'><li>upgrade your browser to the latest version</li><li>navigate to <u>" + path + "</u></li></ol>" +
                 "<p>You can copy&amp;paste the link into your upgraded browser.</p>");
 
             switch (browser) {
             case BrowserSoftware.ieOld:
                 // this is really handled in index.html already
-                return message("TouchDevelop Wep App does not work with Internet Explorer versions earlier than 10.");
+                return message(what + " does not work with Internet Explorer versions earlier than 10.");
 
             case BrowserSoftware.silkOld:
-                return message("TouchDevelop Wep App does not work with the Silk browser in Kindle Fire 1st Gen. Please upgrade to Kindle Fire 2nd Gen or Kindle Fire HD."); // and there's probably nothing the user can do about it
+                return message(what + " does not work with the Silk browser in Kindle Fire 1st Gen. Please upgrade to Kindle Fire 2nd Gen or Kindle Fire HD."); // and there's probably nothing the user can do about it
 
             case BrowserSoftware.opera:
-                return genericMessage("TouchDevelop Wep App does not work with Opera. Please use Internet Explorer 10+, Chrome or Firefox.", "one of the suggested browsers");
+                return genericMessage(what + " does not work with Opera. Please use Internet Explorer 10+, Chrome or Firefox.", "one of the suggested browsers");
 
             case BrowserSoftware.safari:
                 if (isMobileSafariOld)
@@ -458,20 +458,23 @@ module TDev {
                     return genericMessage("Safari 5 and older are not supported. Please upgrade Safari or <a href='http://www.google.com/mac/'>install Chrome</a> or <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.", "the upgraded browser");
                 if (isTouchDevice) break;
                 if (isMacOSX) break;
-                return genericMessage("TouchDevelop Wep App is not supported in Safari on a PC. Please use Internet Explorer 10 or better, Chrome or Firefox.", "one of the suggested browsers");
+                return genericMessage(what  + " is not supported in Safari on a PC. Please use Internet Explorer 10 or better, Chrome or Firefox.", "one of the suggested browsers");
 
             case BrowserSoftware.android2:
-                return olderAndroidMessage("<p>TouchDevelop might require a newer version of Android.</p>"); // and there's probably nothing the user can do about it
+                return olderAndroidMessage(what + " might require a newer version of Android."); // and there's probably nothing the user can do about it
 
+            case BrowserSoftware.chromeiOS:
+                return message(what + " is not supported in Chrome for IOS. Please use Safari instead.");
+                    
             case BrowserSoftware.android4:
-                return chromeAndroidMessage("<p>TouchDevelop Wep App is not supported in the stock Android browser.<p/>");
+                return chromeAndroidMessage(what + " is not supported in the stock Android browser.");
 
             case BrowserSoftware.firefox:
                 if (browserVersion < 16)
-                    return upgradeMessage("<p>You are using an outdated version of Firefox.</p>");
+                    return upgradeMessage("You are using an outdated version of Firefox.");
                 // the latest versions of Firefox mobile on Android look pretty good
                 if (isAndroid && browserVersion < 29)
-                    return upgradeMessage("<p>Please upgrade to the latest version of Firefox for Android.</p>");
+                    return upgradeMessage("Please upgrade to the latest version of Firefox for Android.");
                 break;
 
             case BrowserSoftware.chrome:
@@ -491,12 +494,12 @@ module TDev {
 
             case BrowserSoftware.maxthon:
             case BrowserSoftware.unknown:
-                return genericMessage("<p>TouchDevelop is not supported in the current browser.</p>", "<a href='https://www.touchdevelop.com/app/.browsers#supported'>a supported browser</a>");
+                return genericMessage(what + " is not supported in the current browser.", "<a href='/app/.browsers#supported'>a supported browser</a>");
             }
 
             if (!canWriteLocalStorage) {
                 if (browser == BrowserSoftware.safari)
-                    return message("<p>You are running Safari in Private Mode or Private Browsing. TouchDevelop does not support this mode, as TouchDevelop needs to maintain a database of installed scripts, but Private Mode or Private Browsing does not allow the use of databases.</p>",
+                    return message("<p>You are running Safari in Private Mode or Private Browsing. " + what + " does not support this mode.</p>",
                         "<p><b>Please disable Private Mode or Private Browsing, and then try again.</b></p>" +
                         "<ul>" +
                         "<li>In iOS 6, open 'Settings', select 'Safari', and turn 'Private Browsing' off.</li>" +
