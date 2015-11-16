@@ -2024,6 +2024,12 @@ module TDev
                 );
             }
             
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
+                this.currentCompilationModalDialog.add(div("wall-dialog-body",
+                    lf("To compile and flash BBC micro:bit scripts, you will need to have the BBC micro:bit app installed (available early 2016).")
+                ));                
+            }
+            
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             //if (inBrowser)
             //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
