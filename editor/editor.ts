@@ -2026,7 +2026,7 @@ module TDev
             
             if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
-                    lf("To compile and flash BBC micro:bit scripts, you will need to have the BBC micro:bit app installed (available early 2016).")
+                    lf("To compile and flash BBC micro:bit scripts on your iPhone or iPad, you will need to have the BBC micro:bit app installed (available early 2016).")
                 ));                
             }
             
