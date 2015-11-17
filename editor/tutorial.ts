@@ -1204,32 +1204,7 @@ module TDev
 
             return r;
         }
-
-        private youCanGoFasterAsync()
-        {
-            var r = new PromiseInv()
-            var m = new ModalDialog()
-            m.addHTML(lf("<h3>now, do it yourself!</h3>"))
-            m.addHTML(lf("From now on we just show you the code that you need to write, in the goal line. It looks like this:"))
-            var d = div(null);
-            Browser.setInnerHTML(d, TheEditor.calculator.goalHTML());
-            d.style.margin = "1.5em";
-            m.add(d)
-            m.addHTML(lf("Try finding the buttons yourself. If you get stuck, tap on the goal line."));
-            Util.delayButton(m.addOk(lf("ok, got it!")), 1500, true)
-            m.fullWhite()
-            m.onDismiss = () => {
-                this.disableUpdate = false;
-                this.update();
-                r.success(null)
-            };
-            TipManager.setTip(null);
-            this.disableUpdate = true
-            m.show()
-            return r
-        }
         
-
         private youAreOnYourOwnAsync() {
             var r = new PromiseInv()
             var m = new ModalDialog()
