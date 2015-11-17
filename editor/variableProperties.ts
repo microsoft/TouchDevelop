@@ -708,13 +708,20 @@ module TDev
             input.accept = ".hex,.json,.jsz";
             
             m.add(div('wall-dialog-header', lf("import code")));
-            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .json files. Hint: you can also drag and drop the files in the editor to import them!")));
+            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .jsz files. Hint: you can also drag and drop the files in the editor to import them!")));
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
+                m.add(div('wall-dialog-body',
+                    lf("To import files to your iPhone or iPad, you need to have the latest software installed. Files can only be imported from a cloud storage app.")));
+            }
             m.add(div('wall-dialog-body', input));
-            m.addOk(lf("import"), () => {
-                m.dismiss();
-                handleImportFilesAsync(Util.toArray(input.files))
-                    .done();
-            });
+            m.add(div('wall-dialog-buttons',
+                HTML.mkButton(lf("import"), () => {
+                    m.dismiss();
+                    handleImportFilesAsync(Util.toArray(input.files))
+                        .done();
+                }),
+                HTML.mkButton(lf("cancel"), () => m.dismiss())
+            ));
             m.show();            
         }
 
@@ -812,7 +819,7 @@ module TDev
                         return lzmaDecompressAsync(tmp.text)
                             .then(res => {
                                 if (!res) return null;
-                                var meta = res.slice(0, hd.metaSize);
+                                var meta = res.slice(0, hd.headerSize || hd.metaSize);
                                 var text = res.slice(hd.metaSize);
                                 return [JSON.parse(meta), text]
                             })

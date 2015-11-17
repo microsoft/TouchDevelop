@@ -79,6 +79,15 @@ module TDev {
 
         var pendingMetaItems = [];
 
+        function setUnInstalledAsync(
+            indexTable: Storage.Table,
+            scriptsTable: Storage.Table,
+            header: Cloud.Header)
+        {
+            return setInstalledAsync(indexTable, scriptsTable, uninstall(header), <any>0, <any>0, <any>0, <any>0)
+        }
+
+
         function setInstalledAsync(
             indexTable: Storage.Table,
             scriptsTable: Storage.Table,
@@ -268,10 +277,10 @@ module TDev {
                             .then((script) => script == null // transient download error?
                                 ? Promise.as() // ignore
                                 : script == "" // published script deleted in cloud? (rare, but possible)
-                                ? setInstalledAsync(indexTable, scriptsTable, uninstall(getHeader(body)), undefined, undefined, null, null)
+                                ? setUnInstalledAsync(indexTable, scriptsTable, getHeader(body))
                                 : setInstalledAsync(indexTable, scriptsTable, getHeader(body), script, body.editorState, null, cloudScriptVersion));
                     else if (body.script == "") // unpublished script deleted in cloud? (not sure how possible, but observed in practice)
-                        return setInstalledAsync(indexTable, scriptsTable, uninstall(getHeader(body)), undefined, undefined, null, null);
+                        return setUnInstalledAsync(indexTable, scriptsTable, getHeader(body));
                     else
                         return setInstalledAsync(indexTable, scriptsTable, getHeader(body), body.script, body.editorState, null, cloudScriptVersion);
                 }
@@ -830,8 +839,8 @@ module TDev {
             }).then(function (data/*: SyncData*/) {
                 var h = data.items[guid];
                 if (!h) return undefined; // already uninstalled?
-                var header = uninstall(<Cloud.Header>JSON.parse(h));
-                return setInstalledAsync(data.indexTable, data.scriptsTable, header, undefined, undefined, null, null);
+                var header = <Cloud.Header>JSON.parse(h);
+                return setUnInstalledAsync(data.indexTable, data.scriptsTable, header);
             });
         }
         export function publishAsync(guid: string, hidden:boolean) : Promise // of void
@@ -883,6 +892,9 @@ module TDev {
                 // store date of last modification, not most recent use
                 lastUse: hd.scriptVersion ? hd.scriptVersion.time : getCurrentTime(),
                 editor: hd.editor || "touchdevelop",
+                name: hd.meta.name,
+                comment: hd.meta.comment,
+                // SAVE-COMPAT
                 meta: {
                     name: hd.meta.name,
                     comment: hd.meta.comment
@@ -892,21 +904,39 @@ module TDev {
 
         export function installFromSaveAsync(hd:Cloud.Header, scriptText: string): Promise // of Cloud.Header
         {
+            var tm = (<any>hd).lastUse || hd.recentUse || getCurrentTime();
+            tm = Util.intBetween(1350000000, tm, getCurrentTime());
+            if (!hd.meta) hd.meta = {}
+            var name = hd.name || hd.meta.name || "no name"
+            var comment = (<any>hd).comment || hd.meta.comment || ""
             var h = <Cloud.Header>(<any>{
-                status: hd.status,
+                status: hd.status === "published" ? "published" : "unpublished",
                 scriptId: hd.scriptId,
                 userId: hd.userId || (hd.scriptId ? "bogususerid" : ""),
-                meta: hd.meta,
+                name: name,
+                meta: {
+                    name: name,
+                    comment: comment,
+                },
                 scriptVersion: <Cloud.Version>{
                     instanceId: Cloud.getWorldId(), 
                     version: 0, 
-                    time: (<any>hd).lastUse || hd.recentUse || getCurrentTime(), 
+                    time: tm,
                     baseSnapshot: "" 
                 },
                 guid: Util.guidGen(),
                 editor: hd.editor == "touchdevelop" ? "" : hd.editor,
                 recentUse: getCurrentTime(),
             });
+            if (!/^\w{1,50}$/.test(h.editor))
+                h.editor = "";
+            if (!/^[a-z]{1,20}$/.test(h.scriptId)) {
+                h.scriptId = "";
+                h.userId = "";
+            }
+            if (h.userId && !/^[a-z]{1,20}$/.test(h.userId))
+                h.userId = "bogususerid";
+
             if (!h.editor) h.meta = null; // force recompute of meta
             return Promise.join({
                 indexTable: getIndexTablePromise(),

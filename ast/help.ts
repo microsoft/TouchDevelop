@@ -901,7 +901,10 @@ module TDev {
                     var urlsafe = HTML.proxyResource(url);
                     if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url)
                     var r = "<div class='md-img'><div class='md-img-inner'>";
-                    r += Util.fmt("<img src=\"{0}\" alt='picture' style='height:{1}em'/></div>", urlsafe, height);
+                    r += Util.fmt("<img src=\"{0}\" alt='picture'", urlsafe);
+                    if (m[6] || (!this.forWeb && !this.print))
+                        r += Util.fmt(" style='height:{0}em'", height);
+                    r += "/></div>";
                     if (caption) {
                         r += "<div class='md-caption'>" + this.formatText(caption.slice(1)) + "</div>";
                     }

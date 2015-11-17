@@ -3314,7 +3314,7 @@
                     return;
                 }
 
-                if (!/ visited/.test(box.className))
+                if (!Cloud.isRestricted() && !/ visited/.test(box.className))
                     box.className += " visited";
                 this.parentBrowser.loadDetails(this) 
             });
@@ -6993,6 +6993,10 @@
         public saveAsync(): Promise {
             var guid = this.getGuid();
             var json: string;
+            
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
+                HTML.showWarningNotification(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."));
+                
             return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
                 .then(r => {
                     var text = <string>r[0];
@@ -7371,8 +7375,10 @@
                                 app.libraries().forEach((l: AST.LibraryRef) => {
                                     if (l.pubid) return;
                                     var hd = <Cloud.Header>headers[l.guid];
-                                    if (!hd) {
-                                        HTML.showErrorNotification(lf("cannot find library reference {0} in {1}", l.getName(), app.getName()))
+                                    if (!hd || hd.status == "deleted") {
+                                        ModalDialog.info(lf("cannot publish"),
+                                            lf("We couldn't find library reference {0} in {1}; please edit the script and fix it before publishing.",
+                                                l.getName(), app.getName()))
                                         canPublish = false;
                                         return;
                                     }

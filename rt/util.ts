@@ -2437,7 +2437,7 @@ module TDev{
         return elt;
     }
 
-    export function delayButton(b:HTMLElement, time = 3000) : HTMLElement
+    export function delayButton(b:HTMLElement, time = 3000, blink = false) : HTMLElement
     {
         b.style.opacity = "0";
         b.style.visibility = "hidden";
@@ -2445,7 +2445,8 @@ module TDev{
             b.style.visibility = "";
             Util.fadeIn(b, () => {
                 b.style.opacity = '1';
-                Util.setTimeout(2000, () => Util.coreAnim("blinkLocation", 4000, b));
+                if (blink)
+                    Util.setTimeout(2000, () => Util.coreAnim("blinkLocation", 4000, b));
             })
         });
         return b;

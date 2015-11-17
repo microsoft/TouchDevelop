@@ -273,7 +273,8 @@ module TDev
 
                     var newMeta = {
                         compression: "LZMA",
-                        metaSize: meta.length,
+                        metaSize: meta.length, // SAVE-COMPAT
+                        headerSize: meta.length,
                         textSize: text.length
                     }
 
@@ -298,7 +299,7 @@ module TDev
                 if (dbg)
                     ModalDialog.showText(e.stack)
                 else
-                    HTML.showErrorNotification(lf("compilation failed; developers notified; sorry"))
+                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
                 return
             }
 

@@ -343,6 +343,10 @@ module TDev {
             return;
         }
 
+        var cfg = (<any>window).tdConfig;
+        if (cfg) Object.keys(cfg).forEach(k => Cloud.config[k] = cfg[k]);
+        (<any>window).rootUrl = Cloud.config.rootUrl;
+
         TDev.Browser.isCompiledApp = true;
         TDev.Browser.detect();
         Ticker.fillEditorInfoBugReport = (b: BugReport) => {

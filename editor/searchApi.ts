@@ -265,11 +265,13 @@ module TDev
             this.runBtn.style.position = "relative";
             if (this.compileBtn) {
                 this.compileBtn.style.position = "relative";
-                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:bitcompile,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e:MouseEvent) => {
-                        var debug = (<MouseEvent> e).ctrlKey || /dbgcpp=1/i.test(document.location.href);
+                this.compileBtn.setChildren([Editor.mkTopMenuItem("svg:bitcompile,currentColor", lf("compile"), Ticks.calcSearchCompile, "Ctrl-Alt-M", (e: MouseEvent) => {
+                        var me = <MouseEvent>e;
+                        var forceNative = me.ctrlKey && me.altKey;
+                        var debug = me.ctrlKey || /dbgcpp=1/i.test(document.location.href);
                         if (!debug && SizeMgr.splitScreen)
                             TheEditor.runMainAction();
-                        TheEditor.compile(this.compileBtn, debug);
+                        TheEditor.compile(this.compileBtn, debug, forceNative);
                 })]);
             }    
 

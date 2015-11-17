@@ -254,7 +254,8 @@ module TDev.Cloud {
         localTopicPath: "#topic:",
         legalButtons: [
             { name: "terms of use", url: "/terms-of-use" },
-            { name: "privacy and cookies", url: "/privacy"}
+            { name: "privacy and cookies", url: "/privacy"},
+            { name: "support", url:"https://touchdevelop.uservoice.com" }
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
@@ -908,15 +909,15 @@ module TDev.Cloud {
     }
     
     export function showSigninNotification(isOnline: boolean) {
-        if (isOnline)
-            HTML.showWarningNotification(lf("You are not currently signed in: sign in or dismiss this message"), {
-                onClick: () => {
+        if (isOnline) HTML.showWarningNotification(lf("You are not signed in."), {
+              onDismissText: lf("sign in"),
+              onDismiss: () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
                         login.show()
                 }
             });
-        else HTML.showProgressNotification(lf("cannot sync - you appear to be offline"));
+        else HTML.showProgressNotification(lf("You appear to be offline."));
     }
             
     export function handlePostingError(e: any, action: string, modal = true) {
@@ -971,15 +972,15 @@ module TDev.Cloud {
     }
     export function postBugReportAsync(bug: BugReport) : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("bug"), bug);
+        return postPrivateApiAsync("bug", bug);
     }
     export function postTicksAsync(ticks:any) : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("ticks"), ticks);
+        return postPrivateApiAsync("ticks", ticks);
     }
     export function postNotificationsAsync() : Promise // of void
     {
-        return Util.httpPostJsonAsync(getPrivateApiUrl("me/notifications"), "");
+        return postPrivateApiAsync("me/notifications", {});
     }
     export interface PushNotificationRequestBody {
            // Push notification URL;

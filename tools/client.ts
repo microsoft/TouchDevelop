@@ -1623,10 +1623,14 @@ export function updatelang(args:string[])
     var allTrans = {}
     var numStarted = 0
 
+    var strings = {}
     var usedSet = {}
     JSON.parse(fs.readFileSync("build/localization.json", "utf8")).strings.forEach(s => {
         usedSet[s] = 1
+        if(s)
+            strings[s] = s;
     })
+    fs.writeFileSync("generated/strings.json", JSON.stringify(strings, null, 2));
 
     var arrToStr = arr => {
         var res = "["
@@ -1646,7 +1650,6 @@ export function updatelang(args:string[])
     }
 
     var finish = () => {
-        var strings = {}
         var keys = {}
         var res = "TDev.Util._languageData = function (lang) {\n"
         langs.forEach(l => {
@@ -1654,7 +1657,6 @@ export function updatelang(args:string[])
                 if (keys[k] === 1) return
                 if (usedSet.hasOwnProperty(k)) {
                     keys[k] = 1
-                    strings[k] = k;
                 }
                 else {
                     console.log("skipping: " + k)
@@ -1688,7 +1690,6 @@ export function updatelang(args:string[])
         })
         res += "\n    return false;\n}\n\n"
         fs.writeFileSync("generated/langs.js", res)
-        fs.writeFileSync("generated/strings.json", JSON.stringify(strings));
     }
     
     fs.readdirSync("locales").forEach((folder: string) => {
@@ -3616,20 +3617,7 @@ function tdupload(args:string[])
         lbl = ((253402300799999 - Date.now()) + "0000" + "-" + guidGen().replace(/-/g, ".") + "-" + lbl).toLowerCase()
 
     console.log("releaseid:" + lbl)
-
-    if (key == "direct") {
-        var atokF = "access_token.txt"
-        if (!fs.existsSync(atokF)) {
-            console.warn("Access token not found.");
-            console.log("Open the following link in your browser:");
-            console.log("   https://www.touchdevelop.com/oauth/dialog?client_id=upload&response_type=token");
-            console.log("Log in with your admin credentials, and save the access token in a text file with the following name.");
-            console.log("   ./" + atokF)
-            console.log("The token will be valid for up to one year. Do not share or check in the access token --- it identifies you personally.");
-            return
-        }
-        var td_tok = "?access_token=" + fs.readFileSync(atokF, "utf8").replace(/\s/g, "").replace(/^#access_token=/, "")
-    }
+   
 
     // Recursively enumerates in each entry that's a directory
     var expand = function (fileList) {
@@ -3702,19 +3690,6 @@ function tdupload(args:string[])
                     contentType: mime,
                     content: content,
                 })
-            } else if (td_tok) {
-                var url = "https://www.touchdevelop.com/app/" + lbl + "/" + fileName + td_tok
-                tdevGet(url, (resp) => {
-                    console.log(fileName + ": " + resp)
-                }, 1, data, mime)
-            } else {
-                var url = "https://tdupload.azurewebsites.net/upload?access_token=" + key
-                url += "&path=" + lbl + "/" + encodeURIComponent(fileName)
-                url += "&contentType=" + encodeURIComponent(mime)
-
-                tdevGet(url, (resp) => {
-                    console.log(fileName + ": " + resp)
-                }, 1, data)
             }
         })
     })
@@ -3740,6 +3715,8 @@ function tdupload(args:string[])
                             console.log("channel: " + resp)
                         }, 1, { name: channel })
                     uploadFiles()
+                    if (/touchdevelop/i.test(liteUrl))
+                        uploadRaygunDeployment(d)
                 }
             }, 1, {
                 releaseid: lbl,
@@ -3751,6 +3728,40 @@ function tdupload(args:string[])
 
     } else {
         uploadFiles()
+    }
+}
+
+function uploadRaygunDeployment(d: {
+    id: string;
+    version: string;
+    username: string;
+}) {
+    if (!process.env.RAYGUN_API_KEY
+        || !process.env.RAYGUN_AUTH_TOKEN
+        || process.env.TRAVIS_BRANCH != "master") return;
+
+    console.log('creating raygun deployment');
+    var body = {
+        apiKey: process.env['RAYGUN_API_KEY'],
+        version: d.version,
+        ownerName: d.username,
+        emailAddress: "build@touchdevelop.com",
+        comment: d.id,
+        scmIdentifier: process.env['TRAVIS_COMMIT']
+    };
+    console.log(JSON.stringify(body, null, 2));
+    try {
+        var req = https.request({
+            host: 'app.raygun.io',
+            path: '/deployments?authToken=' + process.env["RAYGUN_AUTH_TOKEN"],
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json; charset=utf8'
+            }
+        });
+        req.end(JSON.stringify(body))
+    } catch (e) {
+        console.log(e);
     }
 }
 
@@ -3954,6 +3965,8 @@ function countpubs(args:string[])
                     k = k.replace(/Count$/, "")
                     if (!counters[k]) counters[k] = 0
                     counters[k] += v
+                } else if (v !== 0) {
+                    console.log("RESP", k, v)
                 }
             })
 

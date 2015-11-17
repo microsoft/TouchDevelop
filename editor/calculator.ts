@@ -1434,7 +1434,7 @@ module TDev
 
         public inlineEdit(l:AST.Token)
         {
-            if (l instanceof AST.FieldName && (<AST.FieldName> l).isOut)
+            if (l instanceof AST.FieldName && (<AST.FieldName> l).isOut && Cloud.isRestricted())
                 return;
             this.unselect();
             if (this.checkNextDisplay()) return;
@@ -2154,7 +2154,7 @@ module TDev
             } else {
                 var e = this.mkIntelliItem(1.1e20, Ticks.calcInsertAssignment);
                 e.nameOverride = ":="
-                e.descOverride = "assignment";
+                e.descOverride = lf("assignment");
                 e.cbOverride = () => { this.insertOp(":="); };
                 this.suggestedAssignment = true;
             }
@@ -3673,7 +3673,7 @@ module TDev
                 var isNum = pp.getKind() == api.core.Number
 
                 e.nameOverride = isNum ? s + "" : isEnum ? s : Util.fmt('"{0}"', s);
-                e.descOverride = "insert";
+                e.descOverride = lf("insert");
                 e.iconOverride = "svg:EmptyCircle,white";
                 e.colorOverride = "rgb(0, 204, 153)";
                 var spic = picStringValues[s];
