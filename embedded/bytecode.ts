@@ -1370,6 +1370,8 @@ module TDev.AST.Bytecode
                 this.dispatch(inl.body);
                 this.proc.emitLbl(ret)
 
+                this.proc.emitClrs(null, false);
+
                 this.proc.popLocals();
                 this.proc.emit("pop {r5, pc}");
                 this.proc.emit("@stackempty inlfunc");
