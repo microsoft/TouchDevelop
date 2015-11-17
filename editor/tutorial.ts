@@ -1084,7 +1084,7 @@ module TDev
                     HTML.mkButton(lf("finished"), () => {
                         willNowPublish = true;
                         m.dismiss();
-                    }), 1000)
+                    }), 1000, true)
             ));
             if (this.hourOfCode)
                 m.add(div('wall-dialog-body hoc-notice',
@@ -1192,7 +1192,7 @@ module TDev
 
             m.fullWhite();
             m.add(div('wall-dialog-buttons',
-                Util.delayButton(HTML.mkButton(lf("let's get started!"), () => m.dismiss()), 1000)
+                Util.delayButton(HTML.mkButton(lf("let's get started!"), () => m.dismiss()), 1000, true)
                 ));
             // add tracking pixel to dialog + notice
             if (this.hourOfCode) {
@@ -1216,7 +1216,7 @@ module TDev
             d.style.margin = "1.5em";
             m.add(d)
             m.addHTML(lf("Try finding the buttons yourself. If you get stuck, tap on the goal line."));
-            Util.delayButton(m.addOk(lf("ok, got it!")), 1500)
+            Util.delayButton(m.addOk(lf("ok, got it!")), 1500, true)
             m.fullWhite()
             m.onDismiss = () => {
                 this.disableUpdate = false;
@@ -1236,7 +1236,7 @@ module TDev
             m.addHTML(lf("<h3>no more tips!</h3>"))
             m.addHTML(lf("From now on we won't show you the code to write. Follow the instructions and tap run when you think you are done."))
             m.addHTML(lf("Try tweaking your code until you get it right. If you get stuck, tap the tutorial bar."));
-            Util.delayButton(m.addOk(lf("ok, let's roll!")), 1500)
+            Util.delayButton(m.addOk(lf("ok, let's roll!")), 1500, true)
             m.fullWhite()
             m.onDismiss = () => {
                 this.disableUpdate = false;
@@ -1325,7 +1325,7 @@ module TDev
                         // TODO: mine tutorial locale
                         /-/.test(this.topic.id) ? HTML.mkLinkButton(lf("rewind"),() => { this.replyDialog() }) : null,
                         TheEditor.widgetEnabled("tutorialGoToPreviousStep", true) && previousStep > 0 && this.steps[previousStep].hasStar() ? HTML.mkLinkButton(lf("go to previous step"),() => { this.replyAsync(previousStep).done(() => { m.dismiss(); }); }) : null,
-                        HTML.mkButton(lf("let's do it!"), () => m.dismiss())
+                        Util.delayButton(HTML.mkButton(lf("let's do it!"), () => m.dismiss()), 2000)
                         )
                     );
 
@@ -1343,7 +1343,7 @@ module TDev
                                 tick(Ticks.hourOfCodeConfirm);
                                 this.openHocFinish();
                             }
-                            ModalDialog.askMany(lf("Are you finished coding?"), lf("You can come back later to TouchDevelop and finish the tutorial!"), btns);
+                            ModalDialog.askMany(lf("Are you finished coding?"), lf("You can come back later to finish the tutorial!"), btns);
                         }));
                     }
 
