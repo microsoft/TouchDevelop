@@ -840,6 +840,14 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
                 resources: cs.packageResources })
         break;
 
+    case "webapp":
+        TDev.Script.setStableNames();
+        var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
+                scriptId: r.id
+        });
+        ar.ok({ compiled: cs.getCompiledCode() });
+        break;
+
     case "package": (() => {
         var user = ""
         if (opts.token) {
