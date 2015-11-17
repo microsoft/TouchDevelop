@@ -6993,6 +6993,10 @@
         public saveAsync(): Promise {
             var guid = this.getGuid();
             var json: string;
+            
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
+                HTML.showWarningNotification(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."));
+                
             return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
                 .then(r => {
                     var text = <string>r[0];

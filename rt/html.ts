@@ -790,13 +790,10 @@ module TDev.HTML {
                 ModalDialog.info(msgText, options.details);
             });
         } else if (options && options.onClick)
-            msg.withClick(() => {
-                options.onClick();
-            }); 
+            msg.withClick(() => options.onClick()); 
         else {
-            info.appendChild(HTML.mkLinkButton(lf("dismiss"), () => {
-                Animation.fadeOut(msg).begin();
-            }))
+            info.appendChild(HTML.mkLinkButton(lf("dismiss"), () => Animation.fadeOut(msg).begin()))
+            msg.withClick(() => Animation.fadeOut(msg).begin())
         }
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
