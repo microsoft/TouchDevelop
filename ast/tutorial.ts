@@ -576,7 +576,7 @@ module TDev.AST
                 if (s.printOut) addHeaders(s.printOut.body)
             })
 
-            var maxCount = 4;
+            var maxCount = 2;
             if (!res.every(s => s.hintLevel === undefined)) maxCount = 1e10;
 
             var currLevel = Cloud.config.hintLevel;
@@ -588,7 +588,7 @@ module TDev.AST
 
                 s.hintLevel = currLevel
                 if (!s.autoMode) maxCount--;
-                if (maxCount < 0) currLevel = "semi";
+                if (maxCount <= 0) currLevel = "semi";
 
                 if (s.validator) s.hintLevel = "free"
             })

@@ -909,15 +909,8 @@ module TDev.Cloud {
     }
     
     export function showSigninNotification(isOnline: boolean) {
-        if (isOnline)
-            HTML.showWarningNotification(lf("You are not currently signed in: sign in or dismiss this message"), {
-                onClick: () => {
-                    var login = (<any>TDev).Login;
-                    if (login && login.show)
-                        login.show()
-                }
-            });
-        else HTML.showProgressNotification(lf("cannot sync - you appear to be offline"));
+        if (isOnline) HTML.showWarningNotification(lf("You are not signed in."));
+        else HTML.showProgressNotification(lf("You appear to be offline."));
     }
             
     export function handlePostingError(e: any, action: string, modal = true) {

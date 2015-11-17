@@ -201,6 +201,7 @@ module TDev.Browser {
                     scriptProperties: true,
                     scriptPropertiesSettings: true,
                     scriptPropertiesPropertyAtomic: true,
+                    scriptPropertiesUseCppCompiler: true,
                     databaseSection: true,
                     // statements
                     comment: true,
@@ -467,6 +468,7 @@ module TDev.Browser {
                         scriptPropertiesSettings: true,
                         editorRunOnLoad: true,
                         calcApiHelp: true,
+                        scriptPropertiesUseCppCompiler: true,
                         whileConditionDefault: "true",
                         whileBodyDefault: "skip; basic->pause(20);",
                         forConditionDefault: "5",
