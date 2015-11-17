@@ -771,10 +771,11 @@ module TDev.HTML {
     export interface ShowWarningNotificationsOptions {
         details?: string;
         els?: HTMLElement[];
-        onClick?: () => void;
+        onDismissText?: string;
+        onDismiss?: () => void;
     }
 
-    export function showWarningNotification(msgText: string, options?: ShowWarningNotificationsOptions) {
+    export function showWarningNotification(msgText: string, options: ShowWarningNotificationsOptions = {}) {
         if (Browser.isHeadless) {
             Util.log("warning: " + msgText);
             return;
@@ -782,6 +783,13 @@ module TDev.HTML {
 
         var info = div('info', msgText);        
         var msg = div("warningNotification", info);
+        var dismissText = options.onDismissText || lf("dismiss");
+        var dismiss = () => {
+            if (options.onDismiss)
+                options.onDismiss();
+            Animation.fadeOut(msg).begin();
+        };
+            
         if (options && options.els) msg.appendChildren(options.els);        
         if (options && options.details) {
             msg.appendChild(div('info link', 'learn more...'));
@@ -789,12 +797,7 @@ module TDev.HTML {
                 tick(Ticks.warningNotificationTap);
                 ModalDialog.info(msgText, options.details);
             });
-        } else if (options && options.onClick)
-            msg.withClick(() => options.onClick()); 
-        else {
-            info.appendChild(HTML.mkLinkButton(lf("dismiss"), () => Animation.fadeOut(msg).begin()))
-            msg.withClick(() => Animation.fadeOut(msg).begin())
-        }
+        } else info.appendChild(HTML.mkLinkButton(dismissText, dismiss))
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
         a.delay = 6000;
