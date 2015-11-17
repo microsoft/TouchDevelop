@@ -2122,8 +2122,9 @@ module TDev
         }
 
         private currentScriptCompiling: string;
-        public compile(btn: HTMLElement, debug: boolean) {
-            if (this.useNativeCompilation() && Cloud.anonMode(lf("C++ compilation"))) {
+        public compile(btn: HTMLElement, debug: boolean, forceNative: boolean) {
+            var useNative = forceNative || this.useNativeCompilation();
+            if (useNative && !debug && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
                 return;
             }
@@ -2133,7 +2134,7 @@ module TDev
                 return;
             }
 
-            if (this.useNativeCompilation())
+            if (useNative)
                 this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
             else
                 this.bytecodeCompileWithUi(Script, debug);
@@ -2152,12 +2153,14 @@ module TDev
                 var str = lf("compile");
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:bitcompile,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
+                        var me = <MouseEvent>e;
+                        var forceCpp = me.ctrlKey && me.altKey;
                         var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || /dbgcpp=1/i.test(document.location.href);
 
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
 
-                        this.compile(compileBtn, debug);
+                        this.compile(compileBtn, debug, forceCpp);
                     })
                     );
             }
