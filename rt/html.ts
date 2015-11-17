@@ -780,8 +780,8 @@ module TDev.HTML {
             return;
         }
 
-        var msg = div("warningNotification",
-            div('frownie', ":("), div('info', msgText));
+        var info = div('info', msgText);        
+        var msg = div("warningNotification", info);
         if (options && options.els) msg.appendChildren(options.els);        
         if (options && options.details) {
             msg.appendChild(div('info link', 'learn more...'));
@@ -793,6 +793,11 @@ module TDev.HTML {
             msg.withClick(() => {
                 options.onClick();
             }); 
+        else {
+            info.appendChild(HTML.mkLinkButton(lf("dismiss"), () => {
+                Animation.fadeOut(msg).begin();
+            }))
+        }
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
         a.delay = 6000;

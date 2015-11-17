@@ -1047,6 +1047,10 @@ div.wall-box-tile>div.wall-box
     font-weight:bold;
 }
 
+.warningNotification .link-button {
+    color:white;
+}
+
 .saveNotification
 {
   position: absolute;
