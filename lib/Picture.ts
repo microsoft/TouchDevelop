@@ -156,7 +156,7 @@ module TDev.RT {
                         onSuccess(this);
                     };
                     //(<any>img).crossOrigin = 'anonymous'; // attempt to thwart cross origin pixel security http://blog.chromium.org/2011/07/using-cross-domain-images-in-webgl-and.html
-                    var href = dataUrl ? dataUrl : cors ? Web.proxy(url) : url;
+                    var href = dataUrl ? dataUrl : cors ? Web.proxy(Cloud.toCdnUrl(url)) : url;
                     img.src = href;
                     img.alt = url;
                 })
