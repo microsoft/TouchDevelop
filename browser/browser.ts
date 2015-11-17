@@ -463,9 +463,6 @@ module TDev {
             case BrowserSoftware.android2:
                 return olderAndroidMessage(what + " might require a newer version of Android."); // and there's probably nothing the user can do about it
 
-            case BrowserSoftware.chromeiOS:
-                return message(what + " is not supported in Chrome for IOS. Please use Safari instead.");
-                    
             case BrowserSoftware.android4:
                 return chromeAndroidMessage(what + " is not supported in the stock Android browser.");
 
@@ -486,6 +483,11 @@ module TDev {
                     return upgradeMessage("<p>You are using an outdated version of Chrome.</p>");
                 break;
 
+            case BrowserSoftware.chromeiOS:
+                //return message(what + " is not supported in Chrome for IOS. Please use Safari instead.");
+                // Supported.
+                break;
+                    
             case BrowserSoftware.ie10:
                 break;
 
