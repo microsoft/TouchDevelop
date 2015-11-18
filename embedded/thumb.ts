@@ -215,6 +215,7 @@ module TDev.AST.Thumb
         private stackpointers:StringMap<number> = {};
         private stack = 0;
         public throwOnError = false;
+        public disablePeepHole = false;
 
         private emitShort(op:number)
         {
@@ -742,6 +743,16 @@ module TDev.AST.Thumb
                     } else if (ln.getOp() == "beq" && lnNext.isBranch() && lb.encode(lnNext.numArgs[0]) != null) {
                         ln.update("bne " + lnNext.words[1])
                         lnNext.update("")
+                    } else if (ln.getOp() == "push" && lnNext.getOp() == "pop" && ln.numArgs[0] == lnNext.numArgs[0]) {
+                        Util.assert(ln.numArgs[0] > 0)
+                        ln.update("")
+                        lnNext.update("")
+                    } else if (ln.getOp() == "push" && lnNext.getOp() == "pop" && 
+                               ln.words.length == 4 && 
+                               lnNext.words.length == 4) {
+                        Util.assert(ln.words[1] == "{")
+                        ln.update("mov " + lnNext.words[2] + ", " + ln.words[2])
+                        lnNext.update("")
                     }
                 }
             }
@@ -749,6 +760,9 @@ module TDev.AST.Thumb
 
         private peepPass()
         {
+            if (this.disablePeepHole)
+                return;
+
             this.peepHole();
 
             this.throwOnError = true;
@@ -1081,6 +1095,7 @@ module TDev.AST.Thumb
 
         var b = new Binary();
         b.throwOnError = true;
+        b.disablePeepHole = true;
         b.emit(asm);
         if (b.errors.length > 0) {
             console.log(b.errors[0].message)
