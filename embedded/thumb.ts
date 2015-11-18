@@ -162,7 +162,6 @@ module TDev.AST.Thumb
 
         public instruction:Instruction;
         public numArgs:number[];
-        public oldText:string;
 
         constructor(public bin:Binary, public text:string)
         {
@@ -181,10 +180,14 @@ module TDev.AST.Thumb
 
         public update(s:string)
         {
-            if (!s) s = "; SKIP";
-            if (!this.oldText) this.oldText = "";
-            this.oldText += "; WAS " + this.text + "\n";
-            this.text = s;
+            this.bin.peepOps++;
+
+            s = s.replace(/^\s*/, "")
+            if (!s)
+                this.bin.peepDel++;
+            if (s) s += "      ";
+            s = "    " + s;
+            this.text = s + "; WAS: " + this.text.trim();
             this.instruction = null;
             this.numArgs = null;
             this.words = tokenize(s) || [];
@@ -214,6 +217,9 @@ module TDev.AST.Thumb
         private labels:StringMap<number> = {};
         private stackpointers:StringMap<number> = {};
         private stack = 0;
+        public peepOps = 0;
+        public peepDel = 0;
+        private stats = "";
         public throwOnError = false;
         public disablePeepHole = false;
 
@@ -707,7 +713,8 @@ module TDev.AST.Thumb
             var lenThumb = this.labels["_program_end"] || lenTotal;
             var res = 
                 Util.fmt("; thumb size: {0} bytes; src size {1} bytes\n", lenThumb, lenTotal - lenThumb) + 
-                Util.fmt("; assembly: {0} lines\n", this.lines.length)
+                Util.fmt("; assembly: {0} lines\n", this.lines.length) +
+                this.stats + "\n\n"
 
             var pastEnd = false;
 
@@ -715,8 +722,6 @@ module TDev.AST.Thumb
                 if (pastEnd) return;
                 if (ln.type == "label" && ln.words[0] == "_program_end")
                     pastEnd = true;
-                if (ln.oldText)
-                    res += ln.oldText;
                 res += ln.text + "\n"
             })
 
@@ -763,6 +768,8 @@ module TDev.AST.Thumb
             if (this.disablePeepHole)
                 return;
 
+            this.peepOps = 0;
+            this.peepDel = 0;
             this.peepHole();
 
             this.throwOnError = true;
@@ -772,6 +779,8 @@ module TDev.AST.Thumb
             Util.assert(!this.checkStack || this.stack == 0);
             this.finalEmit = true;
             this.iterLines();
+
+            this.stats += Util.fmt("; peep hole pass: {0} instructions removed and {1} updated\n", this.peepDel, this.peepOps - this.peepDel)
         }
 
         public emit(text:string)
@@ -800,8 +809,10 @@ module TDev.AST.Thumb
             if (this.errors.length > 0)
                 return;
 
-            this.peepPass();
-            this.peepPass();
+            for (var i = 0; i < 5; ++i) {
+                this.peepPass();
+                if (this.peepOps == 0) break;
+            }
         }
     }
 
