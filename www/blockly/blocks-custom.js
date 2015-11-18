@@ -4,10 +4,15 @@ goog.provide('Blockly.Blocks.device');
 
 goog.require('Blockly.Blocks');
 
-var buttonsDropdown =[
+var buttonsDropdownOn = [
   ["A", "A"],
   ["B", "B"],
   ["A+B", "A+B"],
+];
+
+var buttonsDropdownIs = [
+  ["A", "A"],
+  ["B", "B"],
 ];
 
 var analogPinsDropdown = [
@@ -21,24 +26,6 @@ var digitalPinsDropdown = [
   ["P1", "P1"],
   ["P2", "P2"],
 ];
-
-// Blockly.Blocks['device_scroll_string'] = {
-//   init: function() {
-//     this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
-//     this.setColour(0);
-//     this.appendDummyInput()
-//         .appendField("scroll_string");
-//     this.appendValueInput("Message")
-//         .setCheck("String")
-//         .appendField("String");
-//     this.appendValueInput("Speed")
-//         .setCheck("Number")
-//         .appendField("Speed");
-//     this.setPreviousStatement(true);
-//     this.setNextStatement(true);
-//     this.setTooltip('');
-//   }
-// };
 
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
@@ -123,7 +110,7 @@ Blockly.Blocks['device_button_event'] = {
     this.appendDummyInput()
         .appendField("on button");
     this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown(buttonsDropdown), "NAME");
+        .appendField(new Blockly.FieldDropdown(buttonsDropdownOn), "NAME");
     this.appendDummyInput()
         .appendField("pressed");
     this.appendStatementInput("HANDLER")
@@ -141,7 +128,7 @@ Blockly.Blocks['device_get_button'] = {
     this.appendDummyInput()
         .appendField("button");
     this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown(buttonsDropdown), "NAME");
+        .appendField(new Blockly.FieldDropdown(buttonsDropdownIs), "NAME");
     this.appendDummyInput()
         .appendField("is pressed");
     this.setInputsInline(true);
