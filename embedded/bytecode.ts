@@ -438,7 +438,7 @@ module TDev.AST.Bytecode
                 Util.oops("bad jmp");
             }
 
-            this.emit("b " + trg)
+            this.emit("bb " + trg)
             if (lbl)
                 this.emitLbl(lbl)
         }
