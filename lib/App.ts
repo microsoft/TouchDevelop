@@ -459,11 +459,12 @@ module TDev.RT {
                 else {
                     if (!serie.canvas) {
                         serie.canvas = <HTMLCanvasElement>document.createElement("canvas");
-                        serie.canvas.width = SizeMgr.wallWindowWidth * 0.8;
+                        serie.canvas.width = SizeMgr.windowWidth * 0.8;
                         serie.canvas.height = serie.canvas.width / 7;
                         serie.canvas.style.display = 'block';
                         serie.canvas.style.cursor = 'pointer';
-                        serie.canvas.style.marginTop = "0.5em"; serie.canvas.style.width = "100%";
+                        serie.canvas.style.marginTop = "0.5em";
+                        serie.canvas.style.width = "100%";
                         serie.canvas.withClick(() => {
                             var rows = serie.points.map(p => p.x + "\t" + p.y);
                             rows.unshift("t\t" + key);
@@ -949,7 +950,7 @@ module TDev.RT {
             var view = new AppLogView();
             view.onMessages = onMessages;
             view.charts(true);
-            view.reversed(true);
+            //view.reversed(true);
             view.append(App.logs());
             view.setFilter(filter);
             if (msgs) view.append(msgs);
