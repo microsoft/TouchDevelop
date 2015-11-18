@@ -76,22 +76,27 @@ module TDev
                     External.TheChannel.receive(event);
             });
 
+            handleChromeSerial();            
+        });
+    }
+    
+    function handleChromeSerial() {
             var chrome = (<any> window).chrome;
             if (chrome && chrome.runtime) {
                 var buf = "";
-                var port = chrome.runtime.connect("jmockekaclnoghdblhiogkkhadjmdkin", { name: "micro:bit" });
+                var port = chrome.runtime.connect("hccbjdgogdkdomojppdljbijomobfdap", { name: "micro:bit" });
                 port.onMessage.addListener(function (msg) {
                     if (msg.type == "serial") {
                         buf += msg.data;
                         var i = buf.lastIndexOf("\n");
                         if (i >= 0) {
-                            console.log("SERIAL:", buf.substring(0, i+1));
+                            var msgb = buf.substring(0, i + 1);
+                            TDev.RT.App.logEvent(TDev.RT.App.INFO, "serial", msgb, null);
                             buf = buf.slice(i+1);
                         }
                     }
                 });
-            }
-        });
+            }        
     }
 
     function onlyOneTab()
