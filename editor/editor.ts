@@ -2367,13 +2367,12 @@ module TDev
                 return
             }
 
-
-            // do not dismiss to avoid loosing cursor while running script
-            // this.dismissSidePane();
-
             if (this.isDebuggerMode()) this.leaveDebuggerMode();
 
             if (!Script) return;
+            
+            TDev.RT.App.clearLogs();
+            
             if (Script.isTestOnly()) {
                 TestMgr.testCurrentScript();
             } else {
