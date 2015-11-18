@@ -5,7 +5,6 @@ int            bits::and_uint32              (int x, int y);                    
 int            bits::or_uint32               (int x, int y);                         // F2
 int            bits::rotate_left_uint32      (int x, int y);                         // F2
 int            bits::rotate_right_uint32     (int x, int y);                         // F2
-uint32_t       bits::rotl32c                 (uint32_t x, uint32_t n);               // F2
 int            bits::shift_left_uint32       (int x, int y);                         // F2
 int            bits::shift_right_uint32      (int x, int y);                         // F2
 int            bits::xor_uint32              (int x, int y);                         // F2
@@ -51,6 +50,7 @@ void           contract::assert              (int cond, uint32_t msg);          
 void           ds1307::adjust                (user_types::DateTime d);               // P1
 uint8_t        ds1307::bcd2bin               (uint8_t val);                          // F1
 uint8_t        ds1307::bin2bcd               (uint8_t val);                          // F1
+Action         invalid::action               ();                                     // F0
 int            math::abs                     (int x);                                // F1
 int            math::clamp                   (int l, int h, int x);                  // F3
 int            math::max                     (int x, int y);                         // F2
@@ -62,7 +62,6 @@ int            math::sign                    (int x);                           
 int            math::sqrt                    (int x);                                // F1
 int            micro_bit::analogReadPin      (MicroBitPin& p);                       // F1
 void           micro_bit::analogWritePin     (MicroBitPin& p, int value);            // P2
-void           micro_bit::callback           (MicroBitEvent e, Action a);            // P2 over
 void           micro_bit::clearImage         (ImageData *i);                         // P1 over
 void           micro_bit::clearScreen        ();                                     // P0
 void           micro_bit::compassCalibrateEnd ();                                     // P0 over
@@ -73,7 +72,9 @@ ImageData*     micro_bit::createImageFromString (StringData *s);                
 ImageData*     micro_bit::createReadOnlyImage (uint32_t lit);                         // F1 over
 int            micro_bit::digitalReadPin     (MicroBitPin& p);                       // F1
 void           micro_bit::digitalWritePin    (MicroBitPin& p, int value);            // P2
+void           micro_bit::dispatchEvent      (MicroBitEvent e);                      // P1 over
 ImageData*     micro_bit::displayScreenShot  ();                                     // F0 over
+void           micro_bit::displayStopAnimation ();                                     // P0 over
 void           micro_bit::enablePitch        (MicroBitPin& p);                       // P1
 void           micro_bit::events::alert      (int event);                            // P1
 void           micro_bit::events::audio_recorder (int event);                            // P1
@@ -126,6 +127,7 @@ void           micro_bit::plot               (int x, int y);                    
 void           micro_bit::plotImage          (ImageData *i, int offset);             // P2 over
 void           micro_bit::plotLeds           (uint32_t lit);                         // P1 over
 bool           micro_bit::point              (int x, int y);                         // F2
+void           micro_bit::registerWithDal    (int id, int event, Action a);          // P3 over
 void           micro_bit::reset              ();                                     // P0 over
 void           micro_bit::runInBackground    (Action a);                             // P1 over
 void           micro_bit::scrollImage        (ImageData *i, int offset, int delay);  // P3 over
@@ -145,18 +147,19 @@ void           micro_bit::showDigit          (int n);                           
 void           micro_bit::showImage          (ImageData *i, int offset);             // P2 over
 void           micro_bit::showLeds           (uint32_t lit, int delay);              // P2 over
 void           micro_bit::showLetter         (StringData *s);                        // P1 over
+int            micro_bit::thermometerGetTemperature ();                                     // F0 over
 void           micro_bit::unPlot             (int x, int y);                         // P2
-int            number::div                   (int x, int y);                         // F2
+int            number::add                   (int x, int y);                         // F2
+int            number::divide                (int x, int y);                         // F2
 bool           number::eq                    (int x, int y);                         // F2
-bool           number::geq                   (int x, int y);                         // F2
+bool           number::ge                    (int x, int y);                         // F2
 bool           number::gt                    (int x, int y);                         // F2
-bool           number::leq                   (int x, int y);                         // F2
+bool           number::le                    (int x, int y);                         // F2
 bool           number::lt                    (int x, int y);                         // F2
-int            number::minus                 (int x, int y);                         // F2
+int            number::multiply              (int x, int y);                         // F2
 bool           number::neq                   (int x, int y);                         // F2
-int            number::plus                  (int x, int y);                         // F2
 void           number::post_to_wall          (int n);                                // P1 over
-int            number::times                 (int x, int y);                         // F2
+int            number::subtract              (int x, int y);                         // F2
 StringData*    number::to_character          (int x);                                // F1 over
 StringData*    number::to_string             (int x);                                // F1 over
 RefRecord*     record::mk                    (int reflen, int totallen);             // F2 bvm
@@ -172,5 +175,6 @@ void           string::post_to_wall          (StringData *s);                   
 StringData*    string::substring             (StringData *s, int i, int j);          // F3 bvm
 int            string::to_character_code     (StringData *s);                        // F1 bvm
 int            string::to_number             (StringData *s);                        // F1 bvm
+void           touch_develop::dispatchEvent  (MicroBitEvent e);                      // P1
 void           touch_develop::internal_main  ();                                     // P0
 ManagedString  touch_develop::mk_string      (char* c);                              // F1
