@@ -12,7 +12,7 @@ var AssemblyArmThumbHighlightRules = function() {
 
     this.$rules = { start: 
        [ { token: 'keyword.control.assembly',
-           regex: '\\b(?:adcs|add|adds|adr|ands|asrs|b|bal|bcc|bcs|beq|bge|bgt|bhi|bhs|bics|bkpt|bl|ble|blo|bls|blt|blx|bmi|bne|bpl|bvc|bvs|bx|cmn|cmp|eors|ldmia|ldr|ldrb|ldrh|ldrsb|ldrsh|lsls|lsrs|mov|movs|muls|mvns|negs|nop|orrs|pop|push|rev|rev16|revsh|rors|sbcs|sev|stmia|str|strb|strh|sub|subs|svc|sxtb|sxth|tst|udf|uxtb|uxth|wfe|wfi|yield)\\b',
+           regex: '\\b(?:adcs|add|adds|adr|ands|asrs|b|bal|bcc|bcs|beq|bge|bgt|bhi|bhs|bics|bkpt|bl|ble|blo|bls|blt|blx|bmi|bne|bpl|bvc|bvs|bx|cmn|cmp|eors|ldmia|ldr|ldrb|ldrh|ldrsb|ldrsh|lsls|lsrs|mov|movs|muls|mvns|negs|nop|orrs|pop|push|rev|rev16|revsh|rors|sbcs|sev|stmia|str|strb|strh|sub|subs|svc|sxtb|sxth|tst|udf|uxtb|uxth|wfe|wfi|yield|cpsid|cpsie)\\b',
            caseInsensitive: true },
          { token: 'variable.parameter.register.assembly',
            regex: '\\b(?:r[0-9]|r1[0-5]|pc|lr|sp)\\b',

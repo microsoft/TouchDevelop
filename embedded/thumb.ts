@@ -162,6 +162,7 @@ module TDev.AST.Thumb
         public type:string;
         public lineNo:number;
         public words:string[];
+        public scope:string;
 
         public instruction:Instruction;
         public numArgs:number[];
@@ -653,6 +654,7 @@ module TDev.AST.Thumb
         private mkLine(tx:string)
         {
             var l = new Line(this, tx);
+            l.scope = this.scope;
             l.lineNo = this.currLineNo;
             this.lines.push(l);
             return l;
@@ -784,6 +786,8 @@ module TDev.AST.Thumb
 
             for (var i = 0; i < mylines.length; ++i) {
                 var ln = mylines[i];
+                if (/^user/.test(ln.scope)) // skip opt for user-supplied assembly
+                    continue;
                 var lnNext = mylines[i + 1];
                 if (!lnNext) continue;
                 var lnNext2 = mylines[i + 2]
@@ -1097,6 +1101,9 @@ module TDev.AST.Thumb
         add("wfe",                   0xbf20, 0xffff);
         add("wfi",                   0xbf30, 0xffff);
         add("yield",                 0xbf10, 0xffff);
+
+        add("cpsid i",               0xb672, 0xffff);
+        add("cpsie i",               0xb662, 0xffff);
 
         add("beq   $lb",             0xd000, 0xff00);
         add("bne   $lb",             0xd100, 0xff00);
