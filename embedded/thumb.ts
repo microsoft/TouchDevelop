@@ -162,9 +162,34 @@ module TDev.AST.Thumb
 
         public instruction:Instruction;
         public numArgs:number[];
+        public oldText:string;
 
         constructor(public bin:Binary, public text:string)
         {
+        }
+
+        public getOp()
+        {
+            return this.instruction ? this.instruction.name : "";
+        }
+
+        public isBranch()
+        {
+            var op = this.getOp()
+            return op == "b" || op == "bb"
+        }
+
+        public update(s:string)
+        {
+            if (!s) s = "; SKIP";
+            if (!this.oldText) this.oldText = "";
+            this.oldText += "; WAS " + this.text + "\n";
+            this.text = s;
+            this.instruction = null;
+            this.numArgs = null;
+            this.words = tokenize(s) || [];
+            if (this.words.length == 0)
+                this.type = "empty";
         }
     }
 
@@ -563,6 +588,7 @@ module TDev.AST.Thumb
                     if (op.opcode2 != null)
                         this.emitShort(op.opcode2);
                     ln.instruction = ins[i];
+                    ln.numArgs = op.numArgs;
                     return;
                 }
             }
@@ -626,7 +652,10 @@ module TDev.AST.Thumb
                     if (l.words[0] == "@scope")
                         this.handleDirective(l);
                 } else {
-                    l.type = "instruction";
+                    if (l.words.length == 0)
+                        l.type = "empty";
+                    else
+                        l.type = "instruction";
                 }
             })
         }
@@ -662,6 +691,8 @@ module TDev.AST.Thumb
                     this.handleDirective(l);
                 } else if (l.type == "instruction") {
                     this.handleInstruction(l);
+                } else if (l.type == "empty") {
+                    // nothing
                 } else {
                     Util.die()
                 }
@@ -683,10 +714,50 @@ module TDev.AST.Thumb
                 if (pastEnd) return;
                 if (ln.type == "label" && ln.words[0] == "_program_end")
                     pastEnd = true;
+                if (ln.oldText)
+                    res += ln.oldText;
                 res += ln.text + "\n"
             })
 
             return res;
+        }
+
+        private peepHole()
+        {
+            // TODO disable in user scope
+            
+            var lb11 = encoders["$lb11"]
+            var lb = encoders["$lb"]
+
+            for (var i = 0; i < this.lines.length; ++i) {
+                var ln = this.lines[i];
+                var lnNext = this.lines[i + 1];
+                if (!lnNext) continue;
+                if (ln.type == "instruction") {
+                    if (ln.getOp() == "bb" && lb11.encode(ln.numArgs[0]) != null) {
+                        ln.update("b " + ln.words[1])
+                    } else if (ln.getOp() == "bne" && lnNext.isBranch() && lb.encode(lnNext.numArgs[0]) != null) {
+                        ln.update("beq " + lnNext.words[1])
+                        lnNext.update("")
+                    } else if (ln.getOp() == "beq" && lnNext.isBranch() && lb.encode(lnNext.numArgs[0]) != null) {
+                        ln.update("bne " + lnNext.words[1])
+                        lnNext.update("")
+                    }
+                }
+            }
+        }
+
+        private peepPass()
+        {
+            this.peepHole();
+
+            this.throwOnError = true;
+            this.finalEmit = false;
+            this.labels = {};
+            this.iterLines();
+            Util.assert(!this.checkStack || this.stack == 0);
+            this.finalEmit = true;
+            this.iterLines();
         }
 
         public emit(text:string)
@@ -711,6 +782,12 @@ module TDev.AST.Thumb
 
             this.finalEmit = true;
             this.iterLines();
+
+            if (this.errors.length > 0)
+                return;
+
+            this.peepPass();
+            this.peepPass();
         }
     }
 
