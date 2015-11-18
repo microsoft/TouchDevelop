@@ -894,11 +894,6 @@ module TDev {
                 editor: hd.editor || "touchdevelop",
                 name: hd.meta.name,
                 comment: hd.meta.comment,
-                // SAVE-COMPAT
-                meta: {
-                    name: hd.meta.name,
-                    comment: hd.meta.comment
-                },
             }
         }
 
