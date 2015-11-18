@@ -669,6 +669,26 @@ module TDev.AST.Thumb
             })
         }
 
+        public getSource()
+        {
+            var lenTotal = this.buf ? this.buf.length*2 : 0
+            var lenThumb = this.labels["_program_end"] || lenTotal;
+            var res = 
+                Util.fmt("; thumb size: {0} bytes; src size {1} bytes\n", lenThumb, lenTotal - lenThumb) + 
+                Util.fmt("; assembly: {0} lines\n", this.lines.length)
+
+            var pastEnd = false;
+
+            this.lines.forEach(ln => {
+                if (pastEnd) return;
+                if (ln.type == "label" && ln.words[0] == "_program_end")
+                    pastEnd = true;
+                res += ln.text + "\n"
+            })
+
+            return res;
+        }
+
         public emit(text:string)
         {
             init();
