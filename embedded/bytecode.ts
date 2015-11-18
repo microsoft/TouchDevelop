@@ -783,7 +783,7 @@ module TDev.AST.Bytecode
             b.lookupExternalLabel = lookupFunctionAddr;
             // b.throwOnError = true;
             b.emit(this.csource);
-            this.csource = b.getSource();
+            this.csource = b.getSource(!/peepdbg=1/.test(document.URL));
             if (b.errors.length > 0) {
                 var userErrors = ""
                 b.errors.forEach(e => {

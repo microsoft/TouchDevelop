@@ -180,18 +180,38 @@ module TDev.AST.Thumb
             return this.instruction ? this.instruction.name : "";
         }
 
+        public singleReg()
+        {
+            Util.assert(this.getOp() == "push" || this.getOp() == "pop")
+            var k = 0;
+            var ret = -1;
+            var v = this.numArgs[0]
+            while (v > 0) {
+                if (v & 1) {
+                    if (ret == -1) ret = k;
+                    else ret = -2;
+                }
+                v >>= 1;
+                k++;
+            }
+            if (ret >= 0) return ret;
+            else return -1;
+        }
+
+        // if true then instruction doesn't write r<n> and doesn't read/write memory
+        public preservesReg(n:number)
+        {
+            if (this.getOpExt() == "movs $r5, $i0" && this.numArgs[0] != n)
+                return true;
+            return false;
+        }
+
         public clobbersReg(n:number)
         {
             // TODO add some more
             if (this.getOp() == "pop" && this.numArgs[0] & (1 << n))
                 return true;
             return false;
-        }
-
-        public isBranch()
-        {
-            var op = this.getOp()
-            return op == "b" || op == "bb"
         }
 
         public update(s:string)
@@ -723,7 +743,7 @@ module TDev.AST.Thumb
             })
         }
 
-        public getSource()
+        public getSource(clean:boolean)
         {
             var lenTotal = this.buf ? this.buf.length*2 : 0
             var lenThumb = this.labels["_program_end"] || lenTotal;
@@ -734,11 +754,20 @@ module TDev.AST.Thumb
 
             var pastEnd = false;
 
-            this.lines.forEach(ln => {
+            this.lines.forEach((ln, i) => {
                 if (pastEnd) return;
                 if (ln.type == "label" && ln.words[0] == "_program_end")
                     pastEnd = true;
-                res += ln.text + "\n"
+                var text = ln.text
+                if (clean) {
+                    if (ln.words[0] == "@stackempty" &&
+                        this.lines[i - 1].text == ln.text)
+                        return;
+
+                    text = text.replace(/; WAS: .*/, "")
+                    if (!text.trim()) return;
+                }
+                res += text + "\n"
             })
 
             return res;
@@ -759,30 +788,51 @@ module TDev.AST.Thumb
                 if (!lnNext) continue;
                 var lnNext2 = mylines[i + 2]
                 if (ln.type == "instruction") {
-                    if (ln.getOp() == "bb" && lb11.encode(ln.numArgs[0]) != null) {
+                    var lnop = ln.getOp()
+                    var isSkipBranch = false
+                    if (lnop == "bne" || lnop == "beq") {
+                        if (lnNext.getOp() == "b" && ln.numArgs[0] == 0)
+                            isSkipBranch = true;
+                        if (lnNext.getOp() == "bb" && ln.numArgs[0] == 2)
+                            isSkipBranch = true;
+                    }
+
+                    if (lnop == "bb" && lb11.encode(ln.numArgs[0]) != null) {
+                        // RULE: bb .somewhere -> b .somewhere (if fits)
                         ln.update("b " + ln.words[1])
-                    } else if (ln.getOp() == "bne" && lnNext.isBranch() && lb.encode(lnNext.numArgs[0]) != null) {
+                    } else if (lnop == "bne" && isSkipBranch && lb.encode(lnNext.numArgs[0]) != null) {
+                        // RULE: bne .next; b .somewhere; .next: -> beq .somewhere
                         ln.update("beq " + lnNext.words[1])
                         lnNext.update("")
-                    } else if (ln.getOp() == "beq" && lnNext.isBranch() && lb.encode(lnNext.numArgs[0]) != null) {
+                    } else if (lnop == "beq" && isSkipBranch && lb.encode(lnNext.numArgs[0]) != null) {
+                        // RULE: beq .next; b .somewhere; .next: -> bne .somewhere
                         ln.update("bne " + lnNext.words[1])
                         lnNext.update("")
-                    } else if (ln.getOp() == "push" && lnNext.getOp() == "pop" && ln.numArgs[0] == lnNext.numArgs[0]) {
+                    } else if (lnop == "push" && lnNext.getOp() == "pop" && ln.numArgs[0] == lnNext.numArgs[0]) {
+                        // RULE: push {X}; pop {X} -> nothing
                         Util.assert(ln.numArgs[0] > 0)
                         ln.update("")
                         lnNext.update("")
-                    } else if (ln.getOp() == "push" && lnNext.getOp() == "pop" && 
+                    } else if (lnop == "push" && lnNext.getOp() == "pop" && 
                                ln.words.length == 4 && 
                                lnNext.words.length == 4) {
+                        // RULE: push {rX}; pop {rY} -> mov rY, rX
                         Util.assert(ln.words[1] == "{")
                         ln.update("mov " + lnNext.words[2] + ", " + ln.words[2])
                         lnNext.update("")
                     } else if (lnNext2 && ln.getOpExt() == "movs $r5, $i0" && lnNext.getOpExt() == "mov $r0, $r1" && 
                                ln.numArgs[0] == lnNext.numArgs[1] &&
                                lnNext2.clobbersReg(ln.numArgs[0])) {
+                        // RULE: movs rX, #V; mov rY, rX; clobber rX -> movs rY, #V
                         ln.update("movs r" + lnNext.numArgs[0] + ", #" + ln.numArgs[1])
                         lnNext.update("")
+                    } else if (lnNext2 && lnop == "push" && ln.singleReg() >= 0 && lnNext.preservesReg(ln.singleReg()) &&
+                               lnNext2.getOp() == "pop" && ln.singleReg() == lnNext2.singleReg()) {
+                        // RULE: push {rX}; movs rY, #V; pop {rX} -> movs rY, #V (when X != Y)
+                        ln.update("")
+                        lnNext2.update("")
                     }
+                             
                 }
             }
         }

@@ -2122,7 +2122,9 @@ module TDev
         }
 
         private currentScriptCompiling: string;
+        public compilationStartTime:number;
         public compile(btn: HTMLElement, debug: boolean, forceNative: boolean) {
+            this.compilationStartTime = Util.now();
             var useNative = forceNative || this.useNativeCompilation();
             if (useNative && !debug && Cloud.anonMode(lf("C++ compilation"))) {
                 if (this.stepTutorial) this.stepTutorial.notify("compile");
