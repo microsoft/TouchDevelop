@@ -18,10 +18,13 @@ module TDev.AST.Thumb
         public name:string;
         public args:string[];
         public friendlyFmt:string;
+        public code:string;
 
         constructor(format:string, public opcode:number, public mask:number)
         {
             Util.assert((opcode & mask) == opcode)
+
+            this.code = format.replace(/\s+/g, " ");
 
             this.friendlyFmt = format.replace(/\$\w+/g, m => {
                 if (encoders[m])
@@ -167,9 +170,22 @@ module TDev.AST.Thumb
         {
         }
 
+        public getOpExt()
+        {
+            return this.instruction ? this.instruction.code : "";
+        }
+
         public getOp()
         {
             return this.instruction ? this.instruction.name : "";
+        }
+
+        public clobbersReg(n:number)
+        {
+            // TODO add some more
+            if (this.getOp() == "pop" && this.numArgs[0] & (1 << n))
+                return true;
+            return false;
         }
 
         public isBranch()
@@ -735,10 +751,13 @@ module TDev.AST.Thumb
             var lb11 = encoders["$lb11"]
             var lb = encoders["$lb"]
 
-            for (var i = 0; i < this.lines.length; ++i) {
-                var ln = this.lines[i];
-                var lnNext = this.lines[i + 1];
+            var mylines = this.lines.filter(l => l.type != "empty")
+
+            for (var i = 0; i < mylines.length; ++i) {
+                var ln = mylines[i];
+                var lnNext = mylines[i + 1];
                 if (!lnNext) continue;
+                var lnNext2 = mylines[i + 2]
                 if (ln.type == "instruction") {
                     if (ln.getOp() == "bb" && lb11.encode(ln.numArgs[0]) != null) {
                         ln.update("b " + ln.words[1])
@@ -757,6 +776,11 @@ module TDev.AST.Thumb
                                lnNext.words.length == 4) {
                         Util.assert(ln.words[1] == "{")
                         ln.update("mov " + lnNext.words[2] + ", " + ln.words[2])
+                        lnNext.update("")
+                    } else if (lnNext2 && ln.getOpExt() == "movs $r5, $i0" && lnNext.getOpExt() == "mov $r0, $r1" && 
+                               ln.numArgs[0] == lnNext.numArgs[1] &&
+                               lnNext2.clobbersReg(ln.numArgs[0])) {
+                        ln.update("movs r" + lnNext.numArgs[0] + ", #" + ln.numArgs[1])
                         lnNext.update("")
                     }
                 }
