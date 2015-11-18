@@ -911,7 +911,7 @@ module TDev {
             var comment = (<any>hd).comment || hd.meta.comment || ""
             var h = <Cloud.Header>(<any>{
                 status: hd.status === "published" ? "published" : "unpublished",
-                scriptId: hd.scriptId,
+                scriptId: hd.scriptId || "",
                 userId: hd.userId || (hd.scriptId ? "bogususerid" : ""),
                 name: name,
                 meta: {
