@@ -6,6 +6,7 @@ module TDev.AST.Thumb
         stack: number;
         opcode: number;
         opcode2?: number;
+        numArgs?: number[];
         error?: string;
         errorAt?: string;
     }
@@ -33,12 +34,14 @@ module TDev.AST.Thumb
             this.args = words.slice(1)
         }
 
-        emit(bin:Binary, tokens:string[]):EmitResult
+        emit(ln:Line):EmitResult
         {
+            var tokens = ln.words;
             if (tokens[0] != this.name) return badNameError;
             var r = this.opcode;
             var j = 1;
             var stack = 0;
+            var numArgs = []
 
             for (var i = 0; i < this.args.length; ++i) {
                 var formal = this.args[i]
@@ -51,7 +54,7 @@ module TDev.AST.Thumb
                         if (v == null) return emitErr("expecting register name", actual)
                     } else if (enc.isImmediate) {
                         actual = actual.replace(/^#/, "")
-                        v = bin.parseOneInt(actual);
+                        v = ln.bin.parseOneInt(actual);
                         if (v == null) {
                             return emitErr("expecting number", actual)
                         } else {
@@ -69,6 +72,7 @@ module TDev.AST.Thumb
                                 return emitErr("expecting }", tokens[j - 2])
                             var no = registerNo(actual);
                             if (no == null) return emitErr("expecting register name", actual)
+                            if (v & (1 << no)) return emitErr("duplicate register name", actual)
                             v |= (1 << no);
                             if (this.opcode == 0xb400) // push
                                 stack++;
@@ -82,9 +86,9 @@ module TDev.AST.Thumb
                         if (/^[+-]?\d+$/.test(actual)) {
                             v = parseInt(actual, 10)
                         } else {
-                            v = bin.getRelativeLabel(actual)
+                            v = ln.bin.getRelativeLabel(actual)
                             if (v == null) {
-                                if (bin.finalEmit)
+                                if (ln.bin.finalEmit)
                                     return emitErr("unknown label", actual)
                                 else
                                     v = 42
@@ -95,10 +99,12 @@ module TDev.AST.Thumb
                     }
                     if (v == null) return emitErr("didn't understand it", actual); // shouldn't happen
 
-                    if (this.name == "bl") {
+                    if (this.name == "bl" || this.name == "bb") {
                         if (tokens[j]) return emitErr("trailing tokens", tokens[j])
                         return this.emitBl(v, actual);
                     }
+
+                    numArgs.push(v)
                         
                     v = enc.encode(v)
                     if (v == null) return emitErr("argument out of range or mis-aligned", actual);
@@ -116,6 +122,7 @@ module TDev.AST.Thumb
             return {
                 stack: stack,
                 opcode: r,
+                numArgs: numArgs,
             }
         }
 
@@ -136,13 +143,28 @@ module TDev.AST.Thumb
             return {
                 opcode: (off & 0xf0000000) ? (0xf400 | imm10) : (0xf000 | imm10),
                 opcode2: (0xf800 | imm11),
-                stack: 0
+                stack: 0,
+                numArgs: [v],
             }
         }
 
         toString()
         {
             return this.friendlyFmt;
+        }
+    }
+
+    class Line
+    {
+        public type:string;
+        public lineNo:number;
+        public words:string[];
+
+        public instruction:Instruction;
+        public numArgs:number[];
+
+        constructor(public bin:Binary, public text:string)
+        {
         }
     }
 
@@ -157,10 +179,10 @@ module TDev.AST.Thumb
         public checkStack = true;
         public inlineMode = false;
         public lookupExternalLabel:(name:string)=>number;
-        private lines:string[];
+        private lines:Line[];
         private currLineNo:number = 0;
         private realCurrLineNo:number;
-        private currLine:string = "";
+        private currLine:Line;
         private scope = "";
         public errors:InlineError[] = [];
         public buf:number[];
@@ -297,9 +319,9 @@ module TDev.AST.Thumb
         {
             var err = <InlineError>{
                 scope: this.scope,
-                message: lf("  -> Line {2} ('{1}'), error: {0}\n{3}", msg, this.currLine, this.currLineNo, hints),
-                lineNo: this.currLineNo,
-                line: this.currLine,
+                message: lf("  -> Line {2} ('{1}'), error: {0}\n{3}", msg, this.currLine.text, this.currLine.lineNo, hints),
+                lineNo: this.currLine.lineNo,
+                line: this.currLine.text,
                 coremsg: msg,
                 hints: hints
             }
@@ -399,8 +421,10 @@ module TDev.AST.Thumb
             }
         }
         
-        private handleDirective(l:string, words:string[])
+        private handleDirective(l:Line)
         {
+            var words = l.words;
+
             var expectOne = () => {
                 if (words.length != 2)
                     this.directiveError(lf("expecting one argument"));
@@ -412,7 +436,7 @@ module TDev.AST.Thumb
                 case ".ascii":
                 case ".asciz":
                 case ".string":
-                    this.emitString(l);
+                    this.emitString(l.text);
                     break;
                 case ".align":
                     expectOne();
@@ -524,10 +548,13 @@ module TDev.AST.Thumb
             }
         }
 
-        private handleInstruction(words:string[])
+        private handleInstruction(ln:Line)
         {
-            for (var i = 0; i < instructions.length; ++i) {
-                var op = instructions[i].emit(this, words)
+            var getIns = n => instructions.hasOwnProperty(n) ? instructions[n] : [];
+
+            var ins = ln.instruction ? [ln.instruction] : getIns(ln.words[0])
+            for (var i = 0; i < ins.length; ++i) {
+                var op = ins[i].emit(ln);
                 if (!op.error) {
                     this.stack += op.stack;
                     if (this.checkStack && this.stack < 0)
@@ -535,17 +562,18 @@ module TDev.AST.Thumb
                     this.emitShort(op.opcode);
                     if (op.opcode2 != null)
                         this.emitShort(op.opcode2);
+                    ln.instruction = ins[i];
                     return;
                 }
             }
 
-            var w0 = words[0].toLowerCase().replace(/s$/, "").replace(/[^a-z]/g, "")
+            var w0 = ln.words[0].toLowerCase().replace(/s$/, "").replace(/[^a-z]/g, "")
 
             var hints = ""
-            var possibilities = instructions.filter(i => i.name == w0 || i.name == w0 + "s")
+            var possibilities = getIns(w0).concat(getIns(w0 + "s"))
             if (possibilities.length > 0) {
                 possibilities.forEach(i => {
-                    var err = i.emit(this, words)
+                    var err = i.emit(ln);
                     hints += lf("   Maybe: {0} ({1} at '{2}')\n", i.toString(), err.error, err.errorAt)
                 })
             }
@@ -553,26 +581,70 @@ module TDev.AST.Thumb
             this.pushError(lf("assembly error"), hints);
         }
 
-        private iterLines()
+        private mkLine(tx:string)
+        {
+            var l = new Line(this, tx);
+            l.lineNo = this.currLineNo;
+            this.lines.push(l);
+            return l;
+        }
+
+        private prepLines(text:string)
         {
             this.currLineNo = 0;
             this.realCurrLineNo = 0;
-            this.scope = "";
-            this.lines.forEach(l => {
+            this.lines = [];
+
+            text.split(/\r?\n/).forEach(tx => {
                 if (this.errors.length > 10)
                     return;
 
                 this.currLineNo++;
                 this.realCurrLineNo++;
-                this.currLine = l;
 
-                var words = tokenize(l)
-                if (!words) return;
+                var l = this.mkLine(tx);
+                var words = tokenize(l.text) || [];
+                l.words = words;
 
                 var m = /^([\.\w]+):$/.exec(words[0])
-                
+
                 if (m) {
-                    var lblname = this.scopedName(m[1])
+                    l.type = "label";
+                    l.text = m[1] + ":"
+                    l.words = [m[1]]
+                    if (words.length > 1) {
+                        words.shift()
+                        l = this.mkLine(tx.replace(/^[^:]*:/, ""))
+                        l.words = words
+                    } else {
+                        return;
+                    }
+                }
+
+                if (/^[\.@]/.test(l.words[0])) {
+                    l.type = "directive";
+                    if (l.words[0] == "@scope")
+                        this.handleDirective(l);
+                } else {
+                    l.type = "instruction";
+                }
+            })
+        }
+
+        private iterLines()
+        {
+            this.stack = 0;
+            this.buf = [];
+            this.lines.forEach(l => {
+                if (this.errors.length > 10)
+                    return;
+
+                this.currLine = l;
+
+                if (l.words.length == 0) return;
+
+                if (l.type == "label") {
+                    var lblname = this.scopedName(l.words[0])
                     if (this.finalEmit) {
                         var curr = this.labels[lblname]
                         if (curr == null)
@@ -586,15 +658,12 @@ module TDev.AST.Thumb
                         else
                             this.labels[lblname] = this.location();
                     }
-                    words.shift();
-                }
-
-                if (words.length == 0) return;
-
-                if (/^[\.@]/.test(words[0])) {
-                    this.handleDirective(l, words);
+                } else if (l.type == "directive") {
+                    this.handleDirective(l);
+                } else if (l.type == "instruction") {
+                    this.handleInstruction(l);
                 } else {
-                    this.handleInstruction(words);
+                    Util.die()
                 }
 
             })
@@ -606,9 +675,11 @@ module TDev.AST.Thumb
 
             Util.assert(this.buf == null);
 
-            this.lines = text.split(/\r?\n/);
-            this.stack = 0;
-            this.buf = [];
+            this.prepLines(text);
+
+            if (this.errors.length > 0)
+                return;
+
             this.labels = {};
             this.iterLines();
 
@@ -618,8 +689,6 @@ module TDev.AST.Thumb
             if (this.errors.length > 0)
                 return;
 
-            this.buf = [];
-            this.stack = 0;
             this.finalEmit = true;
             this.iterLines();
         }
@@ -653,7 +722,7 @@ module TDev.AST.Thumb
         isLabel: boolean;
     }
 
-    var instructions:Instruction[];
+    var instructions:StringMap<Instruction[]>;
     var encoders:StringMap<Encoder>;
 
     function tokenize(line:string):string[]
@@ -745,9 +814,12 @@ module TDev.AST.Thumb
         addEnc("$lb", "LABEL", v => inrangeSigned(127, v/2, v >> 1))
         addEnc("$lb11", "LABEL", v => inrangeSigned(1023, v/2, v >> 1))
 
-        instructions = []
+        instructions = {}
         var add = (name, code, mask) => {
-            instructions.push(new Instruction(name, code, mask))
+            var ins = new Instruction(name, code, mask)
+            if (!instructions.hasOwnProperty(ins.name))
+                instructions[ins.name] = [];
+            instructions[ins.name].push(ins)
         }
 
         //add("nop",                   0xbf00, 0xffff);  // we use mov r8,r8 as gcc
@@ -852,6 +924,8 @@ module TDev.AST.Thumb
 
         // handled specially - 32 bit instruction
         add("bl    $lb",             0xf000, 0xf800);
+        // this is normally emitted as 'b' but will be emitted as 'bl' if needed
+        add("bb    $lb",             0xe000, 0xf800);
     }
 
     function parseString(s:string)

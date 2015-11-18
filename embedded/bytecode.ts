@@ -421,14 +421,17 @@ module TDev.AST.Bytecode
 
         emitJmp(trg:string, name = "JMP")
         {
+            var lbl = ""
             if (name == "JMPZ") {
+                lbl = this.mkLabel("jmpz")
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("bne #0") // this is to *skip* the following 'b' instruction; bne itself has a very short range
+                this.emit("bne " + lbl) // this is to *skip* the following 'b' instruction; bne itself has a very short range
             } else if (name == "JMPNZ") {
+                lbl = this.mkLabel("jmpnz")
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("beq #0")
+                this.emit("beq " + lbl)
             } else if (name == "JMP") {
                 // ok
             } else {
@@ -436,6 +439,8 @@ module TDev.AST.Bytecode
             }
 
             this.emit("b " + trg)
+            if (lbl)
+                this.emitLbl(lbl)
         }
 
         mkLabel(root:string):string
