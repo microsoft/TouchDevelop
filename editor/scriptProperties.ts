@@ -257,6 +257,10 @@ module TDev
         static firstTime = true;
         static bytecodeCompile(app : AST.App, showSource = false)
         {
+            var times = ""
+            var startTime = Util.now();
+
+            times += Util.fmt("; type check before compile {0}ms\n", startTime - TheEditor.compilationStartTime);
             var guid = app.localGuid
             var st = TheEditor.saveStateAsync()
                 .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
@@ -287,6 +291,7 @@ module TDev
                     return rp;
                 })
 
+            var realCompileStartTime = Util.now();
             var c = new AST.Bytecode.Compiler(app)
             try {
                 c.run()
@@ -302,10 +307,19 @@ module TDev
                 return
             }
 
+            var compileStop = Util.now();
+
+            times += Util.fmt("; to assembly {0}ms\n", compileStop - realCompileStartTime);
+
             st.then(r => {
+                var saveDone = Util.now()
+                times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
+
                 var res = c.serialize(!ScriptProperties.firstTime, r[0], r[1])
+                times += Util.fmt("; assemble time {0}ms\n", Util.now() - saveDone);
+
                 if (showSource)
-                    ModalDialog.showText(res.csource)
+                    ModalDialog.showText(times + res.csource)
 
                 if (!res.sourceSaved) {
                     HTML.showWarningNotification("program compiled, but without the source; to save for later use the 'save' button")

@@ -421,21 +421,26 @@ module TDev.AST.Bytecode
 
         emitJmp(trg:string, name = "JMP")
         {
+            var lbl = ""
             if (name == "JMPZ") {
+                lbl = this.mkLabel("jmpz")
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("bne #0") // this is to *skip* the following 'b' instruction; bne itself has a very short range
+                this.emit("bne " + lbl) // this is to *skip* the following 'b' instruction; bne itself has a very short range
             } else if (name == "JMPNZ") {
+                lbl = this.mkLabel("jmpnz")
                 this.emit("pop {r0}");
                 this.emit("cmp r0, #0")
-                this.emit("beq #0")
+                this.emit("beq " + lbl)
             } else if (name == "JMP") {
                 // ok
             } else {
                 Util.oops("bad jmp");
             }
 
-            this.emit("b " + trg)
+            this.emit("bb " + trg)
+            if (lbl)
+                this.emitLbl(lbl)
         }
 
         mkLabel(root:string):string
@@ -684,6 +689,8 @@ module TDev.AST.Bytecode
             })
 
             this.csource += this.stringsBody
+
+            this.emit("_program_end:");
         }
 
         addSource(meta:string, blob:Uint8Array)
@@ -692,7 +699,7 @@ module TDev.AST.Bytecode
             var totallen = metablob.length + blob.length
 
             if (totallen > 40000) {
-                return false;
+                return 0;
             }
 
             this.emit(".balign 16");
@@ -724,7 +731,7 @@ module TDev.AST.Bytecode
 
             this.emit(str)
 
-            return true;
+            return totallen + 16;
         }
 
         static extractSource(hexfile: string): { meta: string; text: Uint8Array;}
@@ -776,6 +783,7 @@ module TDev.AST.Bytecode
             b.lookupExternalLabel = lookupFunctionAddr;
             // b.throwOnError = true;
             b.emit(this.csource);
+            this.csource = b.getSource(!/peepdbg=1/.test(document.URL));
             if (b.errors.length > 0) {
                 var userErrors = ""
                 b.errors.forEach(e => {
@@ -894,21 +902,20 @@ module TDev.AST.Bytecode
         public serialize(shortForm:boolean, metainfo:string, blob:Uint8Array)
         {
             shortForm = false; // this doesn't work yet
-            var src = "";
 
             if (this.binary.procs.length == 0) {
                 shortForm = true // which is great in case there are errors in the program
             } else {
                 this.binary.serialize()
-                src = this.binary.csource
             }
-            var sourceSaved = this.binary.addSource(metainfo, blob);
+            var lenSrc = this.binary.addSource(metainfo, blob);
+            var sourceSaved = lenSrc > 0;
             this.binary.assemble()
 
             var res = {
                 data: null,
                 contentType: "application/x-microbit-hex",
-                csource: src,
+                csource: this.binary.csource,
                 sourceSaved: sourceSaved
             }
 
