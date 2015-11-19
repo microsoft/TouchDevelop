@@ -578,7 +578,7 @@ module TDev.RT {
         class Logger {
             logIdx = -1;
             logMsgs:LogMessage[] = [];
-            logSz = 2000;
+            logSz = Browser.isNodeJS ? 2000 : 300;
 
             addMsg(level : number, category : string, s:string, meta: any)
             {

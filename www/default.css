@@ -86,8 +86,8 @@ textarea {
 .logView {
   font-size: 0.8em;
   background: white;
-  padding: 2%;
-  height: 96%;
+  padding: 1em;
+  height: calc(100% - 2em);
   color: black;
   text-align:left;
 }
@@ -1494,7 +1494,7 @@ height: 100%;
 {
     position: absolute;
     left: 0.5em;
-    bottom: 1.5em;
+    bottom: 0.5em;
     z-index:10000;
 }
 

@@ -111,6 +111,10 @@ module TDev
                 });
             }).done()
         }
+        
+        public showSerialView() {
+            TDev.RT.App.showAppLogAsync(undefined, "serial").done()
+        }
 
         static editFullScreenAsync(name : string, value : string, mode? : string): Promise { // of string
             return (Browser.isDesktop && !(<any>window).ace ? HTML.jsrequireAsync(baseUrl + "ace/ace.js") : Promise.as())
@@ -120,7 +124,7 @@ module TDev
                     if (!!(<any>window).ace) {
                         var d = div('');
                         d.style.height = '100%';
-                        d.style.width = '80%';
+                        d.style.width = 'calc(100% - 4em)';
                         m.add(d);
                         var editor = ace.edit(d);
                         if (mode) editor.getSession().setMode("ace/mode/" + mode);
@@ -161,8 +165,9 @@ module TDev
             this.updatePause()
 
             var btns = [this.pauseBtnDiv];
-            if (ScriptEditorWorldInfo.status != "published" && TDev.Browser.EditorSettings.widgets().wallLogsButton)
+            if (TDev.Browser.EditorSettings.widgets().wallLogsButton && ScriptEditorWorldInfo.status != "published")
                 btns.push(HTML.mkRoundButton("svg:CommandLine,currentColor", lf("logs"), Ticks.wallLogs, () => this.showAppView()));
+                
             return btns;
         }
 
@@ -170,6 +175,8 @@ module TDev
             var btns = [];
             if (ScriptEditorWorldInfo.status == "published" && TheEditor.widgetEnabled("wallScreenshot"))
                 btns.push(HTML.mkRoundButton("svg:camera,currentColor", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
+            if (Browser.serialLog)
+                btns.push(HTML.mkRoundButton("svg:CommandLine,currentColor", lf("serial"), Ticks.wallSerial, () => this.showSerialView()))    
             return btns;
         }
 

@@ -90,6 +90,7 @@ module TDev {
         export var logToHost = false;
         export var noNetwork = false;
         export var lowMemory = false;
+        export var serialLog = false;
 
         export var loadingDone = false;
 
