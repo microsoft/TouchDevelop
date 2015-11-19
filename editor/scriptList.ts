@@ -8523,6 +8523,21 @@
                         }))
             }
 
+            if (Cloud.hasPermission("root")) {
+                accountButtons.appendChild(
+                    HTML.mkButton(lf("disable login"),
+                        () =>
+                            ModalDialog.ask(lf("The user will not be able to login, and instead will be asked to create a new account."), 
+                                            lf("disable login"),
+                                            () => {
+                                                Cloud.deletePrivateApiAsync(this.publicId + "/login?primary=true")
+                                                .then(() => Cloud.postPrivateApiAsync(this.publicId + "/logout", {}))
+                                                .then(() => ModalDialog.info(lf("Login deleted"), lf("Also, user logged out everywhere.")),
+                                                      e => Cloud.handlePostingError(e, lf("disable login")))
+                                                .done()
+                                            }, true)))
+            }
+
             if (false && Cloud.isRestricted()) {
                 ch.push(div("", text(lf("Groups of this user:"))));
                 if (!this.groupsTab) {
