@@ -1817,10 +1817,6 @@ span.errorSq .kw
   display:none;
 }
 
-#root.portrait[data-pane-hidden^="no"] #leftBtnRow .topMenu-button {
-  display: none;
-}
-
 .topMenu-button.searchBackButton {
   display: none;
 }
