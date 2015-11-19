@@ -924,12 +924,12 @@ action set_pixel(#P0GQI7mqQZLddWdU @this: * Image, #E5qctGDlXgeNbS9G x: Number, 
   #xpZ7UZvq2Tr4fPY8 // {shim:micro_bit::setImagePixel}
   #Ttlwr2BQ8yIw6IcW $x := math→round($x);
   #BNwkMfmgM6AGCtZ3 $y := math→round($y);
-  #SSAeQ4VRV2uQEsxl if $x < 0 `or` $x > $@this→leds→row_count then {
-    #xxg0vFq2rbHOOMV1 code→warning("x should be between 0 and " →concat($@this→leds→row_count→to_string));
+  #SSAeQ4VRV2uQEsxl if $x < 0 `or` $x ≥ $@this→leds→row_count then {
+    #xxg0vFq2rbHOOMV1 code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
     #ZH3TRsErYzyfXgx3 `return` ;
   }
-  else { #xHF8EEXFlAoY2lKx if $y < 0 `or` $y > $@this→leds→column_count then {
-    #CDa2E4zfBb49ltrJ code→warning("y should be between 0 and " →concat($@this→leds→column_count→to_string));
+  else { #xHF8EEXFlAoY2lKx if $y < 0 `or` $y ≥ $@this→leds→column_count then {
+    #CDa2E4zfBb49ltrJ code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
     #mWJh2S7saTBMyqGM `return` ;
   }
   else { } } 
@@ -946,12 +946,12 @@ action pixel(#TVxswFwyZs0INV5W @this: * Image, #QLIezAtdKSgv2ohr x: Number, #yMN
   #BxesDHsvnmMZkenI // {shim:micro_bit::getImagePixel}
   #fg2Mv5bXgzcqjXUU $x := math→round($x);
   #xagn2bFXho7BIPi7 $y := math→round($y);
-  #B3iuDYg6RgNn8B3B if $x < 0 `or` $x > $@this→leds→row_count then {
-    #xG93gCiHc1YxoaZM code→warning("x should be between 0 and " →concat($@this→leds→row_count→to_string));
+  #B3iuDYg6RgNn8B3B if $x < 0 `or` $x ≥ $@this→leds→row_count then {
+    #xG93gCiHc1YxoaZM code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
     #VYUf4BJs3gI77sMd `return` false;
   }
-  else { #xd24JUL30hN2r5ke if $y < 0 `or` $y > $@this→leds→column_count then {
-    #S4SHEhCcCrgCOl5Y code→warning("y should be between 0 and " →concat($@this→leds→column_count→to_string));
+  else { #xd24JUL30hN2r5ke if $y < 0 `or` $y ≥ $@this→leds→column_count then {
+    #S4SHEhCcCrgCOl5Y code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
     #MubndmgVKnESr4QU `return` false;
   }
   else { } } 
