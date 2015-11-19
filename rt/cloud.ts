@@ -910,12 +910,11 @@ module TDev.Cloud {
     
     export function showSigninNotification(isOnline: boolean) {
         if (isOnline) HTML.showWarningNotification(lf("You are not signed in."), {
-              onDismissText: lf("sign in"),
-              onDismiss: () => {
+            els: [HTML.mkLinkButton(lf("sign in"), () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
                         login.show()
-                }
+                })]
             });
         else HTML.showProgressNotification(lf("You appear to be offline."));
     }
