@@ -7,7 +7,7 @@ meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
 #mExzaWj10ZHeHz4P meta import micro\u003abit {
-  pub "bgmljr"
+  pub "rwqgyd"
   usage {
     type Image
     action `sync` \_libinit()
@@ -60,6 +60,8 @@ meta parentIds "";
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
   }
 }
 #ljbL9TDyViQp60st
@@ -159,7 +161,7 @@ action test_fade() {
 }
 #JzsKhABDnEUitS2i
 action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image) {
-  #F9xzUugwJ3pSz2Jl // Takes a screenshot of the LED screen and returns an image
+  #F9xzUugwJ3pSz2Jl // Takes a screenshot of the LED screen and returns an image.
   #y2Nlin4tWBVdqYY1 // {namespace:led}
   #Hzg49aPDJ5V4z35P // {shim:uBit.display.screenShot}
   #XTef15xe4sxw76s2 // {help:functions/screenshot}
