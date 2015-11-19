@@ -429,7 +429,7 @@ module TDev
         }
 
         public setScroll() {
-            this.dialog.style.maxHeight = 'calc(100% - 1em)';
+            this.dialog.style.maxHeight = (SizeMgr.windowHeight * 0.85) / SizeMgr.topFontSize + "em";
             Util.setupDragToScroll(this.dialog);
         }
 
