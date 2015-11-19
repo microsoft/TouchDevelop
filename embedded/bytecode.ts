@@ -796,16 +796,14 @@ module TDev.AST.Bytecode
     {
         useAction(a:Action)
         {
-            if (a.getShimName() != null && !a._compilerInlineBody) {
-                a.body.stmts.forEach(s => {
-                    var str = AST.getEmbeddedLangaugeToken(s)
-                    if (str && (<ExprStmt>s).expr.parsed.getCalledProperty().getName() == "thumb") {
-                        a._compilerInlineBody = s;
-                    }
-                })
-                if (!a._compilerInlineBody)
-                    return
+            if (a.getShimName() != null) {
+                if (a._compilerInlineBody) {
+                    // TODO  mark stuff as used
+                    a.visitorState = true;
+                }
+                return;
             }
+
             super.useAction(a)
         }
     }
@@ -1712,10 +1710,12 @@ module TDev.AST.Bytecode
         var shimname = act.getShimName();
 
         var b = new Thumb.Binary();
+        if (/{shim:/.test(act.getDescription())) 
+            b.pushError(lf("use {asm:{0}} with app->thumb, not {shim:{0}}", shimname))
         if (lookupFunc(shimname))
-            b.pushError(lf("app->thumb inline body not allowed in {shim:{0}} (already defined in runtime)", shimname))
+            b.pushError(lf("{asm:{0}} already defined in runtime", shimname))
         if (!/^\w+$/.test(shimname))
-            b.pushError(lf("invalid characters in shim name: {shim:{0}}", shimname))
+            b.pushError(lf("invalid characters in shim name: {asm:{0}}", shimname))
         if (act.getInParameters().length > 4)
             b.pushError(lf("inline shims support only up to 4 arguments"));
 

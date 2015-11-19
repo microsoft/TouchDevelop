@@ -871,7 +871,6 @@ module TDev.RT {
 
         //? When compiled to ARM Thumb, inline the body.
         //@ [script].lang("thumb")
-        //@ dbgOnly
         export function thumb(script:string) : void
         {
         }

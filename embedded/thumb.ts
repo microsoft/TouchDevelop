@@ -252,6 +252,8 @@ module TDev.AST.Thumb
     {
         constructor()
         {
+            this.currLine = new Line(this, "<start>");
+            this.currLine.lineNo = 0;
         }
 
         public baseOffset:number;

@@ -1860,8 +1860,8 @@ module TDev.AST {
 
         public getShimName():string
         {
-            var shm = /{shim:([^{}]*)}/.exec(this.getDescription())
-            if (shm) return shm[1]
+            var shm = /{(shim|asm):([^{}]*)}/.exec(this.getDescription())
+            if (shm) return shm[2]
             return null
         }
 
@@ -5666,6 +5666,9 @@ module TDev.AST {
             toks[3].getStringLiteral() != null &&
             toks[4].getOperator() == ")")
             return <Expr>toks[3];
+
+        if (Cloud.isRestricted())
+            return null;
 
         if (toks.length == 7 &&
             toks[0].getThing() == api.core.App.singleton &&

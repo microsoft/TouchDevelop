@@ -2,7 +2,7 @@
 
 // TODO events and async
 
-// Next available error: TD214:
+// Next available error: TD215:
 
 module TDev.AST
 {
@@ -875,6 +875,8 @@ module TDev.AST
             this.actionSection = ActionSection.Normal;
             this.inAtomic = node.isAtomic;
             this.inShim = this.topApp.entireShim || node.getShimName() != null;
+
+            node._compilerInlineBody = null;
 
             this.scope(() => {
                 // TODO in - read-only?
@@ -1783,8 +1785,10 @@ module TDev.AST
             case "thumb":
                 if (!checkArgumentCount(2)) return;
                 if (!this.inShim)
-                    // TODO check that there is only one
-                    this.markError(t, lf("TD213: app->thumb only supported inside of {shim:}"))
+                    this.markError(t, lf("TD213: app->thumb only supported inside of {asm:}"))
+                if (this.currentAction._compilerInlineBody)
+                    this.markError(t, lf("TD214: only one app->thumb allowed"))
+                this.currentAction._compilerInlineBody = this.lastStmt
                 this.currentAction.getOutParameters().forEach(p => this.recordLocalWrite(p.local))
                 if (TypeChecker.lintThumb) {
                     var errs = TypeChecker.lintThumb(this.currentAction, t.args[1].getStringLiteral())
