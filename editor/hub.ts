@@ -1295,14 +1295,14 @@ module TDev.Browser {
     export interface ScriptTemplate {
         title: string;
         id: string;
-        scriptid:string;
+        scriptid?:string;
         //tick: Ticks; automatically generated
         icon: string;
         description: string;
         name: string;
         source: string;
         section: string;
-        editorMode: number;
+        editorMode?: number;
         caps?: string;
         baseId?: string;
         baseUserId?: string;
@@ -1426,10 +1426,10 @@ module TDev.Browser {
         export function createScript() {
             var gotoTemplate = () => {
                 chooseScriptFromTemplateAsync()
-                    .done(template => {
+                    .done((template : ScriptTemplate) => {
                         if (template) {
                             var stub: World.ScriptStub = {
-                                editorName: "touchdevelop",
+                                editorName: template.editor || "touchdevelop",
                                 scriptName: template.name,
                                 scriptText: template.source
                             };
@@ -1467,6 +1467,18 @@ module TDev.Browser {
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 var templates = getAvailableTemplates();
+                
+                templates.unshift({                    
+                    title: lf("blank game (blocks)"),
+                    id: 'blankgameblocks',
+                    icon: 'ABC',
+                    description: lf("An empty game."),
+                    section: 'templates',
+                    name: 'ADJ game',
+                    editor: 'blocks',
+                    source: ''
+                })
+                
                 var sections = Util.unique(templates, t => t.section).map(t => t.section);
                 var bySection = Util.groupBy(templates, t => t.section);
                 m.onDismiss = () => onSuccess(undefined);

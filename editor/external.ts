@@ -48,7 +48,7 @@ module TDev {
 
       var ckPath = isLocal ? '/microbit/sequencer/bin/' : '/';
 
-      externalEditorsCache = [ /* {
+      externalEditorsCache = []; /* {
         name: "C++ Editor",
         description: "Directly write C++ code using Ace (OUTDATED)",
         id: "ace",
@@ -56,7 +56,9 @@ module TDev {
         path: path + "ace/editor.html"
         icon: ""
       }, */
-        {
+
+      if (Cloud.isRestricted()) {
+        externalEditorsCache.pushRange([{
           company: "Microsoft",
           name: "Block Editor",
           description: "Drag and drop blocks to code!",
@@ -66,28 +68,39 @@ module TDev {
           logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
           order: 0,
         }, {
-          company: "Code Kingdoms",
-          name: "CK JavaScript",
-          description: "Code JavaScript with the CK editor",
-          id: 'codekingdoms',
-          origin: ckOrigin,
-          path: ckPath,
-          logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
-          order: 1,
-        }];
-
-      if (TDev.isBeta) {
-        externalEditorsCache.push(
-        {
-          company: "The Python Software Foundation",
-          name: "MicroPython",
-          description: "Hack your micro:bit with MicroPython!",
-          id: "python",
-          origin: "https://microbit.pythonanywhere.com",
-          path: "/editor.html",
-          logoUrl: origin + '/static/img/python-powered.png',
-          order:3
-        })
+            company: "Code Kingdoms",
+            name: "CK JavaScript",
+            description: "Code JavaScript with the CK editor",
+            id: 'codekingdoms',
+            origin: ckOrigin,
+            path: ckPath,
+            logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
+            order: 1,
+          }]);
+        if (TDev.isBeta) {
+          externalEditorsCache.push(
+            {
+              company: "The Python Software Foundation",
+              name: "MicroPython",
+              description: "Hack your micro:bit with MicroPython!",
+              id: "python",
+              origin: "https://microbit.pythonanywhere.com",
+              path: "/editor.html",
+              logoUrl: origin + '/static/img/python-powered.png',
+              order: 3
+            })
+        }
+      } else {
+        externalEditorsCache.push({
+          company: "Microsoft",
+          name: "Block Editor",
+          description: "Drag and drop blocks to code!",
+          id: "blocks",
+          origin: origin,
+          path: path + "blockly/editor-touchdevelop.html",
+          logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
+          order: 0,
+        });
       }
     }
     return externalEditorsCache;
