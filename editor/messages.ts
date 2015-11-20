@@ -31,6 +31,7 @@ module TDev {
             merge?: PendingMerge;
             fota: boolean; // Are we flashing over the air?
             pubId: string; // The last known publication id for this script, if any.
+            libs?: { [index: string]: External.LibEntry }; // additional libraries if any
         }
 
         export interface Message_Save extends Message {

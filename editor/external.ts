@@ -599,6 +599,7 @@ module TDev {
       baseSnapshot: string;
       metadata: Metadata;
       pubId: string;
+      libs?: { [index: string]: External.LibEntry };
     };
 
     window.addEventListener("resize", () => {
@@ -656,6 +657,7 @@ module TDev {
             merge: ("theirs" in extra) ? extra : null,
             fota: Cloud.isFota(),
             pubId: data.pubId,
+            libs:data.libs
           });
         });
       });
