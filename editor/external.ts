@@ -115,7 +115,7 @@ module TDev {
   export module External {
     export var TheChannel: Channel = null;
     // We need that to setup the simulator.
-    export var microbitScriptId = "lwhfye";
+    export var startScriptId = Cloud.isRestricted() ? "lwhfye" : undefined;
 
     import J = AST.Json;
 
@@ -644,10 +644,13 @@ module TDev {
 
         // Start the simulator. This assumes that [TheChannel] is properly
         // setup.
-        pullLatestLibraryVersion(microbitScriptId)
-        .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-        .then((s: string) => typeCheckAndRun(s, "_libinit"))
-        .done(() => {
+        var p = startScriptId ?
+          pullLatestLibraryVersion(startScriptId)
+            .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
+            .then((s: string) => typeCheckAndRun(s, "_libinit"))
+          : Promise.as();
+
+        p.done(() => {
           // Send the initialization message once the simulator is properly
           // setup.
           var extra = JSON.parse(data.scriptVersionInCloud || "{}");
@@ -657,7 +660,7 @@ module TDev {
             merge: ("theirs" in extra) ? extra : null,
             fota: Cloud.isFota(),
             pubId: data.pubId,
-            libs:data.libs
+            libs: data.libs
           });
         });
       });
