@@ -226,14 +226,12 @@
         <block type="device_temperature"></block>
         <block type="device_get_acceleration"></block>
       </category>
-      <category name="If" colour="210">
+      <category name="Logic" colour="210">
         <block type="controls_if"></block>
-        <block type="controls_if">
-          <mutation else="1"></mutation>
-        </block>
-        <block type="controls_if">
-          <mutation elseif="1" else="1"></mutation>
-        </block>
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="logic_negate"></block>
+        <block type="logic_boolean"></block>
       </category>
       <category name="Loops" colour="120">
         <block type="controls_repeat_ext">
@@ -251,33 +249,6 @@
             </shadow>
           </value>
         </block>
-        <!-- <block type="controls_for"> -->
-        <!--   <value name="FROM"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">0</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="TO"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">4</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!--   <value name="BY"> -->
-        <!--     <block type="math_number"> -->
-        <!--       <field name="NUM">1</field> -->
-        <!--     </block> -->
-        <!--   </value> -->
-        <!-- </block> -->
-        <block type="device_forever"></block>
-      </category>
-      <category name="Logic" colour="210">
-        <block type="math_number">
-          <field name="NUM">0</field>
-        </block>
-        <block type="logic_compare"></block>
-        <block type="logic_operation"></block>
-        <block type="logic_negate"></block>
-        <block type="logic_boolean"></block>
       </category>
       <category name="Maths" colour="230">
         <block type="math_arithmetic"></block>
