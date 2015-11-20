@@ -1238,10 +1238,11 @@ module TDev
             return null;
         }
 
+        private helpBtn: HTMLElement;        
         public displayLeft(nodes: any) {
             this.codeInner.setChildren(nodes);
-            if (!this.stepTutorial) {
-                elt("leftPane").appendChild(div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
+            if (!this.stepTutorial && !this.helpBtn) {
+                elt("leftPane").appendChild(this.helpBtn = div('helpBtnOverlay', HTML.mkRoundButton('svg:fa-question,currentColor', lf("help"), Ticks.calcHelpOverlay, () => {
                     var m = new ModalDialog();
                     m.add(div('wall-dialog-header', lf("Have a question?")));
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below for more information.")));
