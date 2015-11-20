@@ -240,8 +240,12 @@ mkSimpleTask('build/blockly-main.js', [
     "www/blockly/compiler.ts",
     "editor/messages.ts",
     "ast/jsonInterfaces.ts"
+], "www/blockly/refs.ts"),
+mkSimpleTask('build/blockly-touchdevelop.js', [
+    "www/blockly/blockly-touchdevelop.ts",
+    "editor/messages.ts",
+    "ast/jsonInterfaces.ts"
 ], "www/blockly/refs.ts");
-
 file('build/libraries.js', expand([
   "build/client.js",
   "microbit/libraries",
@@ -393,6 +397,7 @@ task('default', [
   'build/officemix.d.ts',
   'build/ace-main.js',
   'build/blockly-main.js',
+  'build/blockly-touchdevelop.js',
   'build/libraries.js',
   'log'
 ].concat(Object.keys(concatMap)), {

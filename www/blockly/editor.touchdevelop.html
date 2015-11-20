@@ -1,0 +1,319 @@
+﻿<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script type="application/javascript" src="blockly_compressed.js"></script>
+    <script type="application/javascript" src="blocks_compressed.js"></script>
+    <script type="application/javascript" src="en.js"></script>
+    <script type="application/javascript" src="../jquery-2.1.4.min.js"></script>
+    <!-- Use the lines below when working with a local checkout of blockly. -->
+    <!-- <script type="application/javascript" src="blockly/blockly_uncompressed.js"></script> -->
+    <!-- <script type="application/javascript" src="blockly/blocks_compressed.js"></script> -->
+    <!-- <script type="application/javascript" src="blockly/msg/js/en.js"></script> -->
+    <!-- device-specific blocks -->
+    <script type="application/javascript" src="blocks-touchdevelop-custom.js"></script>
+    <!-- Compiled version of blockly-main.ts -->
+    <script type="application/javascript" src="../blockly-touchdevelop.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="main" class="vbox">
+      <div id="toolbox" class="hbox">
+        <div id="commands" class="hbox">
+          <a href="#" class="roundbutton" id="command-quit">
+            <div class="roundsymbol"><i class="fa fa-arrow-left"></i></div>
+            <div class="roundlabel">my scripts</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-run">
+            <div class="roundsymbol"><i class="fa fa-play"></i></div>
+            <div class="roundlabel">run</div>
+          </a>
+          <a href="#" class="roundbutton" id="command-graduate">
+            <div class="svg-wrapper">
+              <svg class="svg svg-icon-touchdevelop" viewBox="0 0 321.68088 246.57956" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-label="touchdevelop,white">
+                <path fill="black" d="m 244.5274,124.80975 -69.069,51.886 0,-103.785002 69.069,51.899002 z M 193.9674,0.07774818 c 68.362,-2.40499998 125.203,51.28699982 127.653,119.20000182 2.115,67.974 -51.511,125.12 -119.486,127.232 -42.624,1.421 -80.757,-18.96 -104.013,-51.011 l 12.49,-9.085 c 20.384,28.077 53.63,45.945 91.007,44.718 59.579,-1.855 106.479,-51.742 104.624,-111.338 -2.164,-59.649002 -51.725,-106.384002 -111.664,-104.224002 l -0.095,0 c -30.564,0.922 -57.58,14.411 -76.737,35.423 l -11.478,-10.423 c 21.823,-23.917 52.87,-39.4099998 87.699,-40.49199982 z M 61.7614,38.904748 c 33.567,0 61.149,27.242 61.149,61.149002 0,33.907 -27.582,61.055 -61.149,61.055 C 28.1934,161.10875 0,134.04375 0,100.05375 0,66.068748 28.1934,38.904748 61.7614,38.904748 Z m 0,10.539 c -27.904,0 -51.2221,22.467 -51.2221,50.610002 0,23.673 16.4741,43.239 38.2981,48.877 l -9.799,-35.272 -1.645,-5.743 48.545,0 -1.876,5.859 -10.535,35.436 c 22.249,-5.236 38.844,-25.027 38.844,-49.157 0,-28.226002 -22.707,-50.610002 -50.61,-50.610002 z m 0,101.125002 1.49,-0.021 10.082,-33.452 -23.545,0 9.263,33.403 2.71,0.07 z m -28.098,12.911 54.53,0 0,5.615 -54.53,4.292 0,-9.907 z m 54.53,9.585 0,7.602 -54.53,4.292 0,-7.601 54.53,-4.293 z m 0,11.572 0,6.602 -53.869,4.293 -0.661,-6.602 54.53,-4.293 z m -52.543,14.539 8.924,-0.661 34.696,-2.983 8.601,-0.665 -0.339,1.004 -1.305,3.305 -2.326,4.957 c -0.983,1.645 -2.305,3.632 -4.293,5.293 -1.983,1.644 -4.631,3.292 -7.601,4.615 -2.967,1.322 -6.276,1.987 -8.924,2.326 -2.967,0.322 -5.293,0 -7.602,-0.339 -2.306,-0.665 -4.954,-1.326 -6.937,-2.648 -1.987,-0.984 -3.97,-2.31 -5.619,-3.632 -1.661,-1.322 -2.983,-2.971 -4.309,-4.954 -1.322,-1.665 -2.305,-3.309 -2.966,-5.618 z">
+                </path>
+              </svg>
+            </div>
+            <div class="roundlabel">convert</div>
+          </a>
+          <a href="https://live.microbit.co.uk/blocks/contents" target="_blank" class="roundbutton" id="command-help">
+            <div class="roundsymbol"><i class="fa fa-question"></i></div>
+            <div class="roundlabel">help</div>
+          </a>
+        </div>
+        <div id="merge-commands" class="vbox flex1">
+        </div>
+        <div class="vbox flexmax" id="script-box">
+          <div id="script-wrapper" class="vbox flex1">
+            <input type="text" maxlength="60" id="script-name" class="" />
+            <input type="text" maxlength="200" id="script-description" />
+          </div>
+          <div id="script-icons" class="hbox">
+            <div id="cloud-status" class="flex1">
+              <i class="fa fa-cloud-upload" title="Script loaded"></i>
+            </div>
+            <div>
+              <i id="link-log" class="fa fa-bug"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hbox flex1">
+          <div id="editor" class="flex3"></div>
+          <div id="errors" class="vbox hidden flex1">
+              <div id="errorsHeader">
+                  Some blocks could not be compiled.
+              </div>
+              <div id="errorsText" class="flex1">
+              </div>
+          </div>
+      </div>
+    </div>
+    <xml id="blockly-toolbox" style="display: none">
+      <category name="Basic" colour="160">
+        <!-- <block type="text"></block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">0</field> -->
+        <!-- </block> -->
+        <!-- <block type="math_number"> -->
+        <!--   <field name="NUM">1</field> -->
+        <!-- </block> -->
+        <!-- <block type="device_show_letter"> -->
+        <!--   <value name="letter"> -->
+        <!--     <block type="text"> -->
+        <!--       <field name="TEXT"></field> -->
+        <!--     </block> -->
+        <!--   </value> -->
+        <!-- </block> -->
+        <block type="device_show_number">
+          <value name="number">
+            <shadow type="math_number">
+              <field name="NUM">2</field>
+            </shadow>
+          </value>
+          <value name="pausetime">
+            <shadow type="math_number">
+              <field name="NUM">150</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_show_leds">
+        </block>
+        <block type="device_print_message">
+          <value name="message">
+            <shadow type="text">
+              <field name="TEXT">Hello world</field>
+            </shadow>
+          </value>
+          <value name="pausetime">
+            <shadow type="math_number">
+              <field name="NUM">150</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="text">
+          <field name="TEXT">Some text</field>
+        </block>
+        <block type="device_clear_display"></block>
+        <block type="device_forever"></block>
+        <block type="device_pause">
+          <value name="pause">
+            <shadow type="math_number">
+              <field name="NUM">100</field>
+            </shadow>
+          </value>
+        </block>
+      </category>
+      <category name="LED">
+        <block type="device_clear_display"></block>
+
+        <block type="device_plot">
+          <value name="x">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+          <value name="y">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_unplot">
+          <value name="x">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+          <value name="y">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_point">
+          <value name="x">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+          <value name="y">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+        </block>
+
+        <block type="device_get_brightness"></block>
+        <block type="device_set_brightness">
+            <value name="value">
+                <shadow type="math_number">
+                    <field name="NUM">255</field>
+                </shadow>
+            </value>
+        </block>
+
+      </category>
+      <category name="Images" colour="20">
+        <block type="device_show_image_offset">
+          <value name="offset">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_scroll_image">
+            <value name="frame offset">
+                <shadow type="math_number">
+                    <field name="NUM">5</field>
+                </shadow>
+            </value>
+            <value name="delay">
+                <shadow type="math_number">
+                    <field name="NUM">200</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="device_build_image"></block>
+        <block type="device_build_big_image"></block>
+      </category>
+      <category name="Input">
+        <block type="device_get_button"></block>
+        <block type="device_button_event"></block>
+        <block type="device_shake_event"></block>
+        <block type="device_pin_event"></block>
+        <block type="device_heading"></block>
+        <block type="device_temperature"></block>
+        <block type="device_get_acceleration"></block>
+      </category>
+      <category name="Logic" colour="210">
+        <block type="controls_if"></block>
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="logic_negate"></block>
+        <block type="logic_boolean"></block>
+      </category>
+      <category name="Loops" colour="120">
+        <block type="controls_repeat_ext">
+          <value name="TIMES">
+            <shadow type="math_number">
+              <field name="NUM">4</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_while"></block>
+        <block type="controls_simple_for">
+          <value name="TO">
+            <shadow type="math_number">
+              <field name="NUM">4</field>
+            </shadow>
+          </value>
+        </block>
+      </category>
+      <category name="Maths" colour="230">
+        <block type="math_arithmetic"></block>
+        <block type="math_op2"></block>
+        <block type="math_op3"></block>
+        <block type="math_number">
+          <field name="NUM">0</field>
+        </block>
+        <block type="device_random">
+          <field name="limit">4</field>
+        </block>
+      </category>
+      <category name="Pins">
+          <block type="device_get_digital_pin"></block>
+          <block type="device_set_digital_pin">
+            <value name="value">
+              <shadow type="math_number">
+                <field name="NUM">1</field>
+              </shadow>
+            </value>
+          </block>
+          <block type="device_get_analog_pin"></block>
+          <block type="device_set_analog_pin">
+            <value name="value">
+              <shadow type="math_number">
+                <field name="NUM">1024</field>
+              </shadow>
+            </value>
+          </block>
+      </category>
+      <category name="Variables" colour="330">
+        <block type="variables_set"></block>
+        <block type="variables_get"></block>
+      </category>
+      <category name="Music">
+        <block type="device_play_note">
+          <value name="note">
+            <shadow type="device_note_A"></shadow>
+          </value>
+          <value name="duration">
+            <shadow type="device_duration_1/4">
+            </shadow>
+          </value>
+        </block>
+        <block type="device_note_A"></block>
+        <block type="device_note_B"></block>
+        <block type="device_note_C"></block>
+        <block type="device_note_D"></block>
+        <block type="device_note_E"></block>
+        <block type="device_note_F"></block>
+        <block type="device_note_G"></block>
+        <block type="device_duration_1"></block>
+        <block type="device_duration_1/2"></block>
+        <block type="device_duration_1/4"></block>
+        <block type="device_duration_1/8"></block>
+        <block type="device_duration_1/16"></block>
+      </category>
+      <category name="Comments" colour="180">
+        <block type="device_comment2"></block>
+      </category>
+    </xml>
+    <div class="popup hidden" id="popup-log">
+      <div class="popup-inner">
+        <div id="log">
+          <div id="status">✔ loaded</div>
+        </div>
+        <div id="errorsGraduate" class="hidden">
+          I could not understand some blocks. Fix errors or
+          <a class="command" href="#" id="command-force-graduate">convert anyway</a>.
+        </div>
+        <div id="errorsRun" class="hidden">
+          I could not understand some blocks, and I cannot run this script.
+        </div>
+        <div id="errorsCompile" class="hidden">
+          I could not understand some blocks. Fix errors or
+          <a class="command" href="#" id="command-force-compile">
+            <span class="fota">flash</span>
+            <span class="notfota">compile</span>
+            anyway</a>.
+        </div>
+      </div>
+    </div>
+    <div id="blocklyDiv"></div>
+  </body>
+</html>
+<!-- vim: set ts=2 sw=2 sts=2: -->
