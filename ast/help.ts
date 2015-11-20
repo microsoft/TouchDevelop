@@ -788,7 +788,12 @@ module TDev {
             return tracks[0];
         }
         
-        private sig(arg: string) {
+        private sig(arg: string, full = false) {
+            var t = HelpTopic.findById(arg)
+            if (t && t.isPropertyHelp()) {
+                return t.getSig(this, full)
+            }
+
             var m = arg.split(/->/);
             var property: IProperty = undefined;
             if (m) {
@@ -1007,6 +1012,8 @@ module TDev {
                 return this.apiList(arg);
             } else if (macro == "sig") {
                 return this.sig(arg);            
+            } else if (macro == "fullsig") {
+                return this.sig(arg, true);            
             } else if (macro == "youtube") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
@@ -1935,7 +1942,8 @@ module TDev {
         {
             var p = this.apiProperty;
             var r = "";
-            r += "<a href='" + mdcmt.topicLink(this.id) + "' class='md-api-entry-link'><div class='md-api-entry'>";
+            r += Util.fmt("<a href='{0:q}' id='{1:q}' class='md-api-entry-link'><div class='md-api-entry'>", 
+                mdcmt.topicLink(this.id), p ? MdComments.shrink(p.getName()) : MdComments.shrink(this.id))
             if (this.json.text)
                 r += "<div class='md-more'>more info</div>"
             if (mdcmt.renderer)
@@ -2143,6 +2151,40 @@ module TDev {
             return !!this.apiProperty
         }
 
+        public getSig(mdcmt : MdComments, full: boolean) : string
+        {
+            var ch =  "<div class='md-api-header md-tutorial'>" +
+                          (new Renderer()).renderPropertySig(this.apiProperty, true) +
+                          (!full ? "" :
+                              "<div class='md-prop-desc'>" +
+                                mdcmt.formatText(this.apiProperty.getDescription()) +
+                              "</div>") +
+                      "</div>";
+
+            if (full) {
+                var cap = this.apiProperty.getCapability();
+
+                ch += "<div class='md-tutorial'>" +
+                        "<ul>" +
+                          (cap == PlatformCapability.None ? "" :
+                            "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) +
+                             " <a title='" + lf("read more about platforms") + "' href='/help/platforms'>" + lf("Learn more...") + "</a></li>") +
+                          (!this.apiProperty.isBeta() ? "" :
+                            "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change") +
+                            " <a title='" + lf("read more about the beta") + "' href='#topic:beta'>" + lf("Learn more...") + "</a></li>") +
+                          (this.apiProperty.isImplementedAnywhere() ? "" :
+                            "<li><strong>" + lf("API not implemented") + "</strong>, sorry " +
+                            "<a title='" + lf("read more about unimplemented features") + "' href='#topic:notImplemented'>" + lf("Learn more...") + "</a></li>") +
+                        "</ul>" +
+                      "</div>";
+            }
+
+            if (mdcmt.useExternalLinks)
+                ch = ch.replace(/#topic(:|%3a)/g, Cloud.config.rootUrl + Cloud.config.topicPath);
+
+            return ch;
+        }
+
         private renderCore(mdcmt : MdComments) : string
         {
             if (!mdcmt) {
@@ -2155,32 +2197,8 @@ module TDev {
 
             var ch = ""
 
-            if (this.apiProperty) {
-                ch += "<div class='md-api-header md-tutorial'>" +
-                          (new Renderer()).renderPropertySig(this.apiProperty, true) +
-                          "<div class='md-prop-desc'>" +
-                            mdcmt.formatText(this.apiProperty.getDescription()) +
-                          "</div>" +
-                      "</div>";
-
-                var cap = this.apiProperty.getCapability();
-                    ch += "<div class='md-tutorial'>" +
-                            "<ul>" +
-                              (cap == PlatformCapability.None ? "" :
-                                "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) +
-                                 " <a title='" + lf("read more about platforms") + "' href='/help/platforms'>" + lf("Learn more...") + "</a></li>") +
-                              (!this.apiProperty.isBeta() ? "" :
-                                "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change") +
-                                " <a title='" + lf("read more about the beta") + "' href='#topic:beta'>" + lf("Learn more...") + "</a></li>") +
-                              (this.apiProperty.isImplementedAnywhere() ? "" :
-                                "<li><strong>" + lf("API not implemented") + "</strong>, sorry " +
-                                "<a title='" + lf("read more about unimplemented features") + "' href='#topic:notImplemented'>" + lf("Learn more...") + "</a></li>") +
-                            "</ul>" +
-                          "</div>";
-
-                if (mdcmt.useExternalLinks)
-                    ch = ch.replace(/#topic(:|%3a)/g, Cloud.config.rootUrl + Cloud.config.topicPath);
-            }
+            if (this.apiProperty)
+                ch += this.getSig(mdcmt, true);
 
             if (this.app) {
                 var acts:AST.Action[] = <AST.Action[]> this.app.orderedThings().filter((a) => a instanceof AST.Action);
