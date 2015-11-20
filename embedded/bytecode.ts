@@ -1850,7 +1850,7 @@ module TDev.AST.Bytecode
             return res;
 
         fileRepl["/generated/extpointers.inc"] = pointersInc
-        fileRepl["/generated/extensions.inc"] = "#define GLUE /*glue*/\n" + includesInc
+        fileRepl["/generated/extensions.inc"] = includesInc
         var creq = {
             config: "ws",
             tag: Cloud.microbitGitTag,
