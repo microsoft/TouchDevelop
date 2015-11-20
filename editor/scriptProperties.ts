@@ -291,54 +291,86 @@ module TDev
                     return rp;
                 })
 
-            var realCompileStartTime = Util.now();
-            var c = new AST.Bytecode.Compiler(app)
-            try {
-                c.run()
-            } catch (e) {
-                if (app != Script)
-                    // Script is automatically attached
-                    e.bugAttachments = [app.serialize()]
-                Util.reportError("bitvm compile", e, false);
-                if (dbg)
-                    ModalDialog.showText(e.stack)
-                else
-                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
-                return
+            var extInfo = AST.Bytecode.getExtensionInfo(app);
+            if (extInfo.errors) {
+                ModalDialog.info(lf("Errors compiling glue.cpp extensions"), extInfo.errors)
+                return;
             }
 
-            var compileStop = Util.now();
+            var getHex = Promise.as()
 
-            times += Util.fmt("; to assembly {0}ms\n", compileStop - realCompileStartTime);
+            if (extInfo.sha) {
+                var hexurl = Cloud.config.primaryCdnUrl + "/compile/" + extInfo.sha + ".hex"
+                getHex = Util.httpGetTextAsync(hexurl)
+                    .then(text => text,
+                          e => Cloud.postPrivateApiAsync("compile/extension", { data: extInfo.compileData })
+                            .then(() => {
+                                var r = new PromiseInv();
+                                var tryGet = () => Util.httpGetTextAsync(hexurl).then(text => r.success(text), 
+                                    e => Util.setTimeout(1000, tryGet))
+                                tryGet();
+                                return r;
+                            }))
+                    .then(text =>
+                        Util.httpGetJsonAsync(hexurl.replace(/\.hex$/, "-metainfo.json"))
+                            .then(meta => {
+                                meta.hex = text.split(/\r?\n/)
+                                AST.Bytecode.setupFor(extInfo, meta)
+                            }))
+            } else {
+                AST.Bytecode.setupFor(extInfo, null)
+            }
 
-            st.then(r => {
-                var saveDone = Util.now()
-                times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
-
-                var res = c.serialize(!ScriptProperties.firstTime, r[0], r[1])
-                times += Util.fmt("; assemble time {0}ms\n", Util.now() - saveDone);
-
-                if (showSource)
-                    ModalDialog.showText(times + res.csource)
-
-                if (!res.sourceSaved) {
-                    HTML.showWarningNotification("program compiled, but without the source; to save for later use the 'save' button")
+            getHex.done(() => {
+                var realCompileStartTime = Util.now();
+                var c = new AST.Bytecode.Compiler(app)
+                try {
+                    c.run()
+                } catch (e) {
+                    if (app != Script)
+                        // Script is automatically attached
+                        e.bugAttachments = [app.serialize()]
+                    Util.reportError("bitvm compile", e, false);
+                    if (dbg)
+                        ModalDialog.showText(e.stack)
+                    else
+                        HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
+                    return
                 }
 
-                ScriptProperties.firstTime = false
+                var compileStop = Util.now();
 
-                if (res.data) {
-                    var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
-                    HTML.browserDownloadText(res.data, fn, res.contentType);
-                }
-            })
-            .done(() => {},
-            e => {
-                Util.reportError("bitvm download", e, false);
-                if (dbg)
-                    ModalDialog.showText(e.stack)
-                else
-                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
+                times += Util.fmt("; to assembly {0}ms\n", compileStop - realCompileStartTime);
+
+                st.then(r => {
+                    var saveDone = Util.now()
+                    times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
+
+                    var res = c.serialize(!ScriptProperties.firstTime, r[0], r[1])
+                    times += Util.fmt("; assemble time {0}ms\n", Util.now() - saveDone);
+
+                    if (showSource)
+                        ModalDialog.showText(times + res.csource)
+
+                    if (!res.sourceSaved) {
+                        HTML.showWarningNotification("program compiled, but without the source; to save for later use the 'save' button")
+                    }
+
+                    ScriptProperties.firstTime = false
+
+                    if (res.data) {
+                        var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
+                        HTML.browserDownloadText(res.data, fn, res.contentType);
+                    }
+                })
+                .done(() => {},
+                e => {
+                    Util.reportError("bitvm download", e, false);
+                    if (dbg)
+                        ModalDialog.showText(e.stack)
+                    else
+                        HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
+                })
             })
         }
 

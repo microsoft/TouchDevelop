@@ -2,11 +2,20 @@
 
 module TDev.AST.Bytecode
 {
-    interface FuncInfo {
+    export interface FuncInfo {
         name: string;
         type: string;
         args: number;
         value: number;
+    }
+
+    export interface ExtensionInfo
+    {
+        enums:StringMap<number>;
+        functions:FuncInfo[];
+        errors:string;
+        sha:string;
+        compileData:string;
     }
 
     var funcInfo:StringMap<FuncInfo>;
@@ -24,48 +33,16 @@ module TDev.AST.Bytecode
         return r
     }
 
-    function fillValues(jsinf:any)
+    var currentSetup = null;
+    export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
     {
-        funcInfo = {};
-        var funs:FuncInfo[] = jsinf.functions;
+        if (currentSetup == extInfo.sha)
+            return;
 
-        Object.keys(jsinf.enums).forEach(k => {
-            funcInfo[k] = {
-                name: k,
-                type: "E",
-                args: 0,
-                value: jsinf.enums[k]
-            }
-        })
+        currentSetup = extInfo.sha;
 
-        dirtyLines = 1;
-
-        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
-            var m = /^:10(....)00(.{16})/.exec(hex[i])
-
-            if (!m) continue;
-
-            dirtyLines++;
-
-            var s = hex[i].slice(9)
-            while (s.length >= 8) {
-                var inf = funs.shift()
-                if (!inf) return;
-                funcInfo[inf.name] = inf;
-                inf.value = parseInt(swapBytes(s.slice(0, 8)), 16) & 0xfffffffe
-                s = s.slice(8)
-            }
-        }
-
-        Util.die();
-    }
-
-    function setup()
-    {
-        if (funcInfo) return; // already done
-
-        var inf = (<any>TDev).bytecodeInfo
-        hex = Cloud.isFota() ? inf.fotahex : inf.hex;
+        var jsinf = bytecodeInfo || (<any>TDev).bytecodeInfo
+        hex = Cloud.isFota() ? jsinf.fotahex : jsinf.hex;
 
         var i = 0;
         var upperAddr = "0000"
@@ -83,7 +60,43 @@ module TDev.AST.Bytecode
         if (!hexStartAddr)
             Util.oops("No hex start")
 
-        fillValues(inf)
+        funcInfo = {};
+        var funs:FuncInfo[] = jsinf.functions.concat(extInfo.functions);
+
+        var addEnum = enums =>
+            Object.keys(enums).forEach(k => {
+                funcInfo[k] = {
+                    name: k,
+                    type: "E",
+                    args: 0,
+                    value: enums[k]
+                }
+            })
+
+        addEnum(extInfo.enums)
+        addEnum(jsinf.enums)
+
+        dirtyLines = 1;
+
+        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
+            var m = /^:10(....)00(.{16})/.exec(hex[i])
+
+            if (!m) continue;
+
+            dirtyLines++;
+
+            var s = hex[i].slice(9)
+            while (s.length >= 8) {
+                var inf = funs.shift()
+                if (!inf) return;
+                funcInfo[inf.name] = inf;
+                inf.value = parseInt(swapBytes(s.slice(0, 8)), 16) & 0xfffffffe
+                Util.assert(!!inf.value)
+                s = s.slice(8)
+            }
+        }
+
+        Util.die();
     }
 
     function isRefKind(k:Kind)
@@ -1746,5 +1759,106 @@ module TDev.AST.Bytecode
         if (!/(^\s)|(:$)/.test(s))
             s = "    " + s
         return s + "\n"
+    }
+
+    function emptyExtInfo()
+    {
+        return <ExtensionInfo> {
+            enums: {},
+            functions: [],
+            errors: "",
+            sha: "",
+            compileData: "",
+        }
+    }
+
+    function setup()
+    {
+        if (currentSetup == null)
+            setupFor(emptyExtInfo(), null)
+    }
+
+    export function getExtensionInfo(app:App) : ExtensionInfo
+    {
+        var res = emptyExtInfo();
+        var fileRepl:StringMap<string> = {}
+        var pointersInc = ""
+        var includesInc = ""
+
+        app.librariesAndThis().forEach(l => {
+            var thisErrors = ""
+            var err = (s) => thisErrors += "   " + s + "\n";
+            l.resolved.resources().forEach(r => {
+                if (r.getName() != "glue.cpp") return;
+                var src = r.stringResourceValue()
+                if (src == null) {
+                    err("glue.cpp isn't a string resource")
+                    return
+                }
+                var currNs = ""
+                src.split(/\r?\n/).forEach(ln => {
+                    var m = /^\s*namespace\s+(\w+)/.exec(ln)
+                    if (m) {
+                        if (currNs) err("more than one namespace declaration not supported")
+                        currNs = m[1]
+                        return;
+                    }
+
+                    m = /^\s*GLUE\s+(\w+)([\*\&]*\s+[\*\&]*)(\w+)\s*\(([^\(\)]*)\)\s*(;\s*$|\{|$)/.exec(ln)
+                    if (m) {
+                        if (!currNs) err("missing namespace declaration before GLUE");
+                        var retTp = (m[1] + m[2]).replace(/\s+/g, "")
+                        var funName = m[3]
+                        var args = m[4]
+                        var numArgs = 0
+                        if (args.trim())
+                            numArgs = args.replace(/[^,]/g, "").length + 1;
+                        var fi:FuncInfo = {
+                            name: currNs + "::" + funName,
+                            type: retTp == "void" ? "P" : "F",
+                            args: numArgs,
+                            value: null
+                        }
+                        res.functions.push(fi)
+                        pointersInc += "(uint32_t)(void*)::" + fi.name + ",\n"
+                        return;
+                    }
+
+                    if (/^\s*GLUE\s+/.test(ln)) {
+                        err("invalid GLUE line: " + ln)
+                        return;
+                    }
+
+                    ln = ln.replace(/\/\/.*/, "")
+                    m = /^\s*#define\s+(\w+)\s+(\d+)\s*$/.exec(ln)
+                    if (m) {
+                        res.enums[m[1]] = parseInt(m[2])
+                        return;
+                    }
+                })
+                if (!currNs)
+                    err("missing namespace declaration")
+                includesInc += "#include \"" + currNs + ".cpp\"\n"
+                fileRepl["/generated/" + currNs + ".cpp"] = src
+            })
+            if (thisErrors) {
+                res.errors += lf("Library {0}:\n", l.getName()) + thisErrors
+            }
+        })
+
+        if (res.errors || !includesInc)
+            return res;
+
+        fileRepl["/generated/extpointers.inc"] = pointersInc
+        fileRepl["/generated/extensions.inc"] = "#define GLUE /*glue*/\n" + includesInc
+        var creq = {
+            config: "ws",
+            tag: Cloud.microbitGitTag,
+            replaceFiles: fileRepl
+        }
+        var reqData = Util.toUTF8(JSON.stringify(creq))
+        res.sha = Random.sha256buffer(Util.stringToUint8Array(reqData))
+        res.compileData = Util.base64Encode(reqData)
+        return res;
     }
 }
