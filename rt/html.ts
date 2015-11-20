@@ -771,8 +771,6 @@ module TDev.HTML {
     export interface ShowWarningNotificationsOptions {
         details?: string;
         els?: HTMLElement[];
-        onDismissText?: string;
-        onDismiss?: () => void;
     }
 
     export function showWarningNotification(msgText: string, options: ShowWarningNotificationsOptions = {}) {
@@ -783,26 +781,25 @@ module TDev.HTML {
 
         var info = div('info', msgText);        
         var msg = div("warningNotification", info);
-        var dismissText = options.onDismissText || lf("dismiss");
-        var dismiss = () => {
-            if (options.onDismiss)
-                options.onDismiss();
-            Animation.fadeOut(msg).begin();
-        };
+        var a = Animation.fadeOut(msg);
+        a.delay = 6000;
+        a.duration = 500;
+        a.begin();
             
-        if (options && options.els) msg.appendChildren(options.els);        
+        if (options && options.els) info.appendChildren(options.els);        
         if (options && options.details) {
             msg.appendChild(div('info link', 'learn more...'));
             msg.withClick(() => {
                 tick(Ticks.warningNotificationTap);
                 ModalDialog.info(msgText, options.details);
             });
-        } else info.appendChild(HTML.mkLinkButton(dismissText, dismiss))
+        }
+
+        info.appendChild(HTML.mkLinkButton(lf("dismiss"), () => {
+            a.complete();
+        }));
+        
         elt("root").appendChild(msg);
-        var a = Animation.fadeOut(msg);
-        a.delay = 6000;
-        a.duration = 500;
-        a.begin();
     }
 
     export function showPluginNotification(msgText: string) {

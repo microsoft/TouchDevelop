@@ -328,6 +328,7 @@ module TDev {
         wallReplay,
         wallScreenshot,
         wallLogs,
+        wallSerial,
         wallStop,
         wallStopForce,
         wallPause,

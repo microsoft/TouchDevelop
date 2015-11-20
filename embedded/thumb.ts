@@ -2,6 +2,21 @@
 
 module TDev.AST.Thumb
 {
+    /* Docs:
+     *
+     * Thumb 16-bit Instruction Set Quick Reference Card
+     *   http://infocenter.arm.com/help/topic/com.arm.doc.qrc0006e/QRC0006_UAL16.pdf 
+     *
+     * ARMv6-M Architecture Reference Manual (bit encoding of instructions)
+     *   http://ecee.colorado.edu/ecen3000/labs/lab3/files/DDI0419C_arm_architecture_v6m_reference_manual.pdf
+     *
+     * The ARM-THUMB Procedure Call Standard
+     *   http://www.cs.cornell.edu/courses/cs414/2001fa/armcallconvention.pdf
+     *
+     * Cortex-M0 Technical Reference Manual: 3.3. Instruction set summary (cycle counts)
+     *   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0432c/CHDCICDF.html
+     */
+
     interface EmitResult {
         stack: number;
         opcode: number;
@@ -237,6 +252,8 @@ module TDev.AST.Thumb
     {
         constructor()
         {
+            this.currLine = new Line(this, "<start>");
+            this.currLine.lineNo = 0;
         }
 
         public baseOffset:number;
@@ -777,7 +794,7 @@ module TDev.AST.Thumb
 
         private peepHole()
         {
-            // TODO disable in user scope
+            // TODO add: str X; ldr X -> str X ?
             
             var lb11 = encoders["$lb11"]
             var lb = encoders["$lb"]

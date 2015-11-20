@@ -3,6 +3,7 @@ meta name "micro:bit serial";
 meta rootId "J14qS9W69xfJRs1Wg6l4bL8j";
 meta isLibrary "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // A #microbit library to print messages to the serial port.
@@ -12,9 +13,10 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
   #Ht90vVwzb9x642mt // {namespace:serial}
   #R4f2PuqLYHK2Gtcr code→write_string($text);
   #giwZfV8Lt049ksV2 code→write_string("\r\n");
+  meta sync;
 }
 #KayLKTp6ax4o8wIi meta import micro\u003abit {
-  pub "zmjejw"
+  pub "rwqgyd"
   usage {
     type Image
     action `sync` \_libinit()
@@ -66,6 +68,9 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
     action `sync` note(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
   }
 }
 #AABkMop1Z4RJQfcY
@@ -75,8 +80,10 @@ action example() {
   #xfS6oh3qhUuVm3ee code→write_line("hello");
   #USJSQxggyA9b7Xk5 // * print a piece of text
   #DJAddA2AQVd3x44R code→write_string("world");
-  #ZGvSLSTMY2eH7BGS // * print a number formatted as ``x: value``.
+  #ZGvSLSTMY2eH7BGS // * print a number.
   #CPTexj2njchbeTaq code→write_number(5);
+  #FoTvRhTUX9cuCH4G // * write a key-value pair formatted as ``key: value``.
+  #xNrXN2N2zI6RANiH code→write_value("temp", 5);
   #gnakx4J3bNeA6l5y // * read a line of text from Serial
   #xMVREMMWm4TP690d $msg := code→read_string;
   meta private;
@@ -86,6 +93,7 @@ action write_number(#k2kI6XM6EpaLIU35 value: Number) {
   #UPZWaaK4FPhqLQv5 // Prints a numeric value to the serial
   #ABpnPKKwPATyuC4K // {namespace:serial}
   #xyMeH7KZaUtgWna4 code→write_string($value→to_string);
+  meta sync;
 }
 #hGNQralaeJZymMYt
 action read_string() returns(#mR5YbOZ9oVeKJhbt msg: String) {
@@ -93,27 +101,41 @@ action read_string() returns(#mR5YbOZ9oVeKJhbt msg: String) {
   #xjcz6ZTqNS4rrHiN // {namespace:serial}
   #rndC9WsJA7TzRqJw // {shim:uBit.serial.readString}
   #xUvA7hlR41fO4O3S $msg := "";
+  meta sync;
 }
 #RihJksfYn4XsFVvo
 action write_string(#xCSsMIN55sl47uJy text: String) {
   #gQl2sBm102NFdm2r // Sends a piece of text through Serial connection.
   #xaRZMDD1PnoAssMk // {namespace:serial}
   #E2GfoM3vov7PqeyA // {shim:uBit.serial.sendString}
-  #NWy4p0e48SZLl4YH app→log("serial: " ∥ $text);
+  #MZsKH7uN4oOrAkYD if data→logger→is_invalid then {
+    #xI2Zu2L2Lb9tvgAS data→logger := app→create_logger("simulator");
+    #E2SUJPexCTkCqWoA data→buffer := "";
+  }
+  #dxqLroF89D9FBaiI data→buffer := data→buffer ∥ $text;
+  #z7tR5L7oMAlwH4gu $i := data→buffer→index_of("\n", 0);
+  #LS2Xmww1aZuQammy while $i > - 1 do {
+    #x4eGXbX2v6z0SE5y data→logger→info(data→buffer→substring(0, $i - 1));
+    #esc5CnL0W2BjsgA5 data→buffer := data→buffer→substring($i + 1, data→buffer→count - $i);
+    #EWO0d4UsugWoDRjW $i := data→buffer→index_of("\n", 0);
+  }
+  meta sync;
 }
 #ofbblREfGQlVQeKu
 action write_image(#gyH7VhnFqZTOycIl img: ♻ micro\u003abit → Image) {
   #xO6AG2n8p2M0iRM9 // Sends an image through Serial connection in CSV format.
   #i9igu656RRwxytVx // {namespace:serial}
   #sx5zVhpQfuMHxxmC // {shim:uBit.serial.sendImage}
-  #kRfyWkxOQTq4BtkZ app→log("serial: sent image");
+  #dfiCwNN06R38ZYRQ code→write_string("write image");
+  meta sync;
 }
 #x4YEGlXH9CPn24qF
 action write_screen() {
   #W6GWMYLuhTKpZfVd // Sends the current pixel values, byte-per-pixel, over serial.
   #MaKPhWXTpJB2NNWZ // {namespace:serial}
   #ejsGWhn5BXXX8fl4 // {shim:uBit.serial.sendDisplayState}
-  #xU3oa2GHPQS1plg0 app→log("serial: write screen");
+  #AA2MkYF4heyXTuSP code→write_string("write screen");
+  meta sync;
 }
 #x6Hp3T5XixrKOXp4
 action read_screen() {
@@ -121,6 +143,7 @@ action read_screen() {
   #ApoeWPHDMVNc7MjB // {namespace:serial}
   #tZxNxHtIuaSuvjo0 // {shim:uBit.serial.readDisplayState}
   #eUUa4Y2jh2Gby4Ls app→log("serial: read screen");
+  meta sync;
 }
 #xBHnPm4TuXZ1XJba
 action read_image() returns(#i9cIYIjnk4B1camX img: ♻ micro\u003abit → Image) {
@@ -129,4 +152,37 @@ action read_image() returns(#i9cIYIjnk4B1camX img: ♻ micro\u003abit → Image)
   #xKaSva7IbKCilyF8 // {hints:columns:5,10,15}
   #t3L7RQAYTB4ch4Fj // {shim:uBit.serial.readImage}
   #xbuEE8By6wuVCMZn $img := image[lib micro\u003abit] →create_image("");
+  meta sync;
+}
+#zPbJPfnPazeARtdv
+action write_value(#OgjzGItCA4ZJ4BzL name: String, #Vles4eqMyGBPIrfR value: Number) {
+  #VS9lEdypH2IAyWO6 // Writes a ``name: value`` pair line to the serial.
+  #x9jpo8ecP95VZ6PJ // {namespace:serial}
+  #tIIbV2VmG3JI2Q1Z // {weight:80}
+  #gj2gRu3mQINbNkri code→write_string($name);
+  #eYR5noToKqFF6E94 code→write_string(": ");
+  #Zf7NNdlvoPDrwtMy code→write_number($value);
+  #byMfp2eAi2r7tJ1O code→write_line("");
+  meta sync;
+}
+#kyNCj4TkYFS3fVSb
+var buffer : String {
+  // {shim:}
+  transient = true;
+}
+#ObzPYQYVl4tjVK9D
+var logger : App_Logger {
+  transient = true;
+}
+#WnPrTNC3u44ZZOn6
+action test() {
+  #AeRsf2ESRnySmzle // {shim:}
+  #AMj8TxEWtoGWsERs code→write_string("abc");
+  #TK2ZMRUQ2TOXpOa2 code→write_line("line");
+  #pMkSlVs4iOUkZXf1 code→write_line("line 2");
+  #x6rU5ty6bc2OoaN7 for 0 ≤ i < 100 do {
+    #bGiqKsnmXiwKPH2z code→write_value("x", $i * $i);
+  }
+  meta private;
+  meta test;
 }

@@ -1119,10 +1119,12 @@ module TDev {
                 var ms = arg.split(',');
                 if (ms.length != 2) return MdComments.error(lf("bigbutton: must have <text>,<url> arguments"));
                 return this.blockLink(ms[1]) || Util.fmt("<a class='md-bigbutton' target='_blank'  rel='nofollow' href='{0:url}'>{1:q}</a>", ms[1], ms[0]);
-            } else if (macro == "shim") {
-                if (this.designTime) return "{" + macro + ":" + Util.htmlEscape(arg) + "}";
+            } else if (macro == "shim" || macro == "asm") {
+                if (this.designTime || macro == "asm") return "{" + macro + ":" + Util.htmlEscape(arg) + "}";
                 if (!arg) return "";
-                else return "<b>" + lf("<b>compiles to C++ function:</b> <span class='font-family: monospace'>{0}</span>", arg);
+                else
+                    return Util.fmt("<b>{0:q}</b> <span class='font-family: monospace'>{1:q}</span>", 
+                        lf("compiles to C++ function:"), arg);
             } else {
                 return null;
             }

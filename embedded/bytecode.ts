@@ -2,27 +2,6 @@
 
 module TDev.AST.Bytecode
 {
-    /* Docs:
-     *
-     * Thumb 16-bit Instruction Set Quick Reference Card
-     *   http://infocenter.arm.com/help/topic/com.arm.doc.qrc0006e/QRC0006_UAL16.pdf 
-     *
-     * ARMv6-M Architecture Reference Manual (bit encoding of instructions)
-     *   http://ecee.colorado.edu/ecen3000/labs/lab3/files/DDI0419C_arm_architecture_v6m_reference_manual.pdf
-     *
-     * The ARM-THUMB Procedure Call Standard
-     *   http://www.cs.cornell.edu/courses/cs414/2001fa/armcallconvention.pdf
-     *
-     * Cortex-M0 Technical Reference Manual: 3.3. Instruction set summary (cycle counts)
-     *   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0432c/CHDCICDF.html
-     */
-
-    /*
-    TODO Peep-hole optimizations:
-    push {rA} pop {rB} -> mov rB, rA ?
-    str X; ldr X -> str X
-    */
-
     interface FuncInfo {
         name: string;
         type: string;
@@ -817,16 +796,14 @@ module TDev.AST.Bytecode
     {
         useAction(a:Action)
         {
-            if (a.getShimName() != null && !a._compilerInlineBody) {
-                a.body.stmts.forEach(s => {
-                    var str = AST.getEmbeddedLangaugeToken(s)
-                    if (str && (<ExprStmt>s).expr.parsed.getCalledProperty().getName() == "thumb") {
-                        a._compilerInlineBody = s;
-                    }
-                })
-                if (!a._compilerInlineBody)
-                    return
+            if (a.getShimName() != null) {
+                if (a._compilerInlineBody) {
+                    // TODO  mark stuff as used
+                    a.visitorState = true;
+                }
+                return;
             }
+
             super.useAction(a)
         }
     }
@@ -1733,10 +1710,12 @@ module TDev.AST.Bytecode
         var shimname = act.getShimName();
 
         var b = new Thumb.Binary();
+        if (/{shim:/.test(act.getDescription())) 
+            b.pushError(lf("use {asm:{0}} with app->thumb, not {shim:{0}}", shimname))
         if (lookupFunc(shimname))
-            b.pushError(lf("app->thumb inline body not allowed in {shim:{0}} (already defined in runtime)", shimname))
+            b.pushError(lf("{asm:{0}} already defined in runtime", shimname))
         if (!/^\w+$/.test(shimname))
-            b.pushError(lf("invalid characters in shim name: {shim:{0}}", shimname))
+            b.pushError(lf("invalid characters in shim name: {asm:{0}}", shimname))
         if (act.getInParameters().length > 4)
             b.pushError(lf("inline shims support only up to 4 arguments"));
 

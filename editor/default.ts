@@ -81,22 +81,26 @@ module TDev
     }
     
     function handleChromeSerial() {
-            var chrome = (<any> window).chrome;
-            if (chrome && chrome.runtime) {
-                var buf = "";
-                var port = chrome.runtime.connect("hccbjdgogdkdomojppdljbijomobfdap", { name: "micro:bit" });
-                port.onMessage.addListener(function (msg) {
-                    if (msg.type == "serial") {
-                        buf += msg.data;
-                        var i = buf.lastIndexOf("\n");
-                        if (i >= 0) {
-                            var msgb = buf.substring(0, i + 1);
-                            TDev.RT.App.logEvent(TDev.RT.App.INFO, "serial", msgb, null);
-                            buf = buf.slice(i+1);
-                        }
+        var buffers: StringMap<string> = {};
+        var chrome = (<any>window).chrome;
+        if (chrome && chrome.runtime) {
+            var port = chrome.runtime.connect("hccbjdgogdkdomojppdljbijomobfdap", { name: "micro:bit" });
+            port.onMessage.addListener(function(msg) {
+                if (msg.type == "serial") {
+                    Browser.serialLog = true;
+                    
+                    var buf = (buffers[msg.id] || "") + msg.data;
+                    var i = buf.lastIndexOf("\n");
+                    if (i >= 0) {
+                        var msgb = buf.substring(0, i + 1);
+                        TDev.RT.App.logEvent(TDev.RT.App.INFO, "serial", msgb, { id: msg.id });
+                        buf = buf.slice(i + 1);
                     }
-                });
-            }        
+                    
+                    buffers[msg.id] = buf;
+                }
+            });
+        }
     }
 
     function onlyOneTab()
