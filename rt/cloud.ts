@@ -94,6 +94,7 @@ module TDev.Cloud {
         scriptEmail?: boolean;
         scriptAddToChannel?: boolean;
         scriptConvertToDocs?: boolean;
+        scriptConvertToTutorial?: boolean;
         scriptPrintScript?: boolean;
         scriptPrintTopic?: boolean;
         notifyAppReloaded?: boolean;

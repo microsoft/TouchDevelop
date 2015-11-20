@@ -6113,7 +6113,7 @@
                     if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
                         var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
                         //var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.script().editPromo()) : null;
                         divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
