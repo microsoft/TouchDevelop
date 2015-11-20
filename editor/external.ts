@@ -233,7 +233,7 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "auto";
         w.style.display = "";
-        var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl));
+        var bbcLogo = Cloud.config.companyLogoHorizontalUrl ? div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl)) : undefined;
         var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
         var wrapper = div("wallFullScreenWrapper");
         wrapper.setChildren([w]);
