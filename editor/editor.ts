@@ -2040,6 +2040,11 @@ module TDev
             this.currentCompilationModalDialog.add(Browser.TheHost.poweredByElements());
             //if (inBrowser)
             //    this.currentCompilationModalDialog.add(div("wall-dialog-body", HTML.mkCheckBoxLocalStorage(hideKey, lf("don't show this dialog again"))));
+            
+            this.currentCompilationModalDialog.onDismiss = () => {
+                if (this.stepTutorial) this.stepTutorial.notify("compile");                
+            }
+            
             this.currentCompilationModalDialog.fullWhite();
             this.currentCompilationModalDialog.show();
         }
@@ -2052,8 +2057,6 @@ module TDev
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                             this.currentCompilationModalDialog.dismiss();
-                    this.currentCompilationModalDialog = undefined;
-                    if (this.stepTutorial) this.stepTutorial.notify("compile");
                 })
         }
 
