@@ -1038,6 +1038,18 @@ module TDev {
             if (!Util.check(!!guid)) return Promise.as(undefined);
             return getScriptsTablePromise().then((scriptsTable) => scriptsTable.getValueAsync(guid + "-script"));
         }
+        export function setHexInfoAsync(guid: string, val: string) : Promise // of string (script text)
+        {
+            var it = {}
+            it[guid + "-hexinfo"] = val;
+            return getScriptsTablePromise().then((scriptsTable) => 
+                scriptsTable.setItemsAsync(it));
+        }
+        export function getHexInfoAsync(guid: string) : Promise // of string (script text)
+        {
+            return getScriptsTablePromise().then((scriptsTable) => 
+                scriptsTable.getValueAsync(guid + "-hexinfo"));
+        }
         export function getInstalledEditorStateAsync(guid: string) : Promise // of string (script text)
         {
             if (!Util.check(!!guid)) return Promise.as(undefined);

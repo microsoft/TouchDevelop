@@ -2047,7 +2047,7 @@ module TDev
         public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
             tick(Ticks.coreNativeCompile);
             if (!showSource) this.showCompilationDialog(true);
-            ScriptProperties.bytecodeCompile(app, showSource);
+            Hex.compile(app, showSource);
             if (!showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)

@@ -51,6 +51,7 @@
 ///<reference path='messages.ts'/>
 ///<reference path='literalEditor.ts'/>
 ///<reference path='abusereview.ts'/>
+///<reference path='hex.ts'/>
 ///<reference path='../intellitrain/train.ts'/>
 ///<reference path='../intellitrain/astutil.ts'/>
 ///<reference path='../intellitrain/features.ts'/>
