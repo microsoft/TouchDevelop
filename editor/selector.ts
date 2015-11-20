@@ -231,7 +231,6 @@ module TDev
 
             var btn:HTMLElement;
             var btns = <HTMLElement[]>[
-              div("commentHeader", span("commentHeaderSlash kw", "block"), TDev.text(" editing")),
               div("selHeader", lf("clipboard")),
                     mkBtn(lf("cut selection"), "Ctrl-X, Shift-Del", Ticks.codeCutSelection, () => { this.cutSelection() }),
                     btn = mkBtn(lf("copy selection"), "Ctrl-C, Ctrl-Ins", Ticks.codeCopySelection, () => { this.copySelection(); this.unselect() }),
@@ -242,7 +241,7 @@ module TDev
                 btns.push(
                   div("selHeader", lf("extract selection into function")),
                      this.extractedName = HTML.mkTextInput("text", lf("function name")),
-                     mkBtn("extract", "Ctrl-E", Ticks.codeExtractAction, () => { this.extract() }));
+                     mkBtn(lf("extract"), "Ctrl-E", Ticks.codeExtractAction, () => { this.extract() }));
                 
                 btns.push(div("selHeader", lf("surround with")));
                 this.extractedName.value = Script.freshName(extractedName);

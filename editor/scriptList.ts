@@ -6270,11 +6270,11 @@
                     tick(Ticks.browseRunInstall);
                 else
                     tick(Ticks.browseEditInstall);
-                return TheEditor.prepareForLoadAsync("installing and loading script",
+                return TheEditor.prepareForLoadAsync(lf("installing and loading script"),
                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
             } else {
                 this.browser().hide();
-                return TheEditor.prepareForLoadAsync("loading script", () =>
+                return TheEditor.prepareForLoadAsync(lf("loading script"), () =>
                     TheEditor.loadScriptAsync(this.cloudHeader));
             }
         }
