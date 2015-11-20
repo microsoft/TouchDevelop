@@ -1018,18 +1018,6 @@ module TDev.Cloud {
     {
         return Util.httpPostTextAsync(getPrivateApiUrl(id + "/" + appPlatform + "app"), JSON.stringify(data));
     }
-    export function getWebAppAsync(id:string) : Promise // of json
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl(id + "/webapp"));
-    }
-    export function postWebAppAsync(id: string, previewUrl: boolean, data: any): Promise // of string
-    {
-        return Util.httpPostTextAsync(getPrivateApiUrl(id + "/webapp" + (previewUrl ? "?previewUrl=true" : "")), JSON.stringify(data));
-    }
-    export function deleteWebAppAsync(id: string): Promise // of string
-    {
-        return Util.httpDeleteAsync(getPrivateApiUrl(id + "/webapp"));
-    }
     export function postAskBetaAsync(accept:boolean) : Promise // of string
     {
         return Util.httpPostTextAsync(getPrivateApiUrl("/me/askbeta?accept=" + accept), "");

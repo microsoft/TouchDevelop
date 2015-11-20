@@ -173,7 +173,7 @@ module TDev
                                 ModalDialog.info(lf("Sorry, the app could not be created."),
                                     lf("You can only create apps from scripts that are published. You can always publish your script as hidden."));
                             } else {
-                                AppExport.createWebApp(ScriptEditorWorldInfo.baseId);
+                                TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(lf("HTML5 web app"), Cloud.config.rootUrl + "/userapp/" + ScriptEditorWorldInfo.baseId), "").done();
                             }
                         }
                     });
