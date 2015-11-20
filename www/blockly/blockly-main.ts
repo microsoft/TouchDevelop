@@ -377,7 +377,7 @@ module TDev {
     setName(message.script.metadata.name);
     setDescription(message.script.metadata.comment);
     if (!message.script.baseSnapshot && !message.script.metadata.comment) {
-      setDescription("A terrific BBC micro:bit program written with the Microsoft Block Editor!");
+      setDescription("");
       markLocalChanges();
     }
 
