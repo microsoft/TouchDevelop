@@ -300,19 +300,25 @@ module TDev
             var getHex = Promise.as()
 
             if (extInfo.sha) {
-                var hexurl = Cloud.config.primaryCdnUrl + "/compile/" + extInfo.sha + ".hex"
-                getHex = Util.httpGetTextAsync(hexurl)
+                var hexurl = Cloud.config.primaryCdnUrl + "/compile/" + extInfo.sha
+                getHex = Util.httpGetTextAsync(hexurl + ".hex")
                     .then(text => text,
                           e => Cloud.postPrivateApiAsync("compile/extension", { data: extInfo.compileData })
                             .then(() => {
                                 var r = new PromiseInv();
-                                var tryGet = () => Util.httpGetTextAsync(hexurl).then(text => r.success(text), 
+                                var tryGet = () => Util.httpGetJsonAsync(hexurl + ".json")
+                                    .then(json => {
+                                        if (!json.success)
+                                            ModalDialog.showText(JSON.stringify(json, null, 1), lf("Compilation error"));
+                                        else
+                                            r.success(Util.httpGetTextAsync(hexurl + ".hex"))
+                                    },
                                     e => Util.setTimeout(1000, tryGet))
                                 tryGet();
                                 return r;
                             }))
                     .then(text =>
-                        Util.httpGetJsonAsync(hexurl.replace(/\.hex$/, "-metainfo.json"))
+                        Util.httpGetJsonAsync(hexurl + "-metainfo.json")
                             .then(meta => {
                                 meta.hex = text.split(/\r?\n/)
                                 AST.Bytecode.setupFor(extInfo, meta)
