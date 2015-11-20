@@ -3578,7 +3578,7 @@
                 this.tabContent.appendChild(loading);
                 this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
                     loading.removeSelf();
-                    elts.forEach((c) => this.tabContent.appendChild(this.tabBox(c)));
+                    elts.map(c => this.tabBox(c)).filter(elt => !!elt).forEach(elt => this.tabContent.appendChild(elt));
                     if (!!cont) this.tabContent.appendChild(this.loadMoreBtn(cont));
                     else this.tabContent.appendChild(this.finalListElt())
                 });
