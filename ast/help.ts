@@ -901,12 +901,11 @@ module TDev {
                     } else if (!Cloud.isArtUrl(url)) {
                         url = "no-such-image";
                     }
-                    if (url)
-                        url = Cloud.toCdnUrl(url);
-                    var urlsafe = HTML.proxyResource(url);
-                    if (urlsafe == url) urlsafe = Util.fmt("{0:url}", url)
+
+                    url = Cloud.toCdnUrl(url);
+                    url = HTML.proxyResource(url);
                     var r = "<div class='md-img'><div class='md-img-inner'>";
-                    r += Util.fmt("<img src=\"{0}\" alt='picture'", urlsafe);
+                    r += Util.fmt("<img src=\"{0:q}\" alt='picture'", url);
                     if (m[6] || (!this.forWeb && !this.print))
                         r += Util.fmt(" style='height:{0}em'", height);
                     r += "/></div>";
@@ -2469,6 +2468,45 @@ module TDev {
             if (HelpTopic.topicByScriptId.hasOwnProperty(id))
                 return HelpTopic.topicByScriptId[id]
         }
+
+        /*
+        public genScript()
+        {
+            if (!this.apiKind || this.apiProperty || this.json.id)
+                return Promise.as();
+            var app = AST.Parser.parseScript('meta version "v2.2,js,ctx";\naction main() {}')
+            app.setName(this.json.name)
+            app.comment = this.json.description + " #docs"
+            var b = app.actions()[0].body
+            var cmt = t => {
+                var c = new AST.Comment()
+                c.text = t
+                return <AST.Stmt> c
+            }
+            b.setChildren([
+                cmt("{topic:/docs/" + this.id + "}"),
+                cmt("{parenttopic:/docs/api}"),
+                cmt(this.json.description),
+                cmt("{api:" + this.id + "}")
+            ])
+            new AST.InitIdVisitor(true).dispatch(app);
+            return Cloud.getPrivateApiAsync("ptr-docs-" + this.id)
+                .then(() => {},
+                      e => Cloud.postPrivateApiAsync("scripts", {
+                            name: app.getName(),
+                            description: app.getDescription(),
+                            ishidden: true,
+                            text: app.serialize()
+                        }).then(resp =>
+                            Cloud.postPrivateApiAsync("pointers", { 
+                                path: "/docs/" + this.id,
+                                scriptid: resp.id,
+                                description: app.getName()
+                        }))
+                        .then(() => {}, 
+                              e => Cloud.handlePostingError(e, "pub")))
+        }
+        */
     }
 
     TDev.api.addHelpTopics = HelpTopic.addMany;
