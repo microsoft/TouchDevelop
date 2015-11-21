@@ -7250,7 +7250,7 @@
                 if (this.docPathCurrent && !Cloud.hasPermission("root-ptr"))
                     return
 
-                var url = Cloud.getServiceUrl() + "/" + this.docPath
+                var url = Cloud.getServiceUrl() + "/" + this.docPath.replace(/^\/+/, "")
 
                 m.add(div("wall-dialog-header",  lf("documentation page")))
                 m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])
