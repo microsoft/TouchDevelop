@@ -1946,7 +1946,7 @@ function compilerTest() {
     console.log("COMPILER TEST");
     var tests = {
         bqutuo: {}, // pac man runaway
-        hixlrc: {}, // two-player pong (reversed)
+        htdcbb: {}, // two-player pong (reversed and fixed)
         rwadai: { skipBitVm: true }, // clock demo
         xhfhgq: {}, // bitvm test1
     };
