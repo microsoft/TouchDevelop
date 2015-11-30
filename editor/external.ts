@@ -64,7 +64,7 @@ module TDev {
           origin: origin,
           path: path + "blockly/editor.html",
           logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
-          order: 0,
+          order: 1,
         }, {
           company: "Code Kingdoms",
           name: "CK JavaScript",
@@ -73,7 +73,7 @@ module TDev {
           origin: ckOrigin,
           path: ckPath,
           logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
-          order: 1,
+          order: 0,
         }];
 
       if (TDev.isBeta) {
