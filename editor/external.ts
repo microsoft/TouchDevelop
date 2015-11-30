@@ -566,7 +566,8 @@ module TDev {
                     scriptText: text
                   }).done(() => {
                     // Release focus, kill the channel.
-                    (<HTMLElement> document.activeElement).blur();
+                    if (document.activeElement instanceof HTMLElement)
+                      (<HTMLElement> document.activeElement).blur();
                     TheChannel = null;
                   });                  
                 }),
