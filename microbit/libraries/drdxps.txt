@@ -7,7 +7,7 @@ meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
 #mExzaWj10ZHeHz4P meta import micro\u003abit {
-  pub "rwqgyd"
+  pub "lqzmez"
   usage {
     type Image
     action `sync` \_libinit()
@@ -59,9 +59,6 @@ meta parentIds "";
     action `sync` note(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
-    action `sync` temperature() returns(temp: Number)
-    action `sync` stop_animation()
-    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
   }
 }
 #ljbL9TDyViQp60st
@@ -91,7 +88,19 @@ action plot_all() {
 }
 #vsHySw7q1f2qmubh
 action example() {
-  #xQ2zrKasHUhouu4h // Some useful helpers to handle the LED screen. [read more...](/td/contents)
+  #xQ2zrKasHUhouu4h // Some useful helpers to handle the LED screen.
+  #ZZJhlbcH7znOhAib // * turn all LEDs on
+  #B8zVHF1W2Sz9jAsZ code→plot_all;
+  #CtYl9BDypiKy5hQs // * toggle a single LED between on and off
+  #QrOum9fjNAqZjxX8 code→toggle(2, 2);
+  #ngqrfSW76Fhky21E // * toggle all LEDs
+  #LbtP7hux3nW9luVA code→toggle_all;
+  #WIwRCmmTlBUKGl2i // * gradually increase the screen brightness. Specify the fade speed in milliseconds.
+  #siAOajVVpMbTJLyo code→fade_in(700);
+  #elhSqMzjVDxDWbio // * gradually decrease the screen brightness until the image on the screen fades away. Specify the fade speed in milliiseconds.
+  #pmAWvpWldWehf5A1 code→fade_out(1000);
+  #mJfbEenJUZfuettI // * take a screenshot of the screen into an image
+  #xcctRndFzYcJkXwd $img := code→screenshot;
   meta private;
 }
 #jwEvxEXkWvhLQCaf
@@ -161,7 +170,7 @@ action test_fade() {
 }
 #JzsKhABDnEUitS2i
 action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image) {
-  #F9xzUugwJ3pSz2Jl // Takes a screenshot of the LED screen and returns an image.
+  #F9xzUugwJ3pSz2Jl // Takes a screenshot of the LED screen and returns an image
   #y2Nlin4tWBVdqYY1 // {namespace:led}
   #Hzg49aPDJ5V4z35P // {shim:uBit.display.screenShot}
   #XTef15xe4sxw76s2 // {help:functions/screenshot}

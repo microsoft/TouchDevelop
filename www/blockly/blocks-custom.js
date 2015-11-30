@@ -121,9 +121,28 @@ Blockly.Blocks['device_button_event'] = {
   }
 };
 
+// The old "button is pressed" that also has A+B. We have to keep this one
+// defined otherwise old scripts won't load!
 Blockly.Blocks['device_get_button'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/functions/button-is-pressed');
+    this.setColour(210);
+    this.appendDummyInput()
+        .appendField("button");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(buttonsDropdownOn), "NAME");
+    this.appendDummyInput()
+        .appendField("is pressed");
+    this.setInputsInline(true);
+    this.setOutput(true, "Boolean");
+    this.setTooltip('Test whether a button is pressed or not.');
+  }
+};
+
+// The new "button is pressed" that doesn't have A+B.
+Blockly.Blocks['device_get_button2'] = {
+  init: function() {
+    this.setHelpUrl('https://live.microbit.co.uk/functions/button-is-pressed');
     this.setColour(210);
     this.appendDummyInput()
         .appendField("button");

@@ -2014,7 +2014,7 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
             if (inBrowser) {
                 var msg = Cloud.isFota()
-                    ? lf("Your .hex should be uploaded will be uploaded onto your BBC micro:bit soon.")
+                    ? lf("Your .hex will be uploaded onto your BBC micro:bit soon.")
                     : lf("Your .hex file is ready. Drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             } else {

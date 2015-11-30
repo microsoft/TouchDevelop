@@ -1946,7 +1946,7 @@ function compilerTest() {
     console.log("COMPILER TEST");
     var tests = {
         bqutuo: {}, // pac man runaway
-        hixlrc: {}, // two-player pong (reversed)
+        htdcbb: {}, // two-player pong (reversed and fixed)
         rwadai: { skipBitVm: true }, // clock demo
         xhfhgq: {}, // bitvm test1
     };
@@ -1986,10 +1986,11 @@ function compilerTest() {
         }).then(jsons => {
             jsons.forEach(json => {
                 if (!json)
-                    throw new Error(logMsg("no response from ARM cloud"));
+                    console.log(logMsg("no response from ARM cloud"));
                 if (!json.success) {
                     console.log(TDev.Embedded.makeOutMbedErrorMsg(json));
-                    throw new Error(logMsg("compilation failure"));
+                    console.log(logMsg("compilation failure"));
+                    process.exit(1);
                 }
             });
             console.log(logMsg("cpp → hex (arm cloud) ×"+nruns+" ✓"));

@@ -1267,6 +1267,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "button is pressed",
     args: [ "NAME" ]
   },
+  device_get_button2: {
+    namespace: "input",
+    f: "button is pressed",
+    args: [ "NAME" ]
+  },
   device_get_acceleration: {
     namespace: "input",
     f: "acceleration",
