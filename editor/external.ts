@@ -305,8 +305,15 @@ module TDev {
         switch ((<Message> event.data).type) {
           case MessageType.Save: {
             tick(Ticks.externalSave);
-            var message = <Message_Save> event.data;
-            World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
+            var message = <Message_Save>event.data;
+            Promise.join([
+              World.getInstalledHeaderAsync(this.guid),
+              World.getInstalledScriptAsync(this.guid),
+              World.getInstalledEditorStateAsync(this.guid)
+            ]).then((res: any[]) => {
+              var header: Cloud.Header = <Cloud.Header>res[0];              
+              var installedState = JSON.stringify(res);
+
               var scriptText = message.script.scriptText;
               var editorState = JSON.stringify(message.script.editorState);
               header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
@@ -326,9 +333,12 @@ module TDev {
               // appears both on the header and in the metadata.
               header.name = metadata.name;
 
+              // don't update if no changes
+              var backgroundUpdate = installedState == JSON.stringify([header, scriptText, editorState]);
+              
               // Writes into local storage. Also clears the scriptVersionInCloud
               // field (fifth argument).
-              World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
+              World.updateInstalledScriptAsync(header, scriptText, editorState, backgroundUpdate).then(() => {
                 console.log("[external] script saved properly");
                 this.post(<Message_SaveAck>{
                   type: MessageType.SaveAck,
