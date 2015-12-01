@@ -115,7 +115,6 @@ module TDev.Cloud {
         githubLinks?: boolean;
         hubSocialTiles?: boolean;
         hubTopAndNew?: boolean;
-        hubTags?: boolean;
         hubMyArt?: boolean;
         hubLearn?: boolean;
         hubTutorials?: boolean;

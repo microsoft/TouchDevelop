@@ -421,7 +421,6 @@ module TDev {
         hubWrongTime,
         hubTag,
         hubTagFromList,
-        hubTagSearch,
         hubFeedback,
         hubChooseWallpaper,
 
