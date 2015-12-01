@@ -6503,7 +6503,7 @@
             }
             return this.app.htmlColor()
         }
-
+        
         public mkBoxExt(big:boolean, isTopic:boolean)
         {
             var icon = div("sdIcon");
@@ -6532,23 +6532,25 @@
                 res.className += " sdBigHeader";
 
             var setLocal = () => {
-                var deleted = (<any>this.jsonScript) === false;
+                var deleted = this.isDeleted();
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
-                icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
-                                
+                icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
+
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
                 if (!time && this.cloudHeader && this.cloudHeader.scriptVersion) time = this.cloudHeader.scriptVersion.time;
                 var timeStr = "";
-                if (time) timeStr = Util.timeSince(time);
-                if (this.publicId) timeStr += " :: /" + this.publicId;
-                if (this.publicId && this.jsonScript) {
-                    if (this.jsonScript.ishidden)
-                        timeStr += lf(" [hidden]")
-                    else if (this.jsonScript.unmoderated)
-                        timeStr += lf(" [class]")
+                if (!deleted) {                    
+                    if (time) timeStr = Util.timeSince(time);
+                    if (this.publicId) timeStr += " :: /" + this.publicId;
+                    if (this.publicId && this.jsonScript) {
+                        if (this.jsonScript.ishidden)
+                            timeStr += lf(" [hidden]")
+                        else if (this.jsonScript.unmoderated)
+                            timeStr += lf(" [class]")
+                    }
                 }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
