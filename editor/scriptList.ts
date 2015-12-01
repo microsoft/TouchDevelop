@@ -6996,10 +6996,11 @@
             var guid = this.getGuid();
             var json: string;
             
+            var p = Promise.as();
             if (Browser.isMobileSafari || Browser.isMobileSafariOld)
-                HTML.showWarningNotification(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."));
-                
-            return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
+                p = p.then(() => ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app.")));
+
+            return p.then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
                 .then(r => {
                     var text = <string>r[0];
                     var header = <Cloud.Header>r[1];
