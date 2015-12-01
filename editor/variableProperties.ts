@@ -703,7 +703,7 @@ module TDev
        
         export function importFileDialog() {
             var m = new ModalDialog();
-            var input = HTML.mkTextInput("file", lf("choose .hex or .json files"));
+            var input = HTML.mkTextInput("file", lf("choose .hex or .jsz files"));
             input.multiple = true;
             input.accept = ".hex,.json,.jsz";
             
@@ -820,7 +820,7 @@ module TDev
                             .then(res => {
                                 if (!res) return null;
                                 var meta = res.slice(0, hd.headerSize || hd.metaSize);
-                                var text = res.slice(hd.metaSize);
+                                var text = res.slice(meta.length);
                                 return [JSON.parse(meta), text]
                             })
                     } else if (hd.compression) {
