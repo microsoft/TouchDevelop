@@ -15,6 +15,7 @@ action \_libinit() {
   #aCYMP4THhnQkBd4N // {shim:}
   #x3z5eK4ybVcTCWJh if data→board→is_invalid then {
     #diswbwoJ0rRtyUbA data→logger := app→create_logger("simu");
+    #YKJMortE5mXaazK7 data→event_queues := collections→create_string_map;
     #JjsD2sJPrJ6vUU5w data→counters := web→create_json_builder;
     #dSJI8h1ZUeMsbz21 data→compass_heading_value := invalid→number;
     #BamJivB3cALMYQoQ data→start_time := time→now;
@@ -63,7 +64,6 @@ action \_libinit() {
     #qLoyPDrDUdeG77Vv code→set_theme("");
     #ByFADaJmirytJ02b code→background_animation;
     #xmVrpXc8aqbE3dq6 `async` code→animation_worker;
-    #xkycDjt57DBUf4Xz `async` code→event_bus_worker;
     #pNdJy7kyaeqKZhfS data→board→on_every_frame;
     #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
       #WF6Md7jUVLVAe3m4 code→update_board;
@@ -2448,11 +2448,11 @@ table Event_Bus {
   }
 }
 #xQHQZkhjqzpE4CRi
-action event_bus_worker() {
+action event_bus_worker(#VnWE2Q9sB2A5uIXD name: String) {
   #xDyM0UomTSCQXKSV // {shim:}
   #HakK0IQSqWKY8zju while true do {
-    #FTMD9oKdw4fcscHD $ev := records→Event_Bus_table→row_at(0);
-    #xG44rWke0lFZ2GrH if `not` $ev→is_invalid then {
+    #Zg9hZK25Zv1Ub2Ym $ev := code→first_event($name);
+    #lN4KZZuuN9p2paSM if `not` $ev→is_invalid then {
       #qUZz8iwjSjiyyavq $ev→fn→run;
       #E7aHvwM2U423dBK6 $ev→delete_row;
     }
@@ -2471,6 +2471,11 @@ action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: S
     #Guj24KBD912FcSYv $ev→name := $name;
     #OvyZqeICJJ2sQbR4 $ev→fn := $body;
     #J6B4LYyWUMTT4MXF data→logger→debug("queued " ∥ $name);
+    #N8pNCkiRuu6GYHAN if data→event_queues→at($name)→is_invalid then {
+      #xSpLhvkqOzz2Y2Xp data→event_queues→set_at($name, "on");
+      #Dcn5h1NYD742two9 `async` code→event_bus_worker($name);
+      #VtF252bO2GPFA1zp data→logger→debug("started queue for " ∥ $name);
+    }
   }
   else {
     #SzvR3GyWF2k4aEW8 data→logger→debug("skipped event " ∥ $name ∥ ", bus full");
@@ -2488,4 +2493,25 @@ var boar\u002esvg : String {
 var logger : App_Logger {
   // {shim:}
   transient = true;
+}
+#z4JpVqUVYFEt242M
+var event_queues : String_Map {
+  // {shim:}
+  transient = true;
+}
+#BqrPmRC6jDYCukGD
+action first_event(#D42Ig553PhKq4i1h name: String) returns(#LvCIVEn5SGoFsUQw r: * Event_Bus) {
+  #S54lpFtjKjUHFKzi // {shim:}
+  #RZNIuj3lqoN3XBHs $j := 0;
+  #xl2YfZUIVs2bxDTW $n := records→Event_Bus_table→count;
+  #XSmtWmzT9PIeyS4f while $j < $n do {
+    #xyeEq0ZyXsc8jJee $ev := records→Event_Bus_table→row_at($j);
+    #YLmFnqeqCx4SCqaW if $ev→name→equals($name) then {
+      #BfAUYnBpcCUv9d6a `return` $ev;
+    }
+    #Q1dlEH79JUnTh4LX $j := $j + 1;
+  }
+  #wIXRC18Oi3Crpzb5 `return` records→Event_Bus_table→invalid;
+  meta private;
+  meta sync;
 }
