@@ -910,7 +910,7 @@ module TDev.Browser {
                 .then(r => {
                     var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
                     var m = ModalDialog.showText("...[snip]...\n" + full.slice(-3000), null, <any>div(null, 
-                        HTML.mkButton("full", () => {
+                        HTML.mkButton(lf("full"), () => {
                             ModalDialog.showText(full)
                         }),
                         HTML.mkAsyncButton("save tag " + args[1], () => {
@@ -920,7 +920,7 @@ module TDev.Browser {
                             return Cloud.postPrivateApiAsync("config/compiletag", opts)
                             .then(r => r, e => Cloud.handlePostingError(e, ""))
                         }),
-                        HTML.mkButton("cancel", () => {
+                        HTML.mkButton(lf("cancel"), () => {
                             m.dismiss()
                     })))
                 }, e => Cloud.handlePostingError(e, ""))
