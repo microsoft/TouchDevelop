@@ -49,7 +49,7 @@ namespace Microsoft.MicroBit
         private void waitingForHexFileStatus()
         {
             this.updateStatus("waiting for .hex file...");
-            this.trayIcon.ShowBalloonTip(3000, "micro:bit uploader ready...", "waiting for .hex file...", ToolTipIcon.None);
+            this.trayIcon.ShowBalloonTip(3000, "ready...", "waiting for .hex file...", ToolTipIcon.None);
         }
 
         static bool checkTOU()
@@ -111,10 +111,10 @@ namespace Microsoft.MicroBit
 
                 var infoName = info.Name;
                 Trace.WriteLine("download name: " + info.Name);
-                if (!infoName.StartsWith("microbit-", StringComparison.OrdinalIgnoreCase))
-                    return;
-                if(info.Name.EndsWith(".uploaded.hex", StringComparison.OrdinalIgnoreCase))
-                    return;
+                if (!infoName.StartsWith("microbit-", StringComparison.OrdinalIgnoreCase)) return;
+                if(info.Name.EndsWith(".uploaded.hex", StringComparison.OrdinalIgnoreCase)) return;
+                if (info.Length > 1000000) return; // make sure we don't try to copy large files
+               
 
                 // already copying?
                 if (Interlocked.Exchange(ref this.copying, 1) == 1)
@@ -123,21 +123,23 @@ namespace Microsoft.MicroBit
                 {
 
                     this.setBackgroundColor(Color.Yellow);
-                    this.updateStatus("detected " + info.Name);
-                    var drive = getMicrobitDrive();
-                    if (drive == null)
+                    var drives = getMicrobitDrive();
+                    if (drives.Length == 0)
                     {
-                        this.updateStatus("no MICROBIT drive detected");
-                        this.trayIcon.ShowBalloonTip(3000, "cancelled uploading to micro:bit...", "no MICROBIT drive detected", ToolTipIcon.None);
+                        this.updateStatus("no board found");
+                        this.trayIcon.ShowBalloonTip(3000, "cancelled uploading...", "no board found", ToolTipIcon.None);
                         return;
                     }
 
-                    this.trayIcon.ShowBalloonTip(3000, "uploading to micro:bit...", "transferring .hex file", ToolTipIcon.None);
-                    this.updateStatus("uploading .hex file (" + info.Length / 1000 + " kb)...");
-                    var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
-                    File.Copy(info.FullName, trg, true);
-                    this.updateStatus("uploading done");
-
+                    this.trayIcon.ShowBalloonTip(3000, "uploading...", "transferring .hex file", ToolTipIcon.None);
+                    
+                    // copy to all boards
+                    foreach(var drive in drives) {                                                
+                        var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
+                        File.Copy(info.FullName, trg, true);
+                    }
+                    
+                    // move away hex file
                     var temp = System.IO.Path.ChangeExtension(info.FullName, ".uploaded.hex");
                     try
                     {
@@ -148,6 +150,9 @@ namespace Microsoft.MicroBit
                     catch (NotSupportedException) { }
                     catch (UnauthorizedAccessException) { }
                     catch (ArgumentException) { }
+                    
+                    // update ui
+                    this.updateStatus("uploading done");
                     this.waitingForHexFileStatus();
                 }
                 finally
@@ -162,16 +167,17 @@ namespace Microsoft.MicroBit
             catch (ArgumentException) { }
         }
 
-        static DriveInfo getMicrobitDrive()
+        static DriveInfo[] getMicrobitDrives()
         {
             var drives = System.IO.DriveInfo.GetDrives();
+            var r = new List<DriveInfo>();
             foreach (var di in drives)
             {
                 var label = getVolumeLabel(di);
                 if (label.StartsWith("MICROBIT", StringComparison.Ordinal))
-                    return di;
+                    r.add(di);
             }
-            return null;
+            return r.ToArray();
         }
 
         static string getVolumeLabel(DriveInfo di)
@@ -195,7 +201,7 @@ namespace Microsoft.MicroBit
         {
             try
             {
-                Process.Start("https://www.touchdevelop.com/microbit");
+                Process.Start("https://www.touchdevelop.com/microbituploader");
             }
             catch (IOException) { }
         }
@@ -203,7 +209,7 @@ namespace Microsoft.MicroBit
         private void backgroundPictureBox_Click(object sender, EventArgs e)
         {
             try {
-                Process.Start("https://www.microbit.co.uk/app/#");
+                Process.Start("https://www.touchdevelop.com/microbit");
             } catch (IOException) { }
         }
     }
