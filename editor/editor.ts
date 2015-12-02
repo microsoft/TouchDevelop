@@ -2077,7 +2077,8 @@ module TDev
                     btn.setFlag("working", false);
                     btn.classList.remove("disabledItem");
                 }
-                this.currentCompilationModalDialog.dismiss();
+                if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
+                    this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
                 var r = src === this.currentScriptCompiling || src === "";
