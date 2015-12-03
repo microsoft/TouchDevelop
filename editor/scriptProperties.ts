@@ -229,7 +229,7 @@ module TDev
                     ),
                 this.settingsSection = div("formLine",
                     this.isLibrary,
-                    this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
+                    isBeta && this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
                     this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null,
                     this.editor.widgetEnabled("scriptPropertiesPropertyAllowExport") ? this.allowExport : null),
                 dbg ? div("formLine",
