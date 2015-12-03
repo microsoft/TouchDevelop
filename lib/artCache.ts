@@ -4,7 +4,7 @@ module TDev.RT {
     export module ArtCache {
         export var enabled = true;
         export var runningTests = false;
-        function log(s: string) { Util.log("art cace: " + s); }
+        function log(s: string) { Util.log("art cache: " + s); }
         var getArtCacheTableAsync = () => Storage.getTableAsync("ArtCache");
         export var getMaxItems = () =>
         {

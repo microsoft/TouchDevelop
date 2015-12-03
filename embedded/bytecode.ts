@@ -1684,7 +1684,7 @@ module TDev.AST.Bytecode
 
         prepApp(a:App)
         {
-            a.allActions().forEach(a => {
+            this.actions(a).forEach(a => {
                 if (!this.shouldCompile(a)) return
                 this.prepAction(a)
             })
@@ -1695,9 +1695,16 @@ module TDev.AST.Bytecode
             this.dump(a.records())
         }
 
+        actions(a:App):Action[]
+        {
+            var res = a.allActions().filter(a => !a.isActionTypeDef());
+            App.orderThings(res)
+            return res;
+        }
+
         compileApp(a:App)
         {
-            this.dump(a.allActions().filter(a => !a.isActionTypeDef()))
+            this.dump(this.actions(a))
         }
 
         visitApp(a:App)
