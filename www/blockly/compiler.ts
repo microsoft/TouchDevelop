@@ -1276,6 +1276,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "acceleration",
     args: [ "NAME" ]
   },
+  device_get_running_time: {
+    namespace: "input",
+    f: "running time",
+    args: []
+  },
   device_get_digital_pin: {
     namespace: "pins",
     f: "digital read pin",

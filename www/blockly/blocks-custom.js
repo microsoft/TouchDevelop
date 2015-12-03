@@ -262,6 +262,17 @@ Blockly.Blocks['device_get_acceleration'] = {
     }
 };
 
+Blockly.Blocks['device_get_running_time'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/running_time');
+        this.setColour(230);
+        this.appendDummyInput()
+            .appendField("running time (ms)");
+        this.setOutput(true, "Number");
+        this.setTooltip('Get the number of milliseconds elapsed since the script began. 1,000 milliseconds = 1 second');
+    }
+};
+
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#nwf7c5
 Blockly.Blocks['device_clear_display'] = {
   init: function() {
