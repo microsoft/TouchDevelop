@@ -485,7 +485,8 @@ module TDev {
                 break;
 
             case BrowserSoftware.chromeiOS:
-                //return message(what + " is not supported in Chrome for IOS. Please use Safari instead.");
+                if ((<any>window).bbcMicrobit)
+                    return message(what + " is not supported in Chrome for IOS. Please use Safari instead.");                            
                 // Supported.
                 break;
                     
