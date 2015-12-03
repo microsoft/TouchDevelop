@@ -103,7 +103,6 @@ module TDev.Browser {
                     wallScreenshot: true,
                     wallHeart: true,
                     wallStop: true,
-                    scriptConvertToDocs: true,
                     nextTutorialsList: true,
                     codeSearch: true,
                     // section
@@ -228,6 +227,7 @@ module TDev.Browser {
                     scriptStats: true,
                     userSocialTab: true,
                     scriptConvertToDocs: true,
+                    scriptConvertToTutorial: true,
                     nextTutorialsList: true,
                     // sections
                     testsSection: true,
@@ -531,7 +531,7 @@ module TDev.Browser {
                     
                         // teacher specific
                         scriptDiffToBase: true,
-                        scriptConvertToDocs: true,
+                        scriptConvertToTutorial:true,
                         socialNetworks: true,
                         socialNetworkvideoptr: true,
                         socialNetworkart: true,
@@ -602,7 +602,7 @@ module TDev.Browser {
                     
                         // teacher specific
                         scriptDiffToBase: true,
-                        scriptConvertToDocs: true,
+                        scriptConvertToTutorial:true,
                         socialNetworks: true,
                         socialNetworkvideoptr: true,
                         socialNetworkart: true,
@@ -627,6 +627,7 @@ module TDev.Browser {
                         testsSection: true,
                         tokenRefactoring: true,
                         selectExpressions: true,
+                        scriptConvertToDocs: true,
                     }
                 }
             }

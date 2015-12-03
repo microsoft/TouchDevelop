@@ -57,6 +57,9 @@ action main() {
   #UQtoYBY1CERVcw9K $thing := records→Thing→create;
   #LeDrah2RsZKT1pB7 $s4 := $thing→f;
   #yatKuQljTswa4YV1 $thing→f := $s4;
+  #PeQnpqn1X99KPYqa $thing→is_invalid;
+  #gAKBi40RzKRzwv22 $thing→equals($thing);
+  #JEnNA1g0abp21gJ8 records→Thing→invalid;
   #dwjKGUdJ0JXzBEr2 // collections
   #x2fBIBqppWPrRtwg $coll := create→Collection_of→Number;
   #V1jUmLAnDR9hfTzZ $coll→add(0);
@@ -100,7 +103,7 @@ action main() {
   #lY4IxiRSVHUv1prz data→img := @\u267b→micro\u003abit→create_image("");
 }
 #G0lH23nax1Sltq2S meta import micro\u003abit {
-  pub "fnxamc"
+  pub "jnjqgc"
   usage {
     type Image
     action `sync` \_libinit()
@@ -152,6 +155,9 @@ action main() {
     action `sync` note(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
   }
 }
 #Wc1pO4N99lJnJtZj
@@ -176,7 +182,7 @@ var img : ♻ micro\u003abit → Image {
   transient = true;
 }
 #xvqxk1q4qCZk22MO meta import micro\u003abit_screen {
-  pub "xrsbct"
+  pub "tulxtd"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -232,16 +238,17 @@ table Thing {
   }
 }
 #DGIsFkv2N6nOcw2l meta import micro\u003abit_serial {
-  pub "xlxslt"
+  pub "dwiebl"
   usage {
-    action `async` write_line(text: String)
-    action `async` write_number(value: Number)
-    action `async` read_string() returns(msg: String)
-    action `async` write_string(text: String)
-    action `async` write_image(img: ♻ micro\u003abit → Image)
-    action `async` write_screen()
-    action `async` read_screen()
-    action `async` read_image() returns(img: ♻ micro\u003abit → Image)
+    action `sync` write_line(text: String)
+    action `sync` write_number(value: Number)
+    action `sync` read_string() returns(msg: String)
+    action `sync` write_string(text: String)
+    action `sync` write_image(img: ♻ micro\u003abit → Image)
+    action `sync` write_screen()
+    action `sync` read_screen()
+    action `sync` read_image() returns(img: ♻ micro\u003abit → Image)
+    action `sync` write_value(name: String, value: Number)
   }
   #pGGACFQC2GSgng2H resolve micro\u003abit = ♻ micro\u003abit with {
   }

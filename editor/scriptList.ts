@@ -3578,7 +3578,7 @@
                 this.tabContent.appendChild(loading);
                 this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
                     loading.removeSelf();
-                    elts.forEach((c) => this.tabContent.appendChild(this.tabBox(c)));
+                    elts.map(c => this.tabBox(c)).filter(elt => !!elt).forEach(elt => this.tabContent.appendChild(elt));
                     if (!!cont) this.tabContent.appendChild(this.loadMoreBtn(cont));
                     else this.tabContent.appendChild(this.finalListElt())
                 });
@@ -6113,7 +6113,7 @@
                     if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
                         var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
                         var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
                         var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
                         //var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.script().editPromo()) : null;
                         divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
@@ -6270,11 +6270,11 @@
                     tick(Ticks.browseRunInstall);
                 else
                     tick(Ticks.browseEditInstall);
-                return TheEditor.prepareForLoadAsync("installing and loading script",
+                return TheEditor.prepareForLoadAsync(lf("installing and loading script"),
                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
             } else {
                 this.browser().hide();
-                return TheEditor.prepareForLoadAsync("loading script", () =>
+                return TheEditor.prepareForLoadAsync(lf("loading script"), () =>
                     TheEditor.loadScriptAsync(this.cloudHeader));
             }
         }
@@ -7250,7 +7250,7 @@
                 if (this.docPathCurrent && !Cloud.hasPermission("root-ptr"))
                     return
 
-                var url = Cloud.getServiceUrl() + "/" + this.docPath
+                var url = Cloud.getServiceUrl() + "/" + this.docPath.replace(/^\/+/, "")
 
                 m.add(div("wall-dialog-header",  lf("documentation page")))
                 m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])

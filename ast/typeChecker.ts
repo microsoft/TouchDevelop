@@ -1783,6 +1783,10 @@ module TDev.AST
                 this.lintJavaScript(t.args[2].getStringLiteral(), /async/.test(t.prop().getName()))
                 break;
             case "thumb":
+                if (!Cloud.isRestricted()) {
+                    this.markError(t, lf("app->thumb not supported in full Touch Develop"))
+                    return;
+                }
                 if (!checkArgumentCount(2)) return;
                 if (!this.inShim)
                     this.markError(t, lf("TD213: app->thumb only supported inside of {asm:}"))

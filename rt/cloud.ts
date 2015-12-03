@@ -94,6 +94,7 @@ module TDev.Cloud {
         scriptEmail?: boolean;
         scriptAddToChannel?: boolean;
         scriptConvertToDocs?: boolean;
+        scriptConvertToTutorial?: boolean;
         scriptPrintScript?: boolean;
         scriptPrintTopic?: boolean;
         notifyAppReloaded?: boolean;
@@ -910,12 +911,11 @@ module TDev.Cloud {
     
     export function showSigninNotification(isOnline: boolean) {
         if (isOnline) HTML.showWarningNotification(lf("You are not signed in."), {
-              onDismissText: lf("sign in"),
-              onDismiss: () => {
+            els: [HTML.mkLinkButton(lf("sign in"), () => {
                     var login = (<any>TDev).Login;
                     if (login && login.show)
                         login.show()
-                }
+                })]
             });
         else HTML.showProgressNotification(lf("You appear to be offline."));
     }
@@ -1017,18 +1017,6 @@ module TDev.Cloud {
     export function postAppAsync(id:string, appPlatform : string, data:any) : Promise // of string
     {
         return Util.httpPostTextAsync(getPrivateApiUrl(id + "/" + appPlatform + "app"), JSON.stringify(data));
-    }
-    export function getWebAppAsync(id:string) : Promise // of json
-    {
-        return Util.httpGetJsonAsync(getPrivateApiUrl(id + "/webapp"));
-    }
-    export function postWebAppAsync(id: string, previewUrl: boolean, data: any): Promise // of string
-    {
-        return Util.httpPostTextAsync(getPrivateApiUrl(id + "/webapp" + (previewUrl ? "?previewUrl=true" : "")), JSON.stringify(data));
-    }
-    export function deleteWebAppAsync(id: string): Promise // of string
-    {
-        return Util.httpDeleteAsync(getPrivateApiUrl(id + "/webapp"));
     }
     export function postAskBetaAsync(accept:boolean) : Promise // of string
     {

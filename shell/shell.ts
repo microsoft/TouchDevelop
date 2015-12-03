@@ -1961,15 +1961,16 @@ function cacheEditor(version:string, manifest:string)
             return
 
         info.log("caching new version of the editor, " + text.length)
-        debug.log(text);
+        info.log("url: " + manifest)
+        // debug.log(text);
 
         cache[manifest] = ent(buf, hd)
         var num = 0
         var lines = text.split(/\n/)
 
         lines.push(manifest.replace(/\.manifest/, ""))
-        lines.push(manifest.replace(/\.manifest/, ".error"))
-        lines.push(manifest.replace(/\.manifest/, ".browsers"))
+        lines.push(manifest.replace(/\.manifest/, "error.html"))
+        lines.push(manifest.replace(/\.manifest/, "browsers.html"))
 
         var l0 = lines.filter(l => /\/c\/main.js$/.test(l))[0]
         if (l0) l0 = l0.replace(/main.js$/, "")
@@ -2035,7 +2036,7 @@ function proxyEditor(cmds:string[], req, resp)
         }
     }
 
-    var cdn = "https://az31353.vo.msecnd.net/"
+    var cdn = "https://az820584.vo.msecnd.net/"
 
     var url = cdn + "app/" + rel + "/c/" + file
 
@@ -2048,19 +2049,16 @@ function proxyEditor(cmds:string[], req, resp)
         rel = "cache"
     }
 
-    if (rel == "current") path += "current"
-    else if (rel == "beta") path += "beta"
-    else if (rel == "latest") path += "latest"
-    else if (rel == "cache") {
+    if (rel == "cache") {
         url = decodeURIComponent(file)
         url = url.replace(/[?&]access_token=.*/, "")
-        file = url.replace(/^https?:\/\/(www\.|az31353.vo.msecnd.net\/)/, "").replace(/[^a-zA-Z0-9\.\-]/g, "_").slice(0, 64)
+        file = url.replace(/^https?:\/\/(www\.|az820584.vo.msecnd.net\/)/, "").replace(/[^a-zA-Z0-9\.\-]/g, "_").slice(0, 64)
         var h = crypto.createHash("sha256")
         h.update(new Buffer(url, "utf8"))
         file += "." + h.digest("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 16)
         cacheDir = dataPath("cdn-cache")
     }
-    else suff = "?releaseid=" + rel
+    else suff = "?r=" + rel
 
     var rewrite: (s:string) => string;
 
@@ -2068,7 +2066,7 @@ function proxyEditor(cmds:string[], req, resp)
     var selfUrl = "http://" + req.headers.host + "/editor"
     var relUrl = selfUrl + "/" + rel + "/"
 
-    var replUrl = (s:string) => s.replace(/https:\/\/az31353.vo.msecnd.net\/app\/\d\d\d[\da-z\.-]+\/(c\/)?/g, relUrl)
+    var replUrl = (s:string) => s.replace(/https:\/\/az820584.vo.msecnd.net\/app\/\d\d\d[\da-z\.-]+\/(c\/)?/g, relUrl)
 
     switch (file) {
         case "index.html":
@@ -2088,10 +2086,15 @@ function proxyEditor(cmds:string[], req, resp)
                 return s
             }
             break;
+
         case "browsers":
         case "error":
+            url = path + file + ".html?r=" + rel
+            rewrite = replUrl
+            break;
+
         case "manifest":
-            url = path + "." + file + suff
+            url = path + ".manifest?r=" + rel
             rewrite = replUrl
             break;
 
@@ -2112,7 +2115,7 @@ function proxyEditor(cmds:string[], req, resp)
     var serveText = (text) => {
         if (!rewrite) rewrite = s => s;
         if (!/^\d/.test(rel)) {
-            var m = /https:\/\/az31353.vo.msecnd.net\/app\/(\d\d\d[\da-z\.-]+)/.exec(text)
+            var m = /https:\/\/az820584.vo.msecnd.net\/app\/(\d\d\d[\da-z\.-]+)/.exec(text)
             if (m) {
                 rel = m[1]
                 relUrl = selfUrl + "/" + rel + "/"

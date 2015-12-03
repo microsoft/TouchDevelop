@@ -503,22 +503,7 @@ module TDev {
 
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
-            var ast: AST.Json.JApp = message2.ast;
-            fixupLibs(message2.libs);
-            addLibraries(ast, message2.libs).then(() => {;
-              console.log("Attempting to serialize", ast);
-              var text = J.serialize(ast);
-              console.log("Attempting to edit script text", text);
-              Browser.TheHost.openNewScriptAsync({
-                editorName: "touchdevelop",
-                scriptName: message2.name,
-                scriptText: text
-              }).done(() => {
-                // Release focus, kill the channel.
-                (<HTMLElement> document.activeElement).blur();
-                TheChannel = null;
-              });
-            }).done();
+            this.receiveUpgrade(message2);
             break;
 
           case MessageType.Run:
@@ -551,7 +536,47 @@ module TDev {
             break;
         }
       }
-    }
+      
+      private receiveUpgrade(message2: Message_Upgrade) {
+            var ast: AST.Json.JApp = message2.ast;
+            fixupLibs(message2.libs);
+            addLibraries(ast, message2.libs).then(() => {;
+              console.log("Attempting to serialize", ast);
+              var text = J.serialize(ast);
+              console.log("Attempting to edit script text", text);                            
+              
+              var m = new ModalDialog();
+              m.add(div('wall-dialog-header', lf("here is your code")))
+              m.add(div('wall-dialog-body',
+                lf("By dragging and placing blocks, you've created the following code.")))
+              var preview = div('');              
+              m.add(preview);
+              Embedded.parseScript(text)
+                .done((app: AST.App) => {
+                  var main = app.mainAction();
+                  var r = new Renderer();
+                  Browser.setInnerHTML(preview, r.dispatch(main));
+                });    
+              m.add(div('wall-dialog-buttons', [
+                HTML.mkButton(lf("convert"), () => {
+                  m.dismiss();
+                  Browser.TheHost.openNewScriptAsync({
+                    editorName: "touchdevelop",
+                    scriptName: message2.name,
+                    scriptText: text
+                  }).done(() => {
+                    // Release focus, kill the channel.
+                    (<HTMLElement> document.activeElement).blur();
+                    TheChannel = null;
+                  });                  
+                }),
+                HTML.mkButton(lf("cancel"), () => m.dismiss())
+              ]))
+              m.setScroll();
+              m.show();              
+            }).done();        
+      }
+    }    
 
     export interface ScriptData {
       guid: string;

@@ -377,7 +377,7 @@ module TDev {
     setName(message.script.metadata.name);
     setDescription(message.script.metadata.comment);
     if (!message.script.baseSnapshot && !message.script.metadata.comment) {
-      setDescription("A terrific BBC micro:bit program written with the Microsoft Block Editor!");
+      setDescription("");
       markLocalChanges();
     }
 
@@ -400,7 +400,7 @@ module TDev {
       event.preventDefault();
       for (var i = 0; i < event.dataTransfer.files.length; ++i) {
         var f = event.dataTransfer.files[i];
-        if (/\.hex$/.test(f.name))
+        if (/\.(hex|json|jsz)$/.test(f.name))
           post(<External.Message_Load> {
             type: External.MessageType.Load,
             file: f
