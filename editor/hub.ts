@@ -82,7 +82,6 @@ module TDev.Browser {
                     calcSearchArt: true,
                     tokenRefactoring: true,
                     // misc
-                    groupAllowExportApp: true,
                     changeSkillLevel: true,
                     // edit
                     copyPaste: true,
@@ -171,7 +170,6 @@ module TDev.Browser {
                     makeAsyncRefactoring: true,
                     tokenRefactoring: true,
                     // misc
-                    groupAllowExportApp: true,
                     changeSkillLevel: true,
                     // edit
                     copyPaste: true,
@@ -252,7 +250,6 @@ module TDev.Browser {
                     scriptPropertiesData: true,
                     wallLogsButton: true,
                     scriptPropertiesPropertyCloud: true,
-                    scriptPropertiesPropertyAllowExport: true,
                     stringEditFullScreen: true,
                     persistanceRadio: true,
                     awaitClock: true,

@@ -363,7 +363,6 @@ module Helpers {
       platform: "current",
       isLibrary: false,
       useCppCompiler: false,
-      allowExport: true,
       showAd: false,
       hasIds: false,
       rootId: "TODO",

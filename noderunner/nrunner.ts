@@ -849,33 +849,21 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "package": (() => {
-        var user = ""
-        if (opts.token) {
-            var jwt = decodeJWT(opts.token, "Export your scripts")
-            if (jwt.tdUser)
-                user = "/" + encodeURIComponent(jwt.tdUser)
-            else {
-                ar.ok({ error: jwt.error || "bad token" })
-                return
+            var user = ""
+            if (opts.token) {
+                var jwt = decodeJWT(opts.token, "Export your scripts")
+                if (jwt.tdUser)
+                    user = "/" + encodeURIComponent(jwt.tdUser)
+                else {
+                    ar.ok({ error: jwt.error || "bad token" })
+                    return
+                }
             }
-        }
-        TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(r.id) + "/canexportapp" + user + accessToken)
-            .then(v => {
-                if (v.canExport)
-                    return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
-                        relId: relId,
-                        scriptId: r.id,
-                        runtimeFlags: opts.flags,
-                    })
-                else
-                    return TDev.Promise.as({
-                        error: "you cannot export this script: " + v.reason
-                    })
-            }, err => {
-                return { error: "cannot determine if you can export this script" }
-            })
-            .then(ins => ar.ok(ins))
-            .done()
+            TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
+                relId: relId,
+                scriptId: r.id,
+                runtimeFlags: opts.flags,
+            }).done(ins => ar.ok(ins))
         })();
         break;
 

@@ -1299,11 +1299,6 @@
                                     div('wall-dialog-header', lf("for group")),
                                     groupInfo.mkSmallBox()
                                 ]);
-                                if (group.allowexport)
-                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
-                                if (group.allowappstatistics)
-                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
-
                                 if (!!Cloud.getUserId())
                                     Cloud.getPublicApiAsync("me/groups?count=100")
                                         .done((groups: JsonList) => {
@@ -1345,9 +1340,6 @@
             descr.placeholder = lf("enter a description");
             descr.value = "";
 
-            var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
-            HTML.setCheckboxValue(allowExport, false);
-
             var div1, cancelBtn;
             var m = new ModalDialog();
             var groupInfo : GroupInfo;
@@ -1357,8 +1349,7 @@
                 div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("name (minimum 4 characters)")), name),
-                    div('', div('', lf("description")), descr),
-                    EditorSettings.widgets().groupAllowExportApp ? div('', allowExport) : undefined
+                    div('', div('', lf("description")), descr)
                 ),
                 div("wall-dialog-body", lf("The group name cannot be changed afterwards.")),
                 div("wall-dialog-buttons",
@@ -1367,8 +1358,6 @@
                         var request = <Cloud.PostApiGroupsBody>{
                             name: name.value,
                             description: descr.value,
-                            allowexport: HTML.getCheckboxValue(allowExport),
-                            allowappstatistics: false,
                             userplatform: Browser.platformCaps,
                             isclass: Cloud.isRestricted(),
                         };
@@ -9202,15 +9191,6 @@
                         if (!u.isrestricted)
                             ad.appendChild(HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); }));
                     });
-
-                if (u.allowexport)
-                    remainingContainer.appendChild(div('sdExpandableText',
-                        lf("group owner can export your scripts to app."),
-                        Editor.mkHelpLink("groups")));
-                if (u.allowappstatistics)
-                    remainingContainer.appendChild(div('sdExpandableText',
-                        lf("group owner has access to runtime statistics of exported apps."),
-                        Editor.mkHelpLink("groups")));
             });
         }
 

@@ -38,7 +38,6 @@ module TDev.Cloud {
         gotoNavigation?: boolean;
 
         // misc
-        groupAllowExportApp?: boolean;
         changeSkillLevel?: boolean;
         forceMainAsAction?: boolean;
         singleReturnValue?: boolean;
@@ -144,7 +143,6 @@ module TDev.Cloud {
         scriptPropertiesData?: boolean;
         wallLogsButton?: boolean;
         scriptPropertiesPropertyCloud?: boolean;
-        scriptPropertiesPropertyAllowExport?: boolean;
         scriptPropertiesPropertyAtomic?: boolean;
         scriptPropertiesUseCppCompiler?: boolean;
         stringEditFullScreen?: boolean;
@@ -825,8 +823,6 @@ module TDev.Cloud {
         description: string;
         school?:string;
         grade?:string;
-        allowexport: boolean;
-        allowappstatistics: boolean;
         userplatform: string[];
         isclass?: boolean;
     }

@@ -2507,7 +2507,7 @@ module TDev.AST {
         }
 
         // split screen is used as a hit when loaded in the editor, serialized when publishing
-        static metaMapping = [ "showAd", "isLibrary", "allowExport", "isCloud", "hasIds", "splitScreen", "useCppCompiler" ];
+        static metaMapping = [ "showAd", "isLibrary", "isCloud", "hasIds", "splitScreen", "useCppCompiler" ];
 
         public headerStmt: AppHeaderStmt;
         public nodeType() { return "app"; }
@@ -2566,7 +2566,6 @@ module TDev.AST {
         public showAd:boolean;
         public isDocsTopic() { return this.comment && /#docs/i.test(this.comment); }
         public isTutorial() { return this.isDocsTopic() && this.allActions().some(a => /^#\d/.test(a.getName())) }
-        public allowExport:boolean;
         public hasIds: boolean;
         public splitScreen: boolean;
         private stillParsing:boolean = true;

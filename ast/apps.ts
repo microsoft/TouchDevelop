@@ -11,7 +11,6 @@ module TDev.AST.Apps {
         website: string;
         domain: string;
         platforms: TDev.StringMap<CordovaPlatformOptions>;
-        canExport?: boolean;
     }
 
     export function cordovaDefaultOptions() : CordovaOptions {

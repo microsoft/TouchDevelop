@@ -1155,33 +1155,6 @@ module TDev.AppExport
         }
 
         var cordovaOptions = app.editorState.cordova || TDev.AST.Apps.cordovaDefaultOptions();
-        // test if user allowed to export app
-        if (baseScriptId && baseScriptId != "unknown") {
-            if (cordovaOptions.canExport === undefined) {
-                ProgressOverlay.lockAndShowAsync(lf("preparing export (one time setup)"))
-                    .then(() => Cloud.getPublicApiAsync(baseScriptId + "/canexportapp/" + Cloud.getUserId()))
-                    .done((res: JsonCanExportApp) => {
-                        cordovaOptions.canExport = !!res.canExport;
-                        app.editorState.cordova = cordovaOptions;
-                        ProgressOverlay.hide();
-                        deployCordova(app, baseScriptId);
-                    }, e => {
-                        ProgressOverlay.hide();
-                        ModalDialog.info(lf("export to app failed"),
-                            lf("We could not query the status of the script. Are you connected to internet?"))
-                            .add(Editor.mkHelpLink("export to cordova"))
-                    return;
-                    });
-                return;
-            }
-            else if (!cordovaOptions.canExport) {
-                ModalDialog.info(lf("export not allowed by authors"),
-                    lf("We're sorry, one or more authors from the base script have dissallowed the export of this script."))
-                    .add(Editor.mkHelpLink("export to cordova"))
-            return;
-            }
-        }
-
         var v = new TDev.AST.PlatformDetector();
         v.requiredPlatform = PlatformCapability.CordovaApp;
         v.run(app);
