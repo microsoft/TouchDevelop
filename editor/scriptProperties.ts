@@ -33,14 +33,12 @@ module TDev
 
         static allPlatforms = {
             "HTML5": PlatformCapability.AnyWeb,
-            "App Studio": PlatformCapability.AppStudio,
             "Cordova mobile app": PlatformCapability.CordovaApp,
             "Azure Web app": PlatformCapability.AzureWebSite,
         }
 
         static shortPlatforms = {
             "web": PlatformCapability.AnyWeb,
-            "appstudio": PlatformCapability.AppStudio,
             "cordova": PlatformCapability.CordovaApp,
             "azure": PlatformCapability.AzureWebSite,
         }
@@ -91,10 +89,6 @@ module TDev
             m.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("set to current"), () => {
                     platforms = PlatformCapability.Current;
-                    m.dismiss()
-                }),
-                HTML.mkButton(lf("App Studio"), () => {
-                    platforms = PlatformCapability.AppStudio;
                     m.dismiss()
                 }),
                 HTML.mkButton(lf("Cordova mobile app"), () => {

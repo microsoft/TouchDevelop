@@ -474,11 +474,6 @@ module TDev {
             | Network
             ,
 
-        AppStudio =
-            Accelerometer
-            | MusicAndSounds
-            ,
-
         AzureWebSite =
             Npm
             | Network

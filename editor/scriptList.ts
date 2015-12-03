@@ -7272,42 +7272,6 @@
                                 .then(r => r, e => Cloud.handlePostingError(e, lf("update pointer"))))
                     ])
             })()
-
-            if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud()) {
-                var appStudioDiv = div("wall-dialog-buttons text-left")
-                appStudioDiv.style.height = "2.8em";
-                m.add(appStudioDiv)
-                this.appStudioUrlAsync().done((appStudioUrl:string) => {
-                        if (appStudioUrl) {
-                            var lnk = HTML.mkA('appStudio', appStudioUrl, '_blank',
-                                HTML.mkButtonElt("wall-button", lf("make it an app")),
-                                SVG.getAppStudioLogo(),
-                                null)
-                            appStudioDiv.setChildren(lnk);
-                            Util.fadeIn(lnk);
-                        } else if (appStudioUrl === "") {
-                            var dlnk = div('appStudio',
-                                HTML.mkButtonElt("wall-button", lf("want an app?")),
-                                SVG.getAppStudioLogo(),
-                                null)
-                            .withClick(() => {
-                                ModalDialog.ask(
-                                    lf("Your script is currently using features unsupported in App Studio.")
-                                    + " " + lf("If you set your platform settings to 'App Studio', we will give you hints about which particular ones are problematic.")
-                                    + " " + lf("Look for a blue pencil next to function name."),
-                                    lf("set platform to App Studio"),
-                                    () => {
-                                        Script.setPlatform(PlatformCapability.AppStudio)
-                                        TheEditor.queueNavRefresh()
-                                    })
-                            })
-                            appStudioDiv.setChildren(dlnk);
-                            Util.fadeIn(dlnk);
-                        }
-                    }, e => {
-                        Util.reportError('appstudioexport', e, false);
-                    });
-            }
         }
 
         public share()
@@ -7593,22 +7557,6 @@
                         Cloud.handlePostingError(e, lf("upload screenshot"));
                    });
             }
-        }
-
-        public appStudioUrlAsync(): Promise {
-            if (!this.publicId) return Promise.as(undefined);
-            return Cloud.getPublicApiAsync(this.publicId + "/canexportapp/" + Cloud.getUserId() + "?features=anonBrowser")
-                .then((res: JsonCanExportApp) => {
-                    if (res.canExport)
-                        return TDev.AppExport.getExportScriptsTokenAsync()
-                            .then((tok: string) =>
-                                'https://appstudio.windows.com/projects/CreateTouchDevelopApp/' +
-                                this.publicId + "?token=" + encodeURIComponent(tok))
-                    else if (/missing the feature/.test(res.reason))
-                        return Promise.as("")
-                    else
-                        return Promise.as(null)
-                })
         }
 
         private publishFinished(m:ModalDialog, fromHub:boolean, isPull:boolean)
