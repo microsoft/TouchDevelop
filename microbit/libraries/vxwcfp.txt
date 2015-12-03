@@ -4,7 +4,6 @@ meta icon "Command";
 meta color "#ff008000";
 meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
-meta allowExport "yes";
 meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
@@ -34,7 +33,7 @@ action \_libinit() {
     #JoeW2bsnEkDyWSyt data→finger→set_opacity(0);
     #mEta1VHYHeLZUHiH data→back_leds := data→board→create_sprite_set;
     #xWKGWdrq4hPuEt6s data→leds := data→board→create_sprite_set;
-    #SfZi0Q4PST9W8C6f $led_opacity := 127 / 255;
+    #SfZi0Q4PST9W8C6f $led_opacity := 1;
     #md36WuHm2WM6OUim $led_w := 10;
     #wL4ZbsjEBlcHVdT4 $led_offset := 48;
     #czF5GDH9tIShJiHQ $led_h := 20;
@@ -2093,9 +2092,6 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #PAYMs0BDD8RbLR3B // {weight:10}
   #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
   #Xh232b04YquKwayo // {hints:micros:20000}
-  #eskzFxC3911B24dS if `not` data→pitch_pin→is_invalid `and` data→pitch_pin→equals($pin) then {
-    #iJ3KsCdT2LKFuhZU $p := code→pin_by_name($pin);
-  }
   meta sync;
 }
 #AuigaLeUb4929mNA
@@ -2119,20 +2115,21 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
   #Nv7yTShmVzRRmckP // {hints:frequency:440}
   #lyVvmxzXMSk4YDmd // {hints:ms:500}
   #fx1pQM2jYhWeMW8F if data→pitch_pin→is_invalid `or` data→pitch_pin→is_empty then {
-    #X9dWOHCIYzY5e4Eq code→warning("Pitch pin not set! Use `pins->set pitch pin` to setup which pin to use.");
-    #xhsHV4U6nnbq4LYZ `return` ;
+    #bqUsIek5pKDTe6Pe code→warning("pitch pin not set");
+    #ifW5htAtZseohisz `return` ;
   }
   #wunHmKjgrpZ9byII if $frequency < 0 then {
     #Ml7QifWVhfftWKcq code→warning("frequency is too low");
     #H9Y66i52F23oOeSD `return` ;
   }
   #qvLwajJDb3fREXyj if $ms ≤ 0 then {
-    #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
-    #xk1nhHhK4p6I76aX `return` ;
+    #c1DrtuRyJPSPijM8 code→warning("ms should be positive");
   }
-  #xbFhJ20GSASivmak $secs := math→max(1, $ms) / 1000;
-  #c9RnAE2uzKh6Cqax media→play_note($frequency, 1, $secs);
-  #Bdrwg0EArm46eHAx time→sleep($secs);
+  else {
+    #xbFhJ20GSASivmak $secs := $ms / 1000;
+    #c9RnAE2uzKh6Cqax media→play_note($frequency, 1, $secs);
+    #Bdrwg0EArm46eHAx time→sleep($secs);
+  }
 }
 #KgNK732SuRLWRKOO
 var pitch_pin : String {
@@ -2179,7 +2176,7 @@ action show_leds(#Agy1tNVQeIcg2pFD leds: String, #H23Wq0aPH08LnwS6 ms: Number) {
 }
 #t4AKY0PCv6CBzZ12
 action play_note(#zExdWNZANFRC5nyu frequency: Number, #Ulhn7NcyJhmRukqz ms: Number) {
-  #RQfvAHuFsy3gBARR // Plays a music tone through pin `P0` for the given duration.
+  #RQfvAHuFsy3gBARR // Plays a music tone through pin ``P0`` for the given duration.
   #cyajATGMs74bzPW7 // {help:functions/play-note}
   #xQkMwqu2Oa6nrGiE // {namespace:music}
   #ZTzyTPXsUFIyRaeU // {weight:90}
@@ -2514,4 +2511,17 @@ action first_event(#D42Ig553PhKq4i1h name: String) returns(#LvCIVEn5SGoFsUQw r: 
   #wIXRC18Oi3Crpzb5 `return` records→Event_Bus_table→invalid;
   meta private;
   meta sync;
+}
+#shg2hAnCU7F4s74Y
+action test_play_note() {
+  #xzttSnRTTwvwFA7J // {shim:}
+  #x4AIYBST31am9VdY code→play_note(440, 0);
+  #THJySqP27cAgQsaj code→pause(1000);
+  #TblGf0VF1CPJ6kMi code→play_note(540, 1000);
+  #pJWEI0OhM2WjvsmY code→pause(1000);
+  #aRlrDs9lN5SjbIzI code→play_note(0, 0);
+  #rTSs47awcQhuxF68 code→pause(1000);
+  #izbzXfqhmfDGfk1T code→play_note(440, 0);
+  meta private;
+  meta test;
 }

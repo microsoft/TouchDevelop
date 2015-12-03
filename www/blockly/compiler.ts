@@ -1278,7 +1278,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_get_running_time: {
     namespace: "input",
-    f: "running time",
+  f: "running time",
     args: []
   },
   device_get_digital_pin: {

@@ -90,6 +90,8 @@ int            micro_bit::getCurrentTime     ();                                
 int            micro_bit::getImageHeight     (ImageData *i);                         // F1 over
 int            micro_bit::getImagePixel      (ImageData *i, int x, int y);           // F3 over
 int            micro_bit::getImageWidth      (ImageData *i);                         // F1 over
+int            micro_bit::i2cReadRaw         (int address, const char *data, int length, int repeated); // F4 over
+int            micro_bit::i2cWriteRaw        (int address, const char *data, int length, int repeated); // F4 over
 int            micro_bit::i2c_read           (int addr);                             // F1
 void           micro_bit::i2c_write          (int addr, char c);                     // P2
 void           micro_bit::i2c_write2         (int addr, int c1, int c2);             // P3
@@ -147,6 +149,7 @@ void           micro_bit::showDigit          (int n);                           
 void           micro_bit::showImage          (ImageData *i, int offset);             // P2 over
 void           micro_bit::showLeds           (uint32_t lit, int delay);              // P2 over
 void           micro_bit::showLetter         (StringData *s);                        // P1 over
+void           micro_bit::stopAnimation      ();                                     // P0
 int            micro_bit::thermometerGetTemperature ();                                     // F0 over
 void           micro_bit::unPlot             (int x, int y);                         // P2
 int            number::add                   (int x, int y);                         // F2
@@ -178,3 +181,4 @@ int            string::to_number             (StringData *s);                   
 void           touch_develop::dispatchEvent  (MicroBitEvent e);                      // P1
 void           touch_develop::internal_main  ();                                     // P0
 ManagedString  touch_develop::mk_string      (char* c);                              // F1
+void           wait_us                       (int us);                               // P1
