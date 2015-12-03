@@ -34,11 +34,20 @@ module TDev.Hex
         if (!extInfo.sha)
             return Promise.as(null)
 
+        if (AST.Bytecode.isSetupFor(extInfo))
+            return Promise.as(null)
+
+        Util.log("get hex info: " + extInfo.sha)
+
         return World.getHexInfoAsync(extInfo.sha)
             .then(res => {
+                Util.log("get from world: " + extInfo.sha)
                 if (res)
                     return lzmaDecompressAsync(Util.stringToUint8Array(atob(res)))
-                        .then(str => JSON.parse(str))
+                        .then(str => {
+                            Util.log("decompressed: " + extInfo.sha)
+                            return JSON.parse(str)
+                        })
                 else
                     return downloadHexInfoAsync(extInfo)
                         .then(meta => {

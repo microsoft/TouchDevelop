@@ -33,10 +33,15 @@ module TDev.AST.Bytecode
         return r
     }
 
+    export function isSetupFor(extInfo:ExtensionInfo)
+    {
+        return currentSetup == extInfo.sha
+    }
+
     var currentSetup = null;
     export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
     {
-        if (currentSetup == extInfo.sha)
+        if (isSetupFor(extInfo))
             return;
 
         currentSetup = extInfo.sha;
